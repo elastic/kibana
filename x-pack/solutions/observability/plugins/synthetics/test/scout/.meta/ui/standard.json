@@ -1,5 +1,5 @@
 {
-  "sha1": "7cc06e60b29ab92f7a6d6235a81d2ba0fe3a0e4d",
+  "sha1": "2cacec50aea4fd49d36881af2373713d35f4b00a",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -99,7 +99,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
-        "line": 26,
+        "line": 30,
         "column": 7
       }
     },
@@ -113,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/alerting_default.spec.ts",
-        "line": 39,
+        "line": 43,
         "column": 7
       }
     },

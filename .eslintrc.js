@@ -307,10 +307,6 @@ const RESTRICTED_IMPORTS = [
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
   {
-    name: '@testing-library/react-hooks',
-    message: 'Please use @testing-library/react instead',
-  },
-  {
     name: '@elastic/ecs',
     importNames: ['EcsFlat'],
     message:
@@ -3137,8 +3133,81 @@ module.exports = {
         '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/observability/plugins/**/*.test.*',
+        'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/**/*.mock.*',
+        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
+        'x-pack/solutions/observability/packages/**/*.test.*',
+        'x-pack/solutions/observability/packages/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.mock.*',
+        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
+      ],
+      rules: {
+        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
+      },
+    },
   ],
 };
+
+/**
+ * Redux Toolkit v1 enforcement.
+ * These paths still use RTK v1 aliased packages (redux-toolkit-v1, react-redux-v7, etc.).
+ * When a plugin/package migrates to RTK v2, remove its entry here.
+ * See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx
+ */
+module.exports.overrides.push({
+  files: [
+    'src/platform/packages/private/kbn-ambient-common-types/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-coloring/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-test-jest-helpers/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
+    'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/graph/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/index_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/lens/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/license_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/maps/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/searchprofiler/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/streams_app/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/uptime/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/search/plugins/enterprise_search/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/packages/data-table/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/packages/expandable-flyout/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+  ],
+  rules: {
+    '@kbn/imports/no_redux_toolkit_v2_imports': 'error',
+  },
+});
 
 /**
  * Prettier disables all conflicting rules, listing as last override so it takes precedence

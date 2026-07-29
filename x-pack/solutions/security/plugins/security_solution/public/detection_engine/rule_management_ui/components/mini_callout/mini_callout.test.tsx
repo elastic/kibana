@@ -13,7 +13,6 @@ import { MiniCallout } from './mini_callout';
 describe('MiniCallout', () => {
   const defaultProps: MiniCalloutProps = {
     color: 'primary',
-    iconType: 'info',
     title: 'Mini Callout Title',
   };
 
@@ -23,11 +22,11 @@ describe('MiniCallout', () => {
     expect(screen.getByText(defaultProps.title as string)).toBeInTheDocument();
   });
 
-  it('renders the MiniCallout component with the provided iconType and color', () => {
+  it('renders the MiniCallout component with the provided color and a default icon', () => {
     const { container } = render(<MiniCallout {...defaultProps} />);
 
     const miniCallout = screen.getByTestId('mini-callout');
-    const icon = container.querySelector('[data-euiicon-type="info"]');
+    const icon = container.querySelector('[data-euiicon-type="infoFill"]');
     expect(icon).not.toBeNull();
     expect(miniCallout).toHaveAttribute(
       'class',
@@ -35,11 +34,11 @@ describe('MiniCallout', () => {
     );
   });
 
-  it('renders the MiniCallout component with no icon if not provided', () => {
+  it('renders the MiniCallout component with default icon if no custom icon is provided', () => {
     const { container } = render(<MiniCallout {...{ ...defaultProps, iconType: undefined }} />);
 
-    const icon = container.querySelector('[data-euiicon-type]');
-    expect(icon).toBeNull();
+    const icon = container.querySelector('[data-euiicon-type="infoFill"]');
+    expect(icon).not.toBeNull();
   });
 
   it('renders the dismiss link when dismissible is true', () => {

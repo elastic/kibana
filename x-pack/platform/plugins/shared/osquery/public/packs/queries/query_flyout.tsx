@@ -50,7 +50,7 @@ import type {
   PackQueryFormData,
   PackSOQueryFormData,
 } from './use_pack_query_form';
-import { usePackQueryForm } from './use_pack_query_form';
+import { usePackQueryForm, resolveInheritedScheduleInput } from './use_pack_query_form';
 import { deserializeSchedule } from '../form/schedule_serializer';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { ECSMappingEditorField } from './lazy_ecs_mapping_editor_field';
@@ -97,8 +97,12 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
   const overridePackSchedule = watch('override_pack_schedule');
   const schedule = watch('schedule');
 
+  const queryOwnInterval = defaultValue?.interval ? parseInt(defaultValue.interval, 10) : undefined;
+
   // Reuse the schedule that seeded the form's defaultValue so the "unchanged
-  // start" check compares against the same timestamp, not a fresh one.
+  // start" check compares against the same timestamp, not a fresh one. The
+  // seeded schedule already resolves inherited-vs-override (and the legacy-pack
+  // interval-authority case) via `deserializeQuerySchedule`.
   const originalStartDate = isRruleSchedulingEnabled ? deserializedSchedule.startDate : undefined;
 
   // Single source of truth for the override schedule. Only an
@@ -112,36 +116,33 @@ const QueryFlyoutComponent: React.FC<QueryFlyoutProps> = ({
     [isRruleSchedulingEnabled, overridePackSchedule, schedule, originalStartDate]
   );
 
-  const incomingPackMode = packSchedule?.schedule_type;
-  const seededPackModeRef = useRef(incomingPackMode);
+  const inheritedScheduleInput = useMemo(
+    () => resolveInheritedScheduleInput(packSchedule, queryOwnInterval),
+    [packSchedule, queryOwnInterval]
+  );
+  const inheritedScheduleKey = useMemo(
+    () => JSON.stringify(inheritedScheduleInput),
+    [inheritedScheduleInput]
+  );
+  const seededScheduleKeyRef = useRef(inheritedScheduleKey);
   useEffect(() => {
     if (!isRruleSchedulingEnabled || overridePackSchedule) {
-      seededPackModeRef.current = incomingPackMode;
+      seededScheduleKeyRef.current = inheritedScheduleKey;
 
       return;
     }
 
-    if (seededPackModeRef.current === incomingPackMode) {
+    if (seededScheduleKeyRef.current === inheritedScheduleKey) {
       return;
     }
 
-    seededPackModeRef.current = incomingPackMode;
-    setValue(
-      'schedule',
-      deserializeSchedule({
-        schedule_type: packSchedule?.schedule_type,
-        interval: packSchedule?.interval,
-        rrule_schedule: packSchedule?.rrule_schedule,
-      }),
-      { shouldDirty: false }
-    );
+    seededScheduleKeyRef.current = inheritedScheduleKey;
+    setValue('schedule', deserializeSchedule(inheritedScheduleInput), { shouldDirty: false });
   }, [
     isRruleSchedulingEnabled,
     overridePackSchedule,
-    incomingPackMode,
-    packSchedule?.schedule_type,
-    packSchedule?.interval,
-    packSchedule?.rrule_schedule,
+    inheritedScheduleKey,
+    inheritedScheduleInput,
     setValue,
   ]);
 

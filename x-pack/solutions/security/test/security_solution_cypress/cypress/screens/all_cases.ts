@@ -16,7 +16,9 @@ export const ALL_CASES_CREATE_NEW_CASE_TABLE_BTN = '[data-test-subj="cases-table
 export const ALL_CASES_IN_PROGRESS_CASES_STATS =
   '[data-test-subj="inProgressStatsHeader"] .euiStat__title';
 
-export const ALL_CASES_NAME = '[data-test-subj="case-details-link"]';
+// Legacy table renders `case-details-link`; the redesign card list renders `cases-list-item-title`.
+export const ALL_CASES_NAME =
+  '[data-test-subj="case-details-link"],[data-test-subj="cases-list-item-title"]';
 
 export const ALL_CASES_STATUS_FILTER = '[data-test-subj="options-filter-popover-button-status"]';
 
@@ -26,7 +28,9 @@ export const ALL_CASES_OPEN_CASES_STATS = '[data-test-subj="openStatsHeader"] .e
 
 export const ALL_CASES_OPENED_ON = '[data-test-subj="case-table-column-createdAt"]';
 
-export const ALL_CASES_PAGE_TITLE = '[data-test-subj="header-page-title"]';
+// Legacy renders `header-page-title`; the redesign renders the app header title.
+export const ALL_CASES_PAGE_TITLE =
+  '[data-test-subj="header-page-title"],[data-test-subj="appHeaderTitle"]';
 
 export const ALL_CASES_SERVICE_NOW_INCIDENT =
   '[data-test-subj="case-table-column-external-notPushed"]';

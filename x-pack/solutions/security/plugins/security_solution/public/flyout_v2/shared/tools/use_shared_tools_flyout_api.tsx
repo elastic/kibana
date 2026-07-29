@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
-import React, { lazy, Suspense, useCallback, useMemo } from 'react';
-import { useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
+import React, { lazy, useCallback, useMemo } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { useKibana } from '../../../common/lib/kibana';
-import { flyoutProviders } from '../components/flyout_provider';
-import { FlyoutLoading } from '../components/flyout_loading';
+import type { FlyoutOrigin } from '../../../common/lib/telemetry';
+import { FLYOUT_SESSION_KIND, FLYOUT_SURFACE, FLYOUT_TOOL } from '../../../common/lib/telemetry';
 import { defaultToolsFlyoutProperties } from '../hooks/use_default_flyout_properties';
+import { useOpenFlyout } from '../hooks/use_open_flyout';
 import { formatFlyoutTitle, NOTES_TITLE } from '../constants/flyout_titles';
 import { getDocumentTitle } from '../../document/main/utils/get_header_title';
-import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
+import { useFlyoutSessionContext } from '../../session_context';
+import { useFlyoutV2UrlWriter } from '../url_state/flyout_v2_url_writer';
+import { FLYOUT_DESCRIPTOR_KIND, urlParamKeyForHistoryKey } from '../url_state/flyout_v2_url_param';
 
 // Lazy-loaded so consumers of this hook don't statically pull the shared tool graph into their
 // bundle; the chunk only loads when the tool is actually opened.
@@ -26,6 +24,8 @@ const NotesDetails = lazy(() => import('./notes').then((m) => ({ default: m.Note
 export interface OpenNotesParams {
   /** The document record whose notes should be shown. */
   hit: DataTableRecord;
+  /** Telemetry origin indicating where the notes flyout was opened from. */
+  origin?: FlyoutOrigin;
 }
 
 export interface SharedToolsFlyoutApi {
@@ -37,8 +37,9 @@ export interface SharedToolsFlyoutApi {
  * Developer-facing API to open the new (EUI-based) shared tool flyouts — tools that are not owned by
  * a single flyout type and are reused across several of them (e.g. the notes flyout, opened from both
  * the document and attack flyouts). Same mindset as `useDocumentFlyoutApi`, `useEntityFlyoutApi`, etc.:
- * it encapsulates the provider wiring (`flyoutProviders` + `overlays.openSystemFlyout`) and the tool
- * flyout properties so call sites don't repeat them.
+ * it encapsulates the provider wiring (`flyoutProviders` + `overlays.openSystemFlyout`, via
+ * `useOpenFlyout`) and the tool flyout properties so call sites don't repeat them. `useOpenFlyout`
+ * also reports open/close telemetry.
  *
  * This API only ever opens the NEW flyout. It does not know about the legacy expandable flyout:
  * callers remain responsible for gating on `useIsNewFlyoutEnabled()` and falling back to the
@@ -47,41 +48,39 @@ export interface SharedToolsFlyoutApi {
  * Must be used within the Security Solution app shell (Redux store + router + Kibana services).
  */
 export const useSharedToolsFlyoutApi = (): SharedToolsFlyoutApi => {
-  const { services } = useKibana();
-  const { overlays } = services;
-  const store = useStore();
-  const history = useHistory();
-  const { session: sessionMode, historyKey } = useFlyoutSessionContext();
-
-  const open = useCallback(
-    (children: ReactNode, properties: OverlaySystemFlyoutOpenOptions) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <FlyoutSessionContextProvider value={{ session: sessionMode, historyKey }}>
-              <Suspense fallback={<FlyoutLoading />}>{children}</Suspense>
-            </FlyoutSessionContextProvider>
-          ),
-        }),
-        properties
-      );
-    },
-    [overlays, services, store, history, historyKey, sessionMode]
-  );
+  const { historyKey } = useFlyoutSessionContext();
+  const open = useOpenFlyout();
+  const urlParamKey = urlParamKeyForHistoryKey(historyKey);
+  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
 
   const openNotes = useCallback(
-    ({ hit }: OpenNotesParams) => {
-      open(<NotesDetails hit={hit} />, {
-        ...defaultToolsFlyoutProperties,
-        historyKey,
-        session: 'start',
-        title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
-      });
+    ({ hit, origin }: OpenNotesParams) => {
+      const documentId = hit.raw._id as string;
+      const indexName = hit.raw._index as string;
+      writeOnOpen({ kind: FLYOUT_DESCRIPTOR_KIND.notes, documentId, indexName });
+      // A tool flyout opens with session:'start' — it is a root, not a child of the document, and
+      // the document is not persisted alongside it. Closing the tool therefore clears the param
+      // (reverting to the document would resurrect a flyout that was never part of the saved state).
+      const onClose = buildOnClose(null);
+      open(
+        <NotesDetails hit={hit} />,
+        {
+          ...defaultToolsFlyoutProperties,
+          historyKey,
+          session: FLYOUT_SESSION_KIND.START,
+          title: formatFlyoutTitle(NOTES_TITLE, getDocumentTitle(hit)),
+          onClose,
+        },
+        {
+          surface: FLYOUT_SURFACE.TOOL,
+          tool: FLYOUT_TOOL.NOTES,
+          session: FLYOUT_SESSION_KIND.START,
+          origin,
+        },
+        FLYOUT_SESSION_KIND.INHERIT
+      );
     },
-    [open, historyKey]
+    [open, historyKey, writeOnOpen, buildOnClose]
   );
 
   return useMemo(() => ({ openNotes }), [openNotes]);

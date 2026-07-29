@@ -14,8 +14,9 @@ import * as i18n from './translations';
 import { MITRE_ATTACK_VERSION } from './detection_engine/mitre/mitre_version';
 
 export {
-  SecurityPageName,
+  ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING,
   ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+  SecurityPageName,
 } from '@kbn/security-solution-navigation';
 
 /**
@@ -276,6 +277,9 @@ export const DATA_STREAM_NAMESPACES_DEFAULT_SETTING: string[] = [];
 
 /** This Kibana Advanced Setting allows users to enable/disable the Asset Inventory feature */
 export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness feature */
+export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;

@@ -51,6 +51,23 @@ export const listPolicyExecutionHistoryQuerySchema = z.object({
     .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
     .optional()
     .describe('Number of events per page. Defaults to 100.'),
+  episodeIds: z
+    .preprocess(
+      (v) => (v === undefined || Array.isArray(v) ? v : [v]),
+      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
+    )
+    .optional()
+    .describe(
+      'Episode filter. Narrows events to those referencing at least one of the provided episode ids. Max 50 ids.'
+    ),
+  start_date: z
+    .string()
+    .trim()
+    .max(64)
+    .optional()
+    .describe(
+      'Inclusive ISO timestamp lower bound applied to @timestamp; overrides the default 24-hour window. Independent of episodeIds \u2014 e.g. set it to an episode\u2019s start time to scope results to that episode\u2019s lifetime.'
+    ),
   ...sharedFilterFields,
 });
 export type ListPolicyExecutionHistoryParams = z.infer<

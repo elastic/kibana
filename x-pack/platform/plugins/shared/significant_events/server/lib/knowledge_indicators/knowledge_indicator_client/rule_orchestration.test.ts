@@ -5,14 +5,19 @@
  * 2.0.
  */
 
+import { MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import type { QueryLink } from '@kbn/significant-events-schema';
-import { toCreateRuleBody, toUpdateRuleBody } from './rule_orchestration';
+import { toRuleDefinition } from './rule_orchestration';
+import {
+  METRIC_SERIES_EVERY,
+  METRIC_SERIES_RULE_NAME_SUFFIX,
+} from '../../significant_events/rules/metric_series_contract';
 
-const makeQueryLink = (severityScore?: number): QueryLink => ({
+const makeQueryLink = (severityScore?: number, title = 'Error logs'): QueryLink => ({
   query: {
     id: 'query-1',
     type: 'match',
-    title: 'Error logs',
+    title,
     description: 'Matches error logs',
     esql: { query: 'FROM logs-* | WHERE level == "error"' },
     severity_score: severityScore,
@@ -22,22 +27,23 @@ const makeQueryLink = (severityScore?: number): QueryLink => ({
   rule_id: 'rule-1',
 });
 
-describe('rule orchestration bodies', () => {
-  it.each([
-    [85, '1m'],
-    [80, '1m'],
-    [60, '5m'],
-    [undefined, '5m'],
-  ])('sets create schedule for severity %s to %s', (severityScore, expectedInterval) => {
-    expect(toCreateRuleBody(makeQueryLink(severityScore)).schedule.interval).toBe(expectedInterval);
+describe('toRuleDefinition', () => {
+  it('maps a query link to the v2-native Significant Events rule definition', () => {
+    // Severity no longer changes execution cadence — critical vs default only
+    // affects analysis profiles, so a high score still uses METRIC_SERIES_EVERY.
+    expect(toRuleDefinition(makeQueryLink(85))).toEqual({
+      name: `Error logs${METRIC_SERIES_RULE_NAME_SUFFIX}`,
+      streamName: 'logs.test',
+      timestampField: '@timestamp',
+      esqlQuery: 'FROM logs-* | WHERE level == "error"',
+      schedule: { interval: METRIC_SERIES_EVERY },
+    });
   });
 
-  it.each([
-    [85, '1m'],
-    [80, '1m'],
-    [60, '5m'],
-    [undefined, '5m'],
-  ])('sets update schedule for severity %s to %s', (severityScore, expectedInterval) => {
-    expect(toUpdateRuleBody(makeQueryLink(severityScore)).schedule.interval).toBe(expectedInterval);
+  it('trims an overlong title so the name fits the Alerting v2 cap, suffix intact', () => {
+    const { name } = toRuleDefinition(makeQueryLink(85, 'A'.repeat(MAX_NAME_LENGTH + 50)));
+
+    expect(name).toHaveLength(MAX_NAME_LENGTH);
+    expect(name.endsWith(METRIC_SERIES_RULE_NAME_SUFFIX)).toBe(true);
   });
 });

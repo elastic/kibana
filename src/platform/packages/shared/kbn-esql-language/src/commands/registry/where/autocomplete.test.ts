@@ -20,11 +20,13 @@ import {
 } from '../../../__tests__/commands/autocomplete';
 import {
   logicalOperators,
+  matchOperators,
   patternMatchOperators,
   inOperators,
   nullCheckOperators,
 } from '../../definitions/all_operators';
 import type { ICommandCallbacks } from '../types';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../../definitions/constants';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../definitions/types';
 import { getDateLiterals } from '../../definitions/utils';
 import { findAutocompleteAstPosition } from '../../../language/shared/parse_for_autocomplete_query';
@@ -96,6 +98,7 @@ describe('WHERE Autocomplete', () => {
           '> $0',
           '>= $0',
           ...getOperatorSuggestions([
+            ...matchOperators,
             ...patternMatchOperators,
             ...inOperators,
             ...nullCheckOperators,
@@ -113,6 +116,7 @@ describe('WHERE Autocomplete', () => {
         '> $0',
         '>= $0',
         ...getOperatorSuggestions([
+          ...matchOperators,
           ...patternMatchOperators,
           ...inOperators,
           ...nullCheckOperators,
@@ -122,6 +126,54 @@ describe('WHERE Autocomplete', () => {
 
     test('at the start of a parenthesized expression', async () => {
       await whereExpectSuggestions('from a | where (', EMPTY_WHERE_SUGGESTIONS);
+    });
+
+    describe('match operator right operand', () => {
+      test('suggests the value placeholder after a text field', async () => {
+        await whereExpectSuggestions('from a | where textField : ', ['"${0:value}"']);
+      });
+
+      test('suggests the value placeholder after a function left operand', async () => {
+        await whereExpectSuggestions('from a | where concat(textField, keywordField) : ', [
+          '"${0:value}"',
+        ]);
+      });
+
+      test('suggests only the number placeholder after a numeric field', async () => {
+        await whereExpectSuggestions('from a | where doubleField : ', ['${0:0}']);
+      });
+
+      test('suggests date literals after a date field', async () => {
+        await whereExpectSuggestions('from a | where dateField : ', [
+          ...getDateLiterals().map((item) => item.text),
+          '"${0:value}"',
+        ]);
+      });
+
+      test('suggests boolean constants after a boolean field', async () => {
+        await whereExpectSuggestions('from a | where booleanField : ', [
+          'true',
+          'false',
+          '"${0:value}"',
+        ]);
+      });
+
+      test('suggests creating a control when controls are supported', async () => {
+        await whereExpectSuggestions(
+          'from a | where textField : ',
+          ['"${0:value}"', ''],
+          undefined,
+          { ...mockContext, supportsControls: true }
+        );
+      });
+
+      test('suggests logical continuations after a complete match expression', async () => {
+        await whereExpectSuggestions('from a | where textField : "value" ', [
+          '\n',
+          '| ',
+          ...getOperatorSuggestions(logicalOperators),
+        ]);
+      });
     });
 
     test('suggests dates after a comparison with a date', async () => {
@@ -201,7 +253,13 @@ describe('WHERE Autocomplete', () => {
         `from a | where CASE(doubleField < 1 AND doubleField > 2 OR doubleField == 3 AND `,
         [
           ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(
+            Location.WHERE,
+            'any',
+            { scalar: true },
+            undefined,
+            FULL_TEXT_SEARCH_DEFINITIONS
+          ),
         ]
       );
     });
@@ -225,6 +283,7 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests operators after a field name', async () => {
       await whereExpectSuggestions('from a | stats a=avg(doubleField) | where doubleField ', [
+        ...getOperatorSuggestions(matchOperators),
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'any',
@@ -272,6 +331,7 @@ describe('WHERE Autocomplete', () => {
 
     test('suggests boolean and numeric operators after a numeric function result', async () => {
       const expectedSuggestions = [
+        ...getOperatorSuggestions(matchOperators),
         ...getFunctionSignaturesByReturnType(
           Location.WHERE,
           'double',

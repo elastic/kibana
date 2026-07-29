@@ -10,7 +10,7 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { TagsList } from '@kbn/observability-shared-plugin/public';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { selectOverviewPageState } from '../../../../../../state';
@@ -21,6 +21,7 @@ import { useMonitorHistogram } from '../../../../hooks/use_monitor_histogram';
 import type { OverviewStatusMetaData } from '../../../../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from '../../../../../common/components/monitor_type_badge';
 import { SyntheticsRemoteBadge } from '../../../../../common/components/synthetics_remote_badge';
+import { SyntheticsHeartbeatBadge } from '../../../../../common/components/synthetics_heartbeat_badge';
 import { getFilterForTypeMessage } from '../../../../management/monitor_list_table/labels';
 import type { FlyoutParamProps } from '../../types';
 import { MonitorsActions } from '../components/monitors_actions';
@@ -150,9 +151,16 @@ export const useMonitorsTableColumns = ({
                     onClick={() => onClickMonitorFilter('monitorTypes', monitor.type)}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <SyntheticsRemoteBadge remote={monitor.remote} />
-                </EuiFlexItem>
+                {monitor.remote && (
+                  <EuiFlexItem grow={false}>
+                    <SyntheticsRemoteBadge remote={monitor.remote} />
+                  </EuiFlexItem>
+                )}
+                {monitor.origin === 'heartbeat' && (
+                  <EuiFlexItem grow={false}>
+                    <SyntheticsHeartbeatBadge origin={monitor.origin} />
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem grow={false}>
                   <EuiText size="xs" color="subdued" css={{ whiteSpace: 'nowrap' }}>
                     {i18n.translate('xpack.synthetics.overview.compactView.scheduleInline', {

@@ -33,9 +33,8 @@ export interface CorrelationsDetailsProps {
   /**
    * Callback to open an attack preview when clicking the expand button in the related attacks table.
    * When not provided, the expand button column is hidden.
-   * // TODO make required once we have an attack flyout in the new flyout system
    */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
 }
 
 /**
