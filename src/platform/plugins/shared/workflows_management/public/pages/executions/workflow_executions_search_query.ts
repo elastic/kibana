@@ -37,8 +37,17 @@ const filterToKqlClause = (filter: Filter): string | undefined => {
     }
     case 'exists':
       return `${prefix}${key}: *`;
-    default:
+    default: {
+      // OptionsListControl single-select: buildPhraseFilter does not set meta.type,
+      // so fall back to the raw query.match_phrase value.
+      const matchPhrase = (filter as { query?: { match_phrase?: Record<string, unknown> } }).query
+        ?.match_phrase;
+      if (matchPhrase && Object.prototype.hasOwnProperty.call(matchPhrase, key)) {
+        const v = matchPhrase[key];
+        if (v != null) return `${prefix}${key}: ${escapeKqlValue(String(v))}`;
+      }
       return undefined;
+    }
   }
 };
 
@@ -49,11 +58,6 @@ export const filtersToKql = (filters: Filter[]): string => {
   return clauses.length ? clauses.map((c) => `(${c})`).join(' and ') : '';
 };
 
-export const timeRangeToKql = (
-  timeFrom: string,
-  timeTo: string,
-  timeField: string = 'startedAt'
-): string => `(${timeField} >= "${timeFrom}" and ${timeField} <= "${timeTo}")`;
 
 interface WorkflowExecutionsSearchError {
   attributes?: { error?: { type?: string } };

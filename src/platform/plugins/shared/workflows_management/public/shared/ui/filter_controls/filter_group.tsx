@@ -134,7 +134,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       };
     }
 
-    console.log('IHOR', filters, query);
     return {
       filters,
       query,
@@ -311,7 +310,6 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
           String(idx)
         );
       });
-      console.log('IHOR', 'getCreationOptions', initialState);
       return {
         initialState,
         getEditorConfig: () => {

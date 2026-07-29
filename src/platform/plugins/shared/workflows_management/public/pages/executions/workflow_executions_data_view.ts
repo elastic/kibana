@@ -14,12 +14,6 @@ import { WORKFLOWS_EXECUTIONS_INDEX } from '../../../common';
 
 export const WORKFLOW_EXECUTIONS_DATA_VIEW_ID = 'workflows-executions-adhoc';
 
-export const WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
-  id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
-  title: WORKFLOWS_EXECUTIONS_INDEX,
-  timeFieldName: 'startedAt',
-};
-
 const keywordField = (name: string): FieldSpec => ({
   name,
   type: 'string',
@@ -50,26 +44,32 @@ const booleanField = (name: string): FieldSpec => ({
   scripted: false,
 });
 
-export function createWorkflowExecutionsDataView(fieldFormats: FieldFormatsStart): DataView {
-  const fields: Record<string, FieldSpec> = {
-    startedAt: dateField('startedAt'),
-    createdAt: dateField('createdAt'),
-    finishedAt: dateField('finishedAt'),
-    id: keywordField('id'),
-    workflowId: keywordField('workflowId'),
-    status: keywordField('status'),
-    triggeredBy: keywordField('triggeredBy'),
-    executedBy: keywordField('executedBy'),
-    createdBy: keywordField('createdBy'),
-    isTestRun: booleanField('isTestRun'),
-    spaceId: keywordField('spaceId'),
-  };
+const WORKFLOW_EXECUTIONS_FIELD_SPECS: Record<string, FieldSpec> = {
+  startedAt: dateField('startedAt'),
+  createdAt: dateField('createdAt'),
+  finishedAt: dateField('finishedAt'),
+  id: keywordField('id'),
+  workflowId: keywordField('workflowId'),
+  status: keywordField('status'),
+  triggeredBy: keywordField('triggeredBy'),
+  executedBy: keywordField('executedBy'),
+  createdBy: keywordField('createdBy'),
+  isTestRun: booleanField('isTestRun'),
+  spaceId: keywordField('spaceId'),
+};
 
+export const WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC: DataViewSpec = {
+  id: WORKFLOW_EXECUTIONS_DATA_VIEW_ID,
+  title: WORKFLOWS_EXECUTIONS_INDEX,
+  timeFieldName: 'startedAt',
+  fields: WORKFLOW_EXECUTIONS_FIELD_SPECS,
+};
+
+export function createWorkflowExecutionsDataView(fieldFormats: FieldFormatsStart): DataView {
   return new DataView({
     spec: {
       ...WORKFLOW_EXECUTIONS_DATA_VIEW_SPEC,
       allowNoIndex: true,
-      fields,
     },
     fieldFormats,
     metaFields: ['_id', '_type', '_source'],

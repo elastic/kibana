@@ -10,7 +10,7 @@
 import { useMemo } from 'react';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@kbn/react-query';
-import type { WorkflowExecutionListDto } from '@kbn/workflows';
+import type { ExecutionStatus, WorkflowExecutionListDto } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import {
   EXECUTION_TABLE_SORT_FIELD_MAP,
@@ -19,7 +19,6 @@ import {
 import {
   filtersToKql,
   getWorkflowExecutionsFetchErrorMessage,
-  timeRangeToKql,
 } from './workflow_executions_search_query';
 
 export interface UseWorkflowExecutionsSearchParams {
@@ -33,6 +32,43 @@ export interface UseWorkflowExecutionsSearchParams {
   enabled?: boolean;
 }
 
+/**
+ * Extracts selected values from Kibana Filter objects for a specific field.
+ *
+ * Handles filters from two sources:
+ * - OptionsListControl (single selection): uses buildPhraseFilter which does NOT
+ *   set meta.type; value lives in query.match_phrase[fieldKey].
+ * - OptionsListControl (multi selection): uses buildPhrasesFilter which sets
+ *   meta.type='phrases' and meta.params=[value1, ...].
+ * - Search bar / other sources: meta.type='phrase', meta.params.query=value.
+ */
+const extractFilterValues = (filters: Filter[], fieldKey: string): string[] => {
+  const values: string[] = [];
+  for (const f of filters) {
+    if (f.meta.disabled || f.meta.key !== fieldKey) continue;
+
+    if (f.meta.type === 'phrases' && Array.isArray(f.meta.params)) {
+      // Multi-select from OptionsListControl or search bar
+      values.push(...(f.meta.params as string[]));
+    } else if (f.meta.type === 'phrase') {
+      // Search-bar phrase filter: actual ES value in meta.params.query
+      const actualValue =
+        (f.meta.params as { query?: unknown } | undefined)?.query ?? f.meta.value;
+      if (actualValue != null) values.push(String(actualValue));
+    } else {
+      // Single-select from OptionsListControl: buildPhraseFilter does not set
+      // meta.type, so fall back to reading the raw query.match_phrase value.
+      const matchPhrase = (f as { query?: { match_phrase?: Record<string, unknown> } }).query
+        ?.match_phrase;
+      if (matchPhrase && Object.prototype.hasOwnProperty.call(matchPhrase, fieldKey)) {
+        const v = matchPhrase[fieldKey];
+        if (v != null) values.push(String(v));
+      }
+    }
+  }
+  return values;
+};
+
 export const useWorkflowExecutionsSearch = ({
   query,
   filters,
@@ -45,12 +81,25 @@ export const useWorkflowExecutionsSearch = ({
 }: UseWorkflowExecutionsSearchParams) => {
   const api = useWorkflowsApi();
 
+  // Extract known structured filter fields directly from Filter objects so that
+  // the exact ES values are used (not the display-formatted meta.value).
+  const statuses = useMemo(
+    () => extractFilterValues(filters, 'status') as ExecutionStatus[],
+    [filters]
+  );
+  const executedBy = useMemo(() => extractFilterValues(filters, 'executedBy'), [filters]);
+
+  // Remaining filters (e.g. workflowId, triggeredBy) go through KQL.
+  const remainingFiltersKql = useMemo(() => {
+    const STRUCTURED_FIELDS = new Set(['status', 'executedBy']);
+    const remaining = filters.filter((f) => !STRUCTURED_FIELDS.has(f.meta.key ?? ''));
+    return filtersToKql(remaining);
+  }, [filters]);
+
   const kql = useMemo(() => {
     const textKql = query?.query ? `(${String(query.query)})` : '';
-    const filtersKql = filtersToKql(filters);
-    const timeKql = timeRangeToKql(timeRange.from, timeRange.to);
-    return [textKql, filtersKql, timeKql].filter(Boolean).join(' and ') || undefined;
-  }, [query, filters, timeRange]);
+    return [textKql, remainingFiltersKql].filter(Boolean).join(' and ') || undefined;
+  }, [query, remainingFiltersKql]);
 
   const sortParams = useMemo(() => {
     const [[field, direction]] = sort;
@@ -77,6 +126,10 @@ export const useWorkflowExecutionsSearch = ({
     queryFn: () =>
       api.searchExecutions({
         kql,
+        statuses: statuses.length ? statuses : undefined,
+        executedBy: executedBy.length ? executedBy : undefined,
+        startedAfter: timeRange.from,
+        startedBefore: timeRange.to,
         sortField: sortParams.sortField,
         sortOrder: sortParams.sortOrder,
         page: pageIndex + 1,
