@@ -20,6 +20,7 @@ import {
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
+  createBulkWriteValidationError,
   extractCreateResults,
   type CompactBulkError,
   toCompactBulkError,
@@ -257,6 +258,20 @@ export async function eventsWriteBulkHandler({
   const timestamp = now.toISOString();
 
   assertValidBulkWriteSize(inputs);
+
+  // Defensive guard: the tool schema's `.refine()` already blocks this combination for normal
+  // callers, but the handler must not silently discard `event_id` in favor of a generated one if
+  // some other path (bypassing the schema) sends both fields.
+  const mutuallyExclusiveViolations = inputs.flatMap((input, index) =>
+    input.event_id !== undefined && input.dedup_window !== undefined ? [index] : []
+  );
+  if (mutuallyExclusiveViolations.length > 0) {
+    throw createBulkWriteValidationError(
+      `event_id and dedup_window are mutually exclusive at items[${mutuallyExclusiveViolations.join(
+        ', '
+      )}]`
+    );
+  }
 
   // Build typed write candidates.
   const candidates: WriteCandidate[] = inputs.map((input, index) => {

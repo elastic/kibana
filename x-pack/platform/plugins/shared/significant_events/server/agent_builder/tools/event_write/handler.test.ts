@@ -261,6 +261,24 @@ describe('eventsWriteBulkHandler', () => {
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
+  it('rejects an item with both event_id and dedup_window as a validation error', async () => {
+    const eventClient = {
+      findLatestActive: jest.fn(),
+      findLatestByEventIds: jest.fn(),
+      findByEventId: jest.fn(),
+      bulkCreate: jest.fn(),
+    };
+
+    await expect(
+      eventsWriteBulkHandler({
+        eventClient: eventClient as never,
+        inputs: [{ ...baseInput, event_id: 'event-1', dedup_window: 'now-24h' }],
+      })
+    ).rejects.toMatchObject({ code: 'validation_error' });
+    expect(eventClient.findLatestActive).not.toHaveBeenCalled();
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
   it('classifies a response cardinality mismatch as outcome unknown', async () => {
     const eventClient = {
       findLatestActive: noopFindLatestActive,
