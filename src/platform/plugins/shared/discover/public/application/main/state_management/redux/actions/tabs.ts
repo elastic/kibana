@@ -17,7 +17,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
-import { ProfileStateType } from '../../../../../context_awareness';
+import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
@@ -476,10 +476,11 @@ export const openInNewTab: InternalStateThunkActionCreator<
       globalState?: TabState['globalState'];
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
+      profileState?: ProfileStateMap;
     }
   ],
   Promise<void>
-> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec }) =>
+> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -491,6 +492,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
       ...createTabItem(currentTabs),
       appState: initialAppState,
       globalState: initialGlobalState,
+      profileState: cloneDeep(profileState) ?? {},
     };
 
     if (tabLabel) {
@@ -541,7 +543,7 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
   ],
   Promise<void>
 > = ({ searchSession }) =>
-  async function openSearchSessionInNewTabThunkFn(dispatch) {
+  async function openSearchSessionInNewTabThunkFn(dispatch, _getState, { services }) {
     const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
 
     if (!restoreState.searchSessionId) {
@@ -551,8 +553,13 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
     const {
       appState,
       globalState: originalGlobalState,
-      state: { dataViewSpec },
-    } = parseAppLocatorParams(restoreState);
+      profileUrlState,
+      state: { dataViewSpec, profileState: persistentProfileState },
+    } = parseAppLocatorParams(restoreState, services.profileStateRegistry);
+    const profileState = services.profileStateRegistry.mergeState(
+      persistentProfileState,
+      profileUrlState
+    );
 
     const globalState: TabState['globalState'] = {};
     if (originalGlobalState?.time) {
@@ -572,6 +579,7 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
         appState,
         globalState,
         dataViewSpec,
+        profileState,
       })
     );
   };
