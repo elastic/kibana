@@ -89,7 +89,7 @@ spaceTest.describe.skip(
             )
             .click();
 
-          await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 30_000 });
+          await expect(page.testSubj.locator('fieldListLoading')).toBeHidden({ timeout: 10_000 });
           await page.testSubj.click('fieldToggle-AvgTicketPrice');
           await pageObjects.lens.saveAndReturn();
           await dashboard.waitForRenderComplete();
@@ -121,7 +121,7 @@ spaceTest.describe.skip(
 
           const allOptionTexts = await page.components
             .comboBox('filterIndexPatternsSelect')
-            .getAvailableOptions();
+            .getAllVisibleOptions();
           expect(allOptionTexts.length).toBeGreaterThan(0);
           expect(allOptionTexts).toHaveLength(new Set(allOptionTexts).size);
         });
@@ -172,7 +172,7 @@ spaceTest.describe.skip(
 
           const fieldOptions = await page.components
             .comboBox('filterFieldSuggestionList')
-            .getAvailableOptions();
+            .getAllVisibleOptions();
           expect(fieldOptions.length).toBeGreaterThan(0);
         });
       }

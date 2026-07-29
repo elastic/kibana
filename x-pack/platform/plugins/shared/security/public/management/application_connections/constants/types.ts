@@ -21,7 +21,7 @@ export interface ApplicationConnection {
   connection: OAuthConnection;
 }
 
-export type ApplicationConnectionStatusFilter = 'connected' | 'revoked';
+export type ApplicationConnectionStatusFilter = 'connected' | 'expired' | 'revoked';
 
 export type ApplicationConnectionsViewMode = 'grouped' | 'list';
 

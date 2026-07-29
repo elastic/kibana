@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import type { Location, MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import qs from 'query-string';
@@ -29,7 +29,10 @@ describe('RedirectWithDefaultEnvironment', () => {
     jest.restoreAllMocks();
   });
 
-  function renderUrl(location: Pick<Location, 'pathname' | 'search'>, defaultSetting: string) {
+  function renderUrl(
+    location: Pick<Location, 'pathname' | 'search'> & Partial<Pick<Location, 'hash'>>,
+    defaultSetting: string
+  ) {
     history.replace(location);
 
     jest.spyOn(useApmPluginContextExports, 'useApmPluginContext').mockReturnValue({
@@ -50,31 +53,29 @@ describe('RedirectWithDefaultEnvironment', () => {
   }
 
   it('eventually renders the child element', async () => {
-    const view = renderUrl(
-      {
-        pathname: '/services',
-        search: noQuery,
-      },
-      ''
-    );
+    const view = renderUrl({ pathname: '/services', search: noQuery }, '');
 
     expect(await view.findByText('Foo')).toBeInTheDocument();
     expect(view.queryByText('Bar')).not.toBeInTheDocument();
   });
 
-  it('redirects to ENVIRONMENT_ALL if not set', async () => {
-    renderUrl(
-      {
-        pathname: '/services',
-        search: noQuery,
-      },
-      ''
-    );
+  it('redirects to ENVIRONMENT_ALL if no environment is set', async () => {
+    renderUrl({ pathname: '/services', search: noQuery }, '');
 
-    expect(qs.parse(history.entries[0].search).environment).toEqual(ENVIRONMENT_ALL.value);
+    await waitFor(() => {
+      expect(qs.parse(history.location.search).environment).toEqual(ENVIRONMENT_ALL.value);
+    });
   });
 
-  it('preserves existing query when adding default environment', async () => {
+  it('redirects to the default environment if configured', async () => {
+    renderUrl({ pathname: '/services', search: noQuery }, 'production');
+
+    await waitFor(() => {
+      expect(qs.parse(history.location.search).environment).toEqual('production');
+    });
+  });
+
+  it('preserves the existing query when adding the default environment', async () => {
     renderUrl(
       {
         pathname: '/services',
@@ -94,33 +95,19 @@ describe('RedirectWithDefaultEnvironment', () => {
     });
   });
 
-  it('redirects to the default environment if set', () => {
-    renderUrl(
-      {
-        pathname: '/services',
-        search: noQuery,
-      },
-      'production'
-    );
-
-    expect(qs.parse(history.entries[0].search).environment).toEqual('production');
-  });
-
   it('does not redirect when an environment has been set', () => {
     renderUrl(
       {
         pathname: '/services',
-        search: qs.stringify({
-          environment: 'development',
-        }),
+        search: qs.stringify({ environment: 'development' }),
       },
       'production'
     );
 
-    expect(qs.parse(history.entries[0].search).environment).toEqual('development');
+    expect(qs.parse(history.location.search).environment).toEqual('development');
   });
 
-  it('does not redirect for the service overview', () => {
+  it('does not redirect for a service detail page', () => {
     renderUrl(
       {
         pathname: '/services/opbeans-java',
@@ -129,6 +116,60 @@ describe('RedirectWithDefaultEnvironment', () => {
       ''
     );
 
-    expect(qs.parse(history.entries[0].search).environment).toBeUndefined();
+    expect(qs.parse(history.location.search).environment).toBeUndefined();
+  });
+
+  it('restores the environment when navigating directly to the service inventory', async () => {
+    renderUrl(
+      {
+        pathname: '/services/opbeans-java',
+        search: qs.stringify({ environment: 'staging' }),
+      },
+      'production'
+    );
+
+    act(() => {
+      history.push({ pathname: '/services', search: noQuery });
+    });
+
+    await waitFor(() => {
+      expect(qs.parse(history.location.search).environment).toEqual('staging');
+    });
+  });
+
+  it('does not redirect when a legacy hash URL lands on the root, preserving the hash for RenderRedirectTo', () => {
+    const legacyHash = '#/services/opbeans-java/service-map?environment=staging';
+
+    renderUrl(
+      {
+        pathname: '',
+        search: noQuery,
+        hash: legacyHash,
+      },
+      'production'
+    );
+
+    // The hash carries the real route (and its environment); redirecting here would drop it
+    // before the `/` route's RenderRedirectTo can convert it to a path.
+    expect(history.location.hash).toEqual(legacyHash);
+    expect(qs.parse(history.location.search).environment).toBeUndefined();
+  });
+
+  it('restores the environment when navigating to the APM root', async () => {
+    renderUrl(
+      {
+        pathname: '/services/opbeans-java',
+        search: qs.stringify({ environment: 'staging' }),
+      },
+      'production'
+    );
+
+    act(() => {
+      history.push({ pathname: '/', search: noQuery });
+    });
+
+    await waitFor(() => {
+      expect(qs.parse(history.location.search).environment).toEqual('staging');
+    });
   });
 });

@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
@@ -16,11 +16,12 @@ import {
   NonTerminalExecutionStatuses,
 } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTIONS_INDEX } from '../../common';
+import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 
 export class WorkflowExecutionRepository {
   private indexName = WORKFLOWS_EXECUTIONS_INDEX;
 
-  constructor(private esClient: ElasticsearchClient) {}
+  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   /**
    * Retrieves a workflow execution by its ID from Elasticsearch.
@@ -37,10 +38,14 @@ export class WorkflowExecutionRepository {
     spaceId: string
   ): Promise<EsWorkflowExecution | null> {
     try {
-      const response = await this.esClient.get<EsWorkflowExecution>({
-        index: this.indexName,
-        id: workflowExecutionId,
-      });
+      const response = await retryTransientEsErrors(
+        () =>
+          this.esClient.get<EsWorkflowExecution>({
+            index: this.indexName,
+            id: workflowExecutionId,
+          }),
+        { logger: this.logger }
+      );
 
       const doc = response._source;
       // Verify spaceId matches for security/multi-tenancy
@@ -79,12 +84,16 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for creation');
     }
 
-    await this.esClient.index({
-      index: this.indexName,
-      id: workflowExecution.id,
-      refresh: options.refresh ?? false,
-      document: workflowExecution,
-    });
+    await retryTransientEsErrors(
+      () =>
+        this.esClient.index({
+          index: this.indexName,
+          id: workflowExecution.id,
+          refresh: options.refresh ?? false,
+          document: workflowExecution,
+        }),
+      { logger: this.logger }
+    );
   }
 
   /**
@@ -110,11 +119,18 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
-      refresh: options.refresh ?? false,
-      index: this.indexName,
-      operations: executions.flatMap((execution) => [{ create: { _id: execution.id } }, execution]),
-    });
+    const bulkResponse = await retryTransientEsErrors(
+      () =>
+        this.esClient.bulk({
+          refresh: options.refresh ?? false,
+          index: this.indexName,
+          operations: executions.flatMap((execution) => [
+            { create: { _id: execution.id } },
+            execution,
+          ]),
+        }),
+      { logger: this.logger }
+    );
 
     return bulkResponse.items.map((item, idx) => {
       const op = item.create ?? item.index;
@@ -146,12 +162,17 @@ export class WorkflowExecutionRepository {
       throw new Error('Workflow execution ID is required for update');
     }
 
-    await this.esClient.update<Partial<EsWorkflowExecution>>({
-      index: this.indexName,
-      id: workflowExecution.id,
-      refresh: options.refresh ?? false,
-      doc: workflowExecution,
-    });
+    const { id } = workflowExecution;
+    await retryTransientEsErrors(
+      () =>
+        this.esClient.update<Partial<EsWorkflowExecution>>({
+          index: this.indexName,
+          id,
+          refresh: options.refresh ?? false,
+          doc: workflowExecution,
+        }),
+      { logger: this.logger }
+    );
   }
 
   /**
@@ -175,11 +196,15 @@ export class WorkflowExecutionRepository {
       }
     });
 
-    const bulkResponse = await this.esClient.bulk({
-      refresh: true,
-      index: this.indexName,
-      body: updates.flatMap((update) => [{ update: { _id: update.id } }, { doc: update }]),
-    });
+    const bulkResponse = await retryTransientEsErrors(
+      () =>
+        this.esClient.bulk({
+          refresh: true,
+          index: this.indexName,
+          body: updates.flatMap((update) => [{ update: { _id: update.id } }, { doc: update }]),
+        }),
+      { logger: this.logger }
+    );
 
     if (bulkResponse.errors) {
       const erroredDocuments = bulkResponse.items
@@ -206,11 +231,15 @@ export class WorkflowExecutionRepository {
    * @returns A promise that resolves to the list of search hits.
    */
   public async searchWorkflowExecutions(query: Record<string, unknown>, size: number = 10) {
-    const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
-      query,
-      size,
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.search<EsWorkflowExecution>({
+          index: this.indexName,
+          query,
+          size,
+        }),
+      { logger: this.logger }
+    );
 
     return response.hits.hits;
   }
@@ -250,18 +279,22 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
-      size: 0, // Don't need the document, just checking existence
-      terminate_after: 1, // Stop after finding 1 match
-      track_total_hits: true,
-      _source: false, // Don't fetch document content, only check existence
-      query: {
-        bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
-        },
-      },
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.search<EsWorkflowExecution>({
+          index: this.indexName,
+          size: 0, // Don't need the document, just checking existence
+          terminate_after: 1, // Stop after finding 1 match
+          track_total_hits: true,
+          _source: false, // Don't fetch document content, only check existence
+          query: {
+            bool: {
+              filter: filterClauses, // Filter context = no scoring = faster
+            },
+          },
+        }),
+      { logger: this.logger }
+    );
 
     const total = response.hits.total;
     if (total === undefined) {
@@ -300,16 +333,20 @@ export class WorkflowExecutionRepository {
       filterClauses.push({ term: { triggeredBy } });
     }
 
-    const response = await this.esClient.search<EsWorkflowExecution>({
-      index: this.indexName,
-      size: 1,
-      terminate_after: 1, // Stop after finding 1 match
-      query: {
-        bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
-        },
-      },
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.search<EsWorkflowExecution>({
+          index: this.indexName,
+          size: 1,
+          terminate_after: 1, // Stop after finding 1 match
+          query: {
+            bool: {
+              filter: filterClauses, // Filter context = no scoring = faster
+            },
+          },
+        }),
+      { logger: this.logger }
+    );
 
     return response.hits.hits;
   }
@@ -356,20 +393,24 @@ export class WorkflowExecutionRepository {
       });
     }
 
-    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-      index: this.indexName,
-      query: {
-        bool: {
-          filter: filterClauses, // Filter context = no scoring = faster
-        },
-      },
-      _source: ['id'], // Only fetch ID field for efficiency
-      sort: [
-        { createdAt: { order: 'asc' } },
-        { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
-      ],
-      size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
+          index: this.indexName,
+          query: {
+            bool: {
+              filter: filterClauses, // Filter context = no scoring = faster
+            },
+          },
+          _source: ['id'], // Only fetch ID field for efficiency
+          sort: [
+            { createdAt: { order: 'asc' } },
+            { id: { order: 'asc' } }, // Tie-break for determinism when createdAt collides; not chronological order
+          ],
+          size: Math.min(size, 10000), // Cap at ES default max_result_window for validation
+        }),
+      { logger: this.logger }
+    );
 
     return response.hits.hits
       .map((hit) => hit._source?.id ?? hit._id)
@@ -397,14 +438,18 @@ export class WorkflowExecutionRepository {
         },
       });
     }
-    const response = await this.esClient.count({
-      index: this.indexName,
-      query: {
-        bool: {
-          filter: filterClauses,
-        },
-      },
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.count({
+          index: this.indexName,
+          query: {
+            bool: {
+              filter: filterClauses,
+            },
+          },
+        }),
+      { logger: this.logger }
+    );
 
     return response.count;
   }
@@ -416,21 +461,25 @@ export class WorkflowExecutionRepository {
     concurrencyGroupKey: string,
     spaceId: string
   ): Promise<string | null> {
-    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-      index: this.indexName,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            { term: { concurrencyGroupKey } },
-            { term: { spaceId } },
-            { term: { status: ExecutionStatus.QUEUED } },
-          ],
-        },
-      },
-      _source: ['id'],
-      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
+          index: this.indexName,
+          size: 1,
+          query: {
+            bool: {
+              filter: [
+                { term: { concurrencyGroupKey } },
+                { term: { spaceId } },
+                { term: { status: ExecutionStatus.QUEUED } },
+              ],
+            },
+          },
+          _source: ['id'],
+          sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+        }),
+      { logger: this.logger }
+    );
     const hit = response.hits.hits[0];
     const id = hit?._source?.id ?? hit?._id;
     return typeof id === 'string' ? id : null;
@@ -443,28 +492,32 @@ export class WorkflowExecutionRepository {
     workflowExecutionId: string;
     spaceId: string;
   }): Promise<boolean> {
-    const response = await this.esClient.update({
-      index: this.indexName,
-      id: params.workflowExecutionId,
-      // Near-real-time search must see this doc as PENDING before the next
-      // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
-      refresh: 'wait_for',
-      script: {
-        lang: 'painless',
-        source: `
-          if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {
-            ctx._source.status = params.pendingStatus;
-          } else {
-            ctx.op = 'noop';
-          }
-        `,
-        params: {
-          queuedStatus: ExecutionStatus.QUEUED,
-          pendingStatus: ExecutionStatus.PENDING,
-          spaceId: params.spaceId,
-        },
-      },
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.update({
+          index: this.indexName,
+          id: params.workflowExecutionId,
+          // Near-real-time search must see this doc as PENDING before the next
+          // drain loop iteration counts slot occupancy; otherwise max:1 can double-promote.
+          refresh: 'wait_for',
+          script: {
+            lang: 'painless',
+            source: `
+              if (ctx._source.status == params.queuedStatus && ctx._source.spaceId == params.spaceId) {
+                ctx._source.status = params.pendingStatus;
+              } else {
+                ctx.op = 'noop';
+              }
+            `,
+            params: {
+              queuedStatus: ExecutionStatus.QUEUED,
+              pendingStatus: ExecutionStatus.PENDING,
+              spaceId: params.spaceId,
+            },
+          },
+        }),
+      { logger: this.logger }
+    );
     return response.result === 'updated';
   }
 
@@ -501,19 +554,23 @@ export class WorkflowExecutionRepository {
 
     const pageSize = Math.min(size, 10000); // Cap at ES default max_result_window
 
-    const response = await this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
-      index: this.indexName,
-      query: {
-        bool: {
-          filter: filterClauses,
-        },
-      },
-      _source: ['id'],
-      sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
-      size: pageSize,
-      track_total_hits: true,
-      ...(searchAfter?.length ? { search_after: searchAfter } : {}),
-    });
+    const response = await retryTransientEsErrors(
+      () =>
+        this.esClient.search<Pick<EsWorkflowExecution, 'id'>>({
+          index: this.indexName,
+          query: {
+            bool: {
+              filter: filterClauses,
+            },
+          },
+          _source: ['id'],
+          sort: [{ createdAt: { order: 'asc' } }, { id: { order: 'asc' } }],
+          size: pageSize,
+          track_total_hits: true,
+          ...(searchAfter?.length ? { search_after: searchAfter } : {}),
+        }),
+      { logger: this.logger }
+    );
 
     const hits = response.hits.hits;
     const results = hits

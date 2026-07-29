@@ -725,7 +725,7 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async getHeaderText() {
-      return await testSubjects.getVisibleText('mlDataFrameAnalyticsWizardHeaderTitle');
+      return await testSubjects.getVisibleText('appHeaderTitle');
     },
 
     async assertInitialCloneJobConfigStep(job: DataFrameAnalyticsConfig) {

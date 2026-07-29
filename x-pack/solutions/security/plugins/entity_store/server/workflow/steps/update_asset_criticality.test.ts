@@ -77,9 +77,11 @@ const createMockContext = (
 
 describe('updateAssetCriticalityStepDefinition', () => {
   const updateEntity = jest.fn();
-  const createCRUDClient = jest
-    .fn()
-    .mockReturnValue({ updateEntity }) as unknown as EntityStoreStartContract['createCRUDClient'];
+  const listEntities = jest.fn();
+  const createCRUDClient = jest.fn().mockReturnValue({
+    updateEntity,
+    listEntities,
+  }) as unknown as EntityStoreStartContract['createCRUDClient'];
   const getCreateCRUDClient = jest.fn(async () => createCRUDClient);
   const getClient = jest.fn();
   const getWorkflowsExtensionsStart = jest.fn(
@@ -113,9 +115,12 @@ describe('updateAssetCriticalityStepDefinition', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (createCRUDClient as jest.Mock).mockReturnValue({ updateEntity });
+    (createCRUDClient as jest.Mock).mockReturnValue({ updateEntity, listEntities });
     getCreateCRUDClient.mockImplementation(async () => createCRUDClient);
     updateEntity.mockResolvedValue(undefined);
+    listEntities.mockResolvedValue({
+      entities: [{ 'entity.id': 'host:my-host', 'entity.type': 'host' }],
+    });
     getLicense.mockResolvedValue({ hasAtLeast: () => true });
     checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
     checkPrivileges.mockResolvedValue(buildCheckPrivilegesResponse(true));
@@ -284,6 +289,29 @@ describe('updateAssetCriticalityStepDefinition', () => {
           type: 'PermissionError',
         }
       );
+      expect(updateEntity).not.toHaveBeenCalled();
+    });
+
+    it('throws a NotFoundError ExecutionError and does not update the entity when the entity does not exist in the store', async () => {
+      listEntities.mockResolvedValueOnce({ entities: [] });
+      const mockContext = createMockContext({
+        entity_type: 'host',
+        entity_id: 'host:my-host',
+        criticality_level: 'high_impact',
+      });
+
+      await expect(updateAssetCriticalityStepDefinition.handler(mockContext)).rejects.toMatchObject(
+        {
+          type: 'NotFoundError',
+        }
+      );
+      expect(listEntities).toHaveBeenCalledWith({
+        filter: [
+          { term: { 'entity.id': 'host:my-host' } },
+          { term: { 'entity.EngineMetadata.Type': 'host' } },
+        ],
+        size: 1,
+      });
       expect(updateEntity).not.toHaveBeenCalled();
     });
   });

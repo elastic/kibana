@@ -61,6 +61,31 @@ describe('AlertEpisodeOverviewList', () => {
     expect(screen.getByTestId('mockAssigneeCell')).toHaveTextContent('user-1');
   });
 
+  it('renders a Tags row with a badge per tag when the group has tags', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            lastSnoozeAction: null,
+            lastSnoozeActor: null,
+            snoozeExpiry: null,
+            tags: ['tag-a', 'tag-b'],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Tags')).toBeInTheDocument();
+    const tagsRow = screen.getByTestId('alertingV2EpisodeDetailsOverviewListTags');
+    expect(tagsRow).toHaveTextContent('tag-a');
+    expect(tagsRow).toHaveTextContent('tag-b');
+  });
+
   it('hides the grouping row and keeps other rows when grouping is forbidden', () => {
     render(
       <I18nProvider>
@@ -185,5 +210,52 @@ describe('AlertEpisodeOverviewList', () => {
     expect(
       screen.getAllByTestId('mockAssigneeCell').find((el) => el.textContent === 'user-snoozer')
     ).toBeInTheDocument();
+  });
+
+  it('renders snoozed-by and a dash for snoozed-until when the snooze is indefinite', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+            lastSnoozeActor: 'user-snoozer',
+            snoozeExpiry: null,
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            tags: [],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('Snoozed by')).toBeInTheDocument();
+    expect(screen.getByText('Snoozed until')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('does not render snooze rows when snooze expiry has lapsed', () => {
+    render(
+      <I18nProvider>
+        <AlertEpisodeOverviewList
+          {...baseProps}
+          groupAction={{
+            groupHash: 'gh-1',
+            ruleId: 'rule-1',
+            lastSnoozeAction: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
+            lastSnoozeActor: 'user-snoozer',
+            snoozeExpiry: '2020-01-01T00:00:00.000Z',
+            lastDeactivateAction: null,
+            lastDeactivateActor: null,
+            tags: [],
+          }}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.queryByText('Snoozed by')).not.toBeInTheDocument();
+    expect(screen.queryByText('Snoozed until')).not.toBeInTheDocument();
   });
 });

@@ -69,7 +69,7 @@ async function validateAst(
 
   const rootCommands = parsingResult.ast.commands;
 
-  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets] =
+  const [sources, availablePolicies, joinIndices, timeSeriesSources, views, datasets, license] =
     await Promise.all([
       shouldValidateCallback(callbacks, 'getSources')
         ? retrieveSources(rootCommands, callbacks)
@@ -85,9 +85,8 @@ async function validateAst(
         : undefined,
       shouldValidateCallback(callbacks, 'getViews') ? callbacks?.getViews?.() : undefined,
       shouldValidateCallback(callbacks, 'getDatasets') ? callbacks?.getDatasets?.() : undefined,
+      callbacks?.getLicense?.(),
     ]);
-
-  const license = await callbacks?.getLicense?.();
   const hasMinimumLicenseRequired = license
     ? (minimumLicenseRequired: LicenseType) => license.hasAtLeast(minimumLicenseRequired)
     : undefined;

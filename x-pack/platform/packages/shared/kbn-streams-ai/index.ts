@@ -41,6 +41,8 @@ export {
   type PreviouslyIdentifiedFeature,
   type ExcludedFeatureSummary,
   type IgnoredFeature,
+  type SearchSimilarFeaturesArguments,
+  type SimilarFeatureHit,
 } from './src/features/identify_features';
 export { generateAllComputedFeatures } from './src/features/computed';
 export {
@@ -54,7 +56,7 @@ export type {
 
 export {
   searchKnowledgeIndicators,
-  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE,
 } from './src/knowledge_indicators/search';
 export {
   featureToKnowledgeIndicatorFeature,
