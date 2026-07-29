@@ -56,3 +56,5 @@ redux-thunk-v2
 redux-toolkit-v1
 redux-v4
 reselect-v4
+mongodb
+mongodb-connection-string-url
