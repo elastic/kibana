@@ -110,10 +110,10 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }
     'paginates docs in the flyout when clicking a different row in the grid',
     async ({ page, pageObjects }) => {
       await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-      await expect(page.testSubj.locator('docViewerFlyoutNavigationPage-0')).toBeVisible();
+      await expect(page.testSubj.locator('docViewerRowDetailsTitle')).toContainText(/1 of \d+/);
 
       await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 1 });
-      await expect(page.testSubj.locator('docViewerFlyoutNavigationPage-1')).toBeVisible();
+      await expect(page.testSubj.locator('docViewerRowDetailsTitle')).toContainText(/2 of \d+/);
 
       await pageObjects.docViewer.close();
     }

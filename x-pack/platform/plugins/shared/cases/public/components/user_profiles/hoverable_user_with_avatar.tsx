@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UserToolTip } from './user_tooltip';
-import { SmallUserAvatar } from './small_user_avatar';
+import { CaseUserAvatar } from './user_avatar';
 import type { UsernameProps } from './username';
 import { Username } from './username';
 
@@ -22,7 +22,7 @@ const HoverableUserWithAvatarComponent: React.FC<HoverableUserWithAvatarProps> =
     <UserToolTip userInfo={userInfo}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <SmallUserAvatar userInfo={userInfo} />
+          <CaseUserAvatar size="s" userInfo={userInfo} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction={'column'} gutterSize="none">

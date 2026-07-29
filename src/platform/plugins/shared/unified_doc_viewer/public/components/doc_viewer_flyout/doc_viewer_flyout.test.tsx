@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
@@ -63,6 +64,15 @@ const buildProps = (
   ...overrides,
 });
 
+const renderFlyout = (overrides: Partial<UnifiedDocViewerFlyoutProps> = {}) => {
+  const props = buildProps(overrides);
+  const user = userEvent.setup();
+
+  render(<UnifiedDocViewerFlyout {...props} />);
+
+  return { props, user };
+};
+
 describe('UnifiedDocViewerFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -70,7 +80,7 @@ describe('UnifiedDocViewerFlyout', () => {
     setUnifiedDocViewerServices(unifiedDocViewerServices);
   });
 
-  it('uses the refreshed hit from hits and shows pagination when the current hit is found', () => {
+  it('uses the refreshed hit from hits when the current hit is found', () => {
     const staleHit = buildHit({ id: 'shared-hit', message: 'stale message' });
     const unrelatedHit = buildHit({ id: 'other-hit', message: 'other message' });
     const refreshedHit = buildHit({ id: 'shared-hit', message: 'fresh message' });
@@ -93,11 +103,9 @@ describe('UnifiedDocViewerFlyout', () => {
       'data-message',
       'fresh message'
     );
-    expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
-    expect(screen.getByTestId('docViewerFlyoutNavigationPage-1')).toBeInTheDocument();
   });
 
-  it('falls back to the provided hit and hides pagination when the current hit is missing', () => {
+  it('falls back to the provided hit when the current hit is missing', () => {
     const staleHit = buildHit({ id: 'shared-hit', message: 'stale message' });
     const unrelatedHit = buildHit({ id: 'other-hit', message: 'other message' });
     const secondUnrelatedHit = buildHit({ id: 'third-hit', message: 'third message' });
@@ -120,6 +128,73 @@ describe('UnifiedDocViewerFlyout', () => {
       'data-message',
       'stale message'
     );
-    expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+  });
+
+  describe('keyboard navigation', () => {
+    const hit0 = buildHit({ id: 'hit-0', message: 'message 0' });
+    const hit1 = buildHit({ id: 'hit-1', message: 'message 1' });
+    const hit2 = buildHit({ id: 'hit-2', message: 'message 2' });
+    const hits = [hit0, hit1, hit2];
+
+    it('navigates to the next hit with ArrowRight', async () => {
+      const { props, user } = renderFlyout({ hit: hit1, hits });
+
+      screen.getByTestId('euiFlyoutBodyOverflow').focus();
+      await user.keyboard('{ArrowRight}');
+      expect(props.setExpandedDoc).toHaveBeenCalledWith(hit2);
+    });
+
+    it('navigates to the previous hit with ArrowLeft', async () => {
+      const { props, user } = renderFlyout({ hit: hit1, hits });
+
+      screen.getByTestId('euiFlyoutBodyOverflow').focus();
+      await user.keyboard('{ArrowLeft}');
+      expect(props.setExpandedDoc).toHaveBeenCalledWith(hit0);
+    });
+
+    it('does not navigate past the first hit with ArrowLeft', async () => {
+      const { props, user } = renderFlyout({ hit: hit0, hits });
+
+      screen.getByTestId('euiFlyoutBodyOverflow').focus();
+      await user.keyboard('{ArrowLeft}');
+      expect(props.setExpandedDoc).not.toHaveBeenCalled();
+    });
+
+    it('does not navigate past the last hit with ArrowRight', async () => {
+      const { props, user } = renderFlyout({ hit: hit2, hits });
+
+      screen.getByTestId('euiFlyoutBodyOverflow').focus();
+      await user.keyboard('{ArrowRight}');
+      expect(props.setExpandedDoc).not.toHaveBeenCalled();
+    });
+
+    it('does not navigate when hits is undefined', async () => {
+      const { props, user } = renderFlyout({ hit: hit0, hits: undefined });
+
+      screen.getByTestId('euiFlyoutBodyOverflow').focus();
+      await user.keyboard('{ArrowRight}{ArrowLeft}');
+      expect(props.setExpandedDoc).not.toHaveBeenCalled();
+    });
+
+    it('does not navigate backward when the expanded hit is not in hits', async () => {
+      const missingHit = buildHit({ id: 'missing-hit', message: 'missing' });
+      const { props, user } = renderFlyout({ hit: missingHit, hits });
+
+      screen.getByTestId('euiFlyoutBodyOverflow').focus();
+      await user.keyboard('{ArrowLeft}');
+      expect(props.setExpandedDoc).not.toHaveBeenCalled();
+    });
+
+    it('does not navigate when an input element is focused', async () => {
+      const { props, user } = renderFlyout({
+        hit: hit1,
+        hits,
+        renderCustomHeader: () => <input data-test-subj="flyoutCustomInput" />,
+      });
+
+      screen.getByTestId('flyoutCustomInput').focus();
+      await user.keyboard('{ArrowRight}{ArrowLeft}');
+      expect(props.setExpandedDoc).not.toHaveBeenCalled();
+    });
   });
 });

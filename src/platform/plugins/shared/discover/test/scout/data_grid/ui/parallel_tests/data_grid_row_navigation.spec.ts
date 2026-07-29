@@ -34,9 +34,9 @@ const getIndexNames = (spaceId: string) => ({
 });
 
 const goToNextDocViewerDocument = async (page: ScoutPage) => {
-  const navigation = page.testSubj.locator('docViewerFlyoutNavigation');
-  await navigation.waitFor({ state: 'visible' });
-  await navigation.locator('[data-test-subj="pagination-button-next"]').click();
+  const flyout = page.testSubj.locator('docViewerFlyout');
+  await flyout.waitFor({ state: 'visible' });
+  await flyout.locator('[data-test-subj="euiFlyoutMenuPaginationNext"]').click();
 };
 
 spaceTest.describe('Discover data grid row navigation', { tag: '@local-stateful-classic' }, () => {

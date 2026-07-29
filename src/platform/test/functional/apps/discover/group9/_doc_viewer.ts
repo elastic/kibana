@@ -501,65 +501,65 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should navigate between documents with arrow keys', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
           await discover.isShowingDocViewer();
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await dataGrid.expectDocViewerActivePage(0);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-2`);
+          await dataGrid.expectDocViewerActivePage(2);
           await browser.pressKeys(browser.keys.ARROW_LEFT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await browser.pressKeys(browser.keys.ARROW_LEFT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await dataGrid.expectDocViewerActivePage(0);
         });
 
         it('should not navigate between documents with arrow keys when the search input is focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
           await discover.isShowingDocViewer();
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await dataGrid.expectDocViewerActivePage(0);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await testSubjects.click('unifiedDocViewerFieldsSearchInput');
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await browser.pressKeys(browser.keys.TAB);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-2`);
+          await dataGrid.expectDocViewerActivePage(2);
         });
 
         it('should not navigate between documents with arrow keys when the data grid is focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
           await discover.isShowingDocViewer();
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await dataGrid.expectDocViewerActivePage(0);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await testSubjects.click('dataGridHeaderCell-name');
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await browser.pressKeys(browser.keys.TAB);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-2`);
+          await dataGrid.expectDocViewerActivePage(2);
         });
 
         it('should not navigate between documents with arrow keys when the tabs are focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
           await discover.isShowingDocViewer();
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await dataGrid.expectDocViewerActivePage(0);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await testSubjects.click('docViewerTab-doc_view_source');
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
         });
 
         it('should not navigate between documents with arrow keys when resizable button is focused', async () => {
           await dataGrid.clickRowToggle({ defaultTabId: false });
           await discover.isShowingDocViewer();
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-0`);
+          await dataGrid.expectDocViewerActivePage(0);
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
           await testSubjects.click('euiResizableButton');
           await browser.pressKeys(browser.keys.ARROW_RIGHT);
-          await testSubjects.existOrFail(`docViewerFlyoutNavigationPage-1`);
+          await dataGrid.expectDocViewerActivePage(1);
         });
 
         it('should close the flyout with the escape key', async () => {
