@@ -30,6 +30,20 @@ async (page) => {
   // reported as if it belonged to the new flow on its very first drain.
   page.__actionCollectorBuffer = [];
   page.__actionCollectorConsole = [];
+  // Reset every flow, same as the buffers above — NOT gated behind the
+  // alreadyInstalled guard below. A navigation request that never resolves
+  // into a 'framenavigated' (cancelled, superseded by another navigation)
+  // would otherwise leave a stale "seen" entry for its frame that survives
+  // into a LATER flow entirely, wrongly priming its next pushState to
+  // abandon everything. See "Why 'framenavigated' alone is not enough".
+  //
+  // Keyed by Frame, valued by the *specific* in-flight navigation Request
+  // objects seen for it since the last 'framenavigated' processed for that
+  // frame (a Set, not a boolean) — onRequestFailed/onRequestFinished below
+  // remove a request from its frame's set as soon as that specific attempt
+  // resolves one way or another, so a cancelled/superseded navigation can't
+  // poison a later, unrelated same-document navigation on the same frame.
+  page.__actionCollectorNavRequestSeen = new WeakMap();
 
   if (page.__actionCollectorInstalled) return { installed: true, alreadyInstalled: true };
 
@@ -39,15 +53,6 @@ async (page) => {
   // instead of growing unboundedly for the life of the page.
   page.__actionCollectorRequests = new WeakMap();
   page.__actionCollectorNextId = 1;
-  // Also keyed by Frame, WeakMap for the same reason: records whether a real
-  // document-fetching navigation request (isNavigationRequest()) has been
-  // seen for that frame since the last time we processed a 'framenavigated'
-  // for it. history.pushState()/hash changes fire 'framenavigated' too, with
-  // no navigation request at all — without this check, every in-app SPA
-  // route change would wrongly abandon every still-open request on that
-  // frame, even though nothing was actually torn down. See "Why
-  // 'framenavigated' alone is not enough" below.
-  page.__actionCollectorNavRequestSeen = new WeakMap();
 
   // Non-cryptographic, deterministic — its only job is to turn two DIFFERENT
   // secret values into two DIFFERENT (but still opaque) placeholders. Without
@@ -88,12 +93,34 @@ async (page) => {
   const SENSITIVE_KV = /\b(x[-_]?api[-_]?key|api[-_]?key|token|password|passwd|secret|client[-_]?secret|auth(?:orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)=([^\s&#'")]+)/gi;
   const redactText = (text) => text.replace(SENSITIVE_KV, (_m, key, value) => key + '=%5BREDACTED:' + shortHash(value) + '%5D');
 
+  // Playwright documents that request.frame() throws for two request kinds:
+  // one from a Service Worker (request.serviceWorker() non-null), and a
+  // navigation request issued before its frame exists yet. Both are real,
+  // expected occurrences, not exceptional failures — never let either one
+  // throw out of an event handler and silently stop that request (or a
+  // sibling event) from ever being buffered at all.
+  const frameOf = (req) => {
+    try {
+      return req.frame();
+    } catch (e) {
+      return null;
+    }
+  };
   const onRequest = (req) => {
+    const frame = frameOf(req);
+    const isNav = req.isNavigationRequest();
     // A real cross-document navigation always issues the document-fetching
     // request itself first, before 'framenavigated' commits — this is the
     // only public-API signal available to tell that apart from a same-
     // document (pushState/hash) navigation, which issues no request at all.
-    if (req.isNavigationRequest()) page.__actionCollectorNavRequestSeen.set(req.frame(), true);
+    // Skipped when frame is unavailable: with no frame to key by, this
+    // request can't contribute a per-frame abandonment signal anyway.
+    if (isNav && frame) {
+      if (!page.__actionCollectorNavRequestSeen.has(frame)) {
+        page.__actionCollectorNavRequestSeen.set(frame, new Set());
+      }
+      page.__actionCollectorNavRequestSeen.get(frame).add(req);
+    }
     const entry = {
       id: page.__actionCollectorNextId++,
       method: req.method(), url: redact(req.url()),
@@ -102,8 +129,16 @@ async (page) => {
       resourceType: req.resourceType(), abandonedByNavigation: false,
       // Internal only — never included in drain()'s output. Lets
       // 'framenavigated' below abandon only THIS request's own frame's
-      // in-flight requests, not every open request page-wide.
-      frame: req.frame(),
+      // in-flight requests, not every open request page-wide. Stays `null`
+      // (never scoped to, and therefore never abandoned by, any frame's
+      // navigation) when frame() was unavailable above.
+      frame,
+      // Internal only. The navigation request that CAUSES a 'framenavigated'
+      // commit can still be open (respondedAt still null) at that exact
+      // moment — a slow/streaming document's own request must never be
+      // marked abandoned by the very navigation it is driving. See
+      // onFrameNavigated below.
+      isNavigationRequest: isNav,
     };
     page.__actionCollectorBuffer.push(entry);
     page.__actionCollectorRequests.set(req, entry);
@@ -134,12 +169,29 @@ async (page) => {
     if (!entry) return;
     entry.status = res.status(); entry.ok = res.ok();
   };
+  // Removes a settled navigation request from its frame's "seen" set —
+  // whether it succeeded or failed, THIS specific attempt is done and must
+  // stop contributing to a future 'framenavigated' decision on that frame.
+  // Safe to do even on success: a real navigation's own request finishing
+  // its body download always happens after 'framenavigated' has already
+  // committed (and already consumed/cleared the set) for a successful
+  // navigation, so this is a no-op then — it only matters for the case that
+  // motivates it: a cancelled/superseded navigation request that will never
+  // trigger 'framenavigated' at all, which must not poison a later,
+  // unrelated same-document navigation on the same frame.
+  const forgetSettledNavRequest = (req) => {
+    const frame = frameOf(req);
+    const set = frame && page.__actionCollectorNavRequestSeen.get(frame);
+    if (set) set.delete(req);
+  };
   const onRequestFinished = (req) => {
+    forgetSettledNavRequest(req);
     const entry = page.__actionCollectorRequests.get(req);
     if (!entry) return;
     entry.respondedAt = Date.now();
   };
   const onRequestFailed = (req) => {
+    forgetSettledNavRequest(req);
     const entry = page.__actionCollectorRequests.get(req);
     if (!entry) return;
     entry.failure = (req.failure() && req.failure().errorText) || 'unknown';
@@ -162,11 +214,28 @@ async (page) => {
   // last time this handler ran for it — see "Why 'framenavigated' alone is
   // not enough" below.
   const onFrameNavigated = (frame) => {
-    const isRealDocumentNavigation = page.__actionCollectorNavRequestSeen.get(frame) === true;
-    page.__actionCollectorNavRequestSeen.set(frame, false);
+    const navSet = page.__actionCollectorNavRequestSeen.get(frame);
+    const isRealDocumentNavigation = !!navSet && navSet.size > 0;
+    if (navSet) navSet.clear();
     if (!isRealDocumentNavigation) return;
     for (const entry of page.__actionCollectorBuffer) {
-      if (entry.frame === frame && entry.respondedAt == null && entry.failure == null) {
+      // Excludes the navigation request(s) that CAUSED this very commit
+      // (and any of their redirect hops, which are separate Request objects
+      // with isNavigationRequest() also true): 'framenavigated' commits
+      // once enough of the response is available to swap in the new
+      // document, which can be well before that same request's OWN body has
+      // finished downloading (respondedAt still null). Without this
+      // exclusion, a slow-loading document would falsely mark its own
+      // driving request as request_abandoned_by_navigation and stop
+      // tracking it — it settles normally via requestfinished/requestfailed
+      // like any other request; if it never does, pending/stuck detection
+      // (not abandonment) is the correct classification for it.
+      if (
+        entry.frame === frame &&
+        entry.respondedAt == null &&
+        entry.failure == null &&
+        !entry.isNavigationRequest
+      ) {
         entry.abandonedByNavigation = true;
       }
     }
@@ -195,9 +264,13 @@ async (page) => {
 }
 ```
 
-**Install is idempotent by design, but NOT a no-op** — call it at the start of every flow, not just the session's first. The `if (page.__actionCollectorInstalled)` guard only skips re-attaching listeners and re-creating the `WeakMap`s; the buffer/console reset above it runs on every call, every flow, unconditionally.
+**Install is idempotent by design, but NOT a no-op** — call it at the start of every flow, not just the session's first. The `if (page.__actionCollectorInstalled)` guard only skips re-attaching listeners and re-creating the request-keyed `WeakMap`; the buffer/console reset above it, and the `__actionCollectorNavRequestSeen` recreation alongside it, each runs on every call, every flow, unconditionally — see "Why 'framenavigated' alone is not enough" for why that `WeakMap` specifically cannot wait for the guard.
 
-**Why 'framenavigated' alone is not enough.** Playwright fires it for same-document navigations (`history.pushState()`, hash changes) exactly as it does for a real navigation to a new document — nothing in the public `page.on('framenavigated', frame => ...)` signature distinguishes the two. Only a real cross-document navigation issues a document-fetching request first (`request.isNavigationRequest()`); a pushState-driven route change issues no request at all. `__actionCollectorNavRequestSeen` records that per-frame, and `onFrameNavigated` only abandons a frame's open requests when it's set, resetting it every time so a later same-document nav on the same frame doesn't inherit an earlier real navigation's flag.
+**Why 'framenavigated' alone is not enough.** Playwright fires it for same-document navigations (`history.pushState()`, hash changes) exactly as it does for a real navigation to a new document — nothing in the public `page.on('framenavigated', frame => ...)` signature distinguishes the two. Only a real cross-document navigation issues a document-fetching request first (`request.isNavigationRequest()`); a pushState-driven route change issues no request at all. `__actionCollectorNavRequestSeen` tracks, per frame, the *specific* in-flight navigation `Request` objects seen for it since the last `'framenavigated'` processed for that frame — a `Set`, not a bare boolean, because a boolean can't be safely un-set: `onRequestFinished`/`onRequestFailed` remove a request from its frame's set the moment that specific attempt resolves, so a navigation that's cancelled or superseded before ever committing doesn't leave a stale "seen" signal that a later, unrelated same-document navigation on the same frame would inherit. `onFrameNavigated` treats a non-empty set as proof of a real navigation, then clears it either way. Recreating the whole `WeakMap` on every flow-install (not gated behind `alreadyInstalled`) closes the same hole across flow boundaries, not just within one.
+
+**`request.frame()` can throw** — Playwright documents two cases: a request from a Service Worker, and a navigation request issued before its frame exists yet (the second is exactly the kind of request this collector most wants to see coming). `frameOf()` above catches both and returns `null` rather than letting the exception escape the event handler and abort that request's own bookkeeping. A `null` frame simply never matches any real `Frame` in `onFrameNavigated`'s `entry.frame === frame` check, so such a request is correctly never scoped to (and never wrongly abandoned by) any frame's navigation — it can still resolve normally via `requestfinished`/`requestfailed`, or, if it never does, still surface through `pending_request`/`stuck_request` instead.
+
+**The request driving a navigation is never abandoned by that same navigation.** `'framenavigated'` commits once enough of the response is available to swap in the new document — for a slow or streaming document, that request's own `respondedAt` can still be `null` at that exact moment. `entry.isNavigationRequest` (set from `request.isNavigationRequest()`, true for the navigating request itself and for every redirect hop in its chain, each a separate `Request` object) is excluded from `onFrameNavigated`'s abandonment loop for exactly this reason — otherwise a slow document would falsely report itself as `request_abandoned_by_navigation` and stop being tracked, right as it's the one request most worth watching.
 
 ### Uninstall (only when a session with `collector_mode: legacy` suspects this exact page/tab may have been left instrumented by an earlier `collector_mode: shadow` session — see "Reusing a page across sessions" below)
 

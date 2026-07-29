@@ -162,8 +162,17 @@ frame's own navigation abandons only its own requests), a same-document
 (`history.pushState()`) navigation — which Playwright reports via
 `framenavigated` exactly like a real one — never abandoning a still-running
 request (only a navigation preceded by an actual `isNavigationRequest()`
-request does), console-text redaction including per-value differentiation,
-Uninstall removing exactly the collector's own six listeners (never an
-unrelated listener sharing the same event) and clearing state so a later
-install() re-attaches cleanly, and a second flow's install() call not
-inheriting a previous flow's leftover open request or console text.
+request does), a cancelled/superseded navigation request never poisoning a
+*later* same-document navigation on the same frame — within one flow or
+across a flow boundary — into wrongly abandoning something, the navigating
+request itself (and its redirect hops) never being abandoned by the very
+navigation it drives even when its own body is still streaming past commit,
+`request.frame()` throwing (Service Worker requests, and navigation
+requests issued before their frame exists — both documented Playwright
+behavior) never aborting that request's own buffering or wrongly scoping it
+to any frame's navigation, console-text redaction including per-value
+differentiation, Uninstall removing exactly the collector's own six
+listeners (never an unrelated listener sharing the same event) and clearing
+state so a later install() re-attaches cleanly, and a second flow's
+install() call not inheriting a previous flow's leftover open request or
+console text.

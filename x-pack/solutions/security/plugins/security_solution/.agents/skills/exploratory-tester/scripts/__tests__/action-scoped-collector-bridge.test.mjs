@@ -88,12 +88,20 @@ class FakePage extends EventEmitter {
 // Every request defaults to the page's main frame unless a test explicitly
 // constructs it against a child/iframe frame object, so existing tests that
 // don't care about frame-scoping keep working unchanged.
+// Sentinel `frame` value: constructing a FakeRequest with this makes its
+// frame() throw, exactly as real Playwright does for a Service Worker
+// request or a navigation request issued before its frame exists.
+const THROWS_ON_FRAME = Symbol('throws-on-frame');
+
 class FakeRequest {
   constructor(method, url, resourceType = 'xhr', frame = MAIN_FRAME, isNavigationRequest = false) {
     this._method = method;
     this._url = url;
     this._resourceType = resourceType;
     this._failure = null;
+    // Real Playwright: `frame` is a Frame or a special sentinel meaning
+    // "throws" — never a plain `null`/`undefined` (those would mean "no
+    // frame, no throw", which Playwright's real API never does).
     this._frame = frame;
     this._isNavigationRequest = isNavigationRequest;
   }
@@ -110,6 +118,12 @@ class FakeRequest {
     return this._failure;
   }
   frame() {
+    if (this._frame === THROWS_ON_FRAME) {
+      // Mirrors Playwright's own documented behavior: request.frame() throws
+      // for a Service Worker request, or a navigation request issued before
+      // its frame exists yet — never returns null/undefined for those.
+      throw new Error('Request.frame: no frame available for this request');
+    }
     return this._frame;
   }
   isNavigationRequest() {
@@ -389,6 +403,100 @@ await install(page);
   const d = await drain(page);
   const entry = d.network.find((e) => e.url.includes('still-loading-2'));
   assert(!!entry && entry.abandonedByNavigation === true, "a real navigation right after a same-document one still abandons — the flag reset on the pushState event doesn't wrongly suppress it", JSON.stringify(d));
+}
+
+console.log('\n── The request driving a navigation is not abandoned by its own (slow/streaming) navigation ─');
+page = new FakePage();
+await install(page);
+{
+  // isNavigationRequest: true, still open when 'framenavigated' commits —
+  // a slow/streaming document's own top-level request.
+  const navReq = new FakeRequest('GET', 'https://kibana.example/slow-next-page', 'document', page.mainFrame(), true);
+  page.emit('request', navReq);
+  page.emit('framenavigated', page.mainFrame());
+
+  const d = await drain(page);
+  const entry = d.network.find((e) => e.url.includes('slow-next-page'));
+  assert(!!entry && entry.abandonedByNavigation === false, "a slow-loading document's own request must not be abandoned by the very navigation it is driving", JSON.stringify(d));
+}
+
+console.log('\n── A cancelled navigation does not poison a LATER same-document navigation on the same frame ─');
+page = new FakePage();
+await install(page);
+{
+  const cancelledNav = new FakeRequest('GET', 'https://kibana.example/cancelled-nav', 'document', page.mainFrame(), true);
+  page.emit('request', cancelledNav);
+  page.emit('requestfailed', cancelledNav); // superseded/cancelled before ever committing
+
+  const req = new FakeRequest('GET', 'https://kibana.example/api/unrelated');
+  page.emit('request', req);
+  // A pushState — no navigation request precedes THIS event; the only nav
+  // request ever seen on this frame is the earlier, now-failed one, which
+  // must not count towards it.
+  page.emit('framenavigated', page.mainFrame());
+
+  const d = await drain(page);
+  const entry = d.network.find((e) => e.url.includes('unrelated'));
+  assert(!!entry && entry.abandonedByNavigation === false, 'a cancelled navigation must not poison a later same-document navigation into abandoning an unrelated still-open request', JSON.stringify(d));
+}
+
+console.log('\n── A navigation request left unresolved in one flow does not poison a same-document navigation in a LATER flow ─');
+page = new FakePage();
+await install(page); // flow 1
+{
+  const neverResolvedNav = new FakeRequest('GET', 'https://kibana.example/never-resolved-nav', 'document', page.mainFrame(), true);
+  page.emit('request', neverResolvedNav);
+  // Flow 1 ends here — neither requestfinished nor requestfailed ever
+  // fires for it, and no 'framenavigated' ever consumes it either. The
+  // worst case for the WeakMap this collector keeps for the page's whole
+  // lifetime, not just this flow.
+}
+await install(page); // flow 2 — must not inherit flow 1's stale sentinel
+{
+  const req = new FakeRequest('GET', 'https://kibana.example/api/flow2-unrelated');
+  page.emit('request', req);
+  page.emit('framenavigated', page.mainFrame()); // pushState in flow 2
+
+  const d = await drain(page);
+  const entry = d.network.find((e) => e.url.includes('flow2-unrelated'));
+  assert(!!entry && entry.abandonedByNavigation === false, "flow 2's pushState must not be poisoned by flow 1's never-resolved navigation request", JSON.stringify(d));
+}
+
+console.log('\n── request.frame() throwing (Service Worker / pre-frame navigation request) never aborts buffering ─');
+page = new FakePage();
+await install(page);
+{
+  const swReq = new FakeRequest('GET', 'https://kibana.example/sw-fetch', 'fetch', THROWS_ON_FRAME, false);
+  page.emit('request', swReq); // must not throw out of the handler
+  page.emit('response', new FakeResponse(swReq, 200, true));
+  page.emit('requestfinished', swReq);
+
+  const d = await drain(page);
+  const entry = d.network.find((e) => e.url.includes('sw-fetch'));
+  assert(!!entry && entry.status === 200 && entry.respondedAt != null, 'a request whose frame() throws is still buffered and tracked to completion normally', JSON.stringify(d));
+
+  // And a request whose frame() throws can never be scoped to (or
+  // abandoned by) any frame's navigation, real or same-document.
+  const swReq2 = new FakeRequest('GET', 'https://kibana.example/sw-fetch-2', 'fetch', THROWS_ON_FRAME, false);
+  page.emit('request', swReq2);
+  navigate(page, page.mainFrame());
+  const d2 = await drain(page);
+  const entry2 = d2.network.find((e) => e.url.includes('sw-fetch-2'));
+  assert(!!entry2 && entry2.abandonedByNavigation === false, 'a request whose frame() throws is never marked abandoned, since it can never be scoped to any frame', JSON.stringify(d2));
+}
+
+console.log('\n── A navigation request whose OWN frame() throws still avoids crashing the handler ─');
+page = new FakePage();
+await install(page);
+{
+  // Playwright: "Some navigation requests are issued before the corresponding
+  // frame is created" — isNavigationRequest() true AND frame() throwing can
+  // occur on the very same request.
+  const earlyNavReq = new FakeRequest('GET', 'https://kibana.example/early-nav', 'document', THROWS_ON_FRAME, true);
+  page.emit('request', earlyNavReq); // must not throw
+  const d = await drain(page);
+  const entry = d.network.find((e) => e.url.includes('early-nav'));
+  assert(!!entry, 'a navigation request whose own frame() throws is still buffered', JSON.stringify(d));
 }
 
 // ══════════════════════════════════════════════════════════════════════════

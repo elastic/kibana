@@ -4373,9 +4373,12 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         ).read_text(encoding="utf-8")
 
         # Navigation abandonment: scoped to the frame that navigated, not
-        # "any main-frame nav abandons every open request page-wide".
+        # "any main-frame nav abandons every open request page-wide". Each
+        # network entry records its originating frame via frameOf(req) (a
+        # guarded wrapper around request.frame() — see the fourth-review
+        # fixes test below), not a raw unguarded req.frame() call.
         self.assertIn("entry.frame === frame", collector_doc)
-        self.assertIn("frame: req.frame()", collector_doc)
+        self.assertIn("frameOf(req)", collector_doc)
 
         # Uninstall path: an explicit teardown snippet exists, uses page.off
         # (never removeAllListeners, which would also strip unrelated
@@ -4480,6 +4483,62 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
             uninstall_heading_idx,
             "the Install idempotency note must appear before the Uninstall heading",
         )
+
+    def test_shadow_collector_fourth_review_fixes(self):
+        # Fourth-round P2 review findings on PR #281418 (head 2a977525):
+        # the navigation "seen" sentinel must not go stale across a
+        # cancelled navigation or a flow boundary, request.frame() can
+        # throw for documented Playwright reasons and must never abort
+        # buffering, and the navigation request itself (plus redirects)
+        # must never be marked abandoned by the navigation it drives.
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        bridge_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        ).read_text(encoding="utf-8")
+
+        # The sentinel is a per-frame Set of in-flight navigation Requests,
+        # not a bare boolean — a boolean can't be safely un-set when a
+        # navigation is cancelled before it ever commits.
+        self.assertIn("new Set()", collector_doc)
+        self.assertIn("navSet.clear()", collector_doc)
+        # Cleared as soon as that specific attempt resolves, whether it
+        # succeeds or fails, not just on a successful commit.
+        self.assertIn("forgetSettledNavRequest", collector_doc)
+        self.assertIn("onRequestFinished = (req) => {\n    forgetSettledNavRequest(req);", collector_doc)
+        self.assertIn("onRequestFailed = (req) => {\n    forgetSettledNavRequest(req);", collector_doc)
+        # Recreated on every flow install, not just gated behind the
+        # alreadyInstalled guard that skips the other WeakMaps.
+        install_src = collector_doc[
+            collector_doc.index("### Install") : collector_doc.index("### Uninstall")
+        ]
+        nav_seen_create_idx = install_src.index("page.__actionCollectorNavRequestSeen = new WeakMap();")
+        guard_idx = install_src.index("if (page.__actionCollectorInstalled) return")
+        self.assertLess(
+            nav_seen_create_idx,
+            guard_idx,
+            "__actionCollectorNavRequestSeen must be (re)created before the "
+            "alreadyInstalled guard, so a stale sentinel from a previous "
+            "flow's cancelled navigation can't survive into a new flow",
+        )
+
+        # request.frame() is documented to throw for a Service Worker
+        # request and for a navigation request issued before its frame
+        # exists — both must be caught, never left to abort the handler.
+        self.assertIn("frameOf", collector_doc)
+        self.assertIn("try {", collector_doc)
+        self.assertIn("req.frame()", collector_doc)
+
+        # The navigating request (and its redirect hops) must be excluded
+        # from the abandonment loop — it can still be open when
+        # 'framenavigated' commits for a slow/streaming document.
+        self.assertIn("!entry.isNavigationRequest", collector_doc)
+
+        # Regression tests exist for all three fixes.
+        self.assertIn("driving a navigation is not abandoned", bridge_test)
+        self.assertIn("cancelled navigation", bridge_test)
+        self.assertIn("THROWS_ON_FRAME", bridge_test)
 
     def test_head_probes_do_not_wait_for_a_response_body(self):
         # curl -X HEAD keeps waiting for a body that a HEAD response never
