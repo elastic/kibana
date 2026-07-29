@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const useSteppedFlyoutStyles = () => {
   const { euiTheme } = useEuiTheme();
+  const stepTitleFontSize = useEuiFontSize('s');
 
   const backHeaderCss = css`
     && {
@@ -22,6 +23,9 @@ export const useSteppedFlyoutStyles = () => {
     .euiStep__content {
       padding-block-start: ${euiTheme.size.s};
       padding-block-end: ${euiTheme.size.base};
+    }
+    .euiStep__title {
+      ${stepTitleFontSize}
     }
   `;
 
