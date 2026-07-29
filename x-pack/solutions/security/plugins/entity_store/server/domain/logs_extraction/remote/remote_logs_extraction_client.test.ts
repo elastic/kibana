@@ -349,7 +349,7 @@ describe('RemoteLogsExtractionClient', () => {
     const result = await client.extractToUpdates({
       ...defaultExtractParams,
       docsLimit,
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
     });
 
     expect(result.error).toBeDefined();

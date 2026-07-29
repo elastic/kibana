@@ -139,6 +139,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(409);
+      expect(response.body.code).toBe('IMMUTABLE_FIELDS_CHANGED');
       // Verify the rule was not modified.
       const stored = await apiServices.alertingV2.rules.get(id);
       expect(stored.kind).toBe(created.kind);
@@ -206,6 +207,17 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       const response = await apiClient.put(getRuleUrl('any-id'), {
         headers: writerHeaders,
         body: invalidBody,
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
+  apiTest(
+    'validation: should reject body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getRuleUrl('any-id'), {
+        headers: writerHeaders,
+        body: { ...buildCreateRuleData(), unknownField: 'nope' },
       });
       expect(response).toHaveStatusCode(400);
     }

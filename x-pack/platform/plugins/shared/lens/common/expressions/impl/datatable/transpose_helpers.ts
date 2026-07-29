@@ -7,9 +7,9 @@
 
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { DatatableColumnArgs, DatatableColumnConfig } from '@kbn/lens-common';
 import { TRANSPOSE_VISUAL_SEPARATOR, getTransposeId } from '@kbn/transpose-utils';
 import type { DatatableArgs } from '../../defs/datatable/datatable';
-import type { DatatableColumnConfig, DatatableColumnArgs } from './datatable_column';
 
 /**
  * Transposes the columns of the given table as defined in the arguments.

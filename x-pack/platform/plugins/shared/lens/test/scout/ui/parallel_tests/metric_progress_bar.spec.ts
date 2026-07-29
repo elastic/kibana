@@ -7,7 +7,7 @@
 
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { createDashboard, testData } from '../fixtures';
+import { testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric progress bar on dashboard (DSL)',
@@ -44,11 +44,10 @@ spaceTest.describe(
 
     spaceTest(
       'renders vertical progress bar on dashboard',
-      async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
+      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
         spaceTest.fail(!storedDataViewId, 'Stored data view was not created in beforeAll');
 
-        const dashboardId = await createDashboard(
-          kbnClient,
+        const dashboardId = await apiServices.dashboard.create(
           {
             title: 'Metric progress bar vertical',
             time_range: testData.LOGSTASH_IN_RANGE_DATES,
@@ -97,11 +96,10 @@ spaceTest.describe(
 
     spaceTest(
       'renders horizontal progress bar on dashboard',
-      async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
+      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
         spaceTest.fail(!storedDataViewId, 'Stored data view was not created in beforeAll');
 
-        const dashboardId = await createDashboard(
-          kbnClient,
+        const dashboardId = await apiServices.dashboard.create(
           {
             title: 'Metric progress bar horizontal',
             time_range: testData.LOGSTASH_IN_RANGE_DATES,
@@ -151,11 +149,10 @@ spaceTest.describe(
 
     spaceTest(
       'does not render progress bar when max value is not configured',
-      async ({ browserAuth, kbnClient, page, pageObjects, scoutSpace }) => {
+      async ({ apiServices, browserAuth, page, pageObjects, scoutSpace }) => {
         spaceTest.fail(!storedDataViewId, 'Stored data view was not created in beforeAll');
 
-        const dashboardId = await createDashboard(
-          kbnClient,
+        const dashboardId = await apiServices.dashboard.create(
           {
             title: 'Metric without progress bar',
             time_range: testData.LOGSTASH_IN_RANGE_DATES,

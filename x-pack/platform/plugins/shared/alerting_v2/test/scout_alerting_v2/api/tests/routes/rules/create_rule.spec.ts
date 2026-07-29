@@ -103,6 +103,22 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const body = buildCreateRuleData();
+      const invalidBody = {
+        ...body,
+        unknown_field: { name: 'typo field' },
+      };
+      const response = await apiClient.post(testData.RULE_API_PATH, {
+        headers: writerHeaders,
+        body: invalidBody,
+      });
+      expect(response).toHaveStatusCode(400);
+    }
+  );
+
   apiTest('validation: rejects body with missing metadata', async ({ apiClient }) => {
     const { metadata: _metadata, ...rest } = buildCreateRuleData();
     const response = await apiClient.post(testData.RULE_API_PATH, {

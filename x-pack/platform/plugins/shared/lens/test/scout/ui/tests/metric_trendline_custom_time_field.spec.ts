@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
-import { createDashboard } from '../fixtures';
 
 const ECOMMERCE_DATA_VIEW_INDEX = 'kibana_sample_data_ecommerce';
 const ECOMMERCE_TIME_FIELD = 'order_date';
@@ -16,7 +15,10 @@ const ECOMMERCE_TIME_RANGE = { from: 'now-7d', to: 'now' } as const;
 
 test.describe(
   'Lens metric trendline with custom time field',
-  { tag: tags.stateful.classic },
+  // Local-only: forcing the `lens.apiFormat` flag via `apiServices.core.settings` needs the
+  // `/internal/core/_settings` route, which exists only when `coreApp.allowDynamicConfigOverrides`
+  // is enabled (local Scout servers) and 404s on cloud deployments.
+  { tag: '@local-stateful-classic' },
   () => {
     let storedDataViewId: string | undefined;
 
@@ -65,8 +67,8 @@ test.describe(
     });
 
     test('renders trendline when referenced data view time field is not timestamp', async ({
+      apiServices,
       browserAuth,
-      kbnClient,
       page,
       pageObjects,
     }) => {
@@ -99,7 +101,7 @@ test.describe(
         ],
       };
 
-      const dashboardId = await createDashboard(kbnClient, body, 'default');
+      const dashboardId = await apiServices.dashboard.create(body, 'default');
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.dashboard.openDashboardWithId(dashboardId);
 

@@ -11,46 +11,46 @@ import type { EventClient } from './event_client';
 
 export const updateSignificantEventStatus = async ({
   eventClient,
-  eventId,
+  eventUuid,
   status,
 }: {
   eventClient: EventClient;
-  eventId: string;
+  eventUuid: string;
   status: SignificantEventStatus;
 }): Promise<{
-  event_id: string;
+  event_uuid: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
 }> => {
-  const { hits } = await eventClient.findById(eventId);
+  const { hits } = await eventClient.findByEventUuid(eventUuid);
   const referenced = hits[hits.length - 1];
 
   if (!referenced) {
-    return { event_id: eventId, updated: 0, ignored: 1, status };
+    return { event_uuid: eventUuid, updated: 0, ignored: 1, status };
   }
 
   /**
-   * event_id is unique per append-only version; discovery_slug is the stable lineage key.
-   * Resolve the true latest version for this slug so the update chains off the current tip
+   * event_uuid is unique per append-only version; event_id is the stable lineage key.
+   * Resolve the true latest version for this event_id so the update chains off the current tip
    * rather than branching as a sibling off a stale caller-supplied version (see
    * attach_investigation.ts for the same rationale).
    */
-  const { hits: lineageHits } = await eventClient.findByDiscoverySlug(referenced.discovery_slug);
+  const { hits: lineageHits } = await eventClient.findByEventId(referenced.event_id);
   const latest = lineageHits[lineageHits.length - 1] ?? referenced;
 
   if (latest.status === status) {
-    return { event_id: eventId, updated: 0, ignored: 1, status };
+    return { event_uuid: eventUuid, updated: 0, ignored: 1, status };
   }
 
-  const nextEventId = uuidv4();
+  const nextEventUuid = uuidv4();
   const now = new Date().toISOString();
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
     created_at: now,
-    event_id: nextEventId,
-    previous_event_id: latest.event_id,
+    event_uuid: nextEventUuid,
+    previous_event_uuid: latest.event_uuid,
     status,
   };
 
@@ -58,5 +58,5 @@ export const updateSignificantEventStatus = async ({
   // re-fetch (e.g. the UI invalidating its query right after this route responds) sees it.
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
 
-  return { event_id: nextEventId, updated: 1, ignored: 0, status };
+  return { event_uuid: nextEventUuid, updated: 1, ignored: 0, status };
 };

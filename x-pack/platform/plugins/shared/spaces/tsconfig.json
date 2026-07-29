@@ -11,7 +11,7 @@
       "@kbn/core-user-settings-types"
     ]
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_spaces_access_control/**/*", "test/scout_spaces_access_control_disabled/**/*", "../../../../../typings/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_cps_local/**/*", "test/scout_spaces_access_control/**/*", "test/scout_spaces_access_control_disabled/**/*", "../../../../../typings/**/*"],
   "kbn_references": [
     "@kbn/features-plugin",
     "@kbn/licensing-plugin",
@@ -80,6 +80,7 @@
     "@kbn/deeplinks-shared",
     "@kbn/deeplinks-workplace-ai",
     "@kbn/core-user-profile-server",
+    "@kbn/ui-callout",
     "@kbn/repo-info",
     "@kbn/test",
     "@kbn/test-es-server"

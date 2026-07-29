@@ -117,12 +117,13 @@ const handleConversationExecution = async ({
     outputSchema,
     storeConversation = true,
     autoCreateConversationWithId = false,
-    source,
+    origin,
     nextInput,
     browserApiTools,
     configurationOverrides,
     action,
     telemetryMetadata,
+    maxContentLength,
     accessControl,
   } = execution.agentParams;
 
@@ -138,14 +139,20 @@ const handleConversationExecution = async ({
     ...deps,
   });
 
-  // Get conversation
+  // Get conversation — only the conversation-level part of the origin is persisted on it
   const conversation = await getConversation({
     agentId,
     conversationId,
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
-    source,
+    origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
+  });
+
+  const author = await deps.conversationService.getConversationRoundAuthor({
+    request,
+    conversation,
+    origin,
   });
 
   // Emit conversation ID for new conversations (only when persisting)
@@ -160,6 +167,8 @@ const handleConversationExecution = async ({
     executionId: execution.executionId,
     request,
     nextInput,
+    origin,
+    author,
     capabilities,
     structuredOutput,
     outputSchema,
@@ -167,6 +176,7 @@ const handleConversationExecution = async ({
     conversation,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
     browserApiTools,
     configurationOverrides,
@@ -435,7 +445,7 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -455,6 +465,7 @@ const handleStandaloneExecution = async ({
     conversation: undefined,
     defaultConnectorId: selectedConnectorId,
     telemetryMetadata,
+    maxContentLength,
     runAgent,
     executionMode: AgentExecutionMode.standalone,
   });

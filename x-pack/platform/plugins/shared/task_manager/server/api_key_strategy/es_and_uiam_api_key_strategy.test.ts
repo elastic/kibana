@@ -11,6 +11,7 @@ import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import { EsAndUiamApiKeyStrategy } from './es_and_uiam_api_key_strategy';
+import { taskManagerUiamTelemetry } from '../otel/uiam_telemetry';
 
 import {
   createApiKey,
@@ -45,8 +46,13 @@ const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
 });
 
 describe('EsAndUiamApiKeyStrategy', () => {
+  let recordUiamApiKeyFallbackSpy: jest.SpyInstance;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    recordUiamApiKeyFallbackSpy = jest
+      .spyOn(taskManagerUiamTelemetry, 'recordUiamApiKeyFallback')
+      .mockImplementation(() => {});
     // `clearAllMocks` does not reset implementations, so re-establish the default
     // (non-clone) behavior; individual tests opt into cloning explicitly.
     shouldCloneApiKeyFromRequestMock.mockReturnValue(false);
@@ -87,7 +93,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('essu_uiam-key');
     });
 
-    test('falls back to apiKey and warns when typeToUse is UIAM but uiamApiKey is missing and apiKeyCreatedByUser is false', () => {
+    test('falls back to apiKey with a debug log and records an "unexpected" fallback metric when typeToUse is UIAM but uiamApiKey is missing and apiKeyCreatedByUser is false', () => {
       const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({
         apiKey: 'es-key',
@@ -99,26 +105,28 @@ describe('EsAndUiamApiKeyStrategy', () => {
       });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-key');
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
         expect.objectContaining({ tags: expect.any(Array) })
       );
-      expect(logger.debug).not.toHaveBeenCalled();
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
     });
 
-    test('falls back to apiKey and warns when typeToUse is UIAM but uiamApiKey is missing and userScope is absent', () => {
+    test('falls back to apiKey with a debug log and records an "unexpected" fallback metric when typeToUse is UIAM but uiamApiKey is missing and userScope is absent', () => {
       const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({ apiKey: 'es-key' });
 
       expect(strategy.getApiKeyForFakeRequest(task)).toBe('es-key');
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
         'UIAM API key is not provided to create a fake request, falling back to regular API key.',
         expect.objectContaining({ tags: expect.any(Array) })
       );
-      expect(logger.debug).not.toHaveBeenCalled();
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('unexpected');
     });
 
-    test('falls back to apiKey with a debug log when uiamApiKey is missing but apiKeyCreatedByUser is true', () => {
+    test('falls back to apiKey with a debug log and records a "user_created_key" fallback metric when uiamApiKey is missing but apiKeyCreatedByUser is true', () => {
       const { strategy, logger } = createStrategy(ApiKeyType.UIAM);
       const task = mockTaskInstance({
         apiKey: 'es-key',
@@ -135,6 +143,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
         'UIAM API key is not provided to create a fake request, falling back to ES API key created by the user.',
         expect.objectContaining({ tags: expect.any(Array) })
       );
+      expect(recordUiamApiKeyFallbackSpy).toHaveBeenCalledWith('user_created_key');
     });
 
     test('returns apiKey when typeToUse is ES even if uiamApiKey exists', () => {
@@ -175,6 +184,7 @@ describe('EsAndUiamApiKeyStrategy', () => {
       expect(strategy.getApiKeyForFakeRequest(task)).toBeUndefined();
       expect(logger.warn).not.toHaveBeenCalled();
       expect(logger.debug).not.toHaveBeenCalled();
+      expect(recordUiamApiKeyFallbackSpy).not.toHaveBeenCalled();
     });
   });
 

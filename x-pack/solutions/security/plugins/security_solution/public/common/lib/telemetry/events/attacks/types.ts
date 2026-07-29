@@ -22,6 +22,7 @@ export enum AttacksEventTypes {
   ScheduleFlyoutOpened = 'Attacks Schedule Flyout Opened',
   ScheduleDetailsFlyoutOpened = 'Attacks Schedule Details Flyout Opened',
   SettingsFlyoutOpened = 'Attacks Settings Flyout Opened',
+  GenerationsControlCenterOpened = 'Attacks Generations Control Center Opened',
   GenerateClicked = 'Attacks Generate Clicked',
   FeaturePromotionCalloutAction = 'Attacks Feature Promotion Callout Action',
   WorkflowRunTriggered = 'Attacks Workflow Run Triggered',
@@ -61,6 +62,10 @@ interface AttacksScheduleFlyoutOpenedParams {
 }
 
 interface AttacksSettingsFlyoutOpenedParams {
+  source: 'attacks_page_header';
+}
+
+interface AttacksGenerationsControlCenterOpenedParams {
   source: 'attacks_page_header';
 }
 
@@ -129,6 +134,7 @@ export interface AttacksTelemetryEventsMap {
   [AttacksEventTypes.ExpandedViewTabClicked]: AttacksExpandedViewTabClickedParams;
   [AttacksEventTypes.ScheduleFlyoutOpened]: AttacksScheduleFlyoutOpenedParams;
   [AttacksEventTypes.SettingsFlyoutOpened]: AttacksSettingsFlyoutOpenedParams;
+  [AttacksEventTypes.GenerationsControlCenterOpened]: AttacksGenerationsControlCenterOpenedParams;
   [AttacksEventTypes.GenerateClicked]: AttacksGenerateClickedParams;
   [AttacksEventTypes.ScheduleDetailsFlyoutOpened]: AttacksScheduleDetailsFlyoutOpenedParams;
   [AttacksEventTypes.FeaturePromotionCalloutAction]: AttacksFeaturePromotionCalloutActionParams;

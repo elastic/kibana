@@ -6,20 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiBasicTable,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-  type CriteriaWithPagination,
-  type EuiBasicTableColumn,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, type CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { CoreStart, useService } from '@kbn/core-di-browser';
-import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
 import { useCountNewExecutionHistoryEvents } from '../../../hooks/use_count_new_execution_history_events';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
@@ -29,100 +17,10 @@ import { FilteredEmptyState, PoliciesEmptyState } from './empty_state';
 import { ExecutionHistoryErrorState } from './error_state';
 import { NewEventsBanner } from './new_events_banner';
 import { TruncatedCallout } from './truncated_callout';
-import { RulesCell } from './rules_cell';
+import { PoliciesExecutionHistoryTable } from './policies_execution_history_table';
 
 const DEFAULT_PER_PAGE = 10;
 const DEFAULT_OUTCOME: PolicyExecutionOutcomeFilter = 'all';
-const MAX_VISIBLE_RULES = 3;
-
-const buildColumns = (
-  onPolicyClick: (policyId: string) => void,
-  onRuleClick: (ruleId: string) => void,
-  activeRuleId: string | null,
-  getWorkflowUrl: (workflowId: string) => string,
-  formatTimestamp: (value: string) => string
-): Array<EuiBasicTableColumn<PolicyExecutionHistoryItem>> => [
-  {
-    field: '@timestamp',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.timestamp', {
-      defaultMessage: 'Timestamp',
-    }),
-    render: (value: string) => formatTimestamp(value),
-  },
-  {
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.policy', {
-      defaultMessage: 'Policy',
-    }),
-    render: (item: PolicyExecutionHistoryItem) => (
-      <EuiLink onClick={() => onPolicyClick(item.policy.id)}>
-        {item.policy.name ?? item.policy.id}
-      </EuiLink>
-    ),
-  },
-  {
-    field: 'outcome',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.outcome', {
-      defaultMessage: 'Outcome',
-    }),
-    render: (outcome: PolicyExecutionHistoryItem['outcome']) => (
-      <EuiBadge color="hollow" iconType={outcome === 'dispatched' ? 'check' : 'clock'}>
-        {outcome}
-      </EuiBadge>
-    ),
-  },
-  {
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.rules', {
-      defaultMessage: 'Rules',
-    }),
-    render: (item: PolicyExecutionHistoryItem) => (
-      <RulesCell
-        rules={item.rules}
-        maxVisibleRules={MAX_VISIBLE_RULES}
-        totalRuleCount={item.totalRuleCount}
-        activeRuleId={activeRuleId}
-        onRuleClick={onRuleClick}
-      />
-    ),
-  },
-  {
-    field: 'episode_count',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.episodes', {
-      defaultMessage: 'Episodes',
-    }),
-  },
-  {
-    field: 'action_group_count',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.actionGroups', {
-      defaultMessage: 'Action groups',
-    }),
-  },
-  {
-    field: 'workflows',
-    name: i18n.translate('xpack.alertingV2.executionHistory.columns.workflows', {
-      defaultMessage: 'Workflows',
-    }),
-    render: (workflows: PolicyExecutionHistoryItem['workflows']) => {
-      if (workflows.length === 0) return null;
-      return (
-        <EuiBadgeGroup gutterSize="xs">
-          {workflows.map((w) => (
-            <EuiBadge
-              key={w.id}
-              color="hollow"
-              iconType="workflow"
-              href={getWorkflowUrl(w.id)}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ maxWidth: '100%' }}
-            >
-              {w.name ?? w.id}
-            </EuiBadge>
-          ))}
-        </EuiBadgeGroup>
-      );
-    },
-  },
-];
 
 interface Props {
   onPolicyClick: (policyId: string) => void;
@@ -159,10 +57,6 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     enabled: !isError,
   });
   const newEventsCount = newCountData?.count ?? 0;
-
-  const application = useService(CoreStart('application'));
-  const settings = useService(CoreStart('settings'));
-  const dateTimeFormat = settings.client.get<string>('dateFormat');
 
   // Once the list refetch settles, hide the banner by advancing the lastSeenAt anchor.
   useEffect(() => {
@@ -212,18 +106,6 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     return <ExecutionHistoryErrorState onRetry={() => refetch()} />;
   }
 
-  const getWorkflowUrl = (workflowId: string) =>
-    application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
-  const formatTimestamp = (value: string) => moment(value).format(dateTimeFormat);
-
-  const columns = buildColumns(
-    onPolicyClick,
-    onRuleClick,
-    activeRuleId,
-    getWorkflowUrl,
-    formatTimestamp
-  );
-
   return (
     <>
       <ExecutionHistorySearchBar
@@ -253,18 +135,20 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
         </>
       )}
       <TruncatedCallout data={data} searchParam={searchParam} />
-      <EuiBasicTable<PolicyExecutionHistoryItem>
+      <PoliciesExecutionHistoryTable
+        tableCaption={i18n.translate('xpack.alertingV2.executionHistory.tableCaption', {
+          defaultMessage: 'Execution history policies',
+        })}
         items={items}
-        columns={columns}
         loading={isFetching}
-        noItemsMessage={isFiltered ? <FilteredEmptyState /> : <PoliciesEmptyState />}
-        pagination={{
-          pageIndex: page,
-          pageSize: perPage,
-          totalItemCount: totalEvents,
-          pageSizeOptions: [10, 25, 50, 100],
-        }}
+        pageIndex={page}
+        pageSize={perPage}
+        totalItemCount={totalEvents}
         onChange={onTableChange}
+        onPolicyClick={onPolicyClick}
+        onRuleClick={onRuleClick}
+        activeRuleId={activeRuleId}
+        noItemsMessage={isFiltered ? <FilteredEmptyState /> : <PoliciesEmptyState />}
       />
     </>
   );

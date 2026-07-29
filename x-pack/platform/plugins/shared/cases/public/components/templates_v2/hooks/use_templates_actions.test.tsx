@@ -148,7 +148,7 @@ describe('useTemplatesActions', () => {
     });
   });
 
-  it('handleClone does not pass author, fieldCount, fieldNames, or isDefault', () => {
+  it('handleClone does not pass author, fieldCount, fieldDefinitions, or isDefault', () => {
     const { result } = renderHook(() => useTemplatesActions(), { wrapper });
 
     act(() => {
@@ -158,7 +158,7 @@ describe('useTemplatesActions', () => {
     const { template } = cloneTemplateMock.mock.calls[0][0];
     expect(template).not.toHaveProperty('author');
     expect(template).not.toHaveProperty('fieldCount');
-    expect(template).not.toHaveProperty('fieldNames');
+    expect(template).not.toHaveProperty('fieldDefinitions');
     expect(template).not.toHaveProperty('isDefault');
   });
 

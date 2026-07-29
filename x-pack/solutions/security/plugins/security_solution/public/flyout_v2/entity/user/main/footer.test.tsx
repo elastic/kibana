@@ -45,7 +45,9 @@ jest.mock('../../../../flyout/entity_details/shared/components/take_action', () 
 jest.mock(
   '../../../../entity_analytics/components/ai_assistant_button/ai_assistant_button',
   () => ({
-    AiAssistantButton: () => <div data-test-subj="mockAiAssistantButton" />,
+    AiAssistantButton: ({ entityName }: { entityName: string }) => (
+      <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+    ),
   })
 );
 
@@ -70,7 +72,8 @@ const renderFooter = (
   entityAttachmentsEnabled: boolean,
   attachmentsEnabled: boolean,
   entity?: EntityStoreRecord,
-  identityFields = USER_IDENTITY_FIELDS
+  identityFields: Record<string, string> = USER_IDENTITY_FIELDS,
+  userName = 'alice'
 ) => {
   mockUseIsExperimentalFeatureEnabled.mockReturnValue(entityAttachmentsEnabled);
   mockUseKibana.mockReturnValue({
@@ -86,7 +89,7 @@ const renderFooter = (
 
   return render(
     <TestProviders>
-      <Footer identityFields={identityFields} entity={entity} />
+      <Footer userName={userName} identityFields={identityFields} entity={entity} />
     </TestProviders>
   );
 };
@@ -127,5 +130,19 @@ describe('Footer – entity attachment actions', () => {
 
     expect(screen.queryByTestId(ADD_TO_NEW_CASE_TEST_ID)).not.toBeInTheDocument();
     expect(screen.queryByTestId(ADD_TO_EXISTING_CASE_TEST_ID)).not.toBeInTheDocument();
+  });
+});
+
+describe('Footer – AiAssistantButton entity name', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('passes the raw userName prop, not a value derived from identityFields', () => {
+    // Regression for security-team/kibana#277619: for non-local users, identityFields can
+    // resolve to user.email (ranked above user.name) with no user.name key at all. The footer
+    // must still send the flyout's display name to "Add to chat" — the same value the
+    // risk-score tab's AiAssistantButton sends for this entity — not the email.
+    renderFooter(true, true, ENTITY_STORE_RECORD, { 'user.email': 'alice@example.com' }, 'alice');
+
+    expect(screen.getByTestId('mockAiAssistantButton')).toHaveTextContent('alice');
   });
 });

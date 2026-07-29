@@ -16,10 +16,22 @@ import {
   dashboardStateToAttachmentData,
   DASHBOARD_ATTACHMENT_TYPE,
 } from '@kbn/agent-builder-dashboards-common';
+import {
+  CHILDREN_UNSAVED_CHANGES_DEBOUNCE,
+  UNSAVED_CHANGES_DEBOUNCE,
+} from '@kbn/presentation-publishing';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 import { createNewAttachmentIdRegenerationSubscription } from './new_attachment_id_regeneration_subscription';
 import { createOriginSyncSubscription } from './origin_sync_subscription';
 import type { IdGenerator } from '..';
+
+/**
+ * Layout manager refreshes `getSerializedState()` panel configs only after
+ * `UNSAVED_CHANGES_DEBOUNCE` then `CHILDREN_UNSAVED_CHANGES_DEBOUNCE`. Wait that
+ * long (+ buffer) so manual sync is not one edit behind.
+ */
+export const MANUAL_CHANGES_DEBOUNCE_MS =
+  UNSAVED_CHANGES_DEBOUNCE + CHILDREN_UNSAVED_CHANGES_DEBOUNCE + 50;
 
 export interface DashboardAppIntegrationParams {
   agentBuilder: AgentBuilderPluginStart;
@@ -133,7 +145,7 @@ export const registerDashboardAppIntegration = ({
   });
 
   const manualChangesSubscription = api.anyStateChange$
-    .pipe(debounceTime(150))
+    .pipe(debounceTime(MANUAL_CHANGES_DEBOUNCE_MS))
     .subscribe(addAttachmentFromDashboard);
 
   return () => {

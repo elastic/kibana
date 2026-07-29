@@ -14,8 +14,8 @@ import type { RenderResult } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
-import type { Store } from 'redux';
-import { Provider } from 'react-redux';
+import type { Store } from 'redux-v4';
+import { Provider } from 'react-redux-v7';
 
 import type { AppRouter } from '../../../public/application/services';
 import { registerRouter } from '../../../public/application/services';

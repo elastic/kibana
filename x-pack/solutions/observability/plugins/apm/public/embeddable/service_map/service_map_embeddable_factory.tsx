@@ -199,7 +199,7 @@ export const getServiceMapEmbeddableFactory = (deps: EmbeddableDeps) => {
         canEditUnifiedSearch: () => true,
         getTypeDisplayName: () =>
           i18n.translate('xpack.apm.serviceMap.embeddable.typeDisplayName', {
-            defaultMessage: 'configuration',
+            defaultMessage: 'Service map',
           }),
         isEditingEnabled: () => true,
         onEdit: async () => {

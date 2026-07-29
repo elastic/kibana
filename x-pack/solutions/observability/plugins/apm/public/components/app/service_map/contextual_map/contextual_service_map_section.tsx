@@ -8,9 +8,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isActivePlatinumLicense } from '../../../../../common/license_check';
+import { invalidLicenseMessage } from '../../../../../common/service_map';
+import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
+import { LicensePrompt } from '../../../shared/license_prompt';
+import { DisabledPrompt } from '../disabled_prompt';
 import { ContextualServiceMapControls } from './contextual_service_map_controls';
 import {
   CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS,
@@ -34,6 +39,11 @@ export interface ContextualServiceMapSectionProps {
   rangeTo: string;
   environment: string;
   kuery: string;
+  /**
+   * Seeded as filter-bar pills on the global map Explore link (and embeddable
+   * full-map href). Use for non-Controls fields such as transaction.name/type.
+   */
+  filterPills?: Array<{ field: string; value: string }>;
   /** Fixed graph area height when `sectionHeight` is not set. */
   panelHeight?: number;
   /** Fixed outer panel height; map graph fills remaining space below header controls. */
@@ -51,6 +61,7 @@ export function ContextualServiceMapSection({
   rangeTo,
   environment,
   kuery,
+  filterPills,
   panelHeight = DEFAULT_CONTEXTUAL_SERVICE_MAP_PANEL_HEIGHT,
   sectionHeight,
   embeddableMinHeight,
@@ -58,7 +69,8 @@ export function ContextualServiceMapSection({
   exploreLinkTestSubj = 'apmContextualServiceMapExploreInServiceMap',
   embeddableContainerTestSubj = 'apmContextualServiceMapEmbeddableContainer',
 }: ContextualServiceMapSectionProps) {
-  const { core } = useApmPluginContext();
+  const license = useLicenseContext();
+  const { core, config } = useApmPluginContext();
   const [baseMaxHops, setBaseMaxHops] = useState(CONTEXTUAL_MAP_DEFAULT_BASE_MAX_HOPS);
   const [maxVisibleNodes, setMaxVisibleNodes] = useState(CONTEXTUAL_MAP_DEFAULT_MAX_VISIBLE_NODES);
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(() => new Set());
@@ -107,12 +119,56 @@ export function ContextualServiceMapSection({
     return null;
   }
 
+  if (!license) {
+    return null;
+  }
+
+  const hasValidLicense = isActivePlatinumLicense(license);
+  const isServiceMapEnabled = config.serviceMapEnabled;
+
+  if (!hasValidLicense || !isServiceMapEnabled) {
+    const unavailablePrompt = isServiceMapEnabled ? (
+      <LicensePrompt text={invalidLicenseMessage} />
+    ) : (
+      <DisabledPrompt />
+    );
+
+    return (
+      <EuiPanel
+        hasBorder
+        data-test-subj={sectionTestSubj}
+        css={
+          sectionHeight !== undefined
+            ? {
+                height: sectionHeight,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+              }
+            : undefined
+        }
+      >
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h2>{SERVICE_MAP_PANEL_TITLE}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} css={{ maxWidth: 600, alignSelf: 'center', width: '100%' }}>
+            {unavailablePrompt}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+
   const fullMapHref = getServiceMapUrl(core, {
     rangeFrom,
     rangeTo,
     environment,
     kuery,
     serviceName,
+    filterPills,
   });
 
   const titleRow = (
@@ -158,6 +214,7 @@ export function ContextualServiceMapSection({
         environment={environment}
         kuery={kuery}
         serviceName={serviceName}
+        filterPills={filterPills}
         core={core}
         enableContextualMap
         contextualMapBaseMaxHops={baseMaxHops}

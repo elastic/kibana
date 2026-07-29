@@ -494,7 +494,9 @@ describe('getInitialAppState', () => {
           it('should return an esql initial query', () => {
             // Given
             const services = createDiscoverServicesMock();
-            services.storage.get = jest.fn().mockReturnValue('esql');
+            services.storage.get = jest
+              .fn()
+              .mockReturnValue({ currentMode: 'esql', defaultMode: 'classic' });
             services.uiSettings.get = jest.fn().mockReturnValue(true);
 
             // When
@@ -513,6 +515,87 @@ describe('getInitialAppState', () => {
             expect(appState).toEqual(
               expect.objectContaining({
                 query: { esql: 'FROM the-data-view-title' },
+              })
+            );
+          });
+        });
+
+        describe('when the persisted query mode was recorded against a stale default mode', () => {
+          it('should ignore a legacy (pre-object) persisted value and use the current esql default', () => {
+            const services = createDiscoverServicesMock();
+            services.storage.get = jest.fn().mockReturnValue('classic');
+            services.uiSettings.get = jest.fn().mockReturnValue(true);
+            services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+            const appState = getInitialAppState({
+              hasGlobalState: false,
+              initialUrlState: undefined,
+              persistedTab: undefined,
+              dataView: new DataView({
+                spec: dataViewMock.toSpec(),
+                fieldFormats: {} as DataView['fieldFormats'],
+              }),
+              services,
+            });
+
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: { esql: 'FROM the-data-view-title' },
+              })
+            );
+          });
+
+          it('should ignore a persisted value recorded under a different default mode and use the current default', () => {
+            const services = createDiscoverServicesMock();
+            services.storage.get = jest
+              .fn()
+              .mockReturnValue({ currentMode: 'classic', defaultMode: 'classic' });
+            services.uiSettings.get = jest.fn().mockReturnValue(true);
+            services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+
+            const appState = getInitialAppState({
+              hasGlobalState: false,
+              initialUrlState: undefined,
+              persistedTab: undefined,
+              dataView: new DataView({
+                spec: dataViewMock.toSpec(),
+                fieldFormats: {} as DataView['fieldFormats'],
+              }),
+              services,
+            });
+
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: { esql: 'FROM the-data-view-title' },
+              })
+            );
+          });
+
+          it('should honor a persisted value recorded under the current default mode', () => {
+            const services = createDiscoverServicesMock();
+            services.storage.get = jest
+              .fn()
+              .mockReturnValue({ currentMode: 'classic', defaultMode: 'esql' });
+            services.uiSettings.get = jest.fn().mockReturnValue(true);
+            services.discoverFeatureFlags.getIsEsqlDefault = jest.fn(() => true);
+            services.data.query.queryString.getDefaultQuery = jest
+              .fn()
+              .mockReturnValue(defaultQuery);
+
+            const appState = getInitialAppState({
+              hasGlobalState: false,
+              initialUrlState: undefined,
+              persistedTab: undefined,
+              dataView: new DataView({
+                spec: dataViewMock.toSpec(),
+                fieldFormats: {} as DataView['fieldFormats'],
+              }),
+              services,
+            });
+
+            expect(appState).toEqual(
+              expect.objectContaining({
+                query: defaultQuery,
               })
             );
           });
@@ -643,8 +726,14 @@ describe('getInitialAppState', () => {
         });
 
         describe.each([
-          { queryMode: 'esql', description: 'esql but esql is disabled' },
-          { queryMode: 'classic', description: 'classic' },
+          {
+            queryMode: { currentMode: 'esql', defaultMode: 'classic' },
+            description: 'esql but esql is disabled',
+          },
+          {
+            queryMode: { currentMode: 'classic', defaultMode: 'classic' },
+            description: 'classic',
+          },
           { queryMode: undefined, description: 'unset' },
         ])('when the query mode is $description', ({ queryMode }) => {
           it('should return the default query', () => {

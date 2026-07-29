@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 4;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 5;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
 const mappings: MappingsDefinition = {
@@ -58,10 +58,7 @@ export const alertEventSeverity = alertEventSeveritySchema.enum;
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
   scheduled_timestamp: z.string().optional(),
-  rule: z.object({
-    id: z.string(),
-    version: z.number(),
-  }),
+  rule: z.object({ id: z.string().optional(), version: z.number().optional() }).optional(),
   group_hash: z.string(),
   data: z.record(z.string(), z.unknown()),
   status: alertEventStatusSchema,

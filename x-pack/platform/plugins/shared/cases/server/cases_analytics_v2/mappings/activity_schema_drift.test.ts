@@ -7,8 +7,12 @@
 
 import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT, CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import {
+  CASE_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../../../common/constants';
+import { CONNECTOR_ID_REFERENCE_NAME, COMMENT_REF_NAME } from '../../common/constants';
 import { UserActionTypes } from '../../../common/types/domain';
 import type { UserActionPersistedAttributes } from '../../common/types/user_actions';
 import { createCaseUserActionSavedObjectType } from '../../saved_object_types/user_actions';
@@ -176,7 +180,16 @@ const PER_TYPE_FIXTURES: {
   comment: makeUserActionSO(
     'comment',
     { comment: { type: 'user', comment: 'A comment', owner: 'securitySolution' } },
-    { action: 'create' }
+    {
+      action: 'create',
+      // A comment user action references the created attachment SO in
+      // addition to the case, so the fixture exercises the `comment_id`
+      // extraction path (legacy `cases-comments` source type here).
+      references: [
+        caseRef,
+        { id: 'comment-1', type: CASE_COMMENT_SAVED_OBJECT, name: COMMENT_REF_NAME },
+      ],
+    }
   ),
   // Real persisted shape: `extractConnectorId` strips the id out of
   // `payload.connector` (leaving `{ name, type, fields }`) and stores it in
@@ -280,6 +293,10 @@ describe('per-action-type curated extracts', () => {
     const doc = buildActivityDoc(PER_TYPE_FIXTURES.connector);
     expect(doc.action.connector_id_new).toBe('connector-1');
   });
+  it('comment: populates action.attachment_reference_id from the associated attachment reference', () => {
+    const doc = buildActivityDoc(PER_TYPE_FIXTURES.comment);
+    expect(doc.action.attachment_reference_id).toBe('comment-1');
+  });
   it('non-extract types do not leak any curated extract field', () => {
     // Spot-check — `description` carries no curated extract, so
     // every optional extract field on `action` should be undefined.
@@ -289,6 +306,7 @@ describe('per-action-type curated extracts', () => {
     expect(doc.action.assignees_changed).toBeUndefined();
     expect(doc.action.tags_changed).toBeUndefined();
     expect(doc.action.connector_id_new).toBeUndefined();
+    expect(doc.action.attachment_reference_id).toBeUndefined();
   });
 });
 

@@ -7,7 +7,11 @@
 
 import { inject, injectable } from 'inversify';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { buildContinuedBreachAlertEvents, buildNoDataAlertEvents } from '../build_alert_events';
+import {
+  buildContinuedBreachAlertEvents,
+  buildNoDataAlertEvents,
+  resolveAlertEventType,
+} from '../build_alert_events';
 import { fetchActiveAlertGroupHashes } from '../fetch_active_alert_group_hashes';
 import {
   LoggerServiceToken,
@@ -148,6 +152,8 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
 
     const events: AlertEvent[] = [];
 
+    const eventType = resolveAlertEventType(rule);
+
     if (noDataGroupHashes.length > 0) {
       events.push(
         ...buildNoDataAlertEvents({
@@ -156,6 +162,7 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
           spaceId,
           groupHashes: noDataGroupHashes,
           scheduledTimestamp,
+          type: eventType,
         })
       );
     }
@@ -168,6 +175,7 @@ export class CreateNoDataEventsStep implements RuleExecutionStep {
           spaceId,
           groupHashes: continuedBreachGroupHashes,
           scheduledTimestamp,
+          type: eventType,
         })
       );
     }

@@ -14,6 +14,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('../../apis/painless_lab'));
     loadTestFile(require.resolve('../../apis/intercepts'));
     loadTestFile(require.resolve('../../apis/streams'));
-    loadTestFile(require.resolve('../../apis/significant_events'));
   });
 }
