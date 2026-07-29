@@ -47,13 +47,7 @@ import {
   isAlertAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
 } from '../../../common/utils/attachments';
-import {
-  arraysDifference,
-  getCaseToUpdate,
-  buildFilter,
-  combineFilters,
-  NodeBuilderOperators,
-} from '../utils';
+import { getCaseToUpdate, buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import {
   applyProfilesToAssignees,
   dedupAssignees,
@@ -1086,16 +1080,18 @@ const getCasesAndAssigneesToNotifyForAssignment = (
       return acc;
     }
 
-    const alreadyAssignedToCase = originalCaseSO.attributes.assignees;
-    const comparedAssignees = arraysDifference(
-      alreadyAssignedToCase,
-      updatedCase.attributes.assignees ?? []
+    // Compare by uid, not object identity: server-derived identity fields make an enriched
+    // assignee unequal to the legacy uid-only record, so a deep diff would flag every retained
+    // assignee on a pre-rollout case as newly added and re-notify them.
+    const alreadyAssignedUids = new Set(originalCaseSO.attributes.assignees.map(({ uid }) => uid));
+    const addedAssignees = (updatedCase.attributes.assignees ?? []).filter(
+      ({ uid }) => !alreadyAssignedUids.has(uid)
     );
 
-    if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+    if (addedAssignees.length > 0) {
       const theCase = mergeOriginalSOWithUpdatedSO(originalCaseSO, updatedCase);
 
-      const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
+      const assigneesWithoutCurrentUser = addedAssignees.filter(
         (assignee) => assignee.uid !== user.profile_uid
       );
 

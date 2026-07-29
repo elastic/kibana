@@ -91,6 +91,66 @@ describe('update', () => {
       const patchArgs = clientArgs.services.caseService.patchCases.mock.calls[0][0];
       expect(patchArgs.cases[0].updatedAttributes.assignees).toEqual([{ uid: '1' }]);
     });
+
+    it('notifies only newly added assignees, not retained legacy uid-only ones', async () => {
+      // Pre-rollout case: the retained assignee is stored uid-only, so enrichment must not make it
+      // look newly added (notification selection compares by uid, not object identity).
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: { ...mockCases[0].attributes, assignees: [{ uid: 'legacy' }] },
+          },
+        ],
+      });
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: 'legacy',
+          enabled: true,
+          data: {},
+          user: { username: 'leg', full_name: 'Legacy', email: 'l@e.com' },
+        },
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+      ] as never);
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [
+          {
+            ...mockCases[0],
+            attributes: {
+              assignees: [
+                { uid: 'legacy', username: 'leg', full_name: 'Legacy', email: 'l@e.com' },
+                { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+              ],
+            },
+          },
+        ],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              assignees: [{ uid: 'legacy' }, { uid: '1' }],
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock
+      );
+
+      expect(clientArgs.services.notificationService.bulkNotifyAssignees).toHaveBeenCalledTimes(1);
+      const notified = clientArgs.services.notificationService.bulkNotifyAssignees.mock.calls[0][0];
+      expect(notified[0].assignees).toEqual([
+        { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+      ]);
+    });
   });
 
   describe('Assignees', () => {
