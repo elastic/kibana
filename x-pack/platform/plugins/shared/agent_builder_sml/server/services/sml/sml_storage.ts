@@ -88,11 +88,7 @@ const smlStorageSchemaProperties = {
 export const storageSettings = {
   name: smlIndexName,
   /**
-   * The SML backing index name (`ai-index-idx-sml-data-*`) also matches ES's
-   * `ai-index-idx` template (priority 500), which has no alias block. ES picks
-   * the highest-priority matching template regardless of pattern specificity,
-   * so this template must outrank it to ensure the write alias is created.
-   * See https://github.com/elastic/search-team/issues/15534.
+   * Ensure the SML backing index name has a higher priority than built-in AI index templates.
    */
   priority: 600,
   schema: {
