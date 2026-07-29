@@ -60,10 +60,12 @@ const projectPickerOptions = [
     label: i18n.translate('cpsUtils.projectPicker.allProjectsLabel', {
       defaultMessage: 'All projects',
     }),
+    'data-test-subj': 'cpsProjectRoutingButton-all',
   },
   {
     id: PROJECT_ROUTING.ORIGIN,
     label: strings.getOriginProjectLabel(),
+    'data-test-subj': 'cpsProjectRoutingButton-origin',
   },
 ];
 

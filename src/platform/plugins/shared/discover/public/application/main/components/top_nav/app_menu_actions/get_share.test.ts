@@ -15,8 +15,10 @@ import {
   type InternalStateMockToolkit,
 } from '../../../../../__mocks__/discover_state.mock';
 import { FetchStatus } from '../../../../types';
-import { internalStateActions } from '../../../state_management/redux';
+import { internalStateActions, selectTabRuntimeState } from '../../../state_management/redux';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
+import { EXAMPLE_PROFILE_STATE_DEF } from '../../../../../../common/context_awareness';
 
 const mockDiscoverService = createDiscoverServicesMock();
 
@@ -24,6 +26,8 @@ describe('getShare', () => {
   let toolkit: InternalStateMockToolkit;
 
   beforeAll(async () => {
+    mockDiscoverService.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    mockDiscoverService.profileStateRegistry.registerDefinition(EXAMPLE_PROFILE_STATE_DEF);
     toolkit = getDiscoverInternalStateMock({
       services: mockDiscoverService,
       persistedDataViews: [dataViewMock],
@@ -67,6 +71,7 @@ describe('getShare', () => {
         authorizedRuleTypeIds: [],
       },
       currentTab: toolkit.getCurrentTab(),
+      runtimeStateManager: toolkit.runtimeStateManager,
       persistedDiscoverSession: undefined,
       totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
       hasUnsavedChanges: false,
@@ -85,6 +90,7 @@ describe('getShare', () => {
         authorizedRuleTypeIds: [],
       },
       currentTab: toolkit.getCurrentTab(),
+      runtimeStateManager: toolkit.runtimeStateManager,
       persistedDiscoverSession: undefined,
       totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
       hasUnsavedChanges: false,
@@ -138,6 +144,7 @@ describe('getShare', () => {
         authorizedRuleTypeIds: [],
       },
       currentTab: toolkit.getCurrentTab(),
+      runtimeStateManager: toolkit.runtimeStateManager,
       persistedDiscoverSession: undefined,
       totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
       hasUnsavedChanges: false,
@@ -168,6 +175,7 @@ describe('getShare', () => {
         authorizedRuleTypeIds: [],
       },
       currentTab: toolkit.getCurrentTab(),
+      runtimeStateManager: toolkit.runtimeStateManager,
       persistedDiscoverSession: undefined,
       totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
       hasUnsavedChanges: false,
@@ -203,5 +211,115 @@ describe('getShare', () => {
         objectTypeAlias: 'Discover session',
       })
     );
+  });
+
+  it('includes active profile locator defaults without explicit state', async () => {
+    const currentTab = toolkit.getCurrentTab();
+    const scopedProfilesManager = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      currentTab.id
+    ).scopedProfilesManager$.getValue();
+    const contexts = scopedProfilesManager.getContexts();
+    const getContextsSpy = jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      ...contexts,
+      dataSourceContext: {
+        ...contexts.dataSourceContext,
+        profileState: TEST_PROFILE_STATE_DEF,
+      },
+    });
+
+    const shareOptions = await buildShareOptions({
+      services: mockDiscoverService,
+      discoverParams: {
+        dataView: dataViewMock,
+        isEsqlMode: false,
+        adHocDataViews: [],
+        authorizedRuleTypeIds: [],
+      },
+      currentTab,
+      runtimeStateManager: toolkit.runtimeStateManager,
+      persistedDiscoverSession: undefined,
+      totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+      hasUnsavedChanges: false,
+    });
+
+    expect(shareOptions.sharingData.locatorParams[0].params.profileState).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: 'defaultUrl',
+        persistentValue: 'defaultPersistent',
+      },
+    });
+
+    getContextsSpy.mockRestore();
+  });
+
+  it('includes expanded active profile locator state without UI state', async () => {
+    const currentTab = toolkit.getCurrentTab();
+    const scopedProfilesManager = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      currentTab.id
+    ).scopedProfilesManager$.getValue();
+    const contexts = scopedProfilesManager.getContexts();
+    const getContextsSpy = jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      ...contexts,
+      dataSourceContext: {
+        ...contexts.dataSourceContext,
+        profileState: TEST_PROFILE_STATE_DEF,
+      },
+    });
+
+    toolkit.internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId: currentTab.id,
+        profileStateDefinition: TEST_PROFILE_STATE_DEF,
+        profileState: {
+          ...TEST_PROFILE_STATE_DEF.defaultState,
+          uiValue: 'customUi',
+          urlValue: 'customUrl',
+        },
+      })
+    );
+    toolkit.internalState.dispatch(
+      internalStateActions.setProfileState({
+        tabId: currentTab.id,
+        profileStateDefinition: EXAMPLE_PROFILE_STATE_DEF,
+        profileState: {
+          ...EXAMPLE_PROFILE_STATE_DEF.defaultState,
+          boxColor: 'danger',
+        },
+      })
+    );
+
+    const shareOptions = await buildShareOptions({
+      services: mockDiscoverService,
+      discoverParams: {
+        dataView: dataViewMock,
+        isEsqlMode: false,
+        adHocDataViews: [],
+        authorizedRuleTypeIds: [],
+      },
+      currentTab: toolkit.getCurrentTab(),
+      runtimeStateManager: toolkit.runtimeStateManager,
+      persistedDiscoverSession: undefined,
+      totalHitsState: { result: 0, fetchStatus: FetchStatus.COMPLETE },
+      hasUnsavedChanges: false,
+    });
+
+    const shareableUrlLocatorParams = shareOptions.shareableUrlLocatorParams;
+    if (!shareableUrlLocatorParams) {
+      throw new Error('Expected snapshot locator params');
+    }
+
+    expect(shareableUrlLocatorParams.params.profileState).toEqual({
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: 'customUrl',
+        persistentValue: 'defaultPersistent',
+      },
+    });
+    expect(shareOptions.sharingData.locatorParams[0].params.profileState).toEqual(
+      shareableUrlLocatorParams.params.profileState
+    );
+
+    getContextsSpy.mockRestore();
   });
 });
