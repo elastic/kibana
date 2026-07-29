@@ -13,13 +13,10 @@ import { test } from '../fixtures';
 test.describe('Add integration navigation', { tag: tags.stateful.classic }, () => {
   let nginxPkgkey: string;
 
-  test.beforeAll(async ({ apiServices, kbnClient }) => {
+  test.beforeAll(async ({ apiServices }) => {
     await apiServices.fleet.internal.setup();
 
-    const response = await kbnClient.request<{ item: { version: string } }>({
-      method: 'GET',
-      path: '/api/fleet/epm/packages/nginx',
-    });
+    const response = await apiServices.fleet.integration.getPackage('nginx');
 
     nginxPkgkey = `nginx-${response.data.item.version}`;
   });
