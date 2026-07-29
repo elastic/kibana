@@ -156,10 +156,10 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
     });
 
     // reset ordering
-    const unorderedNewLayerList = getLayerListRaw(getState());
+    const replacedLayerList = getLayerListRaw(getState());
     const newOrder = [];
     for (let i = 0; i < newLayerList.length; i++) {
-      const index = unorderedNewLayerList.findIndex(({ id }) => id === newLayerList[i].id);
+      const index = replacedLayerList.findIndex(({ id }) => id === newLayerList[i].id);
       if (index !== -1) {
         newOrder.push(index);
       }
