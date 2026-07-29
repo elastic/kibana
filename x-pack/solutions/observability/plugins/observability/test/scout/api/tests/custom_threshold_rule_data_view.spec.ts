@@ -141,7 +141,7 @@ const searchRuleSo = async (esClient: Client, ruleId: string): Promise<RuleSoHit
   return resp.hits.hits as RuleSoHit[];
 };
 
-apiTest.describe('Custom Threshold rule data view', { tag: [...tags.stateful.classic] }, () => {
+apiTest.describe('Custom Threshold rule data view', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   let headers: Record<string, string>;
   let ruleId: string;
   // Rules created by the `noDataBehavior` cases; removed after each such test.

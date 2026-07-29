@@ -13,7 +13,7 @@ import { NO_CASES_ROLE } from '../../fixtures/roles';
 // Ported from the "no observability privileges" suite in the FTR
 // feature_controls/observability_security.ts. A user without Observability or
 // Cases privileges cannot access the Observability app at all.
-test.describe('Observability cases - no privileges', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability cases - no privileges', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginWithCustomRole(NO_CASES_ROLE);
   });

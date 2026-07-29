@@ -26,7 +26,7 @@ const ANOMALY_RULE_PARAMS = {
   environment: 'ENVIRONMENT_ALL',
 };
 
-test.describe('Observability alerts - rule stats', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability alerts - rule stats', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeEach(async ({ apiServices, browserAuth }) => {
     await apiServices.alerting.cleanup.deleteAllRules();
     await browserAuth.loginAsAdmin();

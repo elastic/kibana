@@ -13,7 +13,7 @@ import { CASES_ALL_ROLE } from '../../fixtures/roles';
 // Ported from the "observability cases all privileges" suite in the FTR
 // feature_controls/observability_security.ts. A user with
 // `observabilityCasesV3: ['all']` can list, create and edit cases.
-test.describe('Observability cases - all privileges', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability cases - all privileges', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   let caseId: string;
 
   test.beforeAll(async ({ apiServices }) => {

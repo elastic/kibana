@@ -27,7 +27,7 @@ import { BIGGER_TIMEOUT } from '../fixtures/constants';
 // Failing: See https://github.com/elastic/kibana/issues/268022
 test.describe.skip(
   'Observability Landing Page (discover.isEsqlDefault enabled)',
-  { tag: [...tags.stateful.classic] },
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       await apiServices.core.settings({
