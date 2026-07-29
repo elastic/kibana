@@ -273,8 +273,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   // Options unsupported by the policy template the page is scoped to (e.g. opened
   // from the integrations browse page) are hidden from selectors and defaults
   const hiddenVarGroupOptions = useMemo(
-    () => getHiddenVarGroupOptionsForPolicyTemplate(packageInfo, integrationToEnable),
-    [packageInfo, integrationToEnable]
+    () =>
+      getHiddenVarGroupOptionsForPolicyTemplate(
+        packageInfo,
+        integrationToEnable,
+        isAgentlessSelected
+      ),
+    [packageInfo, integrationToEnable, isAgentlessSelected]
   );
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {

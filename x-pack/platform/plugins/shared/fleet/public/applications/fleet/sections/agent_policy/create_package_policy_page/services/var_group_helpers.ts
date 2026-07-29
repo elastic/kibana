@@ -9,6 +9,7 @@ import {
   doesPackageHaveIntegrations,
   getNormalizedInputs,
 } from '../../../../../../../common/services';
+import { isInputAllowedForDeploymentMode } from '../../../../../../../common/services/agentless_policy_helper';
 import type {
   PackageInfo,
   RegistryInput,
@@ -91,12 +92,14 @@ export function isInputVisibleForVarGroupSelections(
 /**
  * Compute the var_group options to hide when the package policy form is scoped to a
  * single policy template (integration). An option is hidden when every input of that
- * policy template declares it in `hide_in_var_group_options`, since selecting it would
- * leave the integration without any usable inputs.
+ * policy template available in the selected deployment mode declares it in
+ * `hide_in_var_group_options`, since selecting it would leave the integration without
+ * any usable inputs.
  */
 export function getHiddenVarGroupOptionsForPolicyTemplate(
   packageInfo: PackageInfo | undefined,
-  policyTemplateName: string | undefined
+  policyTemplateName: string | undefined,
+  isAgentlessEnabled: boolean
 ): Record<string, string[]> | undefined {
   if (!packageInfo?.var_groups?.length || !policyTemplateName) {
     return undefined;
@@ -109,7 +112,14 @@ export function getHiddenVarGroupOptionsForPolicyTemplate(
     return undefined;
   }
 
-  const inputs = getNormalizedInputs(policyTemplate);
+  const deploymentMode = isAgentlessEnabled ? 'agentless' : 'default';
+  const inputs = getNormalizedInputs(policyTemplate).filter((input) =>
+    isInputAllowedForDeploymentMode(
+      { type: input.type, policy_template: policyTemplateName },
+      deploymentMode,
+      packageInfo
+    )
+  );
   if (!inputs.length) {
     return undefined;
   }
