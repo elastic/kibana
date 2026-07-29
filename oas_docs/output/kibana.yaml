@@ -121666,6 +121666,10 @@ components:
       additionalProperties: false
       description: Uses explicitly provided domain bounds (min and max).
       properties:
+        enforce:
+          description: 'When true, bypasses axis extent validation: allows fit mode for bar/area series and applies custom bounds even when they would otherwise fail validation.'
+          title: vis_api_domain_enforce
+          type: boolean
         max:
           description: Max domain value
           type: number
@@ -121690,6 +121694,10 @@ components:
       additionalProperties: false
       description: Uses tight domain bounds from the observed data minimum to maximum, without baseline expansion.
       properties:
+        enforce:
+          description: 'When true, bypasses axis extent validation: allows fit mode for bar/area series and applies custom bounds even when they would otherwise fail validation.'
+          title: vis_api_domain_enforce
+          type: boolean
         rounding:
           description: Whether to round axis domain bounds outward to readable “nice” values (for example 1, 5, 10, 100) instead of exact data min/max.
           title: vis_api_domain_rounding
