@@ -40,6 +40,16 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
+const mockMgetWorkflows = jest.fn();
+const mockCreateWorkflow = jest.fn();
+
+jest.mock('@kbn/workflows-ui', () => ({
+  useWorkflowsApi: () => ({
+    mgetWorkflows: mockMgetWorkflows,
+    createWorkflow: mockCreateWorkflow,
+  }),
+}));
+
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
@@ -68,6 +78,11 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
 };
 
 describe('AiIndexDetailPage', () => {
+  beforeEach(() => {
+    mockMgetWorkflows.mockResolvedValue([]);
+    mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -218,6 +233,170 @@ describe('AiIndexDetailPage', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('contextEditSourcesFlyout')).not.toBeInTheDocument();
     });
+    expect(services.http.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders an empty state when there are no automations', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(mockMgetWorkflows).not.toHaveBeenCalled();
+  });
+
+  it('enables the automations edit button once the AI index has loaded', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
+    expect(screen.getByTestId('contextEditDescriptionButton')).toBeEnabled();
+  });
+
+  it('discards the draft when editing is cancelled', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+    fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
+    expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextCancelEditingAutomationsButton'));
+
+    expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('My workflow');
+    expect(services.http.put).not.toHaveBeenCalled();
+  });
+
+  it('keeps the rows rendered while the summaries for an edited list resolve', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [
+        { type: 'workflow', value: 'wf-1' },
+        { type: 'workflow', value: 'wf-2' },
+      ],
+    });
+    mockMgetWorkflows.mockResolvedValue([
+      { id: 'wf-1', name: 'My workflow', enabled: true },
+      { id: 'wf-2', name: 'Another workflow', enabled: false },
+    ]);
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+    expect(await screen.findAllByTestId('contextAiIndexAutomationRow')).toHaveLength(2);
+
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+    // Removing changes the summaries query key, which must not send the panel back to its loading state.
+    fireEvent.click(screen.getAllByTestId('contextRemoveAutomationButton')[1]);
+
+    expect(screen.queryByTestId('contextAiIndexAutomationsLoading')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('My workflow');
+  });
+
+  it('lists existing automations with the resolved workflow name and status', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    expect(await screen.findByTestId('contextAiIndexAutomationRow')).toHaveTextContent(
+      'My workflow'
+    );
+    expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('Enabled');
+    expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['wf-1'] });
+  });
+
+  it('creates a workflow, attaches it, and opens the editor', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue(aiIndex);
+    services.http.put.mockResolvedValue({ status: 'updated' });
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+    fireEvent.click(await screen.findByTestId('contextCreateAutomationButton'));
+
+    await waitFor(() => {
+      expect(mockCreateWorkflow).toHaveBeenCalledWith({
+        yaml: expect.stringContaining('my-ai-index automation'),
+      });
+    });
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [{ type: 'workflow', value: 'wf-created' }],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+          }),
+        })
+      );
+    });
+
+    expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
+      path: '/wf-created',
+    });
+  });
+
+  it('removes an automation and refetches', async () => {
+    const services = coreMock.createStart();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      automations: [{ type: 'workflow', value: 'wf-1' }],
+    });
+    services.http.put.mockResolvedValue({ status: 'updated' });
+    mockMgetWorkflows.mockResolvedValue([{ id: 'wf-1', name: 'My workflow', enabled: true }]);
+
+    renderWithProviders(services);
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
+    expect(services.http.get).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
+    fireEvent.click(await screen.findByTestId('contextRemoveAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextSaveAutomationsButton'));
+
+    await waitFor(() => {
+      expect(services.http.put).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index/my-ai-index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
+            automations: [],
+            sources: [{ type: 'esql', value: 'FROM My view' }],
+          }),
+        })
+      );
+    });
+
     expect(services.http.get).toHaveBeenCalledTimes(2);
   });
 });

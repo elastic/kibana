@@ -163,6 +163,21 @@ describe('run query helpers', () => {
         agent_name: 'go',
       });
     });
+
+    it('should include variables from PromQL expression bodies', () => {
+      const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
+      const query =
+        'PROMQL histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{app=?variable, kubernetes_namespace="default"}[30s])) by (app,kubernetes_namespace,le))';
+      const variables = [
+        {
+          key: 'variable',
+          value: 'my-app',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      const params = getNamedParams(query, time, variables);
+      expect(params).toStrictEqual([{ variable: 'my-app' }]);
+    });
   });
 
   it('should work correctly with datemath ranges', () => {
