@@ -26,7 +26,7 @@ export function ExpandButton({ hasErrorsOrWarnings, isLoading, onClick }: Props)
         defaultMessage: 'Expand layers panel',
       })}
       className="mapLayerControl__openLayerTOCButton"
-      css={{ backgroundColor: euiTheme.colors.emptyShade }}
+      css={{ backgroundColor: `${euiTheme.colors.emptyShade} !important` }}
       color="text"
       onClick={onClick}
       data-test-subj="mapExpandLayerControlButton"
