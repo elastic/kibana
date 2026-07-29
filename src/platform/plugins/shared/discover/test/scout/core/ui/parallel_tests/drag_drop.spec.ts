@@ -59,17 +59,7 @@ spaceTest.describe('Discover drag and drop', { tag: tags.deploymentAgnostic }, (
       // Stable after waitUntilSidebarHasLoaded() in beforeEach
       expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
 
-      // Focus the keyboard DnD handler on the @message field and use keyboard to drag it to the grid.
-      // Uses data-attr-field + domDragDrop-keyboardHandler, mirroring the FTR dragFieldWithKeyboardToTable implementation.
-      const keyboardHandler = page.locator(
-        '[data-attr-field="@message"] [data-test-subj="domDragDrop-keyboardHandler"]'
-      );
-      await keyboardHandler.focus();
-      await page.keyboard.press('Enter'); // enter DnD mode
-      // domDroppable_overlay renders when DnD is active — use it as a sync point
-      await page.testSubj.locator('domDroppable_overlay').waitFor({ state: 'visible' });
-      await page.keyboard.press('ArrowRight'); // move to first drop target (the grid)
-      await page.keyboard.press('Enter'); // drop
+      await pageObjects.discover.dragFieldToGridWithKeyboard('@message');
 
       // Wait for the new column header before asserting the full set
       await page.testSubj.locator('dataGridHeaderCell-@message').waitFor({ state: 'visible' });
