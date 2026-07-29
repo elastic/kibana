@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createHash, randomUUID } from 'crypto';
+import { createHash } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
