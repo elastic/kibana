@@ -8,6 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { uninstallElasticsearchAssets } from './install_assets';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import { getHistorySnapshotIndexPattern } from './history_snapshot_index';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
 
@@ -37,6 +38,19 @@ describe('uninstallElasticsearchAssets', () => {
     expect(deleteIndex).toHaveBeenCalledWith(
       expect.anything(),
       getLatestEntitiesIndexName(namespace)
+    );
+  });
+
+  it('deletes history snapshot indices for the namespace', async () => {
+    await uninstallElasticsearchAssets({
+      esClient: {} as never,
+      logger: loggerMock.create(),
+      namespace,
+    });
+
+    expect(deleteIndex).toHaveBeenCalledWith(
+      expect.anything(),
+      getHistorySnapshotIndexPattern(namespace)
     );
   });
 
@@ -71,14 +85,14 @@ describe('uninstallElasticsearchAssets', () => {
     );
   });
 
-  it('deletes all three resources in a single uninstall call', async () => {
+  it('deletes all data-plane resources in a single uninstall call', async () => {
     await uninstallElasticsearchAssets({
       esClient: {} as never,
       logger: loggerMock.create(),
       namespace,
     });
 
-    expect(deleteIndex).toHaveBeenCalledTimes(1);
+    expect(deleteIndex).toHaveBeenCalledTimes(2);
     expect(deleteDataStream).toHaveBeenCalledTimes(2);
   });
 });

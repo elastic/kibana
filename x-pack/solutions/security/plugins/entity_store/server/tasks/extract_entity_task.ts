@@ -20,6 +20,7 @@ import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { wrapTaskRun } from '../telemetry/traces';
 import { entityStoreMetrics } from '../monitor/metrics';
+import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -49,6 +50,20 @@ async function runTask({
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
   const namespace = currentState.namespace;
+
+  const [coreStart] = await core.getStartServices();
+  if (
+    await shouldDeleteOrphanedEntityStoreTask({
+      coreStart,
+      namespace,
+      logger,
+    })
+  ) {
+    return {
+      state: currentState,
+      shouldDeleteTask: true,
+    };
+  }
 
   if (!fakeRequest) {
     logger.error(`No fake request found, skipping extract entity task`);

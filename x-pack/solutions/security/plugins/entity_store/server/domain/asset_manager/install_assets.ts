@@ -27,6 +27,7 @@ import {
   getUpdatesEntityDefinitionComponentTemplate,
 } from './component_templates';
 import { getHistorySnapshotIndexTemplateConfig } from './history_snapshot_index_template';
+import { getHistorySnapshotIndexPattern } from './history_snapshot_index';
 import { getUpdatesEntityIndexTemplateConfig } from './updates_index_template';
 import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
 import { installLatestIndexIngestPipeline } from './latest_index_ingest_pipeline';
@@ -183,6 +184,10 @@ async function uninstallIndicesAndDataStreams(
     (async () => {
       await deleteIndex(esClient, getLatestEntitiesIndexName(namespace));
       logger.debug(`deleted entity index`);
+    })(),
+    (async () => {
+      await deleteIndex(esClient, getHistorySnapshotIndexPattern(namespace));
+      logger.debug(`deleted entity history snapshot indices`);
     })(),
     (async () => {
       await deleteDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace));

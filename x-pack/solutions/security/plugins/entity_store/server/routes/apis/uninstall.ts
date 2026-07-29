@@ -54,7 +54,6 @@ export function registerUninstall(router: EntityStorePluginRouter) {
         const {
           logger,
           assetManagerClient: assetManager,
-          entityMaintainersClient,
           preferencesClient,
         } = await ctx.entityStore;
         const { entityTypes } = req.body;
@@ -68,7 +67,9 @@ export function registerUninstall(router: EntityStorePluginRouter) {
 
         const isFullUninstall = toUninstall.length === engines.length;
         if (isFullUninstall) {
-          await entityMaintainersClient.removeAll();
+          // since engines are removed in parallel, the cleanup inside `assetManager.uninstall` might not have been called
+          // so we call it here to ensure all namespace-scoped resources are cleaned up
+          await assetManager.cleanupNamespace();
         }
 
         await preferencesClient.update({ autoInstall: false });
