@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 
-const DEFAULT_AUTO_INSTALL = true;
+const DEFAULT_AUTO_INSTALL = false;
 
 export type EntityStorePreferences = z.infer<typeof EntityStorePreferences>;
 export const EntityStorePreferences = z.object({

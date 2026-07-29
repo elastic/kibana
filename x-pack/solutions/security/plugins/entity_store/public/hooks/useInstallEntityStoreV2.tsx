@@ -94,20 +94,19 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           return;
         }
 
-        // In non-default spaces auto-install only happens for users migrating
-        // from v1; everyone else has to opt in manually.
-        if (space.id !== 'default') {
-          const hadV1 = await isEntityStoreV1Installed(services.http);
-          if (!hadV1) return;
-        }
+        // In all spaces, auto-install only for users migrating from v1.
+        // Fresh users must explicitly opt in via the autoInstall preference.
+        const hadV1 = await isEntityStoreV1Installed(services.http);
 
-        // Skip preferences + install for users without install privileges
         if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
 
-        const { autoInstall } = await services.http.get<{ autoInstall: boolean }>(
-          getPreferencesRequest
-        );
-        if (!autoInstall) return;
+        if (!hadV1) {
+          const { autoInstall } = await services.http.get<{ autoInstall: boolean }>(
+            getPreferencesRequest
+          );
+          if (!autoInstall) return;
+        }
+
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
       } catch (e) {
