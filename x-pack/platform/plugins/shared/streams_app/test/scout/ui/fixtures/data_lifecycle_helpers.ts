@@ -73,6 +73,10 @@ export const RETENTION_TEST_IDS = {
   ilmPolicyRow: (policyName: string) =>
     `retentionSelectableRow-${policyName.replace(/[^a-zA-Z0-9]+/g, '_')}`,
 
+  // Readiness signal: `-loading` while a stats (re)fetch is inflight, `-loaded` once it settles.
+  summaryStatsLoading: 'dataLifecycleSummary-stats-loading',
+  summaryStatsLoaded: 'dataLifecycleSummary-stats-loaded',
+
   // Display elements
   retentionMetric: 'retention-metric',
   retentionMetricSubtitle: 'retention-metric-subtitle',
@@ -195,17 +199,33 @@ export async function openLifecycleMethodFlyout(page: ScoutPage): Promise<Locato
 }
 
 /**
+ * Waits for the summary's stats (re)fetch to settle so a following popover click isn't dismissed by
+ * the re-render. Waits for `-loading` first to avoid matching the stale `-loaded` state on screen.
+ */
+export async function waitForLifecycleSummaryStatsSettled(page: ScoutPage): Promise<void> {
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoading)).toBeVisible();
+  await expect(page.getByTestId(RETENTION_TEST_IDS.summaryStatsLoaded)).toBeVisible();
+}
+
+/**
  * Saves the lifecycle method flyout changes (Apply) and waits for it to close.
  */
 export async function saveRetentionChanges(
   page: ScoutPage,
-  { expectOverrideConfirmation = false }: { expectOverrideConfirmation?: boolean } = {}
+  {
+    expectOverrideConfirmation = false,
+    waitForIlmStats = false,
+  }: { expectOverrideConfirmation?: boolean; waitForIlmStats?: boolean } = {}
 ): Promise<void> {
   await page.getByTestId(RETENTION_TEST_IDS.successfulFlyoutApplyButton).click();
   if (expectOverrideConfirmation) {
     await confirmOverride(page);
   }
   await page.getByTestId(RETENTION_TEST_IDS.successfulLifecycleFlyout).waitFor({ state: 'hidden' });
+
+  if (waitForIlmStats) {
+    await waitForLifecycleSummaryStatsSettled(page);
+  }
 }
 
 /**

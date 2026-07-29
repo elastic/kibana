@@ -69,6 +69,8 @@ export interface QuerySandboxProps {
   /**
    * When provided, time-field resolution is owned by the parent (e.g. compose
    * flyout) and the sandbox only displays the options without fetching.
+   * Pass `undefined` (not `[]`) to let the sandbox resolve the time field itself —
+   * an empty array skips resolution and renders an empty time-field select.
    */
   timeFieldOptions?: Array<{ value: string; text: string }>;
   /** Required with `timeFieldOptions` when the parent gates autoRun on resolution. */
@@ -167,6 +169,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     enabled: !skipTimeFieldResolution,
     http: services.http,
     dataViews: services.dataViews,
+    search: services.data.search.search,
   });
 
   const timeFieldOptions = timeFieldOptionsProp ?? resolvedTimeFieldOptions;
