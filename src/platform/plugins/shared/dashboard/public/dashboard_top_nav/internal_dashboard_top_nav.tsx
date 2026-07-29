@@ -39,7 +39,8 @@ import {
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type { AppHeaderBack, AppHeaderBadge, AppHeaderFavoriteAction } from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge } from '@kbn/app-header';
+import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle, useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { UI_SETTINGS } from '../../common/constants';
@@ -66,7 +67,7 @@ import {
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
-import { DashboardFavoritesProvider, useFavorite } from './dashboard_favorite_button';
+import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 
@@ -93,8 +94,7 @@ interface DashboardChromeNextHeaderProps {
 }
 
 /**
- * Chrome Next header path: maps favorites domain state to the Core app-header action.
- * Must render inside `DashboardFavoritesProvider`.
+ * Chrome Next header path. Must render inside `DashboardFavoritesProvider`.
  */
 const DashboardChromeNextHeader = ({
   headerMode,
@@ -105,17 +105,7 @@ const DashboardChromeNextHeader = ({
   dashboardId,
   viewMode,
 }: DashboardChromeNextHeaderProps) => {
-  const favoriteToggle = useFavorite({ id: dashboardId });
-  const favorite = useMemo<AppHeaderFavoriteAction | undefined>(() => {
-    if (!favoriteToggle) {
-      return undefined;
-    }
-
-    return {
-      status: favoriteToggle.status,
-      onToggle: favoriteToggle.onToggle,
-    };
-  }, [favoriteToggle]);
+  const favorite = useFavorite({ id: dashboardId });
 
   if (headerMode === 'inline') {
     if (viewMode === 'print') {

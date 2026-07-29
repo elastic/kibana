@@ -7,8 +7,55 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useFavoriteToggle } from './use_favorite_toggle';
+import { useCallback, useMemo } from 'react';
+import type { FavoriteButtonStatus } from '@kbn/favorite-button';
+import { useAddFavorite, useFavorites, useRemoveFavorite } from './favorites_query';
+import { useFavoritesClient } from './favorites_context';
 
-export const useFavorite = ({ id }: { id?: string }) => {
-  return useFavoriteToggle(id) ?? undefined;
+export interface FavoriteToggleState {
+  status: FavoriteButtonStatus;
+  onToggle: () => void;
+}
+
+/**
+ * Favorite toggle state for a single item.
+ * Returns `undefined` until an id is present and favorites data has loaded.
+ * Shape is structurally compatible with Core `AppHeaderFavoriteAction`.
+ */
+export const useFavorite = ({ id }: { id?: string }): FavoriteToggleState | undefined => {
+  const { data } = useFavorites({ enabled: !!id });
+  const removeFavorite = useRemoveFavorite();
+  const addFavorite = useAddFavorite();
+  const favoritesClient = useFavoritesClient();
+
+  const isPersistedFavorite = !!id && (data?.favoriteIds.includes(id) ?? false);
+  const isAdding = addFavorite.isLoading;
+  const isRemoving = removeFavorite.isLoading;
+
+  const onToggle = useCallback(() => {
+    if (!id || isAdding || isRemoving) {
+      return;
+    }
+
+    if (isPersistedFavorite) {
+      favoritesClient?.reportRemoveFavoriteClick();
+      removeFavorite.mutate({ id });
+    } else {
+      favoritesClient?.reportAddFavoriteClick();
+      addFavorite.mutate({ id });
+    }
+  }, [addFavorite, favoritesClient, id, isAdding, isPersistedFavorite, isRemoving, removeFavorite]);
+
+  const status: FavoriteButtonStatus | undefined =
+    !id || !data
+      ? undefined
+      : isAdding
+      ? 'adding'
+      : isRemoving
+      ? 'removing'
+      : isPersistedFavorite
+      ? 'favorited'
+      : 'unfavorited';
+
+  return useMemo(() => (status ? { status, onToggle } : undefined), [status, onToggle]);
 };

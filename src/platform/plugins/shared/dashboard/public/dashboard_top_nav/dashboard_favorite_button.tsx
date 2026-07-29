@@ -12,7 +12,6 @@ import {
   FavoriteButton,
   FavoritesClient,
   FavoritesContextProvider,
-  useFavorite,
 } from '@kbn/content-management-favorites-public';
 import { QueryClientProvider } from '@kbn/react-query';
 import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
@@ -45,8 +44,6 @@ export const DashboardFavoritesProvider = ({ children }: { children: ReactNode }
     </QueryClientProvider>
   );
 };
-
-export { useFavorite };
 
 /** Legacy chrome breadcrumbs append: self-contained favorite button with its own providers. */
 export const DashboardFavoriteButton = ({ dashboardId }: { dashboardId?: string }) => {

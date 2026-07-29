@@ -10,7 +10,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FavoriteButton as FavoriteButtonView } from '@kbn/favorite-button';
-import { useFavoriteToggle } from '../use_favorite_toggle';
+import { useFavorite } from '../use_favorite';
 
 export interface FavoriteButtonProps {
   id: string;
@@ -26,7 +26,7 @@ const REMOVE_LABEL = i18n.translate('contentManagement.favorites.unfavoriteButto
 });
 
 export const FavoriteButton = ({ id, className }: FavoriteButtonProps) => {
-  const favorite = useFavoriteToggle(id);
+  const favorite = useFavorite({ id });
 
   if (!favorite) {
     return null;
