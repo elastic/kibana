@@ -2686,7 +2686,6 @@
     "discover.confirmModal.confirmTextDescription": "Vous perdrez les modifications non enregistrées si vous ouvrez une autre session Discover avant de revenir à celle-ci.",
     "discover.confirmModal.title": "Modifications non enregistrées",
     "discover.context.breadcrumb": "Documents relatifs",
-    "discover.context.contextOfTitle": "Documents relatifs à {anchorId}",
     "discover.context.failedToLoadAnchorDocumentDescription": "Échec de chargement du document ancré",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "Le document ancré n’a pas pu être chargé.",
     "discover.context.invalidTieBreakerFiledSetting": "Paramètre de champ de départage non valide",

@@ -2700,7 +2700,6 @@
     "discover.confirmModal.confirmTextDescription": "このセッションに戻る前に別のDiscoverセッションを開くと、保存されていない変更は失われます。",
     "discover.confirmModal.title": "保存されていない変更",
     "discover.context.breadcrumb": "周りのドキュメント",
-    "discover.context.contextOfTitle": "{anchorId}の周りのドキュメント",
     "discover.context.failedToLoadAnchorDocumentDescription": "アンカードキュメントの読み込みに失敗しました",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "アンカードキュメントの読み込みに失敗しました。",
     "discover.context.invalidTieBreakerFiledSetting": "無効なタイブレーカーフィールド設定",

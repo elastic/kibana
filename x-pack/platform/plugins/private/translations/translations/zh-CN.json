@@ -2699,7 +2699,6 @@
     "discover.confirmModal.confirmTextDescription": "如果您在返回此会话之前打开另一个 Discover 会话，未保存的更改将会丢失。",
     "discover.confirmModal.title": "未保存的更改",
     "discover.context.breadcrumb": "周围文档",
-    "discover.context.contextOfTitle": "{anchorId} 周围的文档",
     "discover.context.failedToLoadAnchorDocumentDescription": "无法加载定位点文档",
     "discover.context.failedToLoadAnchorDocumentErrorDescription": "无法加载定位点文档。",
     "discover.context.invalidTieBreakerFiledSetting": "无效的平分决胜字段设置",
