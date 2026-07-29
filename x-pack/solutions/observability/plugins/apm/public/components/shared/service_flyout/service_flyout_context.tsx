@@ -10,6 +10,10 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type {
+  PluginSetupContract as AlertingPluginPublicSetup,
+  PluginStartContract as AlertingPluginPublicStart,
+} from '@kbn/alerting-plugin/public';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceSchemaType } from '../../../../common/service_schema_type';
@@ -33,7 +37,9 @@ export interface ServiceFlyoutContextValue {
     share: SharePublicStart;
     lens: LensPublicStart;
     dataViews: DataViewsPublicPluginStart;
-    alerting?: AlertingPluginPublicSetup;
+    // Union: service map reads alerting from ApmPluginContextValue.plugins (typed as setup deps),
+    // while plugin.ts start() has the start contract. Only !!alerting is used inside the flyout.
+    alerting?: AlertingPluginPublicSetup | AlertingPluginPublicStart;
   };
   contextActions?: {
     openInNewDiscoverTab?: (params: {

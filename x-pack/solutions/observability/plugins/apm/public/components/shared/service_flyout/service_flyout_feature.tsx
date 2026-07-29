@@ -11,10 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type {
-  PluginSetupContract as AlertingSetupContract,
-  PluginStartContract as AlertingStartContract,
-} from '@kbn/alerting-plugin/public';
+import type { PluginStartContract as AlertingStartContract } from '@kbn/alerting-plugin/public';
 import type { ObservabilityServiceFlyoutFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import type { ServiceFlyoutTelemetry, ServiceFlyoutService } from '.';
 
@@ -42,7 +39,7 @@ export function createServiceFlyoutRenderer({
         core,
         lens,
         dataViews,
-        alerting: alerting as AlertingSetupContract | undefined,
+        alerting,
       }}
       contextActions={deps.contextActions}
       service={deps.service as ServiceFlyoutService}
