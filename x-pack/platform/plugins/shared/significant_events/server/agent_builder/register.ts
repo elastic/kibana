@@ -14,7 +14,6 @@ import { MemoryServiceImpl } from '../memory_and_investigation/lib/memory';
 import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
-import { registerSignificantEventsDiscoveryAgents } from './agents/discovery';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -41,12 +40,16 @@ export const createMemoryToolsOptions = ({
 };
 
 /**
- * Registers the significant events agent-builder tools, attachments, and agents at setup.
+ * Registers the significant events agent-builder tools and attachments at setup.
  *
  * These are intentionally left registered regardless of the `streams.significantEventsAvailable`
  * flag: their registration APIs are setup-only and cannot be driven dynamically once `start()`
  * has run, so they rely on request-time gating instead. Skills, which support start-phase
  * registration, are gated by the availability flag from `start()` (see `registerSignificantEventsSkills`).
+ *
+ * Discovery and judge agents are registered as agent types from plugin setup (see
+ * `registerSignificantEventsDiscoveryAgentTypes`) and installed as editable profiles via
+ * `installDiscoveryAgents`.
  */
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -63,5 +66,4 @@ export const registerStreamsAgentBuilder = async ({
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  registerSignificantEventsDiscoveryAgents({ agentBuilder, server });
 };

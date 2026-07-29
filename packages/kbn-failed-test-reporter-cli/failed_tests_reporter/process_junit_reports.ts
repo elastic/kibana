@@ -16,6 +16,15 @@ import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
+// At most one NEW GitHub issue is opened per report. `--bail` used to stop a config at its first
+// failure, so at most one new failure per run reached the reporter; removing it (behind
+// FTR_SMART_RETRY_ENABLED) let a broken config open an issue per test. Multiple distinct new
+// failures in one run usually indicate a systemic/environmental failure (e.g. out of disk space),
+// so we cap new issue creation at one per report. Existing tracked issues are always updated
+// regardless (cheap: just a counter bump and a build link, and they carry real signal). Duplicate
+// classname+name entries (e.g. retry artifacts) are deduplicated and do not consume the slot.
+// See https://github.com/elastic/kibana/issues/278308.
+
 export async function processJUnitReports(
   reportPaths: string[],
   params: ProcessReportsParams
@@ -45,6 +54,10 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
+    const seenNewIssueKeys = new Set<string>();
+    let newIssueCreated = false;
+    let skippedNewFailures = 0;
+
     for (const failure of failures) {
       const pushMessage = (msg: string) => {
         messages.push({
@@ -61,6 +74,14 @@ export async function processJUnitReports(
         );
         continue;
       }
+
+      // Deduplicate by classname+name: retry artifacts can emit the same test twice in one XML.
+      const key = `${failure.classname}\n${failure.name}`;
+      if (seenNewIssueKeys.has(key)) {
+        failure.failureCount = 0;
+        continue;
+      }
+      seenNewIssueKeys.add(key);
 
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
@@ -83,6 +104,17 @@ export async function processJUnitReports(
         continue;
       }
 
+      if (newIssueCreated) {
+        skippedNewFailures += 1;
+        pushMessage(
+          'Skipped opening a new issue: only the first new failure in a report opens a GitHub ' +
+            'issue, multiple new failures in one run usually indicate a systemic failure'
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      newIssueCreated = true;
       const newIssue = await createFailureIssue(
         buildUrl,
         failure,
@@ -98,6 +130,15 @@ export async function processJUnitReports(
         failure.githubIssue = newIssue.html_url;
       }
       failure.failureCount = updateGithub ? 1 : 0;
+    }
+
+    if (skippedNewFailures > 0) {
+      log.warning(
+        `Opened one new issue for the first new failure and skipped ${skippedNewFailures} ` +
+          `additional new failure(s) for ${reportPath}, likely a systemic failure. Existing ` +
+          `tracked issues were updated normally. All failures are still indexed to ES and ` +
+          `written to the failure report.`
+      );
     }
 
     // mutates report to include messages and writes updated report to disk

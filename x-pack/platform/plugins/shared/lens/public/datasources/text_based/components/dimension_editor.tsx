@@ -51,6 +51,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     esqlVariables,
     isApproximate,
     enableFormatSelector,
+    isMetricDimension,
+    filterOperations,
   } = props;
 
   useEffect(() => {
@@ -78,8 +80,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
               meta: col?.meta ?? { type: 'number' },
               variable: col.variable,
               compatible:
-                props.isMetricDimension && hasNumberTypeColumns
-                  ? props.filterOperations({
+                isMetricDimension && hasNumberTypeColumns
+                  ? filterOperations({
                       dataType: col?.meta?.type as DataType,
                       isBucketed: Boolean(isNotNumeric(col)),
                       scale: 'ordinal',
@@ -99,7 +101,8 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     isApproximate,
     expressions,
     indexPatterns,
-    props,
+    isMetricDimension,
+    filterOperations,
     query,
   ]);
 
@@ -172,7 +175,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                 meta: column?.meta,
                 variable: column?.variable,
                 label: choice.field,
-                ...(props.isMetricDimension && { inMetricDimension: true }),
+                ...(isMetricDimension && { inMetricDimension: true }),
               };
               return props.setState(
                 !selectedField

@@ -17,6 +17,7 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import { CasesPageBody } from '../../app/cases_page_body';
 import { CaseDetailsAppHeader } from './components/case_details_header';
 import { CaseViewTabContent } from './components/case_view_tab_content';
+import { CaseDetailsTour } from './tour/case_details_tour';
 import { useCaseRefreshRef } from './hooks/use_case_refresh_ref';
 
 export type CaseViewPageRedesignProps = Omit<CaseViewPageProps, 'fetchCase'>;
@@ -61,6 +62,7 @@ export const CaseViewPageRedesign = React.memo<CaseViewPageRedesignProps>(
             onUpdateField={onUpdateField}
           />
         </CasesPageBody>
+        <CaseDetailsTour caseData={caseData} />
       </>
     );
   }

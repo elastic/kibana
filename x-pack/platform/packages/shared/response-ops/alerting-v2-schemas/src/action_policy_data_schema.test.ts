@@ -7,11 +7,12 @@
 
 import {
   actionPolicyDestinationSchema,
-  bulkActionActionPoliciesBodySchema,
+  bulkSnoozeActionPoliciesBodySchema,
   createActionPolicyDataSchema,
   snoozeActionPolicyBodySchema,
   updateActionPolicyDataSchema,
 } from './action_policy_data_schema';
+import { MAX_BULK_ITEMS } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
 
@@ -399,61 +400,60 @@ describe('updateActionPolicyDataSchema', () => {
   });
 });
 
-describe('bulkActionActionPoliciesBodySchema', () => {
-  it('accepts a delete action', () => {
-    const result = bulkActionActionPoliciesBodySchema.parse({
-      actions: [{ id: 'policy-1', action: 'delete' }],
+describe('bulkSnoozeActionPoliciesBodySchema', () => {
+  it('accepts ids plus snoozedUntil', () => {
+    const result = bulkSnoozeActionPoliciesBodySchema.parse({
+      ids: ['policy-1', 'policy-2'],
+      snoozedUntil: '2026-04-01T10:00:00Z',
     });
 
     expect(result).toEqual({
-      actions: [{ id: 'policy-1', action: 'delete' }],
+      ids: ['policy-1', 'policy-2'],
+      snoozedUntil: '2026-04-01T10:00:00Z',
     });
   });
 
-  it('accepts mixed actions including delete', () => {
-    const result = bulkActionActionPoliciesBodySchema.parse({
-      actions: [
-        { id: 'policy-1', action: 'enable' },
-        { id: 'policy-2', action: 'disable' },
-        { id: 'policy-3', action: 'delete' },
-        { id: 'policy-4', action: 'snooze', snoozedUntil: '2026-04-01T10:00:00Z' },
-        { id: 'policy-5', action: 'unsnooze' },
-      ],
-    });
-
-    expect(result.actions).toHaveLength(5);
-    expect(result.actions[2]).toEqual({ id: 'policy-3', action: 'delete' });
-  });
-
-  it('rejects an unknown action', () => {
+  it('rejects a missing snoozedUntil', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [{ id: 'policy-1', action: 'unknown' }],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
       })
     ).toThrow();
   });
 
-  it('rejects an empty actions array', () => {
+  it('rejects a non-datetime snoozedUntil', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
+        snoozedUntil: 'not-a-date',
+      })
+    ).toThrow();
+  });
+
+  it('rejects an empty ids array', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: [],
+        snoozedUntil: '2026-04-01T10:00:00Z',
+      })
+    ).toThrow();
+  });
+
+  it('rejects more than MAX_BULK_ITEMS ids', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `policy-${i}`),
+        snoozedUntil: '2026-04-01T10:00:00Z',
       })
     ).toThrow();
   });
 
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [{ id: 'policy-1', action: 'delete' }],
+      bulkSnoozeActionPoliciesBodySchema.parse({
+        ids: ['policy-1'],
+        snoozedUntil: '2026-04-01T10:00:00Z',
         unknownField: 'x',
-      })
-    ).toThrow();
-  });
-
-  it('rejects unknown fields on a bulk action variant (strict)', () => {
-    expect(() =>
-      bulkActionActionPoliciesBodySchema.parse({
-        actions: [{ id: 'policy-1', action: 'enable', unknownField: 'x' }],
       })
     ).toThrow();
   });

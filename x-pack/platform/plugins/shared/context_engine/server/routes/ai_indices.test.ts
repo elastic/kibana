@@ -11,10 +11,12 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { registerAiIndexRoutes } from './ai_indices';
 import { aiIndexByIdPath, aiIndexPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
+import type { AiIndexHttpItem } from '../../common/http_api/ai_indices';
 import {
   InvalidAiIndexDestError,
   AiIndexConflictError,
   AiIndexNotFoundError,
+  AiIndexAlreadyExistsError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
 
@@ -25,12 +27,27 @@ interface RegisteredRoute {
     security: { authz: { requiredPrivileges: string[] } };
   };
   handler: RequestHandler;
-  validate: false | { request?: { params?: Type<unknown>; body?: Type<unknown> } };
+  validate:
+    | false
+    | { request?: { params?: Type<unknown>; query?: Type<unknown>; body?: Type<unknown> } };
 }
+
+const aiIndexItem: AiIndexHttpItem = {
+  id: 'customer_support',
+  description: 'Customer support context',
+  managed: false,
+  dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
+  automations: [{ type: 'workflow', value: 'nightly-refresh' }],
+  sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+  date_created: '2026-07-08T12:10:30.000Z',
+  date_modified: '2026-07-08T12:10:30.000Z',
+};
 
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
-  let aiIndexService: jest.Mocked<Pick<AiIndexService, 'put' | 'get' | 'list' | 'delete'>>;
+  let aiIndexService: jest.Mocked<
+    Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete'>
+  >;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
 
@@ -54,6 +71,7 @@ describe('ai indices routes', () => {
     featureFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
     aiIndexService = {
+      create: jest.fn(),
       put: jest.fn(),
       get: jest.fn(),
       list: jest.fn(),
@@ -76,6 +94,7 @@ describe('ai indices routes', () => {
     const router = {
       versioned: {
         get: jest.fn(createVersionedRoute('GET')),
+        post: jest.fn(createVersionedRoute('POST')),
         put: jest.fn(createVersionedRoute('PUT')),
         delete: jest.fn(createVersionedRoute('DELETE')),
       },
@@ -95,12 +114,14 @@ describe('ai indices routes', () => {
   it('returns 404 on every route when the context engine is disabled', async () => {
     featureFlagEnabled = false;
 
+    await callRoute('POST', aiIndexPath, { body: { id: 'a' } });
     await callRoute('PUT', aiIndexByIdPath, { params: { aiIndexId: 'a' }, body: {} });
     await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
     await callRoute('GET', aiIndexPath, {});
     await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
 
-    expect(response.notFound).toHaveBeenCalledTimes(4);
+    expect(response.notFound).toHaveBeenCalledTimes(5);
+    expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
     expect(aiIndexService.list).not.toHaveBeenCalled();
@@ -108,6 +129,10 @@ describe('ai indices routes', () => {
   });
 
   it('registers all routes as public with the expected privileges', () => {
+    expect(getRoute('POST', aiIndexPath).config).toMatchObject({
+      access: 'public',
+      security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
+    });
     expect(getRoute('PUT', aiIndexByIdPath).config).toMatchObject({
       access: 'public',
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
@@ -126,14 +151,54 @@ describe('ai indices routes', () => {
     });
   });
 
+  describe('POST /api/context_engine/ai_index', () => {
+    const postBody = {
+      id: 'customer_support',
+      dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
+      automations: [{ type: 'workflow', value: 'nightly-refresh' }],
+      sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+    };
+
+    it('returns 201 when the AI index is created', async () => {
+      aiIndexService.create.mockResolvedValue(undefined);
+
+      await callRoute('POST', aiIndexPath, { body: postBody });
+
+      const { id, ...properties } = postBody;
+      expect(aiIndexService.create).toHaveBeenCalledWith('customer_support', properties);
+      expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
+    });
+
+    it('returns 409 when the id already exists', async () => {
+      aiIndexService.create.mockRejectedValue(new AiIndexAlreadyExistsError('customer_support'));
+
+      await callRoute('POST', aiIndexPath, { body: postBody });
+
+      expect(response.conflict).toHaveBeenCalledWith({
+        body: { message: "AI index 'customer_support' already exists" },
+      });
+    });
+
+    it('returns 400 when the dest is invalid', async () => {
+      aiIndexService.create.mockRejectedValue(
+        new InvalidAiIndexDestError("dest.value 'customer_support*' is not allowed")
+      );
+
+      await callRoute('POST', aiIndexPath, { body: postBody });
+
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: "dest.value 'customer_support*' is not allowed" },
+      });
+    });
+  });
+
   describe('PUT /api/context_engine/ai_index/{aiIndexId}', () => {
     const putRequest = {
       params: { aiIndexId: 'customer_support' },
       body: {
-        name: 'customer_support',
-        dest: { type: 'data_stream', value: '.ai-index-ds-customer_support*' },
+        dest: { type: 'data_stream', value: 'ai-index-ds-customer_support*' },
         automations: [{ type: 'workflow', value: 'nightly-refresh' }],
-        sources: [{ type: 'esql', value: 'FROM .ai-index-ds-customer_support | LIMIT 10' }],
+        sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
       },
     };
 
@@ -184,22 +249,11 @@ describe('ai indices routes', () => {
 
   describe('GET /api/context_engine/ai_index/{aiIndexId}', () => {
     it('returns the AI index', async () => {
-      const aiIndex = {
-        id: 'customer_support',
-        name: 'customer_support',
-        dest: { type: 'data_stream' as const, value: '.ai-index-ds-customer_support*' },
-        automations: [{ type: 'workflow' as const, value: 'nightly-refresh' }],
-        sources: [
-          { type: 'esql' as const, value: 'FROM .ai-index-ds-customer_support | LIMIT 10' },
-        ],
-        date_created: '2026-07-08T12:10:30.000Z',
-        date_modified: '2026-07-08T12:10:30.000Z',
-      };
-      aiIndexService.get.mockResolvedValue(aiIndex);
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
 
       await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } });
 
-      expect(response.ok).toHaveBeenCalledWith({ body: aiIndex });
+      expect(response.ok).toHaveBeenCalledWith({ body: aiIndexItem });
     });
 
     it('returns 404 when the AI index does not exist', async () => {
@@ -254,12 +308,49 @@ describe('ai indices routes', () => {
     });
   });
 
+  describe('POST body validation', () => {
+    const validBody = {
+      id: 'customer_support',
+      dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+      automations: [{ type: 'workflow', value: 'nightly-refresh' }],
+      sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
+    };
+
+    const validateBody = (body: Record<string, unknown>) => {
+      const { validate } = getRoute('POST', aiIndexPath);
+      if (!validate || !validate.request?.body) {
+        throw new Error('expected a POST body schema');
+      }
+      return validate.request.body.validate(body);
+    };
+
+    it('accepts a valid body', () => {
+      expect(() => validateBody(validBody)).not.toThrow();
+    });
+
+    it('rejects a missing id', () => {
+      const { id, ...bodyWithoutId } = validBody;
+      expect(() => validateBody(bodyWithoutId)).toThrow();
+    });
+
+    it('rejects an id with disallowed characters', () => {
+      expect(() => validateBody({ ...validBody, id: 'Customer_Support' })).toThrow(
+        /lowercase letters, numbers, hyphens/
+      );
+    });
+
+    it('rejects a disallowed dest type', () => {
+      expect(() =>
+        validateBody({ ...validBody, dest: { type: 'view', value: 'ai-index-idx-foo' } })
+      ).toThrow();
+    });
+  });
+
   describe('PUT body validation', () => {
     const validBody = {
-      name: 'customer_support',
-      dest: { type: 'data_stream', value: '.ai-index-ds-customer_support' },
+      dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
       automations: [{ type: 'workflow', value: 'nightly-refresh' }],
-      sources: [{ type: 'esql', value: 'FROM .ai-index-ds-customer_support | LIMIT 10' }],
+      sources: [{ type: 'esql', value: 'FROM ai-index-ds-customer_support | LIMIT 10' }],
     };
 
     const validateBody = (body: Record<string, unknown>) => {
@@ -288,9 +379,13 @@ describe('ai indices routes', () => {
       ).not.toThrow();
     });
 
+    it('rejects an id in the update body', () => {
+      expect(() => validateBody({ ...validBody, id: 'customer_support' })).toThrow();
+    });
+
     it('rejects a disallowed dest type', () => {
       expect(() =>
-        validateBody({ ...validBody, dest: { type: 'view', value: '.ai-index-idx-foo' } })
+        validateBody({ ...validBody, dest: { type: 'view', value: 'ai-index-idx-foo' } })
       ).toThrow();
     });
 
@@ -304,19 +399,6 @@ describe('ai indices routes', () => {
       expect(() =>
         validateBody({ ...validBody, automations: [{ type: 'cron', value: 'nightly-refresh' }] })
       ).toThrow();
-    });
-
-    it('accepts automations and sources of different lengths', () => {
-      expect(() =>
-        validateBody({
-          ...validBody,
-          automations: [
-            { type: 'workflow', value: 'a' },
-            { type: 'workflow', value: 'b' },
-          ],
-          sources: validBody.sources,
-        })
-      ).not.toThrow();
     });
 
     it('rejects a missing automations array', () => {
@@ -338,6 +420,40 @@ describe('ai indices routes', () => {
         value: `FROM index-${i}`,
       }));
       expect(() => validateBody({ ...validBody, sources })).toThrow();
+    });
+  });
+
+  describe('aiIndexId param validation', () => {
+    const validateParams = (params: Record<string, unknown>) => {
+      const { validate } = getRoute('PUT', aiIndexByIdPath);
+      if (!validate || !validate.request?.params) {
+        throw new Error('expected a PUT params schema');
+      }
+      return validate.request.params.validate(params);
+    };
+
+    it.each(['customer_support', 'logs-app', 'index-123', 'a', '1', 'a_b-c'])(
+      'accepts a valid id %p',
+      (aiIndexId) => {
+        expect(() => validateParams({ aiIndexId })).not.toThrow();
+      }
+    );
+
+    it.each([
+      'Customer_Support',
+      'has space',
+      'has.dot',
+      'emoji😀',
+      'slash/id',
+      'tilde~',
+      '_leading_underscore',
+      '-leading-hyphen',
+    ])('rejects an id with disallowed characters %p', (aiIndexId) => {
+      expect(() => validateParams({ aiIndexId })).toThrow(/lowercase letters, numbers, hyphens/);
+    });
+
+    it('rejects an empty id', () => {
+      expect(() => validateParams({ aiIndexId: '' })).toThrow();
     });
   });
 });

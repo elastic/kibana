@@ -239,13 +239,14 @@ describe('utils', () => {
 
     it('should return all items as displayed when under limit', () => {
       const items = [
-        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const, order: 1 },
-        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const, order: 2 },
+        { id: '1', label: 'Item 1', run: jest.fn(), iconType: 'gear' as const },
+        { id: '2', label: 'Item 2', run: jest.fn(), iconType: 'gear' as const },
       ];
 
       const result = getAppMenuItems({ config: { items } });
 
       expect(result.displayedItems).toHaveLength(2);
+      expect(result.displayedItems.map((item) => item.id)).toEqual(['1', '2']);
       expect(result.overflowItems).toHaveLength(0);
       expect(result.shouldOverflow).toBe(false);
     });
@@ -262,6 +263,18 @@ describe('utils', () => {
       expect(result.displayedItems[0].id).toBe('1');
       expect(result.displayedItems[1].id).toBe('2');
       expect(result.displayedItems[2].id).toBe('3');
+    });
+
+    it('should use zero as the default order', () => {
+      const items = [
+        { id: 'last', label: 'Last', run: jest.fn(), iconType: 'gear' as const, order: 1 },
+        { id: 'default', label: 'Default', run: jest.fn(), iconType: 'gear' as const },
+        { id: 'first', label: 'First', run: jest.fn(), iconType: 'gear' as const, order: -1 },
+      ];
+
+      const result = getAppMenuItems({ config: { items } });
+
+      expect(result.displayedItems.map((item) => item.id)).toEqual(['first', 'default', 'last']);
     });
 
     it('should split items into displayed and overflow when exceeding limit', () => {
@@ -595,8 +608,8 @@ describe('utils', () => {
 
     it('should create single panel for flat items', () => {
       const items: AppMenuPopoverItem[] = [
-        { id: '1', label: 'Item 1', run: jest.fn(), order: 1 },
-        { id: '2', label: 'Item 2', run: jest.fn(), order: 2 },
+        { id: '1', label: 'Item 1', run: jest.fn() },
+        { id: '2', label: 'Item 2', run: jest.fn() },
       ];
 
       const panels = getPopoverPanels({ items });
@@ -604,6 +617,7 @@ describe('utils', () => {
       expect(panels).toHaveLength(1);
       expect(panels[0].id).toBe(0);
       expect(panels[0].items).toHaveLength(2);
+      expect(panels[0].items?.map((item) => item.key)).toEqual(['1', '2']);
     });
 
     it('should create nested panels for items with sub-items', () => {

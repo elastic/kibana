@@ -19,6 +19,42 @@ exports[`Error ANOMALY_TIMESTAMP 1`] = `undefined`;
 
 exports[`Error APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Error ATTRIBUTE_GEN_AI_CONVERSATION_ID 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_INPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_OPERATION_NAME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_PROVIDER_NAME 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_MODEL 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_SEED 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_TOP_K 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_REQUEST_TOP_P 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_RESPONSE_ID 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_RESPONSE_MODEL 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Error ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Error ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 
 exports[`Error ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
@@ -481,6 +517,42 @@ exports[`Span ANOMALY_TIMESTAMP 1`] = `undefined`;
 
 exports[`Span APP_LAUNCH_TIME 1`] = `undefined`;
 
+exports[`Span ATTRIBUTE_GEN_AI_CONVERSATION_ID 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_INPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_OPERATION_NAME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_PROVIDER_NAME 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_MODEL 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_SEED 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_TOP_K 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_REQUEST_TOP_P 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_RESPONSE_ID 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_RESPONSE_MODEL 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Span ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
+
 exports[`Span ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 
 exports[`Span ATTRIBUTE_HTTP_STATUS_CODE 1`] = `undefined`;
@@ -925,6 +997,42 @@ exports[`Transaction ANOMALY_DETECTOR_TYPE 1`] = `undefined`;
 exports[`Transaction ANOMALY_TIMESTAMP 1`] = `undefined`;
 
 exports[`Transaction APP_LAUNCH_TIME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_CONVERSATION_ID 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_INPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_OPERATION_NAME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_PROVIDER_NAME 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_MODEL 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_SEED 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_TOP_K 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_REQUEST_TOP_P 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_RESPONSE_ID 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_RESPONSE_MODEL 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_USAGE_INPUT_TOKENS 1`] = `undefined`;
+
+exports[`Transaction ATTRIBUTE_GEN_AI_USAGE_OUTPUT_TOKENS 1`] = `undefined`;
 
 exports[`Transaction ATTRIBUTE_HTTP_SCHEME 1`] = `undefined`;
 

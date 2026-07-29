@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLAstAllCommands, ESQLAstField } from '@elastic/esql/types';
-import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../definitions/constants';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../../definitions/constants';
 import type { ICommandCallbacks } from '../types';
 import { type ICommandContext, type ISuggestionItem } from '../types';
 import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 import { Location } from '../types';
 
 export const FUNCTIONS_TO_IGNORE = {
-  names: [...FULL_TEXT_SEARCH_FUNCTIONS],
+  names: [...FULL_TEXT_SEARCH_DEFINITIONS],
   allowedInsideFunctions: Object.fromEntries(
-    FULL_TEXT_SEARCH_FUNCTIONS.map((fn) => [fn, ['score']])
-  ) as Record<(typeof FULL_TEXT_SEARCH_FUNCTIONS)[number], string[]>,
+    FULL_TEXT_SEARCH_DEFINITIONS.map((name) => [name, ['score']])
+  ) as Record<(typeof FULL_TEXT_SEARCH_DEFINITIONS)[number], string[]>,
 };
 
 export async function autocomplete(

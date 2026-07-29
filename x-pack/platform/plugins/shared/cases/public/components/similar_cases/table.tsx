@@ -51,6 +51,7 @@ export const SimilarCasesTable: FunctionComponent<SimilarCasesTableProps> = ({
   ) : (
     <>
       <EuiBasicTable
+        tableCaption={i18n.TABLE_CAPTION}
         onChange={onChange}
         pagination={pagination}
         columns={columns}
