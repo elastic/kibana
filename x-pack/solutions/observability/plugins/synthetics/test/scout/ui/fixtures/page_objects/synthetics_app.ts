@@ -314,7 +314,7 @@ export class SyntheticsAppPage {
   async selectMaintenanceWindowInFlyout(title: string) {
     const flyout = this.page.testSubj.locator('syntheticsBulkMaintenanceWindowsFlyout');
     await flyout.locator('[data-test-subj="comboBoxSearchInput"]').click();
-    await this.page.locator(`[role="option"]:has-text("${title}")`).first().click();
+    await this.page.getByRole('option', { name: title }).click();
   }
 
   async saveBulkMaintenanceWindows() {
