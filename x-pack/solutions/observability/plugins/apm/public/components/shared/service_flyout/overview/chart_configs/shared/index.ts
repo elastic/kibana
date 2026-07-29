@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './types';
+export type * from './types';
 export * from './constants';
 export * from './chart_definition';
 export * from './filters';
