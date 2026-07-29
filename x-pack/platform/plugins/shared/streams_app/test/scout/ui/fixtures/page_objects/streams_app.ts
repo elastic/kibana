@@ -63,6 +63,10 @@ export class StreamsApp {
   public readonly canvasAddDestination;
   public readonly canvasContextMenu;
   public readonly canvasContextMenuTidyUp;
+  // New experience
+  public readonly newExperienceSourcesPlaceholder;
+  public readonly newExperiencePipelinesPlaceholder;
+  public readonly newExperienceDestinationsPlaceholder;
 
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = this.page.components.comboBox(
@@ -132,6 +136,16 @@ export class StreamsApp {
     this.canvasAddDestination = this.page.testSubj.locator('streamsCanvasAddDestination');
     this.canvasContextMenu = this.page.testSubj.locator('streamsCanvasContextMenu');
     this.canvasContextMenuTidyUp = this.page.testSubj.locator('streamsCanvasContextMenuTidyUp');
+    // New experience locators
+    this.newExperienceSourcesPlaceholder = this.page.testSubj.locator(
+      'streamsNewExperienceSourcesPlaceholder'
+    );
+    this.newExperiencePipelinesPlaceholder = this.page.testSubj.locator(
+      'streamsNewExperiencePipelinesPlaceholder'
+    );
+    this.newExperienceDestinationsPlaceholder = this.page.testSubj.locator(
+      'streamsNewExperienceDestinationsPlaceholder'
+    );
   }
 
   async goto() {
@@ -174,8 +188,20 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'attachments');
   }
 
-  async gotoCanvasTab(streamName: string) {
-    await this.gotoStreamManagementTab(streamName, 'canvas');
+  async gotoNewExperience() {
+    await this.page.gotoApp('streams/new-experience');
+  }
+
+  async gotoNewExperienceTab(tabName: string) {
+    await this.page.gotoApp(`streams/new-experience/${tabName}`);
+  }
+
+  getNewExperienceTab(tabName: string) {
+    return this.page.testSubj.locator(`streamsNewExperienceTab-${tabName}`);
+  }
+
+  async clickNewExperienceTab(tabName: string) {
+    await this.getNewExperienceTab(tabName).click();
   }
 
   // Canvas utility methods
