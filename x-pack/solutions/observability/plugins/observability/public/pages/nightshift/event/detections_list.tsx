@@ -50,7 +50,7 @@ export interface DetectionsListProps {
   onDetectionClick?: (detection: LifecycleDetection) => void;
   lifecycleQuery?: Pick<
     UseQueryResult<EventLifecycleResponse, Error>,
-    'data' | 'isLoading' | 'isFetching' | 'isError' | 'refetch'
+    'data' | 'isLoading' | 'isError' | 'refetch'
   >;
 }
 
@@ -314,7 +314,7 @@ export function DetectionsList({
     enabled: !lifecycleQueryFromParent,
   });
   const lifecycleQuery = lifecycleQueryFromParent ?? internalLifecycleQuery;
-  const { data, isLoading, isFetching, isError, refetch } = lifecycleQuery;
+  const { data, isLoading, isError, refetch } = lifecycleQuery;
 
   // Most recent detection first — it is the most actionable one during an incident.
   const detections = useMemo(
