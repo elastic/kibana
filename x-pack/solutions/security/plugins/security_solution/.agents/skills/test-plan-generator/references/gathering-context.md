@@ -54,7 +54,55 @@ For each **image URL** in the issue body, comments, or any PR body or PR review 
 
 ## Figma
 
-For each **Figma link**: use the Figma MCP. If a `node-id` parameter is present, fetch that specific node — do not just fetch the file root. Extract: component names and states, navigation flows, empty states, error states, loading states, and any interactions or annotations visible in the design.
+For each **Figma link**: use the Figma MCP. Extract component names and states, navigation flows, empty states, error states, loading states, and any interactions or annotations visible in the design.
+
+### Step 1 — Parse the URL
+
+Extract `fileKey` and `nodeId` from the URL, and route to the correct handler:
+
+| URL path segment | Handler |
+|---|---|
+| `figma.com/design/:fileKey/:name?node-id=:nodeId` | Standard design file. Convert `-` to `:` in `nodeId`. Proceed to Step 2. |
+| `figma.com/design/:fileKey/branch/:branchKey/:name` | Branched design file. Use `branchKey` as the `fileKey`. Proceed to Step 2. |
+| `figma.com/board/:fileKey/...` | FigJam. Use `get_figjam`, then skip Step 2 (tiered flow is design-file only). |
+| `figma.com/slides/:fileKey/...` | Figma Slides. `get_metadata` is not supported — flag in Known Limitations with ⚠️ and continue. |
+| `figma.com/make/:makeFileKey/...` | Figma Make. `get_metadata` is not supported — flag in Known Limitations with ⚠️ and continue. |
+| Any of the above **without** `node-id` | Vague link — the URL points at the whole file. Call `get_metadata` with `fileKey` only to list top-level pages, then **stop and ask** the user which page or node matters. |
+
+### Step 2 — Detect the root node type
+
+For design-file URLs with a `nodeId`, call `get_metadata` with `fileKey` + `nodeId` (lightweight XML overview) **before** `get_design_context`. Inspect two fields in the response:
+
+1. The **root node type** — one of `frame`, `section`, `canvas`, or something else.
+2. The **direct-children count** — the number of first-level layers under the root.
+
+### Step 3 — Apply the tiered behaviour
+
+| Root type + direct children | Behaviour |
+|---|---|
+| `frame` — any size | Call `get_design_context` on the root. No user prompt. |
+| `section` with **≤ 8** direct children | Call `get_design_context` on each child. No user prompt. |
+| `section` with **9–25** direct children | Call `get_design_context` on each child. Add a note in Sources Summary explaining that N children were auto-expanded from a section container. |
+| `section` with **> 25** direct children | **Stop and ask.** List all direct-child names + IDs and ask the user which children to inspect. Only fetch the selected subset. |
+| `canvas` (whole page) | **Always stop and ask.** Canvas URLs almost always over-fetch — list all direct-child names + IDs and ask the user which children matter. Only fetch the selected subset. |
+| Root node not found (deleted, restructured) | Flag in Sources Summary with ⚠️ and in Known Limitations. Do not silently skip. |
+
+**Threshold origin.** The 8 and 25 thresholds are provisional, derived from an audit of 3 real Security Solution Figma URLs (see [security-team#18320](https://github.com/elastic/security-team/issues/18320)). Refine once the flow has run against ≥ 10 additional real issues.
+
+### Step 4 — Announce and propagate partial fetches
+
+- **Sources Summary.** Announce every container expansion so the user can see what was pulled. Use the status cell to describe the outcome — see the Figma row examples in [`output-formats.md`](output-formats.md#sources-summary) (e.g. `✅ Read (12 children expanded from section)` or `✅ Read (3 of 40 children — user-selected subset)`).
+- **Known Limitations.** When the user narrows a container via stop-and-ask (`section` > 25 or any `canvas`), also add a Known Limitations entry naming the un-inspected children so downstream steps do not treat the Figma context as complete:
+
+  ```
+  ⚠️ Figma canvas "🌈 Design Concepts": 3 of 40 direct children inspected
+  (narrowed by user selection). The remaining 37 children were out of scope
+  for this test plan and may cover behaviour not represented in scenarios.
+  ```
+
+  Without this entry, Step 3 scenario writing and the Issue Clarity Assessment UX/UI dimension would treat the Figma as fully covered when it is not.
+
+### Role after extraction
 
 | Figma role | Action |
 |---|---|
@@ -83,7 +131,7 @@ Check the "Relationships" or "Parent issue" section in the sidebar. If a parent 
 
 1. Fetch using `gh issue view <number> --repo <owner>/<repo> --json number,title,body,labels,comments`. Fall back to GitHub MCP if unavailable.
 2. For each **image URL** found: fetch and analyze.
-3. For each **Figma link** found: use the Figma MCP. Parent epics often contain the most complete designs — treat as high-value context.
+3. For each **Figma link** found: apply the full [Figma](#figma) flow above (URL parsing → root node detection → tiered behaviour → Sources Summary/Known Limitations propagation). Parent epics often contain the most complete designs — treat as high-value context.
 4. Check comments for an existing test plan (body starts with `<!-- test-plan-generated -->`). If found, store as **parent test plan** — use it in Step 2 to understand what is already covered at the epic level.
 
 Constraints:

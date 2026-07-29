@@ -227,7 +227,7 @@ The goal is to give the user full traceability of what the agent read, what it u
 | Parent issue #<number> — <title> | ✅ Read / ⛔ No parent |
 | Sub-issue #<number> — <title> | ✅ Read |
 | PR #<number> — <title> | ✅ Read / ✅ Re-read (activity since plan published) / ➖ Skipped (no activity since plan published) / ⚠️ Partially read (N files skipped — too large) / ⛔ Not found |
-| Figma — <file or node name> | ✅ Read / ⚠️ Read with errors / ⛔ Inaccessible |
+| Figma — <file or node name> | ✅ Read / ✅ Read (N children expanded from section) / ✅ Read (M of N children — user-selected subset) / ⚠️ Read with errors / ⚠️ Node not found in file / ⛔ Inaccessible |
 | Image — <url or description> | ✅ Analyzed / ⛔ Could not fetch |
 | Google Doc — <title or url> | ✅ Read / ⛔ MCP not available |
 | Parent test plan (issue #<number>) | ✅ Found and used as reference / ➖ Not found |
@@ -243,4 +243,8 @@ The goal is to give the user full traceability of what the agent read, what it u
 - If there are multiple sub-issues or PRs, include one row per item.
 - If there is no parent issue, include the row anyway with status `⛔ No parent` so the user can see it was checked.
 - If a source was partially read (e.g. a PR with skipped files), use `⚠️` and describe what was skipped in parentheses.
+- For **Figma containers** (`section` or `canvas`), announce container expansion in the status cell per the tiered flow in [`gathering-context.md`](gathering-context.md#figma):
+  - Auto-expanded section (≤ 25 children): `✅ Read (N children expanded from section)`
+  - User-selected subset (section > 25 or canvas): `✅ Read (M of N children — user-selected subset)`. Also add a Known Limitations entry naming the un-inspected children — status `✅` alone would mask the partial coverage.
+  - Root node missing (deleted, restructured): `⚠️ Node not found in file`. Also flag in Known Limitations.
 - In **update mode**, PRs are checked for activity since the plan was published. Use `✅ Re-read (activity since plan published)` for PRs that were re-read because new commits or review activity was detected. Use `➖ Skipped (no activity since plan published)` for PRs that had no activity and were not re-read. If the user ran `update including PRs`, all PRs will show `✅ Re-read` regardless of activity.
