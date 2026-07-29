@@ -34,6 +34,7 @@ interface ContextSwitcherComponentProps {
   isServerless?: boolean;
   allowSolutionVisibility: boolean;
   iconOnly?: boolean;
+  showLabel?: boolean;
 }
 
 const queryClient = new QueryClient({
@@ -57,6 +58,7 @@ const ContextSwitcherInner = ({
   isServerless,
   allowSolutionVisibility,
   iconOnly,
+  showLabel,
 }: ContextSwitcherComponentProps) => {
   const { data: spaces, isLoading } = useSpaces(spacesManager);
   const activeSpace = useActiveSpace(spacesManager);
@@ -127,6 +129,7 @@ const ContextSwitcherInner = ({
       onOpen={handleOpen}
       footerLinks={footerLinks}
       iconOnly={iconOnly}
+      showLabel={showLabel}
     />
   );
 };

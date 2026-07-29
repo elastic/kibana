@@ -13,12 +13,16 @@ import { useEuiTheme } from '@elastic/eui';
 import { useContextSwitcher } from '../shared/chrome_hooks';
 
 /** Deployment/context switcher as a grid icon for headerless design-exploration nav. */
-export const DesignExplorationNavTopControls = () => {
+export const DesignExplorationNavTopControls = ({ isCollapsed }: { isCollapsed: boolean }) => {
   const { euiTheme } = useEuiTheme();
   const switcher = useContextSwitcher();
+  const showLabel = !isCollapsed;
   const navSwitcher =
     switcher && isValidElement(switcher)
-      ? React.cloneElement(switcher, { iconOnly: true } as Record<string, unknown>)
+      ? React.cloneElement(switcher, {
+          iconOnly: true,
+          showLabel,
+        } as Record<string, unknown>)
       : switcher;
 
   if (!navSwitcher) {
@@ -30,18 +34,24 @@ export const DesignExplorationNavTopControls = () => {
       css={css`
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: ${showLabel ? 'stretch' : 'center'};
         width: 100%;
         padding-top: ${euiTheme.size.xl};
         padding-bottom: ${euiTheme.size.xs};
+        padding-inline: ${showLabel ? euiTheme.size.s : 0};
       `}
       data-test-subj="designExplorationNavTopControls"
     >
       <div
         css={css`
           display: flex;
-          justify-content: center;
+          justify-content: ${showLabel ? 'flex-start' : 'center'};
           width: 100%;
+
+          .euiPopover,
+          .euiPopover__anchor {
+            width: ${showLabel ? '100%' : 'auto'};
+          }
         `}
         data-test-subj="designExplorationNavContextSwitcher"
       >

@@ -136,7 +136,7 @@ export const DesignExplorationProjectSideNav = () => {
         isCollapsed={collapsed}
         setWidth={setWidth}
         onToggleCollapsed={isAutoCollapsed ? undefined : onToggleCollapsed}
-        navTopControls={<DesignExplorationNavTopControls />}
+        navTopControls={<DesignExplorationNavTopControls isCollapsed={collapsed} />}
         navFooterLeadingControls={<DesignExplorationNavFooterLeadingControls />}
         navFooterControls={<DesignExplorationNavFooterControls />}
       />

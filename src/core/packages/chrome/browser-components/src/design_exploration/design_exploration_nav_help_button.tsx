@@ -17,6 +17,10 @@ const HELP_ARIA_LABEL = i18n.translate('core.ui.chrome.headerGlobalNav.helpMenuB
   defaultMessage: 'Help menu',
 });
 
+const HELP_FOOTER_LABEL = i18n.translate('core.ui.chrome.designExplorationNav.helpButton.label', {
+  defaultMessage: 'Help',
+});
+
 export const DesignExplorationNavHelpButton = () => {
   const renderButton = useCallback(
     ({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu: () => void }) => (
@@ -27,6 +31,7 @@ export const DesignExplorationNavHelpButton = () => {
         repositionOnScroll
       >
         <div
+          data-footer-label={HELP_FOOTER_LABEL}
           css={css`
             display: flex;
             justify-content: center;

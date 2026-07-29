@@ -21,12 +21,15 @@ interface ContextSwitcherTriggerButtonProps {
   readonly isSelected?: boolean;
   readonly title?: string;
   readonly iconOnly?: boolean;
+  /** When `iconOnly`, show the space name beside the grid icon. */
+  readonly showLabel?: boolean;
 }
 
 /**
  * Trigger button UI for the context switcher popover.
  * Solution logo (left), space name (middle), down arrow (right).
  * When `iconOnly`, renders a grid ("apps") icon button for nav chrome.
+ * When `iconOnly` + `showLabel`, renders grid icon + space name for expanded nav.
  */
 export const ContextSwitcherTriggerButton = ({
   solutionIcon,
@@ -35,10 +38,44 @@ export const ContextSwitcherTriggerButton = ({
   isSelected,
   title,
   iconOnly = false,
+  showLabel = false,
 }: ContextSwitcherTriggerButtonProps): ReactElement => {
   const { euiTheme } = useEuiTheme();
 
   if (iconOnly) {
+    if (showLabel) {
+      return (
+        <EuiButtonEmpty
+          aria-label={label}
+          color="text"
+          data-test-subj="contextSwitcherTriggerButton"
+          iconType="apps"
+          isSelected={isSelected}
+          onClick={onClick}
+          size="s"
+          css={css`
+            width: 100%;
+            justify-content: flex-start;
+            min-inline-size: 0;
+            color: ${euiTheme.colors.textParagraph};
+
+            .euiButtonEmpty__content {
+              justify-content: flex-start;
+              gap: ${euiTheme.size.s};
+            }
+
+            .euiButtonEmpty__text {
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          `}
+        >
+          {label}
+        </EuiButtonEmpty>
+      );
+    }
+
     return (
       <EuiButtonIcon
         aria-label={label}

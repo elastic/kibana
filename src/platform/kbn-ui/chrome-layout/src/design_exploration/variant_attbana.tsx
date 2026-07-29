@@ -448,8 +448,6 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: 0 !important;
       box-shadow: none !important;
       outline: none !important;
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
     }
 
     ${scope}

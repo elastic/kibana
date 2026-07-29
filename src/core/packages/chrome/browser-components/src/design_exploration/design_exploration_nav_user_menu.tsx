@@ -20,6 +20,8 @@ const USER_MENU_ARIA_LABEL = i18n.translate(
   }
 );
 
+const USER_FOOTER_LABEL = 'Username';
+
 interface UserMenuButtonProps {
   isOpen: boolean;
   toggleMenu: () => void;
@@ -51,7 +53,7 @@ const DesignExplorationNavUserMenuButton = ({ isOpen, toggleMenu, avatar }: User
   const AvatarIcon = () => <span css={avatarIconStyles}>{avatar}</span>;
 
   return (
-    <div css={navFooterItemWrapperStyles}>
+    <div css={navFooterItemWrapperStyles} data-footer-label={USER_FOOTER_LABEL}>
       <EuiButtonIcon
         aria-expanded={isOpen}
         aria-haspopup={true}

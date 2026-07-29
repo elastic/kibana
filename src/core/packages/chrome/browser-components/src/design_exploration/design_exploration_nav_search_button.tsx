@@ -37,6 +37,7 @@ export const DesignExplorationNavSearchButton = () => {
       repositionOnScroll
     >
       <div
+        data-footer-label={ARIA_LABEL}
         css={css`
           display: flex;
           justify-content: center;

@@ -515,8 +515,6 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${knobVar('radiusContainer')} !important;
       box-shadow: none !important;
       outline: none !important;
-      margin-top: 0 !important;
-      margin-bottom: 8 !important;
     }
 
     ${scope} .kbnChromeNav-sidePanel

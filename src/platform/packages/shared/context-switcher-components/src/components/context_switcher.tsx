@@ -101,6 +101,7 @@ export const ContextSwitcher = ({
   footerLinks,
   onOpen,
   iconOnly = false,
+  showLabel = false,
 }: ContextSwitcherProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -263,6 +264,7 @@ export const ContextSwitcher = ({
           onClick={togglePopover}
           isSelected={isOpen}
           iconOnly={iconOnly}
+          showLabel={showLabel}
         />
       }
       isOpen={isOpen}
