@@ -21,6 +21,9 @@ export const buildWatchUrl = (watchId: string) =>
 export const PND_INVESTIGATIONS_URL = `${PND_INTERNAL_URL}/investigations` as const;
 export const PND_INVESTIGATION_URL_TEMPLATE = `${PND_INVESTIGATIONS_URL}/{id}` as const;
 
+/** All proposals across all investigations — Brief queue (one row per Proposal). */
+export const PND_PROPOSALS_URL = `${PND_INTERNAL_URL}/proposals` as const;
+
 export const buildInvestigationUrl = (id: string) =>
   `${PND_INVESTIGATIONS_URL}/${encodeURIComponent(id)}`;
 

@@ -16,6 +16,7 @@ import { registerGetWatchRoute } from './watches/get_watch';
 import { registerListInvestigationsRoute } from './investigations/list_investigations';
 import { registerGetInvestigationRoute } from './investigations/get_investigation';
 import { registerListInvestigationProposalsRoute } from './investigations/list_proposals';
+import { registerListAllProposalsRoute } from './investigations/list_all_proposals';
 import { registerAcceptProposalRoute } from './investigations/accept_proposal';
 import { registerRejectProposalRoute } from './investigations/reject_proposal';
 import { registerEscalateProposalRoute } from './investigations/escalate_proposal';
@@ -44,6 +45,7 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerListInvestigationsRoute(deps);
   registerGetInvestigationRoute(deps);
   registerListInvestigationProposalsRoute(deps);
+  registerListAllProposalsRoute(deps);
   registerAcceptProposalRoute(deps);
   registerRejectProposalRoute(deps);
   registerEscalateProposalRoute(deps);

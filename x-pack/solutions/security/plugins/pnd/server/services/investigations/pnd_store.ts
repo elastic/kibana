@@ -49,6 +49,13 @@ export interface PndStore {
     esClient: ElasticsearchClient,
     investigationId: string
   ): Promise<ListInvestigationProposalsResponse>;
+
+  /**
+   * List ALL proposals across ALL investigations, sorted by pending-first then
+   * by confidence descending. Used by the Brief queue which shows one row per
+   * pending Proposal (ratified queue model, 2026-07-28 design/eng sync).
+   */
+  listAllProposals(esClient: ElasticsearchClient): Promise<ListInvestigationProposalsResponse>;
   updateProposalStatus(
     esClient: ElasticsearchClient,
     proposalId: string,

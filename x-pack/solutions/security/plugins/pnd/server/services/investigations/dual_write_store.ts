@@ -53,6 +53,10 @@ export class DualWriteStore implements PndStore {
     return this.primary.listProposals(esClient, investigationId);
   }
 
+  async listAllProposals(esClient: ElasticsearchClient) {
+    return this.primary.listAllProposals(esClient);
+  }
+
   async getWatchActivityMetrics(esClient: ElasticsearchClient, watchIds: string[]) {
     return this.primary.getWatchActivityMetrics(esClient, watchIds);
   }

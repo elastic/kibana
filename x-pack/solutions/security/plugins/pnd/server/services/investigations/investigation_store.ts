@@ -301,6 +301,39 @@ export class InvestigationStore implements PndStore {
   }
 
   /**
+   * List ALL proposals across ALL investigations for the Brief queue.
+   * Sorted: pending-first (pending has no numeric sort key in ES, so sort in
+   * application code), then by confidence descending.
+   */
+  public async listAllProposals(
+    esClient: ElasticsearchClient
+  ): Promise<ListInvestigationProposalsResponse> {
+    await this.ensureReady(esClient);
+    const result = await esClient.search<ProposalDoc>({
+      index: PND_PROPOSALS_INDEX,
+      size: 1000,
+      query: { match_all: {} },
+    });
+
+    const proposals = result.hits.hits
+      .map((hit) => hit._source)
+      .filter((src): src is ProposalDoc => src != null)
+      .map(({ investigationId: _omit, ...proposal }) => proposal)
+      .sort((a, b) => {
+        // Pending proposals first (they need analyst attention).
+        const aPending = a.status === 'pending' ? 0 : 1;
+        const bPending = b.status === 'pending' ? 0 : 1;
+        if (aPending !== bPending) {
+          return aPending - bPending;
+        }
+        // Then by confidence descending.
+        return (b.confidence ?? 0) - (a.confidence ?? 0);
+      });
+
+    return { proposals, total: proposals.length };
+  }
+
+  /**
    * Apply an analyst decision to a proposal document. Returns the updated
    * status, or null when the proposal does not exist.
    */

@@ -66,6 +66,10 @@ export class PndConversationStore implements PndStore {
     return this.legacy.listProposals(esClient, investigationId);
   }
 
+  async listAllProposals(esClient: ElasticsearchClient) {
+    return this.legacy.listAllProposals(esClient);
+  }
+
   async getWatchActivityMetrics(esClient: ElasticsearchClient, watchIds: string[]) {
     return this.legacy.getWatchActivityMetrics(esClient, watchIds);
   }

@@ -25,11 +25,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
-import type { Investigation, RecommendedAction } from '@kbn/pnd-common';
+import type { Investigation, Proposal, RecommendedAction } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
-import { useInvestigations } from '../../hooks/use_investigations_api';
+import { useInvestigations, useAllProposals } from '../../hooks/use_investigations_api';
 import { DecisionRadar, decisionStateForStatus } from './components/decision_radar';
 import type { DecisionState } from '../../theme';
 import * as i18n from './translations';
@@ -102,19 +102,140 @@ const isQueueRow = (investigation: Investigation): boolean =>
 const isAutoResolved = (investigation: Investigation): boolean =>
   AUTO_RESOLVED_STATUSES.has(investigation.status ?? '');
 
-const matchesBucket = (investigation: Investigation, bucket: i18n.BriefBucket): boolean => {
+const matchesBucket = (
+  action: RecommendedAction | undefined,
+  bucket: i18n.BriefBucket
+): boolean => {
   if (bucket === 'all') return true;
-  return investigation.recommendedAction === bucket;
+  return action === bucket;
+};
+
+/**
+ * A unified queue row. Can represent either:
+ * - A **pending Proposal** (the analyst's HITL decision item) — one row per
+ *   pending proposal, with parent investigation context.
+ * - An **Investigation with no pending proposals** — still actionable (open,
+ *   investigating) but has no specific proposal awaiting a decision.
+ *
+ * Per the 2026-07-28 design/eng sync (ratified queue model): the analyst queue
+ * shows Proposals first, one row per Proposal, drilling down to the parent
+ * Investigation. An Investigation with multiple independent Proposals appears
+ * multiple times.
+ */
+export interface QueueItem {
+  /** Stable React key for this row. */
+  key: string;
+  /** The parent investigation — always present for context/parent chrome. */
+  investigation: Investigation;
+  /** The proposal this row represents, if this is a proposal-driven row. */
+  proposal?: Proposal;
+  /** Recommended action for bucket grouping. Falls back to investigation's. */
+  recommendedAction: RecommendedAction | undefined;
+  /** Sort priority (higher = more urgent). */
+  priority: number;
+  /** Affected surface for filter badges. */
+  affectedSurface?: string;
+  /** Click target — opens investigation detail (proposal tab if proposal row). */
+  href: string;
+}
+
+/**
+ * Build the unified queue from investigations + all proposals.
+ *
+ * Algorithm:
+ * 1. Index investigations by id for O(1) parent lookup.
+ * 2. Group proposals by parentConversationId (investigationId).
+ * 3. For each pending proposal → emit one QueueItem (proposal-first).
+ * 4. For each queue-status investigation with zero pending proposals → emit
+ *    one QueueItem (investigation-only, no specific proposal to decide).
+ * 5. Investigations with ≥1 pending proposal do NOT get their own row — their
+ *    proposals do. This is the ratified queue model.
+ */
+export const buildQueueItems = (
+  investigations: Investigation[],
+  allProposals: Proposal[]
+): QueueItem[] => {
+  const investigationMap = new Map(investigations.map((inv) => [inv.id, inv]));
+
+  // Group pending proposals by their parent investigation.
+  const pendingByInvestigation = new Map<string, Proposal[]>();
+  for (const proposal of allProposals) {
+    if (proposal.status === 'pending') {
+      const parentId = proposal.parentConversationId;
+      const existing = pendingByInvestigation.get(parentId);
+      if (existing) {
+        existing.push(proposal);
+      } else {
+        pendingByInvestigation.set(parentId, [proposal]);
+      }
+    }
+  }
+
+  const items: QueueItem[] = [];
+
+  // 1. One row per pending Proposal (proposal-first queue model).
+  for (const [investigationId, proposals] of pendingByInvestigation) {
+    const investigation = investigationMap.get(investigationId);
+    if (!investigation) {
+      continue;
+    }
+    for (const proposal of proposals) {
+      const action = (proposal.type as RecommendedAction) ?? investigation.recommendedAction;
+      items.push({
+        key: proposal.id,
+        investigation,
+        proposal,
+        recommendedAction: action,
+        priority: investigation.priorityScore ?? Math.round((proposal.confidence ?? 0) * 100),
+        affectedSurface: investigation.affectedSurface,
+        href: `/investigations/${investigation.id}`,
+      });
+    }
+  }
+
+  // 2. Investigations in queue status with zero pending proposals → own row.
+  for (const investigation of investigations) {
+    if (!isQueueRow(investigation)) {
+      continue;
+    }
+    const pending = pendingByInvestigation.get(investigation.id);
+    if (pending && pending.length > 0) {
+      // Already represented by its proposal rows — skip.
+      continue;
+    }
+    items.push({
+      key: investigation.id,
+      investigation,
+      recommendedAction: investigation.recommendedAction,
+      priority: investigation.priorityScore ?? 0,
+      affectedSurface: investigation.affectedSurface,
+      href: `/investigations/${investigation.id}`,
+    });
+  }
+
+  // Sort by priority descending.
+  items.sort((a, b) => b.priority - a.priority);
+
+  return items;
 };
 
 const BriefCard: React.FC<{
-  investigation: Investigation;
+  item: QueueItem;
   accent: string;
   onOpen: () => void;
   onOpenChat: () => void;
-}> = ({ investigation, accent, onOpen, onOpenChat }) => {
+}> = ({ item, accent, onOpen, onOpenChat }) => {
+  const { investigation, proposal } = item;
   const inMotion = investigation.status === 'in-progress';
   const isDecided = isDecidedInvestigation(investigation);
+
+  // When this is a proposal-driven row, the card shows the proposal's
+  // recommendation + confidence, with parent investigation context (per
+  // PR #82: "Proposal structured flyout refers to the parent Investigation
+  // without replacing the Proposal as the selected object").
+  const cardTitle = proposal
+    ? proposal.recommendation || proposal.summary || investigation.title
+    : investigation.title;
 
   return (
     <EuiPanel
@@ -129,17 +250,17 @@ const BriefCard: React.FC<{
       }}
       role="button"
       tabIndex={0}
-      aria-label={investigation.title}
+      aria-label={cardTitle}
       css={css`
         cursor: pointer;
         border-left: 3px solid ${accent};
       `}
     >
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
-        {investigation.priorityScore != null ? (
+        {item.priority != null ? (
           <EuiFlexItem grow={false}>
             <EuiText size="m">
-              <strong>{investigation.priorityScore}</strong>
+              <strong>{item.priority}</strong>
             </EuiText>
           </EuiFlexItem>
         ) : null}
@@ -147,14 +268,23 @@ const BriefCard: React.FC<{
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
-                <h3>{investigation.title}</h3>
+                <h3>{cardTitle}</h3>
               </EuiTitle>
             </EuiFlexItem>
-            {investigation.recordId ? (
+            {/* Parent investigation reference — per PR #82, proposal rows
+                show parent investigation chrome (title, record id). */}
+            {proposal && investigation.recordId ? (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {investigation.recordId}
                 </EuiText>
+              </EuiFlexItem>
+            ) : null}
+            {proposal ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="accent" data-test-subj="pndBriefCardProposalBadge">
+                  {i18n.PROPOSAL}
+                </EuiBadge>
               </EuiFlexItem>
             ) : null}
             {inMotion ? (
@@ -162,7 +292,7 @@ const BriefCard: React.FC<{
                 <EuiBadge color="hollow">{i18n.IN_MOTION}</EuiBadge>
               </EuiFlexItem>
             ) : null}
-            {investigation.pendingProposalCount > 0 ? (
+            {investigation.pendingProposalCount > 0 && !proposal ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning">
                   {i18n.pendingProposalsLabel(investigation.pendingProposalCount)}
@@ -189,11 +319,13 @@ const BriefCard: React.FC<{
             <EuiFlexItem grow />
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <FormattedRelative value={investigation.updatedAt} />
+                <FormattedRelative
+                  value={proposal?.events?.[0]?.timestamp ?? investigation.updatedAt}
+                />
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          {investigation.summary ? (
+          {investigation.summary && !proposal ? (
             <>
               <EuiSpacer size="xs" />
               <EuiText size="s" color="subdued">
@@ -218,7 +350,7 @@ const BriefCard: React.FC<{
                   onOpen();
                 }}
               >
-                {briefActionLabel(investigation)}
+                {proposal ? proposal.recommendation : briefActionLabel(investigation)}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -242,20 +374,24 @@ const BriefCard: React.FC<{
 export const BriefPage: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-  const { data, isLoading, error } = useInvestigations();
+  const { data: invData, isLoading: invLoading, error: invError } = useInvestigations();
+  const { data: propData, isLoading: propLoading, error: propError } = useAllProposals();
   const [selectedBucket, setSelectedBucket] = useState<i18n.BriefBucket>('all');
   const [surfaceFilter, setSurfaceFilter] = useState<string | null>(null);
   const [decisionFilter, setDecisionFilter] = useState<DecisionState | null>(null);
   usePndDocTitle(i18n.PAGE_TITLE);
 
-  const investigations = useMemo(() => data?.investigations ?? [], [data?.investigations]);
+  const investigations = useMemo(() => invData?.investigations ?? [], [invData?.investigations]);
+  const allProposals = useMemo(() => propData?.proposals ?? [], [propData?.proposals]);
 
-  const queueRows = useMemo(
-    () =>
-      investigations
-        .filter(isQueueRow)
-        .sort((a, b) => (b.priorityScore ?? 0) - (a.priorityScore ?? 0)),
-    [investigations]
+  const isLoading = invLoading || propLoading;
+  const error = invError ?? propError;
+
+  // Build the unified queue: one row per pending Proposal + investigations
+  // with no pending proposals (ratified queue model, 2026-07-28 sync).
+  const queueItems = useMemo(
+    () => buildQueueItems(investigations, allProposals),
+    [investigations, allProposals]
   );
 
   const autoResolvedCount = useMemo(
@@ -271,50 +407,47 @@ export const BriefPage: React.FC = () => {
       tune: 0,
       create: 0,
     };
-    for (const investigation of queueRows) {
-      const action = investigation.recommendedAction;
-      if (action && action in counts) {
-        counts[action as RecommendedAction] += 1;
+    for (const item of queueItems) {
+      if (item.recommendedAction && item.recommendedAction in counts) {
+        counts[item.recommendedAction] += 1;
       }
     }
     return counts;
-  }, [queueRows]);
+  }, [queueItems]);
 
   const surfaces = useMemo(() => {
     const seen = new Set<string>();
     const labels: string[] = [];
-    for (const investigation of queueRows) {
-      const surface = investigation.affectedSurface?.trim();
+    for (const item of queueItems) {
+      const surface = item.affectedSurface?.trim();
       if (surface && !seen.has(surface)) {
         seen.add(surface);
         labels.push(surface);
       }
     }
     return labels;
-  }, [queueRows]);
+  }, [queueItems]);
 
   const filtered = useMemo(
     () =>
-      queueRows.filter((investigation) => {
-        if (!matchesBucket(investigation, selectedBucket)) return false;
-        if (surfaceFilter && investigation.affectedSurface !== surfaceFilter) return false;
-        if (decisionFilter && decisionStateForStatus(investigation.status) !== decisionFilter)
+      queueItems.filter((item) => {
+        if (!matchesBucket(item.recommendedAction, selectedBucket)) return false;
+        if (surfaceFilter && item.affectedSurface !== surfaceFilter) return false;
+        if (decisionFilter && decisionStateForStatus(item.investigation.status) !== decisionFilter)
           return false;
         return true;
       }),
-    [queueRows, selectedBucket, surfaceFilter, decisionFilter]
+    [queueItems, selectedBucket, surfaceFilter, decisionFilter]
   );
 
   const grouped = useMemo(() => {
     const groups: Array<{
       id: Exclude<i18n.BriefBucket, 'all'>;
       label: string;
-      items: Investigation[];
+      items: QueueItem[];
     }> = [];
     for (const bucket of i18n.BRIEF_BUCKETS) {
-      const items = filtered.filter(
-        (investigation) => investigation.recommendedAction === bucket.id
-      );
+      const items = filtered.filter((item) => item.recommendedAction === bucket.id);
       if (items.length > 0) {
         groups.push({ ...bucket, items });
       }
@@ -348,7 +481,7 @@ export const BriefPage: React.FC = () => {
                 font-weight: 700;
               `}
             >
-              {i18n.greetingEmphasis(queueRows.length)}
+              {i18n.greetingEmphasis(queueItems.length)}
             </span>
           </>
         }
@@ -358,7 +491,7 @@ export const BriefPage: React.FC = () => {
       />
 
       <DecisionRadar
-        investigations={queueRows}
+        investigations={queueItems.map((item) => item.investigation)}
         selected={decisionFilter}
         onSelect={setDecisionFilter}
       />
@@ -463,7 +596,7 @@ export const BriefPage: React.FC = () => {
                   <EuiText size="xs" color="subdued">
                     <FormattedMessage
                       id="xpack.pnd.brief.sectionBlurb"
-                      defaultMessage="{count, plural, one {# investigation} other {# investigations}}"
+                      defaultMessage="{count, plural, one {# item} other {# items}}"
                       values={{ count: group.items.length }}
                     />
                   </EuiText>
@@ -471,12 +604,12 @@ export const BriefPage: React.FC = () => {
               </EuiFlexGroup>
               <EuiHorizontalRule margin="s" />
               <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                {group.items.map((investigation) => (
-                  <EuiFlexItem key={investigation.id} grow={false}>
+                {group.items.map((item) => (
+                  <EuiFlexItem key={item.key} grow={false}>
                     <BriefCard
-                      investigation={investigation}
+                      item={item}
                       accent={bucketAccent(group.id)}
-                      onOpen={() => history.push(`/investigations/${investigation.id}`)}
+                      onOpen={() => history.push(item.href)}
                       onOpenChat={() => history.push('/chats')}
                     />
                   </EuiFlexItem>
