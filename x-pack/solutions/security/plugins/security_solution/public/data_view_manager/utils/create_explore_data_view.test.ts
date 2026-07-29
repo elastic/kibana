@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0.
- */
-
 import type { DataViewsServicePublic, DataView } from '@kbn/data-views-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createExploreDataView } from './create_explore_data_view';
@@ -48,13 +42,35 @@ describe('createExploreDataView', () => {
     expect(result).toBe(mockCreatedDataView);
     expect(mockSpaces.getActiveSpace).toHaveBeenCalled();
     expect(mockDataViews.create).toHaveBeenCalledTimes(1);
-    expect(mockDataViews.create).toHaveBeenCalledWith({
-      id: `${EXPLORE_DATA_VIEW_PREFIX}-space1`,
-      name: SECURITY_SOLUTION_EXPLORE_DATA_VIEW,
-      timeFieldName: DEFAULT_TIME_FIELD,
-      title: ['pattern-1', 'pattern-2'].join(),
-      managed: true,
-    });
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      {
+        id: `${EXPLORE_DATA_VIEW_PREFIX}-space1`,
+        name: SECURITY_SOLUTION_EXPLORE_DATA_VIEW,
+        timeFieldName: DEFAULT_TIME_FIELD,
+        title: ['pattern-1', 'pattern-2'].join(),
+        managed: true,
+      },
+      false, // skipFetchFields — defaults to fetching fields
+      false // displayErrors — suppressed; callers handle error feedback
+    );
+  });
+
+  it('forwards skipFetchFields when requested', async () => {
+    await createExploreDataView(
+      {
+        dataViews: mockDataViews as DataViewsServicePublic,
+        spaces: mockSpaces as SpacesPluginStart,
+      },
+      ['pattern-1'],
+      'alerts-pattern',
+      { skipFetchFields: true }
+    );
+
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: `${EXPLORE_DATA_VIEW_PREFIX}-space1` }),
+      true,
+      false
+    );
   });
 
   it('filters out the alerts pattern and handles when there are no remaining patterns (title becomes empty string)', async () => {
@@ -71,13 +87,17 @@ describe('createExploreDataView', () => {
     );
 
     expect(result).toBe(mockCreatedDataView);
-    expect(mockDataViews.create).toHaveBeenCalledWith({
-      id: `${EXPLORE_DATA_VIEW_PREFIX}-space1`,
-      name: SECURITY_SOLUTION_EXPLORE_DATA_VIEW,
-      timeFieldName: DEFAULT_TIME_FIELD,
-      title: '',
-      managed: true,
-    });
+    expect(mockDataViews.create).toHaveBeenCalledWith(
+      {
+        id: `${EXPLORE_DATA_VIEW_PREFIX}-space1`,
+        name: SECURITY_SOLUTION_EXPLORE_DATA_VIEW,
+        timeFieldName: DEFAULT_TIME_FIELD,
+        title: '',
+        managed: true,
+      },
+      false,
+      false
+    );
   });
 
   it('propagates errors from dataViews.create', async () => {

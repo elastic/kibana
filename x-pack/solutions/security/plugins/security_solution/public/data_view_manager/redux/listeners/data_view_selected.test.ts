@@ -7,6 +7,7 @@
 
 import { createDataViewSelectedListener } from './data_view_selected';
 import { selectDataViewAsync } from '../actions';
+import { sharedDataViewManagerSlice } from '../slices';
 import type { DataViewsServicePublic, FieldSpec } from '@kbn/data-views-plugin/public';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import type { RootState } from '../reducer';
@@ -23,6 +24,8 @@ const mockDataViewsService = {
     isPersisted: () => false,
     toSpec: () => ({ id: 'adhoc_test-*', title: 'test-*' }),
   }),
+  get: jest.fn(),
+  refreshFields: jest.fn(),
 } as unknown as DataViewsServicePublic;
 
 const mockedState: RootState = {
@@ -62,6 +65,14 @@ const mockedState: RootState = {
               type: 'date',
             } as unknown as FieldSpec,
           },
+        },
+        {
+          // Ad-hoc data view registered without fields (e.g. the explore DV created with
+          // skipFetchFields:true at init). Used to exercise the lazy field-loading branch.
+          id: 'adhoc_no-fields-*',
+          title: 'no-fields-*',
+          name: 'Friendly view name',
+          fields: {},
         },
       ],
       dataViews: [
@@ -292,5 +303,63 @@ describe('createDataViewSelectedListener', () => {
     expect(mockStorage.remove).toHaveBeenCalledWith(
       'securitySolution.dataViewManager.selectedDataView.default.analyzer'
     );
+  });
+
+  describe('lazy field loading for ad-hoc data views without fields', () => {
+    it('loads fields and dispatches the refreshed data view when the selected ad-hoc DV has none', async () => {
+      const refreshedDataView = { id: 'adhoc_no-fields-*', fields: [] as unknown[] };
+      jest.mocked(mockDataViewsService.get).mockResolvedValue(refreshedDataView as never);
+
+      await listener.effect(
+        selectDataViewAsync({ id: 'adhoc_no-fields-*', scope: PageScope.default }),
+        mockListenerApi
+      );
+
+      expect(mockDataViewsService.get).toHaveBeenCalledWith('adhoc_no-fields-*', false);
+      // Called without a displayErrors arg (defaults to true) so the platform shows its own
+      // "Error fetching fields" toast on failure rather than re-throwing.
+      expect(mockDataViewsService.refreshFields).toHaveBeenCalledWith(refreshedDataView);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        sharedDataViewManagerSlice.actions.addDataView(refreshedDataView as never)
+      );
+      expect(mockToastsDanger).not.toHaveBeenCalled();
+    });
+
+    it('does not load fields for the explore scope (useInitExploreDataView owns that)', async () => {
+      const exploreListener = createDataViewSelectedListener({
+        dataViews: mockDataViewsService,
+        notifications: {
+          toasts: { addDanger: mockToastsDanger },
+        } as unknown as CoreStart['notifications'],
+        scope: PageScope.explore,
+        spaces: mockSpaces,
+        storage: mockStorage,
+      });
+
+      await exploreListener.effect(
+        selectDataViewAsync({ id: 'adhoc_no-fields-*', scope: PageScope.explore }),
+        mockListenerApi
+      );
+
+      expect(mockDataViewsService.get).not.toHaveBeenCalled();
+      expect(mockDataViewsService.refreshFields).not.toHaveBeenCalled();
+      expect(mockToastsDanger).not.toHaveBeenCalled();
+    });
+
+    it('does not dispatch and does not show a custom toast when field loading fails', async () => {
+      // refreshFields uses displayErrors=true (the default) so the platform's own
+      // "Error fetching fields" toast is shown — no additional toast from this listener.
+      jest.mocked(mockDataViewsService.get).mockRejectedValue(new Error('field caps too large'));
+
+      await listener.effect(
+        selectDataViewAsync({ id: 'adhoc_no-fields-*', scope: PageScope.default }),
+        mockListenerApi
+      );
+
+      expect(mockToastsDanger).not.toHaveBeenCalled();
+      expect(mockDispatch).not.toHaveBeenCalledWith(
+        sharedDataViewManagerSlice.actions.addDataView(expect.anything())
+      );
+    });
   });
 });

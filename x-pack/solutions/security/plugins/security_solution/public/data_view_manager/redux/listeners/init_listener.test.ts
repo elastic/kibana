@@ -8,7 +8,7 @@
 import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
-import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
@@ -20,10 +20,21 @@ import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { createDefaultDataView } from '../../utils/create_default_data_view';
+import { createExploreDataView } from '../../utils/create_explore_data_view';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 jest.mock('../../utils/create_default_data_view', () => ({
   createDefaultDataView: jest.fn(),
+}));
+
+const mockExploreDataView = {
+  id: 'explore-dv-id',
+  isPersisted: () => false,
+  toSpec: () => ({ id: 'explore-dv-id', title: 'apm-*,auditbeat-*', managed: true }),
+};
+
+jest.mock('../../utils/create_explore_data_view', () => ({
+  createExploreDataView: jest.fn(),
 }));
 
 const mockDataViewsService = {
@@ -66,6 +77,10 @@ describe('createInitListener', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    jest
+      .mocked(createExploreDataView)
+      .mockResolvedValue(mockExploreDataView as unknown as DataView);
 
     jest.mocked(createDefaultDataView).mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: '' },
@@ -160,6 +175,57 @@ describe('createInitListener', () => {
         scope: PageScope.analyzer,
       })
     );
+
+    // explore scope is created eagerly so it appears in data view pickers across the app
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync(expect.objectContaining({ scope: PageScope.explore }))
+    );
+
+    // explore DV is created with skipFetchFields:true to avoid expensive _field_caps on non-explore pages
+    expect(jest.mocked(createExploreDataView)).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      { skipFetchFields: true }
+    );
+
+    expect(mockToastsDanger).not.toHaveBeenCalled();
+  });
+
+  it('silently swallows explore data view creation failure without showing an error modal', async () => {
+    jest
+      .mocked(createExploreDataView)
+      .mockRejectedValue(new Error('_field_caps response too large'));
+
+    await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
+
+    // Other scopes must still be initialized correctly
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({ id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, scope: PageScope.default })
+    );
+
+    // Explore scope failure must not surface a modal — useInitExploreDataView retries on explore pages
+    expect(jest.mocked(mockListenerApi.dispatch)).not.toBeCalledWith(
+      selectDataViewAsync(expect.objectContaining({ scope: PageScope.explore }))
+    );
+    expect(mockToastsDanger).not.toHaveBeenCalled();
+  });
+
+  it('should swallow explore data view creation errors without dispatching error action', async () => {
+    jest.mocked(createExploreDataView).mockRejectedValue(new Error('field caps too large'));
+    jest.mocked(mockDataViewsService.getIdsWithTitle).mockResolvedValue([]);
+
+    await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
+
+    // Main init should still succeed
+    expect(jest.mocked(createDefaultDataView)).toHaveBeenCalled();
+
+    // Error action should NOT be dispatched
+    expect(jest.mocked(mockListenerApi.dispatch)).not.toBeCalledWith(
+      sharedDataViewManagerSlice.actions.error()
+    );
+
+    // Toast should NOT be shown
     expect(mockToastsDanger).not.toHaveBeenCalled();
   });
 

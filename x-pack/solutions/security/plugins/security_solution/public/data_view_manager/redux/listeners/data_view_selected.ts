@@ -17,6 +17,7 @@ import { selectDataViewAsync } from '../actions';
 import { sharedDataViewManagerSlice } from '../slices';
 import { PageScope } from '../../constants';
 import { getSelectedDataViewStorageKey } from './storage_keys';
+import { loadDataViewFields } from '../../utils/load_data_view_fields';
 
 /**
  * Creates a Redux listener for handling data view selection logic in the data view manager.
@@ -159,6 +160,43 @@ export const createDataViewSelectedListener = (dependencies: {
             getSelectedDataViewStorageKey(spaceId, action.payload.scope),
             resolvedIdToUse
           );
+        }
+
+        // If the resolved data view is an ad-hoc DV with no fields loaded (e.g. the explore
+        // data view, which is registered at init with skipFetchFields:true to avoid expensive
+        // _field_caps requests on pages like Alerts), load the fields now that the user has
+        // actively selected it. On success, Redux is updated so the UI re-renders with fields.
+        // On failure, the platform's "Error fetching fields" toast (with "See the full error")
+        // is shown automatically via refreshFields — no additional handling needed here.
+        //
+        // NOTE: skip this for PageScope.explore — useInitExploreDataView owns field loading
+        // for that scope. Doing it here would fire a toast from background init, not user action.
+        const resolvedAdHocSpec = state.dataViewManager.shared.adhocDataViews.find(
+          (dv) => dv.id === resolvedIdToUse
+        );
+
+        if (
+          action.payload.scope !== PageScope.explore &&
+          resolvedAdHocSpec &&
+          isEmpty(resolvedAdHocSpec.fields)
+        ) {
+          try {
+            if (listenerApi.signal.aborted) {
+              return;
+            }
+            const refreshedDataView = await loadDataViewFields(
+              dependencies.dataViews,
+              resolvedIdToUse
+            );
+            if (refreshedDataView) {
+              listenerApi.dispatch(
+                sharedDataViewManagerSlice.actions.addDataView(refreshedDataView)
+              );
+            }
+          } catch {
+            // The platform surfaces its own "Error fetching fields" toast (with a "See the full
+            // error" button) via refreshFields — no additional toast needed here.
+          }
         }
       } else if (dataViewByIdError || adhocDataViewCreationError) {
         const err = dataViewByIdError || adhocDataViewCreationError;

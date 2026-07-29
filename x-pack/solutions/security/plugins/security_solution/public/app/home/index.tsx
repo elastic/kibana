@@ -27,6 +27,7 @@ import { TopValuesPopover } from '../components/top_values_popover/top_values_po
 import { useInitDataViewManager } from '../../data_view_manager/hooks/use_init_data_view_manager';
 import { useRestoreDataViewManagerStateFromURL } from '../../data_view_manager/hooks/use_sync_url_state';
 import { useBrowserFields } from '../../data_view_manager/hooks/use_browser_fields';
+import { useInitExploreDataView } from '../../data_view_manager/hooks/use_init_explore_data_view';
 import { useFlyoutV2RestoreFromUrl } from '../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import {
   FLYOUT_V2_URL_PARAM,
@@ -41,9 +42,11 @@ interface HomePageProps {
 
 const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   const { pathname } = useLocation();
-  const browserFields = useBrowserFields(getScopeFromPath(pathname));
+  const pageScope = getScopeFromPath(pathname);
+  const browserFields = useBrowserFields(pageScope);
 
-  useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), getScopeFromPath(pathname));
+  useRestoreDataViewManagerStateFromURL(useInitDataViewManager(), pageScope);
+  useInitExploreDataView();
 
   useUrlState();
   // Interop must run before the restore hook so the legacy param is consumed first.
