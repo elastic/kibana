@@ -13,7 +13,14 @@ import type { InstallFormField } from '../types/install_form';
 import type { ParsedTemplate } from './parse_template';
 
 const METADATA_KEY = 'template-metadata';
-const INSTALL_PLACEHOLDER = /__install__\.([a-zA-Z0-9_-]+)/g;
+
+/**
+ * Matches `__install__.<name>` install-time placeholders in a workflow template
+ * body. The capture group is the `<name>`. Global, so `String.replace` resolves
+ * every occurrence; use `.source` (which ignores flags) when a single anchored
+ * pattern is needed elsewhere.
+ */
+export const INSTALL_PLACEHOLDER = /__install__\.([a-zA-Z0-9_-]+)/g;
 
 export interface RenderTemplateInput {
   template: ParsedTemplate;
