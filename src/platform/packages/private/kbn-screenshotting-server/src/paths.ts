@@ -71,7 +71,7 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-c583827-locales-linux_x64.zip',
+      archiveFilename: 'chrome-headless-shell-linux64.zip',
       archiveChecksum: '59fc5743feca923cf9602da46db4cd62bf0ef52ea00ebfe64bfe44399be45cf9',
       binaryChecksum: 'dff000e3da120e3937d645b822ab98ba8a818d622219b0eb42ec1d661e5295f2',
       binaryRelativePath: 'chrome-headless-shell-linux64/chrome-headless-shell',
