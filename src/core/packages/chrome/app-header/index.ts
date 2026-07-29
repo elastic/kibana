@@ -24,6 +24,7 @@ export type {
   AppHeaderTab,
   AppHeaderTabAction,
   AppHeaderTabActions,
+  AppHeaderDescription,
   AppHeaderEditableTitle,
   AppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem,
