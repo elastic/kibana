@@ -49,6 +49,7 @@ dependsOn:
   - '@kbn/es-mappings'
   - '@kbn/alerting-plugin'
   - '@kbn/alerting-v2-plugin'
+  - '@kbn/alerting-v2-schemas'
   - '@kbn/logging'
   - '@kbn/workflows-management-plugin'
   - '@kbn/spaces-plugin'
