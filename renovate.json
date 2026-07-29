@@ -2210,7 +2210,7 @@
     },
     {
       "groupName": "mongodb",
-      "matchDepNames": ["mongodb"],
+      "matchDepNames": ["mongodb", "mongodb-connection-string-url"],
       "reviewers": ["team:response-ops", "team:workchat-eng"],
       "addLabels": ["Team:ResponseOps"],
       "matchBaseBranches": ["main"],
