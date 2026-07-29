@@ -184,6 +184,37 @@ export class CloudConnectorUpdateError extends FleetError {
   }
 }
 
+export class IacProviderConfigError extends FleetError {
+  constructor(message: string) {
+    super(`Error validating IaC Provider configuration in Fleet, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provider rejected the render request (4xx). `errorCodes` carries the
+ * provider's `errors[].code` values (e.g. `render.blueprint_not_found`) so the
+ * route can decide whether the caller may fall back to the static template.
+ */
+export class IacProviderRenderError extends FleetError {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+    public readonly errorCodes: string[] = []
+  ) {
+    super(`Error rendering IaC template, ${message}`);
+  }
+}
+
+/**
+ * The IaC Provider could not be reached or returned a 5xx — a retryable
+ * availability problem rather than a contract rejection.
+ */
+export class IacProviderUnavailableError extends FleetError {
+  constructor(message: string, public readonly statusCode?: number) {
+    super(`IaC Provider unavailable, ${message}`);
+  }
+}
+
 export class AgentPolicyNameExistsError extends AgentPolicyError {}
 export class AgentReassignmentError extends FleetError {}
 export class AgentRollbackError extends FleetError {

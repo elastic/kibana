@@ -1,0 +1,221 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { fetch as undiciFetch, Agent } from 'undici';
+
+import {
+  IacProviderConfigError,
+  IacProviderRenderError,
+  IacProviderUnavailableError,
+} from '../errors';
+
+import { appContextService } from './app_context';
+import { iacProviderService, parseIacProviderErrors } from './iac_provider';
+
+jest.mock('undici', () => ({
+  fetch: jest.fn(),
+  Agent: jest.fn().mockImplementation((opts) => ({ __agentOptions: opts })),
+}));
+jest.mock('./app_context');
+
+jest.mock('@kbn/server-http-tools', () => ({
+  ...jest.requireActual('@kbn/server-http-tools'),
+  SslConfig: jest.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
+    rejectUnauthorized: true,
+    certificate,
+    key,
+    certificateAuthorities,
+  })),
+}));
+
+const mockedFetch = jest.mocked(undiciFetch);
+const mockedAgent = jest.mocked(Agent);
+
+const RENDER_REQUEST = {
+  provider: 'aws' as const,
+  integrations: [
+    { name: 'cloud_security_posture', version: '3.5.0', enabledInputs: ['cloudbeat/cis_aws'] },
+  ],
+};
+
+const ARTIFACT_URL = 'https://s3.example/rendered/xyz?X-Amz-Signature=SECRET';
+
+const jsonResponse = (status: number, body: unknown) =>
+  ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+  } as any);
+
+function mockConfig(overrides: Record<string, unknown> = {}) {
+  jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+    agentless: { enabled: true },
+    iacProvider: {
+      enabled: true,
+      api: {
+        url: 'https://iac-provider.example',
+        tls: { certificate: '/path/tls.crt', key: '/path/tls.key', ca: '/path/ca.crt' },
+      },
+      ...overrides,
+    },
+  } as any);
+  jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+}
+
+function mockLogger() {
+  const logger = {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+    get: jest.fn(),
+  };
+  logger.get.mockReturnValue(logger);
+  jest.spyOn(appContextService, 'getLogger').mockReturnValue(logger as any);
+  return logger;
+}
+
+describe('IacProviderService', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('throws IacProviderConfigError when the feature is not enabled', async () => {
+    jest.spyOn(appContextService, 'getConfig').mockReturnValue({
+      agentless: { enabled: true },
+      iacProvider: { enabled: false },
+    } as any);
+    jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
+    mockLogger();
+
+    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProviderConfigError
+    );
+  });
+
+  it('throws IacProviderConfigError when the API url is missing', async () => {
+    mockConfig({ api: undefined });
+    mockLogger();
+
+    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProviderConfigError
+    );
+  });
+
+  it('POSTs the render request with mTLS and returns the rendered artifact', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    const result = await iacProviderService.renderTemplate(RENDER_REQUEST);
+
+    expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
+    expect(mockedFetch).toHaveBeenCalledWith(
+      'https://iac-provider.example/api/v1/render',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify(RENDER_REQUEST),
+      })
+    );
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        cert: '/path/tls.crt',
+        key: '/path/tls.key',
+        ca: '/path/ca.crt',
+      }),
+    });
+  });
+
+  it('never logs the artifactUrl', async () => {
+    mockConfig();
+    const logger = mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    await iacProviderService.renderTemplate(RENDER_REQUEST);
+
+    const allLogged = [
+      ...logger.info.mock.calls,
+      ...logger.error.mock.calls,
+      ...logger.warn.mock.calls,
+      ...logger.debug.mock.calls,
+    ]
+      .flat()
+      .map(String)
+      .join(' ');
+    expect(allLogged).not.toContain(ARTIFACT_URL);
+    expect(allLogged).not.toContain('X-Amz-Signature');
+  });
+
+  it('maps a 422 response to IacProviderRenderError with the provider error codes', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(422, { code: 'render.blueprint_not_found', message: 'blueprint not found' })
+    );
+
+    const promise = iacProviderService.renderTemplate(RENDER_REQUEST);
+    await expect(promise).rejects.toThrow(IacProviderRenderError);
+    await promise.catch((error: IacProviderRenderError) => {
+      expect(error.statusCode).toBe(422);
+      expect(error.errorCodes).toEqual(['render.blueprint_not_found']);
+    });
+  });
+
+  it('maps a 5xx response to IacProviderUnavailableError', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(500, { code: 'render.internal_error', message: 'boom' })
+    );
+
+    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProviderUnavailableError
+    );
+  });
+
+  it('maps a network failure to IacProviderUnavailableError', async () => {
+    mockConfig();
+    mockLogger();
+    mockedFetch.mockRejectedValueOnce(new TypeError('fetch failed'));
+
+    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProviderUnavailableError
+    );
+  });
+});
+
+describe('parseIacProviderErrors', () => {
+  it('parses the single { code, message } shape', () => {
+    expect(parseIacProviderErrors({ code: 'render.conflict', message: 'conflict' })).toEqual([
+      { code: 'render.conflict', message: 'conflict' },
+    ]);
+  });
+
+  it('parses the MultiErrorResponse { errors: [...] } shape', () => {
+    expect(
+      parseIacProviderErrors({
+        errors: [
+          { code: 'render.conflict', message: 'a' },
+          { code: 'render.protected_path', message: 'b' },
+        ],
+      })
+    ).toEqual([
+      { code: 'render.conflict', message: 'a' },
+      { code: 'render.protected_path', message: 'b' },
+    ]);
+  });
+
+  it('returns empty for unknown shapes', () => {
+    expect(parseIacProviderErrors(undefined)).toEqual([]);
+    expect(parseIacProviderErrors('nope')).toEqual([]);
+    expect(parseIacProviderErrors({})).toEqual([]);
+  });
+});

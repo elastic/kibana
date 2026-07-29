@@ -124,6 +124,11 @@ export const CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES = {
   DELETE_PATTERN: `${CLOUD_ONBOARDING_DEPLOYMENT_API_ROOT}/{id}`,
 };
 
+// IaC Provider API routes
+export const IAC_PROVIDER_API_ROUTES = {
+  RENDER_TEMPLATE_PATTERN: `${INTERNAL_ROOT}/iac_provider/render_template`,
+};
+
 // Kubernetes Manifest API routes
 export const K8S_API_ROUTES = {
   K8S_DOWNLOAD_PATTERN: `${K8S_API_ROOT}/download`,

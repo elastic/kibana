@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiAccordion, EuiSpacer, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
 import {
@@ -16,15 +16,12 @@ import {
 } from '../../../../common/services/cloud_connectors';
 import { type CloudConnectorFormProps } from '../types';
 
-import {
-  getCloudConnectorRemoteRoleTemplate,
-  updateInputVarsWithCredentials,
-  isAwsCredentials,
-} from '../utils';
+import { updateInputVarsWithCredentials, isAwsCredentials } from '../utils';
 import { ORGANIZATION_ACCOUNT } from '../constants';
 
 import { CloudConnectorInputFields } from '../form/cloud_connector_input_fields';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
+import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 
 import { getAwsCloudConnectorsCredentialsFormOptions } from './aws_cloud_connector_options';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_guide';
@@ -39,13 +36,18 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
 }) => {
-  const cloudConnectorRemoteRoleTemplate = cloud
-    ? getCloudConnectorRemoteRoleTemplate({
-        cloud,
-        accountType,
-        iacTemplateUrl,
-      })
-    : undefined;
+  const {
+    templateUrl: cloudConnectorRemoteRoleTemplate,
+    launchTemplate,
+    isRendering,
+    renderError,
+  } = useCloudConnectorTemplate({
+    cloud,
+    accountType,
+    iacTemplateUrl,
+    packageName: packageInfo?.name,
+    policyTemplate: newPolicy?.inputs?.find((input) => input.enabled)?.policy_template,
+  });
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -83,16 +85,32 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
       <EuiSpacer size="l" />
       <EuiButton
         data-test-subj="launchCloudFormationAgentlessButton"
-        target="_blank"
         iconSide="left"
         iconType="rocket"
-        href={cloudConnectorRemoteRoleTemplate}
+        isLoading={isRendering}
+        isDisabled={!cloudConnectorRemoteRoleTemplate && !launchTemplate}
+        {...(launchTemplate
+          ? { onClick: launchTemplate }
+          : { href: cloudConnectorRemoteRoleTemplate, target: '_blank' })}
       >
         <FormattedMessage
           id="xpack.fleet.cloudConnector.aws.launchCloudFormationButton"
           defaultMessage="Launch CloudFormation"
         />
       </EuiButton>
+      {renderError && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            announceOnMount
+            data-test-subj="cloudConnectorRenderErrorCallout"
+            title={renderError}
+            color="danger"
+            iconType="error"
+            size="s"
+          />
+        </>
+      )}
       <EuiSpacer size="m" />
 
       {fields && (
