@@ -312,10 +312,12 @@ describe('WorkflowApi', () => {
   describe('searchExecutions', () => {
     it('should call GET /api/workflows/workflow/executions with structured params', async () => {
       const params = {
-        kql: 'status: completed and startedAt >= "now-15m"',
+        kql: 'status: completed',
+        statuses: ['completed' as 'completed'],
         sortField: 'startedAt',
         sortOrder: 'desc' as const,
-        from: 0,
+        startedAfter: 'now-15m',
+        page: 1,
         size: 25,
         trackTotalHits: true,
       };

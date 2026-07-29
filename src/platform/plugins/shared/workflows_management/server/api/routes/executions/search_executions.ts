@@ -10,11 +10,22 @@
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
 import { fromKueryExpression, KQLSyntaxError, toElasticsearchQuery } from '@kbn/es-query';
+import type {
+  ExecutionStatus,
+  ExecutionType,
+  WorkflowExecutionCollapseField,
+} from '@kbn/workflows';
+import {
+  ExecutionStatusValues,
+  ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
+} from '@kbn/workflows';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
   API_VERSION,
   AVAILABILITY,
+  MAX_PAGE_SIZE,
   MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
   OAS_TAG,
 } from '../utils/route_constants';
@@ -29,6 +40,13 @@ import { withAvailabilityCheck } from '../utils/with_availability_check';
 const ALLOWED_SORT_FIELDS = ['startedAt', 'duration', 'workflowId', 'triggeredBy'] as const;
 type AllowedSortField = (typeof ALLOWED_SORT_FIELDS)[number];
 
+const executionStatusSchema = schema.oneOf(
+  ExecutionStatusValues.map((s) => schema.literal(s)) as [Type<ExecutionStatus>]
+);
+const executionTypeSchema = schema.oneOf(
+  ExecutionTypeValues.map((t) => schema.literal(t)) as [Type<ExecutionType>]
+);
+
 const querySchema = schema.object({
   kql: schema.maybe(
     schema.string({
@@ -36,9 +54,64 @@ const querySchema = schema.object({
       meta: { description: 'KQL query string to filter executions.' },
     })
   ),
+  statuses: schema.maybe(
+    schema.oneOf(
+      [
+        executionStatusSchema,
+        schema.arrayOf(executionStatusSchema, { maxSize: ExecutionStatusValues.length }),
+      ],
+      { defaultValue: [], meta: { description: 'Filter by execution status.' } }
+    )
+  ),
+  executionTypes: schema.maybe(
+    schema.oneOf(
+      [
+        executionTypeSchema,
+        schema.arrayOf(executionTypeSchema, { maxSize: ExecutionTypeValues.length }),
+      ],
+      { defaultValue: [], meta: { description: 'Filter by execution type.' } }
+    )
+  ),
+  executedBy: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
+      defaultValue: [],
+      meta: { description: 'Filter by the user who triggered the execution.' },
+    })
+  ),
+  concurrencyGroupKey: schema.maybe(
+    schema.string({ meta: { description: 'Filter by evaluated concurrency group key.' } })
+  ),
+  startedAfter: schema.maybe(
+    schema.string({
+      meta: { description: 'Datemath lower bound for filtering executions by startedAt.' },
+    })
+  ),
+  startedBefore: schema.maybe(
+    schema.string({
+      meta: { description: 'Datemath upper bound for filtering executions by startedAt.' },
+    })
+  ),
+  finishedAfter: schema.maybe(
+    schema.string({
+      meta: { description: 'Datemath lower bound for filtering executions by finishedAt.' },
+    })
+  ),
+  finishedBefore: schema.maybe(
+    schema.string({
+      meta: { description: 'Datemath upper bound for filtering executions by finishedAt.' },
+    })
+  ),
+  collapse: schema.maybe(
+    schema.oneOf(
+      WorkflowExecutionCollapseFields.map((f) => schema.literal(f)) as [
+        Type<WorkflowExecutionCollapseField>
+      ],
+      { meta: { description: 'Field to collapse execution results by.' } }
+    )
+  ),
   sortField: schema.maybe(
     schema.oneOf(
-      ALLOWED_SORT_FIELDS.map((field) => schema.literal(field)) as [Type<AllowedSortField>],
+      ALLOWED_SORT_FIELDS.map((f) => schema.literal(f)) as [Type<AllowedSortField>],
       { meta: { description: `Field to sort by. One of: ${ALLOWED_SORT_FIELDS.join(', ')}.` } }
     )
   ),
@@ -47,11 +120,11 @@ const querySchema = schema.object({
       meta: { description: 'Sort direction.' },
     })
   ),
-  from: schema.maybe(schema.number({ min: 0, meta: { description: 'Pagination offset.' } })),
+  page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
   size: schema.maybe(
     schema.number({
       min: 1,
-      max: 1000,
+      max: MAX_PAGE_SIZE,
       meta: { description: 'Number of results to return.' },
     })
   ),
@@ -91,7 +164,23 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             return response.forbidden();
           }
           const spaceId = spaces.getSpaceId(request);
-          const { kql, sortField, sortOrder, from, size, trackTotalHits } = request.query;
+          const {
+            kql,
+            statuses,
+            executionTypes,
+            executedBy,
+            concurrencyGroupKey,
+            startedAfter,
+            startedBefore,
+            finishedAfter,
+            finishedBefore,
+            collapse,
+            sortField,
+            sortOrder,
+            page,
+            size,
+            trackTotalHits,
+          } = request.query;
 
           let esQuery;
           if (kql) {
@@ -105,12 +194,20 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             }
           }
 
-          const sort = sortField ? [{ [sortField]: { order: sortOrder ?? 'desc' } }] : undefined;
-
           const params: SearchExecutionsViewParams = {
             query: esQuery,
-            sort,
-            from,
+            statuses: parseArray(statuses) as ExecutionStatus[] | undefined,
+            executionTypes: parseArray(executionTypes) as ExecutionType[] | undefined,
+            executedBy: parseArray(executedBy),
+            concurrencyGroupKey,
+            startedAfter,
+            startedBefore,
+            finishedAfter,
+            finishedBefore,
+            collapse,
+            sortField,
+            sortOrder,
+            page,
             size,
             trackTotalHits,
             includeManagedExecutions: canReadManagedWorkflowExecutions(request),
@@ -127,4 +224,9 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
         }
       })
     );
+}
+
+function parseArray<T>(value: T | T[] | undefined): T[] | undefined {
+  if (value == null) return undefined;
+  return Array.isArray(value) ? value : [value];
 }

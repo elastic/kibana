@@ -100,8 +100,18 @@ import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } f
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
-  sort?: estypes.Sort;
-  from?: number;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  executedBy?: string[];
+  concurrencyGroupKey?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  finishedAfter?: string;
+  finishedBefore?: string;
+  collapse?: WorkflowExecutionCollapseField;
+  sortField?: string;
+  sortOrder?: WorkflowExecutionSortOrder;
+  page?: number;
   size?: number;
   trackTotalHits?: boolean;
   includeManagedExecutions?: boolean;

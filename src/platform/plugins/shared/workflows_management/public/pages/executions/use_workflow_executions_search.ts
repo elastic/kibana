@@ -79,7 +79,7 @@ export const useWorkflowExecutionsSearch = ({
         kql,
         sortField: sortParams.sortField,
         sortOrder: sortParams.sortOrder,
-        from: pageIndex * pageSize,
+        page: pageIndex + 1,
         size: pageSize,
         trackTotalHits: true,
       }),

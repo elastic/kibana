@@ -85,9 +85,17 @@ export interface TestWorkflowParams {
 
 export interface SearchExecutionsParams {
   kql?: string;
+  statuses?: ExecutionStatus[];
+  executionTypes?: ExecutionType[];
+  executedBy?: string[];
+  concurrencyGroupKey?: string;
+  startedAfter?: string;
+  startedBefore?: string;
+  finishedAfter?: string;
+  finishedBefore?: string;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
-  from?: number;
+  page?: number;
   size?: number;
   trackTotalHits?: boolean;
 }
