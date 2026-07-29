@@ -9,7 +9,7 @@ import { SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID } from '@kbn/significant-events-p
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
@@ -522,11 +522,11 @@ evaluate.describe(
                           });
                         }
                         const persistedDiscoveries = await Promise.all(
-                          discoveries.map(async (discovery): Promise<Discovery> => {
+                          discoveries.map(async (discovery): Promise<SignificantEvent> => {
                             if (!discovery.event_id) {
                               return discovery;
                             }
-                            const result = await esClient.search<Discovery>({
+                            const result = await esClient.search<SignificantEvent>({
                               index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
                               size: 1,
                               query: { term: { event_id: discovery.event_id } },

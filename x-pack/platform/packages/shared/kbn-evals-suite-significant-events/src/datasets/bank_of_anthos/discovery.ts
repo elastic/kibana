@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { Detection, Discovery } from '@kbn/significant-events-schema';
+import type { Detection, SignificantEvent } from '@kbn/significant-events-schema';
 import type { DatasetConfig } from '../types';
 
-const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partial<Detection>> =>
+const toInputDetections = (
+  discoveries: Array<Partial<SignificantEvent>>
+): Array<Partial<Detection>> =>
   discoveries
     .flatMap((discovery) => discovery.signals ?? [])
     .map((signal) => ({
@@ -27,8 +29,7 @@ const toInputDetections = (discoveries: Array<Partial<Discovery>>): Array<Partia
  * `confirmed: true` itself before promoting (Critical Rule 5). Every field here is seeded by one of
  * the cascade `detections`, so the canonical input and this expected answer stay self-consistent.
  */
-const LEDGER_DB_CASCADE_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
+const LEDGER_DB_CASCADE_DISCOVERY: Partial<SignificantEvent> = {
   event_id: 'transactionhistory__frontend-transactionhistory-read-timeout',
   title: 'Ledger backends — customer transaction connectivity failure',
   symptom_hypothesis:
@@ -229,8 +230,7 @@ const LEDGER_DB_CASCADE_RULE_UUIDS = (LEDGER_DB_CASCADE_DISCOVERY.signals ?? [])
   .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid));
 
 /** Benign login spike — must stay a SEPARATE discovery from the failure cascade and from signup. */
-const BENIGN_LOGIN_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
+const BENIGN_LOGIN_DISCOVERY: Partial<SignificantEvent> = {
   event_id: 'userservice__successful-user-login',
   title: 'Authentication — successful login volume increase',
   symptom_hypothesis: 'Successful login activity increased without an observed failure.',
@@ -263,8 +263,7 @@ const BENIGN_LOGIN_DISCOVERY: Partial<Discovery> = {
 };
 
 /** Benign signup spike — must stay a SEPARATE discovery from the failure cascade and from login. */
-const BENIGN_SIGNUP_DISCOVERY: Partial<Discovery> = {
-  kind: 'discovery',
+const BENIGN_SIGNUP_DISCOVERY: Partial<SignificantEvent> = {
   event_id: 'userservice__new-account-created',
   title: 'Authentication — new account creation volume increase',
   symptom_hypothesis: 'New account creation activity increased without an observed failure.',
@@ -296,7 +295,7 @@ const BENIGN_SIGNUP_DISCOVERY: Partial<Discovery> = {
   causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
-const MISGROUPED_LEDGER_DISCOVERY: Partial<Discovery> = {
+const MISGROUPED_LEDGER_DISCOVERY: Partial<SignificantEvent> = {
   ...LEDGER_DB_CASCADE_DISCOVERY,
   event_id: 'ledger-db-disconnect__misgrouped-auth',
   signals: [

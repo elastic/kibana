@@ -7,7 +7,7 @@
 
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
-import type { Discovery } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 
 interface EventsWriteToolResult {
   data?: {
@@ -26,7 +26,7 @@ type EventsWriteItemResult =
       index: number;
       event_id: string;
       written: false;
-      reason: 'duplicate_within_window' | 'bulk_error';
+      reason: 'duplicate_within_window' | 'bulk_error' | 'duplicate_key';
       existing_event_id?: string;
     };
 
@@ -58,9 +58,9 @@ const validateAlignedResults = <T extends IndexedResult>(
 /**
  * Extract discoveries from `events_write` tool call steps.
  */
-export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery[] =>
+export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
-    const items = getBulkItems<Partial<Discovery>>(step.params, 'events_write');
+    const items = getBulkItems<Partial<SignificantEvent>>(step.params, 'events_write');
     const toolResult = (step.results?.[0] as EventsWriteToolResult | undefined)?.data;
     const results = toolResult?.results;
     if (!Array.isArray(results)) {
@@ -68,14 +68,14 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery
     }
     return validateAlignedResults(results, items.length, 'events_write')
       .map((result, index) =>
-        result.reason === 'bulk_error'
+        !result.written && result.reason !== 'duplicate_within_window'
           ? undefined
           : ({
               ...items[index],
               event_id: result.event_id,
-            } as Discovery)
+            } as SignificantEvent)
       )
-      .filter((discovery): discovery is Discovery => discovery !== undefined);
+      .filter((event): event is SignificantEvent => event !== undefined);
   });
 
 /**
@@ -86,7 +86,7 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Discovery
 export const extractRequestedEventIdsFromToolCall = (steps: ConverseStep[]): string[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
     const items = Array.isArray(step.params?.items)
-      ? (step.params.items as Array<Partial<Discovery>>)
+      ? (step.params.items as Array<Partial<SignificantEvent>>)
       : [];
     return items
       .map((item) => item.event_id)

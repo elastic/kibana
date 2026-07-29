@@ -13,7 +13,6 @@ export {
   type ProcessedMarker,
   type ChangePointType,
 } from './detections';
-export { discoverySchema, type Discovery } from './discoveries';
 export {
   blastRadiusEntrySchema,
   causalFeatureSchema,

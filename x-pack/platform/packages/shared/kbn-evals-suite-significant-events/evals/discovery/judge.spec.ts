@@ -9,7 +9,7 @@ import { SIGNIFICANT_EVENTS_JUDGE_AGENT_ID } from '@kbn/significant-events-plugi
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { tags } from '@kbn/scout';
 import { getCurrentTraceId } from '@kbn/evals';
-import type { Discovery } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   replayIntoManagedStream,
@@ -76,7 +76,7 @@ evaluate.describe(
       evaluate.describe(dataset.id, () => {
         interface CollectedExample {
           scenario: DiscoveryJudgeScenario;
-          discoveries: Discovery[];
+          discoveries: SignificantEvent[];
           snapshotKey: string;
         }
 

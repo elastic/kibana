@@ -7,7 +7,7 @@
 
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
-import type { Discovery } from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { extractToolCallIds, summarizePersistenceCalls } from '../../utils/tool_usage';
 import type { DiscoveryJudgeEvaluator } from '../../types';
 
@@ -42,7 +42,7 @@ export const scoreJudgeToolUsage = ({
   discoveries,
   steps,
 }: {
-  discoveries: Array<Pick<Discovery, 'signals'>>;
+  discoveries: Array<Pick<SignificantEvent, 'signals'>>;
   steps: ConverseStep[];
 }): { score: number; label: string; explanation: string } => {
   // Does at least one discovery need KI search (no pre-populated queries)?

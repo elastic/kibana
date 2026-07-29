@@ -7,7 +7,7 @@
 
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
-import type { Discovery, SignalEntry } from '@kbn/significant-events-schema';
+import type { SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
 import { scoreJudgeToolUsage } from './tool_usage';
 
 const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH, eventsWrite: TOOL_ID_EVENTS_WRITE } =
@@ -43,7 +43,7 @@ const detectionSignal = (withQuery: boolean): SignalEntry => ({
   },
 });
 
-const discovery = (withQuery: boolean): Pick<Discovery, 'signals'> => ({
+const discovery = (withQuery: boolean): Pick<SignificantEvent, 'signals'> => ({
   signals: [detectionSignal(withQuery)],
 });
 

@@ -28,6 +28,7 @@ import {
 type StatusGroup = 'needsAction' | 'resolved';
 
 const STATUS_GROUP: Record<SignificantEventStatus, StatusGroup> = {
+  pending: 'resolved',
   open: 'needsAction',
   closed: 'resolved',
   dismissed: 'resolved',
