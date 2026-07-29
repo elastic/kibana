@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import { identifyFeatures, toPreviouslyIdentifiedFeature } from '@kbn/streams-ai';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import {
+  identifyFeatures,
+  toPreviouslyIdentifiedFeature,
+  type SearchSimilarFeaturesArguments,
+  type SimilarFeatureHit,
+} from '@kbn/streams-ai';
 import { featuresPrompt } from '@kbn/streams-ai/src/features/prompt';
 import { tags } from '@kbn/scout';
-import { createSpanLatencyEvaluator, getCurrentTraceId } from '@kbn/evals';
+import {
+  createSpanLatencyEvaluator,
+  getCurrentTraceId,
+  type EvaluationDataset,
+  type Evaluator,
+  type Example,
+} from '@kbn/evals';
 import { FeatureAccumulator, type BaseFeature, mergeFeature } from '@kbn/significant-events-schema';
 import type { GcsConfig } from '../../src/data_generators/replay';
 import {
@@ -38,6 +50,103 @@ interface AvailableDeduplicationScenario {
   scenario: KIFeatureDeduplicationScenario;
   extractionScenario: KIFeatureExtractionScenario;
 }
+
+interface DedupContextInput extends Record<string, unknown> {
+  sampleDocuments: Array<SearchHit<Record<string, string>>>;
+  knownFeatureIds: string;
+  similarFeature?: SimilarFeatureHit;
+}
+
+interface DedupContextExpected {
+  expectedId: string;
+  expectEntitySearch: boolean;
+}
+
+type DedupContextExample = Example<DedupContextInput, DedupContextExpected>;
+
+interface DedupContextOutput {
+  features: BaseFeature[];
+  searchCalls: SearchSimilarFeaturesArguments[];
+}
+
+const checkoutDocument: SearchHit<Record<string, string>> = {
+  _id: 'checkout-doc',
+  _index: 'logs-synthetic',
+  _source: {
+    'service.name': 'checkout-api',
+    'event.dataset': 'checkout-api.logs',
+    message: 'checkout-api handled GET /checkout',
+  },
+};
+
+const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
+  name: 'sigevents: KI feature deduplication context contracts',
+  description: 'Known feature id and semantic duplicate search behavior',
+  examples: [
+    {
+      id: 'known-feature-id-reuse',
+      input: {
+        sampleDocuments: [checkoutDocument],
+        knownFeatureIds: 'entity: checkout-api',
+      },
+      output: {
+        expectedId: 'checkout-api',
+        expectEntitySearch: false,
+      },
+    },
+    {
+      id: 'semantic-search-id-reuse',
+      input: {
+        sampleDocuments: [checkoutDocument],
+        knownFeatureIds: '',
+        similarFeature: {
+          id: 'checkout-service',
+          title: 'Checkout API',
+          description: 'Checkout API service handling checkout requests',
+          confidence: 0.99,
+        },
+      },
+      output: {
+        expectedId: 'checkout-service',
+        expectEntitySearch: true,
+      },
+    },
+  ],
+};
+
+const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContextOutput> = {
+  name: 'dedup_context_contract',
+  kind: 'CODE',
+  evaluate: async ({ output, expected }) => {
+    if (!expected) {
+      return { score: 0, explanation: 'Expected deduplication contract is missing' };
+    }
+
+    const reusedExpectedId = output.features.some(
+      ({ id, type }) => id === expected.expectedId && type === 'entity'
+    );
+    const entitySearchCalls = output.searchCalls.filter(({ type }) => type === 'entity');
+    const searchBehaviorMatches = expected.expectEntitySearch
+      ? entitySearchCalls.length > 0
+      : entitySearchCalls.length === 0;
+
+    return {
+      score: reusedExpectedId && searchBehaviorMatches ? 1 : 0,
+      explanation: [
+        reusedExpectedId
+          ? `Reused expected id "${expected.expectedId}"`
+          : `Did not reuse expected id "${expected.expectedId}"`,
+        expected.expectEntitySearch
+          ? `Entity semantic search calls: ${entitySearchCalls.length}`
+          : `Unexpected entity semantic search calls: ${entitySearchCalls.length}`,
+      ].join('; '),
+      metadata: {
+        emitted_ids: output.features.map(({ id }) => id),
+        entity_search_calls: entitySearchCalls,
+      },
+    };
+  },
+};
 
 evaluate.describe(
   'KI feature deduplication',
@@ -257,5 +366,49 @@ evaluate.describe(
         });
       });
     }
+
+    evaluate(
+      'known feature ids and semantic duplicate search',
+      async ({ executorClient, inferenceClient, logger }) => {
+        await executorClient.runExperiment(
+          {
+            datasets: [dedupContextDataset],
+            concurrency: 1,
+            task: async ({ input }: DedupContextExample): Promise<DedupContextOutput> => {
+              if (!input) {
+                throw new Error('Deduplication context input is missing');
+              }
+
+              const searchCalls: SearchSimilarFeaturesArguments[] = [];
+              const { features } = await identifyFeatures({
+                streamName: MANAGED_STREAM_NAME,
+                sampleDocuments: input.sampleDocuments,
+                systemPrompt: featuresPrompt,
+                inferenceClient,
+                logger,
+                signal: new AbortController().signal,
+                knownFeatureIds: input.knownFeatureIds,
+                searchSimilarFeatures: async (args) => {
+                  searchCalls.push(args);
+                  const searchText =
+                    `${args.candidate_id} ${args.title} ${args.description}`.toLowerCase();
+                  if (
+                    input.similarFeature &&
+                    args.type === 'entity' &&
+                    searchText.includes('checkout')
+                  ) {
+                    return [input.similarFeature];
+                  }
+                  return [];
+                },
+              });
+
+              return { features, searchCalls };
+            },
+          },
+          [dedupContextContractEvaluator]
+        );
+      }
+    );
   }
 );

@@ -180,6 +180,34 @@ describe('identifyFeatures', () => {
         },
       })
     );
+    expect(capturedOptions?.prompt.versions[0]?.tools?.finalize_features?.schema).toEqual(
+      expect.objectContaining({
+        required: ['features', 'ignored_features'],
+        properties: expect.objectContaining({
+          features: expect.objectContaining({
+            items: expect.objectContaining({
+              required: expect.arrayContaining(['evidence_doc_ids', 'meta']),
+              properties: expect.objectContaining({
+                type: expect.objectContaining({
+                  enum: ['entity', 'infrastructure', 'technology', 'dependency', 'schema'],
+                }),
+                evidence: expect.objectContaining({ minItems: 2, maxItems: 5 }),
+                filter: expect.objectContaining({
+                  oneOf: [
+                    { required: ['field', 'eq'] },
+                    { required: ['and'] },
+                    { required: ['or'] },
+                  ],
+                  properties: expect.objectContaining({
+                    eq: expect.objectContaining({ type: 'string' }),
+                  }),
+                }),
+              }),
+            }),
+          }),
+        }),
+      })
+    );
     expect(searchSimilarFeatures).toHaveBeenCalledWith({
       candidate_id: 'okta-sdk',
       title: 'Okta SDK',
