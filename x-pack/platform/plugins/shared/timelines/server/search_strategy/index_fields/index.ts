@@ -21,6 +21,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';
 import {
   BeatFields,
+  FieldInfo,
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
@@ -273,13 +274,14 @@ export const createFieldItem = (
     splitIndexName[splitIndexName.length - 1] === 'text'
       ? splitIndexName.slice(0, splitIndexName.length - 1).join('.')
       : index.name;
-  const beatIndex = beatFields[indexName] ?? {};
-  if (isEmpty(beatIndex.category)) {
-    beatIndex.category = splitIndexName[0];
-  }
+  const beatIndex: Partial<FieldInfo> = Object.prototype.hasOwnProperty.call(beatFields, indexName)
+    ? beatFields[indexName]
+    : {};
+  const category = isEmpty(beatIndex.category) ? splitIndexName[0] : (beatIndex.category as string);
   return {
     ...beatIndex,
     ...index,
+    category,
     // the format type on FieldSpec is SerializedFieldFormat
     // and is a string on beatIndex
     format: index.format?.id ?? beatIndex.format,
@@ -310,14 +312,14 @@ export const formatIndexFields = async (
 ): Promise<IndexField[]> => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      const indexFieldNameHash: Record<string, number> = {};
+      const indexFieldNameHash = new Map<string, number>();
       resolve(
         responsesFieldSpec.reduce(
           (accumulator: IndexField[], fieldSpec: FieldSpec[], indexesAliasId: number) => {
             const indexesAliasIdx = responsesFieldSpec.length > 1 ? indexesAliasId : null;
             missingFields.concat(fieldSpec).forEach((index) => {
               const item = createFieldItem(beatFields, indexesAlias, index, indexesAliasIdx);
-              const alreadyExistingIndexField = indexFieldNameHash[item.name];
+              const alreadyExistingIndexField = indexFieldNameHash.get(item.name);
               if (alreadyExistingIndexField != null) {
                 const existingIndexField = accumulator[alreadyExistingIndexField];
                 if (isEmpty(accumulator[alreadyExistingIndexField].description)) {
@@ -335,7 +337,7 @@ export const formatIndexFields = async (
                 return;
               }
               accumulator.push(item);
-              indexFieldNameHash[item.name] = accumulator.length - 1;
+              indexFieldNameHash.set(item.name, accumulator.length - 1);
             });
             return accumulator;
           },
