@@ -44,7 +44,7 @@ const createSavedSearch = async (
   });
 };
 
-async function expectColumnTitle(pageObjects: PageObjects, columns: string[]) {
+async function expectColumnTitles(pageObjects: PageObjects, columns: string[]) {
   await expect.poll(() => pageObjects.dataGrid.getColumnTitles()).toStrictEqual(columns);
 }
 
@@ -68,7 +68,7 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
     async ({ pageObjects }) => {
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
-      await expectColumnTitle(pageObjects, ['@timestamp', 'bytes']);
+      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
     }
   );
@@ -122,13 +122,13 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
     });
 
     await spaceTest.step('revert column changes', async () => {
-      await expectColumnTitle(pageObjects, ['@timestamp', 'bytes']);
+      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
       await pageObjects.dataGrid.addFieldFromSidebar('extension');
-      await expectColumnTitle(pageObjects, ['@timestamp', 'bytes', 'extension']);
+      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes', 'extension']);
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
 
       await pageObjects.discover.revertUnsavedChanges();
-      await expectColumnTitle(pageObjects, ['@timestamp', 'bytes']);
+      await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
       await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
     });
 
@@ -160,14 +160,14 @@ spaceTest.describe('Discover unsaved changes indicator', { tag: tags.deploymentA
       });
 
       await spaceTest.step('manually revert column changes', async () => {
-        await expectColumnTitle(pageObjects, ['@timestamp', 'bytes']);
+        await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
         await pageObjects.dataGrid.addFieldFromSidebar('extension');
-        await expectColumnTitle(pageObjects, ['@timestamp', 'bytes', 'extension']);
+        await expectColumnTitles(pageObjects, ['@timestamp', 'bytes', 'extension']);
         await expect(pageObjects.discover.unsavedChangesIndicator()).toBeVisible();
 
         await pageObjects.unifiedFieldList.clickFieldListItemRemove('extension');
         await pageObjects.dataGrid.waitForLoad();
-        await expectColumnTitle(pageObjects, ['@timestamp', 'bytes']);
+        await expectColumnTitles(pageObjects, ['@timestamp', 'bytes']);
         await expect(pageObjects.discover.unsavedChangesIndicator()).toBeHidden();
       });
 
