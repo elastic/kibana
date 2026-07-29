@@ -370,12 +370,20 @@ describe('ai indices routes', () => {
       });
     });
 
-    it('rethrows unexpected errors', async () => {
+    it('rethrows unexpected errors after logging the audit event', async () => {
       aiIndexService.get.mockRejectedValue(new Error('boom'));
 
       await expect(
         callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'customer_support' } })
       ).rejects.toThrow('boom');
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ action: 'ai_index_get', outcome: 'failure' }),
+          kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
+        })
+      );
     });
   });
 
