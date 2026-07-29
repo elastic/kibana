@@ -345,7 +345,7 @@ export const EntityTable: React.FC<EntityTableProps> = ({ entities }) => {
               )}
               <EuiFlexItem grow={false}>
                 <EuiToolTip position="top" content={tooltipContent}>
-                  <EuiText size="xs" data-test-subj="entityAttachmentTableName">
+                  <EuiText size="xs" data-test-subj="entityAttachmentTableName" tabIndex={0}>
                     <strong>{label}</strong>
                   </EuiText>
                 </EuiToolTip>

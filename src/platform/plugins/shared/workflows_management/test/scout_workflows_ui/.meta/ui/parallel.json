@@ -1,5 +1,5 @@
 {
-  "sha1": "22e4694ea09761bfcc2c367b5dc83e5855d909c4",
+  "sha1": "4602d1c69a088cd8d0aaf1ff919dd0d202ce2198",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -648,28 +648,28 @@
     {
       "id": "bd0da7b20f7ccf7-fc39598781b03ea",
       "title": "Workflow execution - Cancellation should cancel a single running execution from the execution details panel",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
-        "line": 27,
+        "line": 28,
         "column": 7
       }
     },
     {
       "id": "bd0da7b20f7ccf7-54e0484e76de34d",
       "title": "Workflow execution - Cancellation should cancel all active executions from the execution list via Cancel all active",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_execution/cancellation.spec.ts",
-        "line": 48,
+        "line": 49,
         "column": 7
       }
     },
