@@ -85,7 +85,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
       await unifiedTabs.editTabLabel(1, 'second tab (modified)');
       await discover.writeAndSubmitKqlQuery('bytes > 500');
-      expect(await discover.getHitCount()).toBe('13,129');
+      await expect(discover.hitCount).toHaveText('13,129');
 
       await sharedPage.close();
     });
@@ -171,7 +171,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
         await unifiedTabs.editTabLabel(1, 'esql2 (modified)');
         await discover.writeAndSubmitEsqlQuery(queryEsqlModified);
-        expect(await discover.getHitCount()).toBe('22');
+        await expect(discover.hitCount).toHaveText('22');
 
         await sharedPage.close();
       });
@@ -279,7 +279,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
 
         await unifiedTabs.editTabLabel(1, 'unsaved (modified)');
         await discover.writeAndSubmitKqlQuery('bytes > 1000');
-        expect(await discover.getHitCount()).toBe('8,830');
+        await expect(discover.hitCount).toHaveText('8,830');
 
         await sharedPage.close();
       });

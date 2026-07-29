@@ -521,6 +521,10 @@ export class DiscoverApp {
     return this.page.testSubj.innerText('discoverQueryHits');
   }
 
+  public get hitCount(): Locator {
+    return this.page.testSubj.locator('discoverQueryHits');
+  }
+
   getErrorCalloutMessage(): Locator {
     return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
