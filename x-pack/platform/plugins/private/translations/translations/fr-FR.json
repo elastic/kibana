@@ -36889,8 +36889,6 @@
     "xpack.searchPlayground.savedPlayground.saveSuccess.text": "{name} a été enregistré.",
     "xpack.searchPlayground.savedPlayground.saveSuccess.title": "terrain de jeu sauvegardé",
     "xpack.searchPlayground.savedPlayground.updateError.title": "Erreur lors de la mise à jour de l'Aire de jeux",
-    "xpack.searchPlayground.savedPlaygrounds.getSOError": "Erreur SavedObject lors de l'obtention de l'environnement de test de recherche {id}",
-    "xpack.searchPlayground.savedPlaygrounds.notFoundError": "Aire de jeux {id} introuvable",
     "xpack.searchPlayground.savedPlaygrounds.validationError": "Demande de terrain de jeu non valide",
     "xpack.searchPlayground.searchMode.queryView.chatQuestion.placeholder": "Poser une question",
     "xpack.searchPlayground.searchMode.queryView.searchBar.placeholder": "Rechercher des documents",

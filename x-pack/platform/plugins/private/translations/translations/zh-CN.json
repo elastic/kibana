@@ -37079,8 +37079,6 @@
     "xpack.searchPlayground.savedPlayground.saveSuccess.text": "{name} 已保存。",
     "xpack.searchPlayground.savedPlayground.saveSuccess.title": "Playground 已保存",
     "xpack.searchPlayground.savedPlayground.updateError.title": "错误更新 Playground",
-    "xpack.searchPlayground.savedPlaygrounds.getSOError": "获取搜索 Playground {id} 时发生 SavedObject 错误",
-    "xpack.searchPlayground.savedPlaygrounds.notFoundError": "未找到 ID 为 {id} 的 Playground",
     "xpack.searchPlayground.savedPlaygrounds.validationError": "无效的 Playground 请求",
     "xpack.searchPlayground.searchMode.queryView.chatQuestion.placeholder": "提出问题",
     "xpack.searchPlayground.searchMode.queryView.searchBar.placeholder": "搜索文档",
