@@ -12,9 +12,12 @@ import { DesignExplorationNavSearchButton } from './design_exploration_nav_searc
 import { DesignExplorationNavHelpButton } from './design_exploration_nav_help_button';
 import { DesignExplorationNavUserMenu } from './design_exploration_nav_user_menu';
 
+/** Search sits first in the footer (before solution footer items). */
+export const DesignExplorationNavFooterLeadingControls = () => <DesignExplorationNavSearchButton />;
+
+/** Help and profile sit after solution footer items. */
 export const DesignExplorationNavFooterControls = () => (
   <>
-    <DesignExplorationNavSearchButton />
     <DesignExplorationNavHelpButton />
     <DesignExplorationNavUserMenu />
   </>

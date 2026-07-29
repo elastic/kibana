@@ -81,6 +81,11 @@ export interface NavigationProps {
    */
   navTopControls?: ReactNode;
   /**
+   * (optional) Chrome controls rendered at the start of the side nav footer,
+   * before solution footer items.
+   */
+  navFooterLeadingControls?: ReactNode;
+  /**
    * (optional) Chrome controls rendered at the bottom of the side nav footer,
    * after solution footer items and before the collapse button.
    */
@@ -108,6 +113,7 @@ export const Navigation = ({
   showTopSeparator = false,
   sidePanelFooter,
   navTopControls,
+  navFooterLeadingControls,
   navFooterControls,
   ...rest
 }: NavigationProps) => {
@@ -406,9 +412,10 @@ export const Navigation = ({
         <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
+              {navFooterLeadingControls}
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
                 const { sections, secondaryMenuTitle, ...itemProps } = item;
-                const isFirstItem = index === 0;
+                const isFirstItem = index === 0 && !navFooterLeadingControls;
                 const ariaDescribedBy = isFirstItem ? footerNavigationInstructionsId : undefined;
 
                 return (

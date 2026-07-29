@@ -32,7 +32,7 @@ export const DesignExplorationNavTopControls = () => {
         flex-direction: column;
         align-items: center;
         width: 100%;
-        padding-top: ${euiTheme.size.s};
+        padding-top: ${euiTheme.size.xl};
         padding-bottom: ${euiTheme.size.xs};
       `}
       data-test-subj="designExplorationNavTopControls"
