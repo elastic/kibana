@@ -68,7 +68,7 @@ export class OasConverter {
     const { params, shared } = this.#getConverter(unwrapped).convertPathParameters(
       unwrapped,
       pathParameters,
-      { env: this.#env, sharedSchemas: this.#sharedSchemas, onCollision: this.#onCollision }
+      { env: this.#env, sharedSchemas: this.#sharedSchemas }
     );
     this.#addComponents(shared);
     return params;
@@ -79,7 +79,6 @@ export class OasConverter {
     const { query, shared } = this.#getConverter(unwrapped).convertQuery(unwrapped, {
       env: this.#env,
       sharedSchemas: this.#sharedSchemas,
-      onCollision: this.#onCollision,
     });
     this.#addComponents(shared);
     return query;
