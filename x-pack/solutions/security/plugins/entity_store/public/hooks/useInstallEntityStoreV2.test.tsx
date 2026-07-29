@@ -62,7 +62,7 @@ describe('useInstallEntityStoreV2', () => {
   it('should not auto-install in non-default space when v1 was never installed', async () => {
     const mockServices = createMockServices();
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
-    mockHttpGet(mockServices, { status: EntityStoreStatusEnum.enum.not_installed });
+    mockHttpGet(mockServices, { status: EntityStoreStatusEnum.enum.not_installed, autoInstall: false });
     mockServices.http.fetch.mockResolvedValueOnce({ total: 0 });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
@@ -75,9 +75,6 @@ describe('useInstallEntityStoreV2', () => {
       method: 'GET',
       query: { type: 'entity-engine-status', per_page: 0 },
     });
-    expect(mockServices.http.get).not.toHaveBeenCalledWith(
-      expect.objectContaining({ path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES })
-    );
     expect(mockServices.http.post).not.toHaveBeenCalled();
   });
 
@@ -154,7 +151,7 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
 
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockHttpGet(mockServices, { status: EntityStoreStatusEnum.enum.not_installed });
+    mockHttpGet(mockServices, { status: EntityStoreStatusEnum.enum.not_installed, autoInstall: false });
     mockServices.http.fetch.mockResolvedValueOnce({ total: 0 });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));

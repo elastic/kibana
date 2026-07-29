@@ -81,7 +81,6 @@ export const useInstallEntityStoreV2 = (services: Services) => {
   useEffect(() => {
     async function install() {
       try {
-        const space = await services.spaces.getActiveSpace();
         const statusResponse = await services.http.get<{ status: EntityStoreStatus }>(
           getStatusRequest
         );
@@ -115,7 +114,7 @@ export const useInstallEntityStoreV2 = (services: Services) => {
       }
     }
     install();
-  }, [services.http, services.uiSettings, services.logger, services.spaces]);
+  }, [services.http, services.uiSettings, services.logger]);
 };
 
 const isEntityStoreInstalled = (status: EntityStoreStatus): boolean =>

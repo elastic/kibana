@@ -11,7 +11,8 @@ const DEFAULT_AUTO_INSTALL = false;
 
 export type EntityStorePreferences = z.infer<typeof EntityStorePreferences>;
 export const EntityStorePreferences = z.object({
-  // Whether the store auto-installs on Security Solution navigation. Only written `false`
-  // (by stop/uninstall); `true` is the default. Survives uninstall in its own saved object.
+  // Whether the store auto-installs on Security Solution navigation. Defaults to false — opt-in
+  // required. Written true when the user explicitly enables the store; written false by
+  // stop/uninstall. Survives uninstall in its own saved object.
   autoInstall: z.boolean().default(DEFAULT_AUTO_INSTALL),
 });

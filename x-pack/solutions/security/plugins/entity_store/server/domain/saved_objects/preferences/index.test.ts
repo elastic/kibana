@@ -35,7 +35,7 @@ describe('EntityStorePreferencesClient', () => {
     it('returns the defaults when no saved object exists', async () => {
       soClient.find.mockResolvedValue(emptyFind as never);
 
-      await expect(client.get()).resolves.toEqual({ autoInstall: true });
+      await expect(client.get()).resolves.toEqual({ autoInstall: false });
     });
 
     it('returns the persisted preferences as-is', async () => {
