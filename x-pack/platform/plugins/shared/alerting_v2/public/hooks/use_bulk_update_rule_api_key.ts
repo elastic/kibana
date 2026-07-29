@@ -66,11 +66,14 @@ const describeBulkErrorGroup = (code: string, count: number): string => {
         }
       );
     case 'RULE_ALREADY_RUNNING':
-      return i18n.translate('xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.reason.alreadyRunning', {
-        defaultMessage:
-          '{count, plural, one {# rule currently running (try again once it finishes)} other {# rules currently running (try again once they finish)}}',
-        values: { count },
-      });
+      return i18n.translate(
+        'xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.reason.alreadyRunning',
+        {
+          defaultMessage:
+            '{count, plural, one {# rule currently running (try again once it finishes)} other {# rules currently running (try again once they finish)}}',
+          values: { count },
+        }
+      );
     default:
       return i18n.translate('xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.reason.other', {
         defaultMessage: '{count, plural, one {# rule failed} other {# rules failed}}',
