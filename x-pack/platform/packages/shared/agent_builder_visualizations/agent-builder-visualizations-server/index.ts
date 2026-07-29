@@ -7,6 +7,9 @@
 
 export { buildLensConfig } from './lens/build_lens_config';
 export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
-export { getEsqlQueriesFromLensConfig } from './lens/esql_queries';
+export {
+  getChartTypeFromLensConfig,
+  getEsqlQueriesFromLensConfig,
+} from './lens/lens_config_helpers';
 export type { VisualizationConfig } from './lens/types';
 export { buildVegaConfig } from './vega';
