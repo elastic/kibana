@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export * from './advanced_settings';
-export * from './agent_builder';
-export * from './artifacts';
-export * from './esql_params';
-export * from './labels';
-export * from './rule_kind';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2'],
+};
