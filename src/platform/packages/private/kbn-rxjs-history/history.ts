@@ -9,7 +9,7 @@
 
 import * as jsondiffpatch from 'jsondiffpatch';
 
-import { BehaviorSubject, combineLatest, map, pairwise, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, map, pairwise, skip } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   state$,
@@ -41,7 +41,6 @@ export function startTrackingHistory<T extends object = {}>({
         return;
       }
       const diff = jsondiffpatch.diff(previous, current);
-      // console.log({ previous, current, diff });
       if (!diff) return;
 
       const pointer = pointer$.getValue();
@@ -55,18 +54,16 @@ export function startTrackingHistory<T extends object = {}>({
       // add the new patch to the top of the history stack and increment (see note) the pointer
       history.push(diff);
       pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
-      console.log({ history: [...history], diff, pointer: pointer$.getValue() });
-      debugger;
     });
 
-  const disabledActionsSubscription = combineLatest([pointer$, disableUndoRedo$]).subscribe(
-    ([pointer, disableUndoRedo]) => {
+  const disabledActionsSubscription = combineLatest([pointer$, disableUndoRedo$])
+    .pipe(debounceTime(60)) // prevent flickering of undo/redo disabled state
+    .subscribe(([pointer, disableUndoRedo]) => {
       disabledActions$.next({
         undo: disableUndoRedo || pointer <= -1, // at the bottom of the history stack
         redo: disableUndoRedo || pointer + 1 >= history.length, // at the top of the history stack
       });
-    }
-  );
+    });
 
   const undoPatch = () => {
     if (disableUndoRedo$.getValue()) return;

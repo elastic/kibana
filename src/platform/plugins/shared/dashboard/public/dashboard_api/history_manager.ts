@@ -40,7 +40,7 @@ export function initializeHistoryManager({
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
   const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(getState());
 
-  combineLatest([hasOverlays$, dataLoading$.pipe(debounceTime(60))])
+  combineLatest([hasOverlays$, dataLoading$])
     .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))
     .subscribe((disableUndoRedo) => {
       disableUndoRedo$.next(disableUndoRedo);

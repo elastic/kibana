@@ -138,20 +138,11 @@ export function initializeReduxSync({
     }
   });
 
-  const test = stateLoading$.subscribe((stateLoading) => {
-    console.log({ stateLoading });
+  const stateLoadingSubscription = stateLoading$.subscribe((stateLoading) => {
     const nextIsMapLoading = isMapLoading(store.getState()) || stateLoading$.getValue();
     if (nextIsMapLoading !== dataLoading$.value) {
       dataLoading$.next(nextIsMapLoading);
     }
-  });
-
-  const test2 = dataLoading$.subscribe((loading) => {
-    console.log({ loading });
-  });
-
-  const test3 = mapCenterAndZoom$.subscribe((mapCenterAndZoom) => {
-    console.log({ mapCenterAndZoom });
   });
 
   store.dispatch(setReadOnly(true));
@@ -199,6 +190,7 @@ export function initializeReduxSync({
   return {
     cleanup: () => {
       if (syncColorsSubscription) syncColorsSubscription.unsubscribe();
+      stateLoadingSubscription.unsubscribe();
       unsubscribeFromStore();
     },
     api: {

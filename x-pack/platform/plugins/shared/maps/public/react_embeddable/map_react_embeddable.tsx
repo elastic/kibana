@@ -127,35 +127,11 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
       },
       anyStateChange$: merge(
-        drilldownsManager.anyStateChange$.pipe(
-          tap(() => {
-            console.log('DRILLDOWN 2');
-          })
-        ),
-        crossPanelActions.anyStateChange$.pipe(
-          tap(() => {
-            console.log('CTOSS PANEL ACTIONS 2');
-          })
-        ),
-        reduxSync.anyStateChange$.pipe(
-          tap(() => {
-            console.log('REDUX SYNCC 2');
-          })
-        ),
-        titleManager.anyStateChange$.pipe(
-          tap(() => {
-            console.log('TITLE MANAGER 2');
-          })
-        ),
-        timeRangeManager.anyStateChange$.pipe(
-          tap(() => {
-            console.log('TIME RANGE 2');
-          })
-        )
-      ).pipe(
-        tap(() => {
-          console.log('ANY STATE CHANGE 2');
-        })
+        drilldownsManager.anyStateChange$,
+        crossPanelActions.anyStateChange$,
+        reduxSync.anyStateChange$,
+        titleManager.anyStateChange$,
+        timeRangeManager.anyStateChange$
       ),
       getComparators: () => {
         return {
@@ -177,7 +153,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         titleManager.reinitializeState(nextState);
 
         await savedMap.reset(nextState);
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for map extent to stabilize
+        await new Promise((resolve) => setTimeout(resolve, 256)); // wait for map extent to stabilize
 
         stateLoading$.next(false);
       },
