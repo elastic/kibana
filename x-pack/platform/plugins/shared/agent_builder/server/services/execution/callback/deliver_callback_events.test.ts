@@ -212,6 +212,58 @@ describe('deliverCallbackEvents', () => {
     );
   });
 
+  it('defers round_complete until the stream completes, delivering it after later events', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const roundCompleteEvent = createRoundCompleteEvent();
+    const laterEvent = createReasoningEvent('after round complete');
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(roundCompleteEvent, laterEvent),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event: ChatEvent }).event
+    );
+
+    expect(deliveredEvents).toEqual([laterEvent, roundCompleteEvent]);
+  });
+
+  it('does not deliver round_complete when the stream errors after it, sending a failure instead', async () => {
+    const { service, transport } = createCallbackDeliveryServiceMock();
+    const roundCompleteEvent = createRoundCompleteEvent();
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: concat(
+        of(createReasoningEvent('progress'), roundCompleteEvent),
+        throwError(() => new Error('persistence boom'))
+      ),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event?: ChatEvent }).event
+    );
+
+    expect(deliveredEvents).not.toContain(roundCompleteEvent);
+    expect(service.makeCallbackRequest).toHaveBeenLastCalledWith({
+      payload: {
+        execution_id: 'execution-1',
+        error: {
+          code: AgentBuilderErrorCode.internalError,
+          message: 'persistence boom',
+        },
+        idempotency_key: 'execution-1',
+      },
+      transport,
+      retry: true,
+    });
+  });
+
   it('does not start the next delivery until the previous one settles', async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const calls: string[] = [];

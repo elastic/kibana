@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EMPTY, from, concatMap, catchError, filter, type Observable } from 'rxjs';
+import {
+  EMPTY,
+  from,
+  concatMap,
+  concatWith,
+  defer,
+  catchError,
+  filter,
+  type Observable,
+} from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import {
   isMessageChunkEvent,
@@ -19,6 +28,10 @@ import type { CallbackDeliveryService } from './callback_delivery_service';
 /**
  * Delivers the execution's events to its configured callback URL, resolving once every
  * delivery has finished. Never rejects; a no-op when the execution has no callback.
+ *
+ * The terminal round_complete event is deferred until the stream completes, so it is only
+ * delivered after the conversation has been persisted. If the stream errors first (e.g. the
+ * persistence write failed), round_complete is skipped and a failure callback is sent instead.
  */
 export const deliverCallbackEvents = ({
   execution,
@@ -49,32 +62,48 @@ export const deliverCallbackEvents = ({
 
   const transport = callbackDeliveryService.createTransport(callbackUrl);
 
+  const deliverEvent = (event: ChatEvent) => {
+    const isTerminal = isRoundCompleteEvent(event);
+    const delivery = callbackDeliveryService.makeCallbackRequest({
+      payload: {
+        execution_id: execution.executionId,
+        event,
+        ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
+      },
+      transport,
+      retry: isTerminal,
+    });
+
+    return from(delivery).pipe(
+      catchError((error) => {
+        logger.warn(
+          `Failed to deliver callback event for execution ${execution.executionId}: ${error.message}`
+        );
+
+        return EMPTY;
+      })
+    );
+  };
+
   return new Promise<void>((resolve) => {
+    let roundCompleteEvent: ChatEvent | undefined;
+
     events$
       .pipe(
         filter((event) => !isMessageChunkEvent(event)),
         concatMap((event) => {
-          const isTerminal = isRoundCompleteEvent(event);
-          const delivery = callbackDeliveryService.makeCallbackRequest({
-            payload: {
-              execution_id: execution.executionId,
-              event,
-              ...(isTerminal ? { idempotency_key: execution.executionId } : {}),
-            },
-            transport,
-            retry: isTerminal,
-          });
+          // Hold the terminal event back until the stream completes (persistence succeeded).
+          if (isRoundCompleteEvent(event)) {
+            roundCompleteEvent = event;
 
-          return from(delivery).pipe(
-            catchError((error) => {
-              logger.warn(
-                `Failed to deliver callback event for execution ${execution.executionId}: ${error.message}`
-              );
+            return EMPTY;
+          }
 
-              return EMPTY;
-            })
-          );
+          return deliverEvent(event);
         }),
+        // Deliver the buffered round_complete last, only on successful completion. On a stream
+        // error concatWith propagates it to catchError below, skipping this delivery.
+        concatWith(defer(() => (roundCompleteEvent ? deliverEvent(roundCompleteEvent) : EMPTY))),
         catchError((error) => {
           const failureDelivery = callbackDeliveryService.makeCallbackRequest({
             payload: {

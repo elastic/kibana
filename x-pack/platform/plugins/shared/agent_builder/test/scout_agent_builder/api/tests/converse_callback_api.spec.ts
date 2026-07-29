@@ -117,13 +117,16 @@ apiTest.describe(
       return requests;
     };
 
-    const isConversationEventPayload = (payload: ChatCallbackResponse): boolean =>
-      isEventPayload(payload) &&
-      (isConversationCreatedEvent(payload.event) || isConversationUpdatedEvent(payload.event));
+    const isRoundCompleteEventPayload = (payload: ChatCallbackResponse): boolean =>
+      isEventPayload(payload) && isRoundCompleteEvent(payload.event);
 
-    /** Consumes streamed callback requests until the conversation event that ends a round. */
+    /**
+     * Consumes streamed callback requests through the terminal round_complete event that ends a
+     * round. round_complete is delivered last, after the conversation event, so this captures the
+     * whole round including the conversation_created/updated payload.
+     */
     const collectCompletedRoundRequests = () =>
-      collectCallbackRequestsUntil(isConversationEventPayload);
+      collectCallbackRequestsUntil(isRoundCompleteEventPayload);
 
     /** Waits for the terminal failure payload, skipping streamed event payloads. */
     const waitForFailurePayload = async (): Promise<ChatCallbackFailureResponse> => {
@@ -193,7 +196,8 @@ apiTest.describe(
       const callbackRequests = await collectCompletedRoundRequests();
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      // Events stream incrementally: progress events are delivered before the terminal ones.
+      // Events stream incrementally: progress and conversation events are delivered before the
+      // terminal round_complete.
       expect(callbackRequests.length).toBeGreaterThan(1);
 
       for (const callbackRequest of callbackRequests) {
