@@ -64,6 +64,16 @@ import {
 import { EpisodeTimelineTab } from './components/episode_timeline_tab';
 import { EpisodeActionPolicyHistoryTab } from './components/episode_action_policy_history_tab';
 import * as i18n from './translations';
+import { z } from '@kbn/zod/v4';
+
+/** Pulls `data.rule_name` from the episode_data JSON blob when present. */
+const episodeDataRuleNameSchema = z
+  .string()
+  .min(1)
+  .transform((s) => JSON.parse(s) as unknown)
+  .pipe(z.object({ rule_name: z.string() }).passthrough())
+  .transform((o) => o.rule_name)
+  .catch(undefined);
 
 interface EpisodeRouteParams {
   episodeId: string;
@@ -127,24 +137,7 @@ export function EpisodeDetailsPage() {
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
   const eventRuleName = episode?.['rule.name'] as string | undefined;
-  const episodeDataRuleName = (() => {
-    const raw = episode?.episode_data;
-    if (typeof raw !== 'string' || raw.length === 0) return undefined;
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (
-        parsed &&
-        typeof parsed === 'object' &&
-        !Array.isArray(parsed) &&
-        typeof (parsed as Record<string, unknown>).rule_name === 'string'
-      ) {
-        return (parsed as Record<string, unknown>).rule_name as string;
-      }
-    } catch {
-      // ignore malformed episode_data
-    }
-    return undefined;
-  })();
+  const episodeDataRuleName = episodeDataRuleNameSchema.parse(episode?.episode_data);
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
