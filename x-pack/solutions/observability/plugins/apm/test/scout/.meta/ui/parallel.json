@@ -1,5 +1,5 @@
 {
-  "sha1": "4fb8696a5e7c40a85d2171073497f490e7c23d6a",
+  "sha1": "e37b8723ef8b6b079fcdf81265e97d6a455f7a7b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -1741,7 +1741,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map_embeddable.spec.ts",
-        "line": 256,
+        "line": 254,
         "column": 9
       }
     },
@@ -1762,8 +1762,8 @@
       }
     },
     {
-      "id": "431bbf1927933f1-9d4b191090eb231",
-      "title": "Service map shows a detailed service map",
+      "id": "431bbf1927933f1-84486d1480fb64c",
+      "title": "Service map navigates from the contextual map to the global map with service context",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1789,7 +1789,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 46,
+        "line": 55,
         "column": 9
       }
     },
@@ -1805,7 +1805,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_map/service_map.spec.ts",
-        "line": 57,
+        "line": 66,
         "column": 9
       }
     },
