@@ -118,7 +118,7 @@ describe('UserActionsService: Finder', () => {
       });
 
       it('applies author filter on created_by.username', async () => {
-        await finder.find({ caseId: '1', author: 'testuser' });
+        await finder.find({ caseId: '1', authors: ['testuser'] });
 
         expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -138,8 +138,40 @@ describe('UserActionsService: Finder', () => {
         );
       });
 
-      it('does not apply author filter when author is not provided', async () => {
+      it('ORs multiple authors together on created_by.username', async () => {
+        await finder.find({ caseId: '1', authors: ['testuser', 'otheruser'] });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+          expect.objectContaining({
+            filter: expect.objectContaining({
+              type: 'function',
+              function: 'or',
+              arguments: expect.arrayContaining([
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({ value: 'testuser' }),
+                  ]),
+                }),
+                expect.objectContaining({
+                  arguments: expect.arrayContaining([
+                    expect.objectContaining({ value: 'otheruser' }),
+                  ]),
+                }),
+              ]),
+            }),
+          })
+        );
+      });
+
+      it('does not apply author filter when authors is not provided', async () => {
         await finder.find({ caseId: '1' });
+
+        const callFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
+        expect(callFilter).toBeUndefined();
+      });
+
+      it('does not apply author filter when authors is an empty array', async () => {
+        await finder.find({ caseId: '1', authors: [] });
 
         const callFilter = unsecuredSavedObjectsClient.find.mock.calls[0][0].filter;
         expect(callFilter).toBeUndefined();
@@ -162,7 +194,7 @@ describe('UserActionsService: Finder', () => {
         });
         mockFind(createSOFindResponse([createUserActionFindSO(userAction)]));
 
-        await expect(finder.find({ caseId: '1', author: 'testuser' })).resolves.toEqual(
+        await expect(finder.find({ caseId: '1', authors: ['testuser'] })).resolves.toEqual(
           expect.objectContaining({
             saved_objects: expect.arrayContaining([
               expect.objectContaining({
@@ -194,7 +226,7 @@ describe('UserActionsService: Finder', () => {
       const soFindRes = createSOFindResponse([createUserActionFindSO(userAction)]);
       mockFinder(soFindRes);
 
-      await finder.findAll({ caseId: '1', author: 'testuser' });
+      await finder.findAll({ caseId: '1', authors: ['testuser'] });
 
       expect(unsecuredSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({

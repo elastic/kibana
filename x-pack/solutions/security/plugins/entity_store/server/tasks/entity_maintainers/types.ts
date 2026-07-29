@@ -9,6 +9,7 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { EntityUpdateClient } from '../../domain/crud';
+import type { ResolutionRulesClient } from '../../domain/resolution/rules';
 import type { EntityMetadataClient } from '../../domain/entity_metadata';
 import type { MaintainerTelemetryClient } from './maintainer_telemetry_client';
 
@@ -81,12 +82,13 @@ export interface EntityMaintainerStatus extends Record<string, unknown> {
 
 export interface EntityMaintainerTaskMethodContext {
   status: EntityMaintainerStatus;
-  abortController: AbortController;
+  signal: AbortSignal;
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
   cpsEsClient: ElasticsearchClient;
   crudClient: EntityUpdateClient;
+  resolutionRulesClient: ResolutionRulesClient;
   entityMetadataClient: EntityMetadataClient;
   telemetry: MaintainerTelemetryClient;
 }

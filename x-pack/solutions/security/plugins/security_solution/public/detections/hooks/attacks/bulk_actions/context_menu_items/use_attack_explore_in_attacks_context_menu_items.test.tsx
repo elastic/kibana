@@ -12,8 +12,8 @@ import {
   useAttackExploreInAttacksContextMenuItems,
   EXPLORE_IN_ATTACKS_TEST_ID,
 } from './use_attack_explore_in_attacks_context_menu_items';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { ATTACK_FLYOUT_V2_URL_PARAM } from '../../../../../flyout_v2/attack/main/utils/attack_flyout_v2_url_param';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 const mockGetUrlForApp = jest.fn(
   (_appId: string, { path }: { path: string }) => `/app/securitySolutionUI/${path}`
@@ -25,8 +25,8 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   })),
 }));
 
-jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn(),
+jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
 }));
 
 const createAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDiscoveryAlert =>
@@ -39,11 +39,10 @@ const createAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDisc
 
 describe('useAttackExploreInAttacksContextMenuItems', () => {
   const closePopover = jest.fn();
-  const mockUseIsExperimentalFeatureEnabled = jest.mocked(useIsExperimentalFeatureEnabled);
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     jest.spyOn(window, 'open').mockImplementation(() => null);
   });
 
@@ -115,7 +114,7 @@ describe('useAttackExploreInAttacksContextMenuItems', () => {
     });
 
     it('encodes the legacy flyout URL state when v2 is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
       const { result } = renderHook(() =>
         useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
       );
@@ -127,7 +126,7 @@ describe('useAttackExploreInAttacksContextMenuItems', () => {
     });
 
     it('encodes the v2 attack flyout URL param when v2 is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
       const { result } = renderHook(() =>
         useAttackExploreInAttacksContextMenuItems({ attack: createAttack(), closePopover })
       );

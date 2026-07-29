@@ -1,9 +1,9 @@
 {
-  "sha1": "b0b0909cb9ba1da8b40b46c1c330cfb0eb157042",
+  "sha1": "5a3f058ad2552283b6061bdd9717484562b09e09",
   "tests": [
     {
-      "id": "5225b19b2303390-62e78b299821a45",
-      "title": "Global setup",
+      "id": "5225b19b2303390-1054e603e578b92",
+      "title": "Ingest archives to Elasticsearch",
       "expectedStatus": "passed",
       "tags": [],
       "location": {

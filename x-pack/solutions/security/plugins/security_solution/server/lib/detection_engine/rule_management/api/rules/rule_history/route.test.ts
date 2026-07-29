@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withSpan } from '@kbn/apm-utils';
 import { requestMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import type {
   MockClients,
@@ -12,6 +13,17 @@ import type {
 } from '../../../../routes/__mocks__/request_context';
 import { RULE_HISTORY_URL } from '../../../../../../../common/api/detection_engine/rule_management';
 import { ruleHistoryRoute } from './route';
+
+jest.mock('@kbn/apm-utils', () => ({
+  withSpan: jest.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
+}));
+
+const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+
+const RULE_HISTORY_ROUTE_SPAN = expect.objectContaining({
+  name: 'getRuleHistoryRoute',
+  labels: { solution: 'security' },
+});
 
 const buildHistoryRequest = ({
   params = {},
@@ -64,6 +76,7 @@ describe('Rule changes history route', () => {
       page: 1,
       perPage: 20,
     });
+    expect(withSpanMock).toHaveBeenCalledWith(RULE_HISTORY_ROUTE_SPAN, expect.any(Function));
   });
 
   test('forwards page and per_page from the query', async () => {
@@ -120,6 +133,7 @@ describe('Rule changes history route', () => {
 
     expect(response.status).toEqual(403);
     expect(clients.detectionRulesClient.getHistoryForRule).not.toHaveBeenCalled();
+    expect(withSpanMock).toHaveBeenCalledWith(RULE_HISTORY_ROUTE_SPAN, expect.any(Function));
   });
 
   test('catches errors thrown by the detection rules client', async () => {
@@ -137,5 +151,6 @@ describe('Rule changes history route', () => {
 
     expect(response.status).toEqual(500);
     expect(response.body).toEqual({ message: 'boom', status_code: 500 });
+    expect(withSpanMock).toHaveBeenCalledWith(RULE_HISTORY_ROUTE_SPAN, expect.any(Function));
   });
 });

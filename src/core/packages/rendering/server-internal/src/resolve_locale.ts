@@ -54,7 +54,7 @@ export interface ResolveLocaleResult {
  *   1. User profile setting (when value is in `translationHashes`)
  *   2. KBN_LOCALE cookie (only when `allowLocaleCookie` is `true` and value is in `translationHashes`)
  *   3. Explicitly-configured `configLocale` (any `i18n.defaultLocale` other than the built-in `en`)
- *   4. Accept-Language header (strict match against `configuredLocales`)
+ *   4. Accept-Language header (exact match against `configuredLocales`, else language-level (region-optional) fallback)
  *   5. `configLocale` (the built-in `en` default)
  */
 export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
@@ -87,11 +87,10 @@ export const resolveLocale = (args: ResolveLocaleArgs): ResolveLocaleResult => {
 
   const headerLocale = pickFromAcceptLanguage(
     getHeader(request, 'accept-language'),
-    configuredLocales
+    configuredLocales,
+    translationHashes
   );
-  // Match the profile/cookie paths above: only return a header-derived
-  // locale if we can actually serve translations for it.
-  if (headerLocale && translationHashes[headerLocale]) {
+  if (headerLocale) {
     return finalize(headerLocale, request, serverBasePath);
   }
 
@@ -131,18 +130,28 @@ export const readCookie = (cookieHeader: string, name: string): string | undefin
 
 /**
  * Walks a weighted Accept-Language header and returns the highest-weight
- * entry that is a strict (case-insensitive) match in `allowed`. Returns
- * `undefined` if no entry matches. Entries with `q=0` are ignored.
+ * servable candidate, matched case-insensitively (exact, else primary-subtag
+ * fallback). Returns `undefined` if no entry yields a servable candidate.
+ * Entries with `q=0` are ignored.
  */
 export const pickFromAcceptLanguage = (
   header: string,
-  allowed: readonly string[]
+  allowed: readonly string[],
+  translationHashes: Record<string, string>
 ): string | undefined => {
   if (!header || allowed.length === 0) return undefined;
 
   const allowedByLowerCase = new Map<string, string>();
+  // Primary subtag → first configured locale with that subtag (config order
+  // wins ties).
+  const allowedByPrimarySubtag = new Map<string, string>();
   for (const id of allowed) {
-    allowedByLowerCase.set(id.toLowerCase(), id);
+    const lower = id.toLowerCase();
+    allowedByLowerCase.set(lower, id);
+    const primary = lower.split('-')[0];
+    if (!allowedByPrimarySubtag.has(primary)) {
+      allowedByPrimarySubtag.set(primary, id);
+    }
   }
 
   const entries = header
@@ -167,8 +176,13 @@ export const pickFromAcceptLanguage = (
     .sort((a, b) => b.q - a.q);
 
   for (const { locale } of entries) {
-    const match = allowedByLowerCase.get(locale);
-    if (match) return match;
+    const exact = allowedByLowerCase.get(locale);
+    if (exact && translationHashes[exact]) return exact;
+    // No exact match: fall back to a configured locale sharing the primary
+    // subtag, regardless of region (`fr-CH` may resolve to `fr-FR`).
+    const primary = locale.split('-')[0];
+    const fallback = allowedByPrimarySubtag.get(primary);
+    if (fallback && translationHashes[fallback]) return fallback;
   }
   return undefined;
 };

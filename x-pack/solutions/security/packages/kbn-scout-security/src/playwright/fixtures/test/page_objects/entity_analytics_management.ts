@@ -143,4 +143,12 @@ export class EntityAnalyticsManagementPage {
     await this.statusLoading.waitFor({ state: 'detached', timeout: 30000 });
     await this.entityAnalyticsHealth.waitFor({ state: 'visible', timeout: 30000 });
   }
+
+  async clearEntityData() {
+    const modal = this.page.testSubj.locator('clear-entity-data-modal');
+    await this.page.testSubj.locator('clear-entity-data-button').click();
+    await modal.waitFor({ state: 'visible' });
+    await this.page.testSubj.locator('confirmModalConfirmButton').click();
+    await modal.waitFor({ state: 'detached' });
+  }
 }

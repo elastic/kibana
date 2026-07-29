@@ -85,6 +85,9 @@ export type {
   RouteConfigOptionsBody,
   RouteContentType,
   SafeRouteMethod,
+  OnRequestValidationError,
+  RequestValidationError,
+  RequestValidationErrorHandler,
   RouteValidationFunction,
   RouteValidationResultFactory,
   RouteValidationSpec,
@@ -171,6 +174,12 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpSelfFetchHeaders,
+  HttpSelfFetchOptions,
+  HttpSelfFetchQuery,
+  HttpSelfResponse,
+  HttpSelfScopedClient,
+  HttpSelfService,
   HttpProtocol,
 } from './src/http_contract';
 

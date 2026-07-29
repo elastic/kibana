@@ -68,7 +68,14 @@ export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
     const hasDivider = triggerTypes.length > 0 && visibleStepTypes.length > 0;
 
     return (
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        responsive={false}
+        wrap={false}
+        // 12px between logos (8px + 4px); no gutter token for 12px.
+        css={{ gap: euiTheme.size.m }}
+      >
         {triggerTypes.map((triggerType) => (
           <EuiFlexItem grow={false} key={`trigger-${triggerType}`}>
             <TypeIcon type={triggerType} kind="trigger" />

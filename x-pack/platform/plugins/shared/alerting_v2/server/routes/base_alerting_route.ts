@@ -157,9 +157,15 @@ export abstract class BaseAlertingRoute implements RouteHandler {
       ...(data?.details ? { details: data.details } : {}),
     };
 
+    // `bypassErrorFormat` sends `body` verbatim. Without it, Kibana core's
+    // `HapiResponseAdapter.toError` rebuilds the response from a bare Boom
+    // envelope (`{ statusCode, error, message }`) and drops every extra field,
+    // stripping our `code` / `details`. Bypassing keeps the response aligned
+    // with `errorResponseSchema`, the single source of truth for the OAS.
     return this.ctx.response.customError({
       statusCode: boom.output.statusCode,
       body,
+      bypassErrorFormat: true,
     });
   }
 }

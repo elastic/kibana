@@ -18,15 +18,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
 
 export interface ModelEndpointRowProps {
-  endpoint: InferenceAPIConfigResponse;
-  onView: (endpoint: InferenceAPIConfigResponse) => void;
+  endpoint: EisInferenceEndpoint;
+  onView: (endpoint: EisInferenceEndpoint) => void;
   onCopy: (id: string) => void;
-  onDelete?: (endpoint: InferenceAPIConfigResponse) => void;
+  onDelete?: (endpoint: EisInferenceEndpoint) => void;
 }
 
 export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
@@ -119,11 +118,13 @@ export const ModelEndpointRow: React.FC<ModelEndpointRowProps> = ({
                       aria-label={preconfiguredEndpointAriaLabel}
                       aria-describedby={preconfiguredTooltipDescriptionId}
                     >
+                      {/* eslint-disable-next-line @elastic/eui/no-unnamed-interactive-element */}
                       <EuiButtonIcon
                         data-test-subj="searchInferenceEndpointsModelEndpointRowLockButton"
                         iconType="lock"
                         size="xs"
                         isDisabled
+                        aria-hidden
                       />
                     </span>
                   </EuiToolTip>

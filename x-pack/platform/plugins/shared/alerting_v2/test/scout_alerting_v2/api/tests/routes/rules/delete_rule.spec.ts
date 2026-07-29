@@ -55,6 +55,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       headers: writerHeaders,
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('RULE_NOT_FOUND');
   });
 
   apiTest('validation: rejects ids longer than ID_MAX_LENGTH with a 400', async ({ apiClient }) => {

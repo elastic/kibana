@@ -78,7 +78,7 @@ function getFetchContext$(api: unknown): Observable<Omit<FetchContext, 'isReload
     timeslice: of(undefined),
     esqlVariables: of(undefined),
     projectRouting: of(undefined),
-    isApproximate: of(undefined),
+    isApproximate: of(false),
   };
 
   const sectionId$ =
@@ -195,7 +195,7 @@ export const useFetchContext = (api: unknown): FetchContext => {
       timeslice: typeApi?.timeRange$?.value ? undefined : typeApi?.parentApi?.timeslice$?.value,
       isReload: false,
       projectRouting: undefined,
-      isApproximate: undefined,
+      isApproximate: false,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

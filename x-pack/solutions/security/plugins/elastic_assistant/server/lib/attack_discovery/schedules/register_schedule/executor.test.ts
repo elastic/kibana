@@ -12,7 +12,7 @@ import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
-import type { InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
@@ -59,6 +59,13 @@ jest.mock('../../../../routes/attack_discovery/helpers/telemetry', () => ({
 jest.mock('../../persistence/deduplication', () => ({
   ...jest.requireActual('../../persistence/deduplication'),
   deduplicateAttackDiscoveries: jest.fn(),
+}));
+jest.mock('../../persistence/transforms/transform_to_alert_documents', () => ({
+  ...jest.requireActual('../../persistence/transforms/transform_to_alert_documents'),
+  transformToBaseAlertDocument: jest.fn(
+    jest.requireActual('../../persistence/transforms/transform_to_alert_documents')
+      .transformToBaseAlertDocument
+  ),
 }));
 
 jest.mock(
@@ -142,6 +149,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     },
     services,
     spaceId,
+    startedAt: new Date('2023-01-01T00:00:00.000Z'),
     state: {},
   };
   const mockReplacements = {
@@ -173,6 +181,9 @@ describe('attackDiscoveryScheduleExecutor', () => {
       isInferenceEndpoint: false,
       isPreconfigured: false,
     });
+    mockInference.getClientWithoutRequest.mockReturnValue({
+      chatComplete: jest.fn(),
+    } as unknown as InferenceClient);
 
     (findDocuments as jest.Mock).mockResolvedValue(getFindAnonymizationFieldsResultWithSingleHit());
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
@@ -191,7 +202,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -206,7 +218,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -221,7 +234,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -241,7 +255,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -263,8 +278,18 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const { query, filters, combinedFilter, ...restParams } = params;
     expect(generateAttackDiscoveries).toHaveBeenCalledWith({
       actionsClient,
-      config: { ...restParams, filter: combinedFilter, anonymizationFields, subAction: 'invokeAI' },
+      config: {
+        ...restParams,
+        apiConfig: {
+          ...restParams.apiConfig,
+          actionTypeId: params.apiConfig.actionTypeId,
+        },
+        filter: combinedFilter,
+        anonymizationFields,
+        subAction: 'invokeAI',
+      },
       esClient: services.scopedClusterClient.asCurrentUser,
+      inferenceClient: expect.objectContaining({ chatComplete: expect.any(Function) }),
       logger: mockLogger,
       savedObjectsClient: services.savedObjectsClient,
     });
@@ -276,7 +301,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(async () => {
       await attackDiscoveryScheduleExecutor({
-        inference: mockInference,
+        getInference: () => mockInference,
+        getWorkflowExecutorFactory: () => undefined,
         options,
         logger: mockLogger,
         publicBaseUrl: undefined,
@@ -287,8 +313,10 @@ describe('attackDiscoveryScheduleExecutor', () => {
     expect(reportAttackDiscoveryGenerationFailure).toHaveBeenCalledWith({
       apiConfig: params.apiConfig,
       errorMessage: 'Big time failure',
+      execution_mode: 'legacy',
       scheduleInfo: { id: 'rule-1', interval: '12m', actions: ['.slack', '.jest'] },
       telemetry: mockTelemetry,
+      trigger: 'schedule',
     });
   });
 
@@ -296,7 +324,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -307,12 +336,15 @@ describe('attackDiscoveryScheduleExecutor', () => {
       alertsContextCount: 2,
       apiConfig: params.apiConfig,
       attackDiscoveries: mockAttackDiscoveries,
+      duplicatesDroppedCount: 0,
       durationMs: 0,
+      execution_mode: 'legacy',
       hasFilter: true,
       scheduleInfo: { id: 'rule-1', interval: '12m', actions: ['.slack', '.jest'] },
       size: 123,
       start: 'now-24h',
       telemetry: mockTelemetry,
+      trigger: 'schedule',
     });
   });
 
@@ -323,7 +355,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -342,7 +375,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -440,7 +474,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: 'http://fake-host.io/test',
@@ -453,7 +488,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
       context: {
         attack: expect.objectContaining({
           detailsUrl:
-            'http://fake-host.io/test/s/test-space/app/security/attack_discovery?id=fake-alert',
+            'http://fake-host.io/test/s/test-space/app/security/attack_discovery?id=fake-alert&timestamp=2023-01-01T00%3A00%3A00.000Z',
         }),
       },
     });
@@ -464,7 +499,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     options.services.shouldStopExecution = () => true;
 
     const attackDiscoveryScheduleExecutorPromise = attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -479,7 +515,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -506,7 +543,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue([]);
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -523,7 +561,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     ]);
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -554,7 +593,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
@@ -581,42 +621,42 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should call transformToBaseAlertDocument with alertsParams.withReplacements set to false', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+    const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
+    mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
       telemetry: mockTelemetry,
     });
 
-    const firstCallArg = spy.mock.calls[0][0] as {
+    const firstCallArg = mockTransform.mock.calls[0][0] as {
       alertsParams: { withReplacements?: boolean };
     };
     expect(firstCallArg.alertsParams.withReplacements).toBe(false);
-
-    spy.mockRestore();
   });
 
   it('should call transformToBaseAlertDocument with alertsParams.enableFieldRendering set to true', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    const spy = jest.spyOn(transforms, 'transformToBaseAlertDocument');
+    const mockTransform = transforms.transformToBaseAlertDocument as jest.Mock;
+    mockTransform.mockClear();
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,
       telemetry: mockTelemetry,
     });
 
-    const firstCallArg = spy.mock.calls[0][0] as {
+    const firstCallArg = mockTransform.mock.calls[0][0] as {
       alertsParams: { enableFieldRendering?: boolean };
     };
     expect(firstCallArg.alertsParams.enableFieldRendering).toBe(true);
-
-    spy.mockRestore();
   });
 
   it('throws TaskRunError when isInvalidAnonymizationError returns true', async () => {
@@ -627,7 +667,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
     await expect(
       attackDiscoveryScheduleExecutor({
-        inference: mockInference,
+        getInference: () => mockInference,
+        getWorkflowExecutorFactory: () => undefined,
         options,
         logger: mockLogger,
         publicBaseUrl: undefined,
@@ -638,6 +679,63 @@ describe('attackDiscoveryScheduleExecutor', () => {
     );
 
     expect(createTaskRunError).toHaveBeenCalledWith(error, TaskErrorSource.USER);
+  });
+
+  it('throws a TaskRunError when workflowConfig is present but executor factory returns undefined', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        workflowConfig: {
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await expect(
+      attackDiscoveryScheduleExecutor({
+        getInference: () => mockInference,
+        getWorkflowExecutorFactory: () => undefined,
+        logger: mockLogger,
+        options,
+        publicBaseUrl: undefined,
+        telemetry: mockTelemetry,
+      })
+    ).rejects.toEqual(expect.objectContaining({ source: TaskErrorSource.USER }));
+  });
+
+  it('throws a TaskRunError with source USER so Task Manager does not retry when executor factory is missing', async () => {
+    const options = {
+      ...executorOptions,
+      params: {
+        ...params,
+        workflowConfig: {
+          alertRetrievalWorkflowIds: [],
+          alertRetrievalMode: 'custom_query',
+          validationWorkflowId: 'default',
+        },
+      },
+    } as unknown as RuleExecutorOptions;
+
+    await expect(
+      attackDiscoveryScheduleExecutor({
+        getInference: () => mockInference,
+        getWorkflowExecutorFactory: () => undefined,
+        logger: mockLogger,
+        options,
+        publicBaseUrl: undefined,
+        telemetry: mockTelemetry,
+      })
+    ).rejects.toEqual(expect.objectContaining({ source: TaskErrorSource.USER }));
+
+    expect(createTaskRunError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining('no workflow executor is registered'),
+      }),
+      TaskErrorSource.USER
+    );
   });
 
   it('should resolve outdated connector ID to the new one before generating discoveries', async () => {
@@ -653,7 +751,8 @@ describe('attackDiscoveryScheduleExecutor', () => {
     } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
-      inference: mockInference,
+      getInference: () => mockInference,
+      getWorkflowExecutorFactory: () => undefined,
       options,
       logger: mockLogger,
       publicBaseUrl: undefined,

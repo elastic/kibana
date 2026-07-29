@@ -58,7 +58,7 @@ const REDIRECT_TYPE_CONFIG: Record<
     urlsLabel: labels.tools.mcpClients.form.localUrlsLabel,
     helpText: labels.tools.mcpClients.form.localUrlsHelpText,
     addButtonLabel: labels.tools.mcpClients.form.addLocalUrl,
-    placeholder: 'http://localhost:3000/callback',
+    placeholder: 'http://localhost/callback',
     testSubjPrefix: 'mcpClientLocalUri',
   },
   [RedirectUriType.REMOTE]: {

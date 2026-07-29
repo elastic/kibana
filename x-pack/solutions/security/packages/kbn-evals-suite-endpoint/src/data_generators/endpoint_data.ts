@@ -321,9 +321,12 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
     },
   });
 
+  const agentStatus =
+    endpointStatus === 'failed' ? 'error' : endpointStatus === 'degraded' ? 'degraded' : 'online';
+
   await clients.internalEsClient.index({
     index: '.fleet-agents',
-    id: `eval-fleet-${agentId}`,
+    id: agentId,
     refresh: true,
     document: {
       '@timestamp': now,
@@ -332,12 +335,10 @@ export async function seedScenario(clients: SeedClients, scenario: EndpointScena
       active: true,
       enrolled_at: now,
       last_checkin: now,
-      status:
-        endpointStatus === 'failed'
-          ? 'error'
-          : endpointStatus === 'degraded'
-          ? 'degraded'
-          : 'online',
+      status: agentStatus,
+      last_known_status: agentStatus,
+      last_checkin_status: agentStatus,
+      policy_revision_idx: 1,
       policy_id: policyId,
     },
   });

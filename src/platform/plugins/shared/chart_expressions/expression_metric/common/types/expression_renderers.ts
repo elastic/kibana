@@ -11,7 +11,7 @@ import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common'
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { LayoutDirection, MetricStyle, SecondaryMetricProps } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { TrendlineResult } from './expression_functions';
+import type { MetricDensity, TrendlineResult } from './expression_functions';
 
 export const visType = 'metric';
 
@@ -41,6 +41,7 @@ export interface MetricVisParam {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
+  density: MetricDensity;
   primaryPosition: MetricStyle['valuePosition'];
   maxCols: number;
   minTiles?: number;

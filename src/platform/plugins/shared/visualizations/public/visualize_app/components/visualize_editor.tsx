@@ -41,7 +41,10 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
 
-  const isChromeVisible = useChromeVisibility(services.chrome);
+  const chromeVisibility = useChromeVisibility(services.chrome);
+  // Screenshot mode hides Chrome externally but must keep the editor renderer. In normal mode,
+  // preserve `undefined` so initialization waits for the Chrome visibility subscription.
+  const isChromeVisible = services.isScreenshotMode ? true : chromeVisibility;
   useEffect(() => {
     const { stateTransferService, data } = services;
     const {

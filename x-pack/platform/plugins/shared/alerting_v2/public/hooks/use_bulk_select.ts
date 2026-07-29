@@ -6,9 +6,18 @@
  */
 
 import { useReducer, useMemo, useCallback } from 'react';
-import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import { escapeQuotes } from '@kbn/es-query';
-import type { BulkOperationParams } from '../services/rules_api';
+import type { BulkByIdsParams, BulkByQueryParams } from '../services/rules_api';
+
+/**
+ * Discriminated union returned by {@link useBulkSelect}'s `getBulkParams`.
+ * `mode: 'by_ids'` targets the by-ID endpoints; `mode: 'by_query'` targets
+ * the by-query endpoints (which the caller must invoke with `force: true`
+ * when executing rather than previewing).
+ */
+export type BulkSelection =
+  | ({ mode: 'by_ids' } & BulkByIdsParams)
+  | ({ mode: 'by_query' } & Omit<BulkByQueryParams, 'force'>);
 
 interface BulkSelectState {
   /**
@@ -93,11 +102,7 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
       return 0;
     }
     if (state.isAllSelected) {
-      const logical = totalItemCount - state.selectedIds.size;
-      if (totalItemCount > BULK_FILTER_MAX_RULES) {
-        return Math.min(logical, BULK_FILTER_MAX_RULES);
-      }
-      return logical;
+      return totalItemCount - state.selectedIds.size;
     }
     // Only IDs that are actually on the current page count
     return itemIds.filter((id) => state.selectedIds.has(id)).length;
@@ -173,38 +178,41 @@ export const useBulkSelect = ({ totalItemCount, items, filter, search }: UseBulk
   }, []);
 
   /**
-   * Returns the appropriate `BulkOperationParams` for the current selection state.
+   * Returns a {@link BulkSelection} describing the current selection.
    *
-   * When `isAllSelected` is true, sends `filter` and/or `search` params
-   * with an exclusion clause for deselected IDs. When false, sends explicit IDs.
+   * - `mode: 'by_ids'` — explicit selection; caller invokes the by-ID endpoint.
+   * - `mode: 'by_query'` — select-all mode; caller invokes the by-query
+   *   endpoint (must set `force: true` to execute rather than preview).
    *
-   * Filters use clean API field names (e.g. `id`), which the server
-   * translates to the saved-object KQL format before querying.
+   * In select-all mode with excluded IDs, the exclusion set is folded into
+   * the KQL filter as a `NOT (id: ...)` clause so the server does not need
+   * to know about exclusion lists.
    */
-  const getBulkParams = useCallback((): BulkOperationParams => {
-    if (state.isAllSelected) {
-      const excludedIds = [...state.selectedIds];
-      const exclusionClauses =
-        excludedIds.length > 0
-          ? excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ')
-          : undefined;
-
-      const wrappedFilter = filter ? `(${filter})` : undefined;
-      const combinedFilter = [
-        wrappedFilter,
-        exclusionClauses ? `NOT (${exclusionClauses})` : undefined,
-      ]
-        .filter(Boolean)
-        .join(' AND ');
-
-      return {
-        ...(combinedFilter ? { filter: combinedFilter } : {}),
-        ...(search ? { search } : {}),
-        ...(!combinedFilter && !search ? { match_all: true as const } : {}),
-      };
+  const getBulkParams = useCallback((): BulkSelection => {
+    if (!state.isAllSelected) {
+      return { mode: 'by_ids', ids: [...state.selectedIds] };
     }
 
-    return { ids: [...state.selectedIds] };
+    const excludedIds = [...state.selectedIds];
+    const exclusionClauses =
+      excludedIds.length > 0
+        ? excludedIds.map((id) => `id: "${escapeQuotes(id)}"`).join(' or ')
+        : undefined;
+
+    const wrappedFilter = filter ? `(${filter})` : undefined;
+    const combinedFilter = [
+      wrappedFilter,
+      exclusionClauses ? `NOT (${exclusionClauses})` : undefined,
+    ]
+      .filter(Boolean)
+      .join(' AND ');
+
+    return {
+      mode: 'by_query',
+      ...(combinedFilter ? { filter: combinedFilter } : {}),
+      ...(search ? { search } : {}),
+      ...(!combinedFilter && !search ? { match_all: true as const } : {}),
+    };
   }, [state, filter, search]);
 
   return useMemo(

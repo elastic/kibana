@@ -8,11 +8,12 @@
 import { useCallback, useMemo, useState } from 'react';
 import moment from 'moment-timezone';
 import type { AppHeaderMetadataItems, AppHeaderTitle } from '@kbn/app-header';
-import type { CaseStatuses } from '../../../../../../../common/types/domain';
+import type { CaseSeverity, CaseStatuses } from '../../../../../../../common/types/domain';
 import type { CaseUI } from '../../../../../../../common';
 import type { OnUpdateFields } from '../../../../../case_view/types';
 import { useAllCasesNavigation } from '../../../../../../common/navigation';
 import { useCasesContext } from '../../../../../cases_context/use_cases_context';
+import { useCasesFeatures } from '../../../../../../common/use_cases_features';
 import { useCasesToast } from '../../../../../../common/use_cases_toast';
 import { useDateFormat, useTimeZone } from '../../../../../../common/lib/kibana';
 import { useRefreshCaseViewPage } from '../../../../../case_view/use_on_refresh_case_view_page';
@@ -20,6 +21,7 @@ import { useGetCaseConnectors } from '../../../../../../containers/use_get_case_
 import { useDeleteCases } from '../../../../../../containers/use_delete_cases';
 import { useShouldDisableStatus } from '../../../../../actions/status/use_should_disable_status';
 import * as commonI18n from '../../../../../../common/translations';
+import { useAddCaseToChat } from '../../../../../../agent_builder/use_add_case_to_chat';
 import {
   REPORTED_BY,
   CREATED_ON,
@@ -32,20 +34,24 @@ import { getMenu } from '../utils/header_menu';
 interface UseCaseViewHeaderArgs {
   caseData: CaseUI;
   onStatusChanged: (status: CaseStatuses) => void;
+  onSeverityChanged: (severity: CaseSeverity) => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 
 export const useCaseViewHeader = ({
   caseData,
   onStatusChanged,
+  onSeverityChanged,
   onUpdateField,
 }: UseCaseViewHeaderArgs) => {
   const { permissions } = useCasesContext();
+  const { hasCaseSettings } = useCasesFeatures();
   const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
   const { showSuccessToast, showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
   const { data: caseConnectors } = useGetCaseConnectors(caseData.id);
   const { mutate: deleteCases } = useDeleteCases();
+  const { addToChat, summarizeCase, isAddToChatAvailable } = useAddCaseToChat(caseData);
 
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -55,6 +61,7 @@ export const useCaseViewHeader = ({
   const isStatusMenuDisabled = useMemo(() => {
     return shouldDisableStatusFn([caseData]);
   }, [caseData, shouldDisableStatusFn]);
+  const isSeverityMenuDisabled = !permissions.update;
 
   const dateFormat = useDateFormat();
   const timeZone = useTimeZone();
@@ -114,8 +121,15 @@ export const useCaseViewHeader = ({
 
   // Badges
   const badges = useMemo(
-    () => getBadges({ caseData, isStatusMenuDisabled, onStatusChanged }),
-    [caseData, isStatusMenuDisabled, onStatusChanged]
+    () =>
+      getBadges({
+        caseData,
+        isStatusMenuDisabled,
+        isSeverityMenuDisabled,
+        onStatusChanged,
+        onSeverityChanged,
+      }),
+    [caseData, isStatusMenuDisabled, isSeverityMenuDisabled, onStatusChanged, onSeverityChanged]
   );
 
   // Menu
@@ -146,7 +160,13 @@ export const useCaseViewHeader = ({
     () =>
       getMenu({
         permissions,
+        hasCaseSettings,
         caseId: caseData.id,
+        chat: {
+          addToChat,
+          summarizeCase,
+          isAddToChatAvailable,
+        },
         currentExternalIncident,
         onRefresh: refreshCaseViewPage,
         onOpenSettings,
@@ -154,7 +174,11 @@ export const useCaseViewHeader = ({
         onOpenDeleteModal,
       }),
     [
+      addToChat,
+      summarizeCase,
+      isAddToChatAvailable,
       permissions,
+      hasCaseSettings,
       caseData.id,
       currentExternalIncident,
       refreshCaseViewPage,

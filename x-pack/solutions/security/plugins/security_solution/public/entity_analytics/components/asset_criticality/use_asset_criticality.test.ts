@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { TanstackQueryClient } from '@kbn/react-query';
+import { waitFor } from '@testing-library/react';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   renderMutation,
@@ -13,6 +15,7 @@ import {
 } from '../../../management/hooks/test_utils';
 import type { Entity } from './use_asset_criticality';
 import { useAssetCriticalityPrivileges, useAssetCriticalityData } from './use_asset_criticality';
+import { ENTITY_STORE_ENTITIES_LIST } from '../entity_store/hooks/use_entities_list_query';
 
 const mockFetchAssetCriticalityPrivileges = jest.fn().mockResolvedValue({});
 const mockFetchEntityStoreV2Privileges = jest.fn().mockResolvedValue({});
@@ -96,6 +99,31 @@ describe('useAssetCriticality', () => {
       );
 
       expect(mockCreateAssetCriticality).toHaveBeenCalled();
+    });
+
+    it('invalidates the entity store entities list query on a successful mutation', async () => {
+      mockFetchAssetCriticalityPrivileges.mockResolvedValue({ has_all_required: true });
+      mockCreateAssetCriticality.mockResolvedValue({});
+      const entity: Entity = { name: 'test_entity_name', type: EntityType.host };
+      const invalidateQueriesSpy = jest.spyOn(TanstackQueryClient.prototype, 'invalidateQueries');
+
+      const { mutation } = await renderWrappedHook(() => useAssetCriticalityData({ entity }));
+
+      await renderMutation(async () =>
+        mutation.mutate({
+          idField: 'test_entity_type.name',
+          idValue: 'test_entity_name',
+          criticalityLevel: 'critical',
+        })
+      );
+
+      await waitFor(() =>
+        expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+          queryKey: [ENTITY_STORE_ENTITIES_LIST],
+        })
+      );
+
+      invalidateQueriesSpy.mockRestore();
     });
   });
 });

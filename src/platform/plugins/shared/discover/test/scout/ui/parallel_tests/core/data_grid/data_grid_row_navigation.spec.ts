@@ -13,7 +13,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest } from '../../../fixtures';
 
 const TIME_RANGE = {
   from: '2015-09-21T09:00:00.000Z',
@@ -105,10 +105,10 @@ spaceTest.describe('Discover data grid row navigation', { tag: '@local-stateful-
     'navigates through rows with the same document id but different indices',
     async ({ page, pageObjects, scoutSpace }) => {
       const { firstIndex, secondIndex } = getIndexNames(scoutSpace.id);
-      const { dataGrid } = pageObjects;
+      const { docViewer } = pageObjects;
 
       await spaceTest.step('open the first row in the document viewer', async () => {
-        await dataGrid.openAndWaitForDocViewerFlyout({ rowIndex: 0 });
+        await docViewer.openAndWaitForFlyout({ rowIndex: 0 });
         await expect.poll(() => getDocViewerFieldValue(page, '_index')).toBe(firstIndex);
       });
 

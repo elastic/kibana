@@ -92,6 +92,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
+    metadata: options.metadata,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */

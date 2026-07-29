@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import type { Detection, Discovery, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_STATUS_OPTIONS } from '@kbn/significant-events-schema';
-import {
-  DETECTION_KIND_COLORS,
-  DISCOVERY_KIND_COLORS,
-  SIGNIFICANT_EVENT_STATUS_COLORS,
-} from './constants';
-import {
-  DETECTION_KIND_LABELS,
-  DISCOVERY_KIND_LABELS,
-  SIGNIFICANT_EVENT_STATUS_LABELS,
-} from './translations';
+import { SIGNIFICANT_EVENT_STATUS_COLORS } from './constants';
+import { SIGNIFICANT_EVENT_STATUS_LABELS } from './translations';
 
-export type LifecycleDisplayStatus = Exclude<
-  Detection['kind'] | Discovery['kind'] | SignificantEventStatus,
-  'handled'
->;
+// Detections carry no lifecycle state — a detection's change_point_type is never mapped here.
+export type LifecycleDisplayStatus = SignificantEventStatus;
 
 export const isSignificantEventStatus = (status: string): status is SignificantEventStatus =>
   (SIGNIFICANT_EVENT_STATUS_OPTIONS as ReadonlyArray<string>).includes(status);
@@ -29,22 +19,11 @@ export const isSignificantEventStatus = (status: string): status is SignificantE
 export const getSignificantEventStatusColor = (status: string): string =>
   isSignificantEventStatus(status) ? SIGNIFICANT_EVENT_STATUS_COLORS[status] : 'default';
 
-export const isVisibleDiscoveryKind = (
-  kind: Discovery['kind']
-): kind is Exclude<Discovery['kind'], 'handled'> => kind !== 'handled';
-
 export const getLifecycleStatusLabel = (status: LifecycleDisplayStatus): string => {
   switch (status) {
-    case 'detection':
-    case 'quiet':
-      return DETECTION_KIND_LABELS[status];
-    case 'discovery':
-    case 'clearance':
-      return DISCOVERY_KIND_LABELS[status];
-    case 'promoted':
-    case 'acknowledged':
-    case 'demoted':
-    case 'resolved':
+    case 'open':
+    case 'closed':
+    case 'dismissed':
       return SIGNIFICANT_EVENT_STATUS_LABELS[status];
     default:
       return status;
@@ -53,16 +32,9 @@ export const getLifecycleStatusLabel = (status: LifecycleDisplayStatus): string 
 
 export const getLifecycleStatusColor = (status: LifecycleDisplayStatus): string => {
   switch (status) {
-    case 'detection':
-    case 'quiet':
-      return DETECTION_KIND_COLORS[status];
-    case 'discovery':
-    case 'clearance':
-      return DISCOVERY_KIND_COLORS[status];
-    case 'promoted':
-    case 'acknowledged':
-    case 'demoted':
-    case 'resolved':
+    case 'open':
+    case 'closed':
+    case 'dismissed':
       return SIGNIFICANT_EVENT_STATUS_COLORS[status];
     default:
       return 'hollow';

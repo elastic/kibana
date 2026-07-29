@@ -12,7 +12,17 @@ export {
   ALL_DATA_SOURCE_TYPES,
   DATA_SOURCE_TYPES_TO_HELP_TEXT,
   DATA_SOURCE_TYPES_TO_ICONS,
+  ES_REDACTED_SECRET_VALUE,
+  SECRET_FIELDS_BY_TYPE,
+  UI_MANAGED_SECRET_FIELDS_BY_TYPE,
 } from './datasource_types';
+
+export {
+  isValidIndexName,
+  validateIndexNameRules,
+  type DataSourceNameValidationError,
+  type DataSourceNameValidationResult,
+} from './valdiate_index_name';
 
 export const PLUGIN_ID = 'data_federation';
 

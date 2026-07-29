@@ -11,7 +11,7 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';
 
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { TimelinesStartServices } from '../../..';
 import { TimelineId } from '../../../store/timeline';

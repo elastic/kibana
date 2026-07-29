@@ -8,7 +8,7 @@
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
 import { escapeStringValue } from '@kbn/esql-utils/src/utils/append_to_query/utils';
-import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
+import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_EVENTS_DATA_STREAM,
   ALERT_ACTIONS_DATA_STREAM,
@@ -72,8 +72,8 @@ export const ALERT_EPISODE_FIELDS = [
 ] as const;
 
 export interface EpisodesFilterState {
-  /** Single episode status (inactive | pending | active | recovering) or null for All */
-  status?: string | null;
+  /** Status values (OR). Empty/undefined shows all statuses. */
+  status?: string[] | null;
   /** Rule ID or null */
   ruleId?: string | null;
   /** Group hash — narrows to a single per-rule series (used for deep-links from rule details). */
@@ -178,6 +178,21 @@ const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
   query.pipe(`WHERE (${clause})`);
 };
 
+const addStatusFilter = (query: ComposerQuery, statuses: string[]) => {
+  const validStatuses = statuses.filter((status): status is AlertEpisodeStatus =>
+    (Object.values(ALERT_EPISODE_STATUS) as string[]).includes(status)
+  );
+  if (!validStatuses.length) {
+    return;
+  }
+  if (validStatuses.length === 1) {
+    query.where`\`episode.status\` == ${validStatuses[0]}`;
+    return;
+  }
+  const inList = validStatuses.map((status) => escapeStringValue(status)).join(', ');
+  query.pipe(`WHERE \`episode.status\` IN (${inList})`);
+};
+
 const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
   const severityValues = severities
     .filter((severity) => severity !== EPISODE_SEVERITY_FILTER_NONE)
@@ -200,8 +215,8 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
 };
 
 const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
-  if (filterState.status) {
-    query.where`\`episode.status\` == ${filterState.status}`;
+  if (filterState.status?.length) {
+    addStatusFilter(query, filterState.status);
   }
   if (filterState.ruleId) {
     query.where`rule.id == ${filterState.ruleId}`;

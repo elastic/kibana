@@ -8,6 +8,7 @@
  */
 
 import type { PageObjects, ScoutPage } from '@kbn/scout';
+import type { DiscoverPageObjects } from '../..';
 import type { ApmPage } from './apm';
 import type { TracesFlyout } from './flyout';
 import type { TracesGrid } from './grid';
@@ -29,6 +30,7 @@ export class TracesExperiencePage {
   constructor(
     page: ScoutPage,
     private readonly dataGrid: PageObjects['dataGrid'],
+    private readonly docViewer: DiscoverPageObjects['docViewer'],
     discover: PageObjects['discover']
   ) {
     this.apm = createApmPage(page);
@@ -40,7 +42,7 @@ export class TracesExperiencePage {
 
   public async openDocumentFlyout(rowIndex = 0) {
     await this.dataGrid.waitForDocTableRendered();
-    await this.dataGrid.openAndWaitForDocViewerFlyout({ rowIndex });
+    await this.docViewer.openAndWaitForFlyout({ rowIndex });
   }
 
   public async openOverviewTab(rowIndex = 0) {

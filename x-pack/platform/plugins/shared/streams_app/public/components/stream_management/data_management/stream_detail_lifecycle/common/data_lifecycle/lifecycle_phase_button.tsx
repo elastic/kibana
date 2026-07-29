@@ -23,6 +23,8 @@ interface LifecyclePhaseButtonProps {
   size?: string;
   testSubjPrefix?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
   showWarningIcon?: boolean;
 }
 
@@ -37,9 +39,13 @@ export const LifecyclePhaseButton = ({
   size,
   testSubjPrefix,
   isEditLifecycleFlyoutOpen = false,
+  disableInteractions = false,
   showWarningIcon = false,
 }: LifecyclePhaseButtonProps) => {
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  // While any lifecycle-editing flyout is open the timeline is in preview mode, where the stored
+  // sizes (which describe the currently applied lifecycle) would be misleading.
+  const showSize = Boolean(size) && !isEditLifecycleFlyoutOpen && !disableInteractions;
 
   return (
     <EuiPanel
@@ -137,12 +143,8 @@ export const LifecyclePhaseButton = ({
               <EuiText
                 size="xs"
                 color={euiTheme.colors.plainDark}
-                data-test-subj={
-                  size && !isEditLifecycleFlyoutOpen
-                    ? `${prefix}lifecyclePhase-${label}-size`
-                    : undefined
-                }
-                title={size && !isEditLifecycleFlyoutOpen ? size : undefined}
+                data-test-subj={showSize ? `${prefix}lifecyclePhase-${label}-size` : undefined}
+                title={showSize ? size : undefined}
                 css={{
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -150,7 +152,7 @@ export const LifecyclePhaseButton = ({
                   maxWidth: '100%',
                 }}
               >
-                {size && !isEditLifecycleFlyoutOpen ? size : null}
+                {showSize ? size : null}
               </EuiText>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -454,6 +454,17 @@
                     }
                   }
                 },
+                "administers": {
+                  "properties": {
+                    "raw_identifiers": {
+                      "type": "object",
+                      "dynamic": true
+                    },
+                    "ids": {
+                      "type": "keyword"
+                    }
+                  }
+                },
                 "communicates_with": {
                   "properties": {
                     "raw_identifiers": {

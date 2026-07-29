@@ -26,7 +26,8 @@ import { withMinimumLicense } from '../../utils/with_minimum_license';
 export const generateLeadsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  ml: EntityAnalyticsRoutesDeps['ml']
 ) => {
   router.versioned
     .post({
@@ -87,6 +88,9 @@ export const generateLeadsRoute = (
               sourceType: 'adhoc',
               analytics: coreStart.analytics,
               chatModel,
+              ml,
+              request,
+              soClient,
             },
           });
 

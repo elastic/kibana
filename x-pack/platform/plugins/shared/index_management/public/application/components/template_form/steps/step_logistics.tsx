@@ -20,7 +20,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { SUBSCRIPTION_FEATURES_URL } from '@kbn/data-lifecycle-phases';
+import {
+  CLOUD_SUBSCRIPTION_FEATURES_URL,
+  CONTACT_US_URL,
+  SUBSCRIPTION_FEATURES_URL,
+} from '@kbn/data-lifecycle-phases';
 
 import { DlmPhasesSelector } from '../../data_lifecycle';
 import type { DlmPhasesSelectorProps, SerializedDlmPhases } from '../../data_lifecycle';
@@ -50,6 +54,7 @@ import {
   TIME_SERIES_MODE,
   LOGSDB_INDEX_MODE,
   LOOKUP_INDEX_MODE,
+  VECTOR_DB_INDEX_MODE,
 } from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
@@ -110,7 +115,12 @@ const useDlmEnterpriseConfig = (): DlmPhasesSelectorProps['enterprise'] => {
     isCloudEnabled: Boolean(cloud?.isCloudEnabled),
     canManageLicense: Boolean(application?.capabilities?.management?.stack?.license_management),
     trialDaysLeft: cloud?.trialDaysLeft?.(),
-    subscriptionFeaturesUrl: SUBSCRIPTION_FEATURES_URL,
+    subscriptionFeaturesUrl: cloud?.isCloudEnabled
+      ? CLOUD_SUBSCRIPTION_FEATURES_URL
+      : SUBSCRIPTION_FEATURES_URL,
+    onUpgrade: cloud?.isCloudEnabled
+      ? undefined
+      : () => window.open(CONTACT_US_URL, '_blank', 'noopener'),
   };
 };
 
@@ -128,6 +138,7 @@ const StatefulDlmPhasesSelector = ({ defaultValue, onChange }: DlmPhasesSelector
       hasEnterpriseLicense={isAtLeastEnterprise()}
       hasDefaultSnapshotRepository={Boolean(snapshotRepositories?.hasDefaultRepository)}
       canCreateDefaultSnapshotRepository={Boolean(snapshotRepositories?.canCreateRepository)}
+      hasExistingRepositories={Boolean(snapshotRepositories?.hasRepositories)}
       defaultSnapshotRepository={snapshotRepositories?.defaultRepository}
       manageRepositoriesUrl={manageRepositoriesUrl}
       createDefaultRepositoryUrl={createDefaultRepositoryUrl}
@@ -248,12 +259,25 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: LOOKUP_INDEX_MODE,
           inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
-          'data-test-subj': 'index_mode_logsdb',
+          'data-test-subj': 'index_mode_lookup',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
               <EuiText size="s" color="subdued">
                 <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: VECTOR_DB_INDEX_MODE,
+          inputDisplay: indexModeLabels[VECTOR_DB_INDEX_MODE],
+          'data-test-subj': 'index_mode_vectordb_document',
+          dropdownDisplay: (
+            <Fragment>
+              <strong>{indexModeLabels[VECTOR_DB_INDEX_MODE]}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{indexModeDescriptions[VECTOR_DB_INDEX_MODE]}</p>
               </EuiText>
             </Fragment>
           ),
@@ -351,6 +375,9 @@ function getformSerializer(initialTemplateData: LogisticsForm = {}) {
 
 export const StepLogistics: React.FunctionComponent<Props> = React.memo(
   ({ defaultValue, isEditing = false, onChange, isLegacy = false }) => {
+    const {
+      config: { enableIndexMode },
+    } = useAppContext();
     const { form } = useForm({
       schema: schemas.logistics,
       defaultValue,
@@ -602,42 +629,44 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
           )}
 
           {/* Index mode */}
-          <FormRow
-            title={indexMode.title}
-            description={
-              <>
-                {indexMode.description}
-                <EuiSpacer size="m" />
+          {enableIndexMode && (
+            <FormRow
+              title={indexMode.title}
+              description={
+                <>
+                  {indexMode.description}
+                  <EuiSpacer size="m" />
+                  <UseField
+                    path="setIndexMode"
+                    component={ToggleField}
+                    componentProps={{
+                      'data-test-subj': 'toggleIndexMode',
+                      euiFieldProps: {
+                        label: i18n.translate(
+                          'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
+                          {
+                            defaultMessage: 'Set index mode',
+                          }
+                        ),
+                      },
+                    }}
+                  />
+                </>
+              }
+            >
+              {setIndexMode && (
                 <UseField
-                  path="setIndexMode"
-                  component={ToggleField}
+                  path="indexMode"
                   componentProps={{
-                    'data-test-subj': 'toggleIndexMode',
                     euiFieldProps: {
-                      label: i18n.translate(
-                        'xpack.idxMgmt.templateForm.stepLogistics.toggleIndexModeLabel',
-                        {
-                          defaultMessage: 'Set index mode',
-                        }
-                      ),
+                      'data-test-subj': indexMode.testSubject,
+                      options: indexMode.options,
                     },
                   }}
                 />
-              </>
-            }
-          >
-            {setIndexMode && (
-              <UseField
-                path="indexMode"
-                componentProps={{
-                  euiFieldProps: {
-                    'data-test-subj': indexMode.testSubject,
-                    options: indexMode.options,
-                  },
-                }}
-              />
-            )}
-          </FormRow>
+              )}
+            </FormRow>
+          )}
 
           {/* Order */}
           {isLegacy && (

@@ -63,6 +63,11 @@ export const composeFormToCreateRequest = (
   const artifacts = mapArtifacts(mergeArtifactsByType(formValues));
   const recoveryStrategy = resolveRecoveryStrategy(formValues);
 
+  const noDataStrategy =
+    formValues.kind === 'alert' && formValues.noDataStrategy
+      ? formValues.noDataStrategy
+      : undefined;
+
   return {
     kind: formValues.kind,
     metadata: {
@@ -76,7 +81,7 @@ export const composeFormToCreateRequest = (
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
     query: ruleQueryToApiQuery(formValues.query),
     ...(recoveryStrategy ? { recovery_strategy: recoveryStrategy } : {}),
-    ...(formValues.noDataStrategy ? { no_data_strategy: formValues.noDataStrategy } : {}),
+    ...(noDataStrategy ? { no_data_strategy: noDataStrategy } : {}),
     grouping: formValues.grouping?.fields?.length
       ? { fields: formValues.grouping.fields }
       : undefined,
@@ -149,7 +154,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
     },
     query: apiQueryToFormQuery(rule.query, rule.recovery_strategy),
     recoveryStrategy: rule.recovery_strategy ?? undefined,
-    noDataStrategy: rule.no_data_strategy ?? undefined,
+    noDataStrategy: rule.no_data_strategy ?? (rule.kind === 'alert' ? 'none' : undefined),
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),

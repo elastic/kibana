@@ -20,7 +20,16 @@ import {
   initializeDataStateInDiscoverStateMock,
 } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
-import { internalStateActions, selectDataSourceProfileId, selectTabRuntimeState } from './redux';
+import {
+  DEFAULT_TAB_STATE,
+  createTabItem,
+  internalStateActions,
+  selectAllTabs,
+  selectDataSourceProfileId,
+  selectTabRuntimeState,
+} from './redux';
+import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
+import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -103,6 +112,111 @@ describe('test getDataStateContainer', () => {
     ).toHaveBeenCalled();
 
     unsubscribe();
+  });
+
+  test('refetch$ clears stale profile URL state when the resolved profile has no URL state', async () => {
+    const services = createDiscoverServicesMock();
+    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMock],
+    });
+
+    await toolkit.initializeTabs();
+
+    const tabId = toolkit.getCurrentTab().id;
+
+    await toolkit.stateStorageContainer.set(PROFILE_STATE_URL_KEY, {
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: 'staleUrl',
+      },
+    });
+
+    const scopedProfilesManager = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      tabId
+    ).scopedProfilesManager$.getValue();
+    const contexts = scopedProfilesManager.getContexts();
+
+    jest.spyOn(scopedProfilesManager, 'getContexts').mockReturnValue({
+      ...contexts,
+      dataSourceContext: {
+        ...contexts.dataSourceContext,
+        profileState: undefined,
+      },
+    });
+
+    const setUrlStateSpy = jest.spyOn(toolkit.stateStorageContainer, 'set');
+
+    await toolkit.initializeSingleTab({ tabId });
+
+    expect(setUrlStateSpy).toHaveBeenCalledWith(PROFILE_STATE_URL_KEY, undefined, {
+      replace: true,
+    });
+    expect(toolkit.stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toBeNull();
+  });
+
+  test('refetch$ does not reconcile profile URL state after switching tabs', async () => {
+    const services = createDiscoverServicesMock();
+    services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+    const toolkit = getDiscoverInternalStateMock({
+      services,
+      persistedDataViews: [dataViewMock],
+    });
+
+    await toolkit.initializeTabs();
+
+    const firstTabId = toolkit.getCurrentTab().id;
+    const resolveProfileDeferred = Promise.withResolvers<{
+      didProfileChange: boolean;
+      isFirstResolution: boolean;
+    }>();
+    const scopedProfilesManager = selectTabRuntimeState(
+      toolkit.runtimeStateManager,
+      firstTabId
+    ).scopedProfilesManager$.getValue();
+
+    jest
+      .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
+      .mockReturnValue(resolveProfileDeferred.promise);
+
+    await toolkit.initializeSingleTab({ tabId: firstTabId, skipWaitForDataFetching: true });
+
+    await waitFor(() => {
+      expect(scopedProfilesManager.resolveDataSourceProfile).toHaveBeenCalled();
+    });
+
+    const secondTabProfileUrlState = {
+      [TEST_PROFILE_STATE_DEF.key]: {
+        urlValue: 'secondTabUrl',
+      },
+    };
+    const secondTab = {
+      ...DEFAULT_TAB_STATE,
+      ...createTabItem(selectAllTabs(toolkit.internalState.getState())),
+      id: 'second-tab',
+      profileState: {
+        [TEST_PROFILE_STATE_DEF.key]: {
+          ...TEST_PROFILE_STATE_DEF.defaultState,
+          urlValue: 'secondTabUrl',
+        },
+      },
+    };
+
+    await toolkit.addNewTab({ tab: secondTab });
+    await toolkit.stateStorageContainer.set(PROFILE_STATE_URL_KEY, secondTabProfileUrlState, {
+      replace: true,
+    });
+
+    const setUrlStateSpy = jest.spyOn(toolkit.stateStorageContainer, 'set');
+
+    resolveProfileDeferred.resolve({ didProfileChange: false, isFirstResolution: true });
+    await toolkit.waitForDataFetching({ tabId: firstTabId });
+
+    expect(setUrlStateSpy.mock.calls.filter(([key]) => key === PROFILE_STATE_URL_KEY)).toEqual([]);
+    expect(toolkit.stateStorageContainer.get(PROFILE_STATE_URL_KEY)).toEqual(
+      secondTabProfileUrlState
+    );
   });
 
   test('reset sets back to initial state', async () => {

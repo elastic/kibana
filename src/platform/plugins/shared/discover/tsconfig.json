@@ -127,7 +127,9 @@
     "@kbn/as-code-filters-schema",
     "@kbn/as-code-filters-transforms",
     "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-telemetry",
     "@kbn/as-code-shared-transforms",
+    "@kbn/as-code-utils",
     "@kbn/scout",
     "@kbn/scout-synthtrace",
     "@kbn/synthtrace-client",
@@ -151,7 +153,9 @@
     "@kbn/logging-mocks",
     "@kbn/react-hooks",
     "@kbn/app-header",
-    "@kbn/use-observable"
+    "@kbn/use-observable",
+    "@kbn/core-security-server",
+    "@kbn/core-http-server",
   ],
   "exclude": ["target/**/*"]
 }

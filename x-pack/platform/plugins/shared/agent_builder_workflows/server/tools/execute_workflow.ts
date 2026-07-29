@@ -11,9 +11,13 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import { errorResult, otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { workflowIdSchema } from '@kbn/workflows-management-plugin/common/lib/workflow_id_schema';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import {
+  executeWorkflow,
+  hasWorkflowExecutePrivilege,
+} from '@kbn/agent-builder-tools-base/workflows';
 
 const executeWorkflowSchema = z.object({
   workflowId: workflowIdSchema.optional().describe('ID of a persisted workflow to execute.'),
@@ -35,8 +39,10 @@ const executeWorkflowSchema = z.object({
 
 export const executeWorkflowTool = ({
   workflowsManagement,
+  getSecurity,
 }: {
   workflowsManagement: WorkflowsServerPluginSetup;
+  getSecurity: () => SecurityPluginStart | undefined;
 }): BuiltinToolDefinition<typeof executeWorkflowSchema> => {
   const { management: workflowApi } = workflowsManagement;
 
@@ -119,6 +125,26 @@ If set to false, or if the workflow does not complete within the timeout, the to
       const { request, spaceId } = toolContext;
       const workflowParams = inputs ?? {};
       const wait = waitForCompletion ?? true;
+
+      // Executing an existing persisted workflow by id runs under the caller's
+      // identity, so require the same Workflows privileges the direct run API
+      // enforces. Inline YAML runs the caller's own definition and is not gated.
+      if (!resolvedYaml) {
+        const canExecute = await hasWorkflowExecutePrivilege({
+          security: getSecurity(),
+          request,
+          spaceId,
+        });
+        if (!canExecute) {
+          return {
+            results: [
+              errorResult(
+                `Unauthorized to execute workflow '${resolvedWorkflowId}'. The 'workflowsManagement' execute and read privileges are required.`
+              ),
+            ],
+          };
+        }
+      }
 
       const result = resolvedYaml
         ? await executeWorkflow({

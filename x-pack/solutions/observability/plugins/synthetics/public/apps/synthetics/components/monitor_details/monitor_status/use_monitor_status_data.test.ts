@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { useBins, useMonitorStatusData } from './use_monitor_status_data';
 import { WrappedHelper } from '../../../utils/testing';
 import * as selectedMonitorHook from '../hooks/use_selected_monitor';

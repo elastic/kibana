@@ -6,7 +6,7 @@
  */
 
 import { useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { selectAlertFlyoutVisibility } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { useMonitorId } from '../../../hooks';

@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiDescribedFormGroup,
   EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSuperSelect,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { ConnectorSelector } from '@kbn/security-solution-connectors';
 import { AiIcon } from '@kbn/shared-ux-ai-components';
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { WorkflowsManagementUiActions } from '@kbn/workflows';
+import { TAG_PREFIX_PATTERN } from '../../../../../common/workflows/alert_analysis_workflow';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExperimentalBadge } from '../../../../common/components/experimental_badge';
@@ -42,6 +46,7 @@ import {
   type AlertAnalysisWorkflowSettingsWithConnector,
 } from './api';
 import { AlertAnalysisWorkflowRuleAttachmentSection } from './rule_attachment_section';
+import { useAlertAnalysisWorkflowAgents } from './use_alert_analysis_workflow_agents';
 import * as translations from './translations';
 
 const ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY = [
@@ -65,6 +70,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   );
   const canAccessPage = isEnterprise && canEditAdvancedSettings;
   const { aiConnectors, isLoading: isLoadingConnectors } = useAIConnectors();
+  const { agents, isLoading: isLoadingAgents } = useAlertAnalysisWorkflowAgents(canAccessPage);
   const { data: savedSettingsResponse, isLoading } = useQuery({
     queryKey: ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY,
     enabled: canAccessPage,
@@ -81,18 +87,31 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
   >();
   const isDirty = !isEqual(pageSettings, savedSettings);
   const isWorkflowEnabled = pageSettings?.workflowEnabled ?? true;
+  // The confidence thresholds only apply to auto-close, so their range is only validated (and only
+  // blocks saving) when auto-close is enabled. When it is off the inputs are disabled and their
+  // values are irrelevant.
   const isThresholdRangeInvalid =
     pageSettings !== undefined &&
+    pageSettings.autoCloseEnabled &&
     !(
       pageSettings.autoCloseConfidenceScoreMinThreshold <
       pageSettings.autoCloseConfidenceScoreMaxThreshold
     );
-  const thresholdRangeErrorMessage = i18n.translate(
-    'xpack.securitySolution.alertAnalysisWorkflow.thresholdRangeErrorMessage',
-    {
-      defaultMessage: 'Minimum confidence score must be lower than maximum confidence score.',
+  // Mirror the server-side tag prefix validation (charset + at least one alphanumeric) so an invalid
+  // value is flagged inline and the Save button is disabled, rather than letting the PUT through to a
+  // 400. Tested against the raw value because the server does not trim.
+  const isTagPrefixInvalid =
+    pageSettings !== undefined && !TAG_PREFIX_PATTERN.test(pageSettings.tagPrefix ?? '');
+  const selectedAgentId = pageSettings?.agentId ?? agentBuilderDefaultAgentId;
+  const agentOptions = useMemo<Array<EuiSuperSelectOption<string>>>(() => {
+    const options = agents.map((agent) => ({ value: agent.id, inputDisplay: agent.name }));
+    // Keep the currently selected agent visible even if it is missing from the fetched list (for
+    // example a custom agent that was deleted), so the selection is never silently lost.
+    if (selectedAgentId && !options.some((option) => option.value === selectedAgentId)) {
+      options.push({ value: selectedAgentId, inputDisplay: selectedAgentId });
     }
-  );
+    return options;
+  }, [agents, selectedAgentId]);
   const saveSettingsMutation = useMutation({
     mutationFn: async (settingsToSave: AlertAnalysisWorkflowSettingsWithConnector) => {
       return saveAlertAnalysisWorkflowSettings({ http, settings: settingsToSave });
@@ -100,17 +119,11 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
     onSuccess: (response) => {
       setPageSettings(response.settings);
       queryClient.setQueryData(ALERT_ANALYSIS_WORKFLOW_SETTINGS_QUERY_KEY, response);
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.securitySolution.alertAnalysisWorkflow.saveSuccessMessage', {
-          defaultMessage: 'Alert analysis workflow settings saved',
-        })
-      );
+      notifications.toasts.addSuccess(translations.SAVE_SUCCESS_MESSAGE);
     },
     onError: (error: AlertAnalysisWorkflowSettingsError) => {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.securitySolution.alertAnalysisWorkflow.saveErrorMessage', {
-          defaultMessage: 'Failed to save alert analysis workflow settings',
-        }),
+        title: translations.SAVE_ERROR_MESSAGE,
         text: error?.body?.message ?? error?.message,
       });
     },
@@ -196,14 +209,8 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 <EuiSwitch
                   data-test-subj="alertAnalysisWorkflowEnabled"
                   showLabel={false}
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledAriaLabel',
-                    { defaultMessage: 'Enable alert analysis workflow' }
-                  )}
-                  label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.workflowEnabledHiddenLabel',
-                    { defaultMessage: 'Enable alert analysis workflow' }
-                  )}
+                  aria-label={translations.WORKFLOW_ENABLED_ARIA_LABEL}
+                  label={translations.WORKFLOW_ENABLED_HIDDEN_LABEL}
                   checked={pageSettings.workflowEnabled ?? true}
                   disabled={!canEditAdvancedSettings}
                   onChange={(event) =>
@@ -234,13 +241,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 </p>
               }
             >
-              <EuiFormRow
-                fullWidth
-                label={i18n.translate(
-                  'xpack.securitySolution.alertAnalysisWorkflow.connectorLabel',
-                  { defaultMessage: 'Connector' }
-                )}
-              >
+              <EuiFormRow fullWidth label={translations.CONNECTOR_LABEL}>
                 <ConnectorSelector
                   data-test-subj="alertAnalysisWorkflowConnectorSelector"
                   connectors={aiConnectors}
@@ -250,6 +251,39 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   settings={settings}
                   onChange={(connectorId) =>
                     setPageSettings((prev) => (prev ? { ...prev, connectorId } : prev))
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.agentSectionTitle"
+                    defaultMessage="Agent"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.agentSectionDescription"
+                    defaultMessage="Select the Agent Builder agent used to analyze alerts. Choose the default agent or one of your custom agents."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow fullWidth label={translations.AGENT_LABEL}>
+                <EuiSuperSelect
+                  data-test-subj="alertAnalysisWorkflowAgentSelector"
+                  options={agentOptions}
+                  valueOfSelected={selectedAgentId}
+                  isLoading={isLoadingAgents}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  aria-label={translations.AGENT_ARIA_LABEL}
+                  onChange={(agentId) =>
+                    setPageSettings((prev) => (prev ? { ...prev, agentId } : prev))
                   }
                 />
               </EuiFormRow>
@@ -277,14 +311,8 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 <EuiSwitch
                   data-test-subj="alertAnalysisWorkflowCreateConversation"
                   showLabel={false}
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.createConversationAriaLabel',
-                    { defaultMessage: 'Create conversation per alert analysis' }
-                  )}
-                  label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.createConversationHiddenLabel',
-                    { defaultMessage: 'Create conversation per alert analysis' }
-                  )}
+                  aria-label={translations.CREATE_CONVERSATION_ARIA_LABEL}
+                  label={translations.CREATE_CONVERSATION_HIDDEN_LABEL}
                   checked={pageSettings.createConversation ?? true}
                   disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   onChange={(event) =>
@@ -319,18 +347,8 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 <EuiSwitch
                   data-test-subj="alertAnalysisWorkflowAutoCloseEnabled"
                   showLabel={false}
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledAriaLabel',
-                    {
-                      defaultMessage: 'Auto-close alerts classified as false positives',
-                    }
-                  )}
-                  label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.autoCloseEnabledHiddenLabel',
-                    {
-                      defaultMessage: 'Auto-close alerts classified as false positives',
-                    }
-                  )}
+                  aria-label={translations.AUTO_CLOSE_ENABLED_ARIA_LABEL}
+                  label={translations.AUTO_CLOSE_ENABLED_HIDDEN_LABEL}
                   checked={pageSettings.autoCloseEnabled}
                   disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
                   onChange={(event) =>
@@ -368,14 +386,11 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMinThreshold}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={
+                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
+                  }
                   isInvalid={isThresholdRangeInvalid}
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.minThresholdAriaLabel',
-                    {
-                      defaultMessage: 'Auto-close minimum confidence score',
-                    }
-                  )}
+                  aria-label={translations.MIN_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,
@@ -407,7 +422,7 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
               <EuiFormRow
                 fullWidth
                 isInvalid={isThresholdRangeInvalid}
-                error={isThresholdRangeInvalid ? thresholdRangeErrorMessage : undefined}
+                error={isThresholdRangeInvalid ? translations.THRESHOLD_RANGE_ERROR : undefined}
               >
                 <EuiFieldNumber
                   data-test-subj="alertAnalysisWorkflowMaxThreshold"
@@ -415,14 +430,11 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                   max={1}
                   step={0.01}
                   value={pageSettings.autoCloseConfidenceScoreMaxThreshold}
-                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  disabled={
+                    !canEditAdvancedSettings || !isWorkflowEnabled || !pageSettings.autoCloseEnabled
+                  }
                   isInvalid={isThresholdRangeInvalid}
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.alertAnalysisWorkflow.maxThresholdAriaLabel',
-                    {
-                      defaultMessage: 'Auto-close maximum confidence score',
-                    }
-                  )}
+                  aria-label={translations.MAX_THRESHOLD_ARIA_LABEL}
                   onChange={(event) =>
                     setPageSettings({
                       ...pageSettings,
@@ -432,10 +444,54 @@ export const AlertAnalysisWorkflowPage: React.FC = () => {
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>
+            <EuiDescribedFormGroup
+              fullWidth
+              title={
+                <h4>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.tagPrefixLabel"
+                    defaultMessage="Alert tag prefix"
+                  />
+                </h4>
+              }
+              description={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.alertAnalysisWorkflow.tagPrefixHelpText"
+                    defaultMessage="Prefix for the tags the workflow adds to alerts it analyzes (for example alert-analysis.classification.false_positive). Changing it means alerts tagged under the old prefix are no longer recognized as analyzed."
+                  />
+                </p>
+              }
+            >
+              <EuiFormRow
+                fullWidth
+                isInvalid={isTagPrefixInvalid}
+                error={isTagPrefixInvalid ? translations.TAG_PREFIX_ERROR : undefined}
+              >
+                <EuiFieldText
+                  data-test-subj="alertAnalysisWorkflowTagPrefix"
+                  value={pageSettings.tagPrefix ?? ''}
+                  disabled={!canEditAdvancedSettings || !isWorkflowEnabled}
+                  isInvalid={isTagPrefixInvalid}
+                  aria-label={translations.TAG_PREFIX_ARIA_LABEL}
+                  onChange={(event) =>
+                    setPageSettings({
+                      ...pageSettings,
+                      tagPrefix: event.target.value,
+                    })
+                  }
+                />
+              </EuiFormRow>
+            </EuiDescribedFormGroup>
             <EuiButton
               data-test-subj="alertAnalysisWorkflowSaveButton"
               fill
-              disabled={!canEditAdvancedSettings || !isDirty || isThresholdRangeInvalid}
+              disabled={
+                !canEditAdvancedSettings ||
+                !isDirty ||
+                isThresholdRangeInvalid ||
+                isTagPrefixInvalid
+              }
               isLoading={saveSettingsMutation.isLoading}
               onClick={() => {
                 if (pageSettings) {

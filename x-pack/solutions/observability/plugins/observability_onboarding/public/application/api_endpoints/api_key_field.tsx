@@ -22,10 +22,17 @@ interface Props {
   encodedApiKey?: string;
   isCreating: boolean;
   canCreate: boolean;
+  wasKeyCreatedBefore: boolean;
   onCreate: () => void;
 }
 
-export const ApiKeyField = ({ encodedApiKey, isCreating, canCreate, onCreate }: Props) => {
+export const ApiKeyField = ({
+  encodedApiKey,
+  isCreating,
+  canCreate,
+  wasKeyCreatedBefore,
+  onCreate,
+}: Props) => {
   const hasApiKey = Boolean(encodedApiKey);
 
   const apiKeyLabel = i18n.translate('xpack.observability_onboarding.apiEndpoints.apiKeyLabel', {
@@ -48,14 +55,18 @@ export const ApiKeyField = ({ encodedApiKey, isCreating, canCreate, onCreate }: 
         >
           <EuiFieldPassword
             fullWidth
-            type="dual"
+            type={hasApiKey ? 'dual' : 'password'}
             value={encodedApiKey ?? ''}
-            placeholder={i18n.translate(
-              'xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder',
-              {
-                defaultMessage: 'No API key yet',
-              }
-            )}
+            placeholder={
+              wasKeyCreatedBefore
+                ? i18n.translate(
+                    'xpack.observability_onboarding.apiEndpoints.apiKeyCreatedBeforePlaceholder',
+                    { defaultMessage: 'Existing key cannot be displayed. Create a new one' }
+                  )
+                : i18n.translate('xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder', {
+                    defaultMessage: 'No API key yet',
+                  })
+            }
             data-test-subj="observabilityOnboardingApiEndpointApiKeyValue"
             aria-label={apiKeyLabel}
             append={

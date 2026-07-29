@@ -28,12 +28,12 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest(
@@ -60,7 +60,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       });
       expect(response).toHaveStatusCode(204);
 
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });
@@ -174,6 +174,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       body: { reason: 'valid reason' },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
@@ -199,10 +200,11 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_EPISODE_STATE_TRANSITION');
 
       const ruleEvents = await apiServices.alertingV2.ruleEvents.find(ruleId);
       expect(ruleEvents).toHaveLength(1);
-      const actions = await apiServices.alertingV2.alertActions.find({
+      const actions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });
@@ -304,7 +306,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
       });
       expect(response).toHaveStatusCode(204);
 
-      const activateActions = await apiServices.alertingV2.alertActions.find({
+      const activateActions = await apiServices.alertingV2.alertActionsEvents.find({
         ruleId,
         actionTypes: ['activate'],
       });

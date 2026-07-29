@@ -12,15 +12,13 @@ import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiFlyoutFooter, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useAssetCriticalityPrivileges } from '../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useUpdateAssetCriticality } from '../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../common/types';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
@@ -28,15 +26,16 @@ import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
-import { UserPanelFooter } from './footer';
-import { UserPanelContent } from './content';
-import { UserPanelHeader } from './header';
+import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { Footer } from '../../../flyout_v2/entity/user/main/footer';
+import { Content } from '../../../flyout_v2/entity/user/main/content';
+import { Header } from '../../../flyout_v2/entity/user/main/header';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
 import { EntityType } from '../../../../common/entity_analytics/types';
-import { useObservedUser } from './hooks/use_observed_user';
+import { useObservedUser } from '../../../flyout_v2/entity/user/main/hooks/use_observed_user';
 import { useEntityFromStore, type EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import type { CriticalityLevelWithUnassigned } from '../../../../common/entity_analytics/asset_criticality/types';
 import {
@@ -47,13 +46,15 @@ import {
   mergeLegacyIdentityWhenStoreEntityMissing,
   type IdentityFields,
 } from '../../document_details/shared/utils';
-import { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID } from './constants';
+import {
+  USER_PANEL_RISK_SCORE_QUERY_ID,
+  USER_PANEL_OBSERVED_USER_QUERY_ID,
+} from '../../../flyout_v2/entity/user/main/constants';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { useEntityPanelTabs, TABLE_TAB_ID } from '../shared/hooks/use_entity_panel_tabs';
 import { EntityPanelHeaderTabs } from '../shared/components/entity_panel_tabs';
 import { EntityStoreTableTab } from '../shared/components/entity_store_table_tab';
 import { EntitySummaryGrid } from '../shared/components/entity_summary_grid';
-import { ENTITY_ANALYTICS_TABLE_ID } from '../../../entity_analytics/components/home/constants';
 import { ENABLE_ASSET_INVENTORY_SETTING } from '../../../../common/constants';
 
 export { USER_PANEL_RISK_SCORE_QUERY_ID, USER_PANEL_OBSERVED_USER_QUERY_ID };
@@ -144,12 +145,6 @@ export const UserPanel = memo(function UserPanel({
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
-  const refetchEntitiesTable = useRefetchQueryById(ENTITY_ANALYTICS_TABLE_ID);
-
-  const onRecalculation = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
-  }, [refetchEntitiesTable]);
-
   const entityStoreV2Enabled = true;
   const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
     useEntityRiskScoreRecalculation({
@@ -159,16 +154,15 @@ export const UserPanel = memo(function UserPanel({
       entityStoreV2Enabled,
       entityFromStoreResult,
       riskScoreState,
-      onRecalculation,
     });
 
   const onAssetCriticalityChanged = useCallback(() => {
-    (refetchEntitiesTable as Refetch | null)?.();
     calculateEntityRiskScore();
-  }, [calculateEntityRiskScore, refetchEntitiesTable]);
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
-    onSuccess: onAssetCriticalityChanged,
+    onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
@@ -296,15 +290,17 @@ export const UserPanel = memo(function UserPanel({
         isPreviewMode={isPreviewMode}
         isRulePreview={scopeId === TableId.rulePreview}
       />
-      <UserPanelHeader
-        lastSeen={observedUser.lastSeen}
-        managedUser={managedUser}
-        userName={userName}
-        entityId={panelDisplayEntityId}
-        identityFields={documentEntityIdentifiers}
-        isEntityInStore={!!entityFromStoreResult.entityRecord}
-        riskLevel={headerRiskLevel}
-      />
+      <FlyoutHeader>
+        <Header
+          lastSeen={observedUser.lastSeen}
+          managedUser={managedUser}
+          userName={userName}
+          entityId={panelDisplayEntityId}
+          identityFields={documentEntityIdentifiers}
+          isEntityInStore={!!entityFromStoreResult.entityRecord}
+          riskLevel={headerRiskLevel}
+        />
+      </FlyoutHeader>
       <FlyoutBody>
         {entityFromStoreResult.entityRecord && (
           <EntitySummaryGrid
@@ -318,7 +314,7 @@ export const UserPanel = memo(function UserPanel({
         {tabs && selectedTabId === TABLE_TAB_ID && entityFromStoreResult.entityRecord ? (
           <EntityStoreTableTab entityRecord={entityFromStoreResult.entityRecord} />
         ) : (
-          <UserPanelContent
+          <Content
             observedUser={observedUser}
             riskScoreState={effectiveRiskScoreState}
             entityRiskScores={entityRiskScores}
@@ -330,13 +326,23 @@ export const UserPanel = memo(function UserPanel({
             isPreviewMode={isPreviewMode}
             identityFields={documentEntityIdentifiers}
             entityRecord={observedUser.entityRecord ?? undefined}
+            refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            riskScoreQueryId={USER_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>
       {!isPreviewMode && assetInventoryEnabled && (
-        <UserPanelFooter identityFields={documentEntityIdentifiers} entity={entityFromStore} />
+        <EuiFlyoutFooter>
+          <EuiPanel color="transparent">
+            <Footer
+              userName={userName}
+              identityFields={documentEntityIdentifiers}
+              entity={entityFromStore}
+            />
+          </EuiPanel>
+        </EuiFlyoutFooter>
       )}
       {isPreviewMode && (
         <UserPreviewPanelFooter

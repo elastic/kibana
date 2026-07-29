@@ -41,8 +41,9 @@ jest.mock('../../components/rule_details/rule_context', () => ({
   RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('../../components/rule_details/rule_header_description', () => ({
+jest.mock('../../components/rule_details/rule_summary_header', () => ({
   RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
+  RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
 }));
 
 jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({

@@ -10,6 +10,14 @@ import { z } from '@kbn/zod/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
+const toJsonSchema = (schema: z.ZodType) => {
+  const { $schema, type, ...jsonSchema } = z.toJSONSchema(schema, {
+    target: 'draft-7',
+    unrepresentable: 'any',
+  }) as Record<string, unknown>;
+  return jsonSchema;
+};
+
 export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: RouteDependencies) => {
   router.versioned
     .get({
@@ -34,13 +42,12 @@ export const registerListEvaluatorsRoute = ({ router, evaluatorRegistry }: Route
           description: evaluator.description,
           ...(evaluator.referenceDataSchema
             ? {
-                reference_data_schema: (() => {
-                  const { $schema, type, ...schema } = z.toJSONSchema(
-                    evaluator.referenceDataSchema,
-                    { target: 'draft-7', unrepresentable: 'any' }
-                  ) as Record<string, unknown>;
-                  return schema;
-                })(),
+                reference_data_schema: toJsonSchema(evaluator.referenceDataSchema),
+              }
+            : {}),
+          ...(evaluator.evidenceSchema
+            ? {
+                evidence_schema: toJsonSchema(evaluator.evidenceSchema),
               }
             : {}),
         }));

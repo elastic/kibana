@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276697
+issues:
+- https://github.com/elastic/security-team/issues/18143
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Fix accidental Entity Store data loss when uninstalling partial engines
+description: "Prevents Entity Store indices and data streams from being deleted when you uninstall only some engines. Elasticsearch assets are now removed only when no engines remain."

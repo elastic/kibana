@@ -167,6 +167,14 @@ const findJestUnitConfig = (filePath: string): string | undefined => {
 
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
+const reportJestFullLog = async (logPath?: string): Promise<void> => {
+  if (!logPath) {
+    return;
+  }
+  writeln(`    full Jest output: ${logPath}`);
+  writeln('');
+};
+
 const runLintTsProjects = async (
   affectedSourceRoots: string[],
   fix: boolean
@@ -506,10 +514,12 @@ run(
             }
             writeln('    $ node scripts/jest --profile quick');
             writeln('');
+            await reportJestFullLog(result.logPath);
             printVerbose();
             errors.push(new Error('jest failed'));
           } else if (result.failed.length > 0) {
             const failCount = result.failed.length;
+            const oomDetected = result.failed.some((task) => task.failures.some((f) => f.oom));
             jestProgress.writeResult(
               line(
                 'jest',
@@ -519,6 +529,13 @@ run(
               )
             );
             writeln('');
+            if (oomDetected) {
+              writeln(
+                '    ⚠ This looks like a Jest worker ran out of memory, not a real test failure.'
+              );
+              writeln('      Try: NODE_OPTIONS=--max-old-space-size=8192 node scripts/check');
+              writeln('');
+            }
             for (const task of result.failed) {
               // Group failures by file
               const byFile = new Map<string, JestFailedTest[]>();
@@ -559,6 +576,7 @@ run(
               writeln(`    $ ${jestCmd}`);
               writeln('');
             }
+            await reportJestFullLog(result.logPath);
             printVerbose();
             errors.push(new Error('jest failed'));
           } else {

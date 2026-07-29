@@ -17,6 +17,7 @@ export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 export type PrimaryMetricFontSize = ValueFontMode;
 
 export type PrimaryMetricPosition = MetricStyle['valuePosition'];
+export type MetricDensity = 'compact' | 'default';
 export type MetricStyleTemplateId = 'top' | 'middle' | 'bottom' | 'custom';
 export type MetricStyleTemplatePresetId = Exclude<MetricStyleTemplateId, 'custom'>;
 
@@ -63,6 +64,7 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
+  density?: MetricDensity;
   /**
    * legacy state property
    * @deprecated
@@ -97,6 +99,7 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'secondaryAlign'
   | 'iconAlign'
   | 'valueFontMode'
+  | 'density'
   | 'primaryPosition'
   | 'secondaryLabelPosition'
   | 'applyColorTo'

@@ -19,8 +19,12 @@ import type {
   UnboundPromptOptions,
 } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common';
-import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
-import { trace } from '@opentelemetry/api';
+import {
+  withActiveInferenceSpan,
+  withExecuteToolSpan,
+  markToolSpanAsError,
+} from '@kbn/inference-tracing';
+
 import { omit, partition } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import {
@@ -124,13 +128,16 @@ export async function executeAsReasoningAgent(
               toolCallId: toolCall.toolCallId,
             },
           },
-          () => callback(toolCall)
-        ).catch((error): ToolCallbackResult => {
-          trace.getActiveSpan()?.recordException(error);
-          return {
-            response: { error, data: undefined },
-          };
-        });
+          (span) =>
+            callback(toolCall).catch((error): ToolCallbackResult => {
+              if (span) {
+                markToolSpanAsError(span, { error });
+              }
+              return {
+                response: { error, data: undefined },
+              };
+            })
+        );
 
         return {
           response: response.response,
