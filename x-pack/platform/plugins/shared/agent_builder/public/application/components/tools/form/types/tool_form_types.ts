@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { EsqlToolFieldTypes, EsqlToolParamValue, ToolType } from '@kbn/agent-builder-common';
+import type {
+  EsqlToolFieldTypes,
+  EsqlToolParamValue,
+  ToolType,
+  ToolConfirmationPolicyMode,
+} from '@kbn/agent-builder-common';
 
 export interface EsqlParam {
   name: string;
@@ -56,12 +61,14 @@ export interface WorkflowToolFormData extends BaseToolFormData {
   type: ToolType.workflow;
   workflow_id: string;
   wait_for_completion: boolean;
+  confirmation_ask_user?: ToolConfirmationPolicyMode;
 }
 
 export interface McpToolFormData extends BaseToolFormData {
   type: ToolType.mcp;
   connectorId: string;
   mcpToolName: string;
+  confirmation_ask_user?: ToolConfirmationPolicyMode;
 }
 
 export type ToolFormData =
