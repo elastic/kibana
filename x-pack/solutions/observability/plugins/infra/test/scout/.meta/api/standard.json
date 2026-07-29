@@ -1,0 +1,189 @@
+{
+  "sha1": "12958eb2bff733504334beb98d2000672b5c44ef",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "2cda671208260e5-f1016fdba9c4fd3",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "2cda671208260e5-09c2af8ec6f0579",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets deduplicates repeated indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 64,
+        "column": 12
+      }
+    },
+    {
+      "id": "2cda671208260e5-a83f5cc96bfd2e0",
+      "title": "API /infra/log_analysis/validation/log_entry_datasets rejects requests with too many indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_datasets.spec.ts",
+        "line": 98,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-636502cc6b4aab7",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices works",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-80d2384ccc7cf39",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices deduplicates fields with identical specifications without multiplying errors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 60,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-321984b4d3b12c2",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with duplicate field names that have conflicting specifications",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-4f0585f79a79c69",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices returns errors in a deterministic order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 114,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-8e5be94eacdeeed",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with too many indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 149,
+        "column": 12
+      }
+    },
+    {
+      "id": "7e9404de1e7c7bd-580a4e38c30b335",
+      "title": "API /infra/log_analysis/validation/log_entry_rate_indices rejects requests with too many fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/infra/test/scout/api/tests/log_analysis_validation_log_entry_rate_indices.spec.ts",
+        "line": 171,
+        "column": 12
+      }
+    }
+  ]
+}

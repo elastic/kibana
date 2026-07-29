@@ -306,7 +306,7 @@ Common mappings:
 - TA0002 Execution
 - TA0003 Persistence
 - TA0004 Privilege Escalation
-- TA0005 Defense Evasion
+- TA0005 Stealth
 - TA0006 Credential Access
 - TA0007 Discovery
 - TA0008 Lateral Movement
@@ -314,6 +314,7 @@ Common mappings:
 - TA0010 Exfiltration
 - TA0011 Command and Control
 - TA0040 Impact
+- TA0112 Defense Impairment
 
 ### Schedule (interval and from)
 

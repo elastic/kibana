@@ -20,138 +20,92 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { Chart, Settings, BarSeries, ScaleType, Tooltip, TooltipType } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import type { ChangePointType, LifecycleDetection } from '@kbn/significant-events-schema';
+import type { UseQueryResult } from '@kbn/react-query';
+import type { LifecycleDetection, EventLifecycleResponse } from '@kbn/significant-events-schema';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { formatTimestamp } from '../format_timestamp';
+import { getChangePointLabel } from '../change_point';
+import { ChangePointSparkline } from './change_point_visualization';
 
 export interface DetectionsListProps {
   eventUuid: string;
+  selectedDetectionId?: string;
+  onDetectionClick?: (detection: LifecycleDetection) => void;
+  lifecycleQuery?: Pick<
+    UseQueryResult<EventLifecycleResponse, Error>,
+    'data' | 'isLoading' | 'isError' | 'refetch'
+  >;
 }
 
 // Minimum width reserved for a detection card's text column. Below this, the
 // fixed-size sparkline wraps onto its own line instead of being clipped.
 const TEXT_CONTENT_MIN_WIDTH = '220px';
 
-const CHANGE_POINT_LABELS: Record<ChangePointType, string> = {
-  spike: i18n.translate('xpack.observability.nightshift.flyout.changePoint.spikeLabel', {
-    defaultMessage: 'Spike',
-  }),
-  dip: i18n.translate('xpack.observability.nightshift.flyout.changePoint.dipLabel', {
-    defaultMessage: 'Dip',
-  }),
-  trend_change: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.trendChangeLabel',
-    { defaultMessage: 'Trend change' }
-  ),
-  step_change: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stepChangeLabel', {
-    defaultMessage: 'Step change',
-  }),
-  distribution_change: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.distributionChangeLabel',
-    { defaultMessage: 'Distribution change' }
-  ),
-  non_stationary: i18n.translate(
-    'xpack.observability.nightshift.flyout.changePoint.nonStationaryLabel',
-    { defaultMessage: 'Non-stationary' }
-  ),
-  stationary: i18n.translate('xpack.observability.nightshift.flyout.changePoint.stationaryLabel', {
-    defaultMessage: 'Stationary',
-  }),
+const parseTimestamp = (timestamp: string): number => {
+  const parsed = new Date(timestamp).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
 };
 
-function getChangePointLabel(type?: ChangePointType): string {
-  if (!type) {
-    return i18n.translate('xpack.observability.nightshift.flyout.detectionFallbackLabel', {
-      defaultMessage: 'Detection',
-    });
-  }
-  return CHANGE_POINT_LABELS[type];
-}
-
-function generateSparklineData(changePointType?: ChangePointType): Array<{ x: number; y: number }> {
-  const points = 20;
-  const data: Array<{ x: number; y: number }> = [];
-  const rand = () => Math.random() * 0.3;
-
-  for (let i = 0; i < points; i++) {
-    let y: number;
-    switch (changePointType) {
-      case 'spike':
-        y = i >= points - 4 ? 0.7 + rand() : 0.2 + rand();
-        break;
-      case 'dip':
-        y = i >= points - 4 ? 0.1 + rand() : 0.6 + rand();
-        break;
-      case 'trend_change':
-        y = i < points / 2 ? 0.4 + rand() : 0.4 + (i - points / 2) * 0.04 + rand();
-        break;
-      case 'step_change':
-        y = i < points / 2 ? 0.25 + rand() : 0.65 + rand();
-        break;
-      default:
-        y = 0.3 + rand();
-    }
-    data.push({ x: i, y });
-  }
-  return data;
-}
-
-function DetectionSparkline({ changePointType }: { changePointType?: ChangePointType }) {
-  const { euiTheme } = useEuiTheme();
-  const { baseTheme, sparklineTheme } = useChartThemes();
-  const data = useMemo(() => generateSparklineData(changePointType), [changePointType]);
-
-  return (
-    <Chart size={{ height: 24, width: 64 }}>
-      <Tooltip type={TooltipType.None} />
-      <Settings
-        baseTheme={baseTheme}
-        theme={[{ background: { color: 'transparent' } }, sparklineTheme]}
-        showLegend={false}
-        locale={i18n.getLocale()}
-      />
-      <BarSeries
-        id="detection-sparkline"
-        xScaleType={ScaleType.Linear}
-        yScaleType={ScaleType.Linear}
-        data={data}
-        xAccessor="x"
-        yAccessors={['y']}
-        color={euiTheme.colors.vis.euiColorVis0}
-      />
-    </Chart>
-  );
-}
-
-function DetectionCard({ detection }: { detection: LifecycleDetection }) {
+function DetectionCard({
+  detection,
+  isSelected = false,
+  onClick,
+}: {
+  detection: LifecycleDetection;
+  isSelected?: boolean;
+  onClick?: (detection: LifecycleDetection) => void;
+}) {
   const { euiTheme } = useEuiTheme();
   const changePointLabel = getChangePointLabel(detection.change_point_type);
 
   const handleClick = () => {
-    // No-op until the detection child flyout ships.
+    onClick?.(detection);
+  };
+
+  const handleKeyDown = (keyboardEvent: React.KeyboardEvent<HTMLDivElement>) => {
+    if (keyboardEvent.key !== 'Enter' && keyboardEvent.key !== ' ') {
+      return;
+    }
+    if (keyboardEvent.target !== keyboardEvent.currentTarget) {
+      return;
+    }
+    keyboardEvent.preventDefault();
+    onClick?.(detection);
   };
 
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      paddingSize="m"
-      onClick={handleClick}
+    <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      aria-pressed={onClick ? isSelected : undefined}
       data-test-subj="nightshiftDetectionCard"
+      onClick={onClick ? handleClick : undefined}
+      onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
+        background: ${isSelected
+          ? euiTheme.colors.backgroundBaseInteractiveSelect
+          : euiTheme.colors.backgroundBasePlain};
+        padding: ${euiTheme.size.m};
+        ${onClick
+          ? `
+        cursor: pointer;
         transition: background 0.15s;
 
-        /* Same hover treatment as the significant event rows, instead of the
-           default clickable-panel lift effect. */
-        &:hover,
-        &:focus {
-          background: ${euiTheme.colors.backgroundBaseSubdued};
-          box-shadow: none;
-          transform: none;
+        &:hover {
+          background: ${
+            isSelected
+              ? euiTheme.colors.backgroundBaseInteractiveSelect
+              : euiTheme.colors.backgroundBaseSubdued
+          };
         }
+
+        &:focus-visible {
+          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.primary};
+          outline-offset: ${euiTheme.border.width.thin};
+        }
+        `
+          : ''}
       `}
     >
       <EuiFlexGroup
@@ -166,41 +120,62 @@ function DetectionCard({ detection }: { detection: LifecycleDetection }) {
             flex: 1 1 ${TEXT_CONTENT_MIN_WIDTH};
           `}
         >
-          <EuiText size="s" textAlign="left">
-            <strong>{detection.rule_name ?? detection.detection_id}</strong>
-          </EuiText>
-          <EuiText size="xs" color="subdued" textAlign="left">
-            {formatTimestamp(detection['@timestamp'])}
-          </EuiText>
-          <EuiSpacer size="xs" />
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="default">{changePointLabel}</EuiBadge>
+              <EuiText size="s" textAlign="left">
+                <strong>{detection.rule_name}</strong>
+              </EuiText>
             </EuiFlexItem>
-            {detection.stream_name && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{detection.stream_name}</EuiBadge>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" textAlign="left">
+                {formatTimestamp(detection['@timestamp'])}
+              </EuiText>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="xs" wrap responsive={false} alignItems="center">
+                {detection.change_point_type && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="default">{changePointLabel}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+                {detection.stream_name && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow">{detection.stream_name}</EuiBadge>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <DetectionSparkline changePointType={detection.change_point_type} />
+          <ChangePointSparkline
+            changePointType={detection.change_point_type}
+            timestamp={detection['@timestamp']}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+    </div>
   );
 }
 
-export function DetectionsList({ eventUuid }: DetectionsListProps): React.ReactElement {
-  const { data, isLoading, isError, refetch } = useFetchEventLifecycle(eventUuid);
+export function DetectionsList({
+  eventUuid,
+  selectedDetectionId,
+  onDetectionClick,
+  lifecycleQuery: lifecycleQueryFromParent,
+}: DetectionsListProps): React.ReactElement {
+  const { euiTheme } = useEuiTheme();
+  const internalLifecycleQuery = useFetchEventLifecycle(eventUuid, {
+    enabled: !lifecycleQueryFromParent,
+  });
+  const lifecycleQuery = lifecycleQueryFromParent ?? internalLifecycleQuery;
+  const { data, isLoading, isError, refetch } = lifecycleQuery;
 
   // Most recent detection first — it is the most actionable one during an incident.
   const detections = useMemo(
     () =>
       [...(data?.detections ?? [])].sort(
         (first, second) =>
-          new Date(second['@timestamp']).getTime() - new Date(first['@timestamp']).getTime()
+          parseTimestamp(second['@timestamp']) - parseTimestamp(first['@timestamp'])
       ),
     [data]
   );
@@ -258,13 +233,34 @@ export function DetectionsList({ eventUuid }: DetectionsListProps): React.ReactE
       )}
 
       {!isLoading && !isError && detections.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {detections.map((detection) => (
-            <EuiFlexItem key={detection.detection_id}>
-              <DetectionCard detection={detection} />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <EuiPanel hasBorder hasShadow={false} paddingSize="none">
+          <ol
+            css={css`
+              list-style: none;
+              margin: 0;
+              padding: 0;
+            `}
+          >
+            {detections.map((detection, index) => (
+              <li
+                key={detection.detection_id}
+                css={
+                  index < detections.length - 1
+                    ? css`
+                        border-bottom: ${euiTheme.border.thin};
+                      `
+                    : undefined
+                }
+              >
+                <DetectionCard
+                  detection={detection}
+                  isSelected={detection.detection_id === selectedDetectionId}
+                  onClick={onDetectionClick}
+                />
+              </li>
+            ))}
+          </ol>
+        </EuiPanel>
       )}
     </>
   );

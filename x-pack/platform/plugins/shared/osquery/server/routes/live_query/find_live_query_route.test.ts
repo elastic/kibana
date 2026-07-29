@@ -161,7 +161,7 @@ describe('findLiveQueryRoute', () => {
       mockEsClient,
       ['query-1'],
       'default',
-      ['default'],
+      undefined,
       false
     );
 
@@ -280,7 +280,10 @@ describe('findLiveQueryRoute', () => {
     );
   });
 
-  it('falls back to the active space id when integration namespaces are unavailable', async () => {
+  it('passes undefined namespaces when integration namespaces are unavailable', async () => {
+    // When Fleet cannot resolve integration namespaces we pass `undefined` so the
+    // counts query uses the base pattern; results stay scoped to the active space
+    // via the space_id filter.
     (mockOsqueryContext.service.getActiveSpace as jest.Mock).mockResolvedValue({
       id: 'custom-space',
     });
@@ -322,7 +325,62 @@ describe('findLiveQueryRoute', () => {
       mockEsClient,
       ['query-1'],
       'custom-space',
-      ['custom-space'],
+      undefined,
+      false
+    );
+  });
+
+  it('uses resolved integration namespaces in a hyphenated space', async () => {
+    const service = mockOsqueryContext.service as unknown as {
+      getActiveSpace: jest.Mock;
+      getIntegrationNamespaces?: jest.Mock;
+    };
+    service.getActiveSpace.mockResolvedValue({ id: 'custom-space' });
+    service.getIntegrationNamespaces = jest.fn().mockResolvedValue({
+      [OSQUERY_INTEGRATION_NAME]: ['team.a'],
+    });
+    mockOsqueryContext.logFactory = {
+      get: jest.fn().mockReturnValue({ debug: jest.fn() }),
+    } as unknown as OsqueryAppContext['logFactory'];
+
+    const edges = [
+      {
+        _source: {
+          action_id: 'action-1',
+          queries: [{ action_id: 'query-1', query: 'select 1;', agents: ['agent-1'] }],
+        },
+        fields: { action_id: ['action-1'] },
+      },
+    ];
+
+    const mockSearchFn = jest.fn().mockReturnValue(
+      of({
+        edges,
+        rawResponse: { hits: { total: 1 } },
+        total: 1,
+      })
+    );
+
+    (getResultCountsForActions as jest.Mock).mockResolvedValue(
+      new Map([
+        ['query-1', { totalRows: 5, respondedAgents: 1, successfulAgents: 1, errorAgents: 0 }],
+      ])
+    );
+
+    setupRoute();
+
+    const mockRequest = httpServerMock.createKibanaRequest({
+      query: { kuery: undefined, page: 0, pageSize: 20, withResultCounts: true },
+    });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    await routeHandler(createRouteContext(mockSearchFn), mockRequest, mockResponse);
+
+    expect(getResultCountsForActions).toHaveBeenCalledWith(
+      mockEsClient,
+      ['query-1'],
+      'custom-space',
+      ['team.a'],
       false
     );
   });

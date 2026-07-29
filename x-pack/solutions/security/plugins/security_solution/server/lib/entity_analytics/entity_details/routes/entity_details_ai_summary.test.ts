@@ -10,6 +10,11 @@ import {
   MAX_ENTITY_SUMMARY_HIGHLIGHTS,
   MAX_ENTITY_SUMMARY_RECOMMENDED_ACTIONS,
 } from '@kbn/entity-store/common/entity_summary';
+import {
+  ENTITY_METADATA,
+  ENTITY_SCHEMA_VERSION_V2,
+  getEntityIndexPattern,
+} from '@kbn/entity-store/common';
 import { ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL } from '../../../../../common/entity_analytics/entity_analytics/constants';
 import { ENTITY_AI_SUMMARY_PERSISTED_EVENT } from '../../../telemetry/event_based/events';
 import {
@@ -23,6 +28,8 @@ const mockCreateEntityMetadataClient = jest.fn(() => ({
   bulkAppendMetadata: mockBulkAppendMetadata,
 }));
 
+const mockCheckPrivileges = jest.fn();
+const mockCheckPrivilegesDynamicallyWithRequest = jest.fn(() => mockCheckPrivileges);
 const mockGetStartServices = jest.fn();
 
 // Import after mocks are set up
@@ -48,6 +55,10 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockReportEvent: jest.Mock;
+  const mockCurrentUser = {
+    username: 'test-user',
+    profile_uid: 'u_test_user',
+  };
 
   beforeEach(() => {
     server = serverMock.create();
@@ -56,13 +67,13 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
 
     mockBulkAppendMetadata.mockReset().mockResolvedValue({ successful: 1, failed: 0 });
     mockCreateEntityMetadataClient.mockClear();
+    mockCheckPrivileges.mockReset().mockResolvedValue({ hasAllRequested: true });
+    mockCheckPrivilegesDynamicallyWithRequest.mockClear();
 
     // Mocks must be configured on the raw context before convertContext wraps it —
     // mutating the converted context.core does not propagate through to the route.
     // Authenticated user (getCurrentUser is already a jest.Mock on the core mock).
-    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
-      username: 'test-user',
-    });
+    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue(mockCurrentUser);
 
     // getSpaceId already returns 'default'. Use a stable analytics mock so the telemetry
     // assertions can inspect reportEvent regardless of how many times getAnalytics is called.
@@ -84,6 +95,11 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
       {
         entityStore: {
           createEntityMetadataClient: mockCreateEntityMetadataClient,
+        },
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+          },
         },
       },
     ]);
@@ -140,6 +156,26 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(docs[0]['Ai_summary.generated_by']).toBe('test-user');
   });
 
+  it('persists Ai_summary.author_profile_uid from the authenticated user profile_uid', async () => {
+    const request = buildRequest();
+    await server.inject(request, context);
+
+    const [docs] = mockBulkAppendMetadata.mock.calls[0];
+    expect(docs[0]['Ai_summary.author_profile_uid']).toBe(mockCurrentUser.profile_uid);
+  });
+
+  it('omits Ai_summary.author_profile_uid when the authenticated user has no profile_uid', async () => {
+    (ctx.core.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+      username: 'test-user',
+    });
+
+    const request = buildRequest();
+    await server.inject(request, context);
+
+    const [docs] = mockBulkAppendMetadata.mock.calls[0];
+    expect(docs[0]['Ai_summary.author_profile_uid']).toBeUndefined();
+  });
+
   it('sets entity.id and entity.type from the request body', async () => {
     const request = buildRequest();
     await server.inject(request, context);
@@ -158,17 +194,54 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
     expect(docs[0]['Ai_summary.staleness']).toEqual(BASE_REQUEST_BODY.summary.staleness);
   });
 
-  it('uses asInternalUser — createEntityMetadataClient is called with the internal ES client', async () => {
+  it('checks metadata read privileges, then writes via asInternalUser', async () => {
     const internalEsClient = { mock: 'internal-client' };
     mockGetStartServices.mockResolvedValue([
-      { elasticsearch: { client: { asInternalUser: internalEsClient } } },
-      { entityStore: { createEntityMetadataClient: mockCreateEntityMetadataClient } },
+      {
+        elasticsearch: {
+          client: { asInternalUser: internalEsClient },
+        },
+      },
+      {
+        entityStore: { createEntityMetadataClient: mockCreateEntityMetadataClient },
+        security: {
+          authz: {
+            checkPrivilegesDynamicallyWithRequest: mockCheckPrivilegesDynamicallyWithRequest,
+          },
+        },
+      },
     ]);
 
     const request = buildRequest();
     await server.inject(request, context);
 
+    expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledTimes(1);
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({
+      elasticsearch: {
+        cluster: [],
+        index: {
+          [getEntityIndexPattern({
+            schemaVersion: ENTITY_SCHEMA_VERSION_V2,
+            dataset: ENTITY_METADATA,
+            namespace: 'default',
+          })]: ['read'],
+        },
+      },
+    });
+    expect(mockCreateEntityMetadataClient).toHaveBeenCalledTimes(1);
     expect(mockCreateEntityMetadataClient).toHaveBeenCalledWith(internalEsClient, 'default');
+  });
+
+  it('returns { created: false } and does not persist when the user lacks metadata read access', async () => {
+    mockCheckPrivileges.mockResolvedValue({ hasAllRequested: false });
+
+    const request = buildRequest();
+    const response = await server.inject(request, context);
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ created: false });
+    expect(mockBulkAppendMetadata).not.toHaveBeenCalled();
+    expect(mockReportEvent).not.toHaveBeenCalled();
   });
 
   it('falls back to "unknown" for Ai_summary.generated_by when no authenticated user', async () => {
@@ -180,6 +253,7 @@ describe('POST /internal/entity_details/ai_summary - entityDetailsAiSummaryRoute
 
     const [docs] = mockBulkAppendMetadata.mock.calls[0];
     expect(docs[0]['Ai_summary.generated_by']).toBe('unknown');
+    expect(docs[0]['Ai_summary.author_profile_uid']).toBeUndefined();
   });
 
   it('caps highlights and recommendedActions in the persisted document', async () => {

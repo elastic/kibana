@@ -15,31 +15,37 @@ components:
           type: boolean
         has_write_permissions:
           type: boolean
+        has_install_permissions:
+          type: boolean
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  type: object
-                  additionalProperties:
-                    type: boolean
-                index:
-                  type: object
-                  additionalProperties:
-                    type: object
-                    additionalProperties:
-                      type: boolean
-            kibana:
-              type: object
-              additionalProperties:
-                type: boolean
-          required:
-            - elasticsearch
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
+        install_privileges:
+          $ref: "#/components/schemas/EntityAnalyticsPrivilegesDetail"
       required:
         - has_all_required
         - privileges
+    EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              type: object
+              additionalProperties:
+                type: boolean
+            index:
+              type: object
+              additionalProperties:
+                type: object
+                additionalProperties:
+                  type: boolean
+        kibana:
+          type: object
+          additionalProperties:
+            type: boolean
+      required:
+        - elasticsearch
     EntityAfterKey:
       type: object
       additionalProperties:

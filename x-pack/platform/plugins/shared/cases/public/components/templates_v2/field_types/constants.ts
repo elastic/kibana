@@ -28,7 +28,7 @@ fields:
   - name: requires_escalation
     control: TOGGLE
     label: Requires escalation
-    type: keyword
+    type: boolean
     metadata:
       default: false
   # Shown and required only when escalation is toggled on.
