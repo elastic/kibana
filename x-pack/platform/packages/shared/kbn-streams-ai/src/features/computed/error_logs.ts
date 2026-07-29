@@ -17,6 +17,38 @@ const SAMPLE_SIZE = 5;
 const LOG_MESSAGE_FIELDS = ['message', 'body.text'] as const;
 const ERROR_KEYWORDS = ['error', 'exception'] as const;
 
+// Keep only the message + prompt-relevant signal fields; raw docs are otherwise
+// mostly irrelevant metadata. OTel nests under `(resource.)attributes.*`, so
+// match on the prefix-stripped leaf (keeps `resource.attributes.service.name`,
+// drops `resource.attributes.cloud.service.name`).
+const ERROR_LOG_KEEP_FIELDS = new Set<string>([
+  '@timestamp',
+  ...LOG_MESSAGE_FIELDS,
+  'log.level',
+  'severity_text',
+  'severity_number',
+  'error.type',
+  'error.message',
+  'exception.type',
+  'exception.message',
+  'event.outcome',
+  'service.name',
+]);
+
+const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
+
+// Keep the original (dotted) key — the name the LLM must reference in ES|QL — not the leaf.
+const pickErrorLogFields = (fields: Record<string, unknown>): Record<string, unknown> => {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    if (value === undefined) continue;
+    if (ERROR_LOG_KEEP_FIELDS.has(key.replace(OTEL_FIELD_PREFIX, ''))) {
+      result[key] = value;
+    }
+  }
+  return result;
+};
+
 const columnPath = (field: string) => (field.includes('.') ? field.split('.') : field);
 
 // Equivalent to the pre-ES|QL DSL filter:
@@ -67,7 +99,12 @@ This is useful for understanding error patterns, identifying recurring issues, a
     });
 
     return {
-      samples: compact(hits.map((hit) => formatRawDocument({ hit })?.fields)),
+      samples: compact(
+        hits.map((hit) => {
+          const fields = formatRawDocument({ hit })?.fields;
+          return fields ? pickErrorLogFields(fields) : undefined;
+        })
+      ),
     };
   },
 };
