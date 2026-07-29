@@ -7,31 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, type DiscoverPageObjects } from '../fixtures';
-
-const openDocViewerFieldDescription = async ({
-  page,
-  pageObjects,
-  field,
-}: {
-  page: ScoutPage;
-  pageObjects: DiscoverPageObjects;
-  field: string;
-}) => {
-  await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
-  await pageObjects.docViewer.openTab('doc_view_table');
-  const flyout = page.testSubj.locator('docViewerFlyout');
-  const fieldNameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${field}-name"]`);
-  const expandButton = flyout.getByTestId('euiDataGridCellExpandButton');
-
-  await fieldNameCell.waitFor({ state: 'visible' });
-  await fieldNameCell.scrollIntoViewIfNeeded();
-  await fieldNameCell.click();
-  await expandButton.click();
-  await page.testSubj.locator(`fieldDescription-${field}`).waitFor({ state: 'visible' });
-};
+import { spaceTest } from '../fixtures';
 
 spaceTest.describe(
   'Discover runtime field editor metadata',
@@ -94,8 +71,8 @@ spaceTest.describe(
         );
         await unifiedFieldList.closeFieldPopover();
 
-        await openDocViewerFieldDescription({ page, pageObjects, field: 'agent' });
-        await expect(unifiedFieldList.getFieldDescription('agent')).toHaveText(
+        await docViewer.openFieldDescription('agent');
+        await expect(docViewer.getExpandedFieldDescription('agent')).toHaveText(
           updatedCustomDescription
         );
         await docViewer.close();
@@ -112,8 +89,8 @@ spaceTest.describe(
         await expect(unifiedFieldList.getFieldDescription('@timestamp')).toContainText('Date');
         await unifiedFieldList.closeFieldPopover();
 
-        await openDocViewerFieldDescription({ page, pageObjects, field: '@timestamp' });
-        await expect(unifiedFieldList.getFieldDescription('@timestamp')).toContainText('Date');
+        await docViewer.openFieldDescription('@timestamp');
+        await expect(docViewer.getExpandedFieldDescription('@timestamp')).toContainText('Date');
         await docViewer.close();
 
         await unifiedFieldList.openFieldEditor('@timestamp');
@@ -126,8 +103,8 @@ spaceTest.describe(
         );
         await unifiedFieldList.closeFieldPopover();
 
-        await openDocViewerFieldDescription({ page, pageObjects, field: '@timestamp' });
-        await expect(unifiedFieldList.getFieldDescription('@timestamp')).toHaveText(
+        await docViewer.openFieldDescription('@timestamp');
+        await expect(docViewer.getExpandedFieldDescription('@timestamp')).toHaveText(
           customDescription
         );
         await docViewer.close();

@@ -65,6 +65,24 @@ export class DocViewer {
     await this.page.testSubj.click(`docViewerTab-${tabId}`);
   }
 
+  async openFieldDescription(fieldName: string) {
+    await this.openAndWaitForFlyout({ rowIndex: 0 });
+    await this.openTab('doc_view_table');
+
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    const fieldNameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
+    const expandButton = flyout.getByTestId('euiDataGridCellExpandButton');
+
+    await fieldNameCell.waitFor({ state: 'visible' });
+    await fieldNameCell.scrollIntoViewIfNeeded();
+    await fieldNameCell.click();
+    await expandButton.click();
+  }
+
+  getExpandedFieldDescription(fieldName: string): Locator {
+    return this.page.testSubj.locator(`fieldDescription-${fieldName}`);
+  }
+
   getFlyout() {
     return this.page.testSubj.locator('kbnDocViewer');
   }
