@@ -114,6 +114,9 @@ export const monitoringTypes = Object.values(dataTypes);
 /** Dedicated indices Universal Profiling reads from and the Elasticsearch exporter writes to. */
 export const UNIVERSAL_PROFILING_INDEX_PATTERNS = ['profiling-*', 'profiles-*'] as const;
 
+/** Concrete symbolization queue indices used by delete-by-query. */
+export const UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS = ['.profiling-sq-*'] as const;
+
 /**
  * Data stream types that Fleet must not manage (OTel or dedicated input): no routing transform,
  * no dataset index templates/data streams, no `<type>-<dataset>-<namespace>` write permissions.
