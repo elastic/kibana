@@ -270,6 +270,7 @@
     "@kbn/as-code-filters-constants": "link:src/platform/packages/shared/as-code/filters-constants",
     "@kbn/as-code-filters-schema": "link:src/platform/packages/shared/as-code/filters-schema",
     "@kbn/as-code-filters-transforms": "link:src/platform/packages/shared/as-code/filters-transforms",
+    "@kbn/as-code-json-flyout-component": "link:src/platform/packages/shared/as-code/json-flyout-component",
     "@kbn/as-code-shared-schemas": "link:src/platform/packages/shared/as-code/shared-schemas",
     "@kbn/as-code-shared-telemetry": "link:src/platform/packages/shared/as-code/shared-telemetry",
     "@kbn/as-code-shared-transforms": "link:src/platform/packages/shared/as-code/shared-transforms",

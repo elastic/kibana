@@ -29,13 +29,13 @@ import { css } from '@emotion/react';
 import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { coreServices, shareService } from '../../../../../services/kibana_services';
-import type { ExportJsonSanitizedState } from './types';
+import type { ExportJsonOpenInConsoleConfig, ExportJsonSanitizedState } from './types';
 
 export type ExportJsonPanelProps<SanitizedState extends object> =
   ExportJsonSanitizedState<SanitizedState> & {
-    apiPath?: string;
+    dataTestSubjPrefix: string;
     onRetry: () => void;
+    openInConsole?: ExportJsonOpenInConsoleConfig;
   };
 
 function WarningsCallout({
@@ -45,6 +45,7 @@ function WarningsCallout({
   setIsExpanded,
   isVisible,
   onDismiss,
+  dataTestSubjPrefix,
 }: {
   warnings: string[];
   accordionId: string;
@@ -52,6 +53,7 @@ function WarningsCallout({
   setIsExpanded: (isExpanded: boolean) => void;
   isVisible: boolean;
   onDismiss: () => void;
+  dataTestSubjPrefix: string;
 }) {
   const euiThemeContext = useEuiTheme();
 
@@ -70,16 +72,16 @@ function WarningsCallout({
   return (
     <EuiFlexItem grow={false}>
       <KbnWarningCallout
-        title={i18n.translate('dashboard.exportJson.warningsTitle', {
+        title={i18n.translate('asCodeExport.exportJson.warningsTitle', {
           defaultMessage: 'Unsupported properties were removed',
         })}
-        text={i18n.translate('dashboard.exportJson.warningsSummary', {
+        text={i18n.translate('asCodeExport.exportJson.warningsSummary', {
           defaultMessage:
             '{count} item{count, plural, one {} other {s}} removed from the JSON source.',
           values: { count: warnings.length },
         })}
         size="s"
-        data-test-subj="dashboardExportSourceWarnings"
+        data-test-subj={`${dataTestSubjPrefix}ExportSourceWarnings`}
         onDismiss={onDismiss}
       >
         <EuiAccordion
@@ -89,10 +91,10 @@ function WarningsCallout({
           paddingSize="s"
           buttonContent={
             isExpanded
-              ? i18n.translate('dashboard.exportJson.warningsAccordionHide', {
+              ? i18n.translate('asCodeExport.exportJson.warningsAccordionHide', {
                   defaultMessage: 'Hide details',
                 })
-              : i18n.translate('dashboard.exportJson.warningsAccordionShow', {
+              : i18n.translate('asCodeExport.exportJson.warningsAccordionShow', {
                   defaultMessage: 'Show details',
                 })
           }
@@ -100,7 +102,7 @@ function WarningsCallout({
           {isExpanded ? (
             <EuiText
               size="s"
-              data-test-subj="dashboardExportSourceWarningsList"
+              data-test-subj={`${dataTestSubjPrefix}ExportSourceWarningsList`}
               css={warningsListStyles}
             >
               <ul>
@@ -116,7 +118,7 @@ function WarningsCallout({
   );
 }
 
-function LoadingState() {
+function LoadingState({ dataTestSubjPrefix }: { dataTestSubjPrefix: string }) {
   return (
     <EuiFlexGroup
       direction="column"
@@ -128,15 +130,15 @@ function LoadingState() {
       <EuiFlexItem grow={false}>
         <EuiLoadingSpinner
           size="xl"
-          data-test-subj="dashboardExportSourceLoading"
-          aria-label={i18n.translate('dashboard.exportJson.loadingLabel', {
+          data-test-subj={`${dataTestSubjPrefix}ExportSourceLoading`}
+          aria-label={i18n.translate('asCodeExport.exportJson.loadingLabel', {
             defaultMessage: 'Loading JSON source',
           })}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiText size="s" color="subdued">
-          {i18n.translate('dashboard.exportJson.loadingText', {
+          {i18n.translate('asCodeExport.exportJson.loadingText', {
             defaultMessage: 'Loading JSON source...',
           })}
         </EuiText>
@@ -146,14 +148,16 @@ function LoadingState() {
 }
 
 function SuccessState({
-  openInConsoleRequest,
   jsonValue,
+  openInConsole,
+  dataTestSubjPrefix,
 }: {
-  openInConsoleRequest?: string;
   jsonValue: string;
+  openInConsole?: ExportJsonOpenInConsoleConfig;
+  dataTestSubjPrefix: string;
 }) {
-  const useUrl = shareService?.url.locators.useUrl;
-
+  const useUrl = openInConsole?.useUrl;
+  const openInConsoleRequest = openInConsole?.getRequest(jsonValue);
   const devToolsDataUri = openInConsoleRequest
     ? compressToEncodedURIComponent(openInConsoleRequest)
     : undefined;
@@ -166,10 +170,7 @@ function SuccessState({
     }),
     [devToolsDataUri]
   );
-
-  const canShowDevTools = Boolean(
-    coreServices.application?.capabilities?.dev_tools?.show && devToolsDataUri !== undefined
-  );
+  const canShowDevTools = Boolean(openInConsole?.canShow && devToolsDataUri !== undefined);
 
   return (
     <EuiFlexGroup
@@ -196,12 +197,12 @@ function SuccessState({
                     flush="right"
                     iconType="copyClipboard"
                     onClick={copy}
-                    aria-label={i18n.translate('dashboard.exportJson.copyAriaLabel', {
+                    aria-label={i18n.translate('asCodeExport.exportJson.copyAriaLabel', {
                       defaultMessage: 'Copy JSON source',
                     })}
-                    data-test-subj="dashboardExportSourceCopyButton"
+                    data-test-subj={`${dataTestSubjPrefix}ExportSourceCopyButton`}
                   >
-                    {i18n.translate('dashboard.exportJson.copyButtonLabel', {
+                    {i18n.translate('asCodeExport.exportJson.copyButtonLabel', {
                       defaultMessage: 'Copy to clipboard',
                     })}
                   </EuiButtonEmpty>
@@ -219,11 +220,12 @@ function SuccessState({
                   href={consoleHref}
                   target="_blank"
                   rel="noopener noreferrer"
-                  data-test-subj="dashboardExportSourceOpenInConsoleButton"
+                  data-test-subj={`${dataTestSubjPrefix}ExportSourceOpenInConsoleButton`}
                 >
-                  {i18n.translate('dashboard.exportJson.openInConsoleButtonLabel', {
-                    defaultMessage: 'Open in Console',
-                  })}
+                  {openInConsole?.label ??
+                    i18n.translate('asCodeExport.exportJson.openInConsoleButtonLabel', {
+                      defaultMessage: 'Open in Console',
+                    })}
                 </EuiButtonEmpty>
               </div>
             </EuiFlexItem>
@@ -234,7 +236,7 @@ function SuccessState({
         <CodeEditor
           languageId={XJsonLang.ID}
           value={jsonValue}
-          aria-label={i18n.translate('dashboard.exportJson.codeBlockAriaLabel', {
+          aria-label={i18n.translate('asCodeExport.exportJson.codeBlockAriaLabel', {
             defaultMessage: 'Export JSON source',
           })}
           options={{
@@ -257,7 +259,15 @@ function SuccessState({
   );
 }
 
-function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: () => void }) {
+function ErrorState({
+  error,
+  onRetry,
+  dataTestSubjPrefix,
+}: {
+  error: Error | undefined;
+  onRetry?: () => void;
+  dataTestSubjPrefix: string;
+}) {
   return (
     <EuiFlexGroup
       direction="column"
@@ -271,10 +281,10 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: ()
           iconType="error"
           color="danger"
           titleSize="s"
-          data-test-subj="dashboardExportSourceSanitizeErrorPrompt"
+          data-test-subj={`${dataTestSubjPrefix}ExportSourceSanitizeErrorPrompt`}
           title={
             <h3>
-              {i18n.translate('dashboard.exportJson.sanitizeErrorTitle', {
+              {i18n.translate('asCodeExport.exportJson.sanitizeErrorTitle', {
                 defaultMessage: 'Unable to export',
               })}
             </h3>
@@ -282,13 +292,13 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: ()
           body={
             <EuiText size="s">
               <p>
-                {i18n.translate('dashboard.exportJson.sanitizeErrorBody', {
+                {i18n.translate('asCodeExport.exportJson.sanitizeErrorBody', {
                   defaultMessage: 'Sorry, there was an error loading the JSON source.',
                 })}
               </p>
               {error && (
                 <p>
-                  {i18n.translate('dashboard.exportJson.sanitizeErrorDetails', {
+                  {i18n.translate('asCodeExport.exportJson.sanitizeErrorDetails', {
                     defaultMessage: 'Error: {errorMessage}',
                     values: { errorMessage: error.message },
                   })}
@@ -302,9 +312,9 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: ()
                 color="danger"
                 iconType="refresh"
                 onClick={onRetry}
-                data-test-subj="dashboardExportSourceRetryButton"
+                data-test-subj={`${dataTestSubjPrefix}ExportSourceRetryButton`}
               >
-                {i18n.translate('dashboard.exportJson.retryButtonLabel', {
+                {i18n.translate('asCodeExport.exportJson.retryButtonLabel', {
                   defaultMessage: 'Retry',
                 })}
               </EuiButton>
@@ -317,14 +327,17 @@ function ErrorState({ error, onRetry }: { error: Error | undefined; onRetry?: ()
 }
 
 export const ExportJsonPanel = <State extends object, SanitizedState extends object>({
-  apiPath,
   status,
   data,
   warnings,
   error,
   onRetry,
+  openInConsole,
+  dataTestSubjPrefix,
 }: ExportJsonPanelProps<SanitizedState>) => {
-  const warningsAccordionId = useGeneratedHtmlId({ prefix: 'dashboardExportSourceWarnings' });
+  const warningsAccordionId = useGeneratedHtmlId({
+    prefix: `${dataTestSubjPrefix}ExportSourceWarnings`,
+  });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
   const [showWarningsCallout, setShowWarningsCallout] = useState(true);
 
@@ -339,11 +352,6 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
     [data, status]
   );
 
-  const openInConsoleRequest = useMemo(
-    () => (apiPath ? `POST kbn:${apiPath}\n${jsonValue}` : undefined),
-    [apiPath, jsonValue]
-  );
-
   return (
     <EuiFlexItem grow css={{ minHeight: 0 }}>
       <EuiFlexGroup direction="column" gutterSize="s" css={{ flex: '1 1 auto', minHeight: 0 }}>
@@ -353,6 +361,7 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
           isExpanded={isWarningsExpanded}
           setIsExpanded={setIsWarningsExpanded}
           isVisible={showWarningsCallout}
+          dataTestSubjPrefix={dataTestSubjPrefix}
           onDismiss={() => {
             setShowWarningsCallout(false);
             setIsWarningsExpanded(false);
@@ -361,16 +370,21 @@ export const ExportJsonPanel = <State extends object, SanitizedState extends obj
 
         <EuiFlexItem grow css={{ minHeight: 0 }}>
           {status === 'loading' ? (
-            <LoadingState />
+            <LoadingState dataTestSubjPrefix={dataTestSubjPrefix} />
           ) : status === 'error' ? (
-            <ErrorState error={error} onRetry={onRetry} />
+            <ErrorState error={error} onRetry={onRetry} dataTestSubjPrefix={dataTestSubjPrefix} />
           ) : jsonValue ? (
-            <SuccessState openInConsoleRequest={openInConsoleRequest} jsonValue={jsonValue} />
+            <SuccessState
+              jsonValue={jsonValue}
+              openInConsole={openInConsole}
+              dataTestSubjPrefix={dataTestSubjPrefix}
+            />
           ) : (
             <ErrorState
+              dataTestSubjPrefix={dataTestSubjPrefix}
               error={
                 new Error(
-                  i18n.translate('dashboard.exportJson.noDataError', {
+                  i18n.translate('asCodeExport.exportJson.noDataError', {
                     defaultMessage: 'No data was returned. See warnings above for more details.',
                   })
                 )

@@ -7,5 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ExportJsonFlyout } from './export_json_flyout';
-export type { ExportJsonSharingData } from './types';
+export { ExportJsonFlyoutContent } from './src/export_json';
+export type {
+  DownloadExportJson,
+  ExportJsonOpenInConsoleConfig,
+  ExportJsonPreparationResult,
+  ExportJsonSharingData,
+  PrepareExportJsonFunction,
+  UseConsoleUrl,
+} from './src/export_json';

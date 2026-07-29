@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/as-code-json-flyout-component",
+  "owner": [
+    "@elastic/kibana-presentation",
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

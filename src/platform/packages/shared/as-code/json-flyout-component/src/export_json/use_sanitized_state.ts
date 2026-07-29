@@ -10,19 +10,23 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { apm } from '@elastic/apm-rum';
-import type { ExportJsonSanitizedState, ExportJsonStatus, SanitizeStateFunction } from './types';
+import type {
+  ExportJsonSanitizedState,
+  ExportJsonStatus,
+  PrepareExportJsonFunction,
+} from './types';
 
 export type UseSanitizedStateResult<SanitizedState extends object> =
   ExportJsonSanitizedState<SanitizedState> & {
     retry: () => void;
   };
 
-export function useSanitizedState<State extends object, SanitizedState extends object>({
+export function useSanitizedState<State extends object, SanitizedState extends object = State>({
   state,
-  sanitizeState,
+  prepareExportJson,
 }: {
   state: State;
-  sanitizeState: SanitizeStateFunction<State, SanitizedState>;
+  prepareExportJson?: PrepareExportJsonFunction<State, SanitizedState>;
 }): UseSanitizedStateResult<SanitizedState> {
   const [status, setStatus] = useState<ExportJsonStatus>('loading');
   const [error, setError] = useState<Error | undefined>(undefined);
@@ -65,10 +69,17 @@ export function useSanitizedState<State extends object, SanitizedState extends o
     setData(undefined);
     setWarnings([]);
 
-    sanitizeState(state)
+    const preparation = prepareExportJson
+      ? prepareExportJson(state)
+      : Promise.resolve({
+          data: state as unknown as SanitizedState,
+          warnings: [],
+        });
+
+    preparation
       .then((response) => {
         if (!isMounted) return;
-        setWarnings(response.warnings.map(({ message }) => message));
+        setWarnings([...response.warnings]);
         setData(response.data);
         setStatus('success');
       })
@@ -77,7 +88,7 @@ export function useSanitizedState<State extends object, SanitizedState extends o
         const err = e instanceof Error ? e : new Error(String(e));
         apm.captureError(err, {
           labels: {
-            error_type: 'SanitizeDashboardFailure',
+            error_type: 'PrepareExportJsonFailure',
           },
         });
         setError(err);
@@ -87,7 +98,7 @@ export function useSanitizedState<State extends object, SanitizedState extends o
     return () => {
       isMounted = false;
     };
-  }, [state, reloadCount, sanitizeState]);
+  }, [state, reloadCount, prepareExportJson]);
 
   return { ...debouncedState, retry };
 }

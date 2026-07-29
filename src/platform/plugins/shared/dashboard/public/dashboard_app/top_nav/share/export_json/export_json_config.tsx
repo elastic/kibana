@@ -10,14 +10,18 @@
 import React from 'react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
+import {
+  ExportJsonFlyoutContent,
+  type ExportJsonSharingData,
+} from '@kbn/as-code-json-flyout-component';
 import { i18n } from '@kbn/i18n';
 import type { ExportShareParameters } from '@kbn/share-plugin/public';
-import { useShareTypeContext } from '@kbn/share-plugin/public';
+import { downloadFileAs, useShareTypeContext } from '@kbn/share-plugin/public';
 
 import { DASHBOARD_API_PATH, type DashboardState } from '../../../../../common';
 import { type DashboardSanitizeResponseBody } from '../../../../../server';
+import { coreServices, shareService } from '../../../../services/kibana_services';
 import { sanitizeDashboard } from './sanitize_dashboard';
-import { ExportJsonFlyout, type ExportJsonSharingData } from './flyout';
 
 export const exportJsonConfig: ExportShareParameters = {
   label: ({ openFlyout }) => (
@@ -49,12 +53,24 @@ const ExportDashboardJsonFlyout = ({ closeFlyout }: { closeFlyout: () => void })
   const { title, getExportJson } = typedSharingData;
 
   return (
-    <ExportJsonFlyout<DashboardState, DashboardSanitizeResponseBody['data']>
-      apiPath={DASHBOARD_API_PATH}
+    <ExportJsonFlyoutContent<DashboardState, DashboardSanitizeResponseBody['data']>
       closeFlyout={closeFlyout}
+      dataTestSubjPrefix="dashboard"
+      downloadExportJson={(filename, content) =>
+        downloadFileAs(filename, { content, type: 'application/json' })
+      }
       getExportJson={getExportJson}
+      isTechnicalPreview
       objectType={objectTypeAlias ?? objectType.toLocaleLowerCase()}
-      sanitizeState={sanitizeDashboard}
+      openInConsole={{
+        canShow: Boolean(coreServices.application?.capabilities?.dev_tools?.show),
+        getRequest: (jsonValue) => `POST kbn:${DASHBOARD_API_PATH}\n${jsonValue}`,
+        label: i18n.translate('dashboard.exportJson.openInConsoleButtonLabel', {
+          defaultMessage: 'Open in Console',
+        }),
+        useUrl: shareService?.url.locators.useUrl,
+      }}
+      prepareExportJson={sanitizeDashboard}
       title={title}
     />
   );

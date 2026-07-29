@@ -8,16 +8,12 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import type { DashboardState } from '../../../../../../common';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../../../common/constants';
 import { useSanitizedState } from './use_sanitized_state';
 
-describe('useSanitizedDashboardState', () => {
-  const dashboardState: DashboardState = {
-    title: 'my dashboard',
-    panels: [],
-    pinned_panels: [],
-    options: DEFAULT_DASHBOARD_OPTIONS,
+describe('useSanitizedState', () => {
+  const state = {
+    title: 'my object',
+    items: [],
   };
 
   beforeEach(() => {
@@ -25,35 +21,32 @@ describe('useSanitizedDashboardState', () => {
   });
 
   test('starts loading and then returns a success state', async () => {
-    const sanitizeDashboard = jest.fn().mockResolvedValue({
-      data: { ...dashboardState, title: 'my dashboard (sanitized)' },
-      warnings: [],
+    const prepareExportJson = jest.fn().mockResolvedValue({
+      data: { ...state, title: 'my object (sanitized)' },
+      warnings: ['Unsupported property removed'],
     });
 
-    const { result } = renderHook(() =>
-      useSanitizedState({ state: dashboardState, sanitizeState: sanitizeDashboard })
-    );
+    const { result } = renderHook(() => useSanitizedState({ state, prepareExportJson }));
     expect(result.current.status).toBe('loading');
 
     await waitFor(() => {
       expect(result.current.status).toBe('success');
     });
 
-    expect(sanitizeDashboard).toHaveBeenCalledTimes(1);
+    expect(prepareExportJson).toHaveBeenCalledTimes(1);
+    expect(result.current.warnings).toEqual(['Unsupported property removed']);
   });
 
   test('retries when retry is called', async () => {
-    const sanitizeDashboard = jest
+    const prepareExportJson = jest
       .fn()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce({
-        data: { ...dashboardState, title: 'my dashboard (sanitized)' },
+        data: { ...state, title: 'my object (sanitized)' },
         warnings: [],
       });
 
-    const { result } = renderHook(() =>
-      useSanitizedState({ state: dashboardState, sanitizeState: sanitizeDashboard })
-    );
+    const { result } = renderHook(() => useSanitizedState({ state, prepareExportJson }));
     await waitFor(() => {
       expect(result.current.status).toBe('error');
     });
@@ -63,8 +56,21 @@ describe('useSanitizedDashboardState', () => {
     });
 
     await waitFor(() => {
-      expect(sanitizeDashboard).toHaveBeenCalledTimes(2);
+      expect(prepareExportJson).toHaveBeenCalledTimes(2);
       expect(result.current.status).toBe('success');
     });
+    expect(prepareExportJson).toHaveBeenNthCalledWith(1, state);
+    expect(prepareExportJson).toHaveBeenNthCalledWith(2, state);
+  });
+
+  test('uses the state as the prepared result when no preparation is provided', async () => {
+    const { result } = renderHook(() => useSanitizedState({ state }));
+
+    await waitFor(() => {
+      expect(result.current.status).toBe('success');
+    });
+
+    expect(result.current.data).toBe(state);
+    expect(result.current.warnings).toEqual([]);
   });
 });
