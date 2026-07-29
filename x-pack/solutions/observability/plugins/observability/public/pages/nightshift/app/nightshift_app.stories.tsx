@@ -72,7 +72,7 @@ export const LookingIntoYourData: Story = {
   },
 };
 
-export const LoadingToHappyPath: Story = {
+export const LoadingToPopulatedContent: Story = {
   args: {
     scenario: 'loadingThenPopulated',
   },

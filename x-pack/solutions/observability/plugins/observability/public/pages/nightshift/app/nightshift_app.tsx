@@ -39,12 +39,17 @@ import { SignificantEventStatuses } from '../landing/significant_event_statuses'
 import { EventFlyout } from '../event/event_flyout';
 import { NightshiftHeader } from './nightshift_header';
 import { NightshiftEmptyState } from './nightshift_empty_state';
-import { NIGHTSHIFT_EVENT_UUID_QUERY_PARAM } from '../common/nightshift_url_params';
+import {
+  BLAST_RADIUS_QUERY_PARAM,
+  clearNightshiftEventSelectionParams,
+  getNightshiftEventSelectionFromSearch,
+  NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  NIGHTSHIFT_EVENT_UUID_QUERY_PARAM,
+  setNightshiftEventSelectionParams,
+} from '../common/nightshift_url_params';
 
-// Kept in the URL so a refresh or a shared link restores the open flyout.
-const BLAST_RADIUS_QUERY_PARAM = 'blastRadius';
-const HAPPY_PATH_TRANSITION_MS = 400;
 const COMPACT_APP_HEADER_HEIGHT_PX = 48;
+const POPULATED_CONTENT_TRANSITION_MS = 400;
 
 const loadingStateExitAnimation = keyframes`
   from {
@@ -57,7 +62,7 @@ const loadingStateExitAnimation = keyframes`
   }
 `;
 
-const happyPathEntryAnimation = keyframes`
+const populatedContentEntryAnimation = keyframes`
   from {
     opacity: 0;
     transform: translateY(12px);
@@ -72,10 +77,28 @@ const setElementInert = (element: HTMLDivElement | null): void => {
   element?.setAttribute('inert', '');
 };
 
-interface SelectedEventIdentity {
-  eventId: string;
-  eventUuid: string;
-}
+const resolveSelectedEvent = ({
+  events,
+  eventIdFromUrl,
+  eventUuidFromUrl,
+}: {
+  events: SignificantEvent[];
+  eventIdFromUrl?: string;
+  eventUuidFromUrl?: string;
+}): SignificantEvent | undefined => {
+  if (eventUuidFromUrl) {
+    const byUuid = events.find(({ event_uuid: eventUuid }) => eventUuid === eventUuidFromUrl);
+    if (byUuid) {
+      return byUuid;
+    }
+  }
+
+  if (eventIdFromUrl) {
+    return events.find(({ event_id: eventId }) => eventId === eventIdFromUrl);
+  }
+
+  return undefined;
+};
 
 export function NightshiftApp(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -86,26 +109,26 @@ export function NightshiftApp(): React.ReactElement {
   const resolvedSectionRef = useRef<HTMLElement>(null);
   const [isTransitioningFromLoading, setIsTransitioningFromLoading] = useState(false);
 
-  const { data, error: eventsError, isLoading, refetch } = useFetchSignificantEvents();
-  const { closeEvent, closingEventUuid } = useCloseSignificantEvent();
+  const { data, error: eventsError, isFetching, isLoading, refetch } = useFetchSignificantEvents();
+  const { closeSignificantEvent, closingEventUuid } = useCloseSignificantEvent();
   const wasLoadingRef = useRef(isLoading);
 
   const events = useMemo(() => data?.hits ?? [], [data]);
 
   // Derived from the freshest fetched list (not a click-time snapshot), so
   // background refetches keep the open flyout current.
-  const selectedEventUuid = useMemo(
-    () => new URLSearchParams(search).get(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM) ?? undefined,
+  const { eventId: selectedEventIdFromUrl, eventUuid: selectedEventUuid } = useMemo(
+    () => getNightshiftEventSelectionFromSearch(search),
     [search]
   );
-  const [selectedEventIdentity, setSelectedEventIdentity] = useState<SelectedEventIdentity>();
   const selectedEvent = useMemo(
     () =>
-      events.find(({ event_uuid: eventUuid }) => eventUuid === selectedEventUuid) ??
-      (selectedEventIdentity && selectedEventIdentity.eventUuid === selectedEventUuid
-        ? events.find(({ event_id: eventId }) => eventId === selectedEventIdentity.eventId)
-        : undefined),
-    [events, selectedEventIdentity, selectedEventUuid]
+      resolveSelectedEvent({
+        events,
+        eventIdFromUrl: selectedEventIdFromUrl,
+        eventUuidFromUrl: selectedEventUuid,
+      }),
+    [events, selectedEventIdFromUrl, selectedEventUuid]
   );
   const [eventNotFound, setEventNotFound] = useState(false);
 
@@ -128,20 +151,19 @@ export function NightshiftApp(): React.ReactElement {
     [agentBuilder]
   );
   const onChatClick = agentBuilder ? handleChatClick : undefined;
-  const handleCloseEvent = useCallback(
-    (event: SignificantEvent) => closeEvent(event.event_uuid),
-    [closeEvent]
+  const handleCloseSignificantEvent = useCallback(
+    (event: SignificantEvent) => closeSignificantEvent(event.event_uuid),
+    [closeSignificantEvent]
   );
 
   const handleEventClick = useCallback(
     (event: SignificantEvent) => {
       setEventNotFound(false);
-      setSelectedEventIdentity({
+      const params = new URLSearchParams(history.location.search);
+      setNightshiftEventSelectionParams(params, {
         eventId: event.event_id,
         eventUuid: event.event_uuid,
       });
-      const params = new URLSearchParams(history.location.search);
-      params.set(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM, event.event_uuid);
       history.replace({ search: params.toString() });
     },
     [history]
@@ -149,9 +171,8 @@ export function NightshiftApp(): React.ReactElement {
 
   const handleFlyoutClose = useCallback(() => {
     setEventNotFound(false);
-    setSelectedEventIdentity(undefined);
     const params = new URLSearchParams(history.location.search);
-    params.delete(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM);
+    clearNightshiftEventSelectionParams(params);
     history.replace({ search: params.toString() });
   }, [history]);
 
@@ -214,12 +235,15 @@ export function NightshiftApp(): React.ReactElement {
   }, [needsActionEvents, resolvedEvents, selectedEvent]);
 
   useEffect(() => {
-    if (selectedEventUuid && !selectedEvent && !isLoading) {
+    const hasSelectionInUrl = Boolean(selectedEventUuid || selectedEventIdFromUrl);
+    if (hasSelectionInUrl && !selectedEvent && !isLoading) {
       setEventNotFound(true);
-      setSelectedEventIdentity(undefined);
       const params = new URLSearchParams(history.location.search);
-      if (params.has(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM)) {
-        params.delete(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM);
+      if (
+        params.has(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM) ||
+        params.has(NIGHTSHIFT_EVENT_ID_QUERY_PARAM)
+      ) {
+        clearNightshiftEventSelectionParams(params);
         history.replace({ search: params.toString() });
       }
       return;
@@ -227,21 +251,18 @@ export function NightshiftApp(): React.ReactElement {
     if (selectedEvent) {
       setEventNotFound(false);
       if (
-        selectedEventIdentity?.eventId !== selectedEvent.event_id ||
-        selectedEventIdentity?.eventUuid !== selectedEvent.event_uuid
+        selectedEventUuid !== selectedEvent.event_uuid ||
+        selectedEventIdFromUrl !== selectedEvent.event_id
       ) {
-        setSelectedEventIdentity({
+        const params = new URLSearchParams(history.location.search);
+        setNightshiftEventSelectionParams(params, {
           eventId: selectedEvent.event_id,
           eventUuid: selectedEvent.event_uuid,
         });
-      }
-      if (selectedEventUuid && selectedEvent.event_uuid !== selectedEventUuid) {
-        const params = new URLSearchParams(history.location.search);
-        params.set(NIGHTSHIFT_EVENT_UUID_QUERY_PARAM, selectedEvent.event_uuid);
         history.replace({ search: params.toString() });
       }
     }
-  }, [history, isLoading, selectedEvent, selectedEventIdentity, selectedEventUuid]);
+  }, [history, isLoading, selectedEvent, selectedEventIdFromUrl, selectedEventUuid]);
 
   const scrollToSection = (sectionRef: React.RefObject<HTMLElement>) => {
     sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -257,9 +278,10 @@ export function NightshiftApp(): React.ReactElement {
 
   const hasEvents = shownEvents.length > 0;
   const hasNeedsAction = needsActionEvents.length > 0;
-  const isEmptyState = isLoading || !hasEvents;
-  const contentTopMargin = isEmptyState && !isLoading ? euiTheme.size.m : euiTheme.size.l;
-  const constrainContentToViewport = isEmptyState || isTransitioningFromLoading;
+  const showCenteredEmptyLayout = isLoading || !hasEvents;
+  const contentTopMargin =
+    showCenteredEmptyLayout && !isLoading ? euiTheme.size.m : euiTheme.size.l;
+  const constrainContentToViewport = showCenteredEmptyLayout || isTransitioningFromLoading;
   const viewportContentHeight = `calc(
     var(--kbn-application--content-height, 100vh) -
     ${COMPACT_APP_HEADER_HEIGHT_PX}px -
@@ -269,11 +291,11 @@ export function NightshiftApp(): React.ReactElement {
   )`;
 
   useLayoutEffect(() => {
-    const shouldTransitionToHappyPath =
+    const shouldTransitionToPopulatedContent =
       wasLoadingRef.current && !isLoading && hasEvents && !eventsError;
     wasLoadingRef.current = isLoading;
 
-    if (!shouldTransitionToHappyPath) {
+    if (!shouldTransitionToPopulatedContent) {
       if (isLoading) {
         setIsTransitioningFromLoading(false);
       }
@@ -290,7 +312,7 @@ export function NightshiftApp(): React.ReactElement {
     setIsTransitioningFromLoading(true);
     const transitionTimeout = window.setTimeout(
       () => setIsTransitioningFromLoading(false),
-      HAPPY_PATH_TRANSITION_MS
+      POPULATED_CONTENT_TRANSITION_MS
     );
 
     return () => window.clearTimeout(transitionTimeout);
@@ -298,9 +320,9 @@ export function NightshiftApp(): React.ReactElement {
 
   usePageReady({
     isReady: !isLoading && !eventsError,
-    isRefreshing: isLoading,
+    isRefreshing: isFetching && !isLoading,
     customMetrics: {
-      key1: 'total_event_count',
+      key1: 'critical_high_event_count',
       value1: events.length,
       key2: 'needs_action_event_count',
       value2: needsActionEvents.length,
@@ -310,9 +332,44 @@ export function NightshiftApp(): React.ReactElement {
       value4: activeBlastRadiusChip ? 1 : 0,
     },
     meta: {
-      description: '[ttfmp_nightshift] The Nightshift landing page has loaded significant events.',
+      description:
+        '[ttfmp_nightshift] The Nightshift landing page has loaded critical/high significant events.',
     },
   });
+
+  const sharedListProps = {
+    closingEventUuid,
+    onChatClick,
+    onCloseClick: handleCloseSignificantEvent,
+    onEventClick: handleEventClick,
+    selectedEventUuid: selectedEvent?.event_uuid,
+  };
+
+  const eventNotFoundCallout = eventNotFound ? (
+    <div
+      css={css`
+        margin-top: ${euiTheme.size.m};
+        width: 100%;
+      `}
+    >
+      <EuiCallOut
+        announceOnMount
+        color="warning"
+        iconType="warning"
+        size="s"
+        title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
+          defaultMessage: 'Significant Event not found',
+        })}
+      >
+        <EuiText size="s">
+          {i18n.translate('xpack.observability.nightshift.eventNotFoundDescription', {
+            defaultMessage:
+              'The event in this link is no longer in the current results. The URL has been cleared.',
+          })}
+        </EuiText>
+      </EuiCallOut>
+    </div>
+  ) : null;
 
   // Only treat a load failure as fatal when there is nothing to show; a failed
   // background refetch that still has cached data degrades to a non-blocking warning.
@@ -326,32 +383,35 @@ export function NightshiftApp(): React.ReactElement {
       gutterSize="none"
       responsive={false}
       css={css`
-        align-items: ${isEmptyState ? 'center' : 'stretch'};
+        align-items: ${showCenteredEmptyLayout ? 'center' : 'stretch'};
         background: ${euiTheme.colors.backgroundBaseSubdued};
         box-sizing: border-box;
-        gap: ${isEmptyState ? euiTheme.size.xl : 0};
+        gap: ${showCenteredEmptyLayout ? euiTheme.size.xl : 0};
         height: ${constrainContentToViewport ? viewportContentHeight : 'auto'};
-        justify-content: ${isEmptyState ? 'center' : 'flex-start'};
+        justify-content: ${showCenteredEmptyLayout ? 'center' : 'flex-start'};
         margin-top: ${contentTopMargin};
         min-height: 0;
         overflow-y: ${constrainContentToViewport ? 'clip' : 'visible'};
-        padding: ${isEmptyState ? euiTheme.size.xxl : 0} ${isEmptyState ? euiTheme.size.xl : 0}
-          calc(${euiTheme.size.xxl} * 1.5);
+        padding: ${showCenteredEmptyLayout ? euiTheme.size.xxl : 0}
+          ${showCenteredEmptyLayout ? euiTheme.size.xl : 0} calc(${euiTheme.size.xxl} * 1.5);
         position: relative;
       `}
     >
       <NightshiftHeader
-        isEmptyState={isEmptyState}
+        isEmptyState={showCenteredEmptyLayout}
         isLoading={isLoading}
         hasNeedsAction={hasNeedsAction}
         showAllEventsHref={hasEvents ? showAllEventsHref : undefined}
       />
 
-      {isEmptyState ? (
-        <NightshiftEmptyState isProcessing={isLoading} logsHref={emptyStateLogsHref} />
+      {showCenteredEmptyLayout ? (
+        <>
+          {eventNotFoundCallout}
+          <NightshiftEmptyState isProcessing={isLoading} logsHref={emptyStateLogsHref} />
+        </>
       ) : (
         <div
-          data-test-subj="nightshiftHappyPath"
+          data-test-subj="nightshiftPopulatedContent"
           css={[
             css`
               width: 100%;
@@ -362,13 +422,13 @@ export function NightshiftApp(): React.ReactElement {
             `,
             isTransitioningFromLoading &&
               css`
-                animation: ${happyPathEntryAnimation} ${HAPPY_PATH_TRANSITION_MS}ms
+                animation: ${populatedContentEntryAnimation} ${POPULATED_CONTENT_TRANSITION_MS}ms
                   ${euiTheme.animation.resistance} both;
               `,
           ]}
         >
           {eventsError && (
-            <EuiFlexItem
+            <div
               css={css`
                 margin-top: ${euiTheme.size.m};
               `}
@@ -395,33 +455,10 @@ export function NightshiftApp(): React.ReactElement {
                   })}
                 </EuiButtonEmpty>
               </EuiCallOut>
-            </EuiFlexItem>
+            </div>
           )}
 
-          {eventNotFound && (
-            <EuiFlexItem
-              css={css`
-                margin-top: ${euiTheme.size.m};
-              `}
-            >
-              <EuiCallOut
-                announceOnMount
-                color="warning"
-                iconType="warning"
-                size="s"
-                title={i18n.translate('xpack.observability.nightshift.eventNotFoundTitle', {
-                  defaultMessage: 'Significant Event not found',
-                })}
-              >
-                <EuiText size="s">
-                  {i18n.translate('xpack.observability.nightshift.eventNotFoundDescription', {
-                    defaultMessage:
-                      'The event in this link is no longer in the current results. The URL has been cleared.',
-                  })}
-                </EuiText>
-              </EuiCallOut>
-            </EuiFlexItem>
-          )}
+          {eventNotFoundCallout}
 
           <SignificantEventStatuses
             needsActionCount={needsActionEvents.length}
@@ -445,6 +482,7 @@ export function NightshiftApp(): React.ReactElement {
               {needsActionEvents.length > 0 && (
                 <EuiFlexItem>
                   <SignificantEventList
+                    {...sharedListProps}
                     events={visibleNeedsActionEvents}
                     filterActive={Boolean(activeBlastRadiusChip)}
                     onClearFilter={
@@ -452,12 +490,7 @@ export function NightshiftApp(): React.ReactElement {
                         ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
                         : undefined
                     }
-                    onChatClick={onChatClick}
-                    onCloseClick={handleCloseEvent}
-                    onEventClick={handleEventClick}
-                    closingEventUuid={closingEventUuid}
                     sectionRef={needsActionSectionRef}
-                    selectedEventUuid={selectedEventUuid}
                     statusColor="danger"
                     title={i18n.translate('xpack.observability.nightshift.list.needActionTitle', {
                       defaultMessage: 'Need Action',
@@ -467,6 +500,7 @@ export function NightshiftApp(): React.ReactElement {
               )}
               <EuiFlexItem>
                 <SignificantEventList
+                  {...sharedListProps}
                   events={visibleResolvedEvents}
                   filterActive={Boolean(activeBlastRadiusChip && resolvedEvents.length > 0)}
                   onClearFilter={
@@ -474,12 +508,7 @@ export function NightshiftApp(): React.ReactElement {
                       ? () => handleBlastRadiusSelect(activeBlastRadiusChip)
                       : undefined
                   }
-                  onChatClick={onChatClick}
-                  onCloseClick={handleCloseEvent}
-                  onEventClick={handleEventClick}
-                  closingEventUuid={closingEventUuid}
                   sectionRef={resolvedSectionRef}
-                  selectedEventUuid={selectedEventUuid}
                   statusColor="success"
                   title={i18n.translate('xpack.observability.nightshift.list.resolvedTitle', {
                     defaultMessage: 'Resolved',
@@ -498,7 +527,7 @@ export function NightshiftApp(): React.ReactElement {
           ref={setElementInert}
           css={css`
             align-items: center;
-            animation: ${loadingStateExitAnimation} ${HAPPY_PATH_TRANSITION_MS}ms
+            animation: ${loadingStateExitAnimation} ${POPULATED_CONTENT_TRANSITION_MS}ms
               ${euiTheme.animation.resistance} both;
             background: ${euiTheme.colors.backgroundBaseSubdued};
             display: flex;

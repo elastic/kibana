@@ -8,20 +8,19 @@
 import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { RouteRepositoryClient } from '@kbn/server-route-repository';
-import type { SignificantEventsRouteRepository } from '@kbn/significant-events-plugin/server';
-import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import type { StreamsRepositoryClientOptions } from '@kbn/streams-plugin/public/api';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
 } from './use_fetch_significant_events';
 
-type MergedStreamsRepositoryClient = RouteRepositoryClient<
-  StreamsRouteRepository & SignificantEventsRouteRepository,
-  StreamsRepositoryClientOptions
->;
+interface CloseSignificantEventResponse {
+  event_uuid: string;
+  updated: number;
+  ignored: number;
+  status: SignificantEventStatus;
+}
 
 const CLOSE_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.observability.nightshift.closeEvent.successToastTitle',
@@ -37,30 +36,31 @@ const CLOSE_ERROR_TOAST_TITLE = i18n.translate(
   }
 );
 
+const toError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error));
+
 interface UseCloseSignificantEventResult {
-  closeEvent: (eventUuid: string) => void;
+  closeSignificantEvent: (eventUuid: string) => void;
   closingEventUuid?: string;
 }
 
 export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
-  const { notifications, streams } = useKibana().services;
+  const { http, notifications } = useKibana().services;
   const queryClient = useQueryClient();
   const [closingEventUuid, setClosingEventUuid] = useState<string>();
-  const streamsRepositoryClient = streams.streamsRepositoryClient as MergedStreamsRepositoryClient;
 
   const mutation = useMutation({
     mutationFn: (eventUuid: string) =>
-      streamsRepositoryClient.fetch('POST /internal/significant_events/events/{id}/update', {
-        params: {
-          path: { id: eventUuid },
-          body: { status: 'closed' },
-        },
-        signal: null,
-      }),
+      http.post<CloseSignificantEventResponse>(
+        `/internal/significant_events/events/${encodeURIComponent(eventUuid)}/update`,
+        {
+          body: JSON.stringify({ status: 'closed' }),
+        }
+      ),
     onMutate: (eventUuid) => {
       setClosingEventUuid(eventUuid);
     },
-    onSuccess: (_, eventUuid) => {
+    onSuccess: (response, eventUuid) => {
       queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
         (current) =>
@@ -68,15 +68,22 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
             ? {
                 ...current,
                 hits: current.hits.map((event) =>
-                  event.event_uuid === eventUuid ? { ...event, status: 'closed' } : event
+                  event.event_uuid === eventUuid
+                    ? {
+                        ...event,
+                        event_uuid: response.event_uuid,
+                        previous_event_uuid: eventUuid,
+                        status: 'closed',
+                      }
+                    : event
                 ),
               }
             : current
       );
       notifications.toasts.addSuccess({ title: CLOSE_SUCCESS_TOAST_TITLE });
     },
-    onError: (error: Error) => {
-      notifications.toasts.addError(error, { title: CLOSE_ERROR_TOAST_TITLE });
+    onError: (error: unknown) => {
+      notifications.toasts.addError(toError(error), { title: CLOSE_ERROR_TOAST_TITLE });
     },
     onSettled: async () => {
       setClosingEventUuid(undefined);
@@ -87,7 +94,7 @@ export const useCloseSignificantEvent = (): UseCloseSignificantEventResult => {
   });
 
   return {
-    closeEvent: (eventUuid) => mutation.mutate(eventUuid),
+    closeSignificantEvent: (eventUuid) => mutation.mutate(eventUuid),
     closingEventUuid,
   };
 };

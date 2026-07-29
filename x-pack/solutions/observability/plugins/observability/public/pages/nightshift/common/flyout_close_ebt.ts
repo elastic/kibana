@@ -9,6 +9,18 @@ import type { MouseEvent } from 'react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { NIGHTSHIFT_EBT_ACTIONS } from './ebt_constants';
 
+export const applyEbtPropsToElement = (
+  element: HTMLElement,
+  ebt: Parameters<typeof getEbtProps>[0]
+): void => {
+  const ebtProps = getEbtProps(ebt);
+  Object.entries(ebtProps).forEach(([attribute, value]) => {
+    if (value) {
+      element.setAttribute(attribute, value);
+    }
+  });
+};
+
 /**
  * EuiFlyout does not forward closeButtonProps when flyoutMenuProps is present.
  * Annotate the menu's close button during capture, before Kibana's window-level
@@ -26,13 +38,8 @@ export const setFlyoutMenuCloseButtonEbtProps = (clickEvent: MouseEvent, element
     return;
   }
 
-  const ebtProps = getEbtProps({
+  applyEbtPropsToElement(closeButton, {
     action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_FLYOUT,
     element,
-  });
-  Object.entries(ebtProps).forEach(([attribute, value]) => {
-    if (value) {
-      closeButton.setAttribute(attribute, value);
-    }
   });
 };

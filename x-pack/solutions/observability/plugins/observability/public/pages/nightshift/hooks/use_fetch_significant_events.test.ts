@@ -10,6 +10,7 @@ import type { QueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/nightshift_constants';
 import {
+  clearPendingInvestigationCompletionsForTests,
   markEventInvestigationCompleteInCache,
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   useFetchSignificantEvents,
@@ -65,6 +66,7 @@ jest.mock('@kbn/react-query', () => ({
 describe('useFetchSignificantEvents', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearPendingInvestigationCompletionsForTests();
     mockHttpGet.mockResolvedValue({
       hits: [],
       page: 1,
@@ -112,6 +114,10 @@ describe('useFetchSignificantEvents', () => {
 });
 
 describe('markEventInvestigationCompleteInCache', () => {
+  beforeEach(() => {
+    clearPendingInvestigationCompletionsForTests();
+  });
+
   it('sets completed_at on the matching event latest investigation', () => {
     let cache: NightshiftSignificantEventsQueryData | undefined = {
       hits: [
@@ -145,5 +151,61 @@ describe('markEventInvestigationCompleteInCache', () => {
     markEventInvestigationCompleteInCache(queryClient, 'evt-uuid-1', '2026-01-01T00:05:00.000Z');
 
     expect(cache?.hits[0].investigations?.[0].completed_at).toBe('2026-01-01T00:05:00.000Z');
+  });
+
+  it('reapplies pending completed_at after a refetch still missing server completion', async () => {
+    let cache: NightshiftSignificantEventsQueryData | undefined = {
+      hits: [
+        mockEvent({
+          investigations: [
+            {
+              workflow_execution_id: 'exec-1',
+              started_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+        }),
+      ],
+      page: 1,
+      perPage: 1,
+      total: 1,
+    };
+    const queryClient = {
+      setQueryData: jest.fn(
+        (
+          _queryKey: typeof NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
+          updater: (
+            current: NightshiftSignificantEventsQueryData | undefined
+          ) => NightshiftSignificantEventsQueryData | undefined
+        ) => {
+          cache = updater(cache);
+        }
+      ),
+    } as unknown as QueryClient;
+
+    markEventInvestigationCompleteInCache(queryClient, 'evt-uuid-1', '2026-01-01T00:05:00.000Z');
+
+    mockHttpGet.mockResolvedValueOnce({
+      hits: [
+        mockEvent({
+          event_uuid: 'evt-uuid-2',
+          investigations: [
+            {
+              workflow_execution_id: 'exec-1',
+              started_at: '2026-01-01T00:00:00.000Z',
+            },
+          ],
+        }),
+      ],
+      page: 1,
+      perPage: 1,
+      total: 1,
+    });
+
+    renderHook(() => useFetchSignificantEvents());
+    const data = (await capturedQueryFn!({
+      signal: undefined,
+    })) as NightshiftSignificantEventsQueryData;
+
+    expect(data.hits[0].investigations?.[0].completed_at).toBe('2026-01-01T00:05:00.000Z');
   });
 });

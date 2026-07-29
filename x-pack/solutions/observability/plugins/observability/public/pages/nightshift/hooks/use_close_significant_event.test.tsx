@@ -19,7 +19,7 @@ import { useCloseSignificantEvent } from './use_close_significant_event';
 jest.mock('../../../utils/kibana_react');
 
 const mockUseKibana = useKibana as jest.Mock;
-const fetch = jest.fn();
+const httpPost = jest.fn();
 const addSuccess = jest.fn();
 const addError = jest.fn();
 
@@ -38,25 +38,23 @@ const event: SignificantEvent = {
 describe('useCloseSignificantEvent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    fetch.mockResolvedValue({
-      event_uuid: event.event_uuid,
+    httpPost.mockResolvedValue({
+      event_uuid: 'event-1-v2',
       updated: 1,
       ignored: 0,
       status: 'closed',
     });
     mockUseKibana.mockReturnValue({
       services: {
+        http: { post: httpPost },
         notifications: {
           toasts: { addError, addSuccess },
-        },
-        streams: {
-          streamsRepositoryClient: { fetch },
         },
       },
     });
   });
 
-  it('closes the event and updates the Nightshift cache', async () => {
+  it('closes the event and updates the Nightshift cache with the new document uuid', async () => {
     const queryClient = new QueryClient({
       defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
     });
@@ -74,22 +72,43 @@ describe('useCloseSignificantEvent', () => {
     );
     const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
 
-    act(() => result.current.closeEvent(event.event_uuid));
+    act(() => result.current.closeSignificantEvent(event.event_uuid));
 
     await waitFor(() => expect(addSuccess).toHaveBeenCalled());
 
-    expect(fetch).toHaveBeenCalledWith('POST /internal/significant_events/events/{id}/update', {
-      params: {
-        path: { id: event.event_uuid },
-        body: { status: 'closed' },
-      },
-      signal: null,
+    expect(httpPost).toHaveBeenCalledWith('/internal/significant_events/events/event-1-v1/update', {
+      body: JSON.stringify({ status: 'closed' }),
     });
     expect(
       queryClient.getQueryData<NightshiftSignificantEventsQueryData>(
         NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY
-      )?.hits[0].status
-    ).toBe('closed');
+      )?.hits[0]
+    ).toEqual(
+      expect.objectContaining({
+        event_uuid: 'event-1-v2',
+        previous_event_uuid: 'event-1-v1',
+        status: 'closed',
+      })
+    );
     expect(addError).not.toHaveBeenCalled();
+  });
+
+  it('surfaces close failures as toast errors', async () => {
+    httpPost.mockRejectedValueOnce(new Error('close failed'));
+    const queryClient = new QueryClient({
+      defaultOptions: { mutations: { retry: false }, queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    const { result } = renderHook(() => useCloseSignificantEvent(), { wrapper });
+
+    act(() => result.current.closeSignificantEvent(event.event_uuid));
+
+    await waitFor(() => expect(addError).toHaveBeenCalled());
+    expect(addSuccess).not.toHaveBeenCalled();
+    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: 'Failed to close significant event',
+    });
   });
 });

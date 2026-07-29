@@ -120,7 +120,7 @@ describe('SignificantEventItem', () => {
     const closeButton = screen.getByTestId('nightshiftCloseSignificantEventButton');
     expect(closeButton).toHaveAttribute('data-ebt-action', 'closeSignificantEvent');
     expect(closeButton).toHaveAttribute('data-ebt-element', 'nightshiftSignificantEventsList');
-    expect(closeButton).toHaveAttribute('data-ebt-detail', 'open');
+    expect(closeButton).toHaveAttribute('data-ebt-detail', 'needsAction');
 
     fireEvent.click(closeButton);
     expect(onCloseClick).toHaveBeenCalledWith(mockEvent);

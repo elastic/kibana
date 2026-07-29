@@ -35,6 +35,55 @@ export const NIGHTSHIFT_EVENTS_PAGE_SIZE = 1000;
 const NIGHTSHIFT_LOOKBACK_DAYS = 30;
 const MAX_FETCH_PAGES = 10;
 
+const pendingInvestigationCompletions = new Map<string, string>();
+
+const pendingInvestigationCompletionKey = (eventId: string, workflowExecutionId: string): string =>
+  `${eventId}:${workflowExecutionId}`;
+
+export const clearPendingInvestigationCompletionsForTests = (): void => {
+  pendingInvestigationCompletions.clear();
+};
+
+const applyPendingInvestigationCompletions = (hits: SignificantEvent[]): SignificantEvent[] => {
+  if (pendingInvestigationCompletions.size === 0) {
+    return hits;
+  }
+
+  let changed = false;
+  const nextHits = hits.map((hit) => {
+    const investigations = hit.investigations;
+    if (!investigations?.length) {
+      return hit;
+    }
+
+    let investigationsChanged = false;
+    const nextInvestigations = investigations.map((investigation) => {
+      if (investigation.completed_at != null) {
+        return investigation;
+      }
+
+      const pendingCompletedAt = pendingInvestigationCompletions.get(
+        pendingInvestigationCompletionKey(hit.event_id, investigation.workflow_execution_id)
+      );
+      if (!pendingCompletedAt) {
+        return investigation;
+      }
+
+      investigationsChanged = true;
+      return { ...investigation, completed_at: pendingCompletedAt };
+    });
+
+    if (!investigationsChanged) {
+      return hit;
+    }
+
+    changed = true;
+    return { ...hit, investigations: nextInvestigations };
+  });
+
+  return changed ? nextHits : hits;
+};
+
 const fetchSignificantEvents = async ({
   http,
   signal,
@@ -76,7 +125,7 @@ const fetchSignificantEvents = async ({
   }
 
   return {
-    hits: allHits,
+    hits: applyPendingInvestigationCompletions(allHits),
     page: 1,
     perPage: allHits.length,
     total,
@@ -132,6 +181,14 @@ export const markEventInvestigationCompleteInCache = (
         if (latestInvestigation.completed_at != null) {
           return hit;
         }
+
+        pendingInvestigationCompletions.set(
+          pendingInvestigationCompletionKey(
+            hit.event_id,
+            latestInvestigation.workflow_execution_id
+          ),
+          completedAt
+        );
 
         changed = true;
         const updatedInvestigations = [...investigations];

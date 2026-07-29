@@ -94,9 +94,16 @@ export function SignificantEventList({
           <EuiText textAlign="center" color="subdued" size="s">
             <p>
               {filterActive
-                ? i18n.translate('xpack.observability.nightshift.list.filteredEmptyDescription', {
-                    defaultMessage: 'No events match this filter.',
-                  })
+                ? statusColor === 'success'
+                  ? i18n.translate(
+                      'xpack.observability.nightshift.list.filteredResolvedEmptyDescription',
+                      {
+                        defaultMessage: 'No resolved events match this filter.',
+                      }
+                    )
+                  : i18n.translate('xpack.observability.nightshift.list.filteredEmptyDescription', {
+                      defaultMessage: 'No events match this filter.',
+                    })
                 : i18n.translate('xpack.observability.nightshift.list.emptyDescription', {
                     defaultMessage: 'No significant events found',
                   })}

@@ -10,7 +10,7 @@ import { useHistory } from 'react-router-dom';
 import { EuiPageTemplate } from '@elastic/eui';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import { NightshiftApp } from './app/nightshift_app';
 import { NightshiftAppHeader } from './app/nightshift_app_header';
 import { useKibana } from '../../utils/kibana_react';

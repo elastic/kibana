@@ -31,6 +31,7 @@ describe('Nightshift global search provider', () => {
     await expect(find('night')).resolves.toEqual([
       expect.objectContaining({
         icon: 'logoObservability',
+        score: 90,
         title: 'Nightshift',
         type: 'application',
         url: {
@@ -41,8 +42,18 @@ describe('Nightshift global search provider', () => {
     ]);
   });
 
+  it('scores exact and prefix matches above the fuzzy floor', async () => {
+    await expect(find('nightshift')).resolves.toEqual([expect.objectContaining({ score: 100 })]);
+    await expect(find('significant')).resolves.toEqual([expect.objectContaining({ score: 90 })]);
+    await expect(find('events')).resolves.toEqual([expect.objectContaining({ score: 75 })]);
+  });
+
   it('supports fuzzy Nightshift searches', async () => {
     await expect(find('nightshf')).resolves.toHaveLength(1);
+  });
+
+  it('does not return Nightshift for unrelated terms', async () => {
+    await expect(find('dashboard')).resolves.toEqual([]);
   });
 
   it('does not return Nightshift when the feature is unavailable', async () => {

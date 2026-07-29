@@ -14,22 +14,27 @@ import { NIGHTSHIFT_PATH, OBSERVABILITY_BASE_PATH } from '../../../../common/loc
 const APPLICATION_RESULT_TYPE = 'application';
 const SEARCH_TERMS = ['nightshift', 'significant events'] as const;
 
+const EXACT_MATCH_SCORE = 100;
+const PREFIX_MATCH_SCORE = 90;
+const SUBSTRING_MATCH_SCORE = 75;
+const MIN_FUZZY_SCORE = 60;
+
 const scoreSearchTerm = (searchTerm: string): number => {
   if (SEARCH_TERMS.includes(searchTerm as (typeof SEARCH_TERMS)[number])) {
-    return 100;
+    return EXACT_MATCH_SCORE;
   }
   if (SEARCH_TERMS.some((candidate) => candidate.startsWith(searchTerm))) {
-    return 90;
+    return PREFIX_MATCH_SCORE;
   }
   if (SEARCH_TERMS.some((candidate) => candidate.includes(searchTerm))) {
-    return 75;
+    return SUBSTRING_MATCH_SCORE;
   }
   const closestDistance = Math.min(
     ...SEARCH_TERMS.map((candidate) => distance(searchTerm, candidate))
   );
   const longestLength = Math.max(searchTerm.length, ...SEARCH_TERMS.map(({ length }) => length));
   const fuzzyScore = Math.floor((1 - closestDistance / longestLength) * 100);
-  return fuzzyScore >= 60 ? fuzzyScore : 0;
+  return fuzzyScore >= MIN_FUZZY_SCORE ? fuzzyScore : 0;
 };
 
 export const createNightshiftGlobalSearchProvider = ({

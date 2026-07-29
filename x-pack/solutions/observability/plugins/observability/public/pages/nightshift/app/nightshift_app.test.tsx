@@ -65,10 +65,17 @@ interface FetchState {
   error?: Error | null;
 }
 
-function setEvents({ events = [], total, isLoading = false, error = null }: FetchState = {}) {
+function setEvents({
+  events = [],
+  total,
+  isLoading = false,
+  isFetching,
+  error = null,
+}: FetchState & { isFetching?: boolean } = {}) {
   mockUseFetchSignificantEvents.mockReturnValue({
     data: { hits: events, total: total ?? events.length, page: 1, perPage: 50 },
     error,
+    isFetching: isFetching ?? isLoading,
     isLoading,
     refetch: jest.fn(),
   });
@@ -106,7 +113,7 @@ describe('NightshiftApp', () => {
     openChat.mockClear();
     mockUsePageReady.mockClear();
     mockUseCloseSignificantEvent.mockReturnValue({
-      closeEvent: jest.fn(),
+      closeSignificantEvent: jest.fn(),
       closingEventUuid: undefined,
     });
     scrollIntoView.mockClear();
@@ -148,7 +155,7 @@ describe('NightshiftApp', () => {
         isReady: true,
         isRefreshing: false,
         customMetrics: expect.objectContaining({
-          key1: 'total_event_count',
+          key1: 'critical_high_event_count',
           value1: 2,
           key2: 'needs_action_event_count',
           value2: 1,
@@ -188,7 +195,7 @@ describe('NightshiftApp', () => {
     );
 
     expect(screen.getByTestId('nightshiftLoadingExitTransition')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftHappyPath')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftPopulatedContent')).toBeInTheDocument();
   });
 
   it('renders summary cards with correct counts', () => {
@@ -449,10 +456,10 @@ describe('NightshiftApp', () => {
   });
 
   it('closes a significant event from its list action', () => {
-    const closeEvent = jest.fn();
+    const closeSignificantEvent = jest.fn();
     const event = mockEvent();
     mockUseCloseSignificantEvent.mockReturnValue({
-      closeEvent,
+      closeSignificantEvent,
       closingEventUuid: undefined,
     });
     setEvents({ events: [event] });
@@ -460,7 +467,7 @@ describe('NightshiftApp', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Close Test significant event' }));
 
-    expect(closeEvent).toHaveBeenCalledWith(event.event_uuid);
+    expect(closeSignificantEvent).toHaveBeenCalledWith(event.event_uuid);
     expect(screen.queryByTestId('stubEventFlyout')).not.toBeInTheDocument();
   });
 
@@ -486,6 +493,24 @@ describe('NightshiftApp', () => {
     expect(screen.getByText('Flyout: Deep linked event')).toBeInTheDocument();
   });
 
+  it('restores the open flyout from a superseded eventUuid using eventId', () => {
+    setEvents({
+      events: [
+        mockEvent({
+          event_id: 'evt-1',
+          event_uuid: 'evt-uuid-current',
+          title: 'Lineage linked event',
+        }),
+      ],
+    });
+    renderWithIntl(<NightshiftApp />, {
+      initialEntries: ['/?eventUuid=evt-uuid-stale&eventId=evt-1'],
+    });
+
+    expect(screen.getByText('Flyout: Lineage linked event')).toBeInTheDocument();
+    expect(screen.queryByText('Significant Event not found')).not.toBeInTheDocument();
+  });
+
   it('keeps the flyout open when a refetch returns a newer event version', () => {
     const initialEvent = mockEvent({
       event_id: 'evt-1',
@@ -500,7 +525,7 @@ describe('NightshiftApp', () => {
     });
     setEvents({ events: [initialEvent] });
     const { rerender } = renderWithIntl(<NightshiftApp />, {
-      initialEntries: ['/?eventUuid=evt-uuid-1'],
+      initialEntries: ['/?eventUuid=evt-uuid-1&eventId=evt-1'],
     });
 
     expect(screen.getByText('Flyout: Investigating event')).toBeInTheDocument();
@@ -523,7 +548,7 @@ describe('NightshiftApp', () => {
     });
     rerender(
       <I18nProvider>
-        <MemoryRouter>
+        <MemoryRouter initialEntries={['/?eventUuid=evt-uuid-1&eventId=evt-1']}>
           <NightshiftApp />
         </MemoryRouter>
       </I18nProvider>

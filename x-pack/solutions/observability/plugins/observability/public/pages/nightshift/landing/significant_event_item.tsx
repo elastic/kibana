@@ -203,7 +203,7 @@ export function SignificantEventItem({
                       {...getEbtProps({
                         action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
                         element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
-                        detail: event.status,
+                        detail: NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION,
                       })}
                       iconType="cross"
                       isDisabled={isClosing}
