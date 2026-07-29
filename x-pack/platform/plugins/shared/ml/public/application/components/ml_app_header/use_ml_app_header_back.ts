@@ -8,10 +8,17 @@
 import type { MouseEvent } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { AppHeaderBack } from '@kbn/app-header';
-import { i18n } from '@kbn/i18n';
-import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import {
+  ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB,
+  CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB,
+  CALENDAR_LISTS_MANAGEMENT_BREADCRUMB,
+  DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB,
+  DATA_VISUALIZER_BREADCRUMB,
+  FILTER_LISTS_MANAGEMENT_BREADCRUMB,
+  SETTINGS_MANAGEMENT_BREADCRUMB,
+} from '../../routing/breadcrumbs';
 
 /**
  * Builds an {@link AppHeaderBack} target for chrome-next headers in the ML app.
@@ -81,88 +88,51 @@ export const useMlManagementAppHeaderBack = (
   );
 };
 
-export const DATA_VISUALIZER_BACK_LABEL = i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
-  defaultMessage: 'Data visualizer',
-});
-
-export const ANOMALY_DETECTION_JOBS_BACK_LABEL = i18n.translate(
-  'xpack.ml.anomalyDetectionManagementBreadcrumbLabel',
-  {
-    defaultMessage: 'Anomaly detection jobs',
-  }
-);
-
-export const DATA_FRAME_ANALYTICS_JOBS_BACK_LABEL = i18n.translate(
-  'xpack.ml.dataFrameAnalyticsManagementLabel',
-  {
-    defaultMessage: 'Data frame analytics jobs',
-  }
-);
-
-export const ANOMALY_DETECTION_SETTINGS_BACK_LABEL = i18n.translate(
-  'xpack.ml.settingsBreadcrumbLabel',
-  {
-    defaultMessage: 'Anomaly detection settings',
-  }
-);
-
-export const CALENDAR_MANAGEMENT_BACK_LABEL = i18n.translate(
-  'xpack.ml.settings.breadcrumbs.calendarListManagementLabel',
-  {
-    defaultMessage: 'Calendar management',
-  }
-);
-
-export const CALENDAR_DST_MANAGEMENT_BACK_LABEL = i18n.translate(
-  'xpack.ml.settings.breadcrumbs.calendarDstListManagementLabel',
-  {
-    defaultMessage: 'Calendar DST management',
-  }
-);
-
-export const FILTER_LISTS_BACK_LABEL = i18n.translate(
-  'xpack.ml.settings.breadcrumbs.filterListsManagementLabel',
-  {
-    defaultMessage: 'Filter lists',
-  }
-);
-
 /** Back navigation from Data visualizer child pages to the selector landing page. */
 export const useDataVisualizerBack = (): AppHeaderBack =>
-  useMlAppHeaderBack(`/${ML_PAGES.DATA_VISUALIZER}`, DATA_VISUALIZER_BACK_LABEL);
+  useMlAppHeaderBack(DATA_VISUALIZER_BREADCRUMB.href!, DATA_VISUALIZER_BREADCRUMB.text as string);
 
 /** Back navigation to the anomaly detection jobs list (Stack Management). */
 export const useAnomalyDetectionJobsBack = (): AppHeaderBack =>
   useMlManagementAppHeaderBack(
-    'anomaly_detection',
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-    ANOMALY_DETECTION_JOBS_BACK_LABEL
+    ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB.appId!,
+    ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB.path!,
+    ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB.text as string
   );
 
 /** Back navigation to the data frame analytics jobs list (Stack Management). */
 export const useDataFrameAnalyticsJobsBack = (): AppHeaderBack =>
   useMlManagementAppHeaderBack(
-    'analytics',
-    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-    DATA_FRAME_ANALYTICS_JOBS_BACK_LABEL
+    DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB.appId!,
+    DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB.path!,
+    DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB.text as string
   );
 
 /** Back navigation to anomaly detection settings (Stack Management). */
 export const useAnomalyDetectionSettingsBack = (): AppHeaderBack =>
-  useMlManagementAppHeaderBack('ad_settings', '', ANOMALY_DETECTION_SETTINGS_BACK_LABEL);
+  useMlManagementAppHeaderBack(
+    SETTINGS_MANAGEMENT_BREADCRUMB.appId!,
+    SETTINGS_MANAGEMENT_BREADCRUMB.path!,
+    SETTINGS_MANAGEMENT_BREADCRUMB.text as string
+  );
 
 /** Back navigation to filter lists (Stack Management). */
 export const useFilterListsBack = (): AppHeaderBack =>
   useMlManagementAppHeaderBack(
-    'ad_settings',
-    ML_PAGES.FILTER_LISTS_MANAGE,
-    FILTER_LISTS_BACK_LABEL
+    FILTER_LISTS_MANAGEMENT_BREADCRUMB.appId!,
+    FILTER_LISTS_MANAGEMENT_BREADCRUMB.path!,
+    FILTER_LISTS_MANAGEMENT_BREADCRUMB.text as string
   );
 
 /** Back navigation to calendar management (Stack Management). */
-export const useCalendarManagementBack = (isDst: boolean): AppHeaderBack =>
-  useMlManagementAppHeaderBack(
-    'ad_settings',
-    isDst ? ML_PAGES.CALENDARS_DST_MANAGE : ML_PAGES.CALENDARS_MANAGE,
-    isDst ? CALENDAR_DST_MANAGEMENT_BACK_LABEL : CALENDAR_MANAGEMENT_BACK_LABEL
+export const useCalendarManagementBack = (isDst: boolean): AppHeaderBack => {
+  const breadcrumb = isDst
+    ? CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB
+    : CALENDAR_LISTS_MANAGEMENT_BREADCRUMB;
+
+  return useMlManagementAppHeaderBack(
+    breadcrumb.appId!,
+    breadcrumb.path!,
+    breadcrumb.text as string
   );
+};

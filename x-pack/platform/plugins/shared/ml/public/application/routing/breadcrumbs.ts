@@ -97,7 +97,7 @@ export const CALENDAR_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
 };
 
 export const CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
-  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarListManagementLabel', {
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarDstListManagementLabel', {
     defaultMessage: 'Calendar DST management',
   }),
   appId: 'ad_settings',
