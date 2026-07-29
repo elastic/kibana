@@ -317,15 +317,15 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     if (!viz.xExtent || viz.xExtent.mode === 'full') {
       viz.xExtent = { mode: 'dataBounds', niceValues: false };
     } else {
+      delete viz.xExtent.enforce; // enforce not preserved through round-trip
       viz.xExtent.niceValues ??= false;
     }
 
     // yLeftExtent: only present when there are left-axis accessors
     if (hasLeftAxisAccessors) {
       viz.yLeftExtent ??= { mode: 'full', niceValues: true };
+      delete viz.yLeftExtent.enforce; // enforce not preserved through round-trip
       viz.yLeftExtent.niceValues ??= true;
-      // enforce is not preserved through the round-trip for full mode
-      if (viz.yLeftExtent.mode === 'full') delete viz.yLeftExtent.enforce;
     } else {
       delete viz.yLeftExtent;
     }
@@ -333,9 +333,8 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     // yRightExtent: only present when there are right-axis accessors
     if (hasRightAxisAccessors) {
       viz.yRightExtent ??= { mode: 'full', niceValues: true };
+      delete viz.yRightExtent.enforce; // enforce not preserved through round-trip
       viz.yRightExtent.niceValues ??= true;
-      // enforce is not preserved through the round-trip for full mode
-      if (viz.yRightExtent.mode === 'full') delete viz.yRightExtent.enforce;
     } else {
       delete viz.yRightExtent;
     }
