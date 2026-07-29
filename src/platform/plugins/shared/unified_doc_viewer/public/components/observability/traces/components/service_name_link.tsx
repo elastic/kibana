@@ -52,13 +52,15 @@ export function ServiceNameLink({
   const { from: timeRangeFrom, to: timeRangeTo } =
     dataService.query.timefilter.timefilter.getTime();
 
+  const canViewApm = core.application.capabilities.apm?.show || false;
+
   const serviceFlyoutFeature = discoverShared.features.registry.getById(
     'observability-service-flyout'
   );
 
   const content = <ServiceNameWithIcon agentName={agentName} serviceName={formattedServiceName} />;
 
-  if (serviceFlyoutFeature) {
+  if (serviceFlyoutFeature && canViewApm) {
     return (
       <>
         <EuiLink
@@ -90,8 +92,7 @@ export function ServiceNameLink({
     );
   }
 
-  // Fallback: no flyout feature registered — render a direct APM link instead.
-  const canViewApm = core.application.capabilities.apm?.show || false;
+  // Fallback: no flyout feature registered (or no APM access) — render a direct APM link instead.
   const apmLinkToServiceEntityLocator = urlService.locators.get<{
     serviceName: string;
     rangeFrom: string;

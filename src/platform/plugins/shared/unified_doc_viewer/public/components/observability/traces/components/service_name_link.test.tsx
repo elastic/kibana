@@ -171,6 +171,18 @@ describe('ServiceNameLink with service flyout feature registered', () => {
       expect.objectContaining({ flyoutHistoryKey: undefined })
     );
   });
+
+  it('renders plain text when the user has no APM access, even if the flyout feature is registered', () => {
+    (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
+      ...mockServices,
+      core: { application: { capabilities: { apm: { show: false } } } },
+    });
+
+    render(<ServiceNameLink {...defaultProps} />);
+
+    expect(screen.queryByTestId('serviceNameLink')).not.toBeInTheDocument();
+    expect(screen.getByText(SERVICE_NAME)).toBeInTheDocument();
+  });
 });
 
 describe('ServiceNameLink without service flyout feature', () => {
