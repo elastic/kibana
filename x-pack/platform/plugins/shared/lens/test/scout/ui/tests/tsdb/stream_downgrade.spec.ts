@@ -26,41 +26,51 @@ const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_tsdb_additional_${RESOUR
 const TIME_RANGE = createTsdbScenarioTimeRange();
 
 interface ScenarioResult {
+  /** Count of `lns-indexPatternDimension-average incompatible` elements. */
+  incompatibleAverageCount: number;
+  /** Bar chart data from the full time range with empty rows enabled. */
   bars: Array<{ y: number }> | undefined;
+  /** Whether the before-downgrade time window contains any data. */
+  hasDataBeforeDowngrade: boolean;
+  /** Whether the after-downgrade time window contains any data. */
+  hasDataAfterDowngrade: boolean;
   expectedDocumentCountBeforeUpgrade: number;
 }
+
+// The downgraded base stream has mixed backing-index mappings (old TSDB + new regular).
+// Elasticsearch field caps reports metric_conflicts_indices and omits time_series_metric,
+// so Lens sees bytes_counter as a plain numeric field and keeps Average enabled — even when
+// another pure TSDB stream is added to the data view. The removed FTR assertion intended to
+// vary by scenario but never awaited testSubjects.exists(), making it a silent no-op.
+// The assertions in each test body lock in the observed product behavior.
 
 const runScenario = async (
   { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[]
 ): Promise<ScenarioResult> => {
   const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
-  // The downgraded base stream has mixed backing-index mappings (old TSDB + new regular).
-  // Elasticsearch field caps reports metric_conflicts_indices and omits time_series_metric,
-  // so Lens sees bytes_counter as a plain numeric field and keeps Average enabled — even when
-  // another pure TSDB stream is added to the data view. The removed FTR assertion intended to
-  // vary by scenario but never awaited testSubjects.exists(), making it a silent no-op.
-  // This assertion locks in the observed product behavior.
 
-  await test.step('verify Average is enabled for the counter field across all scenarios', async () => {
-    await pageObjects.lens.openFullEditor();
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'min',
-      field: 'bytes_counter',
-      keepOpen: true,
-    });
+  const incompatibleAverageCount =
+    await test.step('check counter field compatibility', async () => {
+      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+        field: 'bytes_counter',
+        keepOpen: true,
+      });
 
-    await expect(
-      page.testSubj.locator('lns-indexPatternDimension-average incompatible')
-    ).toHaveCount(0);
-    await pageObjects.lens.closeDimensionEditor();
-  });
+      const count = await page.testSubj
+        .locator('lns-indexPatternDimension-average incompatible')
+        .count();
+      await pageObjects.lens.closeDimensionEditor();
+      return count;
+    });
 
   const bars = await test.step('visualize count data before and after the downgrade', async () => {
     // Start with a clean editor, matching the FTR beforeEach boundary between journey steps.
@@ -86,38 +96,45 @@ const runScenario = async (
     return (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
   });
 
-  await test.step('visualize data on both sides of the downgrade boundary', async () => {
-    // Start with another clean editor, matching the third FTR journey step.
-    await pageObjects.lens.openFullEditor();
-    await pageObjects.datePicker.setAbsoluteRange({
-      from: offsetPickerTime(TIME_RANGE.beforeUpgrade, -60 * 60 * 1000),
-      to: offsetPickerTime(TIME_RANGE.beforeUpgrade, 60 * 60 * 1000),
-    });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'count',
-    });
+  const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
+    await test.step('visualize data on both sides of the downgrade boundary', async () => {
+      // Start with another clean editor, matching the third FTR journey step.
+      await pageObjects.lens.openFullEditor();
+      await pageObjects.datePicker.setAbsoluteRange({
+        from: offsetPickerTime(TIME_RANGE.beforeUpgrade, -60 * 60 * 1000),
+        to: offsetPickerTime(TIME_RANGE.beforeUpgrade, 60 * 60 * 1000),
+      });
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'count',
+      });
 
-    await pageObjects.lens.waitForVisualization('xyVisChart');
-    const barsBeforeDowngrade = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
-    expect(barsBeforeDowngrade?.some(({ y }) => y > 0)).toBe(true);
+      await pageObjects.lens.waitForVisualization('xyVisChart');
+      const barsBeforeDowngrade = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
 
-    await pageObjects.datePicker.setAbsoluteRange({
-      from: offsetPickerTime(TIME_RANGE.afterUpgrade, 1000),
-      to: offsetPickerTime(TIME_RANGE.afterUpgrade, 2 * 60 * 60 * 1000),
+      await pageObjects.datePicker.setAbsoluteRange({
+        from: offsetPickerTime(TIME_RANGE.afterUpgrade, 1000),
+        to: offsetPickerTime(TIME_RANGE.afterUpgrade, 2 * 60 * 60 * 1000),
+      });
+      await pageObjects.lens.waitForVisualization('xyVisChart');
+      const barsAfterDowngrade = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
+
+      return {
+        hasDataBeforeDowngrade: barsBeforeDowngrade?.some(({ y }) => y > 0) ?? false,
+        hasDataAfterDowngrade: barsAfterDowngrade?.some(({ y }) => y > 0) ?? false,
+      };
     });
-    await pageObjects.lens.waitForVisualization('xyVisChart');
-    const barsAfterDowngrade = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
-    expect(barsAfterDowngrade?.some(({ y }) => y > 0)).toBe(true);
-  });
 
   return {
+    incompatibleAverageCount,
     bars,
+    hasDataBeforeDowngrade,
+    hasDataAfterDowngrade,
     expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
   };
 };
@@ -155,6 +172,9 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
     tsdbScenario,
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
+    expect(result.incompatibleAverageCount).toBe(0);
+    expect(result.hasDataBeforeDowngrade).toBe(true);
+    expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
     expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
@@ -169,6 +189,9 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: BASE_STREAM },
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
+    expect(result.hasDataBeforeDowngrade).toBe(true);
+    expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
     expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
@@ -183,6 +206,9 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
+    expect(result.hasDataBeforeDowngrade).toBe(true);
+    expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
     expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
@@ -198,6 +224,9 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
+    expect(result.hasDataBeforeDowngrade).toBe(true);
+    expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
     expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
@@ -212,6 +241,9 @@ test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgno
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
+    expect(result.hasDataBeforeDowngrade).toBe(true);
+    expect(result.hasDataAfterDowngrade).toBe(true);
     const counts = getScenarioDataCounts(result);
     expect(counts.beforeDowngrade).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
     expect(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
