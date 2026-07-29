@@ -13,6 +13,7 @@ import { z } from '@kbn/zod/v4';
 import {
   createAlertEventDataSchema,
   createAlertEventResponseSchema,
+  createAlertEventSourceParamsSchema,
   errorResponseSchema,
   type CreateAlertEventData,
   type CreateAlertEventResponse,
@@ -36,12 +37,6 @@ import { QueryServiceInternalToken } from '../../lib/services/query_service/toke
 
 /** Kibana app path for episode detail — callers prepend origin + basePath as needed. */
 const EPISODE_DETAILS_APP_PATH = '/app/management/alertingV2/episodes';
-
-// ── Shared schemas ────────────────────────────────────────────────────────────
-
-const sourceParamsSchema = z.object({
-  source: z.string().min(1),
-});
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 
@@ -280,7 +275,7 @@ export class CreateAlertEventBySourceRoute extends BaseAlertingRoute {
   static routeOptions = sharedRouteOptions;
   static schemas = {
     request: {
-      params: sourceParamsSchema,
+      params: createAlertEventSourceParamsSchema,
       body: createAlertEventDataSchema,
     },
     response: sharedSchemas.response,
@@ -292,7 +287,7 @@ export class CreateAlertEventBySourceRoute extends BaseAlertingRoute {
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
     private readonly request: KibanaRequest<
-      z.infer<typeof sourceParamsSchema>,
+      z.infer<typeof createAlertEventSourceParamsSchema>,
       unknown,
       CreateAlertEventData
     >,

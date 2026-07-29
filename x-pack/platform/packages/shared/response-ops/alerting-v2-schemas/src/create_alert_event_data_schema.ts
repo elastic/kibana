@@ -6,6 +6,13 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  ID_MAX_LENGTH,
+  MAX_ALERT_EVENT_DATA_KEYS,
+  MAX_FIELD_NAME_LENGTH,
+  MAX_FINGERPRINT_FIELDS,
+  MAX_FINGERPRINT_LENGTH,
+} from './constants';
 
 const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
 
@@ -21,6 +28,7 @@ const RESERVED_SOURCE_PREFIX = 'elastic.';
 const sourceSchema = z
   .string()
   .min(1)
+  .max(ID_MAX_LENGTH)
   .refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
     message:
       'source cannot start with "elastic." — this prefix is reserved for Elastic-produced events.',
@@ -45,16 +53,35 @@ export const createAlertEventDataSchema = z
     // At least one of fingerprint / fingerprint_fields / rule_id is required.
     // Priority: fingerprint > fingerprint_fields > rule_id (hashed with source).
     // Validated in the route handler after source is resolved.
-    fingerprint: z.string().min(1).optional(),
-    fingerprint_fields: z.array(z.string().min(1)).min(1).optional(),
-    rule_id: z.string().min(1).optional(),
+    fingerprint: z.string().min(1).max(MAX_FINGERPRINT_LENGTH).optional(),
+    fingerprint_fields: z
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .min(1)
+      .max(MAX_FINGERPRINT_FIELDS)
+      .optional(),
+    rule_id: z.string().min(1).max(ID_MAX_LENGTH).optional(),
 
     alert_status: externalAlertStatusSchema.optional(),
-    data: z.record(z.string(), z.any()).optional(),
-    timestamp: z.string().optional(),
+    data: z
+      .record(z.string().max(MAX_FIELD_NAME_LENGTH), z.any())
+      .optional()
+      .superRefine((data, ctx) => {
+        if (data != null && Object.keys(data).length > MAX_ALERT_EVENT_DATA_KEYS) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `data must have at most ${MAX_ALERT_EVENT_DATA_KEYS} keys`,
+          });
+        }
+      }),
+    timestamp: z.iso.datetime().optional(),
     severity: alertEventSeveritySchema.optional(),
   })
   .passthrough();
+
+/** Path params for POST /api/alerting/v2/alerts/:source */
+export const createAlertEventSourceParamsSchema = z.object({
+  source: sourceSchema,
+});
 
 export const createAlertEventResponseSchema = z.object({
   group_hash: z.string(),
