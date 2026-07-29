@@ -66,7 +66,26 @@ export type {
 export { RELAY_APP_CONNECTION_STATUS } from './slack_app/types';
 export type {
   RelayAppConnectionStatus,
+  SlackAppBindChannelResponse,
+  SlackAppBindingsResponse,
   SlackAppConnectResponse,
-  SlackAppStatusResponse,
   SlackAppDisconnectResponse,
+  SlackAppStatusResponse,
+  SlackAppUnbindChannelResponse,
+  SlackChannelBinding,
+  SlackChannelBindingStatus,
 } from './slack_app/types';
+
+export type {
+  SignificantEventsMaintenanceFailure,
+  SignificantEventsMaintenanceSummary,
+  SignificantEventsMaintenanceStatus,
+  SignificantEventsMaintenanceFeatureSettings,
+} from './maintenance/types';
+
+export {
+  DEFAULT_MAINTENANCE_STATE,
+  isMaintenanceState,
+  stateBlocksNewActivity,
+} from './maintenance/state_machine';
+export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';

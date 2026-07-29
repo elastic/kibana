@@ -18,7 +18,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');
   const screenshotDirectories = ['response_ops_docs', 'observability_cases'];
   const testSubjects = getService('testSubjects');
-  const cases = getService('cases');
   const owner = OBSERVABILITY_OWNER;
 
   describe('Observability case settings', function () {
@@ -32,21 +31,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     it('case settings screenshots', async function () {
       // With the templates feature flag pinned ON for this suite, custom fields and
       // templates are managed on the dedicated v2 templates / field-library pages
-      // rather than inline on the Case Settings page. Capture the settings page,
-      // the templates list, the field library, and the add-connector flyout.
+      // rather than inline on the Case Settings page. The settings page itself is
+      // the redesigned panel (`casesRedesign.settings` defaults ON). Capture the
+      // settings page, the templates list, the field library, and the
+      // add-connector flyout.
       await navigateToCasesApp(getPageObject, getService, owner);
-      // The redesigned settings page drops the custom fields and templates management these
-      // screenshots document, so skip while the redesign is on.
-      if (await cases.common.isRedesignEnabled()) {
-        return this.skip();
-      }
       await retry.waitFor('configure-case-button exist', async () => {
         return await testSubjects.exists('configure-case-button');
       });
       await testSubjects.click('configure-case-button');
       await header.waitUntilLoadingHasFinished();
-      await retry.waitFor('case-configure-title exist', async () => {
-        return await testSubjects.exists('case-configure-title');
+      await retry.waitFor('cases-redesign-settings-panel exist', async () => {
+        return await testSubjects.exists('cases-redesign-settings-panel');
       });
       await svlCommonScreenshots.takeScreenshot(
         'observability-cases-settings',

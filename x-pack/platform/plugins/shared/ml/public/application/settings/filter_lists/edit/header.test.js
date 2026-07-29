@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 
 import { EditFilterListHeader } from './header';
 
