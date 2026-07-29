@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { apm, apmOtel, timerange, ApmSynthtracePipelineSchema } from '@kbn/synthtrace-client';
+import { apm, apmOtel, timerange } from '@kbn/synthtrace-client';
 import type { ApmSynthtraceEsClient } from '@kbn/synthtrace';
 import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -19,6 +19,7 @@ const endIso = new Date(end).toISOString();
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
+  const es = getService('es');
 
   async function getIngestionType(serviceName: string, environment = ENVIRONMENT_ALL_VALUE) {
     return apmApiClient.readUser({
@@ -32,10 +33,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   describe('ingestion_type', () => {
     describe('when there is no data', () => {
-      it('returns unprocessedOtel (no APM transactions found)', async () => {
+      it('returns unknown for a service with no indexed documents', async () => {
         const { status, body } = await getIngestionType('unknown-service');
         expect(status).to.be(200);
-        expect(body.schema).to.be('otel');
+        expect(body.schema).to.be('unknown');
       });
     });
 
@@ -65,7 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(() => apmSynthtraceEsClient.clean());
 
-      it('returns apm', async () => {
+      it('returns ecs', async () => {
         const { status, body } = await getIngestionType(serviceName);
         expect(status).to.be(200);
         expect(body.schema).to.be('ecs');
@@ -73,15 +74,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when unprocessed OTel data exists', () => {
-      let otelSynthtraceEsClient: ApmSynthtraceEsClient;
-      const serviceName = 'synth-otel-ingestion-type';
+      const serviceName = 'synth-otel-unprocessed-ingestion-type';
+      let spanId: string;
 
       before(async () => {
-        otelSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
-        otelSynthtraceEsClient.setPipeline(
-          otelSynthtraceEsClient.resolvePipelineType(ApmSynthtracePipelineSchema.Otel)
-        );
-
         const instance = apmOtel
           .service({
             name: serviceName,
@@ -89,21 +85,38 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             sdkName: 'opentelemetry',
             sdkLanguage: 'java',
           })
-          .instance('instance-otel');
+          .instance('instance-otel-unprocessed');
 
-        await otelSynthtraceEsClient.index(
-          timerange(start, end)
-            .interval('1m')
-            .rate(1)
-            .generator((timestamp) =>
-              instance.span({ name: 'GET /api', kind: 'Server' }).timestamp(timestamp).duration(100)
-            )
-        );
+        const events = timerange(start, end)
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) =>
+            instance.span({ name: 'GET /api', kind: 'Server' }).timestamp(timestamp).duration(100)
+          );
+
+        const serialized = Array.from(events).flatMap((event) => event.serialize());
+        spanId = serialized[0].span_id!;
+
+        await es.index({
+          index: 'traces-generic.otel-default',
+          document: {
+            ...serialized[0],
+            'service.name': serviceName,
+          },
+          refresh: 'wait_for',
+        });
       });
 
-      after(() => otelSynthtraceEsClient.clean());
+      after(async () => {
+        await es.deleteByQuery({
+          index: 'traces-generic.otel-default*',
+          query: { term: { span_id: spanId } },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+      });
 
-      it('returns unprocessedOtel', async () => {
+      it('returns otel', async () => {
         const { status, body } = await getIngestionType(serviceName);
         expect(status).to.be(200);
         expect(body.schema).to.be('otel');
