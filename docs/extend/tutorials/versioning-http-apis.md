@@ -15,7 +15,7 @@ HTTP APIs may be intended for **internal** or **public** use. Different levels o
 
 :::{dropdown} FAQ: What is the difference between an internal and a public HTTP API?
 :::{note}
-We only declare HTTP APIs that are stable and reliable as public and keep all development changes behind internal HTTP APIs. Public HTTP APIs are intended for external consumption and are typically garanteed not to change within a major. Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
+We only declare HTTP APIs that are stable and reliable as public and keep all development changes behind internal HTTP APIs. Public HTTP APIs are intended for external consumption and are typically guaranteed not to change within a major. Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
 :::
 
 :::

@@ -47,7 +47,7 @@ Simply pass your array of `solutionNav.items` and the required `solution.name` a
 
 ![Screenshots of Stack Management page in mobile view. Menu closed on the left, menu open on the right.](../assets/kibana_template_solution_nav_mobile.png)
 
-If you need custom solution navigation **content**, you can pass your own `solutionNav.children` instead of the items or supply your own componen with `` We still recommend using [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav).
+If you need custom solution navigation **content**, you can pass your own `solutionNav.children` instead of the items or supply your own component. We still recommend using [**EuiSideNav**](https://elastic.github.io/eui/#/navigation/side-nav).
 
 ## `noDataConfig`
 
