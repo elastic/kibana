@@ -7,12 +7,19 @@
 
 import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
+import type { RotationCandidate } from './types';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
   buildUpdateRuleAttributes,
   assertImmutableUnchanged,
   pickImmutable,
+  bulkErrorCodeForStatus,
+  toBulkError,
+  groupCandidatesByInterval,
+  ruleDisabledError,
+  ruleRunningError,
+  rotationFailedError,
 } from './utils';
 
 const serverFields = {
@@ -348,5 +355,78 @@ describe('utils', () => {
 
       expect(next.kind).toBe('alert');
     });
+  });
+});
+
+describe('bulkErrorCodeForStatus', () => {
+  it('maps 404 to RULE_NOT_FOUND', () => {
+    expect(bulkErrorCodeForStatus(404)).toBe('RULE_NOT_FOUND');
+  });
+
+  it('maps 409 to RULE_VERSION_CONFLICT', () => {
+    expect(bulkErrorCodeForStatus(409)).toBe('RULE_VERSION_CONFLICT');
+  });
+
+  it('maps any other status to INTERNAL_SERVER_ERROR', () => {
+    expect(bulkErrorCodeForStatus(500)).toBe('INTERNAL_SERVER_ERROR');
+    expect(bulkErrorCodeForStatus(400)).toBe('INTERNAL_SERVER_ERROR');
+  });
+});
+
+describe('toBulkError', () => {
+  it('builds a per-rule error from a saved-object error', () => {
+    expect(toBulkError('rule-1', { statusCode: 404, message: 'Not found' })).toEqual({
+      id: 'rule-1',
+      error: { code: 'RULE_NOT_FOUND', message: 'Not found' },
+    });
+  });
+});
+
+describe('groupCandidatesByInterval', () => {
+  const candidate = (id: string, every: string): RotationCandidate => ({
+    id,
+    taskId: `task:${id}`,
+    attrs: createRuleSoAttributes({ schedule: { every, lookback: '1m' } }),
+    version: 'v1',
+  });
+
+  it('groups candidates by their schedule interval, preserving order', () => {
+    const grouped = groupCandidatesByInterval([
+      candidate('a', '1m'),
+      candidate('b', '5m'),
+      candidate('c', '1m'),
+    ]);
+
+    expect([...grouped.keys()].sort()).toEqual(['1m', '5m']);
+    expect(grouped.get('1m')?.map((c) => c.id)).toEqual(['a', 'c']);
+    expect(grouped.get('5m')?.map((c) => c.id)).toEqual(['b']);
+  });
+
+  it('returns an empty map when there are no candidates', () => {
+    expect(groupCandidatesByInterval([]).size).toBe(0);
+  });
+});
+
+describe('rotation error builders', () => {
+  it('ruleDisabledError uses RULE_DISABLED and names the rule', () => {
+    expect(ruleDisabledError('rule-1')).toEqual({
+      id: 'rule-1',
+      error: { code: 'RULE_DISABLED', message: expect.stringContaining('rule-1') },
+    });
+  });
+
+  it('ruleRunningError uses RULE_ALREADY_RUNNING', () => {
+    expect(ruleRunningError('rule-1')).toEqual({
+      id: 'rule-1',
+      error: { code: 'RULE_ALREADY_RUNNING', message: expect.stringContaining('running') },
+    });
+  });
+
+  it('rotationFailedError maps the per-task status code', () => {
+    expect(rotationFailedError('rule-1', 409).error.code).toBe('RULE_VERSION_CONFLICT');
+  });
+
+  it('rotationFailedError defaults to INTERNAL_SERVER_ERROR without a status', () => {
+    expect(rotationFailedError('rule-1').error.code).toBe('INTERNAL_SERVER_ERROR');
   });
 });

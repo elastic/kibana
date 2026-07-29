@@ -12,6 +12,80 @@ import { IMMUTABLE_RULE_FIELDS, type ImmutableRuleField } from '@kbn/alerting-v2
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import type { BulkOperationError, RotationCandidate } from './types';
+
+/**
+ * Maps a saved-object status code to the stable, machine-readable bulk-error
+ * `code` returned in the response body. Keeps the by-ID and by-query endpoints
+ * aligned with the single-rule error codes so a client can dispatch on
+ * `error.code` uniformly.
+ */
+export const bulkErrorCodeForStatus = (statusCode: number): string => {
+  if (statusCode === 404) {
+    return ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND;
+  }
+  if (statusCode === 409) {
+    return ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT;
+  }
+  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
+};
+
+export const toBulkError = (
+  id: string,
+  err: { statusCode: number; message: string }
+): BulkOperationError => ({
+  id,
+  error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message },
+});
+
+/**
+ * Groups rotation candidates by their schedule interval. `bulkUpdateSchedules`
+ * takes a single schedule per call, so each interval becomes one call (and
+ * passing each group its own interval leaves the schedule unchanged).
+ */
+export const groupCandidatesByInterval = (
+  candidates: RotationCandidate[]
+): Map<string, RotationCandidate[]> => {
+  const byInterval = new Map<string, RotationCandidate[]>();
+  for (const candidate of candidates) {
+    const interval = candidate.attrs.schedule.every;
+    const group = byInterval.get(interval) ?? [];
+    group.push(candidate);
+    byInterval.set(interval, group);
+  }
+  return byInterval;
+};
+
+/** Per-rule error for a disabled rule — it has no executor task/key to rotate. */
+export const ruleDisabledError = (ruleId: string): BulkOperationError => ({
+  id: ruleId,
+  error: {
+    code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+    message: `Rule with id "${ruleId}" is disabled and has no API key to update`,
+  },
+});
+
+/** Per-rule error for a rule whose executor task is mid-run and was skipped. */
+export const ruleRunningError = (ruleId: string): BulkOperationError => ({
+  id: ruleId,
+  error: {
+    code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+    message: `Rule with id "${ruleId}" is currently running; its API key cannot be updated until the run finishes`,
+  },
+});
+
+/**
+ * Per-rule error for a rule whose executor task key rotation failed — either a
+ * per-task failure (`statusCode` from Task Manager) or a whole-group failure
+ * (no `statusCode` → `INTERNAL_SERVER_ERROR`).
+ */
+export const rotationFailedError = (ruleId: string, statusCode?: number): BulkOperationError => ({
+  id: ruleId,
+  error: {
+    code: bulkErrorCodeForStatus(statusCode ?? 500),
+    message: `Failed to update the executor task API key for rule "${ruleId}"`,
+  },
+});
 
 /**
  * Source-of-truth helpers driven by {@link IMMUTABLE_RULE_FIELDS}. They keep

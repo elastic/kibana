@@ -68,12 +68,18 @@ import type {
   FindRulesParams,
   FindRulesResponse,
   FindRulesSortField,
+  RotationCandidate,
   RuleResponse,
   UpdateRuleParams,
 } from './types';
 import {
   assertImmutableUnchanged,
   buildUpdateRuleAttributes,
+  groupCandidatesByInterval,
+  ruleDisabledError,
+  ruleRunningError,
+  rotationFailedError,
+  toBulkError,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
 } from './utils';
@@ -90,38 +96,6 @@ const DEFAULT_PER_PAGE = 20;
  * many-distinct-interval by-query batch.
  */
 const ROTATION_CONCURRENCY = 10;
-
-/**
- * Maps a saved-object status code to the stable, machine-readable bulk-error
- * `code` returned in the response body. Keeps the by-ID and by-query
- * endpoints aligned with the single-rule error codes so a client can
- * dispatch on `error.code` uniformly.
- */
-const bulkErrorCodeForStatus = (statusCode: number): string => {
-  if (statusCode === 404) {
-    return ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND;
-  }
-  if (statusCode === 409) {
-    return ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT;
-  }
-  return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
-};
-
-const toBulkError = (
-  id: string,
-  err: { statusCode: number; message: string }
-): BulkOperationError => ({
-  id,
-  error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message },
-});
-
-/** An enabled rule whose executor task API key is a candidate for rotation. */
-interface RotationCandidate {
-  id: string;
-  taskId: string;
-  attrs: RuleSavedObjectAttributes;
-  version?: string;
-}
 
 const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   if (!sortField) {
@@ -933,13 +907,7 @@ export class RulesClient {
       }
 
       if (!doc.attributes.enabled) {
-        errors.push({
-          id: doc.id,
-          error: {
-            code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
-            message: `Rule with id "${doc.id}" is disabled and has no API key to update`,
-          },
-        });
+        errors.push(ruleDisabledError(doc.id));
         continue;
       }
 
@@ -1021,14 +989,7 @@ export class RulesClient {
   ): Promise<{ rotated: RotationCandidate[]; errors: BulkOperationError[] }> {
     const errors: BulkOperationError[] = [];
     const taskIdToRuleId = new Map(candidates.map((candidate) => [candidate.taskId, candidate.id]));
-
-    const candidatesByInterval = new Map<string, RotationCandidate[]>();
-    for (const candidate of candidates) {
-      const interval = candidate.attrs.schedule.every;
-      const group = candidatesByInterval.get(interval) ?? [];
-      group.push(candidate);
-      candidatesByInterval.set(interval, group);
-    }
+    const candidatesByInterval = groupCandidatesByInterval(candidates);
 
     const rotatedTaskIds = new Set<string>();
     const erroredRuleIds = new Set<string>();
@@ -1056,13 +1017,7 @@ export class RulesClient {
           for (const taskError of result.errors) {
             const ruleId = taskIdToRuleId.get(taskError.id) ?? taskError.id;
             erroredRuleIds.add(ruleId);
-            errors.push({
-              id: ruleId,
-              error: {
-                code: bulkErrorCodeForStatus(taskError.status ?? 500),
-                message: `Failed to update the executor task API key for rule "${ruleId}"`,
-              },
-            });
+            errors.push(rotationFailedError(ruleId, taskError.status));
           }
         } catch (e) {
           // A whole-group failure (e.g. the per-task-type key grant was rejected).
@@ -1073,13 +1028,7 @@ export class RulesClient {
           });
           for (const candidate of group) {
             erroredRuleIds.add(candidate.id);
-            errors.push({
-              id: candidate.id,
-              error: {
-                code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
-                message: `Failed to update the executor task API key for rule "${candidate.id}"`,
-              },
-            });
+            errors.push(rotationFailedError(candidate.id));
           }
         }
       },
@@ -1098,13 +1047,7 @@ export class RulesClient {
       if (erroredRuleIds.has(candidate.id)) {
         continue;
       }
-      errors.push({
-        id: candidate.id,
-        error: {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
-          message: `Rule with id "${candidate.id}" is currently running; its API key cannot be updated until the run finishes`,
-        },
-      });
+      errors.push(ruleRunningError(candidate.id));
     }
 
     return { rotated, errors };
