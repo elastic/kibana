@@ -12,6 +12,7 @@ import type {
   AppHeaderBadge as CoreAppHeaderBadge,
   AppHeaderBadgeItem as CoreAppHeaderBadgeItem,
   AppHeaderConfig as CoreAppHeaderConfig,
+  AppHeaderDescription as CoreAppHeaderDescription,
   AppHeaderEditableTitle as CoreAppHeaderEditableTitle,
   AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
@@ -33,6 +34,7 @@ export type AppHeaderBack = CoreAppHeaderBack;
 export type AppHeaderBadge = CoreAppHeaderBadge;
 export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
+export type AppHeaderDescription = CoreAppHeaderDescription;
 export type AppHeaderEditableTitle = CoreAppHeaderEditableTitle;
 export type AppHeaderMetadataButtonItem = CoreAppHeaderMetadataButtonItem;
 export type AppHeaderMetadataHealthItem = CoreAppHeaderMetadataHealthItem;
