@@ -12,6 +12,8 @@ import { AnnouncementBanner } from '@kbn/announcement-banner';
 import { useKibana } from '../hooks/use_kibana';
 import { useLocalStorage } from '../hooks/use_local_storage';
 import { BANNER_DISMISSED_KEY, HOME_PAGE_BANNER_COPY } from '../constants';
+import { GETTING_STARTED_DEEP_LINK_ID, VECTORDB_APP_ID } from '../../common/constants';
+import { bannerCallOutStyle, bannerButtonFlexItemStyle } from './home_page_banner_styles';
 
 interface HomePageBannerProps {
   hasData: boolean;
@@ -29,7 +31,7 @@ export const HomePageBanner = ({ hasData, isLoading }: HomePageBannerProps) => {
   }, [setIsDismissed]);
 
   const handleGetStarted = useCallback(() => {
-    application.navigateToApp('vectordb', { path: '/tutorials' });
+    application.navigateToApp(VECTORDB_APP_ID, { deepLinkId: GETTING_STARTED_DEEP_LINK_ID });
   }, [application]);
 
   if (isLoading) {
