@@ -319,6 +319,16 @@ describe('ServiceMapEmbeddable', () => {
       expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
     });
 
+    it('seeds panel kuery into the View full service map href', () => {
+      renderEmbeddable({ kuery: 'transaction.type: "request"' });
+
+      const fullMapLink = screen.getByRole('link', { name: /View full service map/i });
+      expect(fullMapLink).toHaveAttribute(
+        'href',
+        expect.stringContaining('kuery=transaction.type')
+      );
+    });
+
     it('shows the fit view button when embedded', () => {
       renderEmbeddable();
       expect(screen.getByTestId('serviceMapFitViewButton')).toBeInTheDocument();

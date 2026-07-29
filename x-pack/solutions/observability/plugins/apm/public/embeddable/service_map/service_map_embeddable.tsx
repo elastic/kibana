@@ -431,6 +431,7 @@ export function ServiceMapEmbeddable({
     rangeFrom,
     rangeTo,
     environment,
+    kuery,
     serviceName,
     serviceGroupId,
     filterPills,
