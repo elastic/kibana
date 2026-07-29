@@ -97,6 +97,7 @@ export async function runWorkflow({
     workflowExecutionRepository,
     esClient,
     telemetryClient,
+    workflowExecutionCursor,
   } = setupResult;
 
   const execution = workflowExecutionState.getWorkflowExecution();
@@ -181,6 +182,7 @@ export async function runWorkflow({
   try {
     await workflowExecutionLoop({
       workflowRuntime,
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory,
       workflowExecutionState,
       stepIoService,
