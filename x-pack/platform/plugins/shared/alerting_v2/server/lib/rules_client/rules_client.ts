@@ -1006,8 +1006,9 @@ export class RulesClient {
             group.map((candidate) => candidate.taskId),
             { interval },
             {
-              request: this.request as unknown as CoreKibanaRequest,
+              request: this.request,
               regenerateApiKey: true,
+              cloneApiKey: true,
             }
           );
 

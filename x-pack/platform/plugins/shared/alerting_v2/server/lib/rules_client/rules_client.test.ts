@@ -1680,7 +1680,7 @@ describe('RulesClient', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:fallback'],
         { interval: '5m' },
-        expect.objectContaining({ request, regenerateApiKey: true })
+        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
       );
 
       // Only audit metadata is stamped — no rule state is changed.
@@ -1792,7 +1792,7 @@ describe('RulesClient', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:rule-enabled'],
         { interval: '1m' },
-        expect.objectContaining({ request, regenerateApiKey: true })
+        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
       );
       expect(res).toEqual({
         affected_count: 1,
@@ -1947,7 +1947,7 @@ describe('RulesClient', () => {
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:fallback'],
         { interval: '1m' },
-        expect.objectContaining({ request, regenerateApiKey: true })
+        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
       );
       expect(res).toEqual({
         affected_count: 1,
@@ -2189,7 +2189,7 @@ describe('RulesClient', () => {
         expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
           ['task:fallback'],
           { interval: '1m' },
-          expect.objectContaining({ request, regenerateApiKey: true })
+          expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
         );
         expect(rulesSavedObjectService.bulkUpdate).toHaveBeenCalled();
         expect(res).toEqual({ affected_count: 1, errors: [] });
