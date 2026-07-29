@@ -154,8 +154,9 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
     // Without a secondary metric, the transform resets secondary styling to its defaults.
     if (viz.secondaryMetricAccessor) {
       viz.secondaryAlign = viz.secondaryAlign ?? DEFAULT_SECONDARY_VALUE_ALIGNMENT;
-      // The secondary label is the operation name, so a legacy custom label is dropped and only
-      // its visibility survives, mirroring `getUpdatedMetricState`.
+      // The secondary label is the operation name. A legacy custom label is migrated onto the
+      // column by `metricMigrations`; here only visibility is normalized, mirroring
+      // `getUpdatedMetricState`.
       const legacyLabel = viz.secondaryLabel ?? viz.secondaryPrefix;
       viz.secondaryNameVisibility =
         legacyLabel === ''

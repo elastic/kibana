@@ -78,6 +78,15 @@ describe('getSecondaryMetricInfo', () => {
     expect(result.label).toBe(COLUMN_NAME);
   });
 
+  it('gives priority to a legacy secondary label over the column name', () => {
+    const result = getSecondaryMetricInfo({
+      ...defaultSecondaryMetricInfoArgs,
+      secondaryLabel: 'Custom Name (label)',
+      showLabel: true,
+    });
+    expect(result.label).toBe('Custom Name (label)');
+  });
+
   it('returns no label when the label is not shown', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,

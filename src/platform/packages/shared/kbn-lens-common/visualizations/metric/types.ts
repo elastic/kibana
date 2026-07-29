@@ -57,7 +57,8 @@ export interface MetricVisualizationState {
    */
   secondaryPrefix?: string;
   /**
-   * legacy state property, replaced by the secondary metric operation name
+   * Legacy state property. Non-empty values are migrated onto the secondary metric
+   * column as a custom label; visibility becomes `secondaryNameVisibility`.
    * @deprecated
    */
   secondaryLabel?: string;

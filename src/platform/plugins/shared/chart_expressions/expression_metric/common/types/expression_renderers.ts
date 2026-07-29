@@ -49,6 +49,8 @@ export interface MetricVisParam {
   maxCols: number;
   minTiles?: number;
   trends?: TrendlineResult['trends'];
+  /** Legacy fallback for by-value dashboards that have not run full attribute migrations. */
+  secondaryLabel?: string;
   secondaryNameVisibility: SecondaryNameVisibility;
   /**
    * Determines where the metric color should be applied.

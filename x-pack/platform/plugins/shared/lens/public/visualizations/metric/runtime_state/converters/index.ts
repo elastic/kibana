@@ -11,7 +11,9 @@ import { convertApplyColorTo } from './apply_color_to';
 import { convertDensity } from './density';
 
 export const getRuntimeConverters = () => [
-  // v1 CM transform (idempotent): secondaryPrefix/secondaryLabel → secondaryNameVisibility,
+  // v1 CM transform (idempotent): secondaryPrefix/secondaryLabel → secondaryNameVisibility
+  // (content-management migration copies custom label text onto the secondary column;
+  // runtime conversion keeps it as a legacy render fallback for by-value state),
   // valuesTextAlign → primaryAlign/secondaryAlign
   getUpdatedMetricState,
   removeLegacyTitleWeight,

@@ -189,6 +189,14 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       multi: true,
       required: false,
     },
+    secondaryLabel: {
+      types: ['string'],
+      help: i18n.translate('expressionMetricVis.function.secondaryLabel.help', {
+        defaultMessage:
+          'Legacy custom label for the Secondary Metric, used as a fallback for unmigrated by-value state',
+      }),
+      required: false,
+    },
     secondaryNameVisibility: {
       types: ['string'],
       help: i18n.translate('expressionMetricVis.function.secondaryNameVisibility.help', {
@@ -293,6 +301,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               palette: args.secondaryTrendPalette,
               textPalette: args.secondaryTrendTextPalette,
             },
+            secondaryLabel: args.secondaryLabel,
             secondaryNameVisibility: args.secondaryNameVisibility,
             applyColorTo: args.applyColorTo,
           },

@@ -191,6 +191,7 @@ describe('metric visualization', () => {
       );
       expect(result).toEqual({
         ...fullState,
+        secondaryLabel: LEGACY_SECONDARY_PREFIX,
         secondaryNameVisibility: 'before',
         primaryAlign: LEGACY_VALUES_TEXT_ALIGN,
         secondaryAlign: LEGACY_VALUES_TEXT_ALIGN,
@@ -225,6 +226,7 @@ describe('metric visualization', () => {
       const result = visualization.initialize(() => stateWithBoth.layerId, stateWithBoth);
       expect(result).toEqual({
         ...fullState,
+        secondaryLabel: LEGACY_SECONDARY_PREFIX,
         primaryAlign: 'right',
         secondaryAlign: 'right',
       });
@@ -252,10 +254,11 @@ describe('metric visualization', () => {
       );
 
       test.each(['secondaryLabel', 'secondaryPrefix'] as const)(
-        'drops the custom %s text but keeps the name visible',
+        'keeps the custom %s as a runtime fallback and keeps the name visible',
         (property) => {
           expect(initialize(getStateWithLegacyLabel({ [property]: 'custom-text' }))).toEqual({
             ...fullState,
+            secondaryLabel: 'custom-text',
             secondaryNameVisibility: 'before',
           });
         }
@@ -271,7 +274,7 @@ describe('metric visualization', () => {
       test('preserves an explicit position over the legacy label', () => {
         expect(
           initialize({ ...fullState, secondaryNameVisibility: 'after', secondaryLabel: 'ignored' })
-        ).toEqual({ ...fullState, secondaryNameVisibility: 'after' });
+        ).toEqual({ ...fullState, secondaryLabel: 'ignored', secondaryNameVisibility: 'after' });
       });
 
       test('migrates the pre-rename secondaryLabelPosition key, preserving an explicit position', () => {
@@ -1291,13 +1294,13 @@ describe('metric visualization', () => {
       });
     });
 
-    it('never forwards a secondary label, since the label is the operation name', () => {
+    it('forwards a legacy secondary label as a fallback for unmigrated by-value state', () => {
       const expression = visualization.toExpression(
         { ...fullState, secondaryLabel: 'custom-text', collapseFn: undefined },
         datasourceLayers
       );
       if (expression && typeof expression === 'object') {
-        expect(expression.chain[0].arguments.secondaryLabel).toBe(undefined);
+        expect(expression.chain[0].arguments.secondaryLabel).toEqual(['custom-text']);
       } else {
         fail('Expression is not an object');
       }

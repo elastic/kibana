@@ -228,6 +228,7 @@ export const MetricVis = ({
         row,
         columns: data.columns,
         secondaryMetric,
+        secondaryLabel: config.metric.secondaryLabel,
         showLabel: !isLabelHidden,
         trendConfig: buildTrendConfig(config.metric.secondaryTrend, value),
         staticColor: config.metric.secondaryColor,

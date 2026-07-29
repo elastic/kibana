@@ -240,6 +240,7 @@ export const toExpression = (
     maxCols: state.maxCols ?? DEFAULT_MAX_COLUMNS,
     minTiles: maxPossibleTiles ?? undefined,
     inspectorTableId: state.layerId,
+    secondaryLabel: state.secondaryLabel ?? undefined,
     secondaryNameVisibility:
       state.secondaryNameVisibility ?? LENS_METRIC_STATE_DEFAULTS.secondaryNameVisibility,
     applyColorTo: state.applyColorTo,

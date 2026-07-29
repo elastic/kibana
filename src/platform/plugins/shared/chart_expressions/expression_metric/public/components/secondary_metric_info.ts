@@ -34,6 +34,7 @@ export interface SecondaryMetricInfoArgs {
   row: DatatableRow;
   columns: DatatableColumn[];
   secondaryMetric: NonNullable<DimensionsVisParam['secondaryMetric']>;
+  secondaryLabel?: string;
   /** When `false` the label is omitted, e.g. when the name visibility is `hidden` */
   showLabel?: boolean;
   trendConfig?: TrendConfig;
@@ -205,6 +206,7 @@ export function getSecondaryMetricInfo({
   row,
   columns,
   secondaryMetric,
+  secondaryLabel,
   showLabel = false,
   trendConfig,
   staticColor,
@@ -216,8 +218,7 @@ export function getSecondaryMetricInfo({
     getEnhancedNumberSignFormatter(trendConfig)
   );
 
-  // The label is the name of the secondary metric operation
-  const label = showLabel ? secondaryMetricColumn?.name ?? '' : '';
+  const label = showLabel ? secondaryLabel ?? secondaryMetricColumn?.name ?? '' : '';
 
   const rawValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
   const formattedValue = secondaryMetricFormatter(rawValue);
