@@ -725,7 +725,10 @@ describe('Workload Statistics Aggregator', () => {
         if (errorWasThrowAt === 0) {
           errorWasThrowAt = Date.now();
           throw new Error(`Elasticsearch has gone poof`);
-        } else if (Date.now() - errorWasThrowAt < refreshInterval) {
+          // The retry is scheduled by an RxJS `timer` on the monotonic clock, which can fire a
+          // hair under the wall-clock delta measured here, so allow a small tolerance below
+          // refreshInterval — only an effectively-immediate retry should fail this assertion.
+        } else if (Date.now() - errorWasThrowAt < refreshInterval - 50) {
           reject(new Error(`Elasticsearch is still poof`));
         }
 
