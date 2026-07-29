@@ -742,7 +742,7 @@ describe('EndpointActionsClient', () => {
       ${'process'}  | ${{ type: 'process', pid: '123' }}
     `(
       'should validate that agent supports memory dump of $title',
-      async ({ params: ResponseActionMemoryDumpParameters }) => {
+      async ({ params: memoryDumpParameters }) => {
         const generator = new EndpointMetadataGenerator('seed');
 
         applyEsClientSearchMock({
@@ -753,9 +753,18 @@ describe('EndpointActionsClient', () => {
           ]),
         });
 
+        if (memoryDumpParameters.type === 'physical') {
+          // @ts-expect-error update of readonly property is ok here
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+            true;
+        }
+
         await expect(
           endpointActionsClient.memoryDump(
-            responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+            responseActionsClientMock.createMemoryDumpActionOption({
+              ...getCommonResponseActionOptions(),
+              parameters: memoryDumpParameters,
+            })
           )
         ).rejects.toThrow(
           'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
