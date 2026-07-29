@@ -8,6 +8,7 @@
 import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
+import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeEventRow {
   '@timestamp': string;
@@ -32,13 +33,18 @@ export const ALERT_EPISODE_EVENT_FIELDS = [
 /**
  * ES|QL query returning all events for a single alert episode, oldest first.
  */
-export const buildEpisodeEventsQuery = (spaceId: string, episodeId: string) => {
+export const buildEpisodeEventsQuery = (
+  spaceId: string,
+  episodeId: string
+): TypedEsqlQuery<EpisodeEventRow> => {
   // prettier-ignore
-  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
-    .where`space_id == ${spaceId}`
-    .where`type == "alert"`
-    .where`episode.id == ${episodeId}`
-    .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
-    .sort([DEFAULT_TIME_FIELD, 'ASC'])
-    .keep(...ALERT_EPISODE_EVENT_FIELDS);
+  return asTypedEsqlQuery<EpisodeEventRow>(
+    esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+      .where`space_id == ${spaceId}`
+      .where`type == "alert"`
+      .where`episode.id == ${episodeId}`
+      .pipe`EVAL data = JSON_EXTRACT(_source, "$.data")`
+      .sort([DEFAULT_TIME_FIELD, 'ASC'])
+      .keep(...ALERT_EPISODE_EVENT_FIELDS)
+  );
 };

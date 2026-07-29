@@ -10,6 +10,7 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import {
+  asEsqlRows,
   buildEpisodesQuery,
   type AlertEpisodeEsqlRow,
   type EpisodesFilterState,
@@ -58,10 +59,10 @@ export const fetchAlertingEpisodes = ({
     input.timeRange = timeRange;
   }
 
-  return executeEsqlQuery<AlertEpisodeEsqlRow>({
+  return executeEsqlQuery({
     expressions,
     query: query.print('basic'),
     input,
     abortSignal,
-  });
+  }).then((rows) => asEsqlRows(query, rows));
 };

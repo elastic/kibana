@@ -7,6 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeActionRow {
   episode_id: string;
@@ -17,22 +18,27 @@ export interface EpisodeActionRow {
   last_ack_actor: string | null;
 }
 
-export const buildEpisodeActionsQuery = (spaceId: string, episodeIds: string[]) => {
+export const buildEpisodeActionsQuery = (
+  spaceId: string,
+  episodeIds: string[]
+): TypedEsqlQuery<EpisodeActionRow> => {
   const episodeIdLiterals = episodeIds.map((id) => esql.str(id));
 
   // prettier-ignore
-  return esql.from(ALERT_ACTIONS_DATA_STREAM)
-    .where`space_id == ${spaceId}`
-    .where`episode_id IN (${episodeIdLiterals})`
-    .where`action_type IN ("ack", "unack", "assign")`
-    .pipe`EVAL
-      ack_action = CASE(action_type IN ("ack", "unack"), action_type, null),
-      assignee_value = CASE(action_type == "assign", assignee_uid, null),
-      ack_actor = CASE(action_type == "ack", actor, null)`
-    .pipe`STATS
-      last_ack_action = LAST(ack_action, @timestamp),
-      last_assignee_uid = LAST(assignee_value, @timestamp),
-      last_ack_actor = LAST(ack_actor, @timestamp)
-      BY episode_id, rule_id, group_hash`
-    .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor');
+  return asTypedEsqlQuery<EpisodeActionRow>(
+    esql.from(ALERT_ACTIONS_DATA_STREAM)
+      .where`space_id == ${spaceId}`
+      .where`episode_id IN (${episodeIdLiterals})`
+      .where`action_type IN ("ack", "unack", "assign")`
+      .pipe`EVAL
+        ack_action = CASE(action_type IN ("ack", "unack"), action_type, null),
+        assignee_value = CASE(action_type == "assign", assignee_uid, null),
+        ack_actor = CASE(action_type == "ack", actor, null)`
+      .pipe`STATS
+        last_ack_action = LAST(ack_action, @timestamp),
+        last_assignee_uid = LAST(assignee_value, @timestamp),
+        last_ack_actor = LAST(ack_actor, @timestamp)
+        BY episode_id, rule_id, group_hash`
+      .keep('episode_id', 'rule_id', 'group_hash', 'last_ack_action', 'last_assignee_uid', 'last_ack_actor')
+  );
 };

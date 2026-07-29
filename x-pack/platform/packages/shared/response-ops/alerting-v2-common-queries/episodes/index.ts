@@ -8,6 +8,13 @@
 export { PAGE_SIZE_ESQL_VARIABLE, DEFAULT_FLAPPING_LOOKBACK } from './constants';
 
 export {
+  asTypedEsqlQuery,
+  rowsFromEsql,
+  asEsqlRows,
+} from './typed_esql_query';
+export type { TypedEsqlQuery } from './typed_esql_query';
+
+export {
   ALERT_EPISODE_FIELDS,
   buildEpisodesBaseQuery,
   buildEpisodesQuery,

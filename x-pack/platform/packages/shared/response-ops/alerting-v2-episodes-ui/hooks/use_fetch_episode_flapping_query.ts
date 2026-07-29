@@ -8,10 +8,9 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { EpisodeFlappingRow } from '@kbn/alerting-v2-common-queries';
+import { rowsFromEsql } from '@kbn/alerting-v2-common-queries';
 import { buildEpisodeFlappingEsqlQuery } from '../queries/episode_flapping_query';
 import { QUERY_STALE_TIME } from '../constants';
-import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
@@ -37,16 +36,18 @@ export const useFetchEpisodeFlappingQuery = ({
 
   return useQuery({
     queryKey: queryKeys.episodeFlapping(spaceId, episodeId ?? ''),
-    queryFn: ({ signal }) =>
-      runEsqlAsyncSearch({
+    queryFn: async ({ signal }) => {
+      const query = buildEpisodeFlappingEsqlQuery(spaceId, episodeId!);
+      const raw = await runEsqlAsyncSearch({
         data,
         params: {
-          query: buildEpisodeFlappingEsqlQuery(spaceId, episodeId!).print('basic'),
+          query: query.print('basic'),
           time_zone: 'UTC',
         },
         abortSignal: signal,
-      }),
-    select: (raw) => esqlResponseToObjectRows<EpisodeFlappingRow>(raw).reverse(),
+      });
+      return rowsFromEsql(query, raw).reverse();
+    },
     enabled: Boolean(episodeId),
     staleTime: QUERY_STALE_TIME,
   });

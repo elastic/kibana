@@ -11,6 +11,7 @@ import { escapeStringValue } from '@kbn/esql-utils';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
+import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface AlertEpisode {
   '@timestamp': string;
@@ -287,7 +288,7 @@ export const buildEpisodesQuery = (
   spaceId: string,
   sortState: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' },
   filterState?: EpisodesFilterState
-): ComposerQuery => {
+): TypedEsqlQuery<AlertEpisodeEsqlRow> => {
   const sortDir = sortState.sortDirection.toUpperCase() as 'ASC' | 'DESC';
   const pageSizeParam = esql.par(undefined, PAGE_SIZE_ESQL_VARIABLE);
 
@@ -303,7 +304,7 @@ export const buildEpisodesQuery = (
 
   const sortField = resolveSortField(sortState.sortField);
 
-  return query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(
-    ...ALERT_EPISODE_FIELDS
+  return asTypedEsqlQuery<AlertEpisodeEsqlRow>(
+    query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(...ALERT_EPISODE_FIELDS)
   );
 };

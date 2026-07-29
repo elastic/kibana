@@ -8,6 +8,7 @@
   "kbn_references": [
     "@kbn/alerting-v2-constants",
     "@kbn/alerting-v2-schemas",
+    "@kbn/es-types",
     "@kbn/esql-utils"
   ]
 }

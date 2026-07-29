@@ -7,6 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeActionHistoryEntry {
   _id: string;
@@ -40,7 +41,7 @@ export const buildEpisodeActionsHistoryQuery = (
   episodeId: string,
   groupHash: string,
   { before, limit }: BuildEpisodeActionsHistoryQueryOptions
-) => {
+): TypedEsqlQuery<EpisodeActionHistoryEntry> => {
   // prettier-ignore
   const query = esql
     .from([ALERT_ACTIONS_DATA_STREAM], ['_id'])
@@ -52,19 +53,21 @@ export const buildEpisodeActionsHistoryQuery = (
     query.where`@timestamp <= ${before}`;
   }
 
-  return query
-    .sort(['@timestamp', 'DESC'])
-    .limit(limit)
-    .keep(
-      '_id',
-      '@timestamp',
-      'action_type',
-      'actor',
-      'episode_id',
-      'group_hash',
-      'tags',
-      'assignee_uid',
-      'expiry',
-      'reason'
-    );
+  return asTypedEsqlQuery<EpisodeActionHistoryEntry>(
+    query
+      .sort(['@timestamp', 'DESC'])
+      .limit(limit)
+      .keep(
+        '_id',
+        '@timestamp',
+        'action_type',
+        'actor',
+        'episode_id',
+        'group_hash',
+        'tags',
+        'assignee_uid',
+        'expiry',
+        'reason'
+      )
+  );
 };

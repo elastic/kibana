@@ -9,6 +9,7 @@ import { esql } from '@elastic/esql';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { ALERT_EVENTS_DATA_STREAM, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { DEFAULT_FLAPPING_LOOKBACK } from './constants';
+import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeFlappingRow {
   'episode.status': AlertEpisodeStatus;
@@ -30,13 +31,15 @@ export const buildEpisodeFlappingQuery = (
   spaceId: string,
   episodeId: string,
   limit: number = DEFAULT_FLAPPING_LOOKBACK
-) => {
+): TypedEsqlQuery<EpisodeFlappingRow> => {
   // prettier-ignore
-  return esql.from([ALERT_EVENTS_DATA_STREAM])
-    .where`space_id == ${spaceId}`
-    .where`type == "alert"`
-    .where`episode.id == ${episodeId}`
-    .sort([DEFAULT_TIME_FIELD, 'DESC'])
-    .keep(...ALERT_EPISODE_FLAPPING_FIELDS)
-    .limit(limit);
+  return asTypedEsqlQuery<EpisodeFlappingRow>(
+    esql.from([ALERT_EVENTS_DATA_STREAM])
+      .where`space_id == ${spaceId}`
+      .where`type == "alert"`
+      .where`episode.id == ${episodeId}`
+      .sort([DEFAULT_TIME_FIELD, 'DESC'])
+      .keep(...ALERT_EPISODE_FLAPPING_FIELDS)
+      .limit(limit)
+  );
 };

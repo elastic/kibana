@@ -7,6 +7,7 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface EpisodeEventDataRow {
   'episode.id': string;
@@ -27,16 +28,21 @@ export interface EpisodeEventDataRow {
  * lets callers detect when the displayed data is stale relative to the latest
  * event (e.g. after recovery).
  */
-export const buildEpisodeEventDataQuery = (spaceId: string, episodeId: string) => {
+export const buildEpisodeEventDataQuery = (
+  spaceId: string,
+  episodeId: string
+): TypedEsqlQuery<EpisodeEventDataRow> => {
   // prettier-ignore
-  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
-    .where`space_id == ${spaceId}`
-    .where`type == "alert"`
-    .where`episode.id == ${episodeId}`
-    .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS
-      last_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}",
-      last_data_timestamp = MAX(@timestamp) WHERE extracted_data != "{}",
-      last_event_timestamp = MAX(@timestamp)
-      BY \`episode.id\``;
+  return asTypedEsqlQuery<EpisodeEventDataRow>(
+    esql.from([ALERT_EVENTS_DATA_STREAM], ['_source'])
+      .where`space_id == ${spaceId}`
+      .where`type == "alert"`
+      .where`episode.id == ${episodeId}`
+      .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
+      .pipe`INLINE STATS
+        last_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}",
+        last_data_timestamp = MAX(@timestamp) WHERE extracted_data != "{}",
+        last_event_timestamp = MAX(@timestamp)
+        BY \`episode.id\``
+  );
 };
