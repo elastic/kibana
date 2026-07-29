@@ -21,9 +21,9 @@ If you want to use a Kibana release in production, give it a test run, or just p
 
 - Download the latest version on the [Kibana Download Page](https://www.elastic.co/downloads/kibana).
 - Learn more about Kibana's features and capabilities on the
-  [Kibana Product Page](https://www.elastic.co/kibana).
+[Kibana Product Page](https://www.elastic.co/kibana).
 - We also offer a hosted version of Kibana on our
-  [Cloud Service](https://www.elastic.co/cloud/as-a-service).
+[Cloud Service](https://www.elastic.co/cloud/as-a-service).
 
 ### Building and Running Kibana, and/or Contributing Code
 
@@ -46,19 +46,19 @@ Ideally, you should be running Elasticsearch and Kibana with matching version nu
 
 _Note: The version numbers below are only examples, meant to illustrate the relationships between different types of version numbers._
 
-| Situation                 | Example Kibana version | Example ES version | Outcome           |
-| ------------------------- | ---------------------- | ------------------ | ----------------- |
-| Versions are the same.    | 7.15.1                 | 7.15.1             | 💚 OK             |
-| ES patch number is newer. | 7.15.**0**             | 7.15.**1**         | ⚠️ Logged warning |
-| ES minor number is newer. | 7.**14**.2             | 7.**15**.0         | ⚠️ Logged warning |
-| ES major number is newer. | **7**.15.1             | **8**.0.0          | 🚫 Fatal error    |
-| ES patch number is older. | 7.15.**1**             | 7.15.**0**         | ⚠️ Logged warning |
-| ES minor number is older. | 7.**15**.1             | 7.**14**.2         | 🚫 Fatal error    |
-| ES major number is older. | **8**.0.0              | **7**.15.1         | 🚫 Fatal error    |
+| Situation                 | Example Kibana version     | Example ES version | Outcome |
+| ------------------------- | -------------------------- |------------------- | ------- |
+| Versions are the same.    | 7.15.1                     | 7.15.1             | 💚 OK      |
+| ES patch number is newer. | 7.15.__0__                 | 7.15.__1__         | ⚠️ Logged warning      |
+| ES minor number is newer. | 7.__14__.2                 | 7.__15__.0         | ⚠️ Logged warning      |
+| ES major number is newer. | __7__.15.1                 | __8__.0.0          | 🚫 Fatal error      |
+| ES patch number is older. | 7.15.__1__                 | 7.15.__0__         | ⚠️ Logged warning      |
+| ES minor number is older. | 7.__15__.1                 | 7.__14__.2         | 🚫 Fatal error      |
+| ES major number is older. | __8__.0.0                  | __7__.15.1         | 🚫 Fatal error      |
 
 ## Questions? Problems? Suggestions?
 
 - If you've found a bug or want to request a feature, please create a [GitHub Issue](https://github.com/elastic/kibana/issues/new/choose).
   Please check to make sure someone else hasn't already created an issue for the same topic.
 - Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
-  Elastic engineer will be glad to help you out.
+Elastic engineer will be glad to help you out.
