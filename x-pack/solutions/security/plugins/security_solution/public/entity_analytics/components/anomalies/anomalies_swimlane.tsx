@@ -215,10 +215,11 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
 
   return (
     <>
-      {/* @elastic/charts portal z-index stays at 100 on re-render; toast level clears all flyout stacking. */}
+      {/* @elastic/charts portal z-index stays at 100 on re-render; toast level clears all flyout stacking.
+          Scoped to this chart's portal via the Chart id prop: portal id = echTooltipPortal{scope}__{chartId}. */}
       <Global
         styles={css`
-          [id^='echTooltipPortal'] {
+          [id='echTooltipPortalMainTooltip__${heatmapId}'] {
             z-index: ${Number(euiTheme.levels.toast)} !important;
           }
         `}
@@ -228,7 +229,7 @@ export const AnomaliesSwimlane: React.FC<AnomaliesSwimlaneProps> = ({
           height: `${styling.heightOfHeatmap(yAxisNames.length)}px`,
         }}
       >
-        <Chart>
+        <Chart id={heatmapId}>
           <Tooltip customTooltip={swimlaneTooltip} />
           <Settings
             baseTheme={baseTheme}
