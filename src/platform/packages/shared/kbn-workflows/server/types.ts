@@ -79,7 +79,8 @@ export type GetManagedWorkflowStatusOptions = ManagedWorkflowOperationOptions;
  * write. A resolved `Promise<void>` does **not** guarantee the workflow was persisted
  * or that orphan reconciliation ran. Missing installs are retried on a later boot;
  * when any install for the plugin was incomplete this boot, `ready()` skips destructive
- * reconcile so still-desired docs are not force-deleted.
+ * orphan cleanup so still-desired docs are not force-deleted, but still runs dynamic
+ * auto upgrades once Elasticsearch readiness has passed.
  */
 export interface RegisteredManagedWorkflowsLifecycleApi {
   /**
@@ -102,8 +103,9 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
    *
    * Best-effort: may no-op when Workflows is unavailable, Kibana is stopping, or ES is
    * not ready. When installs were gated or aborted incomplete this boot, destructive
-   * reconcile is skipped so persisted workflows are preserved (missing installs retry
-   * on a later boot). Static workflow installs after ready() will log a warning.
+   * orphan cleanup is skipped so persisted workflows are preserved (missing installs
+   * retry on a later boot); dynamic auto upgrades still run once readiness passed.
+   * Static workflow installs after ready() will log a warning.
    */
   ready: () => Promise<void>;
   /**

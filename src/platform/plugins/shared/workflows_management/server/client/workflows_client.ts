@@ -81,7 +81,9 @@ export const createWorkflowsClientProvider = (
  *
  * `install` / `ready` are best-effort during Kibana teardown and when Elasticsearch
  * readiness gating skips writes: they may resolve without persisting or without
- * running destructive reconcile. See {@link RegisteredManagedWorkflowsLifecycleApi}.
+ * running destructive orphan cleanup. When installs were incomplete, `ready()` still
+ * runs dynamic auto upgrades once readiness has passed. See
+ * {@link RegisteredManagedWorkflowsLifecycleApi}.
  */
 export const createManagedWorkflowsSystemApiProvider = (
   workflowsService: WorkflowsService,

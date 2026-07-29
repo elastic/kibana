@@ -674,7 +674,8 @@ export class WorkflowsService {
   /**
    * Owner signal that static managed installs for this plugin are finished.
    * Best-effort: may no-op when Kibana is stopping or ES is not ready. When installs
-   * were incomplete this boot, destructive reconcile is skipped.
+   * were incomplete this boot, destructive orphan cleanup is skipped; dynamic auto
+   * upgrades still run once this call has passed Elasticsearch readiness.
    */
   public async pluginReady(pluginId: string): Promise<void> {
     await this.ensureInitialized();

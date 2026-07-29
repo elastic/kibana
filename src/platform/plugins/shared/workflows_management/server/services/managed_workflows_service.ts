@@ -66,8 +66,9 @@ export class ManagedWorkflowsService {
   private readonly installedDocKeysByPlugin = new Map<string, Set<string>>();
   /**
    * Plugins whose managed install pass did not complete this boot (readiness gate skip
-   * or mid-install abort). Destructive ready() reconcile must not run for these —
-   * `installedDocKeys` is only trustworthy when every install actually ran.
+   * or mid-install abort). Destructive ready() orphan cleanup must not run for these —
+   * `installedDocKeys` is only trustworthy when every install actually ran. Dynamic auto
+   * upgrades may still run once Elasticsearch readiness has already passed at ready().
    */
   private readonly incompleteInstallPluginIds = new Set<string>();
   private readonly logger: Logger;
@@ -87,7 +88,8 @@ export class ManagedWorkflowsService {
   /**
    * Marks that this plugin's managed install pass is incomplete for this boot.
    * Call when an install is gated out before reaching ManagedWorkflowsService, or when
-   * a mid-install write is aborted. ready() will skip destructive reconcile.
+   * a mid-install write is aborted. ready() will skip destructive orphan cleanup but may
+   * still run dynamic auto upgrades.
    */
   public markInstallIncomplete(pluginId: string): void {
     this.incompleteInstallPluginIds.add(pluginId);
@@ -101,8 +103,9 @@ export class ManagedWorkflowsService {
    * Called when a plugin signals it has finished installing all its static workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
    * not installed during the startup window and upgrades dynamic auto workflows.
-   * Destructive reconcile is skipped when any install for this plugin was gated or
-   * aborted incomplete this boot — see {@link markInstallIncomplete}.
+   * Destructive orphan cleanup is skipped when any install for this plugin was gated or
+   * aborted incomplete this boot — see {@link markInstallIncomplete}. Dynamic auto
+   * upgrades still run when ready() itself passed Elasticsearch readiness.
    */
   public async pluginReady(pluginId: string): Promise<void> {
     if (this.readyPluginIds.has(pluginId)) {
@@ -314,8 +317,8 @@ export class ManagedWorkflowsService {
     });
     const documentWithVersion = applyWorkflowVersion(document, existing);
     if (this.shouldAbortManagedWrite(`install update '${id}'`)) {
-      // Keep track so reconcile (if it ran) would preserve working v1; mark incomplete so
-      // ready() skips destructive cleanup and we retry the upgrade on a later boot.
+      // Keep track so orphan cleanup (if it ran) would preserve working v1; mark incomplete
+      // so ready() skips destructive orphan deletes and we retry the upgrade later.
       this.markInstallIncomplete(registeredPluginId);
       return;
     }
@@ -522,17 +525,20 @@ export class ManagedWorkflowsService {
    * startup window, and upgrades persisted dynamic auto workflow documents to the
    * current registry definition.
    *
-   * Must not run destructive cleanup when installs were gated out or aborted incomplete
-   * this boot — `installedDocKeys` is only correct if the install pass completed.
+   * Must not run destructive orphan cleanup when installs were gated out or aborted
+   * incomplete this boot — `installedDocKeys` is only correct if the install pass
+   * completed. Dynamic auto upgrades do not depend on that set and still run once
+   * ready() has already passed Elasticsearch readiness.
    */
   private async reconcilePluginManagedWorkflows(pluginId: string): Promise<void> {
-    if (this.incompleteInstallPluginIds.has(pluginId)) {
+    const installPassIncomplete = this.incompleteInstallPluginIds.has(pluginId);
+    if (installPassIncomplete) {
       this.logger.warn(
-        `Managed workflows: skipping ready() reconcile for plugin '${pluginId}' because ` +
+        `Managed workflows: skipping ready() orphan cleanup for plugin '${pluginId}' because ` +
           `one or more managed installs were incomplete this boot (gated or aborted). ` +
-          `Persisted workflows are preserved; missing installs retry on a later boot.`
+          `Persisted static workflows are preserved; missing installs retry on a later boot. ` +
+          `Dynamic auto upgrades still run when Elasticsearch is ready.`
       );
-      return;
     }
 
     const installedDocKeys = this.installedDocKeysByPlugin.get(pluginId) ?? new Set<string>();
@@ -576,7 +582,7 @@ export class ManagedWorkflowsService {
         : undefined;
       const workflowSpaceId = source.spaceId ?? GLOBAL_WORKFLOW_SPACE_ID;
 
-      if (isPluginStaticDoc) {
+      if (!installPassIncomplete && isPluginStaticDoc) {
         const docKey = `${docId}:${workflowSpaceId}`;
 
         if (!installedDocKeys.has(docKey)) {
@@ -618,6 +624,13 @@ export class ManagedWorkflowsService {
           });
         }
       }
+    }
+
+    if (installPassIncomplete && dynamicUpdates.length > 0) {
+      this.logger.warn(
+        `Managed workflows: running ${dynamicUpdates.length} dynamic auto upgrade(s) for plugin ` +
+          `'${pluginId}' despite incomplete static installs this boot (orphan cleanup skipped).`
+      );
     }
 
     for (const update of dynamicUpdates) {

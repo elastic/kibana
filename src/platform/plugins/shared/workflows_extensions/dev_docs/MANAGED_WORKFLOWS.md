@@ -127,7 +127,7 @@ await managed.ready();
 
 `install()` and `ready()` resolve without throwing when Workflows is unavailable for the environment, Kibana is stopping, or Elasticsearch is not ready for managed writes. **A resolved promise does not mean the workflow was persisted** (same idea as the existing “unavailable → ignore” path).
 
-If any `install` for the plugin was skipped or aborted incomplete this boot, `ready()` **skips destructive orphan cleanup** so still-desired docs are not force-deleted. Missing installs are retried on a later Kibana boot when the owner runs `install` → `ready` again.
+If any `install` for the plugin was skipped or aborted incomplete this boot, `ready()` **skips destructive orphan cleanup** so still-desired docs are not force-deleted. Missing installs are retried on a later Kibana boot when the owner runs `install` → `ready` again. **Dynamic auto upgrades still run** once `ready()` itself has passed Elasticsearch readiness (they do not depend on the incomplete static `installedDocKeys` set). Logs WARN when orphan cleanup is skipped and again when upgrades proceed despite an incomplete install pass.
 
 ### Granularity of tracking
 
