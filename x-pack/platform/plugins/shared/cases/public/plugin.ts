@@ -126,7 +126,7 @@ export class CasesUiPlugin
       plugins.workflowsExtensions,
       this.unifiedAttachmentTypeRegistry,
       config.attachments?.enabled === true,
-      config.templates.enabled === true
+      config.templates?.enabled === true
     );
     registerCasesWorkflowTriggers(plugins.workflowsExtensions);
 
