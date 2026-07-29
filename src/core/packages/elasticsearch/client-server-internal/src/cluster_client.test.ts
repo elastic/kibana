@@ -880,10 +880,8 @@ describe('ClusterClient', () => {
           },
         })
       );
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
-        })
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
@@ -921,10 +919,8 @@ describe('ClusterClient', () => {
           },
         })
       );
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
-        })
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
@@ -996,10 +992,8 @@ describe('ClusterClient', () => {
       client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
-        })
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
@@ -1030,10 +1024,8 @@ describe('ClusterClient', () => {
       client = scopedClusterClient.asCurrentUser;
 
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
-        })
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
@@ -1061,10 +1053,8 @@ describe('ClusterClient', () => {
 
       // Nothing to authenticate, so there is no question for the UIAM service to answer.
       expect(security.uiam!.getElasticsearchClientAuthentication).not.toHaveBeenCalled();
-      expect(scopedClient.child).toHaveBeenCalledWith(
-        expect.not.objectContaining({
-          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'some-shared-secret' },
-        })
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
       );
     });
 
