@@ -147,7 +147,7 @@ export const PndWatchesNav: React.FC<PndWatchesNavProps> = ({ active, onCollapse
                   }
                 `}
               >
-                <EuiIcon type={item.icon} size="m" />
+                <EuiIcon type={item.icon} size="m" aria-hidden={true} />
                 <span>{item.label}</span>
               </button>
             </EuiFlexItem>
