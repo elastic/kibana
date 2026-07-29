@@ -52,7 +52,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/security/config.group5.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group6.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.reporting.ts
-  - x-pack/platform/test/serverless/functional/configs/security/config.group7.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group8.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group9.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group11.ts
@@ -151,7 +150,6 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/authentication/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/metadata/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/package/trial_license_complete_tier/configs/serverless.config.ts
-  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/policy_response/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/policy/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/resolver/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/response_actions/trial_license_complete_tier/configs/serverless.config.ts
