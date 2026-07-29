@@ -80,7 +80,7 @@ export const SubAgentExecutionFlyout: React.FC<SubAgentExecutionFlyoutProps> = (
           {
             title: parametersLabel,
             status: 'complete' as const,
-            children: <JsonCodeBlock data={params} />,
+            children: <JsonCodeBlock data={params} lineNumbers={false} background="subdued" />,
           },
         ]
       : []),

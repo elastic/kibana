@@ -71,7 +71,7 @@ export const ToolResponseFlyout: React.FC<ToolResponseFlyoutProps> = ({
     {
       title: parametersLabel,
       status: 'complete' as const,
-      children: <JsonCodeBlock data={step.params} />,
+      children: <JsonCodeBlock data={step.params} lineNumbers={false} background="subdued" />,
     },
     ...(showExecutionSection
       ? [
