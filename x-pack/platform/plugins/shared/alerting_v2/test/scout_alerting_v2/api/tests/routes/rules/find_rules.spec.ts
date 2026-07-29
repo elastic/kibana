@@ -360,6 +360,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject perPage below the minimum', async ({ apiClient }) => {
@@ -368,6 +369,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject page values below 1', async ({ apiClient }) => {
@@ -376,6 +378,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject non-numeric page values', async ({ apiClient }) => {
@@ -384,6 +387,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject unknown sortField values', async ({ apiClient }) => {
@@ -392,6 +396,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject unknown sortOrder values', async ({ apiClient }) => {
@@ -401,6 +406,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     );
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -411,6 +417,7 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
