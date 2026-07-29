@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { where } from '@kbn/esql-composer';
 import { useDiscoverLinkAndEsqlQuery } from '.';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
-import { ESQL_NULLIFY_UNMAPPED_FIELDS } from '../../utils/esql_nullify_unmapped_fields';
+import { ESQL_NULLIFY_UNMAPPED_FIELDS } from './esql_unmapped_fields';
 
 jest.mock('../use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: jest.fn(),
@@ -36,7 +36,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     expect(generateDiscoverLink).not.toHaveBeenCalled();
   });
 
-  it('returns discoverUrl and esqlQueryString when inputs are provided', () => {
+  it('returns the raw esqlQueryString without SET prefix when no unmappedFieldsPolicy is provided', () => {
     const DISCOVER_URL = 'http://discover/url';
     const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
@@ -48,31 +48,12 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
 
     expect(generateDiscoverLink).toHaveBeenCalledWith(whereClause);
     expect(result.current.discoverUrl).toBe(DISCOVER_URL);
-    expect(result.current.esqlQueryString).toBe(
-      `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM traces-* | WHERE trace.id == "abc123"`
-    );
+    expect(result.current.esqlQueryString).not.toContain('SET unmapped_fields');
+    expect(result.current.esqlQueryString).toContain('FROM traces-*');
+    expect(result.current.esqlQueryString).toContain('trace.id == "abc123"');
   });
 
-  it('prepends the unmapped_fields NULLIFY SET command as a single line so unmapped columns do not fail', () => {
-    const generateDiscoverLink = jest.fn(() => 'http://discover/url');
-    mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
-
-    const indexPattern = 'logs-*';
-    const whereClause = where('error.culprit == ?culprit', { culprit: 'Main.Cache.func3' });
-
-    const { result } = renderHook(() => useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause }));
-
-    const esqlQueryString = result.current.esqlQueryString;
-
-    // Discover drops the header command when the query is multi-line, so it must
-    // be emitted as a single line to survive the "Open in Discover tab" action.
-    expect(esqlQueryString?.startsWith(`${ESQL_NULLIFY_UNMAPPED_FIELDS} `)).toBe(true);
-    expect(esqlQueryString).not.toContain('\n');
-    expect(esqlQueryString).toContain('FROM logs-*');
-    expect(esqlQueryString).toContain('error.culprit == "Main.Cache.func3"');
-  });
-
-  it('prepends SET directive when unmappedFieldsPolicy is provided', () => {
+  it('prepends SET directive single-line when unmappedFieldsPolicy is provided', () => {
     const DISCOVER_URL = 'http://discover/url';
     const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
@@ -85,7 +66,8 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     );
 
     expect(result.current.esqlQueryString).toBe(
-      `SET unmapped_fields = "NULLIFY";\n${from(indexPattern).pipe(whereClause).toString()}`
+      `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM logs-* | WHERE trace.id == "abc123"`
     );
+    expect(result.current.esqlQueryString).not.toContain('\n');
   });
 });

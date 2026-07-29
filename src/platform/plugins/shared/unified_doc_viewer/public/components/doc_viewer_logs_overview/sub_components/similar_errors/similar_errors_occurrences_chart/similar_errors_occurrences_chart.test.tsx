@@ -15,7 +15,7 @@ import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { merge } from 'lodash';
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
-import { ESQL_NULLIFY_UNMAPPED_FIELDS } from '../../../../../utils/esql_nullify_unmapped_fields';
+import { ESQL_NULLIFY_UNMAPPED_FIELDS } from '../../../../../hooks/use_discover_link_and_esql_query/esql_unmapped_fields';
 
 const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },

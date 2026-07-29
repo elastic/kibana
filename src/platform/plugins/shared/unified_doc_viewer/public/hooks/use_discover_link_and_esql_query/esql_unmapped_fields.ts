@@ -9,14 +9,27 @@
 
 import { Parser, BasicPrettyPrinter } from '@elastic/esql';
 
+export type UnmappedFieldsPolicy = 'NULLIFY' | 'LOAD';
+
+interface WithUnmappedFieldsOptions {
+  policy?: UnmappedFieldsPolicy;
+  multiline?: boolean;
+}
+
 export const ESQL_NULLIFY_UNMAPPED_FIELDS = 'SET unmapped_fields="NULLIFY";';
 
-// Discover drops the SET header when the query handed to openInNewTab spans multiple lines.
-// The Parser round-trip collapses @kbn/esql-composer's multiline output to a single line.
-export const withNullifyUnmappedFields = (esqlQuery: string): string => {
-  if (esqlQuery.startsWith(ESQL_NULLIFY_UNMAPPED_FIELDS)) {
+// multiline: false collapses to single line via Parser round-trip — Discover drops the SET header for multiline queries.
+export const withUnmappedFields = (
+  esqlQuery: string,
+  { policy = 'NULLIFY', multiline = true }: WithUnmappedFieldsOptions = {}
+): string => {
+  const header = `SET unmapped_fields="${policy}";`;
+  if (esqlQuery.startsWith(header)) {
     return esqlQuery;
   }
+  if (multiline) {
+    return `${header}\n${esqlQuery}`;
+  }
   const { root } = Parser.parse(esqlQuery);
-  return `${ESQL_NULLIFY_UNMAPPED_FIELDS} ${BasicPrettyPrinter.print(root)}`;
+  return `${header} ${BasicPrettyPrinter.print(root)}`;
 };
