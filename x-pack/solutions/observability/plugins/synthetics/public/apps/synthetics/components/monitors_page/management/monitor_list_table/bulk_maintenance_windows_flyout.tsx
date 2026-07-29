@@ -6,12 +6,14 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiCallOut,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -32,6 +34,7 @@ import { fetchBulkUpdateMonitors } from '../../../../state';
 import { kibanaService } from '../../../../../../utils/kibana_service';
 import { MaintenanceWindowsField } from '../../../monitor_add_edit/fields/maintenance_windows/maintenance_windows';
 import { MaintenanceWindowsLink } from '../../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
+import { useMaintenanceWindows } from '../../../monitor_add_edit/fields/maintenance_windows/use_maintenance_windows';
 
 type BulkMaintenanceWindowsMode = 'apply' | 'remove';
 
@@ -48,8 +51,16 @@ export const BulkMaintenanceWindowsFlyout = ({
   const [selectedWindowIds, setSelectedWindowIds] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const { spaceId } = useGetUrlParams();
+  const { data: maintenanceWindowsData } = useMaintenanceWindows();
   const flyoutTitleId = useGeneratedHtmlId();
   const skippedAccordionId = useGeneratedHtmlId();
+
+  // Apply and Remove select different things (a window to add vs. a window to
+  // detach), so clear the selection when the mode flips to avoid stale ids.
+  const handleModeChange = (nextMode: BulkMaintenanceWindowsMode) => {
+    setMode(nextMode);
+    setSelectedWindowIds([]);
+  };
 
   // Only `ui`-origin monitors can be patched via the bulk API; project/terraform
   // monitors are rejected per-id server-side, so we exclude them up front.
@@ -66,13 +77,31 @@ export const BulkMaintenanceWindowsFlyout = ({
     return { eligibleMonitors: eligible, skippedMonitors: skipped };
   }, [monitors]);
 
+  // Remove now targets specific windows (like Apply), rather than clearing all,
+  // so the options are just the windows currently attached to the selection.
+  const windowTitleById = useMemo(() => {
+    const map = new Map<string, string>();
+    (maintenanceWindowsData?.data ?? []).forEach((mw) => map.set(mw.id, mw.title));
+    return map;
+  }, [maintenanceWindowsData]);
+
+  const appliedWindowOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
+    const ids = new Set<string>();
+    eligibleMonitors.forEach((monitor) => {
+      (monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? []).forEach((id) => ids.add(id));
+    });
+    return Array.from(ids).map((id) => ({ value: id, label: windowTitleById.get(id) ?? id }));
+  }, [eligibleMonitors, windowTitleById]);
+
   // Same rationale as enable/disable: only patch monitors whose resulting set
   // actually differs, so we don't trigger a no-op Fleet re-sync.
   const updates = useMemo(() => {
     return eligibleMonitors.reduce<Array<{ id: string; nextIds: string[] }>>((acc, monitor) => {
       const currentIds = monitor[ConfigKey.MAINTENANCE_WINDOWS] ?? [];
       const nextIds =
-        mode === 'apply' ? Array.from(new Set([...currentIds, ...selectedWindowIds])) : [];
+        mode === 'apply'
+          ? Array.from(new Set([...currentIds, ...selectedWindowIds]))
+          : currentIds.filter((id) => !selectedWindowIds.includes(id));
       const changed =
         nextIds.length !== currentIds.length || !nextIds.every((id) => currentIds.includes(id));
       if (changed) {
@@ -123,7 +152,21 @@ export const BulkMaintenanceWindowsFlyout = ({
     { id: 'remove' as const, label: REMOVE_LABEL },
   ];
 
-  const saveDisabled = updates.length === 0 || (mode === 'apply' && selectedWindowIds.length === 0);
+  const saveDisabled = updates.length === 0 || selectedWindowIds.length === 0;
+
+  // In Remove mode with nothing attached across the selection, there is simply
+  // nothing to remove — surface that plainly instead of an empty combo box.
+  const nothingToRemove = mode === 'remove' && appliedWindowOptions.length === 0;
+
+  // Live breakdown of what Save will touch, shown once a window is picked.
+  const unchangedCount = eligibleMonitors.length - updates.length;
+  const showEffectSummary = selectedWindowIds.length > 0;
+  const effectSummary = [
+    getWillChangeSummary(updates.length),
+    unchangedCount > 0 ? getUnchangedSummary(unchangedCount) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <EuiFlyout
@@ -143,12 +186,12 @@ export const BulkMaintenanceWindowsFlyout = ({
           <p>{getDescription(eligibleMonitors.length)}</p>
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiFormRow label={MODE_LABEL}>
+        <EuiFormRow label={MODE_LABEL} helpText={getModeHelp(mode)}>
           <EuiButtonGroup
             legend={MODE_LABEL}
             options={modeOptions}
             idSelected={mode}
-            onChange={(id) => setMode(id as BulkMaintenanceWindowsMode)}
+            onChange={(id) => handleModeChange(id as BulkMaintenanceWindowsMode)}
             data-test-subj="syntheticsBulkMaintenanceWindowsModeGroup"
           />
         </EuiFormRow>
@@ -162,6 +205,50 @@ export const BulkMaintenanceWindowsFlyout = ({
                 fullWidth
               />
             </EuiFormRow>
+          </>
+        )}
+        {mode === 'remove' && !nothingToRemove && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiFormRow label={REMOVE_WINDOWS_LABEL} fullWidth>
+              <EuiComboBox<string>
+                fullWidth
+                placeholder={REMOVE_WINDOWS_PLACEHOLDER}
+                aria-label={REMOVE_WINDOWS_PLACEHOLDER}
+                options={appliedWindowOptions}
+                selectedOptions={appliedWindowOptions.filter((option) =>
+                  selectedWindowIds.includes(option.value as string)
+                )}
+                onChange={(next) =>
+                  setSelectedWindowIds(next.map((option) => option.value as string))
+                }
+                data-test-subj="syntheticsBulkMaintenanceWindowsRemoveComboBox"
+              />
+            </EuiFormRow>
+          </>
+        )}
+        {nothingToRemove && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiText
+              size="s"
+              color="subdued"
+              data-test-subj="syntheticsBulkMaintenanceWindowsNothingToRemove"
+            >
+              <p>{NOTHING_TO_REMOVE}</p>
+            </EuiText>
+          </>
+        )}
+        {showEffectSummary && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText
+              size="xs"
+              color="subdued"
+              data-test-subj="syntheticsBulkMaintenanceWindowsEffectSummary"
+            >
+              {effectSummary}
+            </EuiText>
           </>
         )}
         {skippedMonitors.length > 0 && (
@@ -224,6 +311,27 @@ export const BulkMaintenanceWindowsFlyout = ({
   );
 };
 
+const getModeHelp = (mode: BulkMaintenanceWindowsMode) =>
+  mode === 'apply'
+    ? i18n.translate('xpack.synthetics.bulkMaintenanceWindowsFlyout.modeHelp.apply', {
+        defaultMessage: "Adds the selected maintenance windows to each monitor's existing ones.",
+      })
+    : i18n.translate('xpack.synthetics.bulkMaintenanceWindowsFlyout.modeHelp.remove', {
+        defaultMessage: 'Removes the selected maintenance windows from each monitor.',
+      });
+
+const getWillChangeSummary = (count: number) =>
+  i18n.translate('xpack.synthetics.bulkMaintenanceWindowsFlyout.summary.willChange', {
+    defaultMessage: '{count, plural, one {# will change} other {# will change}}',
+    values: { count },
+  });
+
+const getUnchangedSummary = (count: number) =>
+  i18n.translate('xpack.synthetics.bulkMaintenanceWindowsFlyout.summary.unchanged', {
+    defaultMessage: '{count, number} unchanged',
+    values: { count },
+  });
+
 const getDescription = (count: number) =>
   i18n.translate('xpack.synthetics.bulkMaintenanceWindowsFlyout.description', {
     defaultMessage:
@@ -282,6 +390,27 @@ const SELECT_WINDOWS_LABEL = i18n.translate(
   'xpack.synthetics.bulkMaintenanceWindowsFlyout.selectWindowsLabel',
   {
     defaultMessage: 'Maintenance windows',
+  }
+);
+
+const REMOVE_WINDOWS_LABEL = i18n.translate(
+  'xpack.synthetics.bulkMaintenanceWindowsFlyout.removeWindowsLabel',
+  {
+    defaultMessage: 'Maintenance windows to remove',
+  }
+);
+
+const REMOVE_WINDOWS_PLACEHOLDER = i18n.translate(
+  'xpack.synthetics.bulkMaintenanceWindowsFlyout.removeWindowsPlaceholder',
+  {
+    defaultMessage: 'Select maintenance windows to remove',
+  }
+);
+
+const NOTHING_TO_REMOVE = i18n.translate(
+  'xpack.synthetics.bulkMaintenanceWindowsFlyout.nothingToRemove',
+  {
+    defaultMessage: 'None of the selected monitors have maintenance windows to remove.',
   }
 );
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { render } from '../../../../utils/testing/rtl_helpers';
@@ -48,6 +48,20 @@ jest.mock(
   })
 );
 
+// Remove mode reads the full window list to resolve id -> title for the
+// applied-windows selector.
+jest.mock('../../../monitor_add_edit/fields/maintenance_windows/use_maintenance_windows', () => ({
+  useMaintenanceWindows: () => ({
+    isLoading: false,
+    data: {
+      data: [
+        { id: 'mw-1', title: 'MW One' },
+        { id: 'mw-2', title: 'MW Two' },
+      ],
+    },
+  }),
+}));
+
 const useGetUrlParamsMock = useGetUrlParams as jest.MockedFunction<typeof useGetUrlParams>;
 const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as jest.MockedFunction<
   typeof fetchBulkUpdateMonitors
@@ -86,6 +100,17 @@ describe('<BulkMaintenanceWindowsFlyout />', () => {
 
   const clickSave = (getByTestId: (id: string) => HTMLElement) => {
     fireEvent.click(getByTestId('syntheticsBulkMaintenanceWindowsSave'));
+  };
+
+  const switchToRemove = (getByRole: (role: string, opts: { name: string }) => HTMLElement) => {
+    fireEvent.click(getByRole('button', { name: 'Remove' }));
+  };
+
+  // Open the Remove-mode combo box and pick a window by its title.
+  const selectRemoveWindow = (getByTestId: (id: string) => HTMLElement, label: string) => {
+    const combo = getByTestId('syntheticsBulkMaintenanceWindowsRemoveComboBox');
+    fireEvent.click(within(combo).getByRole('combobox'));
+    fireEvent.click(screen.getByRole('option', { name: label }));
   };
 
   it('splits eligible vs. skipped monitors', () => {
@@ -145,10 +170,10 @@ describe('<BulkMaintenanceWindowsFlyout />', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('removes maintenance windows only from monitors that currently have one', async () => {
+  it('removes only the chosen window, and only from monitors that have it', async () => {
     const monitors = [
-      makeMonitor('ui-1', 'UI monitor 1', { maintenanceWindows: ['mw-1'] }),
-      makeMonitor('ui-2', 'UI monitor 2 already empty', { maintenanceWindows: [] }),
+      makeMonitor('ui-1', 'UI monitor 1', { maintenanceWindows: ['mw-1', 'mw-2'] }),
+      makeMonitor('ui-2', 'UI monitor 2 without mw-1', { maintenanceWindows: ['mw-2'] }),
     ];
     fetchBulkUpdateMonitorsMock.mockResolvedValue({
       result: [{ id: 'ui-1', updated: true }],
@@ -158,15 +183,36 @@ describe('<BulkMaintenanceWindowsFlyout />', () => {
       <BulkMaintenanceWindowsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
     );
 
-    fireEvent.click(getByRole('button', { name: 'Remove' }));
+    switchToRemove(getByRole);
+    selectRemoveWindow(getByTestId, 'MW One'); // mw-1
     clickSave(getByTestId);
 
     await waitFor(() => {
+      // Only ui-1 has mw-1; it drops to [mw-2]. ui-2 is untouched.
       expect(fetchBulkUpdateMonitorsMock).toHaveBeenCalledWith({
         spaceId: 'default',
-        updates: [{ id: 'ui-1', attributes: { [ConfigKey.MAINTENANCE_WINDOWS]: [] } }],
+        updates: [{ id: 'ui-1', attributes: { [ConfigKey.MAINTENANCE_WINDOWS]: ['mw-2'] } }],
       });
     });
+  });
+
+  it('shows a clear message and disables save when nothing is attached to remove', () => {
+    const monitors = [
+      makeMonitor('ui-1', 'UI monitor 1', { maintenanceWindows: [] }),
+      makeMonitor('ui-2', 'UI monitor 2', { maintenanceWindows: [] }),
+    ];
+
+    const { getByTestId, getByRole, queryByTestId } = render(
+      <BulkMaintenanceWindowsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    switchToRemove(getByRole);
+
+    expect(getByTestId('syntheticsBulkMaintenanceWindowsNothingToRemove')).toHaveTextContent(
+      'None of the selected monitors have maintenance windows to remove.'
+    );
+    expect(queryByTestId('syntheticsBulkMaintenanceWindowsRemoveComboBox')).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsBulkMaintenanceWindowsSave')).toBeDisabled();
   });
 
   it('shows a success toast when all changed monitors are updated', async () => {
@@ -250,5 +296,44 @@ describe('<BulkMaintenanceWindowsFlyout />', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(fetchBulkUpdateMonitorsMock).not.toHaveBeenCalled();
+  });
+
+  it('summarises how many monitors will change vs. stay unchanged', () => {
+    const monitors = [
+      makeMonitor('ui-1', 'UI monitor 1', { maintenanceWindows: [] }),
+      makeMonitor('ui-2', 'UI monitor 2 already has it', { maintenanceWindows: ['mw-2'] }),
+    ];
+
+    const { getByTestId, queryByTestId } = render(
+      <BulkMaintenanceWindowsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    // Apply mode with nothing picked yet: no summary.
+    expect(queryByTestId('syntheticsBulkMaintenanceWindowsEffectSummary')).not.toBeInTheDocument();
+
+    // Pick mw-2: ui-1 gains it (changes), ui-2 already has it (unchanged).
+    selectWindow(getByTestId);
+    expect(getByTestId('syntheticsBulkMaintenanceWindowsEffectSummary')).toHaveTextContent(
+      '1 will change · 1 unchanged'
+    );
+  });
+
+  it('summarises the outcome in remove mode once a window is chosen', () => {
+    const monitors = [
+      makeMonitor('ui-1', 'UI monitor 1', { maintenanceWindows: ['mw-1'] }),
+      makeMonitor('ui-2', 'UI monitor 2 without mw-1', { maintenanceWindows: ['mw-2'] }),
+    ];
+
+    const { getByTestId, getByRole } = render(
+      <BulkMaintenanceWindowsFlyout monitors={monitors} onClose={onClose} reloadPage={reloadPage} />
+    );
+
+    switchToRemove(getByRole);
+    selectRemoveWindow(getByTestId, 'MW One'); // mw-1
+
+    // Only ui-1 has mw-1 (changes); ui-2 keeps mw-2 (unchanged).
+    expect(getByTestId('syntheticsBulkMaintenanceWindowsEffectSummary')).toHaveTextContent(
+      '1 will change · 1 unchanged'
+    );
   });
 });
