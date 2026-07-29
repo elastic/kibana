@@ -18,7 +18,9 @@ import {
   RiskScoreLeftPanelSubTab,
 } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 
-const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
+const mockUseRiskContributingAlerts = jest
+  .fn()
+  .mockReturnValue({ loading: false, data: [], hasAlertsRead: true });
 const mockGetEuidFromObject = jest.fn().mockReturnValue('user:entity-1');
 
 jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
@@ -217,6 +219,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
     mockUseRiskScore.mockReturnValue({
       loading: false,
@@ -349,6 +352,7 @@ describe('RiskInputsTab', () => {
       loading: false,
       error: false,
       data: [alertInputDataMock],
+      hasAlertsRead: true,
     });
 
     const { getByTestId } = render(
@@ -362,6 +366,27 @@ describe('RiskInputsTab', () => {
     );
 
     expect(getByTestId(EXPAND_ALERT_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('does not render the alerts section when the user has no alert read privileges', () => {
+    mockUseRiskContributingAlerts.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [alertInputDataMock],
+      hasAlertsRead: false,
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab
+          entityType={EntityType.user}
+          entityName="elastic"
+          onShowAlert={mockOnShowAlert}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('risk-input-alert-title')).not.toBeInTheDocument();
   });
 
   it('Displays 0.00 for the asset criticality contribution if the contribution value is less than -0.01', () => {

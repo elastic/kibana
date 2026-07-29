@@ -43,6 +43,7 @@ export interface UseRiskContributingAlertsResult {
   loading: boolean;
   error: boolean;
   data?: InputAlert[];
+  hasAlertsRead: boolean;
 }
 
 /**
@@ -89,6 +90,7 @@ export const useRiskContributingAlerts = <T extends EntityType>({
     loading,
     error,
     data: alerts,
+    hasAlertsRead,
   };
 };
 

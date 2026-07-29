@@ -64,7 +64,6 @@ import { getEntityId, getEntityField, getEntityName } from '../../../entity_reso
 import { useStableExpandableFlyoutState } from '../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state';
 import { useMissingRiskEnginePrivileges } from '../../../../hooks/use_missing_risk_engine_privileges';
 import { RiskEnginePrivilegesCallOut } from '../../../risk_engine_privileges_callout';
-import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 export interface RiskInputsTabProps<T extends EntityType> {
   entityType: T;
@@ -413,8 +412,8 @@ const RiskInputsTabContent = <T extends EntityType>({
     setQuery,
   });
 
-  const { hasAlertsRead } = useAlertsPrivileges();
   const alerts = useRiskContributingAlerts<T>({ riskScore: activeRiskScore, entityType });
+  const { hasAlertsRead } = alerts;
 
   const entityNameByEuid = useMemo(() => {
     const map = new Map<string, string>();
