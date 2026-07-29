@@ -1018,7 +1018,13 @@ export class RulesClient {
           for (const taskError of result.errors) {
             const ruleId = taskIdToRuleId.get(taskError.id) ?? taskError.id;
             erroredRuleIds.add(ruleId);
-            errors.push(rotationFailedError(ruleId, taskError.status));
+            // Task Manager nests the status under `error.statusCode` (a
+            // `SavedObjectError`); the top-level `status` on `ErrorOutput` is
+            // declared but left unpopulated by `retryableBulkUpdate`, so we read
+            // the nested field to map e.g. a 409 to RULE_VERSION_CONFLICT.
+            const statusCode =
+              'statusCode' in taskError.error ? taskError.error.statusCode : taskError.status;
+            errors.push(rotationFailedError(ruleId, statusCode));
           }
         } catch (e) {
           // A whole-group failure (e.g. the per-task-type key grant was rejected).
