@@ -225,7 +225,7 @@ describe('<FollowerIndicesList />', () => {
       });
 
       test('should clear the selection after confirming an action', async () => {
-        const firstCheckbox = within(table.getRows()[0]).getByRole('checkbox');
+        const firstCheckbox = within(table.rows[0]).getByRole('checkbox');
         await user.click(firstCheckbox);
         expect(firstCheckbox).toBeChecked();
 
@@ -246,11 +246,11 @@ describe('<FollowerIndicesList />', () => {
 
         // The selection is reset, so the manage button is gone and the row is unchecked.
         expect(screen.queryByTestId('contextMenuButton')).not.toBeInTheDocument();
-        expect(within(table.getRows()[0]).getByRole('checkbox')).not.toBeChecked();
+        expect(within(table.rows[0]).getByRole('checkbox')).not.toBeChecked();
       });
 
       test('should clear the selection after confirming an action from the detail flyout', async () => {
-        const firstCheckbox = within(table.getRows()[0]).getByRole('checkbox');
+        const firstCheckbox = within(table.rows[0]).getByRole('checkbox');
         await user.click(firstCheckbox);
         expect(firstCheckbox).toBeChecked();
 
@@ -276,7 +276,7 @@ describe('<FollowerIndicesList />', () => {
         // The selection is reset through the detail flyout too, so the bulk manage button
         // is gone and the row is unchecked.
         expect(screen.queryByTestId('contextMenuButton')).not.toBeInTheDocument();
-        expect(within(table.getRows()[0]).getByRole('checkbox')).not.toBeChecked();
+        expect(within(table.rows[0]).getByRole('checkbox')).not.toBeChecked();
       });
     });
 
