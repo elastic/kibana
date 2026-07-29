@@ -8,7 +8,12 @@
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import dateMath from '@kbn/datemath';
-import { type Discovery, type SignalEntry } from '@kbn/significant-events-schema';
+import {
+  type BlastRadiusEntry,
+  type CausalFeature,
+  type Discovery,
+  type SignalEntry,
+} from '@kbn/significant-events-schema';
 import type { DiscoveryClient } from '../../../lib/significant_events/discoveries';
 import {
   assertUniqueBulkWriteKeys,
@@ -40,7 +45,7 @@ export type DiscoveryWriteInput = Pick<
    * Deduplication uses `makeFingerprint`, not this ID. Pass verbatim for a continuation.
    */
   event_id?: Discovery['event_id'];
-  /** Deduplication window (ES date math, e.g. `"now-1h"`). Not stored in the document. */
+  /** Deduplication window (ES date math, e.g. `"now-24h"`). Not stored in the document. */
   dedup_window?: string;
 };
 
@@ -90,6 +95,32 @@ const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
 };
 
 /**
+ * Returns true when any submitted detection signal has a different `change_point_type` than
+ * the candidate discovery's signal for the same rule UUID. A changed change-point type means
+ * the alerting engine observed a new pattern (e.g. spike → dip) and the write represents a
+ * different operational state — it must not be suppressed as a duplicate.
+ */
+const hasChangedChangePointType = (
+  submitted: SignalEntry[] | undefined,
+  candidate: Discovery
+): boolean => {
+  const submittedDetections = (submitted ?? []).filter(
+    (s): s is Extract<SignalEntry, { type: 'detection' }> => s.type === 'detection'
+  );
+  const candidateByRule = new Map(
+    (candidate.signals ?? [])
+      .filter((s): s is Extract<SignalEntry, { type: 'detection' }> => s.type === 'detection')
+      .map((s) => [s.metadata.rule_uuid, s])
+  );
+
+  return submittedDetections.some((s) => {
+    const existing = candidateByRule.get(s.metadata.rule_uuid);
+    if (!existing) return false;
+    return s.metadata.change_point_type !== existing.metadata.change_point_type;
+  });
+};
+
+/**
  * Per-incident event ID: a hash of the primary stream name, every detection rule UUID, and a
  * random UUID8 suffix. The suffix keeps distinct incidents for the same rules separate in the UI.
  * Deduplication uses `makeFingerprint` (stream and rules only) instead of this ID.
@@ -127,28 +158,92 @@ const parseDateMathToMs = (expr: string, now: Date): number | undefined => {
  * Merges prior discovery signals with the submitted signals, keeping the latest detection signal
  * per `metadata.rule_uuid`. Prior-only rules are carried forward; submitted rules win ties.
  */
+const mergeLatestByKey = <T>(
+  batches: Array<{ timestamp: string; values: T[] }>,
+  getKey: (value: T) => string | undefined
+): T[] => {
+  const latest = new Map<string, { timestamp: string; value: T }>();
+
+  for (const { timestamp, values } of batches) {
+    for (const value of values) {
+      const key = getKey(value);
+      if (key === undefined) continue;
+      const existing = latest.get(key);
+      if (existing === undefined || timestamp >= existing.timestamp) {
+        latest.set(key, { timestamp, value });
+      }
+    }
+  }
+
+  return [...latest.values()].map(({ value }) => value);
+};
+
 export const mergeSignalsLatestPerRule = (
   priorDocs: Array<Pick<Discovery, '@timestamp' | 'signals'>>,
   submitted: SignalEntry[],
   submittedTimestamp: string
-): SignalEntry[] => {
-  const latest = new Map<string, { timestamp: string; signal: SignalEntry }>();
+): SignalEntry[] =>
+  mergeLatestByKey(
+    [
+      ...priorDocs.map((doc) => ({
+        timestamp: doc['@timestamp'],
+        values: doc.signals ?? [],
+      })),
+      { timestamp: submittedTimestamp, values: submitted },
+    ],
+    (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
+  );
 
-  const consider = (timestamp: string, signals: SignalEntry[] = []) => {
-    for (const signal of signals) {
-      if (signal.type !== 'detection') continue;
-      const ruleId = signal.metadata?.rule_uuid;
-      if (!ruleId) continue;
-      const existing = latest.get(ruleId);
-      if (existing === undefined || timestamp >= existing.timestamp) {
-        latest.set(ruleId, { timestamp, signal });
-      }
+type EpisodeContextSource = Pick<Discovery, '@timestamp'> &
+  Partial<Pick<Discovery, 'stream_names' | 'causal_features' | 'blast_radius'>>;
+
+/**
+ * Accumulates topology observed during an episode. The latest entry for a feature wins.
+ * When the same feature_id appears in both arrays in any document, causal wins.
+ */
+export const mergeEpisodeContext = (
+  priorDocs: EpisodeContextSource[],
+  submitted: Omit<EpisodeContextSource, '@timestamp'> & {
+    stream_names: Discovery['stream_names'];
+  },
+  submittedTimestamp: string
+): { streamNames: string[]; causalFeatures: CausalFeature[]; blastRadius: BlastRadiusEntry[] } => {
+  const contexts: EpisodeContextSource[] = [
+    ...priorDocs,
+    { ...submitted, '@timestamp': submittedTimestamp },
+  ];
+
+  const streamNames = new Set(contexts.flatMap((ctx) => ctx.stream_names ?? []));
+  const causal = new Map<string, { timestamp: string; entry: CausalFeature }>();
+  const blast = new Map<string, { timestamp: string; entry: BlastRadiusEntry }>();
+
+  for (const ctx of contexts) {
+    const ts = ctx['@timestamp'];
+    for (const entry of ctx.blast_radius ?? []) {
+      const existing = blast.get(entry.feature_id);
+      if (!existing || ts >= existing.timestamp)
+        blast.set(entry.feature_id, { timestamp: ts, entry });
     }
-  };
+    for (const entry of ctx.causal_features ?? []) {
+      blast.delete(entry.feature_id);
+      const existing = causal.get(entry.feature_id);
+      if (!existing || ts >= existing.timestamp)
+        causal.set(entry.feature_id, { timestamp: ts, entry });
+    }
+  }
 
-  priorDocs.forEach((doc) => consider(doc['@timestamp'], doc.signals ?? []));
-  consider(submittedTimestamp, submitted);
-  return [...latest.values()].map((entry) => entry.signal);
+  for (const id of causal.keys()) blast.delete(id);
+
+  const byFeatureId = (
+    a: { entry: { feature_id: string } },
+    b: { entry: { feature_id: string } }
+  ) => a.entry.feature_id.localeCompare(b.entry.feature_id);
+
+  return {
+    streamNames: [...streamNames].sort(),
+    causalFeatures: [...causal.values()].sort(byFeatureId).map(({ entry }) => entry),
+    blastRadius: [...blast.values()].sort(byFeatureId).map(({ entry }) => entry),
+  };
 };
 
 interface PreparedInput {
@@ -206,13 +301,19 @@ const findExistingDuplicate = (
   // Match each item against its own cutoff. The candidates come from findLatest, which excludes
   // handled markers and returns only the latest document per event, so an old resolved version
   // cannot block a new incident.
-  return recentDiscoveries.find(
+  const candidate = recentDiscoveries.find(
     (discovery) =>
       discovery.kind === 'discovery' &&
       Date.parse(discovery['@timestamp']) >= cutoffMs &&
       makeFingerprint(discovery.stream_names ?? [], extractRuleUuids(discovery.signals)) ===
         fingerprint
   );
+
+  if (!candidate) return undefined;
+  // A changed change_point_type (e.g. spike → dip) for the same rule represents a different
+  // operational state and must not be suppressed as a duplicate of the prior write.
+  if (hasChangedChangePointType(prepared.input.signals, candidate)) return undefined;
+  return candidate;
 };
 
 /**
@@ -293,14 +394,21 @@ export async function discoveryWriteBulkHandler({
   const timestamp = now.toISOString();
   const pendingWrites = inputsToCreate.map((prepared) => {
     const { dedup_window: _dedupWindow, event_id: _eventId, ...rest } = prepared.input;
-    const signals =
-      prepared.input.event_id !== undefined && prepared.input.kind !== 'handled'
-        ? mergeSignalsLatestPerRule(
-            priorDocsByEventId.get(prepared.eventId) ?? [],
-            prepared.input.signals ?? [],
-            timestamp
-          )
-        : prepared.input.signals ?? [];
+    const isContinuation =
+      prepared.input.event_id !== undefined && prepared.input.kind !== 'handled';
+    const priorDocs = priorDocsByEventId.get(prepared.eventId) ?? [];
+    const signals = isContinuation
+      ? mergeSignalsLatestPerRule(priorDocs, prepared.input.signals ?? [], timestamp)
+      : prepared.input.signals ?? [];
+    // A continuation carries prior topology (causal_features, blast_radius) and stream_names
+    // forward, accumulating the full episode rather than replacing it with only the latest write.
+    const episodeContext = isContinuation
+      ? mergeEpisodeContext(priorDocs, rest, timestamp)
+      : {
+          streamNames: rest.stream_names,
+          causalFeatures: rest.causal_features ?? [],
+          blastRadius: rest.blast_radius ?? [],
+        };
     return {
       ...prepared,
       document: {
@@ -310,6 +418,9 @@ export async function discoveryWriteBulkHandler({
         event_id: prepared.eventId,
         discovery_id: prepared.discoveryId,
         signals,
+        stream_names: episodeContext.streamNames,
+        causal_features: episodeContext.causalFeatures,
+        blast_radius: episodeContext.blastRadius,
         severity: prepared.input.severity,
       },
     };

@@ -218,8 +218,20 @@ export type AppHeaderTitle = string | AppHeaderEditableTitle;
  */
 export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
 
-/** @public */
-export interface AppHeaderConfig {
+/**
+ * Plain-text page description. Use the object form to add a URL rendered with a fixed
+ * "Learn more" label.
+ *
+ * @public
+ */
+export type AppHeaderDescription =
+  | string
+  | {
+      text: string;
+      learnMoreUrl: string;
+    };
+
+interface AppHeaderConfigBase {
   title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
@@ -230,9 +242,21 @@ export interface AppHeaderConfig {
    * the typed favorite action API tracked in https://github.com/elastic/kibana/issues/271402.
    */
   favorite?: ReactNode;
-  metadata?: AppHeaderMetadataItems;
   spacing?: AppHeaderSpacing;
 }
+
+type AppHeaderSecondaryContent =
+  | {
+      description?: AppHeaderDescription;
+      metadata?: never;
+    }
+  | {
+      description?: never;
+      metadata?: AppHeaderMetadataItems;
+    };
+
+/** @public */
+export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 
 /**
  * Chrome Next rollout APIs.
@@ -278,6 +302,14 @@ export interface ChromeNext {
   contextSwitcher: {
     /**
      * Set the context switcher content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
+  /** Project picker content. */
+  projectPicker: {
+    /**
+     * Set the project picker content for the Chrome-Next header.
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(content?: ReactNode): void;

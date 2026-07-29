@@ -7,6 +7,8 @@ type: enhancement
 products:
 - product: cloud-serverless
   target: 2026-05-20
+- product: kibana
+  target: 9.5.0
 areas:
 - Search and data
 title: Add `secretQueryParams` support to HTTP connector

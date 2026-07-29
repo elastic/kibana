@@ -157,7 +157,9 @@ export class DashboardApp {
 
   async openTryEsqlDashboard() {
     await this.goto();
-    await this.page.testSubj.locator('dashboardNoDataPageLoaded').waitFor({ state: 'attached' });
+    await this.page.testSubj
+      .locator('dashboardNoDataPageLoaded')
+      .waitFor({ state: 'attached', timeout: 20_000 });
     await this.tryEsqlLink.click();
     await this.waitForPanelsToLoad(1);
   }
@@ -1147,6 +1149,14 @@ export class DashboardApp {
 
   getDashboardListingLink(title: string) {
     return this.page.testSubj.locator(`dashboardListingTitleLink-${title.split(' ').join('-')}`);
+  }
+
+  // Project (chrome-next) shows the dashboard title in the app header; classic chrome shows it as
+  // the last breadcrumb. `.or()` keeps callers layout-agnostic without a runtime gate.
+  getAppTitle() {
+    return this.page.testSubj
+      .locator('appHeaderTitle')
+      .or(this.page.testSubj.locator('breadcrumb last'));
   }
 
   // ============================================================

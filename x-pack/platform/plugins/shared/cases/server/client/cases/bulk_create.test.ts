@@ -1432,6 +1432,27 @@ describe('bulkCreate', () => {
         expect.stringContaining('Failed to update template usage stats')
       );
     });
+
+    it('rejects a template reference without a pinned version (no server-side expansion on bulkCreate)', async () => {
+      await expect(
+        bulkCreate({ cases: getCases({ template: { id: 'tmpl-1' } }) }, clientArgs, casesClient)
+      ).rejects.toThrow('template.version is required');
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('accepts a version-pinned template reference', async () => {
+      clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ template: { id: 'tmpl-1', version: 2 } }) },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+    });
   });
 
   describe('customFields → extended_fields adapter (write-time mirror)', () => {
