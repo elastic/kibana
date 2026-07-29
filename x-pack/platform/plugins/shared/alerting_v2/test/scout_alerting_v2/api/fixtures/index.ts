@@ -127,6 +127,8 @@ export {
   getUnsnoozeAlertActionUrl,
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
+  CREATE_ALERT_EVENT_URL,
+  getCreateAlertEventBySourceUrl,
   getRuleUrl,
   getRunRuleUrl,
   getEnableRuleUrl,

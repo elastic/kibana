@@ -116,6 +116,13 @@ export const getDeactivateAlertActionUrl = (groupHash: string) =>
 
 export const BULK_ALERT_ACTION_URL = `${ALERT_API_PATH}/_bulk_action`;
 
+/** POST /api/alerting/v2/alerts — source in body */
+export const CREATE_ALERT_EVENT_URL = ALERT_API_PATH;
+
+/** POST /api/alerting/v2/alerts/:source — source in path */
+export const getCreateAlertEventBySourceUrl = (source: string) =>
+  `${ALERT_API_PATH}/${encodeURIComponent(source)}`;
+
 export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryParams): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
