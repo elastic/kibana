@@ -35,6 +35,13 @@ export interface PromptFactoryParams {
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
   renderers: RendererTypeDefinition[];
+  /**
+   * Effective on/off for context-aware skill filtering this run: the `relevantSkills` flag AND a
+   * dedicated fast model being configured. Gates the SKILLS section (static pointer vs full list) and
+   * the `<relevant_skills>` notification — distinct from `experimentalFeatures.relevantSkills`, which
+   * is only the flag.
+   */
+  relevantSkillsEnabled: boolean;
   relevantSkills?: RelevantSkillSelection;
 }
 

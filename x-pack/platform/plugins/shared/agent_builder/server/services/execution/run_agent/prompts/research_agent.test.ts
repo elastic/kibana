@@ -42,6 +42,7 @@ describe('getResearchAgentPrompt', () => {
       actions: [],
       cycleLimit: 1,
       experimentalFeatures: { bash: false, skills: false },
+      relevantSkillsEnabled: false,
       toolManager: {} as any,
       resultTransformer: jest.fn(),
       renderers: [],
@@ -69,10 +70,11 @@ describe('getResearchAgentPrompt', () => {
     );
   });
 
-  it('renders the full skill list when skills is on and relevantSkills is off', async () => {
+  it('renders the full skill list when skills is on and relevant-skills is off', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        experimentalFeatures: { bash: false, skills: true, relevantSkills: false },
+        experimentalFeatures: { bash: false, skills: true },
+        relevantSkillsEnabled: false,
         skills: [alphaSkill],
       })
     );
@@ -82,10 +84,11 @@ describe('getResearchAgentPrompt', () => {
     expect(system).not.toContain('search_relevant_skills');
   });
 
-  it('renders the static pointer with no per-skill lines when relevantSkills is on', async () => {
+  it('renders the static pointer with no per-skill lines when relevant-skills is on', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        experimentalFeatures: { bash: false, skills: true, relevantSkills: true },
+        experimentalFeatures: { bash: false, skills: true },
+        relevantSkillsEnabled: true,
         skills: [alphaSkill],
       })
     );
@@ -99,7 +102,8 @@ describe('getResearchAgentPrompt', () => {
   it('injects the <relevant_skills> notice after previous rounds when a selection is provided', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        experimentalFeatures: { bash: false, skills: true, relevantSkills: true },
+        experimentalFeatures: { bash: false, skills: true },
+        relevantSkillsEnabled: true,
         relevantSkills: {
           skills: [
             {
@@ -122,10 +126,11 @@ describe('getResearchAgentPrompt', () => {
     expect(texts[noticeIdx]).toContain('fits the request');
   });
 
-  it('injects no notice when relevantSkills flag is off even if a selection is present', async () => {
+  it('injects no notice when relevant-skills is disabled even if a selection is present', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        experimentalFeatures: { bash: false, skills: true, relevantSkills: false },
+        experimentalFeatures: { bash: false, skills: true },
+        relevantSkillsEnabled: false,
         relevantSkills: { skills: [{ id: 'a', name: 'a', path: '/p', description: 'd' }] },
       })
     );
@@ -135,7 +140,8 @@ describe('getResearchAgentPrompt', () => {
   it('injects no notice when the selection is empty', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
-        experimentalFeatures: { bash: false, skills: true, relevantSkills: true },
+        experimentalFeatures: { bash: false, skills: true },
+        relevantSkillsEnabled: true,
         relevantSkills: { skills: [] },
       })
     );

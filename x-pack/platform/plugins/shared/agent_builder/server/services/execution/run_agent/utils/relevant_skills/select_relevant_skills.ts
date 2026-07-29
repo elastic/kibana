@@ -136,14 +136,17 @@ export const selectRelevantSkills = async ({
   abortSignal,
   timeoutMs = RELEVANT_SKILLS_TIMEOUT_MS,
 }: SelectRelevantSkillsParams): Promise<RelevantSkillSelection> => {
-  if (skills.length === 0) {
-    return { skills: [] };
-  }
-  if (skills.length <= SMALL_SKILL_THRESHOLD) {
-    return { skills: skills.map((skill) => toRelevantSkill(skill)) };
-  }
-
+  // Wrap the whole body (including the short-circuits, which call getSkillAbsolutePath) so this never
+  // throws: the eagerly-created promise in run_chat_agent must always resolve to a selection, never
+  // reject. On any failure we fall back to no notification.
   try {
+    if (skills.length === 0) {
+      return { skills: [] };
+    }
+    if (skills.length <= SMALL_SKILL_THRESHOLD) {
+      return { skills: skills.map((skill) => toRelevantSkill(skill)) };
+    }
+
     return await withActiveInferenceSpan(
       'select_relevant_skills',
       { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },

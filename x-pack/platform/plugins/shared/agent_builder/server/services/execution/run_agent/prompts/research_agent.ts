@@ -35,7 +35,7 @@ export const getResearchAgentPrompt = async (
     resultTransformer,
     toolManager,
     conversationTimestamp,
-    experimentalFeatures,
+    relevantSkillsEnabled,
     relevantSkills,
   } = params;
 
@@ -51,7 +51,7 @@ export const getResearchAgentPrompt = async (
   });
 
   const relevantSkillsMessages =
-    experimentalFeatures.relevantSkills && relevantSkills && relevantSkills.skills.length > 0
+    relevantSkillsEnabled && relevantSkills && relevantSkills.skills.length > 0
       ? [createUserMessage(formatRelevantSkillsNotice(relevantSkills.skills))]
       : [];
 
@@ -74,6 +74,7 @@ const getAgentSystemMessage = async ({
   outputSchema,
   skills,
   experimentalFeatures,
+  relevantSkillsEnabled,
   capabilities,
   renderers,
 }: ResearchAgentPromptParams): Promise<string> => {
@@ -137,7 +138,7 @@ ${getFileSystemInstructions({ bashEnabled: experimentalFeatures.bash })}
 
 ${
   experimentalFeatures.skills
-    ? experimentalFeatures.relevantSkills
+    ? relevantSkillsEnabled
       ? getRelevantSkillsPointerInstructions()
       : getSkillsInstructions({ skills })
     : ''

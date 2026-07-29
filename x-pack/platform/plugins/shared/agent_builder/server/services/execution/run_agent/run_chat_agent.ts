@@ -142,6 +142,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
+  // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
+  // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
+  // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
+  const relevantSkillsEnabled =
+    experimentalFeatures.relevantSkills && (await modelProvider.hasFastModel());
+
   const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
   const filteredSkills = await selectSkills({
     skills,
@@ -178,7 +184,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
   const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
-    experimentalFeatures.relevantSkills && !pendingRound
+    relevantSkillsEnabled && !pendingRound
       ? selectRelevantSkills({
           skills: filteredSkills,
           context: {
@@ -225,6 +231,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     abortSignal,
     backgroundExecutionService,
     filteredSkills,
+    relevantSkillsEnabled,
   });
 
   // Then add dynamic tools
@@ -276,7 +283,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   processedConversation = compactionResult.processedConversation;
 
   let relevantSkillsSelection: RelevantSkillSelection | undefined;
-  if (experimentalFeatures.relevantSkills) {
+  if (relevantSkillsEnabled) {
     if (pendingRound) {
       const persisted = pendingRound.steps.find(isRelevantSkillsStep);
       relevantSkillsSelection = persisted ? { skills: persisted.skills } : undefined;
@@ -295,6 +302,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    relevantSkillsEnabled,
     relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
   });

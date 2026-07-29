@@ -37,6 +37,12 @@ export interface RegisterInternalToolsParams {
   backgroundExecutionService: BackgroundExecutionService;
   /** The agent's resolved skills, used by the `search_relevant_skills` tool. */
   filteredSkills: InternalSkillDefinition[];
+  /**
+   * Effective on/off for context-aware skill filtering (flag AND a dedicated fast model configured).
+   * Gates registration of `search_relevant_skills` — not the raw `experimentalFeatures.relevantSkills`
+   * flag, since the tool also relies on the fast model.
+   */
+  relevantSkillsEnabled: boolean;
 }
 
 /**
@@ -52,6 +58,7 @@ export const registerInternalTools = async ({
   abortSignal,
   backgroundExecutionService,
   filteredSkills,
+  relevantSkillsEnabled,
 }: RegisterInternalToolsParams): Promise<void> => {
   const {
     toolManager,
@@ -111,8 +118,9 @@ export const registerInternalTools = async ({
     tools.push(createLoadSkillTool({ analyticsService, trackingService }));
   }
 
-  // search_relevant_skills — context-aware skill discovery, gated on the relevantSkills feature.
-  if (experimentalFeatures.relevantSkills) {
+  // search_relevant_skills — context-aware skill discovery. Gated on the effective enablement
+  // (flag AND a dedicated fast model), since the tool relies on the fast model too.
+  if (relevantSkillsEnabled) {
     tools.push(
       createSearchRelevantSkillsTool({ modelProvider, filteredSkills, logger, abortSignal })
     );
