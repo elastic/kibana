@@ -146,7 +146,7 @@ const runScenario = async (
   };
 };
 
-const getScenarioDataCounts = ({ bars }: ScenarioResult) => {
+const getScenarioData = ({ bars }: ScenarioResult) => {
   // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
   // target as an additional contribution beside its source stream.
   const columnsToCheck = Math.floor(bars.length / 2);
@@ -160,7 +160,7 @@ const assertDowngradeResult = (result: ScenarioResult) => {
   expect.soft(result.incompatibleAverageCount).toBe(0);
   expect.soft(result.hasDataBeforeDowngrade).toBe(true);
   expect.soft(result.hasDataAfterDowngrade).toBe(true);
-  const counts = getScenarioDataCounts(result);
+  const counts = getScenarioData(result);
   expect
     .soft(counts.beforeDowngrade)
     .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
