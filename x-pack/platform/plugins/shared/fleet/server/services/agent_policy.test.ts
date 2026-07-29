@@ -40,7 +40,6 @@ import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 
-import { getAgentsByKuery } from './agents';
 import { getPackagePolicySavedObjectType, packagePolicyService } from './package_policy';
 import { appContextService } from './app_context';
 import { outputService } from './output';
@@ -897,13 +896,7 @@ describe('Agent policy', () => {
         },
       ] as any);
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({
-        agents: [],
-        total: 0,
-        page: 1,
-        perPage: 10,
-      });
+      esClient.count.mockResolvedValue({ count: 0 } as any);
       mockedPackagePolicyService.create.mockReset();
     });
 
@@ -950,12 +943,7 @@ describe('Agent policy', () => {
     });
 
     it('should throw error if active agents are assigned to the policy', async () => {
-      (getAgentsByKuery as jest.Mock).mockResolvedValue({
-        agents: [],
-        total: 2,
-        page: 1,
-        perPage: 10,
-      });
+      esClient.count.mockResolvedValueOnce({ count: 2 } as any);
       await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
         'Cannot delete an agent policy that is assigned to any active or inactive agents'
       );

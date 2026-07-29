@@ -27435,6 +27435,8 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        policy_base_id:
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -28082,6 +28084,8 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -28547,6 +28551,8 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -80485,6 +80491,12 @@ components:
           type: object
         index_pattern:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
+          type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
           type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
