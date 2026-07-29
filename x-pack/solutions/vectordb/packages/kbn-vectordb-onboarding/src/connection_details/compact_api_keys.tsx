@@ -43,7 +43,7 @@ export const CompactApiKeys = ({ telemetryPage }: CompactApiKeysProps) => {
           >
             <FormattedMessage
               id="vectordbOnboarding.connectToProject.apiKeysButtonLabel"
-              defaultMessage="API keys"
+              defaultMessage="Generate API Key"
             />
           </EuiButton>
         </EuiFlexItem>

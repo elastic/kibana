@@ -23,7 +23,6 @@ interface DeploymentStatsResponse {
   storeSizeBytes: number | null;
   dashboardsCount: number | null;
   documentsCount: number | null;
-  modelUsageCount: number | null;
   apiKeysTotal: number | null;
   apiKeysExpiring: number | null;
 }
@@ -42,7 +41,6 @@ const initialStats: DeploymentStats = {
   workflowsRunningCount: null,
   dashboardsCount: null,
   documentsCount: null,
-  modelUsageCount: null,
   apiKeysTotal: null,
   apiKeysExpiring: null,
   starredDashboardsCount: null,
@@ -69,7 +67,6 @@ export const useDeploymentStats = () => {
         vectorDocsCount: esStats?.vectorDocsCount ?? null,
         storeSizeBytes: esStats?.storeSizeBytes ?? null,
         documentsCount: esStats?.documentsCount ?? null,
-        modelUsageCount: esStats?.modelUsageCount ?? null,
         apiKeysTotal: esStats?.apiKeysTotal ?? null,
         apiKeysExpiring: esStats?.apiKeysExpiring ?? null,
         workflowsCount: workflowsResponse?.workflows

@@ -45,11 +45,12 @@ export const STAT_TILE_LABELS = {
   vectors: i18n.translate('xpack.serverlessVectordb.home.stats.vectors', {
     defaultMessage: 'Vectors',
   }),
+  vectorsTooltip: i18n.translate('xpack.serverlessVectordb.home.stats.vectorsTooltip', {
+    defaultMessage:
+      'Total vectors in the project. Documents with chunked vector fields will contribute more than one vector each.',
+  }),
   totalSize: i18n.translate('xpack.serverlessVectordb.home.stats.totalSize', {
     defaultMessage: 'Total size',
-  }),
-  modelUsage: i18n.translate('xpack.serverlessVectordb.home.stats.modelUsage', {
-    defaultMessage: 'Model usage',
   }),
   dashboardsTotal: i18n.translate('xpack.serverlessVectordb.home.stats.dashboardsTotal', {
     defaultMessage: 'Total',
