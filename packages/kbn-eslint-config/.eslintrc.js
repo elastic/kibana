@@ -485,6 +485,8 @@ module.exports = {
     '@elastic/eui/tooltip-no-interactive-content': 'error',
     '@elastic/eui/require-table-caption': 'error',
     '@elastic/eui/accessible-interactive-element': 'error',
+    '@elastic/eui/icon-accessibility-rules': 'error',
+    '@elastic/eui/tooltip-button-icon-wrap': 'error',
   },
 
   overrides: [
