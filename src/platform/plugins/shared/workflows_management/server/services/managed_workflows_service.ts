@@ -64,6 +64,12 @@ export class ManagedWorkflowsService {
    * individual instances that were not re-installed across restarts.
    */
   private readonly installedDocKeysByPlugin = new Map<string, Set<string>>();
+  /**
+   * Plugins whose managed install pass did not complete this boot (readiness gate skip
+   * or mid-install abort). Destructive ready() reconcile must not run for these —
+   * `installedDocKeys` is only trustworthy when every install actually ran.
+   */
+  private readonly incompleteInstallPluginIds = new Set<string>();
   private readonly logger: Logger;
 
   constructor(private readonly deps: ManagedWorkflowsServiceDeps) {
@@ -78,6 +84,15 @@ export class ManagedWorkflowsService {
     return true;
   }
 
+  /**
+   * Marks that this plugin's managed install pass is incomplete for this boot.
+   * Call when an install is gated out before reaching ManagedWorkflowsService, or when
+   * a mid-install write is aborted. ready() will skip destructive reconcile.
+   */
+  public markInstallIncomplete(pluginId: string): void {
+    this.incompleteInstallPluginIds.add(pluginId);
+  }
+
   public isPluginReady(pluginId: string): boolean {
     return this.readyPluginIds.has(pluginId);
   }
@@ -86,6 +101,8 @@ export class ManagedWorkflowsService {
    * Called when a plugin signals it has finished installing all its static workflows.
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
    * not installed during the startup window and upgrades dynamic auto workflows.
+   * Destructive reconcile is skipped when any install for this plugin was gated or
+   * aborted incomplete this boot — see {@link markInstallIncomplete}.
    */
   public async pluginReady(pluginId: string): Promise<void> {
     if (this.readyPluginIds.has(pluginId)) {
@@ -194,8 +211,10 @@ export class ManagedWorkflowsService {
     const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
     const spaceId = this.getRequiredSpaceId(options);
 
-    // Abort before trackInstall so ready() reconcile does not treat a skipped write as installed.
+    // Abort before trackInstall; mark incomplete so ready() does not treat a gated skip
+    // as "owner removed this workflow" and force-delete persisted docs.
     if (this.shouldAbortManagedWrite(`install '${id}'`)) {
+      this.markInstallIncomplete(registeredPluginId);
       return;
     }
 
@@ -217,7 +236,10 @@ export class ManagedWorkflowsService {
 
     if (!existing) {
       if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
+        // Never wrote — untrack so a *complete* later pass can orphan-clean; mark incomplete
+        // so ready() this boot does not delete other still-desired docs.
         this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+        this.markInstallIncomplete(registeredPluginId);
         return;
       }
       const document = await this.prepareManagedWorkflowDocument({
@@ -232,6 +254,7 @@ export class ManagedWorkflowsService {
       const documentWithVersion = applyWorkflowVersion(document, undefined);
       if (this.shouldAbortManagedWrite(`install create '${id}'`)) {
         this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+        this.markInstallIncomplete(registeredPluginId);
         return;
       }
       const savedDocument = await this.deps.crudService.createWorkflowDocument(
@@ -291,7 +314,9 @@ export class ManagedWorkflowsService {
     });
     const documentWithVersion = applyWorkflowVersion(document, existing);
     if (this.shouldAbortManagedWrite(`install update '${id}'`)) {
-      this.untrackInstall(registeredPluginId, workflowDocumentId, spaceId);
+      // Keep track so reconcile (if it ran) would preserve working v1; mark incomplete so
+      // ready() skips destructive cleanup and we retry the upgrade on a later boot.
+      this.markInstallIncomplete(registeredPluginId);
       return;
     }
     const savedDocument = await this.deps.crudService.writeWorkflowDocumentWithOcc(
@@ -494,8 +519,20 @@ export class ManagedWorkflowsService {
    * Removes persisted static workflow documents that were NOT installed during the
    * startup window, and upgrades persisted dynamic auto workflow documents to the
    * current registry definition.
+   *
+   * Must not run destructive cleanup when installs were gated out or aborted incomplete
+   * this boot — `installedDocKeys` is only correct if the install pass completed.
    */
   private async reconcilePluginManagedWorkflows(pluginId: string): Promise<void> {
+    if (this.incompleteInstallPluginIds.has(pluginId)) {
+      this.logger.warn(
+        `Managed workflows: skipping ready() reconcile for plugin '${pluginId}' because ` +
+          `one or more managed installs were incomplete this boot (gated or aborted). ` +
+          `Persisted workflows are preserved; missing installs retry on a later boot.`
+      );
+      return;
+    }
+
     const installedDocKeys = this.installedDocKeysByPlugin.get(pluginId) ?? new Set<string>();
 
     const pluginDefinitions = getManagedWorkflowDefinitions().filter(

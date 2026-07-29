@@ -193,6 +193,7 @@ describe('WorkflowsService (facade)', () => {
       'installManagedWorkflow',
       'pluginReady',
       'cleanupUnregisteredOrphans',
+      'markInstallIncomplete',
     ]);
   });
 
@@ -424,9 +425,24 @@ describe('WorkflowsService (facade)', () => {
       await service.cleanupUnregisteredOrphans(['owner']);
 
       expect(managedSpies.installManagedWorkflow).not.toHaveBeenCalled();
+      expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
       expect(managedSpies.pluginReady).not.toHaveBeenCalled();
       expect(managedSpies.cleanupUnregisteredOrphans).not.toHaveBeenCalled();
       expect(mockedWaitForManagedWorkflowInstallReadiness).toHaveBeenCalled();
+    });
+
+    it('marks install incomplete when install is gated out so ready reconcile stays safe', async () => {
+      mockedWaitForManagedWorkflowInstallReadiness
+        .mockResolvedValueOnce({ ready: false, reason: 'stopping' })
+        .mockResolvedValueOnce({ ready: true });
+      const service = await buildService();
+
+      await service.installManagedWorkflow('wf.managed' as any, { spaceId: 'default' }, 'owner');
+      await service.pluginReady('owner');
+
+      expect(managedSpies.installManagedWorkflow).not.toHaveBeenCalled();
+      expect(managedSpies.markInstallIncomplete).toHaveBeenCalledWith('owner');
+      expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
     });
 
     it('delegates install, ready, and orphan cleanup when the gate is ready', async () => {
@@ -442,6 +458,7 @@ describe('WorkflowsService (facade)', () => {
         { spaceId: 'default' },
         'owner'
       );
+      expect(managedSpies.markInstallIncomplete).not.toHaveBeenCalled();
       expect(managedSpies.pluginReady).toHaveBeenCalledWith('owner');
       expect(managedSpies.cleanupUnregisteredOrphans).toHaveBeenCalledWith(['owner']);
     });

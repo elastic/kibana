@@ -621,6 +621,8 @@ export class WorkflowsService {
     await this.ensureInitialized();
     const readiness = await this.ensureManagedInstallReady(`install '${id}'`);
     if (!readiness.ready) {
+      // So ready() cannot treat gated-out installs as orphans and force-delete them.
+      this.managedWorkflowsService.markInstallIncomplete(registeredPluginId);
       return;
     }
     return this.managedWorkflowsService.installManagedWorkflow(id, options, registeredPluginId);
