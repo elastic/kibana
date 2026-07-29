@@ -1,7 +1,7 @@
 {
   "type": "shared-common",
   "id": "@kbn/apm-embeddable-common",
-  "owner": ["@elastic/obs-signals-traces"],
+  "owner": ["@elastic/obs-signals-traces-team"],
   "group": "observability",
   "visibility": "private"
 }

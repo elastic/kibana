@@ -221,7 +221,7 @@ describe('DispatcherService', () => {
       expect(queryEsClient.esql.query).toHaveBeenCalledWith(
         {
           query: getDispatchableAlertEventsQuery().query,
-          drop_null_columns: false,
+          drop_null_columns: true,
           filter: {
             range: {
               '@timestamp': {

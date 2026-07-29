@@ -7,6 +7,8 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
+import type { FlyoutType } from '../../../common/lib/telemetry';
+import { useFlyoutTelemetry } from './use_flyout_telemetry';
 
 export interface UseTabsParams<T extends string> {
   /**
@@ -22,6 +24,11 @@ export interface UseTabsParams<T extends string> {
    * expandable-flyout URL path). Falls back to localStorage, then validTabIds[0].
    */
   initialTabId?: string | null;
+  /**
+   * When provided, an explicit `setSelectedTabId` call (not the render-phase URL sync) reports a
+   * `FlyoutTabClicked` event tagged with this flyout type. Omit to skip tab-click telemetry.
+   */
+  flyoutType?: FlyoutType;
 }
 
 export interface UseTabsResult<T extends string> {
@@ -58,8 +65,10 @@ export const useTabs = <T extends string>({
   validTabIds,
   storageKey,
   initialTabId,
+  flyoutType,
 }: UseTabsParams<T>): UseTabsResult<T> => {
   const { storage } = useKibana().services;
+  const { reportTabClicked } = useFlyoutTelemetry();
 
   const [selectedTabId, setSelectedTabIdState] = useState<T>(
     () =>
@@ -85,8 +94,11 @@ export const useTabs = <T extends string>({
     (tabId: T) => {
       setSelectedTabIdState(tabId);
       storage.set(storageKey, tabId);
+      if (flyoutType) {
+        reportTabClicked({ flyoutType, tabId });
+      }
     },
-    [storage, storageKey]
+    [storage, storageKey, flyoutType, reportTabClicked]
   );
 
   return { selectedTabId, setSelectedTabId };

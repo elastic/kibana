@@ -72,7 +72,7 @@ const makeToggleField = (overrides: Partial<FieldSchemaType> = {}): FieldSchemaT
   ({
     name: 'requires_escalation',
     label: 'Requires escalation',
-    type: 'keyword',
+    type: 'boolean',
     control: FieldType.TOGGLE,
     ...overrides,
   } as FieldSchemaType);
@@ -529,17 +529,17 @@ describe('validateExtendedFields', () => {
     it('accepts true/false string values', () => {
       const fields: FieldSchemaType[] = [makeToggleField()];
 
-      expect(validateExtendedFields({ requires_escalation_as_keyword: 'true' }, fields)).toEqual(
+      expect(validateExtendedFields({ requires_escalation_as_boolean: 'true' }, fields)).toEqual(
         []
       );
-      expect(validateExtendedFields({ requires_escalation_as_keyword: 'false' }, fields)).toEqual(
+      expect(validateExtendedFields({ requires_escalation_as_boolean: 'false' }, fields)).toEqual(
         []
       );
     });
 
     it('rejects values other than true/false', () => {
       const fields: FieldSchemaType[] = [makeToggleField()];
-      const errors = validateExtendedFields({ requires_escalation_as_keyword: 'yes' }, fields);
+      const errors = validateExtendedFields({ requires_escalation_as_boolean: 'yes' }, fields);
 
       expect(errors).toContain('Field "Requires escalation" must be either true or false');
     });

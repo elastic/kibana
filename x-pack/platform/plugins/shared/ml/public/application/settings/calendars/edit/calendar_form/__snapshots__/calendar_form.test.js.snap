@@ -6,6 +6,68 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
   data-test-subj="mlCalendarFormEdit"
 >
   <div
+    data-test-subj="mlCalendarTitle"
+  >
+    <div
+      class="css-ayyaqq-root-root-root-root"
+      data-test-subj="appHeader"
+    >
+      <div
+        class="css-t37kb7-primaryRow-primaryRow-primaryRow"
+      >
+        <div
+          class="css-856hcb-titleCluster"
+        >
+          <div
+            class="css-1cqdmpr-titleGroup"
+          >
+            <div
+              class="css-p0ahs1-wrapper"
+            >
+              <div
+                class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
+              >
+                <h1
+                  class="euiTitle emotion-euiTitle-s"
+                >
+                  <span
+                    class="css-brsrfa-titleFrame"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="css-gbhrtv-titleSizer"
+                    >
+                      Calendar test-calendar
+                    </span>
+                    <span
+                      class="css-zgy7p9-titleText-readContent"
+                      data-test-subj="appHeaderTitle"
+                    >
+                      Calendar test-calendar
+                    </span>
+                  </span>
+                </h1>
+              </div>
+            </div>
+            <div
+              class="titleActionsReveal css-19se5e4-titleActionsReveal"
+            />
+          </div>
+          <div
+            aria-hidden="true"
+            class="css-ph3hxu-titleClusterSpacer"
+          />
+        </div>
+        <div
+          class="css-1ddjbeg-trailingSlot"
+        />
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+    />
+  </div>
+  <div
     class="euiText emotion-euiText-m"
     data-test-subj="mlCalendarDescriptionText"
   >
@@ -402,6 +464,64 @@ exports[`CalendarForm Renders calendar form 1`] = `
   class="euiForm"
   data-test-subj="mlCalendarFormNew"
 >
+  <div
+    class="css-ayyaqq-root-root-root-root"
+    data-test-subj="appHeader"
+  >
+    <div
+      class="css-t37kb7-primaryRow-primaryRow-primaryRow"
+    >
+      <div
+        class="css-856hcb-titleCluster"
+      >
+        <div
+          class="css-1cqdmpr-titleGroup"
+        >
+          <div
+            class="css-p0ahs1-wrapper"
+          >
+            <div
+              class="css-mohf4p-titleWrapper-titleOffsetStyle-Title"
+            >
+              <h1
+                class="euiTitle emotion-euiTitle-s"
+              >
+                <span
+                  class="css-brsrfa-titleFrame"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="css-gbhrtv-titleSizer"
+                  >
+                    Create new calendar
+                  </span>
+                  <span
+                    class="css-zgy7p9-titleText-readContent"
+                    data-test-subj="appHeaderTitle"
+                  >
+                    Create new calendar
+                  </span>
+                </span>
+              </h1>
+            </div>
+          </div>
+          <div
+            class="titleActionsReveal css-19se5e4-titleActionsReveal"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          class="css-ph3hxu-titleClusterSpacer"
+        />
+      </div>
+      <div
+        class="css-1ddjbeg-trailingSlot"
+      />
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
   <div
     class="euiFormRow euiFormRow--hasLabel emotion-euiFormRow"
     id="generated-id-row"

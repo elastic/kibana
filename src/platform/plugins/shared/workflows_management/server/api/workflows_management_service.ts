@@ -293,6 +293,11 @@ export class WorkflowsService {
     return this.crudService.getWorkflowsByIds(ids, spaceId, options);
   }
 
+  public async findExistingWorkflowIds(ids: string[]): Promise<string[]> {
+    await this.ensureInitialized();
+    return this.crudService.findExistingWorkflowIds(ids);
+  }
+
   public async getWorkflowsSourceByIds(
     ids: string[],
     spaceId: string,

@@ -1,5 +1,5 @@
 {
-  "sha1": "4a211106dca275cfa76ce7339e333c92f0df9a46",
+  "sha1": "b384dcabbd36d0ad83c4198044fd8b9687612aa9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -281,7 +281,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
-        "line": 82,
+        "line": 93,
         "column": 7
       }
     },
@@ -295,7 +295,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
-        "line": 94,
+        "line": 105,
         "column": 7
       }
     },
@@ -309,7 +309,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
-        "line": 110,
+        "line": 121,
         "column": 7
       }
     },
