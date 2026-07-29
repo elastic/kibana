@@ -84,9 +84,9 @@ export class UnifiedFieldList {
   }
 
   async waitUntilSidebarHasLoaded(): Promise<void> {
-    await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
-      state: 'hidden',
-    });
+    await this.page.testSubj
+      .locator('fieldListGroupedAvailableFields')
+      .waitFor({ state: 'visible' });
   }
 
   async searchField(name: string): Promise<void> {
