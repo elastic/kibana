@@ -15,6 +15,7 @@ import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isMap, parseDocument } from 'yaml';
 import { useCasesLocalStorage } from '../../../common/use_cases_local_storage';
+import { useKibana } from '../../../common/lib/kibana';
 import type { YamlEditorFormValues } from './template_form';
 import { useCasesTemplatesNavigation } from '../../../common/navigation';
 import { CasesAppHeader } from '../../app/cases_app_header';
@@ -25,6 +26,7 @@ import { TEMPLATE_PREVIEW_WIDTH_KEY } from '../constants';
 import { TemplateResetModal } from './template_reset_modal';
 import { getTemplateFormBadges, getTemplateFormMenu } from './header_menu';
 import { TemplateEditorLayout } from './template_editor_layout';
+import { TemplateEditorTour } from '../tour/template_editor_tour';
 import {
   type FieldDefaultValue,
   updateYamlFieldDefault,
@@ -190,6 +192,7 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
   initialSettings,
 }) => {
   const styles = useMemoCss(componentStyles);
+  const { docLinks } = useKibana().services;
   const { getCasesTemplatesUrl, navigateToCasesTemplates } = useCasesTemplatesNavigation();
 
   const defaultPreviewWidth = Math.floor(window.innerWidth * 0.3);
@@ -594,12 +597,16 @@ export const TemplateFormLayout: React.FC<TemplateFormLayoutProps> = ({
         // bar on Security or leaving dead space elsewhere.
         css={kbnFullBodyHeightCss(bodyHeightOffset)}
       >
+        <TemplateEditorTour enabled={!isLoading} />
         <EuiFlexItem grow={false}>
           <CasesAppHeader
             title={title}
             back={templateFormBack}
             badges={templateFormBadges}
             menu={templateFormMenu}
+            // Surfaces a native "Documentation" item in the header overflow menu (matching other
+            // Kibana editors), linking to the case-templates guide via the doclinks service.
+            docLink={docLinks.links.cases.manageCaseTemplates}
           />
         </EuiFlexItem>
 

@@ -18,6 +18,7 @@
     ],
     "requiredPlugins": [
       "dataViews",
+      "navigation",
       "serverless",
       "share",
       "agentBuilder"

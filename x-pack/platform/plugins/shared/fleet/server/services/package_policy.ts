@@ -2000,6 +2000,11 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           this.keepPolicyIdInSync(oldPackagePolicy);
         }
 
+        _validateRestrictedFieldsNotModifiedOrThrow({
+          oldPackagePolicy,
+          packagePolicyUpdate: enrichedPackagePolicy,
+        });
+
         // If the package version has increased, save the previous package policy revision.
         if (
           appContextService.getExperimentalFeatures().enablePackageRollback &&
@@ -4482,6 +4487,25 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
   packagePolicyUpdate: UpdatePackagePolicy;
 }) {
   const { oldPackagePolicy, packagePolicyUpdate } = opts;
+
+  if (
+    packagePolicyUpdate.package?.name &&
+    oldPackagePolicy.package?.name &&
+    packagePolicyUpdate.package.name !== oldPackagePolicy.package.name
+  ) {
+    appContextService
+      .getLogger()
+      .debug(
+        () =>
+          `Rejecting package policy update due to package name change, old val '${oldPackagePolicy.package?.name}', new val '${packagePolicyUpdate.package?.name}'`
+      );
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.updatePackagePolicy.packageNameCannotBeModified', {
+        defaultMessage:
+          'Cannot change the package of an existing integration policy. Create a new policy with the desired package.',
+      })
+    );
+  }
 
   const { inputs } = packagePolicyUpdate;
 

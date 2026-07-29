@@ -24,7 +24,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
@@ -43,7 +43,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
-      abortController,
+      signal,
       telemetryCollector: collector,
     });
 

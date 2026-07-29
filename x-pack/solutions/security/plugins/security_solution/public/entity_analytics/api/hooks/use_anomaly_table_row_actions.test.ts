@@ -8,15 +8,15 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { FilterStateStore } from '@kbn/es-query';
 import { useKibana } from '../../../common/lib/kibana';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
+import { useShowTimeline } from '../../../common/utils/timeline/use_show_timeline';
 import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
 import { useAnomalySingleMetricViewerUrl } from './use_anomaly_single_metric_viewer_url';
 import { useAnomalyTableRowActions } from './use_anomaly_table_row_actions';
 import type { TableRow } from '../../components/anomalies/table/types';
 
 jest.mock('../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../../../common/components/user_privileges', () => ({
-  useUserPrivileges: jest.fn(),
+jest.mock('../../../common/utils/timeline/use_show_timeline', () => ({
+  useShowTimeline: jest.fn(),
 }));
 jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: jest.fn(),
@@ -26,7 +26,7 @@ jest.mock('./use_anomaly_single_metric_viewer_url', () => ({
 }));
 
 const mockUseKibana = useKibana as jest.Mock;
-const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
+const mockUseShowTimeline = useShowTimeline as jest.Mock;
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseAnomalySingleMetricViewerUrl = useAnomalySingleMetricViewerUrl as jest.Mock;
 
@@ -123,7 +123,7 @@ beforeEach(() => {
     },
   });
 
-  mockUseUserPrivileges.mockReturnValue({ timelinePrivileges: { read: true } });
+  mockUseShowTimeline.mockReturnValue([true]);
   mockUseInvestigateInTimeline.mockReturnValue({
     investigateInTimeline: mockInvestigateInTimeline,
   });
@@ -148,8 +148,8 @@ describe('useAnomalyTableRowActions', () => {
       expect(keys).toEqual(['add-to-timeline', 'view-in-discover', 'view-in-single-metric-viewer']);
     });
 
-    it('excludes add-to-timeline when canReadTimeline is false', () => {
-      mockUseUserPrivileges.mockReturnValue({ timelinePrivileges: { read: false } });
+    it('excludes add-to-timeline when timeline is not available', () => {
+      mockUseShowTimeline.mockReturnValue([false]);
       const { result } = renderActions();
       const keys = result.current.actions.map((a) => a.key);
       expect(keys).not.toContain('add-to-timeline');
