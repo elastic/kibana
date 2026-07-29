@@ -20,7 +20,6 @@ export const kiRetrievalSkill = defineSkillType({
   referencedContent: [],
   getRegistryTools: () => [
     platformCoreTools.executeEsql,
-    platformCoreTools.generateEsql,
     platformCoreTools.listIndices,
   ],
 });

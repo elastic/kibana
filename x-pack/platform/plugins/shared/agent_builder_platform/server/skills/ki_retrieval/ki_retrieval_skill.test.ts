@@ -44,7 +44,6 @@ describe('kiRetrievalSkill', () => {
 
     expect(toolIds).toEqual([
       platformCoreTools.executeEsql,
-      platformCoreTools.generateEsql,
       platformCoreTools.listIndices,
     ]);
   });
