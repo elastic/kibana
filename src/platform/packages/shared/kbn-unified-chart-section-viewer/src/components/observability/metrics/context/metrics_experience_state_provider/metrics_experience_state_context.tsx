@@ -11,7 +11,12 @@ import React, { useCallback } from 'react';
 import { createContext } from 'react';
 import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import type { Dimension, MetricsSort, UnifiedMetricsGridProps } from '../../../../../types';
-import { DEFAULT_METRICS_SORT } from '../../../../../common/constants';
+import {
+  DEFAULT_METRICS_SORT,
+  FEATURE_FLAGS,
+  FEATURE_FLAG_DEFAULTS,
+} from '../../../../../common/constants';
+import { useFeatureFlag } from '../../../../../hooks';
 import { useRecentlyExploredMetrics } from '../../hooks';
 import {
   type FlyoutState,
@@ -68,10 +73,20 @@ export function MetricsExperienceStateProvider({
   const [isFullscreen, setIsFullscreen] = useRestorableState('isFullscreen', false);
   const [flyoutState, setFlyoutState] = useRestorableState('flyoutState', undefined);
 
+  const isSortingEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_SORTING_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_SORTING_ENABLED]
+  );
+
+  // When sorting is disabled, ignore any host-provided sort (e.g. state
+  // persisted or shared while the flag was on) and swallow change requests so
+  // no sorting behavior runs and no new sort state is written while it is off.
+  const effectiveMetricsSort = isSortingEnabled ? metricsSort : DEFAULT_METRICS_SORT;
+
   const recentlyExploredMetrics = useRecentlyExploredMetrics({
     getRecentlyExploredMetrics,
     discoverFetch$,
-    metricsSort,
+    metricsSort: effectiveMetricsSort,
     searchTerm,
     selectedDimensions,
   });
@@ -104,17 +119,21 @@ export function MetricsExperienceStateProvider({
 
   const handleMetricsSortChange = useCallback(
     (nextSort: MetricsSort) => {
+      if (!isSortingEnabled) {
+        return;
+      }
+
       // Preserve the page-reset-on-sort-change behavior from #277184: sort now
       // lives in the host's profile state, so we compare against the current
       // prop-sourced sort and forward the change to the host.
-      const [prevSortBy, prevDirection] = metricsSort;
+      const [prevSortBy, prevDirection] = effectiveMetricsSort;
       const [nextSortBy, nextDirection] = nextSort;
       if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {
         setCurrentPage(0);
       }
       onMetricsSortChange?.(nextSort);
     },
-    [metricsSort, onMetricsSortChange, setCurrentPage]
+    [effectiveMetricsSort, isSortingEnabled, onMetricsSortChange, setCurrentPage]
   );
 
   const onToggleFullscreen = useCallback(() => {
@@ -153,7 +172,7 @@ export function MetricsExperienceStateProvider({
         isFullscreen,
         searchTerm,
         selectedDimensions,
-        metricsSort,
+        metricsSort: effectiveMetricsSort,
         flyoutState,
         onPageChange,
         onDimensionsChange,
