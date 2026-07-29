@@ -37,8 +37,9 @@ import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { SpaceCards, SpaceTable } from './components';
+import { InitialSolutionSetup } from './components/initial_solution_setup';
 import * as styles from './space_selector.styles';
-import type { Space } from '../../common';
+import type { GetInitialSolutionSetupResponse, Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
 
@@ -50,6 +51,7 @@ export interface SpaceSelectorProps {
   spacesManager: SpacesManager;
   serverBasePath: string;
   customBranding$: Observable<CustomBranding>;
+  initialSolutionSetupEnabled?: boolean;
 }
 
 const ViewToggle = ({
@@ -101,6 +103,7 @@ export const SpaceSelector = ({
   spacesManager,
   serverBasePath,
   customBranding$,
+  initialSolutionSetupEnabled = false,
 }: SpaceSelectorProps) => {
   const [currentViewMode, setCurrentViewMode] = useState<ViewMode>('grid');
   const [customLogo, setCustomLogo] = useState<string | undefined>(undefined);
@@ -109,14 +112,31 @@ export const SpaceSelector = ({
   const { euiTheme } = useEuiTheme();
 
   const {
+    data: initialSolutionSetup,
+    isLoading: isInitialSolutionSetupLoading,
+    error: initialSolutionSetupError,
+  } = useQuery<GetInitialSolutionSetupResponse, Error>({
+    queryKey: ['initial_solution_setup'],
+    queryFn: () => spacesManager.getInitialSolutionSetup(),
+    enabled: initialSolutionSetupEnabled,
+  });
+
+  const {
     data: spaces,
-    isLoading,
-    error,
+    isLoading: areSpacesLoading,
+    error: spacesError,
   } = useQuery<Space[], Error>({
     queryKey: ['spaces_list'],
     queryFn: () => spacesManager.getSpaces(),
-    enabled: !searchTerm,
+    enabled:
+      (!initialSolutionSetupEnabled || initialSolutionSetup?.required === false) && !searchTerm,
   });
+  const isInitialSolutionSetup =
+    initialSolutionSetupEnabled && initialSolutionSetup?.required === true;
+  const isLoading =
+    (initialSolutionSetupEnabled && isInitialSolutionSetupLoading) ||
+    (!isInitialSolutionSetup && areSpacesLoading);
+  const error = (initialSolutionSetupEnabled && initialSolutionSetupError) || spacesError;
 
   useEffect(() => {
     setCurrentViewMode((spaces?.length ?? 0) > VIEW_MODE_THRESHOLD ? 'table' : 'grid');
@@ -221,16 +241,30 @@ export const SpaceSelector = ({
           <EuiSpacer size="xxl" />
           <EuiTextColor color="subdued">
             <h1 css={styles.headerStyles} tabIndex={-1} ref={focusHeaderOnMount}>
-              <FormattedMessage
-                id="xpack.spaces.spaceSelector.selectSpacesTitle"
-                defaultMessage="Select your space"
-              />
+              {isInitialSolutionSetup ? (
+                <FormattedMessage
+                  id="xpack.spaces.spaceSelector.initialSolutionSetupTitle"
+                  defaultMessage="Select a solution view for your space"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.spaces.spaceSelector.selectSpacesTitle"
+                  defaultMessage="Select your space"
+                />
+              )}
             </h1>
             <p>
-              <FormattedMessage
-                id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
-                defaultMessage="You can change your space at anytime."
-              />
+              {isInitialSolutionSetup ? (
+                <FormattedMessage
+                  id="xpack.spaces.spaceSelector.initialSolutionSetupDescription"
+                  defaultMessage="Solution views offer focused, solution-based navigation. You can change the solution view in space settings later."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
+                  defaultMessage="You can change your space at anytime."
+                />
+              )}
             </p>
           </EuiTextColor>
         </EuiText>
@@ -242,6 +276,8 @@ export const SpaceSelector = ({
               <div css={styles.spacesLoadingSpinnerStyles} data-test-subj="spacesLoadingSpinner">
                 <EuiLoadingSpinner size="xl" />
               </div>
+            ) : isInitialSolutionSetup ? (
+              <InitialSolutionSetup spacesManager={spacesManager} serverBasePath={serverBasePath} />
             ) : (
               <Fragment>
                 {!error ? (

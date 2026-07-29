@@ -11,6 +11,7 @@ import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-ser
 
 import type { Space } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
+import type { InitialSolutionSetupService } from '../../initial_solution_setup/initial_solution_setup_service';
 import type { SpacesServiceStart } from '../../spaces_service';
 import type { SpacesPluginStartDeps } from '../../types';
 import { wrapError } from '../errors';
@@ -21,12 +22,14 @@ export interface OnPostAuthInterceptorDeps {
   http: CoreSetup['http'];
   getCoreStartServices: CoreSetup<SpacesPluginStartDeps>['getStartServices'];
   getSpacesService: () => SpacesServiceStart;
+  initialSolutionSetup: InitialSolutionSetupService;
   log: Logger;
 }
 
 export function initSpacesOnPostAuthRequestInterceptor({
   getCoreStartServices,
   getSpacesService,
+  initialSolutionSetup,
   log,
   http,
 }: OnPostAuthInterceptorDeps) {
@@ -49,6 +52,25 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingSpaceRoot = path === '/' && spaceId !== DEFAULT_SPACE_ID;
     const isRequestingApplication = path.startsWith('/app');
     const isEnteringSpace = path === '/spaces/enter';
+
+    if (
+      request.auth.isAuthenticated &&
+      spaceId === DEFAULT_SPACE_ID &&
+      (isRequestingKibanaRoot || isRequestingApplication || isEnteringSpace)
+    ) {
+      try {
+        if (await initialSolutionSetup.isRequired()) {
+          const next = isRequestingApplication
+            ? `${request.url.pathname}${request.url.search}`
+            : request.url.searchParams.get('next') ?? undefined;
+          return response.redirected({
+            headers: { location: getSpaceSelectorUrl(serverBasePath, next) },
+          });
+        }
+      } catch (error) {
+        return response.customError(wrapError(error));
+      }
+    }
 
     // When the user deliberately selects a space from any entry point, they all navigate to /spaces/enter within
     // the chosen space. Persist that choice fire-and-forget so it never blocks the response,

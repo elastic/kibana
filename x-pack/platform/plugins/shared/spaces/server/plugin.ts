@@ -19,6 +19,7 @@ import type {
 import { setupCapabilities } from './capabilities';
 import type { ConfigType } from './config';
 import { DefaultSpaceService } from './default_space';
+import { InitialSolutionSetupService } from './initial_solution_setup/initial_solution_setup_service';
 import { initSpacesRequestInterceptors } from './lib/request_interceptors';
 import { createSpacesTutorialContextFactory } from './lib/spaces_tutorial_context_factory';
 import { initExternalSpacesApi } from './routes/api/external';
@@ -148,19 +149,30 @@ export class SpacesPlugin
     const { license } = this.spacesLicenseService.setup({ license$: plugins.licensing.license$ });
 
     let defaultSolution;
+    let initialSolutionSetupEnabled = false;
 
     this.config$.pipe(take(1)).subscribe((config) => {
       defaultSolution = config.defaultSolution;
+      initialSolutionSetupEnabled = config.initialSolutionSetup?.enabled ?? false;
     });
 
+    const solution = plugins.cloud?.onboarding?.defaultSolution || defaultSolution;
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+    const isInitialSolutionSetupEnabled = initialSolutionSetupEnabled && !solution && !isServerless;
+    const getSavedObjects = async () => (await core.getStartServices())[0].savedObjects;
+    const initialSolutionSetup = new InitialSolutionSetupService({
+      enabled: isInitialSolutionSetupEnabled,
+      getSavedObjects,
+    });
     this.defaultSpaceService = new DefaultSpaceService();
     this.defaultSpaceService.setup({
       coreStatus: core.status,
-      getSavedObjects: async () => (await core.getStartServices())[0].savedObjects,
+      getSavedObjects,
       license$: plugins.licensing.license$,
       spacesLicense: license,
       logger: this.log,
-      solution: plugins.cloud?.onboarding?.defaultSolution || defaultSolution,
+      solution,
+      solutionSetupRequired: isInitialSolutionSetupEnabled,
     });
 
     initSpacesViewsRoutes({
@@ -177,13 +189,14 @@ export class SpacesPlugin
       getStartServices: core.getStartServices,
       getSpacesService,
       usageStatsServicePromise,
-      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
+      isServerless,
       packageInfo: this.initializerContext.env.packageInfo,
     });
 
     initInternalSpacesApi({
       router,
       getSpacesService,
+      initialSolutionSetup,
     });
 
     initSpacesRequestInterceptors({
@@ -191,6 +204,7 @@ export class SpacesPlugin
       log: this.log,
       getSpacesService,
       getCoreStartServices: core.getStartServices,
+      initialSolutionSetup,
     });
 
     setupCapabilities(core, getSpacesService, this.log);

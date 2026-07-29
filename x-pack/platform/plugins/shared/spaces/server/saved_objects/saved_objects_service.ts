@@ -64,6 +64,22 @@ export class SpacesSavedObjectsService {
             },
           ],
         },
+        3: {
+          changes: [],
+          schemas: {
+            create: SpacesSavedObjectSchemas['8.8.0'].extends({
+              solution: schema.maybe(
+                schema.oneOf([
+                  schema.literal('security'),
+                  schema.literal('oblt'),
+                  schema.literal('es'),
+                  schema.literal('classic'),
+                ])
+              ),
+              solutionSetupRequired: schema.maybe(schema.boolean()),
+            }),
+          },
+        },
       },
     });
 

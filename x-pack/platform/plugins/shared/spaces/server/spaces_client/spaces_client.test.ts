@@ -32,15 +32,16 @@ const createMockNpreClient = (): INpreClient => {
   } as unknown as INpreClient;
 };
 
-const createMockConfig = (
-  mockConfig: ConfigType = {
+const createMockConfig = (mockConfig: Partial<ConfigType> = {}) => {
+  const config: ConfigType = {
     enabled: true,
     maxSpaces: 1000,
     allowFeatureVisibility: true,
     allowSolutionVisibility: true,
-  }
-) => {
-  return ConfigSchema.validate(mockConfig, { serverless: !mockConfig.allowFeatureVisibility });
+    initialSolutionSetup: { enabled: false },
+    ...mockConfig,
+  };
+  return ConfigSchema.validate(config, { serverless: !config.allowFeatureVisibility });
 };
 
 const features = [
@@ -945,6 +946,11 @@ describe('#update', () => {
       ...attributes,
       solution: 'es',
     });
+    expect(mockCallWithRequestRepository.update).toHaveBeenCalledWith(
+      'space',
+      id,
+      expect.not.objectContaining({ solutionSetupRequired: expect.anything() })
+    );
     expect(mockCallWithRequestRepository.get).toHaveBeenCalledWith('space', id);
   });
 

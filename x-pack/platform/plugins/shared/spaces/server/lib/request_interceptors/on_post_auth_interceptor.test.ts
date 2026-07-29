@@ -40,6 +40,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   let update: jest.Mock;
   let getAll: jest.Mock;
   let getSpaceId: jest.Mock;
+  let isInitialSolutionSetupRequired: jest.Mock;
   let response: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
   let toolkit: ReturnType<typeof httpServiceMock.createOnPostAuthToolkit>;
 
@@ -49,6 +50,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
     update = jest.fn().mockResolvedValue(undefined);
     getAll = jest.fn();
     getSpaceId = jest.fn();
+    isInitialSolutionSetupRequired = jest.fn().mockResolvedValue(false);
 
     const coreStart = coreMock.createStart();
     coreStart.userProfile = {
@@ -84,6 +86,9 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       http: coreSetup.http,
       getCoreStartServices: coreSetup.getStartServices,
       getSpacesService,
+      initialSolutionSetup: {
+        isRequired: isInitialSolutionSetupRequired,
+      } as any,
       log: loggingSystemMock.createLogger(),
     });
 
@@ -326,6 +331,108 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
 
       expect(getCurrent).not.toHaveBeenCalled();
       expect(update).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('initial solution setup redirect', () => {
+    beforeEach(() => {
+      isInitialSolutionSetupRequired.mockResolvedValue(true);
+    });
+
+    it('redirects pending root to space selector without next', async () => {
+      getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/',
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: { location: getSpaceSelectorUrl(serverBasePath) },
+      });
+      expect(getAll).not.toHaveBeenCalled();
+    });
+
+    it('redirects /app requests with path and query as next', async () => {
+      getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/app/dashboards',
+        query: { foo: 'bar' },
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: {
+          location: getSpaceSelectorUrl(serverBasePath, '/app/dashboards?foo=bar'),
+        },
+      });
+    });
+
+    it('redirects /spaces/enter preserving existing next query param', async () => {
+      getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+
+      const request = httpServerMock.createKibanaRequest({
+        path: ENTER_SPACE_PATH,
+        query: { next: '/app/home' },
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: {
+          location: getSpaceSelectorUrl(serverBasePath, '/app/home'),
+        },
+      });
+      expect(getCurrent).not.toHaveBeenCalled();
+    });
+
+    it('preserves original flow when setup is not required', async () => {
+      isInitialSolutionSetupRequired.mockResolvedValue(false);
+      getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+      getAll.mockResolvedValue([space('default'), space('foo')]);
+      getCurrent.mockResolvedValue({
+        data: {
+          userSettings: {
+            rememberSelectedSpace: true,
+            lastSelectedSpaceId: 'foo',
+          },
+        },
+      });
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/',
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(response.redirected).toHaveBeenCalledWith({
+        headers: {
+          location: addSpaceIdToPath(serverBasePath, 'foo', ENTER_SPACE_PATH),
+        },
+      });
+    });
+
+    it('returns custom error when setup check fails', async () => {
+      isInitialSolutionSetupRequired.mockRejectedValue(new Error('setup failed'));
+      getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);
+
+      const request = httpServerMock.createKibanaRequest({
+        path: '/',
+        auth: { isAuthenticated: true },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(response.customError).toHaveBeenCalled();
+      expect(response.redirected).not.toHaveBeenCalled();
+      expect(toolkit.next).not.toHaveBeenCalled();
     });
   });
 });

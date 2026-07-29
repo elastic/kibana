@@ -21,3 +21,8 @@ export type {
   SolutionView,
 } from './types/latest';
 export type { spaceV1 } from './types';
+export type {
+  CompleteInitialSolutionSetupRequest,
+  CompleteInitialSolutionSetupResponse,
+  GetInitialSolutionSetupResponse,
+} from './types/initial_solution_setup';

@@ -23,6 +23,7 @@ describe('config schema', () => {
         "allowFeatureVisibility": true,
         "allowSolutionVisibility": true,
         "enabled": true,
+        "initialSolutionSetup": Object {},
         "maxSpaces": 1000,
       }
     `);
@@ -32,6 +33,9 @@ describe('config schema', () => {
         "allowFeatureVisibility": true,
         "allowSolutionVisibility": true,
         "enabled": true,
+        "initialSolutionSetup": Object {
+          "enabled": false,
+        },
         "maxSpaces": 1000,
       }
     `);
@@ -41,6 +45,9 @@ describe('config schema', () => {
         "allowFeatureVisibility": true,
         "allowSolutionVisibility": true,
         "enabled": true,
+        "initialSolutionSetup": Object {
+          "enabled": true,
+        },
         "maxSpaces": 1000,
       }
     `);
@@ -103,5 +110,33 @@ describe('config schema', () => {
 
   it('should throw error if defaultSolution uses invalid value', () => {
     expect(() => ConfigSchema.validate({ defaultSolution: 'test' })).toThrow();
+  });
+
+  it('should reject initialSolutionSetup.enabled true outside development mode', () => {
+    expect(() =>
+      ConfigSchema.validate({ initialSolutionSetup: { enabled: true } }, { dev: false })
+    ).toThrow();
+  });
+
+  it('should accept initialSolutionSetup.enabled false outside development mode', () => {
+    expect(() =>
+      ConfigSchema.validate({ initialSolutionSetup: { enabled: false } }, { dev: false })
+    ).not.toThrow();
+  });
+
+  it('should keep initial solution setup disabled in serverless development', () => {
+    const serverlessConfig = {
+      allowFeatureVisibility: false,
+      allowSolutionVisibility: false,
+    };
+    expect(
+      ConfigSchema.validate(serverlessConfig, { dev: true, serverless: true }).initialSolutionSetup
+    ).toEqual({ enabled: false });
+    expect(() =>
+      ConfigSchema.validate(
+        { ...serverlessConfig, initialSolutionSetup: { enabled: true } },
+        { dev: true, serverless: true }
+      )
+    ).toThrow();
   });
 });
