@@ -12,7 +12,16 @@ import type { ExtractedIoc, IocTier } from '../../services/extract_iocs';
  * Pattern dialects that are not observable patterns — skip them entirely.
  * STIX (or unspecified → assumed stix) is the only parseable dialect here.
  */
-const NON_STIX_DIALECTS = new Set(['yara', 'snort', 'sigma', 'pcre', 'tanium-signal', 'spl', 'kql', 'eql']);
+const NON_STIX_DIALECTS = new Set([
+  'yara',
+  'snort',
+  'sigma',
+  'pcre',
+  'tanium-signal',
+  'spl',
+  'kql',
+  'eql',
+]);
 
 /**
  * Matches a single STIX `=` comparison: <object>:<property> = '<value>'
@@ -31,8 +40,7 @@ const NON_STIX_DIALECTS = new Set(['yara', 'snort', 'sigma', 'pcre', 'tanium-sig
  *   - network-traffic:* references (SCO, not an atomic indicator)
  *   - IN lists  (multiple values per comparison — no `= '<literal>'` form)
  */
-const makeComparisonRe = () =>
-  /([\w-]+):([\w.'"-]+)\s*=\s*'((?:[^'\\]|\\[\s\S])*)'/g;
+const makeComparisonRe = () => /([\w-]+):([\w.'"-]+)\s*=\s*'((?:[^'\\]|\\[\s\S])*)'/g;
 
 /**
  * Maps a STIX object-type + property-path pair to an IocType.
@@ -59,8 +67,7 @@ const resolveIocType = (objectType: string, propertyPath: string): IocType | nul
 };
 
 /** Unescape STIX string escapes: \\ → \ and \' → ' (single pass, left-to-right). */
-const unescapeStixString = (s: string): string =>
-  s.replace(/\\([\s\S])/g, (_, ch: string) => ch);
+const unescapeStixString = (s: string): string => s.replace(/\\([\s\S])/g, (_, ch: string) => ch);
 
 /**
  * Canonicalize extracted value.
@@ -98,22 +105,23 @@ export const parseStixPattern = (pattern: string, patternType?: string): Extract
   for (const match of pattern.matchAll(makeComparisonRe())) {
     const [, objectType, propertyPath, rawValue] = match;
     const iocType = resolveIocType(objectType, propertyPath);
-    if (iocType === null) continue;
+    if (iocType !== null) {
+      const value = canonicalize(iocType, unescapeStixString(rawValue));
+      const dedupKey = `${iocType}:${value}`;
+      if (!seen.has(dedupKey)) {
+        seen.add(dedupKey);
 
-    const value = canonicalize(iocType, unescapeStixString(rawValue));
-    const dedupKey = `${iocType}:${value}`;
-    if (seen.has(dedupKey)) continue;
-    seen.add(dedupKey);
+        const tierHeuristic: IocTier = iocType === 'hash' ? 'discriminating' : 'contextual';
 
-    const tier_heuristic: IocTier = iocType === 'hash' ? 'discriminating' : 'contextual';
-
-    results.push({
-      type: iocType,
-      value,
-      tier: tier_heuristic,
-      tier_heuristic,
-      tier_basis: 'stix_pattern',
-    });
+        results.push({
+          type: iocType,
+          value,
+          tier: tierHeuristic,
+          tier_heuristic: tierHeuristic,
+          tier_basis: 'stix_pattern',
+        });
+      }
+    }
   }
 
   return results;

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  classifySectionSpans,
-  extractIocs,
-  type ExtractedIoc,
-  type IocTier,
-} from './extract_iocs';
+import { classifySectionSpans, extractIocs, type ExtractedIoc, type IocTier } from './extract_iocs';
 
 /** Helper: extract IOC values of a specific type from the result. */
 const valuesOf = (result: ReturnType<typeof extractIocs>, type: string) =>
@@ -1036,7 +1031,9 @@ describe('extract_iocs — vendor/research domains (B1.6 Fix 2)', () => {
     const r = extractIocs({
       text: 'payload at https://raw.githubusercontent.com/attacker/repo/stage2.bin raw.githubusercontent.com',
     });
-    const bareIoc = r.iocs.find((i) => i.type === 'domain' && i.value === 'raw.githubusercontent.com');
+    const bareIoc = r.iocs.find(
+      (i) => i.type === 'domain' && i.value === 'raw.githubusercontent.com'
+    );
     expect(bareIoc?.tier).toBe('contextual');
     expect(bareIoc?.tier_basis).toBe('known_cdn');
     // URL itself is still extracted
@@ -1140,11 +1137,12 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
 
     // LEAK GATE: no emitted value may contain markdown artifact chars
     for (const ioc of r.iocs) {
-      if (ioc.tier === 'reference' || ioc.tier === 'denied') continue; // noise entries OK to skip
-      expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
-      // Clean canonical form: domain must exactly match the refanged value
-      if (ioc.type === 'domain') {
-        expect(ioc.value).toMatch(/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/);
+      if (ioc.tier !== 'reference' && ioc.tier !== 'denied') {
+        expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+        // Clean canonical form: domain must exactly match the refanged value
+        if (ioc.type === 'domain') {
+          expect(ioc.value).toMatch(/^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/);
+        }
       }
     }
   });
@@ -1163,8 +1161,9 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
     expect(valuesOf(r, 'ip')).toContain('203.0.113.7');
 
     for (const ioc of r.iocs) {
-      if (ioc.tier === 'reference' || ioc.tier === 'denied') continue;
-      expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+      if (ioc.tier !== 'reference' && ioc.tier !== 'denied') {
+        expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+      }
     }
   });
 
@@ -1208,8 +1207,9 @@ describe('extract_iocs — htmlToStructured leak test (markdown artifact gate)',
     expect(valuesOf(r, 'ip')).toContain('198.51.100.99');
 
     for (const ioc of r.iocs) {
-      if (ioc.tier === 'reference' || ioc.tier === 'denied') continue;
-      expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+      if (ioc.tier !== 'reference' && ioc.tier !== 'denied') {
+        expect(ioc.value).not.toMatch(MARKDOWN_ARTIFACT_PATTERN);
+      }
     }
   });
 });
@@ -1676,8 +1676,7 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
 
   test('NVISO regression: sfrclak/callnrwise/calltan still → discriminating/ioc_section', () => {
     // Re-run the NVISO fixture here to confirm the carve-out does not break prior behavior.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { htmlToStructured: h2s } = require('../adapters/text') as typeof import('../adapters/text');
+
     const NVISO_HTML = `
       <h2>Campaign Overview</h2>
       <p>NVISO observed C2 at sfrclak.com, callnrwise.com, calltan.com.</p>
@@ -1688,7 +1687,7 @@ describe('extract_iocs — Elastic-style end-to-end (Observations + GitHub IOC l
         <tr><td>Domain</td><td>calltan.com</td><td>Exfil</td></tr>
       </table>
     `;
-    const structured = h2s(NVISO_HTML);
+    const structured = htmlToStructured(NVISO_HTML);
     const r = extractIocs({ text: structured });
 
     for (const domain of ['sfrclak.com', 'callnrwise.com', 'calltan.com']) {

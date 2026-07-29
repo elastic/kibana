@@ -186,7 +186,9 @@ export const persistHuntFindings = async (
       } else {
         errors += 1;
         logger.warn(
-          `persistHuntFindings failed for report=${reportId} technique=${behavior.technique_id}: ${(err as Error).message}`
+          `persistHuntFindings failed for report=${reportId} technique=${behavior.technique_id}: ${
+            (err as Error).message
+          }`
         );
       }
     }

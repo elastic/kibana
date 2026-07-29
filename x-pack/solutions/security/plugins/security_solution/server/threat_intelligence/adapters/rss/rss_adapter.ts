@@ -30,10 +30,7 @@ const readFeedUrl = (source: SourceHit): string | undefined => {
  * generator fixtures). Network URLs go through `fetchUrl`, which enforces
  * the http/https SSRF guard.
  */
-const readFeedBody = async (
-  feedUrl: string,
-  context: AdapterRunContext
-): Promise<string> => {
+const readFeedBody = async (feedUrl: string, context: AdapterRunContext): Promise<string> => {
   if (isDataUrl(feedUrl)) {
     return decodeDataUrl(feedUrl);
   }

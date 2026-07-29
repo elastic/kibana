@@ -158,7 +158,9 @@ describe('installBuiltinWorkflows', () => {
 // ---------------------------------------------------------------------------
 describe('threat-intel-continuous-threat-hunt', () => {
   it('registers with tier2_when always on the scheduled hunt path', () => {
-    const workflow = BUILTIN_WORKFLOWS.find((wf) => wf.id === 'threat-intel-continuous-threat-hunt');
+    const workflow = BUILTIN_WORKFLOWS.find(
+      (wf) => wf.id === 'threat-intel-continuous-threat-hunt'
+    );
     expect(workflow).toBeDefined();
     expect(workflow?.yaml).toContain('tier2_when: always');
     expect(workflow?.yaml).toContain('/api/threat_intelligence/hunt_orchestrator');
@@ -166,9 +168,7 @@ describe('threat-intel-continuous-threat-hunt', () => {
 });
 
 describe('enrich_threat_report — structured-method isolation boundary (stix + text_indicator_list)', () => {
-  const nlWorkflow = BUILTIN_WORKFLOWS.find(
-    (wf) => wf.id === 'threat-intel-enrich-threat-report'
-  );
+  const nlWorkflow = BUILTIN_WORKFLOWS.find((wf) => wf.id === 'threat-intel-enrich-threat-report');
   // Guard: if the workflow entry itself is removed this fails with a clear message.
   if (!nlWorkflow) {
     it('threat-intel-enrich-threat-report is present in BUILTIN_WORKFLOWS', () => {

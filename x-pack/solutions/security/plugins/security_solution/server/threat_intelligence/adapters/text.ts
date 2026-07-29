@@ -180,14 +180,17 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     if (kind === 'ioc' || kind === 'references') {
       // Lift hrefs into plain text FIRST, before container transforms, so URLs
       // inside <li>/<td> survive. Produces "anchortext URL" as a bare token.
-      s = s.replace(/<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_m, href: string, inner: string) => {
-        const text = inner.replace(/<[^>]+>/g, ' ').trim();
-        return `${text} ${href} `;
-      });
+      s = s.replace(
+        /<a\s[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi,
+        (_m, href: string, inner: string) => {
+          const text = inner.replace(/<[^>]+>/g, ' ').trim();
+          return `${text} ${href} `;
+        }
+      );
     } else {
       // Prose: collapse anchor to its visible text only.
       s = s.replace(/<a\s[^>]*>([\s\S]*?)<\/a>/gi, (_m, inner: string) => {
-        return inner.replace(/<[^>]+>/g, ' ').trim() + ' ';
+        return `${inner.replace(/<[^>]+>/g, ' ').trim()} `;
       });
     }
 
@@ -216,7 +219,10 @@ export const htmlToStructured = (html: string | undefined | null): string => {
     });
 
     // 7. Block-level elements → newline boundary.
-    s = s.replace(/<\/?(p|div|section|article|aside|header|footer|main|figure|blockquote|pre|ul|ol|table|thead|tbody|tfoot)[^>]*>/gi, '\n');
+    s = s.replace(
+      /<\/?(p|div|section|article|aside|header|footer|main|figure|blockquote|pre|ul|ol|table|thead|tbody|tfoot)[^>]*>/gi,
+      '\n'
+    );
     s = s.replace(/<br\s*\/?>/gi, '\n');
 
     // 8. Strip remaining tags (inline and any leftovers).
@@ -226,7 +232,7 @@ export const htmlToStructured = (html: string | undefined | null): string => {
   }
 
   // 9. Decode HTML entities.
-  let result = decodeEntities(processedParts.join(''));
+  const result = decodeEntities(processedParts.join(''));
 
   // 10. Normalise runs within each line; preserve structural newlines.
   const lines = result

@@ -25,7 +25,8 @@ import {
 } from '../../../common/threat_intelligence/hub';
 
 export const PROMOTE_THREAT_INDICATORS_TASK_TYPE = 'threat_intelligence:promote_threat_indicators';
-export const PROMOTE_THREAT_INDICATORS_TASK_ID = 'threat_intelligence:promote_threat_indicators:default';
+export const PROMOTE_THREAT_INDICATORS_TASK_ID =
+  'threat_intelligence:promote_threat_indicators:default';
 const DEFAULT_INTERVAL = '15m';
 const LOOKBACK_ON_FIRST_RUN = 'now-30d';
 const PAGE_SIZE = 200;

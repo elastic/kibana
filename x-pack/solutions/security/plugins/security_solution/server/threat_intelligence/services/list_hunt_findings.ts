@@ -130,7 +130,11 @@ export const listHuntFindings = async (
 
   const totalRaw = response.hits.total;
   const total =
-    typeof totalRaw === 'number' ? totalRaw : typeof totalRaw?.value === 'number' ? totalRaw.value : 0;
+    typeof totalRaw === 'number'
+      ? totalRaw
+      : typeof totalRaw?.value === 'number'
+      ? totalRaw.value
+      : 0;
 
   const findings: HuntFindingRow[] = response.hits.hits.map((hit) => {
     const source = (hit._source ?? {}) as FindingSource;
@@ -157,7 +161,7 @@ export const listHuntFindings = async (
     };
   });
 
-  const feedback_loop: FeedbackLoopSummary[] = feedbackResponse.hits.hits
+  const feedbackLoop: FeedbackLoopSummary[] = feedbackResponse.hits.hits
     .map((hit) => {
       const source = hit._source as
         | {
@@ -181,5 +185,5 @@ export const listHuntFindings = async (
     })
     .filter((row): row is FeedbackLoopSummary => row !== undefined);
 
-  return { findings, total, feedback_loop };
+  return { findings, total, feedback_loop: feedbackLoop };
 };

@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { buildReportContent, collapseWhitespace, htmlToStructured, stripHtml, truncate } from './text';
+import {
+  buildReportContent,
+  collapseWhitespace,
+  htmlToStructured,
+  stripHtml,
+  truncate,
+} from './text';
 
 describe('stripHtml', () => {
   it('returns an empty string for nullish input', () => {
@@ -118,7 +124,8 @@ describe('htmlToStructured', () => {
   it('lifts anchor href URLs as plain text inside an IOC section', () => {
     // Hrefs ARE lifted inside IOC and References heading sections (the original
     // motivation for the lift: capture citation URLs in References, C2 links in IOC tables).
-    const html = '<h2>Indicators of Compromise</h2><p>See <a href="https://c2.evil.com/beacon">this link</a>.</p>';
+    const html =
+      '<h2>Indicators of Compromise</h2><p>See <a href="https://c2.evil.com/beacon">this link</a>.</p>';
     const result = htmlToStructured(html);
     expect(result).toContain('https://c2.evil.com/beacon');
   });
@@ -139,7 +146,8 @@ describe('htmlToStructured', () => {
   });
 
   it('does not produce markdown link [label](url) syntax in IOC sections', () => {
-    const html = '<h2>Indicators of Compromise</h2><a href="https://c2.evil.com/beacon">click here</a>';
+    const html =
+      '<h2>Indicators of Compromise</h2><a href="https://c2.evil.com/beacon">click here</a>';
     const result = htmlToStructured(html);
     expect(result).not.toMatch(/\[.*\]\(.*\)/);
     // href still present as plain text in the IOC section
@@ -149,7 +157,8 @@ describe('htmlToStructured', () => {
   it('preserves anchor href URL inside a list item in References section (anchor-lift ordering fix)', () => {
     // Href-lift must run before <li> processing so the URL survives the inner-tag strip.
     // This test verifies the fix in a References heading context (where href-lift is active).
-    const html = '<h2>References</h2><ul><li><a href="https://socket.dev/blog">Socket writeup</a></li></ul>';
+    const html =
+      '<h2>References</h2><ul><li><a href="https://socket.dev/blog">Socket writeup</a></li></ul>';
     const result = htmlToStructured(html);
     expect(result).toContain('https://socket.dev/blog');
   });

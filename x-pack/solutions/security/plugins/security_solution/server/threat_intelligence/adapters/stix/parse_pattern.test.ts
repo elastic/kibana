@@ -188,15 +188,15 @@ describe('parseStixPattern — rejection cases', () => {
   });
 
   it('returns [] for snort pattern_type', () => {
-    expect(parseStixPattern("alert tcp ...", 'snort')).toEqual([]);
+    expect(parseStixPattern('alert tcp ...', 'snort')).toEqual([]);
   });
 
   it('returns [] for sigma pattern_type', () => {
-    expect(parseStixPattern("title: Suspicious ...", 'sigma')).toEqual([]);
+    expect(parseStixPattern('title: Suspicious ...', 'sigma')).toEqual([]);
   });
 
   it('returns [] for pcre pattern_type', () => {
-    expect(parseStixPattern("/evil.*/i", 'pcre')).toEqual([]);
+    expect(parseStixPattern('/evil.*/i', 'pcre')).toEqual([]);
   });
 
   it('skips unsupported object paths (file:name)', () => {

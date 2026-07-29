@@ -392,8 +392,7 @@ export const registerBackfillDiamondFieldsTask = ({
                 );
               }
 
-              const extractedAt = (hit._source as CandidateHit['_source'])?.lineage
-                ?.extracted_at;
+              const extractedAt = (hit._source as CandidateHit['_source'])?.lineage?.extracted_at;
               if (typeof extractedAt === 'string') latestExtractedAt = extractedAt;
             }
 

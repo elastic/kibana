@@ -9,7 +9,12 @@ import { createHash } from 'crypto';
 import { type IocType } from '../../../common/threat_intelligence/hub';
 import { IANA_TLDS } from '../data/iana_tlds';
 import { IOC_NOISE_DOMAINS } from '../data/ioc_noise_domains';
-import { normalizeHeader, IOC_HEADER_TERMS, TERMINATOR_HEADER_TERMS, TERMINATOR_PREFIXES } from '../adapters/section_headers';
+import {
+  normalizeHeader,
+  IOC_HEADER_TERMS,
+  TERMINATOR_HEADER_TERMS,
+  TERMINATOR_PREFIXES,
+} from '../adapters/section_headers';
 
 /**
  * Discriminating power tier for an extracted IOC.
@@ -688,9 +693,10 @@ const findBestSectionKind = (
   let best: SectionKind | null = null;
   for (const span of spans) {
     const spanText = refangedText.slice(span.start, span.end).toLowerCase();
-    if (!spanText.includes(value.toLowerCase())) continue;
-    if (span.kind === 'ioc') return 'ioc'; // highest priority — short-circuit
-    if (best === null) best = span.kind;
+    if (spanText.includes(value.toLowerCase())) {
+      if (span.kind === 'ioc') return 'ioc'; // highest priority — short-circuit
+      if (best === null) best = span.kind;
+    }
   }
   return best;
 };
@@ -725,31 +731,29 @@ const applySectionOverrides = (
   if (spans.length === 0) return;
   for (const ioc of iocs) {
     const kind = findBestSectionKind(ioc.value, spans, refangedText);
-    if (kind === null) continue;
-
-    if (kind === 'ioc') {
-      // Denylist / vendor_research reference stays — they are high-confidence noise.
-      if (
-        ioc.tier_heuristic === 'reference' &&
-        (ioc.tier_basis === 'denylist' || ioc.tier_basis === 'vendor_research')
-      ) {
-        continue;
+    if (kind !== null) {
+      if (kind === 'ioc') {
+        // Denylist / vendor_research reference stays — they are high-confidence noise.
+        const isHighConfidenceReference =
+          ioc.tier_heuristic === 'reference' &&
+          (ioc.tier_basis === 'denylist' || ioc.tier_basis === 'vendor_research');
+        // Bare content-host / CDN domains: the path-bearing URL is the indicator, not the
+        // bare host. A bare github.com in an IOC section is a URL reference, not a C2 anchor.
+        // tier_basis 'known_cdn' is set by classifyDomainTier for LOW_DISCRIMINATION_DOMAINS
+        // entries (including github.com, raw.githubusercontent.com, amazonaws.com subdomains,
+        // etc.). These stay at their heuristic tier (contextual/uncertain), not discriminating.
+        const isBareCdnDomain = ioc.type === 'domain' && ioc.tier_basis === 'known_cdn';
+        if (!isHighConfidenceReference && !isBareCdnDomain) {
+          ioc.tier = 'discriminating';
+          ioc.tier_basis = 'ioc_section';
+        }
+      } else {
+        // references section: downgrade unless already discriminating
+        if (ioc.tier !== 'discriminating') {
+          ioc.tier = 'reference';
+          ioc.tier_basis = 'references_section';
+        }
       }
-      // Bare content-host / CDN domains: the path-bearing URL is the indicator, not the
-      // bare host. A bare github.com in an IOC section is a URL reference, not a C2 anchor.
-      // tier_basis 'known_cdn' is set by classifyDomainTier for LOW_DISCRIMINATION_DOMAINS
-      // entries (including github.com, raw.githubusercontent.com, amazonaws.com subdomains,
-      // etc.). These stay at their heuristic tier (contextual/uncertain), not discriminating.
-      if (ioc.type === 'domain' && ioc.tier_basis === 'known_cdn') {
-        continue;
-      }
-      ioc.tier = 'discriminating';
-      ioc.tier_basis = 'ioc_section';
-    } else {
-      // references section: downgrade unless already discriminating
-      if (ioc.tier === 'discriminating') continue;
-      ioc.tier = 'reference';
-      ioc.tier_basis = 'references_section';
     }
   }
 };
@@ -821,26 +825,27 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   {
     const pattern = new RegExp(EMAIL_PATTERN.source, EMAIL_PATTERN.flags);
     for (const match of refangedText.matchAll(pattern)) {
-      if (match.index === undefined) continue;
-      const raw = match[0].toLowerCase();
-      const idx = match.index;
-      consumed.push([idx, idx + match[0].length]);
+      if (match.index !== undefined) {
+        const raw = match[0].toLowerCase();
+        const idx = match.index;
+        consumed.push([idx, idx + match[0].length]);
 
-      // Email tier: defanged-in-source → discriminating (like a defanged domain)
-      // We check if the @ was in the original text or reconstructed by refang.
-      const wasDefanged = !text.toLowerCase().includes(raw);
-      const tier: IocTier = wasDefanged ? 'discriminating' : 'uncertain';
-      const basis = wasDefanged ? 'defanged_source' : 'uncertain_default';
+        // Email tier: defanged-in-source → discriminating (like a defanged domain)
+        // We check if the @ was in the original text or reconstructed by refang.
+        const wasDefanged = !text.toLowerCase().includes(raw);
+        const tier: IocTier = wasDefanged ? 'discriminating' : 'uncertain';
+        const basis = wasDefanged ? 'defanged_source' : 'uncertain_default';
 
-      pushIoc({
-        type: 'email',
-        value: raw,
-        defanged: defangValue('email', raw, defang),
-        tier,
-        tier_heuristic: tier,
-        tier_basis: basis,
-        _offset: idx,
-      });
+        pushIoc({
+          type: 'email',
+          value: raw,
+          defanged: defangValue('email', raw, defang),
+          tier,
+          tier_heuristic: tier,
+          tier_basis: basis,
+          _offset: idx,
+        });
+      }
     }
   }
 
@@ -850,40 +855,41 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   {
     const pattern = new RegExp(URL_PATTERN.source, URL_PATTERN.flags);
     for (const match of refangedText.matchAll(pattern)) {
-      if (match.index === undefined) continue;
-      const raw = match[0].toLowerCase();
-      const idx = match.index;
-      consumed.push([idx, idx + match[0].length]);
-      rawUrls.push(raw);
-      rawUrlOffsets.push(idx);
+      if (match.index !== undefined) {
+        const raw = match[0].toLowerCase();
+        const idx = match.index;
+        consumed.push([idx, idx + match[0].length]);
+        rawUrls.push(raw);
+        rawUrlOffsets.push(idx);
 
-      // URL tier: lift-only. A discriminating host lifts the URL to discriminating.
-      // Any non-discriminating host (reference, contextual, uncertain) leaves the URL
-      // uncertain — the path/query carries the signal and B2 should judge the full URL.
-      let tier: IocTier = 'uncertain';
-      let basis = 'uncertain_default';
-      try {
-        const host = new URL(raw).hostname.toLowerCase();
-        if (host) {
-          const hostResult = classifyDomainTier(host, defangedDomains);
-          if (hostResult.tier === 'discriminating') {
-            tier = 'discriminating';
-            basis = `url_host_inherited:${hostResult.basis}`;
+        // URL tier: lift-only. A discriminating host lifts the URL to discriminating.
+        // Any non-discriminating host (reference, contextual, uncertain) leaves the URL
+        // uncertain — the path/query carries the signal and B2 should judge the full URL.
+        let tier: IocTier = 'uncertain';
+        let basis = 'uncertain_default';
+        try {
+          const host = new URL(raw).hostname.toLowerCase();
+          if (host) {
+            const hostResult = classifyDomainTier(host, defangedDomains);
+            if (hostResult.tier === 'discriminating') {
+              tier = 'discriminating';
+              basis = `url_host_inherited:${hostResult.basis}`;
+            }
           }
+        } catch {
+          // malformed URL — keep uncertain
         }
-      } catch {
-        // malformed URL — keep uncertain
-      }
 
-      pushIoc({
-        type: 'url',
-        value: raw,
-        defanged: defangValue('url', raw, defang),
-        tier,
-        tier_heuristic: tier,
-        tier_basis: basis,
-        _offset: idx,
-      });
+        pushIoc({
+          type: 'url',
+          value: raw,
+          defanged: defangValue('url', raw, defang),
+          tier,
+          tier_heuristic: tier,
+          tier_basis: basis,
+          _offset: idx,
+        });
+      }
     }
   }
 
@@ -904,19 +910,20 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   for (let i = 0; i < urlHostList.length; i++) {
     const host = urlHostList[i];
     const result = classifyDomain(host, defangedDomains, urlHosts);
-    if (!result.emit) continue;
-    const dedupKey = `domain:${host}`;
-    if (!seen.has(dedupKey)) {
-      seen.add(dedupKey);
-      iocs.push({
-        type: 'domain',
-        value: host,
-        defanged: defangValue('domain', host, defang),
-        tier: result.tier,
-        tier_heuristic: result.tier,
-        tier_basis: result.basis,
-        _offset: rawUrlOffsets[i],
-      });
+    if (result.emit) {
+      const dedupKey = `domain:${host}`;
+      if (!seen.has(dedupKey)) {
+        seen.add(dedupKey);
+        iocs.push({
+          type: 'domain',
+          value: host,
+          defanged: defangValue('domain', host, defang),
+          tier: result.tier,
+          tier_heuristic: result.tier,
+          tier_basis: result.basis,
+          _offset: rawUrlOffsets[i],
+        });
+      }
     }
   }
 
@@ -925,52 +932,52 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   {
     const pattern = new RegExp(CIDR_PATTERN.source, CIDR_PATTERN.flags);
     for (const match of refangedText.matchAll(pattern)) {
-      if (match.index === undefined) continue;
-      if (isConsumed(match.index, match[0].length, consumed)) continue;
-      const raw = match[0];
-      const idx = match.index;
-      consumed.push([idx, idx + raw.length]);
+      if (match.index !== undefined && !isConsumed(match.index, match[0].length, consumed)) {
+        const raw = match[0];
+        const idx = match.index;
+        consumed.push([idx, idx + raw.length]);
 
-      const slashIdx = raw.indexOf('/');
-      const networkIp = raw.slice(0, slashIdx);
-      const maskWidth = parseInt(raw.slice(slashIdx + 1), 10);
+        const slashIdx = raw.indexOf('/');
+        const networkIp = raw.slice(0, slashIdx);
+        const maskWidth = parseInt(raw.slice(slashIdx + 1), 10);
 
-      // CIDR tier: mask-width driven. ≥/29 → discriminating (narrow/near-host), else contextual.
-      const cidrTier: IocTier = maskWidth >= 29 ? 'discriminating' : 'contextual';
-      const cidrBasis = maskWidth >= 29 ? 'cidr_narrow' : 'cidr_broad';
+        // CIDR tier: mask-width driven. ≥/29 → discriminating (narrow/near-host), else contextual.
+        const cidrTier: IocTier = maskWidth >= 29 ? 'discriminating' : 'contextual';
+        const cidrBasis = maskWidth >= 29 ? 'cidr_narrow' : 'cidr_broad';
 
-      pushIoc({
-        type: 'cidr',
-        value: raw,
-        defanged: defangValue('cidr', raw, defang),
-        tier: cidrTier,
-        tier_heuristic: cidrTier,
-        tier_basis: cidrBasis,
-        _offset: idx,
-      });
+        pushIoc({
+          type: 'cidr',
+          value: raw,
+          defanged: defangValue('cidr', raw, defang),
+          tier: cidrTier,
+          tier_heuristic: cidrTier,
+          tier_basis: cidrBasis,
+          _offset: idx,
+        });
 
-      // Derived bare IP — private wins, then defanged-in-source, else uncertain.
-      let ipTier: IocTier;
-      let ipBasis: string;
-      if (isPrivateIp(networkIp)) {
-        ipTier = 'reference';
-        ipBasis = 'private_ip';
-      } else if (defangedIps.has(networkIp)) {
-        ipTier = 'discriminating';
-        ipBasis = 'defanged_source';
-      } else {
-        ipTier = 'uncertain';
-        ipBasis = 'uncertain_default';
+        // Derived bare IP — private wins, then defanged-in-source, else uncertain.
+        let ipTier: IocTier;
+        let ipBasis: string;
+        if (isPrivateIp(networkIp)) {
+          ipTier = 'reference';
+          ipBasis = 'private_ip';
+        } else if (defangedIps.has(networkIp)) {
+          ipTier = 'discriminating';
+          ipBasis = 'defanged_source';
+        } else {
+          ipTier = 'uncertain';
+          ipBasis = 'uncertain_default';
+        }
+        pushIoc({
+          type: 'ip',
+          value: networkIp,
+          defanged: defangValue('ip', networkIp, defang),
+          tier: ipTier,
+          tier_heuristic: ipTier,
+          tier_basis: ipBasis,
+          _offset: idx,
+        });
       }
-      pushIoc({
-        type: 'ip',
-        value: networkIp,
-        defanged: defangValue('ip', networkIp, defang),
-        tier: ipTier,
-        tier_heuristic: ipTier,
-        tier_basis: ipBasis,
-        _offset: idx,
-      });
     }
   }
 
@@ -983,21 +990,21 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     ];
     for (const pattern of walletPatterns) {
       for (const match of refangedText.matchAll(pattern)) {
-        if (match.index === undefined) continue;
-        if (isConsumed(match.index, match[0].length, consumed)) continue;
-        const raw = match[0];
-        const idx = match.index;
-        consumed.push([idx, idx + raw.length]);
+        if (match.index !== undefined && !isConsumed(match.index, match[0].length, consumed)) {
+          const raw = match[0];
+          const idx = match.index;
+          consumed.push([idx, idx + raw.length]);
 
-        pushIoc({
-          type: 'wallet',
-          value: raw,
-          defanged: raw,
-          tier: 'discriminating',
-          tier_heuristic: 'discriminating',
-          tier_basis: 'wallet_high_entropy',
-          _offset: idx,
-        });
+          pushIoc({
+            type: 'wallet',
+            value: raw,
+            defanged: raw,
+            tier: 'discriminating',
+            tier_heuristic: 'discriminating',
+            tier_basis: 'wallet_high_entropy',
+            _offset: idx,
+          });
+        }
       }
     }
   }
@@ -1007,80 +1014,79 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   {
     const pattern = new RegExp(SOCKET_PATTERN.source, SOCKET_PATTERN.flags);
     for (const match of refangedText.matchAll(pattern)) {
-      if (match.index === undefined) continue;
-      if (isConsumed(match.index, match[0].length, consumed)) continue;
+      if (match.index !== undefined && !isConsumed(match.index, match[0].length, consumed)) {
+        const host = match[1].toLowerCase();
+        const portNum = parseInt(match[2], 10);
+        if (portNum >= 1 && portNum <= 65535) {
+          const idx = match.index;
+          consumed.push([idx, idx + match[0].length]);
 
-      const host = match[1].toLowerCase();
-      const portNum = parseInt(match[2], 10);
-      if (portNum < 1 || portNum > 65535) continue;
+          // Classify host as ip or domain
+          const ipMatch =
+            /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)$/.test(host);
 
-      const idx = match.index;
-      consumed.push([idx, idx + match[0].length]);
-
-      // Classify host as ip or domain
-      const ipMatch =
-        /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d?\d)$/.test(host);
-
-      if (ipMatch) {
-        let tier: IocTier;
-        let basis: string;
-        if (isPrivateIp(host)) {
-          tier = 'reference';
-          basis = 'private_ip';
-        } else if (defangedIps.has(host)) {
-          tier = 'discriminating';
-          basis = 'defanged_source';
-        } else {
-          tier = 'uncertain';
-          basis = 'uncertain_default';
-        }
-        const dedupKey = `ip:${host}`;
-        if (!seen.has(dedupKey)) {
-          seen.add(dedupKey);
-          const ioc: WorkingIoc = {
-            type: 'ip',
-            value: host,
-            defanged: defangValue('ip', host, defang),
-            tier,
-            tier_heuristic: tier,
-            tier_basis: basis,
-            port: portNum,
-            _offset: idx,
-          };
-          iocs.push(ioc);
-          iocByKey.set(dedupKey, ioc);
-        } else {
-          // Already seen (e.g. derived from CIDR pass or atomic pass) — merge port if
-          // the existing entry has no port yet (first socket wins).
-          const existing = iocByKey.get(dedupKey);
-          if (existing && existing.port === undefined) {
-            existing.port = portNum;
-          }
-        }
-      } else {
-        // Domain host — run through domain filter pipeline
-        const result = classifyDomain(host, defangedDomains, urlHosts);
-        if (result.emit) {
-          const dedupKey = `domain:${host}`;
-          if (!seen.has(dedupKey)) {
-            seen.add(dedupKey);
-            const ioc: WorkingIoc = {
-              type: 'domain',
-              value: host,
-              defanged: defangValue('domain', host, defang),
-              tier: result.tier,
-              tier_heuristic: result.tier,
-              tier_basis: result.basis,
-              port: portNum,
-              _offset: idx,
-            };
-            iocs.push(ioc);
-            iocByKey.set(dedupKey, ioc);
+          if (ipMatch) {
+            let tier: IocTier;
+            let basis: string;
+            if (isPrivateIp(host)) {
+              tier = 'reference';
+              basis = 'private_ip';
+            } else if (defangedIps.has(host)) {
+              tier = 'discriminating';
+              basis = 'defanged_source';
+            } else {
+              tier = 'uncertain';
+              basis = 'uncertain_default';
+            }
+            const dedupKey = `ip:${host}`;
+            if (!seen.has(dedupKey)) {
+              seen.add(dedupKey);
+              const ioc: WorkingIoc = {
+                type: 'ip',
+                value: host,
+                defanged: defangValue('ip', host, defang),
+                tier,
+                tier_heuristic: tier,
+                tier_basis: basis,
+                port: portNum,
+                _offset: idx,
+              };
+              iocs.push(ioc);
+              iocByKey.set(dedupKey, ioc);
+            } else {
+              // Already seen (e.g. derived from CIDR pass or atomic pass) — merge port if
+              // the existing entry has no port yet (first socket wins).
+              const existing = iocByKey.get(dedupKey);
+              if (existing && existing.port === undefined) {
+                existing.port = portNum;
+              }
+            }
           } else {
-            // Merge port onto existing domain IOC if not yet set.
-            const existing = iocByKey.get(dedupKey);
-            if (existing && existing.port === undefined) {
-              existing.port = portNum;
+            // Domain host — run through domain filter pipeline
+            const result = classifyDomain(host, defangedDomains, urlHosts);
+            if (result.emit) {
+              const dedupKey = `domain:${host}`;
+              if (!seen.has(dedupKey)) {
+                seen.add(dedupKey);
+                const ioc: WorkingIoc = {
+                  type: 'domain',
+                  value: host,
+                  defanged: defangValue('domain', host, defang),
+                  tier: result.tier,
+                  tier_heuristic: result.tier,
+                  tier_basis: result.basis,
+                  port: portNum,
+                  _offset: idx,
+                };
+                iocs.push(ioc);
+                iocByKey.set(dedupKey, ioc);
+              } else {
+                // Merge port onto existing domain IOC if not yet set.
+                const existing = iocByKey.get(dedupKey);
+                if (existing && existing.port === undefined) {
+                  existing.port = portNum;
+                }
+              }
             }
           }
         }
@@ -1142,24 +1148,33 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
   const candidateDomains: DomainCandidate[] = [];
 
   for (const match of refangedText.matchAll(domainPattern)) {
-    if (match.index === undefined) continue;
-    if (isConsumed(match.index, match[0].length, consumed)) continue;
+    if (match.index !== undefined && !isConsumed(match.index, match[0].length, consumed)) {
+      const raw = match[0].toLowerCase();
 
-    const raw = match[0].toLowerCase();
+      // Step a — redaction-adjacency: drop tokens immediately preceded by a masking glyph
+      // that is glued to a preceding alphanumeric label (aad****ie.com → drop 'ie.com').
+      let isRedactedAdjacent = false;
+      if (match.index > 0 && REDACTION_GLYPHS.has(refangedText[match.index - 1])) {
+        let g = match.index - 1;
+        while (g >= 0 && REDACTION_GLYPHS.has(refangedText[g])) g--;
+        if (g >= 0 && /[a-z0-9]/i.test(refangedText[g])) {
+          isRedactedAdjacent = true;
+        }
+      }
 
-    // Step a — redaction-adjacency: drop tokens immediately preceded by a masking glyph
-    // that is glued to a preceding alphanumeric label (aad****ie.com → drop 'ie.com').
-    if (match.index > 0 && REDACTION_GLYPHS.has(refangedText[match.index - 1])) {
-      let g = match.index - 1;
-      while (g >= 0 && REDACTION_GLYPHS.has(refangedText[g])) g--;
-      if (g >= 0 && /[a-z0-9]/i.test(refangedText[g])) continue;
+      if (!isRedactedAdjacent) {
+        // Steps b–e + discriminating classification.
+        const result = classifyDomain(raw, defangedDomains, urlHosts);
+        if (result.emit) {
+          candidateDomains.push({
+            domain: raw,
+            tier: result.tier,
+            basis: result.basis,
+            offset: match.index,
+          });
+        }
+      }
     }
-
-    // Steps b–e + discriminating classification.
-    const result = classifyDomain(raw, defangedDomains, urlHosts);
-    if (!result.emit) continue;
-
-    candidateDomains.push({ domain: raw, tier: result.tier, basis: result.basis, offset: match.index });
   }
 
   // Step f — longest-match PSL dedup (reference/denied candidates are exempt).
