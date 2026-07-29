@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ONBOARDING_EXITED_STORAGE_KEY, ONBOARDING_SEEN_STORAGE_KEY } from './storage_keys';
+import { ONBOARDING_SEEN_STORAGE_KEY } from './storage_keys';
 
 /**
  * Persistent flag used to decide whether to auto-route a fresh user into the
@@ -28,30 +28,5 @@ export const markOnboardingSeen = (): void => {
     localStorage.setItem(ONBOARDING_SEEN_STORAGE_KEY, 'true');
   } catch {
     // Best-effort: if storage is unavailable, the redirect simply re-fires.
-  }
-};
-
-/**
- * Persistent flag set once the user navigates away from the onboarding wizard
- * (the landing page or any of its steps). Unlike `hasSeenOnboarding`, which is
- * set the moment the wizard is entered, this stays unset while the user moves
- * between wizard pages, so first-visit affordances (e.g. the skip link) remain
- * visible until they actually leave.
- */
-export const hasExitedOnboarding = (): boolean => {
-  try {
-    return localStorage.getItem(ONBOARDING_EXITED_STORAGE_KEY) === 'true';
-  } catch {
-    // localStorage unavailable — treat as exited so first-visit affordances
-    // are simply hidden rather than shown forever.
-    return true;
-  }
-};
-
-export const markOnboardingExited = (): void => {
-  try {
-    localStorage.setItem(ONBOARDING_EXITED_STORAGE_KEY, 'true');
-  } catch {
-    // Best-effort, same as markOnboardingSeen.
   }
 };

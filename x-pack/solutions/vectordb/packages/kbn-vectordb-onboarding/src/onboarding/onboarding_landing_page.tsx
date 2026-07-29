@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { hasExitedOnboarding, markOnboardingSeen } from '../first_load';
+import { markOnboardingSeen } from '../first_load';
 import { ConnectToProject } from '../connection_details/connect_to_project';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { OnboardingPaths } from './components/onboarding_paths';
@@ -32,8 +32,6 @@ export const OnboardingLandingPage = () => {
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
   const { services } = useKibana();
   const vectorDatabaseDocsUrl = services.docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
-
-  const [hasExited] = useState(() => hasExitedOnboarding());
 
   useEffect(() => {
     markOnboardingSeen();
@@ -50,7 +48,7 @@ export const OnboardingLandingPage = () => {
             <EuiTitle size="l">
               <h1>
                 {i18n.translate('vectordbOnboarding.pathSelection.title', {
-                  defaultMessage: 'Get started with your Elasticsearch Vector Database',
+                  defaultMessage: 'Set up your Elasticsearch Vector Database',
                 })}
               </h1>
             </EuiTitle>
@@ -90,23 +88,21 @@ export const OnboardingLandingPage = () => {
                 })}
               </EuiLink>
             </EuiFlexItem>
-            {!hasExited && (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  color="text"
-                  iconType="sortRight"
-                  iconSide="right"
-                  flush="right"
-                  onClick={() => history.push('/')}
-                  data-test-subj="vectordbPathSelectionSkip"
-                  data-telemetry-id="vectordbOnboarding-pathSelection-skip"
-                >
-                  {i18n.translate('vectordbOnboarding.pathSelection.skip', {
-                    defaultMessage: 'Skip the setup guide',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="text"
+                iconType="sortRight"
+                iconSide="right"
+                flush="right"
+                onClick={() => history.push('/')}
+                data-test-subj="vectordbPathSelectionSkip"
+                data-telemetry-id="vectordbOnboarding-pathSelection-skip"
+              >
+                {i18n.translate('vectordbOnboarding.pathSelection.skip', {
+                  defaultMessage: 'Skip the setup guide',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexGroup>
       </EuiPageTemplate.Section>

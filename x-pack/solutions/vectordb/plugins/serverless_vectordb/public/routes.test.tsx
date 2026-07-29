@@ -6,20 +6,15 @@
  */
 
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory, type MemoryHistory } from 'history';
-import {
-  GETTING_STARTED_PATH,
-  hasSeenOnboarding,
-  markOnboardingExited,
-} from '@kbn/vectordb-onboarding';
+import { GETTING_STARTED_PATH, hasSeenOnboarding } from '@kbn/vectordb-onboarding';
 import { AppRoutes } from './routes';
 
 jest.mock('@kbn/vectordb-onboarding', () => ({
   ...jest.requireActual('@kbn/vectordb-onboarding'),
   hasSeenOnboarding: jest.fn(),
-  markOnboardingExited: jest.fn(),
   OnboardingLandingPage: () => <div data-test-subj="onboardingLandingPage" />,
   IngestStep: () => <div data-test-subj="ingestStep" />,
   SearchStep: () => <div data-test-subj="searchStep" />,
@@ -30,7 +25,6 @@ jest.mock('./home/home_page', () => ({
 }));
 
 const mockHasSeenOnboarding = jest.mocked(hasSeenOnboarding);
-const mockMarkOnboardingExited = jest.mocked(markOnboardingExited);
 
 const renderRoutes = (initialEntry: string): MemoryHistory => {
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
@@ -40,12 +34,6 @@ const renderRoutes = (initialEntry: string): MemoryHistory => {
     </Router>
   );
   return history;
-};
-
-const navigate = (history: MemoryHistory, path: string) => {
-  act(() => {
-    history.push(path);
-  });
 };
 
 beforeEach(() => {
@@ -78,49 +66,5 @@ describe('AppRoutes', () => {
 
     expect(history.location.pathname).toBe('/');
     expect(screen.getByTestId('homePage')).toBeInTheDocument();
-  });
-
-  it('redirects unknown wizard sub-paths to the wizard landing page without marking it exited', () => {
-    const history = renderRoutes(`${GETTING_STARTED_PATH}/does-not-exist`);
-
-    expect(history.location.pathname).toBe(GETTING_STARTED_PATH);
-    expect(screen.getByTestId('onboardingLandingPage')).toBeInTheDocument();
-    expect(mockMarkOnboardingExited).not.toHaveBeenCalled();
-  });
-
-  describe('marking the wizard as exited', () => {
-    it('does not mark on entry', () => {
-      renderRoutes(GETTING_STARTED_PATH);
-
-      expect(mockMarkOnboardingExited).not.toHaveBeenCalled();
-    });
-
-    it('does not mark while moving between wizard steps', () => {
-      const history = renderRoutes(GETTING_STARTED_PATH);
-
-      navigate(history, `${GETTING_STARTED_PATH}/ingest?path=have-vectors`);
-      navigate(history, `${GETTING_STARTED_PATH}/search?path=have-vectors`);
-      navigate(history, GETTING_STARTED_PATH);
-
-      expect(screen.getByTestId('onboardingLandingPage')).toBeInTheDocument();
-      expect(mockMarkOnboardingExited).not.toHaveBeenCalled();
-    });
-
-    it('marks when the user leaves the wizard for the home page', () => {
-      const history = renderRoutes(GETTING_STARTED_PATH);
-
-      navigate(history, '/');
-
-      expect(screen.getByTestId('homePage')).toBeInTheDocument();
-      expect(mockMarkOnboardingExited).toHaveBeenCalledTimes(1);
-    });
-
-    it('marks when the user leaves from a wizard step rather than the landing page', () => {
-      const history = renderRoutes(`${GETTING_STARTED_PATH}/search`);
-
-      navigate(history, '/');
-
-      expect(mockMarkOnboardingExited).toHaveBeenCalledTimes(1);
-    });
   });
 });
