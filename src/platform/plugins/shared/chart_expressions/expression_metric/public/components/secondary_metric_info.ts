@@ -188,7 +188,7 @@ function getDynamicColorInfo(
     : undefined;
 
   if (trendConfig.showIcon && !trendConfig.showValue && !icon) {
-    return { value: '', label: '', badgeColor: '', description: trendDescription };
+    return { value: '', label, badgeColor: '', description: trendDescription };
   }
 
   return {

@@ -154,6 +154,22 @@ describe('getSecondaryMetricInfo', () => {
     expect(result.badgeTextColor).toBe(TEXT_PALETTE[1]);
   });
 
+  it('keeps the label in icon-only mode when the delta is NaN', () => {
+    const result = getSecondaryMetricInfo({
+      ...defaultSecondaryMetricInfoArgs,
+      showLabel: true,
+      trendConfig: {
+        ...defaultTrendConfig,
+        showValue: false,
+        baselineValue: undefined,
+      },
+    });
+
+    expect(result.value).toBe('');
+    expect(result.icon).toBeUndefined();
+    expect(result.label).toBe(COLUMN_NAME);
+  });
+
   it('returns info when trendConfig is provided and compareToPrimary is true with decrease (↓)', () => {
     const result = getSecondaryMetricInfo({
       ...defaultSecondaryMetricInfoArgs,
