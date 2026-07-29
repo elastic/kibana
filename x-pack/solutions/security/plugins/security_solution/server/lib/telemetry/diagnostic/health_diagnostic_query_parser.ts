@@ -156,17 +156,20 @@ const parseV3 = (raw: Record<string, unknown> | null): HealthDiagnosticQuery => 
       }
     }
     try {
+      const api = assertRequiredString(raw, 'api');
+      const pathParams = raw.pathParams as Record<string, string> | undefined;
+      assertPathParamsCoverage(api, pathParams);
       return {
         id: assertRequiredString(raw, 'id'),
         name: assertRequiredString(raw, 'name'),
         version: 3 as const,
         type: 'API' as const,
-        api: assertRequiredString(raw, 'api'),
+        api,
         responsePath: raw.responsePath as string | undefined,
         scheduleCron: assertRequiredString(raw, 'scheduleCron'),
         enabled: assertRequiredBoolean(raw, 'enabled'),
         filterlist: assertFilterlist(raw),
-        pathParams: raw.pathParams as Record<string, string> | undefined,
+        pathParams,
         queryParams: raw.queryParams as Record<string, string | number> | undefined,
         responsePathKey: raw.responsePathKey as string | undefined,
         integrations: raw.integrations as string[] | undefined,
@@ -245,4 +248,16 @@ const assertFilterlist = (raw: Record<string, unknown> | null): Record<string, A
     throw new Error('Missing or invalid required field: filterlist');
   }
   return raw.filterlist as Record<string, Action>;
+};
+
+const assertPathParamsCoverage = (
+  api: string,
+  pathParams: Record<string, string> | undefined
+): void => {
+  const placeholders = [...api.matchAll(/\{([^}]+)\}/g)].map(([, key]) => key);
+  for (const key of placeholders) {
+    if (!pathParams || !(key in pathParams)) {
+      throw new Error(`Missing path parameter '${key}' for API template: ${api}`);
+    }
+  }
 };

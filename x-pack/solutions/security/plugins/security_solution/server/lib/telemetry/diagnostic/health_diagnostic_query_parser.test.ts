@@ -457,6 +457,82 @@ filterlist: {}
       const q = result[0] as HealthDiagnosticQueryV3;
       expect(q.pathParams).toEqual({ transform_id: '*' });
     });
+
+    it('returns ParseFailureQuery when api has a placeholder but pathParams is absent', () => {
+      const yaml = validApiYaml.replace('pathParams:\n  transform_id: "*"\n', '');
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('returns ParseFailureQuery when api placeholder has no matching pathParams key', () => {
+      const yaml = validApiYaml.replace(
+        'pathParams:\n  transform_id: "*"',
+        'pathParams:\n  transformId: "*"'
+      );
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('returns ParseFailureQuery when only some placeholders are covered', () => {
+      const yaml = `
+id: nodes-stats
+name: nodes_stats
+version: 3
+type: API
+api: _nodes/{node_id}/stats/{metric}
+pathParams:
+  node_id: "*"
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(true);
+    });
+
+    it('parses successfully when api has no placeholders and pathParams is absent', () => {
+      const yaml = `
+id: cat-tasks
+name: cat_tasks
+version: 3
+type: API
+api: _cat/tasks
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(false);
+      expect(result[0]).toMatchObject({ version: 3, type: 'API', api: '_cat/tasks' });
+    });
+
+    it('parses successfully when all placeholders are covered by pathParams', () => {
+      const yaml = `
+id: nodes-stats
+name: nodes_stats
+version: 3
+type: API
+api: _nodes/{node_id}/stats/{metric}
+pathParams:
+  node_id: "*"
+  metric: "jvm"
+scheduleCron: 1h
+enabled: true
+filterlist: {}
+`;
+      const result = parseHealthDiagnosticQueries(yaml);
+      expect(result).toHaveLength(1);
+      expect('_raw' in result[0]).toBe(false);
+      expect(result[0]).toMatchObject({
+        version: 3,
+        type: 'API',
+        pathParams: { node_id: '*', metric: 'jvm' },
+      });
+    });
   });
 
   describe('unknown version', () => {
