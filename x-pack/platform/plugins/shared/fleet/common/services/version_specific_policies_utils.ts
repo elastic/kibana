@@ -158,6 +158,22 @@ export function buildPolicyBaseIdWithFallbackKuery(
 }
 
 /**
+ * Same as {@link buildPolicyBaseIdWithFallbackKuery}, for multiple base policy ids at once.
+ */
+export function buildPolicyBaseIdsWithFallbackKuery(
+  baseIds: string[],
+  policyBaseIdField: string = 'policy_base_id',
+  policyIdField: string = DEFAULT_POLICY_ID_FIELD
+): string {
+  const uniqueIds = Array.from(new Set(baseIds));
+  if (uniqueIds.length === 0) {
+    return `${policyIdField}:""`;
+  }
+  const idList = uniqueIds.map((id) => escapeKuery(id)).join(' or ');
+  return `(${policyBaseIdField}:(${idList}) or (${policyIdField}:(${idList}) and not ${policyBaseIdField}:*))`;
+}
+
+/**
  * ES query DSL filter preferring `policy_base_id` for migrated documents, with a legacy
  * `policy_id` exact-term fallback for documents that pre-date the `policy_base_id` field.
  */

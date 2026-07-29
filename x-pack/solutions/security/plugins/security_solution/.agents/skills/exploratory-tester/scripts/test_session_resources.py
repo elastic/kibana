@@ -4092,6 +4092,454 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
 
         self.assertEqual(problems, [], "\n".join(["", *problems]))
 
+    def test_explore_phase_wires_the_detector_injector_with_fallback(self):
+        # Task 3 (detector injection): phases/2-explore.md must call the
+        # injected window.__et bridge instead of pasting all three detector
+        # scripts at every checklist step, must reinject after navigation
+        # (browser_navigate resets window context), and must keep the
+        # original full-paste path as an explicit fallback for every
+        # detector rather than dropping it once the bridge is preferred.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/inject-detectors.js", explore)
+        self.assertIn('browser_evaluate(function: "() => window.__et.dom()")', explore)
+        self.assertIn("window.__et.console(", explore)
+        self.assertIn("window.__et.network(", explore)
+
+        # Reinjection is tied explicitly to browser_navigate, not just to
+        # "flow start" — a single flow may navigate multiple times.
+        navigate_mentions = [
+            line
+            for line in explore.split("\n")
+            if "browser_navigate" in line and "__et" in line
+        ]
+        self.assertTrue(
+            navigate_mentions,
+            "expected at least one line tying window.__et reinjection to browser_navigate",
+        )
+
+        # The bridge must be installed once, before the per-step checklist
+        # loop begins — not re-taught inline at every checklist step. This
+        # locks in the "setup" section appearing textually before the
+        # "At every checklist step" section, so a future edit can't move
+        # the inject/verify instructions back into the per-step hot path.
+        setup_idx = explore.index("Detector bridge setup")
+        per_step_idx = explore.index("### At every checklist step")
+        self.assertLess(
+            setup_idx,
+            per_step_idx,
+            "bridge setup instructions must precede the per-step checklist section, "
+            "not live inside it",
+        )
+
+        # The per-step section must not re-teach injection — it should only
+        # reference the setup section already covered above.
+        per_step_and_after = explore[per_step_idx:]
+        self.assertNotIn(
+            "browser_evaluate` with the full content of `scripts/inject-detectors.js",
+            per_step_and_after,
+            "the per-step section must not repeat the one-time injection instructions",
+        )
+
+        # Explicit, literal instruction not to fall back to pasting while the
+        # bridge is confirmed working — this is the entire point of the
+        # bridge; regressing this line would silently reintroduce the large
+        # per-step payload the bridge exists to avoid.
+        self.assertIn(
+            "Do not paste the detector source while the bridge is up",
+            explore,
+            "expected an explicit instruction against pasting detector source "
+            "while the bridge is confirmed installed",
+        )
+
+        # The paste fallback must remain reachable for all three detectors —
+        # this task only changes the preferred path, not the safety net.
+        for canonical_script in (
+            "check-dom-anomalies.js",
+            "classify-console.js",
+            "dedup-network.js",
+        ):
+            self.assertIn(
+                canonical_script,
+                explore,
+                f"fallback path for {canonical_script} must still be documented",
+            )
+        self.assertGreaterEqual(
+            explore.count("Fallback: full paste"),
+            3,
+            "each of the three detectors needs its own documented fallback",
+        )
+
+        # The generated injector this phase depends on must actually exist
+        # and be recognizable as the generated artifact, not a stray file.
+        injector_path = SCRIPT_DIR / "inject-detectors.js"
+        self.assertTrue(
+            injector_path.exists(), "scripts/inject-detectors.js must exist"
+        )
+        injector = injector_path.read_text(encoding="utf-8")
+        self.assertIn("GENERATED FILE", injector)
+        self.assertIn("window.__et", injector)
+
+    def test_explore_phase_wires_the_shadow_collector_off_by_default_with_self_test(self):
+        # Task 4 (action-scoped collector): collector_mode must default to
+        # "legacy" everywhere it is introduced, the shadow path must never be
+        # allowed to drive findings, and a runtime self-test must gate shadow
+        # collection behind an automatic fallback to legacy-only behavior —
+        # not a hard failure — when the bridge is unavailable or errors.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        example_yaml = (TEMPLATE_DIR / "session.example.yaml").read_text(
+            encoding="utf-8"
+        )
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        spike_doc = (SCRIPT_DIR / "action-scoped-collector-spike.md").read_text(
+            encoding="utf-8"
+        )
+
+        # Default is legacy — explicit everywhere the field is introduced.
+        self.assertIn('"collector_mode"', setup)
+        self.assertIn("default legacy", setup)
+        self.assertIn(
+            "Never default to",
+            setup,
+            "expected an explicit instruction against the model enabling shadow "
+            "mode on its own initiative",
+        )
+        self.assertIn("collector_mode: legacy", example_yaml)
+        self.assertIn(
+            "was not recognized and legacy was used instead",
+            setup,
+            "expected explicit guidance that an unrecognized/typo'd "
+            "collector_mode value falls back to legacy with a visible "
+            "warning, not a silent coercion either way",
+        )
+
+        # Step 0b must actually instruct the agent to *parse* collector_mode
+        # from the input — documenting the config.json schema and the
+        # legacy-default rule is not enough if the field is never extracted
+        # from either input source in the first place. Match the actual
+        # heading (bold, trailing colon), not the plain-text cross-reference
+        # to it a few lines earlier in the Session-config bullet.
+        step_0b = setup[setup.index("## Step 0b") :]
+        assigning_heading_idx = step_0b.index("**Assigning `source` to each flow:**")
+        self.assertIn(
+            "collector_mode",
+            step_0b[:assigning_heading_idx],
+            "expected collector_mode in the Session-config field-parsing list",
+        )
+        self.assertIn(
+            "collector_mode",
+            step_0b[step_0b.index("**Inline mode:**") : assigning_heading_idx],
+            "expected collector_mode in the inline-mode field-extraction list",
+        )
+
+        # The shadow setup/self-test section must exist and precede the
+        # per-step checklist, same ordering guarantee as the detector bridge.
+        self.assertIn("Shadow collector setup", explore)
+        setup_idx = explore.index("Shadow collector setup")
+        checklist_idx = explore.index("### Mandatory checklist")
+        self.assertLess(
+            setup_idx,
+            checklist_idx,
+            "shadow collector setup must precede the mandatory checklist, not "
+            "live inside the per-step hot path",
+        )
+
+        # A failed/unavailable bridge must fall back silently to legacy-only
+        # behavior for the rest of the flow, never block or retry per-step.
+        self.assertIn('"available": false', explore)
+        self.assertIn(
+            "treat shadow collection as unavailable for this entire flow",
+            explore,
+        )
+        self.assertIn("do not retry per-step", explore)
+
+        # The collector must never be allowed to drive findings — this is
+        # the single most important invariant of the whole feature.
+        self.assertIn("Never log a finding from this collector's output", explore)
+        self.assertIn(
+            "legacy Detectors A/B/C remain the only source of findings",
+            explore,
+        )
+
+        # Every real session must skip all of this when collector_mode is
+        # legacy (the default) — verify the literal skip instruction exists.
+        self.assertIn(
+            'Skip this entire subsection, and every "Shadow collector" step '
+            'below, whenever `collector_mode` is `"legacy"`',
+            explore,
+        )
+
+        # The one-time manual capability spike must exist, be explicitly
+        # required before real use, and document a concrete decision rule —
+        # not just "verify it works" hand-waving.
+        self.assertIn("browser_run_code_unsafe", spike_doc)
+        self.assertIn("PASS", spike_doc)
+        self.assertIn("FAIL", spike_doc)
+        self.assertIn(
+            "re-run this procedure yourself before setting "
+            "`collector_mode: shadow` in any real session",
+            spike_doc,
+            "expected an explicit re-verification requirement for setups that "
+            "differ from whatever produced the last recorded PASS, not a "
+            "one-time-ever gate that goes stale silently",
+        )
+        # The doc must not claim to be unverified while also containing a
+        # recorded PASS result — that self-contradiction is exactly what
+        # slipped through before (status header said "unverified" after a
+        # live PASS had already been recorded further down the same file).
+        self.assertIn("PASS", spike_doc)
+        self.assertNotIn("unverified against a live browser", spike_doc)
+
+        # The bridge doc must document the install/drain snippets, capture
+        # status/ok on 'response' (headers, synchronous, no promise chain —
+        # avoids the async .then()-off-'requestfinished' race an earlier
+        # version had) but only mark a request truly complete on
+        # 'requestfinished'/'requestfailed' (a stalled body after headers
+        # arrive must still read as pending, not settled), never mention
+        # persisting a request/response body, and cross-link the spike doc
+        # rather than silently assuming the capability.
+        self.assertIn("action-scoped-collector-spike.md", collector_doc)
+        self.assertIn("page.on('request'", collector_doc)
+        self.assertIn("page.on('response'", collector_doc)
+        self.assertIn("page.on('requestfinished'", collector_doc)
+        self.assertIn("page.on('requestfailed'", collector_doc)
+        self.assertIn("page.on('framenavigated'", collector_doc)
+        self.assertNotIn("res.text()", collector_doc)
+        self.assertNotIn("res.json()", collector_doc)
+        self.assertNotIn("req.postData", collector_doc)
+
+        # Console text must be redacted the same way URLs are — it routinely
+        # embeds the failing URL verbatim (query string and all).
+        self.assertIn("redactText", collector_doc)
+
+        # Install must reset per-flow state on every call (not just the
+        # page's first ever call), so a previous flow's leftover pending or
+        # abandoned entries never bleed into the next flow's first drain.
+        self.assertIn(
+            "runs on every call, every flow, unconditionally",
+            collector_doc,
+            "expected install to explicitly document a per-flow buffer reset, "
+            "not a session-lifetime-only guard",
+        )
+
+        # The pure reducer this all depends on must actually exist as an ESM
+        # module (not the shared plugin package.json's CommonJS default),
+        # and export the two functions the doc and tests both rely on.
+        reducer_path = SCRIPT_DIR / "action-scoped-collector.mjs"
+        self.assertTrue(
+            reducer_path.exists(), "scripts/action-scoped-collector.mjs must exist"
+        )
+        reducer = reducer_path.read_text(encoding="utf-8")
+        self.assertIn("export function reduceAction", reducer)
+        self.assertIn("export function redactUrl", reducer)
+
+        # The bridge snippets only ever run inside a live browser sandbox —
+        # a fake-page harness test extracting and executing the real
+        # Install/Drain code (not a hand-copied duplicate) is the only way
+        # bugs specific to that code get caught before a live/manual review.
+        bridge_test_path = SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        self.assertTrue(
+            bridge_test_path.exists(),
+            "scripts/__tests__/action-scoped-collector-bridge.test.mjs must "
+            "exist — the bridge Install/Drain snippets must be executed by "
+            "an actual test, not reasoned about from the markdown alone",
+        )
+        bridge_test = bridge_test_path.read_text(encoding="utf-8")
+        self.assertIn("extractCodeBlock", bridge_test)
+        self.assertIn("### Install", bridge_test)
+        self.assertIn("### Drain", bridge_test)
+
+    def test_shadow_collector_second_review_fixes(self):
+        # Second-round P2 review findings on PR #281418 (head 57fc762):
+        # navigation abandonment must be frame-scoped, listeners must have an
+        # uninstall path, credential redaction must cover more param names
+        # and not collapse different values into one signature, the
+        # duplicate-window check must use total span (not adjacent gaps),
+        # the first-step state-file command must not be ambiguous, and a
+        # resumed session must still create tmp/collector-diffs.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        reducer = (SCRIPT_DIR / "action-scoped-collector.mjs").read_text(
+            encoding="utf-8"
+        )
+        bridge_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        ).read_text(encoding="utf-8")
+
+        # Navigation abandonment: scoped to the frame that navigated, not
+        # "any main-frame nav abandons every open request page-wide". Each
+        # network entry records its originating frame via frameOf(req) (a
+        # guarded wrapper around request.frame() — see the fourth-review
+        # fixes test below), not a raw unguarded req.frame() call.
+        self.assertIn("entry.frame === frame", collector_doc)
+        self.assertIn("frameOf(req)", collector_doc)
+
+        # Uninstall path: an explicit teardown snippet exists, uses page.off
+        # (never removeAllListeners, which would also strip unrelated
+        # listeners another part of the session may have on the same page).
+        self.assertIn("### Uninstall", collector_doc)
+        self.assertIn("page.off(eventName, handlers[eventName])", collector_doc)
+        self.assertIn("### Uninstall", bridge_test)
+
+        # A legacy-mode session must be told, outside any collector_mode:
+        # shadow-gated subsection, to defensively uninstall if it suspects
+        # page reuse from an earlier shadow session.
+        self.assertIn("Uninstall", setup)
+        self.assertIn("collector_mode: shadow", setup)
+
+        # Redaction: previously-missed credential-shaped param names, and a
+        # hashed (not constant) placeholder so different values under the
+        # same sensitive key don't collapse into one signature.
+        for names_source in (collector_doc, reducer):
+            self.assertIn("x[-_]?api[-_]?key", names_source)
+            self.assertIn("client[-_]?secret", names_source)
+        self.assertIn("shortHash", collector_doc)
+        self.assertIn("shortHash", reducer)
+        self.assertIn("%5BREDACTED:", collector_doc)
+        self.assertIn("%5BREDACTED:", reducer)
+
+        # Duplicate-window: total span, not per-adjacent-gap.
+        self.assertIn(
+            "timings[timings.length - 1] - timings[0] <= DUPLICATE_WINDOW_MS",
+            reducer,
+        )
+
+        # First checklist step's command must not include a state-file
+        # argument that cannot exist yet — two separate, unambiguous
+        # commands instead of one command plus an inline comment.
+        shadow_section = explore[explore.index("Shadow collector —") :]
+        first_step_idx = shadow_section.index("first checklist step")
+        first_step_cmd = shadow_section[first_step_idx : first_step_idx + 400]
+        self.assertNotIn("collector-state-flow<N>.json", first_step_cmd)
+        self.assertIn("subsequent checklist step", shadow_section)
+
+        # Resumed sessions must still get tmp/ and collector-diffs/, not
+        # just brand-new ones — Step 0e's mkdir only runs on the new-session
+        # path, so the resume path needs its own.
+        resume_section = setup[
+            setup.index("Resume path") : setup.index("New session path")
+        ]
+        self.assertIn("mkdir -p", resume_section)
+        self.assertIn("tmp", resume_section)
+        self.assertIn("collector-diffs", resume_section)
+
+    def test_shadow_collector_third_review_fixes(self):
+        # Third-round P2/minor review findings on PR #281418 (head d500100):
+        # an abandoned request's known status must not double-count as a
+        # silent_server_error or a settled attempt for duplicate/retry
+        # purposes; 'framenavigated' fires for same-document (pushState)
+        # navigations too, so abandonment must require a real
+        # document-fetching navigation request first; and the Install
+        # idempotency note must sit with Install, not under Uninstall.
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        reducer = (SCRIPT_DIR / "action-scoped-collector.mjs").read_text(
+            encoding="utf-8"
+        )
+        bridge_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        ).read_text(encoding="utf-8")
+        reducer_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector.test.mjs"
+        ).read_text(encoding="utf-8")
+
+        # abandonedByNavigation excluded from silent_server_error...
+        self.assertIn(
+            "ev.status < 500 || ev.abandonedByNavigation", reducer
+        )
+        # ...and from the "settled" set used for duplicate/retry/repeat.
+        self.assertIn(
+            "(ev.status != null || ev.failure != null) && !ev.abandonedByNavigation",
+            reducer,
+        )
+
+        # Same-document (pushState/hash) navigations fire 'framenavigated'
+        # just like a real one, but issue no request at all — abandonment
+        # must be gated on having actually seen a navigation-type request
+        # for that exact frame first.
+        self.assertIn("__actionCollectorNavRequestSeen", collector_doc)
+        self.assertIn("req.isNavigationRequest()", collector_doc)
+        self.assertIn("isNavigationRequest", bridge_test)
+
+        # Regression tests exist for both the reducer-side and bridge-side
+        # fixes, not just the fix itself.
+        self.assertIn("abandoned-then-retry", reducer_test)
+        self.assertIn("pushState", bridge_test)
+
+        # The Install idempotency note must appear before the Uninstall
+        # heading, not after it — otherwise it reads as describing
+        # Uninstall instead of Install.
+        install_note_idx = collector_doc.index("Install is idempotent by design")
+        uninstall_heading_idx = collector_doc.index("### Uninstall")
+        self.assertLess(
+            install_note_idx,
+            uninstall_heading_idx,
+            "the Install idempotency note must appear before the Uninstall heading",
+        )
+
+    def test_shadow_collector_fourth_review_fixes(self):
+        # Fourth-round P2 review findings on PR #281418 (head 2a977525):
+        # the navigation "seen" sentinel must not go stale across a
+        # cancelled navigation or a flow boundary, request.frame() can
+        # throw for documented Playwright reasons and must never abort
+        # buffering, and the navigation request itself (plus redirects)
+        # must never be marked abandoned by the navigation it drives.
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        bridge_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        ).read_text(encoding="utf-8")
+
+        # The sentinel is a per-frame Set of in-flight navigation Requests,
+        # not a bare boolean — a boolean can't be safely un-set when a
+        # navigation is cancelled before it ever commits.
+        self.assertIn("new Set()", collector_doc)
+        self.assertIn("navSet.clear()", collector_doc)
+        # Cleared as soon as that specific attempt resolves, whether it
+        # succeeds or fails, not just on a successful commit.
+        self.assertIn("forgetSettledNavRequest", collector_doc)
+        self.assertIn("onRequestFinished = (req) => {\n    forgetSettledNavRequest(req);", collector_doc)
+        self.assertIn("onRequestFailed = (req) => {\n    forgetSettledNavRequest(req);", collector_doc)
+        # Recreated on every flow install, not just gated behind the
+        # alreadyInstalled guard that skips the other WeakMaps.
+        install_src = collector_doc[
+            collector_doc.index("### Install") : collector_doc.index("### Uninstall")
+        ]
+        nav_seen_create_idx = install_src.index("page.__actionCollectorNavRequestSeen = new WeakMap();")
+        guard_idx = install_src.index("if (page.__actionCollectorInstalled) return")
+        self.assertLess(
+            nav_seen_create_idx,
+            guard_idx,
+            "__actionCollectorNavRequestSeen must be (re)created before the "
+            "alreadyInstalled guard, so a stale sentinel from a previous "
+            "flow's cancelled navigation can't survive into a new flow",
+        )
+
+        # request.frame() is documented to throw for a Service Worker
+        # request and for a navigation request issued before its frame
+        # exists — both must be caught, never left to abort the handler.
+        self.assertIn("frameOf", collector_doc)
+        self.assertIn("try {", collector_doc)
+        self.assertIn("req.frame()", collector_doc)
+
+        # The navigating request (and its redirect hops) must be excluded
+        # from the abandonment loop — it can still be open when
+        # 'framenavigated' commits for a slow/streaming document.
+        self.assertIn("!entry.isNavigationRequest", collector_doc)
+
+        # Regression tests exist for all three fixes.
+        self.assertIn("driving a navigation is not abandoned", bridge_test)
+        self.assertIn("cancelled navigation", bridge_test)
+        self.assertIn("THROWS_ON_FRAME", bridge_test)
+
     def test_head_probes_do_not_wait_for_a_response_body(self):
         # curl -X HEAD keeps waiting for a body that a HEAD response never
         # sends, so it stalls for the whole --max-time on keep-alive servers.
