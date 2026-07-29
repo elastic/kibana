@@ -25,12 +25,9 @@ const { execSync } = require('child_process');
 const gzipAsync = promisify(zlib.gzip);
 
 /**
- * Version-gated Lens embeddable migrations, memoized.
- *
- * These are the exact migrations Kibana runs on a by-value Lens panel embedded in a dashboard (registered
- * via `makeLensEmbeddableFactory` and applied by the persistable-state framework, gated by the panel's
- * stored `version`). e.g. `commonRenameFilterReferences` at 8.1.0, moves a pre-8.1 filter's
- * `meta.indexRefName` into `meta.index`
+ * The exact version-gated migrations Kibana runs on a by-value Lens dashboard panel
+ * (via `makeLensEmbeddableFactory`), memoized. e.g. `commonRenameFilterReferences` at
+ * 8.1.0 moves a pre-8.1 filter's `meta.indexRefName` into `meta.index`.
  */
 let lensEmbeddableMigrations;
 function getLensEmbeddableMigrations() {
@@ -46,10 +43,9 @@ function getLensEmbeddableMigrations() {
 }
 
 /**
- * Run the real, version-gated Lens embeddable migration chain on a by-value panel's attributes, then the
- * content-management (V0→V1→V2) transforms. This mirrors production exactly: `migrateToLatest` applies
- * only the migrations newer than the panel's `version`, so old (pre-8.1) panels get their filter
- * references renamed while already-migrated panels are left untouched — no hand-rolled migration logic.
+ * Run the real Lens embeddable migration chain on a by-value panel's attributes, then the
+ * content-management (V0→V1→V2) transforms. `migrateToLatest` applies only migrations newer
+ * than the panel's `version`, so old panels get migrated while current ones are left untouched.
  */
 function migratePanelAttributes(originalAttrs, panelVersion) {
   let attrs = originalAttrs;
