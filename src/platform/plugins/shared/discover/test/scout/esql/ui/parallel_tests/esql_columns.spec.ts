@@ -26,7 +26,7 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
-      await discoverScoutSpace.savedObjects.load(testData.DISCOVER_ESQL_COLUMNS_KBN_ARCHIVE);
+      await discoverScoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER_ESQL_COLUMNS);
     });
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {

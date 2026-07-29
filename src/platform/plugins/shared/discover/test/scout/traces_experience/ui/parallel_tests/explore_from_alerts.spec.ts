@@ -73,7 +73,7 @@ function createAlertDocument({
 spaceTest.describe(
   'Traces in Discover - Explore from Alerts',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: ['@local-stateful-classic', ...tags.serverless.observability.complete],
   },
   () => {
     let ruleId: string;

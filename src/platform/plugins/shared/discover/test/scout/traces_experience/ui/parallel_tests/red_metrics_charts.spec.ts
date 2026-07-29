@@ -28,7 +28,7 @@ const BREAKDOWN = {
 spaceTest.describe(
   'Traces in Discover - RED metrics charts',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: ['@local-stateful-classic', ...tags.serverless.observability.complete],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {

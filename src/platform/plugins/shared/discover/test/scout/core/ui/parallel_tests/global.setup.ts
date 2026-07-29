@@ -45,4 +45,8 @@ globalSetupHook('Setup Discover core tests data', async ({ esArchiver, log }) =>
     'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
   );
   log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
+
+  log.debug('[setup:ecommerce] loading ecommerce ES data (only if it does not exist)...');
+  await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
+  log.debug('[setup:ecommerce] ecommerce ES data ready');
 });

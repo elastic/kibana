@@ -53,7 +53,7 @@ const APM_TIME_RANGE = {
 spaceTest.describe(
   'Traces in Discover - Explore from APM',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: ['@local-stateful-classic', ...tags.serverless.observability.complete],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {

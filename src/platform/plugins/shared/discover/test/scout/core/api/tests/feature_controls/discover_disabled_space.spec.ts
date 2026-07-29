@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { BASE_HEADERS } from '../../fixtures/constants';
 import { type DiscoverCapabilitiesResponse } from '../../fixtures/feature_controls/constants';
 
 apiTest.describe(
   'POST /s/<space>/api/core/capabilities - Discover space feature controls',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     let spaceId: string | undefined;
 

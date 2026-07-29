@@ -94,9 +94,9 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
       const discoverScoutSpace: DiscoverScoutSpace = {
         ...scoutSpace,
         setupDiscoverDefaults: async ({ loadFlightsDataView = false } = {}) => {
-          await loadSavedObjects(testData.DISCOVER_KBN_ARCHIVE);
+          await loadSavedObjects(testData.KBN_ARCHIVES.DISCOVER);
           if (loadFlightsDataView) {
-            await loadSavedObjects(testData.FLIGHTS_KBN_ARCHIVE);
+            await loadSavedObjects(testData.KBN_ARCHIVES.FLIGHTS_DATA_VIEW);
           }
           await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
           await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);

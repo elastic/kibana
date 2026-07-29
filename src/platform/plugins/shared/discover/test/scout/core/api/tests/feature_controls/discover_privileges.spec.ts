@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags, type ApiClientFixture, type RoleApiCredentials } from '@kbn/scout';
+import { apiTest, type ApiClientFixture, type RoleApiCredentials } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { BASE_HEADERS } from '../../fixtures/constants';
 import {
@@ -21,7 +21,7 @@ import {
 
 apiTest.describe(
   'POST /api/core/capabilities - Discover role privileges',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     let allCredentials: RoleApiCredentials;
     let readCredentials: RoleApiCredentials;

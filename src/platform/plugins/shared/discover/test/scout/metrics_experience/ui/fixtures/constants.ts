@@ -90,7 +90,7 @@ export const KBN_ARCHIVE =
   'src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/fixtures/kbn_archives/metrics_data_view.json';
 
 export const METRICS_EXPERIENCE_TAGS = [
-  ...tags.stateful.all,
+  '@local-stateful-classic',
   ...tags.serverless.observability.complete,
   ...tags.serverless.security.complete,
 ];

@@ -19,7 +19,7 @@ spaceTest.describe('Discover default route', { tag: '@local-stateful-classic' },
   let savedSearchDefaultRoute: string;
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    const imported = await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
+    const imported = await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
     const savedSearch = imported.find(
       ({ title, type }) => title === testData.SAVED_SEARCH_TITLE && type === 'search'
     );

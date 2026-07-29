@@ -11,7 +11,6 @@
  * Discover data-grid cell-expand popover + row-toggle flyout behaviours.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 import { testData } from '../fixtures';
@@ -19,14 +18,14 @@ import { testData } from '../fixtures';
 const EXPECTED_FIRST_ROW_TIMESTAMP = 'Sep 22, 2015 @ 23:50:13.253';
 const EXPECTED_FIRST_ROW_ID = 'AU_x3_g4GFA8no6QjkYX';
 
-spaceTest.describe('Discover data grid - doc viewer', { tag: tags.stateful.all }, () => {
+spaceTest.describe('Discover data grid - doc viewer', { tag: '@local-stateful-classic' }, () => {
   // EUI DataGrid hides/truncates inline cellActions at narrow widths. The FTR
   // equivalent ran at 1600x1200 via `browser.setWindowSize`; match that here so
   // the doc-viewer flyout has room to render its "toggle column" actions.
   spaceTest.use({ viewport: { width: 1600, height: 1200 } });
 
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
+    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
     await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
     await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
     await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
