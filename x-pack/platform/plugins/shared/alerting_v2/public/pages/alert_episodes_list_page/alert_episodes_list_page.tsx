@@ -39,7 +39,7 @@ import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
+import { EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { useAlertingRuleSourceDataViews } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rule_source_data_views';
@@ -174,7 +174,7 @@ export const AlertEpisodesListPage = () => {
     dataView,
     isLoading,
   } = useFetchAlertingEpisodesQuery({
-    pageSize: ALERT_EPISODES_LIST_PAGE_SIZE,
+    pageSize: EPISODES_LIST_PAGE_SIZE,
     services,
     filterState,
     sortState,
@@ -503,11 +503,11 @@ export const AlertEpisodesListPage = () => {
                     customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
                     externalCustomRenderers={externalCustomRenderers}
                     rows={rows}
-                    totalHits={!episodesData?.length ? 0 : ALERT_EPISODES_LIST_PAGE_SIZE + 1}
+                    totalHits={!episodesData?.length ? 0 : EPISODES_LIST_PAGE_SIZE + 1}
                     loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                     isPaginationEnabled
                     paginationMode="singlePage"
-                    sampleSizeState={ALERT_EPISODES_LIST_PAGE_SIZE}
+                    sampleSizeState={EPISODES_LIST_PAGE_SIZE}
                     isSortEnabled
                     sort={sort}
                     onSort={onSort}
