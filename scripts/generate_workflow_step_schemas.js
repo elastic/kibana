@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parseTemplateYaml, TemplateParseError } from './parse_template';
-export type { ParsedTemplate, TemplateParseErrorReason } from './parse_template';
-export { renderTemplate, INSTALL_PLACEHOLDER } from './render_template';
-export type { RenderTemplateInput } from './render_template';
+require('@kbn/setup-node-env');
+require('@kbn/workflow-step-schema-cli').run();

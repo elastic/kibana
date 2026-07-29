@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parseTemplateYaml, TemplateParseError } from './parse_template';
-export type { ParsedTemplate, TemplateParseErrorReason } from './parse_template';
-export { renderTemplate, INSTALL_PLACEHOLDER } from './render_template';
-export type { RenderTemplateInput } from './render_template';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-workflow-step-schema-cli'],
+  // This is a Node CLI package (fetch/fs/crypto/zlib, `AbortSignal.timeout`);
+  // run its tests under the Node environment rather than the default jsdom.
+  testEnvironment: 'node',
+};

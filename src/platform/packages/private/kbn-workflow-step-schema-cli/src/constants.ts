@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { parseTemplateYaml, TemplateParseError } from './parse_template';
-export type { ParsedTemplate, TemplateParseErrorReason } from './parse_template';
-export { renderTemplate, INSTALL_PLACEHOLDER } from './render_template';
-export type { RenderTemplateInput } from './render_template';
+export const DEFAULT_KIBANA_URL = 'http://localhost:5601';
+
+export const DEFAULT_CHANNEL = 'release';
+
+/** Public API version required by the reused versioned routes. */
+export const KIBANA_API_VERSION = '2023-10-31';
