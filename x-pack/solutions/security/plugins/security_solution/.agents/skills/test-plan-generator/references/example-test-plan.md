@@ -327,3 +327,15 @@ Both entries must appear together — the Sources Summary row on its own is not 
 ```
 
 Unlike the narrowed case, the budget-reached case is fully recoverable — bumping the session budget or splitting the plan into per-flyout runs completes the coverage in a subsequent iteration without changing the plan's design intent.
+
+**Name-vs-content mismatch case.** Figma layer names are authored by designers and can drift from what the layer actually renders (a frame labelled `Analyzer` that ends up showing a Notes flyout, an `Alert v2` frame that still holds the old design, etc.). When `get_screenshot` reveals such a mismatch — per the rules in [`gathering-context.md`](gathering-context.md#figma) — the affected node retains a successful Sources Summary status (the fetch worked), but a Known Limitations entry must record the mismatch so downstream reviewers do not treat the metadata inventory as authoritative for that node:
+
+```markdown
+| Figma — Flyout-design-per-release, "New system" (section) | ✅ Metadata read + 3 screenshots for visual verification |
+```
+
+```markdown
+- ⚠️ Figma metadata node names are not fully reliable for the "New system" section. The frame named `Analyzer` (id `6918:7103`) rendered as a Notes flyout when screenshotted; its 4 sibling `Analyzer` frames were not screenshotted and may share the same mismatch. Any analyzer-specific scenarios in this plan therefore rely on the target-issue text and prior Timeline behaviour rather than on a verified visual reference from this Figma section.
+```
+
+Unlike the narrowed and budget-reached cases (where the coverage gap is quantitative), the name-mismatch case is a qualitative signal that the *inventory step alone* is insufficient — a lesson that applies to how the plan cites the Figma node, not to how many nodes were fetched.

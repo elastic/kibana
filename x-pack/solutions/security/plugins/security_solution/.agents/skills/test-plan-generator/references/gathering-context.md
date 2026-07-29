@@ -105,6 +105,12 @@ For each such assertion:
 
 Do **not** call `get_screenshot` speculatively on every child in a container. Only call it where a scenario would otherwise be unverifiable.
 
+**Name-vs-content mismatch.** Figma metadata reports the layer name a designer typed, not what the layer actually depicts — designers sometimes rename or repurpose components without updating the label. If the downloaded PNG visibly does not match the node name (e.g. a frame called `Analyzer` renders as a Notes flyout), treat the mismatch as first-class signal:
+
+1. Trust the screenshot, not the name. Write scenarios only from what the image shows.
+2. Do **not** write assertions grounded in the misleading name. In the `Analyzer` example, do not add analyzer-specific scenarios anchored on that node; either find a differently-named node that genuinely renders the analyzer or defer the scenario to Known Limitations.
+3. Add a Known Limitations entry naming the node and the mismatch, so downstream reviewers know the metadata inventory alone was insufficient for that node.
+
 ### Step 4 — Escape hatch: `get_design_context`
 
 Reserve `get_design_context` for the rare case where a test scenario needs pixel-precise layout data or exact EUI component identifiers that neither the metadata nor the screenshot can supply — for example a regression test asserting on a specific `data-test-subj` selector that only appears in the Code Connect snippet.
@@ -259,7 +265,7 @@ Fall back to GitHub MCP if unavailable. Apply these limits to the diff:
 **If a PR has no test files**, search the filesystem for existing tests:
 - Look for `*.test.ts` / `*.spec.ts` files adjacent to the modified source files
 - Look in `__tests__/` folders near the modified files
-- Use [`references/security-test-directories.md`](references/security-test-directories.md) to find canonical test directories for the feature area
+- Use [`security-test-directories.md`](security-test-directories.md) to find canonical test directories for the feature area
 - Search for folders named `cypress`, `e2e`, or `scout` anywhere under `x-pack/solutions/security/`
 - Search for folders named `integration`, `api_integration` anywhere under `x-pack/` that relate to the feature name or modified file names
 
