@@ -280,32 +280,50 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 ---
 
-## Variant — Figma container narrowed by user selection
+## Variant — Figma metadata-first flow
 
-The worked example above uses "no Figma available" as its Known Limitations entry. When a Figma URL **does** exist but the linked node is a `canvas` or a large `section`, the skill stops and asks the user which children matter (see the tiered flow in [`gathering-context.md`](gathering-context.md#figma)). If the user selects a subset, two entries must appear together to keep the partial coverage visible to downstream steps.
+The worked example above uses "no Figma available" as its Known Limitations entry. When a Figma URL **is** available, the skill follows the metadata-first flow in [`gathering-context.md`](gathering-context.md#figma): one `get_metadata` call to catalogue the structure, then targeted `get_screenshot` calls only for scenarios that assert on visual layout. The Sources Summary and Known Limitations sections change to reflect what was actually fetched.
 
-**Sources Summary row (in place of the ✅ Read row):**
-
-```markdown
-| Figma — 🌈 Design Concepts (canvas) | ✅ Read (3 of 40 children — user-selected subset) |
-```
-
-**Known Limitations entry (added alongside any other limitations):**
+**Common case — metadata + a few screenshots.** Most UI plans need visual anchoring for the P0 flyout and a handful of state variations. Sources Summary:
 
 ```markdown
-- ⚠️ Figma canvas "🌈 Design Concepts": 3 of 40 direct children inspected (narrowed by user selection). The remaining 37 children were out of scope for this test plan and may cover behaviour not represented in scenarios.
+| Figma — Alert flyout redesign (frame) | ✅ Metadata read + 3 screenshots for visual verification |
 ```
 
-Both entries must appear together. The Sources Summary row on its own is not enough — Step 3 scenario writing and the Issue Clarity Assessment UX/UI dimension read Known Limitations to decide whether the Figma context is complete, and would otherwise treat a `✅ Read (…)` status as full coverage.
+The status cell should also include the (short-lived) screenshot URLs the Figma MCP returned so the reviewer can open them without re-running the skill; drop them if they have already expired. No Known Limitations entry is needed for this case — coverage is complete.
 
-**Sibling case — Figma MCP quota exhausted mid-fetch.** When the Figma MCP rate-limit trips while iterating children (common on View seats, capped at 6 tool calls per month), the same paired-entries pattern applies with different statuses:
+**Metadata-only case — small feature, no visual assertion needed.** When every scenario can be written from named components alone (e.g. *"the User flyout opens when clicking the user avatar"* without asserting on its internal layout), no screenshots are needed:
 
 ```markdown
-| Figma — Alert flyout redesign (section) | ⚠️ Read (4 of 12 children — MCP quota exhausted mid-fetch) |
+| Figma — User avatar interactions (frame) | ✅ Metadata read (4 fetchable children catalogued) |
+```
+
+Again, no Known Limitations entry is required — the intent was structural coverage and it was met.
+
+**Narrowed case — canvas or oversized section.** When the linked node is a `canvas` or a large `section`, Step 2 stops and asks the user which children are in scope. The un-selected children are then out of coverage and must be surfaced. Two entries appear together:
+
+Sources Summary row:
+
+```markdown
+| Figma — 🌈 Design Concepts (canvas) | ✅ Metadata read (3 of 40 children catalogued — narrowed by user selection) |
+```
+
+Known Limitations entry (added alongside any other limitations):
+
+```markdown
+- ⚠️ Figma canvas "🌈 Design Concepts": 3 of 40 direct-child frames catalogued (narrowed by user selection). The remaining 37 frames were out of scope for this test plan and may cover behaviour not represented in scenarios.
+```
+
+Both entries must appear together — the Sources Summary row on its own is not enough. Step 3 scenario writing and the Issue Clarity Assessment UX / UI dimension read Known Limitations to decide whether the Figma context is complete, and would otherwise treat a `✅` status as full coverage.
+
+**Budget-reached case.** When the session's `get_screenshot` budget bites mid-draft — usually on very large multi-flyout epics — the remaining scenarios have to be written from metadata alone. Surface it so the reader knows which parts lack visual anchoring:
+
+```markdown
+| Figma — 9.5 Flyouts overhaul (section) | ⚠️ Screenshot budget reached (8 screenshots taken — remaining scenarios verified from metadata only) |
 ```
 
 ```markdown
-- ⚠️ Figma section "Alert flyout redesign": 4 of 12 direct children fetched before the Figma MCP quota was exhausted for this month. The remaining 8 children (nodes `10:2`, `10:3`, `10:5`, `10:6`, `10:8`, `10:9`, `10:11`, `10:12`) were not inspected and may cover behaviour not represented in scenarios.
+- ⚠️ Figma section "9.5 Flyouts overhaul": 8 screenshots covered the P0 Alert / User / Host / Attack flyouts and their default states. Screenshots for the expanded-state variants (nodes named `Alert - expanded`, `User - expanded`, `Host - expanded`, `Attack - expanded`) were not fetched because the per-session screenshot budget was reached; the corresponding scenarios were written from metadata names only and may miss visual-layout details.
 ```
 
-The distinction matters for downstream review: user-selected partial coverage is deliberate and stable across re-runs, while quota-exhausted partial coverage is transient — a re-run in the next billing period or on a Dev/Full seat can complete the missing children without changing the plan's design intent.
+Unlike the narrowed case, the budget-reached case is fully recoverable — bumping the session budget or splitting the plan into per-flyout runs completes the coverage in a subsequent iteration without changing the plan's design intent.

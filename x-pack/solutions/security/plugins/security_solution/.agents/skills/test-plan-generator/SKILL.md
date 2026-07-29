@@ -54,6 +54,8 @@ If you catch yourself thinking any of these, STOP. The thought itself is the sig
 
 **Read reference files only when explicitly instructed.** Each file in `references/` is read at the exact point in the workflow where it is needed — never speculatively at the start of a session.
 
+**Figma MCP call budget.** Because Figma responses can be very large and MCP calls are sequential, the skill enforces soft per-session caps on Figma MCP tools: `get_metadata` ≤ 3, `get_screenshot` ≤ 8, `get_design_context` ≤ 2, `get_figjam` ≤ 1 per FigJam link. The default flow (metadata + a few targeted screenshots) stays well below these caps. If a plan legitimately needs more, announce the overage in chat before the extra call. See [`references/gathering-context.md`](references/gathering-context.md#figma) for the full rationale.
+
 ---
 
 ## Security constraints

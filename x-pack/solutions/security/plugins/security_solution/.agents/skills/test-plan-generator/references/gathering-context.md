@@ -54,7 +54,17 @@ For each **image URL** in the issue body, comments, or any PR body or PR review 
 
 ## Figma
 
-For each **Figma link**: use the Figma MCP. Extract component names and states, navigation flows, empty states, error states, loading states, and any interactions or annotations visible in the design.
+For each **Figma link**: use the Figma MCP. Extract component names and states, navigation flows, empty / error / loading states, and any interactions or annotations visible in the design.
+
+### Why the flow looks the way it does
+
+`get_design_context` is a **design-to-code** tool: it returns full React + Tailwind implementations, Code Connect snippets, component prop definitions, and design tokens. A single response can be 30–200 KB, and less than 10 % of that content is signal for test-plan writing. Historical runs that fanned out `get_design_context` across every child of a section routinely exhausted the agent's context window before any scenario was written (see [security-team#18320](https://github.com/elastic/security-team/issues/18320) validation dry-run).
+
+The flow below is **metadata-first**:
+
+- `get_metadata` gives every structural fact a test plan needs — component names, hierarchy, node types — for typically 1–2 calls total per link.
+- `get_screenshot` gives visual verification when a scenario asserts on layout, section names, or CTAs. The default response is a short-lived URL plus a `curl` instruction (~300 bytes inline), so calls are effectively free in context terms. Fetch the PNG only when actual visual inspection is needed.
+- `get_design_context` is reserved for the rare case where a test asserts on pixel-precise layout or exact CSS identifiers that neither the screenshot nor the metadata can supply. Prefer the other two tools by default.
 
 ### Step 1 — Parse the URL
 
@@ -64,74 +74,87 @@ Extract `fileKey` and `nodeId` from the URL, and route to the correct handler:
 |---|---|
 | `figma.com/design/:fileKey/:name?node-id=:nodeId` | Standard design file. Convert `-` to `:` in `nodeId`. Proceed to Step 2. |
 | `figma.com/design/:fileKey/branch/:branchKey/:name` | Branched design file. Use `branchKey` as the `fileKey`. Proceed to Step 2. |
-| `figma.com/board/:fileKey/...` | FigJam. Use `get_figjam`, then skip Step 2 (tiered flow is design-file only). |
-| `figma.com/slides/:fileKey/...` | Figma Slides. `get_metadata` is not supported — flag in Known Limitations with ⚠️ and continue. |
-| `figma.com/make/:makeFileKey/...` | Figma Make. `get_metadata` is not supported — flag in Known Limitations with ⚠️ and continue. |
-| Any of the above **without** `node-id` | Vague link — the URL points at the whole file. Call `get_metadata` with `fileKey` only to list top-level pages, then **stop and ask** the user which page or node matters. |
+| `figma.com/board/:fileKey/...` | FigJam. Use `get_figjam`, then skip Step 2 (design-file structural inspection only). |
+| `figma.com/slides/:fileKey/...` | Figma Slides. `get_metadata` is not supported — use `get_screenshot` for the referenced node and continue. |
+| `figma.com/make/:makeFileKey/...` | Figma Make. Not supported by `get_metadata` / `get_design_context` — flag in Known Limitations with ⚠️ and continue. |
+| Any design URL **without** `node-id` | Vague link — the URL points at the whole file. Call `get_metadata` with `fileKey` only to list top-level pages, then **stop and ask** the user which page or node matters before spending further calls. |
 
-### Step 2 — Detect the root node type
+### Step 2 — Build the structural inventory with `get_metadata`
 
-For design-file URLs with a `nodeId`, call `get_metadata` with `fileKey` + `nodeId` (lightweight XML overview) **before** `get_design_context`. Inspect two fields in the response:
+For design-file URLs with a `nodeId`, call `get_metadata` **exactly once**. The response is an XML tree of the node and its descendants — every layer, name, type, and hierarchical relationship in one payload.
 
-1. The **root node type** — one of `frame`, `section`, `canvas`, or something else.
-2. The **direct-children count** — the number of first-level layers under the root.
+From that XML, extract three lists and hold them as the "Figma inventory" for the link:
 
-### Step 3 — Apply the tiered behaviour
+1. **Fetchable elements** — direct or nested children whose type is `frame`, `instance`, or `section`. These are the ones that map to real UI components (flyouts, panels, forms, etc.).
+2. **Leaf-shape elements** — `text`, `vector`, `rectangle` / `rounded-rectangle` / `ellipse` / `line` / `star` / `regular-polygon`. These are decorative or per-label; ignore them when writing scenarios, but count them if you need to explain to the user what a container holds.
+3. **Nested containers** — `section` or `canvas` nodes below the root. Note them but do **not** recurse into their children via more `get_metadata` calls unless a scenario explicitly requires it.
 
-| Root type + direct children | Behaviour |
-|---|---|
-| `frame` — any size | Call `get_design_context` on the root. No user prompt. |
-| `section` with **≤ 8** direct children | Call `get_design_context` on each child. No user prompt. |
-| `section` with **9–25** direct children | Call `get_design_context` on each child. Add a note in Sources Summary explaining that N children were auto-expanded from a section container. |
-| `section` with **> 25** direct children | **Stop and ask.** List all direct-child names + IDs and ask the user which children to inspect. Only fetch the selected subset. |
-| `canvas` (whole page) | **Always stop and ask.** Canvas URLs almost always over-fetch — list all direct-child names + IDs and ask the user which children matter. Only fetch the selected subset. |
-| Root node not found (deleted, restructured) | Flag in Sources Summary with ⚠️ and in Known Limitations. Do not silently skip. |
+The inventory alone is usually enough to write scenarios that assert on which flyouts / panels / states exist. Do **not** fan out to `get_design_context` at this step.
 
-**Advance notice for mid-tier auto-expansion.** For `section` with 9–25 direct children, print a one-line chat notice **before** the fetch loop so the user can interrupt (Ctrl-C) if the cost exceeds their monthly Figma MCP quota:
+**Special case — canvas root.** A `canvas` URL points at a whole Figma page and typically bundles dozens of unrelated frames. If the root is `canvas`, list the direct-child frames and **stop and ask** the user which are in scope before continuing. Do not build an inventory of the entire canvas.
 
-```
-📊 Figma: auto-expanding N children from section "<name>" — ~N get_design_context calls.
-Interrupt now if this exceeds your MCP monthly quota (View seats: 6 calls/month; Dev/Full: significantly more).
-```
+### Step 3 — Add visual verification with `get_screenshot` only where needed
 
-Do not print this for `frame` or `section` ≤ 8 (small, always safe). Do not print it for stop-and-ask tiers (the user already chooses the subset there).
+Once scenarios are being drafted (Step 3 of the main workflow), some assertions need visual anchoring — for example *"the Overview tab is selected by default"*, *"the flyout body renders these sections in this order"*, or *"the footer shows an 'Add to chat' and a 'Take action' CTA"*.
 
-**Threshold origin.** The 8 and 25 thresholds are provisional, derived from an audit of 3 real Security Solution Figma URLs (see [security-team#18320](https://github.com/elastic/security-team/issues/18320)). Refine once the flow has run against ≥ 10 additional real issues.
+For each such assertion:
 
-### Step 4 — Announce and propagate partial fetches
+1. Pick the smallest node in the inventory that contains the visual detail (typically a single flyout frame or a specific state instance).
+2. Call `get_screenshot` on that node. Default parameters are fine — the response is a URL, not an inline PNG.
+3. If the visual detail cannot be verified from the URL metadata alone (dimensions, aspect ratio), download the PNG via the `curl` instruction the tool returns and read it. Otherwise leave the URL in place — the URL is what will be linked from the Sources Summary.
 
-- **Sources Summary.** Announce every container expansion so the user can see what was pulled. Use the status cell to describe the outcome — see the Figma row examples in [`output-formats.md`](output-formats.md#sources-summary) (e.g. `✅ Read (12 children expanded from section)` or `✅ Read (3 of 40 children — user-selected subset)`).
-- **Known Limitations.** When the user narrows a container via stop-and-ask (`section` > 25 or any `canvas`), also add a Known Limitations entry naming the un-inspected children so downstream steps do not treat the Figma context as complete:
+Do **not** call `get_screenshot` speculatively on every child in a container. Only call it where a scenario would otherwise be unverifiable.
+
+### Step 4 — Escape hatch: `get_design_context`
+
+Reserve `get_design_context` for the rare case where a test scenario needs pixel-precise layout data or exact EUI component identifiers that neither the metadata nor the screenshot can supply — for example a regression test asserting on a specific `data-test-subj` selector that only appears in the Code Connect snippet.
+
+When calling it:
+
+- Explain in a preceding chat line **why** the metadata + screenshot combination was insufficient.
+- Fetch a single specific node, never a container fan-out.
+- Extract the identifiers needed and drop the raw response — do not retain the full React code in working context.
+
+If the scenario can be written without those identifiers by referring to visible text, ARIA role, or component name, prefer that path and skip `get_design_context` entirely.
+
+### Step 5 — Session budget
+
+To keep the agent's context healthy across the rest of Step 1 (parent issue, sub-issues, PRs, code catalog), cap the **total Figma MCP calls per session** at:
+
+| Tool | Default per-session cap | Rationale |
+|---|---|---|
+| `get_metadata` | 3 | 1 per Figma link on the target + 1 for the parent's link + 1 spare. Nested-container recursion is not counted here — it should not happen. |
+| `get_screenshot` | 8 | Enough for the P0 flyout + a handful of P1 states + 1–2 error/empty states. |
+| `get_design_context` | 2 | The escape hatch above. If a plan needs more than 2, the plan is probably asserting on the wrong things. |
+| `get_figjam` | 1 per FigJam link | FigJam is background context. |
+
+These are **soft caps.** If a plan legitimately needs more (very large multi-flyout epic, several linked Figma files), announce the overage in chat before the extra call and note it in the Sources Summary. Do not silently exceed.
+
+If a session hits the combined `get_screenshot` cap mid-draft, stop calling and switch to metadata-only reasoning for the remaining scenarios. Announce partial coverage in Sources Summary + Known Limitations per Step 6 below. Never continue silently — the user needs to see when the budget bit.
+
+### Step 6 — Announce and propagate
+
+- **Sources Summary.** One row per Figma link, describing what was fetched. Use one of the status cells from [`output-formats.md`](output-formats.md#sources-summary) — e.g. `✅ Metadata read (N fetchable children catalogued)` or `✅ Metadata read + 3 screenshots for visual verification`. When a screenshot was fetched, the URL from `get_screenshot` should be included in the status cell so the reader can open it — the URL is short-lived (Figma expires it after ~15 minutes), so treat it as a preview, not a stable reference.
+- **Known Limitations.** Only add a ⚠️ entry when coverage is genuinely incomplete:
+  - The user narrowed a canvas via stop-and-ask (`section` / `canvas`), and specific children were excluded from the inventory.
+  - The session budget cap fired mid-draft and remaining scenarios could not be visually verified.
+  - `get_metadata` returned an error (deleted / restructured node) or the file was inaccessible.
+  - A scenario would have benefited from `get_design_context` but the escape hatch was intentionally skipped — record the missing precision so the automation writer knows.
 
   ```
-  ⚠️ Figma canvas "🌈 Design Concepts": 3 of 40 direct children inspected
-  (narrowed by user selection). The remaining 37 children were out of scope
-  for this test plan and may cover behaviour not represented in scenarios.
+  ⚠️ Figma canvas "🌈 Design Concepts": 3 of 40 direct-child frames catalogued
+  (narrowed by user selection). The remaining 37 frames were out of scope for
+  this test plan and may cover behaviour not represented in scenarios.
   ```
 
-  Without this entry, Step 3 scenario writing and the Issue Clarity Assessment UX/UI dimension would treat the Figma as fully covered when it is not.
-
-- **Graceful rate-limit degradation.** If the Figma MCP returns a rate-limit / quota-exhausted error mid-fetch (typical on View seats after 6 calls/month), stop the loop immediately — do **not** retry and do **not** silently drop the URL:
-  1. Record whatever children were successfully fetched.
-  2. Set Sources Summary status to `⚠️ Read (X of N children — MCP quota exhausted mid-fetch)`.
-  3. Add a Known Limitations entry naming the un-fetched children:
-
-     ```
-     ⚠️ Figma section "<name>": X of N direct children fetched before the Figma MCP
-     quota was exhausted for this month. The remaining N−X children (<list ids or names>)
-     were not inspected and may cover behaviour not represented in scenarios.
-     ```
-
-  4. Continue with Step 2 (context analysis) using what was fetched. Rate-limit exhaustion is a bounded degradation, not a hard stop.
-
-  The same pattern applies to any Figma MCP error that returns a rate-limit / quota signal, regardless of tier — including a `frame` fetch that itself is the one to trip the limit (in that case, X = 0 and the entry names the whole node as un-inspected).
+  Without this entry, Step 3 scenario writing and the Issue Clarity Assessment UX / UI dimension would treat the Figma as fully covered when it is not.
 
 ### Role after extraction
 
 | Figma role | Action |
 |---|---|
-| Primary UX source for this feature | Ask the user before continuing |
-| Supplementary / supporting link | Flag in Known Limitations with ⚠️ and continue |
+| Primary UX source for this feature | Ask the user before continuing if the metadata inventory disagrees with any AC. |
+| Supplementary / supporting link | Fetch metadata only; skip screenshots unless a scenario specifically needs one. |
 
 ---
 
