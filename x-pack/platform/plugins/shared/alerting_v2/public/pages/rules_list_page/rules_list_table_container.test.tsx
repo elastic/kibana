@@ -311,6 +311,19 @@ describe('RulesListTableContainer', () => {
       });
       expect(mockUpdateApiKeyMutate).not.toHaveBeenCalled();
     });
+
+    it('disables the update API key action for a disabled rule', async () => {
+      renderContainer();
+
+      // rule-2 is disabled; open its row actions menu.
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-2'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('updateRuleApiKey-rule-2')).toBeInTheDocument();
+      });
+      // The action is shown but disabled — a disabled rule has no key to rotate.
+      expect(screen.getByTestId('updateRuleApiKey-rule-2')).toBeDisabled();
+    });
   });
 
   describe('toggle enabled', () => {

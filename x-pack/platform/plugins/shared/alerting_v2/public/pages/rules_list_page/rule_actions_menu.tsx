@@ -112,6 +112,14 @@ export const RuleActionsMenu = ({
           <EuiContextMenuItem
             key="updateApiKey"
             icon={<EuiIcon type="key" size="m" aria-hidden={true} />}
+            disabled={!rule.enabled}
+            toolTipContent={
+              rule.enabled
+                ? undefined
+                : i18n.translate('xpack.alertingV2.rulesList.action.updateApiKeyDisabledTooltip', {
+                    defaultMessage: 'Enable the rule to update its API key',
+                  })
+            }
             onClick={() => {
               setIsOpen(false);
               onUpdateApiKey(rule);

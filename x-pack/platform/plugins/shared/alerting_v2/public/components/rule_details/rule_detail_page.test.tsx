@@ -363,6 +363,13 @@ describe('RuleDetailPage', () => {
     expect(mockUpdateRuleApiKey).not.toHaveBeenCalled();
   });
 
+  it('disables the update API key action for a disabled rule', async () => {
+    renderPage({ ...baseRule, enabled: false });
+    await openAppMenuOverflow();
+    // The action is shown but disabled — a disabled rule has no key to rotate.
+    expect(await screen.findByTestId('ruleDetailsUpdateApiKeyButton')).toBeDisabled();
+  });
+
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCanWriteRules = false;

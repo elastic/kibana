@@ -147,6 +147,12 @@ const getRuleDetailMenu = ({
       run: onUpdateApiKey,
       testId: 'ruleDetailsUpdateApiKeyButton',
       overflow: true,
+      disableButton: !rule.enabled,
+      tooltipContent: rule.enabled
+        ? undefined
+        : i18n.translate('xpack.alertingV2.ruleDetails.updateApiKeyDisabledTooltip', {
+            defaultMessage: 'Enable the rule to update its API key',
+          }),
     },
     {
       id: 'deleteRule',
