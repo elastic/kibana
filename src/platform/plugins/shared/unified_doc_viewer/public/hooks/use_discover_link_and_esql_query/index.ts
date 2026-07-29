@@ -11,6 +11,12 @@ import { from, type QueryOperator } from '@kbn/esql-composer';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 import { withUnmappedFields, type UnmappedFieldsPolicy } from './esql_unmapped_fields';
 
+export {
+  withUnmappedFields,
+  ESQL_NULLIFY_UNMAPPED_FIELDS,
+  type UnmappedFieldsPolicy,
+} from './esql_unmapped_fields';
+
 export interface UseDiscoverLinkAndEsqlQueryParams {
   indexPattern?: string;
   whereClause?: QueryOperator;
@@ -33,7 +39,7 @@ export function useDiscoverLinkAndEsqlQuery({
 
   const rawQuery = from(indexPattern).pipe(whereClause).toString();
   const esqlQueryString = unmappedFieldsPolicy
-    ? withUnmappedFields(rawQuery, { policy: unmappedFieldsPolicy, multiline: false })
+    ? withUnmappedFields(rawQuery, { policy: unmappedFieldsPolicy, multiline: false }) // multiline: false required — Discover drops the SET header from multi-line queries
     : rawQuery;
   const discoverUrl = generateDiscoverLink(whereClause);
 
