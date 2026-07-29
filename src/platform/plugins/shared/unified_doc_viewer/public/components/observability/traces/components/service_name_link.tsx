@@ -91,6 +91,7 @@ export function ServiceNameLink({
     );
   }
 
+  // Fallback: no flyout feature registered — render a direct APM link instead.
   const canViewApm = core.application.capabilities.apm?.show || false;
   const apmLinkToServiceEntityLocator = urlService.locators.get<{
     serviceName: string;
