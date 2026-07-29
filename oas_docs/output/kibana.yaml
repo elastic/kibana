@@ -30163,6 +30163,8 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
+                        policy_base_id:
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -30810,6 +30812,8 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -31275,6 +31279,8 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
