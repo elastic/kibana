@@ -131,7 +131,7 @@ export const PolicyList = memo(() => {
     'integrations',
     {
       path: pagePathGetters.add_integration_to_policy({
-        pkgkey: endpointPackageInfo ? `/endpoint-${endpointPackageInfo?.version}` : '',
+        pkgkey: endpointPackageInfo ? `endpoint-${endpointPackageInfo?.version}` : 'endpoint',
       })[1],
       state: {
         onCancelNavigateTo: [
