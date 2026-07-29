@@ -110,6 +110,7 @@ const mockKibanaContext = {
 
 const mockReact = React;
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  __esModule: true,
   useKibana: () => mockKibanaContext,
   withKibana: (type) => {
     const EnhancedType = (props) => {
@@ -120,6 +121,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
     };
     return EnhancedType;
   },
+}));
+
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => mockKibanaContext,
+  useNavigateToPath: () => jest.fn(),
 }));
 
 import { NewCalendar } from './new_calendar';
