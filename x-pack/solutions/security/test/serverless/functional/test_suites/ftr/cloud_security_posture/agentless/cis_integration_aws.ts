@@ -41,12 +41,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await supertest
-        .delete(`/api/fleet/epm/packages/cloud_security_posture`)
-        .set('kbn-xsrf', 'xxxx')
-        .send({ force: true })
-        .expect(200);
-      mockApiServer.close();
+      try {
+        await supertest
+          .delete(`/api/fleet/epm/packages/cloud_security_posture`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ force: true })
+          .expect(200);
+      } finally {
+        await new Promise<void>((resolve) => mockApiServer.close(() => resolve()));
+      }
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {
