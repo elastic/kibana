@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ToolType, internalTools } from '@kbn/agent-builder-common';
+import { ToolType, internalTools, createBadRequestError } from '@kbn/agent-builder-common';
 import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
@@ -57,9 +57,10 @@ export const createSetConversationMetadataTool = ({
     const fieldIndex = new Map((template.definition.fields ?? []).map((f) => [f.name, f]));
     for (const [key, value] of Object.entries(updates)) {
       const field = fieldIndex.get(key);
-      if (field) {
-        validateSingleField(template.id, field, value);
+      if (!field) {
+        throw createBadRequestError(`Template "${template.id}" has no field "${key}"`);
       }
+      validateSingleField(template.id, field, value);
     }
     await updateConversationMetadata(updates);
     return {
