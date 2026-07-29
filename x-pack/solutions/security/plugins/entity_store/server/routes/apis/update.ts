@@ -60,7 +60,8 @@ export function registerUpdate(router: EntityStorePluginRouter) {
           assetManager,
           req,
           res,
-          req.body.logExtraction?.additionalIndexPatterns
+          req.body.logExtraction?.additionalIndexPatterns,
+          req.body.logExtraction?.excludedIndexPatterns
         );
         if (forbidden) return forbidden;
 

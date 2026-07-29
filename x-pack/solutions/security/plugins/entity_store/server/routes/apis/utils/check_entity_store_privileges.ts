@@ -34,9 +34,14 @@ export async function enforceEntityStorePrivileges(
   assetManager: AssetManagerClient,
   req: KibanaRequest,
   res: KibanaResponseFactory,
-  additionalIndexPatterns?: string[]
+  additionalIndexPatterns?: string[],
+  excludedIndexPatterns?: string[]
 ): Promise<IKibanaResponse | null> {
-  const privileges = await assetManager.getPrivileges(req, additionalIndexPatterns);
+  const privileges = await assetManager.getPrivileges(
+    req,
+    additionalIndexPatterns,
+    excludedIndexPatterns
+  );
   if (!privileges.hasAllRequested) {
     return res.forbidden({
       body: {

@@ -14,6 +14,7 @@ import type {
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CheckPrivilegesResponse } from '@kbn/security-plugin-types-server';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EntityType } from '../../../common';
 import {
@@ -350,7 +351,8 @@ export class AssetManagerClient {
 
   public async getPrivileges(
     request: KibanaRequest,
-    additionalIndexPatterns: string[] = []
+    additionalIndexPatterns: string[] = [],
+    excludedIndexPatterns: string[] = []
   ): Promise<CheckPrivilegesResponse> {
     const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
 
@@ -382,6 +384,16 @@ export class AssetManagerClient {
 
     sourceIndexPatterns
       .filter((idx) => !idx.startsWith('-'))
+      .forEach((idx) => unionPrivileges(idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES));
+
+    // A caller may only exclude source indices they can actually read. Requiring the same
+    // source privileges on excluded patterns stops an under-privileged user from suppressing
+    // extraction coverage on indices they have no access to. Remote patterns are not checked
+    // here (mirroring the source-pattern handling above), and any leading `-` is dropped since
+    // `_has_privileges` treats it as a literal index name.
+    excludedIndexPatterns
+      .map((idx) => (idx.startsWith('-') ? idx.slice(1) : idx))
+      .filter((idx) => idx.length > 0 && !isNonLocalIndexName(idx))
       .forEach((idx) => unionPrivileges(idx, ENTITY_STORE_SOURCE_INDICES_PRIVILEGES));
 
     return checkPrivileges({

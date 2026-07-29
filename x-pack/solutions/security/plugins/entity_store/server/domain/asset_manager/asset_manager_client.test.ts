@@ -286,6 +286,46 @@ describe('AssetManagerClient', () => {
         expect.arrayContaining(['manage', 'view_index_metadata'])
       );
     });
+
+    it('requires source privileges on excluded index patterns as literal names', async () => {
+      getLocalIndexPatternsMock.mockResolvedValue(['logs-*']);
+
+      await getPrivilegesClient.getPrivileges(
+        {} as KibanaRequest,
+        [],
+        ['restricted-*', '-already-negated-*']
+      );
+
+      const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
+      const { index } = calledWith.elasticsearch;
+
+      // Excluded patterns are checked for read/view_index_metadata, with any leading `-` dropped
+      // so `_has_privileges` receives a literal index name.
+      expect(index['restricted-*']).toEqual(
+        expect.arrayContaining(['read', 'view_index_metadata'])
+      );
+      expect(index['already-negated-*']).toEqual(
+        expect.arrayContaining(['read', 'view_index_metadata'])
+      );
+      expect(Object.keys(index)).not.toContain('-already-negated-*');
+    });
+
+    it('skips remote excluded index patterns', async () => {
+      getLocalIndexPatternsMock.mockResolvedValue(['logs-*']);
+
+      await getPrivilegesClient.getPrivileges(
+        {} as KibanaRequest,
+        [],
+        ['remote_cluster:restricted-*']
+      );
+
+      const [calledWith] = checkPrivilegesWithRequestMock.mock.calls[0];
+
+      // Remote patterns are not privilege-checked here, mirroring the source-pattern handling.
+      expect(Object.keys(calledWith.elasticsearch.index)).not.toContain(
+        'remote_cluster:restricted-*'
+      );
+    });
   });
 
   describe('uninstall', () => {

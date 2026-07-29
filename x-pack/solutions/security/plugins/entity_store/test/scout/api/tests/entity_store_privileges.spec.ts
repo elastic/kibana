@@ -258,4 +258,58 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
       });
     }
   );
+
+  // --- excluded index patterns (must also be readable by the caller) ---
+
+  apiTest(
+    'install - Should fail when user lacks permissions for excluded index patterns',
+    async ({ apiClient, esClient, requestAuth }) => {
+      const restrictedIndex = 'restricted-test-logs';
+      additionalIndicesToCleanup = [restrictedIndex];
+
+      await esClient.indices.create({ index: restrictedIndex });
+
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(getRoleWithAllPrivileges());
+
+      const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
+        headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+        body: { logExtraction: { excludedIndexPatterns: [restrictedIndex] } },
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_elasticsearch_privileges: {
+          cluster: [],
+          index: [{ index: restrictedIndex, privileges: ENTITY_STORE_SOURCE_INDICES_PRIVILEGES }],
+        },
+      });
+    }
+  );
+
+  apiTest(
+    'update - Should fail when user lacks permissions for excluded index patterns',
+    async ({ apiClient, esClient, requestAuth }) => {
+      const restrictedIndex = 'restricted-test-logs';
+      additionalIndicesToCleanup = [restrictedIndex];
+
+      await esClient.indices.create({ index: restrictedIndex });
+
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(getRoleWithAllPrivileges());
+
+      const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+        headers: { ...PUBLIC_HEADERS, ...apiKeyHeader },
+        responseType: 'json',
+        body: { logExtraction: { excludedIndexPatterns: [restrictedIndex] } },
+      });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_elasticsearch_privileges: {
+          cluster: [],
+          index: [{ index: restrictedIndex, privileges: ENTITY_STORE_SOURCE_INDICES_PRIVILEGES }],
+        },
+      });
+    }
+  );
 });
