@@ -224,6 +224,34 @@ describe('enrollment api keys', () => {
 
       expect(result.expire_at).toBeUndefined();
     });
+
+    it('should throw FleetError for an invalid expiration format', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        generateEnrollmentAPIKey(soClient, esClient, {
+          name: 'test-api-key',
+          agentPolicyId: 'test-agent-policy',
+          expiration: 'notaduration',
+        })
+      ).rejects.toThrow(
+        'Invalid expiration value "notaduration". Must be a positive duration (for example'
+      );
+    });
+
+    it('should throw FleetError for an expiration value exceeding the ES maximum', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      await expect(
+        generateEnrollmentAPIKey(soClient, esClient, {
+          name: 'test-api-key',
+          agentPolicyId: 'test-agent-policy',
+          expiration: '106752d',
+        })
+      ).rejects.toThrow('Invalid expiration value "106752d"');
+    });
   });
 
   describe('deleteEnrollmentApiKeys', () => {

@@ -18,9 +18,7 @@ import {
 
 import type { AgentPolicy, EnrollmentAPIKey } from '../types';
 import { useInput, useStartServices, sendCreateEnrollmentAPIKey } from '../hooks';
-
-// ES duration format: positive integer followed by d, h, m, or s
-const ES_DURATION_REGEX = /^\d+(d|h|m|s)$/;
+import { isValidEnrollmentKeyExpiration } from '../../common/services';
 
 function validatePolicyId(value: string) {
   if (value === '') {
@@ -33,10 +31,10 @@ function validatePolicyId(value: string) {
 }
 
 function validateExpiration(value: string) {
-  if (value !== '' && !ES_DURATION_REGEX.test(value)) {
+  if (value !== '' && !isValidEnrollmentKeyExpiration(value)) {
     return [
       i18n.translate('xpack.fleet.newEnrollmentKeyForm.expirationInvalidErrorMessage', {
-        defaultMessage: 'Expiration must be a valid duration (e.g. 7d, 24h, 30m, 60s)',
+        defaultMessage: 'Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)',
       }),
     ];
   }
@@ -157,7 +155,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
           })}
           helpText={i18n.translate('xpack.fleet.newEnrollmentKey.expirationHelpText', {
             defaultMessage:
-              'Optional. How long until this token expires (e.g. 30d, 24h, 90m). Leave empty for the token to never expire.',
+              'Optional. How long until the token expires (for example, 30d, 24h, 90m). Leave empty for a token that never expires.',
           })}
           {...form.expirationInput.formRowProps}
         >
@@ -166,7 +164,7 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
             name="expiration"
             autoComplete="off"
             placeholder={i18n.translate('xpack.fleet.newEnrollmentKey.expirationPlaceholder', {
-              defaultMessage: 'e.g. 30d',
+              defaultMessage: 'For example, 30d',
             })}
             {...form.expirationInput.props}
           />

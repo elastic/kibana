@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ENROLLMENT_API_KEY_MAPPINGS } from '../../constants';
 
 import { FLEET_ENROLLMENT_API_PREFIX } from '../../../common/constants';
+import { isValidEnrollmentKeyExpiration } from '../../../common/services';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 import { EnrollmentAPIKeySchema } from '../models';
@@ -78,9 +79,6 @@ export const DeleteEnrollmentAPIKeyResponseSchema = schema.object(
   { meta: { id: 'delete_enrollment_api_key_response' } }
 );
 
-// ES duration format: a positive integer followed by a time unit (d, h, m, s)
-const ES_DURATION_REGEX = /^\d+(d|h|m|s)$/;
-
 export const PostEnrollmentAPIKeyRequestSchema = {
   body: schema.object(
     {
@@ -91,11 +89,11 @@ export const PostEnrollmentAPIKeyRequestSchema = {
           maxLength: 20,
           meta: {
             description:
-              'The expiration time for the enrollment token, expressed as a duration (e.g. 7d, 24h, 30m). By default, enrollment tokens never expire.',
+              'The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.',
           },
           validate: (value) => {
-            if (!ES_DURATION_REGEX.test(value)) {
-              return 'expiration must be a valid duration (e.g. 7d, 24h, 30m, 60s)';
+            if (!isValidEnrollmentKeyExpiration(value)) {
+              return 'Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)';
             }
           },
         })

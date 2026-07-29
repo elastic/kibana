@@ -80,6 +80,7 @@ describe('NewEnrollmentTokenModal', () => {
     '500ms',
     '100micros',
     '50nanos',
+    '0d',
   ])('shows a validation error for invalid expiration "%s"', async (invalidValue) => {
     const testRenderer = createFleetTestRendererMock();
     const results = testRenderer.render(
@@ -100,7 +101,7 @@ describe('NewEnrollmentTokenModal', () => {
 
     await waitFor(() => {
       expect(
-        results.getByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m, 60s)')
+        results.getByText('Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)')
       ).toBeInTheDocument();
     });
   });
@@ -128,7 +129,7 @@ describe('NewEnrollmentTokenModal', () => {
       );
     });
     expect(
-      results.queryByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m, 60s)')
+      results.queryByText('Expiration must be a valid duration (for example, 30d, 24h, 90m, 60s)')
     ).toBeNull();
   });
 

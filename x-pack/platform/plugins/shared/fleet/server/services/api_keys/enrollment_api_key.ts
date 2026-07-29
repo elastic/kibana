@@ -16,6 +16,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ESSearchResponse as SearchResponse } from '@kbn/es-types';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
+import { isValidEnrollmentKeyExpiration } from '../../../common/services';
 import type { EnrollmentAPIKey, FleetServerEnrollmentAPIKey } from '../../types';
 import { FleetError, EnrollmentKeyNameExistsError, EnrollmentKeyNotFoundError } from '../../errors';
 import { ENROLLMENT_API_KEYS_INDEX } from '../../constants';
@@ -358,6 +359,11 @@ export async function generateEnrollmentAPIKey(
     forceRecreate?: boolean;
   }
 ): Promise<EnrollmentAPIKey> {
+  if (data.expiration !== undefined && !isValidEnrollmentKeyExpiration(data.expiration)) {
+    throw new FleetError(
+      `Invalid expiration value "${data.expiration}". Must be a positive duration (for example, 30d, 24h, 90m, 60s) not exceeding 106751d.`
+    );
+  }
   const id = uuidv4();
   const { name: providedKeyName, forceRecreate, agentPolicyId } = data;
   const logger = appContextService.getLogger();

@@ -15,7 +15,18 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
     });
 
   describe('expiration field validation', () => {
-    const validDurations = ['1d', '7d', '30d', '24h', '60m', '90s', '0d'];
+    const validDurations = [
+      '1d',
+      '7d',
+      '30d',
+      '24h',
+      '60m',
+      '90s',
+      '106751d',
+      '2562024h',
+      '153721440m',
+      '9223286400s',
+    ];
 
     validDurations.forEach((value) => {
       it(`accepts valid duration "${value}"`, () => {
@@ -42,11 +53,15 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
       ['500ms', 'unsupported unit (ms)'],
       ['100micros', 'unsupported unit (micros)'],
       ['50nanos', 'unsupported unit (nanos)'],
+      ['0d', 'zero value (already-expired token)'],
+      ['0h', 'zero hours'],
+      ['106752d', 'exceeds ES max days (106751)'],
+      ['9223286401s', 'exceeds ES max seconds (9223286400)'],
     ];
 
     invalidDurations.forEach(([value, description]) => {
       it(`rejects invalid duration: ${description} ("${value}")`, () => {
-        expect(() => validate(value)).toThrow('expiration must be a valid duration');
+        expect(() => validate(value)).toThrow('Expiration must be a valid duration (for example');
       });
     });
 
