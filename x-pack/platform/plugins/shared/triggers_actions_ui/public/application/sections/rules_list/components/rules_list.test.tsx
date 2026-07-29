@@ -983,7 +983,7 @@ describe('internally managed rule', () => {
     expect(screen.queryByTestId('deleteActionHoverButton')).toBeNull();
     expect(screen.queryByTestId('rulesListNotifyBadge-unsnoozed')).toBeNull();
 
-    userEvent.click(await screen.findByTestId('selectActionButton'));
+    await userEvent.click(await screen.findByTestId('selectActionButton'));
     expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
     expect(screen.queryByTestId('snoozeButton')).toBeNull();
     expect(screen.queryByTestId('disableButton')).toBeNull();

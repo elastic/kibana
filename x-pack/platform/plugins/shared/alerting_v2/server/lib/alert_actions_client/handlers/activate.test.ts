@@ -86,7 +86,7 @@ describe('activateHandler', () => {
       const prepared = activateHandler.prepare(
         buildItem(buildAlertEvent({ rule_version: undefined }))
       );
-      expect(prepared.ruleEvent?.rule.version).toBe(1);
+      expect(prepared.ruleEvent?.rule?.version).toBe(1);
     });
 
     it('omits severity on the synthetic event when the alert event has none', () => {

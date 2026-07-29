@@ -13,6 +13,7 @@ import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/serv
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 const CONNECTOR_SML_TYPE = 'connector';
 
@@ -46,11 +47,16 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       });
       try {
         for await (const response of finder.find()) {
-          yield response.saved_objects.map((so) => ({
-            id: so.id,
-            updatedAt: so.updated_at ?? new Date().toISOString(),
-            spaces: so.namespaces ?? [],
-          }));
+          yield response.saved_objects
+            .filter((so) => {
+              const { actionTypeId } = so.attributes as { actionTypeId?: string };
+              return isChatCallableConnectorType(actionTypeId ?? '');
+            })
+            .map((so) => ({
+              id: so.id,
+              updatedAt: so.updated_at ?? new Date().toISOString(),
+              spaces: so.namespaces ?? [],
+            }));
         }
       } finally {
         await finder.close();
