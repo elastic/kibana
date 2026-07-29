@@ -90,7 +90,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
   const dispatch = useDispatch();
   const { dataView, status } = useDataView(PageScope.timeline);
   const dataViewLoading = useMemo(() => status !== 'ready', [status]);
-  const browserFields = useBrowserFields(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
   const dataViewId = dataView?.id || '';
   const selectedPatterns = useSelectedPatterns(PageScope.timeline);
   const runtimeMappings = useMemo(
