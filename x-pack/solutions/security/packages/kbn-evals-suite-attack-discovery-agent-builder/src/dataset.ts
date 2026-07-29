@@ -134,7 +134,7 @@ export const goldenPathExamples: AttackDiscoveryAgentBuilderExample[] = [
     },
     metadata: {
       alertCount: missingAlertRetrievalFixture.alertCount,
-      fixture: 'live-retrieval',
+      fixture: 'missing-alert-retrieval',
     },
   },
   {

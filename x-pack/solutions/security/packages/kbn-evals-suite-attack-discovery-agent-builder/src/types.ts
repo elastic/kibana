@@ -40,6 +40,7 @@ export interface AttackDiscoveryAgentBuilderMetadata extends Record<string, unkn
   fixture:
     | 'provided-alerts'
     | 'live-retrieval'
+    | 'missing-alert-retrieval'
     | 'status-only'
     | 'multiple-alert-sets'
     | 'scenario-registry';

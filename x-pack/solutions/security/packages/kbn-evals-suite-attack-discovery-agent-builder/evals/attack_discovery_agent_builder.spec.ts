@@ -72,8 +72,7 @@ evaluate.describe('Attack Discovery Agent Builder', { tag: tags.stateful.classic
         ...dataset,
         name: `${dataset.name} (missing-alert-retrieval)`,
         examples: goldenPathExamples.filter(
-          ({ metadata }) =>
-            metadata?.fixture === 'live-retrieval' && (metadata?.alertCount ?? 0) === 0
+          ({ metadata }) => metadata?.fixture === 'missing-alert-retrieval'
         ),
       },
     });
