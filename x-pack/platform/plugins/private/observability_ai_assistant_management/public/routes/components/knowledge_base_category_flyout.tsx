@@ -124,7 +124,14 @@ export function KnowledgeBaseCategoryFlyout({
         {hasDescription ? (
           hasDescription
         ) : (
-          <EuiBasicTable<KnowledgeBaseEntry> columns={columns} items={category.entries ?? []} />
+          <EuiBasicTable<KnowledgeBaseEntry>
+            tableCaption={i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseCategoryFlyout.tableCaption',
+              { defaultMessage: 'Knowledge base category entries' }
+            )}
+            columns={columns}
+            items={category.entries ?? []}
+          />
         )}
       </EuiFlyoutBody>
     </EuiFlyout>

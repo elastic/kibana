@@ -20,6 +20,8 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -28,36 +30,41 @@ import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { useKibana } from '../../services';
 import { DEFAULT_LANGUAGE, LANGUAGES, type Language, type SnippetSet } from './languages';
-import { fillPlaceholders } from './snippets';
+import { fillPlaceholders } from './console_snippets';
 import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials';
-import type { InfoPanelProps, VectorPath, WizardStep } from '../types';
+import type { DocsPanelProps, OnboardingPill, VectorPath, WizardStep } from '../types';
 import { OnboardingDocPanel } from './onboarding_doc_panel';
+import { OnboardingPills } from './onboarding_pills';
 
 const SNIPPET_OVERFLOW_HEIGHT = 420;
 
-interface ApiStepProps {
+export interface ApiStepTab {
+  id: string;
+  label: string;
   snippets: SnippetSet;
   consoleRequest: string;
+}
+
+interface ApiStepProps {
+  tabs: ApiStepTab[];
   consoleComment: string;
-  infoPanel: InfoPanelProps[];
+  docsPanel: DocsPanelProps[];
+  pills: OnboardingPill[];
   step: WizardStep;
   path: VectorPath;
 }
 
-export const ApiStep = ({
-  snippets,
-  consoleRequest,
-  consoleComment,
-  infoPanel,
-  step,
-  path,
-}: ApiStepProps) => {
+export const ApiStep = ({ tabs, consoleComment, docsPanel, pills, step, path }: ApiStepProps) => {
   const {
     services: { application, share, console: consolePlugin },
   } = useKibana();
   const { elasticsearchUrl, apiKey } = useOnboardingCredentials();
   const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
   const [isLanguagePopoverOpen, setIsLanguagePopoverOpen] = useState(false);
+  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+
+  const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];
+  const { snippets, consoleRequest } = selectedTab;
 
   const selectedLanguage = LANGUAGES.find((l) => l.id === language);
   const syntax = selectedLanguage?.syntax ?? 'python';
@@ -97,14 +104,39 @@ export const ApiStep = ({
   return (
     <>
       <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
+        {pills.length > 0 && (
+          <>
+            <EuiPanel paddingSize="s" color="transparent">
+              <OnboardingPills pills={pills} telemetryPrefix={telemetryPrefix} />
+            </EuiPanel>
+            <EuiSpacer size="s" />
+          </>
+        )}
         <EuiPanel paddingSize="none" hasBorder={false} hasShadow={true} color="plain">
           <EuiPanel paddingSize="s" hasShadow={false} color="transparent">
             <EuiFlexGroup
-              justifyContent="flexEnd"
+              justifyContent="spaceBetween"
               alignItems="center"
               gutterSize="s"
               responsive={false}
             >
+              <EuiFlexItem grow={true}>
+                {tabs.length > 1 && (
+                  <EuiTabs size="s" bottomBorder={false}>
+                    {tabs.map((tab) => (
+                      <EuiTab
+                        key={tab.id}
+                        isSelected={tab.id === selectedTab.id}
+                        onClick={() => setSelectedTabId(tab.id)}
+                        data-test-subj={`vectordbWizardSnippetTab-${tab.id}`}
+                        data-telemetry-id={`${telemetryPrefix}-selectTab-${tab.id}`}
+                      >
+                        {tab.label}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                )}
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   button={
@@ -179,7 +211,7 @@ export const ApiStep = ({
           </EuiCodeBlock>
         </EuiPanel>
         <EuiSpacer size="s" />
-        <EuiPanel paddingSize="xs" hasBorder={false} hasShadow={false} color="transparent">
+        <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
           <EuiFlexGroup gutterSize="s" direction="row" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon color="subdued" size="m" type="bulb" aria-hidden={true} />
@@ -222,7 +254,7 @@ export const ApiStep = ({
       </EuiTitle>
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="s" direction="column" alignItems="flexStart" responsive={false}>
-        {infoPanel.map((doc, i) => (
+        {docsPanel.map((doc, i) => (
           <React.Fragment key={doc.id}>
             {i > 0 && <EuiHorizontalRule margin="m" />}
             <OnboardingDocPanel doc={doc} telemetryPrefix={telemetryPrefix} />

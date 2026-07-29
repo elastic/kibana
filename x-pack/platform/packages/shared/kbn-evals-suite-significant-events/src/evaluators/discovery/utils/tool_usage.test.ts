@@ -8,10 +8,13 @@
 import type { ConverseStep } from '@kbn/evals';
 import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import {
+  didToolCallReturnRows,
+  extractOrderedToolCalls,
   getToolCallCount,
   extractToolCallIds,
   summarizeEsqlGrounding,
   extractEventSearchCandidateCount,
+  summarizePersistenceCalls,
 } from './tool_usage';
 
 const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
@@ -24,6 +27,7 @@ const steps: ConverseStep[] = [
     type: 'tool_call',
     tool_id: TOOL_ID_KI_SEARCH,
     tool_call_id: 'ki-1',
+    tool_call_group_id: 'ki-group',
     params: { kind: ['feature', 'query'], stream_names: ['logs'] },
     results: [{ type: 'other', data: { knowledge_indicators: [{ kind: 'query' }] } }],
   },
@@ -31,6 +35,7 @@ const steps: ConverseStep[] = [
     type: 'tool_call',
     tool_id: TOOL_ID_EXECUTE_ESQL,
     tool_call_id: 'esql-1',
+    tool_call_group_id: 'esql-group',
     params: { query: 'FROM logs | WHERE body.text : "SQLState"' },
     results: [
       { type: 'query', data: { esql: '…' } },
@@ -41,6 +46,7 @@ const steps: ConverseStep[] = [
     type: 'tool_call',
     tool_id: TOOL_ID_EXECUTE_ESQL,
     tool_call_id: 'esql-2',
+    tool_call_group_id: 'esql-group',
     params: { query: 'FROM logs | WHERE body.text : "Cache error"' },
     results: [{ type: 'esql_results', data: { columns: [{ name: '@timestamp' }], values: [] } }],
   },
@@ -56,9 +62,93 @@ describe('extractToolCallIds', () => {
   });
 });
 
+describe('extractOrderedToolCalls', () => {
+  it('preserves step order, parameters, results, and parallel group IDs', () => {
+    const calls = extractOrderedToolCalls(steps);
+
+    expect(calls[0]).toMatchObject({
+      index: 1,
+      toolId: TOOL_ID_KI_SEARCH,
+      groupId: 'ki-group',
+      params: { kind: ['feature', 'query'], stream_names: ['logs'] },
+    });
+    expect(didToolCallReturnRows(calls[1])).toBe(true);
+    expect(didToolCallReturnRows(calls[2])).toBe(false);
+  });
+});
+
 describe('getToolCallCount', () => {
   it('counts only tool_call steps', () => {
     expect(getToolCallCount(steps)).toBe(3);
+  });
+});
+
+describe('summarizePersistenceCalls', () => {
+  const persistenceToolId = platformSignificantEventsTools.discoveryWrite;
+
+  it('accepts one persistence call', () => {
+    expect(
+      summarizePersistenceCalls(
+        [{ type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-1' }],
+        persistenceToolId
+      )
+    ).toEqual({ count: 1, valid: true, retriedPartialFailure: false });
+  });
+
+  it('accepts exactly one retry after an item-level bulk error', () => {
+    expect(
+      summarizePersistenceCalls(
+        [
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-1',
+            results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
+          },
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-2',
+            params: { items: [{ event_id: 'failed-event' }] },
+          },
+        ],
+        persistenceToolId
+      )
+    ).toEqual({ count: 2, valid: true, retriedPartialFailure: true });
+  });
+
+  it('rejects repeated calls without a partial bulk failure', () => {
+    expect(
+      summarizePersistenceCalls(
+        [
+          { type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-1' },
+          { type: 'tool_call', tool_id: persistenceToolId, tool_call_id: 'write-2' },
+        ],
+        persistenceToolId
+      )
+    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false });
+  });
+
+  it('rejects a retry that resubmits more than the failed items', () => {
+    expect(
+      summarizePersistenceCalls(
+        [
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-1',
+            results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
+          },
+          {
+            type: 'tool_call',
+            tool_id: persistenceToolId,
+            tool_call_id: 'write-2',
+            params: { items: [{ event_id: 'failed-event' }, { event_id: 'successful-event' }] },
+          },
+        ],
+        persistenceToolId
+      )
+    ).toEqual({ count: 2, valid: false, retriedPartialFailure: false });
   });
 });
 

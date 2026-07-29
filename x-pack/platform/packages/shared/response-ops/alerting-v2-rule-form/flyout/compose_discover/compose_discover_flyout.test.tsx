@@ -63,15 +63,6 @@ jest.mock('./compose_discover_form/esql_recovery_content', () => ({
   EsqlRecoveryContent: () => null,
 }));
 
-jest.mock('./compose_discover_time_field_context', () => ({
-  useComposeDiscoverTimeField: () => ({
-    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-    isTimeFieldResolved: true,
-  }),
-  ComposeDiscoverTimeFieldContextProvider: ({ children }: { children: React.ReactNode }) =>
-    children,
-}));
-
 const mockComposeDiscoverForm = jest.fn((_props: FormProps) => (
   <div data-test-subj="composeDiscoverFormMock" />
 ));
@@ -168,7 +159,7 @@ jest.mock('../../form/hooks/use_data_fields', () => ({
 
 jest.mock('@kbn/esql-utils', () => ({
   ...jest.requireActual('@kbn/esql-utils'),
-  getESQLTimeFieldFromQuery: jest.fn().mockResolvedValue(undefined),
+  getESQLTimeField: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('../../form/utils/yaml_form_utils', () => ({

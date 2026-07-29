@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
   createRuleDataSchema,
@@ -27,6 +28,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
+import { resolveTimeFieldForQuery } from './resolve_time_field';
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
 // local to avoid forcing an export purely for this guard.
@@ -192,12 +194,38 @@ export const executeRuleOperations = async (
       }
 
       case 'set_query': {
+        const rootQuery = getRootEsqlQuery(op.query);
+        let resolvedTimeField: string | null | undefined;
         if (esClient) {
-          lastQueryColumns = await validateEsqlQuery(esClient, getRootEsqlQuery(op.query));
+          lastQueryColumns = await validateEsqlQuery(esClient, rootQuery);
+          // Resolve the time field from the index.
+          resolvedTimeField = await resolveTimeFieldForQuery(esClient, rootQuery, next.time_field);
+          // `null` means the index has no usable date field.
+          if (resolvedTimeField === null) {
+            const sourceIndex = getIndexPatternFromESQLQuery(rootQuery);
+            throw new RuleOperationValidationError(
+              `Could not determine a time field for the query: the source index ` +
+                `${
+                  sourceIndex ? `"${sourceIndex}"` : ''
+                } has no \`date\` or \`date_nanos\` field ` +
+                `(and no \`@timestamp\`), which is required for the rule's lookback window. ` +
+                `Add a date field to the data, or query an index that has one.`
+            );
+          }
+          // `undefined` means we couldn't look up the index (non-FROM query, or
+          // fieldCaps failed). Fall back to any existing time field; if there is
+          // none, fail rather than let the schema silently default to @timestamp.
+          if (resolvedTimeField === undefined && !next.time_field) {
+            throw new RuleOperationValidationError(
+              `Could not determine a time field for the query and none is set. A \`date\` or ` +
+                `\`date_nanos\` field is required for the rule's lookback window; set one explicitly.`
+            );
+          }
         }
         next = {
           ...next,
           query: op.query,
+          ...(resolvedTimeField ? { time_field: resolvedTimeField } : {}),
           ...(op.recovery_strategy !== undefined
             ? { recovery_strategy: op.recovery_strategy }
             : {}),

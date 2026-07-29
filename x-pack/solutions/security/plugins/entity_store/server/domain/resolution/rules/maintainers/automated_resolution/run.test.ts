@@ -32,7 +32,7 @@ const createDeps = (
   esClient,
   logger: loggerMock.create(),
   resolutionClient,
-  abortController: new AbortController(),
+  signal: new AbortController().signal,
   telemetry: { report: jest.fn() },
   ...overrides,
 });
@@ -618,7 +618,7 @@ describe('Email rule resolution', () => {
 
       const result = await runEmailRuleResolution(
         createDeps(state, mockEsClient, mockResolutionClient, {
-          abortController: abortCtrl,
+          signal: abortCtrl.signal,
         })
       );
 
