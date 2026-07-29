@@ -234,7 +234,7 @@ export const ConnectorCommand: GenerateCommand = {
     // append to CODEOWNERS: insert within the # Connector Specs section, alphabetically
     // Each connector gets its own line to allow different team ownership
     {
-      let content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
+      const content = await Fsp.readFile(CODEOWNERS_FILE, 'utf8');
       const line = `src/platform/packages/shared/kbn-connector-specs/src/specs/${connectorName}/** ${owner}`;
       if (content.includes(line)) {
         log.info('CODEOWNERS already has rule for', connectorName);
