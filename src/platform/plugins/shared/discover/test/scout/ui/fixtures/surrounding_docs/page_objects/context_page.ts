@@ -124,11 +124,7 @@ export class ContextPage {
   }
 
   async goBackToDiscover() {
-    // Only one renders per chrome style: the chrome-next back button or the classic breadcrumb.
-    await this.page.testSubj
-      .locator('appHeaderBack')
-      .or(this.page.testSubj.locator('~breadcrumb-deepLinkId-discover'))
-      .click();
+    await this.page.testSubj.locator('appHeaderBack').click();
     await this.page.testSubj
       .locator('dscPage')
       .waitFor({ state: 'visible', timeout: CONTEXT_LOAD_TIMEOUT });
