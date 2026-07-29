@@ -28,7 +28,7 @@ jest.mock('../common/api/use_add_integrations_route');
 const server = setupMockServer();
 
 describe('NoVulnerabilitiesStates', () => {
-  const cnvmintegrationLink = 'fleet/integrations/cloud_security_posture/add-integration';
+  const cnvmintegrationLink = 'integrations/detail/cloud_security_posture/add-integration';
   const integrationRouteLink = 'app/integrations/browse/security/vulnerability_workflow';
   const vulnerabilitiesPath = `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`;
 
