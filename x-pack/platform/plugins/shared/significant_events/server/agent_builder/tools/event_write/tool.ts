@@ -51,18 +51,18 @@ export const eventsWriteItemSchema = significantEventSchema
       .optional()
       .describe(
         dedent`
-          Discovery-mode deduplication window as an ES date math expression (e.g. "now-24h").
-          Provide this when writing a discovery-agent hypothesis (new event without an explicit
-          event_id). If an unresolved (status: pending or open) event with the same primary stream
-          and detection rule UUIDs already exists within this window, the write is skipped and the
-          existing event_id is returned. Omit for judge writes, continuations with explicit
-          event_id, and chat-initiated writes — those use snapshot mode with no dedup.
-          When present, the written event's status is forced to "pending" regardless of the
-          supplied status — the judge assigns the final status later.
+          Deduplication window as an ES date math expression (e.g. "now-24h"). Mutually exclusive with event_id.
+
+          Provide this to write a new event candidate without an explicit event_id.
+          
+          If an active (status: pending or open) event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is created with status
         `
       ),
   })
-  .partial({ event_id: true });
+  .partial({ event_id: true })
+  .refine((item) => !(item.dedup_window !== undefined && item.event_id !== undefined), {
+    message: 'dedup_window and event_id are mutually exclusive',
+  });
 
 export const eventsWriteSchema = z.object({
   items: z.array(eventsWriteItemSchema).min(1).max(MAX_BULK_WRITE_ITEMS),
@@ -83,26 +83,17 @@ export function createEventsWriteTool({
     id: SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID,
     type: ToolType.builtin,
     description: dedent`
-      Create or version a batch of significant events. Each written item appends a new version
-      enriched with event_uuid and previous_event_uuid. Submit at most one item per event_id.
+      Write a batch of significant events. Submit at most one item per event_id.
 
-      ## Discovery-agent path
-      Supply dedup_window (e.g. "now-24h") and omit event_id for new hypotheses. The tool forces
-      status = "pending" automatically (hidden from the default read path until assessment is complete)
-      final status). If an unresolved (status: pending or open) event with the same primary stream
-      and detection rule UUIDs already exists within the window, the write is skipped and the
-      existing event_id is returned (written: false, reason: duplicate_within_window).
-      For continuation writes of an existing episode, supply the explicit event_id with
-      dedup_window — signals and topology are merged with prior versions.
+      **dedup_window** (e.g. "now-24h"), no event_id: write a new candidate. Skipped if an active
+      event with the same stream and rule UUIDs already exists in the window (written: false,
+      reason: duplicate_within_window); otherwise written with status "pending".
 
-      ## Judge path
-      Supply event_id and the final status (open/closed/dismissed). Omit dedup_window — no dedup or
-      episode merge is applied. The judge's write promotes the pending hypothesis to its final
-      status.
+      **event_id**, no dedup_window: append a version to an existing event with the supplied status.
+      Signals and topology are merged with prior versions. Discovery-stage writes should always use
+      status "pending"; judge/status-update workflows can set final statuses.
 
-      ## Chat / event_create path
-      Omit event_id and dedup_window. A synthetic event_id is generated. Use event_create for
-      simpler standalone events not linked to detections.
+      **neither**: a synthetic event_id is generated.
     `,
     schema: eventsWriteSchema,
     tags: ['streams', 'significant_events'],

@@ -247,7 +247,7 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    return { detections, events };
+    return { detections, events: events.filter((e) => e.status !== 'pending') };
   },
 });
 

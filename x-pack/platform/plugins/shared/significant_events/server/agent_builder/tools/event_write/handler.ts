@@ -7,7 +7,6 @@
 
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-import dateMath from '@kbn/datemath';
 import {
   type BlastRadiusEntry,
   type CausalFeature,
@@ -15,9 +14,9 @@ import {
   type SignalEntry,
   SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS,
 } from '@kbn/significant-events-schema';
+import { resolveTimeBound } from '../../../lib/significant_events/latest_source_query';
 import type { EventClient } from '../../../lib/significant_events/events';
 import {
-  assertUniqueBulkWriteKeys,
   assertValidBulkWriteSize,
   createBulkWriteItemError,
   createBulkWriteOutcomeUnknownError,
@@ -26,20 +25,17 @@ import {
   toCompactBulkError,
 } from '../bulk_write';
 
-// ---------------------------------------------------------------------------
-// Input types
-// ---------------------------------------------------------------------------
-
 /**
  * Input for writing a significant event document.
  *
- * `event_id` is optional. When absent on a non-dedup write, a synthetic
- * ID is generated (`agent-event-<uuid8>`) and the latest-version lookup is skipped.
+ * Exactly one of `event_id` or `dedup_window` may be present per item — not both.
  *
- * `dedup_window` activates dedup mode for this item: the handler checks whether an active
- * (status == open) event with the same stream-and-rules fingerprint already exists within the
- * window and skips the write if so, returning the existing event_id. Omit it to preserve the
- * plain snapshot behaviour (caller-supplied status persisted as-is).
+ * - `dedup_window` present, `event_id` absent → dedup mode: scan for an active event with the
+ *   same stream-and-rules fingerprint within the window; skip if found, otherwise create with
+ *   status forced to "pending".
+ * - `event_id` present, `dedup_window` absent → continuation/snapshot mode: write a new version
+ *   of the specified event, merging signals and topology with prior versions when found.
+ * - Both absent → anonymous snapshot: generate a synthetic event_id, write as-is.
  *
  * `conversation_id` is the only addition not in the base schema — passed through for traceability.
  */
@@ -59,15 +55,8 @@ export type EventsWriteInput = Pick<
   | 'blast_radius'
   | 'workflow_execution_id'
 > & {
-  /** Optional — generated as `agent-event-<uuid8>` when absent (snapshot writes without an explicit id). */
   event_id?: string;
-  /** Not in the base SignificantEvent schema — passed through for traceability. */
   conversation_id?: string;
-  /**
-   * Discovery-mode deduplication window as an ES date math expression (e.g. "now-24h").
-   * Present → dedup mode (dedup + episode merge + status forced to "pending").
-   * Absent → snapshot mode (caller-supplied status persisted as-is).
-   */
   dedup_window?: string;
 };
 
@@ -98,14 +87,38 @@ export interface EventsWriteFailureResult {
   event_id: string;
   status: SignificantEvent['status'];
   written: false;
-  reason: 'bulk_error';
+  reason: 'bulk_error' | 'duplicate_key';
   error: CompactBulkError;
 }
+
+interface DedupCandidate {
+  mode: 'dedup';
+  index: number;
+  input: EventsWriteInput;
+  eventId: string;
+  eventUuid: string;
+  fingerprint: string;
+  /** ISO string resolved from dedup_window — events older than this are ignored. */
+  windowFrom: string;
+}
+
+interface SnapshotCandidate {
+  mode: 'snapshot';
+  index: number;
+  input: EventsWriteInput;
+  eventId: string;
+  eventUuid: string;
+}
+
+type WriteCandidate = DedupCandidate | SnapshotCandidate;
 
 export type EventsWriteBulkResult =
   | EventsWriteResult
   | EventsWriteDuplicateResult
   | EventsWriteFailureResult;
+
+type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
+  Partial<Pick<SignificantEvent, 'stream_names' | 'causal_features' | 'blast_radius'>>;
 
 const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
@@ -132,15 +145,6 @@ export const generateDiscoveryEventId = (streamNames: string[], ruleUuids: strin
   const primaryStream = [...streamNames].sort()[0] ?? 'unknown';
   const basis = [primaryStream, ...[...ruleUuids].sort(), suffix].join('|');
   return createHash('sha256').update(basis).digest('hex').slice(0, 16);
-};
-
-const isDateMathExpression = (value: string): boolean =>
-  value.startsWith('now') || value.includes('||');
-
-const parseDateMathToMs = (expr: string, now: Date): number | undefined => {
-  if (!isDateMathExpression(expr)) return undefined;
-  const parsed = dateMath.parse(expr, { forceNow: now });
-  return parsed?.isValid() ? now.getTime() - parsed.valueOf() : undefined;
 };
 
 const mergeLatestByKey = <T>(
@@ -178,9 +182,6 @@ export const mergeSignalsLatestPerRule = (
     ],
     (signal) => (signal.type === 'detection' ? signal.metadata?.rule_uuid ?? undefined : undefined)
   );
-
-type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
-  Partial<Pick<SignificantEvent, 'stream_names' | 'causal_features' | 'blast_radius'>>;
 
 export const mergeEpisodeContext = (
   priorDocs: EpisodeContextSource[],
@@ -227,37 +228,23 @@ export const mergeEpisodeContext = (
   };
 };
 
-// ---------------------------------------------------------------------------
-// Prepared-input shape
-// ---------------------------------------------------------------------------
-
-interface PreparedInput {
-  index: number;
-  input: EventsWriteInput;
-  /** Epoch ms cutoff below which an active event blocks this write. Present only in discovery mode. */
-  cutoffMs?: number;
-  /** Stream-and-rules fingerprint for dedup. Present only in discovery mode. */
-  fingerprint?: string;
-  /** Resolved event ID — provided or generated. */
-  eventId: string;
-  eventUuid: string;
-}
-
-// ---------------------------------------------------------------------------
-// Main handler
-// ---------------------------------------------------------------------------
-
 /**
  * Versions a batch of significant events in one request while preserving input order in the
  * returned results.
  *
- * Dedup-mode items (dedup_window present) additionally:
- *  - check for an unresolved (status IN pending/open) event with the same fingerprint in-window and skip;
- *  - set status = "pending" — an unvalidated candidate hidden from the default read path;
- *  - merge signals and topology (stream_names, causal_features, blast_radius) with prior versions.
+ * Dedup-mode items (`dedup_window` present, no `event_id`):
+ *  - Check for an active (status IN pending/open) event with the same fingerprint in-window and
+ *    skip the write if found, returning the existing event_id.
+ *  - Force status = "pending" — an unvalidated candidate hidden from the default read path.
  *
- * Snapshot-mode items (dedup_window absent) retain today's behaviour and persist the
- * caller-supplied status (open/closed/dismissed).
+ * Snapshot-mode items (`event_id` present, no `dedup_window`):
+ *  - Write a new version of the identified event, persisting the caller-supplied status.
+ *    (Discovery-stage callers are expected to pass "pending"; judge/status workflows may
+ *    promote to open/closed/dismissed.)
+ *  - Merge signals and topology with prior versions when history is found.
+ *
+ * Anonymous items (neither `event_id` nor `dedup_window`):
+ *  - Generate a synthetic event_id and write as-is.
  */
 export async function eventsWriteBulkHandler({
   eventClient,
@@ -267,78 +254,95 @@ export async function eventsWriteBulkHandler({
   inputs: EventsWriteInput[];
 }): Promise<EventsWriteBulkResult[]> {
   const now = new Date();
+  const timestamp = now.toISOString();
 
   assertValidBulkWriteSize(inputs);
-  assertUniqueBulkWriteKeys(
-    inputs.flatMap((input, index) =>
-      input.event_id === undefined ? [] : [{ index, key: input.event_id }]
-    ),
-    'event_id'
-  );
 
-  // Pre-compute fingerprints and cutoffs for discovery-mode items.
-  const prepared: PreparedInput[] = inputs.map((input, index) => {
-    const isDiscoveryMode = input.dedup_window !== undefined && input.event_id === undefined;
-    const windowMs =
-      isDiscoveryMode && input.dedup_window
-        ? parseDateMathToMs(input.dedup_window, now)
-        : undefined;
-    const fingerprint =
-      isDiscoveryMode && windowMs !== undefined
-        ? makeFingerprint(input.stream_names, extractRuleUuids(input.signals))
-        : undefined;
-
-    const ruleUuids = extractRuleUuids(input.signals);
-    const eventId =
-      input.event_id ??
-      (isDiscoveryMode
-        ? generateDiscoveryEventId(input.stream_names, ruleUuids)
-        : `agent-event-${uuidv4().slice(0, 8)}`);
-
+  // Build typed write candidates.
+  const candidates: WriteCandidate[] = inputs.map((input, index) => {
+    if (input.dedup_window !== undefined) {
+      const ruleUuids = extractRuleUuids(input.signals);
+      return {
+        mode: 'dedup',
+        index,
+        input,
+        eventId: generateDiscoveryEventId(input.stream_names, ruleUuids),
+        eventUuid: uuidv4(),
+        fingerprint: makeFingerprint(input.stream_names, ruleUuids),
+        windowFrom: resolveTimeBound(input.dedup_window),
+      };
+    }
     return {
+      mode: 'snapshot',
       index,
       input,
-      cutoffMs: isDiscoveryMode && windowMs !== undefined ? now.getTime() - windowMs : undefined,
-      fingerprint,
-      eventId,
+      eventId: input.event_id ?? `agent-event-${uuidv4().slice(0, 8)}`,
       eventUuid: uuidv4(),
     };
   });
 
-  // Validate that no two discovery-mode items share the same fingerprint.
-  assertUniqueBulkWriteKeys(
-    prepared.flatMap(({ index, fingerprint }) =>
-      fingerprint === undefined ? [] : [{ index, key: fingerprint }]
-    ),
-    'discovery fingerprint'
-  );
-
-  // Single scan for dedup candidates: fetch active (status == open) events from the earliest cutoff.
-  const cutoffs = prepared.flatMap(({ cutoffMs }) => (cutoffMs !== undefined ? [cutoffMs] : []));
-  const activeEvents: SignificantEvent[] =
-    cutoffs.length === 0
-      ? []
-      : (await eventClient.findLatestActiveFrom(new Date(Math.min(...cutoffs)).toISOString())).hits;
-
+  // Mark duplicate event_ids and fingerprints as per-item errors (keep first occurrence).
   const results: Array<EventsWriteBulkResult | undefined> = new Array(inputs.length);
-  const toWrite: PreparedInput[] = [];
+  const seenEventIds = new Map<string, number>();
+  const seenFingerprints = new Map<string, number>();
 
-  for (const item of prepared) {
-    if (item.fingerprint !== undefined && item.cutoffMs !== undefined) {
-      // Dedup: look for an unresolved event (pending candidate or open event)
-      // with the same fingerprint in-window. `findLatestActiveFrom` already restricts to the
-      // active statuses; this guards defensively against any status leaking through.
-      const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
+  for (const candidate of candidates) {
+    const key = candidate.mode === 'dedup' ? candidate.fingerprint : candidate.eventId;
+    const seenMap = candidate.mode === 'dedup' ? seenFingerprints : seenEventIds;
+    const firstIndex = seenMap.get(key);
+    if (firstIndex !== undefined) {
+      results[candidate.index] = {
+        index: candidate.index,
+        event_id: candidate.eventId,
+        status: candidate.input.status,
+        written: false,
+        reason: 'duplicate_key',
+        error: {
+          type: 'validation_error',
+          reason: `Duplicate ${
+            candidate.mode === 'dedup' ? 'dedup fingerprint' : 'event_id'
+          } ${JSON.stringify(key)} at items[${firstIndex}] and items[${candidate.index}]`,
+          status: 400,
+        },
+      };
+    } else {
+      seenMap.set(key, candidate.index);
+    }
+  }
+
+  // Only process candidates that have not been flagged as duplicates.
+  const validCandidates = candidates.filter((c) => results[c.index] === undefined);
+
+  // Single scan for dedup candidates: fetch all events from the earliest window start.
+  const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
+  const activeEvents: SignificantEvent[] =
+    dedupCandidates.length === 0
+      ? []
+      : (
+          await eventClient.findLatestActive({
+            from: dedupCandidates.reduce((earliest, c) =>
+              c.windowFrom < earliest.windowFrom ? c : earliest
+            ).windowFrom,
+          })
+        ).hits;
+
+  const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
+
+  const toWrite: WriteCandidate[] = [];
+
+  for (const candidate of validCandidates) {
+    if (candidate.mode === 'dedup') {
       const duplicate = activeEvents.find(
         (ev) =>
           activeStatuses.includes(ev.status) &&
-          Date.parse(ev['@timestamp']) >= (item.cutoffMs as number) &&
-          makeFingerprint(ev.stream_names ?? [], extractRuleUuids(ev.signals)) === item.fingerprint
+          ev['@timestamp'] >= candidate.windowFrom &&
+          makeFingerprint(ev.stream_names ?? [], extractRuleUuids(ev.signals)) ===
+            candidate.fingerprint
       );
       if (duplicate) {
-        const existingEventId = duplicate.event_id ?? item.eventId;
-        results[item.index] = {
-          index: item.index,
+        const existingEventId = duplicate.event_id ?? candidate.eventId;
+        results[candidate.index] = {
+          index: candidate.index,
           event_id: existingEventId,
           status: duplicate.status,
           written: false,
@@ -349,42 +353,36 @@ export async function eventsWriteBulkHandler({
         continue;
       }
     }
-    toWrite.push(item);
+    toWrite.push(candidate);
   }
 
-  // For continuation writes (explicit event_id in discovery mode) and snapshot-mode explicit IDs,
-  // fetch prior versions for lineage + episode merge.
-  const explicitIds = toWrite.flatMap(({ input, eventId }) =>
-    input.event_id !== undefined || input.dedup_window !== undefined ? [eventId] : []
-  );
+  // For snapshot writes with an explicit event_id, fetch prior versions for lineage + episode merge.
+  const explicitIds = toWrite.flatMap((c) => (c.input.event_id !== undefined ? [c.eventId] : []));
   const latestByEventId =
     explicitIds.length === 0
       ? new Map<string, SignificantEvent>()
       : await eventClient.findLatestByEventIds(explicitIds);
 
-  // For discovery-mode continuations, fetch full history for episode merge.
+  // For continuation writes, fetch full history for episode merge.
   const priorDocsByEventId = new Map<string, SignificantEvent[]>();
   await Promise.all(
     toWrite
-      .filter(({ input }) => input.event_id !== undefined && input.dedup_window !== undefined)
-      .map(async ({ eventId }) => {
-        const { hits } = await eventClient.findByEventId(eventId);
-        priorDocsByEventId.set(eventId, hits);
+      .filter((c) => c.input.event_id !== undefined)
+      .map(async (c) => {
+        const { hits } = await eventClient.findByEventId(c.eventId);
+        priorDocsByEventId.set(c.eventId, hits);
       })
   );
 
-  const timestamp = now.toISOString();
-
-  const pendingWrites = toWrite.map((item) => {
-    const { dedup_window: _dedup, event_id: _explicitId, ...rest } = item.input;
-    const isDiscoveryMode = item.input.dedup_window !== undefined;
-    const isContinuation = item.input.event_id !== undefined && isDiscoveryMode;
-    const priorDocs = priorDocsByEventId.get(item.eventId) ?? [];
-    const latestEvent = latestByEventId.get(item.eventId);
+  const pendingWrites = toWrite.map((candidate) => {
+    const { dedup_window: _dedup, event_id: _explicitId, ...rest } = candidate.input;
+    const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
+    const latestEvent = latestByEventId.get(candidate.eventId);
+    const isContinuation = candidate.input.event_id !== undefined;
 
     const signals = isContinuation
-      ? mergeSignalsLatestPerRule(priorDocs, item.input.signals ?? [], timestamp)
-      : item.input.signals ?? [];
+      ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
+      : candidate.input.signals ?? [];
 
     const episodeContext = isContinuation
       ? mergeEpisodeContext(priorDocs, rest, timestamp)
@@ -394,32 +392,30 @@ export async function eventsWriteBulkHandler({
           blastRadius: rest.blast_radius ?? [],
         };
 
-    // Dedup writes (dedup_window present, incl. continuations) land as "pending" candidates;
-    // snapshot writes persist the caller-supplied status.
-    const status = isDiscoveryMode ? ('pending' as const) : item.input.status;
+    // Dedup writes land as "pending" candidates; snapshot writes persist caller-supplied status.
+    const status = candidate.mode === 'dedup' ? ('pending' as const) : candidate.input.status;
 
     return {
-      item,
+      candidate,
       status,
       document: {
         ...rest,
         '@timestamp': timestamp,
-        event_uuid: item.eventUuid,
-        event_id: item.eventId,
+        event_uuid: candidate.eventUuid,
+        event_id: candidate.eventId,
         previous_event_uuid: latestEvent?.event_uuid,
         investigations: latestEvent?.investigations,
         signals,
         stream_names: episodeContext.streamNames,
         causal_features: episodeContext.causalFeatures,
         blast_radius: episodeContext.blastRadius,
-        severity: item.input.severity,
+        severity: candidate.input.severity,
         status,
       },
     };
   });
 
   if (pendingWrites.length === 0) {
-    // All items were deduplicated — return early without an ES round-trip.
     const aligned: EventsWriteBulkResult[] = [];
     for (const result of results) {
       if (result === undefined) {
@@ -445,21 +441,21 @@ export async function eventsWriteBulkHandler({
 
   const createResults = extractCreateResults(response, pendingWrites.length, 'Event');
 
-  pendingWrites.forEach(({ item, status }, responseIndex) => {
+  pendingWrites.forEach(({ candidate, status }, responseIndex) => {
     const detail = createResults[responseIndex];
-    results[item.index] = detail.error
+    results[candidate.index] = detail.error
       ? {
-          index: item.index,
-          event_id: item.eventId,
+          index: candidate.index,
+          event_id: candidate.eventId,
           status,
           written: false,
           reason: 'bulk_error',
           error: toCompactBulkError(detail),
         }
       : {
-          index: item.index,
-          event_uuid: item.eventUuid,
-          event_id: item.eventId,
+          index: candidate.index,
+          event_uuid: candidate.eventUuid,
+          event_id: candidate.eventId,
           status,
           written: true,
         };
@@ -491,7 +487,6 @@ export async function eventsWriteHandler({
   }
   if (!result.written) {
     if ('skipped' in result) {
-      // Treat a skip as success for single-item callers — return a synthetic result.
       throw createBulkWriteOutcomeUnknownError(
         `Event write skipped (duplicate within window): existing event_id=${result.existing_event_id}`
       );

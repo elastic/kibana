@@ -12,6 +12,9 @@ const successfulBulkCreate = async (documents: object[]) => ({
   items: documents.map(() => ({ create: { status: 201, result: 'created' } })),
 });
 
+const noopFindByEventId = jest.fn().mockResolvedValue({ hits: [] });
+const noopFindLatestActive = jest.fn().mockResolvedValue({ hits: [] });
+
 const baseInput: EventsWriteInput = {
   discovery_id: 'disc-1',
   status: 'open' as const,
@@ -30,7 +33,9 @@ const baseInput: EventsWriteInput = {
 describe('eventsWriteHandler', () => {
   it('writes a new event', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
@@ -51,7 +56,9 @@ describe('eventsWriteHandler', () => {
 
   it('skips latest-version lookup when event_id is absent', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn(),
+      findByEventId: jest.fn(),
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
@@ -61,17 +68,20 @@ describe('eventsWriteHandler', () => {
     });
 
     expect(eventClient.findLatestByEventIds).not.toHaveBeenCalled();
+    expect(eventClient.findByEventId).not.toHaveBeenCalled();
     expect(result.written).toBe(true);
     expect(result.event_id).toMatch(/^agent-event-[a-f0-9]{8}$/);
   });
 
   it('sets previous_event_uuid from the latest event returned by findLatestByEventIds', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest
         .fn()
         .mockResolvedValue(
           new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id', status: 'closed' }]])
         ),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
@@ -88,7 +98,9 @@ describe('eventsWriteHandler', () => {
 
   it('writes with refresh wait_for so an immediate triage _count can see the event', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
@@ -108,11 +120,13 @@ describe('eventsWriteHandler', () => {
       { workflow_execution_id: 'wf-1', started_at: '2024-01-01T00:00:00.000Z' },
     ];
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest
         .fn()
         .mockResolvedValue(
           new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id', investigations }]])
         ),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
@@ -127,9 +141,11 @@ describe('eventsWriteHandler', () => {
 
   it('leaves investigations undefined when the latest event has none', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest
         .fn()
         .mockResolvedValue(new Map([['checkout__latency-abc12345', { event_uuid: 'latest-id' }]])),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
@@ -146,7 +162,9 @@ describe('eventsWriteHandler', () => {
 describe('eventsWriteBulkHandler', () => {
   it('writes unique event ids with one lookup and one bulk request', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     };
 
@@ -169,7 +187,9 @@ describe('eventsWriteBulkHandler', () => {
 
   it('returns aligned per-item bulk failures', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockResolvedValue({
         errors: true,
         items: [
@@ -203,28 +223,37 @@ describe('eventsWriteBulkHandler', () => {
     });
   });
 
-  it('rejects duplicate event ids before reads or writes', async () => {
+  it('returns per-item errors for duplicate event_ids without throwing', async () => {
     const eventClient = {
-      findLatestByEventIds: jest.fn(),
-      bulkCreate: jest.fn(),
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockResolvedValue({
+        errors: false,
+        items: [{ create: { result: 'created', _id: 'doc-1', status: 201 } }],
+      }),
     };
 
-    await expect(
-      eventsWriteBulkHandler({
-        eventClient: eventClient as never,
-        inputs: [
-          { ...baseInput, event_id: 'duplicate' },
-          { ...baseInput, event_id: 'duplicate' },
-        ],
-      })
-    ).rejects.toMatchObject({ code: 'validation_error' });
-    expect(eventClient.findLatestByEventIds).not.toHaveBeenCalled();
-    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [
+        { ...baseInput, event_id: 'duplicate' },
+        { ...baseInput, event_id: 'duplicate' },
+      ],
+    });
+
+    expect(results[0]).toEqual(expect.objectContaining({ index: 0, written: true }));
+    expect(results[1]).toEqual(
+      expect.objectContaining({ index: 1, written: false, reason: 'duplicate_key' })
+    );
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
   it('classifies a response cardinality mismatch as outcome unknown', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockResolvedValue({ errors: false, items: [] }),
     };
 
@@ -238,7 +267,9 @@ describe('eventsWriteBulkHandler', () => {
 
   it('classifies a response without a create result as outcome unknown', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockResolvedValue({ errors: false, items: [{}] }),
     };
 
@@ -252,7 +283,9 @@ describe('eventsWriteBulkHandler', () => {
 
   it('classifies a rejected bulk request as outcome unknown', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockRejectedValue(new Error('connection reset')),
     };
 
@@ -266,7 +299,9 @@ describe('eventsWriteBulkHandler', () => {
 
   it('keeps the single-item wrapper throwing on an item failure', async () => {
     const eventClient = {
+      findLatestActive: noopFindLatestActive,
       findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
       bulkCreate: jest.fn().mockResolvedValue({
         errors: true,
         items: [

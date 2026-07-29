@@ -266,6 +266,35 @@ export class EventClient {
     };
   }
 
+  /**
+   * Returns the latest version per event_id for all active events (status IN pending/open)
+   * within the given time range. The status filter is applied after grouping so a
+   * closed/dismissed event whose earlier version was pending is correctly excluded.
+   */
+  async findLatestActive(options: CommonSearchOptions): Promise<{ hits: SignificantEvent[] }> {
+    const query = applyTimeRange({
+      query: fromIndexForSpace({
+        index: EVENTS_DATA_STREAM,
+        space: this.clients.space,
+        columns: ['_id', '_source'],
+      }),
+      from: options.from,
+      to: options.to,
+    });
+
+    pickLatestPerGroup(query, FIELD_EVENT_ID);
+
+    query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((s) =>
+      esql.str(s)
+    )})`;
+
+    const hits = await executeEsqlQuery<SignificantEvent>({
+      esClient: this.clients.esClient,
+      query: query.keep('_source'),
+    });
+    return { hits };
+  }
+
   async findByEventUuid(id: string): Promise<{ hits: SignificantEvent[] }> {
     const result = await runFindByIdEsqlQuery<SignificantEvent>({
       esClient: this.clients.esClient,
@@ -284,27 +313,6 @@ export class EventClient {
       index: EVENTS_DATA_STREAM,
       idField: FIELD_EVENT_ID,
       idValue: eventId,
-    });
-    return { hits: result.hits };
-  }
-
-  /**
-   * Returns the latest version per event_id for all unresolved events (status IN pending/open)
-   * whose latest @timestamp is on or after `from`. Used by event_write to find dedup candidates:
-   * a prior candidate may still be a "pending" candidate or an already-"open" event, and both
-   * should dedup against a fresh write.
-   */
-  async findLatestActiveFrom(from: string): Promise<{ hits: SignificantEvent[] }> {
-    const where = esql.exp`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map(
-      (status) => esql.str(status)
-    )})`;
-    const result = await runLatestSourceEsqlQuery<SignificantEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options: { from },
-      index: EVENTS_DATA_STREAM,
-      where,
-      groupBy: FIELD_EVENT_ID,
     });
     return { hits: result.hits };
   }

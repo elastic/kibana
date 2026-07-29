@@ -44,7 +44,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 
 - `significant-events-memory` (via `load_skill`) — prior learnings about services, known-benign patterns, past false positives, and known ongoing/background issues SREs already track. **You MUST load this skill and search memory before promoting any discovery** — treat consulting memory as a required grounding step, never optional. Writing a discovery without first checking memory is an error. An empty memory result is acceptable and expected; skipping the check is not. Use what memory returns so already-known ongoing/background issues and known noise are recognized as such.
 - `platform_sig_events_event_search` — retrieves existing significant events
-- `platform_sig_events_events_write` — final output step; submit every discovery in one `items` array. Include `dedup_window` (e.g. `"now-24h"`) on new discoveries — the server deduplicates within that window and forces `status: pending` automatically (the judge assigns the final `open`/`closed`/`dismissed` later). Write new discoveries with `status: "pending"`.
+- `platform_sig_events_events_write` — final output step; submit every discovery in one `items` array. Include `dedup_window` (e.g. `"now-24h"`) on new discoveries. Every item must use `status: "pending"`.
 
 </tools>
 
@@ -178,7 +178,7 @@ For the remaining pairs, match if at least one criterion holds:
      - both sides have dependency edges with the same `source` and different `target` nodes (shared caller / fan-out), or
      - both sides share at least one entity node in `blast_radius` (`feature_id` or normalized `name`).
 
-   - Timing, **Domain**, **Alert symptoms**, or mechanism explain a causal chain for the root cause
+   - Timing, **Alert symptom**, or mechanism may support a causal chain for the root cause, but topology is the primary signal; **Current evidence** is only used to reject contradictions
 2. **Evidence convergence**
    - Each side's **Current evidence**, **Alert Symptom**, description, mechanism, or failure keyword must converge on a compatible incident correlation.
    - **Domain** or stream name alone is not sufficient convergence.
@@ -259,7 +259,7 @@ Assign each matched detection to at most one accepted event continuation. The co
 **Pre emit gate**
 - Steps 1-4 are complete
 
-Build the complete `items` array, consolidating any duplicate explicit `event_id` or new-discovery fingerprint, apply field rules from `<field_rules>`, then call `platform_sig_events_events_write` exactly once. Inspect the aligned `results` array. If and only if individual results have `reason: "bulk_error"`, retry those input items once in a second call; never retry a top-level `outcome_unknown` error automatically.
+Build the complete `items` array, consolidating any duplicate explicit `event_id` or new-discovery fingerprint, apply field rules from `<field_rules>`, and set `status: "pending"` on every item (including continuations with explicit `event_id`), then call `platform_sig_events_events_write` exactly once. Inspect the aligned `results` array. If and only if individual results have `reason: "bulk_error"`, retry those input items once in a second call; never retry a top-level `outcome_unknown` error automatically.
 
 Set `written_rule_uuids` from the final results only: include rules belonging to `written: true` items and confirmed `duplicate_within_window` items. Exclude unresolved `bulk_error` items so their detections remain in the workflow queue.
 
