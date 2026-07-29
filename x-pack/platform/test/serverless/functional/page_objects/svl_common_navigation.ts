@@ -57,9 +57,8 @@ class SvlNavigationSearchPageObject extends NavigationalSearchPageObject {
       await testSubjects.existOrFail(CHROME_NEXT_SEARCH_MODAL);
       return;
     }
-    if (await testSubjects.exists(CLASSIC_SEARCH_REVEAL, { timeout: 0 })) {
-      await testSubjects.click(CLASSIC_SEARCH_REVEAL);
-    }
+    if (await testSubjects.exists(CLASSIC_SEARCH_CONCEAL, { timeout: 0 })) return;
+    await testSubjects.click(CLASSIC_SEARCH_REVEAL);
     await testSubjects.existOrFail(CLASSIC_SEARCH_CONCEAL);
   }
 
