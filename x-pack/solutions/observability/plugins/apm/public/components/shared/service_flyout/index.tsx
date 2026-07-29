@@ -72,7 +72,6 @@ export function ServiceFlyout({
   historyKey,
   contextActions,
 }: ServiceFlyoutProps) {
-  const { core, share, lens, dataViews, alerting } = deps;
   const { environment, rangeFrom, rangeTo, transactionType } = filters;
   const title = service.name;
   const titleId = useGeneratedHtmlId({ prefix: 'serviceFlyoutTitle' });
@@ -86,14 +85,14 @@ export function ServiceFlyout({
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
   const capabilities = useServiceFlyoutCapabilities({
-    http: core.http,
+    http: deps.core.http,
     serviceName: service.name,
     environment: flyoutEnvironment,
     start,
     end,
   });
 
-  const { indices } = useApmIndices({ http: core.http });
+  const { indices } = useApmIndices({ http: deps.core.http });
 
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
@@ -116,7 +115,7 @@ export function ServiceFlyout({
   return (
     <ServiceFlyoutContextProvider
       value={{
-        deps: { core, share, lens, dataViews, alerting },
+        deps,
         contextActions,
         service,
         capabilities,
@@ -135,7 +134,7 @@ export function ServiceFlyout({
       }}
     >
       <TimeRangeMetadataContextProvider
-        uiSettings={core.uiSettings}
+        uiSettings={deps.core.uiSettings}
         start={start}
         end={end}
         kuery=""
@@ -150,7 +149,7 @@ export function ServiceFlyout({
           paddingSize="m"
           resizable
           minWidth={660}
-          session="start" // EUI flyout session management: "start" = root flyout; alternatives are "inherit" and "never"
+          session="start"
           historyKey={historyKey}
           flyoutMenuProps={{ title }}
           aria-labelledby={titleId}

@@ -18,8 +18,8 @@ jest.mock('../footer/hooks/use_alerts_href', () => ({
 }));
 
 const mockUseFlyoutDiscoverHref = jest.fn();
-jest.mock('./use_flyout_discover_navigation', () => ({
-  useFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
+jest.mock('../utils/get_flyout_discover_navigation', () => ({
+  getFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
 }));
 
 const mockGetRedirectUrl = jest.fn(

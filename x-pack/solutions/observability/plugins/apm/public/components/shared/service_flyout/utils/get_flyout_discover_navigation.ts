@@ -31,7 +31,7 @@ function toIndexSettings(indices: APMIndices) {
   ];
 }
 
-export function useFlyoutDiscoverNavigation({
+export function getFlyoutDiscoverNavigation({
   share,
   indices,
   indexType,

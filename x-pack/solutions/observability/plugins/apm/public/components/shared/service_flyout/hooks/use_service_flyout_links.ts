@@ -13,7 +13,7 @@ import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAlertsHref } from '../footer/hooks/use_alerts_href';
-import { useFlyoutDiscoverNavigation } from './use_flyout_discover_navigation';
+import { getFlyoutDiscoverNavigation } from '../utils/get_flyout_discover_navigation';
 
 export function useServiceFlyoutLinks() {
   const {
@@ -50,7 +50,7 @@ export function useServiceFlyoutLinks() {
 
   const alerts = useAlertsHref();
 
-  const { href: tracesHref, esqlQuery: tracesEsqlQuery } = useFlyoutDiscoverNavigation({
+  const { href: tracesHref, esqlQuery: tracesEsqlQuery } = getFlyoutDiscoverNavigation({
     share,
     indices,
     indexType: 'traces',
@@ -59,7 +59,7 @@ export function useServiceFlyoutLinks() {
     queryParams: { serviceName, transactionType, environment, sortDirection: 'DESC' },
   });
 
-  const { href: logsHref, esqlQuery: logsEsqlQuery } = useFlyoutDiscoverNavigation({
+  const { href: logsHref, esqlQuery: logsEsqlQuery } = getFlyoutDiscoverNavigation({
     share,
     indices,
     indexType: 'error',

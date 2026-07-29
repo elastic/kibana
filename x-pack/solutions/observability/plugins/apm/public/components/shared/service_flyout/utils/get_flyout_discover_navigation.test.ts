@@ -6,7 +6,7 @@
  */
 
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
-import { useFlyoutDiscoverNavigation } from './use_flyout_discover_navigation';
+import { getFlyoutDiscoverNavigation } from './get_flyout_discover_navigation';
 
 const mockGetESQLQuery = jest.fn();
 jest.mock('../../links/discover_links/get_esql_query', () => ({
@@ -17,7 +17,7 @@ const mockGetRedirectUrl = jest.fn(() => '/app/discover?mock-url');
 const mockLocator = { getRedirectUrl: mockGetRedirectUrl };
 const mockShare = {
   url: { locators: { get: jest.fn(() => mockLocator) } },
-} as unknown as Parameters<typeof useFlyoutDiscoverNavigation>[0]['share'];
+} as unknown as Parameters<typeof getFlyoutDiscoverNavigation>[0]['share'];
 
 const mockIndices: APMIndices = {
   transaction: 'traces-apm*',
@@ -41,32 +41,32 @@ const baseParams = {
   },
 };
 
-describe('useFlyoutDiscoverNavigation', () => {
+describe('getFlyoutDiscoverNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetESQLQuery.mockReturnValue('FROM traces-apm* | WHERE service.name == "opbeans-java"');
   });
 
   it('returns undefined href and null esqlQuery when indices is undefined', () => {
-    const result = useFlyoutDiscoverNavigation({ ...baseParams, indices: undefined });
+    const result = getFlyoutDiscoverNavigation({ ...baseParams, indices: undefined });
     expect(result).toEqual({ href: undefined, esqlQuery: null });
     expect(mockGetESQLQuery).not.toHaveBeenCalled();
   });
 
   it('returns undefined href and null esqlQuery when getESQLQuery returns null', () => {
     mockGetESQLQuery.mockReturnValue(null);
-    const result = useFlyoutDiscoverNavigation(baseParams);
+    const result = getFlyoutDiscoverNavigation(baseParams);
     expect(result).toEqual({ href: undefined, esqlQuery: null });
   });
 
   it('returns the Discover redirect URL and esqlQuery when all inputs are valid', () => {
-    const result = useFlyoutDiscoverNavigation(baseParams);
+    const result = getFlyoutDiscoverNavigation(baseParams);
     expect(result.href).toBe('/app/discover?mock-url');
     expect(result.esqlQuery).toBe('FROM traces-apm* | WHERE service.name == "opbeans-java"');
   });
 
   it('passes the time range to the locator', () => {
-    useFlyoutDiscoverNavigation(baseParams);
+    getFlyoutDiscoverNavigation(baseParams);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
         timeRange: { from: 'now-15m', to: 'now' },
@@ -75,7 +75,7 @@ describe('useFlyoutDiscoverNavigation', () => {
   });
 
   it('passes the ESQL query to the locator', () => {
-    useFlyoutDiscoverNavigation(baseParams);
+    getFlyoutDiscoverNavigation(baseParams);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith(
       expect.objectContaining({
         query: { esql: 'FROM traces-apm* | WHERE service.name == "opbeans-java"' },
@@ -84,7 +84,7 @@ describe('useFlyoutDiscoverNavigation', () => {
   });
 
   it('calls getESQLQuery with indexSettings derived from indices for traces', () => {
-    useFlyoutDiscoverNavigation({ ...baseParams, indexType: 'traces' });
+    getFlyoutDiscoverNavigation({ ...baseParams, indexType: 'traces' });
     expect(mockGetESQLQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         indexType: 'traces',
@@ -100,7 +100,7 @@ describe('useFlyoutDiscoverNavigation', () => {
   });
 
   it('calls getESQLQuery with indexSettings derived from indices for error', () => {
-    useFlyoutDiscoverNavigation({ ...baseParams, indexType: 'error' });
+    getFlyoutDiscoverNavigation({ ...baseParams, indexType: 'error' });
     expect(mockGetESQLQuery).toHaveBeenCalledWith(
       expect.objectContaining({
         indexType: 'error',
@@ -112,7 +112,7 @@ describe('useFlyoutDiscoverNavigation', () => {
   });
 
   it('returns undefined href when share is undefined', () => {
-    const result = useFlyoutDiscoverNavigation({ ...baseParams, share: undefined });
+    const result = getFlyoutDiscoverNavigation({ ...baseParams, share: undefined });
     expect(result.href).toBeUndefined();
     expect(result.esqlQuery).toBe('FROM traces-apm* | WHERE service.name == "opbeans-java"');
   });
