@@ -89,7 +89,7 @@ export const filterOutFromFlyoutBlockItem = () => {
  * Filter in value from indicators flyout overview tab table
  */
 export const filterInFromFlyoutOverviewTable = () => {
-  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
+  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().realHover();
   cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON).click();
 };
 
@@ -97,7 +97,7 @@ export const filterInFromFlyoutOverviewTable = () => {
  * Filter out value from indicators flyout overview tab table
  */
 export const filterOutFromFlyoutOverviewTable = () => {
-  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().trigger('mouseover');
+  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().realHover();
   cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON).click();
 };
 
