@@ -51,6 +51,15 @@ const generateDashboardSchema = z
       ),
   })
   .check((ctx) => {
+    if (ctx.value.prettifyPanelConfigs && !ctx.value.dashboardAttachmentId) {
+      ctx.issues.push({
+        code: 'custom',
+        message: 'dashboardAttachmentId is required when prettifyPanelConfigs is true.',
+        input: ctx.value,
+        path: ['dashboardAttachmentId'],
+      });
+    }
+
     if (ctx.value.operations.length === 0 && !ctx.value.prettifyPanelConfigs) {
       ctx.issues.push({
         code: 'custom',
