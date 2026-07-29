@@ -278,29 +278,39 @@ export const ConnectorCommand: GenerateCommand = {
         log.info('Snippet file already references', kebabName);
       } else {
         // The file is split into categories with a "**Category**" header line (e.g.
-        // "**Third-party search**", "**Identity management**"). Insert alphabetically within the
-        // FIRST category only, and never cross into the next category's header — most scaffolded
-        // connectors are generic third-party integrations, and it's safer to land a new entry at
-        // the end of the first section than to risk it being alphabetically sorted into an
-        // unrelated category (e.g. "Threat intelligence"). Re-categorize manually if needed.
-        const lines = content.split('\n').filter((l) => l.trim());
+        // "**Third-party search**", "**Identity management**") separated by blank lines. Insert
+        // alphabetically within the FIRST category only, and never cross into the next category's
+        // header — most scaffolded connectors are generic third-party integrations, and it's safer
+        // to land a new entry at the end of the first section than to risk it being alphabetically
+        // sorted into an unrelated category (e.g. "Threat intelligence"). Re-categorize manually if
+        // needed. Blank lines are preserved verbatim (not filtered out) so category separators and
+        // the file's exact formatting survive every generator run.
+        const hadTrailingNewline = content.endsWith('\n');
+        const rawLines = content.split('\n');
+        if (hadTrailingNewline) {
+          rawLines.pop();
+        }
         const isCategoryHeader = (l: string) => /^\*\*.+\*\*$/.test(l.trim());
+        const isListItem = (l: string) => l.trim().startsWith('*') && !isCategoryHeader(l);
         let inserted = false;
         let pastFirstCategory = false;
+        let sawFirstCategoryItem = false;
         const newLines: string[] = [];
 
-        for (const line of lines) {
-          if (!inserted && isCategoryHeader(line) && newLines.some((l) => l.startsWith('*'))) {
+        for (const line of rawLines) {
+          if (!inserted && isCategoryHeader(line) && sawFirstCategoryItem) {
             // Reached the end of the first category without finding an alphabetical spot.
             newLines.push(newEntry);
             inserted = true;
             pastFirstCategory = true;
           }
-          if (!inserted && !pastFirstCategory && line.startsWith('*') && !isCategoryHeader(line)) {
+          if (!inserted && !pastFirstCategory && isListItem(line)) {
             const match = line.match(/\[([^\]]+)\]/);
             if (match && match[1] > displayName) {
               newLines.push(newEntry);
               inserted = true;
+            } else if (match) {
+              sawFirstCategoryItem = true;
             }
           }
           newLines.push(line);
@@ -310,7 +320,7 @@ export const ConnectorCommand: GenerateCommand = {
           newLines.push(newEntry);
         }
 
-        await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + '\n');
+        await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + (hadTrailingNewline ? '\n' : ''));
         log.info('Updated', Path.relative(REPO_ROOT, SNIPPET_FILE));
       }
     }
