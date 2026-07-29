@@ -16,10 +16,9 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../doc_viewer_flyout/flyout_history_key_context';
 import { useDocViewerExtensionActionsContext } from '../../../../hooks/use_doc_viewer_extension_actions';
 import { ServiceNameWithIcon } from './service_name_with_icon';
+import { TRACES_DOC_VIEWER_EBT_SOURCES } from '../ebt_constants';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';
-
-export const UNIFIED_DOC_VIEWER_ABOUT_SOURCE = 'unified_doc_viewer_about';
 
 interface ServiceNameLinkProps {
   serviceName: string;
@@ -77,7 +76,7 @@ export function ServiceNameLink({
               rangeFrom: timeRangeFrom,
               rangeTo: timeRangeTo,
             },
-            source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,
+            source: TRACES_DOC_VIEWER_EBT_SOURCES.ABOUT,
             onClose: () => setFlyoutOpen(false),
             flyoutHistoryKey,
             contextActions: {

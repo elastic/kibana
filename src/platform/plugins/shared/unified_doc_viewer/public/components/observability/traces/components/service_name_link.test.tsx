@@ -10,7 +10,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ENVIRONMENT_ALL_VALUE } from '@kbn/apm-types';
-import { ServiceNameLink, UNIFIED_DOC_VIEWER_ABOUT_SOURCE } from './service_name_link';
+import { ServiceNameLink } from './service_name_link';
+import { TRACES_DOC_VIEWER_EBT_SOURCES } from '../ebt_constants';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../doc_viewer_flyout/flyout_history_key_context';
 
@@ -127,7 +128,7 @@ describe('ServiceNameLink with service flyout feature registered', () => {
       expect.objectContaining({
         service: { name: SERVICE_NAME, agentName: 'java' },
         filters: { environment: ENVIRONMENT_ALL_VALUE, rangeFrom: 'now-30m', rangeTo: 'now' },
-        source: UNIFIED_DOC_VIEWER_ABOUT_SOURCE,
+        source: TRACES_DOC_VIEWER_EBT_SOURCES.ABOUT,
       })
     );
   });
