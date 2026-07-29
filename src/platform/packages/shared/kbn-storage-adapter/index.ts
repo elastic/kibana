@@ -47,6 +47,15 @@ interface StorageSettingsBase {
 
 export interface IndexStorageSettings extends StorageSettingsBase {
   name: string;
+  /**
+   * Optional index-template priority. When multiple index templates match a
+   * backing index name, Elasticsearch selects the one with the highest
+   * priority (not the most specific pattern). Set this when a more-specific
+   * pattern must win over a broader, higher-priority template — e.g. an
+   * ES-managed base template that would otherwise create the index without
+   * this adapter's alias.
+   */
+  priority?: number;
 }
 
 export type StorageSettings = IndexStorageSettings;
