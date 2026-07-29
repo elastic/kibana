@@ -96,7 +96,7 @@ describe('Transform: Job List Columns', () => {
 
     jest.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
       ...defaultAppDependencies,
-      cps: { cpsManager },
+      cps: { cpsManager, isTierEligible: true },
     });
 
     const wrapper = createWrapper();
@@ -121,7 +121,7 @@ describe('Transform: Job List Columns', () => {
 
     jest.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
       ...defaultAppDependencies,
-      cps: { cpsManager },
+      cps: { cpsManager, isTierEligible: true },
     });
 
     const wrapper = createWrapper();
@@ -145,7 +145,7 @@ describe('Transform: Job List Columns', () => {
 
     jest.spyOn(appDependencies, 'useAppDependencies').mockReturnValue({
       ...defaultAppDependencies,
-      cps: { cpsManager },
+      cps: { cpsManager, isTierEligible: true },
     });
 
     const wrapper = createWrapper();

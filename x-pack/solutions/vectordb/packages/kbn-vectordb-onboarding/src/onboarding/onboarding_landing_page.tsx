@@ -25,14 +25,13 @@ import { ConnectToProject } from '../connection_details/connect_to_project';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { OnboardingPaths } from './components/onboarding_paths';
 import { useKibana } from '../services';
-import { ONBOARDING_PATH } from '../routes';
 
 export const OnboardingLandingPage = () => {
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
   const { services } = useKibana();
-  const vectorSearchDocsUrl = services.docLinks.links.enterpriseSearch.vectorSearch;
+  const vectorDatabaseDocsUrl = services.docLinks.links.enterpriseSearch.vectorDatabaseGetStarted;
 
   useEffect(() => {
     markOnboardingSeen();
@@ -72,13 +71,13 @@ export const OnboardingLandingPage = () => {
           </EuiFlexGroup>
           <EuiSpacer size="xs" />
           <EuiFlexItem>
-            <OnboardingPaths origin={ONBOARDING_PATH} />
+            <OnboardingPaths />
           </EuiFlexItem>
 
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLink
-                href={vectorSearchDocsUrl}
+                href={vectorDatabaseDocsUrl}
                 target="_blank"
                 external
                 data-test-subj="vectordbPathSelectionDocumentation"
