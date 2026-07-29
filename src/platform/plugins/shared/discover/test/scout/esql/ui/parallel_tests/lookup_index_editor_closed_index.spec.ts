@@ -54,12 +54,9 @@ spaceTest.describe(
           `from logstash-* | LOOKUP JOIN ${indexName} ON customer_id`
         );
 
-        const hoverText = await discover.codeEditor.getDecorationHoverText(
-          'lookupIndexClosedBadge'
-        );
-        expect(hoverText).toContain('closed');
-        expect(hoverText).not.toContain('Create lookup index');
-        expect(hoverText).not.toContain('Edit lookup index');
+        await expect(discover.codeEditor.getDecoration('lookupIndexClosedBadge')).toBeVisible();
+        await expect(discover.codeEditor.getDecoration('lookupIndexAddBadge')).toHaveCount(0);
+        await expect(discover.codeEditor.getDecoration('lookupIndexEditBadge')).toHaveCount(0);
       }
     );
   }

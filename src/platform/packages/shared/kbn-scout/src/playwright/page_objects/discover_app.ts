@@ -674,12 +674,14 @@ export class DiscoverApp {
     await this.page.locator(`button:has-text("${sortOption}")`).click();
   }
 
+  getDocHeaderLabels(): Locator {
+    return this.page.locator(
+      '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
+    );
+  }
+
   async getDocHeader(): Promise<string[]> {
-    const headers = await this.page
-      .locator(
-        '.euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__content'
-      )
-      .allInnerTexts();
+    const headers = await this.getDocHeaderLabels().allInnerTexts();
     return headers.map((h) => h.trim());
   }
 

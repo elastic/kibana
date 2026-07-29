@@ -51,6 +51,10 @@ export class KibanaCodeEditorWrapper {
     await expect(editor).toBeVisible();
   }
 
+  getCodeEditorContent(dataTestSubjId: string = 'ESQLEditor'): Locator {
+    return this.page.getByTestId(dataTestSubjId).locator('.view-lines');
+  }
+
   /**
    * Returns the current value of the Monaco editor model at the given index.
    *
@@ -269,7 +273,7 @@ export class KibanaCodeEditorWrapper {
    * injected by Monaco's decoration API, not React elements, so they can't
    * carry a `data-test-subj` — a CSS class is the correct way to target them.
    */
-  private getDecoration(decorationClassName: string): Locator {
+  getDecoration(decorationClassName: string): Locator {
     return this.page.locator(`.${decorationClassName}`);
   }
 

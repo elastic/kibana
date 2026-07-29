@@ -109,7 +109,9 @@ spaceTest.describe(
         await lookupIndexEditor.saveChangesAndClose();
 
         // Query should be updated appending the new index name
-        expect(await discover.getEsqlQueryValue()).toContain(`| LOOKUP JOIN ${indexName}`);
+        await expect(discover.codeEditor.getCodeEditorContent()).toContainText(
+          `| LOOKUP JOIN ${indexName}`
+        );
 
         // Verify the index is created correctly and contains all the data
         await expect(async () => {
