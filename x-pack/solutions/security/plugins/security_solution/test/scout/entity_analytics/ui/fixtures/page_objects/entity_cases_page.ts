@@ -126,17 +126,13 @@ export class EntityCasesPage {
   }
 
   async navigateToCase(caseId: string) {
-    // Cold-boot the SPA on the lighter Cases list route, then open the case via its
-    // in-app (client-side) link so the heavy case-view render happens on a warm SPA. A
-    // direct gotoApp to the case deep-link cold-boots straight into the case-view render,
-    // which under parallel load exceeds any reasonable readiness budget.
-    await this.page.gotoApp('security/cases');
-    const caseRow = this.page.testSubj.locator(`cases-table-row-${caseId}`);
-    await caseRow.waitFor({ state: 'visible', timeout: 30000 });
-    await caseRow.locator('[data-test-subj="case-details-link"]').click();
-    await this.page.testSubj
-      .locator('case-view-title')
-      .waitFor({ state: 'visible', timeout: 30000 });
+    await this.page.gotoApp(`security/cases/${caseId}`);
+    // Cold SPA boot straight into the case-view render can exceed the default 10s wait
+    // under parallel load. Wait on the Attachments tab title (which the next step opens)
+    // with a generous cold-boot budget — this tab is rendered by the shared case-view tab
+    // bar in both the classic and redesigned Cases UIs, unlike the redesign-absent
+    // `case-view-title`.
+    await this.attachmentsTab.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   // Case view lands on the Activity tab; the Entities accordion lives inside the
