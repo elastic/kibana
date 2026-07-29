@@ -44,7 +44,8 @@ const renderWithProviders = (
   );
 };
 
-const EMPTY_FALLBACK = /No sources yet/;
+const EMPTY_FALLBACK = /No description yet/;
+const ADD_ONE_HINT = /Add one to help agents understand this AI index/;
 
 describe('DescriptionPanel', () => {
   it('renders the provided description when not loading', () => {
@@ -67,6 +68,24 @@ describe('DescriptionPanel', () => {
     );
 
     expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
+    expect(screen.getByText(ADD_ONE_HINT)).toBeInTheDocument();
+  });
+
+  it('renders read-only empty fallback for managed AI indexes', () => {
+    renderWithProviders(
+      <DescriptionPanel isLoading={false} aiIndex={aiIndex} onSaved={jest.fn()} isManaged />
+    );
+
+    expect(screen.getByText(EMPTY_FALLBACK)).toBeInTheDocument();
+    expect(screen.queryByText(ADD_ONE_HINT)).not.toBeInTheDocument();
+  });
+
+  it('does not render the edit button while loading', () => {
+    renderWithProviders(
+      <DescriptionPanel isLoading aiIndex={aiIndex} onSaved={jest.fn()} isManaged={false} />
+    );
+
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
   });
 
   it('does not render the description text while loading', () => {

@@ -56,7 +56,7 @@ describe('ContextLandingPage', () => {
     return core;
   };
 
-  it('renders the header and create button', async () => {
+  it('renders the header and a create button in the empty prompt when there are no indexes', async () => {
     const core = createCore();
     core.http.get.mockResolvedValue({ ai_indices: [] });
 
@@ -64,11 +64,27 @@ describe('ContextLandingPage', () => {
 
     expect(screen.getByTestId('contextLandingPage')).toBeInTheDocument();
 
-    const createButton = screen.getByTestId('contextCreateAiIndexButton');
-    expect(createButton).toBeInTheDocument();
-    expect(createButton).toHaveTextContent('Create AI Index');
+    const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
+    expect(createButtons).toHaveLength(1);
+    expect(createButtons[0]).toHaveTextContent('Create AI Index');
+    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
 
     await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+  });
+
+  it('renders exactly one create button in the page header when indexes exist', async () => {
+    const core = createCore();
+    core.http.get.mockResolvedValue({
+      ai_indices: [buildAiIndex({ id: 'first' })],
+    });
+
+    renderWithProviders(core);
+
+    await screen.findAllByTestId('contextAiIndexCard');
+
+    const createButtons = screen.getAllByTestId('contextCreateAiIndexButton');
+    expect(createButtons).toHaveLength(1);
+    expect(screen.queryByTestId('contextAiIndexCardsEmpty')).not.toBeInTheDocument();
   });
 
   it('renders skeleton cards while the list API is loading', () => {
@@ -126,6 +142,7 @@ describe('ContextLandingPage', () => {
 
     expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('contextCreateAiIndexButton')).toHaveLength(1);
   });
 
   it('renders an error prompt when the list API fails', async () => {

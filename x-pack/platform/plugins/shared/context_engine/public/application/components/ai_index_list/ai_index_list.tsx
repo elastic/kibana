@@ -19,8 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import type { AiIndexHttpItem } from '../../../../common/http_api/ai_indices';
 import { useAiIndexListState } from '../../hooks/use_ai_index_list_state';
-import { useListAiIndices } from '../../hooks/use_list_ai_indices';
 import { useNavigation } from '../../hooks/use_navigation';
 import { getAiIndexDetailPath } from '../../paths';
 import { CreateAiIndexButton } from '../create_ai_index_button';
@@ -30,9 +30,14 @@ import { AiIndexListControls } from './ai_index_list_controls';
 const SKELETON_CARD_COUNT = 3;
 const GRID_COLUMNS = 3;
 
-export const AiIndexList = () => {
+interface AiIndexListProps {
+  aiIndices: AiIndexHttpItem[];
+  isLoading: boolean;
+  error: Error | undefined;
+}
+
+export const AiIndexList = ({ aiIndices, isLoading, error }: AiIndexListProps) => {
   const { createContextEngineUrl } = useNavigation();
-  const { aiIndices, isLoading, error } = useListAiIndices();
   const {
     filters,
     setQuery,
@@ -49,9 +54,9 @@ export const AiIndexList = () => {
   if (isLoading) {
     return (
       <EuiFlexGrid columns={GRID_COLUMNS} gutterSize="l">
-        {Array.from({ length: SKELETON_CARD_COUNT }).map((_, index) => (
+        {Array.from({ length: SKELETON_CARD_COUNT }, (_, index) => (
           <EuiSkeletonRectangle
-            key={index}
+            key={`contextAiIndexCardSkeleton-${index}`}
             width="100%"
             height={160}
             borderRadius="m"

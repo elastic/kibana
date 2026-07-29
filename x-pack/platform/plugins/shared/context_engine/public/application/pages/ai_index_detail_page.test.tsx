@@ -202,8 +202,9 @@ describe('AiIndexDetailPage', () => {
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
     expect(await screen.findByTestId('contextEditSourcesFlyout')).toBeInTheDocument();
-    // Stored sources are restored as raw ES|QL, keyed by their query.
-    expect(await screen.findByTestId('contextSelectedSource-FROM My view')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextSelectedSource-esql-0')).toHaveTextContent(
+      'FROM My view'
+    );
   });
 
   it('saves edited sources and refetches the AI index', async () => {
@@ -256,13 +257,14 @@ describe('AiIndexDetailPage', () => {
     expect(mockMgetWorkflows).not.toHaveBeenCalled();
   });
 
-  it('enables the automations edit button once the AI index has loaded', async () => {
+  it('shows edit controls once the AI index has loaded', async () => {
     const services = coreMock.createStart();
     services.http.get.mockResolvedValue(aiIndex);
 
     renderWithProviders(services);
 
-    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
+    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextEditDescriptionButton')).not.toBeInTheDocument();
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 

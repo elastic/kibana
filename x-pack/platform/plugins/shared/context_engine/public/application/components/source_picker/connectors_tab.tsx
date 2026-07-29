@@ -20,25 +20,21 @@ import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DataConnector } from '../../hooks/use_data_connectors';
 
-// Deep link to the connectors list in Stack Management, where connectors are
-// created and managed.
 const MANAGEMENT_APP_ID = 'management';
 const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors/connectors';
 
 interface ConnectorsTabProps {
   connectors: DataConnector[];
   isLoading: boolean;
+  isError: boolean;
   selectedConnectorIds: string[];
   onToggle: (params: { id: string; name: string; checked: boolean }) => void;
 }
 
-/**
- * Lists the connectors configured in the space and lets the user select them
- * as AI index sources. Selection state mirrors the picker's connector chips.
- */
 export const ConnectorsTab = ({
   connectors,
   isLoading,
+  isError,
   selectedConnectorIds,
   onToggle,
 }: ConnectorsTabProps) => {
@@ -91,6 +87,32 @@ export const ConnectorsTab = ({
 
   if (isLoading) {
     return <EuiSkeletonText lines={3} data-test-subj="contextConnectorsLoading" />;
+  }
+
+  if (isError) {
+    return (
+      <EuiEmptyPrompt
+        color="danger"
+        iconType="error"
+        data-test-subj="contextConnectorsError"
+        title={
+          <h3>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.errorTitle"
+              defaultMessage="Unable to load connectors"
+            />
+          </h3>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.contextEngine.sourcePicker.connectors.errorBody"
+              defaultMessage="Connectors could not be loaded. Try again or check your permissions."
+            />
+          </p>
+        }
+      />
+    );
   }
 
   if (connectors.length === 0) {

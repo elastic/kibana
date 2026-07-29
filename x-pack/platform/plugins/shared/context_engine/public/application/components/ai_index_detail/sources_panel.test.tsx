@@ -10,14 +10,24 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
+import type {
+  UseDataConnectorsOptions,
+  UseDataConnectorsResult,
+} from '../../hooks/use_data_connectors';
 import { SourcesPanel } from './sources_panel';
 
-jest.mock('../../hooks/use_data_connectors', () => ({
-  useDataConnectors: () => ({
+const mockUseDataConnectors = jest.fn(
+  (_options?: UseDataConnectorsOptions): UseDataConnectorsResult => ({
     connectors: [{ id: 'connector-gdrive', name: 'Google Drive' }],
     connectorNameById: new Map([['connector-gdrive', 'Google Drive']]),
     isLoading: false,
-  }),
+    isError: false,
+    error: undefined,
+  })
+);
+
+jest.mock('../../hooks/use_data_connectors', () => ({
+  useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
 }));
 
 const renderWithProviders = (ui: React.ReactElement) =>
@@ -34,6 +44,10 @@ const sources: AiIndexSource[] = [
 ];
 
 describe('SourcesPanel', () => {
+  beforeEach(() => {
+    mockUseDataConnectors.mockClear();
+  });
+
   it('shows the loading skeleton while loading and no rows', () => {
     renderWithProviders(
       <SourcesPanel
@@ -62,7 +76,19 @@ describe('SourcesPanel', () => {
     );
 
     expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(
+      screen.getByText('No sources yet. Add a source to start building context for this AI index.')
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexSourceRow')).not.toBeInTheDocument();
+  });
+
+  it('shows read-only empty copy for managed AI indexes with no sources', () => {
+    renderWithProviders(
+      <SourcesPanel isLoading={false} sources={[]} canEdit onEditSources={jest.fn()} isManaged />
+    );
+
+    expect(screen.getByTestId('contextAiIndexSourcesEmpty')).toBeInTheDocument();
+    expect(screen.getByText('This AI index has no sources.')).toBeInTheDocument();
   });
 
   it('renders one row per source', () => {
@@ -78,6 +104,34 @@ describe('SourcesPanel', () => {
 
     expect(screen.getAllByTestId('contextAiIndexSourceRow')).toHaveLength(sources.length);
     expect(screen.queryByTestId('contextAiIndexSourcesEmpty')).not.toBeInTheDocument();
+  });
+
+  it('does not fetch connectors when there are no connector sources', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        sources={sources}
+        canEdit
+        onEditSources={jest.fn()}
+        isManaged={false}
+      />
+    );
+
+    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: false });
+  });
+
+  it('fetches connectors when at least one source is a connector', () => {
+    renderWithProviders(
+      <SourcesPanel
+        isLoading={false}
+        sources={[{ type: 'connector', value: 'connector-gdrive' }]}
+        canEdit
+        onEditSources={jest.fn()}
+        isManaged={false}
+      />
+    );
+
+    expect(mockUseDataConnectors).toHaveBeenCalledWith({ enabled: true });
   });
 
   it('resolves the connector name for connector sources', () => {

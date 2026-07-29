@@ -38,6 +38,8 @@ export const AiIndexDetailPage = () => {
   const [isEditingSources, setIsEditingSources] = useState(false);
 
   const landingUrl = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
+  const isManaged = aiIndex !== undefined && aiIndex.managed;
+  const hideEditControls = isLoading || isManaged;
 
   if (error) {
     return (
@@ -77,7 +79,7 @@ export const AiIndexDetailPage = () => {
   ) : (
     <EuiFlexGroup alignItems="baseline" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>{aiIndex?.id}</EuiFlexItem>
-      {aiIndex?.managed && (
+      {isManaged && (
         <EuiFlexItem grow={false}>
           <EuiText
             component="span"
@@ -85,7 +87,11 @@ export const AiIndexDetailPage = () => {
             color="subdued"
             data-test-subj="contextAiIndexDetailManagedBadge"
           >
-            <EuiIcon type="lock" size="s" aria-hidden={true} /> Managed
+            <EuiIcon type="lock" size="s" aria-hidden={true} />{' '}
+            <FormattedMessage
+              id="xpack.contextEngine.aiIndexDetail.managedBadge"
+              defaultMessage="Managed"
+            />
           </EuiText>
         </EuiFlexItem>
       )}
@@ -112,7 +118,7 @@ export const AiIndexDetailPage = () => {
           isLoading={isLoading}
           aiIndex={aiIndex}
           onSaved={refetch}
-          isManaged={aiIndex?.managed ?? false}
+          isManaged={isManaged}
         />
         <EuiSpacer size="m" />
         <SourcesPanel
@@ -120,14 +126,14 @@ export const AiIndexDetailPage = () => {
           sources={aiIndex?.sources ?? []}
           canEdit={aiIndex !== undefined}
           onEditSources={() => setIsEditingSources(true)}
-          isManaged={aiIndex?.managed ?? false}
+          isManaged={hideEditControls}
         />
         <EuiSpacer size="m" />
         <AutomationsPanel
           isLoading={isLoading}
           aiIndex={aiIndex}
           onSaved={refetch}
-          isManaged={aiIndex?.managed ?? false}
+          isManaged={isManaged}
         />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (

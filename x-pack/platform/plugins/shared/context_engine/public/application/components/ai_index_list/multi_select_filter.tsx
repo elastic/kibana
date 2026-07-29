@@ -12,7 +12,7 @@ import {
   useGeneratedHtmlId,
   type EuiSelectableOption,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 interface MultiSelectFilterOption<TValue extends string> {
   value: TValue;
@@ -53,6 +53,17 @@ export const MultiSelectFilter = <TValue extends string>({
     [onChange]
   );
 
+  const selectableOptions = useMemo(
+    () =>
+      options.map((option) => ({
+        ...option,
+        key: option.value,
+        checked: selected.includes(option.value) ? ('on' as const) : undefined,
+        'data-test-subj': `${dataTestSubj}Option-${option.value}`,
+      })),
+    [dataTestSubj, options, selected]
+  );
+
   return (
     <EuiPopover
       id={popoverId}
@@ -76,12 +87,7 @@ export const MultiSelectFilter = <TValue extends string>({
     >
       <EuiSelectable<MultiSelectFilterOption<TValue>>
         aria-label={label}
-        options={options.map((option) => ({
-          ...option,
-          key: option.value,
-          checked: selected.includes(option.value) ? 'on' : undefined,
-          'data-test-subj': `${dataTestSubj}Option-${option.value}`,
-        }))}
+        options={selectableOptions}
         onChange={handleChange}
         listProps={{ paddingSize: 's', isVirtualized: false }}
       >

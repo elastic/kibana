@@ -11,7 +11,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
-import { DATA_CONNECTOR_TYPE_IDS, useDataConnectors } from './use_data_connectors';
+import { DATA_CONNECTOR_TYPE_IDS } from '../../../common/data_connectors';
+import { useDataConnectors } from './use_data_connectors';
 
 const ACTION_CONNECTORS_LIST_PATH = '/api/actions/connectors';
 
@@ -28,7 +29,10 @@ const buildRawConnector = (overrides: Partial<RawActionConnector> = {}): RawActi
   ...overrides,
 });
 
-const renderDataConnectors = (core: CoreStart) => {
+const renderDataConnectors = (
+  core: CoreStart,
+  options?: Parameters<typeof useDataConnectors>[0]
+) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const wrapper = ({ children }: { children: React.ReactNode }) =>
     React.createElement(
@@ -37,7 +41,7 @@ const renderDataConnectors = (core: CoreStart) => {
       React.createElement(QueryClientProvider, { client: queryClient }, children)
     );
 
-  return renderHook(() => useDataConnectors(), { wrapper });
+  return renderHook(() => useDataConnectors(options), { wrapper });
 };
 
 describe('useDataConnectors', () => {
@@ -50,7 +54,25 @@ describe('useDataConnectors', () => {
     core.http.get.mockResolvedValue([]);
     renderDataConnectors(core);
 
-    await waitFor(() => expect(core.http.get).toHaveBeenCalledWith(ACTION_CONNECTORS_LIST_PATH));
+    await waitFor(() =>
+      expect(core.http.get).toHaveBeenCalledWith(
+        ACTION_CONNECTORS_LIST_PATH,
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      )
+    );
+  });
+
+  it('passes the abort signal to http.get', async () => {
+    const core = coreMock.createStart();
+    core.http.get.mockResolvedValue([]);
+    renderDataConnectors(core);
+
+    await waitFor(() => expect(core.http.get).toHaveBeenCalled());
+
+    expect(core.http.get).toHaveBeenCalledWith(
+      ACTION_CONNECTORS_LIST_PATH,
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
   });
 
   it('returns isLoading: true and an empty connectors array before the request resolves', () => {
@@ -130,13 +152,26 @@ describe('useDataConnectors', () => {
     expect(result.current.connectorNameById.get('unknown-id')).toBeUndefined();
   });
 
-  it('returns an empty connectors array when the request rejects', async () => {
+  it('returns isError and an empty connectors array when the request rejects', async () => {
     const core = coreMock.createStart();
     core.http.get.mockRejectedValue(new Error('Network error'));
     const { result } = renderDataConnectors(core);
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
+    expect(result.current.isError).toBe(true);
+    expect(result.current.error).toEqual(new Error('Network error'));
+    expect(result.current.connectors).toEqual([]);
+  });
+
+  it('does not fetch connectors when enabled is false', () => {
+    const core = coreMock.createStart();
+    core.http.get.mockReturnValue(new Promise(() => {}));
+    const { result } = renderDataConnectors(core, { enabled: false });
+
+    expect(core.http.get).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.isError).toBe(false);
     expect(result.current.connectors).toEqual([]);
   });
 });

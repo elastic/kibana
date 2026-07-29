@@ -41,11 +41,17 @@ describe('AiIndexListControls', () => {
   it('typing in contextAiIndexListSearch calls setQuery with the typed value', () => {
     const { setQuery } = renderWithProviders();
 
-    fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search AI Indexes' }), {
       target: { value: 'support tickets' },
     });
 
     expect(setQuery).toHaveBeenCalledWith('support tickets');
+  });
+
+  it('exposes the search field with an accessible name', () => {
+    renderWithProviders();
+
+    expect(screen.getByRole('searchbox', { name: 'Search AI Indexes' })).toBeInTheDocument();
   });
 
   it('renders the current filters.query value in the search input', () => {
@@ -53,7 +59,9 @@ describe('AiIndexListControls', () => {
       filters: { query: 'elastic managed', types: [], owners: [] },
     });
 
-    expect(screen.getByTestId('contextAiIndexListSearch')).toHaveValue('elastic managed');
+    expect(screen.getByRole('searchbox', { name: 'Search AI Indexes' })).toHaveValue(
+      'elastic managed'
+    );
   });
 
   it('renders the Type and Owner filter buttons with their labels', () => {

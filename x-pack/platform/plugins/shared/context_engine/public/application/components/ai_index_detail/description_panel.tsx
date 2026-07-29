@@ -70,7 +70,7 @@ export const DescriptionPanel = ({
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {!isEditing && !isManaged && (
+        {!isEditing && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -139,12 +139,18 @@ export const DescriptionPanel = ({
       ) : (
         <EuiText size="s" color={aiIndex?.description ? undefined : 'subdued'}>
           <p>
-            {aiIndex?.description ?? (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.description.empty"
-                defaultMessage="No sources yet — add a source and a summary will be generated automatically."
-              />
-            )}
+            {aiIndex?.description ??
+              (isManaged ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.emptyManaged"
+                  defaultMessage="No description yet."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.empty"
+                  defaultMessage="No description yet. Add one to help agents understand this AI index."
+                />
+              ))}
           </p>
         </EuiText>
       )}

@@ -135,7 +135,24 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(screen.getByText('Create an automation to get started.')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
+  });
+
+  it('shows read-only empty body copy for managed AI indexes', () => {
+    renderPanel({ isManaged: true });
+
+    expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
+    expect(
+      screen.getByText('No automations are configured for this AI index.')
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Create an automation to get started.')).not.toBeInTheDocument();
+  });
+
+  it('does not render the edit button while loading', () => {
+    renderPanel({ isLoading: true });
+
+    expect(screen.queryByTestId('contextEditAutomationsButton')).not.toBeInTheDocument();
   });
 
   it('shows the create control instead of the empty prompt when editing with no automations', () => {

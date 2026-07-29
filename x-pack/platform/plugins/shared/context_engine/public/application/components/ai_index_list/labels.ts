@@ -20,7 +20,7 @@ export const AI_INDEX_TYPE_LABEL: Record<AiIndexType, string> = {
 
 export const AI_INDEX_OWNER_LABEL: Record<AiIndexOwner, string> = {
   managed: i18n.translate('xpack.contextEngine.landing.owner.managed', {
-    defaultMessage: 'Elastic managed',
+    defaultMessage: 'Managed',
   }),
   user: i18n.translate('xpack.contextEngine.landing.owner.user', {
     defaultMessage: 'User created',

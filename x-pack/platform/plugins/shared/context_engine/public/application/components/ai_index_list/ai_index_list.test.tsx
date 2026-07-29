@@ -6,11 +6,9 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
@@ -29,97 +27,85 @@ const buildAiIndex = (overrides: Partial<AiIndexHttpItem> = {}): AiIndexHttpItem
   ...overrides,
 });
 
-const createTestQueryClient = () =>
-  new QueryClient({ defaultOptions: { queries: { retry: false } } });
+type AiIndexListProps = React.ComponentProps<typeof AiIndexList>;
 
-const renderWithProviders = (core: CoreStart) =>
-  render(
+const renderWithProviders = (
+  props: AiIndexListProps,
+  core: ReturnType<typeof coreMock.createStart> = coreMock.createStart()
+) => {
+  core.application.getUrlForApp.mockImplementation(
+    (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  );
+
+  return render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={core}>
-          <QueryClientProvider client={createTestQueryClient()}>
-            <MemoryRouter>
-              <AiIndexList />
-            </MemoryRouter>
-          </QueryClientProvider>
+          <MemoryRouter>
+            <AiIndexList {...props} />
+          </MemoryRouter>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
+};
 
 describe('AiIndexList', () => {
-  const createCore = () => {
-    const core = coreMock.createStart();
-    core.application.getUrlForApp.mockImplementation(
-      (appId, options) => `/app/${appId}${options?.path ?? ''}`
-    );
-    return core;
-  };
-
   it('renders skeleton cards and no index cards while the list request is pending', () => {
-    const core = createCore();
-    core.http.get.mockReturnValue(new Promise(() => {}));
-
-    renderWithProviders(core);
+    renderWithProviders({ aiIndices: [], isLoading: true, error: undefined });
 
     expect(screen.getAllByTestId('contextAiIndexCardSkeleton')).toHaveLength(3);
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
   });
 
-  it('renders an error prompt with the error message when the request rejects', async () => {
-    const core = createCore();
-    core.http.get.mockRejectedValue(new Error('Boom'));
+  it('renders an error prompt with the error message when the request rejects', () => {
+    renderWithProviders({ aiIndices: [], isLoading: false, error: new Error('Boom') });
 
-    renderWithProviders(core);
-
-    expect(await screen.findByTestId('contextAiIndexCardsError')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexCardsError')).toBeInTheDocument();
     expect(screen.getByText('Boom')).toBeInTheDocument();
   });
 
-  it('renders an empty prompt when the API returns an empty array', async () => {
-    const core = createCore();
-    core.http.get.mockResolvedValue({ ai_indices: [] });
+  it('renders an empty prompt when the API returns an empty array', () => {
+    renderWithProviders({ aiIndices: [], isLoading: false, error: undefined });
 
-    renderWithProviders(core);
-
-    expect(await screen.findByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexCardsEmpty')).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeInTheDocument();
   });
 
-  it('does not render search and filter controls while loading, on error, or when empty', async () => {
-    const loadingCore = createCore();
-    loadingCore.http.get.mockReturnValue(new Promise(() => {}));
-    const { unmount: unmountLoading } = renderWithProviders(loadingCore);
+  it('does not render search and filter controls while loading, on error, or when empty', () => {
+    const { unmount: unmountLoading } = renderWithProviders({
+      aiIndices: [],
+      isLoading: true,
+      error: undefined,
+    });
     expect(screen.queryByTestId('contextAiIndexListSearch')).not.toBeInTheDocument();
     unmountLoading();
 
-    const errorCore = createCore();
-    errorCore.http.get.mockRejectedValue(new Error('Boom'));
-    const { unmount: unmountError } = renderWithProviders(errorCore);
-    await screen.findByTestId('contextAiIndexCardsError');
+    const { unmount: unmountError } = renderWithProviders({
+      aiIndices: [],
+      isLoading: false,
+      error: new Error('Boom'),
+    });
     expect(screen.queryByTestId('contextAiIndexListSearch')).not.toBeInTheDocument();
     unmountError();
 
-    const emptyCore = createCore();
-    emptyCore.http.get.mockResolvedValue({ ai_indices: [] });
-    renderWithProviders(emptyCore);
-    await screen.findByTestId('contextAiIndexCardsEmpty');
+    renderWithProviders({ aiIndices: [], isLoading: false, error: undefined });
     expect(screen.queryByTestId('contextAiIndexListSearch')).not.toBeInTheDocument();
   });
 
-  it('renders one card per returned index and a match count summary when there is data', async () => {
-    const core = createCore();
-    core.http.get.mockResolvedValue({
-      ai_indices: [
+  it('renders one card per returned index and a match count summary when there is data', () => {
+    renderWithProviders({
+      aiIndices: [
         buildAiIndex({ id: 'first' }),
         buildAiIndex({ id: 'second' }),
         buildAiIndex({ id: 'third' }),
       ],
+      isLoading: false,
+      error: undefined,
     });
 
-    renderWithProviders(core);
-
-    expect(await screen.findAllByTestId('contextAiIndexCard')).toHaveLength(3);
+    expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(3);
     expect(screen.getByTestId('contextAiIndexListCount')).toHaveTextContent('3 AI Indexes');
     expect(screen.getByRole('link', { name: /first/ })).toHaveAttribute(
       'href',
@@ -127,14 +113,12 @@ describe('AiIndexList', () => {
     );
   });
 
-  it('renders a no-matches prompt and restores all cards when filters are cleared', async () => {
-    const core = createCore();
-    core.http.get.mockResolvedValue({
-      ai_indices: [buildAiIndex({ id: 'alpha' }), buildAiIndex({ id: 'beta' })],
+  it('renders a no-matches prompt and restores all cards when filters are cleared', () => {
+    renderWithProviders({
+      aiIndices: [buildAiIndex({ id: 'alpha' }), buildAiIndex({ id: 'beta' })],
+      isLoading: false,
+      error: undefined,
     });
-
-    renderWithProviders(core);
-    await screen.findAllByTestId('contextAiIndexCard');
 
     fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
       target: { value: 'nothing-matches-this' },
@@ -148,30 +132,26 @@ describe('AiIndexList', () => {
     expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(2);
   });
 
-  it('hides pagination when everything fits on one page', async () => {
-    const core = createCore();
-    core.http.get.mockResolvedValue({
-      ai_indices: Array.from({ length: AI_INDICES_PER_PAGE }, (_, index) =>
+  it('hides pagination when everything fits on one page', () => {
+    renderWithProviders({
+      aiIndices: Array.from({ length: AI_INDICES_PER_PAGE }, (_, index) =>
         buildAiIndex({ id: `ai-index-${index}` })
       ),
+      isLoading: false,
+      error: undefined,
     });
-
-    renderWithProviders(core);
-    await screen.findAllByTestId('contextAiIndexCard');
 
     expect(screen.queryByTestId('contextAiIndexListPagination')).not.toBeInTheDocument();
   });
 
   it(`renders pagination when there are more than ${AI_INDICES_PER_PAGE} indexes`, async () => {
-    const core = createCore();
-    core.http.get.mockResolvedValue({
-      ai_indices: Array.from({ length: AI_INDICES_PER_PAGE + 1 }, (_, index) =>
+    renderWithProviders({
+      aiIndices: Array.from({ length: AI_INDICES_PER_PAGE + 1 }, (_, index) =>
         buildAiIndex({ id: `ai-index-${index}` })
       ),
+      isLoading: false,
+      error: undefined,
     });
-
-    renderWithProviders(core);
-    await screen.findAllByTestId('contextAiIndexCard');
 
     expect(screen.getAllByTestId('contextAiIndexCard')).toHaveLength(AI_INDICES_PER_PAGE);
     expect(screen.getByTestId('contextAiIndexListPagination')).toBeInTheDocument();
@@ -185,10 +165,9 @@ describe('AiIndexList', () => {
   });
 
   describe('search', () => {
-    const renderWithSearchFixtures = async () => {
-      const core = createCore();
-      core.http.get.mockResolvedValue({
-        ai_indices: [
+    const renderWithSearchFixtures = () => {
+      renderWithProviders({
+        aiIndices: [
           buildAiIndex({
             id: 'by-id-index',
             description: 'Unrelated description',
@@ -209,18 +188,16 @@ describe('AiIndexList', () => {
             dest: { type: 'index', value: 'index-without-description' },
           }),
         ],
+        isLoading: false,
+        error: undefined,
       });
-
-      renderWithProviders(core);
-      await screen.findAllByTestId('contextAiIndexCard');
-      return core;
     };
 
     const cardIds = () =>
       screen.getAllByTestId('contextAiIndexCard').map((card) => card.textContent);
 
-    it('matches on the index id', async () => {
-      await renderWithSearchFixtures();
+    it('matches on the index id', () => {
+      renderWithSearchFixtures();
 
       fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
         target: { value: 'by-id-index' },
@@ -230,8 +207,8 @@ describe('AiIndexList', () => {
       expect(cardIds()[0]).toContain('by-id-index');
     });
 
-    it('matches on the description', async () => {
-      await renderWithSearchFixtures();
+    it('matches on the description', () => {
+      renderWithSearchFixtures();
 
       fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
         target: { value: 'unique playbook' },
@@ -241,8 +218,8 @@ describe('AiIndexList', () => {
       expect(cardIds()[0]).toContain('by-description-index');
     });
 
-    it('matches on dest.value', async () => {
-      await renderWithSearchFixtures();
+    it('matches on dest.value', () => {
+      renderWithSearchFixtures();
 
       fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
         target: { value: 'special-backing-value' },
@@ -252,8 +229,8 @@ describe('AiIndexList', () => {
       expect(cardIds()[0]).toContain('by-dest-index');
     });
 
-    it('does not crash when searching indexes without a description and excludes them from text matches', async () => {
-      await renderWithSearchFixtures();
+    it('does not crash when searching indexes without a description and excludes them from text matches', () => {
+      renderWithSearchFixtures();
 
       fireEvent.change(screen.getByTestId('contextAiIndexListSearch'), {
         target: { value: 'playbook' },

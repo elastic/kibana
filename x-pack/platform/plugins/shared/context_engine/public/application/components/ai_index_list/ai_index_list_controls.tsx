@@ -24,6 +24,10 @@ const OWNER_OPTIONS: ReadonlyArray<{ value: AiIndexOwner; label: string }> = [
   { value: 'user', label: AI_INDEX_OWNER_LABEL.user },
 ];
 
+const SEARCH_FIELD_LABEL = i18n.translate('xpack.contextEngine.landing.searchPlaceholder', {
+  defaultMessage: 'Search AI Indexes',
+});
+
 type AiIndexListControlsProps = Pick<
   UseAiIndexListStateResult,
   'filters' | 'setQuery' | 'setTypes' | 'setOwners'
@@ -41,9 +45,8 @@ export const AiIndexListControls = ({
         fullWidth
         incremental
         data-test-subj="contextAiIndexListSearch"
-        placeholder={i18n.translate('xpack.contextEngine.landing.searchPlaceholder', {
-          defaultMessage: 'Search AI Indexes',
-        })}
+        aria-label={SEARCH_FIELD_LABEL}
+        placeholder={SEARCH_FIELD_LABEL}
         value={filters.query}
         onChange={(event) => setQuery(event.target.value)}
       />

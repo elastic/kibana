@@ -31,8 +31,6 @@ jest.mock('@kbn/esql/public', () => ({
   ),
 }));
 
-// The action connectors endpoint returns every connector in the space; the
-// picker filters to the data-retrieval subset. `.slack` should be excluded.
 const CONNECTORS = [
   { id: 'connector-gdrive', name: 'Google Drive', connector_type_id: '.google_drive' },
   { id: 'connector-github', name: 'GitHub', connector_type_id: '.github' },
@@ -50,17 +48,20 @@ const Harness = ({ initialSources = [] }: { initialSources?: SelectedSource[] })
   return <SourcePicker selectedSources={selectedSources} onChange={setSelectedSources} />;
 };
 
-const renderWithProviders = (ui: React.ReactElement) => {
+const renderWithProviders = (ui: React.ReactElement, services = createServices()) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
-    <I18nProvider>
-      <EuiProvider>
-        <KibanaContextProvider services={createServices()}>
-          <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-        </KibanaContextProvider>
-      </EuiProvider>
-    </I18nProvider>
-  );
+  return {
+    services,
+    ...render(
+      <I18nProvider>
+        <EuiProvider>
+          <KibanaContextProvider services={services}>
+            <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+          </KibanaContextProvider>
+        </EuiProvider>
+      </I18nProvider>
+    ),
+  };
 };
 
 const addEsqlSource = (query: string) => {
@@ -85,7 +86,7 @@ describe('SourcePicker', () => {
 
     addEsqlSource('FROM logs-* | LIMIT 10');
 
-    expect(screen.getByTestId('contextSelectedSource-FROM logs-* | LIMIT 10')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
 
   it('does not add a duplicate ES|QL query', () => {
@@ -94,7 +95,7 @@ describe('SourcePicker', () => {
     addEsqlSource('FROM logs-* | LIMIT 10');
     addEsqlSource('FROM logs-* | LIMIT 10');
 
-    expect(screen.getAllByTestId('contextSelectedSource-FROM logs-* | LIMIT 10')).toHaveLength(1);
+    expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
   });
 
   it('removes a selected source when its remove button is clicked', () => {
@@ -102,19 +103,24 @@ describe('SourcePicker', () => {
 
     addEsqlSource('FROM logs-* | LIMIT 10');
 
-    const row = screen.getByTestId('contextSelectedSource-FROM logs-* | LIMIT 10');
+    const row = screen.getByTestId('contextSelectedSource-esql-0');
     fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
 
-    expect(
-      screen.queryByTestId('contextSelectedSource-FROM logs-* | LIMIT 10')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
+  });
+
+  it('does not fetch connectors on mount when only the ES|QL tab is shown', () => {
+    const { services } = renderWithProviders(<Harness />);
+
+    expect(services.http.get).not.toHaveBeenCalled();
   });
 
   it('lists only the data-retrieval connectors in the connectors tab', async () => {
-    renderWithProviders(<Harness />);
+    const { services } = renderWithProviders(<Harness />);
 
     openConnectorsTab();
 
+    await waitFor(() => expect(services.http.get).toHaveBeenCalled());
     expect(await screen.findByText('Google Drive')).toBeInTheDocument();
     expect(screen.getByText('GitHub')).toBeInTheDocument();
     // Slack is not a data-retrieval connector, so it must be filtered out.
@@ -133,7 +139,7 @@ describe('SourcePicker', () => {
   });
 
   it('resolves connector names for restored connector sources', async () => {
-    renderWithProviders(
+    const { services } = renderWithProviders(
       <Harness
         initialSources={[
           {
@@ -146,12 +152,24 @@ describe('SourcePicker', () => {
       />
     );
 
-    // The stored source only knows the connector id; once connectors load its
-    // row should show the human-readable name.
+    await waitFor(() => expect(services.http.get).toHaveBeenCalled());
+
     await waitFor(() =>
       expect(screen.getByTestId('contextSelectedSource-connector-github')).toHaveTextContent(
         'GitHub'
       )
     );
+  });
+
+  it('shows an error prompt in the connectors tab when the connector request fails', async () => {
+    const services = createServices();
+    services.http.get.mockRejectedValue(new Error('Network error'));
+
+    renderWithProviders(<Harness />, services);
+
+    openConnectorsTab();
+
+    expect(await screen.findByTestId('contextConnectorsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextConnectorsEmpty')).not.toBeInTheDocument();
   });
 });

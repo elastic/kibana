@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, KibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
@@ -37,8 +38,10 @@ import {
   AiIndexManagedError,
   AiIndexNotFoundError,
   AiIndexAlreadyExistsError,
+  InvalidConnectorSourceError,
 } from '../ai_indices/errors';
 import type { AiIndexService } from '../ai_indices/service';
+import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 
 const READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [apiPrivileges.readContextEngine] },
@@ -134,7 +137,7 @@ const withContextEngineFeatureFlag =
   };
 
 const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => {
-  if (error instanceof InvalidAiIndexDestError) {
+  if (error instanceof InvalidAiIndexDestError || error instanceof InvalidConnectorSourceError) {
     return response.badRequest({ body: { message: error.message } });
   }
   if (error instanceof AiIndexNotFoundError) {
@@ -153,9 +156,11 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory) => 
 export const registerAiIndexRoutes = ({
   router,
   getAiIndexService,
+  getActions,
 }: {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
+  getActions: () => Promise<ActionsPluginStart>;
 }) => {
   // Create an AI index
   router.versioned
@@ -183,6 +188,11 @@ export const registerAiIndexRoutes = ({
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         try {
           const { id, ...properties } = request.body;
+          await validateConnectorSources({
+            sources: properties.sources,
+            actions: await getActions(),
+            request,
+          });
           await getAiIndexService().create(id, properties);
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
@@ -218,6 +228,11 @@ export const registerAiIndexRoutes = ({
       },
       withContextEngineFeatureFlag(async (ctx, request, response) => {
         try {
+          await validateConnectorSources({
+            sources: request.body.sources,
+            actions: await getActions(),
+            request,
+          });
           const status = await getAiIndexService().put(request.params.aiIndexId, request.body);
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });

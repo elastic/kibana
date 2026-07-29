@@ -72,6 +72,12 @@ describe('AiIndexCard', () => {
     );
   });
 
+  it('omits the description block when there is no description', () => {
+    renderAiIndexCard(buildAiIndex({ description: undefined }));
+
+    expect(screen.queryByTestId('contextAiIndexCardDescription')).not.toBeInTheDocument();
+  });
+
   describe('source and automation counts', () => {
     it.each([
       [0, '0 sources'],

@@ -16,7 +16,7 @@ interface SourceTypeBadgeProps {
 }
 
 /**
- * Tag that surfaces a source's type (e.g. "ES|QL view").
+ * Tag that surfaces a source's type (e.g. "ES|QL").
  */
 export const SourceTypeBadge = ({ type, 'data-test-subj': dataTestSubj }: SourceTypeBadgeProps) => (
   <EuiBadge color="hollow" data-test-subj={dataTestSubj}>

@@ -26,6 +26,7 @@ const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnecto
 interface RenderConnectorsTabOptions {
   connectors?: DataConnector[];
   isLoading?: boolean;
+  isError?: boolean;
   selectedConnectorIds?: string[];
   onToggle?: jest.Mock;
 }
@@ -33,6 +34,7 @@ interface RenderConnectorsTabOptions {
 const renderConnectorsTab = ({
   connectors = CONNECTORS,
   isLoading = false,
+  isError = false,
   selectedConnectorIds = [],
   onToggle = jest.fn(),
 }: RenderConnectorsTabOptions = {}) => {
@@ -47,6 +49,7 @@ const renderConnectorsTab = ({
             <ConnectorsTab
               connectors={connectors}
               isLoading={isLoading}
+              isError={isError}
               selectedConnectorIds={selectedConnectorIds}
               onToggle={onToggle}
             />
@@ -73,6 +76,16 @@ describe('ConnectorsTab', () => {
     expect(screen.getByTestId('contextConnectorsLoading')).toBeInTheDocument();
     expect(screen.queryByTestId('contextConnectorsSelectable')).not.toBeInTheDocument();
     expect(screen.queryByTestId('contextConnectorsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextConnectorsError')).not.toBeInTheDocument();
+  });
+
+  it('renders error prompt instead of the empty prompt when loading failed', () => {
+    renderConnectorsTab({ connectors: [], isError: true });
+
+    expect(screen.getByTestId('contextConnectorsError')).toBeInTheDocument();
+    expect(screen.getByText('Unable to load connectors')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextConnectorsEmpty')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextCreateConnectorButton')).not.toBeInTheDocument();
   });
 
   it('renders empty prompt with create button when there are no connectors', () => {

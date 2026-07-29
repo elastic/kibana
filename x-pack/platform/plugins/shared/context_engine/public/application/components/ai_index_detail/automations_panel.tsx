@@ -112,7 +112,7 @@ export const AutomationsPanel = ({
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : !isManaged ? (
+          ) : !isManaged && !isLoading ? (
             <EuiButtonEmpty
               size="s"
               iconType="pencil"
@@ -184,9 +184,14 @@ export const AutomationsPanel = ({
               }
               body={
                 <p>
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
-                    defaultMessage: 'Create an automation to get started.',
-                  })}
+                  {isManaged
+                    ? i18n.translate(
+                        'xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged',
+                        { defaultMessage: 'No automations are configured for this AI index.' }
+                      )
+                    : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
+                        defaultMessage: 'Create an automation to get started.',
+                      })}
                 </p>
               }
             />
@@ -194,7 +199,7 @@ export const AutomationsPanel = ({
             automations.map((automation, index) => {
               const summary = summaries.get(automation.value);
               return (
-                <React.Fragment key={`${automation.type}-${automation.value}-${index}`}>
+                <React.Fragment key={automation.value}>
                   <AutomationRow
                     automation={automation}
                     name={summary?.name}

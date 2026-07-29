@@ -5,64 +5,53 @@
  * 2.0.
  */
 
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
+import type { GetAllConnectorsResponse } from '@kbn/actions-plugin/common/routes/connector/response';
 import { useQuery } from '@kbn/react-query';
 import { useMemo } from 'react';
+import { isDataConnectorType } from '../../../common/data_connectors';
 import { contextEngineQueryKeys } from './query_keys';
 import { useKibana } from './use_kibana';
-
-// Action connector type ids for the data-retrieval connectors that can back an
-// AI index source. These are spec-based stack connectors that fetch data on
-// demand when a tool is called (e.g. list files, read a document), rather than
-// indexing data into Elasticsearch.
-export const DATA_CONNECTOR_TYPE_IDS = [
-  '.google_drive',
-  '.one_drive',
-  '.notion',
-  '.amazon_s3',
-  '.github',
-  '.box',
-  '.dropbox',
-  '.google_cloud_storage',
-  '.salesforce',
-  '.zendesk',
-] as const;
-
-const DATA_CONNECTOR_TYPE_ID_SET: ReadonlySet<string> = new Set(DATA_CONNECTOR_TYPE_IDS);
-
-// Public route backing the Stack Management connectors page
-// (/app/management/insightsAndAlerting/triggersActionsConnectors/connectors).
-const ACTION_CONNECTORS_LIST_PATH = '/api/actions/connectors';
-
-interface RawActionConnector {
-  id: string;
-  name: string;
-  connector_type_id: string;
-}
 
 export interface DataConnector {
   id: string;
   name: string;
 }
 
+export interface UseDataConnectorsOptions {
+  enabled?: boolean;
+}
+
+export interface UseDataConnectorsResult {
+  connectors: DataConnector[];
+  connectorNameById: Map<string, string>;
+  isLoading: boolean;
+  isError: boolean;
+  error: Error | undefined;
+}
+
 /**
- * Lists the space's action connectors, filtered to the data-retrieval subset
- * that can be used as AI index sources.
+ * Lists connectors filtered by a specific subset of data connector.
  */
-export const useDataConnectors = () => {
+export const useDataConnectors = ({
+  enabled = true,
+}: UseDataConnectorsOptions = {}): UseDataConnectorsResult => {
   const {
     services: { http },
   } = useKibana();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error } = useQuery<GetAllConnectorsResponse, Error>({
     queryKey: contextEngineQueryKeys.connectors.list(),
-    queryFn: () => http.get<RawActionConnector[]>(ACTION_CONNECTORS_LIST_PATH),
+    queryFn: ({ signal }) =>
+      http.get<GetAllConnectorsResponse>(`${BASE_ACTION_API_PATH}/connectors`, { signal }),
     refetchOnWindowFocus: false,
+    enabled,
   });
 
   const connectors = useMemo<DataConnector[]>(
     () =>
       (data ?? [])
-        .filter((connector) => DATA_CONNECTOR_TYPE_ID_SET.has(connector.connector_type_id))
+        .filter((connector) => isDataConnectorType(connector.connector_type_id))
         .map((connector) => ({ id: connector.id, name: connector.name || connector.id })),
     [data]
   );
@@ -72,5 +61,11 @@ export const useDataConnectors = () => {
     [connectors]
   );
 
-  return { connectors, connectorNameById, isLoading };
+  return {
+    connectors,
+    connectorNameById,
+    isLoading: enabled && isLoading,
+    isError: enabled && isError,
+    error: enabled ? error ?? undefined : undefined,
+  };
 };

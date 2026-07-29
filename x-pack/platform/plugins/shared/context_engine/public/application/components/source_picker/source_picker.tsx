@@ -32,7 +32,20 @@ interface SourcePickerProps {
 
 export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) => {
   const [selectedTab, setSelectedTab] = useState<TabId>('esql');
-  const { connectors, connectorNameById, isLoading: isLoadingConnectors } = useDataConnectors();
+
+  const hasSelectedConnectorSources = useMemo(
+    () => selectedSources.some((source) => source.type === 'connector'),
+    [selectedSources]
+  );
+
+  const {
+    connectors,
+    connectorNameById,
+    isLoading: isLoadingConnectors,
+    isError: isConnectorsError,
+  } = useDataConnectors({
+    enabled: selectedTab === 'connectors' || hasSelectedConnectorSources,
+  });
 
   const selectedEsqlCount = useMemo(
     () => selectedSources.filter((source) => source.type === 'esql').length,
@@ -84,8 +97,6 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     );
   };
 
-  // Connector chips store the connector id; resolve it to a human-readable name
-  // once the space connectors have loaded.
   const getSourceLabel = (source: SelectedSource): string =>
     source.type === 'connector'
       ? connectorNameById.get(source.value) ?? source.label
@@ -135,6 +146,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
         <ConnectorsTab
           connectors={connectors}
           isLoading={isLoadingConnectors}
+          isError={isConnectorsError}
           selectedConnectorIds={selectedConnectorIds}
           onToggle={toggleConnectorSource}
         />
@@ -154,13 +166,13 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" gutterSize="s">
-            {selectedSources.map((source) => (
+            {selectedSources.map((source, index) => (
               <EuiFlexItem key={`${source.type}-${source.id}`}>
                 <SourceRow
                   source={{ type: source.type, value: source.value }}
                   connectorName={source.type === 'connector' ? getSourceLabel(source) : undefined}
                   onRemove={() => removeSource(source)}
-                  data-test-subj={`contextSelectedSource-${source.id}`}
+                  data-test-subj={`contextSelected-${source.type}-${source.id}`}
                 />
               </EuiFlexItem>
             ))}

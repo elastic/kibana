@@ -85,7 +85,9 @@ export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href:
 
         <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued" data-test-subj="contextAiIndexCardDescription">
-            <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
+            {aiIndex.description !== undefined && (
+              <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
+            )}
           </EuiText>
         </EuiFlexItem>
 

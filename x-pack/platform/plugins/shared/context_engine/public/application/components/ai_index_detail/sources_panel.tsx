@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
 import { SourceRow } from '../source_row';
@@ -36,13 +36,17 @@ export const SourcesPanel = ({
   onEditSources,
   isManaged,
 }: SourcesPanelProps) => {
-  const { connectorNameById } = useDataConnectors();
+  const hasConnectorSources = useMemo(
+    () => sources.some((source) => source.type === 'connector'),
+    [sources]
+  );
+  const { connectorNameById } = useDataConnectors({ enabled: hasConnectorSources });
   return (
     <EuiPanel hasBorder paddingSize="l">
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         {/* minWidth: 0 keeps the description from running underneath the actions column */}
         <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiTitle size="xs">
+          <EuiTitle size="s">
             <h2>
               <FormattedMessage
                 id="xpack.contextEngine.aiIndexDetail.sources.title"
@@ -83,16 +87,23 @@ export const SourcesPanel = ({
       ) : sources.length === 0 ? (
         <EuiText size="s" color="subdued" data-test-subj="contextAiIndexSourcesEmpty">
           <p>
-            <FormattedMessage
-              id="xpack.contextEngine.aiIndexDetail.sources.empty"
-              defaultMessage="No sources yet. Add a source to start building context for this AI index."
-            />
+            {isManaged ? (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.emptyManaged"
+                defaultMessage="This AI index has no sources."
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.contextEngine.aiIndexDetail.sources.empty"
+                defaultMessage="No sources yet. Add a source to start building context for this AI index."
+              />
+            )}
           </p>
         </EuiText>
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
-          {sources.map((source, index) => (
-            <EuiFlexItem key={`${source.type}-${index}`}>
+          {sources.map((source) => (
+            <EuiFlexItem key={`${source.type}-${source.value}`}>
               <SourceRow
                 source={source}
                 connectorName={

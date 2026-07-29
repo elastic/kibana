@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
+import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -37,6 +39,16 @@ interface RegisteredRoute {
     | { request?: { params?: Type<unknown>; query?: Type<unknown>; body?: Type<unknown> } };
 }
 
+const buildConnector = (id: string, actionTypeId: string): ActionResult => ({
+  id,
+  actionTypeId,
+  name: `Connector ${id}`,
+  isPreconfigured: false,
+  isDeprecated: false,
+  isSystemAction: false,
+  isConnectorTypeDeprecated: false,
+});
+
 const aiIndexItem: AiIndexHttpItem = {
   id: 'customer_support',
   description: 'Customer support context',
@@ -55,6 +67,8 @@ describe('ai indices routes', () => {
   >;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let featureFlagEnabled: boolean;
+  let actionsClient: ReturnType<typeof actionsClientMock.create>;
+  let actions: ReturnType<typeof actionsMock.createStart>;
 
   const createContext = () =>
     ({
@@ -75,6 +89,9 @@ describe('ai indices routes', () => {
     routes = {};
     featureFlagEnabled = true;
     response = httpServerMock.createResponseFactory();
+    actionsClient = actionsClientMock.create();
+    actions = actionsMock.createStart();
+    actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
     aiIndexService = {
       create: jest.fn(),
       put: jest.fn(),
@@ -108,6 +125,7 @@ describe('ai indices routes', () => {
     registerAiIndexRoutes({
       router,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
+      getActions: async () => actions,
     });
   });
 
@@ -196,8 +214,9 @@ describe('ai indices routes', () => {
       });
     });
 
-    it('passes connector sources through to create', async () => {
+    it('passes connector sources through to create once validated', async () => {
       aiIndexService.create.mockResolvedValue(undefined);
+      actionsClient.getBulk.mockResolvedValue([buildConnector('connector-1', '.google_drive')]);
       const body = {
         ...postBody,
         sources: [{ type: 'connector', value: 'connector-1' }],
@@ -208,6 +227,42 @@ describe('ai indices routes', () => {
       const { id, ...properties } = body;
       expect(aiIndexService.create).toHaveBeenCalledWith('customer_support', properties);
       expect(response.created).toHaveBeenCalledWith({ body: { status: 'created' } });
+    });
+
+    it('returns 400 without creating when a connector source is not a data connector', async () => {
+      actionsClient.getBulk.mockResolvedValue([buildConnector('slack-1', '.slack')]);
+
+      await callRoute('POST', aiIndexPath, {
+        body: { ...postBody, sources: [{ type: 'connector', value: 'slack-1' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'Connector [slack-1] of type [.slack] cannot be used as an AI index source',
+        },
+      });
+    });
+
+    it('returns 400 without creating when a connector source cannot be resolved', async () => {
+      actionsClient.getBulk.mockRejectedValue(new Error('Failed to load action missing-1 (404)'));
+
+      await callRoute('POST', aiIndexPath, {
+        body: { ...postBody, sources: [{ type: 'connector', value: 'missing-1' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: { message: 'Unable to resolve connector sources: missing-1' },
+      });
+    });
+
+    it('does not consult the actions client when there are no connector sources', async () => {
+      aiIndexService.create.mockResolvedValue(undefined);
+
+      await callRoute('POST', aiIndexPath, { body: postBody });
+
+      expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
     });
   });
 
@@ -262,6 +317,33 @@ describe('ai indices routes', () => {
 
       expect(response.conflict).toHaveBeenCalledWith({
         body: { message: "AI index 'customer_support' was modified concurrently; please retry" },
+      });
+    });
+
+    it('passes connector sources through to put once validated', async () => {
+      aiIndexService.put.mockResolvedValue('updated');
+      actionsClient.getBulk.mockResolvedValue([buildConnector('connector-1', '.notion')]);
+      const body = { ...putRequest.body, sources: [{ type: 'connector', value: 'connector-1' }] };
+
+      await callRoute('PUT', aiIndexByIdPath, { ...putRequest, body });
+
+      expect(aiIndexService.put).toHaveBeenCalledWith('customer_support', body);
+      expect(response.ok).toHaveBeenCalledWith({ body: { status: 'updated' } });
+    });
+
+    it('returns 400 without updating when a connector source is not a data connector', async () => {
+      actionsClient.getBulk.mockResolvedValue([buildConnector('slack-1', '.slack')]);
+
+      await callRoute('PUT', aiIndexByIdPath, {
+        ...putRequest,
+        body: { ...putRequest.body, sources: [{ type: 'connector', value: 'slack-1' }] },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'Connector [slack-1] of type [.slack] cannot be used as an AI index source',
+        },
       });
     });
   });
