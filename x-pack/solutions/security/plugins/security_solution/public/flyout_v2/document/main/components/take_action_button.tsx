@@ -245,6 +245,11 @@ export const TakeActionButton = memo(
       setOsqueryAgentId(null);
     }, []);
 
+    const osQueryFlyoutDefaultValues = useMemo(
+      () => (isAlert ? { alertIds: [documentId] } : undefined),
+      [isAlert, documentId]
+    );
+
     const handleOnOsqueryClick = useCallback(() => {
       setOsqueryAgentId(agentId);
       closePopoverHandler();
@@ -379,7 +384,7 @@ export const TakeActionButton = memo(
         {osqueryAgentId && (
           <OsqueryFlyout
             agentId={osqueryAgentId}
-            defaultValues={isAlert ? { alertIds: [documentId] } : undefined}
+            defaultValues={osQueryFlyoutDefaultValues}
             onClose={handleOnCloseOsqueryFlyout}
             ecsData={ecsData}
           />
