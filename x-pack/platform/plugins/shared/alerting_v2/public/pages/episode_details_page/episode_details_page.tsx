@@ -45,6 +45,7 @@ import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/compone
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { z } from '@kbn/zod/v4';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
@@ -64,7 +65,6 @@ import {
 import { EpisodeTimelineTab } from './components/episode_timeline_tab';
 import { EpisodeActionPolicyHistoryTab } from './components/episode_action_policy_history_tab';
 import * as i18n from './translations';
-import { z } from '@kbn/zod/v4';
 
 /** Pulls `data.rule_name` from the episode_data JSON blob when present. */
 const episodeDataRuleNameSchema = z
@@ -136,12 +136,11 @@ export function EpisodeDetailsPage() {
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
-  const eventRuleName = episode?.['rule.name'] as string | undefined;
   const episodeDataRuleName = episodeDataRuleNameSchema.parse(episode?.episode_data);
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
-      : episodeDataRuleName ?? eventRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+      : episodeDataRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 
