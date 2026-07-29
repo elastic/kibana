@@ -13,6 +13,7 @@ import {
   fieldSettingsFieldNameSchema,
   indexPatternSchema,
   timeFieldSchema,
+  nameSchema,
 } from './common';
 import {
   savedCompositeRuntimeFieldSchema,
@@ -40,10 +41,7 @@ export const savedDataViewSpecSchema = z
       description:
         'Kibana provides a unique identifier for each data view, or you can create your own.',
     }),
-    name: z.string().min(1).max(256).optional().meta({
-      title: 'Data view name',
-      description: 'The name of the data view. Example: "Sample data view".',
-    }),
+    name: nameSchema,
     allow_hidden_indices: allowHiddenIndicesSchema,
     field_filters: z.array(z.string().min(1).max(1000)).max(10_000).optional().meta({
       title: 'Field filters',

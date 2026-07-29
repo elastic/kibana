@@ -34,3 +34,8 @@ export const allowHiddenIndicesSchema = z.boolean().optional().meta({
   title: 'Allow hidden and system indices',
   description: 'When `true`, allows the data view to match hidden indices.',
 });
+
+export const nameSchema = z.string().min(1).max(256).optional().meta({
+  title: 'Data view name',
+  description: 'The name of the data view. Example: "Sample data view".',
+});

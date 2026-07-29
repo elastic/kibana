@@ -19,6 +19,7 @@ import {
   fieldSettingsFieldNameSchema,
   indexPatternSchema,
   timeFieldSchema,
+  nameSchema,
 } from './common';
 
 export const fieldSettingsSchema = z
@@ -44,6 +45,7 @@ export const dataViewReferenceSchema = z
 export const dataViewSpecSchema = z
   .object({
     type: z.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
+    name: nameSchema,
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     allow_hidden_indices: allowHiddenIndicesSchema,

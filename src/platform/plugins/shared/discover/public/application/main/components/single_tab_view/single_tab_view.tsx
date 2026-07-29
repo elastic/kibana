@@ -15,6 +15,7 @@ import useLatest from 'react-use/lib/useLatest';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { MainHistoryLocationState } from '../../../../../common';
+import type { ProfileStateMap } from '../../../../../common/context_awareness';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../state_management/redux';
 import { getDataStateContainer } from '../../state_management/discover_data_state_container';
@@ -84,10 +85,12 @@ export const SingleTabView = ({
       dataViewSpec,
       defaultUrlState,
       esqlControls,
+      profileState,
     }: {
       dataViewSpec?: DataViewSpec | undefined;
       defaultUrlState?: DiscoverAppState;
       esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
+      profileState?: ProfileStateMap;
     } = {}) => {
       const injectCurrentTab = createTabActionInjector(currentTabId);
       const getCurrentTab = () => selectTab(internalState.getState(), currentTabId);
@@ -119,6 +122,7 @@ export const SingleTabView = ({
             dataViewSpec,
             esqlControls,
             defaultUrlState,
+            profileState,
           },
         })
       );
@@ -135,6 +139,7 @@ export const SingleTabView = ({
         dataViewSpec: historyLocationState?.dataViewSpec,
         esqlControls: historyLocationState?.esqlControls,
         defaultUrlState: historyLocationState?.defaultState,
+        profileState: historyLocationState?.profileState,
       });
     }
   }, [currentTabInitializationState.initializationStatus, initializeTab, services]);
