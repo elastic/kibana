@@ -32,6 +32,10 @@ const mockTestFilter = {
 const mockFilters = jest.fn().mockImplementation(() => Promise.resolve(mockTestFilter));
 const mockKibanaContext = {
   services: {
+    application: {
+      navigateToApp: jest.fn(),
+      getUrlForApp: jest.fn(() => '/app/management/ml/ad_settings/filter_lists'),
+    },
     docLinks: { links: { ml: { customRules: 'test' } } },
     notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
     mlServices: {
@@ -46,6 +50,7 @@ const mockKibanaContext = {
 
 const mockReact = React;
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => mockKibanaContext,
   withKibana: (type) => {
     const EnhancedType = (props) => {
       return mockReact.createElement(type, {

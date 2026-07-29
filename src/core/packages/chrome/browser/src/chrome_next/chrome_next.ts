@@ -66,13 +66,22 @@ export interface AppHeaderTabIconBadge {
   tooltip?: string;
 }
 
+/** @public */
+export interface AppHeaderTabCountBadge {
+  /** Numeric count rendered as a notification badge. */
+  count: number;
+  /** Accessible label for the notification badge. */
+  'aria-label'?: string;
+  'data-test-subj'?: string;
+}
+
 /**
- * Tab badge: either a numeric count (rendered as a notification badge) or an icon
- * with an optional tooltip.
+ * Tab badge: either a numeric count (rendered as a notification badge), a count
+ * object with optional accessibility attributes, or an icon with an optional tooltip.
  *
  * @public
  */
-export type AppHeaderTabBadge = number | AppHeaderTabIconBadge;
+export type AppHeaderTabBadge = number | AppHeaderTabCountBadge | AppHeaderTabIconBadge;
 
 /** @public */
 export interface AppHeaderTabAction {

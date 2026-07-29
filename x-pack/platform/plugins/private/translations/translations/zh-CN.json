@@ -31450,6 +31450,7 @@
     "xpack.ml.overview.trainedModelsTitle": "已训练模型",
     "xpack.ml.overview.visualizeYourDataTitle": "可视化数据",
     "xpack.ml.overview.welcomeBanner.header.title": "Machine Learning",
+    "xpack.ml.overview.welcomeBanner.header.titleDescription": "分析您的数据，并生成反映其行为模式的模型。",
     "xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel": "活动 ML 节点",
     "xpack.ml.overviewJobsList.statsBar.closedJobsLabel": "已关闭",
     "xpack.ml.overviewJobsList.statsBar.failedJobsLabel": "失败",

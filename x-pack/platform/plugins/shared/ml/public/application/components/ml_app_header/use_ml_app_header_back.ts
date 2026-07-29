@@ -10,6 +10,7 @@ import { useCallback, useMemo } from 'react';
 import type { AppHeaderBack } from '@kbn/app-header';
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import type { MlAppBreadcrumb, MlManagementBreadcrumb } from '../../routing/breadcrumbs';
 import {
   ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB,
   CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB,
@@ -24,9 +25,10 @@ import {
  * Builds an {@link AppHeaderBack} target for chrome-next headers in the ML app.
  * Replaces clickable parent breadcrumbs that are no longer interactive in the new header.
  *
- * Pass `label` as the destination name only — AppHeader renders it as "Back to {label}".
+ * Pass a breadcrumb whose `text` is the destination name only — AppHeader renders it as
+ * "Back to {label}".
  */
-export const useMlAppHeaderBack = (path: string, label: string): AppHeaderBack => {
+export const useMlAppHeaderBack = ({ href, text }: MlAppBreadcrumb): AppHeaderBack => {
   const {
     services: {
       application: { getUrlForApp },
@@ -38,29 +40,29 @@ export const useMlAppHeaderBack = (path: string, label: string): AppHeaderBack =
     (event: MouseEvent) => {
       // Keep href for open-in-new-tab / copy-link, but prevent a full page reload on click.
       event.preventDefault();
-      navigateToPath(path);
+      navigateToPath(href);
     },
-    [navigateToPath, path]
+    [navigateToPath, href]
   );
 
   return useMemo(
     () => ({
-      href: getUrlForApp(PLUGIN_ID, { path }),
-      label,
+      href: getUrlForApp(PLUGIN_ID, { path: href }),
+      label: text,
       onClick,
     }),
-    [getUrlForApp, label, onClick, path]
+    [getUrlForApp, text, onClick, href]
   );
 };
 
 /**
  * Builds an {@link AppHeaderBack} target for ML pages hosted under Stack Management.
  */
-export const useMlManagementAppHeaderBack = (
-  appId: string,
-  path: string,
-  label: string
-): AppHeaderBack => {
+export const useMlManagementAppHeaderBack = ({
+  appId,
+  path,
+  text,
+}: MlManagementBreadcrumb): AppHeaderBack => {
   const {
     services: {
       application: { getUrlForApp, navigateToApp },
@@ -81,58 +83,35 @@ export const useMlManagementAppHeaderBack = (
   return useMemo(
     () => ({
       href: getUrlForApp('management', { path: managementPath }),
-      label,
+      label: text,
       onClick,
     }),
-    [getUrlForApp, label, onClick, managementPath]
+    [getUrlForApp, text, onClick, managementPath]
   );
 };
 
 /** Back navigation from Data visualizer child pages to the selector landing page. */
 export const useDataVisualizerBack = (): AppHeaderBack =>
-  useMlAppHeaderBack(DATA_VISUALIZER_BREADCRUMB.href!, DATA_VISUALIZER_BREADCRUMB.text as string);
+  useMlAppHeaderBack(DATA_VISUALIZER_BREADCRUMB);
 
 /** Back navigation to the anomaly detection jobs list (Stack Management). */
 export const useAnomalyDetectionJobsBack = (): AppHeaderBack =>
-  useMlManagementAppHeaderBack(
-    ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB.appId!,
-    ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB.path!,
-    ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB.text as string
-  );
+  useMlManagementAppHeaderBack(ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB);
 
 /** Back navigation to the data frame analytics jobs list (Stack Management). */
 export const useDataFrameAnalyticsJobsBack = (): AppHeaderBack =>
-  useMlManagementAppHeaderBack(
-    DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB.appId!,
-    DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB.path!,
-    DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB.text as string
-  );
+  useMlManagementAppHeaderBack(DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB);
 
 /** Back navigation to anomaly detection settings (Stack Management). */
 export const useAnomalyDetectionSettingsBack = (): AppHeaderBack =>
-  useMlManagementAppHeaderBack(
-    SETTINGS_MANAGEMENT_BREADCRUMB.appId!,
-    SETTINGS_MANAGEMENT_BREADCRUMB.path!,
-    SETTINGS_MANAGEMENT_BREADCRUMB.text as string
-  );
+  useMlManagementAppHeaderBack(SETTINGS_MANAGEMENT_BREADCRUMB);
 
 /** Back navigation to filter lists (Stack Management). */
 export const useFilterListsBack = (): AppHeaderBack =>
-  useMlManagementAppHeaderBack(
-    FILTER_LISTS_MANAGEMENT_BREADCRUMB.appId!,
-    FILTER_LISTS_MANAGEMENT_BREADCRUMB.path!,
-    FILTER_LISTS_MANAGEMENT_BREADCRUMB.text as string
-  );
+  useMlManagementAppHeaderBack(FILTER_LISTS_MANAGEMENT_BREADCRUMB);
 
 /** Back navigation to calendar management (Stack Management). */
-export const useCalendarManagementBack = (isDst: boolean): AppHeaderBack => {
-  const breadcrumb = isDst
-    ? CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB
-    : CALENDAR_LISTS_MANAGEMENT_BREADCRUMB;
-
-  return useMlManagementAppHeaderBack(
-    breadcrumb.appId!,
-    breadcrumb.path!,
-    breadcrumb.text as string
+export const useCalendarManagementBack = (isDst: boolean): AppHeaderBack =>
+  useMlManagementAppHeaderBack(
+    isDst ? CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB : CALENDAR_LISTS_MANAGEMENT_BREADCRUMB
   );
-};

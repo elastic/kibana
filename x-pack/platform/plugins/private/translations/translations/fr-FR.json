@@ -31276,6 +31276,7 @@
     "xpack.ml.overview.trainedModelsTitle": "Modèles entraînés",
     "xpack.ml.overview.visualizeYourDataTitle": "Visualiser vos données",
     "xpack.ml.overview.welcomeBanner.header.title": "Machine Learning",
+    "xpack.ml.overview.welcomeBanner.header.titleDescription": "Analysez vos données et générez des modèles pour leurs schémas de comportement.",
     "xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel": "Nœuds de ML actifs",
     "xpack.ml.overviewJobsList.statsBar.closedJobsLabel": "Fermé",
     "xpack.ml.overviewJobsList.statsBar.failedJobsLabel": "Échoué",

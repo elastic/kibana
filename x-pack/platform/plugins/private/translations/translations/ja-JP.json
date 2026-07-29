@@ -31446,6 +31446,7 @@
     "xpack.ml.overview.trainedModelsTitle": "学習済みモデル",
     "xpack.ml.overview.visualizeYourDataTitle": "データを可視化",
     "xpack.ml.overview.welcomeBanner.header.title": "機械学習",
+    "xpack.ml.overview.welcomeBanner.header.titleDescription": "データを分析し、その動作パターンのモデルを生成します。",
     "xpack.ml.overviewJobsList.statsBar.activeMLNodesLabel": "アクティブな ML ノード",
     "xpack.ml.overviewJobsList.statsBar.closedJobsLabel": "終了",
     "xpack.ml.overviewJobsList.statsBar.failedJobsLabel": "失敗",
