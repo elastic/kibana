@@ -122622,6 +122622,9 @@ components:
           items:
             type: string
           type: array
+        hasManualEntities:
+          description: Indicates whether the watchlist contains manually assigned entities
+          type: boolean
         id:
           description: The unique ID of the watchlist
           type: string
