@@ -188,6 +188,8 @@ export const Proposal = lazySchema(() =>
      * Set when status is dismissed; structured reason (MVP requirement).
      */
     dismissalReason: DismissalReason.optional(),
+    /** ISO timestamp set when an analyst decision is recorded. */
+    decidedAt: z.string().optional(),
     /**
      * Contrary evidence — shown alongside supporting evidenceRefs so uncertainty is visible (MVP requirement).
      */

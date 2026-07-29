@@ -38,6 +38,7 @@ import { API_VERSIONS } from '@kbn/pnd-common';
 import type { Proposal, ProposalStatus } from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
+import { ConversationTab } from './conversation_tab';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
 import { CoverageGapChip } from './components/coverage_gap_chip';
 import { ForensicEvidence } from './components/forensic_evidence';
@@ -810,10 +811,16 @@ export const InvestigationDetailPage: React.FC = () => {
     />
   );
 
+  // ── Conversation tab ──────────────────────────────────────────────
+  const conversationContent = (
+    <ConversationTab investigationId={id ?? ''} isActive={selectedTabId === 'conversation'} />
+  );
+
   const tabs = [
     { id: 'overview', name: i18n.TAB_OVERVIEW, content: overviewContent },
     { id: 'proposals', name: i18n.TAB_PROPOSALS, content: proposalsContent },
     { id: 'timeline', name: i18n.TAB_TIMELINE, content: timelineContent },
+    { id: 'conversation', name: i18n.TAB_CONVERSATION, content: conversationContent },
   ];
 
   const selectedTab = tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0];

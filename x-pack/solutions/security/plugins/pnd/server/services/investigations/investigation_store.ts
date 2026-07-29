@@ -334,6 +334,30 @@ export class InvestigationStore implements PndStore {
   }
 
   /**
+   * List proposals with status 'approved', sorted by decidedAt descending
+   * (most recent first). Used by the Brief page's "Recently Approved"
+   * section for post-approval monitoring.
+   */
+  public async listApprovedProposals(
+    esClient: ElasticsearchClient
+  ): Promise<ListInvestigationProposalsResponse> {
+    await this.ensureReady(esClient);
+    const result = await esClient.search<ProposalDoc>({
+      index: PND_PROPOSALS_INDEX,
+      size: 20,
+      query: { term: { status: 'approved' } },
+      sort: [{ decidedAt: { order: 'desc' } }],
+    });
+
+    const proposals = result.hits.hits
+      .map((hit) => hit._source)
+      .filter((src): src is ProposalDoc => src != null)
+      .map(({ investigationId: _omit, ...proposal }) => proposal);
+
+    return { proposals, total: proposals.length };
+  }
+
+  /**
    * Apply an analyst decision to a proposal document. Returns the updated
    * status, or null when the proposal does not exist.
    */
@@ -344,7 +368,10 @@ export class InvestigationStore implements PndStore {
     _request?: KibanaRequest
   ): Promise<ProposalStatusUpdate | null> {
     await this.ensureReady(esClient);
-    const doc: Record<string, unknown> = { status: update.status };
+    const doc: Record<string, unknown> = {
+      status: update.status,
+      decidedAt: new Date().toISOString(),
+    };
     if (update.status === 'dismissed') {
       if (update.rejectionReason != null) doc.rejectionReason = update.rejectionReason;
       if (update.dismissalReason != null) doc.dismissalReason = update.dismissalReason;

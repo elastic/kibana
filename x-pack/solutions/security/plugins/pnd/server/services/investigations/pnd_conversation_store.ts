@@ -70,6 +70,10 @@ export class PndConversationStore implements PndStore {
     return this.legacy.listAllProposals(esClient);
   }
 
+  async listApprovedProposals(esClient: ElasticsearchClient) {
+    return this.legacy.listApprovedProposals(esClient);
+  }
+
   async getWatchActivityMetrics(esClient: ElasticsearchClient, watchIds: string[]) {
     return this.legacy.getWatchActivityMetrics(esClient, watchIds);
   }

@@ -449,3 +449,108 @@ describe('InvestigationStore#listAllProposals', () => {
     expect(result.total).toBe(0);
   });
 });
+
+/**
+ * `listApprovedProposals` powers the Brief page's "Recently Approved"
+ * section for post-approval monitoring. It queries with
+ * status='approved', sorts by decidedAt desc, limits to 20.
+ */
+describe('InvestigationStore#listApprovedProposals', () => {
+  const makeReadyEsClient = (proposalDocs: Array<Record<string, unknown>>) => {
+    const search = jest.fn().mockImplementation(() => {
+      const hits = proposalDocs.map((doc) => ({ _source: doc }));
+      return Promise.resolve({
+        hits: { hits, total: { value: hits.length } },
+      });
+    });
+    return {
+      indices: {
+        exists: jest.fn().mockResolvedValue(true),
+        create: jest.fn().mockResolvedValue({}),
+        delete: jest.fn().mockResolvedValue({}),
+        getMapping: jest.fn().mockResolvedValue({
+          'pnd-investigations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-proposals': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-evidence': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-worker-evaluations': { mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } } },
+          'pnd-canonical-proposals': {
+            mappings: { _meta: { mappingsVersion: MAPPINGS_VERSION } },
+          },
+        }),
+      },
+      count: jest.fn().mockResolvedValue({ count: 1 }),
+      bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+      search,
+    } as unknown as Parameters<InvestigationStore['ensureReady']>[0] & { search: jest.Mock };
+  };
+
+  const baseApprovedProposal = (overrides: Record<string, unknown>) => ({
+    id: 'prop-approved-1',
+    template_id: 'proposal',
+    parentConversationId: 'inv-a',
+    type: 'contain',
+    confidence: 0.8,
+    reasoning: 'test reasoning',
+    evidenceRefs: [],
+    status: 'approved',
+    assignee: null,
+    sla: null,
+    events: [],
+    sourceWatchId: 'watch-1',
+    approvalRequired: true,
+    summary: 'test summary',
+    recommendation: 'test recommendation',
+    investigationId: 'inv-a',
+    decidedAt: '2026-07-30T00:00:00.000Z',
+    ...overrides,
+  });
+
+  it('returns approved proposals with correct total count', async () => {
+    const docs = [
+      baseApprovedProposal({ id: 'p1' }),
+      baseApprovedProposal({ id: 'p2', decidedAt: '2026-07-29T00:00:00.000Z' }),
+    ];
+    const esClient = makeReadyEsClient(docs);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listApprovedProposals(esClient);
+
+    expect(result.total).toBe(2);
+    expect(result.proposals).toHaveLength(2);
+  });
+
+  it('strips investigationId from returned proposals', async () => {
+    const docs = [baseApprovedProposal({ id: 'p1', investigationId: 'inv-a' })];
+    const esClient = makeReadyEsClient(docs);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listApprovedProposals(esClient);
+
+    expect(result.proposals[0].id).toBe('p1');
+    expect((result.proposals[0] as Record<string, unknown>).investigationId).toBeUndefined();
+  });
+
+  it('returns empty array when no approved proposals exist', async () => {
+    const esClient = makeReadyEsClient([]);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    const result = await store.listApprovedProposals(esClient);
+
+    expect(result.proposals).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+
+  it('queries with status=approved term filter', async () => {
+    const docs = [baseApprovedProposal({ id: 'p1' })];
+    const esClient = makeReadyEsClient(docs);
+    const store = new InvestigationStore(loggingSystemMock.createLogger());
+
+    await store.listApprovedProposals(esClient);
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { term: { status: 'approved' } },
+      })
+    );
+  });
+});

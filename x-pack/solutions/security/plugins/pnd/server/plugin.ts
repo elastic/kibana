@@ -43,6 +43,7 @@ export class PndPlugin
   private watchProjection?: WatchWorkflowProjectionService;
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   private investigationStore?: PndStore;
+  private agentBuilder?: PndStartDependencies['agentBuilder'];
 
   constructor(context: PluginInitializerContext<PndConfig>) {
     this.logger = context.logger.get();
@@ -96,6 +97,11 @@ export class PndPlugin
       getWatchProjection: () => this.watchProjection,
       getWorkflowsManagement: () => this.workflowsManagementApi,
       getInvestigationStore: () => this.investigationStore,
+      getConversationClient: (request) =>
+        this.agentBuilder &&
+        typeof this.agentBuilder.getScopedClient === 'function'
+          ? this.agentBuilder.getScopedClient({ request })
+          : undefined,
     });
 
     return {};
@@ -103,6 +109,7 @@ export class PndPlugin
 
   start(_core: CoreStart, plugins: PndStartDependencies): PndPluginStart {
     this.spaces = plugins.spaces;
+    this.agentBuilder = plugins.agentBuilder;
 
     if (!this.config.enabled) {
       return {};

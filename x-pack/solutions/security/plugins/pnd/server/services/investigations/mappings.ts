@@ -159,6 +159,7 @@ export const proposalsMapping: MappingTypeMapping = {
     recommendation: { type: 'text' },
 
     // Analyst decision fields written by updateProposalStatus().
+    decidedAt: { type: 'date' },
     dismissalReason: { type: 'keyword' },
     rejectionReason: { type: 'text' },
     analystReasoning: { type: 'text' },
@@ -200,6 +201,7 @@ export const canonicalProposalsMapping: MappingTypeMapping = {
     draft: { type: 'boolean' },
     approvalRequired: { type: 'boolean' },
     status: { type: 'keyword' },
+    decidedAt: { type: 'date' },
     createdAt: { type: 'date' },
 
     // Rule-Tuning trigger — Detection Watch subscribes to this shape.

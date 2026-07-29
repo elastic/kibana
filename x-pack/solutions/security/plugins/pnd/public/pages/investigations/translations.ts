@@ -27,6 +27,50 @@ export const TAB_TIMELINE = i18n.translate('xpack.pnd.investigation.tab.timeline
   defaultMessage: 'Timeline',
 });
 
+export const TAB_CONVERSATION = i18n.translate('xpack.pnd.investigation.tab.conversation', {
+  defaultMessage: 'Conversation',
+});
+
+export const CONVERSATION_EMPTY_TITLE = i18n.translate(
+  'xpack.pnd.investigation.conversation.emptyTitle',
+  { defaultMessage: 'No follow-up messages yet' }
+);
+
+export const CONVERSATION_EMPTY_BODY = i18n.translate(
+  'xpack.pnd.investigation.conversation.emptyBody',
+  {
+    defaultMessage:
+      'When a Watch Worker generates a proposal, its conversation will appear here for follow-up questions.',
+  }
+);
+
+export const CONVERSATION_ERROR_TITLE = i18n.translate(
+  'xpack.pnd.investigation.conversation.errorTitle',
+  { defaultMessage: 'Failed to load conversation' }
+);
+
+export const CONVERSATION_LOADING = i18n.translate('xpack.pnd.investigation.conversation.loading', {
+  defaultMessage: 'Loading conversation…',
+});
+
+export const CONVERSATION_USER_ANALYST = i18n.translate(
+  'xpack.pnd.investigation.conversation.userAnalyst',
+  { defaultMessage: 'Analyst' }
+);
+
+export const CONVERSATION_USER_WORKER = i18n.translate(
+  'xpack.pnd.investigation.conversation.userWorker',
+  { defaultMessage: 'Watch Worker' }
+);
+
+export const RECENTLY_APPROVED_TITLE = i18n.translate('xpack.pnd.brief.recentlyApproved.title', {
+  defaultMessage: 'Recently Approved',
+});
+
+export const RECENTLY_APPROVED_EMPTY = i18n.translate('xpack.pnd.brief.recentlyApproved.empty', {
+  defaultMessage: 'No proposals approved in the last 7 days.',
+});
+
 export const ACTION_APPROVE = i18n.translate('xpack.pnd.investigation.action.approve', {
   defaultMessage: 'Approve',
 });

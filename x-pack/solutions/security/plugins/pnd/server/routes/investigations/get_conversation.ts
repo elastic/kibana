@@ -25,7 +25,11 @@ const PATH = `${PND_INVESTIGATION_URL_TEMPLATE}/conversation` as const;
  * If shadow-write is disabled or no Conversation exists yet, returns 404 with
  * a clear message.
  */
-export const registerGetConversationRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetConversationRoute = ({
+  router,
+  logger,
+  getConversationClient,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: PATH,
@@ -44,16 +48,39 @@ export const registerGetConversationRoute = ({ router, logger }: RouteDependenci
       },
       async (context, request, response) => {
         try {
-          // The conversation is resolved by origin.external_conversation_id === investigation id.
-          // For now, return a 404 indicating the conversation surface is available
-          // but no platform Conversation is linked yet (shadow-write is opt-in
-          // via pnd.conversationShadowWrite).
-          return response.notFound({
-            body: {
-              message:
-                'No platform Conversation linked to this investigation. Enable pnd.conversationShadowWrite to activate dual-write.',
-            },
-          });
+          const { id: investigationId } = request.params;
+
+          const client = await getConversationClient?.(request);
+          if (client == null) {
+            return response.notFound({
+              body: {
+                message:
+                  'Conversation integration not enabled. Enable pnd.conversationShadowWrite (and the agentBuilder plugin) to activate it.',
+              },
+            });
+          }
+
+          // The platform Conversation is linked to this investigation via
+          // origin.external_conversation_id (stamped at shadow-write time).
+          // The platform assigns its own UUID as the conversation `id`, so we
+          // cannot directly `get(investigationId)` — we must list and filter
+          // by origin, then fetch the full conversation (with rounds) by its
+          // platform-assigned id.
+          const conversations = await client.list();
+          const match = conversations.find(
+            (candidate) => candidate.origin?.external_conversation_id === investigationId
+          );
+
+          if (match == null) {
+            return response.notFound({
+              body: {
+                message: 'No platform Conversation linked to this investigation.',
+              },
+            });
+          }
+
+          const conversation = await client.get(match.id);
+          return response.ok({ body: conversation });
         } catch (error) {
           logger.error(`Failed to get conversation: ${error}`);
           return response.customError({

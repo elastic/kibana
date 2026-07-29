@@ -56,6 +56,9 @@ export interface PndStore {
    * pending Proposal (ratified queue model, 2026-07-28 design/eng sync).
    */
   listAllProposals(esClient: ElasticsearchClient): Promise<ListInvestigationProposalsResponse>;
+
+  /** List proposals with status 'approved', sorted by decidedAt desc. */
+  listApprovedProposals(esClient: ElasticsearchClient): Promise<ListInvestigationProposalsResponse>;
   updateProposalStatus(
     esClient: ElasticsearchClient,
     proposalId: string,

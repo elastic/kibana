@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -25,7 +25,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
-import type { Investigation, Proposal, RecommendedAction } from '@kbn/pnd-common';
+import {
+  API_VERSIONS,
+  type Investigation,
+  type Proposal,
+  type RecommendedAction,
+} from '@kbn/pnd-common';
 import { PndPageSection } from '../../components/layout/pnd_page_section';
 import { PndPageHeader } from '../../components/pnd_page_header';
 import { usePndDocTitle } from '../../hooks/use_pnd_doc_title';
@@ -618,6 +623,91 @@ export const BriefPage: React.FC = () => {
             </div>
           ))
         : null}
+
+      {/* ── Recently Approved (post-approval monitoring) ───────────── */}
+      <RecentlyApprovedSection />
     </PndPageSection>
+  );
+};
+
+// ── Recently Approved section ─────────────────────────────────────────
+const RecentlyApprovedSection = () => {
+  const [approved, setApproved] = useState<Proposal[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchApproved = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch('/internal/pnd/investigations/proposals/approved', {
+          headers: { 'Elastic-Api-Version': API_VERSIONS.internal.v1 },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (!cancelled) setApproved(data.proposals ?? []);
+        }
+      } catch {
+        // Silent fail — this section is additive.
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    void fetchApproved();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (loading) {
+    return (
+      <>
+        <EuiSpacer size="m" />
+        <EuiText color="subdued">
+          <EuiLoadingSpinner size="s" />{' '}
+          <FormattedMessage
+            id="xpack.pnd.brief.recentlyApproved.loading"
+            defaultMessage="Loading recently approved…"
+          />
+        </EuiText>
+      </>
+    );
+  }
+
+  if (approved.length === 0) return null;
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        <strong>
+          <FormattedMessage
+            id="xpack.pnd.brief.recentlyApproved.title"
+            defaultMessage="Recently Approved"
+          />
+        </strong>
+      </EuiText>
+      <EuiHorizontalRule margin="s" />
+      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+        {approved.map((proposal) => (
+          <EuiFlexItem key={proposal.id} grow={false}>
+            <EuiPanel paddingSize="s" color="subdued">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem>
+                  <EuiText size="xs">{proposal.recommendation ?? proposal.id}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {proposal.decidedAt && (
+                    <EuiText size="xs" color="subdued">
+                      <FormattedRelative value={new Date(proposal.decidedAt)} />
+                    </EuiText>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </>
   );
 };
