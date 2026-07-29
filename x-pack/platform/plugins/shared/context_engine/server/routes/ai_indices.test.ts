@@ -773,6 +773,20 @@ describe('ai indices routes', () => {
           })
         );
       });
+
+      it('logs outcome:failure on error', async () => {
+        aiIndexService.list.mockRejectedValue(new Error('boom'));
+
+        await expect(callRoute('GET', aiIndexPath, {})).rejects.toThrow('boom');
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'ai_index_list', outcome: 'failure' }),
+            kibana: { saved_object: undefined },
+          })
+        );
+      });
     });
 
     describe('DELETE /api/context_engine/ai_index/{aiIndexId}', () => {
