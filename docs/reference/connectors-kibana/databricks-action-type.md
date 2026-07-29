@@ -136,7 +136,7 @@ Always qualify table names with `catalog.schema.table` (for example, `main.defau
 
 ## Async polling pattern [databricks-async-polling]
 
-For long-running queries, `query` or `executeStatement` returns a `statement_id` instead of immediate results:
+For long-running queries, `runQuery` or `executeStatement` returns a `statement_id` instead of immediate results:
 
 1. Call `runQuery` (for read-only SQL) or `executeStatement` (for DML/DDL) with your SQL statement.
 2. If the response contains a `statement_id`, the query is still running.
