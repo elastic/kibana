@@ -18,7 +18,10 @@ import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
 import { ProfileStateType } from '../../../../../context_awareness';
-import { createDataSource } from '../../../../../../common/data_sources/utils';
+import {
+  createDataSource,
+  createDataViewDataSource,
+} from '../../../../../../common/data_sources/utils';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
@@ -43,12 +46,11 @@ import {
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
-import type { DiscoverAppLocatorParams } from '../../../../../../common';
+import type { DiscoverAppLocatorParams, MainHistoryLocationState } from '../../../../../../common';
 import { parseAppLocatorParams } from '../../../../../../common/app_locator_get_location';
 import { fetchData } from './tab_state';
 import { fromSavedObjectTabToTabState } from '../tab_mapping_utils';
 import { initializeAndSync, stopSyncing } from './tab_sync';
-import { diag } from '../../../../../utils/diag_trace';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -351,7 +353,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
     { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
   ) {
-    diag('initTabs:start', { discoverSessionId, shouldClearAllTabs });
     const { userId: existingUserId, spaceId: existingSpaceId } = getState();
 
     const getUserId = async () => {
@@ -404,25 +405,50 @@ export const initializeTabs = createInternalStateAsyncThunk(
       defaultTabState: byValueEmbeddableTabState ?? DEFAULT_TAB_STATE,
     });
 
-    const history = services.getScopedHistory();
+    const history = services.getScopedHistory<MainHistoryLocationState>();
     const locationState = history?.location.state;
+
+    const locationDataViewSpec = locationState?.dataViewSpec;
+    const locationDataViewSpecId = locationDataViewSpec?.id;
+    const restoredLocationState = locationDataViewSpec
+      ? omit(locationState, 'dataViewSpec')
+      : locationState;
+
+    if (locationDataViewSpec && locationDataViewSpecId) {
+      initialTabsState.allTabs = initialTabsState.allTabs.map((tab) =>
+        tab.id === initialTabsState.selectedTabId
+          ? {
+              ...tab,
+              initialInternalState: {
+                ...tab.initialInternalState,
+                serializedSearchSource: {
+                  ...tab.initialInternalState?.serializedSearchSource,
+                  index: locationDataViewSpec,
+                },
+              },
+              appState: tab.appState?.dataSource
+                ? tab.appState
+                : {
+                    ...tab.appState,
+                    dataSource: createDataViewDataSource({ dataViewId: locationDataViewSpecId }),
+                  },
+            }
+          : tab
+      );
+    }
 
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state
-    diag('initTabs:pushSelectedTabIdToUrl', {
-      selectedTabId: initialTabsState.selectedTabId,
-      pathname: history?.location.pathname,
-    });
     await tabsStorageManager.pushSelectedTabIdToUrl(initialTabsState.selectedTabId, {
       replace: true,
     });
 
     // Manually restore the previous location state since pushing the tab ID
     // to the URL clears it, but initial location state must be passed on,
-    // e.g. ad hoc data views specs
-    if (locationState) {
-      diag('initTabs:historyReplace', { hasLocationState: true });
-      history.replace({ ...history.location, state: locationState });
+    // e.g. ES|QL controls. The ad hoc data view spec is intentionally excluded here since it has
+    // been persisted into the selected tab's initial internal state above.
+    if (history && restoredLocationState) {
+      history.replace({ ...history.location, state: restoredLocationState });
     }
 
     dispatch(
@@ -432,7 +458,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
       })
     );
 
-    diag('initTabs:end', { selectedTabId: initialTabsState.selectedTabId });
     return { userId, spaceId, persistedDiscoverSession };
   }
 );

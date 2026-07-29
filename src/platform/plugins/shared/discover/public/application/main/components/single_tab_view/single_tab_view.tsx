@@ -47,7 +47,6 @@ import { ScopedServicesProvider } from '../../../../components/scoped_services_p
 import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 import { InitializationError } from './initialization_error';
 import type { DiscoverSearchSessionManager } from '../../state_management/discover_search_session';
-import { diag } from '../../../../utils/diag_trace';
 
 export interface SingleTabViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -127,18 +126,11 @@ export const SingleTabView = ({
   );
 
   useEffect(() => {
-    diag('singleTabView:initEffect', {
-      status: currentTabInitializationState.initializationStatus,
-    });
     if (currentTabInitializationState.initializationStatus === TabInitializationStatus.NotStarted) {
       const historyLocationState = services.getScopedHistory<
         MainHistoryLocationState & { defaultState?: DiscoverAppState }
       >()?.location.state;
 
-      diag('singleTabView:initTab', {
-        hasDataViewSpec: Boolean(historyLocationState?.dataViewSpec),
-        specId: historyLocationState?.dataViewSpec?.id,
-      });
       initializeTab.current({
         dataViewSpec: historyLocationState?.dataViewSpec,
         esqlControls: historyLocationState?.esqlControls,

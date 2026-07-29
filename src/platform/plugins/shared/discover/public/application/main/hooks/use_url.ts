@@ -10,7 +10,6 @@
 import { useEffect } from 'react';
 import type { History } from 'history';
 import useLatest from 'react-use/lib/useLatest';
-import { diag } from '../../../utils/diag_trace';
 
 export function useUrl({
   history,
@@ -30,15 +29,8 @@ export function useUrl({
     // this listener is waiting for such a path http://localhost:5601/app/discover#/
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
-    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }, action) => {
-      diag('useUrl:historyChange', {
-        pathname,
-        action,
-        hasSearch: Boolean(search),
-        hasHash: Boolean(hash),
-      });
-      if (action !== 'REPLACE' && pathname === '/' && !search && !hash && !savedSearchId) {
-        diag('useUrl:onNewUrl', { pathname, action });
+    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
+      if (pathname === '/' && !search && !hash && !savedSearchId) {
         onNewUrl.current();
       }
     });

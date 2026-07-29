@@ -12,7 +12,6 @@ import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-p
 import type { ToastsStart } from '@kbn/core/public';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from '../redux';
-import { diag } from '../../../../utils/diag_trace';
 
 interface DataViewData {
   /**
@@ -61,12 +60,9 @@ export async function loadDataView({
       // If passed an ad hoc data view spec, clear the instance cache
       // to avoid conflicts, then create and return the data view
       if (locationDataViewSpec.id) {
-        diag('loadDataView:clearInstanceCache', { id: locationDataViewSpec.id });
         dataViews.clearInstanceCache(locationDataViewSpec.id);
       }
-      diag('loadDataView:create', { id: locationDataViewSpec.id });
       const createdAdHocDataView = await dataViews.create(locationDataViewSpec);
-      diag('loadDataView:createDone', { id: createdAdHocDataView.id });
       return {
         loadedDataView: createdAdHocDataView,
         requestedDataViewId: createdAdHocDataView.id,
@@ -207,12 +203,6 @@ export const loadAndResolveDataView = async ({
   const { dataViews, toastNotifications } = services;
   const adHocDataViews = runtimeStateManager.adHocDataViews$.getValue();
 
-  diag('loadAndResolveDataView:start', {
-    dataViewId,
-    locationSpecId: locationDataViewSpec?.id,
-    hasLocationSpec: Boolean(locationDataViewSpec),
-  });
-
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
   let fallback = false;
@@ -243,11 +233,8 @@ export const loadAndResolveDataView = async ({
   // This can happen when default profile data views are created without fields
   // to avoid unnecessary requests on startup.
   if (!dataView.isPersisted() && !dataView.fields.length) {
-    diag('loadAndResolveDataView:refreshFields', { id: dataView.id });
     await dataViews.refreshFields(dataView);
-    diag('loadAndResolveDataView:refreshFieldsDone', { id: dataView.id });
   }
 
-  diag('loadAndResolveDataView:end', { id: dataView.id, fallback });
   return { fallback, dataView };
 };
