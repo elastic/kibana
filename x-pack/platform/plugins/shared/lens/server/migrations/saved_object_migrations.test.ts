@@ -2537,6 +2537,44 @@ describe('Lens migrations', () => {
         example.attributes.state.datasourceStates.indexpattern
       );
     });
+
+    it('migrates the textBasedLanguages (SQL) datasource state to textBased instead of dropping it', () => {
+      const textBasedLanguagesState = {
+        layers: {
+          'first-layer': {
+            columns: [{ columnId: 'a', fieldName: 'bytes' }],
+            query: { sql: 'SELECT bytes FROM "logstash-*"' },
+            index: 'logstash-*',
+          },
+        },
+      };
+      const exampleWithSql = {
+        ...example,
+        attributes: {
+          ...example.attributes,
+          state: {
+            ...example.attributes.state,
+            datasourceStates: {
+              ...example.attributes.state.datasourceStates,
+              textBasedLanguages: textBasedLanguagesState,
+            },
+          },
+        },
+      };
+
+      const result = SavedObjectsUtils.getMigrationFunction(migrations['8.6.0'])(
+        exampleWithSql,
+        context
+      );
+      const { datasourceStates } = result.attributes.state as {
+        datasourceStates: Record<string, unknown>;
+      };
+      expect(datasourceStates.formBased).toBe(
+        example.attributes.state.datasourceStates.indexpattern
+      );
+      expect(datasourceStates.textBased).toBe(textBasedLanguagesState);
+      expect(datasourceStates).not.toHaveProperty('textBasedLanguages');
+    });
   });
   // For 8.8.0 tests are already executed at unit level in common_migrations
 });
