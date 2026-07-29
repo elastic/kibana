@@ -23,6 +23,13 @@ describe('TokenUsageBadges', () => {
     expect(getByText('output.tokens: 58')).toBeInTheDocument();
   });
 
+  it('formats large token counts with thousands separators', () => {
+    const { getByText } = render(<TokenUsageBadges inputTokens={1840} outputTokens={128000} />);
+
+    expect(getByText('input.tokens: 1,840')).toBeInTheDocument();
+    expect(getByText('output.tokens: 128,000')).toBeInTheDocument();
+  });
+
   it('renders only the input tokens badge when output tokens are missing', () => {
     const { getByTestId, queryByTestId } = render(<TokenUsageBadges inputTokens={19} />);
 
