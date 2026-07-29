@@ -88,7 +88,7 @@ export const formatSchema = z
     }
   })
   .meta({
-    id: 'kbn-field-format',
+    id: 'kbn-field-format-new',
     title: 'Format',
     description:
       'Set your preferred format for displaying the value. Changing the format can affect the value and prevent highlighting in Discover.',

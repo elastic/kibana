@@ -12,7 +12,7 @@ import { z } from '@kbn/zod';
 export const numeralPatternSchema = z
   .string()
   .meta({
-    title: 'Format',
+    title: 'Numeral pattern',
     description:
       'Numeral.js format pattern. See https://www.elastic.co/docs/explore-analyze/numeral-formatting to learn more.',
   })
@@ -21,7 +21,7 @@ export const numeralPatternSchema = z
 export const momentPatternSchema = z
   .string()
   .meta({
-    title: 'Format',
+    title: 'Moment.js pattern',
     description: 'Moment.js format pattern. See https://momentjs.com/ to learn more.',
   })
   .optional();

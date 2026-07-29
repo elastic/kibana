@@ -39,24 +39,20 @@ export const durationFormatSchema = z
         z.literal('as_years'),
       ]),
       output_precision: z.number().default(2).optional().meta({
-        id: 'kbn-field-format-duration-output-precision',
         title: 'Output precision',
         description: 'The number of decimal places to display in the duration value.',
       }),
       show_suffix: z.boolean().default(true).optional().meta({
-        id: 'kbn-field-format-duration-show-suffix',
         title: 'Show suffix',
         description:
           'Whether to display the suffix in the duration value. Suffix examples are "seconds", "milliseconds" or "years".',
       }),
       use_short_suffix: z.boolean().default(false).optional().meta({
-        id: 'kbn-field-format-duration-use-short-suffix',
         title: 'Use short suffix',
         description:
           'Whether to use the short suffix in the duration value. Short suffix examples are "s" for seconds, "ms" for milliseconds or "h" for hours.',
       }),
       include_space_with_suffix: z.boolean().default(true).optional().meta({
-        id: 'kbn-field-format-duration-include-space-with-suffix',
         title: 'Include space with suffix',
         description: 'Whether to include a space between the duration value and the suffix.',
       }),

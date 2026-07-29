@@ -17,38 +17,32 @@ export const geoPointFormatSchema = z
         transform: z
           .union([
             z.literal('lat_lon_string').meta({
-              id: 'kbn-field-format-geo_point-transform-lat_lon_string',
               title: 'Lat lon string',
               description:
                 'Transforms the geo point into a string in the format "latitude,longitude". For example "40.7128,-74.0060".',
             }),
             z.literal('wkt').meta({
-              id: 'kbn-field-format-geo_point-transform-wkt',
               title: 'WKT',
               description:
                 'Transforms the geo point into a Well-Known Text (WKT) string. For example "POINT (123.456 78.901)".',
             }),
             z.literal('dms').meta({
-              id: 'kbn-field-format-geo_point-transform-dms',
               title: 'DMS',
               description:
                 'Transforms the geo point into a string in the format "latitude,longitude (degrees, minutes, seconds)". For example "40°42′50.2″N 73°59′45.6″W".',
             }),
             z.literal('mgrs').meta({
-              id: 'kbn-field-format-geo_point-transform-mgrs',
               title: 'MGRS',
               description:
                 'Transforms the geo point into a string in the format "latitude,longitude (Military Grid Reference System)". For example "18SUJ1234567890".',
             }),
             z.literal('multi').meta({
-              id: 'kbn-field-format-geo_point-transform-multi',
               title: 'Multi',
               description:
                 'Transforms the geo point to all the previous formats. For Example: "Lat Long: 40.7128,-74.0060, WKT: POINT (123.456 78.901), DMS: 40°42′50.2″N 73°59′45.6″W, MGRS: 18SUJ1234567890".',
             }),
           ])
           .meta({
-            id: 'kbn-field-format-geo_point-transform',
             title: 'Transform',
             description: 'The transform to apply to the geo point value.',
           }),
