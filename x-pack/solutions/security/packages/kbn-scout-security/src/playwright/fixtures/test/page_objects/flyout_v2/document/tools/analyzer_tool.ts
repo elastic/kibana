@@ -18,19 +18,10 @@ export class AnalyzerTool {
    * Only rendered when the analyzer is enabled for the document.
    */
   public readonly titleLink: Locator;
-  /** Header row of the tools flyout — use to confirm the overlay is open. */
-  public readonly toolsFlyoutHeader: Locator;
-
-  /** Container wrapping the resolver graph inside the analyzer tool overlay. */
-  public readonly analyzerGraph: Locator;
   /** The resolver graph (process tree) once data has loaded. */
   public readonly resolverGraph: Locator;
   /** Loading spinner shown while the resolver fetches the process tree. */
   public readonly resolverLoading: Locator;
-  /** All process nodes rendered in the resolver graph; use toHaveCount() to assert the number. */
-  public readonly resolverNodes: Locator;
-  /** Empty-state message shown when the resolver finds no process events. */
-  public readonly resolverNoData: Locator;
 
   // --- Resolver detail panel (opened by clicking a graph node) ---
   /** Node detail panel shown after clicking a process node in the graph. */
@@ -51,12 +42,8 @@ export class AnalyzerTool {
   constructor(page: ScoutPage) {
     this.page = page;
     this.titleLink = page.testSubj.locator('securitySolutionFlyoutAnalyzerPreviewTitleLink');
-    this.toolsFlyoutHeader = page.testSubj.locator('securitySolutionFlyoutToolsFlyoutHeader');
-    this.analyzerGraph = page.testSubj.locator('securitySolutionFlyoutAnalyzerGraph');
     this.resolverGraph = page.testSubj.locator('resolver:graph');
     this.resolverLoading = page.testSubj.locator('resolver:graph:loading');
-    this.resolverNodes = page.testSubj.locator('resolver:node');
-    this.resolverNoData = page.testSubj.locator('resolver:no-process-events');
     this.nodeDetailPanel = page.testSubj.locator('resolver:panel:node-detail');
     this.nodeDetailTitleLink = page.testSubj.locator('resolver:node-detail:title-link');
     this.nodeDetailEventsLink = page.testSubj.locator('resolver:node-detail:node-events-link');

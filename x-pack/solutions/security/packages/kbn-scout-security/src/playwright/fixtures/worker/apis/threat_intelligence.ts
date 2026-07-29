@@ -8,12 +8,10 @@
 import type { EsClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 
-/** Threat feed name written by the indicator fixture; asserted by the TI/IOC specs. */
+/** Threat feed name written by the indicator fixture. */
 export const THREAT_FEED_NAME = 'Scout Test Feed' as const;
 
 export interface FileIndicatorFixture {
-  /** Index containing the source event; pass as a detection rule's target index for enrichment. */
-  sourceIndex: string;
   /** Index the threat indicator was written to. */
   indicatorIndex: string;
   /** Unique indicator name (also the file sha256); use it to filter the indicators table. */
@@ -22,20 +20,12 @@ export interface FileIndicatorFixture {
   indicatorId: string;
 }
 
-// Index the source event is written to (a plain index, not part of the threat pattern).
-const sourceIndexName = (spaceId: string) => `scout-ti-source-${spaceId}`;
 // Index the threat indicator is written to. Matches `logs-ti_*` (the default threat index
 // pattern) so both investigation-time enrichment and the indicators table pick it up. Scoped
 // per space so parallel workers never collide with each other or pre-existing cluster data.
 const indicatorIndexName = (spaceId: string) => `logs-ti_scout_${spaceId}`;
 
 export interface ThreatIntelligenceApiService {
-  /**
-   * Indexes a source event document with `file.hash.sha256` into the given index.
-   * Use this to create a document that a detection rule can match, so the resulting
-   * alert inherits the hash field for investigation-time enrichment.
-   */
-  indexSourceEvent: (options: { index: string; sha256: string }) => Promise<void>;
   /**
    * Indexes a single, fully-populated file threat indicator into the given index. Sets every
    * field the indicators table and IOC flyout render (name, name_origin, type, file hashes,
@@ -54,13 +44,7 @@ export interface ThreatIntelligenceApiService {
    */
   deleteIndices: (indices: string[]) => Promise<void>;
   /**
-   * Creates a space-isolated source event and a matching, uniquely-named file indicator. Returns
-   * everything either consumer needs:
-   *  - `sourceIndex` — target it from a detection rule so the resulting alert enriches against the
-   *    indicator (investigation-time threat intelligence).
-   *  - `indicatorName` — filter the indicators table down to this single indicator. The table is
-   *    NOT space-scoped (it queries the global `logs-ti_*` pattern), so isolation relies on the
-   *    unique name rather than the Kibana space.
+   * Creates a uniquely-named file indicator for a space-isolated test worker.
    */
   createFileIndicatorFixture: (spaceId: string) => Promise<FileIndicatorFixture>;
   /**
@@ -80,23 +64,6 @@ export const getThreatIntelligenceApiService = ({
   log: ScoutLogger;
 }): ThreatIntelligenceApiService => {
   const service: ThreatIntelligenceApiService = {
-    indexSourceEvent: async ({ index, sha256 }) => {
-      await measurePerformanceAsync(
-        log,
-        'security.threatIntelligence.indexSourceEvent',
-        async () => {
-          await esClient.index({
-            index,
-            document: {
-              '@timestamp': new Date().toISOString(),
-              file: { hash: { sha256 } },
-            },
-            refresh: true,
-          });
-        }
-      );
-    },
-
     indexFileIndicator: async ({ index, sha256 }) => {
       return measurePerformanceAsync(
         log,
@@ -157,25 +124,23 @@ export const getThreatIntelligenceApiService = ({
     },
 
     createFileIndicatorFixture: async (spaceId) => {
-      const sourceIndex = sourceIndexName(spaceId);
       const indicatorIndex = indicatorIndexName(spaceId);
       // The sha256 doubles as the indicator name. Unique per worker so the (globally-scoped)
       // indicators table can be filtered down to this single indicator.
       const indicatorName = `scout-ioc-${spaceId}-${Date.now()}`;
 
       // Delete before creating so stale documents from a crashed prior run don't accumulate.
-      await service.deleteIndices([sourceIndex, indicatorIndex]);
-      await service.indexSourceEvent({ index: sourceIndex, sha256: indicatorName });
+      await service.deleteIndices([indicatorIndex]);
       const { indicatorId } = await service.indexFileIndicator({
         index: indicatorIndex,
         sha256: indicatorName,
       });
 
-      return { sourceIndex, indicatorIndex, indicatorName, indicatorId };
+      return { indicatorIndex, indicatorName, indicatorId };
     },
 
     cleanupFileIndicatorFixture: async (spaceId) => {
-      await service.deleteIndices([sourceIndexName(spaceId), indicatorIndexName(spaceId)]);
+      await service.deleteIndices([indicatorIndexName(spaceId)]);
     },
   };
 

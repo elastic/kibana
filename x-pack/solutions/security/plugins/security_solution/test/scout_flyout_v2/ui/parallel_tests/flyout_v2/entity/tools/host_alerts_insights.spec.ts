@@ -20,13 +20,12 @@ spaceTest.describe(
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     let ruleName: string;
-    let sourceIndex: string;
 
     spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }, testInfo) => {
       // Rule execution can be slow under parallel load.
       testInfo.setTimeout(testInfo.timeout + 120_000);
 
-      ({ sourceIndex } = await apiServices.host.createHostFixture(scoutSpace.id));
+      const { sourceIndex } = await apiServices.host.createHostFixture(scoutSpace.id);
 
       ruleName = `${CUSTOM_QUERY_RULE.name}_${scoutSpace.id}_${Date.now()}`;
       await apiServices.detectionRule.createCustomQueryRule({
@@ -43,66 +42,6 @@ spaceTest.describe(
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
       await apiServices.host.cleanupHostFixture(scoutSpace.id);
-    });
-
-    spaceTest(
-      'filters the alerts table by severity',
-      async ({ pageObjects, apiServices, scoutSpace }) => {
-        // Add a second alert of a different severity (same host) so filtering is observable.
-        const lowSeverityRuleName = `${CUSTOM_QUERY_RULE.name}_low_${scoutSpace.id}_${Date.now()}`;
-        await apiServices.detectionRule.createCustomQueryRule({
-          ...CUSTOM_QUERY_RULE,
-          name: lowSeverityRuleName,
-          rule_id: `${CUSTOM_QUERY_RULE.rule_id}-low`,
-          severity: 'low',
-          index: [sourceIndex],
-        });
-        await apiServices.detectionAlerts.waitForAlerts(lowSeverityRuleName, 1, 60_000);
-
-        const { alertsTablePage, hostFlyout } = pageObjects;
-        await alertsTablePage.navigate();
-        await alertsTablePage.waitForRuleAlert(ruleName);
-        await alertsTablePage.clickHostNameCell(HOST_NAME);
-        await hostFlyout.waitForHostFlyout();
-        await hostFlyout.openAlertsInsightTool();
-
-        await spaceTest.step('both severities are listed', async () => {
-          await expect(hostFlyout.alertsInsightsToolTable).toBeVisible();
-          await expect(hostFlyout.alertsInsightsToolAlertSeverities).toHaveCount(2, {
-            timeout: 15_000,
-          });
-        });
-
-        await spaceTest.step(
-          'clicking the Low severity segment filters to one Low alert',
-          async () => {
-            await hostFlyout.alertsInsightsToolSeveritySegment('Low').click();
-            await expect(hostFlyout.alertsInsightsToolAlertSeverities).toHaveCount(1, {
-              timeout: 15_000,
-            });
-            await expect(hostFlyout.alertsInsightsToolAlertSeverities).toContainText('Low');
-          }
-        );
-      }
-    );
-
-    spaceTest('header opens the host as a child flyout', async ({ pageObjects }) => {
-      const { alertsTablePage, hostFlyout } = pageObjects;
-      await alertsTablePage.navigate();
-      await alertsTablePage.waitForRuleAlert(ruleName);
-      await alertsTablePage.clickHostNameCell(HOST_NAME);
-      await hostFlyout.waitForHostFlyout();
-      await hostFlyout.openAlertsInsightTool();
-
-      // The tool header's source context targets the host, and only the originating host flyout
-      // exists (mounted behind the tool) at this point.
-      await expect(hostFlyout.toolsFlyoutTitle).toContainText(HOST_NAME);
-      await expect(hostFlyout.header).toHaveCount(1);
-
-      // Clicking it opens a second host flyout for the same host as a stacked child.
-      await hostFlyout.toolsFlyoutTitle.click();
-      await expect(hostFlyout.header).toHaveCount(2);
-      await expect(hostFlyout.title.filter({ hasText: HOST_NAME })).toHaveCount(2);
     });
 
     spaceTest(

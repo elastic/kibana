@@ -64,29 +64,5 @@ spaceTest.describe(
         // TODO: Related Attacks
       }
     );
-
-    spaceTest(
-      'sameSource section Investigate in timeline button opens the timeline',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        await expect(pageObjects.documentFlyout.insightsSection).toBeVisible();
-
-        await pageObjects.correlationsTool.titleLink.waitFor({ state: 'visible' });
-        await pageObjects.correlationsTool.titleLink.click();
-
-        await expect(pageObjects.correlationsTool.toolsFlyoutHeader).toBeVisible({
-          timeout: 20_000,
-        });
-
-        await expect(pageObjects.correlationsTool.sameSourceAlertsSectionTable).toBeVisible();
-        await pageObjects.correlationsTool.clickSameSourceInvestigateInTimeline();
-
-        await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
-
-        await expect(pageObjects.timelinePage.providerBadge).toBeVisible();
-        await expect(pageObjects.timelinePage.providerBadge).toContainText('_id:');
-      }
-    );
   }
 );

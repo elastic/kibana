@@ -27,7 +27,6 @@ import type {
   NetworkApiService,
   HostApiService,
   UserApiService,
-  ResponseActionsApiService,
 } from './worker';
 
 export interface SecurityApiServicesFixture extends ApiServicesFixture {
@@ -44,7 +43,6 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   network: NetworkApiService;
   host: HostApiService;
   user: UserApiService;
-  responseActions: ResponseActionsApiService;
 }
 
 export interface SecurityTestFixtures extends ScoutTestFixtures {

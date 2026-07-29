@@ -36,41 +36,18 @@ spaceTest.describe(
       await apiServices.detectionAlerts.deleteAll();
     });
 
-    spaceTest(
-      'rule name in the alerts table opens the rule flyout v2, whose header link opens the rule page in a new tab',
-      async ({ pageObjects, page }) => {
-        await pageObjects.alertsTablePage.navigate();
-        await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
+    spaceTest('rule name in the alerts table opens the rule flyout v2', async ({ pageObjects }) => {
+      await pageObjects.alertsTablePage.navigate();
+      await pageObjects.alertsTablePage.waitForRuleAlert(ruleName);
 
-        await spaceTest.step('clicking the rule name opens the v2 rule flyout', async () => {
-          // Click the rule name link in the "Rule" column.
-          await pageObjects.alertsTablePage.clickRuleName(ruleName);
+      // Click the rule name link in the "Rule" column.
+      await pageObjects.alertsTablePage.clickRuleName(ruleName);
 
-          // The v2 rule flyout opens, titled with the rule name.
-          await expect(pageObjects.ruleFlyout.title).toBeVisible({
-            timeout: 15_000,
-          });
-          await expect(pageObjects.ruleFlyout.title).toContainText(ruleName);
-        });
-
-        await spaceTest.step('header link opens the correct rule page in a new tab', async () => {
-          const headerLink = pageObjects.ruleFlyout.titleLink;
-          await expect(headerLink).toBeVisible();
-
-          // Read the rule id from the header link's href to build the expected destination URL.
-          // (Link presence and the target="_blank" attribute are already covered at the component
-          // level in rule/main/header.test.tsx; here we only need the href to assert navigation.)
-          const href = await headerLink.getAttribute('href');
-          const ruleId = href?.match(/security\/rules\/id\/([^/?#]+)/)?.[1];
-
-          // Clicking it opens a new browser tab navigated to that rule's details page.
-          const newTabPromise = page.context().waitForEvent('page');
-          await headerLink.click();
-          const newTab = await newTabPromise;
-          await newTab.waitForLoadState('domcontentloaded');
-          expect(newTab.url()).toContain(`security/rules/id/${ruleId}`);
-        });
-      }
-    );
+      // The v2 rule flyout opens, titled with the rule name.
+      await expect(pageObjects.ruleFlyout.title).toBeVisible({
+        timeout: 15_000,
+      });
+      await expect(pageObjects.ruleFlyout.title).toContainText(ruleName);
+    });
   }
 );

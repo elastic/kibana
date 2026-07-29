@@ -10,30 +10,19 @@ export { test, spaceTest } from './src/playwright';
 
 // Security-specific test constants
 export { CUSTOM_QUERY_RULE } from './src/playwright/constants/detection_rules';
-export {
-  PREVALENCE_SOURCE_IP,
-  PREVALENCE_DESTINATION_IP,
-  PREVALENCE_HOST_NAME,
-  PREVALENCE_USER_NAME,
-} from './src/playwright/fixtures/worker/apis/prevalence';
+export { PREVALENCE_HOST_NAME } from './src/playwright/fixtures/worker/apis/prevalence';
 export { ANALYZER_ORIGIN_PROCESS_NAME } from './src/playwright/fixtures/worker/apis/analyzer';
 export { NETWORK_SOURCE_IP } from './src/playwright/fixtures/worker/apis/network';
 export { HOST_NAME } from './src/playwright/fixtures/worker/apis/host';
-export { USER_HOST_ID, USER_NAME } from './src/playwright/fixtures/worker/apis/user';
-export { THREAT_FEED_NAME } from './src/playwright/fixtures/worker/apis/threat_intelligence';
+export { USER_NAME } from './src/playwright/fixtures/worker/apis/user';
 export {
   CURRENT_USER_PROFILE_API_PATH,
   AlertWorkflowStatus,
   ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
   ClosingReasonOption,
   closedAlertsToastText,
-  addedToTimelineToastText,
 } from './src/playwright/constants/alert_workflows';
-export {
-  ADD_TO_NEW_CASE_TEST_SUBJ,
-  ALERT_TAGS_MENU_ITEM_TEST_SUBJ,
-  INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ,
-} from './src/playwright/constants/take_action';
+export { INVESTIGATE_IN_TIMELINE_MENU_ITEM_TEST_SUBJ } from './src/playwright/constants/take_action';
 export { FULL_KIBANA_SECURITY_ROLE } from './src/playwright/constants/roles';
 export { ES as SECURITY_ARCHIVES } from './src/playwright/constants/archives';
 

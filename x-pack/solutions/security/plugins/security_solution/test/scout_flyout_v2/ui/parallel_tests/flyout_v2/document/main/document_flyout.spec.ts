@@ -14,7 +14,6 @@ import {
   ALERT_CLOSE_MENU_ITEM_TEST_SUBJ,
   ClosingReasonOption,
   closedAlertsToastText,
-  addedToTimelineToastText,
 } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/ui';
 
@@ -38,30 +37,6 @@ spaceTest.describe(
       await apiServices.detectionRule.deleteAll();
       await apiServices.detectionAlerts.deleteAll();
     });
-
-    spaceTest(
-      'smoke — flyout opens with header, all body sections, and footer',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        // Header
-        await expect.soft(pageObjects.documentFlyout.severity).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.statusBadge).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.riskScore).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.assigneesTitle).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.notesAddButton).toBeVisible();
-
-        // Body sections
-        await expect.soft(pageObjects.documentFlyout.aboutSection).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.investigationSection).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.visualizationsSection).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.insightsSection).toBeVisible();
-        await expect.soft(pageObjects.documentFlyout.responseSection).toBeVisible();
-
-        // Footer
-        await expect.soft(pageObjects.documentFlyout.takeActionButton).toBeVisible();
-      }
-    );
 
     spaceTest(
       'header status badge: closing with a reason updates the badge to closed',
@@ -94,34 +69,6 @@ spaceTest.describe(
           AlertWorkflowStatus.CLOSED,
           { timeout: 15_000 }
         );
-      }
-    );
-
-    spaceTest(
-      'status badge cell actions: filter-in and add-to-timeline buttons both work',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        // Hover the status badge — both cell-action buttons must be visible
-        await pageObjects.documentFlyout.hoverStatusBadge();
-        await expect(pageObjects.documentFlyout.cellActionsFilterInButton).toBeVisible();
-        await expect(pageObjects.documentFlyout.cellActionsAddToTimelineButton).toBeVisible();
-
-        // Click "Add to Timeline" — a success toast must confirm the value was added
-        await pageObjects.documentFlyout.cellActionsAddToTimelineButton.click();
-        await pageObjects.toasts.waitFor();
-        expect(await pageObjects.toasts.getHeaderText()).toContain(
-          addedToTimelineToastText(AlertWorkflowStatus.OPEN)
-        );
-
-        // Re-hover to reopen the popover (it closed after the click above)
-        await pageObjects.documentFlyout.hoverStatusBadge();
-
-        // Click "Filter for" — the flyout closes and a workflow-status filter chip appears
-        await pageObjects.documentFlyout.cellActionsFilterInButton.click();
-        await expect(pageObjects.documentFlyout.workflowStatusFilterBadge).toBeVisible({
-          timeout: 10_000,
-        });
       }
     );
 

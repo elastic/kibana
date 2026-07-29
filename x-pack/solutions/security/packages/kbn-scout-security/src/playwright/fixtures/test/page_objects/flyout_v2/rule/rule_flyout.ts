@@ -17,12 +17,9 @@ export class RuleFlyout {
    * subject with "Text" (the bare RuleDetailsTitle id is only used in the non-link branch).
    */
   public readonly title: Locator;
-  /** Header title link, which opens the rule details page in a new tab. */
-  public readonly titleLink: Locator;
 
   constructor(page: ScoutPage) {
     this.title = page.testSubj.locator('securitySolutionFlyoutRuleDetailsTitleText');
-    this.titleLink = page.testSubj.locator('securitySolutionFlyoutRuleDetailsTitleLink');
   }
 
   /** Wait for the rule flyout to be visible and its title rendered. */

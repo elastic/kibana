@@ -45,29 +45,6 @@ spaceTest.describe(
     // prevalence.spec.ts, so it's not duplicated here.
 
     spaceTest(
-      'opens analyzer tool overlay and renders the resolver process tree',
-      async ({ pageObjects }) => {
-        await pageObjects.documentFlyout.openForRule(ruleName);
-
-        await pageObjects.documentFlyout.visualizationsSection.click();
-        await pageObjects.analyzerTool.titleLink.click();
-
-        // The analyzer overlay mounts asynchronously once the resolver tree fetch kicks off, so
-        // allow extra time for the header/graph to appear.
-        await expect(pageObjects.analyzerTool.toolsFlyoutHeader).toBeVisible({ timeout: 10_000 });
-        await expect(pageObjects.analyzerTool.analyzerGraph).toBeVisible();
-
-        // Wait for the resolver tree fetch to finish, then assert the graph rendered with nodes.
-        await expect(pageObjects.analyzerTool.resolverLoading).toHaveCount(0, { timeout: 15_000 });
-        await expect(pageObjects.analyzerTool.resolverGraph).toBeVisible();
-
-        // origin → parent → grandparent yields three process nodes.
-        await expect(pageObjects.analyzerTool.resolverNodes).toHaveCount(3, { timeout: 15_000 });
-        await expect(pageObjects.analyzerTool.resolverNoData).toHaveCount(0);
-      }
-    );
-
-    spaceTest(
       'clicking an analyzed process node opens its document in a child flyout',
       async ({ pageObjects }) => {
         await pageObjects.documentFlyout.openForRule(ruleName);

@@ -31,6 +31,3 @@ export const ClosingReasonOption = {
 /** Returns the success toast message produced when n alerts are closed. */
 export const closedAlertsToastText = (count: number): string =>
   `Successfully closed ${count} ${count === 1 ? 'alert' : 'alerts'}.`;
-
-/** Returns the success toast title produced when a value is added to Timeline. */
-export const addedToTimelineToastText = (value: string): string => `Added ${value} to Timeline`;

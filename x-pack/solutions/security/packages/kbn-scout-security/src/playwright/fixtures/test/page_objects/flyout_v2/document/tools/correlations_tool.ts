@@ -22,8 +22,6 @@ export class CorrelationsTool {
   public readonly sameSourceAlertsSectionTable: Locator;
   /** Expand button on the first alert row in the sameSource table. */
   public readonly sameSourceAlertsSectionFirstPreviewButton: Locator;
-  /** "Investigate in timeline" button in the sameSource section header. */
-  public readonly sameSourceAlertsSectionInvestigateInTimeline: Locator;
 
   /** Alerts table inside the "related by session" section (visible when expanded). */
   public readonly sessionAlertsSectionTable: Locator;
@@ -39,22 +37,11 @@ export class CorrelationsTool {
     this.sameSourceAlertsSectionFirstPreviewButton = page.testSubj.locator(
       'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionAlertPreviewButton'
     );
-    this.sameSourceAlertsSectionInvestigateInTimeline = page.testSubj.locator(
-      'securitySolutionFlyoutCorrelationsDetailsAlertsBySourceSectionInvestigateInTimeline'
-    );
     this.sessionAlertsSectionTable = page.testSubj.locator(
       'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionTable'
     );
     this.sessionAlertsSectionFirstPreviewButton = page.testSubj.locator(
       'securitySolutionFlyoutCorrelationsDetailsAlertsBySessionSectionAlertPreviewButton'
     );
-  }
-
-  /**
-   * Click the "Investigate in timeline" button in the sameSource section header. The test-subj
-   * wraps the button, so scope to the inner button role rather than exposing the chain in the spec.
-   */
-  async clickSameSourceInvestigateInTimeline() {
-    await this.sameSourceAlertsSectionInvestigateInTimeline.getByRole('button').click();
   }
 }

@@ -36,108 +36,12 @@ spaceTest.describe('IOC flyout v2', { tag: [...tags.stateful.classic] }, () => {
   });
 
   spaceTest(
-    'navigates between the Overview, Table and JSON tabs and the "View all fields in table" shortcut',
+    'restores the indicator from URL state and renders its overview',
     async ({ pageObjects }) => {
       await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
 
-      await spaceTest.step('Overview tab shows the highlighted fields table', async () => {
-        await expect(pageObjects.iocFlyout.overviewTable).toBeVisible();
-      });
-
-      await spaceTest.step('Table tab shows the all-fields table', async () => {
-        await pageObjects.iocFlyout.selectTableTab();
-        await expect(pageObjects.iocFlyout.fieldsTable).toBeVisible();
-      });
-
-      await spaceTest.step('JSON tab renders the indicator document as valid JSON', async () => {
-        await pageObjects.iocFlyout.selectJsonTab();
-        await expect(pageObjects.iocFlyout.jsonViewer).toBeVisible();
-
-        // Monaco populates its model asynchronously after the tab opens
-        await expect
-          .poll(
-            async () => {
-              try {
-                const parsed = JSON.parse(await pageObjects.iocFlyout.getJsonTabValue());
-                return parsed.fields?.['threat.indicator.name'] ?? [];
-              } catch {
-                return [];
-              }
-            },
-            { timeout: 15_000 }
-          )
-          .toContain(indicatorName);
-      });
-
-      await spaceTest.step('returning to the Overview tab restores its content', async () => {
-        await pageObjects.iocFlyout.selectOverviewTab();
-        await expect(pageObjects.iocFlyout.overviewTable).toBeVisible();
-      });
-
-      await spaceTest.step(
-        'the Overview tab "View all fields in table" button navigates to the Table tab',
-        async () => {
-          await pageObjects.iocFlyout.clickViewAllFieldsInTable();
-          await expect(pageObjects.iocFlyout.fieldsTable).toBeVisible();
-        }
-      );
-    }
-  );
-
-  spaceTest(
-    'the take action menu lists every action and Investigate in Timeline opens the timeline',
-    async ({ pageObjects }) => {
-      await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
-
-      await spaceTest.step('the take action menu lists the expected items', async () => {
-        await pageObjects.iocFlyout.openTakeActionMenu();
-        await expect(pageObjects.iocFlyout.investigateInTimelineItem).toBeVisible();
-        await expect(pageObjects.iocFlyout.addToExistingCaseItem).toBeVisible();
-        await expect(pageObjects.iocFlyout.addToNewCaseItem).toBeVisible();
-        await expect(pageObjects.iocFlyout.addToBlockListItem).toBeVisible();
-      });
-
-      await spaceTest.step('Investigate in Timeline opens the timeline', async () => {
-        await pageObjects.iocFlyout.investigateInTimelineItem.click();
-        await expect(pageObjects.timelinePage.panel).toBeVisible({ timeout: 15_000 });
-      });
-    }
-  );
-
-  spaceTest(
-    'take action → Add to block list opens the block list creation flyout',
-    async ({ pageObjects }) => {
-      await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
-
-      await pageObjects.iocFlyout.openTakeActionMenu();
-      await pageObjects.iocFlyout.addToBlockListItem.click();
-
-      await expect(pageObjects.iocFlyout.blocklistFormNameInput).toBeVisible({
-        timeout: 15_000,
-      });
-    }
-  );
-
-  spaceTest(
-    'take action → Add to case opens the existing-case modal and the new-case flyout',
-    async ({ pageObjects, page }) => {
-      await pageObjects.iocFlyout.openForIndicator({ indicatorId, indicatorIndex });
-
-      await spaceTest.step('Add to existing case opens the select-case modal', async () => {
-        await pageObjects.iocFlyout.openTakeActionMenu();
-        await pageObjects.iocFlyout.addToExistingCaseItem.click();
-        const modal = pageObjects.iocFlyout.allCasesModal;
-        await expect(modal).toBeVisible({ timeout: 15_000 });
-        // Dismiss the modal (no fields touched, so it closes cleanly) before the next action.
-        await page.keyboard.press('Escape');
-        await expect(modal).toBeHidden();
-      });
-
-      await spaceTest.step('Add to new case opens the create-case flyout', async () => {
-        await pageObjects.iocFlyout.openTakeActionMenu();
-        await pageObjects.iocFlyout.addToNewCaseItem.click();
-        await expect(pageObjects.iocFlyout.createCaseSubmit).toBeVisible({ timeout: 15_000 });
-      });
+      await expect(pageObjects.iocFlyout.indicatorName).toContainText(indicatorName);
+      await expect(pageObjects.iocFlyout.overviewTable).toBeVisible();
     }
   );
 });

@@ -27,12 +27,9 @@ import { NetworkFlyout } from './flyout_v2/network/network_flyout';
 import { HostFlyout } from './flyout_v2/entity/host_flyout';
 import { UserFlyout } from './flyout_v2/entity/user_flyout';
 import { IOCFlyout } from './flyout_v2/ioc/ioc_flyout';
-import { ThreatIntelligenceTool } from './flyout_v2/document/tools/threat_intelligence_tool';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
-import { NotesTool } from './flyout_v2/document/tools/notes_tool';
-import { ResponseTool } from './flyout_v2/document/tools/response_tool';
 import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 
 export type { ThreatMatchRuleCreatePage } from './threat_match_rule_create_page';
@@ -67,18 +64,12 @@ export interface SecurityPageObjects extends PageObjects {
   userFlyout: UserFlyout;
   /** v2 IOC (indicator) flyout — opened from the Threat Intelligence indicators table. */
   iocFlyout: IOCFlyout;
-  /** Threat intelligence tool overlay inside the flyout v2 document flyout. */
-  threatIntelligenceTool: ThreatIntelligenceTool;
   /** Correlations tool overlay inside the flyout v2 document flyout. */
   correlationsTool: CorrelationsTool;
   /** Prevalence tool overlay inside the flyout v2 document flyout. */
   prevalenceTool: PrevalenceTool;
   /** Analyzer tool overlay (resolver process-tree graph) inside the flyout v2 document flyout. */
   analyzerTool: AnalyzerTool;
-  /** Notes tool overlay inside the flyout v2 document flyout. */
-  notesTool: NotesTool;
-  /** Response tool overlay (automated response actions) inside the flyout v2 document flyout. */
-  responseTool: ResponseTool;
   /** Entity flyout anomalies section and tab — requires entityAnalyticsAnomalyDetails feature flag. */
   entityFlyoutAnomaliesPage: EntityFlyoutAnomaliesPage;
 }
@@ -114,12 +105,9 @@ export function extendPageObjects(
     hostFlyout: createLazyPageObject(HostFlyout, page),
     userFlyout: createLazyPageObject(UserFlyout, page),
     iocFlyout: createLazyPageObject(IOCFlyout, page),
-    threatIntelligenceTool: createLazyPageObject(ThreatIntelligenceTool, page),
     correlationsTool: createLazyPageObject(CorrelationsTool, page),
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
-    notesTool: createLazyPageObject(NotesTool, page),
-    responseTool: createLazyPageObject(ResponseTool, page),
     entityFlyoutAnomaliesPage: createLazyPageObject(EntityFlyoutAnomaliesPage, page),
   };
 }
