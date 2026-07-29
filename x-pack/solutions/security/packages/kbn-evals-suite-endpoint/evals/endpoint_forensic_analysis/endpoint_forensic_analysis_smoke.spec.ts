@@ -185,4 +185,33 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
       },
     });
   });
+
+  evaluate('distractor conflicting antivirus', async ({ evaluateForensicDataset }) => {
+    await evaluateForensicDataset({
+      dataset: {
+        name: 'security: endpoint-forensic-analysis-smoke-distractor-antivirus',
+        description:
+          'Distractor: naming a specific host does not make an antivirus-conflict question ' +
+          'forensic — must route to elastic-defend-configuration-troubleshooting instead of ' +
+          'activating endpoint-forensic-analysis. Regression guard for the skill-collision ' +
+          'reported on eval-host-av (conflicting antivirus scenario).',
+        examples: [
+          {
+            input: {
+              question:
+                'Can you check if endpoint eval-host-av has any conflicting antivirus software?',
+            },
+            output: {
+              criteria: [
+                'Does not perform endpoint forensic reconstruction, patient-zero analysis, or a chronological timeline',
+                'Does not treat this as a forensic-reconstruction question just because a specific host is named',
+                'Defers to or is consistent with elastic-defend-configuration-troubleshooting for antivirus/security-software conflicts',
+              ],
+            },
+            metadata: { golden_id: 'ef-distractor-antivirus-conflict', row_type: 'distractor' },
+          },
+        ],
+      },
+    });
+  });
 });
