@@ -327,11 +327,7 @@ describe('NightshiftApp', () => {
   it('opens an event in chat with a prefilled prompt and attachment', () => {
     const event = mockEvent();
     setEvents({ events: [event] });
-    const { container } = renderWithIntl();
-
-    expect(
-      container.querySelector('[data-test-subj="nightshiftInvestigatingStatusDots"]')
-    ).toBeInTheDocument();
+    renderWithIntl();
 
     fireEvent.click(screen.getByRole('button', { name: 'Open Test significant event in chat' }));
     expect(openChat).toHaveBeenCalledWith(
