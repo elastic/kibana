@@ -22,6 +22,8 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
 import { TransactionMetadata } from '../metadata_table/transaction_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
+import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
+import { getGenAiFields, hasGenAiData } from '../genai_tab/get_genai_fields';
 import { TransactionSummary } from '../summary/transaction_summary';
 import { TransactionActionMenu } from '../transaction_action_menu/transaction_action_menu';
 import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
@@ -133,6 +135,27 @@ function TransactionFlyoutBody({
     processorEvent: ProcessorEvent.transaction,
   });
 
+  const transactionId = transaction.transaction?.id;
+  const { data: eventMetadata, status: metadataStatus } = useFetcher(
+    (callApmApi) => {
+      if (!transactionId) return;
+      return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
+        params: {
+          path: { processorEvent: ProcessorEvent.transaction, id: transactionId },
+          query: { start: transaction['@timestamp'], end: transaction['@timestamp'] },
+        },
+      });
+    },
+    [transactionId, transaction]
+  );
+
+  const metadata = eventMetadata?.metadata ?? {};
+  const isMetadataLoading = isPending(metadataStatus);
+  const isGenAiSpan = hasGenAiData(metadata);
+  const genAi = isGenAiSpan ? getGenAiFields(metadata) : undefined;
+
+  const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+
   const tabs = [
     {
       id: 'metadata',
@@ -142,10 +165,14 @@ function TransactionFlyoutBody({
       content: (
         <>
           <EuiSpacer size="m" />
-          <TransactionMetadata transaction={transaction} />
+          <TransactionMetadata
+            transaction={transaction}
+            prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
+          />
         </>
       ),
     },
+    ...(genAiTabContent ? [genAiTabContent] : []),
     ...(spanLinksTabContent ? [spanLinksTabContent] : []),
   ];
 

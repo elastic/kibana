@@ -141,7 +141,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
 
   const { dataView, status } = useDataView(pageScope);
   const selectedPatterns = useSelectedPatterns(pageScope);
-  const browserFields = useBrowserFields(pageScope);
+  const browserFields = useBrowserFields(dataView);
   const isLoadingIndexPattern = status !== 'ready';
   const dataViewId = dataView.id ?? null;
   const selectedDataViewId = dataView.id;
