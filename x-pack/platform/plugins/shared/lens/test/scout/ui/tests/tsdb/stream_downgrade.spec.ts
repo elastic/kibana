@@ -29,7 +29,7 @@ interface ScenarioResult {
   /** Count of `lns-indexPatternDimension-average incompatible` elements. */
   incompatibleAverageCount: number;
   /** Bar chart data from the full time range with empty rows enabled. */
-  bars: Array<{ y: number }> | undefined;
+  bars: Array<{ y: number }>;
   /** Whether the before-downgrade time window contains any data. */
   hasDataBeforeDowngrade: boolean;
   /** Whether the after-downgrade time window contains any data. */
@@ -93,7 +93,10 @@ const runScenario = async (
     });
 
     await pageObjects.lens.waitForVisualization('xyVisChart');
-    return (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
+    const chartData = await getChartDebugData(page, 'xyVisChart');
+    const chartBars = chartData.bars?.[0]?.bars ?? [];
+    expect(chartBars.length).toBeGreaterThan(0);
+    return chartBars;
   });
 
   const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
@@ -115,18 +118,20 @@ const runScenario = async (
       });
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
-      const barsBeforeDowngrade = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
+      const barsBeforeDowngrade =
+        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
 
       await pageObjects.datePicker.setAbsoluteRange({
         from: offsetPickerTime(TIME_RANGE.afterUpgrade, 1000),
         to: offsetPickerTime(TIME_RANGE.afterUpgrade, 2 * 60 * 60 * 1000),
       });
       await pageObjects.lens.waitForVisualization('xyVisChart');
-      const barsAfterDowngrade = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;
+      const barsAfterDowngrade =
+        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
 
       return {
-        hasDataBeforeDowngrade: barsBeforeDowngrade?.some(({ y }) => y > 0) ?? false,
-        hasDataAfterDowngrade: barsAfterDowngrade?.some(({ y }) => y > 0) ?? false,
+        hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
+        hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
       };
     });
 
@@ -142,10 +147,10 @@ const runScenario = async (
 const getScenarioDataCounts = ({ bars }: ScenarioResult) => {
   // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
   // target as an additional contribution beside its source stream.
-  const columnsToCheck = bars ? bars.length / 2 : 0;
+  const columnsToCheck = Math.floor(bars.length / 2);
   return {
     beforeDowngrade: sumFirstNValues(columnsToCheck, bars),
-    afterDowngrade: sumFirstNValues(columnsToCheck, [...(bars ?? [])].reverse()),
+    afterDowngrade: sumFirstNValues(columnsToCheck, [...bars].reverse()),
   };
 };
 

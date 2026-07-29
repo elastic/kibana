@@ -27,8 +27,8 @@ const TIME_RANGE = createTsdbScenarioTimeRange();
 interface ScenarioResult {
   /** Count of `lns-indexPatternDimension-average incompatible` elements. */
   incompatibleAverageCount: number;
-  counterBars: Array<{ y: number }> | undefined;
-  countBars: Array<{ y: number }> | undefined;
+  counterBars: Array<{ y: number }>;
+  countBars: Array<{ y: number }>;
   expectedDocumentCountBeforeUpgrade: number;
 }
 
@@ -88,11 +88,11 @@ const runScenario = async (
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const chartData = await getChartDebugData(page, 'xyVisChart');
-
-      return {
-        counterBars: chartData.bars?.[0]?.bars,
-        countBars: chartData.bars?.[1]?.bars,
-      };
+      const counterSeries = chartData.bars?.[0]?.bars ?? [];
+      const countSeries = chartData.bars?.[1]?.bars ?? [];
+      expect(counterSeries.length).toBeGreaterThan(0);
+      expect(countSeries.length).toBeGreaterThan(0);
+      return { counterBars: counterSeries, countBars: countSeries };
     });
 
   return {
@@ -106,12 +106,12 @@ const runScenario = async (
 const getScenarioData = ({ counterBars, countBars }: ScenarioResult) => {
   // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
   // target as an additional contribution beside its source stream.
-  const columnsToCheck = countBars ? countBars.length / 2 : 0;
+  const columnsToCheck = Math.floor(countBars.length / 2);
   return {
-    firstCounter: counterBars?.[0]?.y,
-    lastCounter: counterBars?.[counterBars.length - 1]?.y,
+    firstCounter: counterBars[0]?.y,
+    lastCounter: counterBars[counterBars.length - 1]?.y,
     beforeUpgradeCount: sumFirstNValues(columnsToCheck, countBars),
-    afterUpgradeCount: sumFirstNValues(columnsToCheck, [...(countBars ?? [])].reverse()),
+    afterUpgradeCount: sumFirstNValues(columnsToCheck, [...countBars].reverse()),
   };
 };
 
