@@ -120,9 +120,6 @@ export class EventClient {
   private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
     let where: ESQLAstExpression | undefined;
 
-    // Exclude unvalidated candidates (status == "pending") from the default read path
-    where = andWhere(where, esql.exp`${esql.col('status')} != ${esql.str('pending')}`);
-
     where = inFilter({ where, field: 'status', values: options.status });
     where = multiValueContainsAnyFilter({
       where,
@@ -174,12 +171,18 @@ export class EventClient {
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SignificantEvent>> {
+    let where = this.buildWhere(options);
+
+    if (!options.status?.length) {
+      where = andWhere(where, esql.exp`${esql.col('status')} != ${esql.str('pending')}`);
+    }
+
     const result = await runPaginatedLatestSourceEsqlQuery<SignificantEvent>({
       esClient: this.clients.esClient,
       space: this.clients.space,
       options,
       index: EVENTS_DATA_STREAM,
-      where: this.buildWhere(options),
+      where,
       groupBy: FIELD_EVENT_ID,
     });
 
@@ -225,6 +228,8 @@ export class EventClient {
 
       if (options.status?.length) {
         query.where`${esql.col('status')} IN (${options.status.map((status) => esql.str(status))})`;
+      } else {
+        query.where`${esql.col('status')} != ${esql.str('pending')}`;
       }
       if (options.severity?.length) {
         query.where`${esql.col('severity')} IN (${options.severity.map((severity) =>
