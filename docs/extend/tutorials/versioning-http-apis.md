@@ -8,14 +8,14 @@ description: "This tutorial demonstrates how to create or migrate to versionable
 All Kibana HTTP API developers and maintainers must ensure that past versions of HTTP APIs remain available.
 
 :::{note} A note on internal vs public HTTP APIs
-HTTP APIs may be intended for **internal** or **public** use. Different levels of rigour are appropriate when designing and managing changes for each. However, in both cases we must support some minimal set of past HTTP APIs.
+HTTP APIs might be intended for **internal** or **public** use. Different levels of rigour are appropriate when designing and managing changes for each. However, in both cases we must support some minimal set of past HTTP APIs.
 
   The exact number of past APIs and the length of time they are kept available will vary per use case. Generally, the length of time will be shorter for internal HTTP APIs than for public HTTP APIs.
 :::
 
 :::{dropdown} FAQ: What is the difference between an internal and a public HTTP API?
 :::{note}
-We only declare HTTP APIs that are stable and reliable as public and keep all development changes behind internal HTTP APIs. Public HTTP APIs are intended for external consumption and are typically guaranteed not to change within a major. Internal HTTP APIs may change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
+We only declare HTTP APIs that are stable and reliable as public and keep all development changes behind internal HTTP APIs. Public HTTP APIs are intended for external consumption and are typically guaranteed not to change within a major. Internal HTTP APIs might change more frequently, as long as they adhere to the versioning principles outlined in the rest of this doc.
 :::
 
 :::
@@ -123,7 +123,7 @@ router.post(
 ```
 #### Why is this problematic for versioning?
 
-This HTTP API currently accepts all numbers and strings as input which allows for unexpected inputs like negative numbers or non-URL friendly characters. This may break future migrations or integrations that assume your data will always be within certain parameters.
+This HTTP API currently accepts all numbers and strings as input which allows for unexpected inputs like negative numbers or non-URL friendly characters. This might break future migrations or integrations that assume your data will always be within certain parameters.
 
 ```ts
   {
