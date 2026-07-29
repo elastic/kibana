@@ -2023,20 +2023,6 @@ module.exports = {
       },
     },
     /**
-     * connector_execution_manifest.ts uses Node's built-in crypto module for SHA-256
-     * fingerprinting. This file is Node-only (not exported from the browser entry point)
-     * so the import/no-nodejs-modules restriction does not apply.
-     */
-    {
-      files: [
-        'src/platform/packages/shared/kbn-connector-specs/src/lib/connector_execution_manifest.ts',
-      ],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-      },
-    },
-
-    /**
      * Lens overrides
      */
     {

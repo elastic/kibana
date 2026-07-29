@@ -13,7 +13,6 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "connector_execution_manifest.json",
   ],
   "exclude": [
     "target/**/*"
