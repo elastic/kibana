@@ -40,9 +40,7 @@ interface ScenarioResult {
 // The downgraded base stream has mixed backing-index mappings (old TSDB + new regular).
 // Elasticsearch field caps reports metric_conflicts_indices and omits time_series_metric,
 // so Lens sees bytes_counter as a plain numeric field and keeps Average enabled — even when
-// another pure TSDB stream is added to the data view. The removed FTR assertion intended to
-// vary by scenario but never awaited testSubjects.exists(), making it a silent no-op.
-// The assertions in each test body lock in the observed product behavior.
+// another pure TSDB stream is added to the data view.
 
 const runScenario = async (
   { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
@@ -73,7 +71,7 @@ const runScenario = async (
     });
 
   const bars = await test.step('visualize count data before and after the downgrade', async () => {
-    // Start with a clean editor, matching the FTR beforeEach boundary between journey steps.
+    // Each step needs an empty editor, so reload Lens to clear prior dimensions.
     await pageObjects.lens.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -101,7 +99,7 @@ const runScenario = async (
 
   const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
     await test.step('visualize data on both sides of the downgrade boundary', async () => {
-      // Start with another clean editor, matching the third FTR journey step.
+      // Reload Lens for a clean editor before narrowing the time window.
       await pageObjects.lens.openFullEditor();
       await pageObjects.datePicker.setAbsoluteRange({
         from: offsetPickerTime(TIME_RANGE.beforeRollover, -60 * 60 * 1000),

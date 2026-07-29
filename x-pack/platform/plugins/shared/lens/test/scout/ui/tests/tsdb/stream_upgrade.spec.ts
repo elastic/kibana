@@ -62,7 +62,7 @@ const runScenario = async (
 
   const { counterBars, countBars } =
     await test.step('visualize counter data before and after the upgrade', async () => {
-      // Start with a clean editor, matching the FTR beforeEach boundary between journey steps.
+      // Each step needs an empty editor, so reload Lens to clear prior dimensions.
       await pageObjects.lens.openFullEditor();
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
