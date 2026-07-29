@@ -325,7 +325,7 @@ export class MyPlugin implements Plugin {
 
 During the `start` lifecycle stage, `core.http.selfClient` lets a route handler make outbound HTTP calls to Kibana's own APIs on behalf of the current request user. Scope a client to the incoming request with `asScoped(request)`, then call `fetch` with a pathname and optional fetch options.
 
-This is a powerful capability: a handler can reach any Kibana API the current user is authorized to call. If you expose programmable access to agents or end users—for example, a function or endpoint that accepts a pathname and forwards it to Kibana—you must constrain which APIs can be reached. Do not pass user-controlled paths through without an allowlist or equivalent guardrails.
+This is a powerful capability: a handler can reach any Kibana API the current user is authorized to call. If you expose programmable access to agents or end users—for example, a function or endpoint that accepts a pathname and forwards it to Kibana—constrain which APIs can be reached with an allowlist or equivalent guardrails for user-controlled pathnames.
 
 By default, `fetch` uses `access: 'public'`, which restricts calls to public APIs. Internal APIs (paths under `/internal`) are inaccessible unless you set `access: 'internal'` explicitly.
 
