@@ -110,7 +110,9 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
 
-      await test.step('sandbox opens automatically in create mode', async () => {
+      await test.step('sandbox is closed by default; open the query editor', async () => {
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await pageObjects.composeDiscover.openSandbox();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
       });
 
@@ -370,7 +372,7 @@ test.describe(
       await test.step('open create flyout in alert mode and apply a no-alert-condition query', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
 
         // Create starts as composed + empty base. Typing fills base until Apply;
         // a STATS-only pipeline then commits as alert + standalone.
@@ -410,7 +412,7 @@ test.describe(
       await test.step('open create flyout, commit a query, then switch to signal mode', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
 
         // Signal mode always resolves time fields from breach.query (not the
         // alert-standalone bug). Kept as coverage for timestamp-only create +
@@ -455,8 +457,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
       });
 
-      await test.step('close sandbox without applying', async () => {
-        await pageObjects.composeDiscover.sandboxCloseButton.click();
+      await test.step('sandbox is closed by default on create', async () => {
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
       });
 
@@ -513,8 +514,9 @@ test.describe(
     test('sandbox: Apply commits query, closing without Apply discards changes', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout (sandbox opens automatically)', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
       });
 
@@ -543,10 +545,10 @@ test.describe(
     test('alert condition validation: Apply without typing anything shows the empty callout and disables Next', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout (sandbox opens automatically)', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
       });
 
       await test.step('click Apply without typing anything', async () => {
@@ -564,10 +566,10 @@ test.describe(
     test('alert condition validation: base-only query shows the no-alert-condition callout and disables Next', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
       });
 
       await test.step('apply only a base query (no alert condition)', async () => {
@@ -593,10 +595,10 @@ test.describe(
     test('alert condition validation: no callout when the query splits into base + alert condition', async ({
       pageObjects,
     }) => {
-      await test.step('open create flyout', async () => {
+      await test.step('open create flyout and open the query editor', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
-        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
       });
 
       await test.step('apply a unified query with a base and alert condition', async () => {
@@ -619,6 +621,7 @@ test.describe(
       await test.step('open create flyout and apply only a base query', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await pageObjects.composeDiscover.openSandbox();
         await pageObjects.composeDiscover.applySandboxBaseQueryOnly(BASE_QUERY);
       });
 
