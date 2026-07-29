@@ -49,12 +49,24 @@ export const HomePage = () => {
     application.navigateToApp('dashboards');
   }, [application]);
 
+  const navigateToCreateDashboard = useCallback(() => {
+    application.navigateToApp('dashboards', { path: '#/create' });
+  }, [application]);
+
   const navigateToWorkflows = useCallback(() => {
     application.navigateToApp('workflows');
   }, [application]);
 
+  const navigateToCreateWorkflow = useCallback(() => {
+    application.navigateToApp('workflows', { path: '/create' });
+  }, [application]);
+
   const navigateToApiKeys = useCallback(() => {
     application.navigateToApp('management', { path: '/security/api_keys' });
+  }, [application]);
+
+  const navigateToCreateApiKey = useCallback(() => {
+    application.navigateToApp('management', { path: '/security/api_keys/create' });
   }, [application]);
 
   const dataStats = [
@@ -139,9 +151,20 @@ export const HomePage = () => {
               title={i18n.translate('xpack.serverlessVectordb.home.dataCard.title', {
                 defaultMessage: 'Data',
               })}
-              onTitleClick={navigateToIndexManagement}
               testSubj="homePageDataCard"
               metrics={dataStats}
+              actions={[
+                {
+                  key: 'viewIndices',
+                  iconType: 'indexMapping',
+                  label: i18n.translate('xpack.serverlessVectordb.home.dataCard.viewIndices', {
+                    defaultMessage: 'View indices',
+                  }),
+                  onClick: navigateToIndexManagement,
+                  testSubj: 'homePageDataCardViewIndices',
+                  telemetryId: 'serverlessVectordb-home-dataCard-viewIndices',
+                },
+              ]}
             />
           </EuiFlexItem>
 
@@ -154,7 +177,6 @@ export const HomePage = () => {
                   title={i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.title', {
                     defaultMessage: 'Dashboards',
                   })}
-                  onTitleClick={navigateToDashboards}
                   testSubj="homePageDashboardsCard"
                   metrics={[
                     {
@@ -170,6 +192,28 @@ export const HomePage = () => {
                       isLoading,
                     },
                   ]}
+                  actions={[
+                    {
+                      key: 'createDashboard',
+                      iconType: 'plusInCircle',
+                      label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.createDashboard', {
+                        defaultMessage: 'Create a dashboard',
+                      }),
+                      onClick: navigateToCreateDashboard,
+                      testSubj: 'homePageDashboardsCardCreateDashboard',
+                      telemetryId: 'serverlessVectordb-home-dashboardsCard-createDashboard',
+                    },
+                    {
+                      key: 'manageDashboards',
+                      iconType: 'gear',
+                      label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.manageDashboards', {
+                        defaultMessage: 'Manage dashboards',
+                      }),
+                      onClick: navigateToDashboards,
+                      testSubj: 'homePageDashboardsCardManageDashboards',
+                      telemetryId: 'serverlessVectordb-home-dashboardsCard-manageDashboards',
+                    },
+                  ]}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -178,7 +222,6 @@ export const HomePage = () => {
                   title={i18n.translate('xpack.serverlessVectordb.home.workflowsCard.title', {
                     defaultMessage: 'Workflows',
                   })}
-                  onTitleClick={navigateToWorkflows}
                   testSubj="homePageWorkflowsCard"
                   metrics={[
                     {
@@ -194,6 +237,28 @@ export const HomePage = () => {
                       isLoading,
                     },
                   ]}
+                  actions={[
+                    {
+                      key: 'createWorkflow',
+                      iconType: 'plusInCircle',
+                      label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.createWorkflow', {
+                        defaultMessage: 'Create a workflow',
+                      }),
+                      onClick: navigateToCreateWorkflow,
+                      testSubj: 'homePageWorkflowsCardCreateWorkflow',
+                      telemetryId: 'serverlessVectordb-home-workflowsCard-createWorkflow',
+                    },
+                    {
+                      key: 'manageWorkflows',
+                      iconType: 'gear',
+                      label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.manageWorkflows', {
+                        defaultMessage: 'Manage workflows',
+                      }),
+                      onClick: navigateToWorkflows,
+                      testSubj: 'homePageWorkflowsCardManageWorkflows',
+                      telemetryId: 'serverlessVectordb-home-workflowsCard-manageWorkflows',
+                    },
+                  ]}
                 />
               </EuiFlexItem>
               <EuiFlexItem>
@@ -202,7 +267,6 @@ export const HomePage = () => {
                   title={i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.title', {
                     defaultMessage: 'API Keys',
                   })}
-                  onTitleClick={navigateToApiKeys}
                   testSubj="homePageApiKeysCard"
                   metrics={[
                     {
@@ -216,6 +280,28 @@ export const HomePage = () => {
                       label: STAT_TILE_LABELS.apiKeysExpiring,
                       value: formatNumber(stats.apiKeysExpiring),
                       isLoading,
+                    },
+                  ]}
+                  actions={[
+                    {
+                      key: 'createApiKey',
+                      iconType: 'plusInCircle',
+                      label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.createApiKey', {
+                        defaultMessage: 'Create an API key',
+                      }),
+                      onClick: navigateToCreateApiKey,
+                      testSubj: 'homePageApiKeysCardCreateApiKey',
+                      telemetryId: 'serverlessVectordb-home-apiKeysCard-createApiKey',
+                    },
+                    {
+                      key: 'manageApiKeys',
+                      iconType: 'gear',
+                      label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.manageApiKeys', {
+                        defaultMessage: 'Manage API keys',
+                      }),
+                      onClick: navigateToApiKeys,
+                      testSubj: 'homePageApiKeysCardManageApiKeys',
+                      telemetryId: 'serverlessVectordb-home-apiKeysCard-manageApiKeys',
                     },
                   ]}
                 />

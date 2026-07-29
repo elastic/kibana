@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCodeBlock, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
 
 export const ChatWithYourDataSection = () => {
+  const { euiTheme } = useEuiTheme();
   const {
     services: { agentBuilder },
   } = useKibana();
@@ -35,10 +36,17 @@ export const ChatWithYourDataSection = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel color="subdued" paddingSize="s" grow={false}>
-        <EuiCodeBlock language="bash" transparentBackground isCopyable paddingSize="none" fontSize="m">
-          {'$ npx skills add elastic/agent-skills'}
-        </EuiCodeBlock>
-      </EuiPanel>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={true} css={{ borderRight: euiTheme.border.thin }}>
+            <EuiCodeBlock language="bash" transparentBackground isCopyable={false} paddingSize="none" fontSize="m">
+              {'$ npx skills add elastic/agent-skills'}
+            </EuiCodeBlock>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon iconType="copy" color="text" display="empty" onClick={() => { navigator.clipboard.writeText('$ npx skills add elastic/agent-skills'); }} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel >
       <EuiSpacer size="l" />
       <EuiText size="s" color="subdued">
         <p>
