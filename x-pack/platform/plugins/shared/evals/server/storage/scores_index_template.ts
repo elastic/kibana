@@ -14,6 +14,7 @@ const evaluationsDataStreamMappings = {
     '@timestamp': { type: 'date' },
     experiment_id: { type: 'keyword' },
     experiment_name: { type: 'keyword' },
+    space_ids: { type: 'keyword' },
     metadata: {
       type: 'object',
       properties: {
@@ -97,7 +98,7 @@ const evaluationsDataStreamMappings = {
 
 export const evaluationsDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
   name: EvaluationIndices.SCORES,
-  version: 1,
+  version: 2,
   hidden: true,
   template: {
     lifecycle: {
