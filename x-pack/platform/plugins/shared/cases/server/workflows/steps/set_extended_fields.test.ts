@@ -85,6 +85,43 @@ describe('setExtendedFieldsStepDefinition', () => {
     });
   });
 
+  it('returns a forbidden error and never calls bulkUpdate when the version-resolving get is unauthorized', async () => {
+    const get = jest.fn().mockRejectedValue(new Error('Unauthorized to get case'));
+    const bulkUpdate = jest.fn();
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkUpdate },
+    } as unknown as CasesClient);
+    const definition = setExtendedFieldsStepDefinition(getCasesClient);
+
+    const result = await definition.handler(createContext(input));
+
+    expect(bulkUpdate).not.toHaveBeenCalled();
+    expect(result.error).toEqual(
+      expect.objectContaining({
+        message:
+          'Extended fields on case "case-1" could not be updated. Reason: Unauthorized to get case',
+      })
+    );
+  });
+
+  it('surfaces a forbidden bulkUpdate error without applying a partial update', async () => {
+    const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkUpdate = jest.fn().mockRejectedValue(new Error('Unauthorized to update case'));
+    const getCasesClient = jest.fn().mockResolvedValue({
+      cases: { get, bulkUpdate },
+    } as unknown as CasesClient);
+    const definition = setExtendedFieldsStepDefinition(getCasesClient);
+
+    const result = await definition.handler(createContext(input));
+
+    expect(result.error).toEqual(
+      expect.objectContaining({
+        message:
+          'Extended fields on case "case-1" could not be updated. Reason: Unauthorized to update case',
+      })
+    );
+  });
+
   it('surfaces the underlying validation message when bulkUpdate throws', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const bulkUpdate = jest

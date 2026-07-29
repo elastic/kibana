@@ -60,9 +60,23 @@ export const createCaseFromTemplateStepDefinition = (
       // connector / extended_fields (caller-wins) and pins the resolved template version. The step
       // no longer builds any of those client-side.
       if (isTemplatesEnabled) {
+        // NOTE: unlike `cases.create`'s own template expansion (which reads the template via the
+        // unsecured `templatesService` — creating a case only requires createCase authorization for
+        // `owner`, not template-read), this step goes through the authorized `casesClient.templates`
+        // sub-client. Running this step therefore additionally requires the `getTemplate` privilege
+        // for the template's owner. This divergence is intentional for now (documented on the step
+        // itself) rather than silently reusing the unsecured read.
         const templateSO = await casesClient.templates.getTemplate(case_template_id);
 
         if (templateSO) {
+          // A template resolved for a different owner than the requested case must not be used to
+          // seed this create — fail with clear owner context now rather than falling through to
+          // `cases.create`'s generic "Template not found" error, which doesn't mention the owner
+          // mismatch and leaves the caller guessing whether the template id itself was wrong.
+          if (templateSO.attributes.owner !== owner) {
+            throw new Error(`Case template "${case_template_id}" not found for owner "${owner}"`);
+          }
+
           // `cases.create` re-fetches and re-parses the template for expansion; parsing here as well
           // is a small duplicate read on a cold create path, kept for the wire-required seed values
           // that expansion deliberately does not apply.

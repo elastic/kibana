@@ -385,6 +385,60 @@ describe('createCaseFromTemplateStepDefinition', () => {
       expect(createPayload.template).toEqual({ id: 'triage_template', version: 4 });
     });
 
+    it('fails with owner context when the resolved template belongs to a different owner', async () => {
+      const create = jest.fn();
+      const getTemplate = jest
+        .fn()
+        .mockResolvedValue(
+          buildTemplateSO({ name: 'Triage default title', fields: [] }, { owner: 'observability' })
+        );
+      const configureGet = jest.fn();
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: configureGet },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      const result = await definition.handler(
+        createContext({
+          owner: 'securitySolution',
+          case_template_id: 'triage_template',
+        })
+      );
+
+      expect(create).not.toHaveBeenCalled();
+      // The legacy configuration fallback must not run either — the id resolved to a real (if
+      // cross-owner) v2 template SO, so this is not the "unknown id" case.
+      expect(configureGet).not.toHaveBeenCalled();
+      expect(result.error).toBeInstanceOf(Error);
+      expect(result.error?.message).toBe(
+        'Case template "triage_template" not found for owner "securitySolution"'
+      );
+    });
+
+    it('returns a forbidden error and never calls create when getTemplate is unauthorized', async () => {
+      const create = jest.fn();
+      const getTemplate = jest.fn().mockRejectedValue(new Error('Unauthorized to get template'));
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: jest.fn() },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      const result = await definition.handler(
+        createContext({
+          owner: 'securitySolution',
+          case_template_id: 'triage_template',
+        })
+      );
+
+      expect(create).not.toHaveBeenCalled();
+      expect(result.error).toBeInstanceOf(Error);
+      expect((result.error as Error).message).toContain('Unauthorized to get template');
+    });
+
     it('falls back to the legacy configuration path when the id is not a v2 template SO', async () => {
       const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
       const getTemplate = jest.fn().mockResolvedValue(undefined);
