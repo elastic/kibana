@@ -295,7 +295,7 @@ The `response` parameter of the handler already provides APIs for the most commo
 - and so on
 
 However, some of the less commonly used return codes don't have such helpers. In that case, the `response.custom`
-and/or `response.customError` APIs should be used.
+or `response.customError` APIs should be used.
 
 ```ts
 import type { CoreSetup, Plugin } from '@kbn/core/server';
