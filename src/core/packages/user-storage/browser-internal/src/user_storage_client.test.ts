@@ -25,6 +25,18 @@ const buildClient = (initialValues: Record<string, unknown> = {}, available = tr
   return { api, done$, client };
 };
 
+const deferred = <T = unknown>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+
+const flushMicrotasks = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+
 describe('UserStorageClient', () => {
   describe('isAvailable', () => {
     it('reflects the `available` flag passed at construction', () => {
@@ -315,6 +327,118 @@ describe('UserStorageClient', () => {
       await expect(client.remove('key')).rejects.toThrow('nope');
       expect(client.peek('key')).toBe('old');
       await expect(errors).resolves.toEqual(expect.any(Error));
+    });
+  });
+
+  describe('stale fetch orphaning', () => {
+    it('a set() during an in-flight fetch survives the fetch resolving (older read cannot clobber)', async () => {
+      const { client, api } = buildClient({});
+      const fetch1 = deferred<string>();
+      api.get.mockReturnValueOnce(fetch1.promise);
+      api.set.mockResolvedValue('written');
+
+      const getPromise = client.get<string>('key'); // starts the lazy GET
+      await client.set('key', 'written'); // write lands mid-fetch
+
+      fetch1.resolve('stale-from-server'); // older GET resolves late
+
+      await expect(getPromise).resolves.toBe('written');
+      expect(client.peek('key')).toBe('written');
+    });
+
+    it('ignores a stale GET error that arrives after a successful set()', async () => {
+      const { client, api } = buildClient({});
+      const fetch1 = deferred<string>();
+      api.get.mockReturnValueOnce(fetch1.promise);
+      api.set.mockResolvedValue('written');
+
+      const httpErrors = jest.fn();
+      client.getHttpError$().subscribe(httpErrors);
+      const states: Array<{ status: string; value?: unknown }> = [];
+      client.getState$<string>('key', 'default').subscribe((s) => states.push(s));
+
+      const getPromise = client.get<string>('key');
+      await client.set('key', 'written');
+
+      fetch1.reject(new Error('network')); // older GET fails late
+      await expect(getPromise).resolves.toBe('written');
+      await flushMicrotasks();
+
+      expect(httpErrors).not.toHaveBeenCalled();
+      expect(states.some((s) => s.status === 'error')).toBe(false);
+      expect(states.at(-1)).toEqual({ status: 'resolved', value: 'written' });
+    });
+
+    it('does not resurrect a removed value; later readers start a post-remove GET for the default', async () => {
+      const { client, api } = buildClient({});
+      const fetch1 = deferred<string>();
+      const fetch2 = deferred<string>();
+      api.get.mockReturnValueOnce(fetch1.promise).mockReturnValueOnce(fetch2.promise);
+      api.remove.mockResolvedValue(undefined);
+
+      const get1 = client.get<string>('key', 'server-default'); // starts fetch1
+      await client.remove('key'); // invalidates the in-flight GET
+
+      const get2 = client.get<string>('key', 'server-default'); // must NOT join the stale request
+      expect(api.get).toHaveBeenCalledTimes(2);
+
+      fetch1.resolve('stale-old-value'); // discarded
+      fetch2.resolve('server-default'); // authoritative post-remove value
+
+      await expect(get1).resolves.toBe('server-default');
+      await expect(get2).resolves.toBe('server-default');
+      expect(client.peek('key')).toBe('server-default');
+    });
+
+    it('ignores a stale GET error after remove(); only the post-remove GET decides the outcome', async () => {
+      const { client, api } = buildClient({});
+      const fetch1 = deferred<string>();
+      const fetch2 = deferred<string>();
+      api.get.mockReturnValueOnce(fetch1.promise).mockReturnValueOnce(fetch2.promise);
+      api.remove.mockResolvedValue(undefined);
+
+      const httpErrors = jest.fn();
+      client.getHttpError$().subscribe(httpErrors);
+
+      const get1 = client.get<string>('key', 'server-default');
+      await client.remove('key');
+      const get2 = client.get<string>('key', 'server-default');
+
+      fetch1.reject(new Error('stale-network')); // discarded
+      fetch2.resolve('server-default');
+
+      await expect(get1).resolves.toBe('server-default');
+      await expect(get2).resolves.toBe('server-default');
+      await flushMicrotasks();
+      expect(httpErrors).not.toHaveBeenCalled();
+    });
+
+    it('does not orphan an in-flight GET when a different key is written', async () => {
+      const { client, api } = buildClient({});
+      const fetchA = deferred<string>();
+      api.get.mockReturnValueOnce(fetchA.promise);
+      api.set.mockResolvedValue('b-written');
+
+      const getA = client.get<string>('a');
+      await client.set('b', 'b-written'); // unrelated key
+
+      fetchA.resolve('a-fetched');
+      await expect(getA).resolves.toBe('a-fetched');
+      expect(client.peek('a')).toBe('a-fetched');
+    });
+
+    it('does not orphan the in-flight GET when the write fails', async () => {
+      const { client, api } = buildClient({});
+      const fetch1 = deferred<string>();
+      api.get.mockReturnValueOnce(fetch1.promise);
+      api.set.mockRejectedValue(new Error('write-failed'));
+
+      const getPromise = client.get<string>('key');
+      await expect(client.set('key', 'attempted')).rejects.toThrow('write-failed');
+
+      fetch1.resolve('fetched'); // still authoritative — the failed write changed nothing
+      await expect(getPromise).resolves.toBe('fetched');
+      expect(client.peek('key')).toBe('fetched');
     });
   });
 
