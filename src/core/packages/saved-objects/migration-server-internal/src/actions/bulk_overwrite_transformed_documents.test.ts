@@ -252,7 +252,6 @@ describe('bulkOverwriteTransformedDocuments', () => {
         ],
       })
     );
-    client.cluster.allocationExplain.mockRejectedValueOnce(new Error('explain unavailable'));
 
     const task = bulkOverwriteTransformedDocuments({
       client,
@@ -316,11 +315,15 @@ describe('bulkOverwriteTransformedDocuments', () => {
       index: 'new_index',
       operations: [],
       refresh: 'wait_for',
+      fetchAllocationExplain: true,
     });
 
     const result = await task();
 
-    expect(client.cluster.allocationExplain).toHaveBeenCalledWith({ index: 'new_index' });
+    expect(client.cluster.allocationExplain).toHaveBeenCalledWith(
+      { index: 'new_index', shard: 0, primary: false, master_timeout: '30s' },
+      { maxRetries: 0 }
+    );
     expect(Either.isLeft(result)).toBe(true);
     const left = (result as Either.Left<any>).left;
     expect(left.type).toEqual('unavailable_shards_exception');
@@ -352,6 +355,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
       index: 'new_index',
       operations: [],
       refresh: 'wait_for',
+      fetchAllocationExplain: true,
     });
 
     const result = await task();
@@ -387,7 +391,6 @@ describe('bulkOverwriteTransformedDocuments', () => {
         ],
       })
     );
-    client.cluster.allocationExplain.mockRejectedValueOnce(new Error('explain unavailable'));
 
     const task = bulkOverwriteTransformedDocuments({
       client,

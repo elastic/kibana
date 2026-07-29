@@ -33,6 +33,7 @@ import type {
   UpdateDocumentModelVersionsWaitForInstancesState,
 } from './state';
 import type { MigratorContext } from './context';
+import type { Logger } from '@kbn/logging';
 import * as Actions from './actions';
 import { createDelayFn } from '../common/utils';
 import {
@@ -54,7 +55,7 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
-export const nextActionMap = (context: MigratorContext) => {
+export const nextActionMap = (context: MigratorContext, logger: Logger) => {
   const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
@@ -162,6 +163,8 @@ export const nextActionMap = (context: MigratorContext) => {
         index: state.currentIndex,
         operations: state.bulkOperationBatches[state.currentBatch],
         refresh: false,
+        fetchAllocationExplain: state.retryCount === 0,
+        logger,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
       Actions.closePit({
@@ -191,8 +194,8 @@ export const nextActionMap = (context: MigratorContext) => {
   };
 };
 
-export const next = (context: MigratorContext) => {
-  const map = nextActionMap(context);
+export const next = (context: MigratorContext, logger: Logger) => {
+  const map = nextActionMap(context, logger);
 
   return (state: State) => {
     const delay = createDelayFn(state);

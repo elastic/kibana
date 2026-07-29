@@ -12,6 +12,7 @@ import type * as TaskEither from 'fp-ts/TaskEither';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -47,6 +48,15 @@ export interface BulkOverwriteTransformedDocumentsParams {
    * active shards. Defaults to DEFAULT_TIMEOUT (300s).
    */
   timeout?: string;
+  /**
+   * When true, call `_cluster/allocation/explain` on unavailable-shard failures
+   * and include the decider reason in the returned error message. Callers
+   * should gate this on retry count to avoid hitting the cluster API on every
+   * retry of a long-running failure.
+   */
+  fetchAllocationExplain?: boolean;
+  /** Optional logger — used to surface explain-call errors during development. */
+  logger?: Logger;
 }
 
 /**
@@ -61,6 +71,8 @@ export const bulkOverwriteTransformedDocuments =
     refresh = false,
     useAliasToPreventAutoCreate = false,
     timeout = DEFAULT_TIMEOUT,
+    fetchAllocationExplain = false,
+    logger,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
@@ -93,7 +105,10 @@ export const bulkOverwriteTransformedDocuments =
       if (error instanceof esErrors.ResponseError && error.statusCode === 413) {
         return Either.left({ type: 'request_entity_too_large_exception' as const });
       }
-      return catchRetryableEsClientErrors(error as esErrors.ElasticsearchClientError);
+      if (error instanceof esErrors.ElasticsearchClientError) {
+        return catchRetryableEsClientErrors(error);
+      }
+      throw error;
     }
 
     // Filter out version_conflict_engine_exception since these just mean
@@ -116,16 +131,22 @@ export const bulkOverwriteTransformedDocuments =
     }
 
     if (errors.every(isUnavailableShardsException)) {
-      // Fetch the allocation explanation so operators can see WHY shards are
-      // unavailable (e.g. disk watermark, recovery throttling) rather than
-      // just a generic "not enough copies" message on every retry.
       let allocationReason = '';
-      try {
-        const explain = await client.cluster.allocationExplain({ index });
-        allocationReason = formatAllocationExplanation(explain);
-      } catch {
-        // Best-effort: if the explain call fails for any reason (permissions,
-        // network, no unassigned shards found), fall through with the base message.
+      if (fetchAllocationExplain) {
+        try {
+          // Kibana migration indices always have exactly 1 shard (shard 0).
+          // We ask about the replica (primary: false) because wait_for_active_shards:'all'
+          // fails when the replica can't be assigned, not the primary.
+          const explain = await client.cluster.allocationExplain(
+            { index, shard: 0, primary: false, master_timeout: '30s' },
+            { maxRetries: 0 }
+          );
+          allocationReason = formatAllocationExplanation(explain);
+        } catch (explainError) {
+          logger?.debug(
+            `[${index}] Failed to fetch allocation explain: ${explainError instanceof Error ? explainError.message : String(explainError)}`
+          );
+        }
       }
       return Either.left({
         type: 'unavailable_shards_exception' as const,
@@ -138,11 +159,7 @@ export const bulkOverwriteTransformedDocuments =
     throw new Error(JSON.stringify(errors));
   };
 
-/**
- * Formats the allocation explanation response into a human-readable string
- * suitable for inclusion in a log message.
- */
-function formatAllocationExplanation(explain: estypes.ClusterAllocationExplainResponse): string {
+const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainResponse): string => {
   const parts: string[] = [];
 
   if (explain.allocate_explanation) {
@@ -173,4 +190,4 @@ function formatAllocationExplanation(explain: estypes.ClusterAllocationExplainRe
   }
 
   return parts.join('. ');
-}
+};
