@@ -10,7 +10,6 @@ import {
   rawRuleTemplateSchemaV1,
   rawRuleTemplateSchemaV2,
   rawRuleTemplateSchemaV3,
-  rawRuleTemplateSchemaV4,
 } from '../schemas/raw_rule_template';
 
 export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
@@ -42,22 +41,6 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleTemplateSchemaV3.extends({}, { unknowns: 'ignore' }),
       create: rawRuleTemplateSchemaV3,
-    },
-  },
-  '4': {
-    changes: [
-      {
-        type: 'mappings_addition',
-        addedMappings: {
-          engine: {
-            type: 'keyword',
-          },
-        },
-      },
-    ],
-    schemas: {
-      forwardCompatibility: rawRuleTemplateSchemaV4.extends({}, { unknowns: 'ignore' }),
-      create: rawRuleTemplateSchemaV4,
     },
   },
 };

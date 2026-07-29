@@ -10,9 +10,6 @@ import type { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 export const ruleTemplateMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {
-    engine: {
-      type: 'keyword',
-    },
     name: {
       type: 'text',
       fields: {
