@@ -68,6 +68,11 @@ export const ALERT_EPISODE_FIELDS: readonly PayloadVariable[] = [
     documentation: 'Current lifecycle status of the episode.',
   },
   {
+    path: 'severity',
+    detail: "'info' | 'low' | 'medium' | 'high' | 'critical'",
+    documentation: 'Severity of the episode. Optional — may be absent if not set by the rule.',
+  },
+  {
     path: 'data',
     detail: 'Record<string, unknown>',
     documentation:

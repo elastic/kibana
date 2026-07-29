@@ -225,6 +225,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconMongodb" */ './specs/mongodb/icon')),
   ],
   [
+    '.monday_com',
+    lazy(() => import(/* webpackChunkName: "connectorIconMondayCom" */ './specs/monday_com/icon')),
+  ],
+  [
     '.sublime_security',
     lazy(
       () =>
@@ -232,5 +236,9 @@ export const ConnectorIconsMap: Map<
           /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
         )
     ),
+  ],
+  [
+    '.kubernetes',
+    lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
   ],
 ]);
