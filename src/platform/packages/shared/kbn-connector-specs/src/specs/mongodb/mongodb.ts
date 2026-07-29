@@ -33,7 +33,7 @@
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { Db, CollectionInfo } from 'mongodb';
-import { ConnectionString } from 'mongodb-connection-string-url';
+import type { ConnectionString as ConnectionStringType } from 'mongodb-connection-string-url';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import type {
   FindInput,
@@ -57,11 +57,23 @@ import {
 // Stages that mutate data or execute arbitrary code — block these in aggregate
 const DISALLOWED_AGGREGATE_STAGES = new Set(['$out', '$merge', '$function', '$accumulator']);
 
+// Dynamic import keeps mongodb-connection-string-url (and its whatwg-url/tr46
+// dependency chain) out of the browser bundle. Both kbn-optimizer and
+// kbn-rspack-optimizer declare it a browser external so this import is never
+// resolved during browser bundling.
+const loadConnectionString = async (): Promise<typeof ConnectionStringType> => {
+  const { ConnectionString } = await import(
+    /* webpackChunkName: "mongodbConnectionStringUrl" */ 'mongodb-connection-string-url'
+  );
+  return ConnectionString;
+};
+
 /** Resolve the database name: action input → URI path → error. */
-const resolveDb = (inputDatabase: string | undefined, uri: string): string => {
+const resolveDb = async (inputDatabase: string | undefined, uri: string): Promise<string> => {
   if (inputDatabase) return inputDatabase;
 
   try {
+    const ConnectionString = await loadConnectionString();
     const { pathname } = new ConnectionString(uri);
     const dbFromUri = pathname.slice(1);
     if (dbFromUri) return dbFromUri;
@@ -88,6 +100,7 @@ const withClient = async <T>(
   // Both kbn-optimizer and kbn-rspack-optimizer declare 'mongodb' as a browser
   // external so this import is never resolved during browser bundling.
   const { MongoClient } = await import(/* webpackChunkName: "mongodbDriver" */ 'mongodb');
+  const ConnectionString = await loadConnectionString();
   const { uri } = ctx.config as { uri: string };
   const { username, password } = ctx.secrets as { username: string; password: string };
 
@@ -199,7 +212,7 @@ export const MongoDBConnector: ConnectorSpec = {
       input: FindInputSchema,
       handler: async (ctx, input: FindInput) => {
         const { uri } = ctx.config as { uri: string };
-        const database = resolveDb(input.database, uri);
+        const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const cursor = db.collection(input.collection).find(input.filter ?? {}, {
             projection: input.projection,
@@ -242,7 +255,7 @@ export const MongoDBConnector: ConnectorSpec = {
             : [...input.pipeline, { $limit: maxLimit }];
 
         const { uri } = ctx.config as { uri: string };
-        const database = resolveDb(input.database, uri);
+        const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const results = await db.collection(input.collection).aggregate(pipeline).toArray();
           return { count: results.length, results };
@@ -259,7 +272,7 @@ export const MongoDBConnector: ConnectorSpec = {
       input: CountInputSchema,
       handler: async (ctx, input: CountInput) => {
         const { uri } = ctx.config as { uri: string };
-        const database = resolveDb(input.database, uri);
+        const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const count = await db.collection(input.collection).countDocuments(input.filter ?? {});
           return { count };
@@ -275,7 +288,7 @@ export const MongoDBConnector: ConnectorSpec = {
       input: ListCollectionsInputSchema,
       handler: async (ctx, input: ListCollectionsInput) => {
         const { uri } = ctx.config as { uri: string };
-        const database = resolveDb(input.database, uri);
+        const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const { nameFilter } = input;
           const filter = nameFilter ? { name: { $regex: nameFilter } } : {};
@@ -301,7 +314,7 @@ export const MongoDBConnector: ConnectorSpec = {
       input: InsertOneInputSchema,
       handler: async (ctx, input: InsertOneInput) => {
         const { uri } = ctx.config as { uri: string };
-        const database = resolveDb(input.database, uri);
+        const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const result = await db.collection(input.collection).insertOne(input.document);
           return { insertedId: String(result.insertedId), acknowledged: result.acknowledged };
@@ -320,7 +333,7 @@ export const MongoDBConnector: ConnectorSpec = {
       input: UpdateOneInputSchema,
       handler: async (ctx, input: UpdateOneInput) => {
         const { uri } = ctx.config as { uri: string };
-        const database = resolveDb(input.database, uri);
+        const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const result = await db
             .collection(input.collection)
@@ -345,7 +358,7 @@ export const MongoDBConnector: ConnectorSpec = {
       input: DeleteOneInputSchema,
       handler: async (ctx, input: DeleteOneInput) => {
         const { uri } = ctx.config as { uri: string };
-        const database = resolveDb(input.database, uri);
+        const database = await resolveDb(input.database, uri);
         return withClient(ctx, database, async (db) => {
           const result = await db.collection(input.collection).deleteOne(input.filter);
           return { deletedCount: result.deletedCount, acknowledged: result.acknowledged };
