@@ -27,9 +27,11 @@ class DateNanosFormatServer extends DateNanosFormat {
 
     const timezoneChanged = this.timeZone !== timezone;
     const datePatternChanged = this.memoizedPattern !== pattern;
-    if (timezoneChanged || datePatternChanged) {
+    const fallbackPatternChanged = this.memoizedFallbackPattern !== fallbackPattern;
+    if (timezoneChanged || datePatternChanged || fallbackPatternChanged) {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
+      this.memoizedFallbackPattern = fallbackPattern;
 
       this.memoizedConverter = memoize((value: string | number) => {
         if (value === null || value === undefined) {

@@ -119,6 +119,22 @@ describe('Date Nanos Format', () => {
     expect(formatter.convertToText(ms)).toBe(moment(ms).format(fallback));
   });
 
+  test('should clear the memoization cache when the fallback pattern changes', () => {
+    const config: Record<string, string> = {
+      dateNanosFormat: 'MMM D, YYYY @ HH:mm:ss.SSSSSSSSS',
+      dateFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',
+      'dateFormat:tz': 'Browser',
+    };
+    const getConfig: FieldFormatsGetConfigFn = (key: string) => config[key];
+    const formatter = new DateNanosFormat({}, getConfig);
+
+    const ms = 1558361096357;
+    expect(formatter.convertToText(ms)).toBe(moment(ms).format('MMM D, YYYY @ HH:mm:ss.SSS'));
+
+    config.dateFormat = 'YYYY-MM-DD';
+    expect(formatter.convertToText(ms)).toBe(moment(ms).format('YYYY-MM-DD'));
+  });
+
   test('returns a plain string for a valid date', () => {
     const getConfig: FieldFormatsGetConfigFn = (key: string) =>
       ({

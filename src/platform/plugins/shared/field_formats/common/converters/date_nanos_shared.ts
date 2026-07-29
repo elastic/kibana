@@ -77,6 +77,7 @@ export class DateNanosFormat extends FieldFormat {
 
   protected memoizedConverter: Function = noop;
   protected memoizedPattern: string = '';
+  protected memoizedFallbackPattern: string = '';
   protected timeZone: string = '';
 
   getParamDefaults() {
@@ -97,9 +98,11 @@ export class DateNanosFormat extends FieldFormat {
 
     const timezoneChanged = this.timeZone !== timezone;
     const datePatternChanged = this.memoizedPattern !== pattern;
-    if (timezoneChanged || datePatternChanged) {
+    const fallbackPatternChanged = this.memoizedFallbackPattern !== fallbackPattern;
+    if (timezoneChanged || datePatternChanged || fallbackPatternChanged) {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
+      this.memoizedFallbackPattern = fallbackPattern;
 
       this.memoizedConverter = memoize(function converter(value: string | number) {
         if (value === null || value === undefined) {
