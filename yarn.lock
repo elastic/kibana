@@ -2387,10 +2387,10 @@
     tree-dump "1.1.0"
     tslib "2.8.1"
 
-"@elastic/eui-test-helpers@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.1.0.tgz#738c02c7efd00b36d179e057f0f81c1a602555c4"
-  integrity sha512-Mkaav4vjOHULNWk0M+MqheaVyOzvFHYsiKHa+djKtQK9czpP92eY4399ZtYvU5ruyuROfMmj9TmDVJn6iFc0oQ==
+"@elastic/eui-test-helpers@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-test-helpers/-/eui-test-helpers-1.2.0.tgz#60fb34fa36ba169a1ae639284f36b3be43d3c82a"
+  integrity sha512-1k27oE2Wkogh6yeXmUa0kp3D6bjm+8Cv4v8MniBMyLBHwKGK41YQebKAkfmGq4V2xHV5Jv+lAkuTYZf9Iyr0ww==
 
 "@elastic/eui-theme-borealis@8.0.0":
   version "8.0.0"
@@ -10233,6 +10233,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/workflow-step-schema-cli@link:src/platform/packages/private/kbn-workflow-step-schema-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/workflows-execution-engine@link:src/platform/plugins/shared/workflows_execution_engine":
   version "0.0.0"
   uid ""
@@ -11197,13 +11201,6 @@
   resolved "https://registry.yarnpkg.com/@openfeature/web-sdk/-/web-sdk-1.9.0.tgz#af71728b8cc142225e7d92069f48a030b2524c01"
   integrity sha512-FCrNfqvE/thHVfCNU0KKx1SD7rk+1wE2UaR5B5OPZl917QJv6AsKRwaI3N+SVgwXWI07GgtXP6hNlTVb49PGhg==
 
-"@opentelemetry/api-logs@0.219.0":
-  version "0.219.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/api-logs/-/api-logs-0.219.0.tgz#3303f10f43e6ff1741f8f6019e43a92723781630"
-  integrity sha512-FFx7YnaYJlIjqWW/AG/yAZ0L/NEY724PipXXXQLdtZPbLwBGbUMTGL1i/esI56TWfTUXxhLfpgrnWJCG8aUJyg==
-  dependencies:
-    "@opentelemetry/api" "^1.3.0"
-
 "@opentelemetry/api-logs@0.220.0", "@opentelemetry/api-logs@^0.220.0":
   version "0.220.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/api-logs/-/api-logs-0.220.0.tgz#b2ed235de4b5f3c1769adfa5f3bc247d82cdfbc9"
@@ -11719,16 +11716,7 @@
     "@opentelemetry/semantic-conventions" "^1.33.0"
     "@types/tedious" "^4.0.14"
 
-"@opentelemetry/instrumentation-undici@0.29.0":
-  version "0.29.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-undici/-/instrumentation-undici-0.29.0.tgz#271745a5acd112b73e75f0a06ec39f0493fab4f7"
-  integrity sha512-SnA+0XgGc595jtnwFVfWy7Vgfr5hle4D5YKIlm0U4z8aK9YoCZVUn1xAkVZ2evaJyykiDF50FBzr1XZ0uj8CPA==
-  dependencies:
-    "@opentelemetry/core" "^2.0.0"
-    "@opentelemetry/instrumentation" "^0.219.0"
-    "@opentelemetry/semantic-conventions" "^1.24.0"
-
-"@opentelemetry/instrumentation-undici@^0.30.0":
+"@opentelemetry/instrumentation-undici@0.30.0", "@opentelemetry/instrumentation-undici@^0.30.0":
   version "0.30.0"
   resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation-undici/-/instrumentation-undici-0.30.0.tgz#6a86240be0bd7054fcc7a25617133dc5181b225d"
   integrity sha512-VgxMzeR14uPEVqEC5b55m4KijEe+gQAgJ4jjWCE7h5i2Q76nS4y7OWDk8V+XkD4zK9bbJyWEK+a2DqtGP/fCuw==
@@ -11751,15 +11739,6 @@
   integrity sha512-xQx3E2WxP1mDvKzxLxX+CTCtNLa560YJZ3087qYHerl2YmiKpv7AH+dAy7vmx+eVrZ5BwhfWUAVoKOoxCNHcpw==
   dependencies:
     "@opentelemetry/api-logs" "0.220.0"
-    import-in-the-middle "^3.0.0"
-    require-in-the-middle "^8.0.0"
-
-"@opentelemetry/instrumentation@^0.219.0":
-  version "0.219.0"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/instrumentation/-/instrumentation-0.219.0.tgz#84399affd8ee4a12cb199f325c4858654d8dedee"
-  integrity sha512-X5t7I8GyIO9rmGHwoedZLREpQqrF1WW2nxzNNym6HOKpFiE+rvqV3ngC0xcZVO2YwIGf3KKmRdWrYwdwz3H9RQ==
-  dependencies:
-    "@opentelemetry/api-logs" "0.219.0"
     import-in-the-middle "^3.0.0"
     require-in-the-middle "^8.0.0"
 
@@ -12048,10 +12027,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.28.0.tgz#337fb2bca0453d0726696e745f50064411f646d6"
   integrity sha512-lp4qAiMTD4sNWW4DbKLBkfiMZ4jbAboJIGOQr5DvciMRI494OapieI9qiODpOt0XBr1LjIDy1xAGAnVs5supTA==
 
-"@opentelemetry/semantic-conventions@1.41.1", "@opentelemetry/semantic-conventions@^1.24.0", "@opentelemetry/semantic-conventions@^1.27.0", "@opentelemetry/semantic-conventions@^1.29.0", "@opentelemetry/semantic-conventions@^1.30.0", "@opentelemetry/semantic-conventions@^1.33.0", "@opentelemetry/semantic-conventions@^1.33.1", "@opentelemetry/semantic-conventions@^1.34.0", "@opentelemetry/semantic-conventions@^1.36.0", "@opentelemetry/semantic-conventions@^1.37.0", "@opentelemetry/semantic-conventions@^1.41.1":
-  version "1.41.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.41.1.tgz#b04e7151c5913a7a006d4f465479da75efb98a7a"
-  integrity sha512-/UhIkaZgPutTFmQ7RnIJGgDXZmtEJ7Dvi86xNTFWcnRxVRNk/aotsqDJYeEvDP+FSMB2SdW+pQzNMcWP0rwuNA==
+"@opentelemetry/semantic-conventions@1.43.0", "@opentelemetry/semantic-conventions@^1.24.0", "@opentelemetry/semantic-conventions@^1.27.0", "@opentelemetry/semantic-conventions@^1.29.0", "@opentelemetry/semantic-conventions@^1.30.0", "@opentelemetry/semantic-conventions@^1.33.0", "@opentelemetry/semantic-conventions@^1.33.1", "@opentelemetry/semantic-conventions@^1.34.0", "@opentelemetry/semantic-conventions@^1.36.0", "@opentelemetry/semantic-conventions@^1.37.0", "@opentelemetry/semantic-conventions@^1.41.1":
+  version "1.43.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/semantic-conventions/-/semantic-conventions-1.43.0.tgz#f3f467e36c27332f0e735ec86cdcd78dd6f27865"
+  integrity sha512-eSYWTm620tTk45EKSedaUL8MFYI8hW164hIXsgIHyxu3VobUB3fFCu5t0hQby6OoWRPsG1KkKUG2M5UadiLiVg==
 
 "@opentelemetry/sql-common@^0.42.0":
   version "0.42.0"
@@ -14410,14 +14389,6 @@
     dom-accessibility-api "^0.6.3"
     picocolors "^1.1.1"
     redent "^3.0.0"
-
-"@testing-library/react-hooks@8.0.1":
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/@testing-library/react-hooks/-/react-hooks-8.0.1.tgz#0924bbd5b55e0c0c0502d1754657ada66947ca12"
-  integrity sha512-Aqhl2IVmLt8IovEVarNDFuJDVWVvhnr9/GCU6UUnrYXwgDFF9h2L2o2P9KBni1AST5sT6riAyoukFLyjQUgD/g==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
-    react-error-boundary "^3.1.0"
 
 "@testing-library/react@16.3.2":
   version "16.3.2"
@@ -21723,7 +21694,14 @@ esprima@^4.0.0, esprima@^4.0.1, esprima@~4.0.0:
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-4.0.1.tgz#13b04cdb3e6c5d19df91ab6987a8695619b0aa71"
   integrity sha512-eGuFFw7Upda+g4p+QHvnW0RyTX/SVeJBDM/gCtMARO0cLuT2HcEKnTPvhjV6aGeqrCB/sbNop0Kszm0jsaWU4A==
 
-esquery@^1.4.2, esquery@^1.7.0:
+esquery@^1.4.2:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/esquery/-/esquery-1.5.0.tgz#6ce17738de8577694edd7361c57182ac8cb0db0b"
+  integrity sha512-YQLXUplAwJgCydQ78IMJywZCceoqk1oH01OERdSAJc/7U2AylwjhSCLDEtqwg811idIS/9fIU5GjG73IgjKMVg==
+  dependencies:
+    estraverse "^5.1.0"
+
+esquery@^1.7.0:
   version "1.7.0"
   resolved "https://registry.yarnpkg.com/esquery/-/esquery-1.7.0.tgz#08d048f261f0ddedb5bae95f46809463d9c9496d"
   integrity sha512-Ap6G0WQwcU/LHsvLwON1fAQX9Zp0A2Y6Y/cJBl9r/JbW90Zyg4/zbG6zzKa2OTALELarYHmKu0GhpM5EO+7T0g==
@@ -30435,13 +30413,6 @@ react-element-to-jsx-string@15.0.0, react-element-to-jsx-string@^15.0.0:
     is-plain-object "5.0.0"
     react-is "18.1.0"
 
-react-error-boundary@^3.1.0:
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/react-error-boundary/-/react-error-boundary-3.1.4.tgz#255db92b23197108757a888b01e5b729919abde0"
-  integrity sha512-uM9uPzZJTF6wRQORmSrvOIgt4lJ9MC1sNgEOj2XGsDTRE4kmpWxg7ENK9EWNKJRMAOY9z0MuF4yIfl6gp4sotA==
-  dependencies:
-    "@babel/runtime" "^7.12.5"
-
 react-fast-compare@3.2.2, react-fast-compare@^3.0.1:
   version "3.2.2"
   resolved "https://registry.yarnpkg.com/react-fast-compare/-/react-fast-compare-3.2.2.tgz#929a97a532304ce9fee4bcae44234f1ce2c21d49"
@@ -33846,7 +33817,12 @@ tldts-core@^6.1.46:
   resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-6.1.78.tgz#47b477d9742870daa01dbd5ff9a598a48379728c"
   integrity sha512-jS0svNsB99jR6AJBmfmEWuKIgz91Haya91Z43PATaeHJ24BkMoNRb/jlaD37VYjb0mYf6gRL/HOnvS1zEnYBiw==
 
-tldts-core@^7.0.12, tldts-core@^7.4.9:
+tldts-core@^7.0.12:
+  version "7.4.8"
+  resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-7.4.8.tgz#c729aee4ff9d3670741193682a98e25a3d780dd9"
+  integrity sha512-c1P7u0EhACHj7lPy4MJm8iTFEU8+nB0LCtddH0fhP7noaVoXAqafMtOOeX+ulpuPBqnrRgRhw494RICT3mbhnw==
+
+tldts-core@^7.4.9:
   version "7.4.9"
   resolved "https://registry.yarnpkg.com/tldts-core/-/tldts-core-7.4.9.tgz#8c3e6fc36123b6001290860d2abda6546466980b"
   integrity sha512-DxKfPBI52p2msTEu7MPhdpdDTBhhVQg1a/8PjQckeyAvO13eMYElX545grIp6nnTGIMZlRvFZPvFhvI/WIz2Vg==
