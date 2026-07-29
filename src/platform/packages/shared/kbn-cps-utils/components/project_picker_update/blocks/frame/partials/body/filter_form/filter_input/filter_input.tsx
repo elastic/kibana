@@ -182,12 +182,18 @@ export function FilterSelectionInput({
         }
       };
 
+      const selectedOptions = filterValues.filter((option) =>
+        Array.isArray(field.value)
+          ? field.value.includes(option.value)
+          : field.value === option.value
+      );
+
       return (
         <EuiComboBox
           {...field}
           options={filterValues}
           onChange={handleChange}
-          selectedOptions={filterValues.filter((option) => field.value?.includes(option.value))}
+          selectedOptions={selectedOptions}
           singleSelection={!isMultiValueOperator}
           isDisabled={!anchoringFilteringTagName || !filteringOperator || isExistenceCheckOperator}
           compressed

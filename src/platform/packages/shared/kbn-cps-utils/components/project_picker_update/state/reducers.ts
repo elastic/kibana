@@ -249,16 +249,22 @@ export function createStoreReducers() {
       excludedOverrides: removeOverrides(state.excludedOverrides, computeVisibleProjectIds(state)),
     }),
     /**
-     * Includes all other visible projects while preserving the anchor project's exclusion state.
+     * Sets the provided project id as the only project to be included, excluding all other projects.
      */
-    includeAllOtherVisibleProjects: (
+    includeOnlyProvidedProjectId: (
       state: ProjectPickerState,
       payload: { anchorProjectId: string }
     ) => {
       const visibleProjectIds = computeVisibleProjectIds(state);
-      const otherVisibleIds = visibleProjectIds.filter((id) => id !== payload.anchorProjectId);
+      if (!visibleProjectIds.includes(payload.anchorProjectId)) {
+        return state;
+      }
 
-      const nextExcludedOverrides = removeOverrides(state.excludedOverrides, otherVisibleIds);
+      const otherVisibleIds = visibleProjectIds.filter((id) => id !== payload.anchorProjectId);
+      const nextExcludedOverrides = removeOverrides(
+        addOverrides(state.excludedOverrides, otherVisibleIds),
+        [payload.anchorProjectId]
+      );
 
       if (
         nextExcludedOverrides.length === state.excludedOverrides.length &&
@@ -270,21 +276,22 @@ export function createStoreReducers() {
       return { ...state, excludedOverrides: nextExcludedOverrides };
     },
     /**
-     * Excludes all other visible projects while preserving the anchor project's exclusion state.
+     * Excludes the provided project id, set all other projects as included.
      */
-    excludeAllOtherVisibleProjects: (
+    excludeOnlyProvidedProjectId: (
       state: ProjectPickerState,
       payload: { anchorProjectId: string }
     ) => {
       const visibleProjectIds = computeVisibleProjectIds(state);
-      const otherVisibleIds = visibleProjectIds.filter((id) => id !== payload.anchorProjectId);
-      const toExclude = otherVisibleIds.filter((id) => !state.excludedOverrides.includes(id));
-
-      if (getIncludedVisibleProjectIds(state).length - toExclude.length < 1) {
+      if (!visibleProjectIds.includes(payload.anchorProjectId)) {
         return state;
       }
 
-      const nextExcludedOverrides = addOverrides(state.excludedOverrides, otherVisibleIds);
+      const otherVisibleIds = visibleProjectIds.filter((id) => id !== payload.anchorProjectId);
+      const nextExcludedOverrides = removeOverrides(
+        addOverrides(state.excludedOverrides, [payload.anchorProjectId]),
+        otherVisibleIds
+      );
 
       if (
         nextExcludedOverrides.length === state.excludedOverrides.length &&
