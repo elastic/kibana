@@ -6,8 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { partition } from 'lodash';
-
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
@@ -28,7 +26,7 @@ import type {
 } from '../../../common/types/api';
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
 import { validateCustomFields } from './validators';
-import { normalizeCreateCaseRequest } from './utils';
+import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
@@ -97,6 +95,22 @@ export const bulkCreate = async (
       );
     }
 
+    // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      const allUids = new Set(
+        bulkCreateRequest.flatMap((theCase) => theCase.assignees?.map(({ uid }) => uid) ?? [])
+      );
+      const profiles = await getUserProfilesSafe(clientArgs.securityStartPlugin, allUids, logger);
+
+      if (profiles) {
+        for (const theCase of bulkCreateRequest) {
+          if (theCase.assignees && theCase.assignees.length > 0) {
+            theCase.assignees = applyProfilesToAssignees(theCase.assignees, profiles);
+          }
+        }
+      }
+    }
+
     const bulkCreateResponse = await caseService.bulkCreateCases({
       cases: bulkCreateRequest,
       refresh: false,
@@ -106,7 +120,10 @@ export const bulkCreate = async (
     const assigneesPerCase: NotifyAssigneesArgs[] = [];
     const res: Case[] = [];
 
-    const [errors, casesSOs] = partition(bulkCreateResponse.saved_objects, isSOError);
+    const errors = bulkCreateResponse.saved_objects.filter(isSOError<CaseTransformedAttributes>);
+    const casesSOs = bulkCreateResponse.saved_objects.filter(
+      (so): so is SavedObject<CaseTransformedAttributes> => !isSOError(so)
+    );
 
     if (errors.length > 0) {
       const firstError = errors[0].error;
@@ -294,7 +311,8 @@ const createBulkCreateUserActionsRequest = ({
     owner: theCase.attributes.owner,
     description: theCase.attributes.description,
     severity: theCase.attributes.severity ?? CaseSeverity.LOW,
-    assignees: theCase.attributes.assignees ?? [],
+    // Keep the user action uid-only
+    assignees: theCase.attributes.assignees?.map(({ uid }) => ({ uid })) ?? [],
     category: theCase.attributes.category ?? null,
     customFields: theCase.attributes.customFields ?? [],
   };
