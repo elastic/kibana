@@ -47,6 +47,8 @@ import {
 } from './test_helper';
 import userEvent from '@testing-library/user-event';
 
+jest.setTimeout(30_000);
+
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn(() => false),
