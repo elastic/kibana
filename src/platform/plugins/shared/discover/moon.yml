@@ -161,6 +161,7 @@ dependsOn:
   - '@kbn/use-observable'
   - '@kbn/core-security-server'
   - '@kbn/core-http-server'
+  - '@kbn/field-formats-common'
 tags:
   - plugin
   - prod
