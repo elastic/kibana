@@ -124,7 +124,7 @@ This step requires documentation skills from https://github.com/elastic/elastic-
 ### Update navigation and listings
 
 1. Add an entry in `docs/reference/toc.yml` under the connectors section.
-2. Add a row in `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`.
+2. Add a row in `docs/reference/connectors-kibana/_snippets/elastic-connectors-list.md`.
 
 Once you are done developing the connector spec, tests, and documentation, let the user review your work before next steps.
 

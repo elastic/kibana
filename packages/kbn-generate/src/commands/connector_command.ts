@@ -35,7 +35,7 @@ const ALL_SPECS_FILE = Path.resolve(
 
 const CODEOWNERS_FILE = Path.resolve(REPO_ROOT, '.github/CODEOWNERS');
 const DOCS_DIR = Path.resolve(REPO_ROOT, 'docs/reference/connectors-kibana');
-const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/data-context-sources-connectors-list.md');
+const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/elastic-connectors-list.md');
 const TOC_FILE = Path.resolve(REPO_ROOT, 'docs/reference/toc.yml');
 
 const ULTIMATE_PRIORITY_RULES_COMMENT = `
@@ -313,7 +313,7 @@ export const ConnectorCommand: GenerateCommand = {
       }
     }
 
-    // update toc.yml (add to data-context-sources-connectors section)
+    // update toc.yml (add to elastic-connectors section)
     {
       const content = await Fsp.readFile(TOC_FILE, 'utf8');
       const docEntry = `connectors-kibana/${kebabName}-action-type.md`;
@@ -324,9 +324,9 @@ export const ConnectorCommand: GenerateCommand = {
         const lines = content.split('\n');
         let insertAt = -1;
 
-        // Find the data-context-sources-connectors section and its children
+        // Find the elastic-connectors section and its children
         for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes('file: connectors-kibana/data-context-sources-connectors.md')) {
+          if (lines[i].includes('file: connectors-kibana/elastic-connectors.md')) {
             // Found the section, look for the children block
             let childIndent = '';
             for (let j = i + 1; j < lines.length; j++) {
