@@ -77,17 +77,9 @@ export type VegaByValueState = SerializedTitles &
     spec: string;
   };
 
-interface VegaEditCapabilities extends Omit<HasEditCapabilities, 'onEdit'> {
-  /**
-   * Widened from `HasEditCapabilities` so the Add panel action can hand back the focus it
-   * captured; the panel context menu calls this with no arguments.
-   */
-  onEdit: (options?: { isNewPanel?: boolean; returnFocus?: () => void }) => Promise<void>;
-}
-
 export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   HasDrilldowns &
-  VegaEditCapabilities &
+  HasEditCapabilities &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
