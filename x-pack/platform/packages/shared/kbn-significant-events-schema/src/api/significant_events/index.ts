@@ -46,8 +46,8 @@ interface SignificantEventOccurrence {
 }
 
 type QueryWithOccurrences = StreamQuery & {
-  /** Alerting rule whose firings produced this occurrence series. */
-  rule_uuid: string;
+  /** Alerting rule UUID (`QueryLink.rule_id`); optional during rolling upgrades. */
+  rule_uuid?: string;
   stream_name: string;
   occurrences: SignificantEventOccurrence[];
   change_points: {

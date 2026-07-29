@@ -9,6 +9,8 @@ import {
   filterOccurrencesForDetection,
   getChangePointLabel,
   getDetectionOccurrenceTimeRange,
+  getOccurrenceBucketIntervalMs,
+  parseOccurrenceBucketSize,
 } from './change_point';
 
 describe('getChangePointLabel', () => {
@@ -48,5 +50,33 @@ describe('filterOccurrencesForDetection', () => {
       occurrences[1],
       occurrences[2],
     ]);
+  });
+});
+
+describe('parseOccurrenceBucketSize', () => {
+  it('parses minute and hour bucket sizes', () => {
+    expect(parseOccurrenceBucketSize('5m')).toEqual({
+      value: 5,
+      unit: 'm',
+      unitLabel: 'minutes',
+    });
+    expect(parseOccurrenceBucketSize('1h')).toEqual({
+      value: 1,
+      unit: 'h',
+      unitLabel: 'hours',
+    });
+  });
+
+  it('falls back for invalid bucket sizes', () => {
+    expect(parseOccurrenceBucketSize('invalid')).toEqual({
+      value: 5,
+      unit: 'm',
+      unitLabel: 'minutes',
+    });
+  });
+
+  it('converts bucket sizes to milliseconds', () => {
+    expect(getOccurrenceBucketIntervalMs('5m')).toBe(5 * 60 * 1000);
+    expect(getOccurrenceBucketIntervalMs('1h')).toBe(60 * 60 * 1000);
   });
 });

@@ -56,17 +56,27 @@ describe('ChangePointLensChart', () => {
     mockEmbeddableComponent.mockClear();
   });
 
-  it('builds the occurrence query for the active space and rule', () => {
+  it('builds the metric-series occurrence query for the active space and rule', () => {
     const query = buildDetectionOccurrencesEsql({
       ruleUuid,
       spaceId: 'space-a',
+      from: '2026-07-10T11:00:00.000Z',
+      to: '2026-07-10T12:15:00.000Z',
     });
 
     expect(query).toContain('FROM .rule-events');
     expect(query).toContain('space_id == "space-a"');
     expect(query).toContain('rule.id == "rule-uuid-001"');
-    expect(query).toContain('COUNT_DISTINCT(group_hash)');
-    expect(query).toContain('BUCKET(@timestamp, 5 minutes)');
+    expect(query).toContain('FIELD_EXTRACT(data, "metric_value")');
+    expect(query).toContain('FIELD_EXTRACT(data, "bucket")');
+    expect(query).toContain('MAX(metric_value)');
+    expect(query).toContain('SUM(minute_value)');
+    expect(query).toContain('BUCKET(source_minute, 5 minutes)');
+    expect(query).toContain('bucket >= TO_DATETIME("2026-07-10T11:00:00.000Z")');
+    expect(query).toContain('bucket <= TO_DATETIME("2026-07-10T12:15:00.000Z")');
+    expect(query).toContain('LIMIT 100');
+    expect(query).not.toContain('COUNT_DISTINCT');
+    expect(query).not.toContain('group_hash');
   });
 
   it('renders a Lens embeddable with a bar series and change point annotation', async () => {
@@ -103,6 +113,7 @@ describe('ChangePointLensChart', () => {
         ],
       })
     );
+    expect(options.query.esql).toContain('FIELD_EXTRACT(data, "metric_value")');
     expect(options.query.esql).toContain('space_id == "space-a"');
 
     expect(await screen.findByTestId('mockLensEmbeddable')).toHaveTextContent('[Logs] Spike');
@@ -116,5 +127,18 @@ describe('ChangePointLensChart', () => {
         withDefaultActions: true,
       })
     );
+  });
+
+  it('shows the warning callout when the detection has no rule UUID', async () => {
+    render(
+      <I18nProvider>
+        <EuiProvider>
+          <ChangePointLensChart detection={{ ...detection, rule_uuid: undefined }} />
+        </EuiProvider>
+      </I18nProvider>
+    );
+
+    expect(await screen.findByText('Unable to load occurrence visualization')).toBeInTheDocument();
+    expect(mockBuild).not.toHaveBeenCalled();
   });
 });

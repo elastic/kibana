@@ -22,12 +22,13 @@ import {
   DETECTION_OCCURRENCE_BUCKET_SIZE,
   getChangePointLabel,
   getDetectionOccurrenceTimeRange,
+  parseOccurrenceBucketSize,
 } from './change_point';
 
 const CHART_HEIGHT = 200;
 const RULE_EVENTS_INDEX = '.rule-events';
 const DEFAULT_SPACE_ID = 'default';
-const OCCURRENCE_BUCKET_MINUTES = Number.parseInt(DETECTION_OCCURRENCE_BUCKET_SIZE, 10);
+const OCCURRENCE_QUERY_LIMIT = 100;
 
 type LensESQLConfig = LensConfig & { dataset: LensESQLDataset };
 
@@ -45,16 +46,32 @@ const getStreamTypeLabel = (streamName?: string): string => {
 export const buildDetectionOccurrencesEsql = ({
   ruleUuid,
   spaceId,
+  from,
+  to,
+  bucketSize = DETECTION_OCCURRENCE_BUCKET_SIZE,
 }: {
   ruleUuid: string;
   spaceId: string;
-}): string => `FROM ${RULE_EVENTS_INDEX}
+  from: string;
+  to: string;
+  bucketSize?: string;
+}): string => {
+  const { value, unitLabel } = parseOccurrenceBucketSize(bucketSize);
+  return `FROM ${RULE_EVENTS_INDEX}
 | WHERE type == "signal"
   AND space_id == ${JSON.stringify(spaceId)}
   AND rule.id == ${JSON.stringify(ruleUuid)}
-| STATS occurrences = COUNT_DISTINCT(group_hash)
-  BY timestamp = BUCKET(@timestamp, ${OCCURRENCE_BUCKET_MINUTES} minutes)
-| SORT timestamp ASC`;
+| EVAL metric_value = TO_LONG(FIELD_EXTRACT(data, "metric_value"))
+| EVAL bucket = TO_DATETIME(TO_LONG(FIELD_EXTRACT(data, "bucket")))
+| WHERE bucket IS NOT NULL AND metric_value IS NOT NULL
+| WHERE bucket >= TO_DATETIME(${JSON.stringify(from)})
+  AND bucket <= TO_DATETIME(${JSON.stringify(to)})
+| STATS minute_value = MAX(metric_value) BY source_minute = DATE_TRUNC(1 minute, bucket)
+| STATS occurrences = SUM(minute_value)
+  BY timestamp = BUCKET(source_minute, ${value} ${unitLabel})
+| SORT timestamp ASC
+| LIMIT ${OCCURRENCE_QUERY_LIMIT}`;
+};
 
 const buildLensConfig = ({
   changePointLabel,
@@ -137,7 +154,7 @@ export function ChangePointLensChart({
     error,
     loading,
     value: attributes,
-  } = useAsync(async () => {
+  } = useAsync(async (): Promise<LensAttributes> => {
     if (!timeRange) {
       throw new Error('Invalid detection timestamp');
     }
@@ -149,6 +166,8 @@ export function ChangePointLensChart({
     const esqlQuery = buildDetectionOccurrencesEsql({
       ruleUuid,
       spaceId,
+      from: timeRange.from,
+      to: timeRange.to,
     });
     const config = buildLensConfig({
       changePointLabel,

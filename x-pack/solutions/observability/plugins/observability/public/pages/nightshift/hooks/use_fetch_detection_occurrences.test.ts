@@ -6,7 +6,10 @@
  */
 
 import type { LifecycleDetection } from '@kbn/significant-events-schema';
-import { buildDetectionOccurrencesRequest } from './use_fetch_detection_occurrences';
+import {
+  buildDetectionOccurrencesRequest,
+  mapOccurrencesByRuleUuid,
+} from './use_fetch_detection_occurrences';
 
 const detection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDetection => ({
   detection_id: 'detection-1',
@@ -40,5 +43,76 @@ describe('buildDetectionOccurrencesRequest', () => {
 
   it('returns undefined when no detection has a rule UUID', () => {
     expect(buildDetectionOccurrencesRequest([detection({ rule_uuid: undefined })])).toBeUndefined();
+  });
+});
+
+describe('mapOccurrencesByRuleUuid', () => {
+  it('maps occurrence series by rule UUID and skips rows without one', () => {
+    expect(
+      mapOccurrencesByRuleUuid([
+        {
+          rule_uuid: 'rule-1',
+          occurrences: [
+            { date: '2026-07-10T11:55:00.000Z', count: 2 },
+            { date: '2026-07-10T12:00:00.000Z', count: 8 },
+          ],
+        },
+        {
+          occurrences: [{ date: '2026-07-10T12:00:00.000Z', count: 1 }],
+        },
+      ])
+    ).toEqual(
+      new Map([
+        [
+          'rule-1',
+          [
+            { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
+            { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
+          ],
+        ],
+      ])
+    );
+  });
+
+  it('keeps the longer series when multiple query links share a rule UUID', () => {
+    expect(
+      mapOccurrencesByRuleUuid([
+        {
+          rule_uuid: 'rule-1',
+          occurrences: [{ date: '2026-07-10T12:00:00.000Z', count: 1 }],
+        },
+        {
+          rule_uuid: 'rule-1',
+          occurrences: [
+            { date: '2026-07-10T11:55:00.000Z', count: 2 },
+            { date: '2026-07-10T12:00:00.000Z', count: 8 },
+          ],
+        },
+      ])
+    ).toEqual(
+      new Map([
+        [
+          'rule-1',
+          [
+            { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
+            { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
+          ],
+        ],
+      ])
+    );
+  });
+
+  it('filters invalid occurrence dates', () => {
+    expect(
+      mapOccurrencesByRuleUuid([
+        {
+          rule_uuid: 'rule-1',
+          occurrences: [
+            { date: 'invalid', count: 1 },
+            { date: '2026-07-10T12:00:00.000Z', count: 3 },
+          ],
+        },
+      ])
+    ).toEqual(new Map([['rule-1', [{ x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 3 }]]]));
   });
 });

@@ -307,6 +307,42 @@ export async function computeOccurrences(
   return { sparseByRule, aggregatedOccurrences, timeline };
 }
 
+/** Stub query link so rule_uuid filters can return series without a KI query. */
+function createRuleScopedQueryLink(ruleUuid: string): QueryLink {
+  return {
+    query: {
+      id: `rule:${ruleUuid}`,
+      title: ruleUuid,
+      description: '',
+      type: 'match',
+      esql: { query: '' },
+    },
+    stream_name: '',
+    rule_backed: true,
+    rule_id: ruleUuid,
+  };
+}
+
+function resolveQueryLinksForOccurrences(
+  fetchedQueryLinks: QueryLink[],
+  ruleUuids: string[] | undefined
+): QueryLink[] {
+  if (!ruleUuids?.length) {
+    return fetchedQueryLinks;
+  }
+
+  const requestedRuleUuids = new Set(ruleUuids);
+  const matchedLinks = fetchedQueryLinks.filter(({ rule_id: ruleId }) =>
+    requestedRuleUuids.has(ruleId)
+  );
+  const matchedRuleIds = new Set(matchedLinks.map(({ rule_id: ruleId }) => ruleId));
+  const stubs = ruleUuids
+    .filter((ruleUuid) => !matchedRuleIds.has(ruleUuid))
+    .map((ruleUuid) => createRuleScopedQueryLink(ruleUuid));
+
+  return [...matchedLinks, ...stubs];
+}
+
 export async function getQueryOccurrences(
   params: SignificantEventsParams,
   dependencies: SignificantEventsDependencies
@@ -315,10 +351,7 @@ export async function getQueryOccurrences(
   const { from, to, bucketSize, spaceId, alertsReader = ALERTS_READER_V2 } = params;
 
   const fetchedQueryLinks = await fetchQueryLinks(params, kiClient);
-  const requestedRuleUuids = params.ruleUuids ? new Set(params.ruleUuids) : undefined;
-  const queryLinks = requestedRuleUuids
-    ? fetchedQueryLinks.filter(({ rule_id: ruleId }) => requestedRuleUuids.has(ruleId))
-    : fetchedQueryLinks;
+  const queryLinks = resolveQueryLinksForOccurrences(fetchedQueryLinks, params.ruleUuids);
   if (isEmpty(queryLinks)) {
     return {
       queryLinks: [],

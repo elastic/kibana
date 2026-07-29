@@ -60,6 +60,35 @@ export const buildDetectionOccurrencesRequest = (
   };
 };
 
+const toOccurrencePoints = (
+  occurrences: ReadonlyArray<{ date: string; count: number }>
+): OccurrencePoint[] =>
+  occurrences
+    .map(({ date, count }) => ({ x: new Date(date).getTime(), y: count }))
+    .filter(({ x }) => Number.isFinite(x));
+
+export const mapOccurrencesByRuleUuid = (
+  queries: ReadonlyArray<{
+    rule_uuid?: string;
+    occurrences: ReadonlyArray<{ date: string; count: number }>;
+  }>
+): DetectionOccurrencesByRuleUuid => {
+  const byRuleUuid = new Map<string, OccurrencePoint[]>();
+
+  for (const { rule_uuid: ruleUuid, occurrences } of queries) {
+    if (!ruleUuid) {
+      continue;
+    }
+    const points = toOccurrencePoints(occurrences);
+    const existing = byRuleUuid.get(ruleUuid);
+    if (!existing || points.length > existing.length) {
+      byRuleUuid.set(ruleUuid, points);
+    }
+  }
+
+  return byRuleUuid;
+};
+
 export const useFetchDetectionOccurrences = (
   detections: readonly LifecycleDetection[]
 ): UseQueryResult<DetectionOccurrencesByRuleUuid, Error> => {
@@ -91,14 +120,7 @@ export const useFetchDetectionOccurrences = (
         }
       );
 
-      return new Map(
-        response.queries.map(({ rule_uuid: ruleUuid, occurrences }) => [
-          ruleUuid,
-          occurrences
-            .map(({ date, count }) => ({ x: new Date(date).getTime(), y: count }))
-            .filter(({ x }) => Number.isFinite(x)),
-        ])
-      );
+      return mapOccurrencesByRuleUuid(response.queries);
     },
   });
 };

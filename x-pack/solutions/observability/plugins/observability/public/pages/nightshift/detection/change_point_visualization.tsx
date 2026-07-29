@@ -23,7 +23,11 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { ChangePointType } from '@kbn/significant-events-schema';
-import { getChangePointLabel, type OccurrencePoint } from './change_point';
+import {
+  getChangePointLabel,
+  getOccurrenceBucketIntervalMs,
+  type OccurrencePoint,
+} from './change_point';
 import { useChartThemes } from '../../../hooks/use_chart_themes';
 import { ChangePointAnnotationTooltip } from './change_point_annotation_tooltip';
 
@@ -31,7 +35,7 @@ const SPARKLINE_HEIGHT = 32;
 const SPARKLINE_WIDTH = 64;
 const SPARKLINE_MARKER_MARGIN = 6;
 
-const DEFAULT_ANNOTATION_INTERVAL_MS = 5 * 60 * 1000;
+const DEFAULT_ANNOTATION_INTERVAL_MS = getOccurrenceBucketIntervalMs();
 
 const getChangePointAnnotation = (
   data: readonly OccurrencePoint[],

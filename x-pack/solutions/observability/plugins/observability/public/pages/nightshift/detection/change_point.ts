@@ -60,6 +60,46 @@ export interface DetectionOccurrenceTimeRange {
 export const DETECTION_OCCURRENCE_LOOKBACK_MS = 60 * 60 * 1000;
 export const DETECTION_OCCURRENCE_FOLLOWUP_MS = 15 * 60 * 1000;
 export const DETECTION_OCCURRENCE_BUCKET_SIZE = '5m';
+/** Matches server METRIC_SERIES_MAX_WRITE_DELAY so live charts omit unreadable trailing buckets. */
+export const DETECTION_OCCURRENCE_WRITE_HORIZON_MS = 7 * 60 * 1000;
+
+const OCCURRENCE_BUCKET_SIZE_PATTERN = /^(\d+)([smhd])$/;
+const OCCURRENCE_BUCKET_UNIT_LABELS = {
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+  d: 'days',
+} as const;
+const OCCURRENCE_BUCKET_UNIT_MS = {
+  s: 1000,
+  m: 60 * 1000,
+  h: 60 * 60 * 1000,
+  d: 24 * 60 * 60 * 1000,
+} as const;
+
+export function parseOccurrenceBucketSize(bucketSize: string): {
+  value: number;
+  unit: keyof typeof OCCURRENCE_BUCKET_UNIT_LABELS;
+  unitLabel: (typeof OCCURRENCE_BUCKET_UNIT_LABELS)[keyof typeof OCCURRENCE_BUCKET_UNIT_LABELS];
+} {
+  const match = bucketSize.match(OCCURRENCE_BUCKET_SIZE_PATTERN);
+  if (!match) {
+    return { value: 5, unit: 'm', unitLabel: 'minutes' };
+  }
+  const value = Number.parseInt(match[1], 10);
+  const unit = match[2] as keyof typeof OCCURRENCE_BUCKET_UNIT_LABELS;
+  if (value < 1 || !(unit in OCCURRENCE_BUCKET_UNIT_LABELS)) {
+    return { value: 5, unit: 'm', unitLabel: 'minutes' };
+  }
+  return { value, unit, unitLabel: OCCURRENCE_BUCKET_UNIT_LABELS[unit] };
+}
+
+export function getOccurrenceBucketIntervalMs(
+  bucketSize: string = DETECTION_OCCURRENCE_BUCKET_SIZE
+): number {
+  const { value, unit } = parseOccurrenceBucketSize(bucketSize);
+  return value * OCCURRENCE_BUCKET_UNIT_MS[unit];
+}
 
 export function getDetectionOccurrenceTimeRange(
   timestamp: string | number
@@ -69,15 +109,21 @@ export function getDetectionOccurrenceTimeRange(
     return undefined;
   }
 
-  return {
-    from: detectionTime - DETECTION_OCCURRENCE_LOOKBACK_MS,
-    to: detectionTime + DETECTION_OCCURRENCE_FOLLOWUP_MS,
-  };
+  const from = detectionTime - DETECTION_OCCURRENCE_LOOKBACK_MS;
+  const requestedTo = detectionTime + DETECTION_OCCURRENCE_FOLLOWUP_MS;
+  const writeHorizon = Date.now() - DETECTION_OCCURRENCE_WRITE_HORIZON_MS;
+  const to = Math.min(requestedTo, writeHorizon);
+
+  if (to < from) {
+    return undefined;
+  }
+
+  return { from, to };
 }
 
 export function filterOccurrencesForDetection(
   occurrences: readonly OccurrencePoint[],
-  timestamp: string
+  timestamp: string | number
 ): OccurrencePoint[] {
   const range = getDetectionOccurrenceTimeRange(timestamp);
   if (!range) {

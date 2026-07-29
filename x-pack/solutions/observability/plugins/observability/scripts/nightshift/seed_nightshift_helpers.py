@@ -1135,22 +1135,24 @@ def seed_detection_occurrences() -> None:
         while bucket < end:
             minutes_from_anchor = (bucket - anchor).total_seconds() / 60
             count = occurrence_count(change_point_type, minutes_from_anchor, rng)
-            timestamp = (bucket + dt.timedelta(seconds=10)).isoformat().replace(
-                "+00:00", "Z"
+            bucket_ms = int(bucket.timestamp() * 1000)
+            write_time = bucket.isoformat().replace("+00:00", "Z")
+            occurrence_documents.append(
+                {
+                    "@timestamp": write_time,
+                    "scheduled_timestamp": write_time,
+                    "type": "signal",
+                    "space_id": "default",
+                    "status": "breached",
+                    "source": "internal",
+                    "rule": {"id": rule_uuid, "version": 1},
+                    "group_hash": f"nightshift-seed-{rule_uuid}-{bucket_ms}",
+                    "data": {
+                        "bucket": bucket_ms,
+                        "metric_value": count,
+                    },
+                }
             )
-            bucket_id = int(bucket.timestamp())
-            for occurrence_index in range(count):
-                occurrence_documents.append(
-                    {
-                        "@timestamp": timestamp,
-                        "type": "signal",
-                        "space_id": "default",
-                        "rule": {"id": rule_uuid},
-                        "group_hash": (
-                            f"nightshift-seed-{rule_uuid}-{bucket_id}-{occurrence_index}"
-                        ),
-                    }
-                )
             bucket += dt.timedelta(minutes=BUCKET_MINUTES)
 
     query_count = bulk_create(

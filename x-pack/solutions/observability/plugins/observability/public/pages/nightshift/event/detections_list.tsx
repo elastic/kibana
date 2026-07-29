@@ -185,7 +185,7 @@ function DetectionCard({
                 gutterSize="none"
                 responsive={false}
                 css={css`
-                  row-gap: 2px;
+                  row-gap: ${euiTheme.size.xxs};
                 `}
               >
                 <EuiFlexItem grow={false}>

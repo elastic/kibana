@@ -121,10 +121,14 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
     expect(calledWith.query).not.toContain('rule-b');
   });
 
-  it('skips ES|QL when no query link matches the requested rule UUIDs', async () => {
+  it('synthesizes a rule-scoped series when no query link matches the requested rule UUIDs', async () => {
     const { kiClient, esClient, esql } = createMocks([
       makeQueryLink({ id: 'qa', rule_id: 'rule-a' }),
     ]);
+
+    esql.mockResolvedValueOnce(
+      makeStatsResponse([{ rule_id: 'missing-rule', bucket: '2026-01-01T00:00:00.000Z', count: 4 }])
+    );
 
     const result = await fetchQueryOccurrencesFromAlerts(
       {
@@ -137,8 +141,20 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, esClient }
     );
 
-    expect(result).toEqual({ queries: [], aggregated_occurrences: [] });
-    expect(esql).not.toHaveBeenCalled();
+    expect(result.queries).toHaveLength(1);
+    expect(result.queries[0]).toEqual(
+      expect.objectContaining({
+        id: 'rule:missing-rule',
+        rule_uuid: 'missing-rule',
+      })
+    );
+    expect(result.queries[0].occurrences[0]).toEqual({
+      date: '2026-01-01T00:00:00.000Z',
+      count: 4,
+    });
+    const calledWith = esql.mock.calls[0][1] as { query: string };
+    expect(calledWith.query).toContain('missing-rule');
+    expect(calledWith.query).not.toContain('rule-a');
   });
 
   it('groups ES|QL rows into per-rule occurrences with gap filling', async () => {
@@ -159,16 +175,18 @@ describe('fetchQueryOccurrencesFromAlerts', () => {
       { kiClient, esClient }
     );
 
-    const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa')!;
-    const ruleB = result.queries.find((e) => e.id === 'qb')!;
+    const ruleA = result.queries.find((e) => e.stream_name === 'logs.test' && e.id === 'qa');
+    const ruleB = result.queries.find((e) => e.id === 'qb');
 
+    expect(ruleA).toBeDefined();
+    expect(ruleB).toBeDefined();
     // 6 buckets at 1m across [00:00, 00:05] inclusive
-    expect(ruleA.rule_uuid).toBe('rule-a');
-    expect(ruleB.rule_uuid).toBe('rule-b');
-    expect(ruleA.occurrences).toHaveLength(6);
-    expect(ruleA.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
-    expect(ruleB.occurrences).toHaveLength(6);
-    expect(ruleB.occurrences.map((o) => o.count)).toEqual([0, 0, 0, 0, 3, 0]);
+    expect(ruleA?.rule_uuid).toBe('rule-a');
+    expect(ruleB?.rule_uuid).toBe('rule-b');
+    expect(ruleA?.occurrences).toHaveLength(6);
+    expect(ruleA?.occurrences.map((o) => o.count)).toEqual([2, 0, 1, 0, 0, 0]);
+    expect(ruleB?.occurrences).toHaveLength(6);
+    expect(ruleB?.occurrences.map((o) => o.count)).toEqual([0, 0, 0, 0, 3, 0]);
   });
 
   it('emits an empty occurrences array (not a zero-filled series) for rules absent from the result', async () => {
