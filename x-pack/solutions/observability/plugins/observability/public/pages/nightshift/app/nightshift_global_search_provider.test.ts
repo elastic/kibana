@@ -56,6 +56,11 @@ describe('Nightshift global search provider', () => {
     await expect(find('dashboard')).resolves.toEqual([]);
   });
 
+  it('does not return Nightshift for empty or whitespace-only terms', async () => {
+    await expect(find('')).resolves.toEqual([]);
+    await expect(find('   ')).resolves.toEqual([]);
+  });
+
   it('does not return Nightshift when the feature is unavailable', async () => {
     await expect(find('nightshift', false)).resolves.toEqual([]);
   });

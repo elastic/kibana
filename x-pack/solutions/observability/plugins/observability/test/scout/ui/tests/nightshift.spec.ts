@@ -7,7 +7,11 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { APP_HEADER_TEST_SUBJECTS, APP_MENU_TEST_SUBJECTS } from '@kbn/app-header';
+import {
+  APP_HEADER_TEST_SUBJECTS,
+  APP_MENU_TEST_SUBJECTS,
+  getAppMenuItemTestSubj,
+} from '@kbn/app-header';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { test } from '../fixtures';
 
@@ -55,7 +59,7 @@ test.describe(
     test('navigates between Streams discovery, Nightshift, and settings', async ({ page }) => {
       await page.gotoApp('streams/_discovery/streams');
 
-      const nightshiftButton = page.testSubj.locator('app-menu-item-nightshift');
+      const nightshiftButton = page.testSubj.locator(getAppMenuItemTestSubj('nightshift'));
       await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
       await nightshiftButton.click();
 
@@ -65,10 +69,10 @@ test.describe(
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
 
+      // Force the overflow layout so settings is reached through one explicit path.
+      await page.setViewportSize({ width: 800, height: 720 });
       const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
-      if (!(await settingsLink.isVisible())) {
-        await page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton).click();
-      }
+      await page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton).click();
       await expect(settingsLink).toBeVisible();
       await settingsLink.click();
       await expect(page).toHaveURL(/\/app\/streams\/_discovery\/settings/);

@@ -20,6 +20,9 @@ const SUBSTRING_MATCH_SCORE = 75;
 const MIN_FUZZY_SCORE = 60;
 
 const scoreSearchTerm = (searchTerm: string): number => {
+  if (!searchTerm) {
+    return 0;
+  }
   if (SEARCH_TERMS.includes(searchTerm as (typeof SEARCH_TERMS)[number])) {
     return EXACT_MATCH_SCORE;
   }
