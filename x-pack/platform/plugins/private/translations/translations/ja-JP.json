@@ -37076,8 +37076,6 @@
     "xpack.searchPlayground.savedPlayground.saveSuccess.text": "{name}が保存されました。",
     "xpack.searchPlayground.savedPlayground.saveSuccess.title": "プレイグラウンドが保存されました",
     "xpack.searchPlayground.savedPlayground.updateError.title": "プレイグラウンドの更新エラー",
-    "xpack.searchPlayground.savedPlaygrounds.getSOError": "検索プレイグラウンド{id}の取得中にSavedObjectエラーが発生しました",
-    "xpack.searchPlayground.savedPlaygrounds.notFoundError": "{id}プレイグラウンドが見つかりません",
     "xpack.searchPlayground.savedPlaygrounds.validationError": "無効なプレイグラウンドリクエスト",
     "xpack.searchPlayground.searchMode.queryView.chatQuestion.placeholder": "質問を投稿する",
     "xpack.searchPlayground.searchMode.queryView.searchBar.placeholder": "ドキュメントを検索",
