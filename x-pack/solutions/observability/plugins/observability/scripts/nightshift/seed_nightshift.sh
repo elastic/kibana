@@ -3,7 +3,8 @@
 # One-command demo seed for the Nightshift landing page.
 #
 # Seeds significant events, discoveries, detections, backing stream data, and
-# Knowledge Indicator (KI) entity features so the full UI is populated:
+# Knowledge Indicator (KI) entity features, then triggers an investigation for
+# every event so the full UI is populated:
 #   - Landing page (Need action / Resolved, blast-radius stream chips)
 #   - Event flyout (summary, detections list, lifecycle)
 #   - Detection flyout (trend chart, ES|QL evidence, entity pills)
@@ -14,7 +15,7 @@
 #
 # Schema (post #277711 / signals model):
 #   - status: open | closed | dismissed
-#   - severity: demo data uses 80-critical only (matches Nightshift landing MVP filter)
+#   - severity: demo data uses 80-critical and 60-high (matches Nightshift landing MVP filter)
 #   - signals[] (not evidences[]) carries detection metadata + ES|QL evidence
 #   - event_uuid is the document version id; event_id is the stable incident key
 #   - causal_features[] links events to KI entity features for entity pills
@@ -112,6 +113,39 @@ print(lengthen_significant_events_ndjson(os.environ["BODY"]), end="")
 '
 }
 
+trigger_investigation() {
+  local event_uuid="$1"
+  local response_file
+  local status
+  local execution_id
+
+  response_file=$(mktemp "${TMPDIR:-/tmp}/seed_nightshift_investigation.XXXXXX")
+  status=$(curl -s -o "$response_file" -w "%{http_code}" -u "$ES_AUTH" \
+    -X POST "${KIBANA_URL}/internal/significant_events/events/${event_uuid}/investigate" \
+    -H "kbn-xsrf: true" \
+    -H "x-elastic-internal-origin: Kibana")
+
+  if [[ "$status" != "200" ]]; then
+    echo "ERROR: Failed to trigger investigation for ${event_uuid} (HTTP ${status}):" >&2
+    while IFS= read -r line; do
+      echo "$line" >&2
+    done < "$response_file"
+    rm -f "$response_file"
+    return 1
+  fi
+
+  execution_id=$(python3 -c \
+    "import sys,json; print(json.load(sys.stdin).get('executionId', ''))" < "$response_file")
+  rm -f "$response_file"
+
+  if [[ -z "$execution_id" ]]; then
+    echo "ERROR: Investigation response for ${event_uuid} had no executionId." >&2
+    return 1
+  fi
+
+  echo "  ${event_uuid}: investigation ${execution_id} started"
+}
+
 if [[ "$CLEAN" == "true" ]]; then
   echo "Cleaning prior Nightshift seed indices ..."
   for idx in "$INDEX" "$DETECTIONS_INDEX" "$DISCOVERIES_INDEX"; do
@@ -174,7 +208,7 @@ EVENTS_BODY=$(cat <<NDJSON
 {"create":{}}
 {"@timestamp":"${TWO_HOURS_AGO}","event_id":"evt-007","event_uuid":"evt-uuid-007","discovery_id":"discovery-007","status":"dismissed","severity":"40-medium","confidence":0.38,"stream_names":["logs.cache-service"],"title":"Cache layer — brief hit-rate dip (dismissed)","summary":"Redis cache hit rate dipped for about eight minutes during a routine node replacement. Throughput and error rates stayed flat; no user-facing impact was observed.","symptom_hypothesis":"Planned cache node drain caused a transient hit-rate dip that recovered once the replacement node joined the cluster.","causal_features":[{"feature_id":"cache-service","name":"cache-service","stream_name":"logs.cache-service"}],"signals":[{"type":"detection","stream_name":"logs.cache-service","confirmed":false,"collected_at":"${TWO_HOURS_AGO}","description":"Testing: whether cache hit rate dropped below baseline during the node replacement. Expected if true: sustained dip without recovery. Found: an eight-minute dip that fully recovered. Why: timing aligns with a planned node drain. Verdict: does not confirm — dismissed as benign maintenance noise.","evidence":{"esql_query":"FROM logs.cache-service\n| WHERE service.name == \"cache-service\"\n| STATS hit_rate = AVG(cache.hit_rate)\n  BY minute = BUCKET(@timestamp, 1 minute)\n| SORT minute DESC","result":"empty"},"metadata":{"detection_id":"det-011","rule_uuid":"rule-uuid-011","rule_name":"cache-hit-rate-dip","change_point_type":"dip","p_value":0.12}}],"kibana.space_ids":["default"]}
 {"create":{}}
-{"@timestamp":"${HOUR_AGO}","event_id":"evt-008","event_uuid":"evt-uuid-008","discovery_id":"discovery-008","status":"open","severity":"80-critical","confidence":0.84,"stream_names":["logs.web-frontend"],"title":"Search API — elevated empty-result rate","summary":"Empty-result share on search-api rose after a catalog-service deploy while browse traffic on web-frontend remained high. Product search and recommendations look stale to shoppers.","symptom_hypothesis":"Catalog index lag after deploy causes search-api to return empty facets for newly published SKUs.","causal_features":[{"feature_id":"web-frontend","name":"web-frontend","stream_name":"logs.web-frontend"}],"signals":[{"type":"detection","stream_name":"logs.web-frontend","confirmed":true,"collected_at":"${HOUR_AGO}","description":"Testing: whether search-api empty-result rate spiked after the catalog deploy. Expected if true: sustained empty-result share above baseline. Found: empty results climbed on browse paths tied to search-api. Why: timing aligns with catalog-service rollout. Verdict: confirms — search quality degraded for web users.","evidence":{"esql_query":"FROM logs.web-frontend\n| WHERE service.name == \"web-frontend\"\n  AND message LIKE \"*empty search*\"\n| STATS empty_results = COUNT(*)\n  BY minute = BUCKET(@timestamp, 1 minute)\n| SORT minute DESC","result":"found"},"metadata":{"detection_id":"det-012","rule_uuid":"rule-uuid-012","rule_name":"search-empty-rate","change_point_type":"step_change","p_value":0.04}}],"kibana.space_ids":["default"]}
+{"@timestamp":"${HOUR_AGO}","event_id":"evt-008","event_uuid":"evt-uuid-008","discovery_id":"discovery-008","status":"open","severity":"60-high","confidence":0.84,"stream_names":["logs.web-frontend"],"title":"Search API — elevated empty-result rate","summary":"Empty-result share on search-api rose after a catalog-service deploy while browse traffic on web-frontend remained high. Product search and recommendations look stale to shoppers.","symptom_hypothesis":"Catalog index lag after deploy causes search-api to return empty facets for newly published SKUs.","causal_features":[{"feature_id":"web-frontend","name":"web-frontend","stream_name":"logs.web-frontend"}],"signals":[{"type":"detection","stream_name":"logs.web-frontend","confirmed":true,"collected_at":"${HOUR_AGO}","description":"Testing: whether search-api empty-result rate spiked after the catalog deploy. Expected if true: sustained empty-result share above baseline. Found: empty results climbed on browse paths tied to search-api. Why: timing aligns with catalog-service rollout. Verdict: confirms — search quality degraded for web users.","evidence":{"esql_query":"FROM logs.web-frontend\n| WHERE service.name == \"web-frontend\"\n  AND message LIKE \"*empty search*\"\n| STATS empty_results = COUNT(*)\n  BY minute = BUCKET(@timestamp, 1 minute)\n| SORT minute DESC","result":"found"},"metadata":{"detection_id":"det-012","rule_uuid":"rule-uuid-012","rule_name":"search-empty-rate","change_point_type":"step_change","p_value":0.04}}],"kibana.space_ids":["default"]}
 {"create":{}}
 {"@timestamp":"${TWO_HOURS_AGO}","event_id":"evt-009","event_uuid":"evt-uuid-009","discovery_id":"discovery-009","status":"open","severity":"80-critical","confidence":0.89,"stream_names":["logs.api-gateway"],"title":"Auth API — elevated 401 rate","summary":"401 responses on api-gateway auth routes doubled during an identity provider rotation. web-frontend login failures rose in parallel and payment-service saw token validation retries.","symptom_hypothesis":"Stale JWKS cache on api-gateway rejects valid tokens until pods recycle after the IdP key rotation.","causal_features":[{"feature_id":"api-gateway","name":"api-gateway","stream_name":"logs.api-gateway"}],"signals":[{"type":"detection","stream_name":"logs.api-gateway","confirmed":true,"collected_at":"${TWO_HOURS_AGO}","description":"Testing: whether api-gateway 401 rate spiked during the IdP rotation. Expected if true: elevated 401 share on auth middleware. Found: 401 responses doubled versus the prior hour. Why: failures track the rotation window. Verdict: confirms — authenticated flows are failing.","evidence":{"esql_query":"FROM logs.api-gateway\n| EVAL is_unauthorized = CASE(http.response.status_code == 401, 1, 0)\n| STATS unauthorized_rate = AVG(is_unauthorized) * 100\n  BY minute = BUCKET(@timestamp, 1 minute)\n| WHERE unauthorized_rate > 5\n| SORT minute DESC","result":"found"},"metadata":{"detection_id":"det-013","rule_uuid":"rule-uuid-013","rule_name":"auth-401-spike","change_point_type":"spike","p_value":0.02}}],"kibana.space_ids":["default"]}
 NDJSON
@@ -240,7 +274,7 @@ DISCOVERIES_BODY=$(cat <<NDJSON
 {"create":{}}
 {"@timestamp":"${TWO_HOURS_AGO}","kind":"discovery","discovery_id":"discovery-007","event_id":"evt-007","processed":true,"severity":"40-medium","confidence":0.38,"stream_names":["logs.cache-service"],"title":"Cache layer — brief hit-rate dip (dismissed)","summary":"Redis cache hit rate dipped for about eight minutes during a routine node replacement. Throughput and error rates stayed flat; no user-facing impact was observed.","symptom_hypothesis":"Planned cache node drain caused a transient hit-rate dip that recovered once the replacement node joined the cluster.","causal_features":[{"feature_id":"cache-service","name":"cache-service","stream_name":"logs.cache-service"}],"signals":[{"type":"detection","stream_name":"logs.cache-service","confirmed":false,"collected_at":"${TWO_HOURS_AGO}","description":"Testing: whether cache hit rate dropped below baseline during the node replacement. Expected if true: sustained dip without recovery. Found: an eight-minute dip that fully recovered. Why: timing aligns with a planned node drain. Verdict: does not confirm — dismissed as benign maintenance noise.","evidence":{"esql_query":"FROM logs.cache-service\n| WHERE service.name == \"cache-service\"\n| STATS hit_rate = AVG(cache.hit_rate)\n  BY minute = BUCKET(@timestamp, 1 minute)\n| SORT minute DESC","result":"empty"},"metadata":{"detection_id":"det-011","rule_uuid":"rule-uuid-011","rule_name":"cache-hit-rate-dip","change_point_type":"dip","p_value":0.12}}],"kibana.space_ids":["default"]}
 {"create":{}}
-{"@timestamp":"${HOUR_AGO}","kind":"discovery","discovery_id":"discovery-008","event_id":"evt-008","processed":true,"severity":"80-critical","confidence":0.84,"stream_names":["logs.web-frontend"],"title":"Search API — elevated empty-result rate","summary":"Empty-result share on search-api rose after a catalog-service deploy while browse traffic on web-frontend remained high. Product search and recommendations look stale to shoppers.","symptom_hypothesis":"Catalog index lag after deploy causes search-api to return empty facets for newly published SKUs.","causal_features":[{"feature_id":"web-frontend","name":"web-frontend","stream_name":"logs.web-frontend"}],"signals":[{"type":"detection","stream_name":"logs.web-frontend","confirmed":true,"collected_at":"${HOUR_AGO}","description":"Testing: whether search-api empty-result rate spiked after the catalog deploy. Expected if true: sustained empty-result share above baseline. Found: empty results climbed on browse paths tied to search-api. Why: timing aligns with catalog-service rollout. Verdict: confirms — search quality degraded for web users.","evidence":{"esql_query":"FROM logs.web-frontend\n| WHERE service.name == \"web-frontend\"\n  AND message LIKE \"*empty search*\"\n| STATS empty_results = COUNT(*)\n  BY minute = BUCKET(@timestamp, 1 minute)\n| SORT minute DESC","result":"found"},"metadata":{"detection_id":"det-012","rule_uuid":"rule-uuid-012","rule_name":"search-empty-rate","change_point_type":"step_change","p_value":0.04}}],"kibana.space_ids":["default"]}
+{"@timestamp":"${HOUR_AGO}","kind":"discovery","discovery_id":"discovery-008","event_id":"evt-008","processed":true,"severity":"60-high","confidence":0.84,"stream_names":["logs.web-frontend"],"title":"Search API — elevated empty-result rate","summary":"Empty-result share on search-api rose after a catalog-service deploy while browse traffic on web-frontend remained high. Product search and recommendations look stale to shoppers.","symptom_hypothesis":"Catalog index lag after deploy causes search-api to return empty facets for newly published SKUs.","causal_features":[{"feature_id":"web-frontend","name":"web-frontend","stream_name":"logs.web-frontend"}],"signals":[{"type":"detection","stream_name":"logs.web-frontend","confirmed":true,"collected_at":"${HOUR_AGO}","description":"Testing: whether search-api empty-result rate spiked after the catalog deploy. Expected if true: sustained empty-result share above baseline. Found: empty results climbed on browse paths tied to search-api. Why: timing aligns with catalog-service rollout. Verdict: confirms — search quality degraded for web users.","evidence":{"esql_query":"FROM logs.web-frontend\n| WHERE service.name == \"web-frontend\"\n  AND message LIKE \"*empty search*\"\n| STATS empty_results = COUNT(*)\n  BY minute = BUCKET(@timestamp, 1 minute)\n| SORT minute DESC","result":"found"},"metadata":{"detection_id":"det-012","rule_uuid":"rule-uuid-012","rule_name":"search-empty-rate","change_point_type":"step_change","p_value":0.04}}],"kibana.space_ids":["default"]}
 {"create":{}}
 {"@timestamp":"${TWO_HOURS_AGO}","kind":"discovery","discovery_id":"discovery-009","event_id":"evt-009","processed":true,"severity":"80-critical","confidence":0.89,"stream_names":["logs.api-gateway"],"title":"Auth API — elevated 401 rate","summary":"401 responses on api-gateway auth routes doubled during an identity provider rotation. web-frontend login failures rose in parallel and payment-service saw token validation retries.","symptom_hypothesis":"Stale JWKS cache on api-gateway rejects valid tokens until pods recycle after the IdP key rotation.","causal_features":[{"feature_id":"api-gateway","name":"api-gateway","stream_name":"logs.api-gateway"}],"signals":[{"type":"detection","stream_name":"logs.api-gateway","confirmed":true,"collected_at":"${TWO_HOURS_AGO}","description":"Testing: whether api-gateway 401 rate spiked during the IdP rotation. Expected if true: elevated 401 share on auth middleware. Found: 401 responses doubled versus the prior hour. Why: failures track the rotation window. Verdict: confirms — authenticated flows are failing.","evidence":{"esql_query":"FROM logs.api-gateway\n| EVAL is_unauthorized = CASE(http.response.status_code == 401, 1, 0)\n| STATS unauthorized_rate = AVG(is_unauthorized) * 100\n  BY minute = BUCKET(@timestamp, 1 minute)\n| WHERE unauthorized_rate > 5\n| SORT minute DESC","result":"found"},"metadata":{"detection_id":"det-013","rule_uuid":"rule-uuid-013","rule_name":"auth-401-spike","change_point_type":"spike","p_value":0.02}}],"kibana.space_ids":["default"]}
 NDJSON
@@ -260,6 +294,14 @@ echo "Seeding backing stream indices and KI entity features ..."
 ES_URL="$ES_URL" ES_AUTH="$ES_AUTH" KIBANA_URL="$KIBANA_URL" python3 "${SCRIPT_DIR}/seed_nightshift_helpers.py"
 
 echo ""
+echo "Triggering investigations for open landing-visible significant events ..."
+for event_uuid in \
+  evt-uuid-001 evt-uuid-002 evt-uuid-003 \
+  evt-uuid-006 evt-uuid-008 evt-uuid-009; do
+  trigger_investigation "$event_uuid"
+done
+
+echo ""
 echo "Verifying ..."
 for idx in "$INDEX" "$DETECTIONS_INDEX" "$DISCOVERIES_INDEX"; do
   COUNT=$(curl -s -u "$ES_AUTH" "${ES_URL}/${idx}/_count" | python3 -c "import sys,json; print(json.load(sys.stdin).get('count', 0))")
@@ -270,6 +312,7 @@ echo ""
 echo "Done! Open Nightshift to explore:"
 echo "  - Need action: open critical events (evt-001, evt-002, evt-003, evt-006, evt-008, evt-009)"
 echo "  - Resolved: closed critical events (evt-004, evt-005) and dismissed evt-007"
+echo "  - Investigations: triggered for all 9 seeded events"
 echo "  - Event flyout → detection flyout → entity pill for KI-backed entities"
 echo ""
 echo "Tip: re-run with --clean to wipe and re-seed from scratch."
