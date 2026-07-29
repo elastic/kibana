@@ -24,9 +24,14 @@ const createFailingContext = (): ActionContext => {
       request: jest.fn(reject),
     },
     // Provide minimal placeholder values so connectors that derive their URL from
-    // config/secrets (e.g. Sublime Security reads config.baseUrl, Salesforce reads
-    // secrets.tokenUrl) can reach the HTTP call rather than throwing on missing config.
-    config: { baseUrl: 'https://placeholder.example.com' },
+    // config/secrets can reach the HTTP call rather than throwing on missing config.
+    // Keys: baseUrl (Sublime Security), tokenUrl (Salesforce), accountUrl (Azure Blob),
+    //       siteUrl (SharePoint Server).
+    config: {
+      baseUrl: 'https://placeholder.example.com',
+      accountUrl: 'https://placeholder.example.com',
+      siteUrl: 'https://placeholder.example.com',
+    },
     secrets: { tokenUrl: 'https://placeholder.example.com' },
     log: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
@@ -39,6 +44,10 @@ describe('opted-in connector test handlers', () => {
       return spec.test.enabled === true;
     }
   );
+
+  it('has at least one opted-in connector', () => {
+    expect(optedInSpecs.length).toBeGreaterThan(0);
+  });
 
   it.each(optedInSpecs)('%s test handler must throw on failure', async (_exportName, spec) => {
     const handler = spec.test.handler;

@@ -570,7 +570,6 @@ describe('MondayCom', () => {
 
   describe('test handler', () => {
     it('returns {} on successful connection', async () => {
-      if (!MondayCom.test) throw new Error('test handler not defined');
       const result = await MondayCom.test.handler(mockContext);
       expect(mockListTools).toHaveBeenCalled();
       expect(result).toEqual({});
@@ -579,7 +578,6 @@ describe('MondayCom', () => {
     it('propagates errors thrown by withMcpClient', async () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
-      if (!MondayCom.test) throw new Error('test handler not defined');
       await expect(MondayCom.test.handler(mockContext)).rejects.toThrow('connection refused');
     });
   });

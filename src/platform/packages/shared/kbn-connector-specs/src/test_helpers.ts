@@ -9,6 +9,4 @@
 
 import type { ConnectorSpec } from './connector_spec';
 
-export function requireTestHandler<T extends ConnectorSpec>(spec: T): T['test'] {
-  return spec.test;
-}
+export const requireTestHandler = <T extends ConnectorSpec>(spec: T): T['test'] => spec.test;

@@ -277,8 +277,8 @@ export interface ConnectorTest {
    */
   handler: (ctx: ActionContext) => Promise<ConnectorTestHandlerResult>;
   description?: string;
-  /** Flag to opt-in for testing */
-  enabled?: boolean;
+  /** Must be true for the Test tab to appear and the opted_in_test_handlers suite to run this handler */
+  enabled: boolean;
 }
 
 // ============================================================================

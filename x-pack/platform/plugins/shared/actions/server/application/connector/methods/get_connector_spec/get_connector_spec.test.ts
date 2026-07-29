@@ -29,6 +29,7 @@ jest.mock('@kbn/connector-specs', () => {
         auth: null,
         schema: null,
         actions: {},
+        test: { handler: async () => ({}), enabled: false },
       },
     },
   };
