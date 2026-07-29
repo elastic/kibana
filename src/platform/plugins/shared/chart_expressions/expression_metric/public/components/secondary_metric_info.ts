@@ -36,7 +36,7 @@ export interface SecondaryMetricInfoArgs {
   secondaryMetric: NonNullable<DimensionsVisParam['secondaryMetric']>;
   secondaryLabel?: string;
   /** When `false` the label is omitted, e.g. when the name visibility is `hidden` */
-  showLabel?: boolean;
+  showLabel: boolean;
   trendConfig?: TrendConfig;
   staticColor?: string;
 }
@@ -207,7 +207,7 @@ export function getSecondaryMetricInfo({
   columns,
   secondaryMetric,
   secondaryLabel,
-  showLabel = false,
+  showLabel,
   trendConfig,
   staticColor,
 }: SecondaryMetricInfoArgs): SecondaryMetricInfo {

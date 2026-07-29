@@ -54,6 +54,7 @@ describe('getSecondaryMetricInfo', () => {
     row,
     columns,
     secondaryMetric: config.dimensions.secondaryMetric,
+    showLabel: false,
   };
 
   const defaultTrendConfig: TrendConfig = {
