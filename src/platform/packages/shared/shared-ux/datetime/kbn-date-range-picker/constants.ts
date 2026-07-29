@@ -70,15 +70,15 @@ export const UNIT_SHORT_TO_FULL_MAP: Record<string, string> = {
 /**
  * Maps each date-math offset unit to the unit used for rounding (`/X` suffix).
  *
- * Sub-day units promote one step up (`ms→s`, `s→m`, `m→h`), except `h→h`
- * which keeps the hour boundary. Day-and-above units all normalise to `/d`.
+ * Minutes up to a week round to the next finer unit.
+ * Seconds and milliseconds round to `/s`, while months and years normalise to `/d`.
  */
 export const ROUND_UNIT_MAP: Record<string, string> = {
   ms: 's',
-  s: 'm',
-  m: 'm',
-  h: 'h',
-  d: 'd',
+  s: 's',
+  m: 's',
+  h: 'm',
+  d: 'h',
   w: 'd',
   M: 'd',
   y: 'd',

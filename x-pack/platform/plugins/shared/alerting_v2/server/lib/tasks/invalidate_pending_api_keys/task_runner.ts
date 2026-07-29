@@ -25,7 +25,7 @@ import {
   INVALIDATE_API_KEYS_TASK_REMOVAL_DELAY,
 } from './task_definition';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class ApiKeyInvalidationTaskRunner {

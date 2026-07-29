@@ -17,7 +17,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import type { OpenInNewTabParams } from '../../../../../context_awareness/types';
-import { ProfileStateType } from '../../../../../context_awareness';
+import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
 import type { DiscoverAppState, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
@@ -29,6 +29,7 @@ import {
 } from '../internal_state';
 import {
   createTabRuntimeState,
+  selectCurrentProfileUrlState,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -37,6 +38,7 @@ import {
   APP_STATE_URL_KEY,
   GLOBAL_STATE_URL_KEY,
   NEW_TAB_ID,
+  PROFILE_STATE_URL_KEY,
 } from '../../../../../../common/constants';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
@@ -214,9 +216,9 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.appState = cloneDeep(recentlyClosedTabToRestore.appState);
         tab.globalState = cloneDeep(recentlyClosedTabToRestore.globalState);
         tab.profileState = services.profileStateRegistry.pickStateByType({
-          profileState: recentlyClosedTabToRestore.profileState,
-          stateType: ProfileStateType.Persistent,
-          shouldMergeDefaults: true,
+          profileStateMap: recentlyClosedTabToRestore.profileState,
+          stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
+          defaultsHandling: 'strip',
         });
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
@@ -262,6 +264,12 @@ export const updateTabs: InternalStateThunkActionCreator<
       if (nextTab && nextTabDataStateContainer) {
         const { timeRange, refreshInterval, filters: globalFilters } = nextTab.globalState;
         const { filters: appFilters, query } = nextTab.appState;
+        const profileStateForUrl = selectCurrentProfileUrlState({
+          runtimeStateManager,
+          tabId: nextTab.id,
+          profileStateMap: nextTab.profileState,
+          profileStateRegistry: services.profileStateRegistry,
+        });
 
         await Promise.all([
           urlStateStorage.set<QueryState>(
@@ -276,6 +284,7 @@ export const updateTabs: InternalStateThunkActionCreator<
           urlStateStorage.set<DiscoverAppState>(APP_STATE_URL_KEY, nextTab.appState, {
             replace: true,
           }),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, profileStateForUrl, { replace: true }),
         ]);
 
         services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
@@ -311,8 +320,9 @@ export const updateTabs: InternalStateThunkActionCreator<
         }
       } else {
         await Promise.all([
-          urlStateStorage.set(GLOBAL_STATE_URL_KEY, null, { replace: true }),
-          urlStateStorage.set(APP_STATE_URL_KEY, null, { replace: true }),
+          urlStateStorage.set(GLOBAL_STATE_URL_KEY, undefined, { replace: true }),
+          urlStateStorage.set(APP_STATE_URL_KEY, undefined, { replace: true }),
+          urlStateStorage.set(PROFILE_STATE_URL_KEY, undefined, { replace: true }),
         ]);
         searchSessionManager.removeSearchSessionIdFromURL({ replace: true });
         services.data.search.session.reset();
@@ -466,10 +476,11 @@ export const openInNewTab: InternalStateThunkActionCreator<
       globalState?: TabState['globalState'];
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
+      profileState?: ProfileStateMap;
     }
   ],
   Promise<void>
-> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec }) =>
+> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -481,6 +492,7 @@ export const openInNewTab: InternalStateThunkActionCreator<
       ...createTabItem(currentTabs),
       appState: initialAppState,
       globalState: initialGlobalState,
+      profileState: cloneDeep(profileState) ?? {},
     };
 
     if (tabLabel) {
@@ -531,7 +543,7 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
   ],
   Promise<void>
 > = ({ searchSession }) =>
-  async function openSearchSessionInNewTabThunkFn(dispatch) {
+  async function openSearchSessionInNewTabThunkFn(dispatch, _getState, { services }) {
     const restoreState = searchSession.restoreState as DiscoverAppLocatorParams;
 
     if (!restoreState.searchSessionId) {
@@ -541,8 +553,13 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
     const {
       appState,
       globalState: originalGlobalState,
-      state: { dataViewSpec },
-    } = parseAppLocatorParams(restoreState);
+      profileUrlState,
+      state: { dataViewSpec, profileState: persistentProfileState },
+    } = parseAppLocatorParams(restoreState, services.profileStateRegistry);
+    const profileState = services.profileStateRegistry.mergeState(
+      persistentProfileState,
+      profileUrlState
+    );
 
     const globalState: TabState['globalState'] = {};
     if (originalGlobalState?.time) {
@@ -562,6 +579,7 @@ export const openSearchSessionInNewTab: InternalStateThunkActionCreator<
         appState,
         globalState,
         dataViewSpec,
+        profileState,
       })
     );
   };

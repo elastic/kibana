@@ -293,7 +293,7 @@ export class DiscoverApp {
     await this.waitUntilTabIsLoaded();
   }
 
-  private async clickAppMenuItem(
+  async clickAppMenuItem(
     testId: string,
     { isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}
   ) {
@@ -348,11 +348,22 @@ export class DiscoverApp {
     });
   }
 
-  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+  async openSaveSearchModal(name?: string) {
     await this.clickAppMenuItem('discoverSaveButton');
-    await this.page.testSubj.fill('savedObjectTitle', name);
+    await this.page.testSubj.locator('savedObjectSaveModal').waitFor({ state: 'visible' });
+    if (name !== undefined) {
+      await this.page.testSubj.fill('savedObjectTitle', name);
+    }
+  }
+
+  private getStoreTimeWithSearchSwitch() {
+    return this.page.testSubj.locator('storeTimeWithSearch');
+  }
+
+  async saveSearch(name: string, { storeTimeRange }: { storeTimeRange?: boolean } = {}) {
+    await this.openSaveSearchModal(name);
     if (storeTimeRange !== undefined) {
-      const switchControl = this.page.testSubj.locator('storeTimeWithSearch');
+      const switchControl = this.getStoreTimeWithSearchSwitch();
       await switchControl.waitFor({ state: 'visible' });
       const isChecked = (await switchControl.getAttribute('aria-checked')) === 'true';
       if (isChecked !== storeTimeRange) {
@@ -363,7 +374,7 @@ export class DiscoverApp {
   }
 
   async saveSearchAsNew(name: string) {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.fill('savedObjectTitle', name);
     const checkbox = this.page.testSubj.locator('saveAsNewCheckbox');
     if (!(await checkbox.isChecked())) {
@@ -425,7 +436,7 @@ export class DiscoverApp {
   }
 
   async saveUnsavedChanges() {
-    await this.page.testSubj.click('discoverSaveButton');
+    await this.clickAppMenuItem('discoverSaveButton');
     await this.page.testSubj.waitForSelector('confirmSaveSavedObjectButton', { state: 'visible' });
     await this.confirmSaveModal();
     await this.waitUntilSearchingHasFinished();
@@ -561,8 +572,12 @@ export class DiscoverApp {
   }
 
   async getCurrentQueryName(): Promise<string> {
-    const breadcrumb = this.page.testSubj.locator('breadcrumb last');
-    return await breadcrumb.innerText();
+    // Project (chrome-next) shows the saved search name in the app header; classic chrome shows it
+    // as the last breadcrumb. `.or()` keeps this layout-agnostic without a runtime gate.
+    const title = this.page.testSubj
+      .locator('appHeaderTitle')
+      .or(this.page.testSubj.locator('breadcrumb last'));
+    return await title.innerText();
   }
 
   async loadSavedSearch(searchName: string) {
@@ -586,6 +601,10 @@ export class DiscoverApp {
 
   async getHitCount(): Promise<string> {
     return this.page.testSubj.innerText('discoverQueryHits');
+  }
+
+  getErrorCalloutMessage(): Locator {
+    return this.page.testSubj.locator('discoverErrorCalloutMessage');
   }
 
   async getChartTimespan(): Promise<string> {
@@ -616,6 +635,10 @@ export class DiscoverApp {
     const rowIndex = index - 1; // Convert to 0-based index
     const row = this.page.locator(`[data-grid-row-index="${rowIndex}"]`);
     return await row.innerText();
+  }
+
+  getSearchTermHighlights(): Locator {
+    return this.page.testSubj.locator('docTable').locator('mark');
   }
 
   async getDocTableField(index: number): Promise<string> {
@@ -675,6 +698,24 @@ export class DiscoverApp {
    */
   async getBreakdownFieldValue(): Promise<string> {
     return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+  }
+
+  /**
+   * Clears the histogram breakdown field by selecting the "No breakdown" option.
+   */
+  async clearBreakdownField() {
+    await this.page.testSubj.click('unifiedHistogramBreakdownSelectorButton');
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'visible',
+    });
+    await this.page
+      .locator(
+        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="__EMPTY_SELECTOR_OPTION__"]`
+      )
+      .click();
+    await this.page.testSubj.waitForSelector('unifiedHistogramBreakdownSelectorSelectable', {
+      state: 'hidden',
+    });
   }
 
   async expandTimeRangeAsSuggestedInNoResultsMessage() {
@@ -788,6 +829,17 @@ export class DiscoverApp {
 
   getLensEditFlyout(): Locator {
     return this.page.testSubj.locator('lnsChartSwitchPopover');
+  }
+
+  async openEsqlQuickReferenceFlyout() {
+    await this.page.testSubj.click('esql-help-popover-button');
+    await this.esqlMenuPopover.waitFor({ state: 'visible' });
+    await this.page.testSubj.click('esql-quick-reference');
+    await this.getEsqlQuickReferenceFlyout().waitFor({ state: 'visible' });
+  }
+
+  getEsqlQuickReferenceFlyout(): Locator {
+    return this.page.testSubj.locator('esqlInlineDocumentationFlyout');
   }
 
   async getTheColumnFromGrid(): Promise<string[]> {
@@ -1102,22 +1154,25 @@ export class DiscoverApp {
   }
 
   /**
-   * Persists the requested Discover query mode in localStorage on the next
-   * page load. Useful to make tests resilient to the `discover.isEsqlDefault`
-   * feature flag being toggled at the project level.
+   * Seeds the persisted query mode in localStorage on the next page load. Discover
+   * ignores `currentMode` unless `defaultMode` matches the resolved default (the
+   * `discover.isEsqlDefault` flag), so `defaultMode` defaults to `'classic'` to
+   * match today's default. When the flag is flipped to make ES|QL the default,
+   * update `defaultMode` or the seed is ignored.
    *
-   * Note: this is not idempotent. Each call registers an additional init
-   * script via Playwright's `addInitScript`, and on subsequent page loads
-   * every registered script runs in order, so the value written by the
-   * last call wins. Avoid calling it multiple times in the same test
-   * unless that stacking behavior is intentional.
+   * Not idempotent: each call adds an `addInitScript` that reruns on every later
+   * load in order, so the last write wins. Avoid calling it more than once per
+   * test unless that stacking is intentional.
    */
-  public setQueryMode(mode: DiscoverQueryMode) {
+  public setQueryMode(currentMode: DiscoverQueryMode, defaultMode: DiscoverQueryMode = 'classic') {
     return this.page.addInitScript(
-      ([_mode, _discoverQueryModeKey]) => {
-        window.localStorage.setItem(_discoverQueryModeKey, JSON.stringify(_mode));
+      ({ storageKey, storageValue }) => {
+        window.localStorage.setItem(storageKey, storageValue);
       },
-      [mode, DISCOVER_QUERY_MODE_KEY]
+      {
+        storageKey: DISCOVER_QUERY_MODE_KEY,
+        storageValue: JSON.stringify({ currentMode, defaultMode }),
+      }
     );
   }
 

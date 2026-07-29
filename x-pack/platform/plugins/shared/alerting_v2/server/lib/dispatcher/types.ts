@@ -42,7 +42,7 @@ export interface AlertEpisodeSuppression {
 
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }
 
 export interface DispatcherExecutionResult {

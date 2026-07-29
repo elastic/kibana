@@ -19,6 +19,7 @@ export const MemoryDumpActionRequestSchema = {
         entity_id: schema.maybe(
           schema.string({
             minLength: 1,
+            maxLength: 256,
             validate: (value) => {
               if (!value.trim().length) {
                 return `entity_id cannot be an empty string`;

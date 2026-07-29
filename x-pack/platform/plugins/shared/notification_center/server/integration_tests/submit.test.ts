@@ -12,27 +12,27 @@ import { DataStreamClient } from '@kbn/data-streams';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { NotificationInput } from '../../common/types';
+import { NOTIFICATION_TYPES } from '../../common';
 import {
   NOTIFICATION_DATA_STREAM_NAME,
   notificationDataStreamDefinition,
 } from '../data_stream/notification_data_stream';
-import { buildSubmitNotification, NotificationValidationError } from '../submit';
+import { buildForType, NotificationValidationError } from '../submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
-const draft = (overrides: Partial<NotificationInput> = {}): NotificationInput => ({
-  notification_id: 'inference:my-endpoint:deprecated',
-  event_timestamp: '2026-07-09T12:00:00.000Z',
-  type: 'modelStatus',
+const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
+
+const content = (overrides: Record<string, unknown> = {}) => ({
+  entity: 'my-endpoint',
+  state: 'deprecated',
   title: 'Model deprecated',
   description: 'Your endpoint model is deprecated.',
-  source_app_id: 'inference',
   ...overrides,
 });
 
-describe('notificationCenter submit() [integration]', () => {
+describe('notificationCenter forType().submit() [integration]', () => {
   let esServer: EsTestCluster;
-  let submit: (input: NotificationInput) => Promise<void>;
+  let forType: ReturnType<typeof buildForType>;
   let esClient: ReturnType<EsTestCluster['getClient']>;
 
   const countById = async (notificationId: string) => {
@@ -62,47 +62,46 @@ describe('notificationCenter submit() [integration]', () => {
       throw new Error('Failed to initialize the notification data stream client');
     }
 
-    // submit() resolves its client via core.getStartServices().dataStreams;
-    // mock the start service to return the test client bound to the test ES cluster.
+    // submit resolves its client via core.getStartServices().dataStreams,
+    // so mock the start service to return the test client bound to the test ES cluster.
     const dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
-    const core = { getStartServices: async () => [{ dataStreams }] } as unknown as CoreSetup<
-      NotificationCenterStartDependencies,
-      NotificationCenterPluginStart
-    >;
-    submit = buildSubmitNotification(core);
+    const featureFlags = { getBooleanValue: async () => true };
+    const core = {
+      getStartServices: async () => [{ dataStreams, featureFlags }],
+    } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
+    forType = buildForType(core);
   });
 
   afterAll(async () => {
     await esServer?.stop();
   });
 
-  it('lands one document, storing the consumer-provided id and defaulted severity verbatim', async () => {
-    const notificationId = 'inference:endpoint-a:deprecated';
-    await submit(draft({ notification_id: notificationId }));
+  it('lands one document, building the id from the type + id parts and defaulting severity', async () => {
+    await forType(modelStatus).submit(content({ entity: 'endpoint-a' }));
 
+    const notificationId = 'inference:modelStatus:endpoint-a:deprecated';
     const hits = await countById(notificationId);
     expect(hits).toHaveLength(1);
     const source = hits[0]._source as Record<string, unknown>;
     expect(source.notification_id).toBe(notificationId);
-    expect(source.source_app_id).toBe('inference');
+    expect(source.namespace).toBe('inference');
+    expect(source.type).toBe('modelStatus');
     expect(source.severity).toBe('info');
     expect(typeof source['@timestamp']).toBe('string');
   });
 
-  it('appends a second document when the same id is re-pushed (no upsert)', async () => {
-    const notificationId = 'inference:endpoint-b:deprecated';
-    await submit(draft({ notification_id: notificationId }));
-    await submit(draft({ notification_id: notificationId }));
+  it('appends a second document when the same state is re-pushed (no upsert)', async () => {
+    await forType(modelStatus).submit(content({ entity: 'endpoint-b' }));
+    await forType(modelStatus).submit(content({ entity: 'endpoint-b' }));
 
-    expect(await countById(notificationId)).toHaveLength(2);
+    expect(await countById('inference:modelStatus:endpoint-b:deprecated')).toHaveLength(2);
   });
 
-  it('rejects an invalid draft and writes nothing', async () => {
-    const notificationId = 'inference:endpoint-c:deprecated';
+  it('rejects invalid content and writes nothing', async () => {
     await expect(
-      submit(draft({ notification_id: notificationId, event_timestamp: 'not-a-date' }))
+      forType(modelStatus).submit(content({ entity: 'endpoint-c', title: '' }))
     ).rejects.toBeInstanceOf(NotificationValidationError);
 
-    expect(await countById(notificationId)).toHaveLength(0);
+    expect(await countById('inference:modelStatus:endpoint-c:deprecated')).toHaveLength(0);
   });
 });

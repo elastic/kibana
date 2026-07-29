@@ -17,7 +17,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { useIsNewFlyoutEnabled } from '../../common/hooks/use_is_new_flyout_enabled';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
-import { DocumentEventTypes } from '../../common/lib/telemetry';
+import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
 export const OPEN_FLYOUT_BUTTON = i18n.translate(
@@ -58,7 +58,11 @@ export const OpenFlyoutButtonIcon = memo(
     const handleClick = useCallback(() => {
       const indexName = selectedPatterns.join(',');
       if (enableNewFlyout) {
-        openDocumentFlyoutFromPattern({ documentId: eventId, indexName });
+        openDocumentFlyoutFromPattern({
+          documentId: eventId,
+          indexName,
+          origin: FLYOUT_ORIGIN.NOTE_PREVIEW,
+        });
       } else {
         openFlyout({
           right: {

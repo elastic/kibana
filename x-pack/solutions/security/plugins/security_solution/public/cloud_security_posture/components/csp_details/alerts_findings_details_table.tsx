@@ -100,7 +100,7 @@ export const AlertsDetailsTable = memo(
     entityId?: string;
     entityType?: 'host' | 'user';
     /** Callback executed after opening the alert details for a row. */
-    onShowAlert: (eventId: string, indexName: string) => void;
+    onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void;
     /**
      * Scope ID of the table or panel that opened this flyout. When the scope has
      * a registered time-range override in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES}
@@ -340,7 +340,7 @@ export const AlertsDetailsTable = memo(
         name: '',
         width: '5%',
         render: (id: string, alert: ContextualFlyoutAlertsField) => (
-          <EuiLink onClick={() => onShowAlert(id, alert.index)}>
+          <EuiLink onClick={() => onShowAlert(id, alert.index, alert[KIBANA_ALERTS.RULE_NAME])}>
             <EuiIcon type={'expand'} aria-hidden={true} />
           </EuiLink>
         ),

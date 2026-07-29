@@ -35,6 +35,18 @@ export const logLegacyAgentlessWriteDeprecation = (operation: string) => {
     );
 };
 
+export const isManagedBulkEnabled = () => {
+  return (
+    Boolean(appContextService.getCloud()?.managedOtlp?.url) &&
+    Boolean(appContextService.getConfig()?.agentless?.managedBulk?.enabled)
+  );
+};
+
+export const getManagedBulkEndpoint = () => {
+  const managedOtlpUrl = appContextService.getCloud()?.managedOtlp?.url;
+  return managedOtlpUrl ? `${managedOtlpUrl.replace(/\/$/, '')}/_es` : undefined;
+};
+
 const AGENTLESS_ESS_API_BASE_PATH = '/api/v1/ess';
 const AGENTLESS_SERVERLESS_API_BASE_PATH = '/api/v1/serverless';
 

@@ -34,6 +34,7 @@ const getDocViewerResult = (
   const prevRenderHeader = jest.fn();
   const prevRenderFooter = jest.fn();
   const prevDocViewer = {
+    title: 'test title' as string | undefined,
     renderHeader: prevRenderHeader,
     renderFooter: prevRenderFooter,
     docViewsRegistry: jest.fn((r) => r),
@@ -55,6 +56,25 @@ const getDocViewerResult = (
 
 describe('createSecurityDocumentProfileProviders', () => {
   describe('getDocViewer', () => {
+    it('sets the flyout title to "Alert: <rule_name>" for alert documents', () => {
+      const { result } = getDocViewerResult(
+        createRecord({ 'event.kind': 'signal', 'kibana.alert.rule.name': 'My Detection Rule' })
+      );
+      expect(result.title).toBe('Alert: My Detection Rule');
+    });
+
+    it('falls back to the previous title when the alert has no rule name', () => {
+      const { result } = getDocViewerResult(createRecord({ 'event.kind': 'signal' }));
+      expect(result.title).toBe('test title');
+    });
+
+    it('does not override the title for non-alert event documents', () => {
+      const { result } = getDocViewerResult(
+        createRecord({ 'event.kind': 'event', 'kibana.alert.rule.name': 'Should Not Appear' })
+      );
+      expect(result.title).toBe('test title');
+    });
+
     it('overrides renderHeader for alert documents', () => {
       const { result, prevRenderHeader } = getDocViewerResult(
         createRecord({ 'event.kind': 'signal' })

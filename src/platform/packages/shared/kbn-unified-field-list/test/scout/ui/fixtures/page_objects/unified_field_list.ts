@@ -186,6 +186,22 @@ export class UnifiedFieldList {
   }
 
   /**
+   * Remove a field from the selected fields
+   */
+  async clickFieldListItemRemove(field: string): Promise<void> {
+    if (!(await this.isFieldSelected(field))) {
+      return;
+    }
+
+    await this.page.testSubj.click(`fieldToggle-${field}`);
+
+    await this.page.testSubj
+      .locator('fieldListGroupedSelectedFields')
+      .locator(`[data-test-subj="field-${field}"]`)
+      .waitFor({ state: 'hidden' });
+  }
+
+  /**
    * Click a field list item to open details
    */
   async clickFieldListItem(field: string): Promise<void> {

@@ -35,13 +35,13 @@ export const KillProcessRouteRequestBody = lazySchema(() =>
           /**
            * The entity ID of the process to terminate.
            */
-          entity_id: z.string().min(1).optional(),
+          entity_id: z.string().min(1).max(256).optional(),
         }),
         z.object({
           /**
            * The name of the process to terminate. Valid for SentinelOne agent type only.
            */
-          process_name: z.string().min(1).optional(),
+          process_name: z.string().min(1).max(1024).optional(),
         }),
       ]),
     })
