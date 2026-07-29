@@ -1730,8 +1730,6 @@ describe('RulesClient', () => {
 
       const res = await client.bulkUpdateApiKey({ ids: ['rule-1'] });
 
-      // A disabled rule has no executor task; scheduling one would leave a
-      // disabled task document behind that corrupts a later re-enable.
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
       expect(res).toEqual({
