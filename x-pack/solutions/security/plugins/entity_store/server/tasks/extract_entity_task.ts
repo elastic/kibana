@@ -35,7 +35,7 @@ export function getExtractEntityTaskId(entityType: EntityType, namespace: string
   return `${getTaskType(entityType)}:${namespace}`;
 }
 
-const getNewSchedule = (
+export const getNewSchedule = (
   frequency: string,
   taskInstance: ConcreteTaskInstance
 ): { schedule: IntervalSchedule } | undefined => {
