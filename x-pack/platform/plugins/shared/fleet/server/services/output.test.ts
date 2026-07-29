@@ -2733,6 +2733,7 @@ describe('Output Service', () => {
       mockedAgentPolicyService.list.mockResolvedValue({
         items: [{}],
       } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.getByIds.mockResolvedValue([]);
       mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
       mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);

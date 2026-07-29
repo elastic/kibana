@@ -593,14 +593,12 @@ export const OtlpUpdateSchema = {
   secrets: OtlpSecretsSchema,
 };
 
-// TODO: uncomment OtlpSchema entries in each union below when service-layer OTLP CRUD is
-// activated in the follow-up PR.
 export const OutputSchema = schema.discriminatedUnion('type', [
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
   schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
   schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
   schema.object({ ...KafkaSchema }, { meta: { id: 'output_kafka' } }),
-  // schema.object({ ...OtlpSchema }, { meta: { id: 'output_otlp' } }),
+  schema.object({ ...OtlpSchema }, { meta: { id: 'output_otlp' } }),
 ]);
 
 // Separate schema for create operations: uses distinct meta IDs so OAS codegen
@@ -614,7 +612,7 @@ export const NewOutputSchema = schema.discriminatedUnion('type', [
   ),
   schema.object({ ...LogstashSchema }, { meta: { id: 'new_output_logstash' } }),
   schema.object({ ...KafkaSchema }, { meta: { id: 'new_output_kafka' } }),
-  // schema.object({ ...OtlpSchema }, { meta: { id: 'new_output_otlp' } }),
+  schema.object({ ...OtlpSchema }, { meta: { id: 'new_output_otlp' } }),
 ]);
 
 const OutputResponseSharedSchema = {
@@ -640,7 +638,7 @@ export const OutputResponseItemSchema = schema
       { ...KafkaSchema, ...OutputResponseSharedSchema },
       { meta: { id: 'output_response_kafka' } }
     ),
-    // schema.object({ ...OtlpSchema }, { meta: { id: 'output_response_otlp' } }),
+    schema.object({ ...OtlpSchema }, { meta: { id: 'output_response_otlp' } }),
   ])
   .extendsDeep({
     unknowns: 'allow',
@@ -658,5 +656,5 @@ export const UpdateOutputSchema = schema.oneOf([
   ),
   schema.object({ ...LogstashUpdateSchema }, { meta: { id: 'update_output_logstash' } }),
   schema.object({ ...KafkaUpdateSchema }, { meta: { id: 'update_output_kafka' } }),
-  // schema.object({ ...OtlpUpdateSchema }, { meta: { id: 'update_output_otlp' } }),
+  schema.object({ ...OtlpUpdateSchema }, { meta: { id: 'update_output_otlp' } }),
 ]);

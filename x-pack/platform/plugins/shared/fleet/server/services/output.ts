@@ -28,6 +28,7 @@ import {
   outputYmlIncludesReservedPerformanceKey,
   isBeatsOutput,
   isOtlpOutput,
+  agentPolicyHasOnlyOtelInputs,
 } from '../../common/services/output_helpers';
 
 import type {
@@ -47,6 +48,7 @@ import type {
   NewBeatsOutput,
   NewOtlpOutput,
   NewRemoteElasticsearchOutput,
+  OtlpExporterConfig,
   UpdateOutput,
 } from '../../common/types';
 import {
@@ -70,6 +72,8 @@ import {
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
+  otlpProtocol,
+  OTLP_GRPC_ONLY_COMPRESSION_TYPES,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
@@ -152,7 +156,12 @@ export function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): 
   return { id: outputId ?? so.id, ...attributes };
 }
 
-async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean) {
+async function getAgentPoliciesPerOutput(
+  outputId?: string,
+  isDefault?: boolean,
+  options: { withPackagePolicies?: boolean } = {}
+) {
+  const { withPackagePolicies = false } = options;
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
@@ -183,6 +192,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
     kuery: agentPoliciesKuery,
     perPage: SO_SEARCH_LIMIT,
     spaceId: '*',
+    withPackagePolicies,
   });
   const directAgentPolicyIds = directAgentPolicies?.items.map((policy) => policy.id);
 
@@ -208,7 +218,8 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   ];
   const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIds(
     internalSoClientWithoutSpaceExtension,
-    agentPolicyIdsFromPackagePolicies.map((id) => ({ id, spaceId: '*' }))
+    agentPolicyIdsFromPackagePolicies.map((id) => ({ id, spaceId: '*' })),
+    { withPackagePolicies }
   );
 
   const agentPoliciesIndexedById = indexBy(
@@ -216,8 +227,10 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
     [...directAgentPolicies.items, ...agentPoliciesFromPackagePolicies]
   );
 
-  // Bulk fetch package policies with only needed fields
-  if (Object.keys(agentPoliciesIndexedById).length) {
+  // When withPackagePolicies is true all package policies are already hydrated above;
+  // otherwise bulk-fetch only restricted packages (fleet server, synthetics, APM) for
+  // the integration-conflict checks done by callers like validateLogstashOutputNotUsedInAPMPolicy.
+  if (!withPackagePolicies && Object.keys(agentPoliciesIndexedById).length) {
     const { items: packagePolicies } = await packagePolicyService.list(
       internalSoClientWithoutSpaceExtension,
       {
@@ -242,6 +255,21 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   return Object.values(agentPoliciesIndexedById);
 }
 
+function validateOtlpExporterProtocol(exporter: OtlpExporterConfig) {
+  if (exporter.protocol === otlpProtocol.Grpc && exporter.http !== undefined) {
+    throw new OutputInvalidError('`http` fields are only valid when protocol is `http/protobuf`');
+  }
+  if (
+    exporter.protocol === otlpProtocol.HttpProtobuf &&
+    exporter.compression !== undefined &&
+    OTLP_GRPC_ONLY_COMPRESSION_TYPES.includes(exporter.compression)
+  ) {
+    throw new OutputInvalidError(
+      '`snappy` and `zstd` compression are only valid when protocol is `grpc`'
+    );
+  }
+}
+
 async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDefault?: boolean) {
   const agentPolicies = await getAgentPoliciesPerOutput(outputId, isDefault);
 
@@ -251,6 +279,28 @@ async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDef
       if (agentPolicyService.hasAPMIntegration(agentPolicy)) {
         throw new OutputInvalidError('Logstash output cannot be used with APM integration.');
       }
+    }
+  }
+}
+
+async function validateOtlpOutputOnlyUsedInOtelPolicies(
+  outputId: string,
+  mergedIsDefault: boolean
+) {
+  const agentPolicies = await getAgentPoliciesPerOutput(outputId, mergedIsDefault, {
+    withPackagePolicies: true,
+  });
+
+  if (!agentPolicies?.length) return;
+
+  for (const agentPolicy of agentPolicies) {
+    // Policies with no package policies are allowed; the constraint fires when a
+    // non-OTel package policy is later assigned to the policy.
+    const hasPackagePolicies = (agentPolicy.package_policies?.length ?? 0) > 0;
+    if (hasPackagePolicies && !agentPolicyHasOnlyOtelInputs(agentPolicy)) {
+      throw new OutputInvalidError(
+        `OTLP output cannot be used with agent policy "${agentPolicy.name}" because it contains non-OTel inputs.`
+      );
     }
   }
 }
@@ -328,17 +378,23 @@ async function validateTypeChanges(
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   const mergedIsDefault = data.is_default ?? originalOutput.is_default;
+  const mergedType = data.type ?? originalOutput.type;
   const { policiesWithFleetServer, policiesWithSynthetics } =
     await findPoliciesWithFleetServerOrSynthetics(id, mergedIsDefault);
   const agentlessPolicies = await findAgentlessPolicies(id);
 
-  if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
+  if (mergedType === outputType.Logstash) {
     await validateLogstashOutputNotUsedInAPMPolicy(id, mergedIsDefault);
   }
+
+  if (mergedType === outputType.Otlp) {
+    await validateOtlpOutputOnlyUsedInOtelPolicies(id, mergedIsDefault);
+  }
+
   // prevent changing an ES output to a non-local ES output if it's used by an invalid policy
   if (
     originalOutput.type === outputType.Elasticsearch &&
-    data?.type !== outputType.Elasticsearch &&
+    mergedType !== outputType.Elasticsearch &&
     data.type
   ) {
     // Validate no policy with fleet server, synthetics, or agentless policies use that output
@@ -597,6 +653,10 @@ class OutputService {
 
     if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().managedOtlpOutput) {
       throw new OutputInvalidError('OTLP output type is not enabled');
+    }
+
+    if (isOtlpOutput(output)) {
+      validateOtlpExporterProtocol(output.otlp_exporter);
     }
 
     const data: OutputSOAttributes = {
@@ -1085,6 +1145,13 @@ class OutputService {
             ', '
           )}`
         );
+      }
+    }
+
+    if (isOtlpOutput(updateData)) {
+      const otlpUpdateData = updateData as OutputSoOtlpAttributes;
+      if (otlpUpdateData.otlp_exporter) {
+        validateOtlpExporterProtocol(otlpUpdateData.otlp_exporter);
       }
     }
 

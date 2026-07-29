@@ -30,12 +30,13 @@ import {
   BEATS_OUTPUT_TYPES,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
+  OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES,
   RESERVED_CONFIG_YML_KEYS,
   AGENTLESS_ALLOWED_OUTPUT_TYPES,
   DEFAULT_OUTPUT,
 } from '../constants';
 
-import { packagePolicyHasOtelInputs } from './otelcol_helpers';
+import { packagePolicyHasOtelInputs, packagePolicyHasOnlyOtelInputs } from './otelcol_helpers';
 
 /**
  * Minimal agent policy shape needed to evaluate output eligibility — just the package name
@@ -60,6 +61,14 @@ const agentPolicyUsesConnectors = (agentPolicy: AgentPolicyForOutputEligibility)
  */
 export const canUseManagedBulk = (agentPolicy: AgentPolicyForOutputEligibility): boolean =>
   !agentPolicyUsesConnectors(agentPolicy) && !agentPolicyHasOtelInputs(agentPolicy);
+
+export const agentPolicyHasOnlyOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean => {
+  const packagePolicies = agentPolicy.package_policies ?? [];
+  return (
+    packagePolicies.length > 0 &&
+    packagePolicies.every((pp) => packagePolicyHasOnlyOtelInputs(pp.inputs))
+  );
+};
 
 const sameClusterRestrictedPackages = [
   FLEET_SERVER_PACKAGE,
@@ -87,6 +96,10 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
+  if (agentPolicyHasOnlyOtelInputs(agentPolicy)) {
+    return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES;
+  }
+
   if (agentPolicyHasOtelInputs(agentPolicy)) {
     return OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT;
   }
@@ -104,6 +117,10 @@ export function getAllowedOutputTypesForPackagePolicy(
 ): string[] {
   if (packagePolicy.supports_agentless) {
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
+
+  if (packagePolicyHasOnlyOtelInputs(packagePolicy.inputs)) {
+    return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES;
   }
 
   if (packagePolicyHasOtelInputs(packagePolicy.inputs)) {

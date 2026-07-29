@@ -8,7 +8,11 @@
 import { parse } from 'yaml';
 
 import { OTEL_COLLECTOR_INPUT_TYPE } from '../constants';
-import { outputType, OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT } from '../constants/output';
+import {
+  outputType,
+  OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT,
+  OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES,
+} from '../constants/output';
 
 import {
   getAllowedOutputTypesForAgentPolicy,
@@ -73,7 +77,20 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     expect(res).toEqual([outputType.Elasticsearch]);
   });
 
-  it('should return only OTel-supported output types when any package policy has an enabled OTel input', () => {
+  it('should return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES when all package policies have only OTel inputs', () => {
+    const res = getAllowedOutputTypesForAgentPolicy({
+      package_policies: [
+        {
+          package: { name: 'otel' },
+          inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, enabled: true }],
+        },
+      ],
+    } as any);
+
+    expect(res).toEqual(OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES);
+  });
+
+  it('should return only OTel-supported output types when any package policy has an enabled OTel input alongside non-OTel inputs', () => {
     const res = getAllowedOutputTypesForAgentPolicy({
       package_policies: [
         {
@@ -207,13 +224,13 @@ describe('getAllowedOutputTypesForPackagePolicy', () => {
     expect(res).toEqual([outputType.Elasticsearch]);
   });
 
-  it('should return only OTel-supported output types when any input is an OTel input', () => {
+  it('should return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES when all inputs are OTel inputs', () => {
     const res = getAllowedOutputTypesForPackagePolicy({
       supports_agentless: false,
       inputs: [{ type: OTEL_COLLECTOR_INPUT_TYPE, streams: [], enabled: true }],
     } as any);
 
-    expect(res).toEqual(OUTPUT_TYPES_WITH_OTEL_EXPORTER_SUPPORT);
+    expect(res).toEqual(OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES);
   });
 
   it('should return only OTel-supported output types when mixed inputs contain an OTel input', () => {
