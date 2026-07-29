@@ -87,6 +87,15 @@ For design-file URLs with a `nodeId`, call `get_metadata` with `fileKey` + `node
 | `canvas` (whole page) | **Always stop and ask.** Canvas URLs almost always over-fetch — list all direct-child names + IDs and ask the user which children matter. Only fetch the selected subset. |
 | Root node not found (deleted, restructured) | Flag in Sources Summary with ⚠️ and in Known Limitations. Do not silently skip. |
 
+**Advance notice for mid-tier auto-expansion.** For `section` with 9–25 direct children, print a one-line chat notice **before** the fetch loop so the user can interrupt (Ctrl-C) if the cost exceeds their monthly Figma MCP quota:
+
+```
+📊 Figma: auto-expanding N children from section "<name>" — ~N get_design_context calls.
+Interrupt now if this exceeds your MCP monthly quota (View seats: 6 calls/month; Dev/Full: significantly more).
+```
+
+Do not print this for `frame` or `section` ≤ 8 (small, always safe). Do not print it for stop-and-ask tiers (the user already chooses the subset there).
+
 **Threshold origin.** The 8 and 25 thresholds are provisional, derived from an audit of 3 real Security Solution Figma URLs (see [security-team#18320](https://github.com/elastic/security-team/issues/18320)). Refine once the flow has run against ≥ 10 additional real issues.
 
 ### Step 4 — Announce and propagate partial fetches
@@ -101,6 +110,21 @@ For design-file URLs with a `nodeId`, call `get_metadata` with `fileKey` + `node
   ```
 
   Without this entry, Step 3 scenario writing and the Issue Clarity Assessment UX/UI dimension would treat the Figma as fully covered when it is not.
+
+- **Graceful rate-limit degradation.** If the Figma MCP returns a rate-limit / quota-exhausted error mid-fetch (typical on View seats after 6 calls/month), stop the loop immediately — do **not** retry and do **not** silently drop the URL:
+  1. Record whatever children were successfully fetched.
+  2. Set Sources Summary status to `⚠️ Read (X of N children — MCP quota exhausted mid-fetch)`.
+  3. Add a Known Limitations entry naming the un-fetched children:
+
+     ```
+     ⚠️ Figma section "<name>": X of N direct children fetched before the Figma MCP
+     quota was exhausted for this month. The remaining N−X children (<list ids or names>)
+     were not inspected and may cover behaviour not represented in scenarios.
+     ```
+
+  4. Continue with Step 2 (context analysis) using what was fetched. Rate-limit exhaustion is a bounded degradation, not a hard stop.
+
+  The same pattern applies to any Figma MCP error that returns a rate-limit / quota signal, regardless of tier — including a `frame` fetch that itself is the one to trip the limit (in that case, X = 0 and the entry names the whole node as un-inspected).
 
 ### Role after extraction
 

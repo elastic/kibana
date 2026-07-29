@@ -297,3 +297,15 @@ The worked example above uses "no Figma available" as its Known Limitations entr
 ```
 
 Both entries must appear together. The Sources Summary row on its own is not enough — Step 3 scenario writing and the Issue Clarity Assessment UX/UI dimension read Known Limitations to decide whether the Figma context is complete, and would otherwise treat a `✅ Read (…)` status as full coverage.
+
+**Sibling case — Figma MCP quota exhausted mid-fetch.** When the Figma MCP rate-limit trips while iterating children (common on View seats, capped at 6 tool calls per month), the same paired-entries pattern applies with different statuses:
+
+```markdown
+| Figma — Alert flyout redesign (section) | ⚠️ Read (4 of 12 children — MCP quota exhausted mid-fetch) |
+```
+
+```markdown
+- ⚠️ Figma section "Alert flyout redesign": 4 of 12 direct children fetched before the Figma MCP quota was exhausted for this month. The remaining 8 children (nodes `10:2`, `10:3`, `10:5`, `10:6`, `10:8`, `10:9`, `10:11`, `10:12`) were not inspected and may cover behaviour not represented in scenarios.
+```
+
+The distinction matters for downstream review: user-selected partial coverage is deliberate and stable across re-runs, while quota-exhausted partial coverage is transient — a re-run in the next billing period or on a Dev/Full seat can complete the missing children without changing the plan's design intent.
