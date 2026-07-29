@@ -13,22 +13,21 @@ applies_to:
 :::{settings} /reference/configuration-reference/internationalization-settings.yml
 :::
 
+To apply these settings in your deployment, refer to [Elastic Stack settings](docs-content://deploy-manage/stack-settings.md). On {{serverless-full}}, Elastic manages these settings for you.
+
 ## Built-in and custom locales
 
 {{kib}} ships translation files for English, French, Japanese, Simplified Chinese, and German. Plugins and admin-installed translation files can add additional locales. Any locale listed in `i18n.locales` for which a translation file exists will be served; locales without translation files fall back to English.
 
 ## Per-user language selection
 ```{applies_to}
-stack: ga 9.5
-serverless: ga
+stack: beta 9.5
+serverless: beta
 ```
 
-When `i18n.locales` is not empty, individual users can choose their preferred display language:
+Each user can change their display language from the user menu or profile page. For steps, see [Change the interface language in Kibana](docs-content://cloud-account/change-interface-language.md).
 
-* {applies_to}`self:` **User Profile page** — Users can select a language from the **Language** section on their profile page (*User icon → Profile*).
-* {applies_to}`serverless:` {applies_to}`ech:` **User menu** — Users can select a language from the **Language** option in the user menu available from the application header.
-
-When a user sets a preferred language, it is stored in their user profile and takes effect after a page reload.
+When `i18n.locales` is not empty, language selection is available to users. When a user sets a preferred language, it is stored in their user profile and takes effect after a page reload.
 
 ### Resolution priority
 
@@ -77,14 +76,14 @@ previously resolved locale.
 ## Example configurations
 
 ```yaml
-# 1. Default behavior — picker shows the five bundled locales, server defaults
-#    to English. Equivalent to omitting all i18n.* keys.
+# 1. Default behavior — language selection offers the five bundled locales,
+#    server defaults to English. Equivalent to omitting all i18n.* keys.
 
-# 2. Curate the picker to a subset:
+# 2. Curate the available languages to a subset:
 i18n.locales: ["en", "ja-JP"]
 i18n.defaultLocale: "en"
 
-# 3. Disable the per-user picker entirely (server still serves defaultLocale).
+# 3. Disable language selection entirely (server still serves defaultLocale).
 #    The flow-style empty array (square brackets) is the supported way to
 #    express "no locales"; the block-list form has no syntax for an empty list.
 i18n.locales: []

@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { withOAuthManagementGate } from './with_oauth_management_gate';
 import type { RouteDefinitionParams } from '..';
 import {
   OAUTH_MAX_BULK_REVOKE_CONNECTIONS,
@@ -64,69 +63,67 @@ export function defineBulkRevokeOAuthConnectionsRoute({
         access: 'internal',
       },
     },
-    withOAuthManagementGate(
-      createLicensedRouteHandler(async (context, request, response) => {
-        try {
-          const { oauth } = getAuthenticationService();
-          if (!oauth) {
-            return response.notFound({
-              body: { message: 'OAuth management is not available: UIAM is not configured' },
-            });
-          }
-
-          const { connections, reason } = request.body;
-
-          const settled = await Promise.allSettled(
-            connections.map(({ client_id: clientId, connection_id: connectionId }) =>
-              oauth.revokeConnection(request, clientId, connectionId, reason)
-            )
-          );
-
-          const allUnavailable = settled.every(
-            (result) => result.status === 'fulfilled' && result.value === null
-          );
-          if (allUnavailable) {
-            return response.notFound({
-              body: {
-                message: 'OAuth management is not available: security features are disabled',
-              },
-            });
-          }
-
-          const results: BulkRevokeOAuthConnectionResultItem[] = settled.map(
-            (settledResult, index) => {
-              const { client_id: clientId, connection_id: connectionId } = connections[index];
-
-              if (settledResult.status === 'fulfilled') {
-                if (settledResult.value === null) {
-                  return {
-                    client_id: clientId,
-                    connection_id: connectionId,
-                    status: 'error',
-                    status_code: 404,
-                    message: 'OAuth management is not available: security features are disabled',
-                  };
-                }
-                return { client_id: clientId, connection_id: connectionId, status: 'revoked' };
-              }
-
-              const wrapped = wrapError(settledResult.reason);
-              return {
-                client_id: clientId,
-                connection_id: connectionId,
-                status: 'error',
-                status_code: wrapped.output.statusCode,
-                message: wrapped.output.payload.message,
-              };
-            }
-          );
-
-          const body: BulkRevokeOAuthConnectionsResponseBody = { results };
-          return response.ok({ body });
-        } catch (error) {
-          return response.customError(wrapIntoCustomErrorResponse(error));
+    createLicensedRouteHandler(async (context, request, response) => {
+      try {
+        const { oauth } = getAuthenticationService();
+        if (!oauth) {
+          return response.notFound({
+            body: { message: 'OAuth management is not available: UIAM is not configured' },
+          });
         }
-      })
-    )
+
+        const { connections, reason } = request.body;
+
+        const settled = await Promise.allSettled(
+          connections.map(({ client_id: clientId, connection_id: connectionId }) =>
+            oauth.revokeConnection(request, clientId, connectionId, reason)
+          )
+        );
+
+        const allUnavailable = settled.every(
+          (result) => result.status === 'fulfilled' && result.value === null
+        );
+        if (allUnavailable) {
+          return response.notFound({
+            body: {
+              message: 'OAuth management is not available: security features are disabled',
+            },
+          });
+        }
+
+        const results: BulkRevokeOAuthConnectionResultItem[] = settled.map(
+          (settledResult, index) => {
+            const { client_id: clientId, connection_id: connectionId } = connections[index];
+
+            if (settledResult.status === 'fulfilled') {
+              if (settledResult.value === null) {
+                return {
+                  client_id: clientId,
+                  connection_id: connectionId,
+                  status: 'error',
+                  status_code: 404,
+                  message: 'OAuth management is not available: security features are disabled',
+                };
+              }
+              return { client_id: clientId, connection_id: connectionId, status: 'revoked' };
+            }
+
+            const wrapped = wrapError(settledResult.reason);
+            return {
+              client_id: clientId,
+              connection_id: connectionId,
+              status: 'error',
+              status_code: wrapped.output.statusCode,
+              message: wrapped.output.payload.message,
+            };
+          }
+        );
+
+        const body: BulkRevokeOAuthConnectionsResponseBody = { results };
+        return response.ok({ body });
+      } catch (error) {
+        return response.customError(wrapIntoCustomErrorResponse(error));
+      }
+    })
   );
 }

@@ -29,7 +29,7 @@ const ENDPOINT_FILE_BACKING_INDEX = `${ENDPOINT_FILE_INDEX}-000001`;
 
 describe('files service', () => {
   let esClientMock: ElasticsearchClientMock;
-  const abortController = new AbortController();
+  const { signal } = new AbortController();
 
   beforeEach(() => {
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
@@ -65,7 +65,7 @@ describe('files service', () => {
         },
       });
 
-      const result = await getFilesByStatus(esClientMock, abortController, status);
+      const result = await getFilesByStatus(esClientMock, signal, status);
 
       expect(esClientMock.search).toBeCalledWith(
         {
@@ -79,7 +79,7 @@ describe('files service', () => {
           _source: false,
           ignore_unavailable: true,
         },
-        { signal: abortController.signal }
+        { signal }
       );
       expect(result).toEqual([
         { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'someid1' },
@@ -126,7 +126,7 @@ describe('files service', () => {
         { _index: ENDPOINT_FILE_METADATA_BACKING_INDEX, _id: 'delete2' },
       ];
       const { fileIdsByIndex: deletedFileIdsByIndex, allFileIds: allDeletedFileIds } =
-        await fileIdsWithoutChunksByIndex(esClientMock, abortController, files);
+        await fileIdsWithoutChunksByIndex(esClientMock, signal, files);
 
       expect(esClientMock.search).toBeCalledWith(
         {
@@ -151,7 +151,7 @@ describe('files service', () => {
           },
           _source: ['bid'],
         },
-        { signal: abortController.signal }
+        { signal }
       );
       expect(deletedFileIdsByIndex).toEqual({
         [ENDPOINT_FILE_METADATA_INDEX]: new Set(['delete1', 'delete2']),
@@ -168,7 +168,7 @@ describe('files service', () => {
         [FAKE_INTEGRATION_METADATA_INDEX]: new Set(['delete2', 'delete3']),
       };
       const status = 'DELETED';
-      await updateFilesStatus(esClientMock, abortController, files, status);
+      await updateFilesStatus(esClientMock, signal, files, status);
 
       expect(esClientMock.updateByQuery).toHaveBeenNthCalledWith(
         1,
@@ -185,7 +185,7 @@ describe('files service', () => {
             lang: 'painless',
           },
         },
-        { signal: abortController.signal }
+        { signal }
       );
       expect(esClientMock.updateByQuery).toHaveBeenNthCalledWith(
         2,
@@ -202,7 +202,7 @@ describe('files service', () => {
             lang: 'painless',
           },
         },
-        { signal: abortController.signal }
+        { signal }
       );
     });
   });

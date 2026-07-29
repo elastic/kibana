@@ -81,9 +81,11 @@ import {
   type ServiceNodeData,
   type ServiceMapEdge as ServiceMapEdgeType,
 } from '../../../../common/service_map';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { ServiceFlyout } from '../../shared/service_flyout';
 import { SERVICE_FLYOUT_SOURCES } from '../../shared/service_flyout/constants';
 import type { ServiceFlyoutOptions } from '../../shared/service_flyout/types';
+import { useServiceMapFlyoutProps } from './use_service_map_flyout_props';
 import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
 
 type ServiceMapServiceNode = Node<ServiceNodeData>;
@@ -127,10 +129,11 @@ interface GraphProps {
   /** Strip `kuery` from popover-built URLs (env still flows through). */
   clearKueryOnPopoverNavigation?: boolean;
   /**
-   * When set to a service name that exists on the map, that node gets context highlight
-   * (frame, fill, primary node ring). Blue edges/markers remain tied to explicit selection only.
+   * Service names that get context highlight (frame, fill, primary node ring).
+   * Blue edges/markers remain tied to explicit selection only.
+   * Driven by the active `service.name` filter / Controls selection (multi-valued).
    */
-  highlightedServiceName?: string;
+  highlightedServiceNames?: string[];
   /** Controlled initial / current orientation when supplied. Falls back to internal `useState` otherwise. */
   mapOrientation?: ServiceMapOrientation;
   /** Called when orientation changes (Options panel or any other host control). */
@@ -169,7 +172,7 @@ function GraphInner({
   showFocusMap,
   alwaysNavigateOnPopoverFocus,
   clearKueryOnPopoverNavigation,
-  highlightedServiceName,
+  highlightedServiceNames,
   mapOrientation: controlledOrientation,
   onMapOrientationChange,
   viewFilters: controlledViewFilters,
@@ -180,6 +183,7 @@ function GraphInner({
 }: GraphProps) {
   const { services } = useKibana<ApmPluginStartDeps & ApmServices>();
   const { telemetry } = services;
+  const { core, share, lens, dataViews, plugins } = useApmPluginContext();
   const { euiTheme } = useEuiTheme();
   const { fitView, zoomIn, zoomOut, setCenter, getNodes, getNodesBounds } =
     useReactFlow<ServiceMapNode>();
@@ -190,6 +194,13 @@ function GraphInner({
   const [selectedNodeForPopover, setSelectedNodeForPopover] = useState<ServiceMapNode | null>(null);
   const [selectedServiceNodeForFlyout, setSelectedServiceNodeForFlyout] =
     useState<ServiceMapServiceNode | null>(null);
+  const flyoutProps = useServiceMapFlyoutProps({
+    selectedServiceNodeForFlyout,
+    environment,
+    flyoutOptions,
+    start,
+    end,
+  });
   const [selectedEdgeForPopover, setSelectedEdgeForPopover] = useState<ServiceMapEdgeType | null>(
     null
   );
@@ -349,10 +360,10 @@ function GraphInner({
         if (!isServiceNode(n)) {
           return n;
         }
-        const contextHighlight = Boolean(highlightedServiceName && n.id === highlightedServiceName);
+        const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
         return { ...n, data: { ...n.data, contextHighlight } };
       }),
-    [nodesAfterFilters, highlightedServiceName]
+    [nodesAfterFilters, highlightedServiceNames]
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState<ServiceMapNode>(nodesWithContextHighlight);
@@ -366,16 +377,17 @@ function GraphInner({
       selectedEdgeId: selectedEdgeForPopoverRef.current,
     });
 
-    const edgesWithContextHighlight = highlightedServiceName
-      ? highlightedEdges.map((edge) => ({
-          ...edge,
-          data: {
-            ...edge.data,
-            sourceContextHighlight: edge.source === highlightedServiceName,
-            targetContextHighlight: edge.target === highlightedServiceName,
-          },
-        }))
-      : highlightedEdges;
+    const edgesWithContextHighlight =
+      highlightedServiceNames && highlightedServiceNames.length > 0
+        ? highlightedEdges.map((edge) => ({
+            ...edge,
+            data: {
+              ...edge.data,
+              sourceContextHighlight: highlightedServiceNames.includes(edge.source),
+              targetContextHighlight: highlightedServiceNames.includes(edge.target),
+            },
+          }))
+        : highlightedEdges;
 
     setEdges(edgesWithContextHighlight as ServiceMapEdgeType[]);
 
@@ -393,7 +405,7 @@ function GraphInner({
     handleFitView,
     applyEdgeHighlighting,
     nodesAfterFilters.length,
-    highlightedServiceName,
+    highlightedServiceNames,
   ]);
 
   const handleNodeClick: NodeMouseHandler<ServiceMapNode> = useCallback(
@@ -920,15 +932,12 @@ function GraphInner({
             alwaysNavigateOnFocus={alwaysNavigateOnPopoverFocus}
             clearKueryOnNavigation={clearKueryOnPopoverNavigation}
           />
-          {selectedServiceNodeForFlyout && (
+          {flyoutProps && (
             <ServiceFlyout
-              key={selectedServiceNodeForFlyout.data.id}
-              service={selectedServiceNodeForFlyout.data}
-              environment={environment}
-              kuery={flyoutOptions?.kuery ?? kuery}
-              initialRangeFrom={flyoutOptions?.rangeFrom ?? start}
-              initialRangeTo={flyoutOptions?.rangeTo ?? end}
-              initialTransactionType={flyoutOptions?.initialTransactionType}
+              key={flyoutProps.service.name}
+              service={flyoutProps.service}
+              deps={{ core, share, lens, dataViews, alerting: plugins.alerting }}
+              filters={flyoutProps.filters}
               onView={handleServiceFlyoutView}
               onClose={handlePopoverClose}
             />

@@ -17,7 +17,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { getIntervalBoundHelpText } from '@kbn/data-lifecycle-phases';
+import { BOUNDARY_VALIDATION_ERROR, getIntervalBoundHelpText } from '@kbn/data-lifecycle-phases';
 import type { PreservedTimeUnit, TimeUnit } from '../types';
 import { formatDuration, getMultipleStepAttributes, getUnitSelectOptions } from '../../../shared';
 import { getStepIndexFromArrayItemPath, toMilliseconds } from '../utils';
@@ -127,6 +127,8 @@ const FixedIntervalFieldControl = ({
 
   const helpText = getIntervalBoundHelpText({ multipleOf, upper });
 
+  const isBoundaryError = isInvalid && errorMessage === BOUNDARY_VALIDATION_ERROR;
+
   // The interval must be a multiple of the previous step's interval, so step the
   // increment/decrement buttons by that multiple (expressed in the current unit) whenever the
   // current value already sits on a valid multiple; otherwise fall back to stepping by 1.
@@ -142,9 +144,9 @@ const FixedIntervalFieldControl = ({
       label={i18n.translate('xpack.streams.editDslStepsFlyout.fixedIntervalLabel', {
         defaultMessage: 'Downsample interval',
       })}
-      helpText={helpText}
+      helpText={isBoundaryError ? undefined : helpText}
       isInvalid={isInvalid}
-      error={isInvalid ? errorMessage : null}
+      error={isBoundaryError ? helpText : isInvalid ? errorMessage : null}
     >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>

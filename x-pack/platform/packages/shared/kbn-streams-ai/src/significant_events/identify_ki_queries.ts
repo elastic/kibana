@@ -10,13 +10,11 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
-  ensureMetadata,
   getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
   replaceFromSources,
 } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type {
@@ -360,11 +358,7 @@ export async function identifyKIQueries({
                   run_id: returnedFeatureMap.get(id),
                 }));
 
-                const sourceRewritten = replaceFromSources(query.esql, targetSources);
-                const rewritten =
-                  derivedType === QUERY_TYPE_STATS
-                    ? sourceRewritten
-                    : ensureMetadata(sourceRewritten);
+                const rewritten = replaceFromSources(query.esql, targetSources);
 
                 if (normalizedStoredEsqls.has(normalizeEsqlSafe(rewritten))) {
                   return {

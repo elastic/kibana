@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
 import type { MetricCollector, MetricCollectorFactoryContract } from './types';
 import { MetricCollectorImpl } from './metric_collector';
 
 /**
  * Default {@link MetricCollectorFactoryContract} used by the pipeline.
  *
- * Sources `executionId` from `uuid.v4()` and `startedAt` from `Date`. Both
- * seams are overridable via constructor options so tests can stamp
- * deterministic values without patching globals.
+ * `executionId` is passed in at {@link create} time — the pipeline forwards
+ * Task Manager's `RunContext.executionUuid` so the collector does not mint its
+ * own identity. `startedAt` is sourced from `Date`; the `now` seam is
+ * overridable via constructor options so tests can stamp deterministic timing
+ * without patching globals.
  *
  * Deliberately not `@injectable()`: DI never supplies constructor arguments.
  * The container wires it via `.toDynamicValue(() => new MetricCollectorFactory())`
@@ -22,17 +23,15 @@ import { MetricCollectorImpl } from './metric_collector';
  * framework-agnostic and free of decorator/metadata footguns.
  */
 export class MetricCollectorFactory implements MetricCollectorFactoryContract {
-  readonly #generateExecutionId: () => string;
   readonly #now: () => Date;
 
-  constructor(options?: { generateExecutionId?: () => string; now?: () => Date }) {
-    this.#generateExecutionId = options?.generateExecutionId ?? uuidV4;
+  constructor(options?: { now?: () => Date }) {
     this.#now = options?.now ?? (() => new Date());
   }
 
-  public create(): MetricCollector {
+  public create({ executionId }: { executionId: string }): MetricCollector {
     return new MetricCollectorImpl({
-      executionId: this.#generateExecutionId(),
+      executionId,
       startedAt: this.#now(),
     });
   }

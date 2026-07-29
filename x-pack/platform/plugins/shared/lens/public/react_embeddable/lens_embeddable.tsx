@@ -199,6 +199,7 @@ export const createLensEmbeddableFactory = (
           ...integrationsConfig.api,
           ...stateConfig.api,
           ...dashboardConfig.api,
+          supportsJsonExport: true,
         }
       );
 

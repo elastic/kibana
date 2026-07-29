@@ -53,6 +53,10 @@ export const GetEvaluationExperimentsRequestQuery = lazySchema(() =>
      */
     branch: z.string().max(256).optional(),
     /**
+     * Free-text filter matching experiment name or git branch
+     */
+    search: z.string().max(256).optional(),
+    /**
      * Filter by dataset ID
      */
     dataset_id: z.string().max(1024).optional(),

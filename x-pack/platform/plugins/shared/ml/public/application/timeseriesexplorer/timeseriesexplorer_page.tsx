@@ -7,6 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -14,8 +15,8 @@ import { JobSelector } from '../components/job_selector';
 
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
-import { MlPageHeader } from '../components/page_header';
-import { PageTitle } from '../components/page_title';
+import { MlAppHeader } from '../components/ml_app_header';
+import { DatePicker } from '../components/ml_page/date_picker';
 import { useAnnotationStyles, useTimeseriesExplorerStyles } from './styles';
 
 interface TimeSeriesExplorerPageProps {
@@ -57,13 +58,17 @@ export const TimeSeriesExplorerPage: FC<PropsWithChildren<TimeSeriesExplorerPage
         ref={resizeRef}
         data-test-subj="mlPageSingleMetricViewer"
       >
-        <MlPageHeader wrapHeader={true}>
-          <PageTitle
-            title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
-              defaultMessage: 'Single Metric Viewer',
-            })}
-          />
-        </MlPageHeader>
+        <MlAppHeader
+          title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
+            defaultMessage: 'Single Metric Viewer',
+          })}
+        />
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <DatePicker />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
 
         {noSingleMetricJobsFound ? null : (
           <JobSelector

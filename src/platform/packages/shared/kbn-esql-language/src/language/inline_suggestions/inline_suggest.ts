@@ -37,6 +37,7 @@ function processQuery(query: string): string {
     .replace(/\/\/.*$/gm, '') // Remove line comments (//)
     .replace(/[\n\r]/g, ' ') // Remove newlines
     .replace(/\s*\|\s*/g, ' | ') // Normalize pipe spacing
+    .replace(/\s{2,}/g, ' ') // Collapse multiple spaces (e.g. from multiline pretty-printer indentation)
     .trim();
 }
 
