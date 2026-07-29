@@ -2751,14 +2751,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -2769,6 +2770,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2779,7 +2781,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -2812,6 +2814,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -2896,7 +2899,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -2919,6 +2922,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -3206,14 +3210,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -3224,6 +3229,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -3234,7 +3240,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -3267,6 +3273,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -3351,7 +3358,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -3374,6 +3381,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -27225,6 +27233,8 @@ paths:
                         pipeline_config:
                           maxLength: 10000
                           type: string
+                        policy_base_id:
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -27889,6 +27899,8 @@ paths:
                       pipeline_config:
                         maxLength: 10000
                         type: string
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -28369,6 +28381,8 @@ paths:
                         type: array
                       pipeline_config:
                         maxLength: 10000
+                        type: string
+                      policy_base_id:
                         type: string
                       policy_id:
                         type: string
@@ -87810,6 +87824,12 @@ components:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
           minLength: 1
           title: Index pattern
+          type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
           type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'

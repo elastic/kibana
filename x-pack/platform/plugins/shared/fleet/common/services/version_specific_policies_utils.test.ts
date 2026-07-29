@@ -15,6 +15,9 @@ import {
   buildVersionVariantsEsFilter,
   buildPolicyIdOrVariantsEsFilter,
   buildPolicyIdsOrVariantsEsFilter,
+  buildPolicyBaseIdWithFallbackEsFilter,
+  buildPolicyBaseIdsWithFallbackEsFilter,
+  buildPolicyBaseIdWithFallbackKuery,
 } from './version_specific_policies_utils';
 
 describe('removeVersionSuffixFromPolicyId', () => {
@@ -247,5 +250,100 @@ describe('buildPolicyIdsOrVariantsEsFilter', () => {
 
   it('should return match_none for an empty array instead of an empty terms clause', () => {
     expect(buildPolicyIdsOrVariantsEsFilter([])).toEqual({ match_none: {} });
+  });
+});
+
+describe('buildPolicyBaseIdWithFallbackKuery', () => {
+  it('should match migrated docs via policy_base_id term', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my-policy')).toContain('policy_base_id:"my-policy"');
+  });
+
+  it('should include fallback branch for docs missing policy_base_id', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my-policy')).toContain(
+      'policy_id:"my-policy" and not policy_base_id:*'
+    );
+  });
+
+  it('should use custom field names when provided', () => {
+    expect(
+      buildPolicyBaseIdWithFallbackKuery(
+        'my-policy',
+        'fleet-agents.policy_base_id',
+        'fleet-agents.policy_id'
+      )
+    ).toBe(
+      '(fleet-agents.policy_base_id:"my-policy" or (fleet-agents.policy_id:"my-policy" and not fleet-agents.policy_base_id:*))'
+    );
+  });
+
+  it('should escape quotes in the base id', () => {
+    expect(buildPolicyBaseIdWithFallbackKuery('my"policy')).toContain(
+      'policy_base_id:"my\\"policy"'
+    );
+  });
+});
+
+describe('buildPolicyBaseIdWithFallbackEsFilter', () => {
+  it('should match on policy_base_id for migrated docs', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter('my-policy');
+    expect(filter.bool.should[0]).toEqual({ term: { policy_base_id: 'my-policy' } });
+  });
+
+  it('should include a fallback branch for docs missing policy_base_id', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter('my-policy');
+    expect(filter.bool.should[1]).toEqual({
+      bool: {
+        filter: [{ term: { policy_id: 'my-policy' } }],
+        must_not: [{ exists: { field: 'policy_base_id' } }],
+      },
+    });
+  });
+
+  it('should use custom field names when provided', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter(
+      'my-policy',
+      'united.agent.policy_base_id',
+      'united.agent.policy_id'
+    );
+    expect(filter.bool.should[0]).toEqual({ term: { 'united.agent.policy_base_id': 'my-policy' } });
+    expect(filter.bool.should[1]).toEqual({
+      bool: {
+        filter: [{ term: { 'united.agent.policy_id': 'my-policy' } }],
+        must_not: [{ exists: { field: 'united.agent.policy_base_id' } }],
+      },
+    });
+  });
+
+  it('should require minimum_should_match: 1', () => {
+    const filter = buildPolicyBaseIdWithFallbackEsFilter('my-policy');
+    expect(filter.bool.minimum_should_match).toBe(1);
+  });
+});
+
+describe('buildPolicyBaseIdsWithFallbackEsFilter', () => {
+  it('should match on policy_base_id terms for migrated docs', () => {
+    const filter = buildPolicyBaseIdsWithFallbackEsFilter(['policy-a', 'policy-b']);
+    expect((filter as any).bool.should[0]).toEqual({
+      terms: { policy_base_id: ['policy-a', 'policy-b'] },
+    });
+  });
+
+  it('should include a fallback branch for docs missing policy_base_id', () => {
+    const filter = buildPolicyBaseIdsWithFallbackEsFilter(['policy-a', 'policy-b']);
+    expect((filter as any).bool.should[1]).toEqual({
+      bool: {
+        filter: [{ terms: { policy_id: ['policy-a', 'policy-b'] } }],
+        must_not: [{ exists: { field: 'policy_base_id' } }],
+      },
+    });
+  });
+
+  it('should de-duplicate repeated ids', () => {
+    const filter = buildPolicyBaseIdsWithFallbackEsFilter(['policy-a', 'policy-a']);
+    expect((filter as any).bool.should[0]).toEqual({ terms: { policy_base_id: ['policy-a'] } });
+  });
+
+  it('should return match_none for an empty array', () => {
+    expect(buildPolicyBaseIdsWithFallbackEsFilter([])).toEqual({ match_none: {} });
   });
 });
