@@ -330,20 +330,19 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = Parser.parse(esql);
 
-  const promqlParams: string[] = [];
-  // temporarily till walker.params supports promql params too
+  const allParams: string[] = [];
   const usedVariablesInQuery = Walker.params(root, {
     promql: {
       visitPromqlLiteral: (node) => {
         if (node.literalType === 'param') {
-          promqlParams.push(node.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
+          allParams.push(node.text);
         }
       },
     },
   });
-  const variables = usedVariablesInQuery.map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
+  allParams.push(...usedVariablesInQuery.map((v) => v.text));
 
-  return promqlParams.length ? [...new Set([...variables, ...promqlParams])] : variables;
+  return [...new Set(allParams.map((t) => t.replace(LEADING_PARAM_PREFIX_REGEX, '')))];
 };
 
 /**
