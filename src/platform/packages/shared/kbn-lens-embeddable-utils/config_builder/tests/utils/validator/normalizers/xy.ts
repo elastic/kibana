@@ -353,6 +353,11 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       if (viz.labelsOrientation) viz.labelsOrientation.yRight = 0;
     }
 
+    // valuesInLegend is a legacy field (migrated to legend.legendStats by v1 CM transforms).
+    // The API transform reads legend.legendStats (not this top-level field) so it is not
+    // preserved through the round-trip — delete it from the original.
+    delete viz.valuesInLegend;
+
     // yLeftTitle is a legacy alias for yTitle; the transform always uses yTitle
     if (viz.yLeftTitle != null && !viz.yTitle) viz.yTitle = viz.yLeftTitle;
     delete viz.yLeftTitle;
