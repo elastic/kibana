@@ -19,28 +19,36 @@ import type { ChangeHistoryDocument } from '@kbn/change-history';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
+import { isUndefined, omitBy } from 'lodash';
 import { RuleChangesHistoryAction } from '../../../../server/lib/rule_changes_history/audit_actions';
 import { apiTest, buildCreateRuleData } from '../fixtures';
 
 const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleResponse): void => {
   const snapshot = doc.object.snapshot as Partial<RuleResponse>;
 
-  expect(snapshot).toMatchObject({
-    id: expectedRule.id,
-    kind: expectedRule.kind,
-    enabled: expectedRule.enabled,
-    metadata: {
-      name: expectedRule.metadata.name,
-      version: expectedRule.metadata.version,
-    },
-    schedule: {
-      every: expectedRule.schedule.every,
-    },
-    createdBy: expectedRule.createdBy,
-    createdAt: expectedRule.createdAt,
-    updatedBy: expectedRule.updatedBy,
-    updatedAt: expectedRule.updatedAt,
-  });
+  expect(snapshot).toMatchObject(
+    omitBy(
+      {
+        id: expectedRule.id,
+        kind: expectedRule.kind,
+        enabled: expectedRule.enabled,
+        time_field: expectedRule.time_field,
+        metadata: expectedRule.metadata,
+        schedule: expectedRule.schedule,
+        query: expectedRule.query,
+        recovery_strategy: expectedRule.recovery_strategy,
+        no_data_strategy: expectedRule.no_data_strategy,
+        state_transition: expectedRule.state_transition,
+        grouping: expectedRule.grouping,
+        artifacts: expectedRule.artifacts,
+        createdBy: expectedRule.createdBy,
+        createdAt: expectedRule.createdAt,
+        updatedBy: expectedRule.updatedBy,
+        updatedAt: expectedRule.updatedAt,
+      },
+      isUndefined
+    )
+  );
 
   // Cover the full payload shape so significant schema drift fails loudly.
   expect(snapshot).toMatchObject(expectedRule);
@@ -446,21 +454,10 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
 
       // Snapshot is the pre-delete rule with the bumped configuration version.
       // OCC `version` is not stamped on the delete emission.
-      expect(deleteEntries[0].object.snapshot).toMatchObject({
-        id: beforeDelete.id,
-        kind: beforeDelete.kind,
-        enabled: beforeDelete.enabled,
-        metadata: {
-          name: beforeDelete.metadata.name,
-          version: expectedDeleteSequence,
-        },
-        schedule: {
-          every: beforeDelete.schedule.every,
-        },
-        createdBy: beforeDelete.createdBy,
-        createdAt: beforeDelete.createdAt,
-        updatedBy: beforeDelete.updatedBy,
-        updatedAt: beforeDelete.updatedAt,
+      const { version: _occVersion, metadata, ...beforeDeleteSnapshot } = beforeDelete;
+      expectSnapshotShape(deleteEntries[0], {
+        ...beforeDeleteSnapshot,
+        metadata: { ...metadata, version: expectedDeleteSequence },
       });
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({
