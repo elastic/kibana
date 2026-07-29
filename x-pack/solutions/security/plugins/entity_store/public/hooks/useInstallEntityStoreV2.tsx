@@ -93,18 +93,19 @@ export const useInstallEntityStoreV2 = (services: Services) => {
           return;
         }
 
-        // In all spaces, auto-install only for users migrating from v1.
-        // Fresh users must explicitly opt in via the autoInstall preference.
         const hadV1 = await isEntityStoreV1Installed(services.http);
 
         if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
 
-        if (!hadV1) {
-          const { autoInstall } = await services.http.get<{ autoInstall: boolean }>(
-            getPreferencesRequest
-          );
-          if (!autoInstall) return;
-        }
+        const { autoInstall, isExplicitlySet } = await services.http.get<{
+          autoInstall: boolean;
+          isExplicitlySet: boolean;
+        }>(getPreferencesRequest);
+
+        // Block install when:
+        // - No v1 history: require explicit opt-in (autoInstall defaults to false for new users)
+        // - V1 history exists but user explicitly opted out (stop/uninstall written autoInstall: false)
+        if (!autoInstall && (!hadV1 || isExplicitlySet)) return;
 
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);

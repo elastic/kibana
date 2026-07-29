@@ -35,7 +35,7 @@ describe('EntityStorePreferencesClient', () => {
     it('returns the defaults when no saved object exists', async () => {
       soClient.find.mockResolvedValue(emptyFind as never);
 
-      await expect(client.get()).resolves.toEqual({ autoInstall: false });
+      await expect(client.get()).resolves.toEqual({ autoInstall: false, isExplicitlySet: false });
     });
 
     it('returns the persisted preferences as-is', async () => {
@@ -46,7 +46,7 @@ describe('EntityStorePreferencesClient', () => {
         per_page: 1,
       } as never);
 
-      await expect(client.get()).resolves.toEqual({ autoInstall: false });
+      await expect(client.get()).resolves.toEqual({ autoInstall: false, isExplicitlySet: true });
     });
   });
 

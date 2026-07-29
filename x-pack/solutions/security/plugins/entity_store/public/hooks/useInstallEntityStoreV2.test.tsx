@@ -35,10 +35,12 @@ const mockHttpGet = (
   {
     status,
     autoInstall = true,
+    isExplicitlySet = false,
     hasInstallPermissions = true,
   }: {
     status: EntityStoreStatus;
     autoInstall?: boolean;
+    isExplicitlySet?: boolean;
     hasInstallPermissions?: boolean;
   }
 ) => {
@@ -48,7 +50,7 @@ const mockHttpGet = (
       return Promise.resolve({ has_install_permissions: hasInstallPermissions });
     }
     if (opts.path === ENTITY_STORE_ROUTES.internal.PREFERENCES) {
-      return Promise.resolve({ autoInstall });
+      return Promise.resolve({ autoInstall, isExplicitlySet });
     }
     return Promise.reject(new Error(`unexpected GET ${opts.path}`));
   });
@@ -187,6 +189,28 @@ describe('useInstallEntityStoreV2', () => {
       path: ENTITY_STORE_ROUTES.public.INSTALL,
       body: JSON.stringify({}),
     });
+  });
+
+  it('should not auto-install when v1 existed but user explicitly opted out (stop/uninstall)', async () => {
+    const mockServices = createMockServices();
+
+    mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
+    mockHttpGet(mockServices, {
+      status: EntityStoreStatusEnum.enum.not_installed,
+      autoInstall: false,
+      isExplicitlySet: true,
+    });
+    mockServices.http.fetch.mockResolvedValueOnce({ total: 2 });
+
+    renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
+
+    await waitFor(() => {
+      expect(mockServices.http.get).toHaveBeenCalledWith(
+        expect.objectContaining({ path: ENTITY_STORE_ROUTES.internal.PREFERENCES })
+      );
+    });
+
+    expect(mockServices.http.post).not.toHaveBeenCalled();
   });
 
   it('should not auto-install in the default space when the autoInstall preference is disabled', async () => {
