@@ -60,7 +60,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
       await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.unifiedTabs.editTabLabel(1, 'second tab');
       await pageObjects.discover.writeAndSubmitKqlQuery('bytes > 1000');
-      expect(await pageObjects.discover.getHitCountInt()).toBe(12_653);
+      await expect(pageObjects.discover.hitCount).toHaveText('12,653');
       expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual([
         'first tab',
         'second tab',
@@ -144,7 +144,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
           await pageObjects.discover.waitUntilTabIsLoaded();
           await pageObjects.unifiedTabs.editTabLabel(1, 'esql2');
           await pageObjects.discover.writeAndSubmitEsqlQuery(queryEsql);
-          expect(await pageObjects.discover.getHitCountInt()).toBe(20);
+          await expect(pageObjects.discover.hitCount).toHaveText('20');
           expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['esql1', 'esql2']);
 
           await pageObjects.discover.saveSearch(savedSearchName);
@@ -239,7 +239,7 @@ spaceTest.describe('Discover tabs - sharing', { tag: '@local-stateful-classic' }
             value: 'jpg',
           });
           await pageObjects.discover.waitUntilTabIsLoaded();
-          expect(await pageObjects.discover.getHitCountInt()).toBe(9_109);
+          await expect(pageObjects.discover.hitCount).toHaveText('9,109');
           expect(await pageObjects.unifiedTabs.getTabLabels()).toStrictEqual(['saved', 'unsaved']);
 
           const url = await pageObjects.discover.getSharedUrl();
