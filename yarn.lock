@@ -7309,6 +7309,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/favorite-button@link:src/platform/packages/shared/content-management/favorites/favorite-button":
+  version "0.0.0"
+  uid ""
+
 "@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
   version "0.0.0"
   uid ""
