@@ -62,6 +62,9 @@ export type XYPersistedLayerConfig =
 
 export type XYPersistedState = Omit<XYVisualizationState, 'layers'> & {
   layers: XYPersistedLayerConfig[];
+  /**
+  * @deprecated use `legend.legendStats` instead
+  */
   valuesInLegend?: boolean;
 };
 
