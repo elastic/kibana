@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-gen-ai-security-labs
-  description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF (commit SHA) and SECURITY_LABS_VERSION (YYYY.MM.DD-HHMMSS UTC).
+  description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF (commit SHA) and SECURITY_LABS_VERSION (YYYY.MM.DD-HHMMSS UTC). Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
   links:
     - url: 'https://buildkite.com/elastic/kibana-gen-ai-security-labs'
       title: Pipeline link
@@ -15,7 +15,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / gen-ai-security-labs
-      description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF (commit SHA) and SECURITY_LABS_VERSION (YYYY.MM.DD-HHMMSS UTC).
+      description: Builds and publishes the Security Labs KB artifact (ELSER + Jina). Triggered externally on article publish (trigger_mode none); pass SECURITY_LABS_REPO_REF (commit SHA) and SECURITY_LABS_VERSION (YYYY.MM.DD-HHMMSS UTC). Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#appex-ai-infra-alerts'

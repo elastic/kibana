@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
   name: bk-kibana-gen-ai-product-docs
-  description: Runs the GenAI product docs pipeline twice a month
+  description: Runs the GenAI product docs pipeline twice a month. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
   links:
     - url: 'https://buildkite.com/elastic/kibana-gen-ai-product-docs'
       title: Pipeline link
@@ -15,7 +15,7 @@ spec:
     kind: Pipeline
     metadata:
       name: kibana / gen-ai-product-docs
-      description: Runs the GenAI product docs pipeline twice a month
+      description: Runs the GenAI product docs pipeline twice a month. Reuses a recent kibana-on-merge kibana-default.tar.zst when possible (set KIBANA_REUSE_BUILD=false to force a fresh Kibana build).
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#appex-ai-infra-alerts'
