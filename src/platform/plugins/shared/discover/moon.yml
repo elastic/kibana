@@ -160,7 +160,6 @@ dependsOn:
   - '@kbn/app-header'
   - '@kbn/use-observable'
   - '@kbn/core-security-server'
-  - '@kbn/field-formats-common'
   - '@kbn/core-http-server'
 tags:
   - plugin
