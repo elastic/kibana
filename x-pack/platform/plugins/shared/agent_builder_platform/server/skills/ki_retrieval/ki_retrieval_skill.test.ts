@@ -29,6 +29,12 @@ describe('kiRetrievalSkill', () => {
     expect(kiRetrievalSkill.content.length).toBeGreaterThan(0);
   });
 
+  it('references the correct AI index pattern in content', () => {
+    expect(kiRetrievalSkill.content).toContain('ai-index-*');
+    expect(kiRetrievalSkill.content).not.toContain('ai-index-idx-*');
+    expect(kiRetrievalSkill.content).not.toContain('ai-index-ds-*');
+  });
+
   it('has no referencedContent', () => {
     expect(kiRetrievalSkill.referencedContent).toHaveLength(0);
   });
