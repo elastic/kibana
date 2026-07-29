@@ -34,8 +34,8 @@ interface KpiExpandedProps {
 }
 
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
-  const browserFields = useBrowserFields(PageScope.timeline);
   const { dataView } = useDataView(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
   const selectedPatterns = useSelectedPatterns(PageScope.timeline);
 
   const { uiSettings } = useKibana().services;

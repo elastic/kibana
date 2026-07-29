@@ -243,7 +243,8 @@ describe('EventFlyout', () => {
     const onClose = jest.fn();
     renderFlyout({ onClose });
 
-    fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    const closeButton = screen.getByTestId('euiFlyoutCloseButton');
+    fireEvent.click(closeButton);
     expect(onClose).toHaveBeenCalled();
   });
 
