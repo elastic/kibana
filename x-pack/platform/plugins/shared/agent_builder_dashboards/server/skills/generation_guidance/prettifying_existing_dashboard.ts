@@ -28,7 +28,7 @@ Do **not** reason about chart configuration details yourself — colors, palette
 
 When panels in the tool result's \`data.dashboard\` carry an \`authoring_note\`, briefly mention those improvements in your reply. Use the returned notes as-is; do not invent additional chart-config details.
 
-If the user's request does not make the scope clear, call \`ask_user_question\` alone before \`generate_dashboard\` and ask **How should I prettify this dashboard?** with two options: **Improve existing charts and layout without adding panels** and **Improve existing charts and layout and add useful new panels**. Do not ask when the user already specified either scope.
+If the user's request does not make the scope clear, call \`ask_user_question\` alone before \`generate_dashboard\` and ask **How should I enhance this dashboard?** with two options: **Improve existing charts and layout and add useful new panels** and **Improve existing charts and layout without adding panels**. Do not ask when the user already specified either scope.
 
 ## Grid layout pass (always required)
 
