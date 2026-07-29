@@ -13,6 +13,7 @@ import { ATTBANA_VARIANT_ID } from './variant_attbana';
 import { BASELINE_VARIANT_ID } from './variant_baseline';
 import { INTERBANA_VARIANT_ID } from './variant_interbana';
 import { LINBANA_VARIANT_ID } from './variant_linbana';
+import { NIRBANA_VARIANT_ID } from './variant_nirbana';
 import { VERBANA_VARIANT_ID } from './variant_verbana';
 
 export const BASELINE_KNOB_TOKENS: DesignExplorationKnobTokens = {
@@ -80,6 +81,11 @@ export const INTERBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
   shellShadow: '0px 1px 4px 0px rgba(20, 20, 20, 0.15)',
 };
 
+export const NIRBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
+  ...INTERBANA_KNOB_TOKENS,
+  canvas: '#EAEDF5',
+};
+
 export const DESIGN_EXPLORATION_KNOB_TOKENS_BY_VARIANT: Record<string, DesignExplorationKnobTokens> =
   {
     [BASELINE_VARIANT_ID]: BASELINE_KNOB_TOKENS,
@@ -87,6 +93,7 @@ export const DESIGN_EXPLORATION_KNOB_TOKENS_BY_VARIANT: Record<string, DesignExp
     [LINBANA_VARIANT_ID]: LINBANA_KNOB_TOKENS,
     [ATTBANA_VARIANT_ID]: ATTBANA_KNOB_TOKENS,
     [INTERBANA_VARIANT_ID]: INTERBANA_KNOB_TOKENS,
+    [NIRBANA_VARIANT_ID]: NIRBANA_KNOB_TOKENS,
   };
 
 export const getDesignExplorationKnobTokens = (variantId: string): DesignExplorationKnobTokens =>

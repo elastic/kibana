@@ -11,6 +11,7 @@ import type { ColorMode } from '@elastic/eui';
 import type { DesignExplorationKnobTokens } from './design_exploration_knobs';
 
 const INTERBANA_VARIANT_ID = 'interbana';
+const NIRBANA_VARIANT_ID = 'nirbana';
 const VERBANA_VARIANT_ID = 'verbana';
 const LINBANA_VARIANT_ID = 'linbana';
 const ATTBANA_VARIANT_ID = 'attbana';
@@ -99,11 +100,22 @@ const ATTBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalette>
   },
 };
 
+const NIRBANA_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalette> = {
+  LIGHT: {
+    ...INTERBANA_BESPOKE_COLORS.LIGHT,
+    canvas: '#EAEDF5',
+  },
+  DARK: {
+    ...INTERBANA_BESPOKE_COLORS.DARK,
+  },
+};
+
 const BESPOKE_COLORS_BY_VARIANT: Record<
   string,
   Partial<Record<ColorMode, DesignExplorationBespokePalette>>
 > = {
     [INTERBANA_VARIANT_ID]: INTERBANA_BESPOKE_COLORS,
+    [NIRBANA_VARIANT_ID]: NIRBANA_BESPOKE_COLORS,
     [VERBANA_VARIANT_ID]: VERBANA_BESPOKE_COLORS,
     [LINBANA_VARIANT_ID]: LINBANA_BESPOKE_COLORS,
     [ATTBANA_VARIANT_ID]: ATTBANA_BESPOKE_COLORS,

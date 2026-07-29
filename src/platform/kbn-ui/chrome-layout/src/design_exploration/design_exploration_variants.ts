@@ -20,6 +20,7 @@ import {
   BASELINE_KNOB_TOKENS,
   INTERBANA_KNOB_TOKENS,
   LINBANA_KNOB_TOKENS,
+  NIRBANA_KNOB_TOKENS,
   VERBANA_KNOB_TOKENS,
   getDesignExplorationKnobTokens,
 } from './design_exploration_knob_tokens';
@@ -27,6 +28,7 @@ import { BASELINE_VARIANT_ID, createBaselineStyles } from './variant_baseline';
 import { ATTBANA_VARIANT_ID, createAttbanaStyles } from './variant_attbana';
 import { INTERBANA_VARIANT_ID, createInterbanaStyles } from './variant_interbana';
 import { LINBANA_VARIANT_ID, createLinbanaStyles } from './variant_linbana';
+import { NIRBANA_VARIANT_ID, createNirbanaStyles } from './variant_nirbana';
 import { VERBANA_VARIANT_ID, createVerbanaStyles } from './variant_verbana';
 
 export interface DesignExplorationVariantDefinition {
@@ -69,6 +71,12 @@ export const DESIGN_EXPLORATION_VARIANTS: DesignExplorationVariantDefinition[] =
     label: 'Interbana',
     knobTokens: INTERBANA_KNOB_TOKENS,
     createStyles: createInterbanaStyles,
+  },
+  {
+    id: NIRBANA_VARIANT_ID,
+    label: 'Nirbana',
+    knobTokens: NIRBANA_KNOB_TOKENS,
+    createStyles: createNirbanaStyles,
   },
 ];
 
