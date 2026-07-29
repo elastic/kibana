@@ -91,6 +91,7 @@ describe('AddCollectorFlyout', () => {
     mockedUseStartServices.mockReturnValue({
       cloud: { isCloudEnabled: false },
       docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+      application: { capabilities: { api_keys: { save: true } } },
     } as any);
     mockedUseGetCreateApiKey.mockReturnValue({
       apiKey: undefined,
@@ -342,6 +343,7 @@ describe('AddCollectorFlyout', () => {
       mockedUseStartServices.mockReturnValue({
         cloud: { isCloudEnabled: false },
         docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+        application: { capabilities: { api_keys: { save: true } } },
       } as any);
 
       const component = renderFlyout();
@@ -356,6 +358,7 @@ describe('AddCollectorFlyout', () => {
       mockedUseStartServices.mockReturnValue({
         cloud: { isCloudEnabled: true },
         docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+        application: { capabilities: { api_keys: { save: true } } },
       } as any);
 
       const component = renderFlyout();
