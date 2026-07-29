@@ -355,6 +355,69 @@ describe('resolveResource', () => {
       });
     });
 
+    it('bypasses _resolve/index for a named-cluster CCS pattern and uses _field_caps', async () => {
+      // Simulate ES 9.4: _resolve/index throws security_exception for CCS expressions
+      // when remote_cluster_client role is absent (non-404 → old code re-threw this).
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception' } },
+        } as any)
+      );
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['remote_cluster:logs-1'],
+        fields: {
+          '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } },
+          message: { text: { type: 'text', searchable: true, aggregatable: false } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({
+        resourceName: 'remote_cluster:logs-*',
+        esClient,
+      });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(esClient.fieldCaps).toHaveBeenCalledWith({
+        index: 'remote_cluster:logs-*',
+        fields: ['*'],
+      });
+      expect(result.name).toBe('remote_cluster:logs-*');
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ path: '@timestamp', type: 'date' }),
+          expect.objectContaining({ path: 'message', type: 'text' }),
+        ])
+      );
+    });
+
+    it('bypasses _resolve/index for a wildcard-cluster CCS pattern and uses _field_caps', async () => {
+      esClient.indices.resolveIndex.mockRejectedValue(
+        new esErrors.ResponseError({
+          statusCode: 403,
+          body: { error: { type: 'security_exception' } },
+        } as any)
+      );
+
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['cluster_a:logs-1', 'cluster_b:logs-1'],
+        fields: {
+          level: { keyword: { type: 'keyword', searchable: true, aggregatable: true } },
+        },
+      });
+
+      const result = await resolveResourceForEsql({ resourceName: '*:logs-*', esClient });
+
+      expect(esClient.indices.resolveIndex).not.toHaveBeenCalled();
+      expect(result.name).toBe('*:logs-*');
+      expect(result.type).toBe(EsResourceType.indexPattern);
+      expect(result.fields).toEqual(
+        expect.arrayContaining([expect.objectContaining({ path: 'level', type: 'keyword' })])
+      );
+    });
+
     it('uses field caps with index pattern type when multiple data streams match', async () => {
       esClient.indices.resolveIndex.mockResolvedValue({
         indices: [],
