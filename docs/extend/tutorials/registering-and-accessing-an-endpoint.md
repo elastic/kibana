@@ -342,7 +342,7 @@ export class MyPlugin implements Plugin {
         validate: false,
       },
       async (context, request, response) => {
-        const coreStart = await context.core;
+        const [coreStart] = await core.getStartServices();
         const status = await coreStart.http.selfClient.asScoped(request).fetch('/api/status', {
           access: 'public',
         });
