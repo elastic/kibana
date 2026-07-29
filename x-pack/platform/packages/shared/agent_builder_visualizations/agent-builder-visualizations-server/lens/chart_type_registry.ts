@@ -99,7 +99,7 @@ export const chartTypeRegistry: ChartTypeRegistry = {
         'Displays a single numeric value, KPI, or aggregate statistic (count, sum, average) with an optional trend line. Choose for single numbers without ranges or targets.',
       config: {
         rules: [
-          "Align metric values to the right by default: set 'styling.primary.value.alignment' to 'right' and, when secondary metrics are present, set 'styling.secondary.value.alignment' to 'right'. Use 'left' or 'center' only when the user explicitly requests that value alignment.",
+          'Prefer right-aligned metric values. Use left/center only when the user asks.',
         ],
         coloringRules: [
           'Metric placement: set `apply_color_to: "value"` only together with a color config; do not color the background unless the user asks. When not coloring, omit both `color` and `apply_color_to` — `apply_color_to` without a color makes Lens tint the value with a default green.',
