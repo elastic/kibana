@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { filter, firstValueFrom, interval, map, race, take, timer } from 'rxjs';
+import { filter, firstValueFrom, fromEvent, map, of, race, take, timer } from 'rxjs';
 import type { CoreStatus, Logger } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
@@ -24,7 +24,8 @@ export interface WaitForManagedWorkflowInstallReadinessParams {
   core$: Observable<CoreStatus>;
   /** Live ping — typed loosely so tests can pass a stub without ES client `this` binding. */
   esClient: { ping: () => Promise<unknown> };
-  isStopping: () => boolean;
+  /** Abort when Kibana/plugin is stopping (replaces polling an `isStopping` flag). */
+  signal: AbortSignal;
   /**
    * Soft timeout for waiting on Elasticsearch `available`.
    * Default `null` = wait until available or stopping (Task Manager–style).
@@ -38,6 +39,14 @@ export interface WaitForManagedWorkflowInstallReadinessParams {
   logger: Logger;
 }
 
+const whenAborted$ = (signal: AbortSignal): Observable<'stopping'> =>
+  signal.aborted
+    ? of('stopping' as const)
+    : fromEvent(signal, 'abort').pipe(
+        take(1),
+        map(() => 'stopping' as const)
+      );
+
 /**
  * Gate managed install / reconcile / orphan-cleanup ES writes on cluster readiness.
  * Does not wait on Saved Objects or change-history initialization.
@@ -45,20 +54,20 @@ export interface WaitForManagedWorkflowInstallReadinessParams {
 export const waitForManagedWorkflowInstallReadiness = async ({
   core$,
   esClient,
-  isStopping,
+  signal,
   timeoutMs = null,
   pingRetryIntervalMs = DEFAULT_MANAGED_INSTALL_PING_RETRY_INTERVAL_MS,
   operation,
   logger,
 }: WaitForManagedWorkflowInstallReadinessParams): Promise<ManagedInstallReadinessResult> => {
-  if (isStopping()) {
+  if (signal.aborted) {
     return { ready: false, reason: 'stopping' };
   }
 
   const operationSuffix = operation ? ` before managed ${operation}` : '';
 
   const initialStatus = await firstValueFrom(core$.pipe(take(1)));
-  if (initialStatus.elasticsearch.level !== ServiceStatusLevels.available && !isStopping()) {
+  if (initialStatus.elasticsearch.level !== ServiceStatusLevels.available && !signal.aborted) {
     logger.info(
       `Managed workflow install readiness: waiting for Elasticsearch to become available${operationSuffix}`
     );
@@ -71,12 +80,7 @@ export const waitForManagedWorkflowInstallReadiness = async ({
     map(() => 'available' as const)
   );
 
-  // Poll so teardown mid-wait aborts without waiting for a soft timeout.
-  const stopping$ = interval(50).pipe(
-    filter(() => isStopping()),
-    take(1),
-    map(() => 'stopping' as const)
-  );
+  const stopping$ = whenAborted$(signal);
 
   const waitOutcome =
     timeoutMs === null
@@ -97,13 +101,13 @@ export const waitForManagedWorkflowInstallReadiness = async ({
     return { ready: false, reason: 'timeout' };
   }
 
-  if (isStopping()) {
+  if (signal.aborted) {
     return { ready: false, reason: 'stopping' };
   }
 
   return pingUntilReady({
     esClient,
-    isStopping,
+    signal,
     timeoutMs,
     pingRetryIntervalMs,
     operationSuffix,
@@ -113,14 +117,14 @@ export const waitForManagedWorkflowInstallReadiness = async ({
 
 const pingUntilReady = async ({
   esClient,
-  isStopping,
+  signal,
   timeoutMs,
   pingRetryIntervalMs,
   operationSuffix,
   logger,
 }: {
   esClient: { ping: () => Promise<unknown> };
-  isStopping: () => boolean;
+  signal: AbortSignal;
   timeoutMs: number | null;
   pingRetryIntervalMs: number;
   operationSuffix: string;
@@ -128,10 +132,10 @@ const pingUntilReady = async ({
 }): Promise<ManagedInstallReadinessResult> => {
   let loggedPingWait = false;
 
-  while (!isStopping()) {
+  while (!signal.aborted) {
     try {
       await esClient.ping();
-      if (isStopping()) {
+      if (signal.aborted) {
         return { ready: false, reason: 'stopping' };
       }
       return { ready: true };
@@ -155,14 +159,7 @@ const pingUntilReady = async ({
       }
 
       const retryOutcome = await firstValueFrom(
-        race([
-          timer(pingRetryIntervalMs).pipe(map(() => 'retry' as const)),
-          interval(50).pipe(
-            filter(() => isStopping()),
-            take(1),
-            map(() => 'stopping' as const)
-          ),
-        ])
+        race([timer(pingRetryIntervalMs).pipe(map(() => 'retry' as const)), whenAborted$(signal)])
       );
 
       if (retryOutcome === 'stopping') {

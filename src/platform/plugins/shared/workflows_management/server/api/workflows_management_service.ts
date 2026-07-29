@@ -152,7 +152,8 @@ export class WorkflowsService {
   ) => Promise<PublicMethodsOf<ActionsClient>>;
 
   private readonly initPromise: Promise<void>;
-  private stopping = false;
+  /** One-shot stop signal; replaced on start so abort can fire again next lifecycle. */
+  private stopController = new AbortController();
 
   constructor(
     public readonly core: CoreSetup<WorkflowsServerPluginStartDeps>,
@@ -165,7 +166,11 @@ export class WorkflowsService {
   }
 
   public setStopping(stopping: boolean): void {
-    this.stopping = stopping;
+    if (stopping) {
+      this.stopController.abort();
+      return;
+    }
+    this.stopController = new AbortController();
   }
 
   private async ensureInitialized(): Promise<void> {
@@ -182,7 +187,7 @@ export class WorkflowsService {
     const readiness = await waitForManagedWorkflowInstallReadiness({
       core$: this.core.status.core$,
       esClient: { ping: () => this.esClient.ping() },
-      isStopping: () => this.stopping,
+      signal: this.stopController.signal,
       operation,
       logger: this.logger,
     });
@@ -262,7 +267,7 @@ export class WorkflowsService {
       crudService: this.crudService,
       workflowsExecutionEngine: this.workflowsExecutionEngine,
       logger: this.logger,
-      isStopping: () => this.stopping,
+      isStopping: () => this.stopController.signal.aborted,
       audit: new WorkflowManagementAuditLog({ service: this }),
     });
   }

@@ -37,7 +37,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
       waitForManagedWorkflowInstallReadiness({
         core$,
         esClient,
-        isStopping: () => false,
+        signal: new AbortController().signal,
         logger,
       })
     ).resolves.toEqual({ ready: true });
@@ -52,7 +52,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
     const readinessPromise = waitForManagedWorkflowInstallReadiness({
       core$,
       esClient,
-      isStopping: () => false,
+      signal: new AbortController().signal,
       logger,
     });
 
@@ -74,7 +74,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
       waitForManagedWorkflowInstallReadiness({
         core$,
         esClient,
-        isStopping: () => false,
+        signal: new AbortController().signal,
         timeoutMs: 50,
         logger,
       })
@@ -86,12 +86,14 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
   it('returns not ready immediately when already stopping', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.available));
     const esClient = { ping: jest.fn().mockResolvedValue(true) };
+    const stopController = new AbortController();
+    stopController.abort();
 
     await expect(
       waitForManagedWorkflowInstallReadiness({
         core$,
         esClient,
-        isStopping: () => true,
+        signal: stopController.signal,
         logger,
       })
     ).resolves.toEqual({ ready: false, reason: 'stopping' });
@@ -102,18 +104,18 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
   it('returns not ready when stopping flips during the wait', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.unavailable));
     const esClient = { ping: jest.fn().mockResolvedValue(true) };
-    let stopping = false;
+    const stopController = new AbortController();
 
     const readinessPromise = waitForManagedWorkflowInstallReadiness({
       core$,
       esClient,
-      isStopping: () => stopping,
+      signal: stopController.signal,
       timeoutMs: 1_000,
       logger,
     });
 
     setTimeout(() => {
-      stopping = true;
+      stopController.abort();
     }, 20);
 
     await expect(readinessPromise).resolves.toEqual({ ready: false, reason: 'stopping' });
@@ -133,7 +135,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
       waitForManagedWorkflowInstallReadiness({
         core$,
         esClient,
-        isStopping: () => false,
+        signal: new AbortController().signal,
         pingRetryIntervalMs: 20,
         logger,
       })
@@ -155,7 +157,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
       waitForManagedWorkflowInstallReadiness({
         core$,
         esClient,
-        isStopping: () => false,
+        signal: new AbortController().signal,
         timeoutMs: 1_000,
         logger,
       })
@@ -166,10 +168,10 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
 
   it('aborts ping retries when stopping flips', async () => {
     const core$ = new BehaviorSubject(makeCoreStatus(ServiceStatusLevels.available));
-    let stopping = false;
+    const stopController = new AbortController();
     const esClient = {
       ping: jest.fn().mockImplementation(async () => {
-        stopping = true;
+        stopController.abort();
         throw new Error('NoLivingConnectionsError');
       }),
     };
@@ -178,7 +180,7 @@ describe('waitForManagedWorkflowInstallReadiness', () => {
       waitForManagedWorkflowInstallReadiness({
         core$,
         esClient,
-        isStopping: () => stopping,
+        signal: stopController.signal,
         pingRetryIntervalMs: 500,
         logger,
       })
