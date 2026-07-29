@@ -736,9 +736,10 @@ describe('EndpointActionsClient', () => {
     });
 
     it.each`
-      title        | params
-      ${'kernel'}  | ${{ type: 'kernel' }}
-      ${'process'} | ${{ type: 'process', pid: '123' }}
+      title         | params
+      ${'kernel'}   | ${{ type: 'kernel' }}
+      ${'physical'} | ${{ type: 'physical' }}
+      ${'process'}  | ${{ type: 'process', pid: '123' }}
     `(
       'should validate that agent supports memory dump of $title',
       async ({ params: ResponseActionMemoryDumpParameters }) => {
@@ -829,6 +830,20 @@ describe('EndpointActionsClient', () => {
           })
         )
       ).resolves.toBeDefined();
+
+      // Fleet action request, which is dispatched down to the Endpoint, should have
+      // been created with `type: raw` for `memory-dump --physical`
+      expect(
+        (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            command: 'memory-dump',
+            comment: expect.anything(),
+            parameters: { type: 'raw' },
+          },
+        })
+      );
     });
   });
 

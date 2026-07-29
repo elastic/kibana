@@ -369,6 +369,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
         }
       }
 
+      // For `memory-dump --physical` we pass down `type: raw` instead
+      if (
+        command === 'memory-dump' &&
+        (actionParams as ResponseActionMemoryDumpParameters).type === 'physical'
+      ) {
+        actionParams = { ...actionParams, type: 'raw' };
+      }
+
       try {
         await this.dispatchActionViaFleet({
           actionId,
