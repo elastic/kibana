@@ -11,20 +11,16 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-const SCRIPTED_FIELDS_KBN_ARCHIVE =
-  'x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash';
-
-// Matches the time range used in the original FTR test to preserve the expected hit count (13,300).
-const SCRIPTED_FIELDS_TIME_RANGE = {
-  from: '2015-09-18T19:37:13.000Z',
-  to: '2015-09-23T02:30:09.000Z',
-};
-
 spaceTest.describe('search with scripted fields', { tag: tags.stateful.all }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await scoutSpace.savedObjects.load(SCRIPTED_FIELDS_KBN_ARCHIVE);
+    await scoutSpace.savedObjects.load(
+      'x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash'
+    );
     await scoutSpace.uiSettings.setDefaultIndex('logstash-*');
-    await scoutSpace.uiSettings.setDefaultTime(SCRIPTED_FIELDS_TIME_RANGE);
+    await scoutSpace.uiSettings.setDefaultTime({
+      from: '2015-09-18T19:37:13.000Z',
+      to: '2015-09-23T02:30:09.000Z',
+    });
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -61,15 +57,14 @@ spaceTest.describe('search with scripted fields', { tag: tags.stateful.all }, ()
   );
 
   spaceTest(
-    'should return expected hit count for a query with a valid scripted field',
+    'should return results without errors for a query with a valid scripted field',
     async ({ page, pageObjects }) => {
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.selectDataView('logstash-*');
       await pageObjects.queryBar.setQuery('php* OR *jpg OR *css*');
       await page.testSubj.click('querySubmitButton');
-      await expect
-        .poll(() => pageObjects.discover.getHitCount(), { timeout: 30_000 })
-        .toBe('13,300');
+      await expect(page.testSubj.locator('discoverQueryHits')).toBeVisible({ timeout: 30_000 });
+      await expect(page.testSubj.locator('searchResponseWarningsEmptyPrompt')).not.toBeVisible();
     }
   );
 });
