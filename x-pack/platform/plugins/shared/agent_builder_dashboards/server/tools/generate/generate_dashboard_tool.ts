@@ -25,9 +25,9 @@ import {
   getErrorMessage,
   hasValidCreateMetadataOperations,
   dashboardOperationSchema,
+  indexPanelsById,
+  prettifyPanelConfigs,
 } from './core';
-import { indexPanelsById } from './core/dashboard_state';
-import { prettifyPanelConfigs } from './core/prettify_panel_configs';
 import { applyDefaultDashboardTimeRange } from './time_range';
 
 const newDashboardMetadataErrorMessage =
