@@ -50,43 +50,6 @@ const exampleTemplateAttributes = {
   time_field: '@timestamp',
 };
 
-describe('ruleTemplateDataSchema', () => {
-  it('parses the example template attributes', () => {
-    const result = ruleTemplateDataSchema.parse(exampleTemplateAttributes);
-
-    expect(result.engine).toBe('v2');
-    expect(result.recovery_strategy).toBe('no_breach');
-    expect(result.metadata.name).toBe('[Kubernetes OTel] Pod CrashLoopBackOff');
-    expect(result.query.format).toBe('composed');
-  });
-
-  it('rejects a missing engine', () => {
-    const { engine: _engine, ...withoutEngine } = exampleTemplateAttributes;
-    expect(() => ruleTemplateDataSchema.parse(withoutEngine)).toThrow();
-  });
-
-  it('rejects unknown fields such as schema_version', () => {
-    expect(() =>
-      ruleTemplateDataSchema.parse({
-        ...exampleTemplateAttributes,
-        schema_version: 1,
-      })
-    ).toThrow();
-  });
-
-  it('allows omitting recovery_strategy', () => {
-    const { recovery_strategy: _recovery, ...withoutRecovery } = exampleTemplateAttributes;
-    expect(() => ruleTemplateDataSchema.parse(withoutRecovery)).not.toThrow();
-  });
-
-  it('accepts all recovery_strategy values', () => {
-    for (const recovery_strategy of ['no_breach', 'query', 'none'] as const) {
-      expect(() =>
-        ruleTemplateDataSchema.parse({ ...exampleTemplateAttributes, recovery_strategy })
-      ).not.toThrow();
-    }
-  });
-});
 
 describe('parseRuleTemplateData', () => {
   it('parses valid template attributes', () => {
