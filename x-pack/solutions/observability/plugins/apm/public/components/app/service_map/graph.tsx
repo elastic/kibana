@@ -62,6 +62,11 @@ import {
   DEFAULT_SERVICE_MAP_VIEW_FILTERS,
   type ServiceMapViewFilters,
 } from './apply_service_map_visibility';
+import {
+  parseMapOrientationFromAppState,
+  parseViewFiltersFromAppState,
+  readInitialAppStateFromRawUrl,
+} from './use_filter_url_sync';
 import { useServiceMapFilterState } from './use_service_map_filter_state';
 import { focusServiceMapFindInput } from './service_map_find_in_page';
 import { ServiceMapHighlightProvider } from '../../shared/service_map/service_map_search_context';
@@ -207,9 +212,15 @@ function GraphInner({
   const serviceMapId = useGeneratedHtmlId({ prefix: 'serviceMap' });
   const mapRegionRef = useRef<HTMLDivElement | null>(null);
 
-  const [internalViewFilters, setInternalViewFilters] = useState<ServiceMapViewFilters>(
-    controlledViewFilters ?? DEFAULT_SERVICE_MAP_VIEW_FILTERS
-  );
+  const [internalViewFilters, setInternalViewFilters] = useState<ServiceMapViewFilters>(() => {
+    if (controlledViewFilters) {
+      return controlledViewFilters;
+    }
+    return (
+      parseViewFiltersFromAppState(readInitialAppStateFromRawUrl()) ??
+      DEFAULT_SERVICE_MAP_VIEW_FILTERS
+    );
+  });
   const viewFilters = controlledViewFilters ?? internalViewFilters;
   // Keep a ref to the currently-effective view filters so function updaters always see the
   // latest "prev" — internalViewFilters can be stale when the host drives state via
@@ -252,9 +263,12 @@ function GraphInner({
       setPanelExpanded(true);
     }
   }, [showEmbeddedControls]);
-  const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(
-    controlledOrientation ?? 'horizontal'
-  );
+  const [internalOrientation, setInternalOrientation] = useState<ServiceMapOrientation>(() => {
+    if (controlledOrientation) {
+      return controlledOrientation;
+    }
+    return parseMapOrientationFromAppState(readInitialAppStateFromRawUrl()) ?? 'horizontal';
+  });
   const mapOrientation = controlledOrientation ?? internalOrientation;
   const setMapOrientation = useCallback(
     (next: ServiceMapOrientation) => {

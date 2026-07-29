@@ -435,6 +435,8 @@ export function ServiceMapEmbeddable({
     serviceName,
     serviceGroupId,
     filterPills,
+    viewFilters,
+    mapOrientation,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
