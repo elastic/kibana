@@ -9,9 +9,6 @@
 
 import type { ConnectorSpec } from './connector_spec';
 
-export function requireTestHandler<T extends ConnectorSpec>(spec: T): NonNullable<T['test']> {
-  if (!spec.test) {
-    throw new Error('Test handler not defined');
-  }
+export function requireTestHandler<T extends ConnectorSpec>(spec: T): T['test'] {
   return spec.test;
 }

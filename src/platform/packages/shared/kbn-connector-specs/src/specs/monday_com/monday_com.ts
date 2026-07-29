@@ -446,6 +446,7 @@ export const MondayCom: ConnectorSpec = {
       });
       return {};
     },
+    enabled: true,
   },
 
   skill: [

@@ -321,7 +321,7 @@ export interface ConnectorSpec {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- record of actions with different input types (contravariance)
   actions: Record<string, ActionDefinition<any, any, any>>;
 
-  test?: ConnectorTest;
+  test: ConnectorTest;
 
   transformations?: Transformations;
 

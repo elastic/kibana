@@ -34,9 +34,9 @@ const createFailingContext = (): ActionContext => {
 
 describe('opted-in connector test handlers', () => {
   const optedInSpecs = Object.entries(connectorsSpecs).filter(
-    (entry): entry is [string, ConnectorSpec & { test: NonNullable<ConnectorSpec['test']> }] => {
+    (entry): entry is [string, ConnectorSpec] => {
       const [, spec] = entry;
-      return spec.test?.enabled === true;
+      return spec.test.enabled === true;
     }
   );
 

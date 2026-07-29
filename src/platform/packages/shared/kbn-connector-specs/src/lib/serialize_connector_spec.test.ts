@@ -29,6 +29,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}) },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -52,6 +53,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}) },
       };
 
       const result = serializeConnectorSpec(spec);
@@ -77,6 +79,7 @@ describe('serializeConnectorSpec', () => {
             handler: async () => ({ success: true }),
           },
         },
+        test: { handler: async () => ({}) },
       };
 
       const result = serializeConnectorSpec(spec);
