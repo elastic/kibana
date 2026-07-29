@@ -1,7 +1,17 @@
 # Knowledge: Entity Analytics
 
-**Last updated:** 2026-07-15
-**Archive:** `entity-analytics-archive-2026-07-15.md` (sessions through 2026-07-15-041422)
+**Last updated:** 2026-07-29
+**Archive:** `entity-analytics-archive-2026-07-15.md` (all narrative session findings — see "Compact by design" below)
+
+---
+
+**Compact by design:** this file holds only `## Known non-bugs` (suppression-eligible
+entries — see `phases/3-report.md` Step 3b) and `## Navigation patterns` (reachability
+context). It never accumulates per-session bug narratives, confirmed-bug tables, or
+checklist-coverage summaries — those already live in full in each session's
+`report.md`/`findings-flow-*.md`, and are archived here only for explicit lookup, never
+auto-loaded. See `phases/3-report.md` Step 3d before adding anything beyond these two
+sections.
 
 ---
 
@@ -42,51 +52,3 @@ Both entity analytics Kibana features AND Elasticsearch index privileges are req
 - `.entities.v2.metadata.security_default-*`
 - `entities-latest-default`
 - `entities-metadata-default`
-
----
-
-## Session findings — Entity Cases Attachments (2026-07-14 / 2026-07-15-041422)
-
-Key confirmed findings from the first two sessions (10 flows, all 5 checklist steps):
-
-**Confirmed bugs filed:**
-- **B-01 [Level 1]** "Create case" submit button not disabled while in-flight — double-click creates duplicate cases (18ms apart, both HTTP 200). Affects all case creation paths.
-- **B-02 [Level 2] #278382** Entity ID colon-notation (`host:entity-name`) unsearchable in case Entities tab — colon parsed as Elasticsearch field separator. Workaround: search by bare hostname.
-- **B-03 [Level 2]** Select-case modal survives parent entity flyout close — orphaned modal remains interactive and can create attachments.
-
-**UX gaps confirmed (F-series):** toast says "updated" on new case creation (F-01); description required but no asterisk (F-02); beforeunload on unmodified case page (F-03); case picker defaults to Last 30 days silently (F-04); cancel on empty form shows "Discard?" dialog (F-05); hostname click triggers field-actions dialog simultaneously with flyout (F-06); alerts path needs 2 extra steps (F-07); delete only from Activity tab (F-08); closed-case "Select" disabled with no tooltip (F-09); search not real-time, header count stale (F-10); name field no maxlength DOM attr (F-11); case picker fires search twice per click (F-12); empty-string search returns 0 (F-13); Entities section absent (no empty state) when 0 attachments (F-14); delete button no in-flight guard (F-15); entity filter lost on page reload (F-16).
-
-**Positive behaviors confirmed:** XSS-safe Create Case form; empty prerequisites gracefully handled; cancel paths clean; duplicate-entity guard on existing-case path (modal unmount); refresh survives in-flight correctly; flyout URL-encoded and survives page refresh; host not in entity store still shows Take action.
-
----
-
-## Session findings — Entity Cases Attachments Missing Scenarios (2026-07-15-100117)
-
-**12 new flows.** 2 Level 1 bugs, 10 Level 2 findings.
-
-### Level 1 (file immediately)
-
-**L1-01 [NEW]** Service entity has no flyout and no "Take action" from EA home — case attachment completely blocked. Inline data-grid expands in place; row-action button is `disabled`. Related to #268190 but more severe (no flyout at all, not gaps in flyout). All checklist steps 2–5 blocked by this root cause.
-
-**L1-02 [SEVERITY UPGRADE #277750]** No duplicate guard on entity attachments — API stores separate records for each duplicate add (data integrity, not display-only). Each add increments case `version`. 4 records confirmed for 1 entity. No guard at any UI layer. Badge inflates; table deduplicates silently. "Select case" dialog gives no "already attached" indication. Also: no self-referential guard (L2-06) — entity from case row can be re-attached to same case.
-
-### Level 2 (suspicious — review needed)
-
-- **L2-01** Search filter while on page 2 renders "Page 2 of 1" — matching entities inaccessible. Filter must reset page cursor to 1. `POST /internal/cases/{id}/findAttachments` returns 404 on every Update click (falls back to cached data). Flow 1.
-- **L2-02** Entities badge (32) does not match navigable count (30) — 2 attachments silently absent. Likely cause: entity with missing `riskScore`/`riskLevel` in attachment metadata triggers silent rendering failure. Flow 1.
-- **L2-03** `GET /api/cases/{id}` returns `totalComment: 0` for cases with entity attachments (`security.entity` type excluded from public count). UI uses internal-only `/resolve` endpoint (gated by `x-elastic-internal-origin: Kibana`). External API consumers get false negative. Confirmed on two cases (32-entity and duplicate-entity cases). Flows 2, 3.
-- **L2-04** `/resolve` endpoint called twice per page load; second call returns HTTP 400 ("not available with current configuration"). Silently swallowed. Flows 2.
-- **L2-05** Entity store install API (`POST /api/security/entity_store/install → 403`) fires on every EA page load for a read-only user, **after** all four privilege checks confirmed missing privs and the "Privileges required" empty state rendered. Frontend gate failing. Flow 5.
-- **L2-06** No self-referential duplicate guard — the current case appears as selectable in the "Add to existing case" modal with no disabled state or "already attached" badge. Creates new API record silently. No toast. Count updates only on reload. Flow 7.
-- **L2-07** Case Attachments tab entity group card shows 0.00 risk score — reads `entity.relationships.resolution.risk.calculated_score_norm` (resolution cluster aggregate = 0 for directly indexed entities) instead of `entity.risk.calculated_score_norm` (entity's own risk) or `attachment.metadata.riskScore` (stored snapshot = 92.6). Activity tab correctly reads stored snapshot. Confirmed in Flows 8 and 12.
-- **L2-08** Entity attachment row shows wrong empty state when entity not in store — renders alerts-grouping component message "No grouping results match your selected Group alerts field" instead of a contextual "entity not found" message. Attachment metadata not used as fallback. Systemic: affects deleted entities, never-indexed entities, stale ILM-rotated attachments. Flow 9.
-- **L2-09** No success notification after attaching Timeline to a case — both "Attach to existing case" and "Attach to new case" paths succeed (HTTP 200) with zero user feedback. No toast, no navigation to new case. Flow 10.
-- **L2-10 [#277996 scope expanded]** No success toast after "Add to existing case" from entity table — confirmed in BOTH fullscreen AND standard (non-fullscreen) view. Bug filed as "Full Screen view only" — scope is broader. Fix must cover entity flyout "Add to case" callback regardless of parent table display mode. Flow 11.
-
-### Privilege testing gap (action required for future runs)
-
-Both #277724 and #277736 require EA ES index read privileges in addition to Kibana cases privileges. Test roles `cases-read-role` and `cases-all-limited-role` were missing these; EA home rendered "Privileges required" and entity flyout was unreachable. Add five ES index `read` privileges (listed under Navigation patterns above) to both roles. Also add Machine Learning (read) Kibana feature for `cases-read-role`. Test users remain in environment (`cases-read-tester / ReadOnly123!`, `cases-all-tester / AllCases123!`).
-
-### Upgrade compatibility (positive, Flow 12)
-
-Case `6252d052` created 2026-07-14 renders correctly in Kibana 9.5.0 build 106168 — entity attachment records intact, metadata fields present, flyout opens, Activity tab shows stored snapshots. No schema migration breakage. `totalComment: 5` via resolve endpoint matches UI badge.
