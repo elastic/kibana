@@ -4092,6 +4092,94 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
 
         self.assertEqual(problems, [], "\n".join(["", *problems]))
 
+    def test_explore_phase_wires_the_detector_injector_with_fallback(self):
+        # Task 3 (detector injection): phases/2-explore.md must call the
+        # injected window.__et bridge instead of pasting all three detector
+        # scripts at every checklist step, must reinject after navigation
+        # (browser_navigate resets window context), and must keep the
+        # original full-paste path as an explicit fallback for every
+        # detector rather than dropping it once the bridge is preferred.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+
+        self.assertIn("scripts/inject-detectors.js", explore)
+        self.assertIn('browser_evaluate(function: "() => window.__et.dom()")', explore)
+        self.assertIn("window.__et.console(", explore)
+        self.assertIn("window.__et.network(", explore)
+
+        # Reinjection is tied explicitly to browser_navigate, not just to
+        # "flow start" — a single flow may navigate multiple times.
+        navigate_mentions = [
+            line
+            for line in explore.split("\n")
+            if "browser_navigate" in line and "__et" in line
+        ]
+        self.assertTrue(
+            navigate_mentions,
+            "expected at least one line tying window.__et reinjection to browser_navigate",
+        )
+
+        # The bridge must be installed once, before the per-step checklist
+        # loop begins — not re-taught inline at every checklist step. This
+        # locks in the "setup" section appearing textually before the
+        # "At every checklist step" section, so a future edit can't move
+        # the inject/verify instructions back into the per-step hot path.
+        setup_idx = explore.index("Detector bridge setup")
+        per_step_idx = explore.index("### At every checklist step")
+        self.assertLess(
+            setup_idx,
+            per_step_idx,
+            "bridge setup instructions must precede the per-step checklist section, "
+            "not live inside it",
+        )
+
+        # The per-step section must not re-teach injection — it should only
+        # reference the setup section already covered above.
+        per_step_and_after = explore[per_step_idx:]
+        self.assertNotIn(
+            "browser_evaluate` with the full content of `scripts/inject-detectors.js",
+            per_step_and_after,
+            "the per-step section must not repeat the one-time injection instructions",
+        )
+
+        # Explicit, literal instruction not to fall back to pasting while the
+        # bridge is confirmed working — this is the entire point of the
+        # bridge; regressing this line would silently reintroduce the large
+        # per-step payload the bridge exists to avoid.
+        self.assertIn(
+            "Do not paste the detector source while the bridge is up",
+            explore,
+            "expected an explicit instruction against pasting detector source "
+            "while the bridge is confirmed installed",
+        )
+
+        # The paste fallback must remain reachable for all three detectors —
+        # this task only changes the preferred path, not the safety net.
+        for canonical_script in (
+            "check-dom-anomalies.js",
+            "classify-console.js",
+            "dedup-network.js",
+        ):
+            self.assertIn(
+                canonical_script,
+                explore,
+                f"fallback path for {canonical_script} must still be documented",
+            )
+        self.assertGreaterEqual(
+            explore.count("Fallback: full paste"),
+            3,
+            "each of the three detectors needs its own documented fallback",
+        )
+
+        # The generated injector this phase depends on must actually exist
+        # and be recognizable as the generated artifact, not a stray file.
+        injector_path = SCRIPT_DIR / "inject-detectors.js"
+        self.assertTrue(
+            injector_path.exists(), "scripts/inject-detectors.js must exist"
+        )
+        injector = injector_path.read_text(encoding="utf-8")
+        self.assertIn("GENERATED FILE", injector)
+        self.assertIn("window.__et", injector)
+
     def test_head_probes_do_not_wait_for_a_response_body(self):
         # curl -X HEAD keeps waiting for a body that a HEAD response never
         # sends, so it stalls for the whole --max-time on keep-alive servers.
