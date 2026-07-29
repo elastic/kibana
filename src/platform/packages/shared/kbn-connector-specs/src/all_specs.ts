@@ -24,6 +24,7 @@ export * from './specs/notion/notion';
 export * from './specs/shodan/shodan';
 export * from './specs/urlvoid/urlvoid';
 export * from './specs/virustotal/virustotal';
+export * from './specs/datadog/datadog';
 export * from './specs/jina/jina_reader';
 export * from './specs/salesforce/salesforce';
 export * from './specs/servicenow_search/servicenow_search';
