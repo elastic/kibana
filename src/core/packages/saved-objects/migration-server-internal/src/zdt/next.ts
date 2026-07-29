@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Logger } from '@kbn/logging';
 import type {
   AllActionStates,
   State,
@@ -33,7 +34,6 @@ import type {
   UpdateDocumentModelVersionsWaitForInstancesState,
 } from './state';
 import type { MigratorContext } from './context';
-import type { Logger } from '@kbn/logging';
 import * as Actions from './actions';
 import { createDelayFn } from '../common/utils';
 import {

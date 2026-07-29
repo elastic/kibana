@@ -144,7 +144,9 @@ export const bulkOverwriteTransformedDocuments =
           allocationReason = formatAllocationExplanation(explain);
         } catch (explainError) {
           logger?.debug(
-            `[${index}] Failed to fetch allocation explain: ${explainError instanceof Error ? explainError.message : String(explainError)}`
+            `[${index}] Failed to fetch allocation explain: ${
+              explainError instanceof Error ? explainError.message : String(explainError)
+            }`
           );
         }
       }
