@@ -52,3 +52,6 @@ export const getRouterLinkProps = ({ href, onClick }: GetRouterLinkPropsDeps): R
 
   return { href, onClick: guardedClickHandler };
 };
+
+// intentional type error to validate merge queue rejection
+const _mergeQueueTest: number = 'this is not a number';
