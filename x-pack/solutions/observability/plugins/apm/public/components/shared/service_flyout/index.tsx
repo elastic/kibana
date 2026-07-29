@@ -81,7 +81,7 @@ export function ServiceFlyout({
     rangeFrom: flyoutRange.rangeFrom,
     rangeTo: flyoutRange.rangeTo,
   });
-  const [flyoutTransactionType, setTransactionType] = useState(transactionType ?? '');
+  const [flyoutTransactionType, setFlyoutTransactionType] = useState(transactionType ?? '');
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
   const capabilities = useServiceFlyoutCapabilities({
@@ -126,7 +126,7 @@ export function ServiceFlyout({
           refreshToken,
           onRefresh: () => setRefreshToken(Date.now()),
           transactionType: flyoutTransactionType,
-          setTransactionType,
+          setTransactionType: setFlyoutTransactionType,
         },
       }}
     >
@@ -146,7 +146,7 @@ export function ServiceFlyout({
           paddingSize="m"
           resizable
           minWidth={660}
-          session="start"
+          session="start" // EUI flyout session management: "start" = root flyout; alternatives are "inherit" and "never"
           historyKey={historyKey}
           flyoutMenuProps={{ title }}
           aria-labelledby={titleId}
