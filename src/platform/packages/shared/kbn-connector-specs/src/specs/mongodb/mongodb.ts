@@ -87,6 +87,20 @@ const resolveDb = async (inputDatabase: string | undefined, uri: string): Promis
 };
 
 /**
+ * Whether the URI already specifies an authSource query param.
+ * Malformed URIs are treated as "no authSource" — the MongoClient constructor
+ * below gets the same URI and will surface a clearer connection error itself.
+ */
+const hasAuthSource = async (uri: string): Promise<boolean> => {
+  try {
+    const ConnectionString = await loadConnectionString();
+    return new ConnectionString(uri).searchParams.has('authSource');
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Connect to MongoDB, run fn, always close.
  * Creates a fresh client per call (maxPoolSize: 1) as this standalone version
  * does not yet provide a pooled driver transport.
@@ -100,7 +114,6 @@ const withClient = async <T>(
   // Both kbn-optimizer and kbn-rspack-optimizer declare 'mongodb' as a browser
   // external so this import is never resolved during browser bundling.
   const { MongoClient } = await import(/* webpackChunkName: "mongodbDriver" */ 'mongodb');
-  const ConnectionString = await loadConnectionString();
   const { uri } = ctx.config as { uri: string };
   const { username, password } = ctx.secrets as { username: string; password: string };
 
@@ -110,7 +123,7 @@ const withClient = async <T>(
     // The driver gives programmatic options precedence over the connection string, so only
     // apply this default when the URI omits authSource — otherwise ?authSource=<db> in the URI
     // (which the help text and docs tell users to use) would be silently ignored.
-    ...(new ConnectionString(uri).searchParams.has('authSource') ? {} : { authSource: 'admin' }),
+    ...((await hasAuthSource(uri)) ? {} : { authSource: 'admin' }),
     maxPoolSize: 1,
     serverSelectionTimeoutMS: 5_000,
     connectTimeoutMS: 10_000,
