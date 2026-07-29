@@ -313,7 +313,6 @@ describe('GraphQLConnector', () => {
           __schema: {
             queryType: { name: 'Query' },
             mutationType: { name: 'Mutation' },
-            subscriptionType: null,
             types,
           },
         },

@@ -92,7 +92,6 @@ const INTROSPECTION_QUERY = `
     __schema {
       queryType { name }
       mutationType { name }
-      subscriptionType { name }
       types {
         name
         kind
@@ -288,6 +287,7 @@ export const GraphQLConnector: ConnectorSpec = {
             defaultMessage:
               'The URL of your GraphQL API. All queries and mutations are sent as POST requests to this URL.',
           }),
+          validate: { allowedHosts: true },
         }),
     })
   ),
@@ -313,7 +313,6 @@ export const GraphQLConnector: ConnectorSpec = {
           __schema?: {
             queryType?: { name: string };
             mutationType?: { name: string };
-            subscriptionType?: { name: string };
             types?: Array<{
               name: string;
               kind: string;
@@ -341,7 +340,6 @@ export const GraphQLConnector: ConnectorSpec = {
         return {
           queryType: schema.queryType?.name ?? null,
           mutationType: schema.mutationType?.name ?? null,
-          subscriptionType: schema.subscriptionType?.name ?? null,
           types,
         };
       },
@@ -391,6 +389,7 @@ export const GraphQLConnector: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('connectorSpecs.graphQL.test.description', {
       defaultMessage: 'Verifies the GraphQL endpoint by running a minimal introspection query.',
     }),
