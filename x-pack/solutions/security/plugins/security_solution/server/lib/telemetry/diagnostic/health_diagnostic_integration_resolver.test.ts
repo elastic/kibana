@@ -12,6 +12,7 @@ import {
   createMockLogger,
   createMockQueryV1,
   createMockQueryV2,
+  createMockApiQueryV3,
   createMockPackageService,
 } from './__mocks__';
 
@@ -248,7 +249,7 @@ describe('IntegrationResolverImpl', () => {
       packageService.asInternalUser.getPackages.mockRejectedValue(new Error('Fleet is down'));
     });
 
-    it('returns fleet_unavailable SkippedQuery for each v2 query when Fleet call fails', async () => {
+    it('returns fleet_unavailable for each v2 integration query when Fleet call fails', async () => {
       const q1 = createMockQueryV2(QueryType.DSL, { id: 'q1', integrations: ['endpoint'] });
       const q2 = createMockQueryV2(QueryType.DSL, { id: 'q2', integrations: ['fleet_server'] });
       const results = await resolver.resolve([q1, q2]);
@@ -280,6 +281,14 @@ describe('IntegrationResolverImpl', () => {
       packageService.asInternalUser.getPackages.mockClear();
       const v1 = createMockQueryV1(QueryType.DSL);
       await resolver.resolve([v1]);
+
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
+
+    it('does not call Fleet when only v3 API queries without integrations are present', async () => {
+      packageService.asInternalUser.getPackages.mockClear();
+      const v3api = createMockApiQueryV3({ integrations: undefined });
+      await resolver.resolve([v3api]);
 
       expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
     });
@@ -369,18 +378,181 @@ describe('IntegrationResolverImpl', () => {
     });
   });
 
-  describe('mixed queries', () => {
-    it('handles a mix of v1, v2, and unknown queries in one call', async () => {
-      const v1 = createMockQueryV1(QueryType.DSL);
+  describe('v3 API queries', () => {
+    it('returns executable_api without resolution when integrations is absent', async () => {
+      const query = createMockApiQueryV3({ integrations: undefined });
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('executable_api');
+      if (result[0].kind !== 'executable_api') throw new Error('type guard');
+      expect('resolution' in result[0]).toBe(false);
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
+
+    it('returns executable_api without resolution when integrations is an empty array', async () => {
+      const query = createMockApiQueryV3({ integrations: [] });
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('executable_api');
+      expect('resolution' in result[0]).toBe(false);
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
+
+    it('returns executable_api with resolution when integration is matched by exact name', async () => {
+      const query = createMockApiQueryV3({ integrations: ['endpoint'] });
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('executable_api');
+      if (result[0].kind !== 'executable_api') throw new Error('type guard');
+      expect('resolution' in result[0]).toBe(true);
+      const resolved = result[0] as { resolution: IntegrationResolution };
+      expect(resolved.resolution.name).toBe('endpoint');
+      expect(resolved.resolution.version).toBe('8.14.2');
+      expect(resolved.resolution.indices).toEqual([]);
+    });
+
+    it('returns executable_api with resolution when integration is matched by regex', async () => {
+      const query = createMockApiQueryV3({ integrations: ['end.*'] });
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('executable_api');
+      if (result[0].kind !== 'executable_api') throw new Error('type guard');
+      const resolved = result[0] as { resolution: IntegrationResolution };
+      expect(resolved.resolution.name).toBe('endpoint');
+    });
+
+    it('returns executable_api with the first matched integration when multiple patterns provided', async () => {
+      const query = createMockApiQueryV3({ integrations: ['nonexistent', 'fleet_server'] });
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('executable_api');
+      if (result[0].kind !== 'executable_api') throw new Error('type guard');
+      const resolved = result[0] as { resolution: IntegrationResolution };
+      expect(resolved.resolution.name).toBe('fleet_server');
+    });
+
+    it('returns skipped(integration_not_installed) when pattern matches nothing installed', async () => {
+      const query = createMockApiQueryV3({ integrations: ['nonexistent'] });
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('skipped');
+      if (result[0].kind !== 'skipped') throw new Error('type guard');
+      expect(result[0].reason).toBe('integration_not_installed');
+    });
+
+    it('returns skipped(integration_not_installed) when package exists but is not installed', async () => {
+      const query = createMockApiQueryV3({ integrations: ['system'] });
+      const result = await resolver.resolve([query]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('skipped');
+      if (result[0].kind !== 'skipped') throw new Error('type guard');
+      expect(result[0].reason).toBe('integration_not_installed');
+    });
+
+    it('uses getPackages (not getInstallation) to resolve integrations', async () => {
+      const query = createMockApiQueryV3({ integrations: ['endpoint'] });
+      await resolver.resolve([query]);
+      expect(packageService.asInternalUser.getPackages).toHaveBeenCalledTimes(1);
+      expect(packageService.asInternalUser.getInstallation).not.toHaveBeenCalled();
+    });
+
+    it('calls Fleet only once for multiple v3 API queries with integrations', async () => {
+      const q1 = createMockApiQueryV3({ id: 'q1', integrations: ['endpoint'] });
+      const q2 = createMockApiQueryV3({ id: 'q2', integrations: ['fleet_server'] });
+      await resolver.resolve([q1, q2]);
+      expect(packageService.asInternalUser.getPackages).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls Fleet only once when v2 and v3 API queries with integrations are mixed', async () => {
       const v2 = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
-      const unknown = { version: 99, id: 'x', name: 'x', _raw: {} };
+      const v3api = createMockApiQueryV3({ integrations: ['fleet_server'] });
+      await resolver.resolve([v2, v3api]);
+      expect(packageService.asInternalUser.getPackages).toHaveBeenCalledTimes(1);
+    });
 
-      const results = await resolver.resolve([v1, v2, unknown]);
+    it('does not call Fleet when only v3 API queries without integrations are present', async () => {
+      const q1 = createMockApiQueryV3({ id: 'q1', integrations: undefined });
+      const q2 = createMockApiQueryV3({ id: 'q2', integrations: [] });
+      await resolver.resolve([q1, q2]);
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
 
-      expect(results).toHaveLength(3); // 1 v1 + 1 v2 (1 integration) + 1 unknown
+    describe('Fleet unavailability', () => {
+      beforeEach(() => {
+        packageService.asInternalUser.getPackages.mockRejectedValue(new Error('Fleet is down'));
+      });
+
+      it('returns skipped(fleet_unavailable) when Fleet call fails', async () => {
+        const query = createMockApiQueryV3({ integrations: ['endpoint'] });
+        const result = await resolver.resolve([query]);
+        expect(result).toHaveLength(1);
+        expect(result[0].kind).toBe('skipped');
+        if (result[0].kind !== 'skipped') throw new Error('type guard');
+        expect(result[0].reason).toBe('fleet_unavailable');
+      });
+
+      it('still returns executable_api when v3 API query has no integrations and Fleet fails', async () => {
+        const query = createMockApiQueryV3({ integrations: undefined });
+        const result = await resolver.resolve([query]);
+        expect(result).toHaveLength(1);
+        expect(result[0].kind).toBe('executable_api');
+      });
+    });
+  });
+
+  describe('v3 index queries (DSL/EQL/ESQL at version 3)', () => {
+    it('v3 DSL with integrations resolves identically to v2', async () => {
+      const query = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
+      const result = await resolver.resolve([{ ...query, version: 2 }]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('executable');
+    });
+
+    it('v3 DSL with direct index resolves without Fleet', async () => {
+      const query = createMockQueryV2(QueryType.DSL, {
+        integrations: undefined,
+        index: 'logs-test-*',
+      });
+      const result = await resolver.resolve([{ ...query, version: 2 }]);
+      expect(result).toHaveLength(1);
+      expect(result[0].kind).toBe('executable');
+      expect(packageService.asInternalUser.getPackages).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('mixed queries', () => {
+    it('handles v1, v2 (integrations), v2 (index), v3 API (no integrations) together', async () => {
+      const v1 = createMockQueryV1(QueryType.DSL);
+      const v2int = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
+      const v2idx = createMockQueryV2(QueryType.DSL, {
+        integrations: undefined,
+        index: 'logs-test-*',
+      });
+      const v3api = createMockApiQueryV3({ integrations: undefined });
+
+      const results = await resolver.resolve([v1, v2int, v2idx, v3api]);
+
+      expect(results).toHaveLength(4);
       expect(results[0].kind).toBe('executable');
       expect(results[1].kind).toBe('executable');
-      expect(results[2].kind).toBe('skipped');
+      expect(results[2].kind).toBe('executable');
+      expect(results[3].kind).toBe('executable_api');
+      expect(packageService.asInternalUser.getPackages).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles v1, v2 (integrations), v3 API (integrations), unknown together', async () => {
+      const v1 = createMockQueryV1(QueryType.DSL);
+      const v2 = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
+      const v3api = createMockApiQueryV3({ integrations: ['fleet_server'] });
+      const unknown = { version: 99, id: 'x', name: 'x', _raw: {} };
+
+      const results = await resolver.resolve([v1, v2, v3api, unknown]);
+
+      expect(results).toHaveLength(4);
+      expect(results[0].kind).toBe('executable');
+      expect(results[1].kind).toBe('executable');
+      expect(results[2].kind).toBe('executable_api');
+      expect(results[3].kind).toBe('skipped');
       expect(packageService.asInternalUser.getPackages).toHaveBeenCalledTimes(1);
     });
 
@@ -390,6 +562,28 @@ describe('IntegrationResolverImpl', () => {
 
       expect(results).toHaveLength(2);
       expect(results.every((r) => r.kind === 'executable')).toBe(true);
+    });
+
+    it('skips v3 API (integrations) and v2 (integrations) when Fleet is down; v1 and v3 API (no integrations) still run', async () => {
+      packageService.asInternalUser.getPackages.mockRejectedValue(new Error('Fleet is down'));
+
+      const v1 = createMockQueryV1(QueryType.DSL);
+      const v2 = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
+      const v3apiNoInt = createMockApiQueryV3({ id: 'v3-no-int', integrations: undefined });
+      const v3apiWithInt = createMockApiQueryV3({
+        id: 'v3-with-int',
+        integrations: ['fleet_server'],
+      });
+
+      const results = await resolver.resolve([v1, v2, v3apiNoInt, v3apiWithInt]);
+
+      expect(results).toHaveLength(4);
+      expect(results[0].kind).toBe('executable');
+      expect(results[1].kind).toBe('skipped');
+      if (results[1].kind === 'skipped') expect(results[1].reason).toBe('fleet_unavailable');
+      expect(results[2].kind).toBe('executable_api');
+      expect(results[3].kind).toBe('skipped');
+      if (results[3].kind === 'skipped') expect(results[3].reason).toBe('fleet_unavailable');
     });
   });
 });

@@ -12,6 +12,7 @@ import {
   type HealthDiagnosticQuery,
   type HealthDiagnosticQueryV1,
   type HealthDiagnosticQueryV2,
+  type HealthDiagnosticQueryV3,
   type ParseFailureQuery,
 } from './health_diagnostic_service.types';
 
@@ -27,6 +28,8 @@ const parseOne = (doc: YAML.Document): HealthDiagnosticQuery => {
       return parseV1(raw);
     } else if (version === 2) {
       return parseV2(raw);
+    } else if (version === 3) {
+      return parseV3(raw);
     } else {
       return parseUnknown(raw);
     }
@@ -102,6 +105,90 @@ const parseV2 = (raw: Record<string, unknown> | null): HealthDiagnosticQueryV2 =
   } as HealthDiagnosticQueryV2;
 };
 
+const API_QUERY_REQUIRED_FIELDS = [
+  'id',
+  'name',
+  'version',
+  'type',
+  'api',
+  'scheduleCron',
+  'enabled',
+  'filterlist',
+] as const;
+
+const API_QUERY_OPTIONAL_FIELDS = [
+  'responsePath',
+  'pathParams',
+  'queryParams',
+  'responsePathKey',
+  'integrations',
+  'encryptionKeyId',
+] as const;
+
+const API_QUERY_FORBIDDEN_FIELDS = ['query', 'index', 'size', 'datastreamTypes', 'tiers'] as const;
+
+const INDEX_QUERY_FORBIDDEN_FIELDS_V3 = [
+  'api',
+  'pathParams',
+  'queryParams',
+  'responsePath',
+] as const;
+
+const parseV3 = (raw: Record<string, unknown> | null): HealthDiagnosticQuery => {
+  if (!raw || typeof raw !== 'object') {
+    return parseUnknown(raw);
+  }
+  const type = raw.type;
+
+  if (type === 'API') {
+    for (const field of API_QUERY_FORBIDDEN_FIELDS) {
+      if (field in raw) {
+        return parseUnknown(raw);
+      }
+    }
+    const knownFields = new Set<string>([
+      ...API_QUERY_REQUIRED_FIELDS,
+      ...API_QUERY_OPTIONAL_FIELDS,
+    ]);
+    for (const key of Object.keys(raw)) {
+      if (!knownFields.has(key)) {
+        return parseUnknown(raw);
+      }
+    }
+    try {
+      return {
+        id: assertRequiredString(raw, 'id'),
+        name: assertRequiredString(raw, 'name'),
+        version: 3 as const,
+        type: 'API' as const,
+        api: assertRequiredString(raw, 'api'),
+        responsePath: raw.responsePath as string | undefined,
+        scheduleCron: assertRequiredString(raw, 'scheduleCron'),
+        enabled: assertRequiredBoolean(raw, 'enabled'),
+        filterlist: assertFilterlist(raw),
+        pathParams: raw.pathParams as Record<string, string> | undefined,
+        queryParams: raw.queryParams as Record<string, string | number> | undefined,
+        responsePathKey: raw.responsePathKey as string | undefined,
+        integrations: raw.integrations as string[] | undefined,
+        encryptionKeyId: raw.encryptionKeyId as string | undefined,
+      } satisfies HealthDiagnosticQueryV3;
+    } catch (err) {
+      return parseUnknown(raw);
+    }
+  }
+
+  if (type === 'DSL' || type === 'EQL' || type === 'ESQL') {
+    for (const field of INDEX_QUERY_FORBIDDEN_FIELDS_V3) {
+      if (field in raw) {
+        return parseUnknown(raw);
+      }
+    }
+    return parseV2({ ...raw, version: 2 });
+  }
+
+  return parseUnknown(raw);
+};
+
 const parseUnknown = (raw: unknown): ParseFailureQuery => {
   const obj = raw as Record<string, unknown> | null;
   return {
@@ -111,10 +198,11 @@ const parseUnknown = (raw: unknown): ParseFailureQuery => {
   };
 };
 
-const assertRequiredString = (raw: Record<string, unknown> | null, field: string): void => {
+const assertRequiredString = (raw: Record<string, unknown> | null, field: string): string => {
   if (!raw || typeof raw[field] !== 'string' || raw[field] === '') {
     throw new Error(`Missing or invalid required field: ${field}`);
   }
+  return raw[field] as string;
 };
 
 const assertRequiredObject = (raw: Record<string, unknown> | null, field: string): void => {
@@ -143,8 +231,18 @@ const assertFilterlistActions = (raw: Record<string, unknown> | null): void => {
   }
 };
 
-const assertRequiredBoolean = (raw: Record<string, unknown> | null, field: string): void => {
+const assertRequiredBoolean = (raw: Record<string, unknown> | null, field: string): boolean => {
   if (!raw || typeof raw[field] !== 'boolean') {
     throw new Error(`Missing or invalid required field: ${field}`);
   }
+  return raw[field] as boolean;
+};
+
+const assertFilterlist = (raw: Record<string, unknown> | null): Record<string, Action> => {
+  assertRequiredObject(raw, 'filterlist');
+  assertFilterlistActions(raw);
+  if (!raw) {
+    throw new Error('Missing or invalid required field: filterlist');
+  }
+  return raw.filterlist as Record<string, Action>;
 };
