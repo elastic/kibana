@@ -345,6 +345,72 @@ describe('MetricsExperienceStateProvider', () => {
       expect(onMetricsSortChange).toHaveBeenCalled();
     });
 
+    describe('uncontrolled mode (no onMetricsSortChange)', () => {
+      it('manages sort state internally so the control still works', () => {
+        const { result } = renderHook(() => useMetricsExperienceState(), {
+          wrapper: createSortWrapper({}),
+        });
+
+        expect(result.current.metricsSort).toEqual(DEFAULT_METRICS_SORT);
+
+        act(() => {
+          result.current.onMetricsSortChange([
+            METRICS_SORT_BY.recency,
+            METRICS_SORT_DIRECTION.desc,
+          ]);
+        });
+
+        expect(result.current.metricsSort).toEqual([
+          METRICS_SORT_BY.recency,
+          METRICS_SORT_DIRECTION.desc,
+        ]);
+      });
+
+      it('uses the metricsSort prop as the initial value only', () => {
+        const { result } = renderHook(() => useMetricsExperienceState(), {
+          wrapper: createSortWrapper({
+            metricsSort: [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc],
+          }),
+        });
+
+        expect(result.current.metricsSort).toEqual([
+          METRICS_SORT_BY.recency,
+          METRICS_SORT_DIRECTION.desc,
+        ]);
+
+        act(() => {
+          result.current.onMetricsSortChange([
+            METRICS_SORT_BY.alphabetically,
+            METRICS_SORT_DIRECTION.asc,
+          ]);
+        });
+
+        expect(result.current.metricsSort).toEqual([
+          METRICS_SORT_BY.alphabetically,
+          METRICS_SORT_DIRECTION.asc,
+        ]);
+      });
+
+      it('resets currentPage to 0 when the internal sort changes', () => {
+        const { result } = renderHook(() => useMetricsExperienceState(), {
+          wrapper: createSortWrapper({}),
+        });
+
+        act(() => {
+          result.current.onPageChange(2);
+        });
+        expect(result.current.currentPage).toBe(2);
+
+        act(() => {
+          result.current.onMetricsSortChange([
+            METRICS_SORT_BY.recency,
+            METRICS_SORT_DIRECTION.desc,
+          ]);
+        });
+        expect(result.current.currentPage).toBe(0);
+      });
+    });
+
     describe('when the sorting feature flag is disabled', () => {
       it('ignores a host-provided non-default sort and falls back to the default', () => {
         const metricsSort: MetricsSort = [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc];

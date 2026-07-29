@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { createContext } from 'react';
 import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import type { Dimension, MetricsSort, UnifiedMetricsGridProps } from '../../../../../types';
@@ -51,7 +51,7 @@ export function MetricsExperienceStateProvider({
   profileId,
   gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
   onGridSettingsChange,
-  metricsSort = DEFAULT_METRICS_SORT,
+  metricsSort,
   onMetricsSortChange,
   getRecentlyExploredMetrics,
   onMetricExplored,
@@ -78,10 +78,20 @@ export function MetricsExperienceStateProvider({
     FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_SORTING_ENABLED]
   );
 
+  // Sort is controlled when the host provides `onMetricsSortChange` (e.g.
+  // Discover's persistent profile state). Without it, fall back to internal
+  // state so standalone hosts still get a working sort control -- `metricsSort`
+  // then acts as the initial value, like a DOM input's `defaultValue`.
+  const isSortControlled = onMetricsSortChange !== undefined;
+  const [uncontrolledSort, setUncontrolledSort] = useState<MetricsSort>(
+    metricsSort ?? DEFAULT_METRICS_SORT
+  );
+  const hostSort = isSortControlled ? metricsSort ?? DEFAULT_METRICS_SORT : uncontrolledSort;
+
   // When sorting is disabled, ignore any host-provided sort (e.g. state
   // persisted or shared while the flag was on) and swallow change requests so
   // no sorting behavior runs and no new sort state is written while it is off.
-  const effectiveMetricsSort = isSortingEnabled ? metricsSort : DEFAULT_METRICS_SORT;
+  const effectiveMetricsSort = isSortingEnabled ? hostSort : DEFAULT_METRICS_SORT;
 
   const recentlyExploredMetrics = useRecentlyExploredMetrics({
     getRecentlyExploredMetrics,
@@ -123,17 +133,21 @@ export function MetricsExperienceStateProvider({
         return;
       }
 
-      // Preserve the page-reset-on-sort-change behavior from #277184: sort now
-      // lives in the host's profile state, so we compare against the current
-      // prop-sourced sort and forward the change to the host.
+      // Preserve the page-reset-on-sort-change behavior from #277184: compare
+      // against the current sort before forwarding the change.
       const [prevSortBy, prevDirection] = effectiveMetricsSort;
       const [nextSortBy, nextDirection] = nextSort;
       if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {
         setCurrentPage(0);
       }
-      onMetricsSortChange?.(nextSort);
+
+      if (isSortControlled) {
+        onMetricsSortChange(nextSort);
+      } else {
+        setUncontrolledSort(nextSort);
+      }
     },
-    [effectiveMetricsSort, isSortingEnabled, onMetricsSortChange, setCurrentPage]
+    [effectiveMetricsSort, isSortControlled, isSortingEnabled, onMetricsSortChange, setCurrentPage]
   );
 
   const onToggleFullscreen = useCallback(() => {
