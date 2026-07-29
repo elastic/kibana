@@ -76,7 +76,9 @@ export const listPolicyExecutionHistoryQuerySchema = z
     episodeIds: z
       .preprocess(
         (v) => (v === undefined || Array.isArray(v) ? v : [v]),
-        z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(EXECUTION_HISTORY_MAX_RULE_ID_FILTER)
+        z
+          .array(z.string().trim().min(1).max(ID_MAX_LENGTH))
+          .max(EXECUTION_HISTORY_MAX_RULE_ID_FILTER)
       )
       .optional()
       .describe(
