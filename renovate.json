@@ -158,7 +158,6 @@
     {
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
-        "callsites",
         "chance",
         "cheerio",
         "@types/chance",
