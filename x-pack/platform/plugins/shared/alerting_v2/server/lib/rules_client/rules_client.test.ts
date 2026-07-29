@@ -1716,7 +1716,7 @@ describe('RulesClient', () => {
       expect(scheduleOrder).toBeLessThan(updateOrder);
     });
 
-    it('preserves a disabled rule’s enabled state and does not re-enable it', async () => {
+    it('rejects a disabled rule with RULE_DISABLED without scheduling a task', async () => {
       const client = createClient();
 
       const disabledAttrs = createRuleSoAttributes({
@@ -1727,18 +1727,55 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: disabledAttrs, version: 'v1' },
       ]);
-      rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-1', success: true }]);
 
       const res = await client.bulkUpdateApiKey({ ids: ['rule-1'] });
 
+      // A disabled rule has no executor task; scheduling one would leave a
+      // disabled task document behind that corrupts a later re-enable.
+      expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        affected_count: 0,
+        errors: [
+          {
+            id: 'rule-1',
+            error: { code: 'RULE_DISABLED', message: expect.stringContaining('disabled') },
+          },
+        ],
+      });
+    });
+
+    it('rotates enabled rules and reports disabled ones as RULE_DISABLED in a mixed batch', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        { id: 'rule-enabled', attributes: baseSoAttrs, version: 'v1' },
+        {
+          id: 'rule-disabled',
+          attributes: createRuleSoAttributes({ enabled: false }),
+          version: 'v1',
+        },
+      ]);
+      rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([
+        { id: 'rule-enabled', success: true },
+      ]);
+
+      const res = await client.bulkUpdateApiKey({ ids: ['rule-enabled', 'rule-disabled'] });
+
+      // Only the enabled rule is scheduled/rotated.
       expect(taskManager.bulkSchedule).toHaveBeenCalledWith(
-        [expect.objectContaining({ enabled: false })],
+        [expect.objectContaining({ params: expect.objectContaining({ ruleId: 'rule-enabled' }) })],
         expect.objectContaining({ request, cloneApiKey: true })
       );
-      expect(rulesSavedObjectService.bulkUpdate).toHaveBeenCalledWith([
-        expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) }),
-      ]);
-      expect(res).toEqual({ affected_count: 1, errors: [] });
+      expect(res).toEqual({
+        affected_count: 1,
+        errors: [
+          {
+            id: 'rule-disabled',
+            error: { code: 'RULE_DISABLED', message: expect.stringContaining('disabled') },
+          },
+        ],
+      });
     });
 
     it('fails the request and leaves the saved objects untouched when rotation fails', async () => {

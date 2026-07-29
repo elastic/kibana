@@ -875,10 +875,16 @@ export class RulesClient {
    * Task Manager-managed API key captured from whoever last created/updated the
    * rule; that key never expires, so it can outlive the user's privileges. Re-
    * scheduling the executor task with the current request re-provisions the key
-   * (see `bulkSchedule` → `grantApiKeysFromRequest`). The task's schedule
-   * interval and enabled state are carried over unchanged, but `bulkSchedule`
-   * overwrites the task document, so this also resets the task's next run time
-   * (a single rule re-runs immediately) and clears its stored state.
+   * (see `bulkSchedule` → `grantApiKeysFromRequest`); `bulkSchedule` overwrites
+   * the task document, so this also resets the task's next run time (a single
+   * rule re-runs immediately) and clears its stored state.
+   *
+   * Only *enabled* rules are rotated. A disabled rule has no executor task
+   * (disabling removes it), so scheduling one here would leave behind a disabled
+   * task document — which later corrupts re-enable (Task Manager's update path
+   * never re-applies `enabled: true`, leaving the rule permanently non-running).
+   * Disabled rules are therefore rejected with a `RULE_DISABLED` per-rule error
+   * and never scheduled.
    *
    * Key rotation runs *before* the saved-object audit-metadata update: the
    * rotation is the operation's real side effect, so `updatedBy`/`updatedAt`
@@ -909,6 +915,17 @@ export class RulesClient {
         continue;
       }
 
+      if (!doc.attributes.enabled) {
+        errors.push({
+          id: doc.id,
+          error: {
+            code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
+            message: `Rule with id "${doc.id}" is disabled and has no API key to update`,
+          },
+        });
+        continue;
+      }
+
       candidates.push({ id: doc.id, attrs: doc.attributes, version: doc.version });
     }
 
@@ -917,10 +934,10 @@ export class RulesClient {
     }
 
     // 1) Rotate the keys first by re-scheduling the executor tasks with the
-    // current request. Carry over each rule's schedule interval and enabled
-    // state so rotation neither changes the cadence nor enables a disabled rule
-    // (or disables an enabled one). The re-schedule still resets the task's next
-    // run time and stored state, as `bulkSchedule` overwrites the task document.
+    // current request. Only enabled rules reach this point, so the task is always
+    // scheduled enabled; the schedule interval is carried over so the cadence is
+    // unchanged. `bulkSchedule` overwrites the task document, so this also resets
+    // the task's next run time and stored state.
     const tasksToSchedule = candidates.map((candidate) => ({
       id: getRuleExecutorTaskId({ ruleId: candidate.id, spaceId }),
       taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
@@ -928,7 +945,7 @@ export class RulesClient {
       params: { ruleId: candidate.id, spaceId } satisfies RuleExecutorTaskParams,
       state: {} as Record<string, unknown>,
       scope: ['alerting'],
-      enabled: candidate.attrs.enabled,
+      enabled: true,
     }));
 
     // Task Manager provisions the API key once per task type, and every executor
