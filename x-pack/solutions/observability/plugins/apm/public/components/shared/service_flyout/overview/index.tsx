@@ -213,7 +213,7 @@ export function ServiceFlyoutOverview() {
             </EuiFlexItem>
           ) : null)}
         {capabilities.overview?.transactions && (
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="serviceFlyoutSection-transactions">
             <ServiceFlyoutTransactionsSection
               http={core.http}
               notifications={core.notifications}

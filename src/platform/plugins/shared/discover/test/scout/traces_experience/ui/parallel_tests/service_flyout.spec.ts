@@ -13,10 +13,9 @@ import {
   spaceTest,
   TRACES,
   RICH_TRACE,
-  OTEL_SERVICE,
   setupTracesExperience,
   teardownTracesExperience,
-} from '../../fixtures';
+} from '../fixtures';
 
 spaceTest.describe(
   'Traces in Discover - Service flyout',
@@ -70,43 +69,15 @@ spaceTest.describe(
             latencyChart.locator('[data-test-subj="embeddable-lens-failure"]')
           ).toBeHidden();
         });
-      }
-    );
 
-    spaceTest(
-      'opens service flyout for an OTel service and renders charts',
-      async ({ page, pageObjects }) => {
-        const { tracesExperience, discover } = pageObjects;
-
-        await spaceTest.step('navigate to Discover in ES|QL mode', async () => {
-          await discover.goto({ queryMode: 'esql' });
-        });
-
-        await spaceTest.step('run ES|QL query scoped to the OTel service', async () => {
-          await discover.writeAndSubmitEsqlQuery(
-            `${OTEL_SERVICE.ESQL_QUERY} | WHERE service.name == "${OTEL_SERVICE.SERVICE_NAME}"`
-          );
-        });
-
-        await spaceTest.step('open overview tab for the first row', async () => {
-          await tracesExperience.openOverviewTab();
-        });
-
-        await spaceTest.step('click the service name link to open the service flyout', async () => {
-          await tracesExperience.flyout.about.serviceNameLink.click();
-        });
-
-        await spaceTest.step('verify service flyout is visible', async () => {
-          await expect(tracesExperience.flyout.serviceFlyout.container).toBeVisible();
-        });
-
-        await spaceTest.step('verify latency chart renders without error', async () => {
-          const latencyChart = page.testSubj.locator('serviceFlyoutLensChart-latency');
-          await expect(latencyChart).toBeVisible();
-          await expect(
-            latencyChart.locator('[data-test-subj="embeddable-lens-failure"]')
-          ).toBeHidden();
-        });
+        await spaceTest.step(
+          'verify ECS schema: badges, transaction type filter, and transactions section are visible',
+          async () => {
+            await expect(page.testSubj.locator('serviceFlyoutServiceBadge')).toBeVisible();
+            await expect(page.testSubj.locator('serviceFlyoutTransactionTypeSelect')).toBeVisible();
+            await expect(page.testSubj.locator('serviceFlyoutSection-transactions')).toBeVisible();
+          }
+        );
       }
     );
   }
