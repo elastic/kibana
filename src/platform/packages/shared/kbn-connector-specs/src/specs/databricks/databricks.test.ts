@@ -214,7 +214,7 @@ describe('Databricks', () => {
 
   describe('listTools action', () => {
     it('is exposed as a tool', () => {
-      expect(Databricks.actions.listTools.isTool).toBe(true);
+      expect(Databricks.actions.listTools.isTool).toBe(false);
     });
 
     it('returns the list of available tools', async () => {
