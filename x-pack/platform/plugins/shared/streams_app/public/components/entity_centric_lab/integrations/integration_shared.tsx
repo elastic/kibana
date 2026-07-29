@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -31,6 +32,18 @@ import type { FakeIntegration } from './fake_integrations';
 import { countEnabledRecommended, useIntegrationAssetsVersion } from './integration_assets_store';
 
 /**
+ * Hollow "LAB" badge (with a flask glyph) marking every super-short-term
+ * integrations hub page as an experimental lab surface.
+ */
+export const LabBadge = () => (
+  <EuiBadge color="hollow" iconType="flask" data-test-subj="entityCentricLabIntegrationLabBadge">
+    {i18n.translate('xpack.streams.entityCentricLab.integrations.labBadge', {
+      defaultMessage: 'LAB',
+    })}
+  </EuiBadge>
+);
+
+/**
  * Every recommended asset id for an integration (alert rules + SLO templates) —
  * the pool that can be enabled to raise the "Enabled assets" progress.
  */
@@ -41,7 +54,7 @@ export const getRecommendedAssetIds = (integration: FakeIntegration): string[] =
 
 /**
  * Assets that ship enabled: everything the detail page lists as already-on
- * (dashboards, data streams, ML jobs/skills) plus the enabled alert rules and
+ * (dashboards, data streams, anomaly detection jobs/skills) plus the enabled alert rules and
  * SLO templates. Recommended (not-yet-enabled) rules/templates are excluded.
  */
 const getBaselineEnabledAssetCount = (integration: FakeIntegration): number =>
@@ -130,8 +143,9 @@ const StatTile = ({
 
 /**
  * The headline stat row shared by the Overview cards and the detail page:
- * Dashboards / Data streams / Alerts in alert / Breaching SLOs / LLM jobs &
- * skills / Recommended resources / Enabled assets (with a progress bar).
+ * Dashboards / Data streams / Alerts in alert / Breaching SLOs / Anomaly
+ * detection jobs & AI skills / Recommended resources / Enabled assets (with a
+ * progress bar).
  */
 export const IntegrationStatRow = ({ integration }: { integration: FakeIntegration }) => {
   const enabledAssets = useEnabledAssetCount(integration);
@@ -167,7 +181,7 @@ export const IntegrationStatRow = ({ integration }: { integration: FakeIntegrati
       />
       <StatTile
         label={i18n.translate('xpack.streams.entityCentricLab.integrations.stat.llmJobsSkills', {
-          defaultMessage: 'LLM jobs & skills',
+          defaultMessage: 'Anomaly detection jobs & AI skills',
         })}
         value={stats.llmJobsSkills}
       />

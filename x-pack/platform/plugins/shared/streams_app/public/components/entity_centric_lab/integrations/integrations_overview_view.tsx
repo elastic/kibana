@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiBetaBadge,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,12 +26,9 @@ import { getFakeIntegration, type FakeIntegration } from './fake_integrations';
 import {
   BrowseMoreIntegrationsBanner,
   IntegrationStatRow,
+  LabBadge,
   StarToggleButton,
 } from './integration_shared';
-
-const LAB_BADGE_LABEL = i18n.translate('xpack.streams.entityCentricLab.integrations.labBadge', {
-  defaultMessage: 'LAB',
-});
 
 const IntegrationSummaryCard = ({
   integration,
@@ -108,7 +104,7 @@ export const IntegrationsOverviewView = () => {
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBetaBadge label={LAB_BADGE_LABEL} color="accent" size="s" />
+              <LabBadge />
             </EuiFlexItem>
           </EuiFlexGroup>
         }

@@ -9,7 +9,7 @@
  * Seeded content for the Super-short-term lab's integrations hub.
  *
  * Each installed integration exposes everything it ships (dashboards, data
- * streams, alert rules, SLO templates, ML jobs / AI skills, curated resources)
+ * streams, alert rules, SLO templates, anomaly detection jobs / AI skills, curated resources)
  * plus headline stats and an "enabled assets X/Y" progress. Alert rules and
  * SLO templates are split into `enabled` (already on) and `recommended` (ship
  * with the integration but not yet enabled) — the "what's there vs what still
@@ -67,7 +67,7 @@ export interface SloTemplateAsset {
 
 export interface MlAsset {
   readonly id: string;
-  readonly type: 'ML job' | 'AI skill';
+  readonly type: 'Anomaly detection job' | 'AI skill';
   readonly name: string;
   readonly installation: string;
 }
@@ -251,13 +251,13 @@ const KUBERNETES: FakeIntegration = {
   mlAssets: [
     {
       id: 'k8s-ml-memory-anomaly',
-      type: 'ML job',
+      type: 'Anomaly detection job',
       name: 'Kubernetes memory usage anomaly detection',
       installation: 'Detects unusual per-namespace memory growth.',
     },
     {
       id: 'k8s-ml-pod-restart',
-      type: 'ML job',
+      type: 'Anomaly detection job',
       name: 'Pod restart rate anomaly detection',
       installation: 'Flags workloads with abnormal restart rates.',
     },
@@ -420,7 +420,7 @@ const AWS_EC2: FakeIntegration = {
   mlAssets: [
     {
       id: 'ec2-ml-cpu',
-      type: 'ML job',
+      type: 'Anomaly detection job',
       name: 'EC2 CPU anomaly detection',
       installation: 'Detects unusual CPU patterns across the fleet.',
     },
@@ -556,7 +556,7 @@ const AWS_LAMBDA: FakeIntegration = {
   mlAssets: [
     {
       id: 'lambda-ml-errors',
-      type: 'ML job',
+      type: 'Anomaly detection job',
       name: 'Lambda error rate anomaly detection',
       installation: 'Detects unusual error spikes per function.',
     },
@@ -691,7 +691,7 @@ const AWS_RDS: FakeIntegration = {
   mlAssets: [
     {
       id: 'rds-ml-latency',
-      type: 'ML job',
+      type: 'Anomaly detection job',
       name: 'RDS query latency anomaly detection',
       installation: 'Detects unusual read/write latency per instance.',
     },
@@ -809,7 +809,7 @@ const AZURE: FakeIntegration = {
   mlAssets: [
     {
       id: 'azure-ml-cpu',
-      type: 'ML job',
+      type: 'Anomaly detection job',
       name: 'Azure VM CPU anomaly detection',
       installation: 'Detects unusual CPU across subscriptions.',
     },
@@ -902,7 +902,7 @@ const SOMETHING_ELSE: FakeIntegration = {
   mlAssets: [
     {
       id: 'se-ml-anomaly',
-      type: 'ML job',
+      type: 'Anomaly detection job',
       name: 'Generic metric anomaly detection',
       installation: 'Detects unusual patterns in the collected metrics.',
     },

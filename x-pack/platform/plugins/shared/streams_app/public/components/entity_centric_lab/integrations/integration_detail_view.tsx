@@ -55,6 +55,7 @@ import {
 import {
   BrowseMoreIntegrationsBanner,
   IntegrationStatRow,
+  LabBadge,
   StarToggleButton,
 } from './integration_shared';
 
@@ -107,12 +108,14 @@ const SectionPanel = ({
   title,
   count,
   action,
+  headerControls,
   children,
   dataTestSubj,
 }: {
   title: string;
   count?: number;
   action?: { label: string; onClick: () => void };
+  headerControls?: React.ReactNode;
   children: React.ReactNode;
   dataTestSubj?: string;
 }) => {
@@ -137,15 +140,22 @@ const SectionPanel = ({
           </EuiFlexGroup>
         }
         extraAction={
-          action ? (
-            <EuiLink onClick={action.onClick} external={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-                <EuiFlexItem grow={false}>{action.label}</EuiFlexItem>
+          headerControls || action ? (
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              {headerControls ? <EuiFlexItem grow={false}>{headerControls}</EuiFlexItem> : null}
+              {action ? (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="popout" size="s" />
+                  <EuiLink onClick={action.onClick} external={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+                      <EuiFlexItem grow={false}>{action.label}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="popout" size="s" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiLink>
                 </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiLink>
+              ) : null}
+            </EuiFlexGroup>
           ) : undefined
         }
       >
@@ -489,7 +499,7 @@ const AlertRulesSection = ({
     {
       field: 'name',
       name: i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.name', {
-        defaultMessage: 'Alert rule',
+        defaultMessage: 'Alert rule template',
       }),
       render: (name: string) => <EuiLink onClick={onOpenAlerts}>{name}</EuiLink>,
     },
@@ -505,7 +515,7 @@ const AlertRulesSection = ({
     ...sharedColumns,
     {
       name: i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.activeAlerts', {
-        defaultMessage: 'Active alerts using this rule',
+        defaultMessage: 'Active alerts using this rule template',
       }),
       width: '260px',
       render: (rule: AlertRuleAsset) => {
@@ -539,7 +549,7 @@ const AlertRulesSection = ({
   return (
     <SectionPanel
       title={i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.title', {
-        defaultMessage: 'Alert rules',
+        defaultMessage: 'Alert rule templates',
       })}
       action={{
         label: i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.open', {
@@ -547,20 +557,17 @@ const AlertRulesSection = ({
         }),
         onClick: onOpenAlerts,
       }}
+      headerControls={
+        <EnabledRecommendedToggle
+          tab={tab}
+          setTab={setTab}
+          enabledCount={enabledRules.length}
+          recommendedCount={recommendedRules.length}
+          idPrefix={`${integration.id}-alerts`}
+        />
+      }
       dataTestSubj="entityCentricLabIntegrationAlerts"
     >
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EnabledRecommendedToggle
-            tab={tab}
-            setTab={setTab}
-            enabledCount={enabledRules.length}
-            recommendedCount={recommendedRules.length}
-            idPrefix={`${integration.id}-alerts`}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <EuiInMemoryTable
         items={tab === 'enabled' ? enabledRules : recommendedRules}
         columns={tab === 'enabled' ? enabledColumns : recommendedColumns}
@@ -659,20 +666,17 @@ const SloTemplatesSection = ({
         }),
         onClick: onOpenSlos,
       }}
+      headerControls={
+        <EnabledRecommendedToggle
+          tab={tab}
+          setTab={setTab}
+          enabledCount={enabledSlos.length}
+          recommendedCount={recommendedSlos.length}
+          idPrefix={`${integration.id}-slos`}
+        />
+      }
       dataTestSubj="entityCentricLabIntegrationSlos"
     >
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EnabledRecommendedToggle
-            tab={tab}
-            setTab={setTab}
-            enabledCount={enabledSlos.length}
-            recommendedCount={recommendedSlos.length}
-            idPrefix={`${integration.id}-slos`}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <EuiInMemoryTable
         items={tab === 'enabled' ? enabledSlos : recommendedSlos}
         columns={tab === 'enabled' ? enabledColumns : recommendedColumns}
@@ -683,7 +687,7 @@ const SloTemplatesSection = ({
 };
 
 const ML_TYPE_ICON: Record<MlAsset['type'], string> = {
-  'ML job': 'machineLearningApp',
+  'Anomaly detection job': 'machineLearningApp',
   'AI skill': 'sparkles',
 };
 
@@ -700,7 +704,7 @@ const MlAssetsSection = ({
       name: i18n.translate('xpack.streams.entityCentricLab.integrations.ml.type', {
         defaultMessage: 'Type',
       }),
-      width: '120px',
+      width: '220px',
       render: (type: MlAsset['type']) => (
         <EuiBadge color="hollow" iconType={ML_TYPE_ICON[type]}>
           {type}
@@ -724,7 +728,7 @@ const MlAssetsSection = ({
   return (
     <SectionPanel
       title={i18n.translate('xpack.streams.entityCentricLab.integrations.ml.title', {
-        defaultMessage: 'Machine learning jobs and AI skills',
+        defaultMessage: 'Anomaly detection jobs and AI skills',
       })}
       count={integration.mlAssets.length}
       dataTestSubj="entityCentricLabIntegrationMl"
@@ -771,7 +775,7 @@ const ResourcesSection = ({ integration }: { integration: FakeIntegration }) => 
 /**
  * Super-short-term lab: a single integration's detail page. Surfaces
  * everything the integration ships (dashboards, data streams, alert rules,
- * SLO templates, ML jobs / AI skills, curated resources) with the "what's
+ * SLO templates, anomaly detection jobs / AI skills, curated resources) with the "what's
  * there vs what still needs enabling" split.
  */
 export const IntegrationDetailView = () => {
@@ -841,6 +845,9 @@ export const IntegrationDetailView = () => {
               <EuiIcon type={integration.icon} size="xl" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{integration.name}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <LabBadge />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <StarToggleButton integrationId={integration.id} />
             </EuiFlexItem>
