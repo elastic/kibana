@@ -55,6 +55,7 @@ import {
   NodeBuilderOperators,
 } from '../utils';
 import {
+  applyProfilesToAssignees,
   dedupAssignees,
   fillMissingCustomFields,
   getCloseReasonIfValid,
@@ -62,6 +63,7 @@ import {
   getDurationForUpdate,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
+  getUserProfilesSafe,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -732,6 +734,28 @@ export const bulkUpdate = async (
 
     await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
+
+    // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      const allUids = new Set(
+        patchCasesPayload.cases.flatMap(
+          ({ updatedAttributes }) => updatedAttributes.assignees?.map(({ uid }) => uid) ?? []
+        )
+      );
+
+      if (allUids.size > 0) {
+        const profiles = await getUserProfilesSafe(clientArgs.securityStartPlugin, allUids, logger);
+
+        if (profiles) {
+          for (const patchCase of patchCasesPayload.cases) {
+            const { assignees } = patchCase.updatedAttributes;
+            if (assignees && assignees.length > 0) {
+              patchCase.updatedAttributes.assignees = applyProfilesToAssignees(assignees, profiles);
+            }
+          }
+        }
+      }
+    }
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 

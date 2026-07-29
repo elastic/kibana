@@ -38,6 +38,61 @@ describe('update', () => {
   const casesClientMock = createCasesClientMock();
   casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
 
+  describe('assignee identity population', () => {
+    const clientArgs = createCasesClientMockArgs();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: true } };
+      clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: mockCases });
+      clientArgs.services.caseService.getAllCaseComments.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: 10,
+        page: 1,
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [{ ...mockCases[0], attributes: { assignees: cases.cases[0].assignees } }],
+      });
+      clientArgs.services.attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
+        new Map()
+      );
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: 0,
+        [mockCases[1].id]: 0,
+      });
+    });
+
+    it('populates assignee identity on the patch payload when enabled', async () => {
+      clientArgs.securityStartPlugin.userProfiles.bulkGet.mockResolvedValue([
+        {
+          uid: '1',
+          enabled: true,
+          data: {},
+          user: { username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+        },
+      ] as never);
+
+      await bulkUpdate(cases, clientArgs, casesClientMock);
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).toHaveBeenCalledTimes(1);
+      const patchArgs = clientArgs.services.caseService.patchCases.mock.calls[0][0];
+      expect(patchArgs.cases[0].updatedAttributes.assignees).toEqual([
+        { uid: '1', username: 'u1', full_name: 'User One', email: 'u1@e.com' },
+      ]);
+    });
+
+    it('does not resolve profiles when the flag is disabled', async () => {
+      clientArgs.config = { ...clientArgs.config, assigneeIdentity: { enabled: false } };
+
+      await bulkUpdate(cases, clientArgs, casesClientMock);
+
+      expect(clientArgs.securityStartPlugin.userProfiles.bulkGet).not.toHaveBeenCalled();
+      const patchArgs = clientArgs.services.caseService.patchCases.mock.calls[0][0];
+      expect(patchArgs.cases[0].updatedAttributes.assignees).toEqual([{ uid: '1' }]);
+    });
+  });
+
   describe('Assignees', () => {
     const clientArgs = createCasesClientMockArgs();
 

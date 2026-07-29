@@ -40,8 +40,17 @@ export const CaseUserProfileSchema = z.object({
 
 export type CaseUserProfile = z.infer<typeof CaseUserProfileSchema>;
 
+export const CaseAssigneeSchema = z.object({
+  uid: z.string(),
+  username: z.string().nullable().optional(),
+  full_name: z.string().nullable().optional(),
+  email: z.string().nullable().optional(),
+});
+
+export type CaseAssignee = z.infer<typeof CaseAssigneeSchema>;
+
 /**
  * Assignees
  */
-export const CaseAssigneesSchema = z.array(CaseUserProfileSchema);
+export const CaseAssigneesSchema = z.array(CaseAssigneeSchema);
 export type CaseAssignees = z.infer<typeof CaseAssigneesSchema>;

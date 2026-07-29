@@ -8,6 +8,7 @@
 import { isEmpty, uniqBy } from 'lodash';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
+import type { Logger } from '@kbn/logging';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { v4 } from 'uuid';
@@ -622,6 +623,72 @@ export const getUserProfiles = async (
     acc.set(profile.uid, profile);
     return acc;
   }, new Map());
+};
+
+/**
+ * Best-effort `getUserProfiles`: resolves profiles for `uids`, returning
+ * `undefined` (not throwing) if the user-profiles service fails. A transient
+ * `bulkGet` failure must not block case create/update — callers fall back to
+ * storing assignees uid-only, and the read path still resolves identity live.
+ */
+export const getUserProfilesSafe = async (
+  securityStartPlugin: SecurityPluginStart,
+  uids: Set<string>,
+  logger: Logger
+): Promise<Map<string, UserProfileWithAvatar> | undefined> => {
+  try {
+    return await getUserProfiles(securityStartPlugin, uids);
+  } catch (error) {
+    logger.warn(
+      `Failed to resolve assignee user profiles; storing assignees without identity: ${error}`
+    );
+    return undefined;
+  }
+};
+
+/**
+ * Maps resolved user profiles onto assignees, populating `username`,
+ * `full_name` and `email`. Uids without a resolvable profile keep `null`
+ * identity. Pure — the profiles are fetched once by the caller so a bulk
+ * operation can share a single `bulkGet`.
+ */
+export const applyProfilesToAssignees = (
+  assignees: CaseAssignees,
+  profiles: Map<string, UserProfileWithAvatar>
+): CaseAssignees =>
+  assignees.map(({ uid }) => {
+    const profile = profiles.get(uid);
+
+    return {
+      uid,
+      username: profile?.user.username ?? null,
+      full_name: profile?.user.full_name ?? null,
+      email: profile?.user.email ?? null,
+    };
+  });
+
+/**
+ * Resolves each assignee's `uid` to its identity via the user-profiles service
+ * and returns the assignees with those fields populated. The caller gates
+ * invocation on the `assigneeIdentity` config flag. Non-fatal: on a profile
+ * lookup failure the original (uid-only) assignees are returned unchanged.
+ */
+export const populateAssigneesIdentity = async (
+  securityStartPlugin: SecurityPluginStart,
+  logger: Logger,
+  assignees?: CaseAssignees
+): Promise<CaseAssignees | undefined> => {
+  if (assignees == null || assignees.length === 0) {
+    return assignees;
+  }
+
+  const profiles = await getUserProfilesSafe(
+    securityStartPlugin,
+    new Set(assignees.map(({ uid }) => uid)),
+    logger
+  );
+
+  return profiles ? applyProfilesToAssignees(assignees, profiles) : assignees;
 };
 
 export const fillMissingCustomFields = ({
