@@ -18,7 +18,6 @@ import AddToTimelineButton, {
 import type { DataProvider } from '../../../../common/types';
 import { IS_OPERATOR } from '../../../../common/types';
 import { TestProviders } from '../../../mock';
-import { PRESS } from '../../tooltip_with_keyboard_shortcut';
 import * as i18n from './translations';
 
 const coreStart = coreMock.createStart();
@@ -135,35 +134,6 @@ describe('add to timeline', () => {
     test('it has the expected aria label', () => {
       expect(getButton()).toHaveAttribute('aria-label', i18n.ADD_TO_TIMELINE);
     });
-  });
-
-  test('it renders the keyboard shortcut tooltip content when `showTooltip` is true', async () => {
-    render(
-      <TestProviders>
-        <AddToTimelineButton
-          field={field}
-          ownFocus={true}
-          showTooltip={true}
-          startServices={coreStart}
-        />
-      </TestProviders>
-    );
-
-    fireEvent.mouseOver(screen.getByRole('button'));
-
-    expect(await screen.findByText(PRESS)).toBeInTheDocument();
-  });
-
-  test('it does NOT render keyboard shortcut tooltip content when `showTooltip` is false (default)', () => {
-    render(
-      <TestProviders>
-        <AddToTimelineButton field={field} ownFocus={true} startServices={coreStart} />
-      </TestProviders>
-    );
-
-    fireEvent.mouseOver(screen.getByRole('button'));
-
-    expect(screen.queryByText(PRESS)).not.toBeInTheDocument();
   });
 
   describe('when the user clicks the button', () => {
@@ -309,7 +279,6 @@ describe('add to timeline', () => {
                 field={field}
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
-                showTooltip={true}
                 startServices={coreStart}
               />
             </TestProviders>
@@ -327,7 +296,6 @@ describe('add to timeline', () => {
                 field={field}
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
-                showTooltip={true}
                 startServices={coreStart}
               />
             </TestProviders>
@@ -346,7 +314,6 @@ describe('add to timeline', () => {
                 field={field}
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
-                showTooltip={true}
                 startServices={coreStart}
               />
             </TestProviders>
@@ -377,7 +344,6 @@ describe('add to timeline', () => {
                 field={field}
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
-                showTooltip={true}
                 startServices={coreStart}
               />
             </TestProviders>
@@ -395,7 +361,6 @@ describe('add to timeline', () => {
                 field={field}
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
-                showTooltip={true}
                 startServices={coreStart}
               />
             </TestProviders>
@@ -414,7 +379,6 @@ describe('add to timeline', () => {
                 field={field}
                 keyboardEvent={keyboardEvent}
                 ownFocus={true}
-                showTooltip={true}
                 startServices={coreStart}
               />
             </TestProviders>

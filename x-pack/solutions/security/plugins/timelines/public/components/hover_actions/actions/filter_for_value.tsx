@@ -10,9 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
-import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
-import { createFilter, getAdditionalScreenReaderOnlyContext } from '../utils';
-import type { HoverActionComponentProps, FilterValueFnArgs } from './types';
+import { createFilter } from '../utils';
+import type { FilterValueFnArgs, HoverActionComponentProps } from './types';
 
 export const FILTER_FOR_VALUE = i18n.translate('xpack.timelines.hoverActions.filterIn', {
   defaultMessage: 'Filter for',
@@ -32,7 +31,6 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
     ownFocus,
     onClick,
     size,
-    showTooltip = false,
     value,
     dataViewId,
   }) => {
@@ -69,7 +67,7 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
       }
     }, [filterForValueFn, keyboardEvent, ownFocus]);
 
-    const button = useMemo(
+    return useMemo(
       () =>
         Component ? (
           <Component
@@ -98,26 +96,6 @@ const FilterForValueButton: React.FC<FilterForValueProps> = React.memo(
           </EuiToolTip>
         ),
       [Component, defaultFocusedButtonRef, filterForValueFn, size]
-    );
-
-    return showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={FILTER_FOR_VALUE}
-            shortcut={FILTER_FOR_VALUE_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
-      >
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
     );
   }
 );

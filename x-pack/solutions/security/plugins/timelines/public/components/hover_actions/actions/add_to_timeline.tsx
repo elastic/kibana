@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';
@@ -18,8 +18,6 @@ import { TimelineId } from '../../../store/timeline';
 import { addProviderToTimeline } from '../../../store/timeline/actions';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';
 import type { DataProvider } from '../../../../common/types';
-import { TooltipWithKeyboardShortcut } from '../../tooltip_with_keyboard_shortcut';
-import { getAdditionalScreenReaderOnlyContext } from '../utils';
 import { useAddToTimeline } from '../../../hooks/use_add_to_timeline';
 import type { HoverActionComponentProps } from './types';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
@@ -78,8 +76,6 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     keyboardEvent,
     ownFocus,
     onClick,
-    showTooltip = false,
-    value,
     timelineType = 'default',
     startServices,
   }) => {
@@ -139,7 +135,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
       }
     }, [handleStartDragToTimeline, keyboardEvent, ownFocus]);
 
-    const button = useMemo(
+    return useMemo(
       () =>
         Component ? (
           <Component
@@ -167,26 +163,6 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
           </EuiToolTip>
         ),
       [Component, defaultFocusedButtonRef, handleStartDragToTimeline]
-    );
-
-    return showTooltip ? (
-      <EuiToolTip
-        content={
-          <TooltipWithKeyboardShortcut
-            additionalScreenReaderOnlyContext={getAdditionalScreenReaderOnlyContext({
-              field,
-              value,
-            })}
-            content={i18n.ADD_TO_TIMELINE}
-            shortcut={ADD_TO_TIMELINE_KEYBOARD_SHORTCUT}
-            showShortcut={ownFocus}
-          />
-        }
-      >
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
     );
   }
 );

@@ -80,7 +80,6 @@ export interface OsqueryTimelinesStart {
       dataProvider: unknown[];
       field: string;
       ownFocus: boolean;
-      showTooltip: boolean;
       startServices: { analytics: unknown; i18n: unknown; theme: unknown };
     }) => unknown;
   };
