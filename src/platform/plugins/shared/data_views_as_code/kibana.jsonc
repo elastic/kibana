@@ -10,7 +10,7 @@
     "browser": false,
     "server": true,
     "requiredPlugins": ["dataViews"],
-    "optionalPlugins": [],
+    "optionalPlugins": ["usageCollection"],
     "requiredBundles": [],
     "extraPublicDirs": []
   }

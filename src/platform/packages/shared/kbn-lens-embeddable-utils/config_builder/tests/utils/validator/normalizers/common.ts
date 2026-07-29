@@ -134,8 +134,14 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
-      adHocDataView.name = indexPattern;
       adHocDataView.title = indexPattern;
+      // An ES|QL ad-hoc data view has no dedicated `name` in the `{ type: 'esql', query }` data
+      // source; the transform re-derives both title and name from the query's index pattern
+      // (getAdHocDataViewSpec: `name = dataView.name ?? dataView.index`). This mirrors the DataView
+      // runtime, where `getName() = name || title` and a freshly created ES|QL data view
+      // (getESQLAdHocDataview) sets only `title = queryIndexPattern`, so the effective name is the
+      // query index pattern.
+      adHocDataView.name = adHocDataView.title;
       // The transform re-derives the time field from the ES|QL query rather than trusting the
       // persisted value (getAdHocDataViewSpec <- getDataSourceIndex.esql), so align the stored
       // timeFieldName here instead of skipping it entirely.
@@ -207,8 +213,10 @@ function normalizeFormBasedAdHocDataViews(
 
       delete adHocDataViews[adHocId];
       adHocDataView.id = newId;
-      adHocDataView.name = adHocDataView.title ?? adHocDataView.name;
+      // A custom form-based name round-trips verbatim
       adHocDataViews[newId] = adHocDataView;
+      // mirror the transform's `name = name ?? index` (title === index for form-based)
+      adHocDataView.name = adHocDataView.name ?? adHocDataView.title;
 
       if (ref) {
         ref.id = newId;

@@ -29,6 +29,12 @@ import { inject, injectable } from 'inversify';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+import {
+  getInvalidRuleDataMessage,
+  getRuleAlreadyExistsMessage,
+  getRuleNotFoundMessage,
+  getRuleVersionConflictMessage,
+} from '../errors/rule_error_messages';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
@@ -232,13 +238,10 @@ export class RulesClient {
   ): T {
     const parsed = schema.safeParse(data);
     if (!parsed.success) {
-      throw Boom.badRequest(
-        `Error validating ${context} rule data - ${stringifyZodError(parsed.error)}`,
-        {
-          code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-          details: { context, errors: treeifyError(parsed.error) },
-        }
-      );
+      throw Boom.badRequest(getInvalidRuleDataMessage(context, stringifyZodError(parsed.error)), {
+        code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
+        details: { context, errors: treeifyError(parsed.error) },
+      });
     }
     return parsed.data;
   }
@@ -251,7 +254,7 @@ export class RulesClient {
       return { attrs: doc.attributes, version: doc.version };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        throw Boom.notFound(`Rule with id "${id}" not found`, {
+        throw Boom.notFound(getRuleNotFoundMessage(id), {
           code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
           details: { rule_id: id },
         });
@@ -293,7 +296,7 @@ export class RulesClient {
       return await this.rulesSavedObjectService.update({ id, attrs, version });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
-        throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`, {
+        throw Boom.conflict(getRuleVersionConflictMessage(id), {
           code: ALERTING_V2_ERROR_CODES.RULE_VERSION_CONFLICT,
           details: { rule_id: id },
         });
@@ -331,7 +334,7 @@ export class RulesClient {
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         const conflictId = params.options?.id ?? 'unknown';
-        throw Boom.conflict(`Rule with id "${conflictId}" already exists`, {
+        throw Boom.conflict(getRuleAlreadyExistsMessage(conflictId), {
           code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_EXISTS,
           details: { rule_id: conflictId },
         });
