@@ -44,7 +44,7 @@ const runFilterTest = async ({
     await filterBar.hasFilter({ field: 'extension.raw', value: 'css', enabled: true, pinned })
   ).toBe(true);
   await expect(dataGrid.getCell(0, 'extension')).toContainText('css');
-  await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(2159);
+  await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(2_159);
 
   await page.reload();
   await discover.waitUntilTabIsLoaded();
@@ -52,7 +52,7 @@ const runFilterTest = async ({
   expect(
     await filterBar.hasFilter({ field: 'extension.raw', value: 'css', enabled: true, pinned })
   ).toBe(true);
-  await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(2159);
+  await expect.poll(() => pageObjects.discover.getHitCountInt()).toBe(2_159);
   await expect(dataGrid.getCell(0, 'extension')).toContainText('css');
 };
 
