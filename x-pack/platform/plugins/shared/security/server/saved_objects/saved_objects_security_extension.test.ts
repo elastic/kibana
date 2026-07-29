@@ -7170,3 +7170,284 @@ describe('#authorizeChangeAccessControl', () => {
     expect(auditHelperSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('#emitAuditEvent redaction (fieldsToRedact)', () => {
+  function setupForEmit(
+    savedObjectDiffEnabled = true,
+    extra: { savedObjectDiffTypesToExclude?: string[]; savedObjectDiffFieldSizeLimit?: number } = {}
+  ) {
+    const actions = new Actions();
+    jest
+      .spyOn(actions.savedObject, 'get')
+      .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
+    const auditLogger = auditLoggerMock.create();
+    const errors = {
+      decorateForbiddenError: jest.fn().mockImplementation((err) => err),
+      decorateGeneralError: jest.fn().mockImplementation((err) => err),
+    } as unknown as jest.Mocked<SavedObjectsClient['errors']>;
+    const checkPrivileges: jest.MockedFunction<CheckSavedObjectsPrivileges> = jest.fn();
+    const typeRegistryMocked = typeRegistryMock.create();
+
+    const securityExtension = new SavedObjectsSecurityExtension({
+      actions,
+      auditLogger,
+      errors,
+      checkPrivileges,
+      getCurrentUser,
+      typeRegistry: typeRegistryMocked,
+      savedObjectDiffEnabled,
+      ...extra,
+    });
+    return { securityExtension, auditLogger };
+  }
+
+  beforeEach(() => {
+    addAuditEventSpy.mockClear();
+  });
+
+  it('redacts sensitive field values in the diff when fieldsToRedact is provided', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'connector', id: '1' },
+      outcome: 'success',
+      before: { name: 'old', secrets: 'plaintext-secret' },
+      after: { name: 'new', secrets: 'new-plaintext-secret' },
+      fieldsToRedact: ['secrets'],
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const { savedObjectDiff } = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(savedObjectDiff.format).toBe('json_patch_extended');
+
+    const nameOp = savedObjectDiff.ops.find((op: any) => op.path === '/name');
+    expect(nameOp).toEqual({
+      op: 'replace',
+      path: '/name',
+      value: 'new',
+      oldValue: 'old',
+    });
+
+    const secretsOp = savedObjectDiff.ops.find((op: any) => op.path === '/secrets');
+    expect(secretsOp).toEqual({
+      op: 'replace',
+      path: '/secrets',
+      value: '[redacted]',
+      oldValue: '[redacted]',
+    });
+  });
+
+  it('redacts to a constant sentinel regardless of the underlying secret value', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'connector', id: '1' },
+      outcome: 'success',
+      before: { secrets: 'my-secret' },
+      after: { secrets: 'changed' },
+      fieldsToRedact: ['secrets'],
+    });
+
+    const firstOp = (addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff.ops.find(
+      (op: any) => op.path === '/secrets'
+    );
+    expect(firstOp.oldValue).toBe('[redacted]');
+    expect(firstOp.value).toBe('[redacted]');
+
+    addAuditEventSpy.mockClear();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'connector', id: '2' },
+      outcome: 'success',
+      before: { secrets: 'a-totally-different-secret' },
+      after: { secrets: 'other' },
+      fieldsToRedact: ['secrets'],
+    });
+
+    const secondOp = (addAuditEventSpy.mock.calls[0][0] as any).savedObjectDiff.ops.find(
+      (op: any) => op.path === '/secrets'
+    );
+    expect(secondOp.oldValue).toBe('[redacted]');
+  });
+
+  it('produces no ops for redacted fields when their values are unchanged', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'connector', id: '1' },
+      outcome: 'success',
+      before: { name: 'old', secrets: 'same-secret' },
+      after: { name: 'new', secrets: 'same-secret' },
+      fieldsToRedact: ['secrets'],
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const { savedObjectDiff } = addAuditEventSpy.mock.calls[0][0] as any;
+    const secretsOp = savedObjectDiff.ops.find((op: any) => op.path === '/secrets');
+    expect(secretsOp).toBeUndefined();
+
+    const nameOp = savedObjectDiff.ops.find((op: any) => op.path === '/name');
+    expect(nameOp).toBeDefined();
+  });
+
+  it('does not redact when fieldsToRedact is undefined', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'success',
+      before: { title: 'old', secret: 'visible-plaintext' },
+      after: { title: 'new', secret: 'new-visible-plaintext' },
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const { savedObjectDiff } = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(savedObjectDiff.ops).toContainEqual({
+      op: 'replace',
+      path: '/title',
+      value: 'new',
+      oldValue: 'old',
+    });
+    const secretOp = savedObjectDiff.ops.find((op: any) => op.path === '/secret');
+    expect(secretOp).toEqual({
+      op: 'replace',
+      path: '/secret',
+      value: 'new-visible-plaintext',
+      oldValue: 'visible-plaintext',
+    });
+  });
+
+  it('redacts nested object fields under an encrypted attribute', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_create',
+      savedObject: { type: 'connector', id: '1' },
+      outcome: 'success',
+      before: {},
+      after: { name: 'My Connector', config: { apiKey: 'secret-key', url: 'https://example.com' } },
+      fieldsToRedact: ['config'],
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const { savedObjectDiff } = addAuditEventSpy.mock.calls[0][0] as any;
+
+    const nameOp = savedObjectDiff.ops.find((op: any) => op.path === '/name');
+    expect(nameOp).toEqual({ op: 'add', path: '/name', value: 'My Connector' });
+
+    const apiKeyOp = savedObjectDiff.ops.find((op: any) => op.path === '/config/apiKey');
+    expect(apiKeyOp).toEqual({ op: 'add', path: '/config/apiKey', value: '[redacted]' });
+
+    const urlOp = savedObjectDiff.ops.find((op: any) => op.path === '/config/url');
+    expect(urlOp).toEqual({ op: 'add', path: '/config/url', value: '[redacted]' });
+  });
+
+  it('redacts values in remove ops when a redacted field is deleted', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_delete',
+      savedObject: { type: 'connector', id: '1' },
+      outcome: 'success',
+      before: { name: 'My Connector', secrets: 'super-secret-value' },
+      after: {},
+      fieldsToRedact: ['secrets'],
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+    const { savedObjectDiff } = addAuditEventSpy.mock.calls[0][0] as any;
+
+    const nameOp = savedObjectDiff.ops.find((op: any) => op.path === '/name');
+    expect(nameOp).toEqual({ op: 'remove', path: '/name', oldValue: 'My Connector' });
+
+    const secretsOp = savedObjectDiff.ops.find((op: any) => op.path === '/secrets');
+    expect(secretsOp).toEqual({ op: 'remove', path: '/secrets', oldValue: '[redacted]' });
+  });
+
+  it('skips the diff event for types in savedObjectDiffTypesToExclude', () => {
+    const { securityExtension } = setupForEmit(true, {
+      savedObjectDiffTypesToExclude: ['telemetry'],
+    });
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'telemetry', id: '1' },
+      outcome: 'success',
+      before: { a: 1 },
+      after: { a: 2 },
+    });
+
+    expect(addAuditEventSpy).not.toHaveBeenCalled();
+  });
+
+  it('still emits the diff event for types not in the exclude list', () => {
+    const { securityExtension } = setupForEmit(true, {
+      savedObjectDiffTypesToExclude: ['telemetry'],
+    });
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'success',
+      before: { a: 1 },
+      after: { a: 2 },
+    });
+
+    expect(addAuditEventSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('replaces values exceeding savedObjectDiffFieldSizeLimit with the sentinel', () => {
+    const { securityExtension } = setupForEmit(true, { savedObjectDiffFieldSizeLimit: 10 });
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'success',
+      before: { big: 'x' },
+      after: { big: 'x'.repeat(100) },
+    });
+
+    const { savedObjectDiff } = addAuditEventSpy.mock.calls[0][0] as any;
+    const bigOp = savedObjectDiff.ops.find((op: any) => op.path === '/big');
+    expect(bigOp).toEqual({
+      op: 'replace',
+      path: '/big',
+      value: 'Value above fieldSizeLimit',
+      oldValue: 'x',
+    });
+  });
+
+  it('does not emit a diff event when savedObjectDiffEnabled is false', () => {
+    const { securityExtension } = setupForEmit(false);
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_update',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'success',
+      before: { a: 1 },
+      after: { a: 2 },
+    });
+
+    expect(addAuditEventSpy).not.toHaveBeenCalled();
+  });
+
+  it('resolves the object name from attributes onto the diff event', () => {
+    const { securityExtension } = setupForEmit();
+
+    securityExtension.emitAuditEvent({
+      action: 'saved_object_create',
+      savedObject: { type: 'dashboard', id: '1' },
+      outcome: 'success',
+      before: {},
+      after: { name: 'My Dashboard' },
+    });
+
+    const { savedObject } = addAuditEventSpy.mock.calls[0][0] as any;
+    expect(savedObject).toEqual({ type: 'dashboard', id: '1', name: 'My Dashboard' });
+  });
+});

@@ -23,6 +23,9 @@ interface SetupSavedObjectsParams {
   >;
   savedObjects: CoreSetup['savedObjects'];
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
+  savedObjectDiffEnabled?: boolean;
+  savedObjectDiffTypesToExclude?: string[];
+  savedObjectDiffFieldSizeLimit?: number;
 }
 
 export function setupSavedObjects({
@@ -30,6 +33,9 @@ export function setupSavedObjects({
   authz,
   savedObjects,
   getCurrentUser,
+  savedObjectDiffEnabled,
+  savedObjectDiffTypesToExclude,
+  savedObjectDiffFieldSizeLimit,
 }: SetupSavedObjectsParams) {
   savedObjects.setClientFactoryProvider(
     // This is not used by Kibana itself, but it can be leveraged for Kibana to use a third-party authentication header if there is a custom
@@ -58,6 +64,9 @@ export function setupSavedObjects({
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
           typeRegistry,
+          savedObjectDiffEnabled,
+          savedObjectDiffTypesToExclude,
+          savedObjectDiffFieldSizeLimit,
         })
       : undefined;
   });

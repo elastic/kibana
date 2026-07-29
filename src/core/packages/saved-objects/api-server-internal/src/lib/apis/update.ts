@@ -27,6 +27,7 @@ import type { CreateRequest, IndexRequest } from '@elastic/elasticsearch/lib/api
 import { DEFAULT_REFRESH_SETTING, DEFAULT_RETRY_COUNT } from '../constants';
 import { isValidRequest } from '../utils';
 import { getCurrentTime, getSavedObjectFromSource, mergeForUpdate } from './utils';
+import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -87,7 +88,7 @@ export const executeUpdate = async <T>(
     validation: validationHelper,
     user: userHelper,
   } = helpers;
-  const { securityExtension } = extensions;
+  const { securityExtension, encryptionExtension } = extensions;
   const typeDefinition = registry.getType(type)!;
   const {
     version,
@@ -275,6 +276,16 @@ export const executeUpdate = async <T>(
       attributes: upsert, // these ignore the attribute values provided in the main request body.
     } as SavedObject<T>;
 
+    emitSavedObjectDiffAuditEvent({
+      securityExtension,
+      encryptionExtension,
+      logger,
+      action: 'saved_object_update',
+      savedObject: { type, id },
+      before: {} as Record<string, unknown>,
+      after: (migratedUpsert.attributes ?? {}) as Record<string, unknown>,
+    });
+
     // UPSERT CASE END
   } else {
     // UPDATE CASE START
@@ -380,6 +391,16 @@ export const executeUpdate = async <T>(
       references,
       attributes,
     } as SavedObject<T>;
+
+    emitSavedObjectDiffAuditEvent({
+      securityExtension,
+      encryptionExtension,
+      logger,
+      action: 'saved_object_update',
+      savedObject: { type, id },
+      before: (migrated!.attributes ?? {}) as Record<string, unknown>,
+      after: updatedAttributes as Record<string, unknown>,
+    });
   }
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(

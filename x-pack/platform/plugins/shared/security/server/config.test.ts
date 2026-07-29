@@ -1910,6 +1910,38 @@ describe('config schema', () => {
   });
 });
 
+describe('audit.savedObjectDiff config', () => {
+  it('applies defaults when the block is configured', () => {
+    const config = ConfigSchema.validate({
+      audit: { enabled: true, savedObjectDiff: { enabled: true } },
+    });
+    expect(config.audit.savedObjectDiff?.enabled).toBe(true);
+    expect(config.audit.savedObjectDiff?.typesToExclude).toEqual([]);
+    expect(config.audit.savedObjectDiff?.fieldSizeLimit?.getValueInBytes()).toBe(49152);
+  });
+
+  it('is undefined when not configured', () => {
+    expect(ConfigSchema.validate({}).audit.savedObjectDiff).toBeUndefined();
+  });
+
+  it('throws when savedObjectDiff.enabled is true but audit.enabled is false', () => {
+    expect(() =>
+      ConfigSchema.validate({ audit: { enabled: false, savedObjectDiff: { enabled: true } } })
+    ).toThrow(/savedObjectDiff\.enabled requires xpack\.security\.audit\.enabled/);
+  });
+
+  it('does not throw when savedObjectDiff is disabled and audit is disabled', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          enabled: false,
+          savedObjectDiff: { enabled: false, typesToExclude: ['dashboard'] },
+        },
+      })
+    ).not.toThrow();
+  });
+});
+
 describe('createConfig()', () => {
   it('should log a warning and set xpack.security.encryptionKey if not set', async () => {
     const mockRandomBytes = jest.requireMock('crypto').randomBytes;

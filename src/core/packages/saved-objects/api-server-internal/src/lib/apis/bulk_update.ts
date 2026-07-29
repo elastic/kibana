@@ -44,6 +44,7 @@ import {
   getSavedObjectFromSource,
   mergeForUpdate,
 } from './utils';
+import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
 import type { ApiExecutionContext } from './types';
 
 export interface PerformUpdateParams<T = unknown> {
@@ -75,12 +76,22 @@ type ExpectedBulkUpdateResult = Either<
     documentToSave: DocumentToSave;
     esRequestIndex: number;
     rawMigratedUpdatedDoc: SavedObjectsRawDoc;
+    beforeAttributes?: Record<string, unknown>;
+    afterAttributes?: Record<string, unknown>;
   }
 >;
 
 export const performBulkUpdate = async <T>(
   { objects, options }: PerformUpdateParams<T>,
-  { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
+  {
+    registry,
+    helpers,
+    allowedTypes,
+    client,
+    serializer,
+    logger,
+    extensions = {},
+  }: ApiExecutionContext
 ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
   const {
     common: commonHelper,
@@ -88,7 +99,7 @@ export const performBulkUpdate = async <T>(
     migration: migrationHelper,
     user: userHelper,
   } = helpers;
-  const { securityExtension } = extensions;
+  const { securityExtension, encryptionExtension } = extensions;
   const { migrationVersionCompatibility } = options;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const updatedBy = userHelper.getCurrentUserProfileUid();
@@ -359,6 +370,8 @@ export const performBulkUpdate = async <T>(
           documentToSave: expectedBulkGetResult.value.documentToSave,
           rawMigratedUpdatedDoc: updatedMigratedDocumentToSave,
           migrationVersionCompatibility,
+          beforeAttributes: migrated.attributes as Record<string, unknown>,
+          afterAttributes: updatedAttributes as Record<string, unknown>,
         };
 
         bulkUpdateParams.push(
@@ -393,8 +406,15 @@ export const performBulkUpdate = async <T>(
         return expectedResult.value as any;
       }
 
-      const { type, id, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
-        expectedResult.value;
+      const {
+        type,
+        id,
+        documentToSave,
+        esRequestIndex,
+        rawMigratedUpdatedDoc,
+        beforeAttributes,
+        afterAttributes,
+      } = expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
 
@@ -402,6 +422,16 @@ export const performBulkUpdate = async <T>(
       if (error) {
         return { type, id, error };
       }
+
+      emitSavedObjectDiffAuditEvent({
+        securityExtension,
+        encryptionExtension,
+        logger,
+        action: 'saved_object_update',
+        savedObject: { type, id },
+        before: (beforeAttributes ?? {}) as Record<string, unknown>,
+        after: (afterAttributes ?? {}) as Record<string, unknown>,
+      });
 
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 

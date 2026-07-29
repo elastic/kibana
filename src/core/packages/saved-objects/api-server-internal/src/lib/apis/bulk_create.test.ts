@@ -1059,6 +1059,47 @@ describe('#bulkCreate', () => {
       });
     });
 
+    describe('saved object diff audit events', () => {
+      it('emits a per-object diff with an empty "before" when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        await bulkCreateSuccess(client, repository, [obj1, obj2]);
+
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: {},
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            before: {},
+            after: expect.objectContaining({ title: 'Test Two' }),
+          })
+        );
+      });
+
+      it('does not emit a diff event when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        await bulkCreateSuccess(client, repository, [obj1, obj2]);
+        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the bulk create when the diff audit emit throws', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.emitAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        await expect(bulkCreateSuccess(client, repository, [obj1, obj2])).resolves.toBeDefined();
+      });
+    });
+
     describe('security', () => {
       it('correctly passes params to securityExtension.authorizeBulkCreate', async () => {
         const obj1WithoutManaged = {

@@ -24,6 +24,7 @@ import { type IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import type { PreflightCheckForCreateResult } from './internals/preflight_check_for_create';
 import { getSavedObjectNamespaces, getCurrentTime, normalizeNamespace, setManaged } from './utils';
+import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -42,6 +43,7 @@ export const performCreate = async <T>(
     client,
     serializer,
     migrator,
+    logger,
     extensions = {},
   }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
@@ -54,7 +56,7 @@ export const performCreate = async <T>(
     migration: migrationHelper,
     user: userHelper,
   } = helpers;
-  const { securityExtension } = extensions;
+  const { securityExtension, encryptionExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const {
@@ -208,6 +210,16 @@ export const performCreate = async <T>(
   if (isNotFoundFromUnsupportedServer({ statusCode, headers })) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError(id, type);
   }
+
+  emitSavedObjectDiffAuditEvent({
+    securityExtension,
+    encryptionExtension,
+    logger,
+    action: 'saved_object_create',
+    savedObject: { type, id },
+    before: {} as Record<string, unknown>,
+    after: (migrated.attributes ?? {}) as Record<string, unknown>,
+  });
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(
     serializerHelper.rawToSavedObject<T>({ ...raw, ...body }, { migrationVersionCompatibility }),

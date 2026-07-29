@@ -37,6 +37,7 @@ import {
 } from './utils';
 import { getSavedObjectNamespaces } from './utils';
 import type { PreflightCheckForCreateObject } from './internals/preflight_check_for_create';
+import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
 import type { ApiExecutionContext } from './types';
 import { setAccessControl } from './utils/internal_utils';
 
@@ -68,6 +69,7 @@ export const performBulkCreate = async <T>(
     client,
     serializer,
     migrator,
+    logger,
     extensions = {},
   }: ApiExecutionContext
 ): Promise<SavedObjectsBulkResponse<T>> => {
@@ -80,7 +82,7 @@ export const performBulkCreate = async <T>(
     migration: migrationHelper,
     user: userHelper,
   } = helpers;
-  const { securityExtension } = extensions;
+  const { securityExtension, encryptionExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
   const {
@@ -372,6 +374,19 @@ export const performBulkCreate = async <T>(
       if (error) {
         return { type: rawMigratedDoc._source.type, id: requestedId, error };
       }
+
+      emitSavedObjectDiffAuditEvent({
+        securityExtension,
+        encryptionExtension,
+        logger,
+        action: 'saved_object_create',
+        savedObject: { type: rawMigratedDoc._source.type, id: requestedId },
+        before: {} as Record<string, unknown>,
+        after: (rawMigratedDoc._source[rawMigratedDoc._source.type] ?? {}) as Record<
+          string,
+          unknown
+        >,
+      });
 
       // When method == 'index' the bulkResponse doesn't include the indexed
       // _source so we return rawMigratedDoc but have to spread the latest

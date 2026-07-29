@@ -788,6 +788,49 @@ describe('#bulkUpdate', () => {
       });
     });
 
+    describe('saved object diff audit events', () => {
+      it('emits a per-object diff with before/after attributes when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'Test One' }),
+          })
+        );
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_update',
+            savedObject: expect.objectContaining({ type: obj2.type, id: obj2.id }),
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: expect.objectContaining({ title: 'Test Two' }),
+          })
+        );
+      });
+
+      it('does not emit a diff event when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
+        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the bulk update when the diff audit emit throws', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.emitAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        await expect(
+          bulkUpdateSuccess(client, repository, registry, [obj1, obj2])
+        ).resolves.toBeDefined();
+      });
+    });
+
     describe('security', () => {
       it('correctly passes params to securityExtension.authorizeBulkUpdate', async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);

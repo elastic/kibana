@@ -605,6 +605,86 @@ describe('#bulkDelete', () => {
       });
     });
 
+    describe('saved object diff audit events', () => {
+      it('emits a per-object diff for single-namespace deletes via a gated before-attrs fetch', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        // obj1/obj2 are single-namespace, so there's no multi-namespace preflight — the only
+        // mget is the feature-gated before-attributes fetch. `getMockMgetResponse` supplies
+        // `_source[type] = { title: 'Testing' }`.
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1, obj2]));
+        client.bulk.mockResponseOnce(getMockEsBulkDeleteResponse(registry, [obj1, obj2]));
+
+        await repository.bulkDelete([obj1, obj2]);
+
+        expect(client.mget).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: expect.objectContaining({ type: obj1.type, id: obj1.id }),
+            outcome: 'success',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: {},
+          })
+        );
+      });
+
+      it('also emits for multi-namespace deletes (alongside the preflight mget)', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        const multiObjs = [
+          { id: 'diff_m1', type: MULTI_NAMESPACE_TYPE },
+          { id: 'diff_m2', type: MULTI_NAMESPACE_ISOLATED_TYPE },
+        ];
+        // 1st mget = the namespace preflight; 2nd = the gated before-attributes fetch.
+        client.mget.mockResponseOnce(
+          getMockMgetResponse(
+            registry,
+            multiObjs.map((o) => ({ ...o, initialNamespaces: [namespace] })),
+            namespace
+          )
+        );
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, multiObjs, namespace));
+        client.bulk.mockResponseOnce(
+          getMockEsBulkDeleteResponse(registry, multiObjs, { namespace })
+        );
+
+        await repository.bulkDelete(multiObjs, { namespace });
+
+        expect(client.mget).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(2);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: expect.objectContaining({ type: MULTI_NAMESPACE_TYPE, id: 'diff_m1' }),
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: {},
+          })
+        );
+      });
+
+      it('does not fetch before-attrs or emit a diff when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+
+        // bulkDeleteSuccess asserts mget is called 0 times for single-namespace objects, which
+        // confirms the gated before-attrs fetch is skipped when the feature is off.
+        await bulkDeleteSuccess(client, repository, registry, [obj1, obj2]);
+
+        expect(client.mget).not.toHaveBeenCalled();
+        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the bulk delete when the diff audit emit throws', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.emitAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        client.mget.mockResponseOnce(getMockMgetResponse(registry, [obj1, obj2]));
+        client.bulk.mockResponseOnce(getMockEsBulkDeleteResponse(registry, [obj1, obj2]));
+
+        await expect(repository.bulkDelete([obj1, obj2])).resolves.toBeDefined();
+      });
+    });
+
     describe('security', () => {
       it('correctly passes params to securityExtension.authorizeBulkDelete', async () => {
         const testObject1 = { id: 'test_object_1', type: MULTI_NAMESPACE_TYPE };

@@ -950,5 +950,41 @@ describe('#create', () => {
         });
       });
     });
+
+    describe('saved object diff audit events', () => {
+      beforeEach(() => {
+        mockGetCurrentTime.mockReturnValue(mockTimestamp);
+      });
+
+      it('calls emitAuditEvent with before={} and after=attributes when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        await createSuccess(type, attributes, { id });
+
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_create',
+            savedObject: expect.objectContaining({ type, id }),
+            outcome: 'success',
+            before: {},
+            after: expect.any(Object),
+          })
+        );
+      });
+
+      it('does not call emitAuditEvent when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        await createSuccess(type, attributes, { id });
+        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('does not fail the create when the diff audit emit throws', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        securityExtension.emitAuditEvent.mockImplementationOnce(() => {
+          throw new Error('audit boom');
+        });
+        await expect(createSuccess(type, attributes, { id })).resolves.toBeDefined();
+      });
+    });
   });
 });

@@ -591,6 +591,33 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: xpack.security.audit.savedObjectDiff.enabled
+        description: |
+          Set to `true` to record a field-level diff of a saved object's attributes (in the `kibana.diff` field) on its create, update, and delete audit events. Requires `xpack.security.audit.enabled` to be `true`. **Default:** `false`
+        datatype: bool
+        default: false
+        applies_to:
+          stack: preview
+          self: preview
+
+      - setting: xpack.security.audit.savedObjectDiff.typesToExclude[]
+        description: |
+          List of saved object types to exclude from diff generation. Excluded types still emit their normal audit events, but without the `kibana.diff` field. **Default:** `[]`
+        datatype: string
+        default: []
+        applies_to:
+          stack: preview
+          self: preview
+
+      - setting: xpack.security.audit.savedObjectDiff.fieldSizeLimit
+        description: |
+          Maximum serialized size of an individual attribute value included in a diff. Values larger than this are replaced with the placeholder `Value above fieldSizeLimit` to keep audit events bounded. Accepts a byte-size value (for example, `48kb`). **Default:** `48kb`
+        datatype: string
+        default: 48kb
+        applies_to:
+          stack: preview
+          self: preview
+
   - group: File appender
     id: audit-logging-file-appender
     description: |

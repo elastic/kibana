@@ -16,6 +16,7 @@ import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';
+import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
 import type { PreflightCheckNamespacesResult } from './helpers';
 import type { ApiExecutionContext } from './types';
 
@@ -39,7 +40,7 @@ export const performDelete = async <T>(
   }: ApiExecutionContext
 ): Promise<{}> => {
   const { common: commonHelper, preflight: preflightHelper } = helpers;
-  const { securityExtension } = extensions;
+  const { securityExtension, encryptionExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
   if (!allowedTypes.includes(type)) {
@@ -47,6 +48,8 @@ export const performDelete = async <T>(
   }
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
+
+  let deleteBeforeAttributes: Record<string, unknown> = {};
 
   if (securityExtension) {
     const nameAttribute = registry.getNameAttribute(type);
@@ -58,12 +61,19 @@ export const performDelete = async <T>(
         _source_includes: [
           ...SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
           'accessControl',
+          // Only fetch the full attributes (needed for the saved object diff) when the
+          // feature is enabled, to avoid paying that cost on every delete.
+          ...(securityExtension.savedObjectDiffEnabled ? [type] : []),
         ],
       },
       { ignore: [404], meta: true }
     );
 
     const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+    deleteBeforeAttributes = (savedObjectResponse.body._source?.[type] ?? {}) as Record<
+      string,
+      unknown
+    >;
     const name = securityExtension.includeSavedObjectNames()
       ? SavedObjectsUtils.getName(nameAttribute, saveObject)
       : undefined;
@@ -119,6 +129,16 @@ export const performDelete = async <T>(
 
   const deleted = body.result === 'deleted';
   if (deleted) {
+    emitSavedObjectDiffAuditEvent({
+      securityExtension,
+      encryptionExtension,
+      logger,
+      action: 'saved_object_delete',
+      savedObject: { type, id },
+      before: deleteBeforeAttributes,
+      after: {} as Record<string, unknown>,
+    });
+
     const namespaces = preflightResult?.savedObjectNamespaces;
     if (namespaces) {
       // This is a multi-namespace object type, and it might have legacy URL aliases that need to be deleted.

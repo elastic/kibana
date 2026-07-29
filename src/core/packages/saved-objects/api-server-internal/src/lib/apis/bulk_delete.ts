@@ -12,6 +12,7 @@ import type {
   AuthorizeUpdateObject,
   ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
   ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
@@ -32,6 +33,7 @@ import {
   isMgetDoc,
   rawDocExistsInNamespace,
 } from './utils';
+import { emitSavedObjectDiffAuditEvent } from './utils/saved_object_diff_helper';
 import type { ApiExecutionContext } from './types';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import type {
@@ -63,7 +65,7 @@ export const performBulkDelete = async <T>(
   }: ApiExecutionContext
 ): Promise<SavedObjectsBulkDeleteResponse> => {
   const { common: commonHelper, preflight: preflightHelper } = helpers;
-  const { securityExtension } = extensions;
+  const { securityExtension, encryptionExtension } = extensions;
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -95,6 +97,7 @@ export const performBulkDelete = async <T>(
   );
 
   let expectedResults: ExpectedBulkDeleteResult[];
+  const beforeAttributesMap = new Map<string, Record<string, unknown>>();
 
   if (securityExtension) {
     // Perform Auth Check (on both L/R, we'll deal with that later)
@@ -149,6 +152,31 @@ export const performBulkDelete = async <T>(
       return { ...expectedResult.value, success: false };
     });
     return { statuses: [...savedObjects] };
+  }
+
+  // Capture pre-delete attributes for the diff audit event (feature-gated). A dedicated
+  // mget keyed by object covers both single- and multi-namespace types correctly, and a
+  // normal (diff-disabled) bulk delete pays nothing extra.
+  if (securityExtension?.savedObjectDiffEnabled) {
+    const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
+      {
+        docs: validObjects.map(({ value: { type, id } }) => ({
+          _id: serializer.generateRawId(namespace, type, id),
+          _index: commonHelper.getIndexForType(type),
+          _source: [type],
+        })),
+      },
+      { ignore: [404] }
+    );
+    beforeDocs.docs?.forEach((doc, i) => {
+      const { type, id } = validObjects[i].value;
+      const attrs = isMgetDoc(doc)
+        ? (doc._source as SavedObjectsRawDocSource | undefined)?.[type]
+        : undefined;
+      if (attrs) {
+        beforeAttributesMap.set(`${type}:${id}`, attrs as Record<string, unknown>);
+      }
+    });
   }
 
   // Create the bulkDeleteParams
@@ -211,6 +239,19 @@ export const performBulkDelete = async <T>(
     }
 
     if (rawResponse.result === 'deleted') {
+      const beforeAttrs = beforeAttributesMap.get(`${type}:${id}`);
+      if (beforeAttrs) {
+        emitSavedObjectDiffAuditEvent({
+          securityExtension,
+          encryptionExtension,
+          logger,
+          action: 'saved_object_delete',
+          savedObject: { type, id },
+          before: beforeAttrs,
+          after: {} as Record<string, unknown>,
+        });
+      }
+
       // `namespaces` should only exist in the expectedResult.value if the type is multi-namespace.
       if (namespaces) {
         objectsToDeleteAliasesFor.push({

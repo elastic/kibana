@@ -607,6 +607,24 @@ export interface ISavedObjectsSecurityExtension {
   ) => void;
 
   /**
+   * Emits a post-write audit event with before/after attributes for saved object diff computation.
+   * Called by the SO repository after a successful ES write when saved object diff is enabled.
+   */
+  emitAuditEvent: (params: {
+    action: string;
+    savedObject: { type: string; id: string; name?: string };
+    outcome: 'success';
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    fieldsToRedact?: string[];
+  }) => void;
+
+  /**
+   * Whether saved object diff computation is enabled for audit events.
+   */
+  readonly savedObjectDiffEnabled: boolean;
+
+  /**
    * Retrieves the current user from the request context if available
    */
   getCurrentUser: () => AuthenticatedUser | null;

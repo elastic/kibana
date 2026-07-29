@@ -454,5 +454,55 @@ describe('#delete', () => {
         });
       });
     });
+
+    describe('saved object diff audit events', () => {
+      beforeEach(() => {
+        mockGetCurrentTime.mockReturnValue(mockTimestamp);
+      });
+
+      it('calls emitAuditEvent with after={} and before=attributes when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+        client.delete.mockResponseOnce({
+          result: 'deleted',
+        } as estypes.DeleteResponse);
+
+        await repository.delete(type, id);
+
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledTimes(1);
+        expect(securityExtension.emitAuditEvent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            action: 'saved_object_delete',
+            savedObject: expect.objectContaining({ type, id }),
+            outcome: 'success',
+            before: expect.objectContaining({ title: 'Testing' }),
+            after: {},
+          })
+        );
+      });
+
+      it('does not call emitAuditEvent when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        await deleteSuccess(client, repository, registry, type, id);
+        expect(securityExtension.emitAuditEvent).not.toHaveBeenCalled();
+      });
+
+      it('fetches full attributes for the diff only when savedObjectDiffEnabled is true', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = true;
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+        client.delete.mockResponseOnce({ result: 'deleted' } as estypes.DeleteResponse);
+        await repository.delete(type, id);
+        expect((client.get.mock.calls[0][0] as any)._source_includes).toContain(type);
+      });
+
+      it('does not fetch full attributes when savedObjectDiffEnabled is false', async () => {
+        (securityExtension as any).savedObjectDiffEnabled = false;
+        client.get.mockResponse(getMockGetResponse(registry, { type, id }));
+        client.delete.mockResponseOnce({ result: 'deleted' } as estypes.DeleteResponse);
+        await repository.delete(type, id);
+        expect((client.get.mock.calls[0][0] as any)._source_includes).not.toContain(type);
+      });
+    });
   });
 });

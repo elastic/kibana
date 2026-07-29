@@ -8,6 +8,7 @@
 import type { EcsEvent } from '@elastic/ecs';
 import type { Payload } from '@hapi/boom';
 
+import { computeJsonPatch, type ExtendedJsonPatch } from '@kbn/change-history';
 import type { SavedObjectsClient } from '@kbn/core/server';
 import {
   type Either,
@@ -76,6 +77,9 @@ interface Params {
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
   typeRegistry: ISavedObjectTypeRegistry;
+  savedObjectDiffEnabled?: boolean;
+  savedObjectDiffTypesToExclude?: string[];
+  savedObjectDiffFieldSizeLimit?: number;
 }
 
 /**
@@ -152,6 +156,11 @@ export interface AddAuditEventParams {
    * the audit event
    */
   error?: Error;
+  /**
+   * Configuration diff for saved object mutations.
+   * Extended JSON Patch format (RFC 6902 + oldValue).
+   */
+  savedObjectDiff?: ExtendedJsonPatch;
 }
 
 /**
@@ -315,6 +324,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly accessControlService: AccessControlService;
+  public readonly savedObjectDiffEnabled: boolean;
+  private readonly savedObjectDiffTypesToExclude: Set<string>;
+  private readonly savedObjectDiffFieldSizeLimit?: number;
 
   constructor({
     actions,
@@ -323,12 +335,18 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     checkPrivileges,
     getCurrentUser,
     typeRegistry,
+    savedObjectDiffEnabled = false,
+    savedObjectDiffTypesToExclude = [],
+    savedObjectDiffFieldSizeLimit,
   }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
     this.errors = errors;
     this.checkPrivilegesFunc = checkPrivileges;
     this.getCurrentUserFunc = getCurrentUser;
+    this.savedObjectDiffEnabled = savedObjectDiffEnabled;
+    this.savedObjectDiffTypesToExclude = new Set(savedObjectDiffTypesToExclude);
+    this.savedObjectDiffFieldSizeLimit = savedObjectDiffFieldSizeLimit;
 
     this.typeRegistry = typeRegistry;
     this.accessControlService = new AccessControlService({ typeRegistry });
@@ -820,15 +838,67 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
   private addAuditEvent(params: AddAuditEventParams): void {
     if (this.auditLogger.enabled) {
-      const { savedObject, ...rest } = params;
+      const { savedObject, savedObjectDiff, ...rest } = params;
 
       const auditEvent = savedObjectEvent({
         savedObject: this.maybeRedactSavedObject(savedObject),
+        savedObjectDiff,
         ...rest,
       });
 
       this.auditLogger.log(auditEvent);
     }
+  }
+
+  emitAuditEvent(params: {
+    action: string;
+    savedObject: { type: string; id: string; name?: string };
+    outcome: 'success';
+    before: Record<string, unknown>;
+    after: Record<string, unknown>;
+    fieldsToRedact?: string[];
+  }): void {
+    // Only emit when the feature is enabled and the type isn't excluded. The
+    // caller also gates on `savedObjectDiffEnabled`, but checking here keeps the
+    // public method correct on its own. Excluded types still get their normal
+    // pre-write audit event; we only skip the additional diff event for them.
+    if (
+      !this.savedObjectDiffEnabled ||
+      this.savedObjectDiffTypesToExclude.has(params.savedObject.type)
+    ) {
+      return;
+    }
+
+    const { type, id } = params.savedObject;
+
+    // `before`/`after` are the object's attributes (not the full SO), so there
+    // are no system-managed root fields to filter out here.
+    const savedObjectDiff = computeJsonPatch({
+      a: params.before,
+      b: params.after,
+      // ESO attributes are compared as ciphertext here; forwarding them as
+      // fieldsToRedact hides their values in the emitted diff. Because ESO
+      // encryption is non-deterministic, an encrypted attribute included in a
+      // write may surface as a (redacted) change even when its plaintext is
+      // unchanged.
+      fieldsToRedact: params.fieldsToRedact,
+      fieldSizeLimit: this.savedObjectDiffFieldSizeLimit,
+    });
+
+    // Resolve the object name from its attributes (create/update populate
+    // `after`, delete populates `before`) so the diff event is self-contained
+    // like the other audit events. `addAuditEvent` handles name redaction.
+    const attributesForName = Object.keys(params.after).length > 0 ? params.after : params.before;
+    const name = SavedObjectsUtils.getName(this.typeRegistry.getNameAttribute(type), {
+      attributes: attributesForName,
+    });
+
+    this.addAuditEvent({
+      action: params.action as AuditAction,
+      savedObject: { type, id, name },
+      outcome: params.outcome,
+      savedObjectDiff,
+    });
   }
 
   private async checkPrivileges(
@@ -918,7 +988,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       spaces: spacesToAuthorize,
       enforceMap,
       options: { allowGlobalResource: true },
-      auditOptions: { objects },
+      auditOptions: {
+        objects,
+      },
     });
 
     return authorizationResult;
@@ -979,7 +1051,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       types: new Set(enforceMap.keys()),
       spaces: spacesToAuthorize,
       enforceMap,
-      auditOptions: { objects },
+      auditOptions: {
+        objects,
+      },
     });
 
     return authorizationResult;
