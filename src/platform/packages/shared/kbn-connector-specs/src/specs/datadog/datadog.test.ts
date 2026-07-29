@@ -8,10 +8,10 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { DatadogAlertsConnector } from './datadog_alerts';
+import { DatadogConnector } from './datadog';
 import { DATADOG_WEBHOOK_PAYLOAD_TEMPLATE } from './types';
 
-describe('DatadogAlertsConnector', () => {
+describe('DatadogConnector', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
@@ -35,8 +35,8 @@ describe('DatadogAlertsConnector', () => {
 
   it('should be discoverable via getConnectorSpec (all_specs wiring)', async () => {
     const { getConnectorSpec } = await import('../../get_connector_spec');
-    expect(getConnectorSpec('.datadog_alerts')).toBeDefined();
-    expect(getConnectorSpec('.datadog_alerts')?.metadata.id).toBe('.datadog_alerts');
+    expect(getConnectorSpec('.datadog')).toBeDefined();
+    expect(getConnectorSpec('.datadog')?.metadata.id).toBe('.datadog');
   });
 
   it('test validates API key then lists monitors', async () => {
@@ -44,7 +44,7 @@ describe('DatadogAlertsConnector', () => {
       data: [{ id: 1, name: 'm' }],
     });
 
-    const result = await DatadogAlertsConnector.test!.handler(mockContext);
+    const result = await DatadogConnector.test!.handler(mockContext);
 
     expect(mockClient.get).toHaveBeenNthCalledWith(
       1,
@@ -71,7 +71,7 @@ describe('DatadogAlertsConnector', () => {
       data: { name: 'kibana-test', url: 'https://example.com/hook' },
     });
 
-    const result = await DatadogAlertsConnector.actions.registerWebhook.handler(mockContext, {
+    const result = await DatadogConnector.actions.registerWebhook.handler(mockContext, {
       name: 'kibana-test',
       url: 'https://example.com/hook',
       customAuthHeader: 'secret-token',
@@ -97,7 +97,7 @@ describe('DatadogAlertsConnector', () => {
       data: { id: 309422658, overall_state: 'Alert' },
     });
 
-    const result = await DatadogAlertsConnector.actions.muteMonitor.handler(mockContext, {
+    const result = await DatadogConnector.actions.muteMonitor.handler(mockContext, {
       monitorId: 309422658,
       scope: 'host:web01',
     });
@@ -125,7 +125,7 @@ describe('DatadogAlertsConnector', () => {
       ],
     });
 
-    const result = await DatadogAlertsConnector.actions.listMonitors.handler(mockContext, {
+    const result = await DatadogConnector.actions.listMonitors.handler(mockContext, {
       tags: 'env:demo',
       groupStates: 'alert',
     });

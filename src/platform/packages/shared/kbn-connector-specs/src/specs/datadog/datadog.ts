@@ -8,7 +8,7 @@
  */
 
 /**
- * Datadog Alerts Connector (v2)
+ * Datadog Connector (v2)
  *
  * Alert-source connector for Datadog monitors:
  * - Test connection (API key + application key)
@@ -72,13 +72,13 @@ function getDdHeaders(ctx: ActionContext): Record<string, string> {
   };
 }
 
-export const DatadogAlertsConnector: ConnectorSpec = {
+export const DatadogConnector: ConnectorSpec = {
   metadata: {
-    id: '.datadog_alerts',
-    displayName: 'Datadog Alerts',
-    description: i18n.translate('connectorSpecs.datadogAlerts.metadata.description', {
+    id: '.datadog',
+    displayName: 'Datadog',
+    description: i18n.translate('connectorSpecs.datadog.metadata.description', {
       defaultMessage:
-        'Register Datadog webhooks and manage monitors (mute/unmute) for external alert ingestion',
+        'Connect to Datadog: manage monitors and webhooks, with room for downtimes, events, hosts, and more',
     }),
     minimumLicense: 'gold',
     isTechnicalPreview: true,
@@ -90,15 +90,15 @@ export const DatadogAlertsConnector: ConnectorSpec = {
       {
         type: 'basic',
         overrides: {
-          label: i18n.translate('connectorSpecs.datadogAlerts.auth.label', {
+          label: i18n.translate('connectorSpecs.datadog.auth.label', {
             defaultMessage: 'API Key + Application Key',
           }),
           meta: {
             username: {
-              label: i18n.translate('connectorSpecs.datadogAlerts.auth.apiKey.label', {
+              label: i18n.translate('connectorSpecs.datadog.auth.apiKey.label', {
                 defaultMessage: 'API Key',
               }),
-              helpText: i18n.translate('connectorSpecs.datadogAlerts.auth.apiKey.helpText', {
+              helpText: i18n.translate('connectorSpecs.datadog.auth.apiKey.helpText', {
                 defaultMessage:
                   'Datadog API key (DD-API-KEY). Organization Settings → API Keys.',
               }),
@@ -106,11 +106,11 @@ export const DatadogAlertsConnector: ConnectorSpec = {
               sensitive: true,
             },
             password: {
-              label: i18n.translate('connectorSpecs.datadogAlerts.auth.applicationKey.label', {
+              label: i18n.translate('connectorSpecs.datadog.auth.applicationKey.label', {
                 defaultMessage: 'Application Key',
               }),
               helpText: i18n.translate(
-                'connectorSpecs.datadogAlerts.auth.applicationKey.helpText',
+                'connectorSpecs.datadog.auth.applicationKey.helpText',
                 {
                   defaultMessage:
                     'Datadog application key (DD-APPLICATION-KEY). Organization Settings → Application Keys.',
@@ -132,10 +132,10 @@ export const DatadogAlertsConnector: ConnectorSpec = {
         .describe('Datadog site hostname (e.g. datadoghq.com, datadoghq.eu)')
         .meta({
           widget: 'text',
-          label: i18n.translate('connectorSpecs.datadogAlerts.config.site.label', {
+          label: i18n.translate('connectorSpecs.datadog.config.site.label', {
             defaultMessage: 'Datadog site',
           }),
-          helpText: i18n.translate('connectorSpecs.datadogAlerts.config.site.helpText', {
+          helpText: i18n.translate('connectorSpecs.datadog.config.site.helpText', {
             defaultMessage:
               'Site hostname without scheme. US1: datadoghq.com, EU: datadoghq.eu, US3: us3.datadoghq.com',
           }),
@@ -145,16 +145,17 @@ export const DatadogAlertsConnector: ConnectorSpec = {
   ),
 
   skill: [
-    '## Datadog Alerts connector',
+    '## Datadog connector',
     '',
-    'Use this connector to talk to the Datadog Monitors + Webhooks Integration APIs.',
+    'General Datadog integration. Alerting actions use Monitors + Webhooks Integration APIs;',
+    'additional domains (downtimes, events, hosts, metrics, incidents) belong on this same connector.',
     '',
-    '### Typical setup',
+    '### Alerting setup',
     '1. Call `registerWebhook` with a Kibana inbound URL (placeholder OK while inbound is WIP).',
     '2. In Datadog, add `@webhook-{name}` to monitor notification messages.',
     '3. Use `listMonitors` / `getMonitor` to find monitor IDs, then `muteMonitor` / `unmuteMonitor` for write-back.',
     '',
-    '### Fingerprint notes',
+    '### Fingerprint notes (alerting)',
     'Webhook payload includes monitor_id ($ALERT_ID) and groups ($ALERT_SCOPE) — Keep-aligned series identity.',
   ].join('\n'),
 
@@ -317,7 +318,7 @@ export const DatadogAlertsConnector: ConnectorSpec = {
   },
 
   test: {
-    description: i18n.translate('connectorSpecs.datadogAlerts.test.description', {
+    description: i18n.translate('connectorSpecs.datadog.test.description', {
       defaultMessage: 'Validates Datadog API Key and Application Key',
     }),
     handler: async (ctx) => {

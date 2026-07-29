@@ -27,10 +27,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconVirustotal" */ './specs/virustotal/icon')),
   ],
   [
-    '.datadog_alerts',
+    '.datadog',
     lazy(
       () =>
-        import(/* webpackChunkName: "connectorIconDatadogAlerts" */ './specs/datadog_alerts/icon')
+        import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')
     ),
   ],
   [
