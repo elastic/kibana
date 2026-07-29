@@ -158,10 +158,10 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
     // reset ordering
     const unorderedNewLayerList = getLayerListRaw(getState());
     const newOrder = [];
-    for (let i = 0; i < unorderedNewLayerList.length; i++) {
-      const newIndex = newLayerList.findIndex(({ id }) => id === unorderedNewLayerList[i].id);
-      if (newIndex !== -1) {
-        newOrder.push(newIndex);
+    for (let i = 0; i < newLayerList.length; i++) {
+      const index = unorderedNewLayerList.findIndex(({ id }) => id === newLayerList[i].id);
+      if (index !== -1) {
+        newOrder.push(index);
       }
     }
     dispatch(updateLayerOrder(newOrder));
