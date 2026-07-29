@@ -873,24 +873,26 @@ export class RulesClient {
    * Rotates the executor task API key for each rule to one derived from the
    * current user's credentials. The v2 executor authenticates against ES with a
    * Task Manager-managed API key captured from whoever last created/updated the
-   * rule; that key never expires, so it can outlive the user's privileges. Re-
-   * scheduling the executor task with the current request re-provisions the key
-   * (see `bulkSchedule` → `grantApiKeysFromRequest`); `bulkSchedule` overwrites
-   * the task document, so this also resets the task's next run time (a single
-   * rule re-runs immediately) and clears its stored state.
+   * rule; that key never expires, so it can outlive the user's privileges.
    *
-   * Only *enabled* rules are rotated. A disabled rule has no executor task
-   * (disabling removes it), so scheduling one here would leave behind a disabled
-   * task document — which later corrupts re-enable (Task Manager's update path
-   * never re-applies `enabled: true`, leaving the rule permanently non-running).
-   * Disabled rules are therefore rejected with a `RULE_DISABLED` per-rule error
-   * and never scheduled.
+   * Rotation goes through `taskManager.bulkUpdateSchedules(..., { regenerateApiKey: true })`
+   * rather than `bulkSchedule`: it updates the *existing* task in place (no
+   * re-create, so `runAt`/state are preserved) and — crucially — grants a new
+   * key **and invalidates the old one** (`bulkSchedule` only grants, leaking the
+   * previous key). `bulkUpdateSchedules` takes a single schedule per call, so we
+   * group rules by their interval and pass each group its own interval, leaving
+   * the cadence unchanged (only the key rotates).
    *
-   * Key rotation runs *before* the saved-object audit-metadata update: the
-   * rotation is the operation's real side effect, so `updatedBy`/`updatedAt`
-   * must only be stamped for rules whose key actually rotated. Rotation is
-   * all-or-nothing, so if it fails the error propagates and the whole request
-   * fails with no rule touched — rather than silently reporting success.
+   * Rules that cannot be rotated are reported as per-rule errors, never dropped:
+   *   - disabled rules (`RULE_DISABLED`) — a disabled rule has no executor task;
+   *     rotating would recreate one and corrupt a later re-enable, so they are
+   *     rejected before any Task Manager call.
+   *   - currently-running rules (`RULE_ALREADY_RUNNING`) — `bulkUpdateSchedules`
+   *     only touches `idle` tasks, so a running task is skipped; we surface it
+   *     instead of silently leaving its key un-rotated.
+   *
+   * The saved-object audit metadata (`updatedBy`/`updatedAt`) is stamped only for
+   * rules whose key actually rotated.
    */
   private async executeBulkUpdateApiKey(ids: string[]): Promise<BulkResponse> {
     const { spaceId } = this.getSpaceContext();
@@ -905,6 +907,7 @@ export class RulesClient {
 
     const candidates: Array<{
       id: string;
+      taskId: string;
       attrs: RuleSavedObjectAttributes;
       version?: string;
     }> = [];
@@ -926,46 +929,94 @@ export class RulesClient {
         continue;
       }
 
-      candidates.push({ id: doc.id, attrs: doc.attributes, version: doc.version });
+      candidates.push({
+        id: doc.id,
+        taskId: getRuleExecutorTaskId({ ruleId: doc.id, spaceId }),
+        attrs: doc.attributes,
+        version: doc.version,
+      });
     }
 
     if (candidates.length === 0) {
       return { affected_count: 0, errors };
     }
 
-    // 1) Rotate the keys first by re-scheduling the executor tasks with the
-    // current request. Only enabled rules reach this point, so the task is always
-    // scheduled enabled; the schedule interval is carried over so the cadence is
-    // unchanged. `bulkSchedule` overwrites the task document, so this also resets
-    // the task's next run time and stored state.
-    const tasksToSchedule = candidates.map((candidate) => ({
-      id: getRuleExecutorTaskId({ ruleId: candidate.id, spaceId }),
-      taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-      schedule: { interval: candidate.attrs.schedule.every },
-      params: { ruleId: candidate.id, spaceId } satisfies RuleExecutorTaskParams,
-      state: {} as Record<string, unknown>,
-      scope: ['alerting'],
-      enabled: true,
-    }));
+    // 1) Rotate keys on the existing executor tasks. `bulkUpdateSchedules` takes
+    // one schedule per call, so group by interval and pass each group its own
+    // interval — the schedule is unchanged, only the key rotates (and the old one
+    // is invalidated).
+    const taskIdToRuleId = new Map(candidates.map((candidate) => [candidate.taskId, candidate.id]));
+    const candidatesByInterval = new Map<string, typeof candidates>();
+    for (const candidate of candidates) {
+      const interval = candidate.attrs.schedule.every;
+      const group = candidatesByInterval.get(interval) ?? [];
+      group.push(candidate);
+      candidatesByInterval.set(interval, group);
+    }
 
-    // Task Manager provisions the API key once per task type, and every executor
-    // task shares one type — so this is all-or-nothing: if that single key grant
-    // fails, `bulkSchedule` rejects and NO rule is re-keyed. Rotation is this
-    // operation's whole purpose (unlike enable/disable, there is no other side
-    // effect to report), so let the error propagate — the route maps it to a
-    // structured error response. Because rotation runs before the saved objects
-    // are touched, a failure leaves every rule fully untouched.
-    await this.taskManager.bulkSchedule(tasksToSchedule, {
-      request: this.request as unknown as CoreKibanaRequest,
-      cloneApiKey: true,
-    });
+    const rotatedTaskIds = new Set<string>();
+    const erroredRuleIds = new Set<string>();
+
+    for (const [interval, group] of candidatesByInterval) {
+      // A total key-grant failure (e.g. API keys disabled) rejects here and
+      // propagates — the route maps it to a structured error response, and no
+      // audit metadata is written. Per-task failures come back as `errors`.
+      const result = await this.taskManager.bulkUpdateSchedules(
+        group.map((candidate) => candidate.taskId),
+        { interval },
+        {
+          request: this.request as unknown as CoreKibanaRequest,
+          regenerateApiKey: true,
+        }
+      );
+
+      for (const task of result.tasks) {
+        rotatedTaskIds.add(task.id);
+      }
+      for (const taskError of result.errors) {
+        const ruleId = taskIdToRuleId.get(taskError.id) ?? taskError.id;
+        erroredRuleIds.add(ruleId);
+        errors.push({
+          id: ruleId,
+          error: {
+            code: bulkErrorCodeForStatus(taskError.status ?? 500),
+            message: `Failed to update the executor task API key for rule "${ruleId}"`,
+          },
+        });
+      }
+    }
+
+    // `bulkUpdateSchedules` only touches `idle` tasks, so a candidate that was
+    // neither rotated nor errored was skipped because its task is running. Report
+    // it rather than silently leaving its key un-rotated.
+    const rotatedCandidates: typeof candidates = [];
+    for (const candidate of candidates) {
+      if (rotatedTaskIds.has(candidate.taskId)) {
+        rotatedCandidates.push(candidate);
+        continue;
+      }
+      if (erroredRuleIds.has(candidate.id)) {
+        continue;
+      }
+      errors.push({
+        id: candidate.id,
+        error: {
+          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+          message: `Rule with id "${candidate.id}" is currently running; its API key cannot be updated until the run finishes`,
+        },
+      });
+    }
+
+    if (rotatedCandidates.length === 0) {
+      return { affected_count: 0, errors };
+    }
 
     // 2) Keys rotated — stamp the audit metadata so the rotation is attributable
     // to the current user. Per-rule save failures are reported as errors.
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
-    const itemsToUpdate = candidates.map((candidate) => ({
+    const itemsToUpdate = rotatedCandidates.map((candidate) => ({
       id: candidate.id,
       attrs: {
         ...candidate.attrs,
