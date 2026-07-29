@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { maxReferencedContentItems } from '@kbn/agent-builder-common';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { loadSkillFromDirectory } from './load_skill_from_directory';
+import type { SkillLoadErrorCode } from './skill_load_error';
 
 const BASE_PATH = 'skills/search' as const;
 
@@ -168,10 +169,59 @@ describe('loadSkillFromDirectory', () => {
       writeFile(dir, filePath, 'Rejected content.');
 
       expect(() => loadSkillFromDirectory(dir, BASE_PATH, { logger })).toThrow(
-        `has an invalid path segment "${invalidSegment}"`
+        expect.objectContaining({
+          name: 'SkillLoadError',
+          code: 'invalid_reference_name',
+          message: expect.stringContaining(`has an invalid path segment "${invalidSegment}"`),
+        })
       );
     }
   );
+
+  it('throws for a markdown reference with an uppercase extension', () => {
+    const dir = skillDir('uppercase-extension');
+    writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
+    writeFile(dir, 'overview.MD', 'Overview content.');
+
+    expect(() => loadSkillFromDirectory(dir, BASE_PATH, { logger })).toThrow(
+      expect.objectContaining({
+        name: 'SkillLoadError',
+        code: 'invalid_reference_name',
+        message: expect.stringContaining('must use a lowercase ".md" extension, but has ".MD"'),
+      })
+    );
+  });
+
+  it('ignores dot-prefixed files and directories', () => {
+    const dir = skillDir('dot-prefixed');
+    writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
+    writeFile(dir, '.github/CODEOWNERS.md', 'ignored');
+    writeFile(dir, '.hidden.md', 'ignored');
+    writeFile(dir, 'reference.md', 'kept');
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.referencedContent).toEqual([
+      { name: 'reference', relativePath: '.', content: 'kept' },
+    ]);
+  });
+
+  it('does not follow symlinks out of the skill directory', () => {
+    const outside = skillDir('outside');
+    writeFile(outside, 'secret.md', 'Secret content.');
+    const dir = skillDir('symlinked');
+    writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
+    writeFile(dir, 'reference.md', 'kept');
+    symlinkSync(outside, join(dir, 'linked-dir'));
+    symlinkSync(join(outside, 'secret.md'), join(dir, 'linked-file.md'));
+    symlinkSync(dir, join(dir, 'cycle'));
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.referencedContent).toEqual([
+      { name: 'reference', relativePath: '.', content: 'kept' },
+    ]);
+  });
 
   it('trims reference content', () => {
     const dir = skillDir('untrimmed-ref');
@@ -228,82 +278,107 @@ describe('loadSkillFromDirectory', () => {
     fileName: string;
     content: string;
     expectedError: RegExp;
+    expectedCode: SkillLoadErrorCode;
   }> = [
     {
       label: 'SKILL.md is missing',
       fileName: 'overview.md',
       content: 'Orphan reference.',
       expectedError: /no SKILL\.md found/,
+      expectedCode: 'missing_skill_file',
     },
     {
       label: 'the skill file name differs in case from SKILL.md',
       fileName: 'skill.md',
       content: skillMarkdown(['name: my-skill', 'description: desc.']),
       expectedError: /no SKILL\.md found/,
+      expectedCode: 'missing_skill_file',
     },
     {
       label: 'the frontmatter block is missing',
       fileName: 'SKILL.md',
       content: 'Just a body, no frontmatter.',
       expectedError: /must begin with a valid YAML/,
+      expectedCode: 'invalid_frontmatter',
+    },
+    {
+      label: 'the frontmatter block is not valid YAML',
+      fileName: 'SKILL.md',
+      content: ['---', 'name: : : broken', '  bad indent', '---', '', 'Body.'].join('\n'),
+      expectedError: /must begin with a valid YAML.*Nested mappings are not allowed/,
+      expectedCode: 'invalid_frontmatter',
     },
     {
       label: 'the frontmatter block is empty',
       fileName: 'SKILL.md',
       content: ['---', '---', '', 'Body.'].join('\n'),
       expectedError: /invalid frontmatter/,
+      expectedCode: 'invalid_frontmatter',
     },
     {
       label: 'the skill body is empty',
       fileName: 'SKILL.md',
       content: ['---', 'name: my-skill', 'description: desc.', '---', ''].join('\n'),
       expectedError: /Content must be non-empty/,
+      expectedCode: 'invalid_definition',
     },
     {
       label: 'the frontmatter is missing name',
       fileName: 'SKILL.md',
       content: skillMarkdown(['description: desc.']),
       expectedError: /invalid frontmatter/,
+      expectedCode: 'invalid_frontmatter',
     },
     {
       label: 'the frontmatter is missing description',
       fileName: 'SKILL.md',
       content: skillMarkdown(['name: my-skill']),
       expectedError: /invalid frontmatter/,
+      expectedCode: 'invalid_frontmatter',
     },
     {
       label: 'experimental is not a boolean',
       fileName: 'SKILL.md',
       content: skillMarkdown(['name: my-skill', 'description: desc.', 'experimental: maybe']),
       expectedError: /invalid frontmatter/,
+      expectedCode: 'invalid_frontmatter',
     },
     {
       label: 'an explicit id violates the skill ID format',
       fileName: 'SKILL.md',
       content: skillMarkdown(['name: my-skill', 'id: Not A Valid Id', 'description: desc.']),
       expectedError: /invalid skill ID/,
+      expectedCode: 'invalid_frontmatter',
     },
     {
       label: 'the id defaulted from name violates the skill ID format',
       fileName: 'SKILL.md',
       content: skillMarkdown(['name: -leading-hyphen', 'description: desc.']),
       expectedError: /invalid skill ID/,
+      expectedCode: 'invalid_frontmatter',
     },
     {
       label: 'the name violates the schema',
       fileName: 'SKILL.md',
       content: skillMarkdown(['name: Invalid Name', 'id: valid-id', 'description: desc.']),
       expectedError: /invalid skill/,
+      expectedCode: 'invalid_definition',
     },
   ];
 
   it.each(invalidSkillCases)(
     'throws when $label',
-    ({ label, fileName, content, expectedError }) => {
+    ({ label, fileName, content, expectedError, expectedCode }) => {
       const dir = skillDir(dirNameFor(label));
       writeFile(dir, fileName, content);
 
-      expect(() => loadSkillFromDirectory(dir, BASE_PATH, { logger })).toThrow(expectedError);
+      expect(() => loadSkillFromDirectory(dir, BASE_PATH, { logger })).toThrow(
+        expect.objectContaining({
+          name: 'SkillLoadError',
+          code: expectedCode,
+          message: expect.stringMatching(expectedError),
+        })
+      );
     }
   );
 
@@ -313,7 +388,11 @@ describe('loadSkillFromDirectory', () => {
     writeFile(dir, 'overview.md', '   \n  \n');
 
     expect(() => loadSkillFromDirectory(dir, BASE_PATH, { logger })).toThrow(
-      /reference file "overview\.md" is empty/
+      expect.objectContaining({
+        name: 'SkillLoadError',
+        code: 'empty_reference',
+        message: expect.stringMatching(/reference file "overview\.md" is empty/),
+      })
     );
   });
 

@@ -9,3 +9,5 @@ export { loadSkillFromDirectory } from './load_skill_from_directory';
 export type { LoadSkillFromDirectoryDeps } from './load_skill_from_directory';
 export { splitFrontmatter } from './split_frontmatter';
 export type { SplitFrontmatterResult } from './split_frontmatter';
+export { SkillLoadError } from './skill_load_error';
+export type { SkillLoadErrorCode } from './skill_load_error';

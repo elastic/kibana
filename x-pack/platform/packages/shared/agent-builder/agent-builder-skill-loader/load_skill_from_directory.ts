@@ -7,12 +7,14 @@
 
 import { readFileSync, readdirSync, statSync } from 'fs';
 import { join, parse, relative, sep } from 'path';
+import { sortBy } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import { maxReferencedContentItems, validateSkillId } from '@kbn/agent-builder-common';
 import { skillDefinitionSchema } from '@kbn/agent-builder-server/skills';
 import type { DirectoryPath, SkillDefinition } from '@kbn/agent-builder-server/skills';
 import { splitFrontmatter } from './split_frontmatter';
+import { SkillLoadError } from './skill_load_error';
 
 const SKILL_FILE_NAME = 'SKILL.md';
 const MARKDOWN_EXTENSION = '.md';
@@ -37,14 +39,13 @@ export interface LoadSkillFromDirectoryDeps {
  * Loads a {@link SkillDefinition} from a directory containing a top-level `SKILL.md`. Every
  * other `.md` file under that directory becomes referenced content, with its `relativePath`
  * derived from where it sits in the tree (`.` for files alongside `SKILL.md`, then `./sub`,
- * `./sub/deep`).
+ * `./sub/deep`). Ignores dot-prefixed files and directories, as well as symlinks.
  *
  * @param absoluteDir - Absolute path to the skill directory.
  * @param basePath - Base path the skill is registered under.
  * @param deps - See {@link LoadSkillFromDirectoryDeps}.
  * @returns The loaded skill, validated against `skillDefinitionSchema`.
- * @throws If `SKILL.md` is missing, the frontmatter is missing or invalid, a markdown file has an
- * unusable name, a reference file is empty, or the resulting skill fails schema validation.
+ * @throws {SkillLoadError} See {@link SkillLoadError.code} for the failure modes.
  */
 export const loadSkillFromDirectory = (
   absoluteDir: string,
@@ -53,7 +54,10 @@ export const loadSkillFromDirectory = (
 ): SkillDefinition => {
   const skillPath = join(absoluteDir, SKILL_FILE_NAME);
   if (!hasExactSkillFile(absoluteDir)) {
-    throw new Error(`loadSkillFromDirectory: no ${SKILL_FILE_NAME} found at "${skillPath}"`);
+    throw new SkillLoadError(
+      'missing_skill_file',
+      `loadSkillFromDirectory: no ${SKILL_FILE_NAME} found at "${skillPath}"`
+    );
   }
 
   const frontmatter = parseFrontmatter(readFileSync(skillPath, 'utf8'), skillPath);
@@ -61,14 +65,16 @@ export const loadSkillFromDirectory = (
   const id = frontmatter.id ?? frontmatter.name;
   const idError = validateSkillId(id);
   if (idError) {
-    throw new Error(
+    throw new SkillLoadError(
+      'invalid_frontmatter',
       `loadSkillFromDirectory: invalid skill ID "${id}" in "${skillPath}": ${idError}`
     );
   }
 
   const referencedContent = collectReferencedContent(absoluteDir, logger);
   if (referencedContent.length > maxReferencedContentItems) {
-    throw new Error(
+    throw new SkillLoadError(
+      'too_many_references',
       `loadSkillFromDirectory: skill at "${skillPath}" has ${referencedContent.length} referenced ` +
         `files, but at most ${maxReferencedContentItems} are allowed.`
     );
@@ -86,7 +92,8 @@ export const loadSkillFromDirectory = (
 
   const result = skillDefinitionSchema.safeParse(skill);
   if (!result.success) {
-    throw new Error(
+    throw new SkillLoadError(
+      'invalid_definition',
       `loadSkillFromDirectory: invalid skill at "${skillPath}": ${formatZodIssues(result.error)}`
     );
   }
@@ -112,16 +119,19 @@ interface ParsedFrontmatter {
 }
 
 const parseFrontmatter = (skillMarkdown: string, skillPath: string): ParsedFrontmatter => {
-  const { frontmatter, body } = splitFrontmatter(skillMarkdown);
+  const { frontmatter, body, error } = splitFrontmatter(skillMarkdown);
   if (!frontmatter) {
-    throw new Error(
-      `loadSkillFromDirectory: ${SKILL_FILE_NAME} at "${skillPath}" must begin with a valid YAML frontmatter block (--- ... ---) that parses to a mapping`
+    throw new SkillLoadError(
+      'invalid_frontmatter',
+      `loadSkillFromDirectory: ${SKILL_FILE_NAME} at "${skillPath}" must begin with a valid YAML ` +
+        `frontmatter block (--- ... ---) that parses to a mapping${error ? `: ${error}` : ''}`
     );
   }
 
   const result = frontmatterSchema.safeParse(frontmatter);
   if (!result.success) {
-    throw new Error(
+    throw new SkillLoadError(
+      'invalid_frontmatter',
       `loadSkillFromDirectory: invalid frontmatter in "${skillPath}": ${formatZodIssues(
         result.error
       )}`
@@ -142,9 +152,17 @@ const collectReferencedContent = (
     const relativeFilePath = relative(absoluteDir, fullPath);
     const { dir, base, name, ext } = parse(relativeFilePath);
 
-    if (ext !== MARKDOWN_EXTENSION) {
+    if (ext.toLowerCase() !== MARKDOWN_EXTENSION) {
       skipped.push(relativeFilePath);
       continue;
+    }
+
+    if (ext !== MARKDOWN_EXTENSION) {
+      throw new SkillLoadError(
+        'invalid_reference_name',
+        `loadSkillFromDirectory: reference file "${relativeFilePath}" must use a lowercase ` +
+          `"${MARKDOWN_EXTENSION}" extension, but has "${ext}".`
+      );
     }
 
     const dirSegments = dir ? dir.split(sep) : [];
@@ -154,7 +172,8 @@ const collectReferencedContent = (
     }
 
     if (dirSegments.length === 0 && name.toLowerCase() === RESERVED_ROOT_REFERENCE_NAME) {
-      throw new Error(
+      throw new SkillLoadError(
+        'invalid_reference_name',
         `loadSkillFromDirectory: reference file "${relativeFilePath}" uses the reserved name ` +
           `"${name}". ${SKILL_FILE_NAME} already provides the skill's instructions.`
       );
@@ -164,7 +183,8 @@ const collectReferencedContent = (
       (segment) => !REFERENCE_SEGMENT_REGEX.test(segment)
     );
     if (invalidSegment !== undefined) {
-      throw new Error(
+      throw new SkillLoadError(
+        'invalid_reference_name',
         `loadSkillFromDirectory: reference file "${relativeFilePath}" has an invalid path segment ` +
           `"${invalidSegment}". Segments must contain only lowercase letters, numbers, hyphens, ` +
           `and underscores, and must start and end with a letter or number.`
@@ -173,7 +193,10 @@ const collectReferencedContent = (
 
     const content = readFileSync(fullPath, 'utf8').trim();
     if (!content) {
-      throw new Error(`loadSkillFromDirectory: reference file "${relativeFilePath}" is empty.`);
+      throw new SkillLoadError(
+        'empty_reference',
+        `loadSkillFromDirectory: reference file "${relativeFilePath}" is empty.`
+      );
     }
 
     referencedContent.push({
@@ -194,10 +217,11 @@ const collectReferencedContent = (
 };
 
 function* walkFiles(dir: string): Generator<string> {
-  const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
-    a.name.localeCompare(b.name)
-  );
+  const entries = sortBy(readdirSync(dir, { withFileTypes: true }), (entry) => entry.name);
   for (const entry of entries) {
+    if (entry.name.startsWith('.')) {
+      continue;
+    }
     const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
       yield* walkFiles(fullPath);

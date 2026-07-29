@@ -36,30 +36,61 @@ describe('splitFrontmatter', () => {
     expect(body).toBe('Body text.');
   });
 
-  const nullFrontmatterCases: Array<{ label: string; raw: string; expectedBody: string }> = [
+  it('ignores a leading byte order mark', () => {
+    const raw = `\uFEFF${['---', 'name: my-skill', '---', '', 'Body text.'].join('\n')}`;
+
+    const { frontmatter, body } = splitFrontmatter(raw);
+
+    expect(frontmatter).toEqual({ name: 'my-skill' });
+    expect(body).toBe('Body text.');
+  });
+
+  it('strips a leading byte order mark from a body with no frontmatter', () => {
+    const { body } = splitFrontmatter('\uFEFFJust a body.');
+
+    expect(body).toBe('Just a body.');
+  });
+
+  const nullFrontmatterCases: Array<{
+    label: string;
+    raw: string;
+    expectedBody: string;
+    expectedError: RegExp | undefined;
+  }> = [
     {
       label: 'no block is present',
       raw: 'Just a body with no frontmatter.',
       expectedBody: 'Just a body with no frontmatter.',
+      expectedError: undefined,
     },
     {
       label: 'the block is invalid YAML',
       raw: ['---', 'name: : : broken', '  bad indent', '---', 'Body.'].join('\n'),
       expectedBody: 'Body.',
+      expectedError: /Nested mappings are not allowed .* at line 1, column 7/,
     },
     {
       label: 'the block is not an object',
       raw: ['---', '- just', '- a', '- list', '---', 'Body.'].join('\n'),
       expectedBody: 'Body.',
+      expectedError: /must be a mapping of keys to values/,
     },
   ];
 
-  it.each(nullFrontmatterCases)('returns null frontmatter when $label', ({ raw, expectedBody }) => {
-    const { frontmatter, body } = splitFrontmatter(raw);
+  it.each(nullFrontmatterCases)(
+    'returns null frontmatter when $label',
+    ({ raw, expectedBody, expectedError }) => {
+      const { frontmatter, body, error } = splitFrontmatter(raw);
 
-    expect(frontmatter).toBeNull();
-    expect(body).toBe(expectedBody);
-  });
+      expect(frontmatter).toBeNull();
+      expect(body).toBe(expectedBody);
+      if (expectedError) {
+        expect(error).toMatch(expectedError);
+      } else {
+        expect(error).toBeUndefined();
+      }
+    }
+  );
 
   it('returns an empty object for an empty block', () => {
     const raw = ['---', '---', '', 'Body.'].join('\n');
@@ -79,12 +110,24 @@ describe('splitFrontmatter', () => {
     expect(body).toBe('');
   });
 
-  it('does not treat a "---" inside a value as the closing delimiter', () => {
-    const raw = ['---', 'description: a --- b', '---', '', 'Body.'].join('\n');
+  it.each([
+    { label: 'in the middle of a value', value: 'a --- b' },
+    { label: 'at the end of a value', value: 'abcdef ---' },
+  ])('does not treat a "---" $label as the closing delimiter', ({ value }) => {
+    const raw = ['---', `description: ${value}`, '---', '', 'Body.'].join('\n');
 
     const { frontmatter, body } = splitFrontmatter(raw);
 
-    expect(frontmatter).toEqual({ description: 'a --- b' });
+    expect(frontmatter).toEqual({ description: value });
     expect(body).toBe('Body.');
+  });
+
+  it('keeps a "---" line in the body out of the frontmatter', () => {
+    const raw = ['---', 'name: my-skill', '---', '', 'Body.', '', '---', '', 'More.'].join('\n');
+
+    const { frontmatter, body } = splitFrontmatter(raw);
+
+    expect(frontmatter).toEqual({ name: 'my-skill' });
+    expect(body).toBe(['Body.', '', '---', '', 'More.'].join('\n'));
   });
 });

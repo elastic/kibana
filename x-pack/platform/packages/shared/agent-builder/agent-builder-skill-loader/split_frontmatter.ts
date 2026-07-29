@@ -8,12 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { parse as parseYaml } from 'yaml';
 
-export interface SplitFrontmatterResult {
-  frontmatter: Record<string, unknown> | null;
-  body: string;
-}
+export type SplitFrontmatterResult =
+  | { frontmatter: Record<string, unknown>; body: string; error?: never }
+  | { frontmatter: null; body: string; error?: string };
 
-const FRONTMATTER_REGEX = /^---[ \t]*\r?\n([\s\S]*?)(?:\r?\n)?---[ \t]*(?:\r?\n([\s\S]*))?$/;
+const FRONTMATTER_REGEX = /^---[ \t]*\r?\n(?:([\s\S]*?)\r?\n)?---[ \t]*(?:\r?\n([\s\S]*))?$/;
+const BYTE_ORDER_MARK = '\uFEFF';
 
 const frontmatterObjectSchema = z.record(z.string(), z.unknown());
 
@@ -22,15 +22,18 @@ const frontmatterObjectSchema = z.record(z.string(), z.unknown());
  * markdown body.
  *
  * @param rawContent - Raw contents of a `SKILL.md` file.
- * @returns The parsed `frontmatter` object alongside the trimmed markdown
- * `body`.
+ * @returns The parsed frontmatter and markdown body, per {@link SplitFrontmatterResult}.
  */
 export const splitFrontmatter = (rawContent: string): SplitFrontmatterResult => {
-  const match = rawContent.match(FRONTMATTER_REGEX);
+  const content = rawContent.startsWith(BYTE_ORDER_MARK)
+    ? rawContent.slice(BYTE_ORDER_MARK.length)
+    : rawContent;
+
+  const match = content.match(FRONTMATTER_REGEX);
   if (!match) {
     return {
       frontmatter: null,
-      body: rawContent.trim(),
+      body: content.trim(),
     };
   }
 
@@ -40,14 +43,20 @@ export const splitFrontmatter = (rawContent: string): SplitFrontmatterResult => 
   let loaded: unknown;
   try {
     loaded = parseYaml(frontmatterRaw) ?? {};
-  } catch {
-    return { frontmatter: null, body };
+  } catch (yamlError) {
+    return { frontmatter: null, body, error: toYamlErrorReason(yamlError) };
   }
 
   const parsed = frontmatterObjectSchema.safeParse(loaded);
+  if (!parsed.success) {
+    return { frontmatter: null, body, error: 'frontmatter must be a mapping of keys to values' };
+  }
 
-  return {
-    frontmatter: parsed.success ? parsed.data : null,
-    body,
-  };
+  return { frontmatter: parsed.data, body };
+};
+
+const toYamlErrorReason = (yamlError: unknown): string => {
+  const message = yamlError instanceof Error ? yamlError.message : String(yamlError);
+  const [firstLine = ''] = message.split('\n');
+  return firstLine.replace(/:$/, '');
 };
