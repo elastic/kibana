@@ -8,10 +8,7 @@
  */
 
 import { from, where } from '@kbn/esql-composer';
-import {
-  ESQL_NULLIFY_UNMAPPED_FIELDS,
-  withUnmappedFields,
-} from './esql_unmapped_fields';
+import { ESQL_NULLIFY_UNMAPPED_FIELDS, withUnmappedFields } from './esql_unmapped_fields';
 
 describe('withUnmappedFields', () => {
   it('prepends NULLIFY with newline by default (multiline: true)', () => {
@@ -30,7 +27,9 @@ describe('withUnmappedFields', () => {
       .toString();
 
     expect(composerOutput).toContain('\n');
-    expect(withUnmappedFields(composerOutput)).toBe(`${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${composerOutput}`);
+    expect(withUnmappedFields(composerOutput)).toBe(
+      `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${composerOutput}`
+    );
   });
 
   it('collapses a multi-line composer query into a single line when multiline: false', () => {
