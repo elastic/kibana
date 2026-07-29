@@ -13135,7 +13135,6 @@
     "xpack.apm.serviceMap.traceInformation.traceIdLabel": "ID de trace",
     "xpack.apm.serviceMap.traceInformation.traceIdPlaceholder": "Sélectionner ou saisir un ID de trace",
     "xpack.apm.serviceMap.typePopoverStat": "Type",
-    "xpack.apm.serviceMap.viewFullServiceMapButton": "Afficher le mapping des services complet",
     "xpack.apm.serviceMetrics.loading": "Chargement des indicateurs",
     "xpack.apm.serviceNamesSelectPlaceholder": "Sélectionner le nom du service",
     "xpack.apm.serviceNodeMetrics.containerId": "ID de conteneur",

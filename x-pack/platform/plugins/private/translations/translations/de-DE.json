@@ -13155,7 +13155,6 @@
     "xpack.apm.serviceMap.traceInformation.traceIdLabel": "Trace-ID",
     "xpack.apm.serviceMap.traceInformation.traceIdPlaceholder": "Trace-ID auswählen oder eingeben",
     "xpack.apm.serviceMap.typePopoverStat": "Typ",
-    "xpack.apm.serviceMap.viewFullServiceMapButton": "Vollständige Shard anzeigen",
     "xpack.apm.serviceMetrics.loading": "Metriken werden geladen",
     "xpack.apm.serviceNamesSelectCustomOptionText": "Fügen Sie '{searchValue}' als neuen Servicenamen hinzu",
     "xpack.apm.serviceNamesSelectPlaceholder": "Servicenamen auswählen",

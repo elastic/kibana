@@ -118,7 +118,7 @@ interface GraphProps {
   flyoutOptions?: ServiceFlyoutOptions;
   isFullscreen?: boolean;
   onToggleFullscreen?: () => void;
-  /** When set, shows a "View full service map" button that links to the full map (focused map only) */
+  /** When set, shows a "View in Service map" button that links to the global map. */
   fullMapHref?: string;
   /** When true, hides minimap, options panel, and navigation actions that don't apply in dashboard embeds. */
   isEmbedded?: boolean;
@@ -619,9 +619,12 @@ function GraphInner({
         defaultMessage: 'Enter fullscreen',
       });
 
-  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
-    defaultMessage: 'View full service map',
-  });
+  const viewInServiceMapButtonLabel = i18n.translate(
+    'xpack.apm.serviceMap.viewInServiceMapButton',
+    {
+      defaultMessage: 'View in Service map',
+    }
+  );
 
   const zoomInLabel = i18n.translate('xpack.apm.serviceMap.zoomInControl', {
     defaultMessage: 'Zoom In',
@@ -838,14 +841,14 @@ function GraphInner({
                       />
                     </EuiToolTip>
                     {fullMapHref && (
-                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+                      <EuiToolTip content={viewInServiceMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
                           display="empty"
                           color="text"
                           size="s"
                           iconType="apps"
                           href={fullMapHref}
-                          aria-label={viewFullMapButtonLabel}
+                          aria-label={viewInServiceMapButtonLabel}
                           data-test-subj="serviceMapViewFullMapButton"
                           css={mapToolbarControlIconCss}
                         />
