@@ -13,9 +13,6 @@ import {
   ruleTemplateDataSchema,
 } from './rule_template_schema';
 
-/**
- * Mirrors attributes in repo-root `rule_template_v2.example.json`.
- */
 const exampleTemplateAttributes = {
   kind: 'alert' as const,
   engine: 'v2' as const,
