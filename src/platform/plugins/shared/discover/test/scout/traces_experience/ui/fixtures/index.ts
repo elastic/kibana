@@ -56,3 +56,4 @@ export {
   deepTrace,
   otelTrace,
 } from './synthtrace/complete_traces_experience';
+export { indexUnprocessedOtelTrace } from './synthtrace/otel_unprocessed';

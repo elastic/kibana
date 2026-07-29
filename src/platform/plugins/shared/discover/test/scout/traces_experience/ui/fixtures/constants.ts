@@ -60,5 +60,5 @@ export const PRODUCER_TRACE = {
 export const OTEL_SERVICE = {
   SERVICE_NAME: 'synth-traces-otel',
   NAMESPACE: 'production',
-  ESQL_QUERY: 'FROM traces-generic.otel-*',
+  ESQL_QUERY: 'FROM traces-test.otel-*',
 };
