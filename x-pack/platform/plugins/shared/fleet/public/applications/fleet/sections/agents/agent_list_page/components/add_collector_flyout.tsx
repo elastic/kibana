@@ -621,6 +621,10 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
                       onClick={onCreateApiKey}
                       isLoading={isCreatingApiKey}
                       isDisabled={!!apiKeyEncoded || !canCreateApiKey}
+                      // aria-disabled keeps the button focusable and sets pointer-events:none so
+                      // the EuiToolTip anchor span receives hover events cross-browser.
+                      // Scoped to !canCreateApiKey only — the apiKeyEncoded case has no tooltip.
+                      hasAriaDisabled={!canCreateApiKey}
                       iconType={apiKeyEncoded ? 'check' : undefined}
                       color={apiKeyEncoded ? 'success' : 'primary'}
                     >

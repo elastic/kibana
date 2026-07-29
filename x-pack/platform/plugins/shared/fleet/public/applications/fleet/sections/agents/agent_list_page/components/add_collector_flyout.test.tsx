@@ -339,11 +339,18 @@ describe('AddCollectorFlyout', () => {
 
       const component = renderFlyout();
 
-      await waitFor(() => {
-        expect(component.getByText('Create API key').closest('button')).toBeDisabled();
+      const btn = await waitFor(() => {
+        const b = component.getByText('Create API key').closest('button');
+        // hasAriaDisabled renders aria-disabled="true" (not native disabled), preserving
+        // focusability and letting EUI apply pointer-events:none via CSS so the tooltip
+        // anchor span receives hover events in real browsers.
+        expect(b).toHaveAttribute('aria-disabled', 'true');
+        return b;
       });
 
-      fireEvent.mouseOver(component.getByText('Create API key'));
+      // In jsdom, CSS pointer-events:none is not enforced. Fire mouseOver on the EuiToolTip
+      // anchor span (button's direct parent) to simulate real-browser tooltip hover.
+      fireEvent.mouseOver(btn!.parentElement!);
 
       await waitFor(() => {
         expect(
