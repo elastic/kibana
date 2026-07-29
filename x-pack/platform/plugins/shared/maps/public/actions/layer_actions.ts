@@ -50,7 +50,6 @@ import type {
   JoinDescriptor,
   LayerDescriptor,
   LayerGroupDescriptor,
-  RuntimeLayerState,
   StyleDescriptor,
   TileError,
   TileMetaFeature,
@@ -114,26 +113,46 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const runtimeLayers: Record<string, RuntimeLayerState> = {};
     const isMapReady = getMapReady(getState());
     if (!isMapReady) {
       dispatch({
         type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
       });
-    } else {
-      getLayerListRaw(getState()).forEach((layerDescriptor) => {
-        runtimeLayers[layerDescriptor.id] = getRuntimeState(layerDescriptor);
-        dispatch(removeLayerFromLayerList(layerDescriptor.id));
+
+      newLayerList.forEach((layerDescriptor) => {
+        dispatch(addLayer(layerDescriptor));
       });
+      return;
     }
 
-    newLayerList.forEach((layerDescriptor) => {
+    const newLayerIds = newLayerList.map(({ id }) => id);
+
+    const currentLayers: Record<string, LayerDescriptor> = {};
+    getLayerListRaw(getState()).forEach((layerDescriptor) => {
+      currentLayers[layerDescriptor.id] = layerDescriptor;
+
+      // Remove layers that no longer exist
+      if (!newLayerIds.includes(layerDescriptor.id)) {
+        dispatch(removeLayerFromLayerList(layerDescriptor.id));
+      }
+    });
+
+    newLayerList.forEach((newLayerDescriptor) => {
+      const currentLayerDescriptor = currentLayers[newLayerDescriptor.id];
+      // Add layers that do not currently exist
+      if (!currentLayerDescriptor) {
+        dispatch(addLayer(newLayerDescriptor));
+        return;
+      }
+
+      // Reset layer with new state + current runtime
       dispatch(
-        addLayer({
-          ...layerDescriptor,
-          ...runtimeLayers[layerDescriptor.id],
+        updateLayerDescriptor({
+          ...newLayerDescriptor,
+          ...getRuntimeState(currentLayerDescriptor),
         })
       );
+      dispatch(syncDataForLayerId(newLayerDescriptor.id, false));
     });
   };
 }
