@@ -45,8 +45,19 @@ const observeCompiler = (
    * Called by webpack as any compilation is complete. If the
    * needAdditionalPass property is set then another compilation
    * is about to be started, so we shouldn't send complete quite yet
+   *
+   * Uses tapAsync at a high stage so all async done hooks from other plugins
+   * (e.g. StatoscopeWebpackPlugin at stage 5000) finish their work (file writes,
+   * report generation) before we signal completion and allow the worker to exit.
    */
-  const complete$ = Rx.fromEventPattern<Stats>((cb) => done.tap(PLUGIN_NAME, cb)).pipe(
+  const complete$ = new Rx.Observable<Stats>((subscriber) => {
+    done.tapAsync({ name: PLUGIN_NAME, stage: 10000 }, (stats, callback) => {
+      if (!subscriber.closed) {
+        subscriber.next(stats);
+      }
+      callback();
+    });
+  }).pipe(
     maybeMap((stats) => {
       if (stats.compilation.needAdditionalPass) {
         return undefined;
@@ -125,9 +136,7 @@ export const runCompilers = (
      */
     Rx.defer(() => {
       if (!workerConfig.watch) {
-        multiCompiler.run(() => {
-          multiCompiler.close(() => {});
-        });
+        multiCompiler.run(() => {});
       } else {
         multiCompiler.watch({}, () => {});
       }
