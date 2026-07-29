@@ -95,8 +95,8 @@ function createNavTree({
   // mirroring the design mockup. A top group shows the existing Infrastructure
   // touchpoints ("Infrastructure inventory", "Hosts") to illustrate where the
   // hub fits in the current experience, then a "Starred integrations" section
-  // (the starred Overview page plus any starred integrations), then the full
-  // "All installed integrations" list. Each integration links to its detail
+  // (the starred integrations), then the full "All installed integrations"
+  // list (led by the "Overview" page). Each integration links to its detail
   // page via a per-integration deep link registered in streams_app (a relative
   // `href` would make the chrome nav throw and blank the whole side nav; an
   // unresolved `link` is safely dropped instead).
@@ -113,6 +113,14 @@ function createNavTree({
   const favoriteIntegrations = favoriteIntegrationIds
     .map((id) => installedIntegrations.find((integration) => integration.id === id))
     .filter((integration): integration is IntegrationSummary => Boolean(integration));
+
+  // A starred integration is pulled up into the "Starred integrations" section
+  // and removed from "Installed integrations" so it appears exactly once. Two
+  // nodes sharing the same deep link would otherwise make the chrome nav
+  // highlight the first (starred) copy no matter which one was clicked.
+  const unstarredIntegrations = installedIntegrations.filter(
+    (integration) => !favoriteIntegrationIds.includes(integration.id)
+  );
 
   const superShortTermPanelChildren = [
     {
@@ -139,28 +147,39 @@ function createNavTree({
         },
       ],
     },
+    // Only render the "Starred integrations" section when something is starred,
+    // to avoid an empty section header.
+    ...(favoriteIntegrations.length > 0
+      ? [
+          {
+            id: 'entityCentricLab-starredIntegrations',
+            title: i18n.translate('xpack.observability.obltNav.integrations.starred', {
+              defaultMessage: 'Starred integrations',
+            }),
+            children: favoriteIntegrations.map((integration) =>
+              integrationNode(integration, 'starred')
+            ),
+          },
+        ]
+      : []),
     {
-      id: 'entityCentricLab-starredIntegrations',
-      title: i18n.translate('xpack.observability.obltNav.integrations.starred', {
-        defaultMessage: 'Starred integrations',
+      id: 'entityCentricLab-allIntegrations',
+      title: i18n.translate('xpack.observability.obltNav.integrations.all', {
+        defaultMessage: 'Installed integrations',
       }),
+      // "Overview" spans every installed integration, so it heads this list
+      // rather than living under "Starred integrations". Starred integrations
+      // are shown only in the section above, not duplicated here.
       children: [
         {
           id: 'entityCentricLab-integrationsOverview',
           link: 'streams:integrations' as const,
           title: i18n.translate('xpack.observability.obltNav.integrations.overview', {
-            defaultMessage: 'Overview',
+            defaultMessage: 'All integrations',
           }),
         },
-        ...favoriteIntegrations.map((integration) => integrationNode(integration, 'starred')),
+        ...unstarredIntegrations.map((integration) => integrationNode(integration, 'all')),
       ],
-    },
-    {
-      id: 'entityCentricLab-allIntegrations',
-      title: i18n.translate('xpack.observability.obltNav.integrations.all', {
-        defaultMessage: 'All installed integrations',
-      }),
-      children: installedIntegrations.map((integration) => integrationNode(integration, 'all')),
     },
   ];
 

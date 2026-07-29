@@ -181,7 +181,7 @@ export const IntegrationStatRow = ({ integration }: { integration: FakeIntegrati
       />
       <StatTile
         label={i18n.translate('xpack.streams.entityCentricLab.integrations.stat.llmJobsSkills', {
-          defaultMessage: 'Anomaly detection jobs & AI skills',
+          defaultMessage: 'Anomaly detection jobs',
         })}
         value={stats.llmJobsSkills}
       />

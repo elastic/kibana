@@ -7,7 +7,6 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -19,10 +18,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFavoriteIntegrations } from '@kbn/entity-centric-lab-flyout';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { getFakeIntegration, type FakeIntegration } from './fake_integrations';
+import { getFakeIntegrations, type FakeIntegration } from './fake_integrations';
 import {
   BrowseMoreIntegrationsBanner,
   IntegrationStatRow,
@@ -77,7 +75,6 @@ const IntegrationSummaryCard = ({
  */
 export const IntegrationsOverviewView = () => {
   const router = useStreamsAppRouter();
-  const favoriteIds = useFavoriteIntegrations();
 
   const openIntegration = useCallback(
     (integrationId: string) => {
@@ -89,9 +86,7 @@ export const IntegrationsOverviewView = () => {
     [router]
   );
 
-  const starredIntegrations = favoriteIds
-    .map((id) => getFakeIntegration(id))
-    .filter((integration): integration is FakeIntegration => Boolean(integration));
+  const installedIntegrations = getFakeIntegrations();
 
   return (
     <>
@@ -100,7 +95,7 @@ export const IntegrationsOverviewView = () => {
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               {i18n.translate('xpack.streams.entityCentricLab.integrations.overviewTitle', {
-                defaultMessage: 'Overview',
+                defaultMessage: 'All integrations',
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -110,47 +105,26 @@ export const IntegrationsOverviewView = () => {
         }
       />
       <StreamsAppPageTemplate.Body>
-        {starredIntegrations.length === 0 ? (
-          <EuiEmptyPrompt
-            iconType="starEmpty"
-            title={
-              <h2>
-                {i18n.translate('xpack.streams.entityCentricLab.integrations.overviewEmptyTitle', {
-                  defaultMessage: 'No starred integrations yet',
-                })}
-              </h2>
-            }
-            body={
-              <p>
-                {i18n.translate('xpack.streams.entityCentricLab.integrations.overviewEmptyBody', {
-                  defaultMessage:
-                    'Star an integration from the Infrastructure navigation to pin it here and see its assets, alerts, and recommendations at a glance.',
-                })}
-              </p>
-            }
-          />
-        ) : (
-          <EuiFlexGroup direction="column" gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                {i18n.translate('xpack.streams.entityCentricLab.integrations.overviewSubtitle', {
-                  defaultMessage:
-                    '{count, plural, one {# starred integration} other {# starred integrations}}. Open one to see everything it ships.',
-                  values: { count: starredIntegrations.length },
-                })}
-              </EuiText>
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.streams.entityCentricLab.integrations.overviewSubtitle', {
+                defaultMessage:
+                  '{count, plural, one {# installed integration} other {# installed integrations}}. Open one to see everything it ships.',
+                values: { count: installedIntegrations.length },
+              })}
+            </EuiText>
+          </EuiFlexItem>
+          {installedIntegrations.map((integration) => (
+            <EuiFlexItem grow={false} key={integration.id}>
+              <IntegrationSummaryCard integration={integration} onOpen={openIntegration} />
             </EuiFlexItem>
-            {starredIntegrations.map((integration) => (
-              <EuiFlexItem grow={false} key={integration.id}>
-                <IntegrationSummaryCard integration={integration} onOpen={openIntegration} />
-              </EuiFlexItem>
-            ))}
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="s" />
-              <BrowseMoreIntegrationsBanner />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+          ))}
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+            <BrowseMoreIntegrationsBanner />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </StreamsAppPageTemplate.Body>
     </>
   );

@@ -327,10 +327,32 @@ const DataStreamsSection = ({
 
 type AssetTab = 'enabled' | 'recommended';
 
-const useEnabledRecommendedTabs = () => {
-  const [tab, setTab] = useState<AssetTab>('enabled');
+const useEnabledRecommendedTabs = (initialTab: AssetTab = 'enabled') => {
+  const [tab, setTab] = useState<AssetTab>(initialTab);
   return { tab, setTab };
 };
+
+const EnabledAssetsEmptyState = () => (
+  <EuiEmptyPrompt
+    iconType="minusInCircle"
+    titleSize="xs"
+    title={
+      <h3>
+        {i18n.translate('xpack.streams.entityCentricLab.integrations.enabledEmptyTitle', {
+          defaultMessage: 'Nothing enabled yet',
+        })}
+      </h3>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.streams.entityCentricLab.integrations.enabledEmptyBody', {
+          defaultMessage:
+            'Switch to the Disabled tab to review and enable what ships with this integration.',
+        })}
+      </p>
+    }
+  />
+);
 
 const EnabledRecommendedToggle = ({
   tab,
@@ -360,7 +382,7 @@ const EnabledRecommendedToggle = ({
       {
         id: `${idPrefix}-recommended`,
         label: i18n.translate('xpack.streams.entityCentricLab.integrations.tab.recommended', {
-          defaultMessage: 'Recommended ({count})',
+          defaultMessage: 'Disabled ({count})',
           values: { count: recommendedCount },
         }),
       },
@@ -476,7 +498,6 @@ const AlertRulesSection = ({
   onOpenAlerts: () => void;
 }) => {
   useIntegrationAssetsVersion();
-  const { tab, setTab } = useEnabledRecommendedTabs();
 
   const enabledRules = useMemo(
     () => [
@@ -493,6 +514,12 @@ const AlertRulesSection = ({
         (rule) => !isRecommendedAssetEnabled(integration.id, rule.id)
       ),
     [integration]
+  );
+
+  // Default to the "Disabled" tab only when nothing is enabled, so the user
+  // lands on the actionable list rather than an empty "Enabled" one.
+  const { tab, setTab } = useEnabledRecommendedTabs(
+    enabledRules.length === 0 ? 'recommended' : 'enabled'
   );
 
   const sharedColumns: Array<EuiBasicTableColumn<AlertRuleAsset>> = [
@@ -572,6 +599,9 @@ const AlertRulesSection = ({
         items={tab === 'enabled' ? enabledRules : recommendedRules}
         columns={tab === 'enabled' ? enabledColumns : recommendedColumns}
         pagination={DEFAULT_PAGINATION}
+        noItemsMessage={
+          tab === 'enabled' && enabledRules.length === 0 ? <EnabledAssetsEmptyState /> : undefined
+        }
       />
     </SectionPanel>
   );
@@ -585,7 +615,6 @@ const SloTemplatesSection = ({
   onOpenSlos: () => void;
 }) => {
   useIntegrationAssetsVersion();
-  const { tab, setTab } = useEnabledRecommendedTabs();
 
   const enabledSlos = useMemo(
     () => [
@@ -602,6 +631,12 @@ const SloTemplatesSection = ({
         (slo) => !isRecommendedAssetEnabled(integration.id, slo.id)
       ),
     [integration]
+  );
+
+  // Default to the "Disabled" tab only when nothing is enabled, so the user
+  // lands on the actionable list rather than an empty "Enabled" one.
+  const { tab, setTab } = useEnabledRecommendedTabs(
+    enabledSlos.length === 0 ? 'recommended' : 'enabled'
   );
 
   const sharedColumns: Array<EuiBasicTableColumn<SloTemplateAsset>> = [
@@ -681,36 +716,27 @@ const SloTemplatesSection = ({
         items={tab === 'enabled' ? enabledSlos : recommendedSlos}
         columns={tab === 'enabled' ? enabledColumns : recommendedColumns}
         pagination={DEFAULT_PAGINATION}
+        noItemsMessage={
+          tab === 'enabled' && enabledSlos.length === 0 ? <EnabledAssetsEmptyState /> : undefined
+        }
       />
     </SectionPanel>
   );
 };
 
-const ML_TYPE_ICON: Record<MlAsset['type'], string> = {
-  'Anomaly detection job': 'machineLearningApp',
-  'AI skill': 'sparkles',
-};
-
 const MlAssetsSection = ({
   integration,
   onOpenMl,
+  onOpenAgentBuilder,
 }: {
   integration: FakeIntegration;
   onOpenMl: () => void;
+  onOpenAgentBuilder: () => void;
 }) => {
+  const anomalyDetectionJobs = integration.mlAssets.filter(
+    (asset) => asset.type === 'Anomaly detection job'
+  );
   const columns: Array<EuiBasicTableColumn<MlAsset>> = [
-    {
-      field: 'type',
-      name: i18n.translate('xpack.streams.entityCentricLab.integrations.ml.type', {
-        defaultMessage: 'Type',
-      }),
-      width: '220px',
-      render: (type: MlAsset['type']) => (
-        <EuiBadge color="hollow" iconType={ML_TYPE_ICON[type]}>
-          {type}
-        </EuiBadge>
-      ),
-    },
     {
       field: 'name',
       name: i18n.translate('xpack.streams.entityCentricLab.integrations.ml.name', {
@@ -728,16 +754,67 @@ const MlAssetsSection = ({
   return (
     <SectionPanel
       title={i18n.translate('xpack.streams.entityCentricLab.integrations.ml.title', {
-        defaultMessage: 'Anomaly detection jobs and AI skills',
+        defaultMessage: 'Anomaly detection jobs',
       })}
-      count={integration.mlAssets.length}
+      count={anomalyDetectionJobs.length}
+      action={{
+        label: i18n.translate('xpack.streams.entityCentricLab.integrations.ml.openAgentBuilder', {
+          defaultMessage: 'View in Agent builder',
+        }),
+        onClick: onOpenAgentBuilder,
+      }}
       dataTestSubj="entityCentricLabIntegrationMl"
     >
       <EuiInMemoryTable
-        items={[...integration.mlAssets]}
+        items={anomalyDetectionJobs}
         columns={columns}
         pagination={DEFAULT_PAGINATION}
       />
+    </SectionPanel>
+  );
+};
+
+const AiSkillsSection = ({
+  integration,
+  onOpenAgentBuilder,
+}: {
+  integration: FakeIntegration;
+  onOpenAgentBuilder: () => void;
+}) => {
+  const aiSkills = integration.mlAssets.filter((asset) => asset.type === 'AI skill');
+  const columns: Array<EuiBasicTableColumn<MlAsset>> = [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.streams.entityCentricLab.integrations.aiSkills.name', {
+        defaultMessage: 'Name',
+      }),
+      render: (name: string) => <EuiLink onClick={onOpenAgentBuilder}>{name}</EuiLink>,
+    },
+    {
+      field: 'installation',
+      name: i18n.translate('xpack.streams.entityCentricLab.integrations.aiSkills.installation', {
+        defaultMessage: 'What it does',
+      }),
+    },
+  ];
+  return (
+    <SectionPanel
+      title={i18n.translate('xpack.streams.entityCentricLab.integrations.aiSkills.title', {
+        defaultMessage: 'AI skills',
+      })}
+      count={aiSkills.length}
+      action={{
+        label: i18n.translate(
+          'xpack.streams.entityCentricLab.integrations.aiSkills.openAgentBuilder',
+          {
+            defaultMessage: 'View in Agent builder',
+          }
+        ),
+        onClick: onOpenAgentBuilder,
+      }}
+      dataTestSubj="entityCentricLabIntegrationAiSkills"
+    >
+      <EuiInMemoryTable items={aiSkills} columns={columns} pagination={DEFAULT_PAGINATION} />
     </SectionPanel>
   );
 };
@@ -942,7 +1019,17 @@ export const IntegrationDetailView = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <MlAssetsSection integration={integration} onOpenMl={() => openApp('/app/ml')} />
+            <MlAssetsSection
+              integration={integration}
+              onOpenMl={() => openApp('/app/ml')}
+              onOpenAgentBuilder={() => openApp('/app/agent_builder')}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <AiSkillsSection
+              integration={integration}
+              onOpenAgentBuilder={() => openApp('/app/agent_builder')}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ResourcesSection integration={integration} />

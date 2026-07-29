@@ -400,15 +400,16 @@ const AWS_EC2: FakeIntegration = {
     ],
   },
   sloTemplates: {
-    enabled: [
+    // Example integration where every SLO template ships disabled: the section
+    // opens on the "Disabled" tab and the "Enabled" tab shows an empty state.
+    enabled: [],
+    recommended: [
       {
         id: 'ec2-fleet-availability',
         name: 'EC2 fleet availability',
         objective: '99.5% healthy instances, 30d window',
         breaching: 1,
       },
-    ],
-    recommended: [
       {
         id: 'ec2-status-slo',
         name: 'Instance status check pass rate',
