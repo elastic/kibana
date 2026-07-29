@@ -7,80 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
-interface ElasticsearchErrorDetails {
-  error?: {
-    type?: string;
-  };
-}
+const escapeKqlValue = (value: string): string => {
+  if (/[\s:()*"\\]/.test(value)) {
+    return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  }
+  return value;
+};
+
+const filterToKqlClause = (filter: Filter): string | undefined => {
+  if (filter.meta.disabled) return undefined;
+  const { type, key, value, params, negate } = filter.meta;
+  if (!key) return undefined;
+
+  const prefix = negate ? 'NOT ' : '';
+
+  switch (type) {
+    case 'phrase': {
+      const v = value ?? '';
+      return `${prefix}${key}: ${escapeKqlValue(String(v))}`;
+    }
+    case 'phrases': {
+      const values = params as string[] | undefined;
+      if (!values?.length) return undefined;
+      const joined = values.map((v) => escapeKqlValue(String(v))).join(' or ');
+      return `${prefix}${key}: (${joined})`;
+    }
+    case 'exists':
+      return `${prefix}${key}: *`;
+    default:
+      return undefined;
+  }
+};
+
+export const filtersToKql = (filters: Filter[]): string => {
+  const clauses = filters
+    .map(filterToKqlClause)
+    .filter((clause): clause is string => clause != null);
+  return clauses.length ? clauses.map((c) => `(${c})`).join(' and ') : '';
+};
+
+export const timeRangeToKql = (
+  timeFrom: string,
+  timeTo: string,
+  timeField: string = 'startedAt'
+): string => `(${timeField} >= "${timeFrom}" and ${timeField} <= "${timeTo}")`;
 
 interface WorkflowExecutionsSearchError {
-  attributes?: ElasticsearchErrorDetails;
-  body?: ElasticsearchErrorDetails;
+  attributes?: { error?: { type?: string } };
+  body?: { error?: { type?: string } };
 }
 
 const getElasticsearchErrorType = (error: unknown): string | undefined => {
   if (typeof error !== 'object' || error === null) {
     return;
   }
-
   const { attributes, body } = error as WorkflowExecutionsSearchError;
   return attributes?.error?.type ?? body?.error?.type;
 };
-
-const buildSpaceFilterQuery = (spaceId: string): QueryDslQueryContainer => ({
-  bool: {
-    should: [{ term: { spaceId } }, { bool: { must_not: { exists: { field: 'spaceId' } } } }],
-    minimum_should_match: 1,
-  },
-});
-
-const buildOmitStepRunsFilterQuery = (): QueryDslQueryContainer => ({
-  bool: {
-    must_not: { exists: { field: 'stepId' } },
-  },
-});
-
-const buildTimeRangeFilter = (timeRange: TimeRange, timeField: string): Filter => ({
-  query: {
-    range: {
-      [timeField]: {
-        gte: timeRange.from,
-        lte: timeRange.to,
-        format: 'strict_date_optional_time',
-      },
-    },
-  },
-  meta: {
-    type: 'custom',
-  },
-});
-
-export const buildWorkflowExecutionsSearchFilters = ({
-  spaceId,
-  timeRange,
-  timeField,
-  userFilters,
-}: {
-  spaceId: string;
-  timeRange: TimeRange;
-  timeField: string;
-  userFilters: Filter[];
-}): Filter[] => [
-  ...userFilters,
-  {
-    meta: { type: 'custom', disabled: false },
-    query: buildSpaceFilterQuery(spaceId),
-  },
-  {
-    meta: { type: 'custom', disabled: false },
-    query: buildOmitStepRunsFilterQuery(),
-  },
-  buildTimeRangeFilter(timeRange, timeField),
-];
 
 export const isWorkflowExecutionsIndexNotFoundError = (error: unknown): boolean =>
   getElasticsearchErrorType(error) === 'index_not_found_exception';

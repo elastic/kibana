@@ -8,9 +8,6 @@
  */
 
 import { useMemo } from 'react';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useQuery } from '@kbn/react-query';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
@@ -20,13 +17,12 @@ import {
   type ExecutionTableSortOrder,
 } from './workflow_executions_page_constants';
 import {
-  buildWorkflowExecutionsSearchFilters,
+  filtersToKql,
   getWorkflowExecutionsFetchErrorMessage,
+  timeRangeToKql,
 } from './workflow_executions_search_query';
-import { useKibana } from '../../hooks/use_kibana';
 
 export interface UseWorkflowExecutionsSearchParams {
-  dataView: DataView;
   query: Query;
   filters: Filter[];
   timeRange: TimeRange;
@@ -37,14 +33,7 @@ export interface UseWorkflowExecutionsSearchParams {
   enabled?: boolean;
 }
 
-const mapSortToEsSort = (sort: ExecutionTableSortOrder) =>
-  sort.map(([field, direction]) => {
-    const esField = EXECUTION_TABLE_SORT_FIELD_MAP[field] ?? field;
-    return { [esField]: { order: direction } };
-  });
-
 export const useWorkflowExecutionsSearch = ({
-  dataView,
   query,
   filters,
   timeRange,
@@ -54,33 +43,22 @@ export const useWorkflowExecutionsSearch = ({
   sort,
   enabled = true,
 }: UseWorkflowExecutionsSearchParams) => {
-  const { uiSettings } = useKibana().services;
   const api = useWorkflowsApi();
-  const timeField = dataView.timeFieldName ?? 'startedAt';
 
-  const searchFilters = useMemo(
-    () =>
-      buildWorkflowExecutionsSearchFilters({
-        spaceId,
-        timeRange,
-        timeField,
-        userFilters: filters,
-      }),
-    [filters, spaceId, timeField, timeRange]
-  );
+  const kql = useMemo(() => {
+    const textKql = query?.query ? `(${String(query.query)})` : '';
+    const filtersKql = filtersToKql(filters);
+    const timeKql = timeRangeToKql(timeRange.from, timeRange.to);
+    return [textKql, filtersKql, timeKql].filter(Boolean).join(' and ') || undefined;
+  }, [query, filters, timeRange]);
 
-  const esQuery = useMemo(
-    () =>
-      buildEsQuery(
-        dataView,
-        query?.query ? [query] : [],
-        searchFilters,
-        getEsQueryConfig(uiSettings)
-      ),
-    [dataView, query, searchFilters, uiSettings]
-  );
-
-  const sortParam = useMemo(() => mapSortToEsSort(sort), [sort]);
+  const sortParams = useMemo(() => {
+    const [[field, direction]] = sort;
+    return {
+      sortField: EXECUTION_TABLE_SORT_FIELD_MAP[field] ?? field,
+      sortOrder: direction as 'asc' | 'desc',
+    };
+  }, [sort]);
 
   return useQuery<WorkflowExecutionListDto>({
     networkMode: 'always',
@@ -95,14 +73,14 @@ export const useWorkflowExecutionsSearch = ({
       pageIndex,
       pageSize,
       sort,
-      esQuery,
     ],
     queryFn: () =>
       api.searchExecutions({
-        query: JSON.stringify(esQuery),
+        kql,
+        sortField: sortParams.sortField,
+        sortOrder: sortParams.sortOrder,
         from: pageIndex * pageSize,
         size: pageSize,
-        sort: JSON.stringify(sortParam),
         trackTotalHits: true,
       }),
     enabled,

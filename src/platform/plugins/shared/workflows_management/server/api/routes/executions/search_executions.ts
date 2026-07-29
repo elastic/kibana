@@ -8,7 +8,8 @@
  */
 
 import path from 'path';
-import { schema } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
+import { fromKueryExpression, KQLSyntaxError, toElasticsearchQuery } from '@kbn/es-query';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import {
@@ -25,20 +26,25 @@ import {
 } from '../utils/route_security';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-const MAX_EXECUTIONS_SEARCH_QUERY_JSON_LENGTH = MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH * 4;
-const MAX_EXECUTIONS_SEARCH_SORT_JSON_LENGTH = 4096;
+const ALLOWED_SORT_FIELDS = ['startedAt', 'duration', 'workflowId', 'triggeredBy'] as const;
+type AllowedSortField = (typeof ALLOWED_SORT_FIELDS)[number];
 
 const querySchema = schema.object({
-  query: schema.maybe(
+  kql: schema.maybe(
     schema.string({
-      maxLength: MAX_EXECUTIONS_SEARCH_QUERY_JSON_LENGTH,
-      meta: { description: 'JSON-encoded Elasticsearch query DSL.' },
+      maxLength: MAX_TRIGGER_EVENT_SEARCH_KQL_LENGTH,
+      meta: { description: 'KQL query string to filter executions.' },
     })
   ),
-  sort: schema.maybe(
-    schema.string({
-      maxLength: MAX_EXECUTIONS_SEARCH_SORT_JSON_LENGTH,
-      meta: { description: 'JSON-encoded Elasticsearch sort definition.' },
+  sortField: schema.maybe(
+    schema.oneOf(
+      ALLOWED_SORT_FIELDS.map((field) => schema.literal(field)) as [Type<AllowedSortField>],
+      { meta: { description: `Field to sort by. One of: ${ALLOWED_SORT_FIELDS.join(', ')}.` } }
+    )
+  ),
+  sortOrder: schema.maybe(
+    schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
+      meta: { description: 'Sort direction.' },
     })
   ),
   from: schema.maybe(schema.number({ min: 0, meta: { description: 'Pagination offset.' } })),
@@ -54,18 +60,6 @@ const querySchema = schema.object({
   ),
 });
 
-const parseJsonParam = <T>(value: string | undefined, paramName: string): T | undefined => {
-  if (value == null || value === '') {
-    return undefined;
-  }
-
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    throw new Error(`Invalid JSON in ${paramName}`);
-  }
-};
-
 export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
@@ -73,7 +67,7 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
       access: 'public',
       security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
       summary: 'Search workflow executions',
-      description: 'Search across all workflow executions using Elasticsearch query DSL.',
+      description: 'Search across all workflow executions.',
       options: {
         tags: [OAS_TAG],
         availability: AVAILABILITY,
@@ -97,12 +91,30 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             return response.forbidden();
           }
           const spaceId = spaces.getSpaceId(request);
+          const { kql, sortField, sortOrder, from, size, trackTotalHits } = request.query;
+
+          let esQuery;
+          if (kql) {
+            try {
+              esQuery = toElasticsearchQuery(fromKueryExpression(kql));
+            } catch (err) {
+              if (err instanceof KQLSyntaxError) {
+                return response.badRequest({ body: { message: `Invalid KQL: ${err.message}` } });
+              }
+              throw err;
+            }
+          }
+
+          const sort = sortField
+            ? [{ [sortField]: { order: sortOrder ?? 'desc' } }]
+            : undefined;
+
           const params: SearchExecutionsViewParams = {
-            query: parseJsonParam(request.query.query, 'query'),
-            sort: parseJsonParam(request.query.sort, 'sort'),
-            from: request.query.from,
-            size: request.query.size,
-            trackTotalHits: request.query.trackTotalHits,
+            query: esQuery,
+            sort,
+            from,
+            size,
+            trackTotalHits,
             includeManagedExecutions: canReadManagedWorkflowExecutions(request),
           };
 
@@ -110,9 +122,6 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             body: await api.searchExecutionsView(params, spaceId),
           });
         } catch (error) {
-          if (error instanceof Error && error.message.startsWith('Invalid JSON in')) {
-            return response.badRequest({ body: { message: error.message } });
-          }
           if (error instanceof Error && 'statusCode' in error && error.statusCode === 400) {
             return response.badRequest({ body: { message: error.message } });
           }

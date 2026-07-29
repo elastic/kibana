@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,7 +55,6 @@ const tableContainerCss = css`
 const gridWrapperCss = getWorkflowExecutionsTableGridWrapperCss;
 
 export interface WorkflowExecutionsTableProps {
-  dataView: DataView;
   query: Query;
   filters: Filter[];
   liveUpdateIntervalMs?: number;
@@ -68,7 +66,6 @@ export interface WorkflowExecutionsTableProps {
 
 export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
   ({
-    dataView,
     filters,
     liveUpdateIntervalMs,
     onReRunExecution,
@@ -112,7 +109,6 @@ export const WorkflowExecutionsTable = React.memo<WorkflowExecutionsTableProps>(
       isLoading,
       refetch,
     } = useWorkflowExecutionsSearch({
-      dataView,
       query,
       filters,
       timeRange,

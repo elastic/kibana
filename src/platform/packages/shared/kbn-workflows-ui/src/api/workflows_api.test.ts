@@ -310,12 +310,13 @@ describe('WorkflowApi', () => {
   });
 
   describe('searchExecutions', () => {
-    it('should call GET /api/workflows/workflow/executions with query', async () => {
+    it('should call GET /api/workflows/workflow/executions with structured params', async () => {
       const params = {
-        query: JSON.stringify({ match_all: {} }),
+        kql: 'status: completed and startedAt >= "now-15m"',
+        sortField: 'startedAt',
+        sortOrder: 'desc' as const,
         from: 0,
         size: 25,
-        sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
         trackTotalHits: true,
       };
       await api.searchExecutions(params);

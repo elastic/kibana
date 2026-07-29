@@ -84,8 +84,9 @@ export interface TestWorkflowParams {
 }
 
 export interface SearchExecutionsParams {
-  query?: string;
-  sort?: string;
+  kql?: string;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
   from?: number;
   size?: number;
   trackTotalHits?: boolean;

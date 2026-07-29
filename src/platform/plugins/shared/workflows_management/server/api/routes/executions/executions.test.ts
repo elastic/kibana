@@ -346,7 +346,7 @@ describe('Execution Routes', () => {
       expect(handler('GET', path)).toBeDefined();
     });
 
-    it('should call api.searchExecutionsView with parsed query params and space id', async () => {
+    it('should call api.searchExecutionsView with converted kql and structured sort', async () => {
       mockApi.searchExecutionsView.mockResolvedValue({
         results: [],
         page: 1,
@@ -356,10 +356,11 @@ describe('Execution Routes', () => {
       const h = handler('GET', path)!;
       const request = {
         query: {
-          query: JSON.stringify({ term: { workflowId: 'wf-1' } }),
+          kql: 'status: completed',
+          sortField: 'startedAt',
+          sortOrder: 'desc',
           from: 25,
           size: 25,
-          sort: JSON.stringify([{ startedAt: { order: 'desc' } }]),
           trackTotalHits: true,
         },
       };
@@ -367,13 +368,13 @@ describe('Execution Routes', () => {
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
-        {
-          query: { term: { workflowId: 'wf-1' } },
+        expect.objectContaining({
+          query: expect.objectContaining({ term: { status: 'completed' } }),
+          sort: [{ startedAt: { order: 'desc' } }],
           from: 25,
           size: 25,
-          sort: [{ startedAt: { order: 'desc' } }],
           trackTotalHits: true,
-        },
+        }),
         'default'
       );
       expect(mockResponse.ok).toHaveBeenCalledWith({
@@ -381,18 +382,34 @@ describe('Execution Routes', () => {
       });
     });
 
-    it('should return bad request for invalid JSON query params', async () => {
+    it('should call api.searchExecutionsView without query when kql is omitted', async () => {
+      mockApi.searchExecutionsView.mockResolvedValue({
+        results: [],
+        page: 1,
+        size: 25,
+        total: 0,
+      });
+      const h = handler('GET', path)!;
+      await h(mockContext, { query: { from: 0, size: 25 } } as any, mockResponse as any);
+
+      expect(mockApi.searchExecutionsView).toHaveBeenCalledWith(
+        expect.objectContaining({ query: undefined, sort: undefined }),
+        'default'
+      );
+    });
+
+    it('should return bad request for invalid KQL syntax', async () => {
       const h = handler('GET', path)!;
       const request = {
         query: {
-          query: '{invalid-json',
+          kql: 'status:',
         },
       };
 
       await h(mockContext, request as any, mockResponse as any);
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
-        body: { message: 'Invalid JSON in query' },
+        body: { message: expect.stringContaining('Invalid KQL') },
       });
       expect(mockApi.searchExecutionsView).not.toHaveBeenCalled();
     });
@@ -404,19 +421,7 @@ describe('Execution Routes', () => {
         })
       );
       const h = handler('GET', path)!;
-      const request = {
-        query: {
-          query: JSON.stringify({
-            range: {
-              duration: {
-                gte: '2s',
-              },
-            },
-          }),
-        },
-      };
-
-      await h(mockContext, request as any, mockResponse as any);
+      await h(mockContext, { query: {} } as any, mockResponse as any);
 
       expect(mockResponse.badRequest).toHaveBeenCalledWith({
         body: { message: 'failed to create query: For input string: "2s"' },

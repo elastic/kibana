@@ -164,7 +164,6 @@ export const WorkflowExecutionsPageContent = React.memo(() => {
       <EuiSpacer size="l" />
       {spaceId ? (
         <WorkflowExecutionsTable
-          dataView={dataView}
           filters={combinedFilters}
           liveUpdateIntervalMs={
             !isRefreshPaused && refreshIntervalMs > 0 ? refreshIntervalMs : undefined

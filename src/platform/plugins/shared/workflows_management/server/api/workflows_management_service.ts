@@ -100,7 +100,7 @@ import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } f
 
 export interface SearchExecutionsViewParams {
   query?: estypes.QueryDslQueryContainer;
-  sort?: estypes.SortCombinations;
+  sort?: estypes.Sort;
   from?: number;
   size?: number;
   trackTotalHits?: boolean;
