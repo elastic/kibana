@@ -329,8 +329,17 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = Parser.parse(esql);
-  const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace(LEADING_PARAM_PREFIX_REGEX, ''));
+  const params: string[] = [];
+  const collect = (node: { literalType: string; text: string }) => {
+    if (node.literalType === 'param') params.push(node.text);
+  };
+  // TODO: simplify to Walker.params(root) once @elastic/esql is bumped to the version
+  // that natively collects PromQL param literals via visitPromqlLiteral.
+  Walker.walk(root, {
+    visitLiteral: collect,
+    promql: { visitPromqlLiteral: collect },
+  });
+  return [...new Set(params.map((t) => t.replace(LEADING_PARAM_PREFIX_REGEX, '')))];
 };
 
 /**

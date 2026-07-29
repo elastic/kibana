@@ -36957,8 +36957,6 @@
     "xpack.searchPlayground.savedPlayground.saveSuccess.text": "{name} wurde gespeichert.",
     "xpack.searchPlayground.savedPlayground.saveSuccess.title": "Playground gespeichert",
     "xpack.searchPlayground.savedPlayground.updateError.title": "Fehler beim Aktualisieren des Playground",
-    "xpack.searchPlayground.savedPlaygrounds.getSOError": "SavedObject-Fehler beim Abrufen von Such-Playground {id}",
-    "xpack.searchPlayground.savedPlaygrounds.notFoundError": "{id} Playground nicht gefunden",
     "xpack.searchPlayground.savedPlaygrounds.validationError": "Ungültige Playground-Anfrage",
     "xpack.searchPlayground.searchMode.queryView.chatQuestion.placeholder": "Frage stellen",
     "xpack.searchPlayground.searchMode.queryView.searchBar.placeholder": "Dokumente suchen",
