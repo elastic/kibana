@@ -57,11 +57,14 @@ const describeBulkErrorGroup = (code: string, count: number): string => {
         values: { count },
       });
     case 'RULE_VERSION_CONFLICT':
-      return i18n.translate('xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.reason.versionConflict', {
-        defaultMessage:
-          '{count, plural, one {# rule modified since it was loaded} other {# rules modified since they were loaded}}',
-        values: { count },
-      });
+      return i18n.translate(
+        'xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.reason.versionConflict',
+        {
+          defaultMessage:
+            '{count, plural, one {# rule modified since it was loaded} other {# rules modified since they were loaded}}',
+          values: { count },
+        }
+      );
     default:
       return i18n.translate('xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.reason.other', {
         defaultMessage: '{count, plural, one {# rule failed} other {# rules failed}}',

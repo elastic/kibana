@@ -110,7 +110,10 @@ describe('useBulkUpdateRuleApiKey', () => {
     const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
 
     await act(async () => {
-      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2', 'rule-3', 'rule-4'] });
+      await result.current.mutateAsync({
+        mode: 'by_ids',
+        ids: ['rule-1', 'rule-2', 'rule-3', 'rule-4'],
+      });
     });
 
     expect(mockAddWarning).toHaveBeenCalledWith({
