@@ -1,42 +1,108 @@
 # Discover
 
-Contains the Discover application and the saved search embeddable.
+Discover is Kibana's data-exploration application: a histogram plus a document table for searching, filtering, and inspecting Elasticsearch data. It runs in two query modes — **classic** (data view + KQL/Lucene) and **ES|QL** — and also ships the **Discover session embeddable** that renders saved searches on dashboards.
+
+Owned by [`@elastic/kibana-data-discovery`](https://github.com/orgs/elastic/teams/kibana-data-discovery). This README is a high-level map; more specific areas link to their own docs.
+
+## Key concepts
+
+- **Discover session / saved search** — the persisted object holding a query, data view, columns, sort, tabs, etc. Backed by the [`savedSearch`](../../shared/saved_search) plugin. "Saved search" is the historical name; the product now calls it a "Discover session".
+- **Tabs** — a Discover session can contain multiple tabs, built on [`@kbn/unified-tabs`](../../../packages/shared/kbn-unified-tabs). Tab state lives under `state.tabs` in the internal Redux store.
+- **Classic mode vs ES|QL mode** — the active mode is derived from whether the current query is an ES|QL (aggregate) query. Data fetching branches accordingly (see [Architecture](#architecture-at-a-glance)).
+- **Context awareness / profiles** — root/data-source/document-level profiles that adapt Discover's UI and behavior to the surrounding context (solution, data source, document). This is the primary extension mechanism → [`public/context_awareness/README.md`](./public/context_awareness/README.md).
+- **Customizations** — a framework for host solutions to tweak Discover's UI/behavior when embedding it → [`public/customizations`](./public/customizations).
+- **The embeddable** — the Discover session panel rendered on dashboards → [`public/embeddable`](./public/embeddable).
+- **Data subjects** — fetch results flow through the RxJS subjects `main$`, `documents$`, and `totalHits$` (defined in [`discover_data_state_container.ts`](./public/application/main/state_management/discover_data_state_container.ts)), each carrying a `FetchStatus` (`UNINITIALIZED | LOADING | PARTIAL | COMPLETE | ERROR`).
+
+## Architecture at a glance
+
+**Plugin lifecycle.** [`public/plugin.tsx`](./public/plugin.tsx) registers the `discover` application, the share-plugin locators, the session embeddable, and the context-awareness profile services during `setup`; `start` returns `{ locator, DiscoverContainer }`. [`server/plugin.ts`](./server/plugin.ts) registers HTTP routes, the server-side embeddable factory, and the server locator. Services consumed throughout the client are assembled in [`public/build_services.ts`](./public/build_services.ts).
+
+**Routes / sub-apps.** [`public/application/discover_router.tsx`](./public/application/discover_router.tsx) maps URLs to five sub-apps: `main` (histogram + document table), `context` (surrounding documents), `doc` (single document), `view_alert` (alert-notification forwarding), and `not_found`.
+
+**State layering (main app).** State is split into three layers rather than a single container: a serializable Redux internal-state store, a per-tab runtime-state manager of non-serializable RxJS subjects, and a per-tab data-state container that orchestrates fetching. Fetching flows from a trigger observable through `fetchAll`, which branches on query mode and pushes results into the data subjects consumed by the UI.
+
+```mermaid
+flowchart TD
+    internal["Internal state store — redux/internal_state.ts (serializable: tabs, app/global/profile state)"]
+    runtime["Runtime state manager — redux/runtime_state.tsx (per-tab RxJS subjects)"]
+    dataC["Data state container — discover_data_state_container.ts"]
+    internal --> runtime --> dataC
+
+    trigger["Fetch trigger — get_fetch_observable.ts"] --> fetchAll["fetchAll — data_fetching/fetch_all.ts"]
+    fetchAll -->|ES QL mode| esql["fetch_esql.ts"]
+    fetchAll -->|classic mode| docs["fetch_documents.ts"]
+    esql --> subjects
+    docs --> subjects
+    dataC -. owns .-> subjects
+    subjects["Data subjects — main$, documents$, totalHits$"] --> ui["Histogram + document table"]
+```
+
+## Extending Discover
+
+Discover exposes a deliberately thin runtime contract (`DiscoverSetup`/`DiscoverStart` in [`public/types.ts`](./public/types.ts)). Real extensibility happens through these surfaces:
+
+- **Context-awareness profiles** — the primary, modern mechanism for adapting Discover per solution / data source / document. See [`README.md`](./public/context_awareness/README.md), the [extension-point inventory](./public/context_awareness/EXTENSION_POINTS_INVENTORY.md), and [`DEV_DOCS.md`](./public/context_awareness/DEV_DOCS.md). Live example: [`examples/discover_customization_examples`](../../../../../examples/discover_customization_examples).
+- **`discoverShared` feature registry** — a dependency-free layer where solutions (Observability, Security) register UI features that Discover pulls in without a direct dependency, avoiding cyclic deps → [`discover_shared` README](../discover_shared/README.md).
+- **The locator** — `DISCOVER_APP_LOCATOR` ([`common/app_locator.ts`](./common/app_locator.ts)) lets other plugins deep-link into Discover in a specific state; there is a separate ES|QL locator ([`common/esql_locator.ts`](./common/esql_locator.ts)).
+- **The saved-search embeddable** — `SEARCH_EMBEDDABLE_TYPE` / `SearchEmbeddableApi` (exported from [`public/embeddable`](./public/embeddable)) for rendering Discover on dashboards.
+
+> The `DiscoverContainer` component on the `start` contract is **deprecated**. Prefer the profile framework or the embeddable over embedding Discover directly.
 
 ## Project tree
 
-### [src/platform/plugins/shared/discover/public](./public)
+### [public](./public)
 
-Contains all the client-only code. When you initially load Discover, [public/application/main](./public/application/main) is executed and displayed.
+Client-only code. Loading Discover executes [`public/application/main`](./public/application/main).
 
-- **[/application](./public/application)** \
-  One folder for every "route", each folder contains files and folders related only to this route.
-  - **[/context](./public/application/context)** (Also known as "Surrounding documents" - historically this has been a separate plugin)
-  - **[/doc](./public/application/doc)** (Also known as "Single document" - historically this has been a separate plugin)
-  - **[/main](./public/application/main)** (Main part of Discover containing the document table)
-  - **[/not_found](./public/application/not_found)** (Rendered when a route can't be found)
-  - **[/view_alert](./public/application/view_alert)** (Forwarding links in alert notifications)
-- **[/components](./public/components)** (All React components used in more than just one app)
-- **[/embeddable](./public/embeddable)** (Code related to the Discover session embeddable, rendered on dashboards)
-- **[/hooks](./public/hooks)** (Code containing React hooks)
-- **[/services](./public/services)** (Services either for external or internal use)
-- **[/utils](./public/utils)** (All utility functions used across more than one application)
+- **[/application](./public/application)** — one folder per route.
+  - **[/main](./public/application/main)** — the main experience (histogram + document table), including [`/state_management`](./public/application/main/state_management) (Redux store, runtime state, data-state container, tabs storage) and [`/data_fetching`](./public/application/main/data_fetching) (`fetchAll` and the ES|QL / documents fetchers).
+  - **[/context](./public/application/context)** — "Surrounding documents" (historically a separate plugin).
+  - **[/doc](./public/application/doc)** — "Single document" view (historically a separate plugin).
+  - **[/view_alert](./public/application/view_alert)** — forwarding links from alert notifications.
+  - **[/not_found](./public/application/not_found)** — fallback route.
+- **[/components](./public/components)** — React components shared across more than one app.
+- **[/context_awareness](./public/context_awareness)** — the profiles / extension-point framework (has its own [README](./public/context_awareness/README.md)).
+- **[/customizations](./public/customizations)** — the customization framework for host solutions.
+- **[/embeddable](./public/embeddable)** — the Discover session embeddable, rendered on dashboards.
+- **[/ebt_manager](./public/ebt_manager)** — product telemetry (EBT events; see [Telemetry](#telemetry)).
+- **[/agent_builder](./public/agent_builder)** — registers Discover's ES|QL results attachment UI with the agent-builder plugin.
+- **[/hooks](./public/hooks)** — cross-app React hooks.
+- **[/plugin_imports](./public/plugin_imports)** — lazy-loaded chunks the plugin class dynamically imports.
+- **[/utils](./public/utils)** — utilities used across more than one app.
 
-### [src/platform/plugins/shared/discover/server](./server)
+### [server](./server)
 
-Contains all the server-only code.
+Server-only code.
 
-- **[/sample_data](./server/sample_data)** (Registrations with the Sample Data Registry for Discover saved objects)
-- **[/capabilities_provider](./server/capabilities_provider.ts)** (CapabilitiesProvider definition of capabilities for Core)
-- **[/ui_settings](./server/ui_settings.ts)** (Settings and the default values for UiSettingsServiceSetup )
-- **[/locator](./server/locator)** (Extensions of DiscoverAppLocator for the DiscoverServerPlugin API)
+- **[/api](./server/api)** — HTTP routes for Discover sessions.
+- **[/embeddable](./server/embeddable)** — server-side embeddable factory, schema, and transforms.
+- **[/locator](./server/locator)** — server-side extensions of the Discover app locator.
+- **[/sample_data](./server/sample_data)** — Sample Data Registry registrations for Discover saved objects.
+- **[/capabilities_provider.ts](./server/capabilities_provider.ts)** — capabilities definition for Core.
+- **[/ui_settings.ts](./server/ui_settings.ts)** — advanced settings and their defaults.
 
-### [src/platform/plugins/shared/discover/common](./common))
+### [common](./common)
 
-Contains all code shared by client and server.
+Code shared by client and server.
 
-- **[/constants](./common/constants.ts)** (General contants)
-- **[/field_types](./common/field_types.ts)** (Field types constants)
-- **[/locator](./common/locator)** (Registration with the URL service for BWC deep-linking to Discover views.)
+- **[/constants.ts](./common/constants.ts)** — general constants.
+- **[/data_sources](./common/data_sources)** — data-source (data view / ES|QL) types and utils.
+- **[/app_locator.ts](./common/app_locator.ts)** / **[/esql_locator.ts](./common/esql_locator.ts)** — URL-service locators for deep-linking into Discover.
+
+## Related packages
+
+Discover composes a set of reusable packages, several of which have their own docs:
+
+| Package                                                                                                                                     | Purpose                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| [`@kbn/unified-histogram`](../../../packages/shared/kbn-unified-histogram)                                                                  | The histogram / chart section above the table.     |
+| [`@kbn/unified-field-list`](../../../packages/shared/kbn-unified-field-list)                                                                | The fields sidebar (shared with Lens).             |
+| [`@kbn/unified-data-table`](../../../packages/shared/kbn-unified-data-table)                                                                | The document table (`UnifiedDataTable`).           |
+| [`@kbn/unified-doc-viewer`](../../../packages/shared/kbn-unified-doc-viewer) / [`unifiedDocViewer` plugin](../unified_doc_viewer/README.md) | The document flyout and single-document view.      |
+| [`@kbn/unified-tabs`](../../../packages/shared/kbn-unified-tabs)                                                                            | The tabs bar.                                      |
+| [`@kbn/discover-utils`](../../../packages/shared/kbn-discover-utils)                                                                        | Shared Discover types, utils, and mocks.           |
+| [`@kbn/discover-contextual-components`](../../../packages/shared/kbn-discover-contextual-components)                                        | Contextual (e.g. logs) renderers used by Discover. |
 
 ## Telemetry
 
@@ -218,8 +284,14 @@ These counters are reported with `usageCollection.reportUiCounter('discover', ..
 
 ## Feature flags
 
-See the [Feature flag service](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#dynamic-config) documentation for details on how to use feature flags.
+See the [feature flag service](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#dynamic-config) documentation for details on how to use feature flags.
 
-Set constants for feature flag keys in [public/constants.ts](./public/constants.ts).
+Feature flag keys are re-exported as constants from [public/constants.ts](./public/constants.ts).
 
 These are the feature flags used by Discover:
+
+| Flag key                        | Constant                                  | Description                                                          |
+| ------------------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| `discover.cascadeLayoutEnabled` | `CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY` | Enables the cascaded-documents layout.                               |
+| `discover.embeddableTransforms` | `EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY`  | Enables saved-object transforms for the Discover session embeddable. |
+| `discover.isEsqlDefault`        | `IS_ESQL_DEFAULT_FEATURE_FLAG_KEY`        | Makes ES\|QL the default query mode.                                 |
