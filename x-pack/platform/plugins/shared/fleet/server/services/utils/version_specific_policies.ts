@@ -23,9 +23,14 @@ const POLICY_BASE_ID_FIELD = 'policy_base_id';
 /**
  * KQL matching agents assigned to a version-specific variant of the given base policy — but NOT the
  * base policy itself. Term-based on `policy_base_id` (no wildcard/prefix), so it stays compatible
- * with `search.allow_expensive_queries: false`. Agents enrolled via an older fleet-server during a
- * mixed-version rollout that lack `policy_base_id` are covered by the startup backfill, consistent
- * with the rest of Fleet's `policy_base_id` queries.
+ * with `search.allow_expensive_queries: false`.
+ *
+ * Mixed-version rollout note: an agent enrolled by a downlevel fleet-server after the last Kibana
+ * startup backfill will have a versioned `policy_id` (e.g. `policy1#9.4`) but no `policy_base_id`
+ * field. Such agents are NOT matched by this kuery. The orphan sweep may therefore delete the
+ * variant `.fleet-policies` document before that agent is reassigned, leaving it pointing to a
+ * missing policy until the next Kibana restart re-runs the startup backfill and recovers it. The
+ * window is bounded by the time between the mixed-version enrollment and the next restart.
  */
 export function buildVariantAgentsKuery(parentPolicyId: string): string {
   const escapedId = escapeQuotes(parentPolicyId);

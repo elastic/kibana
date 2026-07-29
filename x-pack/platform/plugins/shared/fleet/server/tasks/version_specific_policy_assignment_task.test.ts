@@ -24,6 +24,8 @@ import {
 } from '../services/utils/version_specific_policies';
 import type { Agent, AgentPolicy, PackagePolicy } from '../types';
 
+import { AGENT_POLICY_INDEX } from '../../common/constants';
+
 import {
   VersionSpecificPolicyAssignmentTask,
   TYPE,
@@ -707,6 +709,26 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
       expect(mockAgentPolicyService.getByIds).not.toHaveBeenCalled();
       expect(mockedReassignAgents).not.toHaveBeenCalled();
+    });
+
+    it('queries .fleet-policies with the correct aggregation shape', async () => {
+      const [coreStart] = await mockCore.getStartServices();
+      const esClient = coreStart.elasticsearch.client.asInternalUser as any;
+      await mockVariantPoliciesInIndex([]);
+
+      await runTask();
+
+      expect(esClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: AGENT_POLICY_INDEX,
+          size: 0,
+          aggs: expect.objectContaining({
+            variant_policies: expect.objectContaining({
+              terms: expect.objectContaining({ field: 'policy_id' }),
+            }),
+          }),
+        })
+      );
     });
 
     it('deletes variant docs even when the orphaned parent currently has no assigned agents', async () => {

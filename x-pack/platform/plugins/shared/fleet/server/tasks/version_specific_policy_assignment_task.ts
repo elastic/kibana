@@ -558,6 +558,9 @@ export class VersionSpecificPolicyAssignmentTask {
       ignore_unavailable: true,
       size: 0,
       aggs: {
+        // Named 'variant_policies' for intent. The field is 'policy_id' (not 'policy_base_id')
+        // because we need every doc in the index — base and variant alike. Version-suffixed ids
+        // are then filtered in memory below to derive the set of parent ids with variant docs.
         variant_policies: {
           terms: { field: 'policy_id', size: MAX_VERSION_SPECIFIC_POLICY_BUCKETS },
         },
