@@ -31,6 +31,10 @@ import {
   RuleExecutorEventPublisher,
   type RuleExecutorEventPublisherContract,
 } from '../events/rule_executor_event_publisher/rule_executor_event_publisher';
+import { StorageServiceInternalToken } from '../services/storage_service/tokens';
+import type { StorageServiceContract } from '../services/storage_service/storage_service';
+import { ALERT_EVENTS_DATA_STREAM, AlertEvent } from '../../resources/datastreams/alert_events';
+import { buildExecutionUuid } from './build_alert_events';
 
 /**
  * Raw input from the task runner.
@@ -65,8 +69,10 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
     @inject(MetricCollectorFactoryToken)
     private readonly metricCollectorFactory: MetricCollectorFactoryContract,
     @inject(RuleExecutorEventPublisher)
-    private readonly eventPublisher: RuleExecutorEventPublisherContract
-  ) {}
+    private readonly eventPublisher: RuleExecutorEventPublisherContract,
+    @inject(StorageServiceInternalToken)
+    private readonly storageService: StorageServiceContract
+  ) { }
 
   public async execute(rawInput: RuleExecutionPipelineInput): Promise<RuleExecutionPipelineResult> {
     const executionContext = createExecutionContext(rawInput.abortSignal);
@@ -108,6 +114,33 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       }
 
       const snapshot = collector.finalize();
+
+      // Written strictly after every per-batch StoreAlertEventsStep write has
+      // completed, so the marker is the last document of this execution. A
+      // monotonic auto-refresh therefore guarantees: marker visible =>
+      // every event of this execution visible. The dispatcher gates on this so
+      // it never acts on a partially-written execution (rna-program#437).
+      // Must match the uuid the alert-event builder stamps on `execution.uuid`
+      // (deterministic from ruleId/spaceId/scheduledAt), NOT the Task Manager
+      // run uuid in `rawInput.executionUuid` — otherwise the dispatcher's gate
+      // groups the marker and the events under different uuids and never
+      // correlates them.
+      await writeExecutionEndMarkerDoc({
+        params: {
+          execution: {
+            uuid: buildExecutionUuid({
+              ruleId: rawInput.ruleId,
+              spaceId: rawInput.spaceId,
+              scheduledTimestamp: rawInput.scheduledAt,
+            }),
+          },
+          timestamp: new Date().toISOString(),
+          rule: { id: rawInput.ruleId },
+          spaceId: rawInput.spaceId,
+        },
+        deps: { storageService: this.storageService },
+      });
+
       this.publishExecutionSucceeded(rawInput, collector, pipelineState, snapshot);
       return {
         completed: true,
@@ -173,9 +206,8 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (error) {
       this.logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.succeeded event: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        message: `[rule_executor] Failed to publish rule.execution.succeeded event: ${error instanceof Error ? error.message : String(error)
+          }`,
       });
     }
   }
@@ -188,10 +220,51 @@ export class RuleExecutionPipeline implements RuleExecutionPipelineContract {
       });
     } catch (publishError) {
       this.logger.warn({
-        message: `[rule_executor] Failed to publish rule.execution.failed event: ${
-          publishError instanceof Error ? publishError.message : String(publishError)
-        }`,
+        message: `[rule_executor] Failed to publish rule.execution.failed event: ${publishError instanceof Error ? publishError.message : String(publishError)
+          }`,
       });
     }
   }
 }
+
+/**
+ * Writes a single execution-end marker document to `.rule-events`.
+ *
+ * Called once, after the pipeline stream has drained, so it is the last write
+ * of the execution. Combined with Elasticsearch's monotonic refresh, this lets
+ * the dispatcher treat "marker visible" as "all events of this execution
+ * visible" and avoid acting on a partially-written execution (rna-program#437).
+ *
+ * Uses the default `refresh: false`; the guarantee comes from write ordering,
+ * not a synchronous refresh (which was intentionally removed in #274008).
+ */
+const writeExecutionEndMarkerDoc = async ({
+  params,
+  deps,
+}: {
+  params: {
+    execution: { uuid: string };
+    timestamp: string;
+    rule: { id: string };
+    spaceId: string;
+  };
+  deps: {
+    storageService: StorageServiceContract;
+  };
+}): Promise<void> => {
+
+  const doc: Partial<AlertEvent> = {
+    '@timestamp': params.timestamp,
+    type: 'execution_end_marker',
+    execution: { uuid: params.execution.uuid },
+    rule: { id: params.rule.id, version: 1 },
+    space_id: params.spaceId,
+  };
+
+  await deps.storageService.bulkIndexDocs({
+    index: ALERT_EVENTS_DATA_STREAM,
+    docs: [
+      doc,
+    ],
+  });
+};

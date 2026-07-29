@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 5;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 6;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 
 const mappings: MappingsDefinition = {
@@ -18,6 +18,12 @@ const mappings: MappingsDefinition = {
   properties: {
     // Document '_id' is used as the unique alert event identifier
     '@timestamp': { type: 'date' },
+    execution: {
+      type: 'object',
+      properties: {
+        uuid: { type: 'keyword' },
+      },
+    },
     scheduled_timestamp: { type: 'date' },
     rule: {
       type: 'object',
@@ -45,7 +51,7 @@ const mappings: MappingsDefinition = {
 };
 
 const alertEventStatusSchema = z.enum(['breached', 'recovered', 'no_data']);
-const alertEventTypeSchema = z.enum(['signal', 'alert']);
+const alertEventTypeSchema = z.enum(['signal', 'alert', 'execution_end_marker']);
 const alertEpisodeStatusSchema = z.enum(['inactive', 'pending', 'active', 'recovering']);
 const alertEpisodeStatusCountSchema = z.number().int().optional();
 const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
@@ -57,6 +63,9 @@ export const alertEventSeverity = alertEventSeveritySchema.enum;
 
 export const alertEventSchema = z.object({
   '@timestamp': z.string(),
+  execution: z.object({
+    uuid: z.string(),
+  }).optional(),
   scheduled_timestamp: z.string().optional(),
   rule: z.object({
     id: z.string(),
