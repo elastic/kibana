@@ -24,7 +24,11 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
   getDefaultSort,
 } from '@kbn/discover-utils';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  DISCOVER_QUERY_MODE_KEY,
+} from '../../../../../../common/constants';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { isEqualState } from '../../utils/state_comparators';
@@ -33,8 +37,6 @@ import {
   type InternalStateThunkActionCreator,
   type InternalStateThunkAction,
   type TabActionPayload,
-  transitionedFromEsqlToDataView,
-  transitionedFromDataViewToEsql,
 } from '../internal_state';
 import {
   ProfileStateType,
@@ -428,7 +430,10 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
       })
     );
 
-    dispatch(transitionedFromEsqlToDataView({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'classic',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**
@@ -438,7 +443,7 @@ export const transitionFromESQLToDataView: InternalStateThunkActionCreator<
 export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataView: DataView }>]
 > = ({ tabId, dataView }) =>
-  function transitionFromDataViewToESQLThunkFn(dispatch, getState) {
+  function transitionFromDataViewToESQLThunkFn(dispatch, getState, { services }) {
     // Mark all profile state fields to reset when transitioning to ES|QL mode
     dispatch(
       internalStateSlice.actions.setProfileStateFieldsToReset({
@@ -474,7 +479,10 @@ export const transitionFromDataViewToESQL: InternalStateThunkActionCreator<
     // clears pinned filters
     dispatch(updateGlobalState({ tabId, globalState: { filters: [] } }));
 
-    dispatch(transitionedFromDataViewToEsql({ tabId }));
+    services.storage.set(DISCOVER_QUERY_MODE_KEY, {
+      currentMode: 'esql',
+      defaultMode: services.discoverFeatureFlags.getIsEsqlDefault() ? 'esql' : 'classic',
+    });
   };
 
 /**
