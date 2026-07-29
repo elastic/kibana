@@ -13,19 +13,23 @@ import { NO_CASES_ROLE } from '../../fixtures/roles';
 // Ported from the "no observability privileges" suite in the FTR
 // feature_controls/observability_security.ts. A user without Observability or
 // Cases privileges cannot access the Observability app at all.
-test.describe('Observability cases - no privileges', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginWithCustomRole(NO_CASES_ROLE);
-  });
+test.describe(
+  'Observability cases - no privileges',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ browserAuth }) => {
+      await browserAuth.loginWithCustomRole(NO_CASES_ROLE);
+    });
 
-  test('returns Application not found when the Observability app is inaccessible', async ({
-    page,
-    pageObjects,
-  }) => {
-    const { casesPage } = pageObjects;
-    await casesPage.gotoCasesList();
-    const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
-    await expect(notFoundContent).toBeVisible();
-    await expect(notFoundContent).toContainText('Application not found');
-  });
-});
+    test('returns Application not found when the Observability app is inaccessible', async ({
+      page,
+      pageObjects,
+    }) => {
+      const { casesPage } = pageObjects;
+      await casesPage.gotoCasesList();
+      const notFoundContent = page.testSubj.locator('appNotFoundPageContent');
+      await expect(notFoundContent).toBeVisible();
+      await expect(notFoundContent).toContainText('Application not found');
+    });
+  }
+);
