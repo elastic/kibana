@@ -21,7 +21,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 
 const libraryPageTitle = i18n.translate('workflowsManagement.libraryPage.pageTitle', {
-  defaultMessage: 'Template Library',
+  defaultMessage: 'Template library',
 });
 
 const experimentalBadgeLabel = i18n.translate('workflowsManagement.libraryPage.experimentalBadge', {

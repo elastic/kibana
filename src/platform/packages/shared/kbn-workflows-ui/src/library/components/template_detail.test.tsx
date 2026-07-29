@@ -165,7 +165,7 @@ describe('TemplateDetail', () => {
     ).toBeInTheDocument();
     // Categories render as tags under the title (humanized).
     const tags = screen.getByTestId('workflowLibraryTemplateDetail-tags');
-    expect(within(tags).getByText('Threat Intel')).toBeInTheDocument();
+    expect(within(tags).getByText('Threat intel')).toBeInTheDocument();
     expect(within(tags).getByText('Enrichment')).toBeInTheDocument();
   });
 

@@ -11,6 +11,7 @@ import type { EuiIconProps, IconType } from '@elastic/eui';
 import { EuiIcon, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { Suspense, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { getStepIconType } from './get_step_icon_type';
 import { HardcodedIcons } from './hardcoded_icons';
@@ -22,6 +23,15 @@ const TRIGGER_TYPE_ICONS: Record<string, IconType> = {
   manual: HardcodedIcons.manual,
   alert: HardcodedIcons.alert,
   scheduled: HardcodedIcons.scheduled,
+};
+
+/** Display labels for the bare trigger `type` values above, shown in the icon tooltip. */
+const TRIGGER_TYPE_LABELS: Record<string, string> = {
+  manual: i18n.translate('workflows.stepIcons.triggerType.manual', { defaultMessage: 'Manual' }),
+  alert: i18n.translate('workflows.stepIcons.triggerType.alert', { defaultMessage: 'Alert' }),
+  scheduled: i18n.translate('workflows.stepIcons.triggerType.scheduled', {
+    defaultMessage: 'Scheduled',
+  }),
 };
 
 const DEFAULT_TRIGGER_ICON: IconType = HardcodedIcons.trigger;
@@ -51,7 +61,8 @@ export interface TypeIconProps extends Omit<EuiIconProps, 'type'> {
  * fallbacks, so connectors like `http` that only exist in the action-type
  * registry still render their real icon. The registries come from
  * {@link useWorkflowsUiServices}, so consumers must be wrapped in a
- * `WorkflowsUiServicesProvider`. The tooltip shows the raw `type`.
+ * `WorkflowsUiServicesProvider`. The tooltip shows the raw `type`, except for
+ * the hardcoded trigger types above, which get a capitalized display label.
  */
 export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest }) => {
   const { euiTheme } = useEuiTheme();
@@ -68,7 +79,7 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
     [kind, type, workflowsExtensions, triggersActionsUi]
   );
 
-  const label = title ?? type;
+  const label = title ?? (kind === 'trigger' ? TRIGGER_TYPE_LABELS[type] ?? type : type);
 
   const icon =
     typeof iconType === 'string' && iconType.startsWith('data:') ? (

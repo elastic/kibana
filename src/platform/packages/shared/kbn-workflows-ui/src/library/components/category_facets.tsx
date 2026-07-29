@@ -25,7 +25,7 @@ export interface CategoryFacetsProps {
 
 /**
  * Facet sidebar over the closed-vocabulary `categories` field. Labels humanize
- * the kebab-case category id (e.g. `threat-intel` → `Threat Intel`).
+ * the kebab-case category id (e.g. `threat-intel` → `Threat intel`).
  *
  * Selection is single-select like the Integrations catalog: clicking a
  * category shows only that category; "All categories" resets. The prop shape
