@@ -11,12 +11,6 @@ import {
   type RuleTemplateData,
 } from '@kbn/alerting-v2-schemas';
 
-/**
- * Maps a rule template to {@link CreateRuleData}.
- *
- * Strips template-only fields (`engine`) and applies create-rule validation
- * (including cross-field refinements).
- */
 export const createRuleDataFromTemplate = (template: RuleTemplateData): CreateRuleData => {
   const { engine: _engine, ...ruleFields } = template;
   return createRuleDataSchema.parse(ruleFields);
