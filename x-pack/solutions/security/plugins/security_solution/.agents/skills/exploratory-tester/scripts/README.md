@@ -131,7 +131,10 @@ intentional retry-after-failure vs. the same call repeated far apart,
 known-noise (polling) suppression that still lets a genuinely failing
 polling endpoint through, deterministic spinner-timing escalation, URL
 redaction (including a parity check against the bridge doc's own inline copy
-of the same logic, a malformed-encoding fixture, and a hash-fragment case),
+of the same logic, a malformed-encoding fixture, a hash-fragment case, the
+full credential-shaped param-name list, and the per-value hashed placeholder
+that keeps different secret values from collapsing into one signature), a
+duplicate-window check against total span rather than only adjacent gaps,
 and a CLI-vs-module classification round trip.
 
 ```bash
@@ -143,12 +146,17 @@ run inside a live `browser_run_code_unsafe` VM sandbox — no prior test here
 executed that code at all, only the reducer it feeds. Three separate reviews
 of this feature each found a real bug living exclusively in that
 never-executed bridge logic. `action-scoped-collector-bridge.test.mjs`
-extracts the actual Install/Drain snippets straight out of the doc (never a
-hand-copied duplicate) and runs them against a fake, `EventEmitter`-based
-Playwright `page`/`Request`/`Response`/console-message stand-in, covering:
-idempotent listener attachment vs. non-idempotent per-flow state reset,
-`response` (headers) vs. `requestfinished` (true completion) — a stalled
-body must still read as pending after headers arrive — navigation-abandonment
-of a request whose headers already arrived, console-text redaction, and a
-second flow's install() call not inheriting a previous flow's leftover
+extracts the actual Install/Drain/Uninstall snippets straight out of the doc
+(never a hand-copied duplicate) and runs them against a fake, `EventEmitter`-
+based Playwright `page`/`Request`/`Response`/console-message stand-in,
+covering: idempotent listener attachment vs. non-idempotent per-flow state
+reset, `response` (headers) vs. `requestfinished` (true completion) — a
+stalled body must still read as pending after headers arrive —
+navigation-abandonment scoped to the specific frame that navigated (an
+unrelated iframe's request is untouched by a main-frame nav, and a child
+frame's own navigation abandons only its own requests), console-text
+redaction including per-value differentiation, Uninstall removing exactly
+the collector's own six listeners (never an unrelated listener sharing the
+same event) and clearing state so a later install() re-attaches cleanly, and
+a second flow's install() call not inheriting a previous flow's leftover
 open request or console text.

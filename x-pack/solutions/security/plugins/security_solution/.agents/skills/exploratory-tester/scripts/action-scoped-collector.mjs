@@ -79,12 +79,29 @@ import { pathToFileURL } from 'url';
 // Query parameter names (case-insensitive) whose values must never appear in
 // a persisted finding or diff. Deliberately conservative — false positives
 // (redacting a harmless param) are free; false negatives are not.
-const SENSITIVE_PARAM_NAMES = /^(api[-_]?key|token|password|passwd|secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
+const SENSITIVE_PARAM_NAMES = /^(x[-_]?api[-_]?key|api[-_]?key|token|password|passwd|secret|client[-_]?secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
+
+// Non-cryptographic, deterministic — its only job is to turn two DIFFERENT
+// secret values into two DIFFERENT (but still opaque) placeholders. Without
+// this, redacting `?token=a` and `?token=b` to the exact same literal
+// `token=%5BREDACTED%5D` would make the signature grouping below
+// (method+URL) treat two genuinely different requests as one, hiding a real
+// duplicate-call bug or merging unrelated pending/stuck tracking. Must stay
+// byte-identical to the bridge's copy in action-scoped-collector.md — the
+// parity test evaluates both against the same inputs.
+function shortHash(value) {
+  let hash = 5381;
+  for (let i = 0; i < value.length; i++) hash = (hash * 33) ^ value.charCodeAt(i);
+  return (hash >>> 0).toString(36);
+}
 
 /**
  * Strips the values (not the names) of credential-shaped query parameters
  * from a URL. Never touches the path, and never inspects request/response
- * bodies (this module never receives them).
+ * bodies (this module never receives them). The redacted placeholder embeds
+ * a short hash of the original value (never the value itself) so two
+ * requests differing only in a sensitive param's value are not collapsed
+ * into the same signature — see `shortHash` above.
  * @param {string} url
  * @returns {string}
  */
@@ -117,7 +134,8 @@ export function redactUrl(url) {
         // leave decodedKey as the raw key
       }
       if (SENSITIVE_PARAM_NAMES.test(decodedKey)) {
-        return `${key}=%5BREDACTED%5D`;
+        const value = eq === -1 ? '' : pair.slice(eq + 1);
+        return `${key}=%5BREDACTED:${shortHash(value)}%5D`;
       }
       return pair;
     })
@@ -297,10 +315,12 @@ export function reduceAction(action, priorState) {
           text: `${method} ${redacted} failed then succeeded on retry (${settled.length} attempts) — looks like an intentional retry, not a duplicate-call bug`,
         });
       } else {
+        // Total span from first to last, NOT each adjacent gap — a drifting
+        // sequence like 0ms, 400ms, 800ms has every adjacent gap within the
+        // 500ms window but spans 800ms overall, which is a steadily-repeating
+        // pattern (repeated_api_call), not a tight simultaneous burst.
         const timings = settled.map((ev) => ev.requestedAt);
-        const concurrent = timings.every(
-          (t, i) => i === 0 || t - timings[i - 1] <= DUPLICATE_WINDOW_MS
-        );
+        const concurrent = timings[timings.length - 1] - timings[0] <= DUPLICATE_WINDOW_MS;
         if (concurrent) {
           level2.push({
             type: 'duplicate_api_call',

@@ -319,6 +319,23 @@ console.log('\n── Same exact call fired twice within the duplicate window �
   assert(Array.isArray(finding.evidence) && finding.evidence.length === 2, 'action-duplicate-concurrent → evidence timestamps preserved');
 }
 
+console.log('\n── Adjacent gaps within the window but a longer total span → NOT concurrent ─');
+{
+  // 0ms, 400ms, 800ms: every ADJACENT gap is 400ms (within the 500ms
+  // window), but the TOTAL span from first to last is 800ms — a steadily
+  // drifting/polling-like pattern, not a tight simultaneous burst. Checking
+  // only adjacent gaps used to misclassify this as duplicate_api_call.
+  const r = reduceAction(json('action-duplicate-drift'));
+  assert(
+    !r.level2.some((i) => i.type === 'duplicate_api_call'),
+    'action-duplicate-drift (0/400/800ms, 400ms adjacent gaps) → never Level 2 duplicate_api_call'
+  );
+  assert(
+    r.level3.some((i) => i.type === 'repeated_api_call'),
+    'action-duplicate-drift → correctly classified as Level 3 repeated_api_call instead'
+  );
+}
+
 console.log('\n── Intentional retry (fail, then succeed) is not a duplicate-call bug ──');
 {
   const r = reduceAction(json('action-retry-after-failure'));
@@ -424,12 +441,19 @@ console.log('\n── Delayed elements: spinner within the 10s grace period stay
 
 console.log('\n── URL redaction: credential-shaped query params are never persisted ───');
 {
+  const REDACTED_RE = /^%5BREDACTED:[0-9a-z]+%5D$/;
+  const valueOf = (redactedUrl, key) => {
+    const m = new RegExp(`${key}=([^&#]+)`).exec(redactedUrl);
+    return m && m[1];
+  };
+
   assert(
-    redactUrl('https://kibana.example/api?api_key=super-secret&q=1') === 'https://kibana.example/api?api_key=%5BREDACTED%5D&q=1',
-    'redactUrl → strips api_key value, leaves unrelated params untouched'
+    REDACTED_RE.test(valueOf(redactUrl('https://kibana.example/api?api_key=super-secret&q=1'), 'api_key')) &&
+      redactUrl('https://kibana.example/api?api_key=super-secret&q=1').endsWith('&q=1'),
+    'redactUrl → strips api_key value (leaving an opaque hashed placeholder), unrelated params untouched'
   );
   assert(
-    redactUrl('https://kibana.example/api?Authorization=Bearer%20xyz') === 'https://kibana.example/api?Authorization=%5BREDACTED%5D',
+    REDACTED_RE.test(valueOf(redactUrl('https://kibana.example/api?Authorization=Bearer%20xyz'), 'Authorization')),
     'redactUrl → case-insensitive match on param name'
   );
   assert(
@@ -438,13 +462,39 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
   );
   assert(redactUrl('https://kibana.example/api') === 'https://kibana.example/api', 'redactUrl → URLs with no query string are returned unchanged');
   assert(
-    redactUrl('https://kibana.example/api?token=abc123#somefragment') === 'https://kibana.example/api?token=%5BREDACTED%5D#somefragment',
+    redactUrl('https://kibana.example/api?token=abc123#somefragment').endsWith('#somefragment') &&
+      REDACTED_RE.test(valueOf(redactUrl('https://kibana.example/api?token=abc123#somefragment'), 'token')),
     'redactUrl → a hash fragment after a redacted sensitive param is preserved, not dropped'
   );
   assert(
     redactUrl('https://kibana.example/api?bad%zzkey=secret&page=2') === 'https://kibana.example/api?bad%zzkey=secret&page=2',
     'redactUrl → a malformed %-escape in a query KEY (decodeURIComponent throws) never aborts classification; it just fails to decode-and-match that one key',
     'threw instead of returning a value'
+  );
+
+  // Previously-missed credential-shaped names (P2 review finding).
+  for (const key of ['x-api-key', 'x_api_key', 'client_secret', 'client-secret']) {
+    const redacted = redactUrl(`https://kibana.example/api?${key}=super-secret&q=1`);
+    assert(
+      REDACTED_RE.test(valueOf(redacted, key)),
+      `redactUrl → ${key} is redacted`,
+      redacted
+    );
+  }
+
+  // Redaction-before-grouping collision (P2 review finding): two DIFFERENT
+  // values under the same sensitive key must produce DIFFERENT placeholders,
+  // so the reducer's method+URL signature grouping never wrongly merges two
+  // genuinely different requests into one just because both had a "token".
+  const redactedA = redactUrl('https://kibana.example/api?token=a&page=1');
+  const redactedB = redactUrl('https://kibana.example/api?token=b&page=1');
+  assert(redactedA !== redactedB, 'redactUrl → different sensitive values produce different redacted placeholders (no signature collision)', `${redactedA} vs ${redactedB}`);
+  // ...but the SAME value redacts to the SAME placeholder every time, so a
+  // genuinely repeated call with a constant token is still grouped/detected
+  // as a duplicate, not artificially split by a random per-call salt.
+  assert(
+    redactUrl('https://kibana.example/api?token=a&page=1') === redactedA,
+    'redactUrl → the same sensitive value always redacts to the same placeholder (deterministic, not random)'
   );
 
   const withSecret = {
@@ -460,6 +510,16 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
   const r = reduceAction({ network: [withSecret, { ...withSecret, requestedAt: 50 }] });
   const finding = r.level2.find((i) => i.type === 'duplicate_api_call');
   assert(finding && !finding.url.includes('abc123'), 'a finding built from a URL with a token query param never leaks the token value');
+
+  // A duplicate finding built from two requests with DIFFERENT token values
+  // must not exist — they are different signatures, not one duplicated call.
+  const withSecretA = { ...withSecret, url: 'https://kibana.example/internal/foo?token=a&page=2' };
+  const withSecretB = { ...withSecret, url: 'https://kibana.example/internal/foo?token=b&page=2', requestedAt: 50 };
+  const r2 = reduceAction({ network: [withSecretA, withSecretB] });
+  assert(
+    !r2.level2.some((i) => i.type === 'duplicate_api_call'),
+    'two requests differing only by a redacted-but-different token value are never merged into one duplicate_api_call finding'
+  );
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -474,8 +534,8 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
 console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (reducer) ──────');
 {
   const doc = readFileSync(resolve(__dirname, '../action-scoped-collector.md'), 'utf8');
-  const match = doc.match(/const SENSITIVE = [\s\S]*?\n  \};\n/);
-  assert(!!match, 'action-scoped-collector.md contains the expected `const SENSITIVE` / `redact` bridge snippet');
+  const match = doc.match(/const shortHash = [\s\S]*?return base \+ '\?' \+ rest \+ hash;\n  \};\n/);
+  assert(!!match, 'action-scoped-collector.md contains the expected `const shortHash` / `const SENSITIVE` / `redact` bridge snippet');
 
   if (match) {
     const redactFromDoc = new Function(`${match[0]}\nreturn redact;`)();
@@ -492,6 +552,15 @@ console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (redu
       'https://kibana.example/api?token=abc123#somefragment',
       'https://kibana.example/api?q=1#somefragment',
       'https://kibana.example/api?bad%zzkey=secret&page=2',
+      // Previously-missing credential-shaped names (P2 review finding).
+      'https://kibana.example/api?x-api-key=super-secret&q=1',
+      'https://kibana.example/api?client_secret=super-secret&q=1',
+      'https://kibana.example/api?client-secret=super-secret&q=1',
+      // Redaction-before-grouping collision (P2 review finding): the bridge
+      // and reducer must agree not just that these are redacted, but on the
+      // SAME hashed placeholder for the SAME value.
+      'https://kibana.example/api?token=a&page=1',
+      'https://kibana.example/api?token=b&page=1',
     ];
     for (const url of cases) {
       assert(

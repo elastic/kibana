@@ -56,29 +56,39 @@ function extractCodeBlock(doc, headingText) {
 const doc = readFileSync(DOC_PATH, 'utf8');
 const installSrc = extractCodeBlock(doc, '### Install');
 const drainSrc = extractCodeBlock(doc, '### Drain');
+const uninstallSrc = extractCodeBlock(doc, '### Uninstall');
 // eslint-disable-next-line no-new-func
 const install = new Function(`return (${installSrc});`)();
 // eslint-disable-next-line no-new-func
 const drain = new Function(`return (${drainSrc});`)();
+// eslint-disable-next-line no-new-func
+const uninstall = new Function(`return (${uninstallSrc});`)();
 
 // ── Fake Playwright primitives — just enough surface for the bridge ────────
 
 class FakePage extends EventEmitter {
   constructor() {
     super();
-    this._mainFrame = {};
+    this._mainFrame = 'main';
   }
   mainFrame() {
     return this._mainFrame;
   }
+  // Real Playwright `page.off` is just an EventEmitter#removeListener alias
+  // (Node's EventEmitter already exposes `.off()`), so no override needed —
+  // present only to make the fake's intended surface explicit.
 }
 
+// Every request defaults to the page's main frame unless a test explicitly
+// constructs it against a child/iframe frame object, so existing tests that
+// don't care about frame-scoping keep working unchanged.
 class FakeRequest {
-  constructor(method, url, resourceType = 'xhr') {
+  constructor(method, url, resourceType = 'xhr', frame = 'main') {
     this._method = method;
     this._url = url;
     this._resourceType = resourceType;
     this._failure = null;
+    this._frame = frame;
   }
   method() {
     return this._method;
@@ -91,6 +101,9 @@ class FakeRequest {
   }
   failure() {
     return this._failure;
+  }
+  frame() {
+    return this._frame;
   }
 }
 
@@ -213,7 +226,18 @@ await install(page);
   const d = await drain(page);
   assert(d.console.length === 1, 'the console error is buffered');
   assert(!d.console[0].text.includes('abc123'), 'the token value never appears in the drained console text', d.console[0].text);
-  assert(d.console[0].text.includes('token=%5BREDACTED%5D'), 'the token key is preserved, redacted in the documented [REDACTED] form', d.console[0].text);
+  assert(/token=%5BREDACTED:[0-9a-z]+%5D/.test(d.console[0].text), 'the token key is preserved, redacted in the hashed [REDACTED:<hash>] form', d.console[0].text);
+}
+
+console.log('\n── Different sensitive values in console text redact to different placeholders ─');
+page = new FakePage();
+await install(page);
+{
+  page.emit('console', new FakeConsoleMessage('error', 'Failed to fetch /api/foo?token=aaa: 500'));
+  page.emit('console', new FakeConsoleMessage('error', 'Failed to fetch /api/foo?token=bbb: 500'));
+  const d = await drain(page);
+  assert(d.console.length === 2, 'both console errors are buffered');
+  assert(d.console[0].text !== d.console[1].text, 'different token values redact to different placeholders, not an identical opaque string', JSON.stringify(d.console));
 }
 
 console.log('\n── Console messages with no sensitive content pass through unchanged (besides the 300-char cap) ─');
@@ -258,6 +282,104 @@ await install(page); // second flow
   page.emit('requestfinished', req);
   const d = await drain(page);
   assert(d.network.length === 1 && d.network[0].status === 204, "flow 2's own requests are still captured normally after the reset", JSON.stringify(d));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// NAVIGATION ABANDONMENT: scoped to the frame that actually navigated
+// ══════════════════════════════════════════════════════════════════════════
+
+console.log('\n── A main-frame navigation does NOT abandon an unrelated iframe\'s in-flight request ─');
+page = new FakePage();
+await install(page);
+{
+  const iframeReq = new FakeRequest('GET', 'https://widget.example/data', 'xhr', 'iframe-1');
+  page.emit('request', iframeReq);
+  // The main frame navigates away — the iframe's own request is unrelated.
+  page.emit('framenavigated', page.mainFrame());
+
+  const d = await drain(page);
+  const entry = d.network[0];
+  assert(!!entry && entry.abandonedByNavigation === false, "an iframe's own in-flight request is not marked abandoned just because the main frame navigated", JSON.stringify(d));
+}
+
+console.log('\n── A child frame\'s OWN navigation abandons only that frame\'s own open requests ─');
+page = new FakePage();
+await install(page);
+{
+  const mainReq = new FakeRequest('GET', 'https://kibana.example/api/main-still-open');
+  const iframeReq = new FakeRequest('GET', 'https://widget.example/data', 'xhr', 'iframe-1');
+  page.emit('request', mainReq);
+  page.emit('request', iframeReq);
+  // Only the iframe navigates (e.g. it loads a new document internally).
+  page.emit('framenavigated', 'iframe-1');
+
+  const d = await drain(page);
+  const iframeEntry = d.network.find((e) => e.url.includes('widget.example'));
+  const mainEntry = d.network.find((e) => e.url.includes('main-still-open'));
+  assert(!!iframeEntry && iframeEntry.abandonedByNavigation === true, "the child frame's own request is abandoned by its own frame's navigation", JSON.stringify(d));
+  assert(!!mainEntry && mainEntry.abandonedByNavigation === false, "the main frame's unrelated request is untouched by a child frame's navigation", JSON.stringify(d));
+}
+
+console.log('\n── A main-frame navigation still abandons the main frame\'s own open request (no regression) ─');
+page = new FakePage();
+await install(page);
+{
+  const req = new FakeRequest('GET', 'https://kibana.example/api/main-request');
+  page.emit('request', req);
+  page.emit('framenavigated', page.mainFrame());
+
+  const d = await drain(page);
+  const entry = d.network[0];
+  assert(!!entry && entry.abandonedByNavigation === true, "the main frame's own request is still abandoned by the main frame's own navigation", JSON.stringify(d));
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// UNINSTALL: precise teardown, no cross-talk with unrelated listeners
+// ══════════════════════════════════════════════════════════════════════════
+
+console.log('\n── Uninstall on a page that was never installed is a safe no-op ────────');
+page = new FakePage();
+{
+  const r = await uninstall(page);
+  assert(r.uninstalled === false && r.wasInstalled === false, 'uninstall() on a fresh page reports nothing to uninstall', JSON.stringify(r));
+}
+
+console.log('\n── Uninstall removes exactly the six collector listeners, nothing else ─');
+page = new FakePage();
+await install(page);
+{
+  const unrelatedListener = () => {};
+  page.on('console', unrelatedListener); // simulates e.g. video-evidence recording sharing the same event
+  assert(page.listenerCount('console') === 2, 'sanity: two console listeners attached before uninstall (collector + unrelated)');
+
+  const r = await uninstall(page);
+  assert(r.uninstalled === true && r.wasInstalled === true, 'uninstall() reports it removed a real installation', JSON.stringify(r));
+  assert(page.listenerCount('request') === 0, 'the request listener is removed');
+  assert(page.listenerCount('response') === 0, 'the response listener is removed');
+  assert(page.listenerCount('requestfinished') === 0, 'the requestfinished listener is removed');
+  assert(page.listenerCount('requestfailed') === 0, 'the requestfailed listener is removed');
+  assert(page.listenerCount('framenavigated') === 0, 'the framenavigated listener is removed');
+  assert(page.listenerCount('console') === 1, 'only the collector\'s OWN console listener is removed — the unrelated one set by something else on the page survives', page.listenerCount('console'));
+
+  assert(page.__actionCollectorInstalled === false, 'the installed flag is cleared so a later install() call re-attaches cleanly');
+}
+
+console.log('\n── After uninstall, no further requests/console are buffered until re-installed ─');
+page = new FakePage();
+await install(page);
+await uninstall(page);
+{
+  const req = new FakeRequest('GET', 'https://kibana.example/api/after-uninstall');
+  page.emit('request', req); // no listener left to react to this
+  page.emit('console', new FakeConsoleMessage('error', 'should not be captured'));
+  assert(page.__actionCollectorBuffer === undefined, 'the buffer itself was deleted by uninstall, so nothing could have been pushed');
+
+  const r = await install(page); // re-install for a later session/flow reusing this page
+  assert(r.installed === true && r.alreadyInstalled === false, 'install() after a full uninstall re-attaches from scratch, not a stale alreadyInstalled: true', JSON.stringify(r));
+  const req2 = new FakeRequest('GET', 'https://kibana.example/api/after-reinstall');
+  page.emit('request', req2);
+  const d = await drain(page);
+  assert(d.network.length === 1 && d.network[0].url.includes('after-reinstall'), 'listeners re-attached by install() after uninstall work normally', JSON.stringify(d));
 }
 
 // ══════════════════════════════════════════════════════════════════════════

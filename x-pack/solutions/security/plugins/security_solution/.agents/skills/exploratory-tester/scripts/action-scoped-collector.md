@@ -40,7 +40,21 @@ async (page) => {
   page.__actionCollectorRequests = new WeakMap();
   page.__actionCollectorNextId = 1;
 
-  const SENSITIVE = /^(api[-_]?key|token|password|passwd|secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
+  // Non-cryptographic, deterministic — its only job is to turn two DIFFERENT
+  // secret values into two DIFFERENT (but still opaque) placeholders. Without
+  // this, redacting `?token=a` and `?token=b` to the exact same literal
+  // `token=%5BREDACTED%5D` would make the reducer's signature grouping
+  // (method+URL, computed from this already-redacted URL — see
+  // action-scoped-collector.mjs) treat two genuinely different requests as
+  // one, which can hide a real duplicate-call bug or merge unrelated
+  // pending/stuck tracking. Must stay byte-identical to the reducer's copy —
+  // the parity test below evaluates both against the same inputs.
+  const shortHash = (value) => {
+    let hash = 5381;
+    for (let i = 0; i < value.length; i++) hash = (hash * 33) ^ value.charCodeAt(i);
+    return (hash >>> 0).toString(36);
+  };
+  const SENSITIVE = /^(x[-_]?api[-_]?key|api[-_]?key|token|password|passwd|secret|client[-_]?secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
   const redact = (url) => {
     const q = url.indexOf('?');
     if (q === -1) return url;
@@ -52,7 +66,8 @@ async (page) => {
     const rest = queryOnly.split('&').map((pair) => {
       const eq = pair.indexOf('=');
       const key = eq === -1 ? pair : pair.slice(0, eq);
-      try { if (SENSITIVE.test(decodeURIComponent(key))) return key + '=%5BREDACTED%5D'; } catch (e) {}
+      const value = eq === -1 ? '' : pair.slice(eq + 1);
+      try { if (SENSITIVE.test(decodeURIComponent(key))) return key + '=%5BREDACTED:' + shortHash(value) + '%5D'; } catch (e) {}
       return pair;
     }).join('&');
     return base + '?' + rest + hash;
@@ -61,16 +76,20 @@ async (page) => {
   // `key=value` — console messages routinely embed the failing URL verbatim
   // (e.g. "Failed to fetch /api/foo?token=xyz: 500"), and `redact` above only
   // ever sees structured request URLs, never console text.
-  const SENSITIVE_KV = /\b(api[-_]?key|token|password|passwd|secret|auth(?:orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)=([^\s&#'")]+)/gi;
-  const redactText = (text) => text.replace(SENSITIVE_KV, (_m, key) => key + '=%5BREDACTED%5D');
+  const SENSITIVE_KV = /\b(x[-_]?api[-_]?key|api[-_]?key|token|password|passwd|secret|client[-_]?secret|auth(?:orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)=([^\s&#'")]+)/gi;
+  const redactText = (text) => text.replace(SENSITIVE_KV, (_m, key, value) => key + '=%5BREDACTED:' + shortHash(value) + '%5D');
 
-  page.on('request', (req) => {
+  const onRequest = (req) => {
     const entry = {
       id: page.__actionCollectorNextId++,
       method: req.method(), url: redact(req.url()),
       status: null, ok: null, failure: null,
       requestedAt: Date.now(), respondedAt: null,
       resourceType: req.resourceType(), abandonedByNavigation: false,
+      // Internal only — never included in drain()'s output. Lets
+      // 'framenavigated' below abandon only THIS request's own frame's
+      // in-flight requests, not every open request page-wide.
+      frame: req.frame(),
     };
     page.__actionCollectorBuffer.push(entry);
     page.__actionCollectorRequests.set(req, entry);
@@ -90,40 +109,85 @@ async (page) => {
         }
       }
     }
-  });
+  };
   // 'response' fires as soon as HEADERS arrive — status/ok are informational
   // and may be set well before the body finishes downloading. This is
   // intentionally NOT where the request is considered "done": see
   // 'requestfinished'/'requestfailed' below, which set `respondedAt`, the
   // one true completeness signal the reducer keys "pending"/"stuck" off.
-  page.on('response', (res) => {
+  const onResponse = (res) => {
     const entry = page.__actionCollectorRequests.get(res.request());
     if (!entry) return;
     entry.status = res.status(); entry.ok = res.ok();
-  });
-  page.on('requestfinished', (req) => {
+  };
+  const onRequestFinished = (req) => {
     const entry = page.__actionCollectorRequests.get(req);
     if (!entry) return;
     entry.respondedAt = Date.now();
-  });
-  page.on('requestfailed', (req) => {
+  };
+  const onRequestFailed = (req) => {
     const entry = page.__actionCollectorRequests.get(req);
     if (!entry) return;
     entry.failure = (req.failure() && req.failure().errorText) || 'unknown';
     entry.respondedAt = Date.now();
-  });
-  page.on('framenavigated', (frame) => {
-    if (frame !== page.mainFrame()) return;
+  };
+  // Scoped to the SPECIFIC frame that navigated, not "any main-frame nav
+  // abandons everything": a main-frame navigation to a new document tears
+  // down that frame's own requests, but an unrelated iframe's in-flight
+  // request (e.g. a widget loading independently) is untouched by it and
+  // must not be falsely marked abandoned. Symmetrically, a CHILD frame's own
+  // navigation must abandon that child frame's own open requests — the old
+  // `if (frame !== page.mainFrame()) return;` guard silently ignored those
+  // entirely. Frame objects are stable references across same-document
+  // (SPA/pushState) navigations, so this does not fire on every in-app route
+  // change — only on an actual frame/document replacement.
+  const onFrameNavigated = (frame) => {
     for (const entry of page.__actionCollectorBuffer) {
-      if (entry.respondedAt == null && entry.failure == null) entry.abandonedByNavigation = true;
+      if (entry.frame === frame && entry.respondedAt == null && entry.failure == null) {
+        entry.abandonedByNavigation = true;
+      }
     }
-  });
-  page.on('console', (msg) => {
+  };
+  const onConsole = (msg) => {
     if (msg.type() === 'error') page.__actionCollectorConsole.push({ type: 'error', text: redactText(msg.text().slice(0, 300)) });
-  });
+  };
+
+  page.on('request', onRequest);
+  page.on('response', onResponse);
+  page.on('requestfinished', onRequestFinished);
+  page.on('requestfailed', onRequestFailed);
+  page.on('framenavigated', onFrameNavigated);
+  page.on('console', onConsole);
+  // Keep references so Uninstall (below) can remove exactly these listeners
+  // with page.off(event, handler) — never page.removeAllListeners(event),
+  // which would also tear down unrelated listeners another part of the
+  // session (e.g. video-evidence recording) may have on the same events.
+  page.__actionCollectorHandlers = {
+    request: onRequest, response: onResponse, requestfinished: onRequestFinished,
+    requestfailed: onRequestFailed, framenavigated: onFrameNavigated, console: onConsole,
+  };
 
   page.__actionCollectorInstalled = true;
   return { installed: true, alreadyInstalled: false };
+}
+```
+
+### Uninstall (only when a session with `collector_mode: legacy` suspects this exact page/tab may have been left instrumented by an earlier `collector_mode: shadow` session — see "Reusing a page across sessions" below)
+
+```js
+async (page) => {
+  if (!page.__actionCollectorInstalled) return { uninstalled: false, wasInstalled: false };
+  const handlers = page.__actionCollectorHandlers || {};
+  for (const eventName of Object.keys(handlers)) {
+    page.off(eventName, handlers[eventName]);
+  }
+  delete page.__actionCollectorHandlers;
+  delete page.__actionCollectorRequests;
+  delete page.__actionCollectorBuffer;
+  delete page.__actionCollectorConsole;
+  delete page.__actionCollectorNextId;
+  page.__actionCollectorInstalled = false;
+  return { uninstalled: true, wasInstalled: true };
 }
 ```
 
@@ -132,6 +196,8 @@ async (page) => {
 **Redaction lives in (at least) two places on purpose.** The reducer's `redactUrl` (`action-scoped-collector.mjs`) and this inline `redact` copy must stay logically equivalent — the VM sandbox has no `require`, so this code cannot import the reducer's implementation. `action-scoped-collector.test.mjs` includes a parity test that evaluates this exact snippet's `redact` logic against the same inputs as `redactUrl` and asserts they agree, so drift between the two is caught by the existing test suite rather than only discovered live. `redactText` (console messages) has no reducer-side equivalent to stay in parity with — console text is never re-emitted by the reducer, so redacting it once here, before it is ever buffered or persisted, is the only place it needs to happen.
 
 **Why 'response' and 'requestfinished' are handled separately.** A response can arrive with headers (status known) while its body is still streaming or has stalled — `requestfinished` only fires once the body has actually been fully consumed. Setting `respondedAt` on `'response'` instead of `'requestfinished'` would make a request with a stalled body read as "settled" the moment headers arrived, silently defeating `pending_request`/`stuck_request` detection for exactly the kind of hang this collector exists to catch. Splitting the two also removes a variant of this same bug from an earlier version of this file, which raced `req.response().then(...)` against drain — `'response'`'s `res.status()`/`res.ok()` are available synchronously with no promise chain, and `'requestfinished'` needs no promise at all.
+
+**Reusing a page across sessions.** Install/Uninstall only ever run when a session explicitly calls them via `phases/2-explore.md`'s `collector_mode`-gated instructions — a session with `collector_mode: legacy` never calls Install, so a brand-new page/tab is never instrumented at all. The one case this doesn't cover: an entirely separate, later session reusing the exact same already-open browser page/tab a previous `collector_mode: shadow` session instrumented (this can only happen if whatever is driving the browser — not this skill — persists a page across unrelated sessions; a single session's own resume path re-reads `config.json`, which never changes `collector_mode` mid-session, so this is never a same-session concern). If you have reason to believe that's happening (e.g. you were told to keep reusing an existing tab across separate testing sessions with different areas), run the Uninstall snippet once before Phase 2 even when this session's own `collector_mode` is `legacy` — otherwise the old listeners keep firing and buffering silently for as long as the page lives, with nothing ever draining them.
 
 ### Drain (after every checklist step's normal Detector A/B/C run, while `collector_mode: shadow`)
 
@@ -174,9 +240,9 @@ Manually re-running `action-scoped-collector-spike.md` before every session isn'
 ## What is never collected
 
 - Request or response **bodies** — never requested, never buffered, never returned. Only `id`, `method`, `url` (redacted), `status`, `ok`, `failure`, timestamps, and `resourceType`.
-- Credential-shaped query parameter **values** — redacted before the URL ever leaves the bridge (see `redact`/`redactUrl` above). Parameter *names* are preserved so a finding can still say "an auth-related param was present" without revealing it.
+- Credential-shaped query parameter **values** — redacted before the URL ever leaves the bridge (see `redact`/`redactUrl` above). Parameter *names* are preserved so a finding can still say "an auth-related param was present" without revealing it. The redacted placeholder includes a short one-way hash of the original value (`%5BREDACTED:<hash>%5D`, never the value itself) precisely so it stays *distinguishable* — two requests differing only in a sensitive param's value (e.g. `token=a` vs `token=b`) still get different placeholders and are not wrongly merged into one signature by the reducer's method+URL grouping.
 - Credential-shaped `key=value` pairs embedded in **console text** — a console error frequently repeats the failing URL verbatim (e.g. "Failed to fetch /api/foo?token=xyz: 500"), so console messages are redacted with the same param names (`redactText`, above) before ever being buffered, not just structured request URLs.
-- Anything from `collector_mode: legacy` sessions — the bridge is never installed at all unless `collector_mode: shadow` is explicitly set.
+- Anything from a `collector_mode: legacy` session's own page — that session never calls Install. (A page reused from an *earlier, separate* `collector_mode: shadow` session is the one gap this doesn't cover — see "Reusing a page across sessions" above.)
 - Anything from a **previous flow** — install resets the buffer/console arrays on every call, so a flow's first drain never returns another flow's leftover events (see "Install" above).
 
 ## Known limitation: no click/action intent

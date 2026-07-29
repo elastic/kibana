@@ -213,11 +213,19 @@ Call `browser_evaluate(function: "() => window.__et.dom()")`. Log each returned 
 **Shadow collector — only if `collector_mode: shadow` and "Shadow collector setup" above did not mark it unavailable:**
 
 1. Drain via `browser_run_code_unsafe` using the "Drain" snippet in `scripts/action-scoped-collector.md`. If this call errors or returns an unexpected shape, write `{"available": false, "reason": "<error>"}` to `$SESSION_DIR/collector-diffs/flow<N>-status.json` and stop running shadow steps for the rest of this flow — do not retry per-step.
-2. Save the drained JSON to `$SESSION_DIR/tmp/collector-events-flow<N>-step<M>.json` — adding `dom: { spinnerVisibleForMs: <ms since this action started, if Detector A reported spinner_present> }` — then run:
+2. Save the drained JSON to `$SESSION_DIR/tmp/collector-events-flow<N>-step<M>.json` — adding `dom: { spinnerVisibleForMs: <ms since this action started, if Detector A reported spinner_present> }` — then run **one** of the following two commands, never both, and never the second with a nonexistent state file:
+
+   **This flow's first checklist step** (no prior state file exists yet — omit the second argument entirely, do not pass an empty or guessed path):
+   ```bash
+   node x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/action-scoped-collector.mjs \
+     "$SESSION_DIR/tmp/collector-events-flow<N>-step<M>.json"
+   ```
+
+   **Every subsequent checklist step in this same flow** (the state file from the previous step now exists):
    ```bash
    node x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/action-scoped-collector.mjs \
      "$SESSION_DIR/tmp/collector-events-flow<N>-step<M>.json" \
-     "$SESSION_DIR/tmp/collector-state-flow<N>.json"   # omit the state arg on this flow's first checklist step
+     "$SESSION_DIR/tmp/collector-state-flow<N>.json"
    ```
 3. Overwrite `$SESSION_DIR/tmp/collector-state-flow<N>.json` with the command's `state` field, for the next checklist step in this same flow.
 4. Diff the command's `level1`/`level2`/`level3` against what Detectors A/B/C already logged for this step (by `type` + `path`/`text`) and write `{legacy: [...], collector: [...], onlyInLegacy: [...], onlyInCollector: [...]}` to `$SESSION_DIR/collector-diffs/flow<N>-step<M>.json`.

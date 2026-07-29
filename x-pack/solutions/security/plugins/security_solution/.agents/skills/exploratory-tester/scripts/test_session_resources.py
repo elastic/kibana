@@ -4352,6 +4352,80 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         self.assertIn("### Install", bridge_test)
         self.assertIn("### Drain", bridge_test)
 
+    def test_shadow_collector_second_review_fixes(self):
+        # Second-round P2 review findings on PR #281418 (head 57fc762):
+        # navigation abandonment must be frame-scoped, listeners must have an
+        # uninstall path, credential redaction must cover more param names
+        # and not collapse different values into one signature, the
+        # duplicate-window check must use total span (not adjacent gaps),
+        # the first-step state-file command must not be ambiguous, and a
+        # resumed session must still create tmp/collector-diffs.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        reducer = (SCRIPT_DIR / "action-scoped-collector.mjs").read_text(
+            encoding="utf-8"
+        )
+        bridge_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        ).read_text(encoding="utf-8")
+
+        # Navigation abandonment: scoped to the frame that navigated, not
+        # "any main-frame nav abandons every open request page-wide".
+        self.assertIn("entry.frame === frame", collector_doc)
+        self.assertIn("frame: req.frame()", collector_doc)
+
+        # Uninstall path: an explicit teardown snippet exists, uses page.off
+        # (never removeAllListeners, which would also strip unrelated
+        # listeners another part of the session may have on the same page).
+        self.assertIn("### Uninstall", collector_doc)
+        self.assertIn("page.off(eventName, handlers[eventName])", collector_doc)
+        self.assertIn("### Uninstall", bridge_test)
+
+        # A legacy-mode session must be told, outside any collector_mode:
+        # shadow-gated subsection, to defensively uninstall if it suspects
+        # page reuse from an earlier shadow session.
+        self.assertIn("Uninstall", setup)
+        self.assertIn("collector_mode: shadow", setup)
+
+        # Redaction: previously-missed credential-shaped param names, and a
+        # hashed (not constant) placeholder so different values under the
+        # same sensitive key don't collapse into one signature.
+        for names_source in (collector_doc, reducer):
+            self.assertIn("x[-_]?api[-_]?key", names_source)
+            self.assertIn("client[-_]?secret", names_source)
+        self.assertIn("shortHash", collector_doc)
+        self.assertIn("shortHash", reducer)
+        self.assertIn("%5BREDACTED:", collector_doc)
+        self.assertIn("%5BREDACTED:", reducer)
+
+        # Duplicate-window: total span, not per-adjacent-gap.
+        self.assertIn(
+            "timings[timings.length - 1] - timings[0] <= DUPLICATE_WINDOW_MS",
+            reducer,
+        )
+
+        # First checklist step's command must not include a state-file
+        # argument that cannot exist yet — two separate, unambiguous
+        # commands instead of one command plus an inline comment.
+        shadow_section = explore[explore.index("Shadow collector —") :]
+        first_step_idx = shadow_section.index("first checklist step")
+        first_step_cmd = shadow_section[first_step_idx : first_step_idx + 400]
+        self.assertNotIn("collector-state-flow<N>.json", first_step_cmd)
+        self.assertIn("subsequent checklist step", shadow_section)
+
+        # Resumed sessions must still get tmp/ and collector-diffs/, not
+        # just brand-new ones — Step 0e's mkdir only runs on the new-session
+        # path, so the resume path needs its own.
+        resume_section = setup[
+            setup.index("Resume path") : setup.index("New session path")
+        ]
+        self.assertIn("mkdir -p", resume_section)
+        self.assertIn("tmp", resume_section)
+        self.assertIn("collector-diffs", resume_section)
+
     def test_head_probes_do_not_wait_for_a_response_body(self):
         # curl -X HEAD keeps waiting for a body that a HEAD response never
         # sends, so it stalls for the whole --max-time on keep-alive servers.
