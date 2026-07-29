@@ -403,15 +403,10 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
 
     const candidate = valuesAgg as {
       sum_other_doc_count?: number;
-      doc_count_error_upper_bound?: number;
       buckets?: Array<{ key?: unknown; doc_count?: number }>;
     };
 
-    if (
-      typeof candidate.sum_other_doc_count !== 'number' ||
-      typeof candidate.doc_count_error_upper_bound !== 'number' ||
-      !Array.isArray(candidate.buckets)
-    ) {
+    if (typeof candidate.sum_other_doc_count !== 'number' || !Array.isArray(candidate.buckets)) {
       this.logger.warn(
         `Unexpected aggregation shape for change history field [${field}]; returning empty buckets`
       );
