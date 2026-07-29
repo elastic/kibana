@@ -2,6 +2,12 @@
 
 ---
 
+Before starting Phase 2, inspect `config.json → skipped_setup`. If it contains
+`step: "user-provisioning"`, **do not explore**: stop, report that the
+session-user setup failed, and run the restore-aware cleanup command below.
+The authenticated admin setup session must never be used as an exploration
+identity.
+
 ## Session cap check — run before every flow
 
 Before starting each flow (single or parallel), check whether the session time cap has been reached:
@@ -20,6 +26,17 @@ EOF
 
 - **Exit 0** (within cap) → proceed with the flow.
 - **Exit 1** (cap reached) → mark this flow and all remaining flows as `not started: session time cap reached` in `config.json → skipped_setup`, then **jump to Phase 3 immediately**. Do not start any more flows.
+
+If the browser session is lost and exploration cannot continue, preserve the
+findings and run the restore-and-cleanup command before stopping. It restores
+CCS before cleanup when required, and Phase 3 repeats the same operation, so
+this is safe to retry:
+```bash
+python3 x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/restore-and-cleanup-session.py \
+  --session-dir "$SESSION_DIR"
+```
+The wrapper invokes `cleanup-session-resources.py` only after CCS restoration
+has succeeded.
 
 ---
 
@@ -106,9 +123,29 @@ Record end time when checklist completes or timebox fires. Write both into the f
 | 4 | **Cancel / back-navigate mid-flow** — start the flow, then cancel or navigate away |
 | 5 | **Refresh during in-flight operation** — trigger a server call, confirm loading state with `browser_snapshot`, then navigate to the same URL |
 
+### Detector bridge setup (once per flow, and after every `browser_navigate`)
+
+The three detectors in "At every checklist step" below are called through an injected `window.__et` bridge instead of being pasted at every step. Pasting all three detector scripts at every checklist step was the single largest source of repeated tool-call payload in this phase — do not reintroduce that cost by treating this as a per-step action.
+
+**Set this up once, before Step 1 of the checklist:**
+
+1. **Inject:** call `browser_evaluate` with the full content of `scripts/inject-detectors.js` as the `function` argument.
+2. **Verify:** `browser_evaluate(function: "() => typeof window.__et")`. Expect `"object"`.
+3. **If verification fails:** use **Fallback: full paste** for every detector call in this flow (see each detector's fallback below) until a later reinjection succeeds. Do not block the flow on this.
+
+**`browser_navigate` clears `window.__et`** — it resets the page's window context, so a bridge installed before navigating is gone afterward. Repeat steps 1–2 immediately after every navigation, including the recovery navigations in "Pitfalls" below, before running any detector on the new page.
+
+**Do not paste the detector source while the bridge is up** — once step 2 confirms `window.__et` is installed, every detector call below must use the compact `window.__et.*` form. Pasting is only for the Fallback conditions in step 3.
+
+---
+
 ### At every checklist step
 
 After each action, run the three detectors below **in sequence**. Each detector returns structured results — log them directly, no interpretation needed. Agent judgment applies only after the detectors have run, for UI states the detectors don't cover.
+
+---
+
+**Detector bridge reminder:** the bridge is installed once per flow and once per navigation (see "Detector bridge setup" above) — **do not reinject at every checklist step.** If a `window.__et.*` call below errors (e.g. "window.__et is not defined"), the page context reset without a tracked `browser_navigate` (a full reload, a redirect, an iframe swap): reinject once (the same call as flow start), retry the failed call, and continue. If the retry also fails, fall back to pasting the corresponding detector script for the rest of this checklist step (see each detector's "Fallback: full paste" below), and re-attempt injection at the next navigation or checklist step.
 
 ---
 
@@ -120,38 +157,50 @@ First, wait for the page to settle after the action:
 
 **This 3-second wait is for wrong-state checks only (spinners, error banners, panel content).** If instead you're about to conclude that an *expected element is entirely absent* (a tab, a table's contents, a row) — do not log it yet. A single snapshot cannot distinguish a genuine permanent absence from a transient render race; see "Confirm before logging" below before treating it as a result.
 
-Then paste the full content of `scripts/check-dom-anomalies.js` as the function argument. Log each returned item at its indicated level:
+Call `browser_evaluate(function: "() => window.__et.dom()")`. Log each returned item at its indicated level:
 - `level1[]` items → Level 1 finding
 - `level2[]` items → Level 2 finding
 - `level3[spinner_present]` → **Level 3 normally**; but if the spinner has been visible for **more than 10 seconds** since the action was triggered → escalate to **Level 2**: "Loading indicator unresolved after 10 seconds"
 
-**Never conclude "no warning is shown" from an `innerText`/text search alone when a Lens or dashboard visualization is on the page.** Kibana renders CCS/partial-result warnings as an **icon-only badge** (`data-test-subj="searchResponseWarningsBadgeToogleButton"`) whose visible text and `title` attribute are only a count ("N warnings") — the actual "Problem with N cluster(s)" text renders **only inside the popover, after a click**. A plain text search will not find it (this produced a real false-negative finding). `check-dom-anomalies.js` now flags this badge at Level 2; when it appears, click it before writing the finding.
+**Never conclude "no warning is shown" from an `innerText`/text search alone when a Lens or dashboard visualization is on the page.** Kibana renders CCS/partial-result warnings as an **icon-only badge** (`data-test-subj="searchResponseWarningsBadgeToogleButton"`) whose visible text and `title` attribute are only a count ("N warnings") — the actual "Problem with N cluster(s)" text renders **only inside the popover, after a click**. A plain text search will not find it (this produced a real false-negative finding). `check-dom-anomalies.js` (and the injected `window.__et.dom()`) flags this badge at Level 2; when it appears, click it before writing the finding.
+
+**Fallback: full paste.** Paste the full content of `scripts/check-dom-anomalies.js` as the `function` argument instead of calling `window.__et.dom()`. Everything else in this section is unchanged.
 
 ---
 
 **Detector B — Console** (`browser_console_messages` → `browser_evaluate`)
 
 1. Call `browser_console_messages(level: "error")` — collect the message texts.
-2. Format them as a JSON string array: `["msg 1", "msg 2", ...]`
-3. Call `browser_evaluate` with the content of `scripts/classify-console.js`, replacing the `/*MESSAGES*/` placeholder with the array:
+2. JSON-encode them into an array, e.g. `["msg 1", "msg 2", ...]`. **This is the only escaping step needed:** JSON encoding already turns any embedded `"`, `` ` ``, or newline into a valid escape sequence. Do not hand-add further backslashes on top of the JSON encoding — that produces invalid JS.
+3. Call `browser_evaluate` with `function` set to the array from step 2 substituted directly in:
+   ```js
+   () => window.__et.console(["msg 1", "msg 2", ...])
+   ```
+4. Log each returned item at its indicated level. Do not log `suppressed[]` items.
+
+**Fallback: full paste.** Call `browser_evaluate` with the content of `scripts/classify-console.js`, replacing the `/*MESSAGES*/` placeholder with the same JSON-encoded array from step 2:
    ```
    // Replace:  )(/*MESSAGES*/)
    // With:     )(["msg 1", "msg 2", ...])
    ```
-4. Log each returned item at its indicated level. Do not log `suppressed[]` items.
 
 ---
 
 **Detector C — Network** (`browser_network_requests` → `browser_evaluate`)
 
 1. Call `browser_network_requests(static: false)` — parse each line of the form `N. [METHOD] https://... => [STATUS]` into `{method, url}`.
-2. Format as a JSON array: `[{"method":"GET","url":"https://..."},...]`
-3. Call `browser_evaluate` with the content of `scripts/dedup-network.js`, replacing `/*REQUESTS*/` with the array:
+2. JSON-encode them into an array, e.g. `[{"method":"GET","url":"https://..."},...]`. Same escaping rule as Detector B step 2 — JSON encoding is sufficient on its own.
+3. Call `browser_evaluate` with `function` set to the array from step 2 substituted directly in:
+   ```js
+   () => window.__et.network([{"method":"GET","url":"https://..."}, ...])
+   ```
+4. Log each item in `findings[]` as a Level 2 finding.
+
+**Fallback: full paste.** Call `browser_evaluate` with the content of `scripts/dedup-network.js`, replacing `/*REQUESTS*/` with the same JSON-encoded array from step 2:
    ```
    // Replace:  )(/*REQUESTS*/)
    // With:     )([{"method":"GET","url":"https://..."}, ...])
    ```
-4. Log each item in `findings[]` as a Level 2 finding.
 
 ---
 
@@ -248,6 +297,7 @@ All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In pa
 - After `browser_navigate` in Security Solution, a side panel may re-open as a blocking dialog (e.g. "Admin and settings"). Check the first snapshot for an open `dialog` and press `Escape` before any other action.
 - `browser_navigate` times out when a `beforeunload` dialog is blocking (e.g. Timeline with unsaved changes). If navigation times out, call `browser_snapshot`. If a dialog is present, call `browser_handle_dialog(accept: true)` then retry.
 - After 2 failed attempts to type into a Monaco editor, log "partial interaction — Monaco editor prevented automated input" and move on.
+- Every `browser_navigate` — including retries after the two pitfalls above — clears `window.__et`. Reinject the detector bridge (see "Detector bridge setup" above) before running any detector on the new page.
 
 ### Timebox outcomes
 
