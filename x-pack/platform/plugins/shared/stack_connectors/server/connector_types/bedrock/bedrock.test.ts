@@ -805,6 +805,23 @@ describe('BedrockConnector', () => {
         expect(response.output.message!.content[0].text).toEqual(mockResponseString);
       });
 
+      it('forwards maxContentLength to the request when provided', async () => {
+        await connector.converse(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({ maxContentLength: 10 * 1024 * 1024 }),
+          connectorUsageCollector
+        );
+      });
+
+      it('does not set maxContentLength when not provided', async () => {
+        await connector.converse(aiAssistantBody, connectorUsageCollector);
+        expect(mockRequest.mock.calls[0][0]).not.toHaveProperty('maxContentLength');
+      });
+
       it('formats messages from user, assistant, and system', async () => {
         const response = await connector.converse(
           {
@@ -1040,6 +1057,21 @@ describe('BedrockConnector', () => {
             signal: undefined,
             data: JSON.stringify(DEFAULT_CONVERSE_STREAM_REQUEST_PAYLOAD),
           },
+          connectorUsageCollector
+        );
+      });
+
+      it('forwards maxContentLength to the streaming request when provided', async () => {
+        await connector.converseStream(
+          { ...aiAssistantBody, maxContentLength: 10 * 1024 * 1024 },
+          connectorUsageCollector
+        );
+
+        expect(mockRequest).toHaveBeenCalledWith(
+          expect.objectContaining({
+            responseType: 'stream',
+            maxContentLength: 10 * 1024 * 1024,
+          }),
           connectorUsageCollector
         );
       });

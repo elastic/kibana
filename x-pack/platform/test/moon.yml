@@ -15,6 +15,7 @@ project:
   channel: ''
   sourceRoot: x-pack/platform/test
 dependsOn:
+  - '@kbn/change-history'
   - '@kbn/test-suites-src'
   - '@kbn/telemetry-collection-manager-plugin'
   - '@kbn/features-plugin'

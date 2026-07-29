@@ -653,6 +653,7 @@ describe('<TableSection />', () => {
           hideNoneOption: true,
           hideCustomFieldOption: true,
           hideOptionsTitle: true,
+          hideGroupSelector: true,
           enforcedGroups: [ALERT_ATTACK_IDS],
         });
       });

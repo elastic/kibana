@@ -20,6 +20,7 @@ import {
   clearEntityStoreIndices,
   forceLogExtraction,
   installAllEntityTypes,
+  normalizeKeywordList,
   uninstallAllEntityTypes,
 } from '../../../scout/api/fixtures/helpers';
 
@@ -139,6 +140,93 @@ apiTest.describe(
         });
         expect(hits.hits.hits).toHaveLength(1);
         expect(get(hits.hits.hits[0]._source, ['entity', 'name'])).toBe(userName);
+      }
+    );
+
+    apiTest(
+      'produces a correct entity document after the CPS extract → promote round-trip',
+      async ({ apiClient, esClient, linkedProject }) => {
+        const hostName = `cps_entity_doc_${Date.now()}`;
+        const hostId = `${hostName}-id`;
+        const adminTargetHostId = `admin-target-${Date.now()}`;
+        // A value that must NOT become entity.id: if the self-identifier-field bug is present,
+        // transformDocForUpsert remaps host.entity.id → entity.id, overwriting the real EUID.
+        const rawHostEntityId = `raw-collision-sentinel-${Date.now()}`;
+
+        // Single log that exercises both known CPS field-mapping bugs at once:
+        //  1. host.entity.id is a self-identifier field (source === destination). It must be
+        //     stored at host.entity.id in the entity, not overwrite the computed EUID.
+        //  2. host.entity.relationships.administers.host.id (source) maps to
+        //     entity.relationships.administers.raw_identifiers.host.id (destination).
+        //     The raw_identifiers segment must survive the round-trip into the latest index.
+        await ingestLogOnLinked(linkedProject.esClient, {
+          '@timestamp': new Date(NOW - 5 * 60_000).toISOString(),
+          host: {
+            name: hostName,
+            id: hostId,
+            entity: {
+              id: rawHostEntityId,
+              relationships: {
+                administers: {
+                  host: { id: adminTargetHostId },
+                },
+              },
+            },
+          },
+        });
+
+        // Run 1: CPS remote path writes the entity update into the updates data stream.
+        const firstExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
+        expect(firstExtraction.statusCode).toBe(200);
+        expect((firstExtraction.body as { success: boolean }).success).toBe(true);
+
+        // Make the updates doc visible before the main path reads it.
+        await esClient.indices.refresh({ index: UPDATES_INDEX });
+
+        // Run 2: main local path reads the updates data stream and promotes into the latest index.
+        const secondExtraction = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          WINDOW_FROM,
+          WINDOW_TO
+        );
+        expect(secondExtraction.statusCode).toBe(200);
+        expect((secondExtraction.body as { success: boolean }).success).toBe(true);
+
+        await esClient.indices.refresh({ index: LATEST_ALIAS });
+
+        const hits = await esClient.search({
+          index: LATEST_ALIAS,
+          query: { term: { 'host.name': hostName } },
+        });
+        expect(hits.hits.hits).toHaveLength(1);
+
+        const source = hits.hits.hits[0]._source as Record<string, unknown>;
+
+        // Core entity shape.
+        expect(get(source, ['entity', 'name'])).toBe(hostName);
+        // The EUID must be the value computed from host.name, not rawHostEntityId.
+        const entityId = get(source, ['entity', 'id']) as string;
+        expect(entityId).toMatch(/^host:/);
+        expect(entityId).not.toBe(rawHostEntityId);
+
+        // host-namespaced fields.
+        expect(get(source, ['host', 'name'])).toBe(hostName);
+        // host.entity.id must be stored at its proper path, not leaked into entity.id.
+        expect(get(source, ['host', 'entity', 'id'])).toBe(rawHostEntityId);
+
+        // raw_identifiers must survive the CPS round-trip.
+        const rawIdentifierHostIds = normalizeKeywordList(
+          get(source, ['entity', 'relationships', 'administers', 'raw_identifiers', 'host', 'id'])
+        );
+        expect(rawIdentifierHostIds).toContain(adminTargetHostId);
       }
     );
   }

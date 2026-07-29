@@ -117,11 +117,19 @@ export class EsqlService {
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'all', // this returns hidden indices too
+        filter_path: ['indices.name', 'indices.mode'], // only needed to build the mode map
         ...cpsParams,
       } as Parameters<typeof client.indices.resolveIndex>[0]),
       client.indices.resolveIndex({
         name: namesToQuery,
         expand_wildcards: 'open',
+        filter_path: [
+          'indices.name',
+          'indices.mode',
+          'aliases.name',
+          'data_streams.name',
+          'data_streams.backing_indices',
+        ],
         ...cpsParams,
       } as Parameters<typeof client.indices.resolveIndex>[0]),
     ])) as [ResolveIndexResponse, ResolveIndexResponse];

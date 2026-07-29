@@ -128,6 +128,7 @@ export const ERROR_CODE = 'error.code';
 
 // ANOMALY
 export const ANOMALY_DETECTOR_TYPE = 'anomaly.detector_type';
+export const ANOMALY_TIMESTAMP = 'anomaly.timestamp';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';

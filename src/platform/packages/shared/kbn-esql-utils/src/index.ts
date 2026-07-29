@@ -106,3 +106,5 @@ export { injectWhereClauseAfterSourceCommand } from './utils/inject_where_after_
 
 // Callback functions
 export * from './utils/callbacks';
+
+export { ensureApproximationLicense } from './utils/ensure_approximation_license';

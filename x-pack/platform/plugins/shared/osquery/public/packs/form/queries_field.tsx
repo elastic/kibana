@@ -25,9 +25,16 @@ import type { ScheduleFormData } from '../../components/schedule_section/types';
 
 interface QueriesFieldProps {
   euiFieldProps: EuiComboBoxProps<{}>;
+  // Whether the pack SO actually persisted a pack-level schedule, vs. the
+  // form synthesizing an interval default for a legacy pack. See
+  // `resolveInheritedScheduleInput` in `../queries/use_pack_query_form.tsx`.
+  packHasExplicitSchedule?: boolean;
 }
 
-const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) => {
+const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
+  euiFieldProps,
+  packHasExplicitSchedule,
+}) => {
   const {
     field: { value: fieldValue },
   } = useController<{ queries: PackQueryFormData[] }, 'queries'>({
@@ -45,8 +52,14 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
   const packScheduleFormData = useWatch({ name: 'schedule' }) as ScheduleFormData | undefined;
 
   const packSchedule = useMemo(
-    () => (packScheduleFormData ? serializeSchedule(packScheduleFormData) : undefined),
-    [packScheduleFormData]
+    () =>
+      packScheduleFormData
+        ? {
+            ...serializeSchedule(packScheduleFormData),
+            hasExplicitSchedule: !!packHasExplicitSchedule,
+          }
+        : undefined,
+    [packScheduleFormData, packHasExplicitSchedule]
   );
 
   const handleNameChange = useCallback(

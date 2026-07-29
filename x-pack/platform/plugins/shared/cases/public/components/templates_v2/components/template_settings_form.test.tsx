@@ -25,7 +25,11 @@ jest.mock('./template_connector_form', () => {
   };
 });
 
-const mockUseCasesFeatures = jest.fn(() => ({ isSyncAlertsEnabled: true }));
+const mockUseCasesFeatures = jest.fn(() => ({
+  isSyncAlertsEnabled: true,
+  observablesAuthorized: true,
+  isExtractObservablesEnabled: true,
+}));
 jest.mock('../../../common/use_cases_features', () => ({
   useCasesFeatures: () => mockUseCasesFeatures(),
 }));
@@ -39,7 +43,11 @@ describe('TemplateSettingsForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockConnectorFormMounts.count = 0;
-    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: true });
+    mockUseCasesFeatures.mockReturnValue({
+      isSyncAlertsEnabled: true,
+      observablesAuthorized: true,
+      isExtractObservablesEnabled: true,
+    });
   });
 
   it('reflects the current settings in the toggles and renders the connector form', () => {
@@ -121,14 +129,34 @@ describe('TemplateSettingsForm', () => {
   });
 
   it('hides the sync alerts toggle when alert syncing is disabled (e.g. Observability)', () => {
-    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: false });
+    mockUseCasesFeatures.mockReturnValue({
+      isSyncAlertsEnabled: false,
+      observablesAuthorized: true,
+      isExtractObservablesEnabled: true,
+    });
 
     render(
       <TemplateSettingsForm {...base} settings={{ syncAlerts: true, extractObservables: false }} />
     );
 
     expect(screen.queryByTestId('templateSettingsSyncAlertsSwitch')).not.toBeInTheDocument();
-    // Extract observables remains available regardless of the alert-sync feature.
     expect(screen.getByTestId('templateSettingsExtractObservablesSwitch')).toBeInTheDocument();
+  });
+
+  it('hides the extract observables toggle when the feature is unavailable (e.g. Observability/Stack)', () => {
+    mockUseCasesFeatures.mockReturnValue({
+      isSyncAlertsEnabled: true,
+      observablesAuthorized: true,
+      isExtractObservablesEnabled: false,
+    });
+
+    render(
+      <TemplateSettingsForm {...base} settings={{ syncAlerts: true, extractObservables: false }} />
+    );
+
+    expect(
+      screen.queryByTestId('templateSettingsExtractObservablesSwitch')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('templateSettingsSyncAlertsSwitch')).toBeInTheDocument();
   });
 });

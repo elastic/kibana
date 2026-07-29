@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { generateChangeHistoryDocument } from '@kbn/change-history/test_utils';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { ConstructorOptions } from '../rules_client';
@@ -54,6 +55,7 @@ describe('getHistory()', () => {
 
   const kibanaVersion = 'v9.5.0';
   const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+    request: httpServerMock.createKibanaRequest(),
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,

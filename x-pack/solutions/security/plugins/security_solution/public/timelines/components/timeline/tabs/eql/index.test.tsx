@@ -33,6 +33,7 @@ import { createExpandableFlyoutApiMock } from '../../../../../common/mock/expand
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.mock';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 
 const SPECIAL_TEST_TIMEOUT = 30000;
 
@@ -461,6 +462,7 @@ describe.skip('EQL Tab', () => {
         await waitFor(() => {
           expect(flyoutApi.openNotes).toHaveBeenCalledWith({
             hit: expect.objectContaining({ _id: mockTimelineData[0]._id }),
+            origin: FLYOUT_ORIGIN.TIMELINE,
           });
         });
         expect(mockOpenFlyout).not.toHaveBeenCalled();

@@ -323,6 +323,7 @@ export interface DocLinks {
     readonly automaticImport: string;
     readonly attacksPage: string;
     readonly mitreCoverage: string;
+    readonly remapMitreAttack: string;
   };
   readonly server: {
     readonly protocol: string;
@@ -765,6 +766,7 @@ export interface DocLinks {
   readonly cases: {
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
+    readonly manageCaseTemplates: string;
   };
 }
 

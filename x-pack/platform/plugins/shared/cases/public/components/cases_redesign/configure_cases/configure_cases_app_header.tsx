@@ -7,8 +7,8 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { AppHeader } from '@kbn/app-header';
 import { useAllCasesNavigation } from '../../../common/navigation/hooks';
+import { CasesAppHeader } from '../../app/cases_app_header';
 import { BACK_TO_CASES, CASE_SETTINGS_TITLE } from '../translations';
 
 export const ConfigureCasesAppHeader: FC = () => {
@@ -28,7 +28,7 @@ export const ConfigureCasesAppHeader: FC = () => {
     [getAllCasesUrl, navigateToAllCases]
   );
 
-  return <AppHeader title={CASE_SETTINGS_TITLE} back={back} sticky={false} />;
+  return <CasesAppHeader title={CASE_SETTINGS_TITLE} back={back} />;
 };
 
 ConfigureCasesAppHeader.displayName = 'ConfigureCasesAppHeader';
