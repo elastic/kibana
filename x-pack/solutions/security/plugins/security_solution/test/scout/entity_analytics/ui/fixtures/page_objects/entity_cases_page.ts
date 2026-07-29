@@ -127,6 +127,11 @@ export class EntityCasesPage {
 
   async navigateToCase(caseId: string) {
     await this.page.gotoApp(`security/cases/${caseId}`);
+    // Give the cold Security Solution SPA boot its own readiness budget (mirrors
+    // navigateToHostFlyout) instead of leaning on openAttachmentsTab's default wait.
+    await this.page.testSubj
+      .locator('case-view-title')
+      .waitFor({ state: 'visible', timeout: 30000 });
   }
 
   // Case view lands on the Activity tab; the Entities accordion lives inside the
