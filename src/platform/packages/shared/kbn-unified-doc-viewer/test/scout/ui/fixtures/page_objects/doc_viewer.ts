@@ -71,12 +71,11 @@ export class DocViewer {
 
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     const fieldNameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${fieldName}-name"]`);
-    const expandButton = flyout.getByTestId('euiDataGridCellExpandButton');
 
     await fieldNameCell.waitFor({ state: 'visible' });
     await fieldNameCell.scrollIntoViewIfNeeded();
     await fieldNameCell.click();
-    await expandButton.click();
+    await fieldNameCell.press('Enter');
   }
 
   getExpandedFieldDescription(fieldName: string): Locator {
