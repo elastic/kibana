@@ -6,8 +6,8 @@
  */
 
 /**
- * Single source of truth for the alerting_v2 Stack Management section id and
- * the app ids registered underneath it.
+ * Re-exports the alerting_v2 Stack Management section id and the app ids
+ * registered underneath it from `@kbn/alerting-v2-constants`.
  *
  * Both the browser plugin (which calls `management.sections.register` /
  * `registerApp`) and the server plugin (which threads these ids into
@@ -15,9 +15,10 @@
  * authorization) must agree on these values.
  */
 
-export const ALERTING_V2_SECTION_ID = 'alertingV2';
-
-export const ALERTING_V2_RULES_APP_ID = 'rules';
-export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
-export const ALERTING_V2_EPISODES_APP_ID = 'episodes';
-export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
+export {
+  ALERTING_V2_SECTION_ID,
+  ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_ACTION_POLICIES_APP_ID,
+  ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+} from '@kbn/alerting-v2-constants';

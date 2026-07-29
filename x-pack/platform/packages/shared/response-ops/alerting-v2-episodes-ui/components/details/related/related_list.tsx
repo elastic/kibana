@@ -15,7 +15,7 @@ import {
   RelatedAlertEpisode,
   type RelatedAlertEpisodeProps,
 } from '../../related/related_alert_episode';
-import type { AlertEpisode } from '../../../queries/episodes_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 import { isRuleLoaded, type RuleState } from '../../../types/rule_state';
 import { useAlertingEpisodeSourceDataView } from '../../../hooks/use_alerting_episode_source_data_view';
 import { getRelatedEpisodeMissingRuleTitle } from './translations';

@@ -9,11 +9,8 @@ import { useMemo } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useInfiniteQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import {
-  buildEpisodeActionsHistoryQuery,
-  DEFAULT_ACTIONS_HISTORY_PAGE_SIZE,
-  type EpisodeActionHistoryEntry,
-} from '../queries/episode_actions_history_query';
+import { buildEpisodeActionsHistoryQuery, DEFAULT_ACTIONS_HISTORY_PAGE_SIZE } from '../queries/episode_actions_history_query';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';

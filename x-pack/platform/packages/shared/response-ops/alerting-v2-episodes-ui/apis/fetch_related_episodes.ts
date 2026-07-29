@@ -9,7 +9,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
-import type { AlertEpisode } from '../queries/episodes_query';
+import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchRelatedEpisodesOptions {

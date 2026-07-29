@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserAvatar } from '@kbn/user-profile-components';
 import { AlertEpisodeTags } from '../../actions/tags';
-import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 import * as i18n from './translations';
 
 export interface AlertEpisodeTimelineActionEventProps {

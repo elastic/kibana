@@ -12,8 +12,7 @@ import {
   normalizeEpisodeSeverity,
   type EpisodeSeverity,
 } from '../../severity/severity_utils';
-import type { EpisodeActionHistoryEntry } from '../../../queries/episode_actions_history_query';
-
+import type { EpisodeActionHistoryEntry } from '@kbn/alerting-v2-common-queries';
 export interface StateChangeSourceRow {
   '@timestamp': string;
   'episode.status': AlertEpisodeStatus;

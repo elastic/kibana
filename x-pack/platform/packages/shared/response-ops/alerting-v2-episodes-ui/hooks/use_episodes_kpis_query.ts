@@ -12,7 +12,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
-import { buildEpisodesKpisQuery, type EpisodesFilterState } from '../queries/episodes_query';
+import { buildEpisodesKpisQuery } from '../queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { queryKeys } from '../query_keys';
 

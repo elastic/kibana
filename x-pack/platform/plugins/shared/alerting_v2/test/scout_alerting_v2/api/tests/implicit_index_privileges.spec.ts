@@ -23,9 +23,11 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { EsClient, KibanaRole } from '@kbn/scout';
+import {
+  ALERT_ACTIONS_DATA_STREAM,
+  ALERT_EVENTS_DATA_STREAM,
+} from '@kbn/alerting-v2-constants';
 import { apiTest, buildAlertEvent, testData } from '../fixtures';
-
-const { ALERT_EVENTS_DATA_STREAM, ALERT_ACTIONS_DATA_STREAM } = testData;
 
 // The two index patterns the provider grants read on; also what a search must target so an
 // unauthorized identity resolves to "no index" (empty) rather than a 403.

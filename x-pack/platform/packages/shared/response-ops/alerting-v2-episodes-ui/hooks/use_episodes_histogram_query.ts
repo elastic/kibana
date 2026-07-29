@@ -14,7 +14,8 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useSpaceId } from './use_space_id';
 import { queryKeys } from '../query_keys';
-import { buildEpisodesHistogramQuery, type EpisodesFilterState } from '../queries/episodes_query';
+import { buildEpisodesHistogramQuery } from '../queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import {
   generateTimeBuckets,
