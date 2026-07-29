@@ -118,7 +118,7 @@ describe('requestHandler', () => {
     const wrapped = requestHandler({ logger, usageCounter }, handler);
 
     await expect(wrapped(context, request, response)).rejects.toBe(error);
-    expect(logRequest).toHaveBeenCalledWith(logger, request, 'warn', error.message);
+    expect(logRequest).toHaveBeenCalledWith(logger, request, 'error', error.message);
     expect(writeErrorHandler).not.toHaveBeenCalled();
   });
 
