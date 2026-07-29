@@ -37,7 +37,10 @@ Follow the patterns in [reference/connector-patterns.md](reference/connector-pat
 
 Register in `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` and `connector_icons_map.ts`.
 
-Replace the placeholder icon with a proper brand icon. Search for existing SVG/PNG files in:
+**MCP connectors**: Use [reference/mcp-connector-setup.md](reference/mcp-connector-setup.md) as the direct starting template for the spec — it has concrete, copy-ready examples with the correct `lazySchema`, `callToolJson`/`callToolContent`, and test-mock patterns already in place. Do not reverse-engineer from existing connectors.
+
+Replace the placeholder icon with a proper brand icon. Do NOT generate an icon, use the official brand icon or tell the
+user you could not find one.  Search for existing SVG/PNG files in:
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/*/icon/`
 - `x-pack/platform/plugins/shared/stack_connectors/public/connector_types/{connector}/`
 
