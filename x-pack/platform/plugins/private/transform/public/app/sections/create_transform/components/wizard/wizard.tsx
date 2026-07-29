@@ -9,7 +9,7 @@ import React, { createContext, type FC, useCallback, useEffect, useMemo, useStat
 import { pick } from 'lodash';
 
 import type { EuiStepStatus } from '@elastic/eui';
-import { EuiConfirmModal, EuiFormRow, EuiSteps } from '@elastic/eui';
+import { EuiConfirmModal, EuiFormRow, EuiSteps, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { i18n } from '@kbn/i18n';
@@ -182,6 +182,35 @@ export const Wizard: FC<WizardProps> = React.memo(
 
     const cancelDataViewChange = useCallback(() => setPendingDataViewId(undefined), []);
     const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+    const isDataViewPickerDisabled = setSavedObjectId === undefined;
+    const dataViewPickerComponent = (
+      <DataViewPicker
+        compressed={false}
+        currentDataViewId={dataView?.id}
+        savedDataViews={savedDataViews}
+        isDisabled={isDataViewPickerDisabled}
+        onChangeDataView={requestDataViewChange}
+        onDataViewCreated={
+          canEditDataView
+            ? (createdDataView) => {
+                refreshSavedDataViews();
+                if (createdDataView.id) {
+                  requestDataViewChange(createdDataView.id);
+                }
+              }
+            : undefined
+        }
+        trigger={{
+          label:
+            dataView?.getName() ??
+            i18n.translate('xpack.transform.stepDefineForm.selectDataViewLabel', {
+              defaultMessage: 'Select data view',
+            }),
+          title: dataView?.getName(),
+          'data-test-subj': 'transformDataViewPicker',
+        }}
+      />
+    );
 
     const dataViewPicker = (
       <EuiFormRow
@@ -189,32 +218,24 @@ export const Wizard: FC<WizardProps> = React.memo(
           defaultMessage: 'Data view',
         })}
       >
-        <DataViewPicker
-          compressed={false}
-          currentDataViewId={dataView?.id}
-          savedDataViews={savedDataViews}
-          isDisabled={!setSavedObjectId}
-          onChangeDataView={requestDataViewChange}
-          onDataViewCreated={
-            canEditDataView
-              ? (createdDataView) => {
-                  refreshSavedDataViews();
-                  if (createdDataView.id) {
-                    requestDataViewChange(createdDataView.id);
-                  }
-                }
-              : undefined
-          }
-          trigger={{
-            label:
-              dataView?.getName() ??
-              i18n.translate('xpack.transform.stepDefineForm.selectDataViewLabel', {
-                defaultMessage: 'Select data view',
-              }),
-            title: dataView?.getName(),
-            'data-test-subj': 'transformDataViewPicker',
-          }}
-        />
+        {isDataViewPickerDisabled ? (
+          <EuiToolTip
+            content={i18n.translate('xpack.transform.stepDefineForm.cloneDataViewTooltip', {
+              defaultMessage:
+                'A cloned transform should use the same data source as the original transform.',
+            })}
+          >
+            <span
+              css={css`
+                display: block;
+              `}
+            >
+              {dataViewPickerComponent}
+            </span>
+          </EuiToolTip>
+        ) : (
+          dataViewPickerComponent
+        )}
       </EuiFormRow>
     );
 
