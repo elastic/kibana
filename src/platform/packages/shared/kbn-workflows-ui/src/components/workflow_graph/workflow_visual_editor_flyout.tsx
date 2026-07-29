@@ -23,6 +23,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { StepInfo } from '@kbn/workflows-yaml';
+import { deslugifyStepName } from './deslugify_step_name';
 import type { RenderStepIcon } from './workflow_graph_actions_context';
 import {
   useWorkflowsMonacoTheme,
@@ -88,8 +89,13 @@ export function WorkflowVisualEditorFlyout({
     setIsMenuOpen(true);
   }, [onMoreMenuOpen]);
 
+  // Display-only, mirrors workflow_graph_node.tsx: `target.stepName`/`stepInfo.stepId`
+  // are raw step names and must stay untouched elsewhere (e.g. YAML lookups).
+  // Trigger labels are already human-readable (getTriggerLabel), so left as-is.
   const title =
-    target.kind === 'step' ? target.stepInfo?.stepId ?? target.stepName : target.triggerLabel;
+    target.kind === 'step'
+      ? deslugifyStepName(target.stepInfo?.stepId ?? target.stepName)
+      : target.triggerLabel;
   const subtitle =
     target.kind === 'step'
       ? target.stepInfo?.stepType ?? target.stepType

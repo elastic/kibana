@@ -234,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
-        await listingTable.setSearchFilterValue('new description');
+        await listingTable.searchForItemWithName('new description');
         await listingTable.expectItemsCount('dashboard', 1);
         await listingTable.clickItemLink('dashboard', 'new title');
         await dashboard.waitForRenderComplete();

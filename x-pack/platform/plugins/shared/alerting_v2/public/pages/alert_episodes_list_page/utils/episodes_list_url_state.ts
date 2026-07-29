@@ -8,7 +8,7 @@
 import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import type { TimeRange } from '@kbn/es-query';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { isArray, isNil, isPlainObject, isString } from 'lodash';
+import { isArray, isEqual, isNil, isPlainObject, isString, sortBy } from 'lodash';
 
 /** Namespace for episodes list state inside the `_a` app-state blob */
 export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
@@ -17,7 +17,7 @@ export const EPISODES_LIST_APP_STATE_KEY = 'episodesList' as const;
 export const EPISODES_LIST_STATUS_URL_ALL = 'all' as const;
 
 /** Default list filters (Active episodes, no rule/tags/search/assignee). */
-export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: 'active' };
+export const DEFAULT_EPISODES_LIST_FILTER: EpisodesFilterState = { status: ['active'] };
 
 /** Matches {@link useEpisodesTimeRange} fallback when timefilter has no prior state */
 export const DEFAULT_EPISODES_LIST_TIME_RANGE: TimeRange = {
@@ -34,6 +34,9 @@ const isNonEmptyString = (v: unknown): v is string => isString(v) && v.trim().le
 const isStringArray = (v: unknown): v is string[] =>
   isArray(v) && v.length > 0 && v.every(isString);
 
+/** Order-independent comparison used to detect the default status selection. */
+const isSameStatusSet = (a: string[], b: string[]): boolean => isEqual(sortBy(a), sortBy(b));
+
 const isGroupingValues = (v: unknown): v is Record<string, string | null> =>
   isPlainObject(v) &&
   Object.values(v as Record<string, unknown>).every((val) => isString(val) || val === null);
@@ -42,8 +45,11 @@ function decodeFilterFields(o: Record<string, unknown>): EpisodesFilterState {
   const result: EpisodesFilterState = {};
   if (o.status === EPISODES_LIST_STATUS_URL_ALL) {
     result.status = undefined;
+  } else if (isStringArray(o.status)) {
+    result.status = [...o.status];
   } else if (isNonEmptyString(o.status)) {
-    result.status = o.status;
+    // Back-compat with bookmarks/deep-links created before status became multi-select.
+    result.status = [o.status];
   }
   if (isNonEmptyString(o.ruleId)) {
     result.ruleId = o.ruleId;
@@ -93,10 +99,10 @@ function splitEpisodesListRaw(raw: unknown): {
 function encodeFilterFields(state: EpisodesFilterState): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   const st = state.status;
-  if (isNil(st)) {
+  if (isNil(st) || st.length === 0) {
     result.status = EPISODES_LIST_STATUS_URL_ALL;
-  } else if (isNonEmptyString(st) && st !== DEFAULT_EPISODES_LIST_FILTER.status) {
-    result.status = st;
+  } else if (!isSameStatusSet(st, DEFAULT_EPISODES_LIST_FILTER.status ?? [])) {
+    result.status = [...st];
   }
   if (isNonEmptyString(state.ruleId)) {
     result.ruleId = state.ruleId;

@@ -206,7 +206,6 @@ export function QueryStreamDetailManagement({
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
-        padding="m"
       />
       <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
       {showDeleteModal && (

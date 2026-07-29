@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/code-editor';
 import { collectFullWorkflowYamlValidationResults } from './collect_full_workflow_yaml_validation_results';
 import { createMarkersAndDecorations } from './create_yaml_validation_markers_and_decorations';

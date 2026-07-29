@@ -9,7 +9,7 @@
 
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { useQueryClient } from '@kbn/react-query';

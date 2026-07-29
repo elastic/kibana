@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { EuiComboBoxWrapper, type KibanaUrl, type Locator, type ScoutPage } from '@kbn/scout-oblt';
+import {
+  type EuiComboBoxObject,
+  type KibanaUrl,
+  type Locator,
+  type ScoutPage,
+} from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { waitForApmSettingsHeaderLink } from '../page_helpers';
-import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT, SERVICE_OPBEANS_JAVA } from '../constants';
+import { EXTENDED_TIMEOUT, PRODUCTION_ENVIRONMENT } from '../constants';
 
 export class ServiceMapPage {
   public serviceMap: Locator;
@@ -39,8 +44,7 @@ export class ServiceMapPage {
   public serviceMapFindMatchSummary: Locator;
   public readonly serviceMapEmbeddable: Locator;
   public readonly serviceMapEditorSaveButton: Locator;
-  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxWrapper;
-  public readonly serviceMapEditorEnvironmentComboBoxInput: Locator;
+  public readonly serviceMapEditorServiceNameComboBox: EuiComboBoxObject;
   public readonly serviceMapEditorKueryInput: Locator;
   public readonly serviceMapViewFullMapButton: Locator;
   public readonly dashboardEmbeddablePanel: Locator;
@@ -78,8 +82,7 @@ export class ServiceMapPage {
     this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
     this.serviceMapEmbeddable = page.testSubj.locator('apmServiceMapEmbeddable');
     this.serviceMapEditorSaveButton = page.testSubj.locator('apmServiceMapEditorSaveButton');
-    this.serviceMapEditorServiceNameComboBox = new EuiComboBoxWrapper(
-      page,
+    this.serviceMapEditorServiceNameComboBox = page.components.comboBox(
       'apmServiceMapEditorServiceNameComboBox'
     );
     this.serviceMapEditorServiceNameComboBoxLoading = page.testSubj.locator(
@@ -88,9 +91,6 @@ export class ServiceMapPage {
     this.serviceMapEditorEnvironmentComboBoxLoading = page.testSubj.locator(
       'apmServiceMapEditorEnvironmentComboBoxLoading'
     );
-    this.serviceMapEditorEnvironmentComboBoxInput = page.testSubj
-      .locator('apmServiceMapEditorEnvironmentComboBox')
-      .locator('[data-test-subj="comboBoxInput"]');
     this.serviceMapEditorKueryInput = page.testSubj.locator('apmServiceMapEditorKueryInput');
     this.serviceMapViewFullMapButton = page.testSubj.locator('serviceMapViewFullMapButton');
     this.dashboardEmbeddablePanel = page.testSubj.locator('embeddablePanel');
@@ -107,15 +107,6 @@ export class ServiceMapPage {
       params.set('kuery', options.kuery);
     }
     await this.page.goto(`${this.kbnUrl.app('apm')}/service-map?${params.toString()}`);
-    return await waitForApmSettingsHeaderLink(this.page);
-  }
-
-  async gotoDetailedServiceMapWithDateSelected(start: string, end: string) {
-    await this.page.goto(
-      `${this.kbnUrl.app(
-        'apm'
-      )}/services/${SERVICE_OPBEANS_JAVA}/service-map?rangeFrom=${start}&rangeTo=${end}&environment=${PRODUCTION_ENVIRONMENT}`
-    );
     return await waitForApmSettingsHeaderLink(this.page);
   }
 
@@ -152,8 +143,15 @@ export class ServiceMapPage {
   }
 
   async selectServiceMapEditorEnvironment(environment: string) {
-    await this.serviceMapEditorEnvironmentComboBoxInput.click();
-    await this.page.keyboard.type(environment, { delay: 50 });
+    // `asPlainText` async combo that defaults to "All". Use fill() (replaces the
+    // existing text — raw keyboard.type would append → "Allstaging") and then click
+    // the option by name: this waits for the async list to filter to the exact
+    // option before selecting, avoiding a keyboard pick of a stale suggestion.
+    const searchInput = this.page.testSubj
+      .locator('apmServiceMapEditorEnvironmentComboBox')
+      .locator('[data-test-subj="comboBoxSearchInput"]');
+    await searchInput.click();
+    await searchInput.fill(environment);
     const environmentOption = this.page.getByRole('option', { name: environment });
     await environmentOption.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await environmentOption.click();

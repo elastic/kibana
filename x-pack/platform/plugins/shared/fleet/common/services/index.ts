@@ -164,3 +164,12 @@ export {
   packagePolicyHasOtelInputs,
   OTEL_INPUTS_MINIMUM_VERSION,
 } from './otelcol_helpers';
+
+export {
+  hasVersionSuffix,
+  removeVersionSuffixFromPolicyId,
+  buildPolicyIdOrVariantsKuery,
+  buildPolicyIdsOrVariantsKuery,
+  buildPolicyBaseIdWithFallbackKuery,
+  buildPolicyBaseIdsWithFallbackKuery,
+} from './version_specific_policies_utils';
