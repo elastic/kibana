@@ -95,7 +95,6 @@ export function TagsComboBox({
               isDisabled={selectedTags.length === 0}
               data-test-subj={copyButtonDataTestSubj}
               aria-label={COPY_TAGS_LABEL}
-              title={COPY_TAGS_LABEL}
             />
           )}
         </EuiCopy>
