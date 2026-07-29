@@ -171,22 +171,7 @@ export class EventClient {
   async findLatestPaginated(
     options: EventsPaginatedSearchOptions = {}
   ): Promise<PaginatedResponse<SignificantEvent>> {
-    let where = this.buildWhere(options);
-
-    if (!options.status?.length) {
-      where = andWhere(where, esql.exp`${esql.col('status')} != ${esql.str('pending')}`);
-    }
-
-    const result = await runPaginatedLatestSourceEsqlQuery<SignificantEvent>({
-      esClient: this.clients.esClient,
-      space: this.clients.space,
-      options,
-      index: EVENTS_DATA_STREAM,
-      where,
-      groupBy: FIELD_EVENT_ID,
-    });
-
-    return result;
+    return this.findLatestByCurrentStatePaginated(options);
   }
 
   async findLatestByCurrentStatePaginated(
