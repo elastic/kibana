@@ -109,7 +109,15 @@ export async function cleanUpDuplicatedPackagePolicies(
         serverSetup
       );
     }
-    taskState.hasAlreadyDoneCleanup = true;
+    // Only treat the one-time migration as done once the deployment already matches the expected
+    // state (nothing to delete and no expected policy missing). When a follow-up sync is still
+    // required we leave the flag unset so the next run re-verifies and retries recreation — the
+    // recreation (`deployEditMonitors`) can partially fail without throwing, so latching here would
+    // otherwise strand private location monitors without a package policy (stuck "pending") with no
+    // auto-recovery.
+    if (!performCleanupSync) {
+      taskState.hasAlreadyDoneCleanup = true;
+    }
     taskState.maxCleanUpRetries = 3;
     return { performCleanupSync };
   } catch (e) {

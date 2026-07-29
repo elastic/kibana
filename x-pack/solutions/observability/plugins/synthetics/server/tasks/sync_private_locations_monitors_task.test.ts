@@ -423,7 +423,8 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         expect.any(Array),
         mockAllPrivateLocations,
         'space1',
-        []
+        [],
+        { retryFailedCreates: true }
       );
     });
 

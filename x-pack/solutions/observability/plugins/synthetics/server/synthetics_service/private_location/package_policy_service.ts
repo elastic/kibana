@@ -13,6 +13,8 @@ import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
 
+const MAX_BULK_CREATE_RETRIES = 2;
+
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
 
@@ -86,14 +88,46 @@ export class PackagePolicyService {
   async bulkCreate({
     newPolicies,
     spaceId,
+    retryFailed = false,
   }: {
     newPolicies: NewPackagePolicyWithId[];
     spaceId: string;
+    // Opt-in retry of only the failed creations, used by the sync task recreation path so a
+    // transient failure for one monitor doesn't leave it without a package policy (stuck pending).
+    retryFailed?: boolean;
   }) {
     if (newPolicies.length === 0) {
       return { created: [], failed: [] };
     }
 
+    let { created, failed } = await this.bulkCreateOnce({ newPolicies, spaceId });
+
+    // Retry only the policies that failed, so a transient failure for one monitor doesn't force
+    // re-creating the policies that already succeeded.
+    let attempt = 0;
+    while (retryFailed && failed.length > 0 && attempt < MAX_BULK_CREATE_RETRIES) {
+      attempt++;
+      const retryPolicies = failed.map((f) => f.packagePolicy as NewPackagePolicyWithId);
+      this.server.logger.debug(
+        `[PackagePolicyService] Retrying ${retryPolicies.length} failed package policy creation(s) (attempt ${
+          attempt + 1
+        }/${MAX_BULK_CREATE_RETRIES + 1})`
+      );
+      const res = await this.bulkCreateOnce({ newPolicies: retryPolicies, spaceId });
+      created = created.concat(res.created);
+      failed = res.failed;
+    }
+
+    return { created, failed };
+  }
+
+  private async bulkCreateOnce({
+    newPolicies,
+    spaceId,
+  }: {
+    newPolicies: NewPackagePolicyWithId[];
+    spaceId: string;
+  }) {
     const promises = (
       await this.getDefaultAndSpacePackagePolicies({
         policies: newPolicies,

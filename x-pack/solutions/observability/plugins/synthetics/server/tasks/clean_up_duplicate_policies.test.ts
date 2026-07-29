@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-import { deleteDuplicatePackagePolicies } from './clean_up_duplicate_policies';
+import {
+  cleanUpDuplicatedPackagePolicies,
+  deleteDuplicatePackagePolicies,
+} from './clean_up_duplicate_policies';
 import type { SyntheticsServerSetup } from '../types';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SyncTaskState } from './sync_private_locations_monitors_task';
+
+jest.mock('../synthetics_service/private_location/synthetics_private_location', () => ({
+  // Mirror the 9.4+ scheme: `${configId}-${locationId}` (no spaceId suffix).
+  SyntheticsPrivateLocation: jest.fn().mockImplementation(() => ({
+    getPolicyId: (config: { id: string }, locId: string) => `${config.id}-${locId}`,
+  })),
+}));
 
 describe('deleteDuplicatePackagePolicies', () => {
   const makeServerSetup = (deleteMock: jest.Mock) => {
@@ -108,6 +119,100 @@ describe('deleteDuplicatePackagePolicies', () => {
       spaceIds: ['*'],
     });
     expect(deleteMock).toHaveBeenNthCalledWith(3, soClient, esClient, thirdBatch, {
+      force: true,
+      ignoreMissing: true,
+      spaceIds: ['*'],
+    });
+  });
+});
+
+describe('cleanUpDuplicatedPackagePolicies latch behavior', () => {
+  const makeContext = ({
+    monitorLocationIds,
+    existingPolicyIds,
+  }: {
+    monitorLocationIds: string[];
+    existingPolicyIds: string[];
+  }) => {
+    const deleteMock = jest.fn().mockResolvedValue(undefined);
+    const logger = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
+
+    const monitor = {
+      attributes: {
+        id: 'mon-1',
+        origin: 'ui',
+        locations: monitorLocationIds.map((id) => ({ id, isServiceManaged: false })),
+      },
+    };
+    const finder = {
+      async *find() {
+        yield { saved_objects: [monitor] };
+      },
+      close: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const serverSetup = {
+      pluginsStart: {
+        fleet: {
+          packagePolicyService: {
+            async *fetchAllItemIds() {
+              yield existingPolicyIds;
+            },
+            delete: deleteMock,
+          },
+        },
+      },
+      coreStart: { elasticsearch: { client: { asInternalUser: {} } } },
+      logger,
+    } as unknown as SyntheticsServerSetup;
+
+    const soClient = {
+      createPointInTimeFinder: () => finder,
+    } as unknown as SavedObjectsClientContract;
+
+    const taskState: SyncTaskState = {
+      lastStartedAt: new Date().toISOString(),
+      hasAlreadyDoneCleanup: false,
+      maxCleanUpRetries: 3,
+    };
+
+    return { serverSetup, soClient, taskState, deleteMock };
+  };
+
+  test('latches hasAlreadyDoneCleanup when already converged (nothing to delete, none missing)', async () => {
+    const { serverSetup, soClient, taskState, deleteMock } = makeContext({
+      monitorLocationIds: ['loc-1'],
+      existingPolicyIds: ['mon-1-loc-1'], // matches expected new-format id
+    });
+
+    const { performCleanupSync } = await cleanUpDuplicatedPackagePolicies(
+      serverSetup,
+      soClient,
+      taskState
+    );
+
+    expect(performCleanupSync).toBe(false);
+    expect(taskState.hasAlreadyDoneCleanup).toBe(true);
+    expect(deleteMock).not.toHaveBeenCalled();
+  });
+
+  test('does NOT latch when a follow-up recreation is still required (legacy deleted, new missing)', async () => {
+    const { serverSetup, soClient, taskState, deleteMock } = makeContext({
+      monitorLocationIds: ['loc-1'],
+      existingPolicyIds: ['mon-1-loc-1-default'], // legacy (spaceId-suffixed) id only
+    });
+
+    const { performCleanupSync } = await cleanUpDuplicatedPackagePolicies(
+      serverSetup,
+      soClient,
+      taskState
+    );
+
+    // Legacy policy is deleted, but the expected new-format policy is missing, so the migration is
+    // not complete — the flag must stay false so the next run retries recreation.
+    expect(performCleanupSync).toBe(true);
+    expect(taskState.hasAlreadyDoneCleanup).toBe(false);
+    expect(deleteMock).toHaveBeenCalledWith(soClient, expect.anything(), ['mon-1-loc-1-default'], {
       force: true,
       ignoreMissing: true,
       spaceIds: ['*'],

@@ -384,7 +384,8 @@ export class SyntheticsPrivateLocation {
     configs: Array<{ config: HeartbeatConfig; globalParams: Record<string, string> }>,
     allPrivateLocations: SyntheticsPrivateLocations,
     spaceId: string,
-    maintenanceWindows: MaintenanceWindow[]
+    maintenanceWindows: MaintenanceWindow[],
+    { retryFailedCreates = false }: { retryFailedCreates?: boolean } = {}
   ) {
     if (configs.length === 0) {
       return {
@@ -467,6 +468,7 @@ export class SyntheticsPrivateLocation {
     const createResponse = await this.packagePolicyService.bulkCreate({
       newPolicies: policiesToCreate,
       spaceId,
+      retryFailed: retryFailedCreates,
     });
 
     if (createResponse.failed.length > 0) {
