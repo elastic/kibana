@@ -38,6 +38,18 @@ export const filterTitle = i18n.translate(
   { defaultMessage: 'Type' }
 );
 
+export const spacesFieldName = i18n.translate(
+  'indexPatternManagement.objectsTable.relationships.columnSpacesName',
+  {
+    defaultMessage: 'Spaces',
+  }
+);
+
+export const spacesFieldDescription = i18n.translate(
+  'indexPatternManagement.objectsTable.relationships.columnSpacesDescription',
+  { defaultMessage: 'The spaces this saved object is shared into' }
+);
+
 export const managedBadge = i18n.translate(
   'indexPatternManagement.objectsTable.relationships.managedBadge',
   {

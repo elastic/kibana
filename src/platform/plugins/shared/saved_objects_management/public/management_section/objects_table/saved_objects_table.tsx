@@ -25,6 +25,7 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { Subscription } from 'rxjs';
 import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
 import type { SavedObjectsExportResultDetails } from '../../lib';
@@ -76,6 +77,7 @@ export interface SavedObjectsTableProps {
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   initialQuery?: Query;
   customBranding: CustomBrandingStart;
+  spacesApi?: SpacesApi;
 }
 
 export interface SavedObjectsTableState {
@@ -620,6 +622,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         canGoInApp={this.props.canGoInApp}
         allowedTypes={this.props.allowedTypes}
         showPlainSpinner={this.state.hasCustomBranding}
+        spacesApi={this.props.spacesApi}
       />
     );
   }

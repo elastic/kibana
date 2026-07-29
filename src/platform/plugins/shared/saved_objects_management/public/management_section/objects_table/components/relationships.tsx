@@ -27,6 +27,7 @@ import type { SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IBasePath } from '@kbn/core/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
   withEuiTablePersist,
   type EuiTablePersistInjectedProps,
@@ -40,6 +41,12 @@ import type {
   SavedObjectRelation,
   SavedObjectInvalidRelation,
 } from '../../../types';
+import {
+  RelationshipSpacesCell,
+  SpacesContextWrapper,
+  getRelationshipHref,
+  shouldShowSpacesColumn,
+} from './relationship_spaces';
 
 export interface RelationshipsProps {
   basePath: IBasePath;
@@ -50,6 +57,7 @@ export interface RelationshipsProps {
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   allowedTypes: SavedObjectManagementTypeInfo[];
   showPlainSpinner?: boolean;
+  spacesApi?: SpacesApi;
 }
 
 export interface RelationshipsState {
@@ -93,31 +101,33 @@ export class RelationshipsClass extends Component<
 > {
   render() {
     const modalTitleId = htmlIdGenerator()('relationshipsFlyoutTitle');
-    const { close, savedObject, allowedTypes } = this.props;
+    const { close, savedObject, allowedTypes, spacesApi } = this.props;
     const typeLabel = getSavedObjectLabel(savedObject.type, allowedTypes);
 
     return (
-      <EuiFlyout onClose={close} aria-labelledby={modalTitleId}>
-        <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
-            <h2 id={modalTitleId}>
-              <EuiIconTip
-                position="top"
-                content={typeLabel}
-                type={savedObject.meta.icon || 'apps'}
-                size="m"
-                aria-label={typeLabel}
-              />
-              &nbsp;&nbsp;
-              {savedObject.meta.title || getDefaultTitle(savedObject)}
-            </h2>
-          </EuiTitle>
-        </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {this.renderInvalidRelationship()}
-          {this.renderRelationshipsTable()}
-        </EuiFlyoutBody>
-      </EuiFlyout>
+      <SpacesContextWrapper spacesApi={spacesApi}>
+        <EuiFlyout onClose={close} aria-labelledby={modalTitleId}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="m">
+              <h2 id={modalTitleId}>
+                <EuiIconTip
+                  position="top"
+                  content={typeLabel}
+                  type={savedObject.meta.icon || 'apps'}
+                  size="m"
+                  aria-label={typeLabel}
+                />
+                &nbsp;&nbsp;
+                {savedObject.meta.title || getDefaultTitle(savedObject)}
+              </h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            {this.renderInvalidRelationship()}
+            {this.renderRelationshipsTable()}
+          </EuiFlyoutBody>
+        </EuiFlyout>
+      </SpacesContextWrapper>
     );
   }
 
@@ -271,6 +281,7 @@ export class RelationshipsClass extends Component<
       savedObject,
       allowedTypes,
       showPlainSpinner,
+      spacesApi,
       euiTablePersist: { pageSize, onTableChange },
     } = this.props;
     const { relations, isLoading, error } = this.state;
@@ -335,12 +346,38 @@ export class RelationshipsClass extends Component<
             );
           }
           return (
-            <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
+            <EuiLink
+              href={getRelationshipHref(basePath, object.namespaces, path)}
+              data-test-subj="relationshipsTitle"
+            >
               {title || getDefaultTitle(object)}
             </EuiLink>
           );
         },
       },
+      ...(shouldShowSpacesColumn(spacesApi, relations, basePath)
+        ? [
+            {
+              field: 'namespaces',
+              name: i18n.translate(
+                'savedObjectsManagement.objectsTable.relationships.columnSpacesName',
+                { defaultMessage: 'Spaces' }
+              ),
+              description: i18n.translate(
+                'savedObjectsManagement.objectsTable.relationships.columnSpacesDescription',
+                { defaultMessage: 'The spaces this saved object is shared into' }
+              ),
+              sortable: false,
+              render: (namespaces: string[] | undefined) => (
+                <RelationshipSpacesCell
+                  spacesApi={spacesApi as SpacesApi}
+                  namespaces={namespaces}
+                  targetNamespaces={savedObject.namespaces}
+                />
+              ),
+            },
+          ]
+        : []),
       {
         name: i18n.translate(
           'savedObjectsManagement.objectsTable.relationships.columnActionsName',

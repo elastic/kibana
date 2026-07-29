@@ -48,6 +48,7 @@ const defaultProps = {
   selectedRelationships: {
     '1': [],
   },
+  allowedTypes: [],
   hasSpaces: false,
   onDelete: jest.fn(),
   onClose: jest.fn(),

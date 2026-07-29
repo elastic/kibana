@@ -46,6 +46,8 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/repo-info'
   - '@kbn/core-saved-objects-server'
+  - '@kbn/core-http-browser-mocks'
+  - '@kbn/core-spaces-common'
 tags:
   - plugin
   - prod

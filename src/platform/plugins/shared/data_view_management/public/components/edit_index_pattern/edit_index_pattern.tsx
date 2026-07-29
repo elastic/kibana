@@ -289,6 +289,7 @@ export const EditIndexPattern = withRouter(
               [dataView.id as RemoveDataViewProps['id']]: relationships,
             }}
             hasSpaces={Boolean(dataView.namespaces)}
+            allowedTypes={allowedTypes}
             onDelete={() => {
               history.push('');
             }}

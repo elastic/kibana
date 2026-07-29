@@ -5325,7 +5325,6 @@
     "indexPatternManagement.dataViewTable.createBtn": "创建数据视图",
     "indexPatternManagement.dataViewTable.dataViewColumnName": "数据视图",
     "indexPatternManagement.dataViewTable.deleteButtonLabel": "删除 {selectedItems, number} {selectedItems, plural, one {Data View} other {Data Views} }",
-    "indexPatternManagement.dataViewTable.deleteConfirmSummary": "已成功删除 {count, number} {count, plural, one {data view} other {data views} }。",
     "indexPatternManagement.dataViewTable.deleteDanger": "您要删除的数据视图中至少有一个被另一个 Kibana 对象使用。请审查受影响对象的列表，以避免对依赖这些对象的其他 Kibana 用户造成任何中断。删除数据视图会将其从所有空间中永久删除，并且无法撤销。",
     "indexPatternManagement.dataViewTable.deleteSuccessToast": "已成功删除 {count, number} 个 {count, plural, one {数据视图} other {数据视图}}。",
     "indexPatternManagement.dataViewTable.deleteWarning": "删除数据视图会将其从所有空间中永久移除，并防止所有用户在 Kibana 应用（如 Discover、仪表板或 Lens）中使用它。此操作无法撤消。",

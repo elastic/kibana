@@ -33,6 +33,7 @@ const relationSchema = schema.object({
   references: schema.arrayOf(
     schema.object({ name: schema.string(), type: schema.string(), id: schema.string() })
   ),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const invalidRelationSchema = schema.object({
@@ -45,6 +46,7 @@ const invalidRelationSchema = schema.object({
 const responseSchema = schema.object({
   relations: schema.arrayOf(relationSchema),
   invalidRelations: schema.arrayOf(invalidRelationSchema),
+  targetNamespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 apiTest.describe(

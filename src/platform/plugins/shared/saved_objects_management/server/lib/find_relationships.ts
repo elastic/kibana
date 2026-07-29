@@ -29,7 +29,7 @@ export async function findRelationships({
   referenceTypes: string[];
   savedObjectsManagement: ISavedObjectsManagement;
 }): Promise<v1.RelationshipsResponseHTTP> {
-  const { references = [] } = await client.get(type, id);
+  const { references = [], namespaces: targetNamespaces } = await client.get(type, id);
 
   // Use a map to avoid duplicates, it does happen but have a different "name" in the reference
   const childrenReferences = [
@@ -42,10 +42,13 @@ export async function findRelationships({
     childrenReferences.length > 0
       ? client.bulkGet(childrenReferences)
       : Promise.resolve({ saved_objects: [] }),
+    // Searched across all spaces the user can access: a parent (referencing) object may live in a
+    // different space than the object whose relationships are being requested.
     client.find({
       hasReference: { type, id },
       perPage: size,
       type: referenceTypes,
+      namespaces: ['*'],
     }),
   ]);
 
@@ -79,6 +82,7 @@ export async function findRelationships({
   return {
     relations,
     invalidRelations,
+    targetNamespaces,
   };
 }
 
@@ -89,5 +93,10 @@ function extractCommonProperties(savedObject: SavedObjectWithMetadata) {
     meta: savedObject.meta,
     managed: Boolean(savedObject.managed),
     references: savedObject.references,
+    // `client.find()` only populates the plural `namespaces` field for multi-namespace types; for
+    // single-namespace types (the majority of "parent" relations, e.g. dashboards) it returns the
+    // namespace the object was actually found in as a singular `namespace` field instead.
+    namespaces:
+      savedObject.namespaces ?? (savedObject.namespace ? [savedObject.namespace] : undefined),
   };
 }

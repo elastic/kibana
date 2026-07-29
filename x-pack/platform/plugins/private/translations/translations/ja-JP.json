@@ -5327,7 +5327,6 @@
     "indexPatternManagement.dataViewTable.createBtn": "データビューを作成",
     "indexPatternManagement.dataViewTable.dataViewColumnName": "データビュー",
     "indexPatternManagement.dataViewTable.deleteButtonLabel": "{selectedItems, number} {selectedItems, plural, one {Data View} other {Data Views} }を削除",
-    "indexPatternManagement.dataViewTable.deleteConfirmSummary": "{count, number} {count, plural, one {data view} other {data views} }を正常に削除しました",
     "indexPatternManagement.dataViewTable.deleteDanger": "削除するデータビューの少なくとも1つが別のKibanaオブジェクトによって使用されています。影響を受けるオブジェクトのリストを確認し、それらに依存している他のKibanaユーザーに支障が生じないようにしてください。データビューを削除するとすべてのスペースから永久に削除され、元に戻すことはできません。",
     "indexPatternManagement.dataViewTable.deleteSuccessToast": "{count, number} {count, plural, one {data view} other {件のデータビュー}}を正常に削除しました。",
     "indexPatternManagement.dataViewTable.deleteWarning": "データビューを削除すると、すべてのスペースから完全に削除され、すべてのユーザーがDiscover、Dashboards、LensなどのKibanaアプリでデータビューを使用できなくなります。この操作は元に戻すことができません。",

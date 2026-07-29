@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiTableFieldDataColumnType } from '@elastic/eui';
+import type { EuiTableFieldDataColumnType, HorizontalAlignment } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiBasicTable,
@@ -15,13 +15,23 @@ import {
   EuiScreenReaderOnly,
   EuiLink,
   EuiIcon,
+  EuiIconTip,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/public';
+import {
+  RelationshipSpacesCell,
+  SpacesContextWrapper,
+  getRelationshipHref,
+  shouldShowSpacesColumn,
+} from '@kbn/saved-objects-management-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import React, { useState, type ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -43,6 +53,13 @@ const dataViewColumnName = i18n.translate(
 const spacesColumnName = i18n.translate('indexPatternManagement.dataViewTable.spacesColumnName', {
   defaultMessage: 'Spaces',
 });
+
+const relationshipSpacesColumnName = i18n.translate(
+  'indexPatternManagement.dataViewTable.relationshipSpacesColumnName',
+  {
+    defaultMessage: 'Spaces',
+  }
+);
 
 const tableTitle = i18n.translate('indexPatternManagement.dataViewTable.tableTitle', {
   defaultMessage: 'Data views selected for deletion',
@@ -77,6 +94,7 @@ interface ModalProps {
   relationships: Record<string, SavedObjectRelation[]>;
   reviewedItems: Set<string>;
   setReviewedItems: React.Dispatch<React.SetStateAction<Set<string>>>;
+  allowedTypes: SavedObjectManagementTypeInfo[];
 }
 
 export const DeleteModalContent: React.FC<ModalProps> = ({
@@ -85,8 +103,10 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
   relationships,
   reviewedItems,
   setReviewedItems,
+  allowedTypes,
 }) => {
-  const { http } = useKibana<IndexPatternManagmentContext>().services;
+  const { http, spaces, savedObjectsManagement } =
+    useKibana<IndexPatternManagmentContext>().services;
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, ReactNode>>(
     {}
@@ -99,28 +119,70 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
     if (itemIdToExpandedRowMapValues[id]) {
       delete itemIdToExpandedRowMapValues[id];
     } else {
+      const targetNamespaces = views.find((view) => view.id === id)?.namespaces;
       const relationsColumns: Array<EuiTableFieldDataColumnType<SavedObjectRelation>> = [
-        {
-          field: 'meta',
-          name: i18n.translate('indexPatternManagement.dataViewTable.relationshipMetaTitle', {
-            defaultMessage: 'Name',
-          }),
-          render: (meta: SavedObjectRelation['meta']) => {
-            return meta.inAppUrl ? (
-              <EuiLink target="_blank" href={http.basePath.prepend(meta.inAppUrl.path)}>
-                {meta.title}
-              </EuiLink>
-            ) : (
-              meta.title
-            );
-          },
-        },
         {
           field: 'type',
           name: i18n.translate('indexPatternManagement.dataViewTable.relationshipType', {
             defaultMessage: 'Type',
           }),
+          width: '50px',
+          align: 'center' as HorizontalAlignment,
+          sortable: false,
+          render: (type: string, relation: SavedObjectRelation) => {
+            const typeLabel = savedObjectsManagement.getSavedObjectLabel(type, allowedTypes);
+            return (
+              <EuiIconTip
+                content={typeLabel}
+                position="top"
+                aria-label={typeLabel}
+                type={relation.meta.icon || 'apps'}
+                size="s"
+                iconProps={{
+                  'data-test-subj': 'relationshipsObjectType',
+                }}
+              />
+            );
+          },
         },
+        {
+          field: 'meta.title',
+          name: i18n.translate('indexPatternManagement.dataViewTable.relationshipMetaTitle', {
+            defaultMessage: 'Title',
+          }),
+          sortable: false,
+          render: (title: string, relation: SavedObjectRelation) => {
+            return relation.meta.inAppUrl ? (
+              <EuiLink
+                target="_blank"
+                href={getRelationshipHref(
+                  http.basePath,
+                  relation.namespaces,
+                  relation.meta.inAppUrl.path
+                )}
+              >
+                {title}
+              </EuiLink>
+            ) : (
+              title
+            );
+          },
+        },
+        ...(shouldShowSpacesColumn(spaces, relationships[id], http.basePath)
+          ? [
+              {
+                field: 'namespaces',
+                name: relationshipSpacesColumnName,
+                render: (namespaces: string[] | undefined) => (
+                  <RelationshipSpacesCell
+                    spacesApi={spaces as SpacesPluginStart}
+                    namespaces={namespaces}
+                    targetNamespaces={targetNamespaces}
+                  />
+                ),
+              } as EuiTableFieldDataColumnType<SavedObjectRelation>,
+            ]
+          : []),
       ];
       const relationsTable = (
         <div>
@@ -233,43 +295,26 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
   );
 
   return (
-    <div>
-      {showRelationshipsCallout ? (
-        <>
-          <EuiCallOut
-            announceOnMount={false}
-            color="danger"
-            iconType="warning"
-            title={relationshipCalloutText}
-          />
-        </>
-      ) : (
-        <EuiCallOut
-          announceOnMount={false}
-          color="warning"
-          iconType="warning"
-          title={spacesWarningText}
-        />
-      )}
-      <EuiSpacer size="m" />
+    <SpacesContextWrapper spacesApi={spaces}>
       <div>
-        <FormattedMessage
-          id="indexPatternManagement.dataViewTable.deleteConfirmSummary"
-          defaultMessage="Successfully deleted {count, number} {count, plural,
-          one {data view}
-          other {data views}
-}."
-          values={{ count: views.length }}
+        {showRelationshipsCallout ? (
+          <EuiCallOut announceOnMount={false} color="danger" iconType="warning">
+            <p>{relationshipCalloutText}</p>
+          </EuiCallOut>
+        ) : (
+          <EuiCallOut announceOnMount={false} color="warning" iconType="warning">
+            <p>{spacesWarningText}</p>
+          </EuiCallOut>
+        )}
+        <EuiSpacer size="m" />
+        <EuiBasicTable
+          tableCaption={tableTitle}
+          items={views}
+          itemId="id"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          columns={columns}
         />
       </div>
-      <EuiSpacer size="m" />
-      <EuiBasicTable
-        tableCaption={tableTitle}
-        items={views}
-        itemId="id"
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        columns={columns}
-      />
-    </div>
+    </SpacesContextWrapper>
   );
 };

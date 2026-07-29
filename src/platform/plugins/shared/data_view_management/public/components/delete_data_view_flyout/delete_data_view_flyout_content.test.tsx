@@ -13,6 +13,7 @@ import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/p
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import {
   DeleteModalContent,
   relationshipCalloutText,
@@ -70,6 +71,7 @@ describe('DeleteModalContent', () => {
             relationships={mockRelationships}
             reviewedItems={reviewedItems}
             setReviewedItems={setReviewedItems}
+            allowedTypes={[]}
             {...overrides}
           />
         </KibanaContextProvider>
@@ -79,7 +81,6 @@ describe('DeleteModalContent', () => {
   it('renders warning callout when no relationships', () => {
     renderContent({ relationships: { '1': [], '2': [] } });
     expect(screen.getByText(spacesWarningText)).toBeVisible();
-    expect(screen.getByText(/Successfully deleted 2 data views/i)).toBeVisible();
   });
 
   it('renders danger callout when relationships exist', () => {
@@ -107,6 +108,15 @@ describe('DeleteModalContent', () => {
     expect(setReviewedItems).toHaveBeenCalled();
   });
 
+  it('renders the relations table with a Type icon column before the Title column', async () => {
+    renderContent();
+    await userEvent.click(screen.getByRole('button', { name: /Expand/i }));
+
+    const headers = screen.getAllByRole('columnheader').map((header) => header.textContent);
+    expect(headers.indexOf('Type')).toBeLessThan(headers.indexOf('Title'));
+    expect(screen.getByTestId('relationshipsObjectType')).toBeVisible();
+  });
+
   it('renders related object links with the current space basePath', async () => {
     const context = mockManagementPlugin.createIndexPatternManagmentContext();
     context.http = httpServiceMock.createStartContract({ basePath: '/s/space-a' });
@@ -123,5 +133,57 @@ describe('DeleteModalContent', () => {
   it('renders without spaces column if hasSpaces is false', () => {
     renderContent({ hasSpaces: false });
     expect(screen.queryByText('Spaces')).not.toBeInTheDocument();
+  });
+
+  describe('with a relation in a different space', () => {
+    const renderWithCrossSpaceRelation = async () => {
+      const context = mockManagementPlugin.createIndexPatternManagmentContext();
+      context.http = httpServiceMock.createStartContract();
+      context.http.basePath = httpServiceMock.createBasePath({ serverBasePath: '' });
+      context.http.basePath.get.mockReturnValue('/s/space-a');
+      context.spaces = spacesPluginMock.createStartContract();
+      (context.spaces.ui.components.getSpacesContextProvider as jest.Mock).mockImplementation(
+        ({ children }: React.PropsWithChildren<{}>) => <>{children}</>
+      );
+      (context.spaces.ui.components.getSpaceList as jest.Mock).mockImplementation(
+        ({ namespaces }: { namespaces: string[] }) => (
+          <span data-test-subj="spaceList">{namespaces.join(',')}</span>
+        )
+      );
+
+      renderContent(
+        {
+          relationships: {
+            '1': [
+              {
+                id: 'rel-1',
+                type: 'dashboard',
+                namespaces: ['space-b'],
+                meta: {
+                  title: 'Dashboard 1',
+                  inAppUrl: { path: '/app/dashboards#/view/rel-1', uiCapabilitiesPath: '' },
+                },
+              } as SavedObjectRelation,
+            ],
+            '2': [],
+          },
+        },
+        context
+      );
+      await userEvent.click(screen.getByRole('button', { name: /Expand/i }));
+    };
+
+    it('renders a Spaces column showing the relation namespaces', async () => {
+      await renderWithCrossSpaceRelation();
+      expect(screen.getByTestId('spaceList')).toHaveTextContent('space-b');
+    });
+
+    it('links to the relation own space rather than the current space', async () => {
+      await renderWithCrossSpaceRelation();
+      expect(screen.getByText('Dashboard 1').closest('a')).toHaveAttribute(
+        'href',
+        '/s/space-b/app/dashboards#/view/rel-1'
+      );
+    });
   });
 });

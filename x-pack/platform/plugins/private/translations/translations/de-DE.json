@@ -5308,7 +5308,6 @@
     "indexPatternManagement.dataViewTable.createBtn": "Erstellen Sie eine Datenquelle",
     "indexPatternManagement.dataViewTable.dataViewColumnName": "Datenquelle",
     "indexPatternManagement.dataViewTable.deleteButtonLabel": "Löschen {selectedItems, number} {selectedItems, plural, one {Data View} other {Data Views} }",
-    "indexPatternManagement.dataViewTable.deleteConfirmSummary": "Erfolgreich gelöscht {count, number} {count, plural, one {data view} other {data views} }.",
     "indexPatternManagement.dataViewTable.deleteDanger": "Mindestens eine der Datenansichten, die Sie löschen möchten, wird von einem anderen Kibana-Objekt verwendet. Überprüfen Sie die Liste der betroffenen Objekte, um Störungen für andere Kibana-Nutzer zu vermeiden, die auf diese angewiesen sind. Das Löschen von Datenansichten entfernt diese endgültig aus allen Bereichen und kann nicht rückgängig gemacht werden.",
     "indexPatternManagement.dataViewTable.deleteSuccessToast": "{count, number} {count, plural, one {data view} other {data views}} erfolgreich gelöscht.",
     "indexPatternManagement.dataViewTable.deleteWarning": "Wenn Sie eine Datenansicht löschen, wird sie dauerhaft aus allen Bereichen entfernt, so dass sie nicht mehr von Nutzern in einer Kibana-App wie Discover, Dashboards oder Lens verwendet werden kann. Diese Aktion kann nicht rückgängig gemacht werden.",

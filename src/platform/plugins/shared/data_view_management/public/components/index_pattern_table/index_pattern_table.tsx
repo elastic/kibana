@@ -26,7 +26,10 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
-import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/common';
+import type {
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/common';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
@@ -100,6 +103,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   const [selectedRelationships, setSelectedRelationships] = useState<
     Record<string, SavedObjectRelation[]>
   >({});
+  const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
   const [deleteFlyoutOpen, setDeleteFlyoutOpen] = useState(false);
   const [dataViewController] = useState(
     () =>
@@ -155,9 +159,10 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
   }, [selectedDataView, selectedItems]);
 
   const getRelationshipsForSelections = async (selectedViews: RemoveDataViewProps[]) => {
-    const allowedTypes = (await savedObjectsManagement.getAllowedTypes()).map((type) => type.name);
+    const allowedTypeInfo = await savedObjectsManagement.getAllowedTypes();
+    const allowedTypeNames = allowedTypeInfo.map((type) => type.name);
 
-    const relationships: Record<string, unknown> = {};
+    const relationships: Record<string, SavedObjectRelation[]> = {};
 
     const relationshipsArray = await Promise.all(
       selectedViews.map(async (view) => ({
@@ -166,7 +171,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           await savedObjectsManagement.getRelationships(
             DATA_VIEW_SAVED_OBJECT_TYPE,
             view.id,
-            allowedTypes,
+            allowedTypeNames,
             MAX_DISPLAYED_RELATIONSHIPS
           )
         ).relations,
@@ -178,7 +183,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
       relationships[id] = relations;
     });
 
-    return relationships;
+    return { relationships, allowedTypeInfo };
   };
 
   const renderDeleteButton = () => {
@@ -191,12 +196,11 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
         iconType="trash"
         data-test-subj="delete-data-views-button"
         onClick={async () => {
-          const relationships =
-            ((await getRelationshipsForSelections(selectedItems)) as Record<
-              string,
-              SavedObjectRelation[]
-            >) || {};
+          const { relationships, allowedTypeInfo } = await getRelationshipsForSelections(
+            selectedItems
+          );
           setSelectedRelationships(relationships);
+          setAllowedTypes(allowedTypeInfo);
           setDeleteFlyoutOpen(true);
         }}
       >
@@ -277,12 +281,12 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
         type: 'icon',
         enabled: (dataView: RemoveDataViewProps) => !dataView.managed,
         onClick: async (dataView: RemoveDataViewProps) => {
-          const relationships = (await getRelationshipsForSelections([dataView])) as Record<
-            string,
-            SavedObjectRelation[]
-          >;
+          const { relationships, allowedTypeInfo } = await getRelationshipsForSelections([
+            dataView,
+          ]);
           setSelectedDataView(dataView);
           setSelectedRelationships(relationships);
+          setAllowedTypes(allowedTypeInfo);
           setDeleteFlyoutOpen(true);
         },
         isPrimary: true,
@@ -442,6 +446,7 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
           dataViewArray={dataViewArray}
           selectedRelationships={selectedRelationships}
           hasSpaces={!!spaces}
+          allowedTypes={allowedTypes}
           onDelete={async () => {
             dataViewController.loadDataViews();
             onDeleteFlyoutClose();

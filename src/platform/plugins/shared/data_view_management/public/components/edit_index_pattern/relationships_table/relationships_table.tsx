@@ -22,13 +22,18 @@ import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-
 import type {
   SavedObjectRelation,
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
-
+import {
+  RelationshipSpacesCell,
+  SpacesContextWrapper,
+  getRelationshipHref,
+  shouldShowSpacesColumn,
+} from '@kbn/saved-objects-management-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SearchFilterConfig } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
 import { IPM_APP_ID } from '../../../constants';
@@ -40,6 +45,8 @@ import {
   filterTitle,
   managedBadge,
   relationshipsTableCaption,
+  spacesFieldName,
+  spacesFieldDescription,
 } from './i18n';
 
 const canGoInApp = (
@@ -62,6 +69,8 @@ export const RelationshipsTable = ({
   relationships,
   allowedTypes,
   savedObjectsTagging,
+  spacesApi,
+  targetNamespaces,
 }: {
   basePath: CoreStart['http']['basePath'];
   capabilities: CoreStart['application']['capabilities'];
@@ -72,6 +81,8 @@ export const RelationshipsTable = ({
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  spacesApi?: SpacesPluginStart;
+  targetNamespaces?: string[];
 }) => {
   const columns = [
     {
@@ -119,7 +130,10 @@ export const RelationshipsTable = ({
         return (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             {showUrl ? (
-              <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
+              <EuiLink
+                href={getRelationshipHref(basePath, object.namespaces, path)}
+                data-test-subj="relationshipsTitle"
+              >
                 {titleDisplayed}
               </EuiLink>
             ) : (
@@ -143,6 +157,23 @@ export const RelationshipsTable = ({
         );
       },
     },
+    ...(shouldShowSpacesColumn(spacesApi, relationships, basePath)
+      ? [
+          {
+            field: 'namespaces',
+            name: spacesFieldName,
+            description: spacesFieldDescription,
+            sortable: false,
+            render: (namespaces: string[] | undefined) => (
+              <RelationshipSpacesCell
+                spacesApi={spacesApi as SpacesPluginStart}
+                namespaces={namespaces}
+                targetNamespaces={targetNamespaces}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
 
   const filterTypesMap = new Map(
@@ -180,20 +211,22 @@ export const RelationshipsTable = ({
   });
 
   return (
-    <RedirectAppLinks currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}>
-      <EuiInMemoryTable<SavedObjectRelation>
-        items={relationships}
-        columns={columns}
-        tableCaption={relationshipsTableCaption}
-        pagination={{
-          pageSize,
-        }}
-        onTableChange={onTableChange}
-        search={search}
-        rowProps={() => ({
-          'data-test-subj': `relationshipsTableRow`,
-        })}
-      />
-    </RedirectAppLinks>
+    <SpacesContextWrapper spacesApi={spacesApi}>
+      <RedirectAppLinks currentAppId={IPM_APP_ID} navigateToUrl={navigateToUrl}>
+        <EuiInMemoryTable<SavedObjectRelation>
+          items={relationships}
+          columns={columns}
+          tableCaption={relationshipsTableCaption}
+          pagination={{
+            pageSize,
+          }}
+          onTableChange={onTableChange}
+          search={search}
+          rowProps={() => ({
+            'data-test-subj': `relationshipsTableRow`,
+          })}
+        />
+      </RedirectAppLinks>
+    </SpacesContextWrapper>
   );
 };

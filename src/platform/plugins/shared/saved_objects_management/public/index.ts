@@ -24,6 +24,12 @@ export type {
   SavedObjectMetadata,
   SavedObjectManagementTypeInfo,
 } from './types';
+export {
+  RelationshipSpacesCell,
+  SpacesContextWrapper,
+  getRelationshipHref,
+  shouldShowSpacesColumn,
+} from './management_section/objects_table/components/relationship_spaces';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new SavedObjectsManagementPlugin();

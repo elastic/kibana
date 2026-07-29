@@ -21,7 +21,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/common';
+import type {
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
@@ -42,6 +45,7 @@ interface RemoveDataViewDeps {
   dataViewArray: RemoveDataViewProps[];
   selectedRelationships: Record<string, SavedObjectRelation[]>;
   hasSpaces: boolean;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   onDelete: () => void;
   onClose: () => void;
 }
@@ -51,6 +55,7 @@ export const DeleteDataViewFlyout = ({
   dataViewArray,
   selectedRelationships,
   hasSpaces,
+  allowedTypes,
   onDelete,
   onClose,
 }: RemoveDataViewDeps) => {
@@ -117,6 +122,7 @@ export const DeleteDataViewFlyout = ({
           views={dataViewArray}
           hasSpaces={hasSpaces}
           relationships={selectedRelationships}
+          allowedTypes={allowedTypes}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
