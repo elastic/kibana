@@ -38,7 +38,7 @@ export interface ConversationTemplateField {
   /** Human-readable description shown to the LLM so it knows what to capture. */
   description?: string;
   /** Default value applied to the conversation when the template is used */
-  value?: string;
+  value?: string | boolean;
   /** Optional validation rules checked whenever the template is applied. */
   validation?: ConversationTemplateFieldValidation;
 }

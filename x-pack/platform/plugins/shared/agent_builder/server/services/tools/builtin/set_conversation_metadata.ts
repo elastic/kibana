@@ -15,11 +15,13 @@ import { validateSingleField } from '../../conversation/templates/validation';
 
 const setConversationMetadataSchema = z.object({
   updates: z
-    .record(z.string(), z.string())
+    .record(z.string(), z.union([z.string(), z.boolean()]))
     .describe(
       'Key/value pairs to merge into the conversation metadata. ' +
+        'Use a string value for text/keyword/integer/float/date fields. ' +
+        'Use a boolean value (true or false) for boolean fields. ' +
         'Existing keys not included here are left unchanged. ' +
-        'Pass an empty string as the value to clear a specific key.'
+        'Pass an empty string as the value to clear a specific string key.'
     ),
 });
 
@@ -45,7 +47,7 @@ export const createSetConversationMetadataTool = ({
   updateConversationMetadata,
   template,
 }: {
-  updateConversationMetadata: (updates: Record<string, string>) => Promise<void>;
+  updateConversationMetadata: (updates: Record<string, string | boolean>) => Promise<void>;
   template: ConversationTemplate;
 }): BuiltinToolDefinition<typeof setConversationMetadataSchema> => ({
   id: internalTools.setConversationMetadata,

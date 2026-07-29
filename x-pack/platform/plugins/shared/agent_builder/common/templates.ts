@@ -60,14 +60,14 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'mfa_enabled',
           type: 'boolean',
           description: 'Whether MFA was enrolled on this account (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'mfa_bypass_suspected',
           type: 'boolean',
           description:
             'Whether MFA bypass is suspected (true or false). Only relevant when mfa_enabled is true.',
-          value: 'false',
+          value: false,
         },
         {
           name: 'affected_systems',
@@ -139,13 +139,13 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether the resource was publicly accessible at time of incident (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'sensitive_data_at_risk',
           type: 'boolean',
           description: 'Whether sensitive data was potentially exposed (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'affected_account_count',
@@ -159,7 +159,7 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether cloud audit logs have been preserved for forensics (true or false).',
-          value: 'false',
+          value: false,
         },
       ],
     },
@@ -291,13 +291,13 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'insider_suspected',
           type: 'boolean',
           description: 'Whether an insider threat is suspected (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'breach_notification_required',
           type: 'boolean',
           description: 'Whether regulatory breach notification is required (true or false).',
-          value: 'false',
+          value: false,
         },
       ],
     },
@@ -335,7 +335,7 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'host_isolated',
           type: 'boolean',
           description: 'Whether the host has been isolated from the network (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'business_impact',
@@ -348,7 +348,7 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether the host requires reimaging before returning to service (true or false).',
-          value: 'false',
+          value: false,
         },
       ],
     },
@@ -393,26 +393,26 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'hr_authorized',
           type: 'boolean',
           description: 'Whether HR has authorized the investigation (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'legal_notified',
           type: 'boolean',
           description: 'Whether legal has been notified (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'access_revoked',
           type: 'boolean',
           description: 'Whether system access has been revoked (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'evidence_preserved',
           type: 'boolean',
           description:
             'Whether evidence has been preserved per legal hold procedure (true or false).',
-          value: 'false',
+          value: false,
         },
       ],
     },
@@ -450,7 +450,7 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether domain admin credentials are believed to be compromised (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'affected_host_count',
@@ -532,14 +532,14 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether file encryption has been detected (relevant for ransomware). true or false.',
-          value: 'false',
+          value: false,
         },
         {
           name: 'backup_integrity_verified',
           type: 'boolean',
           description:
             'Whether backups have been verified as intact and unaffected (true or false).',
-          value: 'false',
+          value: false,
         },
       ],
     },
@@ -606,7 +606,7 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'credential_harvesting_suspected',
           type: 'boolean',
           description: 'Whether credential harvesting is suspected (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'attachment_hash',
@@ -675,7 +675,7 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether the activity was authorized via change management or a break-glass procedure (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'authorization_reference',
@@ -686,14 +686,14 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           name: 'pam_bypass_suspected',
           type: 'boolean',
           description: 'Whether PAM controls are suspected to have been bypassed (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'audit_logs_intact',
           type: 'boolean',
           description:
             'Whether audit logs are confirmed intact with no evidence of tampering (true or false).',
-          value: 'false',
+          value: false,
         },
       ],
     },
@@ -747,13 +747,13 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether active exploitation of the component has been confirmed in the environment (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'vendor_notified',
           type: 'boolean',
           description: 'Whether the vendor has been notified (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'disclosure_status',
@@ -831,13 +831,13 @@ export const CONVERSATION_TEMPLATES: ReadonlyArray<ConversationTemplate> = [
           type: 'boolean',
           description:
             'Whether active exploitation has been confirmed in this environment (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'patch_available',
           type: 'boolean',
           description: 'Whether a vendor patch is available (true or false).',
-          value: 'false',
+          value: false,
         },
         {
           name: 'post_exploitation_activity',

@@ -17,6 +17,7 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
+import type { ConversationTemplateField } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,
@@ -32,7 +33,6 @@ import type {
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
-import type { ConversationTemplateField } from '@kbn/agent-builder-common';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateFields } from '../templates/validation';
 import {
@@ -46,8 +46,8 @@ import {
 
 const buildMetadataFromFields = (
   fields: ConversationTemplateField[] | undefined
-): Record<string, string> =>
-  (fields ?? []).reduce<Record<string, string>>((acc, { name, value }) => {
+): Record<string, string | boolean> =>
+  (fields ?? []).reduce<Record<string, string | boolean>>((acc, { name, value }) => {
     if (value !== undefined) acc[name] = value;
     return acc;
   }, {});
@@ -288,9 +288,15 @@ class ConversationClientImpl implements ConversationClient {
 
     validateTemplateFields(template);
     const templateMetadata = buildMetadataFromFields(template.definition.fields);
-    const metadata: Record<string, string> = { ...templateMetadata, ...(existing.metadata ?? {}) };
+    const metadata: Record<string, string | boolean> = {
+      ...templateMetadata,
+      ...(existing.metadata ?? {}),
+    };
 
-    return this.update({ id: conversationId, metadata, template_id: templateId }, { access: 'owner' });
+    return this.update(
+      { id: conversationId, metadata, template_id: templateId },
+      { access: 'owner' }
+    );
   }
 
   private async _get(conversationId: string): Promise<Document | undefined> {

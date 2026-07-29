@@ -18,34 +18,37 @@ const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/;
 // Per-type value checks
 // ---------------------------------------------------------------------------
 
-const validateType = (templateId: string, field: ConversationTemplateField): void => {
+const validateType = (
+  templateId: string,
+  field: ConversationTemplateField & { value?: string | boolean }
+): void => {
   const { name, type, value } = field;
   if (value === undefined) return;
 
   switch (type) {
     case 'integer':
-      if (value.trim() === '' || !Number.isInteger(Number(value))) {
+      if (typeof value !== 'string' || value.trim() === '' || !Number.isInteger(Number(value))) {
         throw createBadRequestError(
           `Template "${templateId}" field "${name}": "${value}" is not a valid integer`
         );
       }
       break;
     case 'float':
-      if (value.trim() === '' || Number.isNaN(Number(value))) {
+      if (typeof value !== 'string' || value.trim() === '' || Number.isNaN(Number(value))) {
         throw createBadRequestError(
           `Template "${templateId}" field "${name}": "${value}" is not a valid float`
         );
       }
       break;
     case 'boolean':
-      if (value !== 'true' && value !== 'false') {
+      if (typeof value !== 'boolean') {
         throw createBadRequestError(
-          `Template "${templateId}" field "${name}": "${value}" is not a valid boolean (expected "true" or "false")`
+          `Template "${templateId}" field "${name}": value must be a boolean (true or false), got "${value}"`
         );
       }
       break;
     case 'date':
-      if (!ISO_DATE_RE.test(value)) {
+      if (typeof value !== 'string' || !ISO_DATE_RE.test(value)) {
         throw createBadRequestError(
           `Template "${templateId}" field "${name}": "${value}" is not a valid ISO 8601 date`
         );
@@ -64,10 +67,10 @@ const validateType = (templateId: string, field: ConversationTemplateField): voi
 const validateRequired = (
   templateId: string,
   name: string,
-  value: string | undefined,
+  value: string | boolean | undefined,
   rules: ConversationTemplateFieldValidation
 ): void => {
-  if (rules.required && (value === undefined || value.trim() === '')) {
+  if (rules.required && (value === undefined || value === '')) {
     throw createBadRequestError(`Template "${templateId}" field "${name}": value is required`);
   }
 };
@@ -154,7 +157,7 @@ const validateAllowedValues = (
 export const validateSingleField = (
   templateId: string,
   field: ConversationTemplateField,
-  value: string
+  value: string | boolean
 ): void => {
   const { name, type, validation } = field;
 
@@ -164,17 +167,21 @@ export const validateSingleField = (
 
   validateType(templateId, { ...field, value });
 
+  // Boolean values don't support pattern / allowed_values / length / numeric checks.
+  if (type === 'boolean') return;
+
   if (!validation) return;
 
-  validatePattern(templateId, name, value, validation);
-  validateAllowedValues(templateId, name, value, validation);
+  const strValue = value as string;
+  validatePattern(templateId, name, strValue, validation);
+  validateAllowedValues(templateId, name, strValue, validation);
 
   if (type === 'keyword' || type === 'text') {
-    validateLengthConstraints(templateId, name, value, validation);
+    validateLengthConstraints(templateId, name, strValue, validation);
   }
 
   if (type === 'integer' || type === 'float') {
-    validateNumericConstraints(templateId, name, value, validation);
+    validateNumericConstraints(templateId, name, strValue, validation);
   }
 };
 
@@ -194,17 +201,18 @@ export const validateTemplateFields = (template: ConversationTemplate): void => 
 
     validateType(template.id, field);
 
-    if (!validation) continue;
+    if (type === 'boolean' || !validation) continue;
 
-    validatePattern(template.id, field.name, value, validation);
-    validateAllowedValues(template.id, field.name, value, validation);
+    const strValue = value as string;
+    validatePattern(template.id, field.name, strValue, validation);
+    validateAllowedValues(template.id, field.name, strValue, validation);
 
     if (type === 'keyword' || type === 'text') {
-      validateLengthConstraints(template.id, field.name, value, validation);
+      validateLengthConstraints(template.id, field.name, strValue, validation);
     }
 
     if (type === 'integer' || type === 'float') {
-      validateNumericConstraints(template.id, field.name, value, validation);
+      validateNumericConstraints(template.id, field.name, strValue, validation);
     }
   }
 };

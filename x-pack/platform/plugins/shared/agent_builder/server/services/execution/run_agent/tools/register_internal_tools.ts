@@ -36,7 +36,7 @@ export interface RegisterInternalToolsParams {
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
   /** Callback to merge key/value updates into the active conversation's metadata. */
-  updateConversationMetadata?: (updates: Record<string, string>) => Promise<void>;
+  updateConversationMetadata?: (updates: Record<string, string | boolean>) => Promise<void>;
   /** Active conversation template, used to validate values written by the LLM. */
   conversationTemplate?: ConversationTemplate;
 }

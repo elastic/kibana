@@ -71,7 +71,7 @@ export interface ConversationProperties {
   workspace_id?: string;
   access_control?: ConversationAccessControl;
   origin?: ConversationOrigin;
-  metadata?: Record<string, string>;
+  metadata?: Record<string, string | boolean>;
   template_id?: string;
   // legacy field
   rounds?: PersistentConversationRound[];

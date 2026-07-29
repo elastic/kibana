@@ -58,7 +58,7 @@ export const getResearchAgentPrompt = async (
 
 const getConversationContextSection = (
   templateId: string | undefined,
-  metadata: Record<string, string> | undefined
+  metadata: Record<string, string | boolean> | undefined
 ): string => {
   const template = templateId ? getTemplate(templateId) : undefined;
   if (!template) return '';
