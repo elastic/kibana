@@ -240,9 +240,9 @@ export const registerAiIndexRoutes = ({
             request,
           });
           const status = await getAiIndexService().put(aiIndexId, request.body);
-          auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE_OR_UPDATE, id: aiIndexId })
-          );
+          const putAction =
+            status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
+          auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
