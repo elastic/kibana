@@ -37,7 +37,13 @@ const createStandaloneExecution = (): AgentExecution =>
     },
   } as unknown as AgentExecution);
 
-const createEvent = (text: string): ChatEvent =>
+const createReasoningEvent = (reasoning: string): ChatEvent =>
+  ({
+    type: ChatEventType.reasoning,
+    data: { reasoning },
+  } as unknown as ChatEvent);
+
+const createMessageChunkEvent = (text: string): ChatEvent =>
   ({
     type: ChatEventType.messageChunk,
     data: { text_chunk: text, message_id: 'message-1' },
@@ -70,7 +76,7 @@ describe('deliverCallbackEvents', () => {
     const subscribed = jest.fn();
     const events$ = defer(() => {
       subscribed();
-      return of(createEvent('hello'));
+      return of(createReasoningEvent('hello'));
     });
 
     await deliverCallbackEvents({
@@ -89,7 +95,7 @@ describe('deliverCallbackEvents', () => {
 
     await deliverCallbackEvents({
       execution: createStandaloneExecution(),
-      events$: of(createEvent('hello')),
+      events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
       logger: loggerMock.create(),
     });
@@ -106,7 +112,7 @@ describe('deliverCallbackEvents', () => {
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
-      events$: of(createEvent('hello')),
+      events$: of(createReasoningEvent('hello')),
       callbackDeliveryService: service,
       logger,
     });
@@ -119,7 +125,11 @@ describe('deliverCallbackEvents', () => {
 
   it('delivers one running envelope per event, in order, through a single request function', async () => {
     const { service, transport } = createCallbackDeliveryServiceMock();
-    const events = [createEvent('one'), createEvent('two'), createEvent('three')];
+    const events = [
+      createReasoningEvent('one'),
+      createReasoningEvent('two'),
+      createReasoningEvent('three'),
+    ];
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
@@ -145,9 +155,34 @@ describe('deliverCallbackEvents', () => {
     );
   });
 
+  it('filters out message_chunk events and delivers the rest', async () => {
+    const { service } = createCallbackDeliveryServiceMock();
+    const reasoningEvent = createReasoningEvent('progress');
+    const roundCompleteEvent = createRoundCompleteEvent();
+
+    await deliverCallbackEvents({
+      execution: createConversationExecution(),
+      events$: of(
+        createMessageChunkEvent('chunk one'),
+        reasoningEvent,
+        createMessageChunkEvent('chunk two'),
+        roundCompleteEvent
+      ),
+      callbackDeliveryService: service,
+      logger: loggerMock.create(),
+    });
+
+    const deliveredEvents = service.makeCallbackRequest.mock.calls.map(
+      ([{ payload }]) => (payload as { event: ChatEvent }).event
+    );
+
+    expect(deliveredEvents).toEqual([reasoningEvent, roundCompleteEvent]);
+    expect(deliveredEvents.some((event) => event.type === ChatEventType.messageChunk)).toBe(false);
+  });
+
   it('retries only round_complete events; other events are delivered at-most-once', async () => {
     const { service } = createCallbackDeliveryServiceMock();
-    const progressEvent = createEvent('progress');
+    const progressEvent = createReasoningEvent('progress');
     const roundCompleteEvent = createRoundCompleteEvent();
 
     await deliverCallbackEvents({
@@ -181,8 +216,8 @@ describe('deliverCallbackEvents', () => {
     const { service } = createCallbackDeliveryServiceMock();
     const calls: string[] = [];
     service.makeCallbackRequest.mockImplementation(async ({ payload }) => {
-      const text = (payload as { event: ChatEvent & { data: { text_chunk: string } } }).event.data
-        .text_chunk;
+      const text = (payload as { event: ChatEvent & { data: { reasoning: string } } }).event.data
+        .reasoning;
       calls.push(`start:${text}`);
       await new Promise((resolve) => setImmediate(resolve));
       calls.push(`end:${text}`);
@@ -190,7 +225,7 @@ describe('deliverCallbackEvents', () => {
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
-      events$: of(createEvent('one'), createEvent('two')),
+      events$: of(createReasoningEvent('one'), createReasoningEvent('two')),
       callbackDeliveryService: service,
       logger: loggerMock.create(),
     });
@@ -204,7 +239,7 @@ describe('deliverCallbackEvents', () => {
     service.makeCallbackRequest
       .mockRejectedValueOnce(new Error('Callback delivery failed with status 400'))
       .mockResolvedValueOnce(undefined);
-    const events = [createEvent('one'), createEvent('two')];
+    const events = [createReasoningEvent('one'), createReasoningEvent('two')];
 
     await deliverCallbackEvents({
       execution: createConversationExecution(),
@@ -225,7 +260,7 @@ describe('deliverCallbackEvents', () => {
     await deliverCallbackEvents({
       execution: createConversationExecution(),
       events$: concat(
-        of(createEvent('one')),
+        of(createReasoningEvent('one')),
         throwError(() => new Error('agent boom'))
       ),
       callbackDeliveryService: service,
