@@ -70,8 +70,7 @@ export const AlertEpisodeOverviewList = ({
     typeof groupingData.alert_url === 'string' && groupingData.alert_url.length > 0
       ? groupingData.alert_url
       : undefined;
-  const alertUrl =
-    rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
+  const alertUrl = rawAlertUrl && /^https?:\/\//i.test(rawAlertUrl) ? rawAlertUrl : undefined;
 
   return (
     <EuiDescriptionList
