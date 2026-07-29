@@ -510,12 +510,14 @@ describe('Case view helpers', () => {
     });
 
     describe('security.entity attachment search', () => {
-      const buildEntityAttachment = (overrides: {
-        attachmentId?: string;
-        entityName?: string;
-        entityType?: string;
-        riskLevel?: string;
-      } = {}) =>
+      const buildEntityAttachment = (
+        overrides: {
+          attachmentId?: string;
+          entityName?: string;
+          entityType?: string;
+          riskLevel?: string;
+        } = {}
+      ) =>
         ({
           id: 'entity-1',
           type: SECURITY_ENTITY_ATTACHMENT_TYPE,
@@ -552,9 +554,7 @@ describe('Case view helpers', () => {
 
       it('matches on attachmentId', () => {
         const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
-        expect(
-          filterCaseAttachmentsBySearchTerm(caseData, 'host:web01').comments
-        ).toHaveLength(1);
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'host:web01').comments).toHaveLength(1);
       });
 
       it('matches case-insensitively', () => {
@@ -564,9 +564,7 @@ describe('Case view helpers', () => {
 
       it('excludes the attachment when nothing matches', () => {
         const caseData = { ...basicCase, comments: [buildEntityAttachment()] };
-        expect(
-          filterCaseAttachmentsBySearchTerm(caseData, 'nonexistent').comments
-        ).toHaveLength(0);
+        expect(filterCaseAttachmentsBySearchTerm(caseData, 'nonexistent').comments).toHaveLength(0);
       });
 
       it('excludes a malformed entity attachment (no attachmentId)', () => {
