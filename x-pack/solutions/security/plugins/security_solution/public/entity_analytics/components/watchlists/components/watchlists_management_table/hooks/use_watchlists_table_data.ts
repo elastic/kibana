@@ -31,13 +31,12 @@ const getSourceLabel = (source: MonitoringEntitySource): string => {
   return source.name ?? '';
 };
 
-const getManualSourceLabel = (): string =>
-  i18n.translate(
-    'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.source.manual',
-    {
-      defaultMessage: 'Manual',
-    }
-  );
+const MANUAL_SOURCE_LABEL = i18n.translate(
+  'xpack.securitySolution.entityAnalytics.watchlistsManagement.table.source.manual',
+  {
+    defaultMessage: 'Manual',
+  }
+);
 
 export const useWatchlistsTableData = (
   spaceId: string,
@@ -71,7 +70,7 @@ export const useWatchlistsTableData = (
             return watchlist;
           }
 
-          const labels = watchlist.hasManualEntities ? [getManualSourceLabel()] : [];
+          const labels = watchlist.hasManualEntities ? [MANUAL_SOURCE_LABEL] : [];
 
           if (!watchlist.entitySourceIds?.length) {
             return labels.length ? { ...watchlist, source: labels.join(', ') } : watchlist;
@@ -92,8 +91,8 @@ export const useWatchlistsTableData = (
               source: labels.length ? labels.join(', ') : undefined,
             };
           } catch {
-            // If fetching sources fails for a single watchlist, just show it without the source
-            return watchlist;
+            // If fetching sources fails, preserve any known manual assignment label.
+            return labels.length ? { ...watchlist, source: labels.join(', ') } : watchlist;
           }
         })
       );

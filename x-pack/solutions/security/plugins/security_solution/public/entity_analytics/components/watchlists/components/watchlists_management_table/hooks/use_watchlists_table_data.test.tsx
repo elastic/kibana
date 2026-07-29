@@ -75,4 +75,20 @@ describe('useWatchlistsTableData', () => {
       expect.objectContaining({ watchlistId: 'manual-and-source' })
     );
   });
+
+  it('preserves the manual source label when fetching entity sources fails', async () => {
+    mockListWatchlistEntitySources.mockRejectedValue(new Error('Request failed'));
+
+    const { result } = renderHook(() => useWatchlistsTableData('default', 0, true), {
+      wrapper: TestProviders,
+    });
+
+    await waitFor(() => {
+      expect(result.current.visibleRecords).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'manual-and-source', source: 'Manual' }),
+        ])
+      );
+    });
+  });
 });

@@ -339,48 +339,11 @@ export class WatchlistConfigClient {
    * @returns Map of watchlist IDs to entity counts
    */
   async getEntityCounts(ids: string[]): Promise<Record<string, number>> {
-    if (ids.length === 0) return {};
-
-    const index = getIndexForWatchlist(this.deps.namespace);
-    const counts: Record<string, number> = {};
-
-    // Initialize all requested IDs to 0 so they are guaranteed to exist in the response
-    for (const id of ids) {
-      counts[id] = 0;
-    }
-
-    try {
-      const countResponse = await this.deps.esClient.search({
-        index,
-        ignore_unavailable: true,
-        size: 0,
-        query: {
-          terms: {
-            'watchlist.id': ids,
-          },
-        },
-        aggs: {
-          watchlist_counts: {
-            terms: {
-              field: 'watchlist.id',
-              size: ids.length,
-            },
-          },
-        },
-      });
-
-      const watchlistCountsAgg = countResponse.aggregations?.watchlist_counts as
-        | AggregationsStringTermsAggregate
-        | undefined;
-      const buckets = (watchlistCountsAgg?.buckets as AggregationsStringTermsBucket[]) ?? [];
-      for (const bucket of buckets) {
-        counts[String(bucket.key)] = bucket.doc_count;
-      }
-    } catch (err) {
-      this.deps.logger.warn(`Failed to fetch watchlist entity counts: ${(err as Error).message}`);
-    }
-
-    return counts;
+    const metadata = await this.getEntityMetadata(ids);
+    return Object.fromEntries(ids.map((id) => [id, metadata[id]?.entityCount ?? 0])) as Record<
+      string,
+      number
+    >;
   }
 
   /**

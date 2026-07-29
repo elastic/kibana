@@ -59,8 +59,8 @@ describe('WatchlistConfigClient', () => {
         aggregations: {
           watchlist_counts: {
             buckets: [
-              { key: 'watchlist-1', doc_count: 5 },
-              { key: 'watchlist-3', doc_count: 12 },
+              { key: 'watchlist-1', doc_count: 5, manual_entities: { doc_count: 0 } },
+              { key: 'watchlist-3', doc_count: 12, manual_entities: { doc_count: 0 } },
             ],
           },
         },
@@ -89,6 +89,15 @@ describe('WatchlistConfigClient', () => {
             terms: {
               field: 'watchlist.id',
               size: ids.length,
+            },
+            aggs: {
+              manual_entities: {
+                filter: {
+                  term: {
+                    'labels.source_ids': 'manual',
+                  },
+                },
+              },
             },
           },
         },
@@ -126,7 +135,7 @@ describe('WatchlistConfigClient', () => {
         'watchlist-2': 0,
       });
       expect(loggerMock.warn).toHaveBeenCalledWith(
-        'Failed to fetch watchlist entity counts: ES failure'
+        'Failed to fetch watchlist entity metadata: ES failure'
       );
     });
   });
