@@ -15,12 +15,11 @@ import {
   getCreateAlertEventBySourceUrl,
   testData,
 } from '../../../fixtures';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../../common/constants';
 
 const findExternalAlertByGroupHash = async (esClient: EsClient, groupHash: string) => {
-  await esClient.indices.refresh({ index: ALERT_EVENTS_DATA_STREAM });
+  await esClient.indices.refresh({ index: testData.ALERT_EVENTS_DATA_STREAM });
   const result = await esClient.search({
-    index: ALERT_EVENTS_DATA_STREAM,
+    index: testData.ALERT_EVENTS_DATA_STREAM,
     size: 1,
     query: { term: { group_hash: groupHash } },
   });
