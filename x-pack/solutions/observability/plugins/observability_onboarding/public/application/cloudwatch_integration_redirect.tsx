@@ -83,7 +83,7 @@ export const CloudwatchIntegrationRedirect: React.FC = () => {
           reportAwsOnboardingFlowEntered(analytics, sessionStorage, version);
         }
 
-        application.navigateToApp('integrations', {
+        application.navigateToApp('fleet', {
           path: addIntegrationPath,
           state: routeState,
           replace: true,
