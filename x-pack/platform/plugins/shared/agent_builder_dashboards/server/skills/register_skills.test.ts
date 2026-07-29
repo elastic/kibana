@@ -55,7 +55,7 @@ describe('registerSkills', () => {
           name: 'prettifying-existing-dashboard',
           relativePath: './references',
           content: expect.stringMatching(
-            /do not set `prettifyPanelConfigs`[\s\S]*inner visualization agent[\s\S]*panel_summaries/
+            /do not set `prettifyPanelConfigs`[\s\S]*inner visualization agent[\s\S]*authoring_note/
           ),
         }),
       ])

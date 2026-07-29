@@ -26,13 +26,13 @@ Set \`prettifyPanelConfigs: true\` only when the user explicitly asks to prettif
 
 Do **not** reason about chart configuration details yourself — colors, palettes, axis titles, legend placement, metric formatting, and similar Lens styling choices live in the inner visualization agent. Set \`prettifyPanelConfigs: true\` and let the tool refresh configs; do not emit \`edit_panels\` solely to hand-tune chart configs.
 
-When the tool result includes \`panel_summaries\`, briefly mention those panel improvements in your reply. Use the returned summaries as-is; do not invent additional chart-config details.
+When panels in the tool result's \`data.dashboard\` carry an \`authoring_note\`, briefly mention those improvements in your reply. Use the returned notes as-is; do not invent additional chart-config details.
 
 If the user's request does not make the scope clear, call \`ask_user_question\` alone before \`generate_dashboard\` and ask **How should I prettify this dashboard?** with two options: **Improve existing charts and layout without adding panels** and **Improve existing charts and layout and add useful new panels**. Do not ask when the user already specified either scope.
 
 ## Grid layout pass (always required)
 
-Every prettify request includes a full grid layout pass, regardless of whether the user allows new panels. Classify existing visualizations by summary \`config.type\`, apply the chart-type size table from the generation guidance, and pack the complete 48-column grid left-to-right and top-to-bottom without gaps, overlaps, or inconsistent row heights.
+Every prettify request includes a full grid layout pass, regardless of whether the user allows new panels. Classify existing visualizations by their Lens chart type (\`config.type\` on the panel in the dashboard attachment), apply the chart-type size table from the generation guidance, and pack the complete 48-column grid left-to-right and top-to-bottom without gaps, overlaps, or inconsistent row heights.
 
 Use \`update_panel_layouts\` to emit the complete final grid for every surviving existing panel. Do this even when the current layout already appears acceptable or no composition changes are warranted; never send empty \`operations\` for a prettify request. When the user chooses the existing-panels-only option, do not add or remove panels.
 
