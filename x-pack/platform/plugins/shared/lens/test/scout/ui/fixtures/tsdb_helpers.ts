@@ -165,10 +165,13 @@ const runCleanupActions = async (
   }
 };
 
-const getTsdbMapping = (
+const getTsdbMapping = ({
   removeTSDBFields = false,
-  includeTimeSeriesMetadata = true
-): Record<string, MappingProperty> => ({
+  includeTimeSeriesMetadata = true,
+}: {
+  removeTSDBFields?: boolean;
+  includeTimeSeriesMetadata?: boolean;
+} = {}): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
   request: {
     type: 'keyword',
@@ -224,7 +227,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
                 }
               : {}),
             mappings: {
-              properties: getTsdbMapping(false, includeTimeSeriesMetadata),
+              properties: getTsdbMapping({ includeTimeSeriesMetadata }),
             },
           },
         });
@@ -387,7 +390,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
               await esClient.indices.create({
                 index,
                 mappings: {
-                  properties: getTsdbMapping(removeTSDBFields),
+                  properties: getTsdbMapping({ removeTSDBFields }),
                 },
               });
               await createDocs(index, beforeRollover, { isStream: false, removeTSDBFields });
