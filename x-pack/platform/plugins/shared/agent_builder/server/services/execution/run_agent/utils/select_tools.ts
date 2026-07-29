@@ -88,13 +88,9 @@ export const selectTools = async ({
     request,
   });
 
-  const capabilityAttachmentTools = agentConfiguration.enable_elastic_capabilities
-    ? withOrigin(versionedAttachmentTools, ToolOrigin.internal)
-    : [];
-
   const staticTools = [
     ...withOrigin(versionedAttachmentBoundTools, ToolOrigin.inline),
-    ...capabilityAttachmentTools,
+    ...withOrigin(versionedAttachmentTools, ToolOrigin.internal),
     ...withOrigin(staticRegistryTools, ToolOrigin.registry),
   ];
 

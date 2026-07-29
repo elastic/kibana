@@ -163,11 +163,6 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     action,
   });
 
-  if (processedConversation.versionedAttachmentPresentation) {
-    processedConversation.versionedAttachmentPresentation.includeToolInstructions =
-      agentConfiguration.enable_elastic_capabilities ?? true;
-  }
-
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
     request,
     abortSignal,

@@ -27,8 +27,6 @@ export interface AttachmentPresentation {
   content: string;
   /** Number of active attachments */
   activeCount: number;
-  /** When false, attachment tool-use instructions are omitted from the system prompt */
-  includeToolInstructions?: boolean;
 }
 
 /**
@@ -211,10 +209,6 @@ export const getConversationAttachmentsSection = (
     presentation.mode === 'inline'
       ? `## Conversation Attachments\n\nThe user has ${presentation.activeCount} attachment(s) in this conversation. The content is shown below in XML format.`
       : `## Conversation Attachments\n\nThe user has ${presentation.activeCount} attachment(s) in this conversation. Only metadata is shown below due to the large number.`;
-
-  if (presentation.includeToolInstructions === false) {
-    return `${preamble}\n\n${presentation.content}`;
-  }
 
   const instructions =
     presentation.mode === 'inline'

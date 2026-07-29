@@ -245,17 +245,6 @@ describe('attachment_presentation', () => {
       expect(instructionsIndex).toBeGreaterThan(xmlIndex);
     });
 
-    it('should omit tool instructions when includeToolInstructions is false', async () => {
-      const attachments = [createMockAttachment('1', 'text', 'Hello world')];
-      const presentation = await prepareAttachmentPresentation(attachments);
-      presentation.includeToolInstructions = false;
-      const section = getConversationAttachmentsSection(presentation);
-
-      expect(section).toContain('## Conversation Attachments');
-      expect(section).toContain('<conversation-attachments');
-      expect(section).not.toContain('You can:');
-      expect(section).not.toContain('attachment_add');
-    });
   });
 
   describe('getConversationAttachmentsSystemMessages', () => {
