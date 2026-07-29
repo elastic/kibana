@@ -197,6 +197,7 @@ export const MAX_BULK_CREATE_ATTACHMENTS = 100 as const;
 export const MAX_USER_ACTIONS_PER_CASE = 10000 as const;
 export const MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES = 100 as const;
 export const MAX_CUSTOM_FIELDS_PER_CASE = 10 as const;
+export const MAX_CONNECTOR_FIELDS_PER_CASE = 100 as const;
 export const MAX_CUSTOM_FIELD_KEY_LENGTH = 36 as const; // uuidv4 length
 export const MAX_CUSTOM_FIELD_LABEL_LENGTH = 50 as const;
 export const MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH = 160 as const;
@@ -379,6 +380,23 @@ export const CASE_VIEW_ATTACHMENTS_TAB_CLICKED_EVENT_TYPE =
 
 export const CASE_VIEW_ATTACHMENTS_SUB_TAB_CLICKED_EVENT_TYPE =
   'case_view_attachments_sub_tab_clicked' as const;
+
+export const CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE = 'cases_list_view_mode_changed' as const;
+
+export const CASES_LIST_PAGE_VIEW_EVENT_TYPE = 'cases_list_page_view' as const;
+
+export const CASE_VIEW_ATTACHMENT_ACCORDION_OPENED_EVENT_TYPE =
+  'case_view_attachment_accordion_opened' as const;
+
+/**
+ * Cases list view toggle. Defined in `common` (rather than the redesign UI package) so that
+ * non-UI consumers, such as the analytics/EBT layer, can depend on it without reaching into a
+ * specific UI feature's implementation.
+ */
+export const VIEW_TOGGLE_LIST_ID = 'list' as const;
+export const VIEW_TOGGLE_TABLE_ID = 'table' as const;
+
+export type ViewToggleId = typeof VIEW_TOGGLE_LIST_ID | typeof VIEW_TOGGLE_TABLE_ID;
 
 /**
  * Exporting this to make it easier to track the usage across the codebase

@@ -73,6 +73,7 @@ interface GetAuthorizedRuleTypesWithAuthorizedConsumersParams {
   ruleTypeIds?: string[];
   operations: Array<ReadOperations | WriteOperations>;
   authorizationEntity: AlertingAuthorizationEntity;
+  namespaces?: Array<string | undefined>;
 }
 
 interface GetAllAuthorizedRuleTypesFindOperationParams {
@@ -339,15 +340,22 @@ export class AlertingAuthorization {
     ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void;
   }> {
     if (this.authorization && this.shouldCheckAuthorization()) {
+      const { namespaces } = params.filterOpts;
       const { authorizedRuleTypes } = await this._getAuthorizedRuleTypesWithAuthorizedConsumers({
         operations: [params.operation],
         authorizationEntity: params.authorizationEntity,
+        namespaces,
       });
 
       if (!authorizedRuleTypes.size) {
-        throw Boom.forbidden(
-          `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types`
-        );
+        const baseMessage = `Unauthorized to ${params.operation} ${params.authorizationEntity}s for any rule types.`;
+        const errorMessage =
+          (namespaces ?? []).length > 0
+            ? `${baseMessage} Validate that you have permissions to access spaces: ${(
+                namespaces ?? []
+              ).map((space) => (space === undefined ? 'default' : space))}`
+            : baseMessage;
+        throw Boom.forbidden(errorMessage);
       }
 
       return {
@@ -481,7 +489,7 @@ export class AlertingAuthorization {
     hasAllRequested: boolean;
     authorizedRuleTypes: Map<string, { authorizedConsumers: AuthorizedConsumers }>;
   }> {
-    const { operations, authorizationEntity } = params;
+    const { operations, authorizationEntity, namespaces } = params;
     const ruleTypeIds = params.ruleTypeIds
       ? new Set(params.ruleTypeIds)
       : new Set(this.ruleTypeRegistry.getAllTypes());
@@ -493,10 +501,6 @@ export class AlertingAuthorization {
 
     if (this.authorization && this.shouldCheckAuthorization()) {
       const authorizedRuleTypes = new Map<string, { authorizedConsumers: AuthorizedConsumers }>();
-
-      const checkPrivileges = this.authorization.checkPrivilegesDynamicallyWithRequest(
-        this.request
-      );
 
       for (const ruleTypeId of ruleTypeIds) {
         /**
@@ -529,31 +533,44 @@ export class AlertingAuthorization {
         }
       }
 
-      const { username, hasAllRequested, privileges } = await checkPrivileges({
+      const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
+      const spaces = (namespaces ? namespaces : [this.spaceId]).map((space) =>
+        space === undefined ? 'default' : space
+      );
+
+      const { username, hasAllRequested, privileges } = await checkPrivileges.atSpaces(spaces, {
         kibana: [...requiredPrivileges.keys()],
       });
 
+      const privilegeAuthResults = new Map<string, boolean[]>();
       for (const { authorized, privilege } of privileges.kibana) {
-        if (authorized && requiredPrivileges.has(privilege)) {
-          const { ruleTypeId, consumer, operation } = requiredPrivileges.get(privilege)!;
-
-          const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId) ?? {
-            authorizedConsumers: {},
-          };
-
-          const authorizedConsumers = authorizedRuleType.authorizedConsumers;
-          const mergedOperations = mergeHasPrivileges(
-            getPrivilegesFromOperation(operation),
-            authorizedConsumers[consumer]
-          );
-
-          authorizedRuleTypes.set(ruleTypeId, {
-            authorizedConsumers: {
-              ...authorizedConsumers,
-              [consumer]: mergedOperations,
-            },
-          });
+        if (requiredPrivileges.has(privilege)) {
+          const auths = privilegeAuthResults.get(privilege) ?? [];
+          auths.push(authorized);
+          privilegeAuthResults.set(privilege, auths);
         }
+      }
+
+      for (const [privilege, auths] of privilegeAuthResults) {
+        if (!auths.every(Boolean)) continue;
+
+        const { ruleTypeId, consumer, operation } = requiredPrivileges.get(privilege)!;
+        const authorizedRuleType = authorizedRuleTypes.get(ruleTypeId) ?? {
+          authorizedConsumers: {},
+        };
+
+        const authorizedConsumers = authorizedRuleType.authorizedConsumers;
+        const mergedOperations = mergeHasPrivileges(
+          getPrivilegesFromOperation(operation),
+          authorizedConsumers[consumer]
+        );
+
+        authorizedRuleTypes.set(ruleTypeId, {
+          authorizedConsumers: {
+            ...authorizedConsumers,
+            [consumer]: mergedOperations,
+          },
+        });
       }
 
       return {
