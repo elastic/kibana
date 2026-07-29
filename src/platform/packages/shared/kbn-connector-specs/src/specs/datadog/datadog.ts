@@ -8,12 +8,13 @@
  */
 
 /**
- * Datadog Connector (v2)
+ * Datadog connector (`.datadog`)
  *
- * Alert-source connector for Datadog monitors:
- * - Test connection (API key + application key)
- * - Register / get / delete outbound webhooks (Datadog → Kibana URL)
- * - Mute / unmute / get / list monitors (write-back + discovery)
+ * General Datadog integration for Workflows / Agent Builder / Alerting.
+ * First action group covers monitors + webhook registration; additional
+ * Datadog API domains (downtimes, events, hosts, metrics, incidents) should
+ * be added as actions on this same connector — do not create `.datadog_*`
+ * variants for each domain.
  *
  * Auth uses basic-auth fields relabeled as API Key + Application Key (both
  * encrypted). Handlers send DD-API-KEY / DD-APPLICATION-KEY headers; Datadog
@@ -78,7 +79,7 @@ export const DatadogConnector: ConnectorSpec = {
     displayName: 'Datadog',
     description: i18n.translate('connectorSpecs.datadog.metadata.description', {
       defaultMessage:
-        'Connect to Datadog: manage monitors and webhooks, with room for downtimes, events, hosts, and more',
+        'Manage Datadog monitors and webhooks; extensible for downtimes, events, hosts, metrics, and incidents',
     }),
     minimumLicense: 'gold',
     isTechnicalPreview: true,
@@ -160,10 +161,11 @@ export const DatadogConnector: ConnectorSpec = {
   ].join('\n'),
 
   actions: {
+    // --- Monitors & webhooks (alerting) ------------------------------------
     registerWebhook: {
       isTool: true,
       description:
-        'Create a Datadog webhook integration that POSTs monitor alerts to a URL (Kibana inbound). ' +
+        'Create a Datadog webhook integration that POSTs monitor notifications to a URL. ' +
         'Returns the created webhook name. Monitors must mention @webhook-{name} to fire it.',
       input: RegisterWebhookInputSchema,
       handler: async (ctx, input: RegisterWebhookInput) => {
