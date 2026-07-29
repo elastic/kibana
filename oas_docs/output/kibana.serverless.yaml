@@ -27216,6 +27216,8 @@ paths:
                         pipeline_config:
                           maxLength: 10000
                           type: string
+                        policy_base_id:
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -27880,6 +27882,8 @@ paths:
                       pipeline_config:
                         maxLength: 10000
                         type: string
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -28360,6 +28364,8 @@ paths:
                         type: array
                       pipeline_config:
                         maxLength: 10000
+                        type: string
+                      policy_base_id:
                         type: string
                       policy_id:
                         type: string
