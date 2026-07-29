@@ -9,6 +9,7 @@
 
 import { globalTeardownHook } from '@kbn/scout';
 
-globalTeardownHook('Teardown traces experience tests data', async ({ log }) => {
-  log.debug('[teardown:traces] no custom teardown required');
+globalTeardownHook('Teardown traces experience tests data', async ({ esClient, log }) => {
+  await esClient.indices.delete({ index: 'traces-test.otel-default', ignore_unavailable: true });
+  log.debug('[teardown:traces] Deleted traces-test.otel-default index');
 });

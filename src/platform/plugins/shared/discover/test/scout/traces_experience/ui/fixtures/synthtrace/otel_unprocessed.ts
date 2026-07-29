@@ -16,14 +16,14 @@ export async function indexUnprocessedOtelTrace(
   esClient: Client,
   timeRange: { from: number; to: number }
 ): Promise<void> {
-  const docs = Array.from(otelTrace(timeRange)).flatMap((event) => event.serialize());
+  const docs = Array.from(otelTrace(timeRange))
+    .flatMap((event) => event.serialize())
+    .filter((doc) => !!doc.kind);
 
-  for (const doc of docs) {
-    if (!doc.kind) continue;
-    await esClient.index({
-      index: 'traces-test.otel-default',
-      document: { ...doc, 'service.name': OTEL_SERVICE.SERVICE_NAME },
-      refresh: 'wait_for',
-    });
-  }
+  const operations = docs.flatMap((doc) => [
+    { index: { _index: 'traces-test.otel-default' } },
+    { ...doc, 'service.name': OTEL_SERVICE.SERVICE_NAME },
+  ]);
+
+  await esClient.bulk({ operations, refresh: true });
 }
