@@ -109,6 +109,7 @@ describe('AssetCriticalityTab', () => {
     expect(
       screen.getByTestId(ASSET_CRITICALITY_INSUFFICIENT_PRIVILEGES_TEST_ID)
     ).toBeInTheDocument();
+    expect(screen.queryByTestId('asset-criticality-file-uploader')).not.toBeInTheDocument();
   });
 
   it('renders the file uploader when all permissions are met', () => {
