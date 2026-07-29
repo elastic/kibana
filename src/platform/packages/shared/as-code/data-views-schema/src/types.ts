@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { TypeOf } from '@kbn/config-schema';
-import type { z } from '@kbn/zod';
 import type {
   dataViewReferenceSchema,
   dataViewSchema,
@@ -29,9 +28,6 @@ import type {
   savedPrimitiveRuntimeFieldSchema,
   savedRuntimeFieldSchema,
 } from './runtime_fields/schema_saved_runtime_fields';
-import type { formatSchema } from './field_settings/formats/format_schema';
-import type { durationFormatSchema } from './field_settings/formats/duration';
-import type { histogramFormatSchema } from './field_settings/formats/histogram';
 
 export type AsCodeFieldSettings = TypeOf<typeof fieldSettingsSchema>;
 export type AsCodeCompositeRuntimeField = TypeOf<typeof compositeRuntimeFieldSchema>;
@@ -48,8 +44,3 @@ export type AsCodeSavedCompositeRuntimeField = TypeOf<typeof savedCompositeRunti
 export type AsCodeSavedPrimitiveRuntimeField = TypeOf<typeof savedPrimitiveRuntimeFieldSchema>;
 export type AsCodeSavedRuntimeField = TypeOf<typeof savedRuntimeFieldSchema>;
 export type AsCodeSavedDataView = TypeOf<typeof savedDataViewSpecSchema>;
-
-// Field format
-export type AsCodeFieldFormat = z.infer<typeof formatSchema>;
-export type AsCodeDurationFormat = z.infer<typeof durationFormatSchema>;
-export type AsCodeHistogramFormat = z.infer<typeof histogramFormatSchema>;
