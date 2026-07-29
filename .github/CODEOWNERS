@@ -485,6 +485,7 @@ src/platform/packages/shared/content-management/content_list/kbn-content-list-pr
 src/platform/packages/shared/content-management/content_list/kbn-content-list-scout @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/content_list/kbn-content-list-toolbar @elastic/appex-sharedux
+src/platform/packages/shared/content-management/favorites/favorite-button @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_common @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_public @elastic/appex-sharedux
 src/platform/packages/shared/content-management/favorites/favorites_server @elastic/appex-sharedux
