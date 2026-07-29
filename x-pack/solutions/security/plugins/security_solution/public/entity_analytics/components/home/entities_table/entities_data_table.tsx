@@ -253,7 +253,6 @@ export const EntitiesDataTable = ({
     query,
     sort,
     enabled: !queryError,
-    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
   });
 
   const rows = getRowsFromPages(rowsData?.pages);
