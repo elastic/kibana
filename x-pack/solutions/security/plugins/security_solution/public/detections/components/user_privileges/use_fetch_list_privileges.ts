@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { useReadListPrivileges } from '@kbn/securitysolution-list-hooks';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { isAbortError } from '../../../common/utils/exceptions';
 import { useHttp, useKibana } from '../../../common/lib/kibana';
 import type { Privilege } from '../../containers/detection_engine/alerts/types';
 import * as i18n from './translations';
@@ -47,7 +48,9 @@ export const useFetchListPrivileges = (isAppAvailable: boolean = true) => {
 
   useEffect(() => {
     const error = listPrivileges.error;
-    if (error != null) {
+    // A fetch cancelled on unmount (rapid card mount/unmount during streaming)
+    // surfaces as an AbortError; it is not a real failure, so don't toast it.
+    if (error != null && !isAbortError(error)) {
       addError(error, {
         title: i18n.LISTS_PRIVILEGES_FETCH_FAILURE,
       });
