@@ -30,13 +30,17 @@ export class DataRequest {
   }
 
   getMeta(): DataRequestMeta {
-    if (this._descriptor.dataRequestMetaAtStart) {
-      return this._descriptor.dataRequestMetaAtStart;
-    } else if (this._descriptor.dataRequestMeta) {
-      return this._descriptor.dataRequestMeta;
-    } else {
-      return {};
-    }
+    return this._descriptor.dataRequestMetaAtStart ?? this.getLoadedMeta();
+  }
+
+  /**
+   * Meta of the most recently completed request. Unlike 'getMeta', this is never shadowed by the
+   * meta of an in-flight request, so it always describes the request that produced the data
+   * returned by 'getData'. Use it when deriving rendered state from a data request, where reading
+   * the in-flight parameters would describe data that is not on screen yet.
+   */
+  getLoadedMeta(): DataRequestMeta {
+    return this._descriptor.dataRequestMeta ?? {};
   }
 
   hasData(): boolean {

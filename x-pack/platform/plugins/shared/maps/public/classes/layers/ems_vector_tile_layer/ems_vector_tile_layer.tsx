@@ -36,7 +36,6 @@ interface SourceRequestData {
   spriteSheetImageData?: ImageData;
   vectorStyleSheet?: StyleSpecification;
   spriteMeta?: SpriteMeta;
-  tileLayerId?: string;
 }
 
 export class EmsVectorTileLayer extends AbstractLayer {
@@ -136,7 +135,6 @@ export class EmsVectorTileLayer extends AbstractLayer {
       const data = {
         ...styleAndSprites,
         spriteSheetImageData,
-        tileLayerId: nextMeta.tileLayerId,
       };
       stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, data);
     } catch (error) {
@@ -156,10 +154,8 @@ export class EmsVectorTileLayer extends AbstractLayer {
   // while it still holds the previous theme's layers, leaving the basemap stuck on the old theme
   // until the next re-sync.
   _getLoadedTileLayerId() {
-    const sourceDataRequest = this.getSourceDataRequest();
-    const tileLayerId = (sourceDataRequest?.getData() as SourceRequestData | undefined)
-      ?.tileLayerId;
-    return tileLayerId ?? this.getSource().getTileLayerId();
+    const loadedTileLayerId = this.getSourceDataRequest()?.getLoadedMeta().tileLayerId;
+    return loadedTileLayerId ?? this.getSource().getTileLayerId();
   }
 
   _generateMbSourceIdPrefix() {

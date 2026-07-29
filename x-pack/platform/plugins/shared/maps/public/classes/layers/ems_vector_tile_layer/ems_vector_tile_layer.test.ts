@@ -10,6 +10,7 @@ import type { LayerSpecification, Map as MbMap } from '@kbn/mapbox-gl';
 import { SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../common/constants';
 import type {
   DataFilters,
+  DataRequestDescriptor,
   EMSVectorTileLayerDescriptor,
   XYZTMSSourceDescriptor,
 } from '../../../../common/descriptor_types';
@@ -59,11 +60,11 @@ describe('EmsVectorTileLayer', () => {
 
   // When the color mode changes, the source's live 'getTileLayerId()' flips synchronously while
   // the matching light/dark style is still being fetched asynchronously. The mb source prefix and
-  // color filter must be derived from the tileLayerId stored on the loaded data, otherwise the mb
+  // color filter must be derived from the tileLayerId of the loaded data request, otherwise the mb
   // source gets namespaced with the new theme while it still holds the previous theme's layers,
   // leaving the EMS basemap stuck on the old theme until the next re-sync.
-  describe('deriving the tileLayerId from the loaded data', () => {
-    const createLayer = (dataTileLayerId?: string) => {
+  describe('deriving the tileLayerId from the loaded data request', () => {
+    const createLayer = (dataRequest?: Partial<DataRequestDescriptor>) => {
       return new EmsVectorTileLayer({
         source: {
           getTileLayerId: () => 'newTheme',
@@ -75,18 +76,26 @@ describe('EmsVectorTileLayer', () => {
             urlTemplate: 'https://example.com/{x}/{y}/{z}.png',
             id: 'mockSourceId',
           } as XYZTMSSourceDescriptor,
-          __dataRequests:
-            dataTileLayerId === undefined
-              ? []
-              : [{ dataId: SOURCE_DATA_REQUEST_ID, data: { tileLayerId: dataTileLayerId } }],
+          __dataRequests: dataRequest ? [{ dataId: SOURCE_DATA_REQUEST_ID, ...dataRequest }] : [],
         } as unknown as EMSVectorTileLayerDescriptor,
       });
     };
 
+    const loadedWith = (tileLayerId: string) => ({ dataRequestMeta: { tileLayerId } });
+
     test('_generateMbSourceIdPrefix should use the loaded tileLayerId over the live source value', () => {
-      const layer = createLayer('oldTheme') as unknown as {
+      const layer = createLayer(loadedWith('oldTheme')) as unknown as {
         _generateMbSourceIdPrefix: () => string;
       };
+      expect(layer._generateMbSourceIdPrefix()).toBe('layerid___oldTheme___');
+    });
+
+    test('_generateMbSourceIdPrefix should ignore the tileLayerId of an in-flight request', () => {
+      const layer = createLayer({
+        ...loadedWith('oldTheme'),
+        dataRequestMetaAtStart: { tileLayerId: 'newTheme' },
+        dataRequestToken: Symbol('in-flight request'),
+      }) as unknown as { _generateMbSourceIdPrefix: () => string };
       expect(layer._generateMbSourceIdPrefix()).toBe('layerid___oldTheme___');
     });
 
@@ -108,7 +117,7 @@ describe('EmsVectorTileLayer', () => {
         .spyOn(TMSService, 'transformColorProperties')
         .mockReturnValue([]);
 
-      const layer = createLayer('oldTheme') as unknown as {
+      const layer = createLayer(loadedWith('oldTheme')) as unknown as {
         _setColorFilter: (mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) => void;
       };
       const mbLayer = { id: 'mbLayerId', type: 'symbol' } as unknown as LayerSpecification;
