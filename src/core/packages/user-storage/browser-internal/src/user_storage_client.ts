@@ -9,7 +9,7 @@
 
 import { cloneDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
-import { filter, map, share } from 'rxjs';
+import { filter, map } from 'rxjs';
 
 import type {
   IUserStorageClient,
@@ -133,7 +133,7 @@ export class UserStorageClient implements IUserStorageClient {
           loadSub.unsubscribe();
         };
       })
-    ).pipe(share());
+    );
   }
 
   public getState$<T = unknown>(key: string): Observable<UserStorageValue<T | undefined>>;
@@ -171,7 +171,7 @@ export class UserStorageClient implements IUserStorageClient {
         .subscribe(() => emitResolved());
 
       return () => writeSub.unsubscribe();
-    }).pipe(share());
+    });
   }
 
   public async set<T = unknown>(key: string, value: T): Promise<T> {

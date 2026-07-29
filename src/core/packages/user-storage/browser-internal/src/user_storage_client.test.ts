@@ -169,6 +169,19 @@ describe('UserStorageClient', () => {
       expect(await emissions).toEqual([undefined, 'lazy-value']);
     });
 
+    it('emits the current value to every subscriber of the same observable', () => {
+      const { client } = buildClient({ key: 'cached' });
+      const value$ = client.get$<string>('key');
+      const first = jest.fn();
+      const second = jest.fn();
+
+      value$.subscribe(first);
+      value$.subscribe(second);
+
+      expect(first).toHaveBeenCalledWith('cached');
+      expect(second).toHaveBeenCalledWith('cached');
+    });
+
     it('emits to getHttpError$ and retries on next subscription if fetch fails', async () => {
       const { client, api } = buildClient({});
 
@@ -235,6 +248,33 @@ describe('UserStorageClient', () => {
         { status: 'loading', value: 'default' },
         { status: 'error', value: 'default', error },
       ]);
+    });
+
+    it('emits the resolved state to every subscriber of the same observable', () => {
+      const { client } = buildClient({ key: 'cached' });
+      const state$ = client.getState$<string>('key');
+      const first = jest.fn();
+      const second = jest.fn();
+
+      state$.subscribe(first);
+      state$.subscribe(second);
+
+      expect(first).toHaveBeenCalledWith({ status: 'resolved', value: 'cached' });
+      expect(second).toHaveBeenCalledWith({ status: 'resolved', value: 'cached' });
+    });
+
+    it('emits loading to every subscriber of an uncached key while sharing one request', () => {
+      const { client, api } = buildClient({});
+      const state$ = client.getState$<string>('key', 'default');
+      const first = jest.fn();
+      const second = jest.fn();
+
+      state$.subscribe(first);
+      state$.subscribe(second);
+
+      expect(first).toHaveBeenCalledWith({ status: 'loading', value: 'default' });
+      expect(second).toHaveBeenCalledWith({ status: 'loading', value: 'default' });
+      expect(api.get).toHaveBeenCalledTimes(1);
     });
 
     it('re-emits resolved after an explicit write', async () => {
