@@ -8,8 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -55,23 +54,24 @@ export const HomePageStatPanel = ({
   actions,
 }: HomePageStatPanelProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closePopover = () => setIsPopoverOpen(false);
 
-  const contextMenuItems = actions.map(
-    ({ key, iconType: actionIconType, label, onClick, testSubj: actionTestSubj, telemetryId }) => (
-      <EuiContextMenuItem
-        key={key}
-        icon={actionIconType}
-        onClick={() => {
-          setIsPopoverOpen(false);
+  const panels = [
+    {
+      id: 0,
+      items: actions.map(({ key, iconType, label, onClick, testSubj, telemetryId }) => ({
+        key,
+        name: label,
+        icon: iconType,
+        'data-test-subj': testSubj,
+        'data-telemetry-id': telemetryId,
+        onClick: () => {
+          closePopover();
           onClick();
-        }}
-        data-test-subj={actionTestSubj}
-        data-telemetry-id={telemetryId}
-      >
-        {label}
-      </EuiContextMenuItem>
-    )
-  );
+        },
+      })),
+    },
+  ];
 
   return (
     <EuiPanel hasBorder paddingSize="m" data-test-subj={testSubj}>
@@ -101,11 +101,11 @@ export const HomePageStatPanel = ({
                 />
               }
               isOpen={isPopoverOpen}
-              closePopover={() => setIsPopoverOpen(false)}
+              closePopover={closePopover}
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel items={contextMenuItems} />
+              <EuiContextMenu initialPanelId={0} panels={panels} />
             </EuiPopover>
           </EuiFlexItem>
         )}

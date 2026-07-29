@@ -45,30 +45,6 @@ export const HomePage = () => {
     if (locator) await locator.navigate({ page: 'index_list' });
   }, [share]);
 
-  const navigateToDashboards = useCallback(() => {
-    application.navigateToApp('dashboards');
-  }, [application]);
-
-  const navigateToCreateDashboard = useCallback(() => {
-    application.navigateToApp('dashboards', { path: '#/create' });
-  }, [application]);
-
-  const navigateToWorkflows = useCallback(() => {
-    application.navigateToApp('workflows');
-  }, [application]);
-
-  const navigateToCreateWorkflow = useCallback(() => {
-    application.navigateToApp('workflows', { path: '/create' });
-  }, [application]);
-
-  const navigateToApiKeys = useCallback(() => {
-    application.navigateToApp('management', { path: '/security/api_keys' });
-  }, [application]);
-
-  const navigateToCreateApiKey = useCallback(() => {
-    application.navigateToApp('management', { path: '/security/api_keys/create' });
-  }, [application]);
-
   const dataStats = [
     {
       key: 'totalIndices',
@@ -199,7 +175,7 @@ export const HomePage = () => {
                       label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.createDashboard', {
                         defaultMessage: 'Create a dashboard',
                       }),
-                      onClick: navigateToCreateDashboard,
+                      onClick: () => application.navigateToApp('dashboards', { path: '#/create' }),
                       testSubj: 'homePageDashboardsCardCreateDashboard',
                       telemetryId: 'serverlessVectordb-home-dashboardsCard-createDashboard',
                     },
@@ -209,7 +185,7 @@ export const HomePage = () => {
                       label: i18n.translate('xpack.serverlessVectordb.home.dashboardsCard.manageDashboards', {
                         defaultMessage: 'Manage dashboards',
                       }),
-                      onClick: navigateToDashboards,
+                      onClick: () => application.navigateToApp('dashboards'),
                       testSubj: 'homePageDashboardsCardManageDashboards',
                       telemetryId: 'serverlessVectordb-home-dashboardsCard-manageDashboards',
                     },
@@ -244,7 +220,7 @@ export const HomePage = () => {
                       label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.createWorkflow', {
                         defaultMessage: 'Create a workflow',
                       }),
-                      onClick: navigateToCreateWorkflow,
+                      onClick: () => application.navigateToApp('workflows', { path: '/create' }),
                       testSubj: 'homePageWorkflowsCardCreateWorkflow',
                       telemetryId: 'serverlessVectordb-home-workflowsCard-createWorkflow',
                     },
@@ -254,7 +230,7 @@ export const HomePage = () => {
                       label: i18n.translate('xpack.serverlessVectordb.home.workflowsCard.manageWorkflows', {
                         defaultMessage: 'Manage workflows',
                       }),
-                      onClick: navigateToWorkflows,
+                      onClick: () => application.navigateToApp('workflows'),
                       testSubj: 'homePageWorkflowsCardManageWorkflows',
                       telemetryId: 'serverlessVectordb-home-workflowsCard-manageWorkflows',
                     },
@@ -289,7 +265,8 @@ export const HomePage = () => {
                       label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.createApiKey', {
                         defaultMessage: 'Create an API key',
                       }),
-                      onClick: navigateToCreateApiKey,
+                      onClick: () =>
+                        application.navigateToApp('management', { path: '/security/api_keys/create' }),
                       testSubj: 'homePageApiKeysCardCreateApiKey',
                       telemetryId: 'serverlessVectordb-home-apiKeysCard-createApiKey',
                     },
@@ -299,7 +276,8 @@ export const HomePage = () => {
                       label: i18n.translate('xpack.serverlessVectordb.home.apiKeysCard.manageApiKeys', {
                         defaultMessage: 'Manage API keys',
                       }),
-                      onClick: navigateToApiKeys,
+                      onClick: () =>
+                        application.navigateToApp('management', { path: '/security/api_keys' }),
                       testSubj: 'homePageApiKeysCardManageApiKeys',
                       telemetryId: 'serverlessVectordb-home-apiKeysCard-manageApiKeys',
                     },

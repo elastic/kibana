@@ -59,7 +59,6 @@ export const ChatWithYourDataSection = () => {
       <span>
         <EuiButton
           color="text"
-          size="s"
           onClick={() => agentBuilder.toggleChat()}
           data-test-subj="openElasticAgentButton"
           data-telemetry-id="serverlessVectordb-home-chat-openElasticAgent"
