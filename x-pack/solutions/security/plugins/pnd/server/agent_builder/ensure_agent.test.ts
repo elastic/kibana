@@ -40,7 +40,7 @@ describe('thin agent', () => {
       },
     });
     expect(agent.id).toBe('pnd-thin-agent');
-    expect(agent.type).toBe('security.pnd-thin-type');
+    expect(agent.type).toBe('security.pnd-type');
   });
 
   it('registers a managed type with an empty skill floor and elastic capabilities off', () => {

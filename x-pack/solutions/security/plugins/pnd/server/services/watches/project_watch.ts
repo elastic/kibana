@@ -286,12 +286,13 @@ export const projectCallablesFromDefinition = (
 
   for (const id of skillIds) {
     const override = overrides.get(id);
-    const skillDef = agents?.getSkill(id);
+    // Default to skill definition only if UI overrides are not defined
+    const skillDef = override ? undefined : agents?.getSkill(id);
     callables.push({
       id,
-      name: skillDef?.name ?? override?.name ?? humanizeId(id),
+      name: override?.name ?? skillDef?.name ?? humanizeId(id),
       kind: 'skill',
-      summary: skillDef?.description ?? override?.summary ?? '',
+      summary: override?.summary ?? skillDef?.description ?? '',
       gated: override?.gated ?? false,
       enabled: override?.enabled ?? true,
       lastRun: override?.lastRun ?? null,

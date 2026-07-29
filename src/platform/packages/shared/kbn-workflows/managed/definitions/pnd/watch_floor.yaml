@@ -45,9 +45,13 @@ consts:
 steps:
   - name: triage_alerts
     type: ai.agent
+    agent-id: pnd-thin-agent
     timeout: "10m"
     create-conversation: true
     with:
+      configuration_overrides:
+        skill_ids:
+          - alert-analysis
       message: >
         Use the [/alert-analysis](skill://alert-analysis) skill to triage the
         security alert context below. Prefer recall over precision when unsure.
