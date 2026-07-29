@@ -154,6 +154,7 @@ describe('toListExecutionHistoryRequest', () => {
         ruleIds: ['rule-1', 'rule-2'],
         outcome: 'dispatched',
         episodeIds: ['ep-1'],
+        startDate: '2026-01-01T00:00:00.000Z',
       })
     ).toEqual({
       page: 1,
@@ -162,6 +163,7 @@ describe('toListExecutionHistoryRequest', () => {
       rule_ids: ['rule-1', 'rule-2'],
       outcome: 'dispatched',
       episode_ids: ['ep-1'],
+      start_date: '2026-01-01T00:00:00.000Z',
     });
   });
 });

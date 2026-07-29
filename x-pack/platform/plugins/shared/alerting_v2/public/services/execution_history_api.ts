@@ -40,6 +40,8 @@ export class ExecutionHistoryApi {
           search: params.search,
           rule_ids: params.rule_ids,
           outcome: params.outcome,
+          episode_ids: params.episode_ids,
+          start_date: params.start_date,
         },
       }
     );

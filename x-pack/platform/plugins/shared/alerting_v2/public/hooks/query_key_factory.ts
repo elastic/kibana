@@ -66,6 +66,8 @@ export const executionHistoryKeys = {
     search?: string;
     ruleIds?: string[];
     outcome?: 'all' | 'dispatched' | 'throttled';
+    episodeIds?: string[];
+    startDate?: string;
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
   countSince: (
     since: string,

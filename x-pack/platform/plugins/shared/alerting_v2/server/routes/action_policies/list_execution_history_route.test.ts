@@ -53,7 +53,10 @@ describe('ListExecutionHistoryRoute', () => {
       page: 2,
       perPage: 25,
       search: 'foo',
+      ruleIds: undefined,
       outcome: 'throttled',
+      episodeIds: undefined,
+      startDate: undefined,
     });
   });
 
@@ -71,6 +74,20 @@ describe('ListExecutionHistoryRoute', () => {
     );
   });
 
+  it('forwards start_date from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { start_date: '2026-01-01T00:00:00.000Z' },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ startDate: '2026-01-01T00:00:00.000Z' })
+    );
+  });
+
   it('passes undefined params when query is empty (defaults applied by client)', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest();
@@ -83,7 +100,10 @@ describe('ListExecutionHistoryRoute', () => {
       page: undefined,
       perPage: undefined,
       search: undefined,
+      ruleIds: undefined,
       outcome: undefined,
+      episodeIds: undefined,
+      startDate: undefined,
     });
   });
 
@@ -124,6 +144,7 @@ describe('toListExecutionHistoryArgs', () => {
         rule_ids: ['rule-1', 'rule-2'],
         outcome: 'dispatched',
         episode_ids: ['ep-1'],
+        start_date: '2026-01-01T00:00:00.000Z',
       })
     ).toEqual({
       page: 1,
@@ -132,6 +153,7 @@ describe('toListExecutionHistoryArgs', () => {
       ruleIds: ['rule-1', 'rule-2'],
       outcome: 'dispatched',
       episodeIds: ['ep-1'],
+      startDate: '2026-01-01T00:00:00.000Z',
     });
   });
 });

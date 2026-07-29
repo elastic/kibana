@@ -57,6 +57,11 @@ export interface ListExecutionHistoryArgs {
   ruleIds?: string[];
   outcome?: PolicyExecutionOutcomeFilter;
   episodeIds?: string[];
+  /**
+   * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
+   * replaces the default rolling {@link TIME_WINDOW_HOURS}-hour window.
+   */
+  startDate?: string;
 }
 
 export interface ListExecutionHistoryResult {
@@ -100,8 +105,10 @@ export class ActionPolicyExecutionHistoryClient {
     ruleIds,
     outcome = DEFAULT_OUTCOME_FILTER,
     episodeIds,
+    startDate,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
-    const startDate = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    const effectiveStartDate =
+      startDate ?? new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
@@ -113,7 +120,7 @@ export class ActionPolicyExecutionHistoryClient {
 
     const result = await this.eventLogService.findActionPolicyExecutionEvents({
       spaceId,
-      startDate,
+      startDate: effectiveStartDate,
       page,
       perPage,
       outcome: toOutcomeForService(outcome),
