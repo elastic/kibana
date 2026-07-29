@@ -9,12 +9,12 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 import type {
   GetExecutionByIdsItem,
   GetExecutionsByIdsOptions,
   GetExecutionsByIdsResponse,
 } from '../types';
-import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
 
 export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
   esClient: ElasticsearchClient;
@@ -27,7 +27,7 @@ export interface GetExecutionsByIdsParams<TExecution extends { id: string }> {
   ) => TExecution;
   logger: Logger;
 }
-  
+
 export const getExecutionsByIds = async <TExecution extends { id: string }>({
   esClient,
   ids,

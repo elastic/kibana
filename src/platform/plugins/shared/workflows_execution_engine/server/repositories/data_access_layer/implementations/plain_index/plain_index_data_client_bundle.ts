@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type { CoreSetup, CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import { createOrUpdateIndex } from './helpers';
 import { PlainIndexDataClient } from './plain_index_data_client';
 import {

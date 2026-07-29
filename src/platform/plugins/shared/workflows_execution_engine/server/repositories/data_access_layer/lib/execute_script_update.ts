@@ -9,8 +9,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { ScriptUpdateRequest, ScriptUpdateResponse, ScriptUpdateResult } from '../types';
 import { retryTransientEsErrors } from '../../../lib/retry_transient_es_errors';
+import type { ScriptUpdateRequest, ScriptUpdateResponse, ScriptUpdateResult } from '../types';
 
 export interface ExecuteScriptUpdateParams {
   esClient: ElasticsearchClient;

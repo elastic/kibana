@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 import { executeScriptUpdate } from '../../lib/execute_script_update';
 import { getExecutionsByIds } from '../../lib/get_executions_by_ids';
 import { sharedBulk } from '../../lib/shared_bulk';
@@ -26,7 +27,6 @@ import type {
   ScriptUpdateRequest,
   ScriptUpdateResponse,
 } from '../../types';
-import { retryTransientEsErrors } from '../../../../lib/retry_transient_es_errors';
 
 export interface PlainIndexDataClientDeps {
   esClient: ElasticsearchClient;
@@ -43,10 +43,14 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
   public async search(
     request: ExecutionsSearchRequest
   ): Promise<estypes.SearchResponse<TExecution>> {
-    return retryTransientEsErrors(() => this.deps.esClient.search<TExecution>({
-      index: this.deps.indexName,
-      ...request,
-    }), { logger: this.deps.logger });
+    return retryTransientEsErrors(
+      () =>
+        this.deps.esClient.search<TExecution>({
+          index: this.deps.indexName,
+          ...request,
+        }),
+      { logger: this.deps.logger }
+    );
   }
 
   public async count(request: ExecutionsCountRequest): Promise<estypes.CountResponse> {
@@ -80,10 +84,14 @@ export class PlainIndexDataClient<TExecution extends { id: string }>
       ...item,
       index: this.deps.indexName,
     }));
-    const response = await sharedBulk(this.deps.esClient, {
-      ...request,
-      items: itemsWithIndex,
-    }, this.deps.logger);
+    const response = await sharedBulk(
+      this.deps.esClient,
+      {
+        ...request,
+        items: itemsWithIndex,
+      },
+      this.deps.logger
+    );
     if (response.errors) {
       const errorCount = response.items.filter((item) => item.error).length;
       this.deps.logger.debug(
