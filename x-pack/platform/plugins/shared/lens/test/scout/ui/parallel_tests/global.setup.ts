@@ -8,7 +8,13 @@
 import { globalSetupHook } from '@kbn/scout';
 import { testData } from '../fixtures';
 
-globalSetupHook('Setup environment for Lens tests', async ({ esArchiver }) => {
+globalSetupHook('Setup environment for Lens tests', async ({ apiServices, esArchiver }) => {
+  await apiServices.core.settings({
+    'feature_flags.overrides': {
+      'lens.enable_esql_conversion': true,
+    },
+  });
+
   await Promise.all([
     esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LOGSTASH),
     esArchiver.loadIfNeeded(testData.ES_ARCHIVE_PATHS.LONG_WINDOW_LOGSTASH),

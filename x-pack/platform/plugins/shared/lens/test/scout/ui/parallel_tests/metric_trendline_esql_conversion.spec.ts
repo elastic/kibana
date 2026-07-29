@@ -22,12 +22,6 @@ spaceTest.describe(
     let panelId: string;
 
     spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': {
-          'lens.enable_esql_conversion': true,
-        },
-      });
-
       await scoutSpace.uiSettings.set({
         defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
         'dateFormat:tz': 'UTC',
@@ -70,10 +64,9 @@ spaceTest.describe(
       panelId = result.panelId;
     });
 
-    spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
-      await apiServices.core.settings({ 'feature_flags.overrides': {} });
     });
 
     spaceTest(
