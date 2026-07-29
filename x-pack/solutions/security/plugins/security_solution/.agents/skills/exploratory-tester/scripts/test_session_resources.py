@@ -6183,12 +6183,40 @@ print("404")
         self.assertIn("Do NOT write to the knowledge file", prompt)
         self.assertIn("Do NOT write to config.json", prompt)
         self.assertNotIn(
-            "knowledge/<area_slug>.md\n",
+            "knowledge/<area_slug>.md",
             prompt,
             "the sub-agent must never construct the knowledge path itself "
             "from area_slug — it must only use the orchestrator-confirmed "
             "path placeholder",
         )
+        # area_slug must not be a template placeholder the orchestrator
+        # substitutes — it is orphaned once the knowledge path is passed
+        # pre-resolved. The sub-agent instead reads it straight from
+        # config.json (needed for screenshot filenames in 2-flow-core.md).
+        self.assertNotIn("`<area_slug>`", prompt)
+        self.assertIn("area_slug", prompt)
+
+    def test_orchestrator_dispatch_placeholders_match_template(self):
+        # Important #2 from review of commit 34c8eea: the orchestrator's
+        # dispatch instruction listed a placeholder set that had drifted
+        # from templates/subagent-prompt.md — it was missing the knowledge
+        # file path placeholder (risking an unsubstituted literal placeholder
+        # or a skipped approval gate) and still listed the now-orphaned
+        # `<area_slug>`.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        dispatch_section = explore[
+            explore.index("3. Dispatch sub-agents concurrently") : explore.index(
+                "4. Wait for all Wave 1 sub-agents to complete."
+            )
+        ]
+        self.assertIn("<flow object as JSON>", dispatch_section)
+        self.assertIn("<value of $SESSION_DIR>", dispatch_section)
+        self.assertIn("<N>", dispatch_section)
+        self.assertIn(
+            "<knowledge file path, or omitted entirely>", dispatch_section
+        )
+        self.assertNotIn("<area_slug>", dispatch_section)
+        self.assertIn("omit", dispatch_section.lower())
 
 
 if __name__ == "__main__":

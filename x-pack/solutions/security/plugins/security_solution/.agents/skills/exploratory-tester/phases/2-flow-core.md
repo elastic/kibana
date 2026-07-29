@@ -75,7 +75,7 @@ shared state in this skill before.
 | "All my test data is well-formed ECS" | Real customer data has non-ECS types. Use the noise index for data-view flows. |
 | "Let me check the source code / test file selectors" | **Hard stop.** The implementation may be wrong. Navigate from what's visible in the browser. |
 | "I don't know how this feature works" | Check specs → official docs → UI → test files for user flows. |
-| "This error is expected" | Document it. User decides — then add to `knowledge/<area-slug>.md`. |
+| "This error is expected" | Document it in your findings file and let the user decide. Do not add it to the knowledge file yourself — only Phase 3, after separate explicit user approval, writes there. |
 | "I called the API and it works" | UI and API hit different code paths. Browser reproduction required. |
 | "I didn't find anything — I should flag this observation just in case" | If you completed the checklist and nothing confirmed, report it as clean. That is signal, not failure. |
 
@@ -234,7 +234,7 @@ All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In pa
 2. If `entry` starts with `/s/` → `<environment.url><entry>` as-is
 3. If `entry` is a natural-language description → navigate from `/s/<space_id>/app/security` and follow the path
 4. If redirected to an unrelated page or space prefix is missing → log a Level 2 finding, try a more specific sub-path
-5. Check `knowledge/<area_slug>.md` for navigation patterns from prior sessions
+5. If a knowledge file path was provided in your dispatch context (single mode: confirmed in Phase 0; parallel mode: the prompt's knowledge file path line), check it for navigation patterns from prior sessions — never construct `knowledge/<area_slug>.md` or any other path yourself
 6. If still ambiguous → take a screenshot, choose the most reasonable interpretation, proceed — never skip
 
 **Pitfalls:**
@@ -248,7 +248,7 @@ All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In pa
 
 - **Timebox fires before checklist completes:** log remaining steps as `skipped: time budget exhausted (N minutes elapsed)`
 - **Checklist completes before timebox:** probe 1–2 unexpected UI states noticed during the checklist. Do not start new flows.
-- **Browser session lost:** log findings so far, mark remaining steps as `skipped: session lost`, continue with next flow.
+- **Browser session lost:** log findings so far, mark remaining steps as `skipped: session lost`, then stop — exit (parallel mode) or return to the orchestrator's loop (single mode) so the next flow can be picked up. Do not attempt to start another flow yourself.
 
 ### CCS-specific techniques (optional — CCS sessions only)
 
