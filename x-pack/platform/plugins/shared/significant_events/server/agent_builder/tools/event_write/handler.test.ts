@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { eventsWriteBulkHandler, eventsWriteHandler, type EventsWriteInput } from './handler';
+import {
+  eventsWriteBulkHandler,
+  eventsWriteHandler,
+  makeFingerprint,
+  mergeSignalsLatestPerRule,
+  mergeEpisodeContext,
+  type EventsWriteInput,
+} from './handler';
+import type { SignalEntry, BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
 
 const successfulBulkCreate = async (documents: object[]) => ({
   errors: false,
@@ -14,6 +22,10 @@ const successfulBulkCreate = async (documents: object[]) => ({
 
 const noopFindByEventId = jest.fn().mockResolvedValue({ hits: [] });
 const noopFindLatestActive = jest.fn().mockResolvedValue({ hits: [] });
+
+const TS_EARLIER = '2024-01-01T00:00:00.000Z';
+const TS_SUBMITTED = '2024-01-02T00:00:00.000Z';
+const TS_LATER = '2024-01-03T00:00:00.000Z';
 
 const baseInput: EventsWriteInput = {
   discovery_id: 'disc-1',
@@ -316,5 +328,284 @@ describe('eventsWriteBulkHandler', () => {
         input: { ...baseInput, event_id: 'event-1' },
       })
     ).rejects.toThrow('mapper_parsing_exception: bad');
+  });
+});
+
+describe('makeFingerprint', () => {
+  it('is stable regardless of stream and rule ordering', () => {
+    const a = makeFingerprint(['logs.b', 'logs.a'], ['rule-2', 'rule-1']);
+    const b = makeFingerprint(['logs.a', 'logs.b'], ['rule-1', 'rule-2']);
+    expect(a).toBe(b);
+  });
+
+  it('uses only the lexicographically first stream (primary)', () => {
+    const onePrimary = makeFingerprint(['logs.a'], ['rule-1']);
+    const withExtra = makeFingerprint(['logs.a', 'logs.z'], ['rule-1']);
+    expect(onePrimary).toBe(withExtra);
+  });
+
+  it('produces different fingerprints for different rule sets', () => {
+    const a = makeFingerprint(['logs.app'], ['rule-1']);
+    const b = makeFingerprint(['logs.app'], ['rule-2']);
+    expect(a).not.toBe(b);
+  });
+
+  it('falls back to "unknown" primary stream when stream_names is empty', () => {
+    expect(() => makeFingerprint([], ['rule-1'])).not.toThrow();
+    const fp = makeFingerprint([], ['rule-1']);
+    expect(fp).toContain('unknown');
+  });
+});
+
+describe('mergeSignalsLatestPerRule', () => {
+  const makeSignal = (ruleUuid: string): SignalEntry => ({
+    type: 'detection',
+    stream_name: 'logs.test',
+    description: 'Test signal',
+    confirmed: true,
+    metadata: {
+      detection_id: `det-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+
+  it('keeps the submitted signal when no prior docs exist', () => {
+    const signal = makeSignal('rule-1');
+    const result = mergeSignalsLatestPerRule([], [signal], TS_SUBMITTED);
+    expect(result).toEqual([signal]);
+  });
+
+  it('uses the most recent version of a signal per rule_uuid — submitted wins when newer', () => {
+    const priorSignal = makeSignal('rule-1');
+    const submittedSignal = makeSignal('rule-1');
+    const priorDocs = [{ '@timestamp': TS_EARLIER, signals: [priorSignal] }];
+    const result = mergeSignalsLatestPerRule(priorDocs, [submittedSignal], TS_SUBMITTED);
+    expect(result).toHaveLength(1);
+    // submitted wins — its detection_id matches the submitted signal
+    expect((result[0] as SignalEntry & { type: 'detection' }).metadata.detection_id).toBe(
+      submittedSignal.metadata.detection_id
+    );
+  });
+
+  it('carries forward prior rules that are absent in the submitted batch', () => {
+    const rule1 = makeSignal('rule-1');
+    const rule2 = makeSignal('rule-2');
+    const priorDocs = [{ '@timestamp': TS_EARLIER, signals: [rule1] }];
+    const result = mergeSignalsLatestPerRule(priorDocs, [rule2], TS_SUBMITTED);
+    expect(result).toHaveLength(2);
+    const ruleUuids = result.map(
+      (s) => (s as Extract<SignalEntry, { type: 'detection' }>).metadata.rule_uuid
+    );
+    expect(ruleUuids).toContain('rule-1');
+    expect(ruleUuids).toContain('rule-2');
+  });
+
+  it('prefers prior doc when its timestamp is newer than submitted', () => {
+    const priorSignal = makeSignal('rule-1');
+    const submittedSignal = makeSignal('rule-1');
+    const priorDocs = [{ '@timestamp': TS_LATER, signals: [priorSignal] }];
+    const result = mergeSignalsLatestPerRule(priorDocs, [submittedSignal], TS_EARLIER);
+    expect((result[0] as Extract<SignalEntry, { type: 'detection' }>).metadata.detection_id).toBe(
+      priorSignal.metadata.detection_id
+    );
+  });
+});
+
+describe('mergeEpisodeContext', () => {
+  const makeCausal = (featureId: string): CausalFeature => ({
+    feature_id: featureId,
+    name: featureId,
+  });
+  const makeBlast = (featureId: string): BlastRadiusEntry => ({
+    type: 'entity',
+    feature_id: featureId,
+    name: featureId,
+    stream_name: 'logs.test',
+  });
+
+  it('unions stream_names across all docs and sorts them', () => {
+    const priorDocs = [{ '@timestamp': TS_EARLIER, stream_names: ['logs.b'] }];
+    const { streamNames } = mergeEpisodeContext(
+      priorDocs,
+      { stream_names: ['logs.a'], causal_features: [], blast_radius: [] },
+      TS_SUBMITTED
+    );
+    expect(streamNames).toEqual(['logs.a', 'logs.b']);
+  });
+
+  it('causal classification beats blast for the same feature_id', () => {
+    const priorDocs = [
+      {
+        '@timestamp': TS_EARLIER,
+        stream_names: ['logs.app'],
+        blast_radius: [makeBlast('feat-1')],
+        causal_features: [] as CausalFeature[],
+      },
+    ];
+    const { causalFeatures, blastRadius } = mergeEpisodeContext(
+      priorDocs,
+      {
+        stream_names: ['logs.app'],
+        causal_features: [makeCausal('feat-1')],
+        blast_radius: [],
+      },
+      TS_SUBMITTED
+    );
+    expect(causalFeatures.map((f) => f.feature_id)).toContain('feat-1');
+    expect(blastRadius.map((f) => f.feature_id)).not.toContain('feat-1');
+  });
+
+  it('keeps the most recent version of a blast_radius entry per feature_id', () => {
+    const older = makeBlast('feat-1');
+    const newer = makeBlast('feat-1');
+    const priorDocs = [
+      {
+        '@timestamp': TS_EARLIER,
+        stream_names: ['logs.app'],
+        blast_radius: [older],
+        causal_features: [] as CausalFeature[],
+      },
+    ];
+    const { blastRadius } = mergeEpisodeContext(
+      priorDocs,
+      { stream_names: ['logs.app'], causal_features: [], blast_radius: [newer] },
+      TS_SUBMITTED
+    );
+    expect(blastRadius).toHaveLength(1);
+    expect(blastRadius[0].feature_id).toBe('feat-1');
+  });
+});
+
+describe('eventsWriteBulkHandler — dedup mode', () => {
+  const dedupInput: EventsWriteInput = {
+    ...baseInput,
+    status: 'pending' as const,
+    stream_names: ['logs.checkout'],
+    signals: [
+      {
+        type: 'detection',
+        metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency' },
+        confirmed: true,
+      } as never,
+    ],
+    dedup_window: 'now-24h',
+  };
+
+  it('skips write and returns existing event_id when an active duplicate is found in window', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
+      '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout'],
+      signals: dedupInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn(),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [dedupInput],
+    });
+
+    expect(results[0]).toMatchObject({
+      index: 0,
+      written: false,
+      skipped: true,
+      reason: 'duplicate_within_window',
+      event_id: 'existing-event-id',
+      existing_event_id: 'existing-event-id',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('does not skip when the matching event is older than the dedup window', async () => {
+    const oldEvent = {
+      event_id: 'old-event-id',
+      status: 'open',
+      '@timestamp': '2000-01-01T00:00:00.000Z',
+      stream_names: ['logs.checkout'],
+      signals: dedupInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [oldEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [dedupInput],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it('forces status = "pending" for dedup writes regardless of input status', async () => {
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [{ ...dedupInput, status: 'open' as const }],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true, status: 'pending' });
+    const written = eventClient.bulkCreate.mock.calls[0][0][0];
+    expect(written.status).toBe('pending');
+  });
+
+  it('returns duplicate_key error for a second in-batch item with the same fingerprint', async () => {
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [dedupInput, { ...dedupInput }],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_key' });
+    // Only one item should have been written.
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+  });
+
+  it('uses only one findLatestActive scan for multiple dedup candidates', async () => {
+    const dedupInput2: EventsWriteInput = {
+      ...dedupInput,
+      stream_names: ['logs.payments'],
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [dedupInput, dedupInput2],
+    });
+
+    expect(eventClient.findLatestActive).toHaveBeenCalledTimes(1);
   });
 });

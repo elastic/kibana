@@ -55,7 +55,7 @@ export const eventsWriteItemSchema = significantEventSchema
 
           Provide this to write a new event candidate without an explicit event_id.
           
-          If an active (status: pending or open) event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is created with status
+          If an active (status: pending or open) event with the same primary stream and detection rule UUIDs already exists within this window, the write is skipped and the existing event_id is returned (written: false). Otherwise a new event is created with status "pending".
         `
       ),
   })
