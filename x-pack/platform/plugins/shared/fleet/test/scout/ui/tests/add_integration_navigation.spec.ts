@@ -31,21 +31,13 @@ test.describe('Add integration navigation', { tag: tags.stateful.classic }, () =
     const { integrationHome } = pageObjects;
 
     await integrationHome.navigateToDetailPage(nginxPkgkey);
-    await integrationHome.waitForDetailPageToLoad();
 
     await integrationHome.getAddIntegrationPolicyButton().click();
 
-    // Wait for the form to render before reading the URL — acts as a navigation sync point
-    await page.testSubj.waitForSelector('createPackagePolicy_page', {
-      state: 'visible',
-      timeout: 20_000,
-    });
-
-    // URL must be within the Integrations app, not Fleet
-    await expect(page).toHaveURL(/\/app\/integrations\//);
+    // URL must be within the Integrations app at /detail/:pkgkey/add-integration
+    await expect(page).toHaveURL(
+      new RegExp(`/app/integrations/detail/${nginxPkgkey}/add-integration`)
+    );
     await expect(page).not.toHaveURL(/\/app\/fleet\//);
-
-    // URL path must be /detail/:pkgkey/add-integration
-    expect(page.url()).toContain(`/app/integrations/detail/${nginxPkgkey}/add-integration`);
   });
 });
