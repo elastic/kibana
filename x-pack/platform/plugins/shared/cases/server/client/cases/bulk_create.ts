@@ -6,8 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { partition } from 'lodash';
-
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
@@ -106,7 +104,10 @@ export const bulkCreate = async (
     const assigneesPerCase: NotifyAssigneesArgs[] = [];
     const res: Case[] = [];
 
-    const [errors, casesSOs] = partition(bulkCreateResponse.saved_objects, isSOError);
+    const errors = bulkCreateResponse.saved_objects.filter(isSOError<CaseTransformedAttributes>);
+    const casesSOs = bulkCreateResponse.saved_objects.filter(
+      (so): so is SavedObject<CaseTransformedAttributes> => !isSOError(so)
+    );
 
     if (errors.length > 0) {
       const firstError = errors[0].error;
