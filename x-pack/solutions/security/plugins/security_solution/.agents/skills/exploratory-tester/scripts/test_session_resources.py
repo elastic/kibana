@@ -6196,6 +6196,16 @@ print("404")
         self.assertNotIn("`<area_slug>`", prompt)
         self.assertIn("area_slug", prompt)
 
+        # SKILL.md is a protected file (changes require a separate PR) and
+        # still describes the pre-Task-5 monolithic Phase 2. Until that PR
+        # lands, the template must explicitly tell sub-agents to disregard
+        # SKILL.md's phase-execution instructions rather than infer them.
+        self.assertIn(
+            'Ignore its "Execute phases 0 → 1 → 2 → 3" instruction and its '
+            "Phases table",
+            prompt,
+        )
+
     def test_orchestrator_dispatch_placeholders_match_template(self):
         # Important #2 from review of commit 34c8eea: the orchestrator's
         # dispatch instruction listed a placeholder set that had drifted

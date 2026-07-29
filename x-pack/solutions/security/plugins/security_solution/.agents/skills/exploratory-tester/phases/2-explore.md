@@ -88,7 +88,7 @@ The orchestrator dispatches one sub-agent per flow concurrently.
 **Wave 2 (investigation flows):**
 
 6. Read all Wave 1 findings files. For each Level 1 finding where the mini-probe left scope unresolved, create an `investigation` flow in `config.json` (see `phases/2-investigation.md` for the entry format — you are the orchestrator, so you follow it here directly; sub-agents never do this themselves).
-7. If any investigation flows were created, dispatch them as a second concurrent wave using the same `templates/subagent-prompt.md` template. Assign indices continuing from Wave 1 (e.g. if Wave 1 had flows 1–5, Wave 2 starts at 6).
+7. If any investigation flows were created, dispatch them as a second concurrent wave using the same `templates/subagent-prompt.md` template, substituting placeholders exactly as in step 3. Assign indices continuing from Wave 1 (e.g. if Wave 1 had flows 1–5, Wave 2 starts at 6).
 8. Wait for all Wave 2 sub-agents to complete. Any Level 1 bugs found during Wave 2 → record as `deferred_flows` (format in `phases/2-investigation.md`), do not open a Wave 3.
 9. Proceed to Phase 3.
 
