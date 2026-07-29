@@ -10,9 +10,12 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiToolTip,
   type EuiComboBoxOptionOption,
   useEuiTheme,
 } from '@elastic/eui';
@@ -23,6 +26,7 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
+import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
@@ -48,19 +52,11 @@ export interface QuickSearchVisorProps {
 }
 
 export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
-  defaultMessage: 'Filter your data using KQL',
-});
-
-const searchPlaceholderWithAi = i18n.translate('esqlEditor.visor.searchPlaceholderWithAi', {
-  defaultMessage: 'Filter using KQL or ask AI...',
-});
-
-const searchPlaceholderShort = i18n.translate('esqlEditor.visor.searchPlaceholderShort', {
   defaultMessage: 'Filter using KQL',
 });
 
-const askAiLabel = i18n.translate('esqlEditor.visor.askAiLabel', {
-  defaultMessage: 'or ask using AI',
+const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
+  defaultMessage: 'Describe the query you want in plain language',
 });
 
 const generatingLabel = i18n.translate('esqlEditor.visor.generatingLabel', {
@@ -69,6 +65,14 @@ const generatingLabel = i18n.translate('esqlEditor.visor.generatingLabel', {
 
 const stopLabel = i18n.translate('esqlEditor.visor.stopLabel', {
   defaultMessage: 'Stop',
+});
+
+const askAiLabel = i18n.translate('esqlEditor.visor.askAiLabel', {
+  defaultMessage: 'Ask AI',
+});
+
+const backToKqlLabel = i18n.translate('esqlEditor.visor.backToKql', {
+  defaultMessage: 'Back to KQL',
 });
 
 export function QuickSearchVisor({
@@ -85,9 +89,10 @@ export function QuickSearchVisor({
   const { kql, core, data } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
-  const useShortPlaceholder = useMemo(() => isInline || isSpaceReduced, [isInline, isSpaceReduced]);
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
+  const [visorMode, setVisorMode] = useState<'kql' | 'nl'>('kql');
+  const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const isNlLoadingRef = useRef(isNlLoading);
   isNlLoadingRef.current = isNlLoading;
@@ -213,31 +218,26 @@ export function QuickSearchVisor({
     autoGenerateFromPrompt(initialPrompt);
   }, [initialPrompt, isNlToEsqlEnabled, hasConnector, autoGenerateFromPrompt]);
 
-  const onAskAiClick = useCallback(async () => {
-    if (isNlLoading) return;
+  const onStopGeneration = useCallback(() => {
+    abortControllerRef.current?.abort();
+    setIsNlLoading(false);
+    setNlValue('');
+  }, []);
 
-    const trimmed = searchValue.trim();
+  const onNlSubmit = useCallback(async () => {
+    const trimmed = nlValue.trim();
+    if (!trimmed || isNlLoading) return;
     const abortController = new AbortController();
     abortControllerRef.current = abortController;
     setIsNlLoading(true);
     const startTime = Date.now();
     try {
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
-        body: JSON.stringify({
-          nlInstruction: trimmed,
-          currentQuery: query,
-        }),
+        body: JSON.stringify({ nlInstruction: trimmed, currentQuery: query }),
         signal: abortController.signal,
       });
       if (result.content) {
-        trackNlResult(
-          trimmed.length,
-          query.length,
-          startTime,
-          true,
-          undefined,
-          result.content.length
-        );
+        trackNlResult(trimmed.length, query.length, startTime, true, undefined, result.content.length);
         if (onNlResult) {
           onNlResult(result.content);
         } else {
@@ -258,26 +258,20 @@ export function QuickSearchVisor({
         });
       core.notifications.toasts.addDanger({ title: message });
     } finally {
-      setSearchValue('');
+      setNlValue('');
       if (!abortController.signal.aborted) {
         setIsNlLoading(false);
       }
     }
-  }, [
-    isNlLoading,
-    searchValue,
-    query,
-    core.http,
-    core.notifications.toasts,
-    onNlResult,
-    onUpdateAndSubmitQuery,
-    trackNlResult,
-  ]);
+  }, [nlValue, isNlLoading, query, core.http, core.notifications.toasts, onNlResult, onUpdateAndSubmitQuery, trackNlResult]);
 
-  const onStopGeneration = useCallback(() => {
-    abortControllerRef.current?.abort();
-    setIsNlLoading(false);
-    setSearchValue('');
+  const onAskAiClick = useCallback(() => {
+    setVisorMode('nl');
+  }, []);
+
+  const onBackToKql = useCallback(() => {
+    setVisorMode('kql');
+    setNlValue('');
   }, []);
 
   useEffect(() => {
@@ -350,11 +344,7 @@ export function QuickSearchVisor({
     return null;
   }
 
-  const showFooterOption =
-    isNlToEsqlEnabled && hasConnector === true && searchValue.trim().length > 0;
-  const footerOption = showFooterOption
-    ? { label: askAiLabel, iconType: 'productAgent' as const, onClick: onAskAiClick }
-    : undefined;
+  const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
 
   return (
     <EuiFlexGroup
@@ -376,7 +366,7 @@ export function QuickSearchVisor({
           <EuiFlexItem grow={isInline ? true : false} css={styles.comboBoxWrapper}>
             <SourcesDropdown
               currentSources={selectedSources.map((source) => source.label)}
-              isDisabled={isNlLoading}
+              isDisabled={isNlLoading || visorMode === 'nl'}
               onChangeSources={(newSources) => {
                 setSelectedSources(newSources.map((source) => ({ label: source })));
                 userSelectedSourceRef.current = true;
@@ -385,69 +375,102 @@ export function QuickSearchVisor({
           </EuiFlexItem>
           {!isInline && <EuiFlexItem grow={false} css={styles.separator} />}
 
-          <EuiFlexItem css={styles.searchWrapper}>
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="center"
-              responsive={false}
-              css={styles.searchInner}
-            >
-              <EuiFlexItem>
-                <KQLComponent
-                  iconType=""
-                  disableLanguageSwitcher={true}
-                  indexPatterns={adHocDataView ? [adHocDataView] : []}
-                  bubbleSubmitEvent={false}
-                  query={{
-                    query: searchValue,
-                    language: 'kuery',
-                  }}
-                  disableAutoFocus={true}
-                  placeholder={
-                    isNlToEsqlEnabled
-                      ? searchPlaceholderWithAi
-                      : useShortPlaceholder
-                      ? searchPlaceholderShort
-                      : searchPlaceholder
-                  }
-                  onChange={(newQuery) => {
-                    onKqlValueChange(newQuery.query as string);
-                  }}
-                  onSubmit={(newQuery) => {
-                    onKqlSubmit(newQuery.query as string);
-                  }}
-                  appName="esqlEditorVisor"
-                  dataTestSubj="esqlVisorKQLQueryInput"
-                  size="s"
-                  footerOption={footerOption}
-                  isClearable={false}
-                />
-              </EuiFlexItem>
-              {isNlLoading && (
-                <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {generatingLabel}
-                      </EuiText>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge
-                        color="hollow"
-                        iconType="stop"
-                        iconSide="left"
-                        onClick={onStopGeneration}
-                        onClickAriaLabel={stopLabel}
-                        data-test-subj="esqlVisorStopGeneration"
-                      >
-                        {stopLabel}
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
+          {visorMode === 'kql' ? (
+            <EuiFlexItem css={styles.searchWrapper}>
+              <EuiFlexGroup
+                gutterSize="none"
+                alignItems="center"
+                responsive={false}
+                css={styles.searchInner}
+              >
+                <EuiFlexItem>
+                  <KQLComponent
+                    iconType=""
+                    disableLanguageSwitcher={true}
+                    indexPatterns={adHocDataView ? [adHocDataView] : []}
+                    bubbleSubmitEvent={false}
+                    query={{ query: searchValue, language: 'kuery' }}
+                    disableAutoFocus={true}
+                    placeholder={searchPlaceholder}
+                    onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
+                    onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
+                    appName="esqlEditorVisor"
+                    dataTestSubj="esqlVisorKQLQueryInput"
+                    size="s"
+                    isClearable={false}
+                  />
                 </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+                {showAskAiButton && (
+                  <EuiFlexItem grow={false} css={styles.askAiButtonWrapper}>
+                    <EuiButton
+                      iconType="sparkles"
+                      onClick={onAskAiClick}
+                      color="primary"
+                      size="s"
+                      data-test-subj="esqlVisorAskAiButton"
+                    >
+                      {askAiLabel}
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem css={styles.nlInputWrapper}>
+              <EuiFlexGroup
+                gutterSize="none"
+                alignItems="center"
+                responsive={false}
+                css={styles.searchInner}
+              >
+                <EuiFlexItem css={styles.nlFormControl}>
+                  <NLInput
+                    value={nlValue}
+                    placeholder={nlPlaceholder}
+                    disabled={isNlLoading}
+                    onChange={setNlValue}
+                    onSubmit={onNlSubmit}
+                    inputStyles={styles.nlInput}
+                  />
+                </EuiFlexItem>
+                {isNlLoading ? (
+                  <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {generatingLabel}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          color="hollow"
+                          iconType="stop"
+                          iconSide="left"
+                          onClick={onStopGeneration}
+                          onClickAriaLabel={stopLabel}
+                          data-test-subj="esqlVisorStopGeneration"
+                        >
+                          {stopLabel}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                ) : (
+                  <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
+                    <EuiToolTip content={backToKqlLabel}>
+                      <EuiButtonIcon
+                        iconType="returnKey"
+                        aria-label={backToKqlLabel}
+                        onClick={onBackToKql}
+                        color="text"
+                        data-test-subj="esqlVisorBackToKql"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

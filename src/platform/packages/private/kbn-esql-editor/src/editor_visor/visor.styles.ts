@@ -110,5 +110,40 @@ export const visorStyles = (
       padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
     `,
+    askAiButtonWrapper: css`
+      padding-left: ${euiTheme.size.xs};
+      flex-shrink: 0;
+    `,
+    nlInputWrapper: css`
+      justify-content: center;
+      padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.s};
+      min-width: 0;
+    `,
+    nlInput: css`
+      font-size: ${fontSize};
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+      background: transparent !important;
+      &:hover,
+      &:focus {
+        box-shadow: none !important;
+        outline: none !important;
+      }
+    `,
+    nlFormControl: css`
+      .euiFormControlLayout {
+        box-shadow: none !important;
+        background: transparent !important;
+        &:hover,
+        &:focus-within {
+          outline: none !important;
+          box-shadow: none !important;
+        }
+      }
+      .euiFormControlLayout__childrenWrapper {
+        background: transparent !important;
+      }
+    `,
   };
 };

@@ -476,12 +476,11 @@ export const openInNewTab: InternalStateThunkActionCreator<
       globalState?: TabState['globalState'];
       searchSessionId?: string;
       dataViewSpec?: DataViewSpec;
-      uiState?: Partial<TabState['uiState']>;
       profileState?: ProfileStateMap;
     }
   ],
   Promise<void>
-> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, uiState, profileState }) =>
+> = ({ tabLabel, appState, globalState, searchSessionId, dataViewSpec, profileState }) =>
   function openInNewTabThunkFn(dispatch, getState) {
     const initialAppState = appState ? cloneDeep(appState) : {};
     const initialGlobalState = globalState ? cloneDeep(globalState) : {};
@@ -512,10 +511,6 @@ export const openInNewTab: InternalStateThunkActionCreator<
         ...newDefaultTab.initialInternalState,
         serializedSearchSource: { index: dataViewSpec },
       };
-    }
-
-    if (uiState) {
-      newDefaultTab.uiState = { ...newDefaultTab.uiState, ...uiState };
     }
 
     return dispatch(

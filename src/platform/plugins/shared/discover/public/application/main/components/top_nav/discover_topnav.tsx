@@ -131,25 +131,16 @@ export const DiscoverTopNav = ({
   });
 
   const onOpenQueryInNewTab = useCallback(
-    async (tabName: string, nlPrompt: string) => {
+    async (tabName: string, esqlQuery: string) => {
       await dispatch(
         internalStateActions.openInNewTab({
           tabLabel: tabName,
-          appState: { query: { esql: getInitialESQLQuery(dataView) } },
-          uiState: { esqlEditor: { visorPrompt: nlPrompt } },
+          appState: { query: { esql: esqlQuery } },
         })
       );
     },
-    [dispatch, dataView]
+    [dispatch]
   );
-
-  const [hasAiConnector, setHasAiConnector] = useState(false);
-  useEffect(() => {
-    services.http
-      .get<{ connectors: unknown[] }>('/internal/inference/connectors')
-      .then((res) => setHasAiConnector(res.connectors.length > 0))
-      .catch(() => setHasAiConnector(false));
-  }, [services.http]);
 
   useEffect(() => {
     return () => {
@@ -349,26 +340,6 @@ export const DiscoverTopNav = ({
     [dispatch, setSearchDraftUiState]
   );
 
-  const draftKqlText = useMemo(() => {
-    const draftQuery = searchDraftUiState?.query;
-    if (draftQuery && 'query' in draftQuery) return (draftQuery as { query: string }).query;
-    return '';
-  }, [searchDraftUiState]);
-
-  const kqlFooterOption = useMemo(() => {
-    if (isEsqlMode || !hasAiConnector || !draftKqlText.trim()) return undefined;
-    return {
-      label: i18n.translate('discover.dslToEsql.askAiLabel', { defaultMessage: 'or ask using AI' }),
-      iconType: 'productAgent' as const,
-      onClick: () => {
-        onOpenQueryInNewTab(
-          i18n.translate('discover.dslToEsql.newTabLabel', { defaultMessage: 'AI Query' }),
-          draftKqlText.trim()
-        );
-      },
-    };
-  }, [isEsqlMode, hasAiConnector, draftKqlText, onOpenQueryInNewTab]);
-
   const esqlEditorUiState = useCurrentTabSelector((state) => state.uiState.esqlEditor);
   const setEsqlEditorUiState = useCurrentTabAction(internalStateActions.setESQLEditorUiState);
   const onEsqlEditorInitialStateChange = useCallback(
@@ -475,7 +446,6 @@ export const DiscoverTopNav = ({
         }
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
-        kqlFooterOption={kqlFooterOption}
         esqlApproximation={
           isEsqlMode
             ? {
