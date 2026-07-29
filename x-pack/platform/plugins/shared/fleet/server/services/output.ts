@@ -49,6 +49,7 @@ import type {
   NewBeatsOutput,
   NewOtlpOutput,
   NewRemoteElasticsearchOutput,
+  OtlpExporterConfig,
   UpdateOutput,
   UpdateTypedOutput,
 } from '../../common/types';
@@ -73,6 +74,8 @@ import {
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
+  otlpProtocol,
+  OTLP_GRPC_ONLY_COMPRESSION_TYPES,
 } from '../../common/constants';
 import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents, validateFleetSavedObjectId } from '../../common/services';
@@ -257,6 +260,21 @@ async function getAgentPoliciesPerOutput(
   }
 
   return Object.values(agentPoliciesIndexedById);
+}
+
+function validateOtlpExporterProtocol(exporter: OtlpExporterConfig) {
+  if (exporter.protocol === otlpProtocol.Grpc && exporter.http !== undefined) {
+    throw new OutputInvalidError('`http` fields are only valid when protocol is `http/protobuf`');
+  }
+  if (
+    exporter.protocol === otlpProtocol.HttpProtobuf &&
+    exporter.compression !== undefined &&
+    OTLP_GRPC_ONLY_COMPRESSION_TYPES.includes(exporter.compression)
+  ) {
+    throw new OutputInvalidError(
+      '`snappy` and `zstd` compression are only valid when protocol is `grpc`'
+    );
+  }
 }
 
 async function validateLogstashOutputNotUsedInAPMPolicy(outputId?: string, isDefault?: boolean) {
@@ -656,6 +674,10 @@ class OutputService {
 
     if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().enableOtlpOutput) {
       throw new OutputInvalidError('OTLP output type is not enabled');
+    }
+
+    if (isOtlpOutput(output)) {
+      validateOtlpExporterProtocol(output.otlp_exporter);
     }
 
     await validateOutputServerless(this, output);
@@ -1159,6 +1181,13 @@ class OutputService {
             ', '
           )}`
         );
+      }
+    }
+
+    if (isOtlpOutput(updateData)) {
+      const otlpUpdateData = updateData as OutputSoOtlpAttributes;
+      if (otlpUpdateData.otlp_exporter) {
+        validateOtlpExporterProtocol(otlpUpdateData.otlp_exporter);
       }
     }
 

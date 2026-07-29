@@ -62,9 +62,13 @@ const agentPolicyUsesConnectors = (agentPolicy: AgentPolicyForOutputEligibility)
 export const canUseManagedBulk = (agentPolicy: AgentPolicyForOutputEligibility): boolean =>
   !agentPolicyUsesConnectors(agentPolicy) && !agentPolicyHasOtelInputs(agentPolicy);
 
+<<<<<<< HEAD
 export const agentPolicyHasOnlyOtelInputs = (
   agentPolicy: AgentPolicyForOutputEligibility
 ): boolean => {
+=======
+export const agentPolicyHasOnlyOtelInputs = (agentPolicy: Partial<AgentPolicy>): boolean => {
+>>>>>>> 0a6a9fa920de (Add otlp output schema and validation)
   const packagePolicies = agentPolicy.package_policies ?? [];
   return (
     packagePolicies.length > 0 &&
@@ -98,12 +102,15 @@ export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPo
     return AGENTLESS_ALLOWED_OUTPUT_TYPES;
   }
 
+<<<<<<< HEAD
   // A policy with no package policies has no inputs to constrain the output; every type is valid.
   // Eligibility is re-checked against the resolved output on package policy create.
   if ((agentPolicy.package_policies ?? []).length === 0) {
     return Object.values(outputType);
   }
 
+=======
+>>>>>>> 0a6a9fa920de (Add otlp output schema and validation)
   if (agentPolicyHasOnlyOtelInputs(agentPolicy)) {
     return OUTPUT_TYPES_FOR_OTEL_ONLY_POLICIES;
   }

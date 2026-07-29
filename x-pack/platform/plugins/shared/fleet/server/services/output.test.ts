@@ -3175,6 +3175,7 @@ describe('Output Service', () => {
       });
     });
 
+<<<<<<< HEAD
     describe('otlp output', () => {
       beforeEach(() => {
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
@@ -3182,6 +3183,43 @@ describe('Output Service', () => {
         } as any);
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+=======
+    it('Should throw if OTLP output type is not enabled on update', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: false,
+      } as any);
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          name: 'Updated OTLP',
+        })
+      ).rejects.toThrow('OTLP output type is not enabled');
+
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
+    });
+
+    it('Should clear beats fields when changing an ES output to OTLP', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAppContextService.getExperimentalFeatures.mockReturnValue({
+        managedOtlpOutput: true,
+      } as any);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.getByIds.mockResolvedValue([]);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasSyntheticsIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-es-output', {
+        type: 'otlp',
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4317',
+          protocol: 'grpc',
+        },
+>>>>>>> 0a6a9fa920de (Add otlp output schema and validation)
       });
 
       afterEach(() => {
