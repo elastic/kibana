@@ -114,7 +114,9 @@ const CRITICALITY_HEALTH_COLOR: Record<CriticalityLevel, CriticalityHealthColor>
 
 // ── Styled shells ─────────────────────────────────────────────────────────────
 
-const CardWrapper = styled.div<{ $fitContent?: boolean }>`
+const CardWrapper = styled.div<{
+  $fitContent?: boolean;
+}>`
   position: relative;
   width: ${({ $fitContent }) => ($fitContent ? 'max-content' : `${CARD_NODE_WIDTH}px`)};
 `;
@@ -134,9 +136,8 @@ const CardShell = styled.div<{
   defaultBorderColor: string;
   activeBorderColor: string;
   bgColor: string;
-  selectedBgColor: string;
-  hoverShadow?: string;
-  dragShadow?: string;
+  $defaultShadow?: string;
+  $hoverShadow?: string;
 }>`
   position: relative;
   width: 100%;
@@ -144,44 +145,29 @@ const CardShell = styled.div<{
   border-radius: ${CARD_BORDER_RADIUS}px;
   background: ${({ bgColor }) => bgColor};
   overflow: hidden;
-  box-shadow: none;
-  transition: box-shadow ${CARD_INTERACTIVE_TRANSITION}, border-color ${CARD_INTERACTIVE_TRANSITION},
-    background-color ${CARD_INTERACTIVE_TRANSITION}, border-width ${CARD_INTERACTIVE_TRANSITION};
+  ${({ $defaultShadow }) => $defaultShadow ?? ''}
+  transition: border-color ${CARD_INTERACTIVE_TRANSITION},
+    border-width ${CARD_INTERACTIVE_TRANSITION}, box-shadow ${CARD_INTERACTIVE_TRANSITION};
 
-  /* Hover: lift + shadow; keep default border/fill */
-  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
-    ${({ hoverShadow }) => hoverShadow ?? ''}
+  .react-flow__node:not(.non-interactive):hover:not(.dragging) & {
+    ${({ $hoverShadow }) => $hoverShadow ?? ''}
   }
 
-  /* Selected: thick primary border + tinted fill; no shadow */
-  .react-flow__node:not(.non-interactive).selected:not(.dragging) & {
-    border-color: ${({ activeBorderColor }) => activeBorderColor};
-    border-width: 2px;
-    background: ${({ selectedBgColor }) => selectedBgColor};
-  }
-
-  /* Grabbed: selected chrome + lift shadow */
+  /* Selected: primary border only; no fill tint */
+  .react-flow__node:not(.non-interactive).selected:not(.dragging) &,
   .react-flow__node:not(.non-interactive).dragging & {
     border-color: ${({ activeBorderColor }) => activeBorderColor};
     border-width: 2px;
-    background: ${({ selectedBgColor }) => selectedBgColor};
-    ${({ dragShadow }) => dragShadow ?? ''}
   }
 `;
 
-const CardHeader = styled.div<{ bgColor: string; selectedBgColor: string }>`
+const CardHeader = styled.div<{ bgColor: string }>`
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px;
   background: ${({ bgColor }) => bgColor};
   position: relative;
-  transition: background-color ${CARD_INTERACTIVE_TRANSITION};
-
-  .react-flow__node:not(.non-interactive).selected &,
-  .react-flow__node:not(.non-interactive).dragging & {
-    background: ${({ selectedBgColor }) => selectedBgColor};
-  }
 `;
 
 const IconBox = styled.div<{
@@ -236,7 +222,7 @@ const EntityGroupCountBadge = ({
     font-size: ${GROUP_COUNT_BADGE_FONT_SIZE}px;
     line-height: ${GROUP_COUNT_BADGE_FONT_SIZE}px;
     font-weight: ${euiTheme.font.weight.medium};
-    background-color: ${euiTheme.colors.backgroundFilledPrimary};
+    background-color: ${euiTheme.colors.backgroundFilledText};
     color: ${euiTheme.colors.textInverse};
     height: ${badgeSize}px;
     min-width: ${badgeSize}px;
@@ -331,9 +317,8 @@ const SimplifiedIconBox = styled.div<{
   defaultBorderColor: string;
   activeBorderColor: string;
   bgColor: string;
-  selectedBgColor: string;
+  defaultShadow?: string;
   hoverShadow?: string;
-  dragShadow?: string;
 }>`
   width: 100%;
   height: 100%;
@@ -343,25 +328,18 @@ const SimplifiedIconBox = styled.div<{
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: none;
+  ${({ defaultShadow }) => defaultShadow ?? ''}
   transition: background-color 0.15s ease, box-shadow ${CARD_INTERACTIVE_TRANSITION},
     border-color ${CARD_INTERACTIVE_TRANSITION}, border-width ${CARD_INTERACTIVE_TRANSITION};
 
-  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
+  .react-flow__node:not(.non-interactive):hover:not(.dragging) & {
     ${({ hoverShadow }) => hoverShadow ?? ''}
   }
 
-  .react-flow__node:not(.non-interactive).selected:not(.dragging) & {
-    border-color: ${({ activeBorderColor }) => activeBorderColor};
-    border-width: 2px;
-    background: ${({ selectedBgColor }) => selectedBgColor};
-  }
-
+  .react-flow__node:not(.non-interactive).selected:not(.dragging) &,
   .react-flow__node:not(.non-interactive).dragging & {
     border-color: ${({ activeBorderColor }) => activeBorderColor};
     border-width: 2px;
-    background: ${({ selectedBgColor }) => selectedBgColor};
-    ${({ dragShadow }) => dragShadow ?? ''}
   }
 `;
 
@@ -544,11 +522,10 @@ interface SimplifiedCardProps {
   defaultBorderColor: string;
   activeBorderColor: string;
   iconBg: string;
-  selectedBgColor: string;
   originOutlineColor: string;
   highlightAsOrigin?: boolean;
+  defaultShadow?: string;
   hoverShadow?: string;
-  dragShadow?: string;
   interactive?: boolean;
   showExpandButton?: boolean;
   expandButtonClick?: EntityNodeViewModel['expandButtonClick'];
@@ -596,11 +573,10 @@ const SimplifiedCard = ({
   defaultBorderColor,
   activeBorderColor,
   iconBg,
-  selectedBgColor,
   originOutlineColor,
   highlightAsOrigin = false,
+  defaultShadow,
   hoverShadow,
-  dragShadow,
   interactive,
   showExpandButton = true,
   expandButtonClick,
@@ -621,9 +597,8 @@ const SimplifiedCard = ({
           defaultBorderColor={defaultBorderColor}
           activeBorderColor={activeBorderColor}
           bgColor={iconBg}
-          selectedBgColor={selectedBgColor}
+          defaultShadow={defaultShadow}
           hoverShadow={hoverShadow}
-          dragShadow={dragShadow}
           data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
         >
           {isGroup && count !== undefined && (
@@ -711,8 +686,8 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   } = props.data as EntityNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
-  const hoverShadow = useEuiShadow('xs');
-  const dragShadow = useEuiShadow('xs');
+  const defaultShadow = useEuiShadow('xs');
+  const hoverShadow = useEuiShadow('s');
   const zoom = useViewportZoom();
   const isMultipleNodesSelected = useMultipleNodesSelected();
   const showExpandButton = interactive && !isMultipleNodesSelected;
@@ -746,7 +721,6 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const activeBorderColor = euiTheme.colors.borderBasePrimary;
   const headerBg = euiTheme.colors.backgroundLightPrimary;
   const cardBg = euiTheme.colors.backgroundBasePlain;
-  const selectedBgColor = euiTheme.colors.backgroundBasePrimary;
   const iconBorderColor = euiTheme.colors.borderBaseProminent;
   const iconBg = euiTheme.colors.backgroundBasePlain;
   const iconEmphasizedBg = euiTheme.colors.backgroundBaseSubdued;
@@ -775,11 +749,10 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
         defaultBorderColor={defaultBorderColor}
         activeBorderColor={activeBorderColor}
         iconBg={iconBg}
-        selectedBgColor={selectedBgColor}
         originOutlineColor={originOutlineColor}
         highlightAsOrigin={highlightAsOrigin}
+        defaultShadow={defaultShadow}
         hoverShadow={hoverShadow}
-        dragShadow={dragShadow}
         interactive={interactive}
         showExpandButton={showExpandButton}
         expandButtonClick={expandButtonClick}
@@ -809,16 +782,11 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
           defaultBorderColor={defaultBorderColor}
           activeBorderColor={activeBorderColor}
           bgColor={cardBg}
-          selectedBgColor={selectedBgColor}
-          hoverShadow={hoverShadow}
-          dragShadow={dragShadow}
+          $defaultShadow={defaultShadow}
+          $hoverShadow={hoverShadow}
         >
           {/* Header */}
-          <CardHeader
-            bgColor={headerBg}
-            selectedBgColor={selectedBgColor}
-            data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
-          >
+          <CardHeader bgColor={headerBg} data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}>
             <IconBox
               borderColor={iconBorderColor}
               bgColor={iconBg}

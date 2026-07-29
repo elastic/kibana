@@ -56,15 +56,15 @@ describe('Minimap', () => {
     );
 
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
-    const rfMinimap = minimap.querySelector('.react-flow__minimap');
-    expect(rfMinimap).toHaveStyle({
+    expect(minimap).toHaveClass('bottom right');
+    const flowMinimap = minimap.querySelector('.react-flow__minimap');
+    expect(flowMinimap).toHaveStyle({
       '--xy-minimap-background-color-props': '#F6F9FC',
     });
     // Mask is a semi-transparent mix so the overview stays visible when zoomed in
-    expect(rfMinimap?.getAttribute('style') ?? '').toContain(
+    expect(flowMinimap?.getAttribute('style') ?? '').toContain(
       '--xy-minimap-mask-background-color-props'
     );
-    expect(minimap).toHaveClass('bottom right');
   });
 
   it('should collapse and expand when the toggle is clicked', () => {

@@ -14,7 +14,11 @@ import { NODE_LABEL_WIDTH, getRelationshipColors } from '../styles';
 import { PillExpandButton, TEST_SUBJ_PILL_EXPAND_BTN } from '../pill_expand_button';
 import { useMultipleNodesSelected } from '../../../hooks/use_multiple_nodes_selected';
 import type { RelationshipNodeViewModel, NodeProps } from '../../types';
-import { EVENT_PILL_HEIGHT, LABEL_PILL_TEXT_MAX_WIDTH, pillHandleStyle } from '../label_node/event_pill_styles';
+import {
+  EVENT_PILL_HEIGHT,
+  LABEL_PILL_TEXT_MAX_WIDTH,
+  pillHandleStyle,
+} from '../label_node/event_pill_styles';
 import {
   GRAPH_RELATIONSHIP_NODE_ID,
   GRAPH_RELATIONSHIP_NODE_SHAPE_ID,
@@ -45,11 +49,10 @@ const PillShell = styled.div`
 
 const RelationshipPill = styled.div<{
   backgroundColor: string;
-  selectedBackgroundColor: string;
   borderColor: string;
   activeBorderColor: string;
+  defaultShadow?: string;
   hoverShadow?: string;
-  dragShadow?: string;
 }>`
   display: inline-flex;
   align-items: center;
@@ -61,25 +64,17 @@ const RelationshipPill = styled.div<{
   border: 1px solid ${({ borderColor }) => borderColor};
   background: ${({ backgroundColor }) => backgroundColor};
   max-width: 100%;
-  box-shadow: none;
-  transition: background-color 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease,
-    border-width 0.2s ease;
+  ${({ defaultShadow }) => defaultShadow ?? ''}
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, border-width 0.2s ease;
 
-  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
+  .react-flow__node:not(.non-interactive):hover:not(.dragging) & {
     ${({ hoverShadow }) => hoverShadow ?? ''}
   }
 
-  .react-flow__node:not(.non-interactive).selected:not(.dragging) & {
-    background: ${({ selectedBackgroundColor }) => selectedBackgroundColor};
-    border-color: ${({ activeBorderColor }) => activeBorderColor};
-    border-width: 2px;
-  }
-
+  .react-flow__node:not(.non-interactive).selected:not(.dragging) &,
   .react-flow__node:not(.non-interactive).dragging & {
-    background: ${({ selectedBackgroundColor }) => selectedBackgroundColor};
     border-color: ${({ activeBorderColor }) => activeBorderColor};
     border-width: 2px;
-    ${({ dragShadow }) => dragShadow ?? ''}
   }
 `;
 
@@ -91,8 +86,8 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
   const showExpandButton = interactive && !isMultipleNodesSelected;
 
   const { euiTheme } = useEuiTheme();
-  const hoverShadow = useEuiShadow('xs');
-  const dragShadow = useEuiShadow('xs');
+  const defaultShadow = useEuiShadow('xs');
+  const hoverShadow = useEuiShadow('s');
 
   const text = label ?? id;
 
@@ -100,8 +95,7 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
     () => getRelationshipColors(euiTheme),
     [euiTheme]
   );
-  const selectedBackgroundColor = euiTheme.colors.backgroundBasePrimary;
-  const activeBorderColor = euiTheme.colors.borderBasePrimary;
+  const activeBorderColor = euiTheme.colors.primary;
 
   const labelTextCss = css`
     flex: 1;
@@ -148,11 +142,10 @@ export const RelationshipNode = memo<NodeProps>((props: NodeProps) => {
         <RelationshipPill
           data-test-subj={GRAPH_RELATIONSHIP_NODE_SHAPE_ID}
           backgroundColor={backgroundColor}
-          selectedBackgroundColor={selectedBackgroundColor}
           borderColor={borderColor}
           activeBorderColor={activeBorderColor}
+          defaultShadow={defaultShadow}
           hoverShadow={hoverShadow}
-          dragShadow={dragShadow}
         >
           {renderLabelText()}
         </RelationshipPill>
