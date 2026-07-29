@@ -104,24 +104,16 @@ const runScenario = async (
   });
 };
 
-const expectScenarioData = ({
-  counterBars,
-  countBars,
-  expectedDocumentCountBeforeUpgrade,
-}: ScenarioResult): void => {
-  expect(counterBars?.[0]?.y).toBe(5000);
-  expect(counterBars?.[counterBars.length - 1]?.y).toBe(5000);
-
-  // Bucket boundaries can vary with chart interval selection. The lower bound accounts for every
-  // logical scenario index. Lens does not count a downsample target as an additional contribution
-  // beside its source stream, so a missing regular index or stream still lowers this total by 100.
+const getScenarioData = ({ counterBars, countBars }: ScenarioResult) => {
+  // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
+  // target as an additional contribution beside its source stream.
   const columnsToCheck = countBars ? countBars.length / 2 : 0;
-  expect(sumFirstNValues(columnsToCheck, countBars)).toBeGreaterThan(
-    expectedDocumentCountBeforeUpgrade - 1
-  );
-  expect(sumFirstNValues(columnsToCheck, [...(countBars ?? [])].reverse())).toBeGreaterThan(
-    TSDB_SCENARIO_DOCUMENT_COUNT - 1
-  );
+  return {
+    firstCounter: counterBars?.[0]?.y,
+    lastCounter: counterBars?.[counterBars.length - 1]?.y,
+    beforeUpgradeCount: sumFirstNValues(columnsToCheck, countBars),
+    afterUpgradeCount: sumFirstNValues(columnsToCheck, [...(countBars ?? [])].reverse()),
+  };
 };
 
 test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
@@ -147,7 +139,11 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     tsdbScenario,
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
-    expectScenarioData(result);
+    const data = getScenarioData(result);
+    expect(data.firstCounter).toBe(5000);
+    expect(data.lastCounter).toBe(5000);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
   test('supports an upgraded TSDB data stream with a regular index', async ({
@@ -159,7 +155,11 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
     ]);
-    expectScenarioData(result);
+    const data = getScenarioData(result);
+    expect(data.firstCounter).toBe(5000);
+    expect(data.lastCounter).toBe(5000);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
   test('supports an upgraded TSDB data stream with a downsampled TSDB stream', async ({
@@ -171,7 +171,11 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    expectScenarioData(result);
+    const data = getScenarioData(result);
+    expect(data.firstCounter).toBe(5000);
+    expect(data.lastCounter).toBe(5000);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
   test('supports an upgraded TSDB data stream with regular and downsampled resources', async ({
@@ -184,7 +188,11 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    expectScenarioData(result);
+    const data = getScenarioData(result);
+    expect(data.firstCounter).toBe(5000);
+    expect(data.lastCounter).toBe(5000);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 
   test('supports an upgraded TSDB data stream with another TSDB stream', async ({
@@ -196,6 +204,10 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
     ]);
-    expectScenarioData(result);
+    const data = getScenarioData(result);
+    expect(data.firstCounter).toBe(5000);
+    expect(data.lastCounter).toBe(5000);
+    expect(data.beforeUpgradeCount).toBeGreaterThan(result.expectedDocumentCountBeforeUpgrade - 1);
+    expect(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
   });
 });
