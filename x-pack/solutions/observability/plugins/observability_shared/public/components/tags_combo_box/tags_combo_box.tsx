@@ -79,8 +79,13 @@ export function TagsComboBox({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiCopy textToCopy={selectedTags.join('\n')}>
+        <EuiCopy
+          textToCopy={selectedTags.join('\n')}
+          beforeMessage={COPY_TAGS_LABEL}
+          tooltipProps={{ disableScreenReaderOutput: true }}
+        >
           {(copy) => (
+            /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
             <EuiButtonIcon
               iconType="copyClipboard"
               display="base"
