@@ -10,7 +10,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { PluginSetupContract as AlertingPluginPublicSetup } from '@kbn/alerting-plugin/public';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceSchemaType } from '../../../../common/service_schema_type';
 import type { ServiceFlyoutService } from './types';
@@ -46,6 +46,8 @@ export interface ServiceFlyoutContextValue {
   service: ServiceFlyoutService;
   // Resolved once on open — drives conditional rendering throughout the flyout
   capabilities: ServiceFlyoutCapabilities;
+  // APM index patterns — fetched once at the top level and shared to avoid duplicate requests
+  indices: APMIndices | undefined;
   // Mutable query scope — changes stay local to the flyout and do not propagate to the host
   filters: {
     environment: Environment;

@@ -13,7 +13,6 @@ import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { getManageSlosUrl } from '../../../../hooks/use_manage_slos_url';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAlertsHref } from '../footer/hooks/use_alerts_href';
-import { useApmIndices } from './use_apm_indices';
 import { useFlyoutDiscoverNavigation } from './use_flyout_discover_navigation';
 
 export function useServiceFlyoutLinks() {
@@ -21,11 +20,11 @@ export function useServiceFlyoutLinks() {
     deps: { core, share },
     contextActions,
     service,
+    indices,
     filters: { environment, rangeFrom, rangeTo, transactionType = '' },
   } = useServiceFlyoutContext();
   const serviceName = service.name;
   const canReadSlos = !!core.application?.capabilities?.slo?.read;
-  const { indices } = useApmIndices({ http: core.http });
   const { openInNewDiscoverTab } = contextActions ?? {};
 
   const apm = useMemo(() => {
@@ -33,11 +32,6 @@ export function useServiceFlyoutLinks() {
     return {
       overviewTab: locator?.getRedirectUrl({
         serviceName,
-        query: { environment, rangeFrom, rangeTo },
-      }),
-      alertsTab: locator?.getRedirectUrl({
-        serviceName,
-        serviceOverviewTab: 'alerts',
         query: { environment, rangeFrom, rangeTo },
       }),
     };
@@ -74,14 +68,12 @@ export function useServiceFlyoutLinks() {
     queryParams: { serviceName, environment, sortDirection: 'DESC' },
   });
 
-  const timeRange = { from: rangeFrom, to: rangeTo };
-
   const tracesOpenInDiscoverTab =
     openInNewDiscoverTab && tracesEsqlQuery
       ? () =>
           openInNewDiscoverTab({
             esqlQuery: tracesEsqlQuery,
-            timeRange,
+            timeRange: { from: rangeFrom, to: rangeTo },
             tabLabel: i18n.translate('xpack.apm.serviceFlyout.tracesDiscoverTabLabel', {
               defaultMessage: 'Traces - {serviceName}',
               values: { serviceName },
@@ -94,7 +86,7 @@ export function useServiceFlyoutLinks() {
       ? () =>
           openInNewDiscoverTab({
             esqlQuery: logsEsqlQuery,
-            timeRange,
+            timeRange: { from: rangeFrom, to: rangeTo },
             tabLabel: i18n.translate('xpack.apm.serviceFlyout.logsDiscoverTabLabel', {
               defaultMessage: 'Logs - {serviceName}',
               values: { serviceName },

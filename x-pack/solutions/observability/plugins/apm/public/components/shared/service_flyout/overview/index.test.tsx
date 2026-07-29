@@ -28,10 +28,6 @@ jest.mock('../hooks/use_service_has_system_metrics', () => ({
   useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
 }));
 
-jest.mock('../hooks/use_apm_indices', () => ({
-  useApmIndices: () => ({ indices: undefined }),
-}));
-
 jest.mock('@kbn/apm-ui-shared', () => ({
   ServiceFlyoutTransactionsSection: (
     props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>
@@ -66,6 +62,7 @@ function buildContextValue({ refreshToken = 0 }: { refreshToken?: number } = {})
       dataViews: undefined as any,
     },
     service,
+    indices: undefined,
     capabilities: {
       loading: false,
       error: undefined,

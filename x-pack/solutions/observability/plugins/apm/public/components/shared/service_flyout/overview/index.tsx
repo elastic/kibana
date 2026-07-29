@@ -26,7 +26,6 @@ import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
 import { useServiceHasSystemMetrics } from '../hooks/use_service_has_system_metrics';
-import { useApmIndices } from '../hooks/use_apm_indices';
 import { getChartDefinitions } from './chart_configs';
 import { ServiceFlyoutLensChart } from './lens_chart';
 import { ServiceFlyoutQueryControls } from './query_controls';
@@ -124,11 +123,11 @@ export function ServiceFlyoutOverview() {
     deps: { core, share },
     service,
     capabilities,
+    indices,
     filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
   } = useServiceFlyoutContext();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { indices } = useApmIndices({ http: core.http });
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
     http: core.http,
     serviceName: service.name,

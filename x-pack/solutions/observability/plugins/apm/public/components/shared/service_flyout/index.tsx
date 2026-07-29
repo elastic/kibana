@@ -20,6 +20,7 @@ import {
   type ServiceFlyoutContextValue,
 } from './service_flyout_context';
 import { useServiceFlyoutCapabilities } from './hooks/use_service_flyout_capabilities';
+import { useApmIndices } from './hooks/use_apm_indices';
 export type { ServiceFlyoutService } from './types';
 
 export const SERVICE_FLYOUT_TAB_IDS = {
@@ -92,6 +93,8 @@ export function ServiceFlyout({
     end,
   });
 
+  const { indices } = useApmIndices({ http: core.http });
+
   const [selectedTabId, setSelectedTabId] = useState<ServiceFlyoutTabId>(
     SERVICE_FLYOUT_DEFAULT_TAB_ID
   );
@@ -117,6 +120,7 @@ export function ServiceFlyout({
         contextActions,
         service,
         capabilities,
+        indices,
         filters: {
           environment: flyoutEnvironment,
           setEnvironment: setFlyoutEnvironment,

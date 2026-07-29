@@ -13,17 +13,6 @@ jest.mock('../../../../hooks/use_manage_slos_url', () => ({
   getManageSlosUrl: jest.fn(() => '/app/slos?serviceName=opbeans-java'),
 }));
 
-jest.mock('./use_apm_indices', () => ({
-  useApmIndices: () => ({
-    indices: {
-      transaction: 'traces-apm-*',
-      span: 'traces-apm-*',
-      error: 'logs-apm.error-*',
-      metric: 'metrics-apm-*',
-    },
-  }),
-}));
-
 jest.mock('../footer/hooks/use_alerts_href', () => ({
   useAlertsHref: jest.fn(() => '/app/observability/alerts?mock'),
 }));
@@ -62,6 +51,12 @@ function makeContext(overrides: { sloRead?: boolean; transactionType?: string } 
       footer: { alerts: true, slos: true },
     },
     service: { name: 'opbeans-java' },
+    indices: {
+      transaction: 'traces-apm-*',
+      span: 'traces-apm-*',
+      error: 'logs-apm.error-*',
+      metric: 'metrics-apm-*',
+    },
     filters: {
       environment: 'production',
       rangeFrom: 'now-15m',
@@ -92,20 +87,6 @@ describe('useServiceFlyoutLinks', () => {
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       serviceName: 'opbeans-java',
       query: { environment: 'production', rangeFrom: 'now-15m', rangeTo: 'now' },
-    });
-  });
-
-  it('builds apm.alertsTab using the APM locator, dropping the kuery', () => {
-    renderHook(() => useServiceFlyoutLinks());
-
-    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-      serviceName: 'opbeans-java',
-      serviceOverviewTab: 'alerts',
-      query: {
-        environment: 'production',
-        rangeFrom: 'now-15m',
-        rangeTo: 'now',
-      },
     });
   });
 
@@ -156,7 +137,6 @@ describe('useServiceFlyoutLinks', () => {
     const { result } = renderHook(() => useServiceFlyoutLinks());
 
     expect(result.current.apm.overviewTab).toEqual('/app/apm/services/opbeans-java/overview');
-    expect(result.current.apm.alertsTab).toEqual('/app/apm/services/opbeans-java/alerts');
     expect(result.current.slos).toEqual('/app/slos?serviceName=opbeans-java');
     expect(result.current.alerts).toEqual('/app/observability/alerts?mock');
     expect(result.current.discover.traces.href).toEqual('/app/discover/traces');
