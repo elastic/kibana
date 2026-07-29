@@ -149,8 +149,8 @@ If newly typed (not loaded from a profile), offer once to save it as a reusable 
 **Step 0b input-source priority (check in order):**
 
 1. `Session-config: <path>` present → read that file (YAML), use it as the complete input source.
-   Parse `Area`, `Flows`, `Setup`, `Environment`, `Specs`, `Session-timeout`, `Session-dir`, and
-   `mode` from the file. The file format mirrors `templates/session.example.yaml`.
+   Parse `Area`, `Flows`, `Setup`, `Environment`, `Specs`, `Session-timeout`, `Session-dir`,
+   `mode`, and `collector_mode` from the file. The file format mirrors `templates/session.example.yaml`.
    Then skip to the "Assigning `source` to each flow" section.
 
 2. `Area` or `Flows` absent AND invocation references a GitHub issue/PR number → use GitHub mode
@@ -160,7 +160,7 @@ If newly typed (not loaded from a profile), offer once to save it as a reusable 
 
 4. `Area` absent (and not covered by 1 or 2) → **Stop. Read `phases/0-guided-intake.md` in full. Do not conduct intake from memory.**
 
-**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, `Specs`, `Session-timeout`, `Session-dir`, and `mode` directly from the invocation text.
+**Inline mode:** extract `Area`, `Flows`, `Setup`, `Environment`, `Specs`, `Session-timeout`, `Session-dir`, `mode`, and `collector_mode` (also accepted as `Collector-mode`) directly from the invocation text.
 
 For each flow, parse optional sub-fields: `entry:`, `expected:`, `timeout:` (minutes, default 4).
 
@@ -313,7 +313,7 @@ SESSION_STARTED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 SESSION_ID=$(python3 -c 'import secrets; print(secrets.token_hex(8))')
 TEST_USERNAME="exploratory-tester-$SESSION_ID"
 SESSION_DIR=".exploratory-session/${AREA_SLUG}-${SESSION_TIMESTAMP}"
-mkdir -p "$SESSION_DIR/screenshots" "$SESSION_DIR/videos"
+mkdir -p "$SESSION_DIR/screenshots" "$SESSION_DIR/videos" "$SESSION_DIR/tmp" "$SESSION_DIR/collector-diffs"
 echo "SESSION_DIR: $SESSION_DIR"
 echo "session_started_at: $SESSION_STARTED_AT"
 echo "session_id: $SESSION_ID"

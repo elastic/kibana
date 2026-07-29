@@ -4216,6 +4216,25 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
             "warning, not a silent coercion either way",
         )
 
+        # Step 0b must actually instruct the agent to *parse* collector_mode
+        # from the input — documenting the config.json schema and the
+        # legacy-default rule is not enough if the field is never extracted
+        # from either input source in the first place. Match the actual
+        # heading (bold, trailing colon), not the plain-text cross-reference
+        # to it a few lines earlier in the Session-config bullet.
+        step_0b = setup[setup.index("## Step 0b") :]
+        assigning_heading_idx = step_0b.index("**Assigning `source` to each flow:**")
+        self.assertIn(
+            "collector_mode",
+            step_0b[:assigning_heading_idx],
+            "expected collector_mode in the Session-config field-parsing list",
+        )
+        self.assertIn(
+            "collector_mode",
+            step_0b[step_0b.index("**Inline mode:**") : assigning_heading_idx],
+            "expected collector_mode in the inline-mode field-extraction list",
+        )
+
         # The shadow setup/self-test section must exist and precede the
         # per-step checklist, same ordering guarantee as the detector bridge.
         self.assertIn("Shadow collector setup", explore)
@@ -4275,19 +4294,36 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         self.assertNotIn("unverified against a live browser", spike_doc)
 
         # The bridge doc must document the install/drain snippets, capture
-        # response status on the 'response' event (not an async .then() off
-        # 'requestfinished', which races with drain — see reducer history bug
-        # investigation), never mention persisting a request/response body,
-        # and cross-link the spike doc rather than silently assuming the
-        # capability.
+        # status/ok on 'response' (headers, synchronous, no promise chain —
+        # avoids the async .then()-off-'requestfinished' race an earlier
+        # version had) but only mark a request truly complete on
+        # 'requestfinished'/'requestfailed' (a stalled body after headers
+        # arrive must still read as pending, not settled), never mention
+        # persisting a request/response body, and cross-link the spike doc
+        # rather than silently assuming the capability.
         self.assertIn("action-scoped-collector-spike.md", collector_doc)
         self.assertIn("page.on('request'", collector_doc)
         self.assertIn("page.on('response'", collector_doc)
+        self.assertIn("page.on('requestfinished'", collector_doc)
         self.assertIn("page.on('requestfailed'", collector_doc)
         self.assertIn("page.on('framenavigated'", collector_doc)
         self.assertNotIn("res.text()", collector_doc)
         self.assertNotIn("res.json()", collector_doc)
         self.assertNotIn("req.postData", collector_doc)
+
+        # Console text must be redacted the same way URLs are — it routinely
+        # embeds the failing URL verbatim (query string and all).
+        self.assertIn("redactText", collector_doc)
+
+        # Install must reset per-flow state on every call (not just the
+        # page's first ever call), so a previous flow's leftover pending or
+        # abandoned entries never bleed into the next flow's first drain.
+        self.assertIn(
+            "runs on every call, every flow, unconditionally",
+            collector_doc,
+            "expected install to explicitly document a per-flow buffer reset, "
+            "not a session-lifetime-only guard",
+        )
 
         # The pure reducer this all depends on must actually exist as an ESM
         # module (not the shared plugin package.json's CommonJS default),
@@ -4299,6 +4335,22 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         reducer = reducer_path.read_text(encoding="utf-8")
         self.assertIn("export function reduceAction", reducer)
         self.assertIn("export function redactUrl", reducer)
+
+        # The bridge snippets only ever run inside a live browser sandbox —
+        # a fake-page harness test extracting and executing the real
+        # Install/Drain code (not a hand-copied duplicate) is the only way
+        # bugs specific to that code get caught before a live/manual review.
+        bridge_test_path = SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        self.assertTrue(
+            bridge_test_path.exists(),
+            "scripts/__tests__/action-scoped-collector-bridge.test.mjs must "
+            "exist — the bridge Install/Drain snippets must be executed by "
+            "an actual test, not reasoned about from the markdown alone",
+        )
+        bridge_test = bridge_test_path.read_text(encoding="utf-8")
+        self.assertIn("extractCodeBlock", bridge_test)
+        self.assertIn("### Install", bridge_test)
+        self.assertIn("### Drain", bridge_test)
 
     def test_head_probes_do_not_wait_for_a_response_body(self):
         # curl -X HEAD keeps waiting for a body that a HEAD response never

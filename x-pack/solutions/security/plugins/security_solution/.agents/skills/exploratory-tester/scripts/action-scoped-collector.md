@@ -7,7 +7,7 @@
 ## Architecture
 
 ```
-page.on('request'/'response'/'requestfailed'/'framenavigated'/'console')
+page.on('request'/'response'/'requestfinished'/'requestfailed'/'framenavigated'/'console')
   → buffered on the Playwright-side page object itself (survives navigation, survives separate tool calls)
   → drained as plain JSON via a second browser_run_code_unsafe call (never response/request bodies)
   → classified by the pure reducer, action-scoped-collector.mjs (Node-side, unit-tested, no browser dependency)
@@ -23,15 +23,22 @@ This split exists because `browser_run_code_unsafe` executes inside a `vm.create
 
 ```js
 async (page) => {
-  if (page.__actionCollectorInstalled) return { installed: true, alreadyInstalled: true };
-
+  // Reset per-flow state on EVERY call, even when listeners are already
+  // attached — this must run once at the start of every flow, not once ever
+  // for the page's whole lifetime. Otherwise a still-pending or just-
+  // abandoned entry from the PREVIOUS flow lingers in the buffer and gets
+  // reported as if it belonged to the new flow on its very first drain.
   page.__actionCollectorBuffer = [];
   page.__actionCollectorConsole = [];
+
+  if (page.__actionCollectorInstalled) return { installed: true, alreadyInstalled: true };
+
   // WeakMap, not Map: entries are only ever looked up by the Request object
   // itself (never iterated), so once Playwright drops its own reference to an
   // old Request (long after it settles), this entry becomes GC-eligible too
   // instead of growing unboundedly for the life of the page.
   page.__actionCollectorRequests = new WeakMap();
+  page.__actionCollectorNextId = 1;
 
   const SENSITIVE = /^(api[-_]?key|token|password|passwd|secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
   const redact = (url) => {
@@ -50,9 +57,16 @@ async (page) => {
     }).join('&');
     return base + '?' + rest + hash;
   };
+  // Same credential-shaped names, but matched anywhere in free text as
+  // `key=value` — console messages routinely embed the failing URL verbatim
+  // (e.g. "Failed to fetch /api/foo?token=xyz: 500"), and `redact` above only
+  // ever sees structured request URLs, never console text.
+  const SENSITIVE_KV = /\b(api[-_]?key|token|password|passwd|secret|auth(?:orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)=([^\s&#'")]+)/gi;
+  const redactText = (text) => text.replace(SENSITIVE_KV, (_m, key) => key + '=%5BREDACTED%5D');
 
   page.on('request', (req) => {
     const entry = {
+      id: page.__actionCollectorNextId++,
       method: req.method(), url: redact(req.url()),
       status: null, ok: null, failure: null,
       requestedAt: Date.now(), respondedAt: null,
@@ -77,10 +91,20 @@ async (page) => {
       }
     }
   });
+  // 'response' fires as soon as HEADERS arrive — status/ok are informational
+  // and may be set well before the body finishes downloading. This is
+  // intentionally NOT where the request is considered "done": see
+  // 'requestfinished'/'requestfailed' below, which set `respondedAt`, the
+  // one true completeness signal the reducer keys "pending"/"stuck" off.
   page.on('response', (res) => {
     const entry = page.__actionCollectorRequests.get(res.request());
     if (!entry) return;
-    entry.status = res.status(); entry.ok = res.ok(); entry.respondedAt = Date.now();
+    entry.status = res.status(); entry.ok = res.ok();
+  });
+  page.on('requestfinished', (req) => {
+    const entry = page.__actionCollectorRequests.get(req);
+    if (!entry) return;
+    entry.respondedAt = Date.now();
   });
   page.on('requestfailed', (req) => {
     const entry = page.__actionCollectorRequests.get(req);
@@ -91,11 +115,11 @@ async (page) => {
   page.on('framenavigated', (frame) => {
     if (frame !== page.mainFrame()) return;
     for (const entry of page.__actionCollectorBuffer) {
-      if (entry.status == null && entry.failure == null) entry.abandonedByNavigation = true;
+      if (entry.respondedAt == null && entry.failure == null) entry.abandonedByNavigation = true;
     }
   });
   page.on('console', (msg) => {
-    if (msg.type() === 'error') page.__actionCollectorConsole.push({ type: 'error', text: msg.text().slice(0, 300) });
+    if (msg.type() === 'error') page.__actionCollectorConsole.push({ type: 'error', text: redactText(msg.text().slice(0, 300)) });
   });
 
   page.__actionCollectorInstalled = true;
@@ -103,9 +127,11 @@ async (page) => {
 }
 ```
 
-**Idempotent by design** — re-running this (e.g. defensively, at the start of every flow rather than tracking whether it's the first) is always safe: the `if (page.__actionCollectorInstalled)` guard returns immediately without attaching a second set of listeners.
+**Idempotent by design, but NOT a no-op** — call this at the start of every flow, not just the session's first. The `if (page.__actionCollectorInstalled)` guard only skips re-attaching listeners and re-creating the `WeakMap`; the buffer/console reset above it runs on every call, every flow, unconditionally.
 
-**Redaction lives in two places on purpose.** The reducer's `redactUrl` (`action-scoped-collector.mjs`) and this inline copy must stay logically equivalent — the VM sandbox has no `require`, so this code cannot import the reducer's implementation. `action-scoped-collector.test.mjs` includes a parity test that evaluates this exact snippet's `redact` logic against the same inputs as `redactUrl` and asserts they agree, so drift between the two is caught by the existing test suite rather than only discovered live.
+**Redaction lives in (at least) two places on purpose.** The reducer's `redactUrl` (`action-scoped-collector.mjs`) and this inline `redact` copy must stay logically equivalent — the VM sandbox has no `require`, so this code cannot import the reducer's implementation. `action-scoped-collector.test.mjs` includes a parity test that evaluates this exact snippet's `redact` logic against the same inputs as `redactUrl` and asserts they agree, so drift between the two is caught by the existing test suite rather than only discovered live. `redactText` (console messages) has no reducer-side equivalent to stay in parity with — console text is never re-emitted by the reducer, so redacting it once here, before it is ever buffered or persisted, is the only place it needs to happen.
+
+**Why 'response' and 'requestfinished' are handled separately.** A response can arrive with headers (status known) while its body is still streaming or has stalled — `requestfinished` only fires once the body has actually been fully consumed. Setting `respondedAt` on `'response'` instead of `'requestfinished'` would make a request with a stalled body read as "settled" the moment headers arrived, silently defeating `pending_request`/`stuck_request` detection for exactly the kind of hang this collector exists to catch. Splitting the two also removes a variant of this same bug from an earlier version of this file, which raced `req.response().then(...)` against drain — `'response'`'s `res.status()`/`res.ok()` are available synchronously with no promise chain, and `'requestfinished'` needs no promise at all.
 
 ### Drain (after every checklist step's normal Detector A/B/C run, while `collector_mode: shadow`)
 
@@ -114,10 +140,10 @@ async (page) => {
   const out = [];
   for (const entry of (page.__actionCollectorBuffer || [])) {
     if (entry.__reportedFinal) continue;
-    out.push({ method: entry.method, url: entry.url, status: entry.status, ok: entry.ok,
+    out.push({ id: entry.id, method: entry.method, url: entry.url, status: entry.status, ok: entry.ok,
       failure: entry.failure, requestedAt: entry.requestedAt, respondedAt: entry.respondedAt,
       resourceType: entry.resourceType, abandonedByNavigation: entry.abandonedByNavigation });
-    if (entry.status != null || entry.failure != null || entry.abandonedByNavigation) entry.__reportedFinal = true;
+    if (entry.respondedAt != null || entry.failure != null || entry.abandonedByNavigation) entry.__reportedFinal = true;
   }
   // Compact now that this drain has reported everything reportable: drop
   // entries already marked __reportedFinal (this drain's or an earlier
@@ -129,7 +155,9 @@ async (page) => {
 }
 ```
 
-**Why drain doesn't simply clear the whole buffer:** a request that's still pending at drain time (no `status`/`failure` yet) is returned again on the *next* drain if it's still pending then — that's exactly how the reducer's cross-action `stuck_request` escalation (see `action-scoped-collector.mjs`) is meant to observe the same signature repeatedly across checklist steps. Only requests that have fully settled (succeeded, failed, or been abandoned by navigation) are marked `__reportedFinal`, and drain compacts those out of the buffer immediately after reporting them so the buffer's steady-state size tracks "currently pending", not "everything ever seen". The `request` handler's own size cap is a defensive backstop only (see comment there) and, unlike a blind `splice`, is only ever allowed to remove entries already marked `__reportedFinal` — it must never discard a still-pending entry, since that would silently break `stuck_request` tracking for the rest of the flow.
+**Why drain doesn't simply clear the whole buffer:** a request that's still open at drain time (`respondedAt` still `null`) is returned again on the *next* drain if it's still open then — that's exactly how the reducer's cross-action `stuck_request` escalation (see `action-scoped-collector.mjs`) is meant to observe the same signature repeatedly across checklist steps. Only requests that have truly finished (succeeded, failed, or been abandoned by navigation) are marked `__reportedFinal` — `respondedAt`, not `status`, decides this, so a response whose headers arrived but whose body is still streaming is correctly returned again on the next drain instead of being dropped as if it were done. Drain compacts fully-finished entries out of the buffer immediately after reporting them so the buffer's steady-state size tracks "currently open", not "everything ever seen". The `request` handler's own size cap is a defensive backstop only (see comment there) and, unlike a blind `splice`, is only ever allowed to remove entries already marked `__reportedFinal` — it must never discard a still-open entry, since that would silently break `stuck_request` tracking for the rest of the flow.
+
+**`id`** is a per-page, monotonically increasing counter assigned when a request is first seen. The reducer uses it to tell "this signature is still the same request that was pending last checklist step" (→ `stuck_request`) apart from "a settled request and a brand-new request happen to share a URL in the same drain" (→ a plain `pending_request` for the new one, not a false `stuck_request`) — see "Cumulative history" in `action-scoped-collector.mjs`.
 
 ## Reducer (Node-side — `action-scoped-collector.mjs`)
 
@@ -145,9 +173,15 @@ Manually re-running `action-scoped-collector-spike.md` before every session isn'
 
 ## What is never collected
 
-- Request or response **bodies** — never requested, never buffered, never returned. Only `method`, `url` (redacted), `status`, `ok`, `failure`, timestamps, and `resourceType`.
+- Request or response **bodies** — never requested, never buffered, never returned. Only `id`, `method`, `url` (redacted), `status`, `ok`, `failure`, timestamps, and `resourceType`.
 - Credential-shaped query parameter **values** — redacted before the URL ever leaves the bridge (see `redact`/`redactUrl` above). Parameter *names* are preserved so a finding can still say "an auth-related param was present" without revealing it.
+- Credential-shaped `key=value` pairs embedded in **console text** — a console error frequently repeats the failing URL verbatim (e.g. "Failed to fetch /api/foo?token=xyz: 500"), so console messages are redacted with the same param names (`redactText`, above) before ever being buffered, not just structured request URLs.
 - Anything from `collector_mode: legacy` sessions — the bridge is never installed at all unless `collector_mode: shadow` is explicitly set.
+- Anything from a **previous flow** — install resets the buffer/console arrays on every call, so a flow's first drain never returns another flow's leftover events (see "Install" above).
+
+## Known limitation: no click/action intent
+
+`duplicate_api_call` (Level 2) is decided purely from network timing — two identical requests within `DUPLICATE_WINDOW_MS` (500ms) of each other, with no DOM click or action-intent signal to tell a genuine duplicate-call bug apart from, say, a deliberate fast double-click the checklist's "cancel/back-navigate" step is specifically testing for. This is a real limitation, not something this task set out to solve (action-level *timing* boundaries, not click *causation*, were in scope — see the roadmap plan's Task 4). It is **not a regression against what it shadows**: legacy Detector C (`dedup-network.js`) flags *any* 2+ occurrences of the same method+path within a whole action with no time window at all, no query-string distinction, and no spaced-vs-concurrent distinction — this collector's `DUPLICATE_WINDOW_MS` + exact-URL-match + `repeated_api_call` (Level 3) downgrade for spaced-out repeats are already strictly more conservative. Since shadow mode never drives findings (see "Status" above), an over-eager `duplicate_api_call` here only shows up as a reviewable diff entry, not a false report. Capturing genuine click/action intent to disambiguate this further is future work, not blocking for shadow-mode comparison.
 
 ## Diff storage and promotion
 

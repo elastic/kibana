@@ -40,14 +40,29 @@
  *   NetworkEvent: {
  *     method: string,
  *     url: string,               // full URL including query — see "Redaction" below
- *     status: number|null,       // null while pending
- *     ok: boolean|null,          // null while pending
+ *     status: number|null,       // set as soon as response HEADERS arrive; may be non-null
+ *                                 // while the request is still `pending` below (streaming body) —
+ *                                 // informational/classification use only, never a completeness signal.
+ *     ok: boolean|null,          // set together with `status`, same caveat.
  *     failure: string|null,      // network-level failure text (DNS, aborted, ...); null on a real HTTP response
  *     requestedAt: number,       // ms, relative to the action's own clock — only deltas matter
- *     respondedAt: number|null,  // ms; null while pending or on network-level failure
+ *     respondedAt: number|null,  // ms — the ONE true completeness signal: null until the request has
+ *                                 // *fully* finished (Playwright `requestfinished`/`requestfailed`, i.e.
+ *                                 // the body has actually been consumed), not merely until headers
+ *                                 // arrived. `pending`/`stuck`/`abandoned` classification below all key
+ *                                 // off this, not off `status` — a response whose headers arrived but
+ *                                 // whose body is still streaming/stalled must still read as pending.
  *     resourceType: string,      // 'xhr' | 'fetch' | 'document' | ... (informational only)
  *     abandonedByNavigation?: boolean, // set by the bridge when the frame navigated away
  *                                      // before this request settled — see "Navigation reset" below.
+ *     id?: number,                // bridge-assigned, unique per request instance for the page's
+ *                                  // lifetime. Optional — hand-written fixtures may omit it, in which
+ *                                  // case cross-call continuity for the same signature falls back to
+ *                                  // "assume it's the same request" (the pre-existing, coarser
+ *                                  // behavior). When present (always true for real bridge output), it
+ *                                  // disambiguates "the same request is still pending" from "a new
+ *                                  // request with the same URL started right as the old one settled" —
+ *                                  // see "Cumulative history" below.
  *   }
  *   ConsoleEvent: { type: string, text: string }  — same shape classify-console.js already consumes.
  *
@@ -89,7 +104,19 @@ export function redactUrl(url) {
       if (!pair) return pair;
       const eq = pair.indexOf('=');
       const key = eq === -1 ? pair : pair.slice(0, eq);
-      if (SENSITIVE_PARAM_NAMES.test(decodeURIComponent(key))) {
+      // A malformed %-sequence in the key must never throw and abort the
+      // whole action's classification — same guard the bridge's inline copy
+      // already has. Falling back to the raw (undecoded) key for the
+      // SENSITIVE test is the conservative choice: it can only cause an
+      // over-eager decodeURIComponent-required match to be missed, never an
+      // unrelated key to be wrongly redacted.
+      let decodedKey = key;
+      try {
+        decodedKey = decodeURIComponent(key);
+      } catch {
+        // leave decodedKey as the raw key
+      }
+      if (SENSITIVE_PARAM_NAMES.test(decodedKey)) {
         return `${key}=%5BREDACTED%5D`;
       }
       return pair;
@@ -190,11 +217,15 @@ export function reduceAction(action, priorState) {
     }
 
     // ── Pending / stuck / navigation-abandoned requests ─────────────────────
-    // A request still in flight when the frame navigates away will never
-    // settle — Playwright's navigation tears it down. The bridge marks these
+    // "Still open" is decided by `respondedAt` (true completion), never by
+    // `status` — a response whose headers arrived but whose body is still
+    // streaming/stalled must still read as pending, not as settled.
+    //
+    // A request still open when the frame navigates away will never settle —
+    // Playwright's navigation tears it down. The bridge marks these
     // `abandonedByNavigation` so they read as "the page moved on", not as an
     // ever-worsening "stuck" signal across subsequent checklist steps.
-    const abandoned = events.filter((ev) => ev.abandonedByNavigation && ev.status == null && ev.failure == null);
+    const abandoned = events.filter((ev) => ev.abandonedByNavigation && ev.respondedAt == null && ev.failure == null);
     for (const ev of abandoned) {
       level3.push({
         type: 'request_abandoned_by_navigation',
@@ -206,11 +237,27 @@ export function reduceAction(action, priorState) {
     }
 
     const pendingNow = events.filter(
-      (ev) => ev.status == null && ev.failure == null && !ev.abandonedByNavigation
+      (ev) => ev.respondedAt == null && ev.failure == null && !ev.abandonedByNavigation
     );
+    // Identity check for cross-call escalation: grouping is by signature
+    // (method+URL), not by request instance, so a signature can go
+    // pending → settle → a brand-new request starts, all before the next
+    // drain. Without disambiguating by `id`, that brand-new request would
+    // wrongly inherit the old `firstPendingAt` and get escalated to
+    // `stuck_request` on its very first sighting. Only trust `id`-based
+    // continuity when BOTH sides actually carry ids (real bridge output
+    // always does); hand-written events without ids fall back to the
+    // coarser "assume same request" behavior this reducer always had.
+    const currentPendingIds = pendingNow.map((ev) => ev.id).filter((id) => id != null);
+    const priorPendingIds = (history[sig] && history[sig].pendingRequestIds) || null;
+    const idsKnown = currentPendingIds.length > 0 && priorPendingIds != null && priorPendingIds.length > 0;
+    const continuesPriorPendingRequest = idsKnown
+      ? currentPendingIds.some((id) => priorPendingIds.includes(id))
+      : true;
+
     if (pendingNow.length > 0) {
       const priorPendingSeenAt = history[sig] && history[sig].firstPendingAt;
-      if (priorPendingSeenAt != null) {
+      if (priorPendingSeenAt != null && continuesPriorPendingRequest) {
         level2.push({
           type: 'stuck_request',
           method,
@@ -230,6 +277,9 @@ export function reduceAction(action, priorState) {
     }
 
     // ── Duplicate vs. retry-after-failure vs. repeated-over-time ────────────
+    // Uses `status`/`failure` (known outcome), not `respondedAt` (full
+    // completion) — classifying a duplicate/retry only needs to know each
+    // attempt's outcome category, not whether its body finished downloading.
     const settled = events.filter((ev) => ev.status != null || ev.failure != null);
     if (settled.length >= 2 && !isPolling(path)) {
       const firstFailed = settled[0].failure != null || (settled[0].status != null && settled[0].status >= 400);
@@ -279,7 +329,7 @@ export function reduceAction(action, priorState) {
     // human reviewing a persisted collector-state-flow<N>.json file (see
     // action-scoped-collector.md) can see how many times a signature was
     // seen across the flow without re-deriving it from the diff files.
-    const priorEntry = history[sig] || { count: 0, firstPendingAt: null };
+    const priorEntry = history[sig] || { count: 0, firstPendingAt: null, pendingRequestIds: null };
     history[sig] = {
       count: priorEntry.count + events.length,
       // Reset whenever this signature has nothing pending *right now* —
@@ -287,13 +337,17 @@ export function reduceAction(action, priorState) {
       // "not pending". Without this reset, a signature that goes
       // pending → settles → pending again (a brand-new request) would
       // wrongly inherit the old timestamp and get misclassified as
-      // `stuck_request` on its second, unrelated sighting.
+      // `stuck_request` on its second, unrelated sighting. Also reset (to a
+      // fresh timestamp, not cleared) when ids prove the current pending
+      // instance is NOT the one `firstPendingAt` was recorded for — see
+      // `continuesPriorPendingRequest` above.
       firstPendingAt:
         pendingNow.length === 0
           ? null
-          : priorEntry.firstPendingAt != null
+          : continuesPriorPendingRequest && priorEntry.firstPendingAt != null
           ? priorEntry.firstPendingAt
           : Date.now(),
+      pendingRequestIds: pendingNow.length === 0 ? null : currentPendingIds.length > 0 ? currentPendingIds : null,
     };
   }
 

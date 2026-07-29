@@ -95,6 +95,21 @@ console.log('\n── Pending request: still in flight at the end of one action 
   );
 }
 
+console.log('\n── Headers received but body still streaming: NOT settled — respondedAt, not status, decides "still open" ─');
+{
+  const r = reduceAction(json('action-headers-received-body-still-streaming'));
+  assert(
+    r.level3.some((i) => i.type === 'pending_request'),
+    'action-headers-received-body-still-streaming → Level 3 pending_request even though status is already 200',
+    JSON.stringify(r)
+  );
+  assert(
+    !r.level1.length && !r.level2.length,
+    'action-headers-received-body-still-streaming → not treated as a silent server error or duplicate',
+    JSON.stringify(r)
+  );
+}
+
 console.log('\n── Stuck request: still pending across a SECOND action (cumulative history) ─');
 {
   const pendingEvent = {
@@ -106,6 +121,7 @@ console.log('\n── Stuck request: still pending across a SECOND action (cumul
     requestedAt: 0,
     respondedAt: null,
     resourceType: 'xhr',
+    id: 1,
   };
   const first = reduceAction({ network: [pendingEvent] });
   assert(
@@ -192,6 +208,53 @@ console.log('\n── Abandon-then-repend: an abandoned-by-navigation request mu
   assert(
     !a3.level2.some((i) => i.type === 'stuck_request'),
     'abandon-then-repend A3 → NOT misclassified as stuck_request after an abandonment that followed a genuine pending sighting',
+    JSON.stringify(a3)
+  );
+}
+
+console.log('\n── Same-drain settle+repend: an old request settling and a NEW same-URL request starting, both observed in ONE call, must not escalate the new one to stuck_request ─');
+{
+  const sig = {
+    method: 'GET',
+    url: 'https://kibana.example/internal/entity_analytics/entity_store/engine_state',
+    resourceType: 'xhr',
+  };
+  const a1 = reduceAction({
+    network: [{ ...sig, id: 1, status: null, ok: null, failure: null, requestedAt: 0, respondedAt: null }],
+  });
+  assert(a1.level3.some((i) => i.type === 'pending_request'), 'same-drain setup A1 → plain pending_request (id 1)');
+
+  // A2, in ONE call: id 1 settles AND a brand-new id 2 for the identical
+  // signature is already pending by the time this same drain fires.
+  const a2 = reduceAction(
+    {
+      network: [
+        { ...sig, id: 1, status: 200, ok: true, failure: null, requestedAt: 0, respondedAt: 1000 },
+        { ...sig, id: 2, status: null, ok: null, failure: null, requestedAt: 950, respondedAt: null },
+      ],
+    },
+    a1.state
+  );
+  assert(
+    a2.level3.some((i) => i.type === 'pending_request'),
+    'same-drain settle+repend A2 → the NEW request (id 2) is a plain pending_request',
+    JSON.stringify(a2)
+  );
+  assert(
+    !a2.level2.some((i) => i.type === 'stuck_request'),
+    'same-drain settle+repend A2 → NOT escalated to stuck_request just because id 1 (a different, now-settled request) shares the same URL',
+    JSON.stringify(a2)
+  );
+
+  // And the genuine continuation case must still escalate: id 2 (the one
+  // actually left pending after A2) still pending in A3 → stuck_request.
+  const a3 = reduceAction(
+    { network: [{ ...sig, id: 2, status: null, ok: null, failure: null, requestedAt: 2000, respondedAt: null }] },
+    a2.state
+  );
+  assert(
+    a3.level2.some((i) => i.type === 'stuck_request'),
+    'same-drain settle+repend A3 → id 2 genuinely continuing to be pending IS escalated to stuck_request',
     JSON.stringify(a3)
   );
 }
@@ -378,6 +441,11 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
     redactUrl('https://kibana.example/api?token=abc123#somefragment') === 'https://kibana.example/api?token=%5BREDACTED%5D#somefragment',
     'redactUrl → a hash fragment after a redacted sensitive param is preserved, not dropped'
   );
+  assert(
+    redactUrl('https://kibana.example/api?bad%zzkey=secret&page=2') === 'https://kibana.example/api?bad%zzkey=secret&page=2',
+    'redactUrl → a malformed %-escape in a query KEY (decodeURIComponent throws) never aborts classification; it just fails to decode-and-match that one key',
+    'threw instead of returning a value'
+  );
 
   const withSecret = {
     method: 'GET',
@@ -423,6 +491,7 @@ console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (redu
       // while redactUrl always carved the hash out separately and kept it.
       'https://kibana.example/api?token=abc123#somefragment',
       'https://kibana.example/api?q=1#somefragment',
+      'https://kibana.example/api?bad%zzkey=secret&page=2',
     ];
     for (const url of cases) {
       assert(

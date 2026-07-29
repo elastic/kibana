@@ -121,11 +121,34 @@ against your MCP setup — required reading before ever setting
 `collector_mode: shadow`.
 
 `action-scoped-collector.test.mjs` covers: silent 5xx with no matching
-console error, pending-vs-stuck-vs-abandoned-by-navigation classification,
-meaningfully different query strings never being grouped as duplicates,
-concurrent duplicate calls vs. an intentional retry-after-failure vs. the
-same call repeated far apart, known-noise (polling) suppression that still
-lets a genuinely failing polling endpoint through, deterministic
-spinner-timing escalation, URL redaction (including a parity check against
-the bridge doc's own inline copy of the same logic, since that copy can't
-`import` this module either), and a CLI-vs-module classification round trip.
+console error, pending-vs-stuck-vs-abandoned-by-navigation classification
+(including settle-then-repend and same-drain settle+repend, both
+disambiguated by the bridge-assigned `id` — see the reducer's own header
+comment), a request whose headers arrived but whose body is still streaming
+(must read as pending, not settled), meaningfully different query strings
+never being grouped as duplicates, concurrent duplicate calls vs. an
+intentional retry-after-failure vs. the same call repeated far apart,
+known-noise (polling) suppression that still lets a genuinely failing
+polling endpoint through, deterministic spinner-timing escalation, URL
+redaction (including a parity check against the bridge doc's own inline copy
+of the same logic, a malformed-encoding fixture, and a hash-fragment case),
+and a CLI-vs-module classification round trip.
+
+```bash
+node __tests__/action-scoped-collector-bridge.test.mjs
+```
+
+The bridge snippets in `action-scoped-collector.md` (Install/Drain) only ever
+run inside a live `browser_run_code_unsafe` VM sandbox — no prior test here
+executed that code at all, only the reducer it feeds. Three separate reviews
+of this feature each found a real bug living exclusively in that
+never-executed bridge logic. `action-scoped-collector-bridge.test.mjs`
+extracts the actual Install/Drain snippets straight out of the doc (never a
+hand-copied duplicate) and runs them against a fake, `EventEmitter`-based
+Playwright `page`/`Request`/`Response`/console-message stand-in, covering:
+idempotent listener attachment vs. non-idempotent per-flow state reset,
+`response` (headers) vs. `requestfinished` (true completion) — a stalled
+body must still read as pending after headers arrive — navigation-abandonment
+of a request whose headers already arrived, console-text redaction, and a
+second flow's install() call not inheriting a previous flow's leftover
+open request or console text.
