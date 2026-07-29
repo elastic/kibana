@@ -24,11 +24,11 @@ const openDocViewerFieldDescription = async ({
   await pageObjects.docViewer.openTab('doc_view_table');
   const flyout = page.testSubj.locator('docViewerFlyout');
   const fieldNameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${field}-name"]`);
-  const expandButton = fieldNameCell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+  const expandButton = flyout.getByTestId('euiDataGridCellExpandButton');
 
   await fieldNameCell.waitFor({ state: 'visible' });
   await fieldNameCell.scrollIntoViewIfNeeded();
-  await fieldNameCell.hover();
+  await fieldNameCell.click();
   await expandButton.click();
   await page.testSubj.locator(`fieldDescription-${field}`).waitFor({ state: 'visible' });
 };
