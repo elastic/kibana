@@ -83,7 +83,7 @@ export const attachInvestigationToEvent = async ({
     investigations,
   };
 
-  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
+  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
 
   return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
 };

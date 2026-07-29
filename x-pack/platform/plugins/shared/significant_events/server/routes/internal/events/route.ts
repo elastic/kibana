@@ -11,6 +11,7 @@ import {
   significantEventStatusSchema,
   CHANGE_POINT_TYPES,
   severitySchema,
+  MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type SignificantEvent,
@@ -20,7 +21,7 @@ import {
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import { updateSignificantEvent } from '../../../lib/significant_events/events/update_event';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -349,7 +350,7 @@ const eventsUpdateRoute = createServerRoute({
     access: 'internal',
     summary: 'Update a significant event',
     description:
-      'Manually override attributes of a significant event, writing a new append-only version.',
+      'Override attributes (status, severity, summary) of a significant event, writing a new append-only version.',
   },
   security: {
     authz: {
@@ -361,7 +362,10 @@ const eventsUpdateRoute = createServerRoute({
       id: z.string().max(255),
     }),
     body: z.object({
-      status: significantEventStatusSchema,
+      severity: severitySchema.optional(),
+      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+      status: significantEventStatusSchema.optional(),
+      workflow_execution_id: z.string().max(255).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
@@ -369,10 +373,16 @@ const eventsUpdateRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return updateSignificantEventStatus({
-      eventClient: getEventClient(),
+    const eventClient = getEventClient();
+    const { severity, summary, status, workflow_execution_id: workflowExecutionId } = params.body;
+
+    // `updateSignificantEvent` ignores `undefined` fields (and values equal to the current
+    // version), so passing the whole set through is safe even when only some attributes change.
+    return updateSignificantEvent({
+      eventClient,
       eventUuid: params.path.id,
-      status: params.body.status,
+      fields: { severity, summary, status },
+      workflowExecutionId,
     });
   },
 });

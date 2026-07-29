@@ -6,7 +6,7 @@
  */
 
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
+import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event';
 import type { EventClient } from '../../../lib/significant_events/events';
 
 export async function updateEventStatusToolHandler({
