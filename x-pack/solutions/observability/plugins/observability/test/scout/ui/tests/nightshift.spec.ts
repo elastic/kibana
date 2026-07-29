@@ -7,11 +7,7 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import {
-  APP_HEADER_TEST_SUBJECTS,
-  APP_MENU_TEST_SUBJECTS,
-  getAppMenuItemTestSubj,
-} from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/streams-plugin/common';
 import { test } from '../fixtures';
 
@@ -69,10 +65,9 @@ test.describe(
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
 
-      // Force the overflow layout so settings is reached through one explicit path.
-      await page.setViewportSize({ width: 800, height: 720 });
+      // Single settings action stays inline at Scout's default viewport — click it directly
+      // (no overflow branch; expect() auto-waits for mount).
       const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
-      await page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton).click();
       await expect(settingsLink).toBeVisible();
       await settingsLink.click();
       await expect(page).toHaveURL(/\/app\/streams\/_discovery\/settings/);
