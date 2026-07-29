@@ -13,13 +13,23 @@ describe('generateDashboardTool', () => {
   describe('schema', () => {
     const schema = generateDashboardTool().schema;
 
-    it('allows config-only prettification', () => {
+    it('allows config-only prettification for an existing dashboard', () => {
+      expect(
+        schema.safeParse({
+          dashboardAttachmentId: 'dashboard-1',
+          operations: [],
+          prettifyPanelConfigs: true,
+        }).success
+      ).toBe(true);
+    });
+
+    it('requires an existing dashboard for config prettification', () => {
       expect(
         schema.safeParse({
           operations: [],
           prettifyPanelConfigs: true,
         }).success
-      ).toBe(true);
+      ).toBe(false);
     });
 
     it('requires an operation or config prettification', () => {
