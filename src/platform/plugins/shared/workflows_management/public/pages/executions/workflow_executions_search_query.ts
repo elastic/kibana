@@ -58,7 +58,6 @@ export const filtersToKql = (filters: Filter[]): string => {
   return clauses.length ? clauses.map((c) => `(${c})`).join(' and ') : '';
 };
 
-
 interface WorkflowExecutionsSearchError {
   attributes?: { error?: { type?: string } };
   body?: { error?: { type?: string } };

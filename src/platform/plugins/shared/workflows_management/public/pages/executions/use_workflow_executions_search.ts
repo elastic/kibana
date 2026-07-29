@@ -52,8 +52,7 @@ const extractFilterValues = (filters: Filter[], fieldKey: string): string[] => {
       values.push(...(f.meta.params as string[]));
     } else if (f.meta.type === 'phrase') {
       // Search-bar phrase filter: actual ES value in meta.params.query
-      const actualValue =
-        (f.meta.params as { query?: unknown } | undefined)?.query ?? f.meta.value;
+      const actualValue = (f.meta.params as { query?: unknown } | undefined)?.query ?? f.meta.value;
       if (actualValue != null) values.push(String(actualValue));
     } else {
       // Single-select from OptionsListControl: buildPhraseFilter does not set
