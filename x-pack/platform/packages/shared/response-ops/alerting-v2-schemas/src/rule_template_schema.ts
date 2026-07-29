@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema } from './common';
+import { MAX_KQL_LENGTH } from './constants';
 import { createRuleDataBaseSchema } from './rule_data_schema';
 
 /**
@@ -71,22 +71,24 @@ export const findRuleTemplatesParamsSchema = z.object({
   perPage: z.coerce
     .number()
     .min(1)
-    .max(100)
+    .max(1000)
     .optional()
     .describe('The number of rule templates to return per page. Defaults to 20.'),
+  filter: z
+    .string()
+    .max(MAX_KQL_LENGTH)
+    .optional()
+    .describe('The filter to apply to the rule templates.'),
+  sortField: findRuleTemplatesSortFieldSchema
+    .optional()
+    .describe('The field to sort rule templates by.'),
+  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rule templates.'),
   search: z
     .string()
     .trim()
     .min(1)
     .optional()
     .describe('A text string to search across rule template fields.'),
-  sortField: findRuleTemplatesSortFieldSchema
-    .optional()
-    .describe('The field to sort rule templates by. Defaults to name.'),
-  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rule templates.'),
-  tags: arrayOrSingleSchema(z.string().min(1).max(128), 10)
-    .optional()
-    .describe('Filter by tags. Accepts a single string or an array.'),
 });
 
 export type FindRuleTemplatesParams = z.infer<typeof findRuleTemplatesParamsSchema>;
