@@ -6,16 +6,16 @@
  */
 
 import { tags } from '@kbn/scout';
-import type { ScoutTestFixtures } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
   getChartDebugData,
+  sumFirstNValues,
   test,
 } from '../../fixtures';
-import type { TsdbScenario, TsdbScenarioIndex } from '../../fixtures';
+import type { TsdbScenarioContext, TsdbScenarioIndex } from '../../fixtures';
 
 const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
 // Serverless Security's editor role grants data access to the sample-data namespace.
@@ -24,23 +24,14 @@ const REGULAR_INDEX = `kibana_sample_data_lens_tsdb_regular_${RESOURCE_SUFFIX}`;
 const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_tsdb_additional_${RESOURCE_SUFFIX}`;
 const TIME_RANGE = createTsdbScenarioTimeRange();
 
-interface ScenarioContext {
-  page: ScoutTestFixtures['page'];
-  pageObjects: ScoutTestFixtures['pageObjects'];
-  tsdbScenario: TsdbScenario;
-}
-
 interface ScenarioResult {
   counterBars: Array<{ y: number }> | undefined;
   countBars: Array<{ y: number }> | undefined;
   expectedDocumentCountBeforeUpgrade: number;
 }
 
-const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
-  (bars ?? []).slice(0, count).reduce((sum, bar) => sum + bar.y, 0);
-
 const runScenario = async (
-  { page, pageObjects, tsdbScenario }: ScenarioContext,
+  { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[]
 ): Promise<ScenarioResult> => {
   const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);

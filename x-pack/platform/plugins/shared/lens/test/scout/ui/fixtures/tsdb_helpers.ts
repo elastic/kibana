@@ -24,6 +24,15 @@ export const ROLLED_UP_MEDIAN_WARNING =
 
 export const TSDB_SCENARIO_DOCUMENT_COUNT = 100;
 
+export interface TsdbScenarioContext {
+  page: ScoutTestFixtures['page'];
+  pageObjects: ScoutTestFixtures['pageObjects'];
+  tsdbScenario: TsdbScenario;
+}
+
+export const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
+  (bars ?? []).slice(0, count).reduce((sum, bar) => sum + bar.y, 0);
+
 export interface DownsampleTSDBIndexOptions {
   isStream: boolean;
   interval?: string;
