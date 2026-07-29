@@ -19,6 +19,14 @@ import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provid
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
 import { getAttackTitleValue } from '../../flyout_v2/attack/utils/get_attack_title';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export interface AttackFlyoutHeaderProps {
   hit: DataTableRecord;
@@ -45,7 +53,7 @@ export const AttackFlyoutHeader = ({
       return;
     }
 
-    services.overlays?.openSystemFlyout(
+    const ref = services.overlays?.openSystemFlyout(
       flyoutProviders({
         services,
         store,
@@ -55,9 +63,19 @@ export const AttackFlyoutHeader = ({
       {
         ...defaultToolsFlyoutProperties,
         historyKey,
+        session: FLYOUT_SESSION_KIND.START,
         title: formatFlyoutTitle(NOTES_TITLE, attackTitle),
       }
     );
+    if (ref) {
+      trackFlyoutOpen(services.telemetry, ref, {
+        surface: FLYOUT_SURFACE.TOOL,
+        flyoutType: FLYOUT_TYPE.ATTACK,
+        tool: FLYOUT_TOOL.NOTES,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    }
   }, [attackTitle, history, historyKey, hit, services, store]);
 
   useEffect(() => {

@@ -66,7 +66,7 @@ describe('createUnsnoozeAction', () => {
 
   it('execute: POSTs unique-by-group UNSNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 2, total: 2 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = jest.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [
