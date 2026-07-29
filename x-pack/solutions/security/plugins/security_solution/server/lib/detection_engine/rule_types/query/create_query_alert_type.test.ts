@@ -19,6 +19,7 @@ import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
+import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
 const actualHasTimestampFields = jest.requireActual('../utils/utils').hasTimestampFields;
 jest.mock('../utils/utils', () => ({
@@ -58,6 +59,7 @@ describe('Custom Query Alerts', () => {
   const { actions, alerting, lists, logger, ruleDataClient } = dependencies;
 
   const eventsTelemetry = createMockTelemetryEventsSender(true);
+  const endpointAppContextService = createMockEndpointAppContextService();
 
   const wrapperOptions = {
     actions,
@@ -73,6 +75,7 @@ describe('Custom Query Alerts', () => {
     alerting,
     eventsTelemetry,
     licensing,
+    endpointAppContextService,
     scheduleNotificationResponseActionsService: () => null,
   };
 
