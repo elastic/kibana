@@ -105,9 +105,7 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             }
           }
 
-          const sort = sortField
-            ? [{ [sortField]: { order: sortOrder ?? 'desc' } }]
-            : undefined;
+          const sort = sortField ? [{ [sortField]: { order: sortOrder ?? 'desc' } }] : undefined;
 
           const params: SearchExecutionsViewParams = {
             query: esQuery,
