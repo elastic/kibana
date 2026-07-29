@@ -151,6 +151,10 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
 }) => {
   const instanceUid = useRef(uuidv4());
   const { cloud, docLinks, application } = useStartServices();
+  // api_keys.save maps to manage_own_api_key, which is necessary but not sufficient —
+  // the server also requires apm event:write. In the rare case where a user has
+  // manage_own_api_key but not apm event:write the button is enabled and the server
+  // returns a 403; the error handler in use_managed_otlp surfaces the server's message.
   const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
 
   const esApiKey = useGetCreateApiKey();
