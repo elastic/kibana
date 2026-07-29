@@ -6,8 +6,8 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { PipelineStateStream, RuleExecutionStep } from '../types';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import {

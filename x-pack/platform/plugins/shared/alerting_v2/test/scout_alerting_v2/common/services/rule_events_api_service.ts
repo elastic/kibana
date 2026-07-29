@@ -9,13 +9,13 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type {
   AlertEpisodeStatus,
   AlertEvent,
   AlertEventStatus,
   AlertEventType,
 } from '../../../../server/resources/datastreams/alert_events';
-import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 
 export interface RuleEventFilter {

@@ -9,8 +9,8 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { AlertAction } from '../../../../server/resources/datastreams/alert_actions';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import type { AlertAction } from '../../../../server/resources/datastreams/alert_actions';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 
 export interface AlertActionsFilter {

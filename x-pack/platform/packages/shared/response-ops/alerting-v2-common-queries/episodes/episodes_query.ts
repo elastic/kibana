@@ -8,10 +8,7 @@
 import type { ComposerQuery } from '@elastic/esql';
 import { esql } from '@elastic/esql';
 import { escapeStringValue } from '@kbn/esql-utils';
-import {
-  ALERT_ACTIONS_DATA_STREAM,
-  ALERT_EVENTS_DATA_STREAM,
-} from '@kbn/alerting-v2-constants';
+import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
 

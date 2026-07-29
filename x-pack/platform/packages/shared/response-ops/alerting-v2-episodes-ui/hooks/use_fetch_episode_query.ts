@@ -8,9 +8,9 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { AlertEpisode, AlertEpisodeEsqlRow } from '@kbn/alerting-v2-common-queries';
 import { buildEpisodeQuery } from '../queries/episode_query';
 import { QUERY_STALE_TIME } from '../constants';
-import type { AlertEpisode, AlertEpisodeEsqlRow } from '@kbn/alerting-v2-common-queries';
 import { esqlResponseToObjectRows } from '../utils/esql_response_to_rows';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { normalizeTags } from '../utils/normalize_tags';
