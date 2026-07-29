@@ -1009,6 +1009,7 @@ apiTest.describe(
             projectId: project,
             locationId: testPolicyId,
             locationName: testPrivateLocationName,
+            kibanaUrl: kibanaServerUrl,
           })
         );
       }
@@ -1127,6 +1128,7 @@ apiTest.describe(
             projectId: project,
             locationId: testPolicyId,
             locationName: testPrivateLocationName,
+            kibanaUrl: kibanaServerUrl,
           })
         );
 
@@ -1170,6 +1172,7 @@ apiTest.describe(
             projectId: project,
             locationId: testPolicyId,
             locationName: testPrivateLocationName,
+            kibanaUrl: kibanaServerUrl,
           })
         );
 
@@ -1194,6 +1197,7 @@ apiTest.describe(
             locationId: testPolicyId,
             locationName: testPrivateLocationName,
             namespace: 'custom_namespace',
+            kibanaUrl: kibanaServerUrl,
           })
         );
       }
