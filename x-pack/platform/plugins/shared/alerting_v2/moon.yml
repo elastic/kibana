@@ -134,6 +134,8 @@ dependsOn:
   - '@kbn/content-list'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-toolbar'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
 tags:
   - plugin
   - prod
