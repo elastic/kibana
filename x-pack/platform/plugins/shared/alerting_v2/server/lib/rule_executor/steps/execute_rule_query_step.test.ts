@@ -25,6 +25,7 @@ import { createLoggerService } from '../../services/logger_service/logger_servic
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { RULE_EXECUTION_COUNTERS } from '../metrics/counters';
 import type { PluginConfig } from '../../../config';
 
 const DEFAULT_MAX_ALERTS_PER_RUN = 10000;
@@ -252,5 +253,44 @@ describe('ExecuteRuleQueryStep', () => {
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
+  });
+
+  it('emits rowsReturnedByQuery per batch equal to the batch row count', async () => {
+    mockHelpersEsqlArrowBatches(mockEsClient, [
+      { numRows: 2, rows: [{ 'host.name': 'host-a' }, { 'host.name': 'host-b' }] },
+      { numRows: 1, rows: [{ 'host.name': 'host-c' }] },
+    ]);
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(results).toHaveLength(2);
+    expect(results[0].type).toBe('continue');
+
+    // @ts-expect-error: meta is present on the result
+    expect(results[0].meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 2,
+    });
+
+    expect(results[1].type).toBe('continue');
+
+    // @ts-expect-error: meta is present on the result
+    expect(results[1].meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 1,
+    });
+  });
+
+  it('emits rowsReturnedByQuery = 0 when the query returns no rows', async () => {
+    mockHelpersEsqlArrowBatches(mockEsClient, []);
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+
+    // @ts-expect-error: meta is present on the result
+    expect(result.meta?.counters).toEqual({
+      [RULE_EXECUTION_COUNTERS.rowsReturnedByQuery]: 0,
+    });
   });
 });

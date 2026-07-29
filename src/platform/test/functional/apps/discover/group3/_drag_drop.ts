@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Drag-and-drop is a browser feature.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -48,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '48 available fields. 5 empty fields. 4 meta fields.'
+          '49 available fields. 5 empty fields. 4 meta fields.'
         );
         expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Summary');
 
@@ -68,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '48 available fields. 5 empty fields. 4 meta fields.'
+          '49 available fields. 5 empty fields. 4 meta fields.'
         );
         expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Summary');
 

@@ -12,7 +12,7 @@ import type { DiscoveryEvaluator } from '../types';
 import { createExecuteEsqlGroundingEvaluator } from '../common/esql_grounding';
 import { createDiscoveryToolUsageEvaluator } from './tool_usage/tool_usage';
 import {
-  createCriticalityCalibrationEvaluator,
+  createSeverityCalibrationEvaluator,
   createConfidenceCalibrationEvaluator,
 } from '../common/scores_calibration';
 import { createEvidenceDescriptionEvaluator } from '../common/evidence_quality';
@@ -20,6 +20,7 @@ import { groupingCorrectnessEvaluator } from './grouping/grouping_correctness';
 import { evidenceCollectionEvaluator } from './evidences/evidence_collection';
 import { continuationTrajectoryEvaluator } from './tool_usage/tool_usage';
 import {
+  continuationRoutingEvaluator,
   continuationStabilityEvaluator,
   type ContinuationEvaluator,
 } from './continuation/continuation_stability';
@@ -49,7 +50,7 @@ export const createDiscoveryEvaluators = (
     ...base,
     createScenarioCriteriaLlmEvaluator({ criteriaFn, criteria }),
     createEvidenceDescriptionEvaluator({ criteriaFn }),
-    createCriticalityCalibrationEvaluator({ criteriaFn }),
+    createSeverityCalibrationEvaluator({ criteriaFn }),
     createConfidenceCalibrationEvaluator({ criteriaFn }),
   ];
 };
@@ -60,4 +61,8 @@ export const createDiscoveryEvaluators = (
  * scenario-criteria variant; the continuation output has no `expected` criteria to score against).
  */
 export const createContinuationEvaluators = (): ContinuationEvaluator[] =>
-  selectEvaluators([continuationStabilityEvaluator, continuationTrajectoryEvaluator]);
+  selectEvaluators([
+    continuationStabilityEvaluator,
+    continuationRoutingEvaluator,
+    continuationTrajectoryEvaluator,
+  ]);

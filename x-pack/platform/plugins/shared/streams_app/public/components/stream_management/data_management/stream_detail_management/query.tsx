@@ -57,7 +57,7 @@ export function QueryStreamDetailManagement({
   const { rangeFrom, rangeTo } = useTimeRange();
   const {
     ui,
-    features: { significantEventsDiscovery },
+    features: { significantEvents },
     isLoading: isPrivilegesLoading,
   } = useStreamsPrivileges();
 
@@ -178,7 +178,7 @@ export function QueryStreamDetailManagement({
       return null;
     }
 
-    if (significantEventsDiscovery?.enabled && significantEventsDiscovery?.available) {
+    if (significantEvents?.available) {
       return (
         <RedirectTo
           path="/_discovery/{tab}"
@@ -206,7 +206,6 @@ export function QueryStreamDetailManagement({
         badges={badges}
         tabs={appHeaderTabs}
         menu={appHeaderMenu}
-        padding="m"
       />
       <StreamsAppPageTemplate.Body>{tabs[tab].content}</StreamsAppPageTemplate.Body>
       {showDeleteModal && (

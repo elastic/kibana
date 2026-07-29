@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { encode } from '@kbn/rison';
 import type { State } from '../../../common/store';
 import { PageScope } from '../../../data_view_manager/constants';

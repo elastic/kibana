@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 
 export const reconcileKnowledgeIndicatorsRoute = createServerRoute({
@@ -25,11 +26,13 @@ export const reconcileKnowledgeIndicatorsRoute = createServerRoute({
   params: z.object({
     path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getKnowledgeIndicatorClient, licensing, uiSettingsClient, streamsClient } =
-      await getScopedClients({ request });
+  handler: async ({ params, request, getScopedClients, server, maintenanceService }) => {
+    const { getKnowledgeIndicatorClient, licensing, streamsClient } = await getScopedClients({
+      request,
+    });
 
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const definition = await streamsClient.getStream(params.path.streamName);
     const kiClient = await getKnowledgeIndicatorClient();

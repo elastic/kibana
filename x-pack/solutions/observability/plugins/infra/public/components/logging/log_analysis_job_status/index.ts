@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export * from './job_stopped_callout';
 export * from './log_analysis_job_problem_indicator';
 export * from './notices_section';

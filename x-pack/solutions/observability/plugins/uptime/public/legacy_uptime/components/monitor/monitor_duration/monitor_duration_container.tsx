@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { JobStat } from '@kbn/ml-common-types/data_recognizer';
 import { useGetUrlParams } from '../../../hooks';
 import {

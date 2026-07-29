@@ -25,6 +25,13 @@ export interface ApiEndpointDefinition {
   euiIconType?: EuiIconType;
   getUrl: (context: ApiEndpointContext) => string | undefined;
   usesManagedInput: (context: ApiEndpointContext) => boolean;
+  getAdditionalEndpoints?: (context: ApiEndpointContext) => ResolvedAdditionalEndpoint[];
+}
+
+export interface ResolvedAdditionalEndpoint {
+  id: 'supabase' | 'vercel';
+  label: string;
+  url: string;
 }
 
 const trimTrailingSlashes = (url: string): string => url.replace(/\/+$/, '');
@@ -89,6 +96,32 @@ export const API_ENDPOINTS: readonly ApiEndpointDefinition[] = [
         return `${trimTrailingSlashes(elasticsearchUrl)}/_otlp`;
       }
       return undefined;
+    },
+    getAdditionalEndpoints: ({ isManagedOtlpServiceAvailable, managedOtlpServiceUrl }) => {
+      const managedUrl = normalizeEndpointUrl(managedOtlpServiceUrl);
+      if (!isManagedOtlpServiceAvailable || !managedUrl) {
+        return [];
+      }
+      return [
+        {
+          id: 'supabase',
+          label: i18n.translate(
+            'xpack.observability_onboarding.apiEndpoints.supabaseLogsEndpoint.label',
+            { defaultMessage: 'Supabase logs endpoint' }
+          ),
+          url: `${managedUrl}/supabase/v1/logs`,
+        },
+        {
+          id: 'vercel',
+          label: i18n.translate(
+            'xpack.observability_onboarding.apiEndpoints.vercelEndpoint.label',
+            {
+              defaultMessage: 'Vercel endpoint',
+            }
+          ),
+          url: `${managedUrl}/vercel`,
+        },
+      ];
     },
   },
   {

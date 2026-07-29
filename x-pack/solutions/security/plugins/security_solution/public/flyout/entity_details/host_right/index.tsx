@@ -319,6 +319,7 @@ export const HostPanel = memo(function HostPanel({
             refetchEntityRecord={entityFromStoreResult.refetch}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            riskScoreQueryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
           />
         )}
       </FlyoutBody>

@@ -6,7 +6,6 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../../common/feature_flags';
 
 globalSetupHook(
@@ -25,25 +24,15 @@ globalSetupHook(
     }
 
     // Significant events is gated behind the streams.significantEventsAvailable feature flag, which
-    // falls back to false. Force it on as the outermost availability gate for the API tests.
+    // falls back to false. Force it on as the sole availability gate for the API tests (required for
+    // the insights API).
     log.debug('[setup] Enabling significant events availability feature flag...');
     await apiServices.core.settings({
       'feature_flags.overrides': {
         [STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG]: true,
       },
     });
-
-    // Enable significant events feature (required for insights API)
-    log.debug('[setup] Enabling significant events feature...');
-    try {
-      await kbnClient.uiSettings.update({
-        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
-      });
-      log.debug('[setup] Significant events feature enabled successfully');
-    } catch (error) {
-      log.error(`[setup] Failed to enable significant events: ${error}`);
-      throw error;
-    }
+    log.debug('[setup] Significant events availability feature flag enabled successfully');
 
     // Index documents to both 'logs.otel' and 'logs.ecs' streams to initialize the data streams
     // This is required for the processing simulation API to work, as it needs

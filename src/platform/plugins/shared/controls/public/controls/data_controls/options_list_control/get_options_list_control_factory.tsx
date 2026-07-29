@@ -333,6 +333,7 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
         clearSelections: () => clearSelections({ selectionsManager, temporaryStateManager }),
         hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
+        supportsJsonExport: true,
       });
 
       const componentApi: DSLOptionsListComponentApi = {

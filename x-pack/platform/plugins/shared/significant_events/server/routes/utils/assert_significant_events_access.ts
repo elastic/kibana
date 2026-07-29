@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import type { IUiSettingsClient } from '@kbn/core/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
-import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
 import type { SignificantEventsAvailabilityResponse } from '../../../common';
 import {
   SIGNIFICANT_EVENTS_REQUIRED_PLUGINS,
@@ -23,7 +21,6 @@ import { MissingDependencyError } from '../../lib/errors/missing_dependency_erro
 interface SignificantEventsAccessContext {
   server: StreamsServer;
   licensing: LicensingPluginStart;
-  uiSettingsClient: IUiSettingsClient;
 }
 
 /**
@@ -76,24 +73,6 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
         : new FeatureNotEnabledError(
             'An Enterprise license or higher is required to use significant events.'
           ),
-    ui_setting: async ({ uiSettingsClient }) => {
-      let enabled: boolean;
-      try {
-        enabled = await uiSettingsClient.get<boolean>(
-          OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS
-        );
-      } catch {
-        // Setting not registered (e.g. pricing tier check skipped registration).
-        // Treat as disabled so callers get a clean 403 rather than an unhandled
-        // rejection propagating through Promise.all as a 500.
-        enabled = false;
-      }
-      return enabled
-        ? undefined
-        : new FeatureNotEnabledError(
-            `Significant events is disabled. Enable "${OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS}" in Advanced Settings to start using it.`
-          );
-    },
     ...pluginRequirements,
   };
 
@@ -102,7 +81,7 @@ const significantEventsRequirements: Record<SignificantEventsUnavailableReason, 
  * declaration order), or `undefined` when significant events is fully available.
  *
  * Parallel (rather than sequential short-circuit) is deliberate: only the
- * license and UI-setting checks are async, and the common "available" path has
+ * feature-flag and license checks are async, and the common "available" path has
  * to run all checks anyway, so parallel keeps that hot path at the latency of
  * the single slowest check instead of summing them.
  */

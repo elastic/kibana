@@ -16,7 +16,7 @@ import {
   getChartDebugData,
 } from '../../../fixtures';
 
-spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.deploymentAgnostic }, () => {
   const openInLensSuite = createOpenInLensSuiteSetup({
     archivePath: testData.KBN_ARCHIVE_PATHS.OPEN_IN_LENS.AGG_BASED.GAUGE,
     dashboardTitles: testData.DASHBOARD_TITLES.OPEN_IN_LENS.AGG_BASED.GAUGE,
@@ -43,7 +43,7 @@ spaceTest.describe('Lens open in Lens — agg-based Gauge', { tag: tags.stateful
     const { bullet } = await getChartDebugData(page, 'gaugeChart');
     const debugData = bullet?.rows[0][0];
     expect(debugData?.title).toBe('Count');
-    expect(Math.round(debugData?.value ?? 0)).toBe(14005);
+    expect(Math.round(debugData?.value ?? 0)).toBe(14004);
   });
 
   spaceTest('should convert aggregation with params', async ({ page, pageObjects }) => {

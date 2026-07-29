@@ -27,11 +27,11 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import { noop } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import type { ConnectedProps } from 'react-redux-v7';
+import { connect, useDispatch } from 'react-redux-v7';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { Dispatch } from 'redux';
+import type { Dispatch } from 'redux-v4';
 import { isTab } from '@kbn/timelines-plugin/public';
 import {
   dataTableActions,
@@ -246,7 +246,12 @@ export const RuleDetailsPage = connector(
     const isRuleChangesHistoryEnabled =
       ruleChangesHistoryFFEnabled && ruleChangesHistoryAdvancedSetting;
 
-    const { application, timelines: timelinesUi, spaces: spacesApi } = useKibana().services;
+    const {
+      application,
+      timelines: timelinesUi,
+      spaces: spacesApi,
+      aiRuleCreation,
+    } = useKibana().services;
     const {
       navigateToApp,
       capabilities: { actions },
@@ -362,6 +367,21 @@ export const RuleDetailsPage = connector(
         path: getRuleDetailsTabUrl(ruleId ?? '', 'alerts', ''),
       });
     }, [navigateToApp, ruleId]);
+
+    // Sync after a chat-driven rule save. Must refetch here: the save handler can't write
+    // to this page's react-query cache (security pages use the Cases context's query client).
+    useEffect(() => {
+      let prevSaving: ReadonlySet<string> = new Set();
+      const savingSub = aiRuleCreation.saving$.subscribe((saving) => {
+        if (saving.size < prevSaving.size) {
+          refreshRule();
+        }
+        prevSaving = saving;
+      });
+      return () => {
+        savingSub.unsubscribe();
+      };
+    }, [aiRuleCreation, refreshRule]);
 
     // persist rule until refresh is complete
     useEffect(() => {

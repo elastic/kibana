@@ -23,7 +23,19 @@ jest.mock('./use_api_keys', () => ({
 }));
 
 jest.mock('./endpoint_field', () => ({
-  EndpointField: () => <div data-test-subj="endpointFieldStub" />,
+  EndpointField: ({
+    label,
+    url,
+    dataTestSubjSuffix = '',
+  }: {
+    label?: string;
+    url?: string;
+    dataTestSubjSuffix?: string;
+  }) => (
+    <div data-test-subj={`endpointFieldStub${dataTestSubjSuffix}`} data-label={label ?? ''}>
+      {url}
+    </div>
+  ),
 }));
 
 jest.mock('./api_key_field', () => ({
@@ -55,6 +67,7 @@ describe('ApiEndpoints', () => {
           euiIconType: 'logoElasticsearch',
           url: 'https://otlp.example.com:443/_es',
           usesManagedInput: true,
+          additionalEndpoints: [],
         },
       ],
       isLoading: false,
@@ -62,6 +75,7 @@ describe('ApiEndpoints', () => {
     });
     mockUseApiKeys.mockReturnValue({
       encodedApiKeys: {},
+      keyCreatedBeforeByEndpointId: {},
       createApiKey: jest.fn(),
     });
     mockUseKibana.mockReturnValue({
@@ -107,6 +121,7 @@ describe('ApiEndpoints', () => {
           logo: 'prometheus',
           url: 'http://localhost:9200/_prometheus/api/v1/write',
           usesManagedInput: false,
+          additionalEndpoints: [],
         },
       ],
       isLoading: false,
@@ -133,6 +148,7 @@ describe('ApiEndpoints', () => {
           logo: 'prometheus',
           url: 'http://localhost:9200/_prometheus/api/v1/write',
           usesManagedInput: false,
+          additionalEndpoints: [],
         },
         {
           id: ApiEndpointId.OpenTelemetry,
@@ -140,6 +156,7 @@ describe('ApiEndpoints', () => {
           logo: 'opentelemetry',
           url: 'https://managed-otlp.example.elastic.dev:443',
           usesManagedInput: true,
+          additionalEndpoints: [],
         },
       ],
       isLoading: false,
@@ -160,5 +177,102 @@ describe('ApiEndpoints', () => {
     expect(
       container.querySelector('[data-test-subj="observabilityOnboardingApiEndpointsLearnMore"]')
     ).toHaveAttribute('href', 'https://ela.st/managed-inputs');
+  });
+
+  it('renders vendor endpoint fields when the selected endpoint has additional endpoints', () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.OpenTelemetry,
+          label: 'OpenTelemetry',
+          logo: 'opentelemetry',
+          url: 'https://otlp.example.com:443',
+          usesManagedInput: true,
+          additionalEndpoints: [
+            {
+              id: 'supabase',
+              label: 'Supabase logs endpoint',
+              url: 'https://otlp.example.com:443/supabase/v1/logs',
+            },
+            {
+              id: 'vercel',
+              label: 'Vercel endpoint',
+              url: 'https://otlp.example.com:443/vercel',
+            },
+          ],
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderApiEndpoints();
+
+    expect(screen.getByTestId('endpointFieldStub-supabase')).toHaveTextContent(
+      'https://otlp.example.com:443/supabase/v1/logs'
+    );
+    expect(screen.getByTestId('endpointFieldStub-supabase')).toHaveAttribute(
+      'data-label',
+      'Supabase logs endpoint'
+    );
+    expect(screen.getByTestId('endpointFieldStub-vercel')).toHaveTextContent(
+      'https://otlp.example.com:443/vercel'
+    );
+    expect(screen.getByTestId('endpointFieldStub-vercel')).toHaveAttribute(
+      'data-label',
+      'Vercel endpoint'
+    );
+  });
+
+  it('renders no vendor endpoint fields when the selected endpoint has none', () => {
+    renderApiEndpoints();
+
+    expect(screen.queryByTestId('endpointFieldStub-supabase')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('endpointFieldStub-vercel')).not.toBeInTheDocument();
+  });
+
+  it('hides vendor endpoint fields after switching to a tab without them', () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.OpenTelemetry,
+          label: 'OpenTelemetry',
+          logo: 'opentelemetry',
+          url: 'https://otlp.example.com:443',
+          usesManagedInput: true,
+          additionalEndpoints: [
+            {
+              id: 'supabase',
+              label: 'Supabase logs endpoint',
+              url: 'https://otlp.example.com:443/supabase/v1/logs',
+            },
+            {
+              id: 'vercel',
+              label: 'Vercel endpoint',
+              url: 'https://otlp.example.com:443/vercel',
+            },
+          ],
+        },
+        {
+          id: ApiEndpointId.Prometheus,
+          label: 'Prometheus',
+          logo: 'prometheus',
+          url: 'https://otlp.example.com:443/api/v1/write',
+          usesManagedInput: true,
+          additionalEndpoints: [],
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderApiEndpoints();
+
+    expect(screen.getByTestId('endpointFieldStub-supabase')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('observabilityOnboardingApiEndpointTab-prometheus'));
+
+    expect(screen.queryByTestId('endpointFieldStub-supabase')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('endpointFieldStub-vercel')).not.toBeInTheDocument();
   });
 });

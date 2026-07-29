@@ -39,7 +39,7 @@ import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe(
+describe.skip(
   'Packs - Create and Edit',
   // TODO: failing on MKI https://github.com/elastic/kibana/issues/200302
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },

@@ -14,6 +14,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -83,6 +84,7 @@ import {
 } from './validators';
 import type { InlineField } from '../../../common/types/domain/template/fields';
 import { emptyCasesAssigneesSanitizer } from './sanitizers';
+import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
  */
@@ -629,6 +631,7 @@ export const bulkUpdate = async (
           updateReq,
           originalCase,
           templatesService,
+          fieldDefinitionsService,
           globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
         })
       )
@@ -669,6 +672,7 @@ export const bulkUpdate = async (
             templateId: id,
             templateVersion: version,
             templatesService,
+            fieldDefinitionsService,
             logger,
           });
           return [`${id}@${version}`, fields] as [string, InlineField[]];
@@ -692,6 +696,7 @@ export const bulkUpdate = async (
       user,
       casesToUpdate,
       customFieldsConfigurationMap,
+      templatesEnabled: clientArgs.config.templates.enabled,
     });
 
     // Resolve names of newly-applied templates so the "applied template" user action records the
@@ -774,7 +779,7 @@ export const bulkUpdate = async (
       (flattenCases, updatedCase) => {
         const originalCase = casesMap.get(updatedCase.id);
 
-        if (!originalCase) {
+        if (!originalCase || isSavedObjectErrorResult(updatedCase)) {
           return flattenCases;
         }
 
@@ -921,10 +926,12 @@ const createPatchCasesPayload = ({
   casesToUpdate,
   user,
   customFieldsConfigurationMap,
+  templatesEnabled,
 }: {
   casesToUpdate: UpdateRequestWithOriginalCase[];
   user: User;
   customFieldsConfigurationMap: Map<string, CustomFieldsConfiguration>;
+  templatesEnabled: boolean;
 }): PatchCasesArgs => {
   const updatedDt = new Date().toISOString();
 
@@ -964,6 +971,33 @@ const createPatchCasesPayload = ({
           ...(originalCase.attributes.extended_fields ?? {}),
           ...trimmedCaseAttributes.extended_fields,
         };
+      }
+
+      // Mirror customFields into extended_fields so that automations writing to the legacy API
+      // keep the v2 analytics / UI surface populated. Only run when the update includes
+      // customFields — an update that omits customFields must not change extended_fields.
+      //
+      // CustomFields-win semantics: the incoming value always overrides the mirror key; a null
+      // value the caller explicitly submitted clears the mirror key.
+      //
+      // Pass the RAW request customFields (updateCaseAttributes.customFields), not the
+      // post-fill array (trimmedCaseAttributes.customFields). fillMissingCustomFields pads
+      // absent optional-no-default fields with { key, value: null }; those synthetic nulls
+      // would otherwise hit the merge's delete branch and wipe mirror keys the update never
+      // intended to clear — silently destroying values stored via the v2 UI.
+      //
+      // mergeCustomFieldsIntoExtendedFields returns the *same reference* when the result is
+      // value-identical — guard on reference inequality to avoid spurious writes/user-actions.
+      if (templatesEnabled && updateCaseAttributes.customFields) {
+        const currentExtendedFields =
+          trimmedCaseAttributes.extended_fields ?? originalCase.attributes.extended_fields;
+        const merged = mergeCustomFieldsIntoExtendedFields(
+          updateCaseAttributes.customFields,
+          currentExtendedFields
+        );
+        if (merged !== currentExtendedFields && merged != null) {
+          trimmedCaseAttributes.extended_fields = merged;
+        }
       }
 
       return {
@@ -1024,7 +1058,7 @@ const getCasesAndAssigneesToNotifyForAssignment = (
   >((acc, updatedCase) => {
     const originalCaseSO = casesMap.get(updatedCase.id);
 
-    if (!originalCaseSO) {
+    if (!originalCaseSO || isSavedObjectErrorResult(updatedCase)) {
       return acc;
     }
 

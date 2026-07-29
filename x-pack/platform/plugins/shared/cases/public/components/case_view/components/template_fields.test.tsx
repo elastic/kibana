@@ -107,7 +107,7 @@ describe('TemplateFields', () => {
   it('fetches the template with the correct id and version', () => {
     render(<TemplateFields {...defaultProps} />);
 
-    expect(mockUseGetTemplate).toHaveBeenCalledWith('template-1', 1);
+    expect(mockUseGetTemplate).toHaveBeenCalledWith('template-1', 1, { includeDeleted: true });
   });
 
   it('renders nothing when template is loading', () => {

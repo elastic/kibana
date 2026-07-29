@@ -81,7 +81,9 @@ jest.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () =
   useNavigateToAlertsPageWithFilters: jest.fn().mockReturnValue(jest.fn()),
 }));
 
-const renderTable = (onShowAlert: (eventId: string, indexName: string) => void) =>
+const renderTable = (
+  onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void
+) =>
   render(
     <TestProviders>
       <AlertsDetailsTable
@@ -109,7 +111,7 @@ describe('AlertsDetailsTable', () => {
 
     clickRowAction();
 
-    expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1');
+    expect(onShowAlert).toHaveBeenCalledWith('alert-1', 'index-1', 'Rule');
   });
 
   describe('time range', () => {

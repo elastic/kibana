@@ -147,6 +147,67 @@ describe('useGrouping', () => {
     expect(result.current.groupSelector.props.settings).toEqual(settings);
   });
 
+  it('Hides group selector in getGrouping when hideGroupSelector is true', async () => {
+    const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
+    getItem.mockReturnValue(
+      JSON.stringify({
+        'test-table': {
+          itemsPerPageOptions: [10, 25, 50, 100],
+          itemsPerPage: 25,
+          activeGroup: 'kibana.alert.rule.name',
+          options: defaultGroupingOptions,
+        },
+      })
+    );
+
+    const settings = { hideGroupSelector: true };
+    const { result } = renderHook(() =>
+      useGrouping({
+        ...defaultArgs,
+        settings,
+      })
+    );
+    await waitFor(() => new Promise((resolve) => resolve(null)));
+
+    expect(result.current.groupSelector).not.toBeNull();
+    expect(result.current.groupSelector.props['data-test-subj']).toEqual(
+      'alerts-table-group-selector'
+    );
+
+    const { queryByTestId, getByTestId } = render(
+      <IntlProvider locale="en">
+        {result.current.getGrouping({
+          ...groupingArgs,
+          data: {
+            groupsCount: {
+              value: 9,
+            },
+            groupByFields: {
+              buckets: [
+                {
+                  key: ['critical hosts', 'description'],
+                  key_as_string: 'critical hosts|description',
+                  doc_count: 3,
+                  unitsCount: {
+                    value: 3,
+                  },
+                },
+              ],
+            },
+            unitsCount: {
+              value: 18,
+            },
+          },
+          renderChildComponent: jest.fn(),
+          selectedGroup: 'test',
+        })}
+      </IntlProvider>
+    );
+
+    expect(getByTestId('grouping-table')).toBeInTheDocument();
+    expect(queryByTestId('alerts-table-group-selector')).not.toBeInTheDocument();
+  });
+
   describe('additionalToolbarControls', () => {
     it('passes additionalToolbarControls to grouping component when provided', async () => {
       const customControl1 = <button data-test-subj="custom-control-1">Control 1</button>;
