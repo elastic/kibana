@@ -27,6 +27,13 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconVirustotal" */ './specs/virustotal/icon')),
   ],
   [
+    '.datadog_alerts',
+    lazy(
+      () =>
+        import(/* webpackChunkName: "connectorIconDatadogAlerts" */ './specs/datadog_alerts/icon')
+    ),
+  ],
+  [
     '.alienvault-otx',
     lazy(
       () =>
