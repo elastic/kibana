@@ -4625,6 +4625,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-skill-loader@link:x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-sml-plugin@link:x-pack/platform/plugins/shared/agent_builder_sml":
   version "0.0.0"
   uid ""
@@ -7130,6 +7134,10 @@
   uid ""
 
 "@kbn/evals-suite-alert-analysis-workflow@link:x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-alerting-v2@link:x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2":
   version "0.0.0"
   uid ""
 
@@ -15925,11 +15933,6 @@
   integrity sha512-KHPsfX/FoVbUGbyYvk1q9MMQHLPeRZhRJZdO45Q4YjvFkv4hMNghCWTvy7rdKessBsmtz4euWCWAB6/tVpI1Iw==
   dependencies:
     "@types/node" "*"
-
-"@types/textarea-caret@3.0.4":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@types/textarea-caret/-/textarea-caret-3.0.4.tgz#eaa7a83ec23121147f33cb37f71450e42606f86b"
-  integrity sha512-epJGYB37/sNrTDbhfyRjHkXsQSAcO6zby0JBDS0QMt6HQ1f1W2E4YpSc7TQkNmWaWmYXv92zOIfN5PHA8CmThg==
 
 "@types/through@*":
   version "0.0.30"
@@ -33617,11 +33620,6 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
-
-textarea-caret@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/textarea-caret/-/textarea-caret-3.1.0.tgz#5d5a35bb035fd06b2ff0e25d5359e97f2655087f"
-  integrity sha512-cXAvzO9pP5CGa6NKx0WYHl+8CHKZs8byMkt3PCJBCmq2a34YA9pO1NrQET5pzeqnBjBdToF5No4rrmkDUgQC2Q==
 
 thingies@^2.5.0:
   version "2.5.0"
