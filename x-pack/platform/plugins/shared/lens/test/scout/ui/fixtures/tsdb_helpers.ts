@@ -202,7 +202,8 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
 
       const putDataStreamTemplate = async (
         stream: string,
-        mode: 'tsdb' | undefined
+        mode: 'tsdb' | undefined,
+        { includeTimeSeriesMetadata = true }: { includeTimeSeriesMetadata?: boolean } = {}
       ): Promise<void> => {
         await esClient.cluster.putComponentTemplate({
           name: `${stream}_mapping`,
@@ -216,7 +217,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
                 }
               : {}),
             mappings: {
-              properties: getTsdbMapping(false, mode === 'tsdb'),
+              properties: getTsdbMapping(false, includeTimeSeriesMetadata),
             },
           },
         });
@@ -341,7 +342,7 @@ export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
           await createDocs(stream, timeRange.beforeUpgrade, { isStream: true });
 
           log.info(`Downgrading data stream "${stream}" to a regular data stream`);
-          await putDataStreamTemplate(stream, undefined);
+          await putDataStreamTemplate(stream, undefined, { includeTimeSeriesMetadata: false });
           await esClient.indices.rollover({ alias: stream });
           await createDocs(stream, timeRange.afterUpgrade, { isStream: true });
 
