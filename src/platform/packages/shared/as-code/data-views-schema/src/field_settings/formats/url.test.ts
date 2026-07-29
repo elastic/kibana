@@ -15,20 +15,20 @@ describe('formatSchema', () => {
       const result = formatSchema.safeParse({
         type: 'url',
         params: {
-          type: 'link',
+          type: 'a',
           url_template: 'https://example.com/{{value}}',
           label_template: 'View {{value}}',
-          open_in_new_tab: true,
+          open_link_in_current_tab: true,
         },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual({
         type: 'url',
         params: {
-          type: 'link',
+          type: 'a',
           url_template: 'https://example.com/{{value}}',
           label_template: 'View {{value}}',
-          open_in_new_tab: true,
+          open_link_in_current_tab: true,
         },
       });
     });

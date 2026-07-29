@@ -10,10 +10,17 @@
 import { z } from '@kbn/zod';
 import { numeralPatternSchema } from './common';
 
-export const histogramFormatSchema = z.object({
-  type: z.literal('histogram'),
-  params: z.object({
-    format: z.union([z.literal('bytes'), z.literal('percent'), z.literal('number')]),
-    pattern: numeralPatternSchema,
-  }),
-});
+export const histogramFormatSchema = z
+  .object({
+    type: z.literal('histogram'),
+    params: z.object({
+      format: z.union([z.literal('bytes'), z.literal('percent'), z.literal('number')]),
+      pattern: numeralPatternSchema,
+    }),
+  })
+  .meta({
+    id: 'kbn-field-format-histogram',
+    title: 'Histogram field format',
+    description:
+      'Formats a histogram field into a numeric value following the defined pattern. The default pattern is defined by format:bytes:defaultPattern, format:percent:defaultPattern or format:number:defaultPattern advanced settings depending on the selected format.',
+  });

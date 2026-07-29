@@ -10,11 +10,18 @@
 import { z } from '@kbn/zod';
 import { numeralPatternSchema } from './common';
 
-export const numberFormatSchema = z.object({
-  type: z.literal('number'),
-  params: z
-    .object({
-      pattern: numeralPatternSchema.default('0,0.[0]b'),
-    })
-    .optional(),
-});
+export const numberFormatSchema = z
+  .object({
+    type: z.literal('number'),
+    params: z
+      .object({
+        pattern: numeralPatternSchema,
+      })
+      .optional(),
+  })
+  .meta({
+    id: 'kbn-field-format-number',
+    title: 'Number field format',
+    description:
+      'Formats a field into a numeric value following the defined pattern. The default pattern is defined by format:number:defaultPattern advanced setting.',
+  });

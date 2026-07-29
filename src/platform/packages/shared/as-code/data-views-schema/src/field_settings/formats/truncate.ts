@@ -9,11 +9,18 @@
 
 import { z } from '@kbn/zod';
 
-export const truncateFormatSchema = z.object({
-  type: z.literal('truncate'),
-  params: z
-    .object({
-      field_length: z.number().optional(),
-    })
-    .optional(),
-});
+export const truncateFormatSchema = z
+  .object({
+    type: z.literal('truncate'),
+    params: z
+      .object({
+        field_length: z.number().optional(),
+      })
+      .optional(),
+  })
+  .meta({
+    id: 'kbn-field-format-truncate',
+    title: 'Truncate field format',
+    description:
+      'Truncates the field value to the specified length. If the field value is longer than the specified length, it will be truncated and the remaining text will be replaced with "...".',
+  });

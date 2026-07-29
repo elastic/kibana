@@ -10,11 +10,17 @@
 import { z } from '@kbn/zod';
 import { momentPatternSchema } from './common';
 
-export const dateNanosFormatSchema = z.object({
-  type: z.literal('date_nanos'),
-  params: z
-    .object({
-      pattern: momentPatternSchema.default('MMM D, YYYY @ HH:mm:ss.SSSSSSSSS'),
-    })
-    .optional(),
-});
+export const dateNanosFormatSchema = z
+  .object({
+    type: z.literal('date_nanos'),
+    params: z
+      .object({
+        pattern: momentPatternSchema.default('MMM D, YYYY @ HH:mm:ss.SSSSSSSSS'),
+      })
+      .optional(),
+  })
+  .meta({
+    id: 'kbn-field-format-date_nanos',
+    title: 'Date nanos field format',
+    description: 'Formats a field into a date nanos value following the defined pattern.',
+  });

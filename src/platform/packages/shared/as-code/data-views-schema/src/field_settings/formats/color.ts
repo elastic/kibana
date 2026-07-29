@@ -62,6 +62,7 @@ export const colorFormatSchema = z
     ]),
   })
   .meta({
+    id: 'kbn-field-format-color',
     title: 'Color field format',
     description: 'Formats a field into a color value.',
   });

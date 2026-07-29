@@ -9,6 +9,12 @@
 
 import { z } from '@kbn/zod';
 
-export const relativeDateFormatSchema = z.object({
-  type: z.literal('relative_date'),
-});
+export const relativeDateFormatSchema = z
+  .object({
+    type: z.literal('relative_date'),
+  })
+  .meta({
+    id: 'kbn-field-format-relative_date',
+    title: 'Relative date field format',
+    description: 'Formats a field into a relative date value. For example: "1 day ago".',
+  });
