@@ -26,7 +26,11 @@ import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/tem
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { isRefField } from '../../../common/types/domain/template/fields';
 import { toFieldDefinitions, trimFieldDefaults } from './utils';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_TEMPLATE_SAVED_OBJECT,
+  MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATES_PER_OWNER,
+} from '../../../common/constants';
 import type {
   TemplatesFindRequest,
   TemplatesFindResponse,
@@ -361,10 +365,14 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
     });
+
+    await this.assertOwnerTemplateCountWithinLimit(input.owner);
 
     const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
@@ -418,11 +426,17 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
+
     await this.assertTemplateNameIsUnique({
       name: templateName,
       owner: input.owner,
       excludeTemplateId: currentTemplate.attributes.templateId,
     });
+
+    if (input.owner !== currentTemplate.attributes.owner) {
+      await this.assertOwnerTemplateCountWithinLimit(input.owner);
+    }
 
     const libraryDefs = await this.getLibraryDefsIfReferenced(parsedDefinition.fields, input.owner);
 
@@ -672,6 +686,40 @@ export class TemplatesService {
     }
 
     return referencing;
+  }
+
+  private assertFieldCountWithinLimit(fieldCount: number): void {
+    if (fieldCount > MAX_FIELDS_PER_TEMPLATE) {
+      throw Boom.badRequest(
+        `A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`
+      );
+    }
+  }
+
+  /**
+   * Counts the latest, non-deleted templates for an owner. This is a best-effort
+   * read-then-write check, so two concurrent creates can overshoot by one.
+   */
+  private async assertOwnerTemplateCountWithinLimit(owner: string): Promise<void> {
+    const escapedOwner = escapeKuery(owner);
+    const soType = CASE_TEMPLATE_SAVED_OBJECT;
+    const { total } = await this.dependencies.unsecuredSavedObjectsClient.find<Template>({
+      type: soType,
+      namespaces: [this.dependencies.namespace],
+      page: 1,
+      perPage: 0,
+      fields: ['owner', 'isLatest', 'deletedAt'],
+      filter: fromKueryExpression(
+        `${soType}.attributes.owner: "${escapedOwner}" AND ` +
+          `${soType}.attributes.isLatest: true AND NOT ${soType}.attributes.deletedAt: *`
+      ),
+    });
+
+    if (total >= MAX_TEMPLATES_PER_OWNER) {
+      throw Boom.badRequest(
+        `Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`
+      );
+    }
   }
 
   private async assertTemplateNameIsUnique({

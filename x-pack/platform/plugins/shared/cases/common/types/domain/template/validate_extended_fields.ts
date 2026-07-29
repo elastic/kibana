@@ -9,6 +9,11 @@ import type { InlineField, RefField } from './fields';
 import { FieldType, isInlineField, isDisplayOnlyField } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
 import { getFieldSnakeKey } from '../../../utils';
+import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
+
+// Lucene's keyword-term limit is measured in UTF-8 bytes, while string.length
+// counts UTF-16 code units and can undercount non-ASCII input.
+const textEncoder = new TextEncoder();
 
 const validatePattern = (
   label: string,
@@ -137,10 +142,20 @@ export const validateExtendedFields = (
   // 1. Build valid key set
   const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
-  // 2. Unknown keys
+  // 2. Unknown keys + value-size backstop
   for (const key of Object.keys(extendedFields)) {
     if (!validKeys.has(key)) {
       errors.push(`Unknown extended field key: "${key}"`);
+    }
+
+    const value = extendedFields[key];
+    if (
+      typeof value === 'string' &&
+      textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES
+    ) {
+      errors.push(
+        `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
     }
   }
 

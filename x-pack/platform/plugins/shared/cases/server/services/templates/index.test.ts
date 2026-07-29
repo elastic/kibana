@@ -14,7 +14,11 @@ import type {
   SavedObjectsSearchResponse,
 } from '@kbn/core-saved-objects-api-server';
 import type { Template } from '../../../common/types/domain/template/v1';
-import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_TEMPLATE_SAVED_OBJECT,
+  MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATES_PER_OWNER,
+} from '../../../common/constants';
 import { TemplatesService } from '.';
 
 const buildDefinition = (
@@ -72,12 +76,13 @@ const createTemplateSO = (
   } as SavedObject<Template>);
 
 const createMockFindResponse = (
-  savedObjects: Array<SavedObject<Template>>
+  savedObjects: Array<SavedObject<Template>>,
+  totalOverride?: number
 ): SavedObjectsFindResponse<Template> =>
   ({
     page: 1,
     per_page: savedObjects.length,
-    total: savedObjects.length,
+    total: totalOverride ?? savedObjects.length,
     saved_objects: savedObjects,
   } as SavedObjectsFindResponse<Template>);
 
@@ -1520,6 +1525,146 @@ describe('TemplatesService', () => {
         }),
         expect.any(Object)
       );
+    });
+  });
+
+  describe('resource limits', () => {
+    const buildDefinitionWithFields = (name: string, fieldCount: number) =>
+      yamlStringify({
+        name,
+        fields: Array.from({ length: fieldCount }, (_, index) => ({
+          control: 'INPUT_TEXT',
+          name: `field_${index}`,
+          type: 'keyword',
+        })),
+      });
+
+    it('rejects create when the owner is at the template limit', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'One Too Many',
+            owner: 'securitySolution',
+            definition: buildDefinition('One Too Many'),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(`Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create when the owner is below the template limit', async () => {
+      const service = createService();
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER - 1)
+      );
+
+      await service.createTemplate(
+        {
+          name: 'Just Fits',
+          owner: 'securitySolution',
+          definition: buildDefinition('Just Fits'),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects an owner-changing update when the target owner is at the template limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+            owner: 'securitySolution',
+          })
+        );
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'observability',
+          definition: buildDefinition('Existing'),
+        })
+      ).rejects.toThrow(`Cannot create more than ${MAX_TEMPLATES_PER_OWNER} templates per owner.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects create when a definition declares too many fields', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Too Many Fields',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithFields('Too Many Fields', MAX_FIELDS_PER_TEMPLATE + 1),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create with exactly the maximum number of fields', async () => {
+      const service = createService();
+
+      await service.createTemplate(
+        {
+          name: 'Exactly At Limit',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithFields('Exactly At Limit', MAX_FIELDS_PER_TEMPLATE),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects update when a definition declares too many fields', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+          })
+        );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithFields('Existing', MAX_FIELDS_PER_TEMPLATE + 1),
+        })
+      ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 
