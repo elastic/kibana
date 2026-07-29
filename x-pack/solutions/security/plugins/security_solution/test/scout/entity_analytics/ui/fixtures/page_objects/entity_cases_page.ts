@@ -127,6 +127,12 @@ export class EntityCasesPage {
 
   async navigateToCase(caseId: string) {
     await this.page.gotoApp(`security/cases/${caseId}`);
+    // Cold full-page navigation lands on the `case-view-loading` spinner; wait for
+    // the case view's own loaded signal before returning so downstream tab clicks
+    // aren't racing the case fetch. Mirrors `navigateToHostFlyout` above.
+    await this.page.testSubj
+      .locator('case-view-title')
+      .waitFor({ state: 'visible', timeout: 30000 });
   }
 
   // Case view lands on the Activity tab; the Entities accordion lives inside the
