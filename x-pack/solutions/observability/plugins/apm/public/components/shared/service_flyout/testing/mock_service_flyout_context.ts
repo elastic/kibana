@@ -49,5 +49,5 @@ export function createMockServiceFlyoutContext(
       setTransactionType: jest.fn(),
     },
     ...overrides,
-  };
+  } as ServiceFlyoutContextValue;
 }
