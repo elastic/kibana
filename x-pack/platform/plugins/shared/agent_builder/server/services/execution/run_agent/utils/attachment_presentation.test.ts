@@ -244,7 +244,6 @@ describe('attachment_presentation', () => {
       expect(xmlIndex).toBeGreaterThan(titleIndex);
       expect(instructionsIndex).toBeGreaterThan(xmlIndex);
     });
-
   });
 
   describe('getConversationAttachmentsSystemMessages', () => {
