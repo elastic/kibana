@@ -102,6 +102,12 @@ describe('DateRangePickerPresetsService', () => {
       const preset: PresetItem = { start: 'now-1h', end: 'now', label: 'Last hour' };
 
       await expect(service.savePreset(preset)).resolves.toBe('saved');
+      // Persists through the atomic read-modify-write API.
+      expect(core.userStorage.update).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        DEFAULT_STORED_PRESETS,
+        expect.any(Function)
+      );
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([preset])
@@ -179,6 +185,12 @@ describe('DateRangePickerPresetsService', () => {
       );
 
       await service.deletePreset({ start: 'now-1h', end: 'now' });
+      // Persists through the atomic read-modify-write API.
+      expect(core.userStorage.update).toHaveBeenCalledWith(
+        DATE_RANGE_PICKER_PRESETS_KEY,
+        DEFAULT_STORED_PRESETS,
+        expect.any(Function)
+      );
       expect(core.userStorage.set).toHaveBeenCalledWith(
         DATE_RANGE_PICKER_PRESETS_KEY,
         storedPresets([{ start: 'now-2h', end: 'now' }])
