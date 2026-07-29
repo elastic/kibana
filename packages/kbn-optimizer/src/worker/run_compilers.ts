@@ -125,7 +125,9 @@ export const runCompilers = (
      */
     Rx.defer(() => {
       if (!workerConfig.watch) {
-        multiCompiler.run(() => {});
+        multiCompiler.run(() => {
+          multiCompiler.close(() => {});
+        });
       } else {
         multiCompiler.watch({}, () => {});
       }
