@@ -525,20 +525,24 @@ export class WorkflowsExecutionEnginePlugin
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
-              // Guard check: Check&Skip only when workflow has no concurrency strategy. When strategy is
-              // set, the concurrency check (later) governs the limit and strategy.
-              if (!workflow.definition?.settings?.concurrency?.strategy) {
-                const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
-                  workflow,
-                  spaceId,
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
-                  taskInstance,
-                  logger
-                );
-                if (wasSkipped) {
-                  return;
-                }
+              // Always run scheduled recovery. Stale same-taskRunAt retries are failed so an
+              // orphaned pending cannot hold a concurrency slot forever. When a concurrency
+              // strategy is set, defer "SKIPPED for in-flight other ticks" to the concurrency
+              // check so strategies like cancel-in-progress still apply.
+              const hasConcurrencyStrategy = Boolean(
+                workflow.definition?.settings?.concurrency?.strategy
+              );
+              const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
+                workflow,
+                spaceId,
+                workflowExecutionRepository,
+                stepExecutionRepository,
+                taskInstance,
+                logger,
+                { createSkippedForInFlightDuplicates: !hasConcurrencyStrategy }
+              );
+              if (wasSkipped) {
+                return;
               }
 
               // Check for RRule triggers and log details

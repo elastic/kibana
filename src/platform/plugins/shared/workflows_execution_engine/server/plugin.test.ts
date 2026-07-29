@@ -681,6 +681,123 @@ describe('checkAndSkipIfExistingScheduledExecution', () => {
       );
     });
   });
+
+  describe('createSkippedForInFlightDuplicates: false (concurrency workflows)', () => {
+    it('still fails stale same-taskRunAt pending on retry so the concurrency slot can free', async () => {
+      const matchingRunAt = baseRunAt.toISOString();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                id: 'orphaned-pending-id',
+                workflowId: workflow.id,
+                spaceId,
+                status: ExecutionStatus.PENDING,
+                triggeredBy: 'scheduled',
+                taskRunAt: matchingRunAt,
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+      esClient.update.mockResolvedValue({} as any);
+
+      const result = await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        createMockTaskInstance({ attempts: 2 }),
+        logger,
+        { createSkippedForInFlightDuplicates: false }
+      );
+
+      expect(result).toBe(false);
+      expect(esClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'orphaned-pending-id',
+          doc: expect.objectContaining({
+            status: ExecutionStatus.FAILED,
+          }),
+        })
+      );
+      expect(esClient.index).not.toHaveBeenCalled();
+    });
+
+    it('does not create SKIPPED for a different in-flight taskRunAt (defers to concurrency)', async () => {
+      const differentRunAt = new Date('2024-01-01T09:00:00Z').toISOString();
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                id: 'existing-execution-id',
+                workflowId: workflow.id,
+                spaceId,
+                status: ExecutionStatus.RUNNING,
+                triggeredBy: 'scheduled',
+                taskRunAt: differentRunAt,
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+
+      const result = await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        currentTaskInstance,
+        logger,
+        { createSkippedForInFlightDuplicates: false }
+      );
+
+      expect(result).toBe(false);
+      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Deferring in-flight scheduled overlap')
+      );
+    });
+
+    it('does not create SKIPPED for same taskRunAt on first attempt (defers to concurrency)', async () => {
+      esClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                id: 'existing-execution-id',
+                workflowId: workflow.id,
+                spaceId,
+                status: ExecutionStatus.PENDING,
+                triggeredBy: 'scheduled',
+                taskRunAt: baseRunAt.toISOString(),
+              },
+            },
+          ],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+
+      const result = await checkAndSkipIfExistingScheduledExecution(
+        workflow,
+        spaceId,
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        createMockTaskInstance({ attempts: 1 }),
+        logger,
+        { createSkippedForInFlightDuplicates: false }
+      );
+
+      expect(result).toBe(false);
+      expect(esClient.update).not.toHaveBeenCalled();
+      expect(esClient.index).not.toHaveBeenCalled();
+    });
+  });
 });
 
 describe('elastic-apm-node dynamic import pattern', () => {

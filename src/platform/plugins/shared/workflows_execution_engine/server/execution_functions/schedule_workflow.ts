@@ -17,6 +17,17 @@ import { markExecutionFailedTaskRecovery, taskRecoveryMessages } from '../lib/ta
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
+export interface CheckExistingScheduledExecutionOptions {
+  /**
+   * When true (default), create a SKIPPED execution if another scheduled run
+   * (different `taskRunAt`) is still non-terminal.
+   * When false (workflows with a concurrency strategy), leave in-flight overlap
+   * to the concurrency check so strategies like `cancel-in-progress` still apply.
+   * Stale same-`taskRunAt` recovery always runs regardless of this flag.
+   */
+  createSkippedForInFlightDuplicates?: boolean;
+}
+
 /**
  * Checks if there's an existing non-terminal scheduled execution for a workflow.
  *
@@ -33,11 +44,12 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
  *   → The execution is stale from a previous attempt and will never complete
  *   → If `waiting_for_input`, skip this tick only (human resume; do not fail the execution)
  *   → Else mark execution as FAILED (TaskRecoveryError) and proceed with a new execution for this tick
+ *   → This stale path always runs, including when the workflow has a concurrency strategy
  *
  * - If execution's `taskRunAt` differs from current task's `runAt`:
  *   → Execution is from a DIFFERENT scheduled run that's still running
- *   → This is a legitimate concurrent execution (previous scheduled run hasn't finished yet)
- *   → Skip current run (create SKIPPED execution)
+ *   → When `createSkippedForInFlightDuplicates` is true: skip current run (create SKIPPED)
+ *   → When false: return false so the concurrency check governs overlap
  *
  * Note: Retries of the same scheduled run will have the same `runAt` but different `startedAt`.
  * This is why we use `runAt` instead of `startedAt` for comparison.
@@ -49,8 +61,11 @@ export async function checkAndSkipIfExistingScheduledExecution(
   workflowExecutionRepository: WorkflowExecutionRepository,
   stepExecutionRepository: StepExecutionRepository,
   currentTaskInstance: ConcreteTaskInstance,
-  logger: Logger
+  logger: Logger,
+  options: CheckExistingScheduledExecutionOptions = {}
 ): Promise<boolean> {
+  const { createSkippedForInFlightDuplicates = true } = options;
+
   // Check if there's already a scheduled workflow execution in non-terminal state
   const runningExecutions = await workflowExecutionRepository.getRunningExecutionsByWorkflowId(
     workflow.id,
@@ -58,7 +73,6 @@ export async function checkAndSkipIfExistingScheduledExecution(
     'scheduled'
   );
 
-  // There's already a non-terminal scheduled execution - create SKIPPED execution
   if (runningExecutions.length > 0) {
     const existingExecution = runningExecutions[0]?._source;
     if (!existingExecution) {
@@ -100,6 +114,14 @@ export async function checkAndSkipIfExistingScheduledExecution(
         {
           message: taskRecoveryMessages.scheduledStale,
         }
+      );
+      return false;
+    }
+
+    if (!createSkippedForInFlightDuplicates) {
+      logger.debug(
+        `Deferring in-flight scheduled overlap for workflow ${workflow.id} to concurrency check ` +
+          `(existing execution ${existingExecution.id}, taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt})`
       );
       return false;
     }
