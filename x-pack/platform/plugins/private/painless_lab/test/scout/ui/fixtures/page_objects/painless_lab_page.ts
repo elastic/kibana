@@ -45,8 +45,12 @@ export class PainlessLab {
   }
 
   async waitForEditorToLoad() {
-    // wait for page to be rendered
-    await this.page.testSubj.locator('kibanaCodeEditor').waitFor({ state: 'visible' });
+    // Dev Tools + the Monaco code editor are a heavy, lazily-loaded bundle: on cold or
+    // resource-contended runs (notably serverless) the app can sit on the "Loading Elastic"
+    // splash for more than the default 10s, so give the editor a longer readiness budget.
+    await this.page.testSubj
+      .locator('kibanaCodeEditor')
+      .waitFor({ state: 'visible', timeout: 30_000 });
     await this.editorOutputPane.waitFor({ state: 'visible' });
   }
 
