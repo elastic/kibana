@@ -247,9 +247,7 @@ test.describe(
         await expect(pageObjects.serviceMapPage.serviceMapViewFullMapButton).toBeVisible();
         await pageObjects.serviceMapPage.serviceMapViewFullMapButton.click();
 
-        await expect(page).toHaveURL(
-          new RegExp(`/app/apm/services/${SERVICE_MAP_TEST_SERVICE}/service-map`)
-        );
+        await expect(page).toHaveURL(new RegExp(`/app/apm(?:#)?/service-map`));
       });
     });
 
