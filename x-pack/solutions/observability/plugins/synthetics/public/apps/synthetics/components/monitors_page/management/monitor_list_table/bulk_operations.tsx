@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiPopover, EuiToolTip } from '@elastic/eui';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import {
@@ -77,7 +77,21 @@ export const BulkOperations = ({
   ).length;
 
   if (selectedItems.length === 0) {
-    return null;
+    // Keep the affordance visible but disabled so users can discover bulk
+    // actions before selecting anything; the tooltip explains what to do.
+    return (
+      <EuiToolTip content={SELECT_MONITORS_FIRST}>
+        <EuiButton
+          data-test-subj="syntheticsBulkActionsButton"
+          size="s"
+          iconType="arrowDown"
+          iconSide="right"
+          isDisabled={true}
+        >
+          {BULK_ACTIONS_LABEL}
+        </EuiButton>
+      </EuiToolTip>
+    );
   }
 
   const isActionDisabled = !canEditSynthetics || !isServiceAllowed;
@@ -223,6 +237,17 @@ export const BulkOperations = ({
     </EuiPopover>
   );
 };
+
+const BULK_ACTIONS_LABEL = i18n.translate('xpack.synthetics.bulkOperations.bulkActionsLabel', {
+  defaultMessage: 'Bulk actions',
+});
+
+const SELECT_MONITORS_FIRST = i18n.translate(
+  'xpack.synthetics.bulkOperations.selectMonitorsFirst',
+  {
+    defaultMessage: 'Select one or more monitors to perform bulk actions.',
+  }
+);
 
 const ALL_ALREADY_ENABLED = i18n.translate('xpack.synthetics.bulkOperations.allAlreadyEnabled', {
   defaultMessage: 'All selected monitors are already enabled.',
