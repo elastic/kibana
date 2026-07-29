@@ -86,7 +86,7 @@ export interface ContextualServiceMapGraphProps {
   kuery: string;
   start: string;
   end: string;
-  highlightedServiceName?: string;
+  highlightedServiceNames?: string[];
   fullMapHref?: string;
   showFocusMap?: boolean;
   clearKueryOnPopoverNavigation?: boolean;
@@ -112,7 +112,7 @@ function ContextualGraphInner({
   kuery,
   start,
   end,
-  highlightedServiceName,
+  highlightedServiceNames,
   fullMapHref,
   showFocusMap,
   clearKueryOnPopoverNavigation,
@@ -167,10 +167,10 @@ function ContextualGraphInner({
       if (!isServiceNode(n)) {
         return n;
       }
-      const contextHighlight = Boolean(highlightedServiceName && n.id === highlightedServiceName);
+      const contextHighlight = Boolean(highlightedServiceNames?.includes(n.id));
       return { ...n, data: { ...n.data, contextHighlight } };
     });
-  }, [visibleNodes, visibleEdges, highlightedServiceName]);
+  }, [visibleNodes, visibleEdges, highlightedServiceNames]);
 
   const flyoutProps = useServiceMapFlyoutProps({
     selectedServiceNodeForFlyout,
