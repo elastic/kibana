@@ -9,7 +9,6 @@ This directory contains functional tests for the Lens visualization editor.
 | group1-6 | Core Lens functionality tests | varies |
 | group7 | ES\|QL tests | ~10-15 min |
 | group8 | LogsDB upgrade scenarios | ~20 min |
-| group9 | TSDB upgrade scenarios | ~15 min |
 | group10 | LogsDB downgrade scenarios | ~20 min |
 
 ---
@@ -132,5 +131,4 @@ Each scenario runs **5 tests** per block:
 
 - `tsdb_logsdb_helpers.ts` - Shared utilities for scenario setup and test runners
 - `group8/logsdb.ts` - LogsDB upgrade scenarios
-- `group9/tsdb.ts` - TSDB upgrade scenarios  
 - `group10/logsdb_downgrade.ts` - LogsDB downgrade scenarios
