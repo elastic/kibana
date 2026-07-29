@@ -291,17 +291,21 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   // and child open methods. Only the `session` differs between them, so it is kept private here and
   // callers pick `openDocumentFlyoutFromIndex` (main) or `openDocumentFlyoutFromIndexAsChild` (child).
   const buildFromIndexContent = useCallback(
-    ({
-      documentId,
-      indexName,
-      renderCellActions = cellActionRenderer,
-      onAlertUpdated = noop,
-    }: OpenDocumentFlyoutParams) => (
+    (
+      {
+        documentId,
+        indexName,
+        renderCellActions = cellActionRenderer,
+        onAlertUpdated = noop,
+      }: OpenDocumentFlyoutParams,
+      dataTestSubj?: string
+    ) => (
       <DocumentFlyoutWrapper
         documentId={documentId}
         indexName={indexName}
         renderCellActions={renderCellActions}
         onAlertUpdated={onAlertUpdated}
+        dataTestSubj={dataTestSubj}
       />
     ),
     []
@@ -358,7 +362,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
       );
       const onClose = buildOnClose(parentDescriptor);
       open(
-        <div data-test-subj={CHILD_DOCUMENT_FLYOUT_TEST_ID}>{buildFromIndexContent(params)}</div>,
+        buildFromIndexContent(params, CHILD_DOCUMENT_FLYOUT_TEST_ID),
         {
           ...defaultDocumentFlyoutProperties,
           historyKey,

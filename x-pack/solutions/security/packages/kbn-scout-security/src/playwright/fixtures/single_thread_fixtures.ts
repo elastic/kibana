@@ -18,7 +18,6 @@ import {
   getEntityAnalyticsApiService,
   getTimelineApiService,
   getAttackDiscoveryApiService,
-  getThreatIntelligenceApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
   getAnalyzerApiService,
@@ -83,10 +82,6 @@ export const test = securityFixtures.extend<SecurityTestFixtures, SecurityWorker
         kbnClient,
         log,
         esClient,
-      });
-      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
-        esClient,
-        log,
       });
       extendedApiServices.correlations = getCorrelationsApiService({
         esClient,

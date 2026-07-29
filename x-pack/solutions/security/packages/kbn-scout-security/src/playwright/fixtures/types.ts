@@ -20,7 +20,6 @@ import type {
   CloudConnectorApiService,
   TimelineApiService,
   AttackDiscoveryApiService,
-  ThreatIntelligenceApiService,
   CorrelationsApiService,
   PrevalenceApiService,
   AnalyzerApiService,
@@ -36,7 +35,6 @@ export interface SecurityApiServicesFixture extends ApiServicesFixture {
   cloudConnectorApi: CloudConnectorApiService;
   timeline: TimelineApiService;
   attackDiscovery: AttackDiscoveryApiService;
-  threatIntelligence: ThreatIntelligenceApiService;
   correlations: CorrelationsApiService;
   prevalence: PrevalenceApiService;
   analyzer: AnalyzerApiService;

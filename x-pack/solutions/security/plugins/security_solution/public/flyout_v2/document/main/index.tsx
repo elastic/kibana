@@ -88,13 +88,17 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Optional test subject applied to the existing flyout header.
+   */
+  dataTestSubj?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, dataTestSubj }: DocumentFlyoutProps) => {
     const { openNotes } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -163,7 +167,7 @@ export const DocumentFlyout = memo(
     return (
       <>
         <RemoteDocumentCallout hit={hit} />
-        <EuiFlyoutHeader css={headerStyles}>
+        <EuiFlyoutHeader css={headerStyles} data-test-subj={dataTestSubj}>
           <Header
             hit={hit}
             renderCellActions={renderCellActions}

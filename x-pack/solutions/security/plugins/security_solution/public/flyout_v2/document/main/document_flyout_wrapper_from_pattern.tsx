@@ -47,7 +47,13 @@ const DOCUMENT_NOT_FOUND = i18n.translate(
  * only the internal fetch strategy differs.
  */
 export const DocumentFlyoutWrapperFromPattern = memo(
-  ({ documentId, indexName, renderCellActions, onAlertUpdated }: DocumentFlyoutWrapperProps) => {
+  ({
+    documentId,
+    indexName,
+    renderCellActions,
+    onAlertUpdated,
+    dataTestSubj,
+  }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
     const isDataViewLoading = status === 'loading' || status === 'pristine';
@@ -112,6 +118,7 @@ export const DocumentFlyoutWrapperFromPattern = memo(
           hit={hit}
           renderCellActions={renderCellActions}
           onAlertUpdated={handleAlertUpdated}
+          dataTestSubj={dataTestSubj}
         />
       );
     }

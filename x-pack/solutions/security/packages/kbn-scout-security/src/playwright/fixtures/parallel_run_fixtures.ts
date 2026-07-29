@@ -19,7 +19,6 @@ import {
   getCloudConnectorApiService,
   getTimelineApiService,
   getAttackDiscoveryApiService,
-  getThreatIntelligenceApiService,
   getCorrelationsApiService,
   getPrevalenceApiService,
   getAnalyzerApiService,
@@ -101,10 +100,6 @@ export const spaceTest = securityParallelFixtures.extend<
         log,
         scoutSpace,
         esClient,
-      });
-      extendedApiServices.threatIntelligence = getThreatIntelligenceApiService({
-        esClient,
-        log,
       });
       extendedApiServices.correlations = getCorrelationsApiService({
         esClient,

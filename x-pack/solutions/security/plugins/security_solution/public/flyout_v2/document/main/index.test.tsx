@@ -113,6 +113,23 @@ describe('<DocumentFlyout />', () => {
     expect(getByTestId('mock-footer')).toBeInTheDocument();
   });
 
+  it('applies the optional test subject to the existing flyout header', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <DocumentFlyout
+          hit={createAlertHit()}
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+          dataTestSubj="childDocumentFlyout"
+        />
+      </TestProviders>
+    );
+
+    expect(getByTestId('childDocumentFlyout')).toContainElement(getByTestId('mock-header'));
+  });
+
   it('renders Overview, Table and JSON tabs and switches between them in Security Solution', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
 

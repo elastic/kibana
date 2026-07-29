@@ -26,7 +26,6 @@ import { RuleFlyout } from './flyout_v2/rule/rule_flyout';
 import { NetworkFlyout } from './flyout_v2/network/network_flyout';
 import { HostFlyout } from './flyout_v2/entity/host_flyout';
 import { UserFlyout } from './flyout_v2/entity/user_flyout';
-import { IOCFlyout } from './flyout_v2/ioc/ioc_flyout';
 import { CorrelationsTool } from './flyout_v2/document/tools/correlations_tool';
 import { PrevalenceTool } from './flyout_v2/document/tools/prevalence_tool';
 import { AnalyzerTool } from './flyout_v2/document/tools/analyzer_tool';
@@ -62,8 +61,6 @@ export interface SecurityPageObjects extends PageObjects {
   hostFlyout: HostFlyout;
   /** v2 user entity flyout — opened from a user.name value (alerts table user cell / document flyout entities section). */
   userFlyout: UserFlyout;
-  /** v2 IOC (indicator) flyout — opened from the Threat Intelligence indicators table. */
-  iocFlyout: IOCFlyout;
   /** Correlations tool overlay inside the flyout v2 document flyout. */
   correlationsTool: CorrelationsTool;
   /** Prevalence tool overlay inside the flyout v2 document flyout. */
@@ -104,7 +101,6 @@ export function extendPageObjects(
     networkFlyout: createLazyPageObject(NetworkFlyout, page),
     hostFlyout: createLazyPageObject(HostFlyout, page),
     userFlyout: createLazyPageObject(UserFlyout, page),
-    iocFlyout: createLazyPageObject(IOCFlyout, page),
     correlationsTool: createLazyPageObject(CorrelationsTool, page),
     prevalenceTool: createLazyPageObject(PrevalenceTool, page),
     analyzerTool: createLazyPageObject(AnalyzerTool, page),
