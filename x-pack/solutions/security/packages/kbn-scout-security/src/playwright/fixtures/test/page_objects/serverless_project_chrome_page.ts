@@ -37,6 +37,9 @@ export class ServerlessProjectChromePage {
       // securitySolutionUI loads the full SIEM shell; first project chrome render can exceed the default action timeout in CI.
       timeout: 35_000,
     });
+    await this.page
+      .locator('#security-solution-app')
+      .waitFor({ state: 'visible', timeout: 35_000 });
   }
 
   /** Primary strip or "More" popover — for overflow-dependent placement (same as ObservabilityNavigation.navItemInBodyById). */
