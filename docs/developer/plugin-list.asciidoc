@@ -463,6 +463,12 @@ The plugin exposes the static DefaultEditorController class to consume.
 |This plugin provides cases management in Kibana
 
 
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/client_apps/README.md[clientApps]
+|Plugin that complements client applications' dashboards. It currently allows retracing obfuscated
+errors back to human-readable source code references. It is designed to accommodate multiple platforms (Android,
+JavaScript, iOS) within the same plugin, with each platform defining its own backend services and UI independently.
+
+
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cloud/README.md[cloud]
 |The cloud plugin exposes Cloud-specific metadata to Kibana.
 

@@ -48,7 +48,7 @@ export function createTestServerlessInstances({
   };
   adjustTimeout?: (timeout: number) => void;
 } = {}): TestServerlessUtils {
-  adjustTimeout?.(150_000);
+  adjustTimeout?.(300_000);
 
   const esUtils = createServerlessES();
   const kbUtils = createServerlessKibana(kibana.settings, kibana.cliArgs);

@@ -112,6 +112,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -410,6 +411,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -777,6 +779,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -1062,6 +1065,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -1352,6 +1356,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -1631,6 +1636,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -1694,6 +1700,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -1853,6 +1860,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -1980,6 +1988,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -2112,6 +2121,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],
@@ -2233,6 +2243,7 @@ Array [
         Object {
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
+          "getDataUpdates$": [MockFunction],
           "getEnabled$": [MockFunction],
           "getUserProfile$": [MockFunction],
           "partialUpdate": [MockFunction],

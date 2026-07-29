@@ -81,7 +81,7 @@ export const registerContentInsights = (
   const router = http.createRouter();
   const validate = {
     params: schema.object({
-      id: schema.string(),
+      id: schema.string({ minLength: 1, maxLength: 256 }),
       eventType: schema.literal('viewed'),
     }),
   };

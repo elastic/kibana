@@ -68,6 +68,8 @@ export const Overview = () => {
     breadcrumbs.setBreadcrumbs('overview');
   }, [breadcrumbs]);
 
+  const [isMigrationNeeded, setIsMigrationNeeded] = useState(false);
+
   const [completedStepsMap, setCompletedStepsMap] = useState({
     backup: false,
     migrate_system_indices: false,
@@ -216,6 +218,8 @@ export const Overview = () => {
                   docLinks,
                   isComplete: isStepComplete('migrate_system_indices'),
                   setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
+                  isMigrationNeeded,
+                  setIsMigrationNeeded,
                 }),
               getFixIssuesStep({
                 isComplete: isStepComplete('fix_issues'),

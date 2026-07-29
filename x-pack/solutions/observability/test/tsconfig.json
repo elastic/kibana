@@ -101,6 +101,7 @@
     "@kbn/guided-onboarding-plugin",
     "@kbn/logs-explorer-plugin",
     "@kbn/observability-logs-explorer-plugin",
-    "@kbn/security-plugin-types-common"
+    "@kbn/security-plugin-types-common",
+    "@kbn/repo-info"
   ]
 }

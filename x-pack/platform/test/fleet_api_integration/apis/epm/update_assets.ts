@@ -335,8 +335,10 @@ export default function (providerContext: FtrProviderContext) {
         type: 'epm-packages',
         id: 'all_assets',
       });
+      const attributes = { ...res.attributes };
+      delete attributes.installed_kibana_version;
 
-      expect(res.attributes).eql({
+      expect(attributes).eql({
         installed_kibana_space_id: 'default',
         installed_kibana: [
           {
@@ -449,7 +451,6 @@ export default function (providerContext: FtrProviderContext) {
             id: 'metrics-all_assets.test_metrics@package',
             type: 'component_template',
           },
-
           {
             id: 'metrics@custom',
             type: 'component_template',

@@ -66,9 +66,16 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: {
+    standalone?: boolean;
+    agentPolicy?: AgentPolicy;
+    agentVersion?: string;
+    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
+    redactProxySecrets?: boolean;
+  }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
+  const redactProxySecrets = options?.redactProxySecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
@@ -152,7 +159,8 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone
+          standalone,
+          redactProxySecrets
         );
 
         return acc;
@@ -357,7 +365,8 @@ export function generateFleetConfig(
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false
+  standalone = false,
+  redactProxySecrets = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -488,7 +497,7 @@ export function transformOutputToFullPolicyOutput(
 
   if (proxy) {
     newOutput.proxy_url = proxy.url;
-    if (proxy.proxy_headers) {
+    if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -507,7 +516,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (proxy.certificate_key) {
+    if (!redactProxySecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }
