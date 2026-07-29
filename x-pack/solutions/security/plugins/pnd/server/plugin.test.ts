@@ -24,8 +24,9 @@ jest.mock('./managed_workflows/install_static', () => ({
 }));
 
 jest.mock('./agent_builder', () => ({
+  agentType: { id: 'mock-pnd-type', baseConfiguration: {} },
   ensureAgentSafe: jest.fn().mockResolvedValue(undefined),
-  registerPndThinAgentType: jest.fn(),
+  registerAgentType: jest.fn(),
 }));
 
 jest.mock('./routes/register_routes', () => ({

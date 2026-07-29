@@ -27,7 +27,7 @@ import type {
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
 import { installStatic } from './managed_workflows/install_static';
-import { ensureAgentSafe, registerAgentType } from './agent_builder';
+import { agentType, ensureAgentSafe, registerAgentType } from './agent_builder';
 import type { WatchWorkflowProjectionService } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowProjectionService as WatchWorkflowProjectionServiceImpl } from './services/watches/watch_workflow_projection_service';
 import { WatchWorkflowsManagementClientImpl } from './services/watches/watch_workflows_management_client';
@@ -129,7 +129,7 @@ export class PndPlugin
       });
     }
 
-    if (!this.config.ui.useMockData && this.workflowsManagementApi != null) {
+    if (this.workflowsManagementApi != null) {
       const managementClient = new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi);
       this.watchProjection = new WatchWorkflowProjectionServiceImpl(
         managementClient,
@@ -137,6 +137,8 @@ export class PndPlugin
         installationReady,
         {
           ensureAgentForSpace: this.ensureAgentsForSpace.bind(this),
+          agentBuilder: plugins.agentBuilder,
+          agentTypes: [agentType],
         }
       );
     }

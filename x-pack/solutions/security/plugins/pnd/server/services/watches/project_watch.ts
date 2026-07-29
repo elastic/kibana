@@ -21,6 +21,7 @@ import type {
   WorkflowTriggerType,
 } from '@kbn/pnd-common';
 import { coverageFromSchedule } from '@kbn/pnd-common';
+import type { AgentLookup } from './types';
 
 /** Static watch policy bag from `consts.watch_policy`. */
 interface WatchPolicyAttrs {
@@ -210,7 +211,8 @@ const collectSkillIdsFromText = (text: string, into: Set<string>): void => {
  */
 export const projectCallablesFromDefinition = (
   definition: WorkflowYaml | null | undefined,
-  policy: WatchPolicyAttrs | undefined
+  policy: WatchPolicyAttrs | undefined,
+  agents?: AgentLookup
 ): WatchCallableRef[] => {
   const skillIds = new Set<string>();
   const workflowIds = new Set<string>();
@@ -219,9 +221,30 @@ export const projectCallablesFromDefinition = (
     const type = asString(step.type);
     if (type === 'ai.agent') {
       const withBlock = isRecord(step.with) ? step.with : {};
+      const agentId = asString(step['agent-id']);
+
+      if (agentId && agents) {
+        const agentDef = agents.getAgent(agentId);
+        if (agentDef) {
+          const agentTypeDef = agentDef.type ? agents.getAgentType(agentDef.type) : undefined;
+          const baseSkills: readonly string[] = agentTypeDef?.baseConfiguration?.skill_ids ?? [];
+          const overridesBlock = isRecord(withBlock.configuration_overrides)
+            ? withBlock.configuration_overrides
+            : {};
+          const stepSkillIds = Array.isArray(overridesBlock.skill_ids)
+            ? overridesBlock.skill_ids.filter((s): s is string => typeof s === 'string')
+            : null;
+          const agentSkills: readonly string[] = agentDef.configuration.skill_ids ?? [];
+          for (const id of [...baseSkills, ...(stepSkillIds ?? agentSkills)]) {
+            if (id) skillIds.add(id);
+          }
+          return;
+        }
+      }
+
+      // No agent lookup or agent not found — fall back to URI scanning.
       const message = asString(withBlock.message);
       if (message) collectSkillIdsFromText(message, skillIds);
-      // Also scan the whole with-block for skill URIs in other string fields.
       collectSkillIdsFromText(JSON.stringify(withBlock), skillIds);
     }
     if (type === 'workflow.execute' || type === 'workflow.executeAsync') {
@@ -238,13 +261,23 @@ export const projectCallablesFromDefinition = (
   for (const c of policy?.callables ?? []) {
     const id = asString(c.id);
     if (!id) continue;
+
     overrides.set(id, {
       id,
       name: asString(c.name, id),
       kind: c.kind === 'workflow' ? 'workflow' : 'skill',
       summary: asString(c.summary, ''),
       gated: asBoolean(c.gated, false),
+      // This is reading from the "callables" constant on the workflow but
+      // if we add the ability to enable/disable, we'll have to read that state
+      // from persistence
       enabled: asBoolean(c.enabled, true),
+
+      // What does this mean for a skill? We're projecting the list of skills bound
+      // to the workflow but not all skills are used in every ai.agent step even if
+      // they are available. Do we have this information now (which skills are called
+      // for an ai.agent) or is this something we'll be able to get from the investigation/
+      // conversation trail?
       lastRun: typeof c.lastRun === 'string' ? c.lastRun : null,
     });
   }
@@ -253,11 +286,12 @@ export const projectCallablesFromDefinition = (
 
   for (const id of skillIds) {
     const override = overrides.get(id);
+    const skillDef = agents?.getSkill(id);
     callables.push({
       id,
-      name: override?.name ?? humanizeId(id),
+      name: skillDef?.name ?? override?.name ?? humanizeId(id),
       kind: 'skill',
-      summary: override?.summary ?? 'Invoked via ai.agent',
+      summary: skillDef?.description ?? override?.summary ?? '',
       gated: override?.gated ?? false,
       enabled: override?.enabled ?? true,
       lastRun: override?.lastRun ?? null,
@@ -293,7 +327,7 @@ export const projectRecentRunsFromHistory = (
   }));
 };
 
-export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
+export const projectWorkflowToWatch = (item: WorkflowListItemDto, agents?: AgentLookup): Watch => {
   const definition = item.definition;
   const policy = extractWatchPolicy(definition);
   const triggers = projectTriggers(definition);
@@ -322,7 +356,7 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     coverage,
     scopeSummary: asString(policy?.scopeSummary, '—'),
     scopes: projectScopes(policy),
-    callables: projectCallablesFromDefinition(definition, policy),
+    callables: projectCallablesFromDefinition(definition, policy, agents),
     autonomyLevel: asAutonomyLevel(policy?.autonomyLevel),
     metrics: {
       // Real 7-day run counts are not available from the list/history projection yet.

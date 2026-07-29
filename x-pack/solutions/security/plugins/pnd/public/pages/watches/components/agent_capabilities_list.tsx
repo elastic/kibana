@@ -97,11 +97,13 @@ export const AgentCapabilitiesList: React.FC<AgentCapabilitiesListProps> = ({
                 {callable.kind === 'workflow' ? i18n.KIND_WORKFLOW : i18n.KIND_SKILL}
               </EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" iconType="bolt">
-                {callable.summary}
-              </EuiBadge>
-            </EuiFlexItem>
+            {callable.summary ? (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {callable.summary}
+                </EuiText>
+              </EuiFlexItem>
+            ) : null}
             {callable.gated ? (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="warning">{i18n.GATED_BADGE}</EuiBadge>

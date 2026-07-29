@@ -9,11 +9,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
 import { WATCH_TAG } from '@kbn/pnd-common';
 import { compareWatchesForDisplay, GetWatchResponse, ListWatchesResponse } from '@kbn/pnd-common';
-
-export interface CreateWatchRequest {
-  name: string;
-  description?: string;
-}
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   buildCustomWatchYaml,
   normalizeWorkflowTriggerType,
@@ -21,10 +18,18 @@ import {
 } from './project_watch';
 import { createWatchDeleteForbiddenError, createWatchNotFoundError } from './watch_errors';
 import type { WatchWorkflowsManagementClient } from './watch_workflows_management_client';
+import type { AgentLookup } from './types';
+
+export interface CreateWatchRequest {
+  name: string;
+  description?: string;
+}
 
 const WATCH_VISIBILITY_CONTEXT = getManagedWorkflowSelectorVisibilityContext('watch');
 
 export class WatchWorkflowProjectionService {
+  private readonly agentTypeMap: ReadonlyMap<string, AgentTypeDefinition>;
+
   constructor(
     private readonly management: WatchWorkflowsManagementClient | undefined,
     private readonly logger: Logger,
@@ -32,8 +37,13 @@ export class WatchWorkflowProjectionService {
     private readonly options: {
       /** Lazy ensure of the shared thin agent for the caller's space. */
       ensureAgentForSpace?: (spaceId: string) => Promise<void>;
+      agentBuilder?: AgentBuilderPluginStart;
+      /** Code-registered agent types owned by this plugin, used for skill base resolution. */
+      agentTypes?: readonly AgentTypeDefinition[];
     } = {}
-  ) {}
+  ) {
+    this.agentTypeMap = new Map((options.agentTypes ?? []).map((t) => [t.id, t]));
+  }
 
   private requireManagement(): WatchWorkflowsManagementClient {
     if (!this.management) {
@@ -47,9 +57,48 @@ export class WatchWorkflowProjectionService {
     await this.options.ensureAgentForSpace?.(spaceId);
   }
 
-  async list(spaceId: string): Promise<ListWatchesResponse> {
+  private async buildAgentLookup(request: KibanaRequest): Promise<AgentLookup | undefined> {
+    if (!this.options.agentBuilder) return undefined;
+    try {
+      // RBAC concerns? Using this to project skill IDs from workflow to UI "callable"
+      // but is it possible a user has access to workflows but not agent builder?
+      const [agentRegistry, skillRegistry] = await Promise.all([
+        this.options.agentBuilder.agents.getRegistry({ request }),
+        this.options.agentBuilder.skills.getRegistry({ request }),
+      ]);
+      const [agentList, skillList] = await Promise.all([
+        agentRegistry.list(),
+        skillRegistry.list(),
+      ]);
+      const agentMap = new Map(agentList.map((a) => [a.id, a]));
+      const skillMap = new Map(skillList.map((s) => [s.id, s]));
+      return {
+        getAgent: (id) => agentMap.get(id) ?? null,
+        getSkill: (id) => skillMap.get(id) ?? null,
+        getAgentType: (typeId) => {
+          const typeDef = this.agentTypeMap.get(typeId);
+          if (!typeDef) return null;
+          // TODO baseConfiguration can be an async resolvable function
+          // this handles only the case where it's a static object (which is most common for code-owned types)
+          const base =
+            typeof typeDef.baseConfiguration === 'function' ? undefined : typeDef.baseConfiguration;
+          return { baseConfiguration: { skill_ids: base?.skill_ids } };
+        },
+      };
+    } catch (error) {
+      // Non-blocking error - UI won't be rendered correctly with skill projections
+      this.logger.debug(
+        `Failed to build agent lookup: ${error instanceof Error ? error.message : String(error)}`
+      );
+      return undefined;
+    }
+  }
+
+  async list(request: KibanaRequest, spaceId: string): Promise<ListWatchesResponse> {
     await this.prepareSpace(spaceId);
     const management = this.requireManagement();
+    const agents = await this.buildAgentLookup(request);
+
     // Managed catalog watches opt into `selector:watch` visibility; custom
     // unmanaged watches still match via tag `watch` under managedFilter `all`.
     // Default getWorkflows managedFilter is 'unmanaged' — must request 'all'.
@@ -71,15 +120,20 @@ export class WatchWorkflowProjectionService {
         const tags = item.tags?.length ? item.tags : item.definition?.tags ?? [];
         return tags.includes(WATCH_TAG);
       })
-      .map(projectWorkflowToWatch)
+      .map((item) => projectWorkflowToWatch(item, agents))
       .sort(compareWatchesForDisplay);
 
     return ListWatchesResponse.parse({ watches });
   }
 
-  async get(watchId: string, spaceId: string): Promise<GetWatchResponse | undefined> {
+  async get(
+    watchId: string,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<GetWatchResponse | undefined> {
     await this.prepareSpace(spaceId);
     const management = this.requireManagement();
+    const agents = await this.buildAgentLookup(request);
     const detail = await management.getWorkflow(watchId, spaceId);
     if (!detail) {
       return undefined;
@@ -119,7 +173,10 @@ export class WatchWorkflowProjectionService {
         finishedAt: run.finishedAt,
         duration: run.duration,
       }));
-      const watch = projectWorkflowToWatch({ ...listItem, history, tags: detail.definition?.tags });
+      const watch = projectWorkflowToWatch(
+        { ...listItem, history, tags: detail.definition?.tags },
+        agents
+      );
 
       // Attach step summaries for the latest few runs
       const enrichedRuns = await Promise.all(
@@ -156,7 +213,7 @@ export class WatchWorkflowProjectionService {
           error instanceof Error ? error.message : String(error)
         }`
       );
-      return GetWatchResponse.parse({ watch: projectWorkflowToWatch(listItem) });
+      return GetWatchResponse.parse({ watch: projectWorkflowToWatch(listItem, agents) });
     }
   }
 
@@ -173,7 +230,7 @@ export class WatchWorkflowProjectionService {
       'Custom watch scaffold — tagged watch so it appears in the Watches catalog.';
     const yaml = buildCustomWatchYaml(name, description);
     const created = await management.createWorkflow({ yaml }, spaceId, request);
-    const projected = await this.get(created.id, spaceId);
+    const projected = await this.get(created.id, spaceId, request);
     if (!projected) {
       throw new Error(`Created watch "${created.id}" but failed to reload it`);
     }
