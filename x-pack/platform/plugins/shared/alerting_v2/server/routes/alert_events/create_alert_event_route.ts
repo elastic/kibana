@@ -228,7 +228,8 @@ export class CreateAlertEventRoute extends BaseAlertingRoute {
 
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
-    @inject(Request) private readonly request: KibanaRequest<unknown, unknown, CreateAlertEventData>,
+    @inject(Request)
+    private readonly request: KibanaRequest<unknown, unknown, CreateAlertEventData>,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(RequestSpaceIdToken) private readonly spaceId: string
