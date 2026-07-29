@@ -31,7 +31,7 @@ interface ComposedHeaderStoryProps {
   showBack: boolean;
   showTabs: boolean;
   showBadges: boolean;
-  showMetadata: boolean;
+  secondaryContent: 'description' | 'metadata' | 'none';
   showFavorite: boolean;
   showMenu: boolean;
 }
@@ -88,6 +88,11 @@ const metadata: AppHeaderMetadataItems = [
   { type: 'button', label: 'View details', onClick: action('view-details-clicked') },
 ];
 
+const description = {
+  text: 'Query and analyze data stored across multiple Elasticsearch clusters.',
+  learnMoreUrl: 'https://www.elastic.co/docs',
+};
+
 // Six items so the menu overflows the visible limit into the "More" popover.
 const menu: AppMenuConfig = {
   items: Array.from({ length: 6 }, (_, index) => ({
@@ -107,7 +112,7 @@ const ComposedHeader = ({
   showBack,
   showTabs,
   showBadges,
-  showMetadata,
+  secondaryContent,
   showFavorite,
   showMenu,
 }: ComposedHeaderStoryProps) => {
@@ -121,6 +126,12 @@ const ComposedHeader = ({
       setTitle(nextTitle);
     },
   };
+  const secondaryContentProps =
+    secondaryContent === 'description'
+      ? { description }
+      : secondaryContent === 'metadata'
+      ? { metadata }
+      : {};
 
   return (
     <ChromeServiceProvider value={{ chrome }}>
@@ -134,7 +145,7 @@ const ComposedHeader = ({
           back={showBack ? { href: '/app/management', label: 'Stack Management' } : undefined}
           tabs={showTabs ? tabs : undefined}
           badges={showBadges ? badges : undefined}
-          metadata={showMetadata ? metadata : undefined}
+          {...secondaryContentProps}
           menu={showMenu ? menu : undefined}
           favorite={
             showFavorite ? (
@@ -170,7 +181,7 @@ const meta: Meta<ComposedHeaderStoryProps> = {
       description: {
         component:
           'The composed Chrome Next app header. Toggle the regions (back navigation, tabs, ' +
-          'badges, metadata, app menu, favorite) to see how they lay out together. For ' +
+          'badges, description or metadata, app menu, favorite) to see how they lay out together. For ' +
           'title-specific states see the "App Header Editable Title" story.',
       },
     },
@@ -182,6 +193,10 @@ const meta: Meta<ComposedHeaderStoryProps> = {
       description:
         'Outer spacing. Standard uses a 16px symmetric gutter; bleed matches the same 16px inside a padded parent and largeBleed a 24px one.',
     },
+    secondaryContent: {
+      control: 'inline-radio',
+      options: ['description', 'metadata', 'none'],
+    },
   },
   args: {
     title: 'System Shells via Services',
@@ -191,7 +206,7 @@ const meta: Meta<ComposedHeaderStoryProps> = {
     showBack: true,
     showTabs: true,
     showBadges: true,
-    showMetadata: true,
+    secondaryContent: 'metadata',
     showFavorite: true,
     showMenu: true,
   },
@@ -203,12 +218,18 @@ type Story = StoryObj<ComposedHeaderStoryProps>;
 
 export const FullHeader: Story = {};
 
+export const FullHeaderWithDescription: Story = {
+  args: {
+    secondaryContent: 'description',
+  },
+};
+
 export const TitleOnly: Story = {
   args: {
     showBack: false,
     showTabs: false,
     showBadges: false,
-    showMetadata: false,
+    secondaryContent: 'none',
     showFavorite: false,
     showMenu: false,
   },
