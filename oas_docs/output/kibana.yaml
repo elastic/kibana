@@ -76054,22 +76054,35 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Search across all workflow executions using Elasticsearch query DSL.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Search across all workflow executions.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
       operationId: get-workflows-workflow-executions
       parameters:
-        - description: JSON-encoded Elasticsearch query DSL.
+        - description: KQL query string to filter executions.
           in: query
-          name: query
-          required: false
-          schema:
-            maxLength: 16384
-            type: string
-        - description: JSON-encoded Elasticsearch sort definition.
-          in: query
-          name: sort
+          name: kql
           required: false
           schema:
             maxLength: 4096
+            type: string
+        - description: 'Field to sort by. One of: startedAt, duration, workflowId, triggeredBy.'
+          in: query
+          name: sortField
+          required: false
+          schema:
+            enum:
+              - startedAt
+              - duration
+              - workflowId
+              - triggeredBy
+            type: string
+        - description: Sort direction.
+          in: query
+          name: sortOrder
+          required: false
+          schema:
+            enum:
+              - asc
+              - desc
             type: string
         - description: Pagination offset.
           in: query
@@ -76125,10 +76138,10 @@ paths:
             application/json:
               examples:
                 searchExecutionsBadRequestExample:
-                  description: Example response when query or sort JSON is invalid
+                  description: Example response when the kql parameter contains invalid syntax
                   value:
-                    message: Invalid JSON in query
-          description: Indicates a bad request, such as invalid JSON in query parameters
+                    message: 'Invalid KQL: Expected AND, OR, or end of input but "f" found.'
+          description: Indicates a bad request, such as invalid KQL syntax
       summary: Search workflow executions
       tags:
         - workflows
@@ -76136,11 +76149,11 @@ paths:
         - lang: curl
           source: |
             curl \
-              -X GET "${KIBANA_URL}/api/workflows/executions?from=0&size=25&trackTotalHits=true" \
+              -X GET "${KIBANA_URL}/api/workflows/executions?from=0&size=25&trackTotalHits=true&kql=startedAt%20%3E%3D%20%22now-15m%22&sortField=startedAt&sortOrder=desc" \
               -H "Authorization: ApiKey ${API_KEY}"
         - lang: Console
           source: |
-            GET kbn://api/workflows/executions?from=0&size=25&trackTotalHits=true
+            GET kbn://api/workflows/executions?from=0&size=25&trackTotalHits=true&kql=startedAt >= "now-15m"&sortField=startedAt&sortOrder=desc
       x-state: Generally available; added in 9.4.0
       x-metaTags:
         - content: Kibana
