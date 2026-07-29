@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/scout",
     "@kbn/es",
-    "@kbn/rison",
     "@kbn/test-subj-selector",
   ]
 }
