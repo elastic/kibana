@@ -67,9 +67,6 @@ type TestsResults = TestResult[];
 export const DELAYED_DATA_BUCKETS_PAGE_SIZE = 1000;
 export const MAX_DELAYED_DATA_BUCKET_PAGES = 10;
 
-// Keeps the annotation in the within-threshold partition when percentage cannot be computed reliably.
-const NON_ALERTING_DOCS_THRESHOLD = Number.POSITIVE_INFINITY;
-
 // Round to 1 decimal so alert context and action messages stay readable.
 const roundMissedDocsPercentage = (percentage: number): number => Math.round(percentage * 10) / 10;
 
@@ -88,7 +85,7 @@ interface DelayedDataConfig {
 }
 
 interface DelayedDataThreshold {
-  effectiveDocsThreshold: number;
+  exceedsThreshold: boolean;
   missedDocsPercentage?: number;
 }
 
@@ -232,7 +229,9 @@ export function jobsHealthServiceProvider(
   ): Promise<DelayedDataThreshold[]> => {
     if (delayedDataConfig.thresholdType !== DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE) {
       const docsCountThreshold = delayedDataConfig.docsCount ?? 0;
-      return annotations.map(() => ({ effectiveDocsThreshold: docsCountThreshold }));
+      return annotations.map(({ missed_docs_count: missedDocsCount }) => ({
+        exceedsThreshold: missedDocsCount >= docsCountThreshold,
+      }));
     }
 
     const pct = delayedDataConfig.docsCountPercentage ?? 0;
@@ -278,7 +277,7 @@ export function jobsHealthServiceProvider(
           const eventCountSum = await sumEventCountForAnnotation(annotation);
 
           if (eventCountSum === null) {
-            return { effectiveDocsThreshold: NON_ALERTING_DOCS_THRESHOLD };
+            return { exceedsThreshold: false };
           }
 
           // Missed docs are not included in analyzed bucket counts.
@@ -286,15 +285,14 @@ export function jobsHealthServiceProvider(
 
           // Prefer skipping the alert over firing when there is no usable denominator.
           if (total <= 0) {
-            return { effectiveDocsThreshold: NON_ALERTING_DOCS_THRESHOLD };
+            return { exceedsThreshold: false };
           }
 
-          const missedDocsPercentage = roundMissedDocsPercentage(
-            (annotation.missed_docs_count / total) * 100
-          );
+          const rawMissedDocsPercentage = (annotation.missed_docs_count / total) * 100;
+          const missedDocsPercentage = roundMissedDocsPercentage(rawMissedDocsPercentage);
 
           return {
-            effectiveDocsThreshold: (pct / 100) * total,
+            exceedsThreshold: rawMissedDocsPercentage >= pct,
             missedDocsPercentage,
           };
         } catch (err) {
@@ -303,7 +301,7 @@ export function jobsHealthServiceProvider(
             `Failed to fetch buckets for job ${annotation.job_id} during delayed data percentage check: ${errorMessage}`
           );
           // Prefer skipping the alert over firing on incomplete bucket data.
-          return { effectiveDocsThreshold: NON_ALERTING_DOCS_THRESHOLD };
+          return { exceedsThreshold: false };
         }
       })
     );
@@ -435,7 +433,7 @@ export function jobsHealthServiceProvider(
 
       const [exceeded, withinThreshold] = partition(
         enriched,
-        ({ record, effectiveDocsThreshold }) => record.missed_docs_count >= effectiveDocsThreshold
+        ({ exceedsThreshold }) => exceedsThreshold
       );
 
       const toPayload = ({

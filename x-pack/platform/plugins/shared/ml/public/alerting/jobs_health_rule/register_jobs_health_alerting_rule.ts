@@ -76,12 +76,12 @@ export function registerJobsHealthAlertingRule(
         resultTestConfig.delayedData.thresholdType === DELAYED_DATA_THRESHOLD_TYPE.PERCENTAGE
       ) {
         const pct = resultTestConfig.delayedData.docsCountPercentage;
-        if (pct < 1 || pct > 100) {
+        if (pct <= 0 || pct > 100) {
           validationResult.errors.delayedData.push(
             i18n.translate(
               'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountPercentageErrorMessage',
               {
-                defaultMessage: 'Percentage must be between 1 and 100',
+                defaultMessage: 'Percentage must be greater than 0 and no more than 100',
               }
             )
           );

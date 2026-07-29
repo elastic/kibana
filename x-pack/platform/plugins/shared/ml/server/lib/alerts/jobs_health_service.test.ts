@@ -291,15 +291,14 @@ describe('JobsHealthService', () => {
     annotationService.getDelayedDataAnnotations.mockImplementation(
       ({ jobIds }: { jobIds: string[] }) =>
         Promise.resolve(
-          jobIds.map((jobId) => ({
-            job_id: jobId,
-            annotation: `Datafeed has missed ${
-              jobId === 'test_job_01' ? 11 : 8
-            } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`,
-            modified_time: 1627660295141,
-            timestamp: 1627653000000,
-            end_timestamp: 1627653300000,
-          }))
+          jobIds.map((jobId) =>
+            createDelayedDataAnnotation(
+              jobId,
+              `Datafeed has missed ${
+                jobId === 'test_job_01' ? 11 : 8
+              } documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay`
+            )
+          )
         )
     );
 
@@ -699,14 +698,14 @@ describe('JobsHealthService', () => {
           jobIds.map((jobId) =>
             createDelayedDataAnnotation(
               jobId,
-              'Datafeed has missed 10 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay'
+              'Datafeed has missed 3 documents due to ingest latency, latest bucket with missing data is [2021-07-30T13:50:00.000Z]. Consider increasing query_delay'
             )
           )
         )
     );
 
     mlClient.getBuckets.mockImplementation(async ({ job_id: jobId }) =>
-      createBucketsResponse(jobId, 90)
+      createBucketsResponse(jobId, 27)
     );
 
     const executionResult = await jobHealthService.getTestsResults(

@@ -160,8 +160,9 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                               },
                             });
                           }}
-                          min={1}
+                          min={0}
                           max={100}
+                          step="any"
                           append={i18n.translate(
                             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountPercentageAppend',
                             { defaultMessage: '% Missing documents' }
