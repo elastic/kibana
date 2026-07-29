@@ -25,6 +25,8 @@ const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_tsdb_additional_${RESOUR
 const TIME_RANGE = createTsdbScenarioTimeRange();
 
 interface ScenarioResult {
+  /** Count of `lns-indexPatternDimension-average incompatible` elements. */
+  incompatibleAverageCount: number;
   counterBars: Array<{ y: number }> | undefined;
   countBars: Array<{ y: number }> | undefined;
   expectedDocumentCountBeforeUpgrade: number;
@@ -36,60 +38,69 @@ const runScenario = async (
 ): Promise<ScenarioResult> => {
   const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
 
-  await test.step('detect the upgraded data stream as TSDB', async () => {
-    await pageObjects.lens.openFullEditor();
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'min',
-      field: 'bytes_counter',
-      keepOpen: true,
-    });
+  const incompatibleAverageCount =
+    await test.step('check counter field compatibility', async () => {
+      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+        field: 'bytes_counter',
+        keepOpen: true,
+      });
 
-    await expect(
-      page.testSubj.locator('lns-indexPatternDimension-average incompatible')
-    ).toHaveCount(0);
-    await pageObjects.lens.closeDimensionEditor();
-  });
-
-  return test.step('visualize counter data before and after the upgrade', async () => {
-    // Start with a clean editor, matching the FTR beforeEach boundary between its two journey steps.
-    await pageObjects.lens.openFullEditor();
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-      keepOpen: true,
+      const count = await page.testSubj
+        .locator('lns-indexPatternDimension-average incompatible')
+        .count();
+      await pageObjects.lens.closeDimensionEditor();
+      return count;
     });
 
-    // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars cover
-    // the complete range before and after the stream rollover.
-    await pageObjects.lens.enableIncludeEmptyRows();
-    await pageObjects.lens.closeDimensionEditor();
+  const { counterBars, countBars } =
+    await test.step('visualize counter data before and after the upgrade', async () => {
+      // Start with a clean editor, matching the FTR beforeEach boundary between journey steps.
+      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+        keepOpen: true,
+      });
 
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'min',
-      field: 'bytes_counter',
+      // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars
+      // cover the complete range before and after the stream rollover.
+      await pageObjects.lens.enableIncludeEmptyRows();
+      await pageObjects.lens.closeDimensionEditor();
+
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+        field: 'bytes_counter',
+      });
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'count',
+      });
+
+      await pageObjects.lens.waitForVisualization('xyVisChart');
+      const chartData = await getChartDebugData(page, 'xyVisChart');
+
+      return {
+        counterBars: chartData.bars?.[0]?.bars,
+        countBars: chartData.bars?.[1]?.bars,
+      };
     });
-    await pageObjects.lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'count',
-    });
 
-    await pageObjects.lens.waitForVisualization('xyVisChart');
-    const chartData = await getChartDebugData(page, 'xyVisChart');
-
-    return {
-      counterBars: chartData.bars?.[0]?.bars,
-      countBars: chartData.bars?.[1]?.bars,
-      expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
-    };
-  });
+  return {
+    incompatibleAverageCount,
+    counterBars,
+    countBars,
+    expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
+  };
 };
 
 const getScenarioData = ({ counterBars, countBars }: ScenarioResult) => {
@@ -127,6 +138,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     tsdbScenario,
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
+    expect(result.incompatibleAverageCount).toBe(0);
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
@@ -143,6 +155,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
@@ -159,6 +172,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
@@ -176,6 +190,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
@@ -192,6 +207,7 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
     ]);
+    expect(result.incompatibleAverageCount).toBe(0);
     const data = getScenarioData(result);
     expect(data.firstCounter).toBe(5000);
     expect(data.lastCounter).toBe(5000);
