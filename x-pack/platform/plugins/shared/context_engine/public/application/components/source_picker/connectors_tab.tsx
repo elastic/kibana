@@ -14,14 +14,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
+import type { LinkId } from '@kbn/deeplinks-management';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import type { DataConnector } from '../../hooks/use_data_connectors';
 
-const MANAGEMENT_APP_ID = 'management';
-const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors/connectors';
+const CONNECTORS_DEEP_LINK_ID: LinkId = 'triggersActionsConnectors';
 
 interface ConnectorsTabProps {
   connectors: DataConnector[];
@@ -74,7 +75,7 @@ export const ConnectorsTab = ({
     <EuiButtonEmpty
       iconType="plusInCircle"
       onClick={() =>
-        application.navigateToApp(MANAGEMENT_APP_ID, { path: CONNECTORS_MANAGEMENT_PATH })
+        application.navigateToApp(MANAGEMENT_APP_ID, { deepLinkId: CONNECTORS_DEEP_LINK_ID })
       }
       data-test-subj="contextCreateConnectorButton"
     >

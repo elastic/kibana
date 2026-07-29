@@ -36,10 +36,7 @@ export const toAiIndexSources = (selectedSources: SelectedSource[]): AiIndexSour
   });
 
 /**
- * Rebuilds source picker selections from the sources stored on an AI index. An
- * ES|QL source restores to its raw query; a connector source restores to its
- * connector id. The connector label is resolved to a human-readable name later,
- * once the space connectors are loaded.
+ * Rebuilds source picker selections from the sources stored on an AI index.
  */
 export const toSelectedSources = (sources: AiIndexSource[]): SelectedSource[] =>
   sources.map((source) => ({

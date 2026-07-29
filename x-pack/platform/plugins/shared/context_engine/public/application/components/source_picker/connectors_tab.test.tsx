@@ -21,7 +21,7 @@ const CONNECTORS: DataConnector[] = [
   { id: 'connector-notion', name: 'Notion' },
 ];
 
-const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors/connectors';
+const CONNECTORS_DEEP_LINK_ID = 'triggersActionsConnectors';
 
 interface RenderConnectorsTabOptions {
   connectors?: DataConnector[];
@@ -159,7 +159,7 @@ describe('ConnectorsTab', () => {
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: CONNECTORS_MANAGEMENT_PATH,
+      deepLinkId: CONNECTORS_DEEP_LINK_ID,
     });
   });
 
@@ -169,7 +169,7 @@ describe('ConnectorsTab', () => {
     fireEvent.click(screen.getByTestId('contextCreateConnectorButton'));
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith('management', {
-      path: CONNECTORS_MANAGEMENT_PATH,
+      deepLinkId: CONNECTORS_DEEP_LINK_ID,
     });
   });
 });

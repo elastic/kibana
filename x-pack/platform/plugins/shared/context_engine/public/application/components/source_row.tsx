@@ -7,8 +7,8 @@
 
 import {
   EuiAvatar,
+  EuiBadge,
   EuiButtonIcon,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -16,36 +16,28 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ReactNode } from 'react';
 import React from 'react';
-import type { AiIndexSource } from '../../../common/http_api/ai_indices';
-import { toSourceType } from '../utils/sources';
-// Imported from the modules rather than the barrel: the source picker renders
-// this row, so importing its barrel here would create a cycle.
-import { SourceTypeBadge } from './source_picker/source_type_badge';
-import { getSourceTypeLabel } from './source_picker/types';
 
 interface SourceRowProps {
-  source: AiIndexSource;
-  /** Resolved connector name, when the source is a connector. */
-  connectorName?: string;
-  /** Renders a remove button when the row belongs to an editable list. */
+  /** Plain-text label, used for the remove action and as the default content. */
+  label: string;
+  typeLabel: string;
+  iconType: string;
+  /** Overrides how the label is rendered, e.g. as a code block. */
+  children?: ReactNode;
   onRemove?: () => void;
   'data-test-subj'?: string;
 }
 
-/**
- * A single source, rendered the same way in the read-only detail list and in
- * the source picker's list of selected sources.
- */
 export const SourceRow = ({
-  source,
-  connectorName,
+  label,
+  typeLabel,
+  iconType,
+  children,
   onRemove,
   'data-test-subj': dataTestSubj,
 }: SourceRowProps) => {
-  const isConnector = source.type === 'connector';
-  const sourceType = toSourceType(source.type);
-  const label = isConnector ? connectorName ?? source.value : source.value;
   const removeLabel = i18n.translate('xpack.contextEngine.sourceRow.removeAriaLabel', {
     defaultMessage: 'Remove {label}',
     values: { label },
@@ -59,8 +51,8 @@ export const SourceRow = ({
             type="space"
             size="m"
             color="subdued"
-            name={getSourceTypeLabel(sourceType)}
-            iconType={isConnector ? 'plugs' : 'editorCodeBlock'}
+            name={typeLabel}
+            iconType={iconType}
             iconColor="primary"
             iconSize="m"
           />
@@ -68,19 +60,13 @@ export const SourceRow = ({
         {/* minWidth: 0 lets the flex item shrink so long queries truncate instead of overflowing the panel */}
         <EuiFlexItem css={{ minWidth: 0 }}>
           <EuiText size="s" className="eui-textTruncate">
-            <strong>
-              {isConnector ? (
-                label
-              ) : (
-                <EuiCode language="sql" transparentBackground>
-                  {source.value}
-                </EuiCode>
-              )}
-            </strong>
+            <strong>{children ?? label}</strong>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <SourceTypeBadge type={sourceType} data-test-subj="contextSourceTypeBadge" />
+          <EuiBadge color="hollow" data-test-subj="contextSourceTypeBadge">
+            {typeLabel}
+          </EuiBadge>
         </EuiFlexItem>
         {onRemove && (
           <EuiFlexItem grow={false}>

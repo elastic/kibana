@@ -26,6 +26,11 @@ const matchesQuery = (aiIndex: AiIndexHttpItem, query: string): boolean => {
   return haystack.some((field) => field?.toLowerCase().includes(query));
 };
 
+/** An empty selection means the group is unconstrained, not that nothing matches. */
+const matchesFilters = (aiIndex: AiIndexHttpItem, { types, owners }: AiIndexListFilters): boolean =>
+  (types.length === 0 || types.includes(aiIndex.dest.type)) &&
+  (owners.length === 0 || owners.includes(getAiIndexOwner(aiIndex)));
+
 export interface UseAiIndexListStateResult {
   filters: AiIndexListFilters;
   setQuery: (query: string) => void;
@@ -67,18 +72,13 @@ export const useAiIndexListState = (aiIndices: AiIndexHttpItem[]): UseAiIndexLis
   }, []);
 
   const matches = useMemo(() => {
-    const { query, types, owners } = filters;
-    const normalizedQuery = query.trim().toLowerCase();
+    const normalizedQuery = filters.query.trim().toLowerCase();
 
-    return aiIndices.filter((aiIndex) => {
-      if (types.length > 0 && !types.includes(aiIndex.dest.type)) {
-        return false;
-      }
-      if (owners.length > 0 && !owners.includes(getAiIndexOwner(aiIndex))) {
-        return false;
-      }
-      return normalizedQuery === '' || matchesQuery(aiIndex, normalizedQuery);
-    });
+    return aiIndices.filter(
+      (aiIndex) =>
+        matchesFilters(aiIndex, filters) &&
+        (normalizedQuery === '' || matchesQuery(aiIndex, normalizedQuery))
+    );
   }, [aiIndices, filters]);
 
   const pageCount = Math.max(1, Math.ceil(matches.length / AI_INDICES_PER_PAGE));

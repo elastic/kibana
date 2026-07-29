@@ -8,8 +8,7 @@
 import type { AiIndexHttpItem } from '../../../common/http_api/ai_indices';
 
 /**
- * Who owns an AI index. Managed entries are registered in code and cannot be
- * edited or deleted through the API.
+ * Managed entries are registered in code and derived from isManaged property on the AI index.
  */
 export type AiIndexOwner = 'managed' | 'user';
 

@@ -19,6 +19,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import type { AiIndexSource } from '../../../../common/http_api/ai_indices';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { toSourceType } from '../../utils/sources';
+import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 
 interface SourcesPanelProps {
@@ -102,17 +104,25 @@ export const SourcesPanel = ({
         </EuiText>
       ) : (
         <EuiFlexGroup direction="column" gutterSize="s">
-          {sources.map((source) => (
-            <EuiFlexItem key={`${source.type}-${source.value}`}>
-              <SourceRow
-                source={source}
-                connectorName={
-                  source.type === 'connector' ? connectorNameById.get(source.value) : undefined
-                }
-                data-test-subj="contextAiIndexSourceRow"
-              />
-            </EuiFlexItem>
-          ))}
+          {sources.map((source) => {
+            const { label, typeLabel, iconType, content } = getSourceDisplay(
+              toSourceType(source.type),
+              source.value,
+              { connectorNameById }
+            );
+            return (
+              <EuiFlexItem key={`${source.type}-${source.value}`}>
+                <SourceRow
+                  label={label}
+                  typeLabel={typeLabel}
+                  iconType={iconType}
+                  data-test-subj="contextAiIndexSourceRow"
+                >
+                  {content}
+                </SourceRow>
+              </EuiFlexItem>
+            );
+          })}
         </EuiFlexGroup>
       )}
     </EuiPanel>

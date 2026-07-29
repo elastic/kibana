@@ -19,23 +19,28 @@ const renderWithProviders = (ui: React.ReactElement) =>
   );
 
 describe('SourceRow', () => {
-  it('renders the ES|QL query value and its source type', () => {
+  it('renders the children instead of the label when provided', () => {
     renderWithProviders(
       <SourceRow
-        source={{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }}
+        label="FROM logs-* | LIMIT 10"
+        typeLabel="ES|QL"
+        iconType="editorCodeBlock"
         data-test-subj="testSourceRow"
-      />
+      >
+        <code>FROM logs-* | LIMIT 10</code>
+      </SourceRow>
     );
 
     expect(screen.getByTestId('testSourceRow')).toHaveTextContent('FROM logs-* | LIMIT 10');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
   });
 
-  it('renders the resolved connector name for connector sources', () => {
+  it('renders the label as plain text by default', () => {
     renderWithProviders(
       <SourceRow
-        source={{ type: 'connector', value: 'connector-gdrive' }}
-        connectorName="Drive"
+        label="Drive"
+        typeLabel="Connector"
+        iconType="plugs"
         data-test-subj="testSourceRow"
       />
     );
@@ -45,7 +50,9 @@ describe('SourceRow', () => {
   });
 
   it('does not render a remove button unless onRemove is provided', () => {
-    renderWithProviders(<SourceRow source={{ type: 'esql', value: 'FROM logs-*' }} />);
+    renderWithProviders(
+      <SourceRow label="FROM logs-*" typeLabel="ES|QL" iconType="editorCodeBlock" />
+    );
 
     expect(screen.queryByTestId('contextRemoveSourceButton')).not.toBeInTheDocument();
   });
@@ -53,7 +60,12 @@ describe('SourceRow', () => {
   it('calls onRemove when the remove button is clicked', () => {
     const onRemove = jest.fn();
     renderWithProviders(
-      <SourceRow source={{ type: 'esql', value: 'FROM logs-*' }} onRemove={onRemove} />
+      <SourceRow
+        label="FROM logs-*"
+        typeLabel="ES|QL"
+        iconType="editorCodeBlock"
+        onRemove={onRemove}
+      />
     );
 
     fireEvent.click(screen.getByTestId('contextRemoveSourceButton'));

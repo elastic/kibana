@@ -18,6 +18,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState } from 'react';
 import { useDataConnectors } from '../../hooks/use_data_connectors';
+import { getSourceDisplay } from '../source_display';
 import { SourceRow } from '../source_row';
 import { ConnectorsTab } from './connectors_tab';
 import { EsqlTab } from './esql_tab';
@@ -74,19 +75,10 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
     name: string;
     checked: boolean;
   }) => {
-    const isSelected = selectedSources.some(
-      (current) => current.type === 'connector' && current.value === id
+    const others = selectedSources.filter(
+      (current) => !(current.type === 'connector' && current.value === id)
     );
-    if (checked) {
-      if (isSelected) {
-        return;
-      }
-      onChange([...selectedSources, { type: 'connector', id, label: name, value: id }]);
-      return;
-    }
-    onChange(
-      selectedSources.filter((current) => !(current.type === 'connector' && current.value === id))
-    );
+    onChange(checked ? [...others, { type: 'connector', id, label: name, value: id }] : others);
   };
 
   const removeSource = (source: SelectedSource) => {
@@ -96,11 +88,6 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
       )
     );
   };
-
-  const getSourceLabel = (source: SelectedSource): string =>
-    source.type === 'connector'
-      ? connectorNameById.get(source.value) ?? source.label
-      : source.label;
 
   return (
     <div data-test-subj="contextSourcePicker">
@@ -166,16 +153,26 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" gutterSize="s">
-            {selectedSources.map((source, index) => (
-              <EuiFlexItem key={`${source.type}-${source.id}`}>
-                <SourceRow
-                  source={{ type: source.type, value: source.value }}
-                  connectorName={source.type === 'connector' ? getSourceLabel(source) : undefined}
-                  onRemove={() => removeSource(source)}
-                  data-test-subj={`contextSelected-${source.type}-${source.id}`}
-                />
-              </EuiFlexItem>
-            ))}
+            {selectedSources.map((source) => {
+              const { label, typeLabel, iconType, content } = getSourceDisplay(
+                source.type,
+                source.value,
+                { connectorNameById }
+              );
+              return (
+                <EuiFlexItem key={`${source.type}-${source.id}`}>
+                  <SourceRow
+                    label={label}
+                    typeLabel={typeLabel}
+                    iconType={iconType}
+                    onRemove={() => removeSource(source)}
+                    data-test-subj={`contextSelected-${source.type}-${source.id}`}
+                  >
+                    {content}
+                  </SourceRow>
+                </EuiFlexItem>
+              );
+            })}
           </EuiFlexGroup>
         </>
       )}
