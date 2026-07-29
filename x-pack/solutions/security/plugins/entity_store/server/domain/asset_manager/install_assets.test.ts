@@ -114,7 +114,7 @@ describe('reinstallSharedElasticsearchAssetsIfMissing', () => {
           if (!present) {
             throw new Error('resource_not_found_exception');
           }
-          return {};
+          return { data_streams: [{ name }] };
         }),
       },
       ingest: { putPipeline: jest.fn().mockResolvedValue(undefined) },

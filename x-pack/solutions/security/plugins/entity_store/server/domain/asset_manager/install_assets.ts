@@ -195,11 +195,17 @@ async function uninstallIndicesAndDataStreams(
   ]);
 }
 
-const INDEX_NOT_FOUND = 'index_not_found_exception';
+const INDEX_NOT_FOUND_ERR_TYPE = 'index_not_found_exception';
+const VERIFICATION_EXCEPTION_ERR_TYPE = 'verification_exception';
+
+interface EsErrorCause {
+  type?: string;
+  reason?: string;
+}
 
 interface EsErrorLike {
   message?: string;
-  meta?: { body?: { error?: { type?: string; root_cause?: Array<{ type?: string }> } } };
+  meta?: { body?: { error?: { type?: string; root_cause?: EsErrorCause[] } } };
 }
 
 /**
@@ -210,28 +216,27 @@ interface EsErrorLike {
  */
 export const isIndexNotFoundError = (error: unknown): boolean => {
   const esError = (error as EsErrorLike)?.meta?.body?.error;
-  if (esError?.type === INDEX_NOT_FOUND) {
+  if (esError?.type === INDEX_NOT_FOUND_ERR_TYPE) {
     return true;
   }
   if (
     esError?.root_cause?.some(
       (cause) =>
-        cause?.type === INDEX_NOT_FOUND ||
-        (typeof (cause as { reason?: string })?.reason === 'string' &&
-          ((cause as { reason?: string }).reason!.includes(INDEX_NOT_FOUND) ||
-            (cause as { reason?: string }).reason!.includes('Unknown index')))
+        cause?.type === INDEX_NOT_FOUND_ERR_TYPE ||
+        (cause?.type === VERIFICATION_EXCEPTION_ERR_TYPE &&
+          cause?.reason?.includes('Unknown index'))
     )
   ) {
     return true;
   }
   const message = (error as EsErrorLike)?.message;
-  return typeof message === 'string' && message.includes(INDEX_NOT_FOUND);
+  return message?.includes(INDEX_NOT_FOUND_ERR_TYPE) ?? false;
 };
 
 const dataStreamExists = async (esClient: ElasticsearchClient, name: string): Promise<boolean> => {
   try {
-    await esClient.indices.getDataStream({ name });
-    return true;
+    const response = await esClient.indices.getDataStream({ name });
+    return (response.data_streams?.length ?? 0) > 0;
   } catch {
     return false;
   }
