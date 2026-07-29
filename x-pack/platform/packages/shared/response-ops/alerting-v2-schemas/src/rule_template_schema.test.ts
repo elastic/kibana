@@ -154,7 +154,8 @@ describe('rule template create-rule schema coupling', () => {
   /**
    * Full structural snapshot of the create-rule base schema.
    * When create-rule changes, update this snapshot and confirm the template
-   * schema still extends the same base.
+   * schema still extends the same base. If a new model version was added 
+   * for create rule, a new model version is needed for the template. 
    */
   it('matches the snapshot of the full create-rule JSON schema', () => {
     expect({
