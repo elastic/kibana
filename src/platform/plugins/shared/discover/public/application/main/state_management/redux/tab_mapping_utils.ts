@@ -9,11 +9,17 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
+import type {
+  DiscoverSession,
+  DiscoverSessionTab,
+  DiscoverSessionTabProfileState,
+} from '@kbn/saved-search-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
+import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
+import { ProfileStateType } from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
@@ -57,10 +63,12 @@ export const fromSavedObjectTabToTabState = ({
   tab,
   existingTab,
   initialAppState,
+  profileStateRegistry,
 }: {
   tab: DiscoverSessionTab;
   existingTab?: TabState;
   initialAppState?: DiscoverAppState;
+  profileStateRegistry: ProfileStateRegistry;
 }): TabState => {
   const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
@@ -70,6 +78,16 @@ export const fromSavedObjectTabToTabState = ({
       ? tab.refreshInterval
       : existingTab?.globalState.refreshInterval,
   };
+
+  // Persistent-typed profile state comes from the saved object, while Ui and
+  // Url-typed overrides are not part of saved tab state, so keep the current
+  // values (mirroring how e.g. `hideSidebar` is handled on reset).
+  const nonPersistentProfileState = profileStateRegistry.pickStateByType({
+    profileStateMap: existingTab?.profileState,
+    stateTypes: [ProfileStateType.Ui, ProfileStateType.Url],
+    defaultsHandling: 'strip',
+  });
+  const profileState = profileStateRegistry.mergeState(nonPersistentProfileState, tab.profileState);
 
   return {
     ...DEFAULT_TAB_STATE,
@@ -82,6 +100,7 @@ export const fromSavedObjectTabToTabState = ({
     appState,
     previousAppState: existingTab?.appState ?? appState,
     globalState,
+    profileState,
     attributes: {
       ...DEFAULT_TAB_STATE.attributes,
       timeRestore: tab.timeRestore ?? false,
@@ -175,6 +194,21 @@ export const fromTabStateToSavedObjectTab = ({
 
   const usesAdHocDataView = isObject(serializedSearchSource.index);
 
+  // Only Persistent-typed profile state fields belong in the saved object,
+  // stripped of default values so all-default state is stored as `undefined`.
+  const persistentProfileState = services.profileStateRegistry.pickStateByType({
+    profileStateMap: tab.profileState,
+    stateTypes: [ProfileStateType.Persistent],
+    defaultsHandling: 'strip',
+  });
+  const profileState: DiscoverSessionTabProfileState = {};
+
+  for (const [stateKey, state] of Object.entries(persistentProfileState)) {
+    if (state) {
+      profileState[stateKey] = state;
+    }
+  }
+
   return {
     id: tab.id,
     label: tab.label,
@@ -205,6 +239,7 @@ export const fromTabStateToSavedObjectTab = ({
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
       : undefined,
+    profileState: Object.keys(profileState).length ? profileState : undefined,
   };
 };
 

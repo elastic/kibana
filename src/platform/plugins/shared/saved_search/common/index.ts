@@ -18,6 +18,7 @@ export type {
   SavedSearchByValueAttributes,
   DiscoverSession,
   DiscoverSessionTab,
+  DiscoverSessionTabProfileState,
 } from './types';
 
 export enum VIEW_MODE {

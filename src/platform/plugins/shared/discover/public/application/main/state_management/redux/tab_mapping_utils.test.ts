@@ -24,6 +24,7 @@ import {
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import { TEST_PROFILE_STATE_DEF } from '../../../../context_awareness/__mocks__/profile_state';
 
 const services = createDiscoverServicesMock();
 const tab1 = getTabStateMock({
@@ -108,6 +109,7 @@ describe('tab mapping utils', () => {
           currentDataView: undefined,
         }),
         existingTab: tab1,
+        profileStateRegistry: services.profileStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -194,6 +196,7 @@ describe('tab mapping utils', () => {
           currentDataView: undefined,
         }),
         existingTab: tab1,
+        profileStateRegistry: services.profileStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -294,6 +297,7 @@ describe('tab mapping utils', () => {
           currentDataView: undefined,
         }),
         existingTab: tab1,
+        profileStateRegistry: services.profileStateRegistry,
       });
 
       expect(tabState.attributes.controlGroupState).toEqual({
@@ -461,6 +465,7 @@ describe('tab mapping utils', () => {
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
+          "profileState": undefined,
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
@@ -501,6 +506,7 @@ describe('tab mapping utils', () => {
           "id": "1",
           "isTextBasedQuery": false,
           "label": "Tab 1",
+          "profileState": undefined,
           "refreshInterval": Object {
             "pause": true,
             "value": 500,
@@ -587,6 +593,125 @@ describe('tab mapping utils', () => {
       expect(savedObjectTab.serializedSearchSource).toEqual({
         index: 'initial-data-view-id',
         query: { esql: 'FROM test' },
+      });
+    });
+  });
+
+  describe('profileState mapping', () => {
+    const createServicesWithRegistry = () => {
+      const servicesWithRegistry = createDiscoverServicesMock();
+      servicesWithRegistry.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+      return servicesWithRegistry;
+    };
+
+    it('should write only non-default Persistent-typed fields to the saved object tab', () => {
+      const servicesWithRegistry = createServicesWithRegistry();
+      const tabWithProfileState = getTabStateMock({
+        id: 'profile-tab',
+        profileState: {
+          testProfileState: {
+            uiValue: 'customUi',
+            urlValue: 'customUrl',
+            persistentValue: 'customPersistent',
+          },
+        },
+      });
+
+      const savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: tabWithProfileState,
+        services: servicesWithRegistry,
+        currentDataView: undefined,
+      });
+
+      expect(savedObjectTab.profileState).toEqual({
+        testProfileState: { persistentValue: 'customPersistent' },
+      });
+    });
+
+    it('should write undefined when all Persistent-typed fields are default', () => {
+      const servicesWithRegistry = createServicesWithRegistry();
+      const tabWithDefaultProfileState = getTabStateMock({
+        id: 'profile-tab',
+        profileState: {
+          testProfileState: {
+            uiValue: 'customUi',
+            persistentValue: 'defaultPersistent',
+          },
+        },
+      });
+
+      const savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: tabWithDefaultProfileState,
+        services: servicesWithRegistry,
+        currentDataView: undefined,
+      });
+
+      expect(savedObjectTab.profileState).toBeUndefined();
+    });
+
+    it('should restore Persistent-typed fields from the saved object tab and keep existing Ui and Url overrides', () => {
+      const servicesWithRegistry = createServicesWithRegistry();
+      const existingTab = getTabStateMock({
+        id: 'profile-tab',
+        profileState: {
+          testProfileState: {
+            uiValue: 'existingUi',
+            urlValue: 'existingUrl',
+            persistentValue: 'existingPersistent',
+          },
+        },
+      });
+      const savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({
+          id: 'profile-tab',
+          profileState: {
+            testProfileState: { persistentValue: 'savedPersistent' },
+          },
+        }),
+        services: servicesWithRegistry,
+        currentDataView: undefined,
+      });
+
+      const tabState = fromSavedObjectTabToTabState({
+        tab: savedObjectTab,
+        existingTab,
+        profileStateRegistry: servicesWithRegistry.profileStateRegistry,
+      });
+
+      expect(tabState.profileState).toEqual({
+        testProfileState: {
+          uiValue: 'existingUi',
+          urlValue: 'existingUrl',
+          persistentValue: 'savedPersistent',
+        },
+      });
+    });
+
+    it('should clear existing Persistent-typed overrides when the saved object tab has none', () => {
+      const servicesWithRegistry = createServicesWithRegistry();
+      const existingTab = getTabStateMock({
+        id: 'profile-tab',
+        profileState: {
+          testProfileState: {
+            uiValue: 'existingUi',
+            persistentValue: 'existingPersistent',
+          },
+        },
+      });
+      const savedObjectTab = fromTabStateToSavedObjectTab({
+        tab: getTabStateMock({ id: 'profile-tab' }),
+        services: servicesWithRegistry,
+        currentDataView: undefined,
+      });
+
+      const tabState = fromSavedObjectTabToTabState({
+        tab: savedObjectTab,
+        existingTab,
+        profileStateRegistry: servicesWithRegistry.profileStateRegistry,
+      });
+
+      expect(tabState.profileState).toEqual({
+        testProfileState: { uiValue: 'existingUi' },
       });
     });
   });
