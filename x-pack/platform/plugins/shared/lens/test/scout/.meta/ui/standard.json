@@ -1,5 +1,5 @@
 {
-  "sha1": "ba08f6c50148465b22f38eff8b1c3c33e1d53c03",
+  "sha1": "e28f1eab512955910042c315433ba802bab88ebd",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -209,7 +209,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
-        "line": 164,
+        "line": 161,
         "column": 7
       }
     },
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
-        "line": 173,
+        "line": 172,
         "column": 7
       }
     },
@@ -261,7 +261,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
-        "line": 185,
+        "line": 186,
         "column": 7
       }
     },
@@ -287,7 +287,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
-        "line": 197,
+        "line": 200,
         "column": 7
       }
     },
@@ -313,7 +313,137 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_downgrade.spec.ts",
-        "line": 210,
+        "line": 215,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f381045690c1c4-cfc5662eb8bc50d",
+      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream without additional indices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_upgrade.spec.ts",
+        "line": 136,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f381045690c1c4-262e2389c524312",
+      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with a regular index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_upgrade.spec.ts",
+        "line": 149,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f381045690c1c4-d8765ed48ef14b3",
+      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with a downsampled TSDB stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_upgrade.spec.ts",
+        "line": 165,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f381045690c1c4-ccf60734e02ab62",
+      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with regular and downsampled resources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_upgrade.spec.ts",
+        "line": 181,
+        "column": 7
+      }
+    },
+    {
+      "id": "2f381045690c1c4-14a59aebc57d8ac",
+      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with another TSDB stream",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/tsdb/stream_upgrade.spec.ts",
+        "line": 198,
         "column": 7
       }
     }
