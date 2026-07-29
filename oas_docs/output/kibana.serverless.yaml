@@ -2751,14 +2751,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -2769,6 +2770,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2779,7 +2781,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -2812,6 +2814,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -2845,9 +2848,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -2896,7 +2909,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -2919,6 +2932,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -3206,14 +3220,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -3224,6 +3239,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -3234,7 +3250,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -3267,6 +3283,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -3300,9 +3317,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3351,7 +3378,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -3374,6 +3401,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -27225,6 +27253,8 @@ paths:
                         pipeline_config:
                           maxLength: 10000
                           type: string
+                        policy_base_id:
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -27889,6 +27919,8 @@ paths:
                       pipeline_config:
                         maxLength: 10000
                         type: string
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -28369,6 +28401,8 @@ paths:
                         type: array
                       pipeline_config:
                         maxLength: 10000
+                        type: string
+                      policy_base_id:
                         type: string
                       policy_id:
                         type: string
@@ -87811,6 +87845,12 @@ components:
           minLength: 1
           title: Index pattern
           type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
+          type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
           title: Time field
@@ -89572,9 +89612,11 @@ components:
       properties:
         end:
           description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+          maxLength: 100
           type: string
         every:
           description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+          maxLength: 100
           type: string
         occurrences:
           description: The total number of recurrences of the schedule.
@@ -89586,6 +89628,7 @@ components:
             maximum: 12
             minimum: 1
             type: number
+          maxItems: 12
           minItems: 1
           type: array
         onMonthDay:
@@ -89594,12 +89637,15 @@ components:
             maximum: 31
             minimum: 1
             type: number
+          maxItems: 31
           minItems: 1
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           minItems: 1
           type: array
       title: maintenance_window_schedule_recurring_request
@@ -89620,16 +89666,20 @@ components:
           description: The specific months for a recurring schedule. Valid values are 1-12.
           items:
             type: number
+          maxItems: 12
           type: array
         onMonthDay:
           description: The specific days of the month for a recurring schedule. Valid values are 1-31.
           items:
             type: number
+          maxItems: 31
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           type: array
       title: maintenance_window_schedule_recurring_response
       type: object
@@ -89638,14 +89688,17 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request'
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -101981,6 +102034,7 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           additionalProperties: false
@@ -101988,9 +102042,11 @@ components:
           properties:
             end:
               description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+              maxLength: 100
               type: string
             every:
               description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+              maxLength: 100
               type: string
             occurrences:
               description: The total number of recurrences of the schedule.
@@ -102002,6 +102058,7 @@ components:
                 maximum: 12
                 minimum: 1
                 type: number
+              maxItems: 12
               minItems: 1
               type: array
             onMonthDay:
@@ -102010,19 +102067,24 @@ components:
                 maximum: 31
                 minimum: 1
                 type: number
+              maxItems: 31
               minItems: 1
               type: array
             onWeekDay:
               description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
               items:
+                maxLength: 10
                 type: string
+              maxItems: 77
               minItems: 1
               type: array
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -126707,6 +126769,9 @@ components:
           items:
             type: string
           type: array
+        hasManualEntities:
+          description: Indicates whether the watchlist contains manually assigned entities
+          type: boolean
         id:
           description: The unique ID of the watchlist
           type: string

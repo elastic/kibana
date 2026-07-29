@@ -211,6 +211,8 @@ describe('generateSampleFromJsonSchema', () => {
         {
           last_event_timestamp: INPUT_STRING_PLACEHOLDER,
           rule_id: INPUT_STRING_PLACEHOLDER,
+          source: INPUT_STRING_PLACEHOLDER,
+          space_id: INPUT_STRING_PLACEHOLDER,
           group_hash: INPUT_STRING_PLACEHOLDER,
           episode_id: INPUT_STRING_PLACEHOLDER,
           episode_status: INPUT_STRING_PLACEHOLDER,
