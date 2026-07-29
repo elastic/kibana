@@ -95,7 +95,10 @@ export class DiscoverApp {
     await dataViewSwitch.click();
   }
 
-  async selectDataView(name: string) {
+  async selectDataView(
+    name: string,
+    { waitForFieldList = true }: { waitForFieldList?: boolean } = {}
+  ) {
     const dataViewSwitch = await this.getVisibleDataViewSwitch();
     const currentValue = await dataViewSwitch.innerText();
     if (currentValue === name) {
@@ -113,7 +116,9 @@ export class DiscoverApp {
       await this.page.testSubj.locator('explore-matching-indices-button').click();
     }
     await switcher.waitFor({ state: 'hidden' });
-    await this.waitUntilFieldListHasCountOfFields();
+    if (waitForFieldList) {
+      await this.waitUntilFieldListHasCountOfFields();
+    }
   }
 
   getSelectedDataView(): Locator {

@@ -7,23 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutPage, ScoutSpaceParallelFixture } from '@kbn/scout';
+import type { ScoutSpaceParallelFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { DATE_NESTED_KBN_ARCHIVE, SAVED_SEARCH_TITLE } from '../../../common/ui/fixtures/constants';
 import { spaceTest, type DiscoverPageObjects } from '../fixtures';
-
-const selectDataViewWithoutFieldListWait = async (page: ScoutPage, name: string) => {
-  await page
-    .locator(
-      '[data-test-subj="discover-dataView-switch-link"]:visible, [data-test-subj="dataView-switch-link"]:visible'
-    )
-    .click();
-  const switcher = page.testSubj.locator('indexPattern-switcher');
-  await switcher.waitFor({ state: 'visible' });
-  await page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-  await switcher.locator(`[data-test-subj="dataView-${name}"]`).click();
-  await switcher.waitFor({ state: 'hidden' });
-};
 
 spaceTest.describe(
   'Discover search on page load setting',
@@ -75,7 +62,7 @@ spaceTest.describe(
         await expect(fieldList).toBeHidden();
 
         await spaceTest.step('does not fetch on data view change', async () => {
-          await selectDataViewWithoutFieldListWait(page, 'date-nested');
+          await discover.selectDataView('date-nested', { waitForFieldList: false });
 
           await expect(discover.getRefreshDataButton()).toBeVisible();
           expect(await discover.getSearchFetchCount()).toBe(0);
