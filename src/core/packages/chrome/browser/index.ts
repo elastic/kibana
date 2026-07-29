@@ -26,7 +26,6 @@ export type {
   AppHeaderTabAction,
   AppHeaderTabActions,
   AppHeaderTabBadge,
-  AppHeaderTabCountBadge,
   AppHeaderTabIconBadge,
   AppHeaderTitle,
   AppHeaderTitleSaveResult,

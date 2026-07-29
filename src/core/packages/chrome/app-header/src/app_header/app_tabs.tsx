@@ -39,19 +39,6 @@ const renderTabBadge = (badge: AppHeaderTab['badge']) => {
     );
   }
 
-  if ('count' in badge) {
-    return (
-      <EuiNotificationBadge
-        color="subdued"
-        size="m"
-        aria-label={badge['aria-label']}
-        data-test-subj={badge['data-test-subj']}
-      >
-        {badge.count}
-      </EuiNotificationBadge>
-    );
-  }
-
   return badge.tooltip !== undefined ? (
     <EuiIconTip type={badge.iconType} content={badge.tooltip} position="bottom" />
   ) : (
