@@ -275,9 +275,6 @@ export const AGENT_MAPPINGS = {
     policy_output_permissions_hash: {
       type: 'keyword',
     },
-    policy_base_id: {
-      type: 'keyword',
-    },
     policy_coordinator_idx: {
       type: 'integer',
     },
