@@ -15,6 +15,7 @@ import {
   createAlertEventResponseSchema,
   errorResponseSchema,
   type CreateAlertEventData,
+  type CreateAlertEventResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_ALERT_API_PATH } from '../constants';
@@ -33,6 +34,9 @@ import type { AlertEvent } from '../../resources/datastreams/alert_events';
 import type { QueryServiceContract } from '../../lib/services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../lib/services/query_service/tokens';
 
+/** Kibana app path for episode detail — callers prepend origin + basePath as needed. */
+const EPISODE_DETAILS_APP_PATH = '/app/management/alertingV2/episodes';
+
 // ── Shared schemas ────────────────────────────────────────────────────────────
 
 const sourceParamsSchema = z.object({
@@ -45,10 +49,14 @@ function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
 }
 
+function buildEpisodeUrl(episodeId: string): string {
+  return `${EPISODE_DETAILS_APP_PATH}/${encodeURIComponent(episodeId)}`;
+}
+
 /**
  * Resolves the fingerprint in priority order:
  *   1. Explicit `fingerprint` field
- *   2. `fingerprint_fields` — hash of named fields from the `data` block
+ *   2. `fingerprint_fields` — hash of named fields (body top-level, then data.*)
  *   3. `rule_id` — hashed with source for a stable per-rule series key
  *   4. null → caller must be rejected with 400
  */
@@ -56,7 +64,18 @@ function resolveFingerprint(body: CreateAlertEventData, source: string): string 
   if (body.fingerprint) return body.fingerprint;
 
   if (body.fingerprint_fields?.length) {
-    const values = body.fingerprint_fields.map((f) => String(body.data?.[f] ?? ''));
+    const record = body as CreateAlertEventData & Record<string, unknown>;
+    const values = body.fingerprint_fields.map((field) => {
+      if (
+        field !== 'data' &&
+        field !== 'fingerprint_fields' &&
+        Object.prototype.hasOwnProperty.call(record, field) &&
+        record[field] != null
+      ) {
+        return String(record[field]);
+      }
+      return String(body.data?.[field] ?? '');
+    });
     return sha256(values.join(':'));
   }
 
@@ -114,10 +133,7 @@ async function ingestAlertEvent({
   spaceId: string;
   storageService: StorageServiceContract;
   queryService: QueryServiceContract;
-}): Promise<{ group_hash: string; episode_id: string }> {
-  const ruleId = body.rule_id ? `${source}/${body.rule_id}` : source;
-  const ruleName = body.rule_name ?? body.rule_id ?? source;
-
+}): Promise<CreateAlertEventResponse> {
   // spaceId scopes the hash to prevent cross-space group_hash collisions.
   const groupHash = sha256(`${spaceId}:${source}:${fingerprint}`);
 
@@ -136,26 +152,15 @@ async function ingestAlertEvent({
       ? 1
       : undefined;
 
-  // Merge rule_name and alert_url into data only when the caller hasn't already
-  // set those keys — avoids overwriting explicit caller-provided values.
-  const incomingData = body.data ?? {};
-  const enrichedData = {
-    ...(!('rule_name' in incomingData) && body.rule_name != null
-      ? { rule_name: body.rule_name }
-      : {}),
-    ...(!('alert_url' in incomingData) && body.alert_url != null
-      ? { alert_url: body.alert_url }
-      : {}),
-    ...incomingData,
-  };
-
+  // No `rule` object — external alerts have no saved object. Display name /
+  // backlink live in data.rule_name / data.alert_url when the caller provides them.
   const doc: AlertEvent = {
     '@timestamp': atTimestamp,
-    rule: { id: ruleId, name: ruleName, version: 1 },
+    scheduled_timestamp: atTimestamp,
     group_hash: groupHash,
-    data: enrichedData,
+    data: body.data ?? {},
     status,
-    source: { name: source },
+    source,
     type: alertEventType.alert,
     episode: {
       id: episodeId,
@@ -171,7 +176,11 @@ async function ingestAlertEvent({
     docs: [doc],
   });
 
-  return { group_hash: groupHash, episode_id: episodeId };
+  return {
+    group_hash: groupHash,
+    episode_id: episodeId,
+    episode_url: buildEpisodeUrl(episodeId),
+  };
 }
 
 // ── Shared route config ───────────────────────────────────────────────────────

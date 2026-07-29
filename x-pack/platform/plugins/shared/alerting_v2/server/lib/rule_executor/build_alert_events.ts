@@ -222,7 +222,7 @@ export function buildRecoveryAlertEvents({
         group_hash,
         data: {},
         status: 'recovered',
-        source: { name: 'internal' },
+        source: 'internal',
         type,
         space_id: spaceId,
       })
@@ -261,7 +261,7 @@ export function buildContinuedBreachAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'breached' as const,
-    source: { name: 'internal' },
+    source: 'internal',
     type,
     space_id: spaceId,
   }));
@@ -298,7 +298,7 @@ export function buildNoDataAlertEvents({
     group_hash: groupHash,
     data: {},
     status: 'no_data' as const,
-    source: { name: 'internal' },
+    source: 'internal',
     type,
     space_id: spaceId,
   }));
@@ -398,7 +398,7 @@ export function buildQueryRecoveryAlertEvents({
       group_hash: groupHash,
       data,
       status: 'recovered',
-      source: { name: 'internal' },
+      source: 'internal',
       type,
       space_id: spaceId,
     })

@@ -7,7 +7,14 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiBadgeGroup, EuiDescriptionList, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiDescriptionList,
+  EuiLink,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -57,6 +64,10 @@ export const AlertEpisodeOverviewList = ({
   const isResolved = groupAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozeExpiry);
   const tags = groupAction?.tags ?? [];
+  const alertUrl =
+    typeof groupingData.alert_url === 'string' && groupingData.alert_url.length > 0
+      ? groupingData.alert_url
+      : undefined;
 
   return (
     <EuiDescriptionList
@@ -96,6 +107,23 @@ export const AlertEpisodeOverviewList = ({
                   ),
               },
             ]),
+        ...(alertUrl
+          ? [
+              {
+                title: i18n.METADATA_LIST_SOURCE_URL_LABEL,
+                description: (
+                  <EuiLink
+                    href={alertUrl}
+                    target="_blank"
+                    external
+                    data-test-subj="alertingV2EpisodeDetailsOverviewListAlertUrl"
+                  >
+                    {i18n.METADATA_LIST_SOURCE_URL_LINK}
+                  </EuiLink>
+                ),
+              },
+            ]
+          : []),
         ...(tags.length > 0
           ? [
               {

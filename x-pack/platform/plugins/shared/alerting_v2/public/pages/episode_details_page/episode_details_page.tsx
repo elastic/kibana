@@ -127,10 +127,28 @@ export function EpisodeDetailsPage() {
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
   const eventRuleName = episode?.['rule.name'] as string | undefined;
+  const episodeDataRuleName = (() => {
+    const raw = episode?.episode_data;
+    if (typeof raw !== 'string' || raw.length === 0) return undefined;
+    try {
+      const parsed: unknown = JSON.parse(raw);
+      if (
+        parsed &&
+        typeof parsed === 'object' &&
+        !Array.isArray(parsed) &&
+        typeof (parsed as Record<string, unknown>).rule_name === 'string'
+      ) {
+        return (parsed as Record<string, unknown>).rule_name as string;
+      }
+    } catch {
+      // ignore malformed episode_data
+    }
+    return undefined;
+  })();
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
-      : eventRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+      : episodeDataRuleName ?? eventRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

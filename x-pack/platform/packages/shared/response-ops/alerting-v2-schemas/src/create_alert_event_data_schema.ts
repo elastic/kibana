@@ -26,28 +26,40 @@ const sourceSchema = z
       'source cannot start with "elastic." — this prefix is reserved for Elastic-produced events.',
   });
 
-export const createAlertEventDataSchema = z.object({
-  // Required via body or /:source URL path — validated in the route handler.
-  source: sourceSchema.optional(),
+/**
+ * Request body for POST /api/alerting/v2/alerts[/:source].
+ *
+ * `.passthrough()` keeps unknown top-level keys so `fingerprint_fields` can
+ * name either top-level body fields (e.g. Datadog `monitor_id` + `scope`) or
+ * keys nested under `data`.
+ *
+ * Display name / backlink are not first-class request fields — callers who
+ * want them put `rule_name` / `alert_url` inside `data`. The UI reads those
+ * keys when present.
+ */
+export const createAlertEventDataSchema = z
+  .object({
+    // Required via body or /:source URL path — validated in the route handler.
+    source: sourceSchema.optional(),
 
-  // At least one of fingerprint / fingerprint_fields / rule_id is required.
-  // Priority: fingerprint > fingerprint_fields (hashed from data.*) > rule_id (hashed with source).
-  // Validated in the route handler after source is resolved.
-  fingerprint: z.string().min(1).optional(),
-  fingerprint_fields: z.array(z.string().min(1)).min(1).optional(),
-  rule_id: z.string().min(1).optional(),
+    // At least one of fingerprint / fingerprint_fields / rule_id is required.
+    // Priority: fingerprint > fingerprint_fields > rule_id (hashed with source).
+    // Validated in the route handler after source is resolved.
+    fingerprint: z.string().min(1).optional(),
+    fingerprint_fields: z.array(z.string().min(1)).min(1).optional(),
+    rule_id: z.string().min(1).optional(),
 
-  rule_name: z.string().optional(),
-  alert_url: z.string().optional(),
-  alert_status: externalAlertStatusSchema.optional(),
-  data: z.record(z.string(), z.any()).optional(),
-  timestamp: z.string().optional(),
-  severity: alertEventSeveritySchema.optional(),
-});
+    alert_status: externalAlertStatusSchema.optional(),
+    data: z.record(z.string(), z.any()).optional(),
+    timestamp: z.string().optional(),
+    severity: alertEventSeveritySchema.optional(),
+  })
+  .passthrough();
 
 export const createAlertEventResponseSchema = z.object({
   group_hash: z.string(),
   episode_id: z.string(),
+  episode_url: z.string(),
 });
 
 export type CreateAlertEventData = z.infer<typeof createAlertEventDataSchema>;
