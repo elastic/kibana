@@ -613,6 +613,11 @@ export class WorkflowsService {
     return this.validationService.getWorkflowZodSchema(options, spaceId, request);
   }
 
+  /**
+   * Install or update a managed workflow after ES readiness gating.
+   * Best-effort: may no-op when Kibana is stopping or ES is not ready (resolve ≠ persisted).
+   * Gated skips mark the plugin install pass incomplete so ready() will not orphan-delete.
+   */
   public async installManagedWorkflow(
     id: ManagedWorkflowId,
     options: ManagedWorkflowServiceInstallOptions,
@@ -661,6 +666,11 @@ export class WorkflowsService {
     );
   }
 
+  /**
+   * Owner signal that static managed installs for this plugin are finished.
+   * Best-effort: may no-op when Kibana is stopping or ES is not ready. When installs
+   * were incomplete this boot, destructive reconcile is skipped.
+   */
   public async pluginReady(pluginId: string): Promise<void> {
     await this.ensureInitialized();
     const readiness = await this.ensureManagedInstallReady(`ready() for plugin '${pluginId}'`);

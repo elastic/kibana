@@ -76,6 +76,13 @@ export const createWorkflowsClientProvider = (
   };
 };
 
+/**
+ * System (requestless) managed-workflows API used by `initManagedWorkflowsClient`.
+ *
+ * `install` / `ready` are best-effort during Kibana teardown and when Elasticsearch
+ * readiness gating skips writes: they may resolve without persisting or without
+ * running destructive reconcile. See {@link RegisteredManagedWorkflowsLifecycleApi}.
+ */
 export const createManagedWorkflowsSystemApiProvider = (
   workflowsService: WorkflowsService,
   config: WorkflowsManagementConfig,

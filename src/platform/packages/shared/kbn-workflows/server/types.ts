@@ -71,9 +71,22 @@ export interface ManagedWorkflowStatusReport {
 export type GetManagedWorkflowStatusOptions = ManagedWorkflowOperationOptions;
 
 /**
- * Requestless lifecycle API returned by the managed workflows system provider.
+ * Requestless lifecycle API returned by the managed workflows system provider
+ * (`initManagedWorkflowsClient` / `ManagedWorkflowsSystemApiProvider`).
+ *
+ * `install` and `ready` are best-effort: they resolve without throwing when Workflows
+ * is unavailable, Kibana is stopping, or Elasticsearch readiness gating skips the
+ * write. A resolved `Promise<void>` does **not** guarantee the workflow was persisted
+ * or that orphan reconciliation ran. Missing installs are retried on a later boot;
+ * when any install for the plugin was incomplete this boot, `ready()` skips destructive
+ * reconcile so still-desired docs are not force-deleted.
  */
 export interface RegisteredManagedWorkflowsLifecycleApi {
+  /**
+   * Install or update a managed workflow instance for this plugin.
+   * May no-op (resolve without persisting) when Workflows is unavailable, Kibana is
+   * stopping, or ES is not ready for managed writes.
+   */
   install: <TId extends ManagedWorkflowId>(
     id: TId,
     options: ManagedWorkflowInstallOptions<TId>
@@ -87,7 +100,10 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
    * Triggers per-plugin reconciliation: removes persisted static workflows that were
    * not installed during the startup window (between owner registration and this call).
    *
-   * Static workflow installs after ready() will log a warning.
+   * Best-effort: may no-op when Workflows is unavailable, Kibana is stopping, or ES is
+   * not ready. When installs were gated or aborted incomplete this boot, destructive
+   * reconcile is skipped so persisted workflows are preserved (missing installs retry
+   * on a later boot). Static workflow installs after ready() will log a warning.
    */
   ready: () => Promise<void>;
   /**
@@ -112,8 +128,14 @@ export interface RegisteredManagedWorkflowsApi extends RegisteredManagedWorkflow
 
 /**
  * Request-scoped workflows client API; pluginId is supplied by workflows_extensions.
+ *
+ * `install` is best-effort (same semantics as {@link RegisteredManagedWorkflowsLifecycleApi}).
  */
 export interface ManagedWorkflowsApi {
+  /**
+   * Install or update a managed workflow. May no-op when Workflows is unavailable,
+   * Kibana is stopping, or ES readiness gating skips the write — resolve ≠ persisted.
+   */
   install: <TId extends ManagedWorkflowId>(
     pluginId: string,
     id: TId,
