@@ -504,7 +504,7 @@ export class DataGridService extends FtrService {
   }
 
   public async isDocViewerNavigationVisible() {
-    return await this.testSubjects.exists('docViewerFlyoutNavigation');
+    return await this.testSubjects.exists('docViewerFlyout > euiFlyoutMenuPaginationNext');
   }
 
   public async clickDocViewerTab(id: string) {
@@ -536,17 +536,30 @@ export class DataGridService extends FtrService {
   }
 
   public async getDocViewerActivePage() {
-    const activePage = await this.find.byCssSelector(
-      '[data-test-subj^="docViewerFlyoutNavigationPage-"]'
-    );
-    const dataTestSubj = await activePage.getAttribute('data-test-subj');
-    const match = dataTestSubj?.match(/docViewerFlyoutNavigationPage-(\d+)/);
+    const menu = await this.testSubjects.find('docViewerRowDetailsTitle');
+    const text = await menu.getVisibleText();
+    const match = text.match(/(\d+)\s+of\s+(\d+)/);
 
     if (!match) {
-      throw new Error(`Unable to parse active flyout page from "${dataTestSubj}"`);
+      throw new Error(`Unable to parse active flyout page from "${text}"`);
     }
 
-    return Number(match[1]);
+    // Counter is 1-based; callers expect a zero-based index.
+    return Number(match[1]) - 1;
+  }
+
+  public async expectDocViewerActivePage(activePage: number) {
+    await this.retry.waitFor(`doc viewer active page to be ${activePage}`, async () => {
+      return (await this.getDocViewerActivePage()) === activePage;
+    });
+  }
+
+  public async clickDocViewerNextPage() {
+    await this.testSubjects.click('docViewerFlyout > euiFlyoutMenuPaginationNext');
+  }
+
+  public async clickDocViewerPreviousPage() {
+    await this.testSubjects.click('docViewerFlyout > euiFlyoutMenuPaginationPrev');
   }
 
   public async getHeaderFields(): Promise<string[]> {

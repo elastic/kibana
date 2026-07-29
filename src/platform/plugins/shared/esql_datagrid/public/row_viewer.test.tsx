@@ -20,7 +20,15 @@ import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/pub
 import { RowViewer } from './row_viewer';
 
 describe('RowViewer', () => {
-  function renderComponent(closeFlyoutSpy?: jest.Mock, extraHit?: DataTableRecord) {
+  function renderComponent({
+    closeFlyoutSpy,
+    extraHit,
+    setExpandedDoc = jest.fn(),
+  }: {
+    closeFlyoutSpy?: jest.Mock;
+    extraHit?: DataTableRecord;
+    setExpandedDoc?: jest.Mock;
+  } = {}) {
     const dataView = {
       title: 'foo',
       id: 'foo',
@@ -55,6 +63,7 @@ describe('RowViewer', () => {
         addSuccess: jest.fn(),
       },
     };
+    const user = userEvent.setup();
 
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -81,10 +90,12 @@ describe('RowViewer', () => {
           onRemoveColumn={jest.fn()}
           onAddColumn={jest.fn()}
           onClose={closeFlyoutSpy ?? jest.fn()}
-          setExpandedDoc={jest.fn()}
+          setExpandedDoc={setExpandedDoc}
         />
       </KibanaContextProvider>
     );
+
+    return { hit, hits, setExpandedDoc, user };
   }
 
   it('should render a flyout', async () => {
@@ -94,13 +105,13 @@ describe('RowViewer', () => {
 
   it('should run the onClose prop when the close button is clicked', async () => {
     const closeFlyoutSpy = jest.fn();
-    renderComponent(closeFlyoutSpy);
+    renderComponent({ closeFlyoutSpy });
     await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
   });
 
-  it('displays row navigation when there is more than 1 row available', async () => {
-    renderComponent(undefined, {
+  it('navigates to the next hit with ArrowRight', async () => {
+    const extraHit = {
       flattened: {
         bytes: 456,
         destination: 'Athens',
@@ -110,16 +121,28 @@ describe('RowViewer', () => {
         bytes: 456,
         destination: 'Athens',
       },
-    } as unknown as DataTableRecord);
-    await waitFor(() => {
-      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
-    });
+    } as unknown as DataTableRecord;
+    const { hits, setExpandedDoc, user } = renderComponent({ extraHit });
+
+    await waitFor(() => expect(screen.getByTestId('esqlRowDetailsFlyout')).toBeInTheDocument());
+
+    screen.getByTestId('euiFlyoutBodyOverflow').focus();
+    await user.keyboard('{ArrowRight}');
+    expect(setExpandedDoc).toHaveBeenCalledWith(hits[1]);
   });
 
-  it('doesnt display row navigation when there is only 1 row available', async () => {
-    renderComponent();
-    await waitFor(() => {
-      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
-    });
+  it('does not navigate to a different hit when there is only 1 hit', async () => {
+    const { hit, setExpandedDoc, user } = renderComponent();
+
+    await waitFor(() => expect(screen.getByTestId('esqlRowDetailsFlyout')).toBeInTheDocument());
+
+    screen.getByTestId('euiFlyoutBodyOverflow').focus();
+    await user.keyboard('{ArrowLeft}');
+    expect(setExpandedDoc).not.toHaveBeenCalled();
+
+    await user.keyboard('{ArrowRight}');
+    // activePage is -1 when pageCount <= 1, so ArrowRight resolves to index 0 (same hit)
+    expect(setExpandedDoc).toHaveBeenCalledTimes(1);
+    expect(setExpandedDoc).toHaveBeenCalledWith(hit);
   });
 });

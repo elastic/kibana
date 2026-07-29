@@ -12,15 +12,12 @@ import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlyoutMenuPagination, EuiFlyoutProps } from '@elastic/eui';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiHorizontalRule,
-  EuiPagination,
   EuiPortal,
   EuiSpacer,
   isDOMNode,
@@ -142,7 +139,9 @@ export function UnifiedDocViewerFlyout({
     return getIndexByDocId(hits, id);
   }, [hits, hit, pageCount]);
 
-  const renderSubheader = pageCount > 1 || flyoutActions;
+  // Discover is the only caller that passes flyoutActions and already gates on
+  // !isESQLQuery, so this keeps the subheader only when actions are renderable.
+  const renderSubheader = !isEsqlQuery && flyoutActions;
 
   const setPage = useCallback(
     (index: number) => {
@@ -151,6 +150,21 @@ export function UnifiedDocViewerFlyout({
       }
     },
     [hits, setExpandedDoc]
+  );
+
+  // Pagination takes the left menu slot from back/history — harmless here
+  // because this flyout starts its own session.
+  const pagination = useMemo<EuiFlyoutMenuPagination | undefined>(
+    () =>
+      activePage === -1
+        ? undefined
+        : {
+            currentIndex: activePage,
+            total: pageCount,
+            onPrevious: () => setPage(activePage - 1),
+            onNext: () => setPage(activePage + 1),
+          },
+    [activePage, pageCount, setPage]
   );
 
   const onKeyDown = useCallback(
@@ -251,8 +265,10 @@ export function UnifiedDocViewerFlyout({
             historyKey={historyKey}
             flyoutMenuProps={{
               title: currentFlyoutTitle,
+              titleId: 'docViewerFlyoutTitle',
               'data-test-subj': 'docViewerRowDetailsTitle',
               hideTitle: false,
+              pagination,
             }}
             className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
             onClose={onClose}
@@ -277,32 +293,9 @@ export function UnifiedDocViewerFlyout({
             {screenReaderDescription}
             {renderSubheader && (
               <>
-                <EuiFlexGroup
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="spaceBetween"
-                  responsive={false}
-                  wrap={true}
-                  css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.m }}
-                >
-                  {activePage !== -1 && (
-                    <EuiFlexItem data-test-subj={`docViewerFlyoutNavigationPage-${activePage}`}>
-                      <EuiPagination
-                        aria-label={i18n.translate('unifiedDocViewer.flyout.documentNavigation', {
-                          defaultMessage: 'Document pagination',
-                        })}
-                        pageCount={pageCount}
-                        activePage={activePage}
-                        onPageClick={setPage}
-                        compressed
-                        data-test-subj="docViewerFlyoutNavigation"
-                      />
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-                    {isEsqlQuery || !flyoutActions ? null : <>{flyoutActions}</>}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <div css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.m }}>
+                  {flyoutActions}
+                </div>
                 <EuiHorizontalRule margin="none" />
               </>
             )}
