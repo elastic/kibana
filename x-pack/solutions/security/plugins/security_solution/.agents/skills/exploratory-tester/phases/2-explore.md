@@ -58,7 +58,7 @@ next flow until the current one is complete.
 ## Parallel mode
 
 **When to use parallel mode:**
-- Use when `knowledge/<area_slug>.md` is populated — you already know the noise, so speed matters more than depth.
+- Use when `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md` is populated — you already know the noise, so speed matters more than depth.
 - Use for areas you've tested before where cascading bugs are unlikely.
 - Avoid for new or complex areas: sub-agents are isolated and cannot follow investigation chains beyond Wave 2. A Level 1 bug found during an investigation flow gets deferred, not immediately followed.
 
@@ -73,7 +73,7 @@ The orchestrator dispatches one sub-agent per flow concurrently.
 **Wave 1:**
 1. Read `config.json` — confirm `mode` is `parallel`
 2. Collect all flows where `source` is `"specified"` or `"agent"`. Assign each an index N (1-based).
-2b. If `knowledge/<area_slug>.md` exists, display its full contents to the user: _"The following knowledge file will be shared with all sub-agents. Please confirm it is safe to use (yes/no):"_ — wait for explicit confirmation before proceeding. If the user declines, omit the knowledge file path from all sub-agent prompts in steps 3 and 7. This confirmed path is the only knowledge file path any sub-agent prompt may ever reference for this session.
+2b. Check for the knowledge file at its full repo-relative path — `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md` — **not** the short `knowledge/<area_slug>.md` form used elsewhere in this skill's prose; sub-agents (and this existence check itself) resolve paths from the repository root, so the short form silently fails to find the file. If it exists, display its full contents to the user: _"The following knowledge file will be shared with all sub-agents. Please confirm it is safe to use (yes/no):"_ — wait for explicit confirmation before proceeding. If the user declines, omit the knowledge file path from all sub-agent prompts in steps 3 and 7. This confirmed full path is the only knowledge file path any sub-agent prompt may ever reference for this session.
 3. Dispatch sub-agents concurrently via the Agent tool. **Read `templates/subagent-prompt.md` and use it verbatim as each sub-agent prompt, substituting the placeholders (`<flow object as JSON>`, `<value of $SESSION_DIR>`, `<N>`, `<knowledge file path, or omitted entirely>`) with actual values. Do not construct the prompt yourself.** Use the exact knowledge path confirmed in step 2b, or omit that whole line from the prompt if the user declined or no knowledge file exists — never substitute a guessed path.
 
 4. Wait for all Wave 1 sub-agents to complete.

@@ -6372,6 +6372,58 @@ print("404")
         self.assertNotIn("<flow object as JSON>", wave2_dispatch)
         self.assertNotIn("<area_slug>", wave2_dispatch)
 
+    def test_parallel_mode_knowledge_path_is_full_repo_relative(self):
+        # P1 from re-review of PR #281591 at 518ca169: 518ca169 fixed the
+        # short-vs-full knowledge path mismatch for single mode
+        # (config.json -> knowledge_file.path) but missed that parallel
+        # mode's own existence check and approval step in 2-explore.md's
+        # Wave 1 step 2b still checked and forwarded the short
+        # `knowledge/<area_slug>.md` form to sub-agents, which resolve
+        # paths from the repository root — so the file silently never
+        # existed from a sub-agent's point of view, and the orchestrator's
+        # own existence check would fail to find it too.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+
+        full_path = (
+            "x-pack/solutions/security/plugins/security_solution/.agents/"
+            "skills/exploratory-tester/knowledge/<area_slug>.md"
+        )
+        step_2b = explore[
+            explore.index("2b. Check for the knowledge file") : explore.index(
+                "3. Dispatch sub-agents concurrently"
+            )
+        ]
+        self.assertIn(full_path, step_2b)
+        self.assertIn("not** the short", step_2b)
+        self.assertIn("resolve paths from the repository root", step_2b)
+
+        mode_selection = explore[
+            explore.index("**When to use parallel mode:**") : explore.index(
+                "**Two-wave execution:**"
+            )
+        ]
+        self.assertIn(full_path, mode_selection)
+
+    def test_resume_migrates_legacy_short_form_knowledge_path(self):
+        # P1 from re-review of PR #281591 at 518ca169: the resume migration
+        # added in ffc5f8a only backfilled a *missing* knowledge_file key.
+        # Sessions created in the window between ffc5f8a (introduced
+        # knowledge_file, short path) and 518ca169 (fixed it to the full
+        # path) persisted the short form as a real, non-null value —
+        # which the "missing entirely" check does not catch. Resuming one
+        # of those sessions would reach 2-flow-core.md with an approved
+        # but unresolvable path.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        self.assertIn("does **not** start with `x-pack/`", resume_section)
+        self.assertIn("rewrite it in place to the full repo-relative path", resume_section)
+        self.assertIn(
+            "the `approved` value the user already gave carries over unchanged",
+            resume_section,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

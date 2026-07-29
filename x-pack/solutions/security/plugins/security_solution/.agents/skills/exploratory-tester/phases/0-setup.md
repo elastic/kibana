@@ -304,9 +304,10 @@ Each session lives in its own timestamped subfolder of `.exploratory-session/`. 
 
 Set `SESSION_DIR` to the provided path. Read `$SESSION_DIR/config.json` — trust it as-is, except for the two backward-compatible migrations below. Run `mkdir -p "$SESSION_DIR/tmp" "$SESSION_DIR/collector-diffs"` unconditionally before Phase 2 — a session created before these two directories existed (or one that never reached Step 0e's `mkdir` for any other reason) must not have Phase 2 fail on a missing directory; `mkdir -p` is a no-op when they already exist. Skip remaining Phase 0 steps and all of Phase 1. Jump to Phase 2. Existing `findings-flow-<N>.md` files in `$SESSION_DIR/` are included in Phase 3.
 
-**Migrations for sessions created before `flow.space_id` and `knowledge_file` were introduced:** apply both, unconditionally, before jumping to Phase 2 — resumed sessions never run the rest of Phase 0, so nothing else will backfill these fields.
+**Migrations for sessions created before `flow.space_id` and `knowledge_file` were introduced, or before `knowledge_file.path` used the full repo-relative path:** apply all three, unconditionally, before jumping to Phase 2 — resumed sessions never run the rest of Phase 0, so nothing else will backfill or correct these fields.
 - If `mode` is `"single"` and any `flows[N].space_id` is `null` or missing, set it to `environment.space_id` — same rule as new sessions in Step 0e above.
 - If `config.json → knowledge_file` is missing entirely, add it as `{ "path": null, "approved": false }`. Do not display or ask about a knowledge file on resume just because the field was missing — a missing field means this session predates the field, not that consent is owed retroactively; treat it exactly like `approved: false`.
+- If `knowledge_file.path` is non-null but does **not** start with `x-pack/` (i.e. it is still the short `knowledge/<area_slug>.md` form persisted by a session created before the full-path fix), rewrite it in place to the full repo-relative path — `x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/knowledge/<area_slug>.md` — without re-asking for approval; the `approved` value the user already gave carries over unchanged.
 
 **New session path — no `Session-dir:` provided:**
 
