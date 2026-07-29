@@ -9,9 +9,14 @@ import type { Client } from '@elastic/elasticsearch';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
+import { SYSTEM_INDICES_SUPERUSER, SYSTEM_INDICES_SUPERUSER_PASSWORD } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { systemIndicesSuperuser } from '@kbn/test';
 import { createEsClientForTesting } from '@kbn/test-es-server';
+
+const systemIndicesSuperuser = {
+  username: SYSTEM_INDICES_SUPERUSER,
+  password: SYSTEM_INDICES_SUPERUSER_PASSWORD,
+};
 
 interface ArchiveDoc {
   id: string;

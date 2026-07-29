@@ -86,7 +86,7 @@ dependsOn:
   - '@kbn/core-user-profile-server'
   - '@kbn/ui-callout'
   - '@kbn/repo-info'
-  - '@kbn/test'
+  - '@kbn/es'
   - '@kbn/test-es-server'
 tags:
   - plugin
