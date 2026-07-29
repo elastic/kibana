@@ -639,6 +639,8 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         { id: 'agent-2', policy_id: 'policy-1#9.3' },
       ] as Agent[];
       mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(variantAgents));
+      // Post-reassignment count check: all agents moved successfully.
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0, agents: [], page: 1, perPage: 0 });
 
       await runTask();
 
@@ -664,6 +666,28 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
         expect.anything(),
         'policy-1'
       );
+    });
+
+    it('skips variant doc deletion and retries on next run when bulk reassignment partially fails', async () => {
+      // Simulate: reassignAgents returns { actionId } without throwing even though one agent's
+      // _update failed (bulkUpdateAgents silently collects per-agent errors). The post-reassignment
+      // count check sees 1 remaining agent and must skip deleteVersionSpecificFleetServerPolicies
+      // so the next sweep run can retry rather than stranding the agent on a missing policy.
+      await mockVariantPoliciesInIndex(['policy-1#9.4']);
+      mockAgentPolicyService.getByIds = jest
+        .fn()
+        .mockResolvedValue([{ id: 'policy-1', has_agent_version_conditions: false }]);
+      mockedFetchAllAgentsByKuery.mockResolvedValue(
+        getMockFetchAllAgentsByKuery([{ id: 'agent-1', policy_id: 'policy-1#9.4' }] as Agent[])
+      );
+      // Post-reassignment count: 1 agent still on variant (bulk update failed silently).
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 1, agents: [], page: 1, perPage: 0 });
+
+      await runTask();
+
+      expect(mockedReassignAgents).toHaveBeenCalled();
+      // Must NOT delete variant docs — the stranded agent must be recoverable on the next run.
+      expect(mockedDeleteVersionSpecificFleetServerPolicies).not.toHaveBeenCalled();
     });
 
     it('does not reassign when the parent policy still has version conditions', async () => {

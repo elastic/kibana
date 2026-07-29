@@ -654,9 +654,26 @@ export class VersionSpecificPolicyAssignmentTask {
         // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
         // with a space-agnostic saved objects client.
         await reassignAgents(soClient, esClient, { agentIds, showInactive: true }, parentPolicyId);
+
+        // bulkUpdateAgents collects per-agent ES errors without throwing, so reassignAgents
+        // returns { actionId } even if some updates silently failed (e.g. retry_on_conflict
+        // exhausted under heavy check-in churn). Re-check the count before deleting variant docs:
+        // if any agents remain on the variant, skip deletion so the next sweep run can retry.
+        const { total: remaining } = await getAgentsByKuery(esClient, soClient, {
+          kuery: variantAgentsKuery,
+          showInactive: true,
+          perPage: 0,
+        });
+        if (remaining > 0) {
+          this.logger.warn(
+            `[VersionSpecificPolicyAssignmentTask] ${remaining} agent(s) still on variant policies of ${parentPolicyId} after reassignment (bulk update may have partially failed); skipping variant doc deletion so the next sweep run can retry`
+          );
+          return;
+        }
       }
 
-      // Remove the now-stale variant documents so they don't linger in .fleet-policies.
+      // All agents have been moved off the variant policies (or there were none to move).
+      // Safe to remove the now-stale variant documents.
       await deleteVersionSpecificFleetServerPolicies(esClient, parentPolicyId);
     } catch (error) {
       this.logger.error(
