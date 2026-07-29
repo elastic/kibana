@@ -160,8 +160,7 @@ export const Databricks: ConnectorSpec = {
             'core.kibanaConnectorSpecs.databricks.config.serverUrl.helpText',
             {
               defaultMessage:
-                "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. " +
-                'For other MCP server types (Genie, AI Search), change the path accordingly.',
+                "The Databricks SQL MCP server URL for your workspace. Replace '{workspace}' with your workspace hostname. ",
             }
           ),
         }),
@@ -219,12 +218,10 @@ export const Databricks: ConnectorSpec = {
 
     // ── Escape hatches ────────────────────────────────────────────────────────
     listTools: {
-      isTool: true,
+      isTool: false,
       description:
         'List all tools available on the Databricks MCP server. Use this to discover server capabilities ' +
-        'and verify exact tool names before using callTool. Different Databricks MCP servers expose ' +
-        'different tools — the SQL server provides execute_sql, execute_sql_read_only, and poll_sql_result, ' +
-        'while the Genie server provides query_space and poll_response.',
+        'and verify exact tool names before using callTool.',
       input: ListToolsInputSchema,
       handler: async (ctx) => {
         return withMcpClient(ctx, async (mcp) => {
@@ -235,11 +232,10 @@ export const Databricks: ConnectorSpec = {
     },
 
     callTool: {
-      isTool: true,
+      isTool: false,
       description:
-        'Call any tool on the Databricks MCP server directly by name. Use this as an escape hatch for tools ' +
-        'not yet exposed as named actions, or for tools on non-SQL Databricks MCP servers (such as Genie ' +
-        'query_space or AI Search). Use listTools first to discover available tool names and their arguments.',
+        'Call any tool on the Databricks MCP server directly by name. Workflow-only. Use this as an escape hatch for tools ' +
+        'not yet exposed as named actions. Use listTools first to discover available tool names and their arguments.',
       input: CallToolInputSchema,
       handler: async (ctx, input: CallToolInput) => {
         return callToolContent(ctx, input.name, input.arguments);
@@ -337,9 +333,11 @@ export const Databricks: ConnectorSpec = {
       input: RepairRunInputSchema,
       handler: async (ctx, input: RepairRunInput) => {
         const body: Record<string, unknown> = { run_id: input.runId };
-        if (input.rerunTasks !== undefined) body.rerun_tasks = input.rerunTasks;
-        if (input.rerunAllFailedTasks !== undefined)
-          body.rerun_all_failed_tasks = input.rerunAllFailedTasks;
+        if (input.rerunTasks !== undefined) {
+          body.rerun_tasks = input.rerunTasks;
+        } else {
+          body.rerun_all_failed_tasks = input.rerunAllFailedTasks ?? true;
+        }
         if (input.latestRepairId !== undefined) body.latest_repair_id = input.latestRepairId;
         const { data } = await ctx.client.post(
           `${workspaceOrigin(ctx)}/api/2.1/jobs/runs/repair`,
@@ -523,6 +521,10 @@ export const Databricks: ConnectorSpec = {
     '### Alerts',
     '- Use `listAlerts` to see all SQL alerts and their current state (OK, TRIGGERED, UNKNOWN).',
     '- Use `getAlert` to retrieve the full condition, query, and notification config for a specific alert.',
+    '',
+    '### MCP escape hatches (`listTools`, `callTool`)',
+    '- `listTools` is exposed to agents — use it to discover available tool names on the connected MCP server.',
+    '- `callTool` is workflow-only — it can invoke any MCP tool including unrestricted write tools (e.g. `execute_sql`), so it is not exposed to AI agents.',
     '',
     '### Common gotchas',
     '- The MCP server URL is workspace-specific — each Databricks workspace has a different hostname.',

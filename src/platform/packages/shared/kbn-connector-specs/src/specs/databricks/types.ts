@@ -100,9 +100,9 @@ export const ListRunsInputSchema = lazySchema(() =>
     limit: z
       .number()
       .min(1)
-      .max(100)
+      .max(25)
       .optional()
-      .describe('Maximum number of runs to return (default 25, max 100).'),
+      .describe('Maximum number of runs to return (default 20, max 25).'),
     pageToken: z
       .string()
       .max(200)
@@ -153,21 +153,27 @@ export const CancelRunInputSchema = lazySchema(() =>
 export type CancelRunInput = z.infer<typeof CancelRunInputSchema>;
 
 export const RepairRunInputSchema = lazySchema(() =>
-  z.object({
-    runId: z.number().describe('The run ID to repair. Example: 455644833'),
-    rerunTasks: z
-      .array(z.string().max(200))
-      .optional()
-      .describe('Task keys to re-run. Omit to re-run all failed tasks.'),
-    rerunAllFailedTasks: z
-      .boolean()
-      .optional()
-      .describe('If true, re-run all failed tasks. Cannot be combined with rerunTasks.'),
-    latestRepairId: z
-      .number()
-      .optional()
-      .describe('ID of the most recent repair run. Required when chaining multiple repairs.'),
-  })
+  z
+    .object({
+      runId: z.number().describe('The run ID to repair. Example: 455644833'),
+      rerunTasks: z
+        .array(z.string().max(200))
+        .optional()
+        .describe(
+          'Task keys to re-run. Mutually exclusive with rerunAllFailedTasks. Omit both to re-run all failed tasks.'
+        ),
+      rerunAllFailedTasks: z
+        .boolean()
+        .optional()
+        .describe('If true, re-run all failed tasks. Mutually exclusive with rerunTasks.'),
+      latestRepairId: z
+        .number()
+        .optional()
+        .describe('ID of the most recent repair run. Required when chaining multiple repairs.'),
+    })
+    .refine((v) => !(v.rerunTasks !== undefined && v.rerunAllFailedTasks !== undefined), {
+      message: 'rerunTasks and rerunAllFailedTasks are mutually exclusive',
+    })
 );
 export type RepairRunInput = z.infer<typeof RepairRunInputSchema>;
 

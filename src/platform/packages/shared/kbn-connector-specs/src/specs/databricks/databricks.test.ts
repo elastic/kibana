@@ -229,8 +229,8 @@ describe('Databricks', () => {
   });
 
   describe('callTool action', () => {
-    it('is exposed as a tool', () => {
-      expect(Databricks.actions.callTool.isTool).toBe(true);
+    it('is not exposed as a tool (workflow-only)', () => {
+      expect(Databricks.actions.callTool.isTool).toBe(false);
     });
 
     it('calls the named tool with provided arguments', async () => {
@@ -376,11 +376,21 @@ describe('Databricks', () => {
       expect(Databricks.actions.repairRun.isTool).toBe(false);
     });
 
-    it('calls POST /api/2.1/jobs/runs/repair with run_id', async () => {
+    it('defaults to rerun_all_failed_tasks=true when neither selector is provided', async () => {
       const input = parse('repairRun', { runId: 455644833 });
       await Databricks.actions.repairRun.handler(mockContext, input);
       expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/repair`, {
         run_id: 455644833,
+        rerun_all_failed_tasks: true,
+      });
+    });
+
+    it('sends rerun_all_failed_tasks=true when explicitly set', async () => {
+      const input = parse('repairRun', { runId: 455644833, rerunAllFailedTasks: true });
+      await Databricks.actions.repairRun.handler(mockContext, input);
+      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/repair`, {
+        run_id: 455644833,
+        rerun_all_failed_tasks: true,
       });
     });
 
@@ -396,6 +406,16 @@ describe('Databricks', () => {
         rerun_tasks: ['task_a', 'task_b'],
         latest_repair_id: 789,
       });
+    });
+
+    it('rejects when both rerunTasks and rerunAllFailedTasks are provided', () => {
+      expect(() =>
+        parse('repairRun', {
+          runId: 455644833,
+          rerunTasks: ['task_a'],
+          rerunAllFailedTasks: true,
+        })
+      ).toThrow('rerunTasks and rerunAllFailedTasks are mutually exclusive');
     });
   });
 
