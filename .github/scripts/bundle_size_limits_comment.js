@@ -15,13 +15,18 @@ const LIMITS_PATHS = [
 ];
 
 const getContent = async ({ github, context }, ref, path) => {
-  const { data } = await github.rest.repos.getContent({
-    owner: context.repo.owner,
-    repo: context.repo.repo,
-    path,
-    ref,
-  });
-  return Buffer.from(data.content, 'base64').toString('utf8');
+  try {
+    const { data } = await github.rest.repos.getContent({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      path,
+      ref,
+    });
+    return Buffer.from(data.content, 'base64').toString('utf8');
+  } catch (err) {
+    if (err.status === 404) return null;
+    throw err;
+  }
 };
 
 const parseYaml = (content) => {
@@ -42,6 +47,8 @@ module.exports = async ({ github, context }) => {
       getContent({ github, context }, pr.base.sha, path),
       getContent({ github, context }, pr.head.sha, path),
     ]);
+
+    if (baseContent === null || headContent === null) continue;
 
     const baseMap = parseYaml(baseContent);
     const headMap = parseYaml(headContent);
