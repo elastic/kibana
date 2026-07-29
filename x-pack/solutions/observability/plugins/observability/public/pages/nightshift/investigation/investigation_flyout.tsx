@@ -31,6 +31,7 @@ import {
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
@@ -53,6 +54,11 @@ import {
 import { TruncatableSummary } from '../common/truncatable_summary';
 import { truncateTextPreview } from '../common/truncate_text_preview';
 import { FlyoutSectionTitle } from '../common/flyout_section_title';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 import {
   GradientOutlinedStatusBadge,
   InvestigationCompleteCheckIcon,
@@ -344,6 +350,7 @@ function RecommendationRow({
       expandableContent={expandableContent}
       action={
         <InvestigationItemChatButton
+          ebtElement={NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_FLYOUT}
           tooltip={recommendationChatTooltip}
           testSubj={`nightshiftInvestigationFlyoutRecommendationChatButton-${index}`}
           onClick={onOpenInChat}
@@ -466,6 +473,7 @@ function HypothesisRow({
       expandableContent={reason ? <FlyoutFormattedText text={reason} /> : undefined}
       action={
         <InvestigationItemChatButton
+          ebtElement={NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_FLYOUT}
           tooltip={hypothesisChatTooltip}
           testSubj={`nightshiftInvestigationFlyoutHypothesisChatButton-${index}`}
           onClick={onOpenInChat}
@@ -619,6 +627,13 @@ export function InvestigationFlyout({
       resizable
       data-test-subj="nightshiftInvestigationFlyout"
       aria-labelledby="nightshiftInvestigationFlyoutTitle"
+      closeButtonProps={{
+        'data-test-subj': 'euiFlyoutCloseButton',
+        ...getEbtProps({
+          action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_FLYOUT,
+          element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_FLYOUT,
+        }),
+      }}
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -841,6 +856,11 @@ export function InvestigationFlyout({
                     data-test-subj="nightshiftInvestigationFlyoutChatButton"
                     disabled={!conversationId}
                     onClick={handleOpenInChat}
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_FLYOUT,
+                      detail: NIGHTSHIFT_EBT_DETAILS.EXISTING_CONVERSATION,
+                    })}
                   >
                     {openInChatLabel}
                   </AiButton>

@@ -170,6 +170,8 @@ describe('DetectionFlyout', () => {
     const chip = screen.getByTestId('nightshiftDetectionFlyoutEntityChip');
     expect(chip).toHaveTextContent('logs.web-frontend');
     expect(chip.tagName).toBe('BUTTON');
+    expect(chip).toHaveAttribute('data-ebt-action', 'viewEntity');
+    expect(chip).toHaveAttribute('data-ebt-element', 'nightshiftDetectionFlyoutEntities');
   });
 
   it('opens the entity flyout when an associated entity chip is clicked', () => {
@@ -217,10 +219,9 @@ describe('DetectionFlyout', () => {
     expect(screen.getByTestId('nightshiftDetectionFlyoutEsql')).toHaveTextContent(
       'FROM logs.web-frontend'
     );
-    expect(screen.getByTestId('nightshiftDetectionFlyoutDiscoverLink')).toHaveAttribute(
-      'href',
-      '/app/discover#redirect'
-    );
+    const discoverLink = screen.getByTestId('nightshiftDetectionFlyoutDiscoverLink');
+    expect(discoverLink).toHaveAttribute('href', '/app/discover#redirect');
+    expect(discoverLink).toHaveAttribute('data-ebt-action', 'openInDiscover');
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: { esql: mockSignal.evidence?.esql_query },
       timeRange: {
@@ -244,7 +245,10 @@ describe('DetectionFlyout', () => {
   it('opens a new chat with the detection attached when Open in chat is clicked', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutChatButton'));
+    const chatButton = screen.getByTestId('nightshiftDetectionFlyoutChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'newConversation');
+    fireEvent.click(chatButton);
 
     expect(mockOpenChat).toHaveBeenCalledWith({
       newConversation: true,

@@ -15,6 +15,7 @@ import { InvestigationFormattedText } from './investigation_formatted_text';
 import { InvestigationRowHoverAction } from './investigation_row_hover_action';
 import { buildBlindSpotChatOptions } from './open_investigation_item_in_chat';
 import { formatBlindSpotMarkdown, type BlindSpotItem } from './investigation_presentation';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
 
 const blindSpotChatTooltip = i18n.translate(
@@ -100,6 +101,7 @@ export function BlindSpotsTable({
               <InvestigationRowHoverAction
                 action={
                   <InvestigationItemChatButton
+                    ebtElement={NIGHTSHIFT_EBT_ELEMENTS.INVESTIGATION_FLYOUT}
                     tooltip={blindSpotChatTooltip}
                     testSubj={`${testSubj}ChatButton-${index}`}
                     onClick={() => openBlindSpotInChat(item, index)}
