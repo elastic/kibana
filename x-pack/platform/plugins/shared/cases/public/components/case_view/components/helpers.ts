@@ -153,6 +153,8 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
           comment.type === SECURITY_ENTITY_ATTACHMENT_TYPE &&
           isUnifiedReferenceAttachmentRequest(comment)
         ) {
+          // Duplicates matchesSearchTerm in security_solution/cases/attachments/entity/utils.ts —
+          // cases cannot import from security_solution. Entity attachmentId is always a single string.
           const meta = (comment.metadata ?? {}) as {
             entityName?: string;
             entityType?: string;
@@ -169,6 +171,8 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
             .toLowerCase();
           return text.includes(term) ? comment : null;
         }
+        // Malformed security.entity attachment (no attachmentId) — exclude rather than pass through.
+        if (comment.type === SECURITY_ENTITY_ATTACHMENT_TYPE) return null;
         if (isUnifiedReferenceAttachmentRequest(comment)) {
           return filterUnifiedAttachment(comment, searchTerm);
         }
