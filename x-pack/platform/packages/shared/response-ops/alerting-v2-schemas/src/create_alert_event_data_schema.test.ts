@@ -57,4 +57,11 @@ describe('createAlertEventDataSchema bounds', () => {
       createAlertEventDataSchema.safeParse({ ...base, timestamp: 'not-a-datetime' }).success
     ).toBe(false);
   });
+
+  it('requires one of fingerprint, fingerprint_fields, or rule_id', () => {
+    expect(createAlertEventDataSchema.safeParse({ source: 'datadog' }).success).toBe(false);
+    expect(
+      createAlertEventDataSchema.safeParse({ source: 'datadog', rule_id: 'mon-1' }).success
+    ).toBe(true);
+  });
 });

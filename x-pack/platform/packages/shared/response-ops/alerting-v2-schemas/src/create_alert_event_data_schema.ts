@@ -50,9 +50,9 @@ export const createAlertEventDataSchema = z
     // Required via body or /:source URL path — validated in the route handler.
     source: sourceSchema.optional(),
 
-    // At least one of fingerprint / fingerprint_fields / rule_id is required.
-    // Priority: fingerprint > fingerprint_fields > rule_id (hashed with source).
-    // Validated in the route handler after source is resolved.
+    // At least one of fingerprint / fingerprint_fields / rule_id is required
+    // (enforced by .superRefine below). Priority when resolving the series key:
+    // fingerprint > fingerprint_fields > rule_id (hashed with source).
     fingerprint: z.string().min(1).max(MAX_FINGERPRINT_LENGTH).optional(),
     fingerprint_fields: z
       .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
@@ -76,7 +76,17 @@ export const createAlertEventDataSchema = z
     timestamp: z.iso.datetime().optional(),
     severity: alertEventSeveritySchema.optional(),
   })
-  .passthrough();
+  .passthrough()
+  .superRefine((body, ctx) => {
+    if (!body.fingerprint && !body.fingerprint_fields?.length && !body.rule_id) {
+      ctx.addIssue({
+        code: 'custom',
+        message:
+          'one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity',
+        path: ['fingerprint'],
+      });
+    }
+  });
 
 /** Path params for POST /api/alerting/v2/alerts/:source */
 export const createAlertEventSourceParamsSchema = z.object({

@@ -56,7 +56,7 @@ function buildEpisodeUrl(episodeId: string): string {
  *   3. `rule_id` — hashed with source for a stable per-rule series key
  *   4. null → caller must be rejected with 400
  */
-function resolveFingerprint(body: CreateAlertEventData, source: string): string | null {
+function resolveFingerprint(body: CreateAlertEventData, source: string): string {
   if (body.fingerprint) return body.fingerprint;
 
   if (body.fingerprint_fields?.length) {
@@ -77,7 +77,8 @@ function resolveFingerprint(body: CreateAlertEventData, source: string): string 
 
   if (body.rule_id) return sha256(`${source}:${body.rule_id}`);
 
-  return null;
+  // createAlertEventDataSchema requires one of the three above.
+  throw new Error('Missing fingerprint, fingerprint_fields, or rule_id');
 }
 
 async function resolveEpisodeId(
@@ -100,7 +101,7 @@ async function resolveEpisodeId(
     });
 
     if (rows.length === 0 || !rows[0].last_episode_id) {
-      return randomUUID();
+      return uuidv4();
     }
 
     const { last_episode_id: lastEpisodeId, last_episode_status: lastEpisodeStatus } = rows[0];
@@ -109,9 +110,9 @@ async function resolveEpisodeId(
       lastEpisodeStatus === alertEpisodeStatus.inactive &&
       nextStatus !== alertEpisodeStatus.inactive;
 
-    return isNewLifecycle ? randomUUID() : lastEpisodeId;
+    return isNewLifecycle ? uuidv4() : lastEpisodeId;
   } catch {
-    return randomUUID();
+    return uuidv4();
   }
 }
 
@@ -244,14 +245,6 @@ export class CreateAlertEventRoute extends BaseAlertingRoute {
     }
 
     const fingerprint = resolveFingerprint(body, source);
-    if (!fingerprint) {
-      return this.ctx.response.badRequest({
-        body: {
-          message:
-            'one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity',
-        },
-      });
-    }
 
     const result = await ingestAlertEvent({
       source,
@@ -304,14 +297,6 @@ export class CreateAlertEventBySourceRoute extends BaseAlertingRoute {
     const body = this.request.body;
 
     const fingerprint = resolveFingerprint(body, source);
-    if (!fingerprint) {
-      return this.ctx.response.badRequest({
-        body: {
-          message:
-            'one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity',
-        },
-      });
-    }
 
     const result = await ingestAlertEvent({
       source,
