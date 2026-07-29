@@ -87,7 +87,7 @@ export function ServiceFlyout({
   const capabilities = useServiceFlyoutCapabilities({
     http: core.http,
     serviceName: service.name,
-    environment,
+    environment: flyoutEnvironment,
     start,
     end,
   });
