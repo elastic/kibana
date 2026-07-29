@@ -10,6 +10,8 @@ import type { ChatCompletionChunkEvent } from '@kbn/inference-common';
 import type { OpenAIRequest } from './types';
 import { mergeChunks } from '../../utils';
 
+const ENCODE_OPTIONS = { allowedSpecial: 'all' as const };
+
 export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const tokensFromMessages = encode(
@@ -24,7 +26,8 @@ export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
               : ''
           }<|end|>`
       )
-      .join('\n')
+      .join('\n'),
+    ENCODE_OPTIONS
   ).length;
 
   // this is an approximation. OpenAI cuts off a function schema
@@ -36,7 +39,8 @@ export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
           ?.map(({ function: fn }) => {
             return `${fn.name}:${fn.description}:${JSON.stringify(fn.parameters)}`;
           })
-          .join('\n')
+          .join('\n'),
+        ENCODE_OPTIONS
       ).length
     : 0;
 
@@ -46,7 +50,7 @@ export const manuallyCountPromptTokens = (request: OpenAIRequest) => {
 export const manuallyCountCompletionTokens = (chunks: ChatCompletionChunkEvent[]) => {
   const message = mergeChunks(chunks);
 
-  const tokenFromContent = encode(message.content).length;
+  const tokenFromContent = encode(message.content, ENCODE_OPTIONS).length;
 
   const tokenFromToolCalls = message.tool_calls?.length
     ? encode(
@@ -54,7 +58,8 @@ export const manuallyCountCompletionTokens = (chunks: ChatCompletionChunkEvent[]
           .map((toolCall) => {
             return JSON.stringify(toolCall);
           })
-          .join('\n')
+          .join('\n'),
+        ENCODE_OPTIONS
       ).length
     : 0;
 
