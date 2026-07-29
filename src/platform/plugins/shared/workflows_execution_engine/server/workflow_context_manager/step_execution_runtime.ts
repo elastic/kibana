@@ -114,6 +114,11 @@ export class StepExecutionRuntime {
     this.stackFrames = stepExecutionRuntimeInit.stackFrames;
   }
 
+  public get error(): ExecutionError | undefined {
+    const errorInStep = this.workflowExecutionState.getStepExecution(this.stepExecutionId)?.error;
+    return errorInStep ? new ExecutionError(errorInStep) : undefined;
+  }
+
   public stepExecutionExists(): boolean {
     return !!this.workflowExecutionState.getStepExecution(this.stepExecutionId);
   }
@@ -234,7 +239,6 @@ export class StepExecutionRuntime {
     // `details` is persisted (`KibanaApiCallError` deliberately limits this to the safe `status`).
     // (Covered by `step_execution_runtime.test.ts` > failStep > "persists status in details ...".)
     const executionError = toExecutionError(error);
-    const serializedError = executionError.toSerializableObject();
 
     this.workflowExecutionState.setLastFailedStepContext({
       stepId: this.node.stepId,
@@ -249,18 +253,14 @@ export class StepExecutionRuntime {
       : undefined;
 
     const usage = this.recordTokenUsage(partialOutput);
-
-    this.workflowExecutionState.updateWorkflowExecution({
-      error: serializedError,
-    });
     this.workflowExecutionState.upsertStep({
       id: this.stepExecutionId,
       stepId: this.node.stepId,
       stepType: this.node.stepType,
       status: ExecutionStatus.FAILED,
       scopeStack: this.stackFrames,
+      error: executionError.toSerializableObject(),
       finishedAt,
-      error: serializedError,
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });

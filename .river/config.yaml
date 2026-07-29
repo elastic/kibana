@@ -18,7 +18,7 @@ services:
         echo "Waiting for bootstrap to finish before starting Kibana..."
         sleep 5
       done
-      yarn start --no-base-path --server.host=0.0.0.0
+      KBN_USE_RSPACK=true yarn start --no-base-path --server.host=0.0.0.0
     port: 5601
     ready: |
       until curl -sf -o /dev/null http://localhost:5601/api/status; do sleep 5; done

@@ -19,6 +19,15 @@ jest.mock('../../../../embeddable/service_map/service_map_embeddable', () => ({
   ServiceMapEmbeddable: () => <div data-test-subj="mockServiceMapEmbeddable" />,
 }));
 
+const mockGetServiceMapUrl = jest.fn(
+  (_core: unknown, _params?: unknown) => '/app/apm#/service-map?rangeFrom=now-15m&rangeTo=now'
+);
+
+jest.mock('../../../../embeddable/service_map/get_service_map_url', () => ({
+  getServiceMapUrl: (...args: Parameters<typeof mockGetServiceMapUrl>) =>
+    mockGetServiceMapUrl(...args),
+}));
+
 const defaultProps: ContextualServiceMapSectionProps = {
   serviceName: 'opbeans-node',
   rangeFrom: 'now-15m',
@@ -55,6 +64,10 @@ function renderSection(
 }
 
 describe('ContextualServiceMapSection', () => {
+  beforeEach(() => {
+    mockGetServiceMapUrl.mockClear();
+  });
+
   it('renders the map section when platinum license and service map are available', () => {
     renderSection();
 
@@ -63,6 +76,23 @@ describe('ContextualServiceMapSection', () => {
     expect(screen.getByTestId('apmContextualServiceMapExploreInServiceMap')).toBeInTheDocument();
     expect(screen.getByTestId('contextualServiceMapControls')).toBeInTheDocument();
     expect(screen.getByTestId('mockServiceMapEmbeddable')).toBeInTheDocument();
+  });
+
+  it('passes filterPills through to the Explore in Service map URL', () => {
+    const filterPills = [
+      { field: 'transaction.type', value: 'request' },
+      { field: 'transaction.name', value: 'GET /api' },
+    ];
+
+    renderSection({ filterPills });
+
+    expect(mockGetServiceMapUrl).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        serviceName: 'opbeans-node',
+        filterPills,
+      })
+    );
   });
 
   it('renders the license prompt without map controls when license is insufficient', () => {
