@@ -1021,9 +1021,10 @@ export class RulesClient {
             // Task Manager nests the status under `error.statusCode` (a
             // `SavedObjectError`); the top-level `status` on `ErrorOutput` is
             // declared but left unpopulated by `retryableBulkUpdate`, so we read
-            // the nested field to map e.g. a 409 to RULE_VERSION_CONFLICT.
+            // the nested field (mapping e.g. a 409 to RULE_VERSION_CONFLICT) and
+            // let a missing code fall back to a 500 in `rotationFailedError`.
             const statusCode =
-              'statusCode' in taskError.error ? taskError.error.statusCode : taskError.status;
+              'statusCode' in taskError.error ? taskError.error.statusCode : undefined;
             errors.push(rotationFailedError(ruleId, statusCode));
           }
         } catch (e) {

@@ -1883,9 +1883,6 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
       ]);
-      // Mirror the real `bulkUpdateSchedules` error shape: the status code is
-      // nested under `error.statusCode` (a SavedObjectError), not a top-level
-      // `status` — see retryableBulkUpdate / TaskStore._bulkUpdate.
       taskManager.bulkUpdateSchedules.mockResolvedValueOnce({
         tasks: [],
         errors: [
