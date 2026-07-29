@@ -22,7 +22,7 @@ import { escapeRegExp } from 'lodash';
  */
 export class LookupIndexEditor {
   readonly flyout: Locator;
-  private readonly unsavedChangesModal: Locator;
+  readonly unsavedChangesModal: Locator;
 
   constructor(private readonly page: ScoutPage, private readonly dataGrid: DataGrid) {
     this.flyout = page.testSubj.locator('lookupIndexFlyout');
@@ -215,13 +215,6 @@ export class LookupIndexEditor {
 
   async close(): Promise<void> {
     await this.page.testSubj.click('indexEditorCloseButton');
-  }
-
-  async isUnsavedChangesModalVisible(): Promise<boolean> {
-    return this.unsavedChangesModal
-      .waitFor({ state: 'visible', timeout: 2_000 })
-      .then(() => true)
-      .catch(() => false);
   }
 
   /** Discards unsaved changes and closes the flyout from the "Leave without saving?" modal. */

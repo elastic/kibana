@@ -17,8 +17,9 @@ const IMPORT_FILE_PATH = path.join(
   '..',
   '..',
   '..',
-  'fixtures',
   'common',
+  'ui',
+  'fixtures',
   'customers.csv'
 );
 

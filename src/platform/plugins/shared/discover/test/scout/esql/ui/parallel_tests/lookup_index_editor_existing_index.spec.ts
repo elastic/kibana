@@ -124,7 +124,7 @@ spaceTest.describe(
 
       // Try to exit without saving changes
       await lookupIndexEditor.close();
-      expect(await lookupIndexEditor.isUnsavedChangesModalVisible()).toBe(true);
+      await expect(lookupIndexEditor.unsavedChangesModal).toBeVisible();
 
       // Go back to save
       await lookupIndexEditor.cancelCloseWithoutSaving();

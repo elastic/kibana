@@ -40,8 +40,10 @@ export const DISCOVER_READ_URL_CREATE_ROLE: KibanaRole = {
  * disable Kibana route authorization and delegate entirely to the scoped ES client, so creating,
  * editing, closing, or deleting a lookup index is gated purely by Elasticsearch index privileges on
  * the target index name — no built-in Kibana role (`viewer`/`editor`/`admin`) grants `create_index`/
- * `delete_index`/`manage` on non-system indices. Scoped to the `test-lookup-index-*` prefix used by
- * the lookup-index-editor Scout specs.
+ * `delete_index`/`manage` on non-system indices. The privilege-check route always includes `*` in
+ * its `hasPrivileges` request, because the manual-create flow has no index name yet; `create_index`
+ * must therefore be granted on `*` to surface the editor suggestion. All index reads and mutations
+ * remain scoped to the `test-lookup-index-*` prefix used by the lookup-index-editor Scout specs.
  */
 export const LOOKUP_INDEX_EDITOR_ROLE: KibanaRole = {
   elasticsearch: {
