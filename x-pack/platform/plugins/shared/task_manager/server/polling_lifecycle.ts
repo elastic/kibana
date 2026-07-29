@@ -207,13 +207,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    let pollIntervalDelay$: Observable<number> | undefined;
-
     this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
-      pollIntervalDelay$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {
