@@ -35,11 +35,13 @@ export const createUnresolveAction = (deps: UnresolveActionDeps): EpisodeAction 
     );
   },
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = uniqueByGroup(filterV2Episodes(episodes)).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-      reason: i18n.RESOLVE_ACTION_REASON,
-    }));
+    const items: BulkCreateAlertActionBody = uniqueByGroup(filterV2Episodes(episodes)).map(
+      (ep) => ({
+        group_hash: ep.group_hash,
+        action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+        reason: i18n.RESOLVE_ACTION_REASON,
+      })
+    );
     if (!items.length) return;
 
     try {
