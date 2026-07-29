@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { test as baseTest } from '@kbn/scout';
 import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
@@ -21,10 +22,38 @@ export const TSDB_TIME_RANGE = {
 export const ROLLED_UP_MEDIAN_WARNING =
   'Median of bytes_gauge uses a function that is unsupported by rolled up data. Select a different function or change the time range.';
 
+export const TSDB_SCENARIO_DOCUMENT_COUNT = 100;
+
 export interface DownsampleTSDBIndexOptions {
   isStream: boolean;
   interval?: string;
   deleteOriginal?: boolean;
+}
+
+export interface TsdbScenarioIndex {
+  index: string;
+  create?: boolean;
+  downsample?: boolean;
+  removeTSDBFields?: boolean;
+  mode?: 'tsdb';
+}
+
+export interface TsdbScenarioTimeRange {
+  beforeUpgrade: string;
+  afterUpgrade: string;
+  picker: {
+    from: string;
+    to: string;
+  };
+}
+
+interface CleanupHandle {
+  cleanup: () => Promise<void>;
+}
+
+interface TsdbScenarioSetup extends CleanupHandle {
+  dataViewTitle: string;
+  expectedDocumentCountBeforeUpgrade: number;
 }
 
 export interface TsdbHelper {
@@ -32,6 +61,27 @@ export interface TsdbHelper {
     indexOrStream: string,
     options: DownsampleTSDBIndexOptions
   ) => Promise<string>;
+  createUpgradedStream: (
+    stream: string,
+    timeRange: TsdbScenarioTimeRange
+  ) => Promise<CleanupHandle>;
+  setupScenario: (
+    initialIndex: string,
+    indexes: TsdbScenarioIndex[],
+    beforeUpgrade: string
+  ) => Promise<TsdbScenarioSetup>;
+}
+
+export interface TsdbScenario {
+  setup: (
+    initialIndex: string,
+    indexes: TsdbScenarioIndex[],
+    timeRange: TsdbScenarioTimeRange
+  ) => Promise<{ dataViewTitle: string; expectedDocumentCountBeforeUpgrade: number }>;
+}
+
+interface LensUiTestFixtures extends ScoutTestFixtures {
+  tsdbScenario: TsdbScenario;
 }
 
 interface LensUiWorkerFixtures extends ScoutWorkerFixtures {
@@ -69,9 +119,140 @@ const retryDownsample = async (downsample: () => Promise<void>): Promise<void> =
   }
 };
 
-export const test = baseTest.extend<ScoutTestFixtures, LensUiWorkerFixtures>({
+export const createTsdbScenarioTimeRange = (now = Date.now()): TsdbScenarioTimeRange => ({
+  beforeUpgrade: new Date(now - 60 * 60 * 1000).toISOString(),
+  afterUpgrade: new Date(now).toISOString(),
+  picker: {
+    from: new Date(now - 60 * 60 * 1000).toISOString(),
+    to: new Date(now + 2 * 60 * 60 * 1000).toISOString(),
+  },
+});
+
+const runCleanupActions = async (
+  description: string,
+  actions: Array<() => Promise<void>>
+): Promise<void> => {
+  const errors: Error[] = [];
+  for (const action of actions) {
+    try {
+      await action();
+    } catch (error) {
+      errors.push(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+  if (errors.length > 0) {
+    throw new AggregateError(errors, `Failed to clean up ${description}`);
+  }
+};
+
+const getTsdbMapping = (removeTSDBFields = false): Record<string, MappingProperty> => ({
+  '@timestamp': { type: 'date' },
+  request: {
+    type: 'keyword',
+    time_series_dimension: true,
+  },
+  ...(removeTSDBFields
+    ? {}
+    : {
+        bytes_counter: {
+          type: 'long',
+          time_series_metric: 'counter',
+        },
+      }),
+});
+
+export const test = baseTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
   tsdbHelper: [
     async ({ esClient, log }, use) => {
+      const deleteDataStream = async (stream: string): Promise<void> => {
+        await runCleanupActions(`data stream "${stream}"`, [
+          async () => {
+            await esClient.indices.deleteDataStream({ name: stream }, { ignore: [404] });
+          },
+          async () => {
+            await esClient.indices.deleteIndexTemplate(
+              { name: `${stream}_index_template` },
+              { ignore: [404] }
+            );
+          },
+          async () => {
+            await esClient.cluster.deleteComponentTemplate(
+              { name: `${stream}_mapping` },
+              { ignore: [404] }
+            );
+          },
+        ]);
+      };
+
+      const putDataStreamTemplate = async (
+        stream: string,
+        mode: 'tsdb' | undefined
+      ): Promise<void> => {
+        await esClient.cluster.putComponentTemplate({
+          name: `${stream}_mapping`,
+          template: {
+            ...(mode === 'tsdb'
+              ? {
+                  settings: {
+                    mode: 'time_series',
+                    routing_path: ['request'],
+                  },
+                }
+              : {}),
+            mappings: {
+              properties: getTsdbMapping(),
+            },
+          },
+        });
+        await esClient.indices.putIndexTemplate({
+          name: `${stream}_index_template`,
+          index_patterns: [stream],
+          data_stream: {},
+          composed_of: [`${stream}_mapping`],
+          _meta: {
+            description: `Template for Lens TSDB test stream ${stream}`,
+          },
+        });
+      };
+
+      const createDataStream = async (stream: string, mode: 'tsdb' | undefined): Promise<void> => {
+        await putDataStreamTemplate(stream, mode);
+        await esClient.indices.createDataStream({ name: stream });
+      };
+
+      const createDocs = async (
+        index: string,
+        startTime: string,
+        { isStream, removeTSDBFields = false }: { isStream: boolean; removeTSDBFields?: boolean }
+      ): Promise<void> => {
+        const startTimeMs = Date.parse(startTime);
+        const documents = Array.from(
+          { length: TSDB_SCENARIO_DOCUMENT_COUNT },
+          (_, indexOffset) => ({
+            '@timestamp': new Date(
+              startTimeMs + (TSDB_SCENARIO_DOCUMENT_COUNT + indexOffset) * 1000
+            ).toISOString(),
+            request: `/lens-tsdb-test/${indexOffset % 5}`,
+            ...(removeTSDBFields ? {} : { bytes_counter: 5000 }),
+          })
+        );
+        const response = await esClient.bulk({
+          index,
+          refresh: 'wait_for',
+          operations: documents.flatMap((document) => [
+            isStream ? { create: {} } : { index: {} },
+            document,
+          ]),
+        });
+        if (response.errors) {
+          const failures = response.items.flatMap((item) => {
+            const result = item.create ?? item.index;
+            return result?.error ? [result.error] : [];
+          });
+          throw new Error(`Failed to index TSDB scenario documents: ${JSON.stringify(failures)}`);
+        }
+      };
+
       const downsampleTSDBIndex: TsdbHelper['downsampleTSDBIndex'] = async (
         indexOrStream,
         { isStream, interval = '1h', deleteOriginal = false }
@@ -111,8 +292,136 @@ export const test = baseTest.extend<ScoutTestFixtures, LensUiWorkerFixtures>({
         return downsampledTargetIndex;
       };
 
-      await use({ downsampleTSDBIndex });
+      const createUpgradedStream: TsdbHelper['createUpgradedStream'] = async (
+        stream,
+        timeRange
+      ) => {
+        const cleanup = async () => deleteDataStream(stream);
+        try {
+          log.info(`Creating regular data stream "${stream}"`);
+          await createDataStream(stream, undefined);
+          await createDocs(stream, timeRange.beforeUpgrade, { isStream: true });
+
+          log.info(`Upgrading data stream "${stream}" to TSDB`);
+          await putDataStreamTemplate(stream, 'tsdb');
+          await esClient.indices.rollover({ alias: stream });
+          await createDocs(stream, timeRange.afterUpgrade, { isStream: true });
+
+          return { cleanup };
+        } catch (error) {
+          await cleanup();
+          throw error;
+        }
+      };
+
+      const setupScenario: TsdbHelper['setupScenario'] = async (
+        initialIndex,
+        indexes,
+        beforeUpgrade
+      ) => {
+        const cleanupActions: Array<() => Promise<void>> = [];
+        let downsampledTargetIndex = '';
+
+        const cleanup = async () =>
+          runCleanupActions(`TSDB scenario for "${initialIndex}"`, [...cleanupActions].reverse());
+
+        try {
+          for (const { index, create, downsample, removeTSDBFields, mode } of indexes) {
+            if (!create) {
+              continue;
+            }
+            if (mode === 'tsdb') {
+              cleanupActions.push(async () => deleteDataStream(index));
+              await createDataStream(index, 'tsdb');
+              await createDocs(index, beforeUpgrade, { isStream: true, removeTSDBFields });
+            } else {
+              cleanupActions.push(async () => {
+                await esClient.indices.delete({ index }, { ignore: [404] });
+              });
+              await esClient.indices.create({
+                index,
+                mappings: {
+                  properties: getTsdbMapping(removeTSDBFields),
+                },
+              });
+              await createDocs(index, beforeUpgrade, { isStream: false, removeTSDBFields });
+            }
+
+            if (downsample) {
+              const targetIndex = `${index}_downsampled`;
+              downsampledTargetIndex = targetIndex;
+              cleanupActions.push(async () => {
+                await esClient.indices.delete({ index: targetIndex }, { ignore: [404] });
+              });
+              await downsampleTSDBIndex(index, {
+                isStream: mode === 'tsdb',
+              });
+            }
+          }
+
+          return {
+            dataViewTitle: `${indexes.map(({ index }) => index).join(',')}${
+              downsampledTargetIndex ? `,${downsampledTargetIndex}` : ''
+            }`,
+            // Lens count aggregation treats the downsample target as the stream's rolled-up data;
+            // it does not add another logical source contribution for that target.
+            expectedDocumentCountBeforeUpgrade: indexes.length * TSDB_SCENARIO_DOCUMENT_COUNT,
+            cleanup,
+          };
+        } catch (error) {
+          await cleanup();
+          throw error;
+        }
+      };
+
+      await use({ downsampleTSDBIndex, createUpgradedStream, setupScenario });
     },
     { scope: 'worker' },
   ],
+  tsdbScenario: async ({ apiServices, tsdbHelper, uiSettings }, use) => {
+    const dataViewIds: string[] = [];
+    const scenarioCleanups: Array<() => Promise<void>> = [];
+
+    const setup: TsdbScenario['setup'] = async (initialIndex, indexes, timeRange) => {
+      const scenario = await tsdbHelper.setupScenario(
+        initialIndex,
+        indexes,
+        timeRange.beforeUpgrade
+      );
+      try {
+        const { data: dataView } = await apiServices.dataViews.create({
+          title: scenario.dataViewTitle,
+          timeFieldName: '@timestamp',
+        });
+        dataViewIds.push(dataView.id);
+        scenarioCleanups.push(scenario.cleanup);
+        await uiSettings.set({
+          'dateFormat:tz': 'UTC',
+          defaultIndex: dataView.id,
+          'timepicker:timeDefaults': JSON.stringify(timeRange.picker),
+        });
+        return {
+          dataViewTitle: scenario.dataViewTitle,
+          expectedDocumentCountBeforeUpgrade: scenario.expectedDocumentCountBeforeUpgrade,
+        };
+      } catch (error) {
+        await scenario.cleanup();
+        throw error;
+      }
+    };
+
+    try {
+      await use({ setup });
+    } finally {
+      await runCleanupActions('TSDB scenario fixture', [
+        ...dataViewIds.map((dataViewId) => async () => {
+          await apiServices.dataViews.delete(dataViewId);
+        }),
+        async () => {
+          await uiSettings.unset('dateFormat:tz', 'defaultIndex', 'timepicker:timeDefaults');
+        },
+        ...[...scenarioCleanups].reverse(),
+      ]);
+    }
+  },
 });

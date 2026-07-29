@@ -71,6 +71,14 @@ const alertingV2NotificationGroup: JsonSchema = {
             type: 'string',
             description: 'Identifier of the rule that produced this episode',
           },
+          source: {
+            type: 'string',
+            description: 'Origin of the alert events for this episode (e.g. `internal`)',
+          },
+          space_id: {
+            type: 'string',
+            description: 'Identifier of the space the episode belongs to',
+          },
           group_hash: {
             type: 'string',
             description: 'Hash identifying the alert series/group this episode belongs to',
@@ -95,7 +103,15 @@ const alertingV2NotificationGroup: JsonSchema = {
             additionalProperties: true,
           },
         },
-        required: ['last_event_timestamp', 'rule_id', 'group_hash', 'episode_id', 'episode_status'],
+        required: [
+          'last_event_timestamp',
+          'rule_id',
+          'source',
+          'space_id',
+          'group_hash',
+          'episode_id',
+          'episode_status',
+        ],
         additionalProperties: false,
       },
     },
