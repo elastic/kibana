@@ -98,7 +98,6 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
       : undefined;
 
     return {
-      kuery: '',
       transactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
       rangeFrom: paddedRange?.from,
       rangeTo: paddedRange?.to,
