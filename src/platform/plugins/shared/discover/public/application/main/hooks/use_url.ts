@@ -30,14 +30,15 @@ export function useUrl({
     // this listener is waiting for such a path http://localhost:5601/app/discover#/
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
-    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
+    const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }, action) => {
       diag('useUrl:historyChange', {
         pathname,
+        action,
         hasSearch: Boolean(search),
         hasHash: Boolean(hash),
       });
-      if (pathname === '/' && !search && !hash && !savedSearchId) {
-        diag('useUrl:onNewUrl', { pathname });
+      if (action !== 'REPLACE' && pathname === '/' && !search && !hash && !savedSearchId) {
+        diag('useUrl:onNewUrl', { pathname, action });
         onNewUrl.current();
       }
     });
