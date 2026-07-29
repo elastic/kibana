@@ -22,15 +22,15 @@ const openDocViewerFieldDescription = async ({
 }) => {
   await pageObjects.docViewer.openAndWaitForFlyout({ rowIndex: 0 });
   await pageObjects.docViewer.openTab('doc_view_table');
-  const fieldNameCell = page.testSubj
-    .locator('docViewerFlyout')
-    .locator(`[data-test-subj="tableDocViewRow-${field}-name"]`);
+  const flyout = page.testSubj.locator('docViewerFlyout');
+  const fieldNameCell = flyout.locator(`[data-test-subj="tableDocViewRow-${field}-name"]`);
+  const expandButton = fieldNameCell.locator('[data-test-subj="euiDataGridCellExpandButton"]');
+
   await fieldNameCell.waitFor({ state: 'visible' });
+  await fieldNameCell.scrollIntoViewIfNeeded();
   await fieldNameCell.hover();
-  await fieldNameCell.click();
-  const expandButton = page.testSubj.locator('euiDataGridCellExpandButton');
-  await expandButton.waitFor({ state: 'visible' });
   await expandButton.click();
+  await page.testSubj.locator(`fieldDescription-${field}`).waitFor({ state: 'visible' });
 };
 
 spaceTest.describe(
