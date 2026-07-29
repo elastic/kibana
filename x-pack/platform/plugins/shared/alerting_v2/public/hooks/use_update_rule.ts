@@ -9,6 +9,8 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
+import { RULES_CONTENT_LIST_ID } from '../constants';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
@@ -32,6 +34,13 @@ export const useUpdateRule = () => {
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.detail(variables.id));
+      // Content List uses its own QueryClient; tags under the provider land there too.
+      void contentListQueryClient.invalidateQueries({
+        queryKey: contentListKeys.all(RULES_CONTENT_LIST_ID),
+      });
+      void contentListQueryClient.invalidateQueries({
+        queryKey: [...ruleKeys.all, 'tags'],
+      });
     },
     onError: (error: Error) => {
       toasts.addError(enrichHttpErrorMessage(error), {

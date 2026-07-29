@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
+import { contentListQueryClient } from '@kbn/content-list-provider';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
-import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
+import type { RuleApiResponse } from '../../services/rules_api';
+import { RulesListPage } from './rules_list_page';
 
 const mockNavigateToUrl = jest.fn();
 const mockNavigateToApp = jest.fn();
@@ -18,6 +21,7 @@ const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) =>
   return `/app/${appId}${path}`;
 });
 const mockDocTitleChange = jest.fn();
+const mockFindItems = jest.fn();
 
 jest.mock('../../application/breadcrumb_context', () => ({
   useSetBreadcrumbs: () => jest.fn(),
@@ -27,59 +31,45 @@ let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
 let mockCanWriteRules = true;
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'application') {
-      return {
-        navigateToUrl: mockNavigateToUrl,
-        navigateToApp: mockNavigateToApp,
-        getUrlForApp: mockGetUrlForApp,
-        capabilities: {
-          agentBuilder: { show: mockAgentBuilderShow },
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return {
+          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canRead: () => true,
+          can: () => mockCanWriteRules,
+        };
+      }
+
+      const services: Record<string, unknown> = {
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: mockGetUrlForApp,
+          capabilities: {
+            agentBuilder: { show: mockAgentBuilderShow },
+          },
         },
-      };
-    }
-    if (token === 'uiSettings') {
-      return {
-        get: (id: string) => {
-          if (id === 'agentBuilder:experimentalFeatures') {
-            return mockExperimentalFeaturesEnabled;
-          }
-          return undefined;
+        uiSettings: {
+          get: (id: string) =>
+            id === 'agentBuilder:experimentalFeatures'
+              ? mockExperimentalFeaturesEnabled
+              : undefined,
         },
+        chrome: { docTitle: { change: mockDocTitleChange } },
+        http: { basePath: { prepend: (p: string) => p } },
+        notifications: { toasts: { addSuccess: jest.fn(), addError: jest.fn() } },
       };
-    }
-    if (token === 'chrome') {
-      return { docTitle: { change: mockDocTitleChange } };
-    }
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => p } };
-    }
-    if (token === 'notifications') {
-      return { toasts: { addSuccess: jest.fn(), addError: jest.fn() } };
-    }
-    if (
-      token === 'data' ||
-      token === 'dataViews' ||
-      token === 'lens' ||
-      token === 'uiActions' ||
-      token === 'dashboard' ||
-      token === 'cps'
-    ) {
-      return {};
-    }
-    if (typeof token === 'function') {
-      // UserCapabilities service token
-      return {
-        canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
-        canRead: () => true,
-        can: () => mockCanWriteRules,
-      };
-    }
-    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
-  },
-  CoreStart: (key: string) => key,
-}));
+
+      return services[token as string] ?? {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 jest.mock('@kbn/core-di', () => ({
   PluginStart: (key: string) => key,
@@ -93,9 +83,13 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
   ),
 }));
 
-const mockUseFetchRules = jest.fn();
-jest.mock('../../hooks/use_fetch_rules', () => ({
-  useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+jest.mock('./rules_data_source', () => ({
+  ...jest.requireActual('./rules_data_source'),
+  useRulesDataSource: () => ({
+    findItems: mockFindItems,
+    // Skip Content List's search debounce so filter/search assertions stay synchronous.
+    debounceMs: 0,
+  }),
 }));
 
 jest.mock('../../hooks/use_fetch_rule_tags', () => ({
@@ -136,36 +130,82 @@ jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
   useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
 }));
 
-const mockRules = [
-  {
+const mockRunRuleMutate = jest.fn();
+jest.mock('../../hooks/use_run_rule', () => ({
+  useRunRule: () => ({ mutate: mockRunRuleMutate, isLoading: false }),
+}));
+
+const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =>
+  ({
     id: 'rule-1',
     kind: 'alert',
     enabled: true,
-    metadata: { name: 'Rule One', description: 'Monitors log errors', tags: ['prod'] },
+    metadata: {
+      name: 'Rule One',
+      description: 'Monitors log errors',
+      tags: ['prod'],
+    },
     schedule: { every: '1m' },
     query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
-  },
-  {
+    time_field: '@timestamp',
+    createdBy: 'elastic',
+    createdAt: '2026-01-01T00:00:00.000Z',
+    updatedBy: 'elastic',
+    updatedAt: '2026-01-02T03:04:05.000Z',
+    ...overrides,
+  } as RuleApiResponse);
+
+const mockRules: RuleApiResponse[] = [
+  createRule(),
+  createRule({
     id: 'rule-2',
-    kind: 'alert',
     enabled: false,
-    metadata: { name: 'Rule Two', tags: [] },
+    metadata: { name: 'Rule Two', tags: [] as string[] },
     schedule: { every: '5m' },
     query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
-  },
+  }),
 ];
 
-const renderPage = () => {
-  return render(
+const toListItem = (rule: RuleApiResponse) => ({
+  id: rule.id,
+  title: rule.metadata?.name ?? rule.id,
+  description: rule.metadata?.description,
+  tags: rule.metadata?.tags,
+  rule,
+});
+
+const resolveRules = (items: RuleApiResponse[] = mockRules, total = items.length) => {
+  mockFindItems.mockResolvedValue({
+    items: items.map(toListItem),
+    total,
+  });
+};
+
+const lastFindItemsArgs = () => {
+  const { calls } = mockFindItems.mock;
+  return calls[calls.length - 1][0];
+};
+
+const rowCheckbox = (ruleId: string) => screen.getByTestId(`checkboxSelectRow-${ruleId}`);
+
+const renderPage = () =>
+  render(
     <ListPageTestProviders>
       <RulesListPage />
     </ListPageTestProviders>
   );
+
+const waitForRules = async () => {
+  await waitFor(() => {
+    expect(screen.getByText('Rule One')).toBeInTheDocument();
+  });
 };
 
 describe('RulesListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Content List uses a shared QueryClient; clear cached pages between tests.
+    contentListQueryClient.clear();
     mockAgentBuilderShow = true;
     mockExperimentalFeaturesEnabled = true;
     mockCanWriteRules = true;
@@ -176,599 +216,308 @@ describe('RulesListPage', () => {
     mockUseToggleRuleEnabled.mockReturnValue({
       mutate: mockToggleEnabledMutate,
       isLoading: false,
+      variables: undefined,
     });
+    resolveRules();
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('renders the experimental badge in the page header', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('renders the experimental badge in the page header', async () => {
     renderPage();
+    await waitForRules();
 
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
   });
 
-  it('renders loading state', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: undefined,
-      isLoading: true,
-      isError: false,
-      error: null,
-    });
-
+  it('renders loading state', async () => {
+    mockFindItems.mockReturnValue(new Promise(() => {}));
     renderPage();
 
-    expect(screen.getByTestId('rulesListLoading')).toBeInTheDocument();
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId(CONTENT_LIST_TEST_SUBJECTS.toolbarSkeleton)).toBeInTheDocument();
+    });
   });
 
-  it('renders rules in the table', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('renders rules in the table', async () => {
     renderPage();
+    await waitForRules();
 
-    expect(screen.getByText('Rule One')).toBeInTheDocument();
     expect(screen.getByText('Rule Two')).toBeInTheDocument();
   });
 
-  it('renders the search bar', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('renders the search bar', async () => {
     renderPage();
+    await waitForRules();
 
     expect(screen.getByPlaceholderText('Search rules')).toBeInTheDocument();
   });
 
-  it('renders description under the rule name when present', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('renders description under the rule name when present', async () => {
     renderPage();
+    await waitForRules();
 
     expect(screen.getByText('Monitors log errors')).toBeInTheDocument();
   });
 
-  it('does not render description when not present', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('does not render description when not present', async () => {
     renderPage();
+    await waitForRules();
 
-    // Rule Two has no description — should only show the name
-    const ruleTwoName = screen.getByText('Rule Two');
-    expect(ruleTwoName.closest('div')?.querySelectorAll('.euiText--extraSmall')).toHaveLength(0);
+    expect(screen.getByText('Monitors log errors')).toBeInTheDocument();
+    const ruleTwoRow = screen
+      .getAllByRole('row')
+      .find((row) => row.textContent?.includes('Rule Two'));
+    expect(ruleTwoRow).toBeDefined();
+    expect(ruleTwoRow?.textContent).not.toMatch(/Monitors/);
   });
 
-  it('renders the Source column with extracted data source', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('renders the Source column with extracted data source', async () => {
     renderPage();
+    await waitForRules();
 
     expect(screen.getByText('logs-*')).toBeInTheDocument();
     expect(screen.getByText('metrics-*')).toBeInTheDocument();
   });
 
-  it('renders error state', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: undefined,
-      isLoading: false,
-      isError: true,
-      error: new Error('Network error'),
-    });
-
+  it('surfaces fetch failures on the table instead of the empty create state', async () => {
+    mockFindItems.mockRejectedValue(new Error('Network error'));
     renderPage();
 
-    expect(screen.getByText('Failed to load rules')).toBeInTheDocument();
-    expect(screen.getByText('Network error')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Network error')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('ruleCreateOptionsPanel')).not.toBeInTheDocument();
   });
 
-  it('shows empty state when there are no rules and no active filters', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('shows empty state when there are no rules and no active filters', async () => {
+    resolveRules([], 0);
     renderPage();
 
-    expect(
-      screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
-    ).toBeInTheDocument();
-    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { level: 2, name: /no rules yet\. let's get started!/i })
+      ).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('rulesListTable')).not.toBeInTheDocument();
   });
 
-  it('hides the header create controls in the empty state (no rules, no active filters)', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('hides the header create controls in the empty state (no rules, no active filters)', async () => {
+    resolveRules([], 0);
     renderPage();
 
+    await waitFor(() => {
+      expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
+    });
     expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     expect(screen.queryByTestId('createRuleButton-secondary-button')).not.toBeInTheDocument();
   });
 
   it('keeps the header create controls when filters are active even with zero matching rules', async () => {
-    jest.useFakeTimers();
-    // Unfiltered fetch returns rules (so the search bar renders); once a search term is applied the
-    // fetch returns zero rows, exercising the `hasActiveFilters` branch of `showHeaderMenu`.
-    mockUseFetchRules.mockImplementation((params?: { search?: string }) => ({
-      data: params?.search
-        ? { items: [], total: 0, page: 1, perPage: 20 }
-        : { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    }));
-
-    renderPage();
-
-    expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
-
-    fireEvent.change(screen.getByPlaceholderText('Search rules'), {
-      target: { value: 'no-such-rule' },
+    mockFindItems.mockImplementation(async ({ filters }: { filters?: { search?: string } }) => {
+      if (filters?.search) {
+        return { items: [], total: 0 };
+      }
+      return { items: mockRules.map(toListItem), total: 2 };
     });
 
-    act(() => {
-      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.change(screen.getByPlaceholderText('Search rules'), {
+      target: { value: 'nosuchrule' },
     });
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
-        expect.objectContaining({ search: 'no-such-rule' })
-      );
+      expect(lastFindItemsArgs().filters.search).toBe('nosuchrule');
     });
 
-    // Header create controls remain because filters are active, even though the list is now empty.
     expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
-    // The empty-state create panel must NOT take over while filters are active.
     expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
   });
 
-  it('opens the flyout from the empty state ES|QL rule card', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('opens the flyout from the empty state ES|QL rule card', async () => {
+    resolveRules([], 0);
     renderPage();
 
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
-  it('shows correct "Showing" range when rules exist', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('passes the search term to findItems', async () => {
     renderPage();
-
-    const showingLabel = screen.getByTestId('rulesListShowingLabel');
-    expect(showingLabel).toHaveTextContent('Showing 1-2 of 2 Rules');
-  });
-
-  it('passes the debounced search term to useFetchRules', async () => {
-    jest.useFakeTimers();
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
-    renderPage();
+    await waitForRules();
 
     fireEvent.change(screen.getByPlaceholderText('Search rules'), {
       target: { value: 'Rule One' },
     });
 
-    expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-      page: 1,
-      perPage: 20,
-      filter: undefined,
-      search: undefined,
-      sortField: 'name',
-      sortOrder: 'asc',
-    });
-
-    act(() => {
-      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
-    });
-
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: undefined,
-        search: 'Rule One',
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().filters.search).toBe('Rule One');
     });
   });
 
   it('clearing the search resets the fetch back to an unfiltered list', async () => {
-    jest.useFakeTimers();
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
     const searchInput = screen.getByPlaceholderText('Search rules');
 
-    fireEvent.change(searchInput, {
-      target: { value: 'prod' },
-    });
-
-    act(() => {
-      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
-    });
-
+    fireEvent.change(searchInput, { target: { value: 'prod' } });
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: undefined,
-        search: 'prod',
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().filters.search).toBe('prod');
     });
 
-    fireEvent.change(searchInput, {
-      target: { value: '' },
-    });
-
-    act(() => {
-      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
-    });
-
+    fireEvent.change(searchInput, { target: { value: '' } });
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: undefined,
-        search: undefined,
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().filters.search ?? '').toBe('');
     });
   });
 
   it('resets pagination to the first page after a new search', async () => {
-    jest.useFakeTimers();
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 40, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+    resolveRules(mockRules, 40);
     renderPage();
+    await waitForRules();
 
-    fireEvent.click(screen.getByLabelText('Next page'));
-
+    const nextPage = await screen.findByTestId('pagination-button-next');
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 2,
-        perPage: 20,
-        filter: undefined,
-        search: undefined,
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      expect(nextPage).not.toBeDisabled();
+    });
+    fireEvent.click(nextPage);
+    await waitFor(() => {
+      expect(lastFindItemsArgs().page.index).toBe(1);
     });
 
     fireEvent.change(screen.getByPlaceholderText('Search rules'), {
       target: { value: 'Rule' },
     });
 
-    expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-      page: 2,
-      perPage: 20,
-      filter: undefined,
-      search: undefined,
-      sortField: 'name',
-      sortOrder: 'asc',
-    });
-
-    act(() => {
-      jest.advanceTimersByTime(SEARCH_DEBOUNCE_MS);
-    });
-
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: undefined,
-        search: 'Rule',
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      const args = lastFindItemsArgs();
+      expect(args.filters.search).toBe('Rule');
+      expect(args.page.index).toBe(0);
     });
   });
 
-  it('renders filter controls', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('renders filter controls', async () => {
     renderPage();
+    await waitForRules();
 
     expect(screen.getByTestId('rulesListStatusFilter')).toBeInTheDocument();
     expect(screen.getByTestId('rulesListTagsFilter')).toBeInTheDocument();
     expect(screen.getByTestId('rulesListModeFilter')).toBeInTheDocument();
   });
 
-  it('does not show an active count on the status filter when nothing is selected', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('does not show an active count on the status filter when nothing is selected', async () => {
     renderPage();
+    await waitForRules();
 
     expect(screen.getByTestId('rulesListStatusFilter')).toHaveTextContent(/^Status$/);
   });
 
-  it('passes status filters to useFetchRules', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('passes status filters to findItems', async () => {
     renderPage();
+    await waitForRules();
 
     fireEvent.click(screen.getByTestId('rulesListStatusFilter'));
-    fireEvent.click(screen.getByTestId('rulesListStatusFilterOption-true'));
+    const list = await screen.findByTestId('rulesListStatusFilter-list');
+    fireEvent.click(within(list).getByText('Enabled'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: 'enabled: true',
-        search: undefined,
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().filters.enabled).toMatchObject({ include: ['true'] });
     });
   });
 
-  it('passes tags filters to useFetchRules', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('passes tags filters to findItems', async () => {
     renderPage();
+    await waitForRules();
 
     fireEvent.click(screen.getByTestId('rulesListTagsFilter'));
-    fireEvent.click(screen.getByTestId('rulesListTagsFilterOption-prod'));
+    const list = await screen.findByTestId('rulesListTagsFilter-list');
+    fireEvent.click(within(list).getByText('prod'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: '(metadata.tags: "prod")',
-        search: undefined,
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().filters.tag).toMatchObject({ include: ['prod'] });
     });
   });
 
-  it('passes mode filters to useFetchRules', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('passes mode filters to findItems', async () => {
     renderPage();
+    await waitForRules();
 
     fireEvent.click(screen.getByTestId('rulesListModeFilter'));
-    fireEvent.click(screen.getByTestId('rulesListModeFilterOption-signal'));
+    const list = await screen.findByTestId('rulesListModeFilter-list');
+    fireEvent.click(within(list).getByText('Signal'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: 'kind: signal',
-        search: undefined,
-        sortField: 'name',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().filters.kind).toMatchObject({ include: ['signal'] });
     });
   });
 
-  it('uses name ascending as the default sort', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('uses name ascending as the default sort', async () => {
     renderPage();
+    await waitForRules();
 
-    expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-      page: 1,
-      perPage: 20,
-      filter: undefined,
-      search: undefined,
-      sortField: 'name',
-      sortOrder: 'asc',
-    });
+    expect(lastFindItemsArgs().sort).toEqual({ field: 'name', direction: 'asc' });
   });
 
-  it('sorts by name when the Name header is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('toggles name sort direction when the Name header is clicked', async () => {
     renderPage();
+    await waitForRules();
 
     const nameHeader = screen.getByRole('columnheader', { name: /^name$/i });
     fireEvent.click(within(nameHeader).getByRole('button'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: undefined,
-        search: undefined,
-        sortField: 'name',
-        sortOrder: 'desc',
-      });
+      expect(lastFindItemsArgs().sort).toEqual({ field: 'name', direction: 'desc' });
     });
   });
 
-  it('sorts by mode when the Mode header is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('sorts by kind when the Mode header is clicked', async () => {
     renderPage();
+    await waitForRules();
 
     const modeHeader = screen.getByRole('columnheader', { name: /^mode$/i });
     fireEvent.click(within(modeHeader).getByRole('button'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: undefined,
-        search: undefined,
-        sortField: 'kind',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().sort).toEqual({ field: 'kind', direction: 'asc' });
     });
   });
 
   it('changes sort parameters when a sortable header is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
     const enabledHeader = screen.getByRole('columnheader', { name: /^enabled$/i });
     fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith({
-        page: 1,
-        perPage: 20,
-        filter: undefined,
-        search: undefined,
-        sortField: 'enabled',
-        sortOrder: 'asc',
-      });
+      expect(lastFindItemsArgs().sort).toEqual({ field: 'enabled', direction: 'asc' });
     });
   });
 
   it('toggles sort direction when the same header is clicked twice', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
     const enabledHeader = screen.getByRole('columnheader', { name: /^enabled$/i });
     fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sortField: 'enabled', sortOrder: 'asc' })
-      );
+      expect(lastFindItemsArgs().sort).toEqual({ field: 'enabled', direction: 'asc' });
     });
 
     fireEvent.click(within(enabledHeader).getByRole('button'));
 
     await waitFor(() => {
-      expect(mockUseFetchRules).toHaveBeenLastCalledWith(
-        expect.objectContaining({ sortField: 'enabled', sortOrder: 'desc' })
-      );
+      expect(lastFindItemsArgs().sort).toEqual({ field: 'enabled', direction: 'desc' });
     });
   });
 
-  it('opens create rule options in a flyout when create button is clicked', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('opens create rule options in a flyout when create button is clicked', async () => {
     renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
 
@@ -777,15 +526,9 @@ describe('RulesListPage', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('closes create rule options flyout without navigating', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('closes create rule options flyout without navigating', async () => {
     renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
     fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
@@ -795,15 +538,9 @@ describe('RulesListPage', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('opens the rule creation flow from the create rule options flyout', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('opens the rule creation flow from the create rule options flyout', async () => {
     renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
     fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
@@ -813,18 +550,13 @@ describe('RulesListPage', () => {
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
-  it('stays on the rules list after creating a rule from the flyout', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
+  it('stays on the rules list after creating a rule from the flyout', async () => {
     mockCreateRuleMutate.mockImplementationOnce((_payload, options) =>
       options?.onSuccess?.({ id: 'rule-1', metadata: { name: 'Test Rule' } })
     );
 
     renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
 
     fireEvent.click(screen.getByTestId('createRuleButton'));
     fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
@@ -840,14 +572,10 @@ describe('RulesListPage', () => {
   });
 
   it('opens the rule creation flow from the split button dropdown', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitFor(() =>
+      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
+    );
 
     fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
@@ -861,14 +589,10 @@ describe('RulesListPage', () => {
   });
 
   it('opens agent chat when "Create with agent" is clicked in the split button dropdown', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitFor(() =>
+      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
+    );
 
     fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
@@ -888,14 +612,10 @@ describe('RulesListPage', () => {
     mockAgentBuilderShow = false;
     mockExperimentalFeaturesEnabled = false;
 
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitFor(() =>
+      expect(screen.getByTestId('createRuleButton-secondary-button')).toBeInTheDocument()
+    );
 
     fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
@@ -911,39 +631,24 @@ describe('RulesListPage', () => {
     expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
-  it('disables the empty state agent card (does not hide it) when agent builder is not available', () => {
+  it('disables the empty state agent card (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
     mockExperimentalFeaturesEnabled = false;
-
-    mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
+    resolveRules([], 0);
 
     renderPage();
 
-    expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
     const agentCard = screen.getByTestId('createWithAgentCard');
     expect(agentCard).toBeInTheDocument();
     expect(agentCard).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
-    // Open the context menu for the first rule
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-    // Click the delete item in the context menu
     fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
 
     await waitFor(() => {
@@ -954,19 +659,10 @@ describe('RulesListPage', () => {
   });
 
   it('calls deleteRule mutation when delete is confirmed', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
-    // Open the context menu for the first rule
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
-
-    // Click the delete item
     fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
 
     await waitFor(() => {
@@ -983,48 +679,26 @@ describe('RulesListPage', () => {
     );
   });
 
-  it('renders the Enabled column with switches reflecting each rule state', () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
+  it('renders the Enabled column with switches reflecting each rule state', async () => {
     renderPage();
+    await waitForRules();
 
     expect(screen.getByTestId('ruleEnabledSwitch-rule-1')).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByTestId('ruleEnabledSwitch-rule-2')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('calls toggleEnabledMutation when the Enabled switch is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
-    // Click the switch for the enabled rule (rule-1) — should disable it
     fireEvent.click(screen.getByTestId('ruleEnabledSwitch-rule-1'));
 
-    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({
-      id: 'rule-1',
-      enabled: false,
-    });
+    expect(mockToggleEnabledMutate).toHaveBeenCalledWith({ id: 'rule-1', enabled: false });
   });
 
   it('shows "Clone" action in the context menu', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
 
@@ -1034,14 +708,8 @@ describe('RulesListPage', () => {
   });
 
   it('opens the clone flyout when clone is clicked', async () => {
-    mockUseFetchRules.mockReturnValue({
-      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-      isLoading: false,
-      isError: false,
-      error: null,
-    });
-
     renderPage();
+    await waitForRules();
 
     fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
     fireEvent.click(screen.getByTestId('cloneRule-rule-1'));
@@ -1050,25 +718,17 @@ describe('RulesListPage', () => {
   });
 
   describe('selection', () => {
-    beforeEach(() => {
-      mockUseFetchRules.mockReturnValue({
-        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-        isLoading: false,
-        isError: false,
-        error: null,
-      });
+    it('renders selection checkboxes for each row', async () => {
+      renderPage();
+      await waitForRules();
+
+      expect(rowCheckbox('rule-1')).toBeInTheDocument();
+      expect(rowCheckbox('rule-2')).toBeInTheDocument();
     });
 
-    it('renders selection checkboxes for each row', () => {
+    it('does not show selected count or clear button when no rules are selected', async () => {
       renderPage();
-
-      const checkboxes = screen.getAllByRole('checkbox');
-      // 1 header "select all" checkbox + 2 row checkboxes
-      expect(checkboxes.length).toBeGreaterThanOrEqual(3);
-    });
-
-    it('does not show selected count or clear button when no rules are selected', () => {
-      renderPage();
+      await waitForRules();
 
       expect(screen.queryByTestId('bulkActionsButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('clearSelectionButton')).not.toBeInTheDocument();
@@ -1076,10 +736,9 @@ describe('RulesListPage', () => {
 
     it('shows selected count when rules are selected', async () => {
       renderPage();
+      await waitForRules();
 
-      // Click the first row checkbox (skip index 0 which is "select all")
-      const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[1]);
+      fireEvent.click(rowCheckbox('rule-1'));
 
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toBeInTheDocument();
@@ -1089,9 +748,9 @@ describe('RulesListPage', () => {
 
     it('shows clear selection button when rules are selected', async () => {
       renderPage();
+      await waitForRules();
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[1]);
+      fireEvent.click(rowCheckbox('rule-1'));
 
       await waitFor(() => {
         expect(screen.getByTestId('clearSelectionButton')).toBeInTheDocument();
@@ -1100,11 +759,10 @@ describe('RulesListPage', () => {
 
     it('updates selected count when selecting multiple rules', async () => {
       renderPage();
+      await waitForRules();
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      // Select both rows
-      fireEvent.click(checkboxes[1]);
-      fireEvent.click(checkboxes[2]);
+      fireEvent.click(rowCheckbox('rule-1'));
+      fireEvent.click(rowCheckbox('rule-2'));
 
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
@@ -1113,9 +771,9 @@ describe('RulesListPage', () => {
 
     it('clears selection when clear button is clicked', async () => {
       renderPage();
+      await waitForRules();
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[1]);
+      fireEvent.click(rowCheckbox('rule-1'));
 
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toBeInTheDocument();
@@ -1129,16 +787,83 @@ describe('RulesListPage', () => {
       });
     });
 
-    it('selects all rules when header checkbox is clicked', async () => {
+    it('selects all rules on the page when header checkbox is clicked', async () => {
       renderPage();
+      await waitForRules();
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      // Click the header "select all" checkbox (first checkbox)
-      fireEvent.click(checkboxes[0]);
+      fireEvent.click(screen.getByTestId('selectAllRulesOnPage'));
 
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
       });
+    });
+
+    it('folds deselected rows into a NOT exclusion under select-all', async () => {
+      resolveRules(mockRules, 40);
+      renderPage();
+      await waitForRules();
+
+      fireEvent.click(rowCheckbox('rule-1'));
+      fireEvent.click(await screen.findByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('40 Selected');
+      });
+
+      fireEvent.click(rowCheckbox('rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('39 Selected');
+      });
+
+      fireEvent.click(screen.getByTestId('bulkActionsButton'));
+      fireEvent.click(await screen.findByTestId('bulkEnableRules'));
+
+      expect(mockBulkEnableMutate).toHaveBeenCalledWith(
+        {
+          mode: 'by_query',
+          filter: 'NOT (id: "rule-1")',
+        },
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+    });
+
+    it('keeps select-all selection after pagination', async () => {
+      const page2 = [
+        createRule({
+          id: 'rule-3',
+          metadata: { name: 'Rule Three', tags: [] as string[] },
+        }),
+        createRule({
+          id: 'rule-4',
+          metadata: { name: 'Rule Four', tags: [] as string[] },
+        }),
+      ];
+
+      mockFindItems.mockImplementation(async ({ page }: { page: { index: number } }) => {
+        const items = page.index === 0 ? mockRules : page2;
+        return { items: items.map(toListItem), total: 40 };
+      });
+
+      renderPage();
+      await waitForRules();
+
+      fireEvent.click(rowCheckbox('rule-1'));
+      fireEvent.click(await screen.findByTestId('selectAllRulesButton'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('40 Selected');
+      });
+
+      fireEvent.click(await screen.findByTestId('pagination-button-next'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Rule Three')).toBeInTheDocument();
+      });
+
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('40 Selected');
+      expect(rowCheckbox('rule-3')).toBeChecked();
+      expect(rowCheckbox('rule-4')).toBeChecked();
     });
   });
 
@@ -1147,43 +872,27 @@ describe('RulesListPage', () => {
       mockCanWriteRules = false;
     });
 
-    it('hides the header create controls even when rules exist', () => {
-      mockUseFetchRules.mockReturnValue({
-        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-        isLoading: false,
-        isError: false,
-        error: null,
-      });
-
+    it('hides the header create controls even when rules exist', async () => {
       renderPage();
+      await waitForRules();
 
       expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
       expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
     });
 
-    it('shows a read-only empty prompt (not the create panel) when there are no rules', () => {
-      mockUseFetchRules.mockReturnValue({
-        data: { items: [], total: 0, page: 1, perPage: 20 },
-        isLoading: false,
-        isError: false,
-        error: null,
-      });
-
+    it('shows a read-only empty prompt (not the create panel) when there are no rules', async () => {
+      resolveRules([], 0);
       renderPage();
 
-      expect(screen.getByTestId('rulesListReadOnlyEmpty')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('rulesListReadOnlyEmpty')).toBeInTheDocument();
+      });
       expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
     });
 
-    it('hides row selection, quick edit, and actions menu affordances', () => {
-      mockUseFetchRules.mockReturnValue({
-        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-        isLoading: false,
-        isError: false,
-        error: null,
-      });
-
+    it('hides row selection, quick edit, and actions menu affordances', async () => {
       renderPage();
+      await waitForRules();
 
       expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
@@ -1191,15 +900,9 @@ describe('RulesListPage', () => {
       expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     });
 
-    it('hides the enabled switch and shows a read-only status badge instead', () => {
-      mockUseFetchRules.mockReturnValue({
-        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-        isLoading: false,
-        isError: false,
-        error: null,
-      });
-
+    it('hides the enabled switch and shows a read-only status badge instead', async () => {
       renderPage();
+      await waitForRules();
 
       expect(screen.queryByTestId('ruleEnabledSwitch-rule-1')).not.toBeInTheDocument();
       expect(screen.getByTestId('ruleEnabledBadge-rule-1')).toHaveTextContent('Enabled');
@@ -1207,20 +910,11 @@ describe('RulesListPage', () => {
   });
 
   describe('bulk actions menu', () => {
-    beforeEach(() => {
-      mockUseFetchRules.mockReturnValue({
-        data: { items: mockRules, total: 2, page: 1, perPage: 20 },
-        isLoading: false,
-        isError: false,
-        error: null,
-      });
-    });
-
     const selectFirstRuleAndOpenMenu = async () => {
       renderPage();
+      await waitForRules();
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[1]);
+      fireEvent.click(rowCheckbox('rule-1'));
 
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toBeInTheDocument();
@@ -1253,7 +947,6 @@ describe('RulesListPage', () => {
         expect(screen.getByTestId('deleteRuleConfirmationModal')).toHaveTextContent(/1 rule/);
       });
 
-      // Mutation should NOT have been called yet
       expect(mockBulkDeleteMutate).not.toHaveBeenCalled();
     });
 
@@ -1330,10 +1023,10 @@ describe('RulesListPage', () => {
 
     it('shows correct count in bulk delete modal when multiple rules are selected', async () => {
       renderPage();
+      await waitForRules();
 
-      const checkboxes = screen.getAllByRole('checkbox');
-      fireEvent.click(checkboxes[1]);
-      fireEvent.click(checkboxes[2]);
+      fireEvent.click(rowCheckbox('rule-1'));
+      fireEvent.click(rowCheckbox('rule-2'));
 
       await waitFor(() => {
         expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');

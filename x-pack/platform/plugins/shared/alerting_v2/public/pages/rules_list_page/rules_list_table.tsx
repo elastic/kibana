@@ -68,6 +68,8 @@ export interface RulesListTableProps {
   totalItemCount: number;
   page: number;
   perPage: number;
+  /** Page-size choices for the EUI pagination control. */
+  pageSizeOptions?: number[];
   search: string;
   hasActiveFilters: boolean;
   sortField?: RulesListTableSortField;
@@ -110,11 +112,14 @@ export interface RulesListTableProps {
   onTableChange: (criteria: Criteria<RuleApiResponse>) => void;
 }
 
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
+
 export const RulesListTable: React.FC<RulesListTableProps> = ({
   items,
   totalItemCount,
   page,
   perPage,
+  pageSizeOptions = DEFAULT_PAGE_SIZE_OPTIONS,
   search,
   hasActiveFilters,
   sortField,
@@ -161,7 +166,7 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
     pageIndex: page - 1,
     pageSize: perPage,
     totalItemCount,
-    pageSizeOptions: [10, 20, 50],
+    pageSizeOptions,
   };
 
   const columns: Array<EuiBasicTableColumn<RuleApiResponse>> = useMemo(
