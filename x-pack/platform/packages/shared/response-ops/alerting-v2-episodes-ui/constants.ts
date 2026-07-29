@@ -7,7 +7,7 @@
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-export {
+import {
   ALERT_EVENTS_DATA_STREAM,
   ALERT_ACTIONS_DATA_STREAM,
   DEFAULT_TIME_FIELD as TIME_FIELD,
@@ -15,6 +15,14 @@ export {
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
 } from '@kbn/alerting-v2-constants';
+export {
+  ALERT_EVENTS_DATA_STREAM,
+  ALERT_ACTIONS_DATA_STREAM,
+  TIME_FIELD,
+  ALERTING_V2_SECTION_ID,
+  ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_EPISODES_APP_ID,
+};
 export {
   HISTOGRAM_EPISODE_LIMIT,
   EPISODES_LIST_PAGE_SIZE,
