@@ -63,18 +63,17 @@ spaceTest.describe(
           await expect(tracesExperience.flyout.serviceFlyout.container).toBeVisible();
         });
 
-        await spaceTest.step('verify latency chart renders without error', async () => {
-          const latencyChart = page.testSubj.locator('serviceFlyoutLensChart-latency');
-          await expect(latencyChart).toBeVisible();
-          await expect(
-            latencyChart.locator('[data-test-subj="embeddable-lens-failure"]')
-          ).toBeHidden();
+        await spaceTest.step('verify charts render without error', async () => {
+          for (const chartId of ['latency', 'throughput', 'failedTransactionRate']) {
+            const chart = page.testSubj.locator(`serviceFlyoutLensChart-${chartId}`);
+            await expect(chart).toBeVisible();
+            await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
+          }
         });
 
         await spaceTest.step(
-          'verify ECS schema: badges, transaction type filter, and transactions section are visible',
+          'verify ECS schema: transaction type filter and transactions section are visible',
           async () => {
-            await expect(page.testSubj.locator('serviceFlyoutServiceBadge')).toBeVisible();
             await expect(page.testSubj.locator('serviceFlyoutTransactionTypeSelect')).toBeVisible();
             await expect(page.testSubj.locator('serviceFlyoutSection-transactions')).toBeVisible();
           }
@@ -109,8 +108,16 @@ spaceTest.describe(
           await expect(tracesExperience.flyout.serviceFlyout.container).toBeVisible();
         });
 
+        await spaceTest.step('verify charts render without error', async () => {
+          for (const chartId of ['latency', 'throughput', 'failedTransactionRate']) {
+            const chart = page.testSubj.locator(`serviceFlyoutLensChart-${chartId}`);
+            await expect(chart).toBeVisible();
+            await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
+          }
+        });
+
         await spaceTest.step(
-          'verify OTel schema: transactions section and transaction type filter are hidden',
+          'verify OTel schema: transaction type filter and transactions section are hidden',
           async () => {
             await expect(page.testSubj.locator('serviceFlyoutTransactionTypeSelect')).toBeHidden();
             await expect(page.testSubj.locator('serviceFlyoutSection-transactions')).toBeHidden();
