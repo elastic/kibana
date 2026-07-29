@@ -4625,6 +4625,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/agent-builder-skill-loader@link:x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader":
+  version "0.0.0"
+  uid ""
+
 "@kbn/agent-builder-sml-plugin@link:x-pack/platform/plugins/shared/agent_builder_sml":
   version "0.0.0"
   uid ""
@@ -7126,6 +7130,10 @@
   uid ""
 
 "@kbn/evals-suite-alert-analysis-workflow@link:x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow":
+  version "0.0.0"
+  uid ""
+
+"@kbn/evals-suite-alerting-v2@link:x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2":
   version "0.0.0"
   uid ""
 
