@@ -41,9 +41,12 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
+    const { getByTestId, getByText } = renderWithI18n(<EditFilterListHeader {...props} />);
 
-    expect(container).toMatchSnapshot();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Create new filter list');
+    expect(getByTestId('mlNewFilterListIdInput')).toHaveValue('');
+    expect(getByText('Add a description')).toBeInTheDocument();
+    expect(getByText('0 items in total')).toBeInTheDocument();
   });
 
   test('renders the header when creating a new filter list with ID, description and items set', () => {
@@ -55,9 +58,12 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 15,
     };
 
-    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
+    const { getByTestId, getByText } = renderWithI18n(<EditFilterListHeader {...props} />);
 
-    expect(container).toMatchSnapshot();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Create new filter list');
+    expect(getByTestId('mlNewFilterListIdInput')).toHaveValue('test_filter_list');
+    expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent('A test filter list');
+    expect(getByText('15 items in total')).toBeInTheDocument();
   });
 
   test('renders the header when editing an existing unused filter list with no description or items', () => {
@@ -67,9 +73,15 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
+    const { getByTestId, getByText, queryByTestId } = renderWithI18n(
+      <EditFilterListHeader {...props} />
+    );
 
-    expect(container).toMatchSnapshot();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Filter list test_filter_list');
+    expect(queryByTestId('mlNewFilterListIdInput')).not.toBeInTheDocument();
+    expect(getByText('Add a description')).toBeInTheDocument();
+    expect(getByText('0 items in total')).toBeInTheDocument();
+    expect(getByText('This filter list is not used by any jobs.')).toBeInTheDocument();
   });
 
   test('renders the header when editing an existing used filter list with description and items set', () => {
@@ -84,8 +96,14 @@ describe('EditFilterListHeader', () => {
       },
     };
 
-    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
+    const { getByRole, getByTestId, getByText } = renderWithI18n(
+      <EditFilterListHeader {...props} />
+    );
 
-    expect(container).toMatchSnapshot();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Filter list test_filter_list');
+    expect(getByTestId('mlNewFilterListDescriptionText')).toHaveTextContent('A test filter list');
+    expect(getByText('15 items in total')).toBeInTheDocument();
+    expect(getByRole('button', { name: '1 detector' })).toBeInTheDocument();
+    expect(getByRole('button', { name: '1 job' })).toBeInTheDocument();
   });
 });
