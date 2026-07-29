@@ -10,6 +10,7 @@ import type { EuiTextProps } from '@elastic/eui';
 import { EuiTextColor, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ProcessTree } from './components/process_tree';
 import { ProcessResult } from './components/process_result';
 import { RESPONSE_ACTION_STATUS } from '../../common/translations';
 import { EndpointActionFailureMessage } from '../endpoint_action_failure_message';
@@ -102,15 +103,25 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                       values={{ count: hostActionOutput.descendants.length }}
                     />
 
-                    {hostActionOutput.descendants.map((descendantResult) => {
-                      return (
-                        <ProcessResult
-                          command={command}
-                          processResult={descendantResult}
-                          key={`pid-${descendantResult.pid}`}
-                        />
-                      );
-                    })}
+                    {
+                      // FIXME:PT delete once tree view is implemented
+                      hostActionOutput.descendants.map((descendantResult) => {
+                        return (
+                          <ProcessResult
+                            command={command}
+                            processResult={descendantResult}
+                            key={`pid-${descendantResult.pid}`}
+                          />
+                        );
+                      })
+                    }
+
+                    {hostActionOutput.descendants && (
+                      <ProcessTree
+                        processList={hostActionOutput.descendants}
+                        data-test-subj={getTestId(`${agentId}-processTree`)}
+                      />
+                    )}
                   </div>
                 )}
               </div>
