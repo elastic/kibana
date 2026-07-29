@@ -83,7 +83,7 @@ export const chartTypeRegistry: Record<SupportedChartType, ChartTypeRegistryEntr
       },
       config: {
         perChartTypeRules: [
-          "Align metric values to the right by default: set 'styling.primary.value.alignment' to 'right' and, when secondary metrics are present, set 'styling.secondary.value.alignment' to 'right'. Use 'left' or 'center' only when the user explicitly requests that value alignment.",
+          'Prefer right-aligned metric values. Use left/center only when the user asks.',
         ],
         options: {
           coloring: {
