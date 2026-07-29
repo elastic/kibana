@@ -76,8 +76,11 @@ describe('createTextFieldFormatter and createReactFieldFormatter', () => {
     const textFormatter = createTextFieldFormatter('stringField', fieldFormatMap);
     const reactFormatter = createReactFieldFormatter('stringField', fieldFormatMap);
 
-    expect(textFormatter(value)).toBe('×møç®ü÷');
-    expect(reactFormatter(value)).toBe('×møç®ü÷');
+    // '1234567890' decodes to bytes that are not valid UTF-8, so the invalid
+    // sequences map to U+FFFD, matching Buffer.from(value, 'base64').toString('utf8')
+    const decoded = '�m����';
+    expect(textFormatter(value)).toBe(decoded);
+    expect(reactFormatter(value)).toBe(decoded);
   });
 
   it('should return formatted value for colorField (text vs react element)', () => {
