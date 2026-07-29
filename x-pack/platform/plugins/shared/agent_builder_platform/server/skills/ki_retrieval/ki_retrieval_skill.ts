@@ -18,8 +18,5 @@ export const kiRetrievalSkill = defineSkillType({
     'Retrieve context from a Context Engine AI Index at query time using keyword, semantic, or hybrid (FORK+FUSE) ES|QL search.',
   content,
   referencedContent: [],
-  getRegistryTools: () => [
-    platformCoreTools.executeEsql,
-    platformCoreTools.listIndices,
-  ],
+  getRegistryTools: () => [platformCoreTools.executeEsql, platformCoreTools.listIndices],
 });

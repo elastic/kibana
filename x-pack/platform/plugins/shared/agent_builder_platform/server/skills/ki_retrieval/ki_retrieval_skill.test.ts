@@ -42,9 +42,6 @@ describe('kiRetrievalSkill', () => {
   it('binds the three required registry tools', async () => {
     const toolIds = (await kiRetrievalSkill.getRegistryTools?.()) ?? [];
 
-    expect(toolIds).toEqual([
-      platformCoreTools.executeEsql,
-      platformCoreTools.listIndices,
-    ]);
+    expect(toolIds).toEqual([platformCoreTools.executeEsql, platformCoreTools.listIndices]);
   });
 });
