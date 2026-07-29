@@ -139,6 +139,31 @@ describe('buildScheduledResponsesQuery', () => {
 
       expect(filters).toContainEqual({ term: { space_id: 'security' } });
     });
+
+    test('requires an exact default space_id when CPS is enabled', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: defaultSpaceId, cpsEnabled: true });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ term: { space_id: 'default' } });
+      expect(filters).not.toContainEqual(
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            should: expect.arrayContaining([
+              { bool: { must_not: { exists: { field: 'space_id' } } } },
+            ]),
+          }),
+        })
+      );
+    });
+
+    test('leaves the non-default space filter unchanged when CPS is enabled', () => {
+      const result = buildScheduledResponsesQuery({ spaceId: 'security', cpsEnabled: true });
+      const query = result.body.query as Record<string, unknown>;
+      const filters = (query.bool as Record<string, unknown>).filter as unknown[];
+
+      expect(filters).toContainEqual({ term: { space_id: 'security' } });
+    });
   });
 
   describe('cursor filter', () => {

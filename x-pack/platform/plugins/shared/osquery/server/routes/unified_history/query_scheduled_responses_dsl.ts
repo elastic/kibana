@@ -18,6 +18,7 @@ interface ScheduledResponsesQueryOptions {
   startDate?: string;
   endDate?: string;
   sortDirection?: 'asc' | 'desc';
+  cpsEnabled?: boolean;
 }
 
 export const buildScheduledResponsesQuery = ({
@@ -30,12 +31,18 @@ export const buildScheduledResponsesQuery = ({
   startDate,
   endDate,
   sortDirection = 'desc',
+  cpsEnabled = false,
 }: ScheduledResponsesQueryOptions): {
   body: Record<string, unknown>;
 } => {
+  // Unlike every other osquery read, this aggregation is not bound to an action
+  // or schedule id the caller already had access to, so it is the one query
+  // where a field-less document fanned in from a linked project could surface.
   const filters: estypes.QueryDslQueryContainer[] = [
     { exists: { field: 'schedule_id' } },
-    buildSpaceIdFilter(spaceId) as estypes.QueryDslQueryContainer,
+    buildSpaceIdFilter(spaceId, {
+      matchMissingSpaceId: !cpsEnabled,
+    }) as estypes.QueryDslQueryContainer,
   ];
 
   if (packIds !== undefined || scheduleIds !== undefined) {

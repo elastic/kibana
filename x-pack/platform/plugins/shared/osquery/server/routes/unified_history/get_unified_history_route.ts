@@ -205,6 +205,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                 startDate,
                 endDate,
                 sortDirection,
+                cpsEnabled: osqueryContext.cpsEnabled,
               })
             : undefined;
 
