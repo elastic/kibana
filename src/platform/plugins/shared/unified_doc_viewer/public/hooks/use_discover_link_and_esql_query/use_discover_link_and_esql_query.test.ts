@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { where } from '@kbn/esql-composer';
 import { useDiscoverLinkAndEsqlQuery } from '.';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
+import { ESQL_NULLIFY_UNMAPPED_FIELDS } from '../../utils/esql_nullify_unmapped_fields';
 
 jest.mock('../use_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: jest.fn(),
@@ -48,11 +49,11 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     expect(generateDiscoverLink).toHaveBeenCalledWith(whereClause);
     expect(result.current.discoverUrl).toBe(DISCOVER_URL);
     expect(result.current.esqlQueryString).toBe(
-      'SET unmapped_fields="nullify"; FROM traces-* | WHERE trace.id == "abc123"'
+      `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM traces-* | WHERE trace.id == "abc123"`
     );
   });
 
-  it('prepends the unmapped_fields nullify SET command as a single line so unmapped columns do not fail', () => {
+  it('prepends the unmapped_fields NULLIFY SET command as a single line so unmapped columns do not fail', () => {
     const generateDiscoverLink = jest.fn(() => 'http://discover/url');
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
@@ -65,7 +66,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
 
     // Discover drops the header command when the query is multi-line, so it must
     // be emitted as a single line to survive the "Open in Discover tab" action.
-    expect(esqlQueryString?.startsWith('SET unmapped_fields="nullify"; ')).toBe(true);
+    expect(esqlQueryString?.startsWith(`${ESQL_NULLIFY_UNMAPPED_FIELDS} `)).toBe(true);
     expect(esqlQueryString).not.toContain('\n');
     expect(esqlQueryString).toContain('FROM logs-*');
     expect(esqlQueryString).toContain('error.culprit == "Main.Cache.func3"');

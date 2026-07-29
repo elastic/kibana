@@ -14,7 +14,7 @@ import {
 } from './esql_nullify_unmapped_fields';
 
 describe('withNullifyUnmappedFields', () => {
-  it('prepends the nullify SET header separated by a space', () => {
+  it('prepends the NULLIFY SET header separated by a space', () => {
     expect(withNullifyUnmappedFields('FROM logs-*')).toBe(
       `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM logs-*`
     );
@@ -31,8 +31,30 @@ describe('withNullifyUnmappedFields', () => {
     const result = withNullifyUnmappedFields(multiline);
 
     expect(result).toBe(
-      'SET unmapped_fields="nullify"; FROM logs-* | WHERE error.culprit == "Main.Cache.func3"'
+      `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM logs-* | WHERE error.culprit == "Main.Cache.func3"`
     );
     expect(result).not.toContain('\n');
+  });
+
+  it('is idempotent — does not double-prepend the SET directive', () => {
+    const once = withNullifyUnmappedFields('FROM logs-*');
+    expect(withNullifyUnmappedFields(once)).toBe(once);
+  });
+
+  it('single-line guarantee holds for a complex multi-command query', () => {
+    const multiline = from('logs-*')
+      .pipe(
+        where('error.culprit == ?culprit', { culprit: 'Main.Cache.func3' }),
+        where('service.name == ?service', { service: 'my-svc' })
+      )
+      .toString();
+
+    expect(multiline).toContain('\n');
+
+    const result = withNullifyUnmappedFields(multiline);
+
+    // Regression: single-line output must survive even with multiple piped commands.
+    expect(result).not.toContain('\n');
+    expect(result.startsWith(ESQL_NULLIFY_UNMAPPED_FIELDS)).toBe(true);
   });
 });

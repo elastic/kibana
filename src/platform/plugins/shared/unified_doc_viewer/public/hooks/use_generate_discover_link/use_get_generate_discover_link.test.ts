@@ -10,6 +10,7 @@
 import { renderHook } from '@testing-library/react';
 import { where } from '@kbn/esql-composer';
 import { useGetGenerateDiscoverLink } from '.';
+import { ESQL_NULLIFY_UNMAPPED_FIELDS } from '../../utils/esql_nullify_unmapped_fields';
 
 jest.mock('../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
@@ -99,14 +100,14 @@ describe('useGetGenerateDiscoverLink', () => {
     expect(mockGetRedirectUrl).toHaveBeenCalled();
     const esql = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
-    // The query is emitted as a single line with the nullify SET header so that
+    // The query is emitted as a single line with the NULLIFY SET header so that
     // Discover keeps the directive when opening the deep link.
     expect(esql).toBe(
-      'SET unmapped_fields="nullify"; FROM traces-* | WHERE trace.id == "abc123" AND exception.message == "Test error"'
+      `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM traces-* | WHERE trace.id == "abc123" AND exception.message == "Test error"`
     );
   });
 
-  it('prepends the nullify SET header as a single line even without a whereClause', () => {
+  it('prepends the NULLIFY SET header as a single line even without a whereClause', () => {
     const { result } = renderHook(() => useGetGenerateDiscoverLink({ indexPattern: 'traces-*' }));
     const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
@@ -115,7 +116,7 @@ describe('useGetGenerateDiscoverLink', () => {
 
     const esql = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
-    expect(esql).toBe('SET unmapped_fields="nullify"; FROM traces-*');
+    expect(esql).toBe(`${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM traces-*`);
     expect(esql).not.toContain('\n');
   });
 
