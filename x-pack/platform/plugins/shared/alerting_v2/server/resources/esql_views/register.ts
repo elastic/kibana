@@ -15,6 +15,8 @@ import type { ResourceManagerContract } from '../../lib/services/resource_servic
 import { getAlertEventsViewDefinition } from './alert_events';
 import { getAlertActionsViewDefinition } from './alert_actions';
 import { getAlertEpisodesViewDefinition } from './alert_episodes';
+import { getAlertEpisodesEnrichedViewDefinition } from './alert_episodes_enriched';
+import { getClassicAlertsViewDefinition } from './classic_alerts';
 
 export interface RegisterEsqlViewsOptions {
   resourceManager: ResourceManagerContract;
@@ -39,5 +41,7 @@ function getEsqlViewDefinitions(): EsqlViewDefinition[] {
     getAlertEventsViewDefinition(),
     getAlertActionsViewDefinition(),
     getAlertEpisodesViewDefinition(),
+    getAlertEpisodesEnrichedViewDefinition(),
+    getClassicAlertsViewDefinition(),
   ];
 }

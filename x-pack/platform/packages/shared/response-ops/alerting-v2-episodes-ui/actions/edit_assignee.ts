@@ -18,7 +18,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { successOrPartialToast } from './helpers';
+import { filterV2Episodes, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openAssigneeFlyout } from '../components/assignee_flyout';
 
@@ -37,12 +37,16 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
   order: 50,
   displayName: i18n.EDIT_ASSIGNEE,
   iconType: 'user',
-  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
+  isCompatible: ({ episodes }: EpisodeActionContext) => filterV2Episodes(episodes).length > 0,
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
+    const v2Episodes = filterV2Episodes(episodes);
+    if (!v2Episodes.length) return;
+
     // For a single-row invocation, pre-populate the picker with the episode's
     // current assignee. For bulk (>1), leave it blank — there's no shared
     // "current" value across the selection.
-    const lastAssigneeUid = episodes.length === 1 ? episodes[0].last_assignee_uid ?? null : null;
+    const lastAssigneeUid =
+      v2Episodes.length === 1 ? v2Episodes[0].last_assignee_uid ?? null : null;
     const result = await openAssigneeFlyout(
       deps.overlays,
       deps.rendering,
@@ -54,12 +58,12 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
           docLinks: deps.docLinks,
         },
       },
-      { lastAssigneeUid, episodeCount: episodes.length }
+      { lastAssigneeUid, episodeCount: v2Episodes.length }
     );
     // `undefined` means cancelled; `null` means "clear assignee".
     if (result === undefined) return;
 
-    const items: BulkCreateAlertActionBody = episodes.map((ep) => ({
+    const items: BulkCreateAlertActionBody = v2Episodes.map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
       episode_id: ep['episode.id'],

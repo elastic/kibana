@@ -62,6 +62,39 @@ describe('createAckAction', () => {
     expect(createAckAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
+  it('not compatible when all episodes are classic (v1)', () => {
+    expect(
+      createAckAction(makeDeps()).isCompatible({
+        episodes: [makeEpisode({ _is_v1: true })],
+      })
+    ).toBe(false);
+  });
+
+  it('compatible when mixed selection has an actionable v2 episode', () => {
+    expect(
+      createAckAction(makeDeps()).isCompatible({
+        episodes: [
+          makeEpisode({ _is_v1: true, last_ack_action: 'unack' }),
+          makeEpisode({ 'episode.id': 'e2', last_ack_action: 'unack' }),
+        ],
+      })
+    ).toBe(true);
+  });
+
+  it('execute: skips classic episodes when POSTing ACK items', async () => {
+    const deps = makeDeps();
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    await createAckAction(deps).execute({
+      episodes: [
+        makeEpisode({ 'episode.id': 'v1', group_hash: 'g1', _is_v1: true }),
+        makeEpisode({ 'episode.id': 'v2', group_hash: 'g2' }),
+      ],
+    });
+    expect(bulk.bulkCreateAlertActions).toHaveBeenCalledWith(deps.http, [
+      { group_hash: 'g2', action_type: 'ack', episode_id: 'v2' },
+    ]);
+  });
+
   it('execute: POSTs per-episode ACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 2, errors: [] });

@@ -27,10 +27,21 @@ export class ESQLViewInitializer implements IResourceInitializer {
 
     this.logger.debug(`ESQLViewInitializer: Initializing view [${name}].`);
 
-    await this.esClient.transport.request({
-      method: 'PUT',
-      path: `/_query/view/${name}`,
-      body: { query },
-    });
+    try {
+      // Encode the view name so characters like `$` are valid in the HTTP path.
+      // Dev Tools does this automatically; a raw `$` in `transport.request` can fail.
+      await this.esClient.transport.request({
+        method: 'PUT',
+        path: `/_query/view/${encodeURIComponent(name)}`,
+        body: { query },
+      });
+    } catch (error) {
+      this.logger.error(
+        `ESQLViewInitializer: Failed to create ES|QL view [${name}]: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      throw error;
+    }
   }
 }

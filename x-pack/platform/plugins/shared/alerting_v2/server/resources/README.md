@@ -184,6 +184,8 @@ ES|QL views are registered as `optional: true`, which lets Kibana start even on 
 | `view:rule-events` | `$.rule-events` | Direct view of `.rule-events` |
 | `view:alert-actions` | `$.alert-actions` | Direct view of `.alert-actions` |
 | `view:alert-episodes` | `$.alert-episodes` | Episode-oriented projection over rule events |
+| `view:alert-episodes-enriched` | `$.alert-episodes-enriched` | Episodes with space-keyed `.alert-actions` joins (`BY …, space_id`); caller still filters `space_id` |
+| `view:alerts-v1` | `$.alerts-v1` | Classic (v1) alerts projected to episode-shaped columns (KEEP includes authz/space fields for list RBAC) |
 
 Definitions live in `esql_views/`. The richest example is `esql_views/alert_episodes.ts`.
 

@@ -6,13 +6,13 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
-import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
+import { fetchUnifiedAlertingEpisodes } from '../apis/fetch_unified_alerting_episodes';
 import {
   type AlertEpisode,
   type AlertEpisodeEsqlRow,
@@ -27,15 +27,16 @@ export interface UseFetchAlertingEpisodesQueryOptions {
   sortState?: EpisodesSortState;
   timeRange?: TimeRange | null;
   services: UseAlertingEpisodesDataViewOptions['services'] & {
-    expressions: ExpressionsStart;
+    http: HttpStart;
   };
 }
 
 const DEFAULT_SORT: EpisodesSortState = { sortField: '@timestamp', sortDirection: 'desc' };
 
 /**
- * Hook to fetch alerting episodes data with filters and sort.
- * Returns an ad-hoc data view too, constructed from the query columns.
+ * Hook to fetch alerting episodes (v2 + classic) with filters and sort via the
+ * unified server list API. Returns an ad-hoc data view constructed from the
+ * query columns.
  */
 export const useFetchAlertingEpisodesQuery = ({
   pageSize,
@@ -59,8 +60,7 @@ export const useFetchAlertingEpisodesQuery = ({
     enabled: dataView != null,
     queryKey,
     queryFn: ({ signal: abortSignal }) =>
-      fetchAlertingEpisodes({
-        spaceId,
+      fetchUnifiedAlertingEpisodes({
         abortSignal,
         pageSize,
         services,

@@ -13,7 +13,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { successOrPartialToast } from './helpers';
+import { filterV2Episodes, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 
 export interface UnackActionDeps {
@@ -26,10 +26,12 @@ export const createUnackAction = (deps: UnackActionDeps): EpisodeAction => ({
   order: 11,
   displayName: i18n.UNACK,
   iconType: 'crossInCircle',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 && episodes.some((ep) => ep.last_ack_action === 'ack'),
+  isCompatible: ({ episodes }: EpisodeActionContext) => {
+    const v2Episodes = filterV2Episodes(episodes);
+    return v2Episodes.length > 0 && v2Episodes.some((ep) => ep.last_ack_action === 'ack');
+  },
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = episodes.map((ep) => ({
+    const items: BulkCreateAlertActionBody = filterV2Episodes(episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.UNACK,
       episode_id: ep['episode.id'],

@@ -50,6 +50,14 @@ describe('createEditTagsAction', () => {
     expect(createEditTagsAction(makeDeps()).isCompatible({ episodes: [] })).toBe(false);
   });
 
+  it('not compatible when all episodes are classic (v1)', () => {
+    expect(
+      createEditTagsAction(makeDeps()).isCompatible({
+        episodes: [makeEpisode({ _is_v1: true } as any)],
+      })
+    ).toBe(false);
+  });
+
   it('execute: cancelled flyout (resolves undefined) is a no-op', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(undefined);

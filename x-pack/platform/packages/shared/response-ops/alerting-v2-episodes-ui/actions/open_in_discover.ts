@@ -7,6 +7,7 @@
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { EpisodeAction } from './types';
+import { isV1AlertEpisode } from './helpers';
 import * as i18n from './translations';
 
 export const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
@@ -28,7 +29,7 @@ export const createOpenInDiscoverAction = (deps: OpenInDiscoverActionDeps): Epis
   order: 50,
   displayName: i18n.OPEN_IN_DISCOVER,
   iconType: 'discoverApp',
-  isCompatible: ({ episodes }) => episodes.length === 1,
+  isCompatible: ({ episodes }) => episodes.length === 1 && !isV1AlertEpisode(episodes[0]),
   execute: async ({ episodes }) => {
     const [ep] = episodes;
     const href = await deps.getDiscoverHref({
