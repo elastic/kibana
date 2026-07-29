@@ -11,6 +11,12 @@ behind a `window.__et` bridge, so a flow can inject it once (and again after
 each `browser_navigate`) instead of pasting all three scripts at every
 checklist step. See `__tests__/` below for how it's generated and verified.
 
+`action-scoped-collector.mjs` is an experimental, **shadow-only** alternative
+network/console classifier (`collector_mode: shadow`, default `legacy` —
+never drives findings). See `action-scoped-collector.md` for the design and
+`action-scoped-collector-spike.md` for the one-time manual capability check
+required before enabling it in any real session.
+
 ## Running the Python tests
 
 ```bash
@@ -87,3 +93,39 @@ inside a normal `yarn kbn bootstrap`'d checkout.
 This suite is also not part of Kibana CI (same reasoning as the Python
 suite above). Run it locally before sending a change that touches any
 detector script or `inject-detectors.js`.
+
+## `action-scoped-collector.mjs` and its test suite
+
+```bash
+cd x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts
+node __tests__/action-scoped-collector.test.mjs
+```
+
+Pure reducer, no browser dependency — `reduceAction(events, priorState)`
+classifies pre-collected `{network, console, dom}` events (see the module's
+own header comment for the exact shape) into the same
+`{level1, level2, level3, suppressed}` convention the other detectors use,
+plus a `state` object to carry cumulative history (e.g. a pending request
+that's still pending several checklist steps later) between calls in the
+same flow. Also runnable as a CLI (`node action-scoped-collector.mjs
+<events.json> [<prior-state.json>]`) — `phases/2-explore.md` invokes it this
+way in shadow mode.
+
+The actual event collection happens elsewhere: Playwright-side, inside a
+`browser_run_code_unsafe` call, because that sandbox has no `require`/`import`
+and can't execute this module directly. See `action-scoped-collector.md` for
+that bridge script, and `action-scoped-collector-spike.md` for the manual,
+one-time verification that the bridge's core assumption (listeners installed
+in one tool call are still there in a later, separate one) actually holds
+against your MCP setup — required reading before ever setting
+`collector_mode: shadow`.
+
+`action-scoped-collector.test.mjs` covers: silent 5xx with no matching
+console error, pending-vs-stuck-vs-abandoned-by-navigation classification,
+meaningfully different query strings never being grouped as duplicates,
+concurrent duplicate calls vs. an intentional retry-after-failure vs. the
+same call repeated far apart, known-noise (polling) suppression that still
+lets a genuinely failing polling endpoint through, deterministic
+spinner-timing escalation, URL redaction (including a parity check against
+the bridge doc's own inline copy of the same logic, since that copy can't
+`import` this module either), and a CLI-vs-module classification round trip.

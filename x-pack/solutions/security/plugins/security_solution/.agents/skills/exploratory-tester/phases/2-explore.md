@@ -113,6 +113,12 @@ date -u +"%Y-%m-%dT%H:%M:%SZ"   # record flow start time
 
 Record end time when checklist completes or timebox fires. Write both into the findings file header (see `templates/finding-format.md`).
 
+### Shadow collector setup — only if `config.json → collector_mode` is `"shadow"`
+
+**Skip this entire subsection, and every "Shadow collector" step below, whenever `collector_mode` is `"legacy"` (the default).** Nothing here ever changes what gets logged as a finding — see `scripts/action-scoped-collector.md` before using this.
+
+Before the flow's first navigation, install the bridge via `browser_run_code_unsafe` using the "Install" snippet in `scripts/action-scoped-collector.md`. If the tool is unavailable or the call errors, write `{"available": false, "reason": "<error>"}` to `$SESSION_DIR/collector-diffs/flow<N>-status.json` and treat shadow collection as unavailable for this entire flow — proceed with the checklist exactly as `collector_mode: legacy` would, with no further shadow steps or retries. This is the runtime self-test described in `action-scoped-collector.md` — it is not a substitute for having already run `scripts/action-scoped-collector-spike.md` once against this MCP setup.
+
 ### Mandatory checklist
 
 | Step | What to attempt |
@@ -201,6 +207,21 @@ Call `browser_evaluate(function: "() => window.__et.dom()")`. Log each returned 
    // Replace:  )(/*REQUESTS*/)
    // With:     )([{"method":"GET","url":"https://..."}, ...])
    ```
+
+---
+
+**Shadow collector — only if `collector_mode: shadow` and "Shadow collector setup" above did not mark it unavailable:**
+
+1. Drain via `browser_run_code_unsafe` using the "Drain" snippet in `scripts/action-scoped-collector.md`. If this call errors or returns an unexpected shape, write `{"available": false, "reason": "<error>"}` to `$SESSION_DIR/collector-diffs/flow<N>-status.json` and stop running shadow steps for the rest of this flow — do not retry per-step.
+2. Save the drained JSON to `$SESSION_DIR/tmp/collector-events-flow<N>-step<M>.json` — adding `dom: { spinnerVisibleForMs: <ms since this action started, if Detector A reported spinner_present> }` — then run:
+   ```bash
+   node x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts/action-scoped-collector.mjs \
+     "$SESSION_DIR/tmp/collector-events-flow<N>-step<M>.json" \
+     "$SESSION_DIR/tmp/collector-state-flow<N>.json"   # omit the state arg on this flow's first checklist step
+   ```
+3. Overwrite `$SESSION_DIR/tmp/collector-state-flow<N>.json` with the command's `state` field, for the next checklist step in this same flow.
+4. Diff the command's `level1`/`level2`/`level3` against what Detectors A/B/C already logged for this step (by `type` + `path`/`text`) and write `{legacy: [...], collector: [...], onlyInLegacy: [...], onlyInCollector: [...]}` to `$SESSION_DIR/collector-diffs/flow<N>-step<M>.json`.
+5. **Never log a finding from this collector's output.** It exists to be reviewed for parity after the session — legacy Detectors A/B/C remain the only source of findings, per `scripts/action-scoped-collector.md`.
 
 ---
 
@@ -298,6 +319,7 @@ All navigation must stay within this flow's space (`/s/<flow.space_id>/`). In pa
 - `browser_navigate` times out when a `beforeunload` dialog is blocking (e.g. Timeline with unsaved changes). If navigation times out, call `browser_snapshot`. If a dialog is present, call `browser_handle_dialog(accept: true)` then retry.
 - After 2 failed attempts to type into a Monaco editor, log "partial interaction — Monaco editor prevented automated input" and move on.
 - Every `browser_navigate` — including retries after the two pitfalls above — clears `window.__et`. Reinject the detector bridge (see "Detector bridge setup" above) before running any detector on the new page.
+- **Only if `collector_mode: shadow`:** the shadow collector's bridge does *not* need reinjecting after navigation — unlike `window.__et` (in-page state, wiped by every navigation), it lives on the Playwright-side `page` object across the whole flow. Reinstalling it anyway is harmless (the install snippet is idempotent) but unnecessary.
 
 ### Timebox outcomes
 

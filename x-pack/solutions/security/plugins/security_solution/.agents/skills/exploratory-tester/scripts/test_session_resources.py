@@ -4180,6 +4180,107 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         self.assertIn("GENERATED FILE", injector)
         self.assertIn("window.__et", injector)
 
+    def test_explore_phase_wires_the_shadow_collector_off_by_default_with_self_test(self):
+        # Task 4 (action-scoped collector): collector_mode must default to
+        # "legacy" everywhere it is introduced, the shadow path must never be
+        # allowed to drive findings, and a runtime self-test must gate shadow
+        # collection behind an automatic fallback to legacy-only behavior —
+        # not a hard failure — when the bridge is unavailable or errors.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        example_yaml = (TEMPLATE_DIR / "session.example.yaml").read_text(
+            encoding="utf-8"
+        )
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        spike_doc = (SCRIPT_DIR / "action-scoped-collector-spike.md").read_text(
+            encoding="utf-8"
+        )
+
+        # Default is legacy — explicit everywhere the field is introduced.
+        self.assertIn('"collector_mode"', setup)
+        self.assertIn("default legacy", setup)
+        self.assertIn(
+            "Never default to",
+            setup,
+            "expected an explicit instruction against the model enabling shadow "
+            "mode on its own initiative",
+        )
+        self.assertIn("collector_mode: legacy", example_yaml)
+
+        # The shadow setup/self-test section must exist and precede the
+        # per-step checklist, same ordering guarantee as the detector bridge.
+        self.assertIn("Shadow collector setup", explore)
+        setup_idx = explore.index("Shadow collector setup")
+        checklist_idx = explore.index("### Mandatory checklist")
+        self.assertLess(
+            setup_idx,
+            checklist_idx,
+            "shadow collector setup must precede the mandatory checklist, not "
+            "live inside the per-step hot path",
+        )
+
+        # A failed/unavailable bridge must fall back silently to legacy-only
+        # behavior for the rest of the flow, never block or retry per-step.
+        self.assertIn('"available": false', explore)
+        self.assertIn(
+            "treat shadow collection as unavailable for this entire flow",
+            explore,
+        )
+        self.assertIn("do not retry per-step", explore)
+
+        # The collector must never be allowed to drive findings — this is
+        # the single most important invariant of the whole feature.
+        self.assertIn("Never log a finding from this collector's output", explore)
+        self.assertIn(
+            "legacy Detectors A/B/C remain the only source of findings",
+            explore,
+        )
+
+        # Every real session must skip all of this when collector_mode is
+        # legacy (the default) — verify the literal skip instruction exists.
+        self.assertIn(
+            'Skip this entire subsection, and every "Shadow collector" step '
+            'below, whenever `collector_mode` is `"legacy"`',
+            explore,
+        )
+
+        # The one-time manual capability spike must exist, be explicitly
+        # required before real use, and document a concrete decision rule —
+        # not just "verify it works" hand-waving.
+        self.assertIn("browser_run_code_unsafe", spike_doc)
+        self.assertIn("PASS", spike_doc)
+        self.assertIn("FAIL", spike_doc)
+        self.assertIn(
+            "Do not set `collector_mode: shadow` in any real session until "
+            "this procedure has been run once",
+            spike_doc,
+        )
+
+        # The bridge doc must document both the install and drain snippets,
+        # never mention persisting a request/response body, and cross-link
+        # the spike doc rather than silently assuming the capability.
+        self.assertIn("action-scoped-collector-spike.md", collector_doc)
+        self.assertIn("page.on('request'", collector_doc)
+        self.assertIn("page.on('requestfinished'", collector_doc)
+        self.assertIn("page.on('requestfailed'", collector_doc)
+        self.assertIn("page.on('framenavigated'", collector_doc)
+        self.assertNotIn("res.text()", collector_doc)
+        self.assertNotIn("res.json()", collector_doc)
+        self.assertNotIn("req.postData", collector_doc)
+
+        # The pure reducer this all depends on must actually exist as an ESM
+        # module (not the shared plugin package.json's CommonJS default),
+        # and export the two functions the doc and tests both rely on.
+        reducer_path = SCRIPT_DIR / "action-scoped-collector.mjs"
+        self.assertTrue(
+            reducer_path.exists(), "scripts/action-scoped-collector.mjs must exist"
+        )
+        reducer = reducer_path.read_text(encoding="utf-8")
+        self.assertIn("export function reduceAction", reducer)
+        self.assertIn("export function redactUrl", reducer)
+
     def test_head_probes_do_not_wait_for_a_response_body(self):
         # curl -X HEAD keeps waiting for a body that a HEAD response never
         # sends, so it stalls for the whole --max-time on keep-alive servers.
