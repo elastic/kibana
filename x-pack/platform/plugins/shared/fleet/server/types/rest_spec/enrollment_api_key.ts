@@ -88,6 +88,7 @@ export const PostEnrollmentAPIKeyRequestSchema = {
       policy_id: schema.string(),
       expiration: schema.maybe(
         schema.string({
+          maxLength: 20,
           meta: {
             description:
               'The expiration time for the enrollment token, expressed as a duration (e.g. 7d, 24h, 30m). By default, enrollment tokens never expire.',

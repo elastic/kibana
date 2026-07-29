@@ -128,7 +128,7 @@ describe('NewEnrollmentTokenModal', () => {
       );
     });
     expect(
-      results.queryByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m)')
+      results.queryByText('Expiration must be a valid duration (e.g. 7d, 24h, 30m, 60s)')
     ).toBeNull();
   });
 

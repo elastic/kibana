@@ -49,5 +49,9 @@ describe('PostEnrollmentAPIKeyRequestSchema', () => {
         expect(() => validate(value)).toThrow('expiration must be a valid duration');
       });
     });
+
+    it('rejects values exceeding maxLength of 20 characters', () => {
+      expect(() => validate('1'.repeat(20) + 'd')).toThrow();
+    });
   });
 });
