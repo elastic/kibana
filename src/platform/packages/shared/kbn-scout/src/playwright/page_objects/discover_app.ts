@@ -1125,12 +1125,12 @@ export class DiscoverApp {
     return Promise.all([
       this.page.testSubj
         .locator('data-cascade')
-        .waitFor({ state: 'visible', timeout: 5_000 })
+        .waitFor({ state: 'visible', timeout: 1_000 })
         .then(() => true)
         .catch(() => false),
       this.page.testSubj
         .locator('discoverEnableCascadeLayoutSwitch')
-        .waitFor({ state: 'visible', timeout: 5_000 })
+        .waitFor({ state: 'visible', timeout: 1_000 })
         .then(() => true)
         .catch(() => false),
     ]).then(([hasCascade, hasSwitch]) => hasCascade && hasSwitch);
