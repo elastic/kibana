@@ -179,9 +179,17 @@ describe('String Format', () => {
       );
     });
 
-    test('highlights while applying short dots transform', () => {
-      expect(highlight('dot.notated.string', 'short', [`${hl('dot.notated.string')}`])).toBe(
-        mark(`d.n.string`)
+    test('highlights a sub-word match while applying the title case transform', () => {
+      expect(highlight('paymentprocessor', 'title', [`${hl('pay')}mentprocessor`])).toBe(
+        `${mark('Pay')}mentprocessor`
+      );
+    });
+
+    test('does not highlight short-dots values', () => {
+      // Short Dots removes characters, so a transformed snippet can no longer be located within
+      // the shortened value; highlighting is dropped rather than shown at the wrong position.
+      expect(highlight('dot.notated.string', 'short', [hl('dot.notated.string')])).toBe(
+        'd.n.string'
       );
     });
 
