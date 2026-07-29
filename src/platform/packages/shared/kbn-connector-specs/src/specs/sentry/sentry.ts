@@ -71,6 +71,10 @@ function formatSentryError(action: string, error: unknown): Error {
   );
 }
 
+// Issues and projects carry a lot of Sentry-internal noise (feature flags,
+// avatar metadata, sharing settings, ...), so their list/get actions trim to
+// a curated shape. Alert rules and events are already compact and purpose-
+// built for their action, so those return `response.data` as-is.
 const projectIssue = (issue: SentryIssue) => ({
   id: issue.id,
   shortId: issue.shortId,
@@ -183,9 +187,10 @@ export const Sentry: ConnectorSpec = {
         if (input.cursor) params.cursor = input.cursor;
         if (input.limit) params.limit = input.limit;
 
+        const baseUrl = buildBaseUrl(ctx);
         const url = input.project
-          ? `${buildBaseUrl(ctx)}/projects/${orgSlug}/${input.project}/issues/`
-          : `${buildBaseUrl(ctx)}/organizations/${orgSlug}/issues/`;
+          ? `${baseUrl}/projects/${orgSlug}/${input.project}/issues/`
+          : `${baseUrl}/organizations/${orgSlug}/issues/`;
 
         try {
           const response = await ctx.client.get<SentryIssue[]>(url, { params });
@@ -463,14 +468,20 @@ export const Sentry: ConnectorSpec = {
 
         try {
           // Sentry's rule-update endpoint replaces the whole rule rather than
-          // patching it, so unset required fields (name/actionMatch/conditions/
-          // actions) must be backfilled from the current rule before the PUT.
+          // patching it, so every persisted field — not just the ones this
+          // action lets callers set — must be backfilled from the current
+          // rule before the PUT, or an unrelated field like `name` would
+          // silently wipe filters/environment/owner on the existing rule.
           const current = await ctx.client.get<{
             name: string;
             actionMatch: string;
             conditions: unknown[];
             actions: unknown[];
             frequency?: number;
+            filters?: unknown[];
+            filterMatch?: string;
+            environment?: string | null;
+            owner?: string | null;
           }>(ruleUrl);
 
           const body = {
@@ -479,6 +490,10 @@ export const Sentry: ConnectorSpec = {
             conditions: input.conditions ?? current.data.conditions,
             actions: input.actions ?? current.data.actions,
             frequency: input.frequency ?? current.data.frequency,
+            filters: current.data.filters,
+            filterMatch: current.data.filterMatch,
+            environment: current.data.environment,
+            owner: current.data.owner,
           };
 
           const response = await ctx.client.put(ruleUrl, body);

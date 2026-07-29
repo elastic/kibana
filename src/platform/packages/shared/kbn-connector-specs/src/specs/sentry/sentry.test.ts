@@ -10,6 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Sentry } from './sentry';
+import { SentryBulkUpdateIssuesInputSchema } from './types';
 
 describe('Sentry', () => {
   const mockClient = {
@@ -237,6 +238,32 @@ describe('Sentry', () => {
   });
 
   describe('bulkUpdateIssues action', () => {
+    it('should reject input with neither status nor assignedTo', () => {
+      const result = SentryBulkUpdateIssuesInputSchema.safeParse({
+        project: 'backend',
+        issueIds: ['1'],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('should accept input with only status or only assignedTo', () => {
+      expect(
+        SentryBulkUpdateIssuesInputSchema.safeParse({
+          project: 'backend',
+          issueIds: ['1'],
+          status: 'resolved',
+        }).success
+      ).toBe(true);
+      expect(
+        SentryBulkUpdateIssuesInputSchema.safeParse({
+          project: 'backend',
+          issueIds: ['1'],
+          assignedTo: 'user@example.com',
+        }).success
+      ).toBe(true);
+    });
+
     it('should update status for multiple issue ids', async () => {
       mockClient.put.mockResolvedValue({ data: { status: 'resolved' } });
 
@@ -376,7 +403,45 @@ describe('Sentry', () => {
           conditions: [{ id: 'condition-a' }],
           actions: [{ id: 'action-a' }],
           frequency: 30,
+          filters: undefined,
+          filterMatch: undefined,
+          environment: undefined,
+          owner: undefined,
         }
+      );
+    });
+
+    it('should preserve filters, filterMatch, environment, and owner on a partial update', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          name: 'Existing rule',
+          actionMatch: 'any',
+          conditions: [{ id: 'condition-a' }],
+          actions: [{ id: 'action-a' }],
+          frequency: 30,
+          filters: [{ id: 'sentry.rules.filters.age_comparison.AgeComparisonFilter' }],
+          filterMatch: 'all',
+          environment: 'production',
+          owner: 'team:1',
+        },
+      });
+      mockClient.put.mockResolvedValue({ data: { id: 'r1' } });
+
+      await Sentry.actions.updateIssueAlertRule.handler(mockContext, {
+        project: 'backend',
+        ruleId: 'r1',
+        frequency: 60,
+      });
+
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://sentry.io/api/0/projects/my-org/backend/rules/r1/',
+        expect.objectContaining({
+          frequency: 60,
+          filters: [{ id: 'sentry.rules.filters.age_comparison.AgeComparisonFilter' }],
+          filterMatch: 'all',
+          environment: 'production',
+          owner: 'team:1',
+        })
       );
     });
 

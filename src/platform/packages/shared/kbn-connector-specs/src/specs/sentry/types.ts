@@ -13,8 +13,6 @@ const MAX_SLUG_LENGTH = 200;
 const MAX_QUERY_LENGTH = 2000;
 const MAX_ID_LENGTH = 64;
 const MAX_CURSOR_LENGTH = 1024;
-const MAX_COMMENT_LENGTH = 4000;
-
 export const SentryListIssuesInputSchema = z.object({
   project: z
     .string()
@@ -162,29 +160,33 @@ export const SentryGetEventInputSchema = z.object({
 });
 export type SentryGetEventInput = z.infer<typeof SentryGetEventInputSchema>;
 
-export const SentryBulkUpdateIssuesInputSchema = z.object({
-  project: z
-    .string()
-    .min(1)
-    .max(MAX_SLUG_LENGTH)
-    .describe('The project slug the issues belong to.'),
-  issueIds: z
-    .array(z.string().max(MAX_ID_LENGTH))
-    .min(1)
-    .max(100)
-    .describe('Issue IDs to update in one call (1-100).'),
-  status: z
-    .enum(['resolved', 'resolvedInNextRelease', 'unresolved', 'ignored'])
-    .optional()
-    .describe('New status to apply to all named issues.'),
-  assignedTo: z
-    .string()
-    .max(320)
-    .optional()
-    .describe(
-      'Reassign all named issues to this user\'s primary email, "user:<user-id>", or "team:<team-slug>".'
-    ),
-});
+export const SentryBulkUpdateIssuesInputSchema = z
+  .object({
+    project: z
+      .string()
+      .min(1)
+      .max(MAX_SLUG_LENGTH)
+      .describe('The project slug the issues belong to.'),
+    issueIds: z
+      .array(z.string().max(MAX_ID_LENGTH))
+      .min(1)
+      .max(100)
+      .describe('Issue IDs to update in one call (1-100).'),
+    status: z
+      .enum(['resolved', 'resolvedInNextRelease', 'unresolved', 'ignored'])
+      .optional()
+      .describe('New status to apply to all named issues.'),
+    assignedTo: z
+      .string()
+      .max(320)
+      .optional()
+      .describe(
+        'Reassign all named issues to this user\'s primary email, "user:<user-id>", or "team:<team-slug>".'
+      ),
+  })
+  .refine((v) => v.status !== undefined || v.assignedTo !== undefined, {
+    message: 'At least one of status or assignedTo must be provided.',
+  });
 export type SentryBulkUpdateIssuesInput = z.infer<typeof SentryBulkUpdateIssuesInputSchema>;
 
 export const SentryListProjectsInputSchema = z.object({
@@ -278,14 +280,6 @@ export const SentryUpdateIssueAlertRuleInputSchema = z.object({
     .describe('Minutes to wait before the rule can trigger again for the same issue.'),
 });
 export type SentryUpdateIssueAlertRuleInput = z.infer<typeof SentryUpdateIssueAlertRuleInputSchema>;
-
-export const SentryIssueCommentInputSchema = z.object({
-  comment: z
-    .string()
-    .max(MAX_COMMENT_LENGTH)
-    .optional()
-    .describe('Optional activity comment to attach to the status change.'),
-});
 
 export interface SentryIssue {
   id: string;

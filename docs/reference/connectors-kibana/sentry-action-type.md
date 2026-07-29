@@ -25,10 +25,10 @@ Organization slug
 :   The slug of your Sentry organization, found in the URL: `sentry.io/organizations/<slug>/`.
 
 API base URL
-:   Optional. Leave empty to use Sentry SaaS (`https://sentry.io/api/0`). Set this for a self-hosted Sentry instance, for example `https://sentry.example.com/api/0`.
+:   Optional. Leave empty to use Sentry SaaS (`https://sentry.io/api/0`). If your organization uses a region-specific data storage location, use its regional domain instead, for example `https://us.sentry.io/api/0` or `https://de.sentry.io/api/0`. Set this for a self-hosted Sentry instance, for example `https://sentry.example.com/api/0`.
 
 Authentication
-:   Bearer token. Use a Sentry auth token with `org:read`, `project:read`, `event:read`, and `event:write` scopes.
+:   Bearer token. Use a Sentry auth token with `org:read`, `project:read`, `event:read`, and `event:write` scopes (add `event:admin` too if you plan to use `deleteIssue`).
 
 ## Available actions [sentry-available-actions]
 
@@ -42,11 +42,11 @@ Authentication
 | `assignIssue` | Assign an issue to a user or team. Parameters: `issueId` (required), `assignedTo` (required). |
 | `listIssueEvents` | List the events recorded under an issue. Parameters: `issueId` (required), `cursor`, `full`. |
 | `getEvent` | Get one event's full detail (stack trace, tags, context). Parameters: `project` (required), `eventId` (required). |
-| `bulkUpdateIssues` | Update status and/or assignee for multiple issues in one call. Parameters: `project` (required), `issueIds` (required), `status`, `assignedTo`. |
-| `deleteIssue` | Permanently delete an issue. Parameters: `issueId` (required). |
+| `bulkUpdateIssues` | Update status and/or assignee for multiple issues in one call. Parameters: `project` (required), `issueIds` (required), `status`, `assignedTo` (at least one of `status`/`assignedTo` is required). |
+| `deleteIssue` | Permanently delete an issue. Requires the `event:admin` scope. Parameters: `issueId` (required). |
 | `listProjects` | List the organization's projects. Parameters: `cursor`. |
 | `listIssueAlertRules` | List issue alert rules configured on a project. Parameters: `project` (required), `cursor`. |
-| `createIssueAlertRule` | Create a new issue alert rule. Parameters: `project`, `name`, `actionMatch`, `conditions`, `actions` (required), `frequency`. |
+| `createIssueAlertRule` | Create a new issue alert rule. Parameters: `project` (required), `name` (required), `conditions` (required), `actions` (required), `actionMatch`, `frequency`. |
 | `updateIssueAlertRule` | Update an existing issue alert rule. Parameters: `project` (required), `ruleId` (required), `name`, `actionMatch`, `conditions`, `actions`, `frequency`. |
 
 ## Connector networking configuration [sentry-connector-networking-configuration]
@@ -57,6 +57,6 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 1. Log in to your [Sentry](https://sentry.io/) account.
 2. Go to **Settings** > **Developer Settings** > **New Internal Integration** (or, for a personal auth token, **User Settings** > **User Auth Tokens**).
-3. Grant the scopes `org:read`, `project:read`, `event:read`, and `event:write` (and `alerts:write` if you plan to provision issue alert rules).
+3. Grant the scopes `org:read`, `project:read`, `event:read`, and `event:write` (add `alerts:write` if you plan to provision issue alert rules, and `event:admin` if you plan to use `deleteIssue`).
 4. Save the integration and copy the generated token.
 5. When configuring the connector, enter the token as the Bearer token, and enter your organization slug (from your Sentry URL) in the **Organization slug** field.
