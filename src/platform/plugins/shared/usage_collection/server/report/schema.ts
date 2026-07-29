@@ -13,7 +13,9 @@ import { schema } from '@kbn/config-schema';
 const applicationUsageReportSchema = schema.object({
   minutesOnScreen: schema.number(),
   numberOfClicks: schema.number(),
+  // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
   appId: schema.string(),
+  // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
   viewId: schema.string(),
 });
 
@@ -21,28 +23,40 @@ export const reportSchema = schema.object({
   reportVersion: schema.maybe(schema.oneOf([schema.literal(3)])),
   userAgent: schema.maybe(
     schema.recordOf(
-      schema.string(),
+      // Client-supplied User-Agent record key; bounded generously to cover any real UA.
+      schema.string({ maxLength: 2048 }),
       schema.object({
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         key: schema.string(),
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         type: schema.string(),
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         appName: schema.string(),
-        userAgent: schema.string(),
+        // Client-supplied User-Agent header value; bounded generously to cover any real UA.
+        userAgent: schema.string({ maxLength: 2048 }),
       })
     )
   ),
   uiCounter: schema.maybe(
     schema.recordOf(
+      // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
       schema.string(),
       schema.object({
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         key: schema.string(),
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         type: schema.string(),
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         appName: schema.string(),
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         eventName: schema.string(),
+        // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
         namespace: schema.maybe(schema.string()),
         total: schema.number(),
       })
     )
   ),
+  // codeql[js/kibana/unbounded-string-in-schema] Kibana-generated telemetry value, not user input
   application_usage: schema.maybe(schema.recordOf(schema.string(), applicationUsageReportSchema)),
 });
 

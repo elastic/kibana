@@ -43,6 +43,7 @@ export {
   formatFieldValueText,
   formatFieldStringValueWithHighlights,
   formatHitReact,
+  tryPrettyPrintJsonBlocks,
   getDocId,
   getLogDocumentOverview,
   getFlattenedTraceDocumentOverview,
@@ -50,6 +51,7 @@ export {
   getMessageFieldWithFallbacks,
   getChartHidden,
   getTableHidden,
+  getSidebarHidden,
   getTopPanelHeight,
   getBreakdownField,
   getAvailableResourceFields,
@@ -78,12 +80,14 @@ export {
   getEsqlDataView,
   setChartHidden,
   setTableHidden,
+  setSidebarHidden,
   setTopPanelHeight,
   setBreakdownField,
   LogLevelBadge,
   getDefaultSort,
   getSort,
   getSortArray,
+  isLegacySort,
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,
@@ -92,6 +96,7 @@ export {
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
+  METRICS_GRID_SETTINGS_DEFAULTS,
 } from './src';
 
 export type {
@@ -102,6 +107,9 @@ export type {
   SortPair,
   ErrorCalloutProps,
   DiscoverSessionFinderAttributes,
+  HistogramPercentile,
+  MetricsGridSettings,
+  SimpleAggregation,
 } from './src';
 
 export * from './src/types';

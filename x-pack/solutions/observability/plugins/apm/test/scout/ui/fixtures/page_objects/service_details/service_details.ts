@@ -24,6 +24,7 @@ export class ServiceDetailsPage {
   public readonly dependenciesTab: DependenciesTab;
   public readonly alertsTab: AlertsTab;
   public readonly overviewTab: OverviewTab;
+  public readonly mobileOverviewTab: OverviewTab;
   public readonly transactionsTab: TransactionsTab;
   public readonly errorsTab: ErrorsTab;
   public readonly dashboardsTab: DashboardsTab;
@@ -39,6 +40,13 @@ export class ServiceDetailsPage {
     );
     this.alertsTab = createLazyPageObject(AlertsTab, this.page, this.kbnUrl, this.SERVICE_NAME);
     this.overviewTab = createLazyPageObject(OverviewTab, this.page, this.kbnUrl, this.SERVICE_NAME);
+    this.mobileOverviewTab = createLazyPageObject(
+      OverviewTab,
+      this.page,
+      this.kbnUrl,
+      this.SERVICE_NAME,
+      'mobile'
+    );
     this.transactionsTab = createLazyPageObject(
       TransactionsTab,
       this.page,

@@ -26,6 +26,8 @@ import type { IStaticAssets } from './static_assets';
 import type { ICspConfig } from './csp';
 import type { GetAuthState, IsAuthenticated } from './auth_state';
 import type { SessionStorageCookieOptions, SessionStorageFactory } from './session_storage';
+import type { ApiVersion } from './versioning';
+import type { KibanaRequest } from './router';
 
 /**
  * @public
@@ -41,6 +43,73 @@ export interface HttpAuth {
    * {@link IsAuthenticated}
    */
   isAuthenticated: IsAuthenticated;
+}
+
+/** @public */
+export interface HttpSelfFetchQuery {
+  [key: string]: string | number | boolean | string[] | number[] | boolean[] | undefined | null;
+}
+
+/** @public */
+export interface HttpSelfFetchHeaders {
+  [name: string]: string | string[] | undefined;
+}
+
+/** @public */
+export interface HttpSelfFetchOptions<TRequestBody = unknown> {
+  /** HTTP method. Defaults to `GET`. */
+  method?: string;
+  /** Query string parameters to append to the target path. */
+  query?: HttpSelfFetchQuery;
+  /** JSON-serializable or text request body. */
+  body?: TRequestBody | string | null;
+  /** Non-auth, non-Core-owned headers to send with the request. */
+  headers?: HttpSelfFetchHeaders;
+  /**
+   * When `true`, forwards a Core-owned allowlist of safe headers from the incoming
+   * request. Protected routing, auth, and Core-owned headers are never forwarded.
+   */
+  forwardRequestHeaders?: boolean;
+  /** API version string used to populate the `elastic-api-version` header. */
+  version?: ApiVersion;
+  /** Abort signal for cancelling the outbound request. */
+  signal?: AbortSignal | null;
+  /** Request timeout in milliseconds. Defaults to a bounded Core value. */
+  timeout?: number;
+  /** Whether to include the incoming request base path and space prefix. Defaults to `true`. */
+  prependBasePath?: boolean;
+  /** When `true`, return response details instead of only the parsed response body. */
+  asResponse?: boolean;
+  /** When `true`, return the raw `Response` without parsing its body. Requires `asResponse: true`. */
+  rawResponse?: boolean;
+  /** Internal APIs are inaccessible unless explicitly requested. Defaults to `public`. */
+  access?: 'public' | 'internal';
+}
+
+/** @public */
+export interface HttpSelfResponse<TResponseBody = unknown, TRequestBody = unknown> {
+  readonly fetchOptions: Readonly<HttpSelfFetchOptions<TRequestBody> & { path: string }>;
+  readonly request: Readonly<Request>;
+  readonly response: Readonly<Response>;
+  readonly body?: TResponseBody;
+}
+
+/** @public */
+export interface HttpSelfScopedClient {
+  fetch<TResponseBody = unknown, TRequestBody = unknown>(
+    path: string,
+    options: HttpSelfFetchOptions<TRequestBody> & { asResponse: true }
+  ): Promise<HttpSelfResponse<TResponseBody, TRequestBody>>;
+
+  fetch<TResponseBody = unknown, TRequestBody = unknown>(
+    path: string,
+    options?: HttpSelfFetchOptions<TRequestBody>
+  ): Promise<TResponseBody>;
+}
+
+/** @public */
+export interface HttpSelfService {
+  asScoped(request: KibanaRequest): HttpSelfScopedClient;
 }
 
 /**
@@ -400,6 +469,11 @@ export interface HttpServiceStart {
    * Provides common {@link HttpServerInfo | information} about the running http server.
    */
   getServerInfo: () => HttpServerInfo;
+
+  /**
+   * Make outbound HTTP calls to Kibana's own APIs on behalf of the current request user.
+   */
+  selfClient: HttpSelfService;
 }
 
 /**

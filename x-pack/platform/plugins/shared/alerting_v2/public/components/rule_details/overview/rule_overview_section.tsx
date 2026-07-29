@@ -7,27 +7,38 @@
 
 import React from 'react';
 import { EuiErrorBoundary, EuiSpacer } from '@elastic/eui';
+import { useService } from '@kbn/core-di-browser';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import { AlertTimelineSection } from './alert_timeline/alert_timeline_section';
-import { DashboardArtifactsSection } from './artifacts';
+import { ArtifactsSection, SignalArtifactsSection } from './artifacts';
 import { SignalRuleOverview } from './signal_rule_overview';
 import { useRule } from '../rule_context';
 
 export const RuleOverviewSection: React.FC = () => {
   const rule = useRule();
+  const canReadAlerts = useService(UserCapabilities).canRead('alerts');
 
   return (
     <div data-test-subj="ruleOverviewSection">
       {rule.kind === 'signal' ? (
-        <SignalRuleOverview />
-      ) : (
+        <EuiErrorBoundary>
+          <SignalRuleOverview />
+        </EuiErrorBoundary>
+      ) : canReadAlerts ? (
         <EuiErrorBoundary>
           <AlertTimelineSection />
         </EuiErrorBoundary>
-      )}
+      ) : null}
       {rule.kind === 'alert' ? (
         <>
           <EuiSpacer size="l" />
-          <DashboardArtifactsSection />
+          <ArtifactsSection />
+        </>
+      ) : null}
+      {rule.kind === 'signal' ? (
+        <>
+          <EuiSpacer size="l" />
+          <SignalArtifactsSection />
         </>
       ) : null}
     </div>

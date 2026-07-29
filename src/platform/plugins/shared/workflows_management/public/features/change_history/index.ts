@@ -11,11 +11,5 @@ export {
   WorkflowChangeHistoryListItem,
   WorkflowChangeHistoryProvider,
 } from './workflow_change_history';
-export type {
-  WorkflowChangeHistoryListItemProps,
-  WorkflowChangeHistoryProviderProps,
-} from './workflow_change_history';
-export {
-  useWorkflowChangeHistoryEnabled,
-  useWorkflowVersioningEnabled,
-} from './use_workflow_change_history';
+export type { WorkflowChangeHistoryProviderProps } from './workflow_change_history';
+export { useWorkflowChangeHistoryEnabled } from './use_workflow_change_history';

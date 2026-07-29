@@ -6,12 +6,16 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiComboBox, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
+import { useService } from '@kbn/core-di-browser';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import { useFetchRules } from '../../../hooks/use_fetch_rules';
+import { UserCapabilities } from '../../../services/user_capabilities';
 
 const SEARCH_DEBOUNCE_MS = 300;
+const RULE_FILTER_MAX_RESULTS = 20;
 
 const OUTCOME_OPTIONS: Array<{ value: PolicyExecutionOutcomeFilter; text: string }> = [
   {
@@ -34,18 +38,31 @@ const OUTCOME_OPTIONS: Array<{ value: PolicyExecutionOutcomeFilter; text: string
   },
 ];
 
+export interface RuleOption {
+  id: string;
+  name: string;
+}
+
 interface ExecutionHistorySearchBarProps {
   onSearchChange: (search: string) => void;
   outcome: PolicyExecutionOutcomeFilter;
   onOutcomeChange: (outcome: PolicyExecutionOutcomeFilter) => void;
+  ruleFilters: RuleOption[];
+  onRuleFiltersChange: (rules: RuleOption[]) => void;
 }
 
 export const ExecutionHistorySearchBar = ({
   onSearchChange,
   outcome,
   onOutcomeChange,
+  ruleFilters,
+  onRuleFiltersChange,
 }: ExecutionHistorySearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
+  const [ruleSearchInput, setRuleSearchInput] = useState('');
+  const [debouncedRuleSearch, setDebouncedRuleSearch] = useState('');
+
+  const canReadRules = useService(UserCapabilities).canRead('rules');
 
   useDebounce(
     () => {
@@ -54,6 +71,29 @@ export const ExecutionHistorySearchBar = ({
     SEARCH_DEBOUNCE_MS,
     [onSearchChange, searchInput]
   );
+
+  useDebounce(
+    () => {
+      setDebouncedRuleSearch(ruleSearchInput);
+    },
+    SEARCH_DEBOUNCE_MS,
+    [ruleSearchInput]
+  );
+
+  const { data: rulesData, isFetching: isFetchingRules } = useFetchRules({
+    page: 1,
+    perPage: RULE_FILTER_MAX_RESULTS,
+    search: debouncedRuleSearch.trim() || undefined,
+    enabled: canReadRules,
+  });
+
+  const ruleOptions = (rulesData?.items ?? []).map((r) => ({
+    key: r.id,
+    label: r.metadata.name,
+    value: { id: r.id, name: r.metadata.name },
+  }));
+
+  const selectedOptions = ruleFilters.map((r) => ({ key: r.id, label: r.name, value: r }));
 
   return (
     <EuiFlexGroup gutterSize="s" direction="row" responsive={false} css={{ flexGrow: 0 }}>
@@ -74,6 +114,36 @@ export const ExecutionHistorySearchBar = ({
           )}
         />
       </EuiFlexItem>
+      {canReadRules && (
+        <EuiFlexItem grow={false} style={{ minWidth: 260 }}>
+          <EuiComboBox<RuleOption>
+            compressed
+            data-test-subj="executionHistoryRuleFilter"
+            async
+            isClearable
+            isLoading={isFetchingRules}
+            placeholder={i18n.translate(
+              'xpack.alertingV2.executionHistory.searchBar.rulePlaceholder',
+              { defaultMessage: 'Filter by rules' }
+            )}
+            options={ruleOptions}
+            selectedOptions={selectedOptions}
+            onSearchChange={setRuleSearchInput}
+            onChange={(picked) => {
+              const values = picked
+                .map((opt) => opt.value)
+                .filter((v): v is RuleOption => v !== undefined);
+              onRuleFiltersChange(values);
+            }}
+            aria-label={i18n.translate(
+              'xpack.alertingV2.executionHistory.searchBar.ruleAriaLabel',
+              {
+                defaultMessage: 'Filter by rules',
+              }
+            )}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiSelect
           compressed

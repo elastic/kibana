@@ -11,11 +11,13 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 export interface EsqlEditorActions {
   toggleHistory: () => void;
   toggleStarredQuery: () => void;
+  toggleLanguageComponent: () => void;
   submitEsqlQuery: (query: string) => void;
   isHistoryOpen: boolean;
   isCurrentQueryStarred: boolean;
   canToggleStarredQuery: boolean;
   currentQuery: string;
+  editorIsInline: boolean;
 }
 
 const EsqlEditorActionsContext = createContext<EsqlEditorActions | null>(null);

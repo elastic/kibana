@@ -69,9 +69,9 @@ describe('eventDataToFieldValueRows', () => {
     ]);
   });
 
-  it('serializes nested object values as JSON', () => {
+  it('flattens nested object values into their scalar leaves', () => {
     expect(eventDataToFieldValueRows({ host: { name: 'h1' } })).toEqual([
-      { field: 'host', value: '{"name":"h1"}' },
+      { field: 'host', value: 'h1' },
     ]);
   });
 
@@ -81,7 +81,8 @@ describe('eventDataToFieldValueRows', () => {
 });
 
 describe('formatEpisodeEventFieldValue', () => {
-  it('stringifies object values', () => {
-    expect(formatEpisodeEventFieldValue({ count: 1 })).toBe('{"count":1}');
+  it('flattens object values into their scalar leaves', () => {
+    expect(formatEpisodeEventFieldValue({ count: 1 })).toBe('1');
+    expect(formatEpisodeEventFieldValue({ ip: '10.0.0.1', port: 443 })).toBe('10.0.0.1, 443');
   });
 });

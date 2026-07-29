@@ -233,6 +233,9 @@ const PluginsSelection: React.FC<PluginsSelectionProps> = ({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
+        tableCaption={i18n.translate('xpack.agentBuilder.plugins.tableCaption', {
+          defaultMessage: 'Plugins',
+        })}
         columns={columns}
         items={filteredPlugins}
         itemId="id"

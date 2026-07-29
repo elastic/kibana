@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 import {
@@ -116,15 +117,15 @@ spaceTest.describe(
         await browserAuth.loginAsPrivilegedUser();
         await pageObjects.discover.goto({ queryMode: 'classic' });
         await pageObjects.discover.waitUntilSearchingHasFinished();
-        await pageObjects.discover.waitForDocTableRendered();
-        const savedSearchName = 'my search';
+        await pageObjects.dataGrid.waitForDocTableRendered();
+        const savedSearchName = `my search ${randomUUID().replace(/-/g, '')}`;
         await pageObjects.discover.saveSearch(savedSearchName);
 
         await pageObjects.dashboard.openNewDashboard();
         await pageObjects.dashboard.addSavedSearch(savedSearchName);
         await pageObjects.dashboard.waitForRenderComplete();
 
-        await pageObjects.discover.openDocumentDetails({ rowIndex: 0 });
+        await pageObjects.dataGrid.openDocumentDetails({ rowIndex: 0 });
         await pageObjects.contextPage.clickRowAction(0);
 
         // dashboard may prompt "unsaved changes" confirmation on navigation

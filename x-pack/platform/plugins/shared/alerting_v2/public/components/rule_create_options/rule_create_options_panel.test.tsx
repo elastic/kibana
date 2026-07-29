@@ -8,11 +8,11 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { RuleCreateOptionsPanel } from './rule_create_options_panel';
+import { RuleCreateOptionsPanel, getCreateWithAgentTooltipText } from './rule_create_options_panel';
 
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
-const onCreateThresholdAlert = jest.fn();
+const onCreateThresholdRule = jest.fn();
 
 const renderPanel = () =>
   render(
@@ -20,7 +20,7 @@ const renderPanel = () =>
       <RuleCreateOptionsPanel
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
-        onCreateThresholdAlert={onCreateThresholdAlert}
+        onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
   );
@@ -61,32 +61,163 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
   });
 
-  it('renders the "Threshold Alert" card', () => {
+  it('renders the "Threshold rule" card', () => {
     renderPanel();
 
-    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
   });
 
-  it('calls onCreateThresholdAlert when the "Threshold Alert" card is clicked', () => {
+  it('calls onCreateThresholdRule when the "Threshold rule" card is clicked', () => {
     renderPanel();
 
-    fireEvent.click(screen.getByTestId('createThresholdAlertCard'));
+    fireEvent.click(screen.getByTestId('createThresholdRuleCard'));
 
-    expect(onCreateThresholdAlert).toHaveBeenCalledTimes(1);
+    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the agent card when onCreateWithAgent is not provided', () => {
+  it('renders the agent card disabled and does not fire onCreateWithAgent when createWithAgentDisabled is set', () => {
     render(
       <I18nProvider>
         <RuleCreateOptionsPanel
           onCreateEsqlRule={onCreateEsqlRule}
-          onCreateThresholdAlert={onCreateThresholdAlert}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
+          createWithAgentTooltipText="Missing privileges"
+          onCreateThresholdRule={onCreateThresholdRule}
         />
       </I18nProvider>
     );
 
-    expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument();
-    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
-    expect(screen.getByTestId('createThresholdAlertCard')).toBeInTheDocument();
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(agentCard);
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
+  });
+
+  it('shows the tooltip text on hover regardless of the disabled state', async () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
+          createWithAgentTooltipText="Missing privileges"
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    fireEvent.mouseOver(screen.getByTestId('createWithAgentCard'));
+
+    expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
+  });
+
+  it('renders the agent card disabled and shows the tooltip on hover in the vertical (flyout) layout', async () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          layout="vertical"
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
+          createWithAgentTooltipText="Missing privileges"
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
+
+    fireEvent.mouseOver(agentCard);
+    expect(await screen.findByText('Missing privileges')).toBeInTheDocument();
+  });
+
+  it('disables the agent card without a tooltip when createWithAgentDisabled is set alone', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentDisabled
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(agentCard);
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
+  });
+
+  it('shows a tooltip without disabling the agent card when only createWithAgentTooltipText is set', async () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          createWithAgentTooltipText="Extra context"
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).not.toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(agentCard);
+    expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+
+    fireEvent.mouseOver(agentCard);
+    expect(await screen.findByText('Extra context')).toBeInTheDocument();
+  });
+});
+
+describe('getCreateWithAgentTooltipText', () => {
+  it('returns undefined when both prerequisites are met', () => {
+    expect(
+      getCreateWithAgentTooltipText({
+        hasAgentBuilderCapability: true,
+        isExperimentalFeaturesEnabled: true,
+      })
+    ).toBeUndefined();
+  });
+
+  it('names only the privilege when only the capability is missing', () => {
+    const tooltip = getCreateWithAgentTooltipText({
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: true,
+    });
+
+    expect(tooltip).toContain('Agent Builder: Read');
+    expect(tooltip).not.toContain('advanced setting');
+  });
+
+  it('names only the advanced setting when only the experimental feature is missing', () => {
+    const tooltip = getCreateWithAgentTooltipText({
+      hasAgentBuilderCapability: true,
+      isExperimentalFeaturesEnabled: false,
+    });
+
+    expect(tooltip).toContain('Elastic Agent Builder: Experimental Features');
+    expect(tooltip).toContain('advanced setting');
+    expect(tooltip).not.toContain('Agent Builder: Read');
+  });
+
+  it('names both prerequisites when neither is met', () => {
+    const tooltip = getCreateWithAgentTooltipText({
+      hasAgentBuilderCapability: false,
+      isExperimentalFeaturesEnabled: false,
+    });
+
+    expect(tooltip).toContain('Agent Builder: Read');
+    expect(tooltip).toContain('Elastic Agent Builder: Experimental Features');
   });
 });

@@ -10,6 +10,7 @@ import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/
 import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
+  getAlertActionsEventsService,
   getDispatcherApiService,
   getMaintenanceWindowsApiService,
   getRuleExecutionsApiService,
@@ -18,6 +19,7 @@ import {
   getTelemetryService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
+  type AlertActionsEventsService,
   type DispatcherApiService,
   type MaintenanceWindowsApiService,
   type RuleExecutionsApiService,
@@ -33,6 +35,7 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 export interface AlertingApiServices {
   rules: RulesApiService;
   ruleEvents: RuleEventsApiService;
+  alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
   actionPolicies: ActionPoliciesApiService;
   maintenanceWindows: MaintenanceWindowsApiService;
@@ -65,7 +68,8 @@ export const buildAlertingApiServices = ({
   return {
     rules: getRulesApiService({ kbnClient, log }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
-    alertActions: getAlertActionsApiService({ esClient, log }),
+    alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
+    alertActions: getAlertActionsApiService({ kbnClient, log }),
     actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
@@ -110,6 +114,7 @@ export {
   buildAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
+  getSnoozeDate,
 } from '../../common/builders';
 export {
   getActionPolicyUrl,
@@ -122,9 +127,17 @@ export {
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
   getRuleUrl,
+  getRunRuleUrl,
+  getEnableRuleUrl,
+  getDisableRuleUrl,
   getBulkRulesUrl,
   BULK_ALERT_ACTION_URL,
-  getBulkActionPoliciesUrl,
+  getBulkDeleteActionPoliciesUrl,
+  getBulkEnableActionPoliciesUrl,
+  getBulkDisableActionPoliciesUrl,
+  getBulkSnoozeActionPoliciesUrl,
+  getBulkUnsnoozeActionPoliciesUrl,
+  getBulkUpdateApiKeyActionPoliciesUrl,
   getDisableActionPolicyUrl,
   getEnableActionPolicyUrl,
   getListActionPoliciesUrl,
@@ -133,8 +146,8 @@ export {
   getUpdateActionPolicyApiKeyUrl,
   getListExecutionHistoryUrl,
   getCountNewExecutionHistoryEventsUrl,
+  getRuleExecutionsUrl,
 } from '../../common/urls';
-export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export {
   ACTION_POLICY_PER_PAGE_MAX,
   ACTION_POLICY_SEARCH_MAX_LENGTH,

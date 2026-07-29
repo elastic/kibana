@@ -20,6 +20,7 @@ export interface AlertingV2Usage {
   // rule stats
   count_total?: number;
   count_enabled?: number;
+  count_agent_builder_assisted?: number;
   count_by_kind?: { alert?: number; signal?: number };
   count_by_schedule?: NameValuePair[];
   count_by_lookback?: NameValuePair[];
@@ -30,6 +31,14 @@ export interface AlertingV2Usage {
   count_with_grouping?: number;
   avg_grouping_fields_count?: number | null;
   min_created_at?: string | null;
+  count_by_query_format?: { composed?: number; standalone?: number };
+  count_by_recovery_strategy?: { no_breach?: number; query?: number; none?: number };
+  count_by_no_data_strategy?: {
+    last_known_status?: number;
+    emit?: number;
+    recover?: number;
+    none?: number;
+  };
 
   // execution stats
   executions_count_24hr?: number;
@@ -44,6 +53,7 @@ export interface AlertingV2Usage {
   action_policies_count?: number;
   action_policies_unique_workflow_count?: number;
   action_policies_count_with_matcher?: number;
+  action_policies_count_agent_builder_assisted?: number;
   action_policies_count_with_group_by?: number;
   action_policies_avg_group_by_fields_count?: number | null;
   action_policies_count_by_throttle_interval?: NameValuePair[];

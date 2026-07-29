@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
@@ -19,7 +20,6 @@ import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
@@ -82,6 +82,7 @@ export const DiscoverTopNav = ({
   const onSaveCbRef = useRef<(() => void) | undefined>(undefined);
 
   const query = useAppStateSelector((state) => state.query);
+  const isApproximate = useAppStateSelector((state) => state.isApproximate ?? false);
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const { timeRangeAbsolute } = useCurrentTabSelector((tab) => tab.dataRequestParams);
   const refreshInterval = useCurrentTabSelector((state) => state.globalState.refreshInterval);
@@ -211,6 +212,13 @@ export const DiscoverTopNav = ({
     [dispatch, setAppState, getState, currentTabId, updateAppState]
   );
 
+  const onUseApproximationChange = useCallback(
+    (nextValue: boolean) => {
+      dispatch(updateAppState({ appState: { isApproximate: nextValue } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   const dataStateContainer = useCurrentTabDataStateContainer();
   const esqlQueryStats = useESQLQueryStats(
     isEsqlMode,
@@ -232,14 +240,14 @@ export const DiscoverTopNav = ({
       if (needsSave) {
         setInitialCopyOnSave(false);
         onSaveCbRef.current = () => {
-          dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+          dispatch(transitionFromESQLToDataView({ dataView }));
         };
         setIsSaveModalVisible(true);
         return;
       }
-      dispatch(transitionFromESQLToDataView({ dataViewId: dataView.id ?? '' }));
+      dispatch(transitionFromESQLToDataView({ dataView }));
     },
-    [dataView.id, dispatch, services, transitionFromESQLToDataView]
+    [dataView, dispatch, services, transitionFromESQLToDataView]
   );
 
   const onOpenSaveModal = useCallback(() => {
@@ -468,6 +476,17 @@ export const DiscoverTopNav = ({
         esqlQueryStats={esqlQueryStats}
         onOpenQueryInNewTab={onOpenQueryInNewTab}
         kqlFooterOption={kqlFooterOption}
+        esqlApproximation={
+          isEsqlMode
+            ? {
+                isApproximate,
+                onChange: onUseApproximationChange,
+                additionalText: i18n.translate('discover.esqlApproximationToggle.additionalText', {
+                  defaultMessage: 'Only applies to queries that use one STATS command.',
+                }),
+              }
+            : undefined
+        }
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

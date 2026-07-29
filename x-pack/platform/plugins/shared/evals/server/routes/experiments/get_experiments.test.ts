@@ -9,9 +9,10 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_EXPERIMENTS_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXPERIMENTS_URL, API_VERSIONS, buildSpaceFilter } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { registerGetExperimentsRoute } from './get_experiments';
 
 describe('GET /internal/evals/experiments', () => {
@@ -22,6 +23,8 @@ describe('GET /internal/evals/experiments', () => {
       router,
       logger,
       canEncrypt: false,
+      evaluatorRegistry: { list: () => [], get: () => undefined },
+      getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
       getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
       getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
     });
@@ -85,7 +88,10 @@ describe('GET /internal/evals/experiments', () => {
         query: {
           bool: {
             must_not: [{ term: { experiment_id: 'kbn-evals-preflight' } }],
-            filter: [{ term: { 'example.dataset.id': 'dataset-123' } }],
+            filter: [
+              { term: { 'example.dataset.id': 'dataset-123' } },
+              buildSpaceFilter('default'),
+            ],
           },
         },
       })

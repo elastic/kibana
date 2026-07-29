@@ -69,7 +69,7 @@ export const useCurrentTabMenuActions = ({ currentDataView }: UseCurrentTabMenuA
     ) {
       dispatch(internalStateActions.setIsESQLToDataViewTransitionModalVisible(true));
     } else {
-      dispatch(transitionFromESQLToDataView({ dataViewId: currentDataView.id ?? '' }));
+      dispatch(transitionFromESQLToDataView({ dataView: currentDataView }));
     }
   }, [
     currentDataView,

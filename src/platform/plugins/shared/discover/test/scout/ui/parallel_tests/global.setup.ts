@@ -12,6 +12,8 @@ import { getSynthtraceClient } from '@kbn/scout-synthtrace';
 import {
   createMetricsTestIndexIfNeeded,
   DIMENSIONS_WIPE_CONFIG,
+  PARTIAL_DIM_FULL_CONFIG,
+  PARTIAL_DIM_ONLY_CONFIG,
 } from '../fixtures/metrics_experience';
 import {
   TRACES,
@@ -32,6 +34,10 @@ globalSetupHook(
       'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
     );
     log.debug('[setup:logstash] logstash_functional ES data ready');
+
+    log.debug('[setup:hamlet] loading hamlet ES data (only if it does not exist)...');
+    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/hamlet');
+    log.debug('[setup:hamlet] hamlet ES data ready');
 
     // Date nanos data for surrounding_docs/context app tests.
     log.debug('[setup:date_nanos] loading date_nanos ES data (only if it does not exist)...');
@@ -66,7 +72,24 @@ globalSetupHook(
       '[setup:index_pattern_without_timefield] index_pattern_without_timefield ES data ready'
     );
 
+    // Sample flights data for Discover tabs ES|QL time-field tests.
+    log.debug(
+      '[setup:kibana_sample_data_flights] loading kibana_sample_data_flights ES data (only if it does not exist)...'
+    );
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+    );
+    log.debug('[setup:kibana_sample_data_flights] kibana_sample_data_flights ES data ready');
+
     // Metrics Experience setup
+    log.debug('[setup:metrics] feature flag overrides');
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'discover.metricsExperienceEditGridSettingsEnabled': true,
+        'discover.metricsExperienceSortEnabled': true,
+      },
+    });
+
     log.debug('[setup:metrics] creating metrics test index (only if it does not exist)...');
     const created = await createMetricsTestIndexIfNeeded(esClient);
     log.debug(
@@ -85,6 +108,14 @@ globalSetupHook(
         ? '[setup:metrics] companion metrics test index created successfully'
         : '[setup:metrics] companion metrics test index already exists, skipping'
     );
+
+    // Companion indices where a dimension is only a plain keyword on one metric
+    log.debug(
+      '[setup:metrics] creating partial-dimension metrics test indices (only if they do not exist)...'
+    );
+    await createMetricsTestIndexIfNeeded(esClient, PARTIAL_DIM_FULL_CONFIG);
+    await createMetricsTestIndexIfNeeded(esClient, PARTIAL_DIM_ONLY_CONFIG);
+    log.debug('[setup:metrics] partial-dimension metrics test indices ready');
 
     // Traces Experience setup (not supported in serverless security or search - no Fleet/APM privileges)
     const hasFleetSupport = !config.serverless || config.projectType === 'oblt';

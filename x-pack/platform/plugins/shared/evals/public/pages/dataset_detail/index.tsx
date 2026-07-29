@@ -41,6 +41,7 @@ import {
   EuiToolTip,
   useEuiTheme,
   type EuiBasicTableColumn,
+  type CriteriaWithPagination,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
@@ -139,6 +140,8 @@ export const DatasetDetailPage: React.FC = () => {
   const [isDeleteDatasetModalOpen, setIsDeleteDatasetModalOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [examplesPageIndex, setExamplesPageIndex] = useState(0);
+  const [examplesPageSize, setExamplesPageSize] = useState(25);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
   const fetchTrace = useEvalsTraceFetcher();
   const {
@@ -285,6 +288,29 @@ export const DatasetDetailPage: React.FC = () => {
       return inputStr.includes(query) || outputStr.includes(query) || metadataStr.includes(query);
     });
   }, [dataset?.examples, searchQuery]);
+
+  // Datasets can hold hundreds/thousands of examples; paginate client-side so the whole set is
+  // not rendered into one DOM subtree. `pageIndex` is clamped in case the filtered set shrinks.
+  const examplesPageCount = Math.max(1, Math.ceil(filteredExamples.length / examplesPageSize));
+  const safeExamplesPageIndex = Math.min(examplesPageIndex, examplesPageCount - 1);
+  const paginatedExamples = useMemo(() => {
+    const start = safeExamplesPageIndex * examplesPageSize;
+    return filteredExamples.slice(start, start + examplesPageSize);
+  }, [filteredExamples, safeExamplesPageIndex, examplesPageSize]);
+
+  const examplesPagination = {
+    pageIndex: safeExamplesPageIndex,
+    pageSize: examplesPageSize,
+    totalItemCount: filteredExamples.length,
+    pageSizeOptions: [10, 25, 50],
+  };
+
+  const onExamplesTableChange = ({ page }: CriteriaWithPagination<DatasetExample>) => {
+    if (page) {
+      setExamplesPageIndex(page.index);
+      setExamplesPageSize(page.size);
+    }
+  };
 
   const examplesColumns: Array<EuiBasicTableColumn<DatasetExample>> = useMemo(
     () => [
@@ -715,7 +741,10 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiFieldSearch
                   placeholder={i18n.SEARCH_EXAMPLES_PLACEHOLDER}
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setExamplesPageIndex(0);
+                  }}
                   isClearable
                   fullWidth
                 />
@@ -731,8 +760,10 @@ export const DatasetDetailPage: React.FC = () => {
             <EuiSpacer size="m" />
             <EuiBasicTable<DatasetExample>
               tableCaption={i18n.EXAMPLES_SECTION_TITLE}
-              items={filteredExamples}
+              items={paginatedExamples}
               columns={examplesColumns}
+              pagination={examplesPagination}
+              onChange={onExamplesTableChange}
               loading={addExamples.isLoading || updateExample.isLoading || deleteExample.isLoading}
               noItemsMessage={i18n.EXAMPLES_EMPTY_MESSAGE}
               rowProps={(item) => ({

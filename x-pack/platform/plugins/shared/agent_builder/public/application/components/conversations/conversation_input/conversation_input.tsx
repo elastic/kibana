@@ -147,7 +147,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
-    if (initialMessage && !autoSendInitialMessage && isNewConversation) {
+    if (initialMessage && !autoSendInitialMessage && isNewConversation && !isAwaitingPrompt) {
       messageEditorController.setContent(initialMessage);
       messageEditorController.focus();
       resetInitialMessage?.(); // Reset the initial message to avoid sending it again
@@ -156,12 +156,14 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     initialMessage,
     autoSendInitialMessage,
     isNewConversation,
+    isAwaitingPrompt,
     messageEditorController,
     resetInitialMessage,
   ]);
 
-  // Auto-focus when conversation changes
+  // Skip auto-focus while a HITL prompt is open, it should own focus instead
   useEffect(() => {
+    if (isAwaitingPrompt) return;
     const timeoutId = setTimeout(() => {
       messageEditorController.focus();
     }, 200);
@@ -169,7 +171,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [conversationId, messageEditorController]);
+  }, [conversationId, messageEditorController, isAwaitingPrompt]);
 
   const handleSubmit = () => {
     if (isSubmitDisabled) {

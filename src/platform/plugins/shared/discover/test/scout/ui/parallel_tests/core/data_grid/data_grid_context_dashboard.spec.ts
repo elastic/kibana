@@ -12,7 +12,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
+import { spaceTest } from '../../../fixtures';
 import { testData } from '../../../fixtures/common';
 
 spaceTest.describe(
@@ -29,7 +29,7 @@ spaceTest.describe(
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.goto({ queryMode: 'classic' });
-      await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+      await pageObjects.dataGrid.waitForLoad();
       await pageObjects.dataGrid.waitForDocTableRendered();
     });
 
@@ -53,16 +53,16 @@ spaceTest.describe(
           operator: 'is',
           value: 'jpg',
         });
-        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForLoad();
         await pageObjects.discover.saveSearch(searchName);
 
         await pageObjects.dashboard.openNewDashboard();
         await pageObjects.dashboard.addSavedSearch(searchName);
-        await pageObjects.dataGrid.waitUntilSearchingHasFinished();
+        await pageObjects.dataGrid.waitForLoad();
         await pageObjects.dataGrid.waitForDocTableRendered();
         await pageObjects.dashboard.saveDashboard(dashboardName);
 
-        await pageObjects.dataGrid.openSurroundingDocuments(0);
+        await pageObjects.docViewer.openSurroundingDocuments(0);
 
         await expect(page).toHaveURL(/#\/context/);
         await pageObjects.dataGrid.waitForDocTableRendered();

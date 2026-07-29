@@ -68,7 +68,7 @@ const createFormatContext = (agentContext: AgentHandlerContext): AttachmentForma
 const mergeInputAttachmentsIntoAttachmentState = async (
   attachmentStateManager: AttachmentStateManager,
   inputs: AttachmentInput[],
-  options?: { updateOriginSnapshot?: boolean; resolveContext?: AttachmentResolveContext }
+  options: { updateOriginSnapshot?: boolean; resolveContext: AttachmentResolveContext }
 ) => {
   if (inputs.length === 0) return;
 
@@ -121,7 +121,7 @@ const mergeInputAttachmentsIntoAttachmentState = async (
         ...(input.group_id !== undefined ? { group_id: input.group_id } : {}),
       },
       ATTACHMENT_REF_ACTOR.user,
-      options?.resolveContext
+      options.resolveContext
     );
 
     const latest = getLatestVersion(created);
@@ -177,14 +177,11 @@ export const prepareConversation = async ({
 }): Promise<ProcessedConversation> => {
   const { attachments: attachmentsService, attachmentStateManager } = context;
   const formatContext = createFormatContext(context);
-  const resolveContext: AttachmentResolveContext | undefined =
-    context.savedObjectsClient !== undefined
-      ? {
-          request: context.request,
-          spaceId: context.spaceId,
-          savedObjectsClient: context.savedObjectsClient,
-        }
-      : undefined;
+  const resolveContext: AttachmentResolveContext = {
+    request: context.request,
+    spaceId: context.spaceId,
+    savedObjectsClient: context.savedObjectsClient,
+  };
 
   // Handle regenerate action: use last round's input and strip it from previous rounds
   const { effectiveRounds, effectiveNextInput } = prepareForAction({

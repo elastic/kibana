@@ -669,11 +669,13 @@ export class WorkflowsBaseTelemetry {
     entryPoint: WorkflowAiChatEntryPoint;
     sessionType: WorkflowAiSessionType;
     workflowId?: string;
+    autoOpened: boolean;
   }) => {
     this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiChatOpened, {
       eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiChatOpened],
       entryPoint: params.entryPoint,
       sessionType: params.sessionType,
+      autoOpened: params.autoOpened,
       ...(params.workflowId && { workflowId: params.workflowId }),
     });
   };
@@ -721,6 +723,7 @@ export class WorkflowsBaseTelemetry {
     proposalsAccepted: number;
     proposalsDeclined: number;
     proposalsPending: number;
+    autoOpened: boolean;
   }) => {
     this.telemetryService.reportEvent(WorkflowAiChatEventTypes.WorkflowAiSessionCompleted, {
       eventName: workflowEventNames[WorkflowAiChatEventTypes.WorkflowAiSessionCompleted],
@@ -730,6 +733,7 @@ export class WorkflowsBaseTelemetry {
       proposalsAccepted: params.proposalsAccepted,
       proposalsDeclined: params.proposalsDeclined,
       proposalsPending: params.proposalsPending,
+      autoOpened: params.autoOpened,
     });
   };
 }

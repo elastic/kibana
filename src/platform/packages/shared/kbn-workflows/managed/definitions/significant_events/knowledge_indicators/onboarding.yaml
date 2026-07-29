@@ -1,0 +1,208 @@
+# KI Onboarding Workflow
+#
+# Orchestrates the full KI onboarding pipeline for a stream:
+#   1. Features recency check (auto-skips identification if features are recent)
+#   2. Features identification (optional, skippable)
+#   3. Queries generation (optional, skippable — persistence handled by the child workflow)
+
+version: "1"
+name: "KI Onboarding"
+enabled: true
+description: "Orchestrates KI feature identification and query generation for a stream."
+tags:
+  - observability
+  - streams
+  - knowledge-indicators
+  - onboarding
+settings:
+  timeout: "30m"
+  concurrency:
+    key: "streams-ki-onboarding-{{ inputs.streamName }}"
+    strategy: drop
+    max: 1
+triggers:
+  - type: manual
+    inputs:
+      - name: streamName
+        type: string
+        required: true
+        description: "Target stream name."
+      - name: skipFeatures
+        type: boolean
+        default: false
+        description: "Skip the features identification step."
+      - name: skipQueries
+        type: boolean
+        default: false
+        description: "Skip the queries generation step."
+      - name: featuresConnectorId
+        type: string
+        description: "Optional connector ID override for features identification."
+      - name: queriesConnectorId
+        type: string
+        description: "Optional connector ID override for queries generation."
+      - name: featuresStart
+        type: number
+        description: "Start timestamp (epoch ms) for feature sampling window. Defaults to 24 h ago."
+      - name: featuresEnd
+        type: number
+        description: "End timestamp (epoch ms) for feature sampling window. Defaults to now."
+      - name: featuresMaxIterations
+        type: number
+        default: 5
+        description: "Maximum number of LLM sampling iterations for features identification."
+      - name: featuresSampleSize
+        type: number
+        description: "Number of documents sampled per features identification iteration."
+      - name: featuresTtlDays
+        type: number
+        description: "Days before a KI feature expires."
+      - name: featuresEntityFilteredRatio
+        type: number
+        description: "Fraction (0–1) of sample for entity-filtered documents in features identification."
+      - name: featuresDiverseRatio
+        type: number
+        description: "Fraction (0–1) of sample for diverse documents in features identification."
+      - name: featuresMaxExcludedInPrompt
+        type: number
+        description: "Max excluded features sent in LLM prompt during features identification."
+      - name: featuresMaxEntityFilters
+        type: number
+        description: "Max entity filters applied during features identification sampling."
+      - name: featuresMaxPreviouslyIdentified
+        type: number
+        description: "Max previously identified features sent in LLM prompt during features identification."
+      - name: featuresRecencyThresholdHours
+        type: number
+        default: 12
+        description: "Skip features identification if features were identified within this many hours."
+      - name: queriesMaxExistingForContext
+        type: number
+        description: "Max existing queries for LLM context in query generation."
+steps:
+  # -----------------------------------------------------------------------
+  # Step 0: Initialize variables.
+  # -----------------------------------------------------------------------
+  - name: init
+    type: data.set
+    with:
+      discoveredFeatures: []
+      generatedQueries: []
+      persistedQueries: []
+      skipFeatures: "${{ inputs.skipFeatures }}"
+      featuresTokensUsed: {}
+      queriesTokensUsed: {}
+      featuresConnectorUsed: ""
+      queriesConnectorUsed: ""
+      cycleStartedAt: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000Z" }}'
+
+  # -----------------------------------------------------------------------
+  # Step 1: Recency check — auto-skip features if recently identified.
+  #         When skipQueries=true we always want to identify features,
+  #         so the recency optimization is skipped in that case.
+  # -----------------------------------------------------------------------
+  - name: check_should_identify
+    type: if
+    condition: "${{ variables.skipFeatures == false and inputs.skipQueries == false }}"
+    steps:
+      - name: should_identify
+        type: kibana.request
+        with:
+          method: GET
+          path: "/internal/streams/{{ inputs.streamName }}/features/_should_identify?thresholdHours={{ inputs.featuresRecencyThresholdHours }}"
+          headers:
+            x-elastic-internal-origin: "kibana"
+      - name: skip_if_recent
+        type: if
+        condition: "${{ steps.should_identify.output.shouldIdentify == false }}"
+        steps:
+          - name: set_skip_features
+            type: data.set
+            with:
+              skipFeatures: true
+
+  # -----------------------------------------------------------------------
+  # Step 2: Features identification (unless skipped or recent)
+  # -----------------------------------------------------------------------
+  - name: run_features
+    type: if
+    condition: "${{ variables.skipFeatures == false }}"
+    steps:
+      - name: identify_features
+        type: workflow.execute
+        with:
+          workflow-id: "system-streams-ki-features-identification"
+          inputs:
+            streamName: "${{ inputs.streamName }}"
+            connectorId: "${{ inputs.featuresConnectorId }}"
+            start: "${{ inputs.featuresStart }}"
+            end: "${{ inputs.featuresEnd }}"
+            maxIterations: "${{ inputs.featuresMaxIterations }}"
+            sampleSize: "${{ inputs.featuresSampleSize }}"
+            featureTtlDays: "${{ inputs.featuresTtlDays }}"
+            entityFilteredRatio: "${{ inputs.featuresEntityFilteredRatio }}"
+            diverseRatio: "${{ inputs.featuresDiverseRatio }}"
+            maxExcludedFeaturesInPrompt: "${{ inputs.featuresMaxExcludedInPrompt }}"
+            maxEntityFilters: "${{ inputs.featuresMaxEntityFilters }}"
+            maxPreviouslyIdentifiedFeatures: "${{ inputs.featuresMaxPreviouslyIdentified }}"
+      - name: save_features_output
+        type: data.set
+        with:
+          discoveredFeatures: "${{ steps.identify_features.output.discoveredFeatures }}"
+          featuresTokensUsed: "${{ steps.identify_features.output.tokensUsed }}"
+          featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
+
+  # -----------------------------------------------------------------------
+  # Step 3: Queries generation (unless skipped)
+  # -----------------------------------------------------------------------
+  - name: run_queries
+    type: if
+    condition: "${{ inputs.skipQueries == false }}"
+    steps:
+      - name: generate_queries
+        type: workflow.execute
+        with:
+          workflow-id: "system-streams-ki-queries-generation"
+          inputs:
+            streamName: "${{ inputs.streamName }}"
+            connectorId: "${{ inputs.queriesConnectorId }}"
+            maxExistingQueriesForContext: "${{ inputs.queriesMaxExistingForContext }}"
+      - name: save_queries_output
+        type: data.set
+        with:
+          generatedQueries: "${{ steps.generate_queries.output.queries }}"
+          persistedQueries: "${{ steps.generate_queries.output.persistedQueries }}"
+          queriesTokensUsed: "${{ steps.generate_queries.output.tokensUsed }}"
+          queriesConnectorUsed: "${{ steps.generate_queries.output.connectorId }}"
+
+  # -----------------------------------------------------------------------
+  # Step 4: Keep-alive — re-stamp persistent KIs (durable ones, plus excluded
+  #         features whose exclusion must be remembered) not refreshed this
+  #         cycle so DSL retention does not physically delete them.
+  # -----------------------------------------------------------------------
+  - name: keep_alive_persistent
+    type: kibana.request
+    with:
+      method: POST
+      path: "/internal/streams/{{ inputs.streamName }}/knowledge_indicators/_keep_alive"
+      headers:
+        x-elastic-internal-origin: "kibana"
+      body:
+        lastRefreshedBefore: "${{ variables.cycleStartedAt }}"
+
+  # -----------------------------------------------------------------------
+  # Step 5: Output summary
+  # -----------------------------------------------------------------------
+  - name: output_result
+    type: workflow.output
+    with:
+      streamName: "${{ inputs.streamName }}"
+      featuresSkipped: "${{ variables.skipFeatures }}"
+      featuresConnectorUsed: "${{ variables.featuresConnectorUsed }}"
+      discoveredFeatures: "${{ variables.discoveredFeatures }}"
+      featuresTokensUsed: "${{ variables.featuresTokensUsed }}"
+      queriesSkipped: "${{ inputs.skipQueries }}"
+      queriesConnectorUsed: "${{ variables.queriesConnectorUsed }}"
+      persistedQueries: "${{ variables.persistedQueries }}"
+      queriesTokensUsed: "${{ variables.queriesTokensUsed }}"
+      keepAliveRefreshed: "${{ steps.keep_alive_persistent.output.refreshed }}"

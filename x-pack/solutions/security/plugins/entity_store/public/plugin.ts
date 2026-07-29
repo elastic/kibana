@@ -7,9 +7,14 @@
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { AppPluginSetupDependencies } from './types';
+import { registerTriggerDefinitions } from './workflow/triggers';
+import { registerStepDefinitions } from './workflow/steps';
 
 export class EntityStorePlugin implements Plugin {
   public setup(core: CoreSetup, deps: AppPluginSetupDependencies) {
+    registerTriggerDefinitions(deps.workflowsExtensions);
+    registerStepDefinitions(deps.workflowsExtensions);
+
     // DON'T REGISTER APPLICATION ON THIS STAGE, WILL BE DONE LATER ON DEVELOPMENT STAGE
     //
     // core.application.register({

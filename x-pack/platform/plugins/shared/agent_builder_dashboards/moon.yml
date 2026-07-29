@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/agent-builder-dashboards-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/kibana-presentation'
 toolchains:
   default: node
 language: typescript
@@ -14,15 +14,17 @@ project:
   title: '@kbn/agent-builder-dashboards-plugin'
   description: Moon project for @kbn/agent-builder-dashboards-plugin
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/kibana-presentation'
   sourceRoot: x-pack/platform/plugins/shared/agent_builder_dashboards
 dependsOn:
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
-  - '@kbn/agent-builder-tools-base'
+  - '@kbn/agent-builder-visualizations-server'
+  - '@kbn/agent-builder-visualizations-common'
   - '@kbn/agent-builder-server'
+  - '@kbn/controls-constants'
   - '@kbn/dashboard-plugin'
   - '@kbn/agent-builder-dashboards-common'
   - '@kbn/zod'
@@ -34,14 +36,17 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
+  - '@kbn/esql-utils'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'
-  - '@kbn/agent-context-layer-plugin'
+  - '@kbn/agent-builder-sml-plugin'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-transforms'
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
+  - '@kbn/esql-utils'
+  - '@kbn/presentation-publishing'
 tags:
   - plugin
   - prod

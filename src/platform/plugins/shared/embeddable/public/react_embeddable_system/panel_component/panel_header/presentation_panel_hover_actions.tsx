@@ -29,6 +29,7 @@ import { buildContextMenuForActions, triggers } from '@kbn/ui-actions-plugin/pub
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
 import { apiCanLockHoverActions, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { getPanelContextMenuTriggerId } from '@kbn/presentation-util';
 import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
 import { BehaviorSubject, Subscription, switchMap } from 'rxjs';
 import {
@@ -62,7 +63,10 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
 
 const ALLOWED_NOTIFICATIONS = ['ACTION_FILTERS_NOTIFICATION'] as const;
 
-const createClickHandler =
+const getQuickActionElementId = (actionId: string, uuid: string) =>
+  `presentationPanelQuickAction-${actionId}-${uuid}`;
+
+export const createClickHandler =
   (action: Action<EmbeddableApiContext>, context: ActionExecutionContext<EmbeddableApiContext>) =>
   (event: React.MouseEvent) => {
     if (event.currentTarget instanceof HTMLAnchorElement) {
@@ -76,7 +80,6 @@ const createClickHandler =
         event.preventDefault();
       }
     }
-    (event.currentTarget as HTMLElement).blur();
     action.execute(context);
   };
 
@@ -379,6 +382,7 @@ export const PresentationPanelHoverActions = ({
   const ContextMenuButton = (
     <EuiToolTip content={getContextMenuAriaLabel(title, index)} disableScreenReaderOutput>
       <EuiButtonIcon
+        id={api?.uuid ? getPanelContextMenuTriggerId(api.uuid) : undefined}
         color="text"
         data-test-subj="embeddablePanelToggleMenuIcon"
         aria-label={getContextMenuAriaLabel(title, index)}
@@ -460,13 +464,14 @@ export const PresentationPanelHoverActions = ({
               />
             )}
             {quickActionElements.map(
-              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name, id }) => (
                 <EuiToolTip
                   key={`main_action_${dataTestSubj}_${api?.uuid}`}
                   content={name}
                   disableScreenReaderOutput
                 >
                   <EuiButtonIcon
+                    id={api?.uuid ? getQuickActionElementId(id, api.uuid) : undefined}
                     iconType={iconType}
                     color="text"
                     onClick={onClick as MouseEventHandler}

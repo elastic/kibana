@@ -70,6 +70,19 @@ describe('WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS', () => {
     expect(properties.finishedAt).toEqual({ type: 'date' });
     expect(properties.duration).toEqual({ type: 'long' });
   });
+
+  it('indexes token usage fields, including cached token counts', () => {
+    const properties = WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
+    expect(properties.usage).toEqual({
+      type: 'object',
+      properties: {
+        inputTokens: { type: 'long' },
+        outputTokens: { type: 'long' },
+        cachedTokens: { type: 'long' },
+        totalTokens: { type: 'long' },
+      },
+    });
+  });
 });
 
 describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
@@ -97,5 +110,29 @@ describe('WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS', () => {
     // duplicate the envelope here.
     const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
     expect(properties.hitl).toBeUndefined();
+  });
+
+  it('indexes aggregate and per-step token usage fields', () => {
+    const properties = WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS.properties ?? {};
+    expect(properties.usage).toEqual({
+      type: 'object',
+      properties: {
+        inputTokens: { type: 'long' },
+        outputTokens: { type: 'long' },
+        cachedTokens: { type: 'long' },
+        totalTokens: { type: 'long' },
+      },
+    });
+    expect(properties.stepUsage).toEqual({
+      type: 'nested',
+      properties: {
+        stepId: { type: 'keyword' },
+        connectorId: { type: 'keyword' },
+        inputTokens: { type: 'long' },
+        outputTokens: { type: 'long' },
+        cachedTokens: { type: 'long' },
+        totalTokens: { type: 'long' },
+      },
+    });
   });
 });

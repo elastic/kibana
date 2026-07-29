@@ -12,6 +12,7 @@ import { test } from '../../../fixtures';
 import {
   cancelRetentionChanges,
   closeToastsIfPresent,
+  openDeletePhaseEditor,
   openLifecycleMethodFlyout,
   setCustomRetention,
   RETENTION_TEST_IDS,
@@ -73,14 +74,15 @@ test.describe(
       await setCustomRetention(page, '7', 'd');
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
-      // Open the delete-phase flyout, change the value but cancel - original preserved
-      await page.getByTestId('lifecyclePhase-delete-button').click();
-      await page.getByTestId('lifecyclePhase-delete-editButton').click();
-      const deletePhaseFlyout = page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseFlyout);
-      await expect(deletePhaseFlyout).toBeVisible();
-      await deletePhaseFlyout.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseValue).fill('14');
-      await page.getByTestId(RETENTION_TEST_IDS.successfulDeletePhaseCancelButton).click();
-      await expect(deletePhaseFlyout).toBeHidden();
+      // Open the existing delete phase, change the value but cancel - original preserved. Routed
+      // through openDeletePhaseEditor so it works in both flows (stateful data phases flyout vs
+      // serverless delete-only flyout).
+      const { flyout, fields, valueTestId, cancelTestId } = await openDeletePhaseEditor(page, {
+        existing: true,
+      });
+      await fields.getByTestId(valueTestId).fill('14');
+      await page.getByTestId(cancelTestId).click();
+      await expect(flyout).toBeHidden();
       await expect(page.getByTestId(RETENTION_TEST_IDS.retentionMetric)).toContainText('7 days');
 
       // Set a new value and save - value updates

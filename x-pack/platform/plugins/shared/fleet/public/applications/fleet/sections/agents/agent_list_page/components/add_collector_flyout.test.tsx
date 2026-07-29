@@ -215,6 +215,28 @@ describe('AddCollectorFlyout', () => {
     expect(configYaml).toContain('Authorization: "ApiKey space-created-token"');
   });
 
+  it('does not fetch OpAMP policy/token until spaceId is resolved (prevents Default-space mis-enrollment)', async () => {
+    // Start with spaceId undefined (simulates the async resolution race on first render)
+    mockedUseFleetStatus.mockReturnValue({ spaceId: undefined } as any);
+
+    mockedSendGetOneAgentPolicy.mockResolvedValue({
+      data: { item: { id: 'my-space-opamp' } },
+    } as any);
+    mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+      data: { items: [{ api_key: 'space-token' }] },
+    } as any);
+
+    renderFlyout();
+
+    // Give React a tick to flush any immediate effects
+    await new Promise((r) => setTimeout(r, 50));
+
+    // Neither the lookup nor the create should have fired while space is unknown
+    expect(mockedSendGetOneAgentPolicy).not.toHaveBeenCalled();
+    expect(mockedSendCreateAgentPolicyForRq).not.toHaveBeenCalled();
+    expect(mockedSendGetEnrollmentAPIKeys).not.toHaveBeenCalled();
+  });
+
   it('renders a user-facing error when policy/token setup fails', async () => {
     mockedSendGetOneAgentPolicy.mockRejectedValue(new Error('setup failed'));
 
@@ -539,6 +561,73 @@ describe('AddCollectorFlyout', () => {
         expect(yaml).not.toContain('tags:');
         expect(yaml).not.toContain('deployment:');
       });
+    });
+  });
+
+  describe('runtime selector', () => {
+    beforeEach(() => {
+      mockedSendGetOneAgentPolicy.mockResolvedValue({
+        data: { item: { id: 'opamp' } },
+      } as any);
+      mockedSendGetEnrollmentAPIKeys.mockResolvedValue({
+        data: { items: [{ api_key: 'test-token' }] },
+      } as any);
+    });
+
+    it('defaults to Elastic Agent with ./otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
+    });
+
+    it('Elastic Agent filter button is active by default', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      const elasticAgentBtn = component.getByText('Elastic Agent').closest('button');
+      const otelContribBtn = component.getByText('OTel Contrib Collector').closest('button');
+
+      expect(elasticAgentBtn).toHaveAttribute('aria-pressed', 'true');
+      expect(otelContribBtn).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    it('switching to OTel Contrib Collector shows otelcol-contrib command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol-contrib --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+    });
+
+    it('switching back to Elastic Agent restores otelcol command', async () => {
+      const component = renderFlyout();
+
+      await waitFor(() => component.getByTestId('runCollectorCommand'));
+
+      fireEvent.click(component.getByText('OTel Contrib Collector'));
+      fireEvent.click(component.getByText('Elastic Agent'));
+
+      expect(component.getByTestId('runCollectorCommand').textContent).toContain(
+        './otelcol --config ./otel-opamp.yaml'
+      );
+      expect(component.getByTestId('runCollectorCommand').textContent).not.toContain(
+        'otelcol-contrib'
+      );
     });
   });
 

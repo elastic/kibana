@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient } from '@kbn/react-query';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { AlertEpisodesListPage } from './alert_episodes_list_page';
 import type { CustomBulkActions } from '@kbn/unified-data-table';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -25,6 +25,27 @@ import {
   createEpisodeActions,
   type EpisodeActionContext,
 } from '@kbn/alerting-v2-episodes-ui/actions';
+
+const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
+
+const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
+const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
+let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
+
+jest.mock('@kbn/core-di-browser', () => {
+  const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
+    '../../services/user_capabilities'
+  );
+  return {
+    useService: (token: unknown) => {
+      if (token === ActualUserCapabilities) {
+        return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+});
 
 jest.mock('@kbn/unified-data-table', () => ({
   DataLoadingState: { loading: 'loading', loaded: 'loaded' },
@@ -53,6 +74,7 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query');
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
+  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
@@ -96,6 +118,13 @@ jest.mock('react-use/lib/useObservable', () =>
 const mockHttp = httpServiceMock.createStartContract();
 const mockSpaces = createMockSpaces();
 
+const mockStorage = {
+  get: jest.fn().mockReturnValue(null),
+  set: jest.fn(),
+  remove: jest.fn(),
+  clear: jest.fn(),
+};
+
 const mockServices = {
   http: mockHttp,
   data: {
@@ -123,6 +152,7 @@ const mockServices = {
   userProfile: {},
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
+  storage: mockStorage,
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -170,11 +200,9 @@ const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
 
 const mockedUseEpisodesKpisQuery = jest.mocked(useEpisodesKpisQuery);
 
-// The page calls useEpisodesKpisQuery twice: filtered (filterState defined)
-// and total (filterState undefined). Differentiate by that arg.
-const defaultKpisImpl: typeof useEpisodesKpisQuery = ({ filterState }) => ({
+const defaultKpisImpl: typeof useEpisodesKpisQuery = () => ({
   data: {
-    alertsCount: filterState ? 3 : 10,
+    alertsCount: 3,
     firingRules: 0,
     assignedToMe: 0,
     unassigned: 0,
@@ -193,21 +221,17 @@ const getCapturedBulkActions = (): CustomBulkActions => {
 };
 
 const renderPage = () => {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <I18nProvider>
-      <MemoryRouter>
-        <QueryClientProvider client={queryClient}>
-          <AlertEpisodesListPage />
-        </QueryClientProvider>
-      </MemoryRouter>
-    </I18nProvider>
+    <ListPageTestProviders>
+      <AlertEpisodesListPage />
+    </ListPageTestProviders>
   );
 };
 
 describe('AlertEpisodesListPage', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
     jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
@@ -221,7 +245,13 @@ describe('AlertEpisodesListPage', () => {
   });
 
   it('renders the experimental badge in the page header', () => {
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alert episodes');
     expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
+  });
+
+  it('renders the manage rules link in the app header menu', async () => {
+    const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
+    expect(manageRulesLink).toHaveAttribute('href', '/app/management/alertingV2/rules');
   });
 
   it('passes customBulkActions derived from episode actions to UnifiedDataTable', () => {
@@ -313,6 +343,7 @@ describe('AlertEpisodesListPage', () => {
 describe('query invalidation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
     capturedFilterBarOnRefresh = undefined;
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
@@ -386,6 +417,7 @@ describe('query invalidation', () => {
 describe('episode count + reset filters toolbar', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCapabilities = WRITE_CAPABILITIES;
     capturedFilterBarOnFilterChange = undefined;
     mockCreateEpisodeActions.mockReturnValue([]);
     jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
@@ -394,17 +426,16 @@ describe('episode count + reset filters toolbar', () => {
     mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
   });
 
-  it('renders "Showing X of Y alerts" with filtered and total counts', async () => {
+  it('renders the episode count', async () => {
     renderPage();
     const node = await screen.findByTestId('alertEpisodesItemCount');
-    expect(node.textContent).toMatch(/^Showing\s+3\s+of\s+10\s+alerts$/);
+    expect(node.textContent).toMatch(/^Showing\s+3\s+episodes$/);
   });
 
-  it('fires useEpisodesKpisQuery both with and without filterState', () => {
+  it('fires useEpisodesKpisQuery only with filterState', () => {
     renderPage();
     const calls = mockedUseEpisodesKpisQuery.mock.calls.map(([args]) => args);
-    expect(calls.some((c) => c.filterState !== undefined)).toBe(true);
-    expect(calls.some((c) => c.filterState === undefined)).toBe(true);
+    expect(calls.every((c) => c.filterState !== undefined)).toBe(true);
   });
 
   it('disables the reset filters button when filter state equals the default', async () => {
@@ -429,5 +460,72 @@ describe('episode count + reset filters toolbar', () => {
     await waitFor(() => {
       expect(screen.getByTestId('episodesFilterBar-resetFilters')).toBeDisabled();
     });
+  });
+});
+
+describe('privilege gating', () => {
+  const ackAction = {
+    id: 'ALERTING_V2_ACK_EPISODE',
+    order: 10,
+    displayName: 'Acknowledge',
+    iconType: 'checkCircle',
+    isCompatible: () => true,
+    execute: jest.fn(async () => {}),
+  };
+  const discoverAction = {
+    id: OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    order: 50,
+    displayName: 'Open in Discover',
+    iconType: 'discoverApp',
+    isCompatible: () => true,
+    execute: jest.fn(async () => {}),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.mocked(useAlertingEpisodesDataView).mockReturnValue(mockDataView as any);
+    jest.mocked(fetchAlertingEpisodes).mockResolvedValue(mockEpisodes as any);
+    mockHttp.post.mockResolvedValue({ rules: [] });
+    mockedUseEpisodesKpisQuery.mockImplementation(defaultKpisImpl);
+    mockCreateEpisodeActions.mockReturnValue([ackAction, discoverAction]);
+  });
+
+  const getRowControlIds = (): string[] => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    return (lastCall?.rowAdditionalLeadingControls ?? []).map((control) => control.id);
+  };
+
+  const waitForRows = () =>
+    waitFor(() => {
+      const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+      expect(lastCall?.rows?.length).toBeGreaterThan(0);
+    });
+
+  it('exposes every episode action when the user has write privilege', async () => {
+    mockCapabilities = WRITE_CAPABILITIES;
+
+    renderPage();
+    await waitForRows();
+
+    expect(getRowControlIds()).toEqual([
+      'ALERTING_V2_ACK_EPISODE',
+      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    ]);
+    expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
+      'ALERTING_V2_ACK_EPISODE',
+      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    ]);
+  });
+
+  it('hides mutating episode actions when the user only has read privilege', async () => {
+    mockCapabilities = READ_ONLY_CAPABILITIES;
+
+    renderPage();
+    await waitForRows();
+
+    expect(getRowControlIds()).toEqual([OPEN_IN_DISCOVER_EPISODE_ACTION_ID]);
+    expect(getCapturedBulkActions().map((action) => action.key)).toEqual([
+      OPEN_IN_DISCOVER_EPISODE_ACTION_ID,
+    ]);
   });
 });

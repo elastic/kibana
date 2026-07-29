@@ -1,0 +1,446 @@
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+entries:
+- file:
+    name: 270307.yaml
+    checksum: 0f15b30566f4d9dbfd8728b673445bc2d9fbc811
+  type: enhancement
+  title: Update tooltip text in **Metrics** and **Traces** actions
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/270307
+  issues:
+  - https://github.com/elastic/kibana/issues/268129
+- file:
+    name: 270540.yaml
+    checksum: d2384b1c2d9fc69229021c0f022e0d50df315604
+  type: bug-fix
+  title: Fix monitor health API for monitors in non-default spaces
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  description: When using Kibana Spaces, the Synthetics monitor health endpoint could incorrectly report monitors as unhealthy — showing errors such as "missing location", "missing agent policy", or "missing package policy" — even when everything was properly configured. This happened because the health check was only looking for monitors, private locations, and Fleet policies in the current space, missing resources that existed in other spaces.
+  prs:
+  - https://github.com/elastic/kibana/pull/270540
+  issues:
+  - https://github.com/elastic/kibana/issues/270477
+- file:
+    name: 269018.yaml
+    checksum: fa9da48096ba99ac410e7b11ba94413335bcd95e
+  type: bug-fix
+  title: Fix empty sort array triggering unsaved changes
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/269018
+  issues:
+  - https://github.com/elastic/kibana/issues/269016
+- file:
+    name: 270782.yaml
+    checksum: 0c388de33bc1fee21ee9a0505f7a7131c9cf559d
+  type: bug-fix
+  title: Show ML anomaly detection and stack alerts on the Observability **Alerts** page
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  description: ML anomaly detection alerts and Stack alerts are now visible on the Observability Alerts page for users who have the corresponding feature privileges.
+  prs:
+  - https://github.com/elastic/kibana/pull/270782
+- file:
+    name: 270608.yaml
+    checksum: bbfd5f9a5a3469bde5e71088a385a6e22c7f4ab3
+  type: bug-fix
+  title: Disallow deletion of managed data views in Stack Management UI
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/270608
+  issues:
+  - https://github.com/elastic/kibana/issues/270030
+- file:
+    name: 264518.yaml
+    checksum: 224be5c8f576a86472157c36c56167a7f535e5bb
+  type: bug-fix
+  title: Preserve table state during auto-refresh with grouping
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/264518
+  issues:
+  - https://github.com/elastic/kibana/issues/262246
+- file:
+    name: 268940.yaml
+    checksum: d0c6a1563bf8e0cf18220c8c180ef4609017cc8b
+  type: enhancement
+  title: Always use `deployment.environment.name` for APM environment identification
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/268940
+- file:
+    name: 269869.yaml
+    checksum: 9bad8089c2e97d465079ddf725838725cc1c9060
+  type: bug-fix
+  title: Add flyout to configure delete phase retention in Streams
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269869
+  issues:
+  - https://github.com/elastic/kibana/issues/266049
+- file:
+    name: 269074.yaml
+    checksum: 7c3fdfe6719cd0677231142d0a2752c1a5b8732d
+  type: bug-fix
+  title: Fix missing .otel suffix on named OTel inputs
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/269074
+- file:
+    name: 266220.yaml
+    checksum: e1fceeb267533461217795329e9c94bfdca642f8
+  type: feature
+  title: Add CRUD API endpoints for Kibana platform
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Kibana platform
+  prs:
+  - https://github.com/elastic/kibana/pull/266220
+  issues:
+  - https://github.com/elastic/kibana/issues/215243
+- file:
+    name: 270970.yaml
+    checksum: 1898948c0c490fb57c08b4929eddc195fd1db630
+  type: bug-fix
+  title: Restore **Tags** column and fix trigger icon alignment in the Workflows list
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/270970
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17005'
+- file:
+    name: 269550.yaml
+    checksum: b9da802094038229d160bcfedb2ce4cc027fe4b7
+  type: enhancement
+  title: Add unified search controls and filter support to service map
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269550
+  issues:
+  - https://github.com/elastic/kibana/issues/269194
+- file:
+    name: 270116.yaml
+    checksum: abdbde8017c1264560a74954f51c5c540cf8620e
+  type: bug-fix
+  title: Group continuous extraction workflow inputs under manual trigger
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/270116
+- file:
+    name: 271091.yaml
+    checksum: b1b947fbd0a8b5481c34b2c663b7275e4c4d48b9
+  type: bug-fix
+  title: Fix workflow step output getting lost when resuming execution
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/271091
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17554'
+- file:
+    name: 269730.yaml
+    checksum: 36691a4c895d4561de5320742923bde95a9ced72
+  type: feature
+  title: Add recurring rule scheduling with rrule support
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269730
+- file:
+    name: 269988.yaml
+    checksum: 367d87f4859fd22019aa733268fbc8b43e975e94
+  type: bug-fix
+  title: Fix `default_pipeline` not updating on write index for second OTel metrics stream
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269988
+  issues:
+  - https://github.com/elastic/kibana/issues/269984
+- file:
+    name: 270603.yaml
+    checksum: 5cb01fcdd49cf4d64e095f6b7a24324b324b098f
+  type: bug-fix
+  title: Fix unhandled DOM exceptions in ES|QL editor
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/270603
+- file:
+    name: 270137.yaml
+    checksum: 341df75c2de92fcc1abee54da8f038002fd26c1b
+  type: bug-fix
+  title: Fix false missing integration warnings and repeated health checks in Synthetics
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  description: Fixes false "missing integration" warnings on project monitors by using the correct monitor identifier in health checks. Also fixes infinite `_health` polling triggered by the missing-integration banner on monitor overview pages.
+  prs:
+  - https://github.com/elastic/kibana/pull/270137
+  issues:
+  - https://github.com/elastic/kibana/issues/270125
+- file:
+    name: 269642.yaml
+    checksum: 289b3ac7437863beb7fa5116359c806557f3d0b1
+  type: bug-fix
+  title: Fix incorrect UI setting override
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269642
+- file:
+    name: 269790.yaml
+    checksum: 3c52aa9d42494d84f72337631a0c5608426fe841
+  type: enhancement
+  title: Improve consistency in the **View details** flyout in Discover
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269790
+  issues:
+  - https://github.com/elastic/kibana/issues/269041
+- file:
+    name: 269895.yaml
+    checksum: 849691427887f04118ec7c5b61f40e97f5146270
+  type: enhancement
+  title: Support `data_stream.type` variable in Fleet's simplified package policy API
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  description: Fleet now supports overriding `data_stream.type` via the simplified package policy API for input-only packages. Setting this variable routes collected data to a different Elasticsearch index prefix (e.g. `logs-*` instead of `metrics-*`) and grants the appropriate index permissions to the agent.
+  areas:
+  - Search and data
+  prs:
+  - https://github.com/elastic/kibana/pull/269895
+  issues:
+  - https://github.com/elastic/kibana/issues/266321
+- file:
+    name: 269335.yaml
+    checksum: f3902a5895c292c5586e3fce9659b595127a47ed
+  type: enhancement
+  title: Add `platform.core.list_workflow_executions` tool for Agent Builder
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269335
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17367'
+- file:
+    name: 269898.yaml
+    checksum: 5bbba7750a220ea501786a9d40092d1828df0d3e
+  type: bug-fix
+  title: Fix HTTP connector TLS options through proxies
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/269898
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17454'
+  - https://github.com/elastic/kibana/issues/196602
+- file:
+    name: 270338.yaml
+    checksum: 3cd05f2f8c69b2d57d74c39ce3440785673f1eb7
+  type: enhancement
+  title: Improve period comparison with a chart showing both time periods in Discover ES|QL
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/270338
+- file:
+    name: 268397.yaml
+    checksum: 7d6e84ee965730fac270b253f96388726d40bd23
+  type: enhancement
+  title: Add warning callout for escaped wildcards in rule exception matches
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  description: Adds a warning callout and confirmation modal to the rule exceptions form when a user enters escaped characters (e.g. `\*` or `\?`) with the matches operator, indicating they may have intended wildcards instead. The warning is non-blocking, users can acknowledge and save.
+  prs:
+  - https://github.com/elastic/kibana/pull/268397
+- file:
+    name: 269744.yaml
+    checksum: 168184bce9444b009749b78b19b785e20bbfc944
+  type: enhancement
+  title: Show inner search requests in the Inspect panel
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/269744
+- file:
+    name: 269590.yaml
+    checksum: 46ee304528e89ab7696ce7bcaa758013ab466ba8
+  type: enhancement
+  title: Add tab actions to app menu
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/269590
+  issues:
+  - https://github.com/elastic/kibana/issues/269347
+- file:
+    name: 270230.yaml
+    checksum: bbc22f10c4561febfe43eb1517aa83421673d972
+  type: bug-fix
+  title: Fix **Links** panel saving unsupported `enhancements` property
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/270230
+  issues:
+  - https://github.com/elastic/kibana/issues/270190
+- file:
+    name: 268591.yaml
+    checksum: 351897d3448abc8091fac34550f21693071bba5d
+  type: bug-fix
+  title: Clarify connector response size limit error messages
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/268591
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17243'
+- file:
+    name: 267454.yaml
+    checksum: 117f15123456ff260e5a3a9aaec68ba69419f10f
+  type: enhancement
+  title: Add context-aware deep AI analysis in Discover
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Discover and ES|QL
+  prs:
+  - https://github.com/elastic/kibana/pull/267454
+- file:
+    name: 263895.yaml
+    checksum: b1859e7df191f0ed39f43734af66cf6ec3c1dbdc
+  type: feature
+  title: Add CSV export button to the **Alerts** table
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/263895
+- file:
+    name: 270597.yaml
+    checksum: a4e34b0f87c6511dc1382963228e0c6e3b515ae3
+  type: bug-fix
+  title: Fix "Conversation not found" errors during first message
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/270597
+- file:
+    name: 268847.yaml
+    checksum: bea6e8586b3aca668ff3faf7c25f5324b5b50cd3
+  type: feature
+  title: Add JWT assertion-based client credentials authentication for connectors
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  description: Connectors V2 can now authenticate using client credentials flow with a JWT assertion instead of client secret.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/268847
+- file:
+    name: 267530.yaml
+    checksum: 867bdc9993b130da180e5c31f8a17d328093d327
+  type: feature
+  title: Add per-agent access control lists (ACLs) in Agent Builder
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - AI and machine Learning
+  prs:
+  - https://github.com/elastic/kibana/pull/267530
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/14263'
+- file:
+    name: 266706.yaml
+    checksum: 12e098b1d714f9f715294554a16037c74a879494
+  type: feature
+  title: Add date range filter to rule execution history
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  prs:
+  - https://github.com/elastic/kibana/pull/266706
+- file:
+    name: 269774.yaml
+    checksum: 02de3bfe8cb9760abeb3e2c539d99894c1385765
+  type: bug-fix
+  title: Fix waffle chart legend values not persisting correctly through the API
+  products:
+  - product: cloud-serverless
+    target: 2026-05-26
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/269774
+  issues:
+  - https://github.com/elastic/kibana/issues/268819

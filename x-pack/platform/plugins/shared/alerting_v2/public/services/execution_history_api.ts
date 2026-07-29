@@ -11,6 +11,8 @@ import { CoreStart } from '@kbn/core-di-browser';
 import type {
   CountPolicyExecutionEventsParams,
   CountPolicyExecutionEventsResponse,
+  GetRuleExecutionsQuery,
+  GetRuleExecutionsResponse,
   ListPolicyExecutionHistoryParams,
   ListPolicyExecutionHistoryResponse,
   PolicyExecutionHistoryItem,
@@ -19,9 +21,10 @@ import type {
 import {
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
   ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+  ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
 } from '../constants';
 
-export type { PolicyExecutionHistoryItem, PolicyExecutionOutcomeFilter };
+export type { GetRuleExecutionsResponse, PolicyExecutionHistoryItem, PolicyExecutionOutcomeFilter };
 
 export type CountNewSinceParams = Omit<CountPolicyExecutionEventsParams, 'since'>;
 
@@ -37,7 +40,10 @@ export class ExecutionHistoryApi {
           page: params.page,
           perPage: params.perPage,
           search: params.search,
+          ruleIds: params.ruleIds,
           outcome: params.outcome,
+          episodeIds: params.episodeIds,
+          start_date: params.start_date,
         },
       }
     );
@@ -47,8 +53,14 @@ export class ExecutionHistoryApi {
     return this.http.get<CountPolicyExecutionEventsResponse>(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
       {
-        query: { since, search: params.search, outcome: params.outcome },
+        query: { since, search: params.search, ruleIds: params.ruleIds, outcome: params.outcome },
       }
     );
+  }
+
+  public async getRuleExecutions(params: Partial<GetRuleExecutionsQuery>) {
+    return this.http.get<GetRuleExecutionsResponse>(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
+      query: params,
+    });
   }
 }

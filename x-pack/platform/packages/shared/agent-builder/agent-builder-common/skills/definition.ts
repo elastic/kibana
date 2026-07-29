@@ -59,6 +59,10 @@ export interface PublicSkillDefinition {
    * When true, this skill is only available when experimental features are enabled.
    */
   experimental: boolean;
+  /**
+   * When true, this skill is not automatically included when Elastic capabilities are enabled.
+   */
+  exclude_from_elastic_capabilities?: boolean;
 }
 
 /**

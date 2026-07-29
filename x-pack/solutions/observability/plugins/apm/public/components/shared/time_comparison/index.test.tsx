@@ -18,12 +18,14 @@ import {
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { EXPECTED_BOUNDS_TEST_SUBJ } from './get_comparison_options';
+import { EXPECTED_BOUNDS_TEST_SUBJ, TimeRangeComparisonEnum } from './get_comparison_options';
 import * as useAnomalyDetectionJobsContextModule from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import * as useEnvironmentContextModule from '../../../context/environments_context/use_environments_context';
+import * as useShouldShowAnomalyUiModule from '../../../hooks/use_should_show_anomaly_ui';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { merge } from 'lodash';
 import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
+import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { EuiThemeProvider } from '@elastic/eui';
 
@@ -102,6 +104,7 @@ describe('TimeComparison component', () => {
         {
           anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
           anomalyDetectionJobsData: ML_AD_JOBS,
+          anomalyDetectionSetupState: AnomalyDetectionSetupState.UpToDate,
         }
       );
 
@@ -121,6 +124,7 @@ describe('TimeComparison component', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     mockMLJobs();
+    jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
   });
 
   describe('ML expected model bounds', () => {
@@ -129,6 +133,10 @@ describe('TimeComparison component', () => {
         application: { capabilities: { ml: { canGetJobs: true } } },
       },
     }) as unknown as ApmPluginContextValue;
+
+    beforeEach(() => {
+      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(true);
+    });
 
     it('shows disabled option for expected bounds when there are ML jobs available with sufficient permission', () => {
       jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce(
@@ -159,6 +167,80 @@ describe('TimeComparison component', () => {
       ).toEqual(0);
     });
 
+    it('preserves expected bounds deeplink while anomaly detection setup is loading', () => {
+      jest
+        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
+        .mockReturnValue(
+          // @ts-ignore mocking only partial data
+          {
+            anomalyDetectionJobsStatus: FETCH_STATUS.LOADING,
+            anomalyDetectionJobsData: undefined,
+            anomalyDetectionSetupState: AnomalyDetectionSetupState.Loading,
+          }
+        );
+
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+        preferredEnvironment: 'prod',
+        environment: 'prod',
+        environments: [],
+        status: FETCH_STATUS.SUCCESS,
+      });
+
+      const Wrapper = getWrapper({
+        url: '/services/frontend/overview',
+        rangeFrom: '2021-06-04T16:17:02.335Z',
+        rangeTo: '2021-06-04T16:32:02.335Z',
+        comparisonEnabled: true,
+        offset: TimeRangeComparisonEnum.ExpectedBounds,
+        mockPluginContext: pluginContextCanGetMlJobs,
+        environment: 'prod',
+      });
+
+      render(<TimeComparison />, { wrapper: Wrapper });
+
+      expect(spy).not.toHaveBeenCalled();
+    });
+
+    it('replaces the expected bounds deeplink for unauthorized users instead of hiding the selector', () => {
+      // Unauthorized users get a permanent `Unknown` setup state and a fetch that
+      // never initiates, so the deeplink must fall through to the replace guard rather
+      // than being treated as pending (which would hide the selector forever).
+      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
+      jest
+        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
+        .mockReturnValue(
+          // @ts-ignore mocking only partial data
+          {
+            anomalyDetectionJobsStatus: FETCH_STATUS.NOT_INITIATED,
+            anomalyDetectionJobsData: undefined,
+            anomalyDetectionSetupState: AnomalyDetectionSetupState.Unknown,
+          }
+        );
+
+      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
+        preferredEnvironment: 'prod',
+        environment: 'prod',
+        environments: [],
+        status: FETCH_STATUS.SUCCESS,
+      });
+
+      const Wrapper = getWrapper({
+        url: '/services/frontend/overview',
+        rangeFrom: '2021-06-04T16:17:02.335Z',
+        rangeTo: '2021-06-04T16:32:02.335Z',
+        comparisonEnabled: true,
+        offset: TimeRangeComparisonEnum.ExpectedBounds,
+        mockPluginContext: pluginContextCanGetMlJobs,
+        environment: 'prod',
+      });
+
+      render(<TimeComparison />, { wrapper: Wrapper });
+
+      expect(spy).toHaveBeenCalledWith(expect.anything(), {
+        query: { offset: '1d' },
+      });
+    });
+
     it('shows enabled option for expected bounds when there are ML jobs available matching the preferred environment', () => {
       jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
         preferredEnvironment: 'prod',
@@ -187,7 +269,22 @@ describe('TimeComparison component', () => {
       ).toEqual(0);
     });
 
-    it('does not show option for expected bounds when there are no ML jobs available', () => {
+    it('does not render expected bounds option when shouldShowAnomalyUi is false', () => {
+      jest.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
+
+      const Wrapper = getWrapper({
+        url: '/services/frontend/transactions',
+        rangeFrom: '2020-05-27T16:32:46.747Z',
+        rangeTo: '2021-06-04T16:32:46.747Z',
+        comparisonEnabled: true,
+        offset: '32227200000ms',
+        mockPluginContext: pluginContextCanGetMlJobs,
+      });
+      const component = render(<TimeComparison />, { wrapper: Wrapper });
+      expectNoExpectedBoundsOption(component);
+    });
+
+    it('shows disabled option for expected bounds when no ML jobs match the current environment', () => {
       jest
         .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
         .mockReturnValue(
@@ -210,61 +307,10 @@ describe('TimeComparison component', () => {
         wrapper: Wrapper,
       });
       expect(spy).not.toHaveBeenCalled();
-      expectNoExpectedBoundsOption(component);
-      expect(
-        (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
-      ).toEqual(0);
-    });
-
-    it('does not show option for expected bounds for pages other than overall transactions and overview', () => {
-      const urlsWithoutExpectedBoundsOptions = [
-        '/services/frontend/dependencies',
-        '/services/frontend/transactions/view',
-      ];
-
-      urlsWithoutExpectedBoundsOptions.forEach((url) => {
-        const Wrapper = getWrapper({
-          url,
-          rangeFrom: '2020-05-27T16:32:46.747Z',
-          rangeTo: '2021-06-04T16:32:46.747Z',
-          comparisonEnabled: true,
-          offset: '32227200000ms',
-          mockPluginContext: pluginContextCanGetMlJobs,
-          params: '&transactionName=createOrder&transactionType=request',
-        });
-        const component = render(<TimeComparison />, {
-          wrapper: Wrapper,
-        });
-        expect(spy).not.toHaveBeenCalled();
-        expectNoExpectedBoundsOption(component);
-      });
-    });
-
-    it('does not show option for expected bounds if user does not have access to ML jobs', () => {
-      jest.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce(
-        // @ts-ignore mocking only partial data
-        {
-          preferredEnvironment: ENVIRONMENT_ALL.value,
-        }
+      const expectedBoundsOption = component.getByTestId(
+        EXPECTED_BOUNDS_TEST_SUBJ.environmentDisabled
       );
-
-      const Wrapper = getWrapper({
-        url: '/services/frontend/transactions',
-        rangeFrom: '2020-05-27T16:32:46.747Z',
-        rangeTo: '2021-06-04T16:32:46.747Z',
-        comparisonEnabled: true,
-        offset: '32227200000ms',
-        mockPluginContext: merge({}, mockApmPluginContextValue, {
-          core: {
-            application: { capabilities: { ml: { canGetJobs: false } } },
-          },
-        }) as unknown as ApmPluginContextValue,
-      });
-      const component = render(<TimeComparison />, {
-        wrapper: Wrapper,
-      });
-      expect(spy).not.toHaveBeenCalled();
-      expectNoExpectedBoundsOption(component);
+      expect(expectedBoundsOption).toBeDisabled();
       expect(
         (component.getByTestId('comparisonSelect') as HTMLSelectElement).selectedIndex
       ).toEqual(0);

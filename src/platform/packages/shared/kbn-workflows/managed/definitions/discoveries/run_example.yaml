@@ -1,0 +1,196 @@
+version: '1'
+name: Security - Attack discovery - Run example
+description: |
+  Demonstrates the security.attack-discovery.run step, which orchestrates the
+  full Attack Discovery pipeline (alert retrieval → generation → validation →
+  persistence) in a single step. All inputs are optional: when `connector_id`
+  is omitted, the server resolves the configured default AI connector
+  (`genAiSettings:defaultAIConnector`, with an inference default-connector
+  fallback). Provide `connector_id` to override the configured default.
+
+  ## Modes of execution
+
+  ### 1. All defaults (custom_query)
+  Retrieves the 100 most recent security alerts and generates discoveries using
+  the configured default AI connector.
+  ```json
+  {}
+  ```
+
+  ### 2. custom_query with overrides
+  Scope retrieval to a specific time range, alert count, and DSL filter. Pass
+  `connector_id` to override the configured default connector.
+  ```json
+  {
+    "connector_id": "<your-connector-id>",
+    "alert_retrieval_mode": "custom_query",
+    "size": 25,
+    "start": "now-72h",
+    "end": "now",
+    "filter": { "term": { "kibana.alert.severity": "critical" } }
+  }
+  ```
+
+  ### 3. ES|QL retrieval
+  Retrieve alerts via an ES|QL query instead of DSL.
+  ```json
+  {
+    "alert_retrieval_mode": "esql",
+    "esql_query": "FROM .alerts-security.alerts-default METADATA _id | WHERE kibana.alert.severity == \"critical\" | LIMIT 50"
+  }
+  ```
+
+  ### 4. Pre-retrieved alerts (provided)
+  Pass alerts directly — retrieval is skipped automatically when `alerts` is
+  non-empty. This is the primary composability pattern: an upstream step or
+  detection rule populates `alerts`; this step generates discoveries without
+  re-querying Elasticsearch.
+  ```json
+  {
+    "alerts": [
+      "Alert 1: Unusual process execution on host web-prod-01. Process: cmd.exe spawned by iis.exe.",
+      "Alert 2: Lateral movement detected. User admin logged in from 10.0.0.5 to 10.0.0.23 via PsExec.",
+      "Alert 3: Privilege escalation attempt. User admin added to Domain Admins group."
+    ]
+  }
+  ```
+
+  ### 5. Async mode
+  Fire the pipeline without waiting. Returns `execution_uuid` immediately;
+  discoveries are written to Elasticsearch in the background. Can be combined
+  with any retrieval mode by adding the relevant inputs alongside `"mode": "async"`.
+  ```json
+  { "mode": "async" }
+  ```
+enabled: true
+tags:
+  - Attack discovery
+  - Security
+  - Example
+  - attackDiscovery:run_example
+
+triggers:
+  - type: manual
+
+inputs:
+  additionalProperties: false
+  properties:
+    additional_context:
+      description: |
+        Optional free-form text appended to the LLM generation prompt.
+        Use this to provide extra context, constraints, or focus areas
+        that the model should consider when analysing alerts.
+        Example: "Focus on lateral movement and privilege escalation."
+      type: string
+    alert_retrieval_mode:
+      default: custom_query
+      description: |
+        Controls how alerts are retrieved before generation.
+        - provided: Skips retrieval; uses the `alerts` input directly.
+          Automatically selected when `alerts` is non-empty.
+        - custom_query: Retrieves alerts via DSL query (default when
+          `alerts` is empty). Respects `start`, `end`, `size`, and `filter`.
+        - esql: Retrieves alerts via the ES|QL query in `esql_query`.
+        - custom_only: Skips the built-in retrieval; uses only results from
+          `alert_retrieval_workflow_ids` (custom retrieval workflows).
+      enum:
+        - custom_only
+        - custom_query
+        - esql
+        - provided
+      type: string
+    alert_retrieval_workflow_ids:
+      default: []
+      description: |
+        Optional array of custom alert retrieval workflow IDs.
+        These workflows run in parallel with the chosen retrieval mode,
+        and their results are merged into the alert set for generation.
+      items:
+        type: string
+      type: array
+    alerts:
+      default: []
+      description: |
+        Pre-retrieved anonymized alert texts. **Primary composability input.**
+        When provided, alert retrieval is skipped automatically
+        (alert_retrieval_mode becomes "provided"). This is how a detection
+        rule, upstream retrieval step, or another workflow feeds alerts
+        into Attack Discovery.
+        Example: steps.my_retrieval_step.output.alerts
+      items:
+        type: string
+      type: array
+    connector_id:
+      description: |
+        Optional LLM connector UUID used for generation. When omitted, the
+        server resolves the configured default AI connector
+        (genAiSettings:defaultAIConnector, with an inference default-connector
+        fallback). Provide a value to override the configured default.
+      type: string
+    end:
+      description: |
+        Time range end (Elasticsearch date math, e.g. "now").
+        Used when alert_retrieval_mode is custom_query.
+      type: string
+    esql_query:
+      description: |
+        ES|QL query for alert retrieval. Required when
+        alert_retrieval_mode is "esql".
+        Example: FROM .alerts-security.alerts-default METADATA _id
+                 | WHERE kibana.alert.severity == "critical"
+                 | LIMIT 50
+      type: string
+    filter:
+      additionalProperties: true
+      description: |
+        Elasticsearch DSL query filter applied during alert retrieval.
+        Used when alert_retrieval_mode is custom_query.
+      type: object
+    mode:
+      default: sync
+      description: |
+        Execution mode for the pipeline.
+        - sync: Waits for the full pipeline and returns discoveries inline.
+        - async: Fires the pipeline and returns execution_uuid immediately.
+      enum:
+        - async
+        - sync
+      type: string
+    size:
+      default: 100
+      description: |
+        Maximum number of alerts to retrieve. Applies to custom_query
+        and esql retrieval modes.
+      type: integer
+    start:
+      description: |
+        Time range start (Elasticsearch date math, e.g. "now-24h").
+        Used when alert_retrieval_mode is custom_query.
+      type: string
+    validation_workflow_id:
+      default: ''
+      description: |
+        Override the built-in validation workflow. Pass a workflow ID
+        to use a custom validation workflow, or leave empty to use
+        the default validation.
+      type: string
+
+steps:
+  - name: run_attack_discovery
+    type: security.attack-discovery.run
+    timeout: '10m'
+    with:
+      # `alerts` is the primary composability point — when non-empty,
+      # alert_retrieval_mode is automatically set to "provided".
+      additional_context: ${{ inputs.additional_context }}
+      alert_retrieval_mode: ${{ inputs.alert_retrieval_mode }}
+      alert_retrieval_workflow_ids: ${{ inputs.alert_retrieval_workflow_ids }}
+      alerts: ${{ inputs.alerts }}
+      connector_id: ${{ inputs.connector_id }}
+      end: ${{ inputs.end }}
+      esql_query: ${{ inputs.esql_query }}
+      filter: ${{ inputs.filter }}
+      mode: ${{ inputs.mode }}
+      size: ${{ inputs.size }}
+      start: ${{ inputs.start }}
+      validation_workflow_id: ${{ inputs.validation_workflow_id }}

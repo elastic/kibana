@@ -14,7 +14,8 @@ export {
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
-  platformStreamsSigEventsTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
   attachmentTools,
   internalTools,
   activeToolsCountWarningThreshold,

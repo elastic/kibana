@@ -216,4 +216,25 @@ export const ConnectorIconsMap: Map<
     '.dropbox',
     lazy(() => import(/* webpackChunkName: "connectorIcondropbox" */ './specs/dropbox/icon')),
   ],
+  [
+    '.one_drive',
+    lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
+  ],
+  [
+    '.monday_com',
+    lazy(() => import(/* webpackChunkName: "connectorIconMondayCom" */ './specs/monday_com/icon')),
+  ],
+  [
+    '.sublime_security',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconSublimeSecurity" */ './specs/sublime_security/icon'
+        )
+    ),
+  ],
+  [
+    '.kubernetes',
+    lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
+  ],
 ]);

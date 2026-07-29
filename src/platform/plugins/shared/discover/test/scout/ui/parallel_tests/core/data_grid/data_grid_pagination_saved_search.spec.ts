@@ -31,10 +31,9 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({ 'discover:rowHeightOption': 0 });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       // Saving searches and creating dashboard panels require write access.
       await browserAuth.loginAsPrivilegedUser();
-      await pageObjects.discover.setQueryMode('classic');
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -61,7 +60,7 @@ spaceTest.describe(
 
         await spaceTest.step('render the default Discover rows-per-page setting', async () => {
           await discover.goto({ queryMode: 'classic' });
-          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForLoad();
 
           expect(await dataGrid.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
           expect(await dataGrid.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
@@ -75,7 +74,7 @@ spaceTest.describe(
 
         await spaceTest.step('new Discover sessions still use the settings value', async () => {
           await discover.clickNewSearch();
-          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForLoad();
 
           expect(await dataGrid.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
           expect(await dataGrid.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
@@ -85,7 +84,7 @@ spaceTest.describe(
           'the saved search restores its saved rows-per-page value',
           async () => {
             await discover.loadSavedSearch(savedSearchTitle);
-            await dataGrid.waitUntilSearchingHasFinished();
+            await dataGrid.waitForLoad();
 
             expect(await dataGrid.getDocTableRowCount()).toBe(SAVED_ROWS_PER_PAGE);
             expect(await dataGrid.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
@@ -98,7 +97,7 @@ spaceTest.describe(
             await dashboard.openNewDashboard();
             await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE);
             await dashboard.addSavedSearch(savedSearchTitle);
-            await dataGrid.waitUntilSearchingHasFinished();
+            await dataGrid.waitForLoad();
 
             expect(await dataGrid.getDocTableRowCount()).toBe(SAVED_ROWS_PER_PAGE);
             expect(await dataGrid.getCurrentRowsPerPage()).toBe(SAVED_ROWS_PER_PAGE);
@@ -110,7 +109,7 @@ spaceTest.describe(
           async () => {
             await dashboard.removePanel(savedSearchTitle);
             await dashboard.addSavedSearch(testData.SAVED_SEARCH_TITLE);
-            await dataGrid.waitUntilSearchingHasFinished();
+            await dataGrid.waitForLoad();
 
             expect(await dataGrid.getDocTableRowCount()).toBe(SETTINGS_ROWS_PER_PAGE);
             expect(await dataGrid.getCurrentRowsPerPage()).toBe(SETTINGS_ROWS_PER_PAGE);
@@ -132,7 +131,7 @@ spaceTest.describe(
 
         await spaceTest.step('classic mode shows pagination', async () => {
           await discover.goto({ queryMode: 'classic' });
-          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForLoad();
 
           expect(await dataGrid.getDocTableRowCount()).toBe(ESQL_ROWS_PER_PAGE);
           expect(await dataGrid.getCurrentRowsPerPage()).toBe(ESQL_ROWS_PER_PAGE);
@@ -141,7 +140,7 @@ spaceTest.describe(
 
         await spaceTest.step('ES|QL mode renders all rows without pagination', async () => {
           await discover.selectTextBaseLang();
-          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForLoad();
 
           expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(ESQL_ROWS_PER_PAGE);
           await expect(page.testSubj.locator('pagination-button-0')).toBeHidden();
@@ -152,7 +151,7 @@ spaceTest.describe(
           await dashboard.openNewDashboard();
           await datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE);
           await dashboard.addSavedSearch(savedSearchTitle);
-          await dataGrid.waitUntilSearchingHasFinished();
+          await dataGrid.waitForLoad();
 
           expect(await dataGrid.getDocTableRowCount()).toBeGreaterThan(ESQL_ROWS_PER_PAGE);
           await expect(page.testSubj.locator('pagination-button-0')).toBeHidden();

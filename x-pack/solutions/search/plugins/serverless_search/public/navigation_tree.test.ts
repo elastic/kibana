@@ -39,6 +39,11 @@ describe('Navigation Tree', () => {
     expect(body[1]).toMatchObject({ link: 'agent_builder' });
   });
 
+  it('has context_engine right after agent_builder', () => {
+    const { body } = createNavigationTree(mockApplication);
+    expect(body[2]).toMatchObject({ link: 'context_engine' });
+  });
+
   it('includes Manage jobs link to Stack Management anomaly detection jobs list under ML nav', () => {
     const { body } = createNavigationTree(mockApplication);
     const mlNode = body.find((item: any) => item.id === 'machine_learning');
@@ -65,6 +70,19 @@ describe('Navigation Tree', () => {
     expect(mlSection).toBeDefined();
     expect(mlSection?.children?.[0]).toEqual(
       expect.objectContaining({ link: 'management:overview' })
+    );
+  });
+
+  it('includes Data Federation under Data management > Indices and data streams', () => {
+    const { body } = createNavigationTree(mockApplication);
+    const dataManagement = body.find((item: any) => item.title === 'Data management');
+    const indicesSection = dataManagement?.children?.find(
+      (item: any) => item.title === 'Indices and data streams'
+    );
+
+    expect(indicesSection).toBeDefined();
+    expect(indicesSection?.children).toContainEqual(
+      expect.objectContaining({ link: 'management:data_federation' })
     );
   });
 

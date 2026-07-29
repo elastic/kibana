@@ -16,6 +16,8 @@ export type {
   WaitGraphNodeSchema,
   WaitForInputGraphNode,
   WaitForInputGraphNodeSchema,
+  WaitForApprovalGraphNode,
+  WaitForApprovalGraphNodeSchema,
   ElasticsearchGraphNode,
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,
@@ -56,6 +58,14 @@ export type {
   LoopContinueNode,
   LoopContinueNodeSchema,
 } from './nodes/flow_control_nodes';
+export type {
+  EnterParallelNode,
+  EnterParallelNodeSchema,
+  ExitParallelNode,
+  ExitParallelNodeSchema,
+  EnterParallelNodeConfiguration,
+  EnterParallelNodeConfigurationSchema,
+} from './nodes/parallel_nodes';
 export type {
   EnterRetryNode,
   EnterRetryNodeSchema,
@@ -108,6 +118,7 @@ export {
   isKibana,
   isWait,
   isWaitForInput,
+  isWaitForApproval,
   isWorkflowOutput,
   isEnterForeach,
   isEnterWhile,
@@ -117,6 +128,8 @@ export {
   isEnterNormalPath,
   isExitForeach,
   isExitWhile,
+  isEnterParallel,
+  isExitParallel,
   isExitIf,
   isExitRetry,
   isExitTryBlock,

@@ -10,6 +10,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
 import { getTransposeId } from '@kbn/transpose-utils';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
@@ -21,6 +22,7 @@ import userEvent from '@testing-library/user-event';
 describe('datatable cell renderer', () => {
   const innerCellColorFnMock = jest.fn().mockReturnValue('blue');
   const cellColorFnMock = jest.fn().mockReturnValue(innerCellColorFnMock);
+  const paletteServiceMock = chartPluginMock.createPaletteRegistry();
   const setCellProps = jest.fn();
 
   const baseTable: Datatable = {
@@ -108,6 +110,7 @@ describe('datatable cell renderer', () => {
       DataContext,
       isDarkMode,
       cellColorFnMock,
+      paletteServiceMock,
       fitRowToContent
     );
 
@@ -740,6 +743,166 @@ describe('datatable cell renderer', () => {
       renderThemedCellRenderer(columnConfigNonCellColorMode, isDarkMode, backgroundColor);
       const linkColor = '#1750BA'; // Default EuiLink color for light mode
       expect(screen.getByRole('button')).toHaveStyle(`color: ${linkColor}`);
+    });
+  });
+
+  describe('progress bar', () => {
+    const progressColumnConfig = (fillStyle: object): ColumnConfig => ({
+      columns: [
+        {
+          columnId: 'a',
+          type: 'lens_datatable_column',
+          colorMode: 'progress',
+          fillStyle: JSON.stringify(fillStyle),
+        },
+      ],
+      sortingColumnId: '',
+      sortingDirection: 'none',
+    });
+
+    it('renders a Meter with the formatted value label for a numeric cell', () => {
+      const CellRenderer = makeCellRenderer({
+        columnConfig: progressColumnConfig({ fillMode: 'single', valueRange: { mode: 'auto' } }),
+      });
+      render(
+        <EuiThemeProvider>
+          <CellRenderer
+            rowIndex={0}
+            colIndex={0}
+            columnId="a"
+            setCellProps={setCellProps}
+            isExpandable={false}
+            isDetails={false}
+            isExpanded={false}
+          />
+        </EuiThemeProvider>,
+        {
+          wrapper: DataContextProviderWrapper({
+            table: baseTable,
+            minMaxByColumnId: defaultMinMaxByColumnId,
+          }),
+        }
+      );
+
+      expect(screen.getByTestId('lnsTableProgressBarLabel')).toHaveTextContent('formatted 123');
+      // The Meter renders with role="meter" carrying the cell value.
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '123');
+    });
+
+    it('resolves solid progress-bar fills through a stepped palette over the active bar domain', () => {
+      const getColorForValueSpy = jest.spyOn(paletteServiceMock.get('custom'), 'getColorForValue');
+      getColorForValueSpy.mockReturnValueOnce('#663399');
+
+      const columnConfig = progressColumnConfig({
+        fillMode: 'solid',
+        valueRange: { mode: 'custom', min: 0, max: 100 },
+      });
+      columnConfig.columns[0].palette = {
+        type: 'palette',
+        name: 'custom',
+        params: {
+          colors: ['#24c292', '#f6726a'],
+          gradient: true,
+          stops: [50, 100],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 100,
+        },
+      };
+
+      const CellRenderer = makeCellRenderer({ columnConfig });
+      render(
+        <EuiThemeProvider>
+          <CellRenderer
+            rowIndex={0}
+            colIndex={0}
+            columnId="a"
+            setCellProps={setCellProps}
+            isExpandable={false}
+            isDetails={false}
+            isExpanded={false}
+          />
+        </EuiThemeProvider>,
+        {
+          wrapper: DataContextProviderWrapper({
+            table: makeTable([{ a: 75 }]),
+            minMaxByColumnId: new Map([['a', { min: 70, max: 90 }]]),
+          }),
+        }
+      );
+
+      expect(getColorForValueSpy).toHaveBeenCalledWith(
+        75,
+        expect.objectContaining({
+          colors: ['#24c292', '#f6726a'],
+          gradient: false,
+          stops: [50],
+          range: 'number',
+          rangeMin: 0,
+          rangeMax: 100,
+        }),
+        { min: 0, max: 100 }
+      );
+      expect(document.querySelector('.echMeterFillPaint')).toHaveStyle({
+        backgroundColor: '#663399',
+      });
+    });
+
+    it('anchors a flat positive auto range to zero in the rendered Meter domain', () => {
+      const CellRenderer = makeCellRenderer({
+        columnConfig: progressColumnConfig({ fillMode: 'single', valueRange: { mode: 'auto' } }),
+      });
+      render(
+        <EuiThemeProvider>
+          <CellRenderer
+            rowIndex={0}
+            colIndex={0}
+            columnId="a"
+            setCellProps={setCellProps}
+            isExpandable={false}
+            isDetails={false}
+            isExpanded={false}
+          />
+        </EuiThemeProvider>,
+        {
+          wrapper: DataContextProviderWrapper({
+            table: makeTable([{ a: 85 }]),
+            minMaxByColumnId: new Map([['a', { min: 85, max: 85 }]]),
+          }),
+        }
+      );
+
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuemin', '0');
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuemax', '85');
+      expect(screen.getByRole('meter')).toHaveAttribute('aria-valuenow', '85');
+    });
+
+    it('falls back to a formatted cell for empty/non-numeric values', () => {
+      const CellRenderer = makeCellRenderer({
+        columnConfig: progressColumnConfig({ fillMode: 'single', valueRange: { mode: 'auto' } }),
+      });
+      render(
+        <EuiThemeProvider>
+          <CellRenderer
+            rowIndex={0}
+            colIndex={0}
+            columnId="a"
+            setCellProps={setCellProps}
+            isExpandable={false}
+            isDetails={false}
+            isExpanded={false}
+          />
+        </EuiThemeProvider>,
+        {
+          wrapper: DataContextProviderWrapper({
+            table: makeTable([{ a: null }]),
+            minMaxByColumnId: defaultMinMaxByColumnId,
+          }),
+        }
+      );
+
+      expect(screen.queryByRole('meter')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('lnsTableProgressBarLabel')).not.toBeInTheDocument();
     });
   });
 });

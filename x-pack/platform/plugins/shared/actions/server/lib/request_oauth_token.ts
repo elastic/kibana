@@ -98,7 +98,7 @@ export async function requestOAuthToken<T>(
     validateStatus: () => true,
   });
 
-  if (res.status === 200) {
+  if (res.status >= 200 && res.status < 300) {
     if (typeof res.data !== 'object' || res.data == null) {
       logger.warn(
         `OAuth token endpoint ${tokenUrl} returned a non-JSON response. Ensure the provider supports Accept: application/json.`

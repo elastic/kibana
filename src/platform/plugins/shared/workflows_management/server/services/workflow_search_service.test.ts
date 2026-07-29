@@ -10,6 +10,10 @@
 import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows/managed';
 import { buildWorkflowFilters } from '@kbn/workflows/server';
 
 import type { WorkflowSearchDeps } from './types';
@@ -162,6 +166,74 @@ describe('WorkflowSearchService', () => {
       // Text search clause injected under the `query` branch — assert one of the multi_match-style
       // clauses landed on `must` without pinning to a brittle shape.
       expect(call.query.bool.must.length).toBeGreaterThanOrEqual(4);
+    });
+
+    it('keeps unmanaged workflows and filters managed workflows by selector availability', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows(
+        {
+          size: 20,
+          page: 1,
+          managedFilter: 'all',
+          visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
+        },
+        'default'
+      );
+
+      const call = storageClient.search.mock.calls[0][0];
+      expect(call.query.bool.must).toContainEqual({
+        bool: {
+          should: [
+            { bool: { must_not: [{ term: { managed: true } }] } },
+            {
+              terms: {
+                managedVisibilityContexts: [
+                  getManagedWorkflowSelectorVisibilityContext('rule_action'),
+                ],
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+    });
+
+    it('keeps unmanaged workflows and filters managed workflows by multiple visibility contexts', async () => {
+      const { deps, storageClient } = makeDeps();
+      storageClient.search.mockResolvedValue({ hits: { total: { value: 0 }, hits: [] } });
+      const visibilityContext = [
+        getManagedWorkflowSelectorVisibilityContext('rule_action'),
+        getManagedWorkflowSolutionVisibilityContext('security'),
+      ];
+
+      const service = new WorkflowSearchService(deps);
+      await service.getWorkflows(
+        {
+          size: 20,
+          page: 1,
+          managedFilter: 'all',
+          visibilityContext,
+        },
+        'default'
+      );
+
+      const call = storageClient.search.mock.calls[0][0];
+      expect(call.query.bool.must).toContainEqual({
+        bool: {
+          should: [
+            { bool: { must_not: [{ term: { managed: true } }] } },
+            {
+              terms: {
+                managedVisibilityContexts: visibilityContext,
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
     });
 
     it('skips execution-history fetch when there are no workflows on the page', async () => {

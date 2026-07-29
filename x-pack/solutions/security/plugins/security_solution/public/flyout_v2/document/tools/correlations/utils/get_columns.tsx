@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { PreviewLink } from '../../../../../flyout/shared/components/preview_link';
 import { OpenFlyoutLink } from '../../../../shared/components/open_flyout_link';
+import { formatFlyoutTitle, ALERT_TITLE } from '../../../../shared/constants/flyout_titles';
 
 export const TIMESTAMP_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
@@ -29,7 +30,7 @@ export const getColumns = ({
 }: {
   scopeId: string;
   dataTestSubj?: string;
-  onShowAlert: (id: string, indexName: string) => void;
+  onShowAlert: (id: string, indexName: string, title?: string) => void;
   useLegacyExpandableFlyout?: boolean;
 }): Array<EuiBasicTableColumn<Record<string, unknown>>> => [
   {
@@ -47,7 +48,13 @@ export const getColumns = ({
         <EuiButtonIcon
           iconType="expand"
           data-test-subj={`${dataTestSubj}AlertPreviewButton`}
-          onClick={() => onShowAlert(row.id as string, row.index as string)}
+          onClick={() =>
+            onShowAlert(
+              row.id as string,
+              row.index as string,
+              formatFlyoutTitle(ALERT_TITLE, row[ALERT_RULE_NAME] as string | undefined)
+            )
+          }
           aria-label={i18n.translate(
             'xpack.securitySolution.flyout.correlations.alertPreview.ariaLabel',
             {
@@ -106,6 +113,7 @@ export const getColumns = ({
             <OpenFlyoutLink
               field={ALERT_RULE_NAME}
               value={ruleId}
+              displayValue={ruleName}
               data-test-subj={`${dataTestSubj}RuleLink`}
             >
               <span>{ruleName}</span>

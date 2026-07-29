@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/apm-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/apm-plugin'
   description: Moon project for @kbn/apm-plugin
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: x-pack/solutions/observability/plugins/apm
 dependsOn:
   - '@kbn/synthtrace'
@@ -41,7 +41,6 @@ dependsOn:
   - '@kbn/task-manager-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/fleet-plugin'
-  - '@kbn/io-ts-utils'
   - '@kbn/i18n'
   - '@kbn/es-query'
   - '@kbn/ui-theme'
@@ -160,16 +159,21 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/cps-utils'
   - '@kbn/zod'
+  - '@kbn/zod-helpers'
   - '@kbn/agent-builder-browser'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-server'
   - '@kbn/presentation-util'
   - '@kbn/presentation-util-plugin'
+  - '@kbn/apm-api-shared'
+  - '@kbn/apm-common'
   - '@kbn/unified-doc-viewer-plugin'
   - '@kbn/ebt-click'
   - '@kbn/apm-types-shared'
   - '@kbn/apm-common'
   - '@kbn/storybook'
+  - '@kbn/lens-embeddable-utils'
+  - '@kbn/apm-shared'
 tags:
   - plugin
   - prod

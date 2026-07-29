@@ -7,6 +7,7 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
+import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ToolsFlyoutTitle } from './tools_flyout_title';
 import { TOOLS_FLYOUT_HEADER_TEST_ID } from './test_ids';
@@ -29,7 +30,7 @@ export interface ToolsFlyoutHeaderProps {
   /**
    * EUI icon type shown next to the label.
    */
-  iconType?: string;
+  iconType?: IconType;
   /**
    * Optional badge rendered alongside the title button (e.g. severity badge for documents).
    */

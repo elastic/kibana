@@ -87,6 +87,7 @@ const defaultMetricParams: MetricVisParam = {
   secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
+  density: 'compact',
   secondaryTrend: {
     visuals: undefined,
     baseline: undefined,
@@ -797,11 +798,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 310,
+            value: 300,
           },
           y: {
             unit: 'pixels',
-            value: 310,
+            value: 160,
           },
         },
       },
@@ -950,6 +951,44 @@ describe('MetricVisComponent', function () {
         });
 
         expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
+      });
+
+      it('applies no value color when applyColorTo is "value" and the value is outside the palette range', async () => {
+        // a value outside the palette range yields no color, so the palette color falls back to the default
+        mockGetColorForValue.mockReturnValue(undefined);
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              applyColorTo: 'value',
+              color: undefined,
+              palette: {
+                type: 'palette',
+                name: 'default',
+                params: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
+              },
+            },
+          },
+        });
+
+        // background stays the default and the value text has no explicit (custom) color
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+        const valueEl = container.querySelector<HTMLElement>('.echMetricText__value');
+        expect(valueEl).not.toBeNull();
+        expect(valueEl?.style.color).toBe('');
       });
 
       describe('percent-based', () => {
@@ -1266,6 +1305,7 @@ describe('MetricVisComponent', function () {
             maxCols: 3,
             titlesTextAlign: 'left',
             valueFontSize: 'default',
+            density: 'compact',
             primaryAlign: 'right',
             secondaryAlign: 'right',
             primaryPosition: 'bottom',

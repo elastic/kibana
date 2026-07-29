@@ -62,6 +62,8 @@ import { registerDataGeneratorRoutes } from './data_generator/register_data_gene
 import { registerInitializationRoutes } from '../lib/initialization';
 import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
 import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
+import { registerAlertAnalysisWorkflowSettingsRoutes } from '../workflows/alert_analysis_workflow/settings_routes';
+import { registerAlertAnalysisWorkflowRuleAttachmentRoutes } from '../workflows/alert_analysis_workflow/rule_attachment_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -139,12 +141,9 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
-  const { previewTelemetryUrlEnabled, publicAttacksApiEnabled } = config.experimentalFeatures;
+  registerAttacksRoutes(router, ruleDataClient, telemetrySender);
 
-  // If publicAttacksApiEnabled is enabled, register the attacks routes.
-  if (publicAttacksApiEnabled) {
-    registerAttacksRoutes(router);
-  }
+  const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
 
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
@@ -167,6 +166,8 @@ export const initRoutes = (
   getFleetManagedIndexTemplatesRoute(router);
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
+  registerAlertAnalysisWorkflowSettingsRoutes(router, getStartServices, logger);
+  registerAlertAnalysisWorkflowRuleAttachmentRoutes(router);
 
   registerAssetInventoryRoutes({ router, logger });
 

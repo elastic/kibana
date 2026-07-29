@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import { scanForTemplateVariables } from '@kbn/workflows/common/utils';
+import { extractPropertyPathsFromKql, scanForTemplateVariables } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import {
   extractReferencedStepIds,
@@ -46,6 +46,15 @@ export interface StepIoServiceInit {
 export interface PrepareForReadArgs {
   node: GraphNodeUnion;
   predecessorsResolver: PredecessorsResolver;
+  /**
+   * Stable identifier for the node that is about to read context — used to
+   * key the per-consumer read-pin so parallel branches sharing one
+   * {@link StepIoService} instance cannot clobber each other's pins.
+   * Equals {@link StepExecutionRuntime.stepExecutionId} for the invoking node.
+   * Optional only for backwards-compatible callers (e.g. tests) — omitting it
+   * uses a fixed sentinel key that assumes single-consumer access.
+   */
+  consumerId?: string;
 }
 
 /**
@@ -98,6 +107,7 @@ export interface StepIoLifecycle {
   flushStepChanges(): Promise<void>;
   load(): Promise<void>;
   prepareForRead(args: PrepareForReadArgs): Promise<void>;
+  releaseReadPins(consumerId: string): void;
   releaseTransientlyRehydratedOutputs(): void;
   evictStaleLoopOutputs(innerStepIds: Iterable<string>): void;
   evictCompletedLoopsOnResume(graph: {
@@ -180,8 +190,15 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * each (re-)entry pins before it exits) so nested/sibling loops referencing
    * the same source are unpinned independently — a source stays pinned until
    * every loop that pinned it has exited.
+   *
+   * The inner map is keyed by the *referenced* step's `stepId` so re-pinning
+   * the same step (e.g. a `while` condition that references a step produced
+   * inside the loop body, whose latest execution id changes every iteration)
+   * overwrites its previous execution id instead of accumulating one resident
+   * copy per iteration — which would otherwise defeat the eviction memory
+   * protection. Only the current latest execution is ever needed.
    */
-  private readonly pinnedOutputIdsByScope = new Map<string, Set<string>>();
+  private readonly pinnedOutputIdsByScope = new Map<string, Map<string, string>>();
   /**
    * Sizes for evicted outputs that we actually measured. Resume-time
    * deferred outputs land in {@link evictedOutputIds} only — their size is
@@ -210,6 +227,25 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * outputs they only briefly needed.
    */
   private transientlyRehydratedIds: string[] = [];
+  /**
+   * Per-consumer read-pins: the step execution ids each consuming node has
+   * pinned for the duration of its own execution. Keyed by
+   * {@link PrepareForReadArgs.consumerId} (= the consuming node's step
+   * execution id) → the set of step execution ids that node needs resident.
+   *
+   * Parallel branches share one {@link StepIoService}, so a flat Set cleared
+   * on every {@link prepareForRead} call would let one branch wipe a sibling's
+   * pins mid-flight. Keying by consumer prevents that: each node/branch
+   * releases only its own entry ({@link releaseReadPins}), and an output stays
+   * pinned until every consumer holding it has released. `isPinned` takes the
+   * union across all entries.
+   *
+   * Unlike {@link pinnedOutputIdsByScope} (loop-lifetime pin, survives many
+   * node executions), a read-pin is per-node-execution: it is set at
+   * {@link prepareForRead} and cleared at node completion via
+   * {@link releaseReadPins}.
+   */
+  private readonly readPinnedOutputIdsByConsumer = new Map<string, ReadonlySet<string>>();
 
   /**
    * Per-execution `data.set` output, keyed by step execution id. Populated
@@ -350,6 +386,14 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
     // prepareForRead rehydrate from ES and overwrite with a stale doc
     // (common when a deferred step completes on resume before flush).
     this.clearEvicted(stepExecutionId);
+    // A step that just (re)wrote its output is no longer a "transiently
+    // rehydrated predecessor": the value is freshly authoritative, not a
+    // copy pulled from ES for one read. Drop it from the transient set so the
+    // deferred transient-release in a later `prepareForRead` cannot re-evict
+    // it and force a stale ES re-read (which returns the pre-flush value). This
+    // matters for re-entrant aggregators (e.g. `parallel`) that finish on a
+    // resume tick and are consumed by the next step before the flush lands.
+    this.forgetTransientRehydration(stepExecutionId);
 
     if (this.state.getStepExecution(stepExecutionId)?.stepType === 'data.set') {
       this.recordDataSetOutput(stepExecutionId, output);
@@ -585,13 +629,43 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * No-op (zero ES calls) when nothing is evicted and nothing is transiently
    * rehydrated from a previous step.
    */
-  public async prepareForRead({ node, predecessorsResolver }: PrepareForReadArgs): Promise<void> {
+  public async prepareForRead({
+    node,
+    predecessorsResolver,
+    consumerId = '__single_consumer__',
+  }: PrepareForReadArgs): Promise<void> {
+    // Fast path: eviction is disabled (default config, evictionMinBytes ===
+    // Infinity). Nothing can ever be evicted → no race possible → zero work.
+    // This must come first so the read-pin logic below only runs when eviction
+    // is actually on — computing rehydration targets unconditionally would
+    // regress the default-config per-node cost.
+    if (this.evictionMinBytes === Infinity) {
+      return;
+    }
+
+    // Compute the set of step execution ids this node will read through
+    // getContext(), then **read-pin** them before any gate or await. Two
+    // ordering rules are load-bearing:
+    //
+    //   1. Set pins before the evicted/transient early-return: if the source
+    //      was resident when a preceding guard checked it (nothing evicted yet),
+    //      both the guard and the foreach hit the old early-return and no pin
+    //      is ever set — the concurrent 500 ms eviction loop can evict the
+    //      source in the await gap between prepareForRead returning and the
+    //      foreach's own pinForeachSource (enter_foreach_node_impl.ts:48).
+    //
+    //   2. Set pins before the `await rehydrateOutputs`: resident co-neededIds
+    //      must be protected during the real ES fetch (a genuine macrotask yield
+    //      where the persistence loop can fire).
+    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
+    this.readPinnedOutputIdsByConsumer.set(consumerId, neededIds);
+
+    // Zero-ES-call fast path: nothing is evicted and no stale transients need
+    // releasing. The read-pin above still fires so the source stays protected.
     const noPriorTransients = this.transientlyRehydratedIds.length === 0;
     if (!this.hasEvictedOutputs() && noPriorTransients) {
       return;
     }
-
-    const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
 
     // Drop the previous step's transient outputs that this step does not
     // need. Anything still in `neededIds` stays resident — `rehydrateOutputs`
@@ -605,26 +679,71 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   }
 
   /**
-   * Pins the source outputs referenced by a loop's source value for the
-   * lifetime of the loop, keyed by the loop's `stepId`. Called unconditionally
-   * when a loop is entered (before any eviction has happened) so the source
-   * stays resident across the per-iteration source re-evaluation — the
-   * eviction-gated rehydration path ({@link computeRehydrationTargets}) cannot
-   * be relied on, because it is skipped entirely until something is evicted.
+   * Releases the read-pins recorded for `consumerId` so outputs that were
+   * only needed by that node can be evicted again. Called from `runNode`'s
+   * `finally` block (and `runBranchNode`'s) after the node's synchronous
+   * context reads have completed. Idempotent — safe to call even if
+   * {@link prepareForRead} never ran for this consumer (e.g. eviction-disabled
+   * fast path).
    */
-  public pinForeachSource(foreachStepId: string, sourceValue: unknown): void {
-    const referencedStepIds = this.extractReferencedStepIdsFromValue(sourceValue);
+  public releaseReadPins(consumerId: string): void {
+    this.readPinnedOutputIdsByConsumer.delete(consumerId);
+  }
+
+  /**
+   * Pins the outputs referenced by a loop's source value (foreach `foreach:`
+   * expression or while `condition`) for the lifetime of the loop, keyed by the
+   * loop's `stepId`. Called unconditionally when a loop is entered (before any
+   * eviction has happened) so the referenced outputs stay resident across the
+   * per-iteration source/condition re-evaluation — the eviction-gated
+   * rehydration path ({@link computeRehydrationTargets}) cannot be relied on,
+   * because it is skipped entirely until something is evicted.
+   */
+  public pinLoopSource(loopStepId: string, sourceValue: unknown): void {
+    // A loop source is either a foreach `foreach:` expression (Liquid `{{ }}`)
+    // or a while `condition` (frequently bare KQL with no Liquid markers).
+    // `extractReferencedStepIdsFromValue` only sees Liquid expressions, so a
+    // bare-KQL condition would resolve to an empty set and pin nothing —
+    // KQL-parse string values too so while conditions are actually pinned.
+    const referencedStepIds =
+      typeof sourceValue === 'string'
+        ? this.extractReferencedStepIdsFromConditionValue(sourceValue)
+        : this.extractReferencedStepIdsFromValue(sourceValue);
     if (referencedStepIds === null) {
       return;
     }
-    this.pinLatestExecutionIdsForScope(foreachStepId, referencedStepIds);
+    this.pinLatestExecutionIdsForScope(loopStepId, referencedStepIds);
   }
 
-  /** True if any active loop scope has pinned this output. */
+  /**
+   * @deprecated Use {@link pinLoopSource}. Retained so foreach call sites keep
+   * compiling; foreach and while share the same loop-source pinning mechanism.
+   */
+  public pinForeachSource(foreachStepId: string, sourceValue: unknown): void {
+    this.pinLoopSource(foreachStepId, sourceValue);
+  }
+
+  /**
+   * True if any active loop scope **or** any currently-executing consumer node
+   * has pinned this output. The union of two independent pin structures:
+   * - {@link pinnedOutputIdsByScope}: loop-lifetime pin, survives many nodes.
+   * - {@link readPinnedOutputIdsByConsumer}: per-node read-pin, released when
+   *   that node finishes.
+   *
+   * This is the single chokepoint consulted by every output-removal path
+   * (`isEvictionCandidate`, `isReleaseCandidate`, `dropStaleStepIo`).
+   */
   private isPinned(stepExecutionId: string): boolean {
-    for (const ids of this.pinnedOutputIdsByScope.values()) {
-      if (ids.has(stepExecutionId)) {
+    for (const execIds of this.readPinnedOutputIdsByConsumer.values()) {
+      if (execIds.has(stepExecutionId)) {
         return true;
+      }
+    }
+    for (const execIdsByStepId of this.pinnedOutputIdsByScope.values()) {
+      for (const execId of execIdsByStepId.values()) {
+        if (execId === stepExecutionId) {
+          return true;
+        }
       }
     }
     return false;
@@ -632,11 +751,19 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
 
   /**
    * Clears all pins recorded for the given loop `stepId`. Called when a loop
-   * exits ({@link ExitForeachNodeImpl}) so its source output becomes evictable
-   * again. Idempotent.
+   * exits ({@link ExitForeachNodeImpl} / {@link ExitWhileNodeImpl}) so its
+   * pinned outputs become evictable again. Idempotent.
+   */
+  public unpinLoopScope(loopStepId: string): void {
+    this.pinnedOutputIdsByScope.delete(loopStepId);
+  }
+
+  /**
+   * @deprecated Use {@link unpinLoopScope}. Retained so foreach call sites keep
+   * compiling.
    */
   public unpinForeachScope(foreachStepId: string): void {
-    this.pinnedOutputIdsByScope.delete(foreachStepId);
+    this.unpinLoopScope(foreachStepId);
   }
 
   /**
@@ -701,18 +828,24 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       neededIds.add(scopeStepExecutionId);
 
       const scopeStepExecution = this.state.getStepExecution(scopeStepExecutionId);
-      if (scopeStepExecution?.stepType === 'foreach') {
-        const scopeInputStepIds = this.extractReferencedStepIdsFromValue(
-          this.getStepInput(scopeStepExecutionId)
-        );
+      const scopeStepType = scopeStepExecution?.stepType;
+      if (scopeStepType === 'foreach' || scopeStepType === 'while') {
+        // foreach stores its source under input.foreach (an expression);
+        // while stores its source under input.condition (a KQL/template
+        // string). The KQL-aware extraction below handles both — a while
+        // condition is frequently bare KQL with no Liquid markers.
+        const scopeInputStepIds =
+          scopeStepType === 'while'
+            ? this.extractReferencedStepIdsFromCondition(scopeStepExecutionId)
+            : this.extractReferencedStepIdsFromValue(this.getStepInput(scopeStepExecutionId));
         if (scopeInputStepIds === null) {
           fallbackToPredecessors();
         } else {
           this.addLatestExecutionIdsForStepIds(neededIds, scopeInputStepIds);
           // Re-pin the loop's source outputs while the loop scope is active.
           // Primary pinning happens unconditionally at loop entry
-          // (pinForeachSource); this re-pin covers resume, where the loop is
-          // re-entered mid-iteration without going through enterForeach.
+          // (pinLoopSource); this re-pin covers resume, where the loop is
+          // re-entered mid-iteration without going through the enter node.
           this.pinLatestExecutionIdsForScope(frame.stepId, scopeInputStepIds);
         }
       }
@@ -746,11 +879,45 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       const latestExec = this.state.getLatestStepExecution(stepId);
       if (latestExec) {
         if (!pinned) {
-          pinned = new Set<string>();
+          pinned = new Map<string, string>();
           this.pinnedOutputIdsByScope.set(foreachStepId, pinned);
         }
-        pinned.add(latestExec.id);
+        // Keyed by stepId: re-pinning a step that ran again this iteration
+        // overwrites its previous execution id, so the scope holds at most one
+        // resident output per referenced step (not one per iteration).
+        pinned.set(stepId, latestExec.id);
       }
+    }
+  }
+
+  /**
+   * Extracts the step ids referenced by a while loop's stored condition input.
+   * A while condition is frequently bare KQL (no Liquid markers), which
+   * {@link extractReferencedStepIdsFromValue} would miss — so we KQL-parse it.
+   * Mirrors the static analysis in `extractReferencedStepIds`. Returns `null`
+   * on dynamic bracket access so the caller falls back conservatively.
+   */
+  private extractReferencedStepIdsFromCondition(scopeStepExecutionId: string): Set<string> | null {
+    const input = this.getStepInput(scopeStepExecutionId) as { condition?: unknown } | undefined;
+    const condition = input?.condition;
+    if (typeof condition !== 'string') {
+      return this.extractReferencedStepIdsFromValue(input);
+    }
+    return this.extractReferencedStepIdsFromConditionValue(condition);
+  }
+
+  /**
+   * KQL-aware step-id extraction for a condition string. A while condition is
+   * frequently bare KQL (`steps.x.output.y: "z"`) with no Liquid markers, which
+   * {@link extractReferencedStepIdsFromValue} (Liquid-only) would miss.
+   * `extractPropertyPathsFromKql` handles both KQL field paths and embedded
+   * `{{ }}` templates. Returns `null` on dynamic bracket access.
+   */
+  private extractReferencedStepIdsFromConditionValue(condition: string): Set<string> | null {
+    try {
+      return extractReferencedStepIdsFromVariables(extractPropertyPathsFromKql(condition));
+    } catch {
+      return null;
     }
   }
 
@@ -787,6 +954,10 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
    * no-op.
    */
   public releaseTransientlyRehydratedOutputs(): void {
+    // Safety net: at workflow end no further prepareForRead will run, so any
+    // read-pins still held (e.g. from the last node) would permanently block
+    // eviction of the final-flush transients. Clear them before releasing.
+    this.readPinnedOutputIdsByConsumer.clear();
     this.releaseTransientExcept(undefined);
   }
 
@@ -833,6 +1004,24 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
       this.logger?.debug(
         `Released ${releasedCount} transiently rehydrated step output(s); ${remaining.length} kept resident; total evicted: ${this.evictedOutputIds.size}`
       );
+    }
+  }
+
+  /**
+   * Removes a step execution id from the transient-rehydration set. Called
+   * when the step (re)writes its own output via {@link setStepOutput}: the
+   * value is now freshly authoritative rather than a copy pulled from ES for
+   * a single downstream read, so it must not be subject to the deferred
+   * transient release (which would re-evict it and force a stale ES re-read
+   * before the flush lands).
+   */
+  private forgetTransientRehydration(stepExecutionId: string): void {
+    if (this.transientlyRehydratedIds.length === 0) {
+      return;
+    }
+    const idx = this.transientlyRehydratedIds.indexOf(stepExecutionId);
+    if (idx !== -1) {
+      this.transientlyRehydratedIds.splice(idx, 1);
     }
   }
 

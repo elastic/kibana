@@ -132,10 +132,6 @@ jest.mock('../../../shared/ui', () => ({
   WorkflowStatus: ({ valid }: { valid: boolean }) => <span>{valid ? 'Valid' : 'Invalid'}</span>,
 }));
 
-jest.mock('../../../shared/ui/next_execution_time', () => ({
-  NextExecutionTime: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
 jest.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => ({
   WorkflowsTriggersList: () => <span>{'Triggers'}</span>,
 }));

@@ -25,7 +25,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ESQLSourceResult } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
+import { getDatasets, getESQLSources, getTimeseriesIndices } from '@kbn/esql-utils';
 import { BrowserPopoverWrapper } from '../browser_popover_wrapper';
 import { getSourceTypeKey, getSourceTypeLabel } from './utils';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
@@ -83,11 +83,14 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
     return await getESQLSources({ http, application }, getLicense, enrichSources);
   }, [application, enrichSources, getLicense, http]);
 
+  const getDatasetsCallback = useCallback(() => getDatasets(http), [http]);
+
   const { allSources, isLoading } = useAllSources({
     isOpen,
     preloadedSources,
     getSources: getSourcesCallback,
     getTimeseriesIndices: getTimeseriesIndicesCallback,
+    getDatasets: getDatasetsCallback,
     isTimeseries,
   });
   const { euiTheme } = useEuiTheme();

@@ -15,11 +15,14 @@ import type { EsqlStarredQueriesService } from '../editor_footer/esql_starred_qu
 interface UseEsqlEditorActionsParams {
   code: string;
   isHistoryOpen: boolean;
+  isLanguageComponentOpen: boolean;
   isCurrentQueryStarred: boolean;
+  editorIsInline: boolean;
   onUpdateAndSubmitQuery: (newQuery: string, source: QuerySource) => void;
   starredQueriesService: EsqlStarredQueriesService | null;
   trimmedQuery: string;
   setIsHistoryOpen: (value: boolean) => void;
+  setIsLanguageComponentOpen: (value: boolean) => void;
   setIsCurrentQueryStarred: (value: boolean) => void;
   trackQueryHistoryOpened: (isOpen: boolean) => void;
 }
@@ -27,11 +30,14 @@ interface UseEsqlEditorActionsParams {
 export function useEsqlEditorActions({
   code,
   isHistoryOpen,
+  isLanguageComponentOpen,
   isCurrentQueryStarred,
+  editorIsInline,
   onUpdateAndSubmitQuery,
   starredQueriesService,
   trimmedQuery,
   setIsHistoryOpen,
+  setIsLanguageComponentOpen,
   setIsCurrentQueryStarred,
   trackQueryHistoryOpened,
 }: UseEsqlEditorActionsParams): {
@@ -52,6 +58,11 @@ export function useEsqlEditorActions({
   const onToggleHistory = useCallback(() => {
     onClickQueryHistory(!isHistoryOpen);
   }, [isHistoryOpen, onClickQueryHistory]);
+
+  const onToggleLanguageComponent = useCallback(() => {
+    setIsLanguageComponentOpen(!isLanguageComponentOpen);
+    setIsHistoryOpen(false);
+  }, [isLanguageComponentOpen, setIsHistoryOpen, setIsLanguageComponentOpen]);
 
   const onToggleStarredQuery = useCallback(async () => {
     if (!starredQueriesService || !trimmedQuery) {
@@ -82,18 +93,22 @@ export function useEsqlEditorActions({
     () => ({
       toggleHistory: onToggleHistory,
       toggleStarredQuery: onToggleStarredQuery,
+      toggleLanguageComponent: onToggleLanguageComponent,
       submitEsqlQuery: onSubmitEsqlQuery,
       isHistoryOpen,
       isCurrentQueryStarred,
       canToggleStarredQuery: Boolean(starredQueriesService && trimmedQuery),
       currentQuery: code,
+      editorIsInline,
     }),
     [
       code,
+      editorIsInline,
       isCurrentQueryStarred,
       isHistoryOpen,
       onSubmitEsqlQuery,
       onToggleHistory,
+      onToggleLanguageComponent,
       onToggleStarredQuery,
       starredQueriesService,
       trimmedQuery,

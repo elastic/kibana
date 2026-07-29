@@ -28,18 +28,18 @@ import { DiagnosticConfigurationForm } from './diagnostic_configuration_form';
 import { DiagnosticResults } from './diagnostic_results';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { TechnicalPreviewBadge } from '../../../shared/technical_preview_badge';
 import type { DiagnosticFormState } from './types';
 import type { ServiceMapDiagnosticResponse } from '../../../../../common/service_map_diagnostic_types';
 import { FORBIDDEN_SERVICE_NAMES } from '../../../../../common/service_map/constants';
 import type { ServiceMapSelection } from '../popover/popover_content';
+import { callApmApi as callLegacyApmApi } from '../../../../services/rest/create_call_apm_api';
 
 interface DiagnosticFlyoutProps {
   onClose: () => void;
   isOpen: boolean;
-  /** Selected node or edge from the service map */
-  selection: ServiceMapSelection;
+  /** Selected node or edge from the service map. When omitted the form starts with an empty source node. */
+  selection?: ServiceMapSelection;
 }
 
 function checkForForbiddenServiceNames(form: DiagnosticFormState | null): boolean {
@@ -70,7 +70,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyou
   const [isLoading, setIsLoading] = useState(false);
 
   const [form, setFormState] = useState<DiagnosticFormState>({
-    sourceNode: selection.id,
+    sourceNode: selection?.id ?? '',
     destinationNode: undefined,
     traceId: undefined,
     isValid: false,
@@ -95,7 +95,7 @@ export function DiagnosticFlyout({ onClose, isOpen, selection }: DiagnosticFlyou
 
     try {
       if (start && end && form.sourceNode && form.destinationNode) {
-        const response = await callApmApi('POST /internal/apm/diagnostics/service-map', {
+        const response = await callLegacyApmApi('POST /internal/apm/diagnostics/service-map', {
           params: {
             body: {
               start,

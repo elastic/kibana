@@ -8,7 +8,7 @@
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 import { BehaviorSubject, Subject, of } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 import type { CoreStart } from '@kbn/core/public';
@@ -240,6 +240,7 @@ const noopProductDocBase = {
     getStatus: () => Promise.resolve({}),
     install: () => Promise.resolve(),
     uninstall: () => Promise.resolve(),
+    getDefaultInferenceId: () => Promise.resolve('.elser-2-elasticsearch'),
   },
 };
 

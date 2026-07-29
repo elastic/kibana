@@ -53,11 +53,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       // defaultRepository is undefined and therefore omitted from the JSON response
       expect(Object.keys(body).sort()).to.eql(
-        ['canCreateRepository', 'hasDefaultRepository'].sort()
+        ['canCreateRepository', 'hasDefaultRepository', 'hasRepositories'].sort()
       );
       expect(body.canCreateRepository).to.be.a('boolean');
       expect(body.hasDefaultRepository).to.be(false);
       expect(body.defaultRepository).to.be(undefined);
+      expect(body.hasRepositories).to.be(false);
     });
 
     it('reports the configured default repository', async () => {
@@ -72,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(body.hasDefaultRepository).to.be(true);
       expect(body.defaultRepository).to.be(REPOSITORY_NAME);
       expect(body.canCreateRepository).to.be.a('boolean');
+      expect(body.hasRepositories).to.be(true);
     });
   });
 }

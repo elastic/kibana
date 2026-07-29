@@ -10,6 +10,7 @@ import { createDefaultScheduleFormData } from '../types';
 import type { ScheduleFormData } from '../types';
 import {
   AT_LEAST_ONE_DAY_ERROR,
+  intervalOutOfRangeError,
   SPLAY_MAX_ERROR,
   START_DATE_IN_PAST_ERROR,
   STOP_AFTER_BEFORE_START_ERROR,
@@ -226,6 +227,67 @@ describe('validateScheduleFormData', () => {
       expect(validateScheduleFormData(data, { originalStartDate: original })).toContain(
         START_DATE_IN_PAST_ERROR
       );
+    });
+  });
+
+  describe('rule: custom interval out of range for the unit', () => {
+    it('flags a hydrated over-cap Month(s) interval', () => {
+      const data = recurrenceState({
+        startDate: START,
+        recurrence: { frequency: 'custom', interval: 1201, byweekday: [], repeatUnit: 'months' },
+      });
+
+      expect(validateScheduleFormData(data)).toContain(intervalOutOfRangeError(1200));
+    });
+
+    it('flags a hydrated over-cap Year(s) interval', () => {
+      const data = recurrenceState({
+        startDate: START,
+        recurrence: { frequency: 'custom', interval: 101, byweekday: [], repeatUnit: 'years' },
+      });
+
+      expect(validateScheduleFormData(data)).toContain(intervalOutOfRangeError(100));
+    });
+
+    it('does not flag a Month(s) interval within range', () => {
+      const data = recurrenceState({
+        startDate: START,
+        recurrence: { frequency: 'custom', interval: 1200, byweekday: [], repeatUnit: 'months' },
+      });
+
+      expect(validateScheduleFormData(data)).toEqual([]);
+    });
+
+    it('does not flag a Year(s) interval within range', () => {
+      const data = recurrenceState({
+        startDate: START,
+        recurrence: { frequency: 'custom', interval: 100, byweekday: [], repeatUnit: 'years' },
+      });
+
+      expect(validateScheduleFormData(data)).toEqual([]);
+    });
+
+    it('does not flag a Week(s) interval at 9999', () => {
+      const data = recurrenceState({
+        startDate: START,
+        recurrence: {
+          frequency: 'custom',
+          interval: 9999,
+          byweekday: ['MO'],
+          repeatUnit: 'weeks',
+        },
+      });
+
+      expect(validateScheduleFormData(data)).toEqual([]);
+    });
+
+    it('does not apply the interval cap outside custom frequency', () => {
+      const data = recurrenceState({
+        startDate: START,
+        recurrence: { frequency: 'daily', interval: 99999, byweekday: [] },
+      });
+
+      expect(validateScheduleFormData(data)).toEqual([]);
     });
   });
 

@@ -25,10 +25,12 @@ jest.mock('./lib/get_user', () => ({
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
     createWorkflowExecution: mockCreateWorkflowExecution,
+    getWorkflowExecutionById: mockGetWorkflowExecutionById,
   })),
 }));
 
@@ -53,14 +55,6 @@ jest.mock('./concurrency/concurrency_manager', () => ({
     evaluateConcurrencyKey: mockEvaluateConcurrencyKey,
   })),
 }));
-
-jest.mock('@kbn/workflows/server', () => {
-  const actual = jest.requireActual('@kbn/workflows/server');
-  return {
-    ...actual,
-    readWorkflowVersioningEnabled: jest.fn().mockResolvedValue(false),
-  };
-});
 
 import { checkLicense } from './lib/check_license';
 import { getAuthenticatedUser } from './lib/get_user';

@@ -49,6 +49,7 @@ interface UseCommentToEsqlParams {
   telemetryService?: ESQLEditorTelemetryService;
   // When set, generation auto-accepts: removes the comment line, keeps generated code, and calls this callback with the final query instead of showing the review UI.
   autoAcceptCallbackRef?: MutableRefObject<((finalQuery: string) => void) | undefined>;
+  onAfterInsert?: () => void;
 }
 
 export const useCommentToEsql = ({
@@ -60,6 +61,7 @@ export const useCommentToEsql = ({
   clearGhostHintRef,
   telemetryService,
   autoAcceptCallbackRef,
+  onAfterInsert,
 }: UseCommentToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const reviewStateRef = useRef<CommentReviewState | null>(null);
@@ -418,6 +420,7 @@ export const useCommentToEsql = ({
         currentCommentLine,
         result.content
       );
+      onAfterInsert?.();
 
       const replacedLineNumber =
         result.replacesNext && generatedLineEnd + 1 <= liveModel.getLineCount()
@@ -450,17 +453,18 @@ export const useCommentToEsql = ({
       clearGeneratingDecoration();
     }
   }, [
+    isEnabled,
     editorRef,
     editorModel,
-    cleanup,
-    clearCommentAnchor,
-    showGeneratingDecoration,
-    clearGeneratingDecoration,
     clearGhostHintRef,
+    showGeneratingDecoration,
+    cleanup,
     generateESQL,
-    showReview,
-    isEnabled,
     trackCommentResult,
+    clearCommentAnchor,
+    onAfterInsert,
+    showReview,
+    clearGeneratingDecoration,
   ]);
 
   return {

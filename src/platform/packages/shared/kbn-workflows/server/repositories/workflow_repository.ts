@@ -81,6 +81,7 @@ export class WorkflowRepository {
       const source = document._source as Record<string, unknown>;
       const managed = typeof source.managed === 'boolean' ? (source.managed as boolean) : undefined;
       const managedBy = typeof source.managedBy === 'string' ? source.managedBy : undefined;
+      const billable = typeof source.billable === 'boolean' ? source.billable : undefined;
       const originManagedWorkflowId =
         typeof source.originManagedWorkflowId === 'string'
           ? source.originManagedWorkflowId
@@ -103,6 +104,7 @@ export class WorkflowRepository {
         yaml: source.yaml as string,
         ...(managed !== undefined ? { managed } : {}),
         ...(managedBy !== undefined ? { managedBy } : {}),
+        ...(billable !== undefined ? { billable } : {}),
         ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
         ...(managedVersion !== undefined ? { managedVersion } : {}),
         ...pickWorkflowDocumentVersion(source),

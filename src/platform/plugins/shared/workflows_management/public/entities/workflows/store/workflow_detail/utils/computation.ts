@@ -9,11 +9,11 @@
 
 import YAML, { LineCounter } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { WorkflowGraph } from '@kbn/workflows/graph';
+import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import { parseWorkflowYamlForAutocomplete } from '@kbn/workflows-yaml';
 import { buildWorkflowLookup } from './build_workflow_lookup';
 import { correctYamlSyntax } from '../../../../../../common/lib/yaml';
-import type { ComputedData } from '../types';
+import type { ComputedData, GraphBuildErrorInfo } from '../types';
 
 export const performComputation = (
   yamlString: string,
@@ -50,9 +50,24 @@ export const performComputation = (
     }
   }
 
-  const graph = workflowDefinition
-    ? WorkflowGraph.fromWorkflowDefinition(workflowDefinition)
-    : undefined;
+  // Compiling the definition into an execution graph can throw for valid YAML
+  // that uses an unsupported construct (e.g. a `wait`/`waitForInput` or nested
+  // flow-control inside a parallel branch). Treat that as non-fatal: keep the
+  // parsed document, lookup and definition so YAML-only validators still run,
+  // and surface the precise error (anchored to the offending step) rather than
+  // wiping everything and showing a generic "document not loaded" message.
+  let graph: WorkflowGraph | undefined;
+  let graphBuildError: GraphBuildErrorInfo | undefined;
+  if (workflowDefinition) {
+    try {
+      graph = WorkflowGraph.fromWorkflowDefinition(workflowDefinition);
+    } catch (error) {
+      graphBuildError = {
+        message: error instanceof Error ? error.message : String(error),
+        stepId: isGraphBuildError(error) ? error.stepId : undefined,
+      };
+    }
+  }
 
   return {
     yamlLineCounter: lineCounter,
@@ -60,5 +75,6 @@ export const performComputation = (
     workflowLookup: lookup,
     workflowGraph: graph,
     workflowDefinition,
+    graphBuildError,
   };
 };

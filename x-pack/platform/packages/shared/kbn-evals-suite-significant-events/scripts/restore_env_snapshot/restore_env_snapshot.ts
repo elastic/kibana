@@ -13,7 +13,7 @@ import type { LoadResult } from '@kbn/es-snapshot-loader';
 import { createGcsRepository, replaySnapshot, restoreSnapshot } from '@kbn/es-snapshot-loader';
 import type { ConnectionConfig } from '../lib/get_connection_config';
 import { getConnectionConfig } from '../lib/get_connection_config';
-import { GCS_BUCKET, KNOWLEDGE_INDICATORS_DATA_STREAM } from '../lib/constants';
+import { GCS_BUCKET, SIGNIFICANT_EVENTS_DATA_STREAMS } from '../lib/constants';
 import {
   ensureCleanEnvironment,
   ensureKnownAliases,
@@ -64,19 +64,28 @@ async function repromoteQueries({
   await promoteQueries(config);
 }
 
-async function restoreKiDataStream({
+/**
+ * Restores one SigEvents data stream from its `snapshot-*` plain index.
+ * The plugin owns the data-stream template, so we restore captured docs into a temp
+ * index and reindex them into the data-stream name — letting ES materialize the stream.
+ * `allowNoMatches` makes this a no-op when the stream was not captured (user chose not
+ * to run the discovery workflow).
+ */
+async function restoreDataStream({
   esClient,
   log,
   repository,
   snapshotName,
+  dataStream,
 }: {
   esClient: Client;
   log: ToolingLog;
   repository: ReturnType<typeof createGcsRepository>;
   snapshotName: string;
+  dataStream: string;
 }): Promise<string> {
-  const snapshotIndex = toSnapshotName(KNOWLEDGE_INDICATORS_DATA_STREAM);
-  const tempIndex = `restore-temp-ki-${randomUUID()}`;
+  const snapshotIndex = toSnapshotName(dataStream);
+  const tempIndex = `restore-temp-${randomUUID()}`;
 
   try {
     const restoreResult = await restoreSnapshot({
@@ -87,20 +96,20 @@ async function restoreKiDataStream({
       indices: [snapshotIndex],
       renamePattern: '(.+)',
       renameReplacement: tempIndex,
-      allowNoMatches: true, // old snapshots predate KI capture
+      allowNoMatches: true,
     });
 
     if (!restoreResult.success) {
       throw new Error(
-        `Failed to restore KI data stream from snapshot "${snapshotName}": ${restoreResult.errors.join(
+        `Failed to restore data stream "${dataStream}" from snapshot "${snapshotName}": ${restoreResult.errors.join(
           '; '
         )}`
       );
     }
 
     if (restoreResult.restoredIndices.length === 0) {
-      log.info(`KI store not in snapshot "${snapshotName}" — skipping (old snapshot).`);
-      return 'skipped (not in snapshot)';
+      log.info(`"${dataStream}" not in snapshot — skipping (discovery workflow was not run).`);
+      return `${dataStream}: skipped (not in snapshot)`;
     }
 
     // Reindex into the data-stream name. ES auto-creates the data stream from the
@@ -108,21 +117,21 @@ async function restoreKiDataStream({
     const reindexResult = await esClient.reindex({
       wait_for_completion: true,
       source: { index: tempIndex },
-      dest: { index: KNOWLEDGE_INDICATORS_DATA_STREAM, op_type: 'create' },
+      dest: { index: dataStream, op_type: 'create' },
     });
 
     if ((reindexResult.version_conflicts ?? 0) > 0) {
       log.warning(
-        `KI data stream restore had ${reindexResult.version_conflicts} version conflicts — some documents may have been skipped.`
+        `"${dataStream}" restore had ${reindexResult.version_conflicts} version conflicts — some documents may have been skipped.`
       );
     }
 
     const created = reindexResult.created ?? 0;
-    log.info(`Restored KI data stream "${KNOWLEDGE_INDICATORS_DATA_STREAM}" (${created} docs)`);
-    return `restored (${created} docs)`;
+    log.info(`Restored data stream "${dataStream}" (${created} docs)`);
+    return `${dataStream}: restored (${created} docs)`;
   } finally {
     await esClient.indices.delete({ index: tempIndex, ignore_unavailable: true }).catch(() => {
-      log.debug(`Failed to delete temp KI index "${tempIndex}"`);
+      log.debug(`Failed to delete temp index "${tempIndex}"`);
     });
   }
 }
@@ -207,12 +216,11 @@ export const restoreEnvSnapshot = async ({
   }
 
   const clean = Boolean(flags.clean);
-  const { snapshotName, systemIndices, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
+  const { snapshotName, alertIndices, logsIndex } = parseCommonSnapshotFlags(flags);
 
   log.info(`Restore: ${snapshotName} | ES: ${config.esUrl} | Kibana: ${config.kibanaUrl}`);
   log.info(`GCS bucket: ${gcsBucket} | Base path: ${gcsBasePath}`);
   log.info(`Data indices: ${[logsIndex, ...alertIndices].join(', ')}`);
-  log.info(`System indices: ${systemIndices.join(', ')}`);
 
   const repository = createGcsRepository({ bucket: gcsBucket, basePath: gcsBasePath });
 
@@ -220,59 +228,24 @@ export const restoreEnvSnapshot = async ({
     await ensureCleanEnvironment({
       esClient: sysClient,
       log,
-      systemIndices: [...systemIndices, KNOWLEDGE_INDICATORS_DATA_STREAM],
+      dataStreamIndices: [...SIGNIFICANT_EVENTS_DATA_STREAMS],
       alertIndices,
       logsIndex,
       clean,
     });
 
-    // Plain `.kibana` system indices are captured as snapshot-* via reindex
-    // (e.g. .kibana_streams_tasks → snapshot-kibana_streams_tasks) so we match the
-    // snapshot-* names and rename them back on restore. The KI data stream is NOT here —
-    // it is re-materialized as a data stream after streams is enabled (Step 3b).
-    const snapshotSystemIndices = systemIndices.map(toSnapshotName);
-
     log.info('');
-    log.info('Step 1/7 — Restoring system indices (with rename snapshot-* → .*)...');
-    // restoreSnapshot and replaySnapshot use the caller's esClient intentionally:
-    // the snapshot/replay APIs work with the caller's privileges, and keeping them
-    // outside sysClient avoids creating the temp superuser a second time.
-    // No allowNoMatches here — these plain system indices must be present; a genuinely
-    // missing one should fail loudly rather than restore an incomplete environment.
-    const restoreResult = await restoreSnapshot({
-      esClient,
-      log,
-      repository,
-      snapshotName,
-      indices: snapshotSystemIndices,
-      renamePattern: 'snapshot-(.*)',
-      renameReplacement: '.$1',
-    });
-
-    if (!restoreResult.success) {
-      throw new Error(
-        `Failed to restore system indices from snapshot "${snapshotName}": ${restoreResult.errors.join(
-          '; '
-        )}`
-      );
-    }
-
-    log.info('');
-    log.info('Step 2/7 — Ensuring system-index aliases...');
-    await ensureKnownAliases({
-      esClient: sysClient,
-      log,
-      systemIndices,
-      alertIndices: [],
-    });
-
-    log.info('');
-    log.info('Step 3/7 — Enabling streams...');
+    log.info('Step 1/5 — Enabling streams...');
     await ensureStreamsEnabled(config, log);
 
     log.info('');
-    log.info('Step 4/7 — Restoring KI data stream (reindex into data stream)...');
-    const kiRestoreStatus = await restoreKiDataStream({ esClient, log, repository, snapshotName });
+    log.info('Step 2/5 — Restoring SigEvents data streams (reindex into data streams)...');
+    const dataStreamStatuses: string[] = [];
+    for (const dataStream of SIGNIFICANT_EVENTS_DATA_STREAMS) {
+      dataStreamStatuses.push(
+        await restoreDataStream({ esClient, log, repository, snapshotName, dataStream })
+      );
+    }
 
     const enabledStreams = await getEnabledStreams(esClient, log);
     const enabledStreamsSet = new Set(enabledStreams);
@@ -284,10 +257,10 @@ export const restoreEnvSnapshot = async ({
 
     try {
       log.info('');
-      log.info('Step 5/7 — Replaying data indices (with timestamp transformation)...');
+      log.info('Step 3/5 — Replaying data indices (with timestamp transformation)...');
 
       replayResult = await replaySnapshot({
-        esClient, // caller's client — see comment at Step 1/7
+        esClient,
         log,
         repository,
         snapshotName,
@@ -326,11 +299,11 @@ export const restoreEnvSnapshot = async ({
     }
 
     log.info('');
-    log.info('Step 6/7 — Ensuring alert-index aliases...');
-    await ensureKnownAliases({ esClient: sysClient, log, systemIndices: [], alertIndices });
+    log.info('Step 4/5 — Ensuring alert-index aliases...');
+    await ensureKnownAliases({ esClient: sysClient, log, alertIndices });
 
     log.info('');
-    log.info('Step 7/7 — Repromoting queries...');
+    log.info('Step 5/5 — Repromoting queries...');
     await repromoteQueries({ esClient: sysClient, log, config });
 
     log.info('');
@@ -338,8 +311,10 @@ export const restoreEnvSnapshot = async ({
     log.info('RESTORE COMPLETE');
     log.info('='.repeat(70));
     log.info(`Snapshot: ${snapshotName}`);
-    log.info(`Restored system indices: ${restoreResult.restoredIndices.join(', ')}`);
-    log.info(`KI data stream: ${kiRestoreStatus}`);
+    log.info(`SigEvents data streams:`);
+    for (const status of dataStreamStatuses) {
+      log.info(`  - ${status}`);
+    }
     log.info(`Replayed data indices: ${replayResult.restoredIndices.join(', ')}`);
   });
 };
