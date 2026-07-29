@@ -84,12 +84,12 @@ spaceTest.describe(
           scoutSpace.id
         );
 
-        await pageObjects.dashboard.openDashboardWithId(dashboardId, false);
-
-        // Panel creates a search
-        await page.waitForRequest(
+        // Set up listener before opening the dashboard to avoid race conditions
+        const esqlRequestPromise = page.waitForRequest(
           (req) => req.url().endsWith('/esql_async') && req.method() === 'POST'
         );
+        await pageObjects.dashboard.openDashboardWithId(dashboardId, false);
+        await esqlRequestPromise;
 
         expect(
           await network.countMatchingRequests(

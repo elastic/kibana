@@ -113,8 +113,7 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddablePanelApiS
   Partial<HasEditCapabilities & PublishesSavedObjectId> &
   Partial<CanOverrideHoverActions> &
   HasDrilldowns &
-  HasSupportedTriggers &
-  CanCancelRequests;
+  HasSupportedTriggers;
 
 export interface PublishesSavedSearch {
   savedSearch$: PublishingSubject<SavedSearch>;
