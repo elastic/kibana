@@ -1805,7 +1805,7 @@ describe('RulesClient', () => {
       });
     });
 
-    it('fails the request and leaves the saved objects untouched when rotation fails', async () => {
+    it('reports a failed rotation group as per-rule errors without aborting or stamping', async () => {
       const client = createClient();
 
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -1814,13 +1814,66 @@ describe('RulesClient', () => {
 
       taskManager.bulkUpdateSchedules.mockRejectedValueOnce(new Error('Failed to grant API key'));
 
-      await expect(client.bulkUpdateApiKey({ ids: ['rule-1'] })).rejects.toThrow(
-        'Failed to grant API key'
-      );
+      const res = await client.bulkUpdateApiKey({ ids: ['rule-1'] });
 
-      // Rotation runs first, so a failure must not persist any audit metadata.
+      // The group failure is captured per-rule; nothing rotated, so no metadata
+      // is stamped and no event is emitted.
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
       expect(ruleEventPublisher.emitRuleUpdated).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        affected_count: 0,
+        errors: [
+          {
+            id: 'rule-1',
+            error: {
+              code: 'INTERNAL_SERVER_ERROR',
+              message: expect.stringContaining('rule-1'),
+            },
+          },
+        ],
+      });
+    });
+
+    it('rotates and stamps a healthy interval group even when another group fails', async () => {
+      const client = createClient();
+      getRuleExecutorTaskIdMock.mockImplementation(({ ruleId }) => `task:${ruleId}`);
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        {
+          id: 'rule-1m',
+          attributes: createRuleSoAttributes({ schedule: { every: '1m', lookback: '1m' } }),
+          version: 'v1',
+        },
+        {
+          id: 'rule-5m',
+          attributes: createRuleSoAttributes({ schedule: { every: '5m', lookback: '1m' } }),
+          version: 'v1',
+        },
+      ]);
+      // The '1m' group rotates; the '5m' group's grant is rejected.
+      taskManager.bulkUpdateSchedules.mockImplementation(async (taskIds: string[]) => {
+        if (taskIds.includes('task:rule-1m')) {
+          return { tasks: [{ id: 'task:rule-1m' }], errors: [] } as unknown as Awaited<
+            ReturnType<typeof taskManager.bulkUpdateSchedules>
+          >;
+        }
+        throw new Error('Failed to grant API key');
+      });
+      rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-1m', success: true }]);
+
+      const res = await client.bulkUpdateApiKey({ ids: ['rule-1m', 'rule-5m'] });
+
+      // The healthy group is still stamped even though the other group failed.
+      expect(rulesSavedObjectService.bulkUpdate).toHaveBeenCalledWith([
+        expect.objectContaining({ id: 'rule-1m' }),
+      ]);
+      expect(res.affected_count).toBe(1);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-5m',
+          error: { code: 'INTERNAL_SERVER_ERROR', message: expect.stringContaining('rule-5m') },
+        },
+      ]);
     });
 
     it('reports a per-task rotation failure as a per-rule error', async () => {

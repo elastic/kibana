@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import pMap from 'p-map';
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
@@ -83,6 +84,14 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 20;
 
 /**
+ * Max concurrent `bulkUpdateSchedules` calls when rotating executor task API
+ * keys. One call is issued per distinct schedule interval; in practice only a
+ * handful of intervals are in use, so this cap mainly bounds the pathological
+ * many-distinct-interval by-query batch.
+ */
+const ROTATION_CONCURRENCY = 10;
+
+/**
  * Maps a saved-object status code to the stable, machine-readable bulk-error
  * `code` returned in the response body. Keeps the by-ID and by-query
  * endpoints aligned with the single-rule error codes so a client can
@@ -105,6 +114,14 @@ const toBulkError = (
   id,
   error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message },
 });
+
+/** An enabled rule whose executor task API key is a candidate for rotation. */
+interface RotationCandidate {
+  id: string;
+  taskId: string;
+  attrs: RuleSavedObjectAttributes;
+  version?: string;
+}
 
 const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   if (!sortField) {
@@ -890,6 +907,8 @@ export class RulesClient {
    *   - currently-running rules (`RULE_ALREADY_RUNNING`) — `bulkUpdateSchedules`
    *     only touches `idle` tasks, so a running task is skipped; we surface it
    *     instead of silently leaving its key un-rotated.
+   *   - rules whose rotation call failed — reported per-rule; a failure in one
+   *     interval group never aborts the others, so successful groups still rotate.
    *
    * The saved-object audit metadata (`updatedBy`/`updatedAt`) is stamped only for
    * rules whose key actually rotated.
@@ -905,12 +924,7 @@ export class RulesClient {
 
     const fetchResults = await this.rulesSavedObjectService.bulkGetByIds(ids);
 
-    const candidates: Array<{
-      id: string;
-      taskId: string;
-      attrs: RuleSavedObjectAttributes;
-      version?: string;
-    }> = [];
+    const candidates: RotationCandidate[] = [];
 
     for (const doc of fetchResults) {
       if ('error' in doc) {
@@ -941,78 +955,19 @@ export class RulesClient {
       return { affected_count: 0, errors };
     }
 
-    // 1) Rotate keys on the existing executor tasks. `bulkUpdateSchedules` takes
-    // one schedule per call, so group by interval and pass each group its own
-    // interval — the schedule is unchanged, only the key rotates (and the old one
-    // is invalidated).
-    const taskIdToRuleId = new Map(candidates.map((candidate) => [candidate.taskId, candidate.id]));
-    const candidatesByInterval = new Map<string, typeof candidates>();
-    for (const candidate of candidates) {
-      const interval = candidate.attrs.schedule.every;
-      const group = candidatesByInterval.get(interval) ?? [];
-      group.push(candidate);
-      candidatesByInterval.set(interval, group);
-    }
-
-    const rotatedTaskIds = new Set<string>();
-    const erroredRuleIds = new Set<string>();
-
-    for (const [interval, group] of candidatesByInterval) {
-      // A total key-grant failure (e.g. API keys disabled) rejects here and
-      // propagates — the route maps it to a structured error response, and no
-      // audit metadata is written. Per-task failures come back as `errors`.
-      const result = await this.taskManager.bulkUpdateSchedules(
-        group.map((candidate) => candidate.taskId),
-        { interval },
-        {
-          request: this.request as unknown as CoreKibanaRequest,
-          regenerateApiKey: true,
-        }
-      );
-
-      for (const task of result.tasks) {
-        rotatedTaskIds.add(task.id);
-      }
-      for (const taskError of result.errors) {
-        const ruleId = taskIdToRuleId.get(taskError.id) ?? taskError.id;
-        erroredRuleIds.add(ruleId);
-        errors.push({
-          id: ruleId,
-          error: {
-            code: bulkErrorCodeForStatus(taskError.status ?? 500),
-            message: `Failed to update the executor task API key for rule "${ruleId}"`,
-          },
-        });
-      }
-    }
-
-    // `bulkUpdateSchedules` only touches `idle` tasks, so a candidate that was
-    // neither rotated nor errored was skipped because its task is running. Report
-    // it rather than silently leaving its key un-rotated.
-    const rotatedCandidates: typeof candidates = [];
-    for (const candidate of candidates) {
-      if (rotatedTaskIds.has(candidate.taskId)) {
-        rotatedCandidates.push(candidate);
-        continue;
-      }
-      if (erroredRuleIds.has(candidate.id)) {
-        continue;
-      }
-      errors.push({
-        id: candidate.id,
-        error: {
-          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
-          message: `Rule with id "${candidate.id}" is currently running; its API key cannot be updated until the run finishes`,
-        },
-      });
-    }
+    // Rotate the keys on the existing executor tasks (grants a new key and
+    // invalidates the old one). Running tasks / per-task failures come back as
+    // per-rule errors to merge into the response.
+    const { rotated: rotatedCandidates, errors: rotationErrors } =
+      await this.rotateExecutorTaskApiKeys(candidates);
+    errors.push(...rotationErrors);
 
     if (rotatedCandidates.length === 0) {
       return { affected_count: 0, errors };
     }
 
-    // 2) Keys rotated — stamp the audit metadata so the rotation is attributable
-    // to the current user. Per-rule save failures are reported as errors.
+    // Keys rotated — stamp the audit metadata so the rotation is attributable to
+    // the current user. Per-rule save failures are reported as errors.
     const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const nowIso = new Date().toISOString();
 
@@ -1045,6 +1000,114 @@ export class RulesClient {
     this.ruleEventPublisher.emitRuleUpdated(this.request, updatedRules);
 
     return { affected_count: affectedCount, errors };
+  }
+
+  /**
+   * Rotates the executor task API keys for the given (enabled) candidates via
+   * `bulkUpdateSchedules({ regenerateApiKey: true })`, which grants a new key and
+   * invalidates the old one. That API takes one schedule per call and only
+   * updates `idle` tasks, so candidates are grouped by their interval (passing
+   * each group its own interval leaves the schedule unchanged) and any task
+   * skipped for being mid-run is reported as `RULE_ALREADY_RUNNING`.
+   *
+   * Returns the candidates whose key actually rotated, plus the per-rule errors
+   * (running tasks and per-task/group failures) to merge into the bulk response.
+   * A group whose rotation fails (e.g. the key grant is rejected) is reported as
+   * per-rule errors rather than aborting the other groups — so a partial failure
+   * still rotates and stamps the groups that succeeded.
+   */
+  private async rotateExecutorTaskApiKeys(
+    candidates: RotationCandidate[]
+  ): Promise<{ rotated: RotationCandidate[]; errors: BulkOperationError[] }> {
+    const errors: BulkOperationError[] = [];
+    const taskIdToRuleId = new Map(candidates.map((candidate) => [candidate.taskId, candidate.id]));
+
+    const candidatesByInterval = new Map<string, RotationCandidate[]>();
+    for (const candidate of candidates) {
+      const interval = candidate.attrs.schedule.every;
+      const group = candidatesByInterval.get(interval) ?? [];
+      group.push(candidate);
+      candidatesByInterval.set(interval, group);
+    }
+
+    const rotatedTaskIds = new Set<string>();
+    const erroredRuleIds = new Set<string>();
+
+    // One call per distinct interval, run with bounded concurrency. Each call is
+    // isolated: a group-level failure is captured as per-rule errors so it never
+    // aborts the other groups (mutations below are synchronous post-await, so the
+    // shared sets/array are safe under concurrency).
+    await pMap(
+      [...candidatesByInterval.entries()],
+      async ([interval, group]) => {
+        try {
+          const result = await this.taskManager.bulkUpdateSchedules(
+            group.map((candidate) => candidate.taskId),
+            { interval },
+            {
+              request: this.request as unknown as CoreKibanaRequest,
+              regenerateApiKey: true,
+            }
+          );
+
+          for (const task of result.tasks) {
+            rotatedTaskIds.add(task.id);
+          }
+          for (const taskError of result.errors) {
+            const ruleId = taskIdToRuleId.get(taskError.id) ?? taskError.id;
+            erroredRuleIds.add(ruleId);
+            errors.push({
+              id: ruleId,
+              error: {
+                code: bulkErrorCodeForStatus(taskError.status ?? 500),
+                message: `Failed to update the executor task API key for rule "${ruleId}"`,
+              },
+            });
+          }
+        } catch (e) {
+          // A whole-group failure (e.g. the per-task-type key grant was rejected).
+          // Report every rule in the group and keep going with the other groups.
+          const failure = e instanceof Error ? e.message : String(e);
+          this.logger.warn({
+            message: `Failed to rotate executor task API keys for ${group.length} rule(s) at interval "${interval}": ${failure}`,
+          });
+          for (const candidate of group) {
+            erroredRuleIds.add(candidate.id);
+            errors.push({
+              id: candidate.id,
+              error: {
+                code: ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR,
+                message: `Failed to update the executor task API key for rule "${candidate.id}"`,
+              },
+            });
+          }
+        }
+      },
+      { concurrency: ROTATION_CONCURRENCY }
+    );
+
+    // `bulkUpdateSchedules` only touches `idle` tasks, so a candidate that was
+    // neither rotated nor errored was skipped because its task is running. Report
+    // it rather than silently leaving its key un-rotated.
+    const rotated: RotationCandidate[] = [];
+    for (const candidate of candidates) {
+      if (rotatedTaskIds.has(candidate.taskId)) {
+        rotated.push(candidate);
+        continue;
+      }
+      if (erroredRuleIds.has(candidate.id)) {
+        continue;
+      }
+      errors.push({
+        id: candidate.id,
+        error: {
+          code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
+          message: `Rule with id "${candidate.id}" is currently running; its API key cannot be updated until the run finishes`,
+        },
+      });
+    }
+
+    return { rotated, errors };
   }
 
   /**
