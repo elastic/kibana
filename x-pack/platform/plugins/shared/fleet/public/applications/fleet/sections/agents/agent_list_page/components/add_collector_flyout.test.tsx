@@ -329,6 +329,30 @@ describe('AddCollectorFlyout', () => {
         expect(component.getByText('Create API key').closest('button')).toBeDisabled();
       });
     });
+
+    it('disables the Create API key button and shows tooltip when user lacks api_keys.save permission', async () => {
+      mockedUseStartServices.mockReturnValue({
+        cloud: { isCloudEnabled: false },
+        docLinks: { links: { fleet: { managedOtlp: 'https://example.test/motlp' } } },
+        application: { capabilities: { api_keys: { save: false } } },
+      } as any);
+
+      const component = renderFlyout();
+
+      await waitFor(() => {
+        expect(component.getByText('Create API key').closest('button')).toBeDisabled();
+      });
+
+      fireEvent.mouseOver(component.getByText('Create API key'));
+
+      await waitFor(() => {
+        expect(
+          component.getByText(
+            "You don't have permission to create API keys. Contact your administrator."
+          )
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('TLS configuration', () => {
