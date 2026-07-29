@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { DataViewsAsCodeServerPlugin } = await import('./plugin');
-  return new DataViewsAsCodeServerPlugin(initializerContext);
+export interface RegisterRouteArgs {
+  router: IRouter;
+  usageCounter: UsageCounter | undefined;
+  logger: Logger;
+  getStartServices: StartServicesAccessor<DataViewsAsCodeServerPluginStartDependencies, void>;
 }
