@@ -43,7 +43,7 @@ export async function cleanupOrphanTransforms(
   params: RunParams,
   dependencies: Dependencies
 ): Promise<TransformCleanupRunResult> {
-  const { esClient, logger, abortController } = dependencies;
+  const { esClient, logger, signal } = dependencies;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const maxPages = params.maxPages ?? DEFAULT_MAX_PAGES;
   const concurrency = params.concurrency ?? DEFAULT_CONCURRENCY;
@@ -53,7 +53,7 @@ export async function cleanupOrphanTransforms(
 
   try {
     while (true) {
-      abortController.signal.throwIfAborted();
+      signal.throwIfAborted();
       currentPage++;
 
       const response = await esClient.transform.getTransformStats(
@@ -67,7 +67,7 @@ export async function cleanupOrphanTransforms(
           // health blobs (multi-KB each at pageSize=100).
           filter_path: 'count,transforms.id,transforms.state',
         },
-        { signal: abortController.signal }
+        { signal }
       );
 
       const transforms = response.transforms ?? [];
@@ -89,14 +89,14 @@ export async function cleanupOrphanTransforms(
 
       let deletedCount = 0;
       if (sloTransforms.length > 0) {
-        abortController.signal.throwIfAborted();
+        signal.throwIfAborted();
         const uniqueSloIds = [...new Set(sloTransforms.map(({ slo }) => slo.id))];
         const definitionMap = await findSloDefinitionMap(uniqueSloIds, dependencies);
 
         const orphans = sloTransforms.filter(({ slo }) => !definitionMap.has(getKey(slo)));
 
         if (orphans.length > 0) {
-          abortController.signal.throwIfAborted();
+          signal.throwIfAborted();
           logger.debug(`Deleting ${orphans.length} orphaned SLO transforms`);
 
           await Promise.all(
@@ -105,11 +105,11 @@ export async function cleanupOrphanTransforms(
                 try {
                   await esClient.transform.deleteTransform(
                     { transform_id: transformId, force: true },
-                    { ignore: [404], signal: abortController.signal }
+                    { ignore: [404], signal }
                   );
                   deletedCount++;
                 } catch (err) {
-                  if (isAbortError(err, abortController)) throw err;
+                  if (isAbortError(err, signal)) throw err;
                   logger.warn(
                     `Failed to delete orphaned transform [${transformId}]: ${err.message}`
                   );
@@ -125,7 +125,7 @@ export async function cleanupOrphanTransforms(
         });
 
         if (disabledButRunning.length > 0) {
-          abortController.signal.throwIfAborted();
+          signal.throwIfAborted();
           logger.debug(`Stopping ${disabledButRunning.length} transforms for disabled SLOs`);
 
           await Promise.all(
@@ -139,10 +139,10 @@ export async function cleanupOrphanTransforms(
                       force: true,
                       allow_no_match: true,
                     },
-                    { ignore: [404], signal: abortController.signal }
+                    { ignore: [404], signal }
                   );
                 } catch (err) {
-                  if (isAbortError(err, abortController)) throw err;
+                  if (isAbortError(err, signal)) throw err;
                   logger.warn(
                     `Failed to stop transform [${transformId}] for disabled SLO: ${err.message}`
                   );
@@ -170,7 +170,7 @@ export async function cleanupOrphanTransforms(
       }
     }
   } catch (error) {
-    if (isAbortError(error, abortController)) {
+    if (isAbortError(error, signal)) {
       logger.debug('Orphan transforms cleanup aborted');
       return { aborted: true, completed: false, nextState: { from } };
     }

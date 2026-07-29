@@ -7,7 +7,7 @@
 
 import { set } from '@kbn/safer-lodash-set';
 import { get, isEqual, unset } from 'lodash';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { CoreStart, Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
@@ -37,13 +37,13 @@ export const reconcileScheduleIdsToWire = async ({
   coreStart,
   osqueryContext,
   logger,
-  abortController,
+  signal,
   isRruleFeatureEnabled = false,
 }: {
   coreStart: CoreStart;
   osqueryContext: OsqueryAppContextService;
   logger: Logger;
-  abortController?: AbortController;
+  signal?: AbortSignal;
   isRruleFeatureEnabled?: boolean;
 }): Promise<{ hadFailures: boolean }> => {
   let hadFailures = false;
@@ -98,7 +98,7 @@ export const reconcileScheduleIdsToWire = async ({
     }
 
     for (const [spaceId, spacePacks] of packsBySpaceId) {
-      if (abortController?.signal.aborted) {
+      if (signal?.aborted) {
         logger.info(
           'reconcileScheduleIdsToWire: aborted by task manager, will retry remaining packs'
         );
@@ -117,7 +117,7 @@ export const reconcileScheduleIdsToWire = async ({
       for (const packSO of spacePacks) {
         // Abort per-pack, not just per-space: the default single-space deployment
         // has one space iteration, so a space-only check would never re-fire.
-        if (abortController?.signal.aborted) {
+        if (signal?.aborted) {
           logger.info(
             'reconcileScheduleIdsToWire: aborted by task manager, will retry remaining packs'
           );
@@ -152,7 +152,7 @@ export const reconcileScheduleIdsToWire = async ({
           // later packs on the same policy diff against post-write state.
           for (let ppIndex = 0; ppIndex < packagePolicies.length; ppIndex++) {
             // Abort down to the individual write: one pack on many policies can run long.
-            if (abortController?.signal.aborted) {
+            if (signal?.aborted) {
               logger.info(
                 'reconcileScheduleIdsToWire: aborted by task manager, will retry remaining packs'
               );

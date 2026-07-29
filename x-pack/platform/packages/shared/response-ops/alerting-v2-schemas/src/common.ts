@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { validateDuration, validateMaxDuration } from './validation';
 import { MAX_DURATION } from './constants';
 
@@ -23,9 +24,10 @@ const durationSchema = z.string().superRefine((value, ctx) => {
 
 /**
  * Shared schema for tag arrays used across alerting v2 (rule metadata, action policies,
- * alert tag actions, tag filters). Each tag is up to 128 characters. Up to 20 tags allowed.
+ * alert tag actions, tag filters). Each tag is up to `MAX_TAG_LENGTH` characters, up to
+ * `MAX_TAGS` tags allowed.
  */
-const tagsSchema = z.array(z.string().min(1).max(128)).max(20);
+const tagsSchema = z.array(z.string().min(1).max(MAX_TAG_LENGTH)).max(MAX_TAGS);
 
 /** Make a schema optional while preserving its `.describe()` metadata. */
 const optionalWithDescription = <T extends z.ZodType>(schema: T) => {
@@ -48,7 +50,7 @@ const optionalWithDescription = <T extends z.ZodType>(schema: T) => {
  * `min`/`max` inside the union.
  *
  * @example
- *   const tagsQuerySchema = arrayOrSingleSchema(z.string().min(1).max(128), 20);
+ *   const tagsQuerySchema = arrayOrSingleSchema(z.string().min(1).max(MAX_TAG_LENGTH), MAX_TAGS);
  */
 const arrayOrSingleSchema = <T extends z.ZodType>(item: T, max: number) =>
   z

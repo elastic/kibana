@@ -208,6 +208,10 @@ export function RootCauseAnalysisEntityLogPatternTable({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiBasicTable
+        tableCaption={i18n.translate(
+          'xpack.observabilityAiAssistant.rca.logPatternTable.tableCaption',
+          { defaultMessage: 'Log patterns' }
+        )}
         tableLayout="auto"
         columns={columns}
         items={visibleItems}

@@ -18,7 +18,7 @@ export const useToggleRuleEnabled = () => {
 
   return useMutation({
     mutationFn: ({ id, enabled }: { id: string; enabled: boolean }) =>
-      rulesApi.updateRule(id, { enabled }),
+      enabled ? rulesApi.enableRule(id) : rulesApi.disableRule(id),
     onSuccess: async (data, variables) => {
       toasts.addSuccess(
         variables.enabled

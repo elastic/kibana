@@ -147,6 +147,7 @@ export const useCasesColumns = ({
                 data-test-subj="case-table-column-tags"
                 css={getLineClampedCss}
                 gutterSize="xs"
+                tabIndex={0}
               >
                 {tags.map((tag: string, i: number) => (
                   <EuiBadge
@@ -299,7 +300,7 @@ export const useCasesColumns = ({
             const isAlreadyAttached = disabledCases?.has(theCase.id) ?? false;
             const isClosed = theCase.status === CaseStatuses.closed;
             const disabled = isAlreadyAttached || isClosed;
-            return (
+            const selectButton = (
               <EuiButton
                 data-test-subj={`cases-table-row-select-${theCase.id}`}
                 onClick={() => assignCaseAction(theCase)}
@@ -310,6 +311,23 @@ export const useCasesColumns = ({
                 {isAlreadyAttached ? i18n.ALREADY_ATTACHED : i18n.SELECT}
               </EuiButton>
             );
+
+            // Disabled buttons do not emit pointer events, so wrap in a span to
+            // ensure the explanatory tooltip still shows on hover.
+            if (isAlreadyAttached) {
+              return (
+                <EuiToolTip content={i18n.ALREADY_ATTACHED_TOOLTIP}>
+                  <span
+                    tabIndex={0}
+                    data-test-subj={`cases-table-row-select-tooltip-${theCase.id}`}
+                  >
+                    {selectButton}
+                  </span>
+                </EuiToolTip>
+              );
+            }
+
+            return selectButton;
           }
           return getEmptyCellValue();
         },

@@ -11,6 +11,17 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDefinitionParams } from '..';
 
 /**
+ * Maximum lengths for CSP/Permissions-Policy violation report string fields. Values are chosen to
+ * be generous enough to accommodate real-world browser payloads while still providing an upper
+ * bound that satisfies CodeQL unbounded-string rules.
+ */
+const MAX_URL_LENGTH = 8192;
+const MAX_USER_AGENT_LENGTH = 1024;
+const MAX_DIRECTIVE_LENGTH = 1024;
+const MAX_POLICY_LENGTH = 8192;
+const MAX_SAMPLE_LENGTH = 1024;
+
+/**
  * # Tracking CSP violations
  *
  * Add the following settings to your `kibana.dev.yml`:
@@ -48,17 +59,17 @@ const cspViolationReportSchema = schema.object(
   {
     type: schema.literal('csp-violation'),
     age: schema.maybe(schema.nullable(schema.number())),
-    url: schema.string(),
-    user_agent: schema.maybe(schema.nullable(schema.string())),
+    url: schema.string({ maxLength: MAX_URL_LENGTH }),
+    user_agent: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_USER_AGENT_LENGTH }))),
     body: schema.object(
       {
-        documentURL: schema.string(),
-        referrer: schema.maybe(schema.nullable(schema.string())),
-        blockedURL: schema.maybe(schema.nullable(schema.string())),
-        effectiveDirective: schema.string(),
-        originalPolicy: schema.string(),
-        sourceFile: schema.maybe(schema.nullable(schema.string())),
-        sample: schema.maybe(schema.nullable(schema.string())),
+        documentURL: schema.string({ maxLength: MAX_URL_LENGTH }),
+        referrer: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_URL_LENGTH }))),
+        blockedURL: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_URL_LENGTH }))),
+        effectiveDirective: schema.string({ maxLength: MAX_DIRECTIVE_LENGTH }),
+        originalPolicy: schema.string({ maxLength: MAX_POLICY_LENGTH }),
+        sourceFile: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_URL_LENGTH }))),
+        sample: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_SAMPLE_LENGTH }))),
         disposition: schema.oneOf([schema.literal('enforce'), schema.literal('report')]),
         statusCode: schema.number(),
         lineNumber: schema.maybe(schema.nullable(schema.number())),
@@ -84,23 +95,25 @@ export const permissionsPolicyViolationReportSchema = schema.object(
   {
     type: schema.literal('permissions-policy-violation'),
     age: schema.maybe(schema.nullable(schema.number())),
-    url: schema.string(),
-    user_agent: schema.maybe(schema.nullable(schema.string())),
+    url: schema.string({ maxLength: MAX_URL_LENGTH }),
+    user_agent: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_USER_AGENT_LENGTH }))),
     body: schema.object(
       {
         /**
          * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
          * Spec mentions featureId, however the report that is sent from Chrome has policyId. This is to handle both cases.
          */
-        policyId: schema.maybe(schema.nullable(schema.string())),
+        policyId: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_DIRECTIVE_LENGTH }))),
         /**
          * The string identifying the policy-controlled feature whose policy has been violated. This string can be used for grouping and counting related reports.
          */
-        featureId: schema.maybe(schema.nullable(schema.string())),
+        featureId: schema.maybe(
+          schema.nullable(schema.string({ maxLength: MAX_DIRECTIVE_LENGTH }))
+        ),
         /**
          * If known, the file where the violation occured, or null otherwise.
          */
-        sourceFile: schema.maybe(schema.nullable(schema.string())),
+        sourceFile: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_URL_LENGTH }))),
         /**
          * If known, the line number in sourceFile where the violation occured, or null otherwise.
          */
@@ -117,12 +130,14 @@ export const permissionsPolicyViolationReportSchema = schema.object(
          * For reports attributable to a specific `iframe` element, the value of that element's
          * `allow` attribute, or null otherwise.
          */
-        allowAttribute: schema.maybe(schema.nullable(schema.string())),
+        allowAttribute: schema.maybe(
+          schema.nullable(schema.string({ maxLength: MAX_POLICY_LENGTH }))
+        ),
         /**
          * For reports attributable to a specific `iframe` element, the value of that element's
          * `src` attribute, or null otherwise.
          */
-        srcAttribute: schema.maybe(schema.nullable(schema.string())),
+        srcAttribute: schema.maybe(schema.nullable(schema.string({ maxLength: MAX_URL_LENGTH }))),
       },
       { unknowns: 'ignore' }
     ),

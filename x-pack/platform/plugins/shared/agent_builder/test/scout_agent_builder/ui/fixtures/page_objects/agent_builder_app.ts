@@ -285,19 +285,7 @@ export class AgentBuilderApp {
   }
 
   async selectMcpTool(toolName: string) {
-    const optionSubj = `mcpToolOption-${toolName}`;
-    const option = this.page.locator(`[data-test-subj="${optionSubj}"]`);
-    // Retry clicking the combobox until the option appears. A single click can
-    // either open or close the EuiComboBox dropdown, so we guard against
-    // accidentally toggling it closed by only clicking when the option isn't
-    // already visible.
-    await expect(async () => {
-      if (!(await option.isVisible())) {
-        await this.page.testSubj.click('agentBuilderMcpToolSelect');
-      }
-      await expect(option).toBeVisible({ timeout: 2_000 });
-    }).toPass({ timeout: 60_000 });
-    await option.click();
+    await this.page.components.comboBox('agentBuilderMcpToolSelect').setSelectedOptions([toolName]);
   }
 
   async waitForMcpToolsToLoad() {
@@ -453,13 +441,9 @@ export class AgentBuilderApp {
     await this.page.testSubj.fill('agentSettingsIdInput', agent.id);
     await this.page.testSubj.fill('agentSettingsDisplayNameInput', agent.name);
     await this.page.testSubj.fill('agentSettingsDescriptionInput', `Agent for testing ${agent.id}`);
-    const labelsCombo = this.page.testSubj.locator('agentSettingsLabelsComboBox');
-    const labelsInput = labelsCombo.getByTestId('comboBoxSearchInput');
-    for (const label of agent.labels) {
-      await labelsInput.click();
-      await labelsInput.fill(label);
-      await this.page.keyboard.press('Enter');
-    }
+    await this.page.components
+      .comboBox('agentSettingsLabelsComboBox')
+      .setCustomSelectedOptions(agent.labels);
     await this.page.testSubj.click('agentFormSaveButton');
     await this.page.testSubj
       .locator('agentBuilderAgentsListPageTitle')

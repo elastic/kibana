@@ -78,6 +78,7 @@ export const ProjectPicker = ({
         iconType="crossProjectSearch"
         onClick={() => setShowPopover(!showPopover)}
         color="text"
+        css={styles.button}
       >
         {activeProjectsCount === totalProjectCount
           ? strings.allButtonLabel
@@ -148,7 +149,7 @@ export const ProjectPicker = ({
           projectRouting={projectRouting}
           onProjectRoutingChange={onProjectRoutingChange}
           projects={projects}
-          isReadonly={isReadonly}
+          controlsState={isReadonly ? 'disabled' : 'enabled'}
         />
       </EuiPopover>
     </EuiTourStep>
@@ -180,6 +181,10 @@ export const DisabledProjectPicker = ({ totalProjectCount }: { totalProjectCount
 };
 
 const projectPickerStyles = {
+  button: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textSubdued,
+    }),
   popover: ({ euiTheme }: UseEuiTheme) =>
     css({
       width: euiTheme.base * 35,

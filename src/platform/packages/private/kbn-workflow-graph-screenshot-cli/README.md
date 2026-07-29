@@ -95,13 +95,24 @@ npx playwright install chromium
 
 ### Icon lazy-loading
 
-EUI step icons are loaded asynchronously. With the default `--settle-ms 500`
-they typically appear by the time the screenshot is taken. If you see generic
-placeholder icons, increase `--settle-ms`:
+The bundle forces all dynamic `import()`s (EUI's internal icon components, and
+the connector-spec integration icons — e.g. AbuseIPDB — resolved via
+`getConnectorSpecIcon`) into a single `bundle.js` (`LimitChunkCountPlugin` in
+`webpack.config.js`), so icons don't race a network fetch. Icons still resolve
+through a `React.lazy`/`Suspense` boundary, which takes a render tick. With the
+default `--settle-ms 500` they reliably appear by the time the screenshot is
+taken. If you still see generic placeholder icons, increase `--settle-ms`:
 
 ```sh
 node scripts/workflow_graph_screenshot.js --input ... --settle-ms 1000
 ```
+
+Integration step icons (connector specs like AbuseIPDB) render via a headless
+`renderStepIcon` in `browser_entry.tsx` that mirrors the live app's `<StepIcon>`
+using only statically-registered sources (`getConnectorSpecIcon`, the hardcoded
+trigger/fallback tables). Icons that only exist in the workflows-extensions or
+stack-connector action-type registries — which require a running Kibana — still
+fall back to the generic icon, since those registries aren't available headlessly.
 
 ### Bundle build time
 

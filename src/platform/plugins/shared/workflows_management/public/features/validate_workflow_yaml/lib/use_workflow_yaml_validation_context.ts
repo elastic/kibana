@@ -8,7 +8,7 @@
  */
 
 import { type MutableRefObject, useMemo, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { WorkflowYamlValidationContext } from './collect_full_workflow_yaml_validation_results';
 import { useGetPropertyHandler } from './property_handlers/use_get_property_handler';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';

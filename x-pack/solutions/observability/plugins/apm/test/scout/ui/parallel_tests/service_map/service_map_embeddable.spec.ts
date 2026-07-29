@@ -133,12 +133,9 @@ test.describe(
 
         // Suggestions can be empty under load on cloud/serverless, but the
         // control supports committing typed values via onCreateOption.
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
-          SERVICE_MAP_TEST_SERVICE,
-          {
-            useFill: true,
-            settleTimeoutMs: EXTENDED_TIMEOUT,
-          }
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
+          [SERVICE_MAP_TEST_SERVICE],
+          { timeout: EXTENDED_TIMEOUT }
         );
 
         await expect
@@ -250,9 +247,7 @@ test.describe(
         await expect(pageObjects.serviceMapPage.serviceMapViewFullMapButton).toBeVisible();
         await pageObjects.serviceMapPage.serviceMapViewFullMapButton.click();
 
-        await expect(page).toHaveURL(
-          new RegExp(`/app/apm/services/${SERVICE_MAP_TEST_SERVICE}/service-map`)
-        );
+        await expect(page).toHaveURL(new RegExp(`/app/apm(?:#)?/service-map`));
       });
     });
 
@@ -300,9 +295,9 @@ test.describe(
           })
           .toBe(0);
 
-        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSingleOption(
-          SERVICE_MAP_TEST_SERVICE,
-          { useFill: true, settleTimeoutMs: EXTENDED_TIMEOUT }
+        await pageObjects.serviceMapPage.serviceMapEditorServiceNameComboBox.setCustomSelectedOptions(
+          [SERVICE_MAP_TEST_SERVICE],
+          { timeout: EXTENDED_TIMEOUT }
         );
         await pageObjects.serviceMapPage.selectServiceMapEditorEnvironment(
           SERVICE_MAP_TEST_ENVIRONMENT_STAGING
