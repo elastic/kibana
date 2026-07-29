@@ -89,6 +89,50 @@ export function isInputVisibleForVarGroupSelections(
 }
 
 /**
+ * Compute the var_group options to hide when the package policy form is scoped to a
+ * single policy template (integration). An option is hidden when every input of that
+ * policy template declares it in `hide_in_var_group_options`, since selecting it would
+ * leave the integration without any usable inputs.
+ */
+export function getHiddenVarGroupOptionsForPolicyTemplate(
+  packageInfo: PackageInfo | undefined,
+  policyTemplateName: string | undefined
+): Record<string, string[]> | undefined {
+  if (!packageInfo?.var_groups?.length || !policyTemplateName) {
+    return undefined;
+  }
+
+  const policyTemplate = packageInfo.policy_templates?.find(
+    (template) => template.name === policyTemplateName
+  );
+  if (!policyTemplate) {
+    return undefined;
+  }
+
+  const inputs = getNormalizedInputs(policyTemplate);
+  if (!inputs.length) {
+    return undefined;
+  }
+
+  const hiddenOptions: Record<string, string[]> = {};
+  for (const varGroup of packageInfo.var_groups) {
+    const hiddenOptionNames = varGroup.options
+      .filter((option) =>
+        inputs.every((input) =>
+          input.hide_in_var_group_options?.[varGroup.name]?.includes(option.name)
+        )
+      )
+      .map((option) => option.name);
+
+    if (hiddenOptionNames.length > 0) {
+      hiddenOptions[varGroup.name] = hiddenOptionNames;
+    }
+  }
+
+  return Object.keys(hiddenOptions).length > 0 ? hiddenOptions : undefined;
+}
+
+/**
  * Get visible options for a var group, filtering out options that should be hidden
  * based on deployment mode or hide_in_var_group_options configuration.
  *
