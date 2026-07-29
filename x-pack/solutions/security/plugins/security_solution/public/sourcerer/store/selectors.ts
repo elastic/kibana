@@ -48,23 +48,3 @@ export const sourcererScopeMissingPatterns = createSelector(
     },
   }
 );
-
-export const defaultDataView = createSelector(
-  selectSourcerer,
-  (sourcerer) => sourcerer.defaultDataView,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
-export const signalIndexName = createSelector(
-  selectSourcerer,
-  (sourcerer) => sourcerer.signalIndexName,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
