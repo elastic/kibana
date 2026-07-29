@@ -18,7 +18,6 @@ import type {
   RouteMethod,
   RouteSecurity,
 } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
@@ -70,13 +69,12 @@ export const createAlertActionRouteForType = <
       description: 'Create an action for a specific alert group.',
       oasOperationObject,
     } as const;
-    static validate = {
+    static schemas = {
       request: {
-        params: buildRouteValidationWithZod(createAlertActionParamsSchema),
-        body: buildRouteValidationWithZod(bodySchema),
+        params: createAlertActionParamsSchema,
+        body: bodySchema,
       },
       response: {
-        ...BaseAlertingRoute.commonResponses,
         204: {
           description: 'Returns the newly created alert action.',
         },
@@ -115,5 +113,10 @@ export const createAlertActionRouteForType = <
     }
   }
 
-  return CreateTypedAlertActionRoute;
+  return CreateTypedAlertActionRoute as RouteDefinition<
+    CreateAlertActionParams,
+    unknown,
+    ActionBody,
+    'post'
+  >;
 };
