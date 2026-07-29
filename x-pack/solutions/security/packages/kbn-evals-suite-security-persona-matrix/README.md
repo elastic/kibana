@@ -13,7 +13,7 @@ designed for multi-model comparison and persona-driven reporting.
 | Threat Hunting | 3 | threat-hunting |
 | Workflow Authoring | 3 | workflow-authoring |
 | Workflow Execution | 3 | workflow-authoring, cases-management |
-| Multi-Step | 3 | security-multi-step |
+| Multi-Step | 3 | alert-analysis (+ allowSkills) |
 
 ## Evaluators
 

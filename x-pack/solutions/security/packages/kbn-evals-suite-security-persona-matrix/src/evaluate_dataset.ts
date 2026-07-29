@@ -6,8 +6,8 @@
  */
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
+import { isValidTraceId } from '@opentelemetry/api';
 import {
-  createSkillInvocationEvaluator,
   createTrajectoryEvaluator,
   getToolCallSteps,
   withEvaluatorSpan,
@@ -59,6 +59,115 @@ const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
   },
 });
 
+/**
+ * SkillInvoked — verifies the agent loaded an acceptable skill for THIS example.
+ *
+ * Scored per-example from the example's own metadata, not fanned out across the
+ * whole dataset: an `alert-analysis` prompt must not be scored against the
+ * `workflow-authoring` assertion. `expectedSkill` and `allowSkills` are a union
+ * — loading any one of them passes. Examples with no `expectedSkill` are N/A
+ * (score `null`), which is the correct shape for prompts whose documented
+ * contract is a direct tool call with no skill load.
+ */
+const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
+
+const createPersonaMatrixSkillInvokedEvaluator = ({
+  traceEsClient,
+  log,
+}: {
+  traceEsClient: EsClient;
+  log: ToolingLog;
+}): Evaluator => ({
+  name: 'SkillInvoked',
+  kind: 'CODE',
+  evaluate: async ({ output, metadata }) => {
+    const meta = metadata as { expectedSkill?: string; allowSkills?: string[] } | undefined;
+    const acceptedSkills = [meta?.expectedSkill, ...(meta?.allowSkills ?? [])].filter(
+      (s): s is string => typeof s === 'string' && s.length > 0
+    );
+
+    if (!acceptedSkills.length) {
+      return {
+        score: null,
+        label: 'N/A',
+        explanation: 'No expectedSkill/allowSkills annotation — skipping SkillInvoked.',
+      };
+    }
+
+    const invalid = acceptedSkills.filter((s) => !VALID_SKILL_NAME.test(s));
+    if (invalid.length) {
+      return {
+        score: null,
+        label: 'error',
+        explanation: `Invalid skill name(s): ${invalid.join(', ')}`,
+      };
+    }
+
+    const traceId = (output as { traceId?: string } | undefined)?.traceId;
+    if (!traceId || !isValidTraceId(traceId)) {
+      return {
+        score: null,
+        label: 'unavailable',
+        explanation: `No usable traceId for SkillInvoked (traceId: ${traceId ?? 'none'})`,
+      };
+    }
+
+    const skillPredicate = acceptedSkills
+      .map((skillName) => `attributes.gen_ai.tool.call.arguments LIKE "*/${skillName}/SKILL.md*"`)
+      .join(' OR ');
+
+    const query = `FROM traces-*
+| WHERE trace.id == "${traceId}"
+| STATS
+  total_tool_spans = COUNT(
+    CASE(attributes.elastic.inference.span.kind == "TOOL", 1, NULL)
+  ),
+  skill_invoked = COUNT(
+    CASE(
+      attributes.gen_ai.tool.name == "filestore.read" AND (${skillPredicate}),
+      1,
+      NULL
+    )
+  )`;
+
+    try {
+      const response = (await traceEsClient.esql.query({ query })) as unknown as {
+        columns: Array<{ name: string }>;
+        values: unknown[][];
+      };
+      const row = response.values?.[0];
+      const idx = (name: string) => response.columns?.findIndex((c) => c.name === name) ?? -1;
+      const toolSpansIdx = idx('total_tool_spans');
+      const invokedIdx = idx('skill_invoked');
+
+      if (!row || toolSpansIdx === -1 || invokedIdx === -1) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: 'Expected columns not found in trace query response',
+        };
+      }
+
+      // No tool spans at all means the trace is not yet searchable, not that the
+      // skill was skipped — scoring 0 here would be a false failure.
+      if (!(row[toolSpansIdx] as number | undefined)) {
+        return {
+          score: null,
+          label: 'unavailable',
+          explanation: 'No tool spans found for trace — trace data likely incomplete',
+        };
+      }
+
+      const invoked = ((row[invokedIdx] as number | undefined) ?? 0) > 0;
+      return { score: invoked ? 1 : 0, metadata: { acceptedSkills, invoked } };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      log.warning(`SkillInvoked failed for trace ${traceId}: ${message}`);
+      return { score: null, label: 'error', explanation: `SkillInvoked query failed: ${message}` };
+    }
+  },
+});
+
 export function createEvaluatePersonaMatrixDataset({
   chatClient,
   evaluators,
@@ -77,21 +186,10 @@ export function createEvaluatePersonaMatrixDataset({
   }: {
     dataset: EvaluationDataset<PersonaMatrixExample>;
   }): Promise<void> {
-    const expectedSkills = Array.from(
-      new Set(
-        dataset.examples
-          .map((e) => (e.metadata as Record<string, unknown> | undefined)?.expectedSkill)
-          .filter((s): s is string => typeof s === 'string')
-      )
-    );
-
-    const skillEvaluators = expectedSkills.map((skillName) =>
-      createSkillInvocationEvaluator({
-        traceEsClient,
-        log,
-        skillName,
-      })
-    );
+    const skillInvokedEvaluator = createPersonaMatrixSkillInvokedEvaluator({
+      traceEsClient,
+      log,
+    });
 
     const trajectoryEvaluator = createTrajectoryEvaluator({
       extractToolCalls: (output) => {
@@ -115,7 +213,7 @@ export function createEvaluatePersonaMatrixDataset({
     const { inputTokens, outputTokens, toolCalls, latency } = evaluators.traceBasedEvaluators;
 
     const allEvaluators: Evaluator[] = [
-      ...skillEvaluators,
+      skillInvokedEvaluator,
       trajectoryEvaluator,
       expectedToolCalledEvaluator,
       ...correctnessEvaluators,

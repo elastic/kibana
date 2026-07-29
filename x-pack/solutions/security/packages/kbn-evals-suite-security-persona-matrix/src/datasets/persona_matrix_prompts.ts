@@ -25,8 +25,23 @@ export interface PersonaMatrixExample {
   input: PersonaMatrixExampleInput;
   output: PersonaMatrixExampleOutput;
   metadata: {
-    expectedSkill: string;
+    /**
+     * Skill whose SKILL.md the agent is expected to load for this prompt.
+     *
+     * Omit it when the documented contract for the prompt is a direct tool call
+     * with no skill load (e.g. `platform.core.generate_workflow`, which
+     * `workflow-authoring` explicitly says is not required). Asserting a skill
+     * that the product tells the agent NOT to load makes the suite false-fail
+     * the happy path.
+     *
+     * Must be a skill `id` that is actually registered via `defineSkillType`.
+     */
+    expectedSkill?: string;
     expectedTools?: string[];
+    /**
+     * Additional registered skill ids that also satisfy the skill assertion.
+     * Scored as a union with `expectedSkill`: loading any one of them passes.
+     */
     allowSkills?: string[];
     expectedAttachmentReads?: number;
     severity?: 'low' | 'medium' | 'high' | 'critical';
@@ -301,8 +316,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'recommendation with the IOCs called out.',
     },
     metadata: {
-      expectedSkill: 'security-multi-step',
-      allowSkills: ['alert-analysis'],
+      expectedSkill: 'alert-analysis',
       expectedTools: [
         'attachments.read',
         'security.security_labs_search',
@@ -332,8 +346,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'each step taken.',
     },
     metadata: {
-      expectedSkill: 'security-multi-step',
-      allowSkills: ['alert-analysis', 'cases-management'],
+      expectedSkill: 'alert-analysis',
+      allowSkills: ['cases-management'],
       expectedTools: ['security.security_labs_search', 'platform.core.cases'],
       severity: 'critical',
       tags: ['multi-step', 'incident-response'],
@@ -358,8 +372,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'the hunt confirms a true positive — explicitly stating when it does not escalate.',
     },
     metadata: {
-      expectedSkill: 'security-multi-step',
-      allowSkills: ['alert-analysis', 'threat-intel-hunt'],
+      expectedSkill: 'alert-analysis',
+      allowSkills: ['threat-hunting'],
       expectedTools: [
         'security.alerts',
         'platform.core.generate_esql',
@@ -478,7 +492,9 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'language, and validates the resulting workflow before rendering it inline.',
     },
     metadata: {
-      expectedSkill: 'workflow-authoring',
+      // No expectedSkill: the prompt does not ask for the skill, and
+      // `workflow-authoring` documents that it is NOT required for creating or
+      // editing a workflow — call `platform.core.generate_workflow` directly.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
       severity: 'low',
       tags: ['workflow', 'authoring-fixed'],
@@ -501,7 +517,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'given connector ID described in natural language, then validates and renders the workflow.',
     },
     metadata: {
-      expectedSkill: 'workflow-authoring',
+      // No expectedSkill: see `workflow-authoring-b` — the prompt does not ask
+      // for the skill and generate_workflow is the documented direct path.
       expectedTools: ['platform.core.generate_workflow', 'platform.workflows.validate_workflow'],
       severity: 'medium',
       tags: ['workflow', 'authoring-parameterized'],
@@ -523,7 +540,8 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'rather than reasoning about the hash without checking it or fabricating a verdict.',
     },
     metadata: {
-      expectedSkill: 'workflow-authoring',
+      // No expectedSkill: `workflow-authoring` documents that it is NOT required
+      // for running workflows — the contract is a direct custom-tool call.
       expectedTools: ['virustotal_lookup'],
       severity: 'high',
       tags: ['workflow', 'vt-check'],
@@ -545,7 +563,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'than guessing or asking the user who is on call.',
     },
     metadata: {
-      expectedSkill: 'workflow-authoring',
+      // No expectedSkill: see `workflow-execution-a` — direct custom-tool call.
       expectedTools: ['on_call_lookup'],
       severity: 'medium',
       tags: ['workflow', 'on-call'],
