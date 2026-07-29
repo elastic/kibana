@@ -10,6 +10,7 @@ import type {
   Feature,
   InvestigationState,
   LifecycleDetection,
+  QueryOccurrencesResponse,
   SignalEntry,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
@@ -143,6 +144,41 @@ export const checkoutDetection: LifecycleDetection = {
 export const checkoutLifecycle: EventLifecycleResponse = {
   detections: [checkoutDetection],
   events: [checkoutEventWithSignals],
+};
+
+export const checkoutOccurrences: QueryOccurrencesResponse = {
+  queries: [
+    {
+      id: 'checkout-api-p95-latency',
+      type: 'match',
+      title: 'Checkout API P95 latency',
+      description: 'Tracks checkout latency alerts.',
+      esql: {
+        query: 'FROM logs.checkout-api | STATS p95_latency = PERCENTILE(transaction.duration, 95)',
+      },
+      severity_score: 80,
+      rule_uuid: checkoutDetection.rule_uuid ?? 'checkout-latency-rule',
+      stream_name: checkoutDetection.stream_name,
+      occurrences: [
+        { date: '2026-07-24T09:20:00.000Z', count: 2 },
+        { date: '2026-07-24T09:25:00.000Z', count: 3 },
+        { date: '2026-07-24T09:30:00.000Z', count: 4 },
+        { date: '2026-07-24T09:35:00.000Z', count: 7 },
+        { date: '2026-07-24T09:40:00.000Z', count: 15 },
+        { date: '2026-07-24T09:45:00.000Z', count: 9 },
+      ],
+      change_points: { type: {} },
+      rule_backed: true,
+    },
+  ],
+  aggregated_occurrences: [
+    { date: '2026-07-24T09:20:00.000Z', count: 2 },
+    { date: '2026-07-24T09:25:00.000Z', count: 3 },
+    { date: '2026-07-24T09:30:00.000Z', count: 4 },
+    { date: '2026-07-24T09:35:00.000Z', count: 7 },
+    { date: '2026-07-24T09:40:00.000Z', count: 15 },
+    { date: '2026-07-24T09:45:00.000Z', count: 9 },
+  ],
 };
 
 export const checkoutFeature: Feature = {
