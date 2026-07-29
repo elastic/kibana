@@ -15,6 +15,7 @@ import type {
   PluginStartContract as AlertingPluginPublicStart,
 } from '@kbn/alerting-plugin/public';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
+import type { TimeRange } from '@kbn/es-query';
 import type { Environment } from '../../../../common/environment_rt';
 import type { ServiceSchemaType } from '../../../../common/service_schema_type';
 import type { ServiceFlyoutService } from './types';
@@ -44,7 +45,7 @@ export interface ServiceFlyoutContextValue {
   contextActions?: {
     openInNewDiscoverTab?: (params: {
       esqlQuery: string;
-      timeRange: { from: string; to: string };
+      timeRange: TimeRange;
       tabLabel: string;
     }) => void;
   };
