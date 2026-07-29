@@ -525,24 +525,32 @@ export class WorkflowsExecutionEnginePlugin
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
-              // Always run scheduled recovery. Stale same-taskRunAt retries are failed so an
-              // orphaned pending cannot hold a concurrency slot forever. When a concurrency
-              // strategy is set, defer "SKIPPED for in-flight other ticks" to the concurrency
-              // check so strategies like cancel-in-progress still apply.
-              const hasConcurrencyStrategy = Boolean(
-                workflow.definition?.settings?.concurrency?.strategy
+              // Overlap handling: concurrency collision strategies only run when both
+              // `key` (group) and `strategy` (drop/cancel/queue) are set. Without that
+              // pair, keep schedule-level SKIPPED for in-flight duplicates.
+              // Stale same-taskRunAt recovery only applies on TM retries (attempts > 1);
+              // skip the ES lookup on first attempt when deferring to concurrency.
+              const concurrency = workflow.definition?.settings?.concurrency;
+              const deferInFlightDuplicatesToConcurrency = Boolean(
+                concurrency?.key?.trim() && concurrency?.strategy
               );
-              const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
-                workflow,
-                spaceId,
-                workflowExecutionRepository,
-                stepExecutionRepository,
-                taskInstance,
-                logger,
-                { createSkippedForInFlightDuplicates: !hasConcurrencyStrategy }
-              );
-              if (wasSkipped) {
-                return;
+              const shouldCheckExistingScheduledExecution =
+                !deferInFlightDuplicatesToConcurrency || taskInstance.attempts > 1;
+              if (shouldCheckExistingScheduledExecution) {
+                const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
+                  workflow,
+                  spaceId,
+                  workflowExecutionRepository,
+                  stepExecutionRepository,
+                  taskInstance,
+                  logger,
+                  {
+                    createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
+                  }
+                );
+                if (wasSkipped) {
+                  return;
+                }
               }
 
               // Check for RRule triggers and log details

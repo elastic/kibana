@@ -21,7 +21,7 @@ export interface CheckExistingScheduledExecutionOptions {
   /**
    * When true (default), create a SKIPPED execution if another scheduled run
    * (different `taskRunAt`) is still non-terminal.
-   * When false (workflows with a concurrency strategy), leave in-flight overlap
+   * When false (workflows with concurrency `key` + `strategy`), leave in-flight overlap
    * to the concurrency check so strategies like `cancel-in-progress` still apply.
    * Stale same-`taskRunAt` recovery always runs regardless of this flag.
    */
@@ -44,7 +44,7 @@ export interface CheckExistingScheduledExecutionOptions {
  *   → The execution is stale from a previous attempt and will never complete
  *   → If `waiting_for_input`, skip this tick only (human resume; do not fail the execution)
  *   → Else mark execution as FAILED (TaskRecoveryError) and proceed with a new execution for this tick
- *   → This stale path always runs, including when the workflow has a concurrency strategy
+ *   → This stale path always runs when invoked, including for workflows with valid concurrency settings
  *
  * - If execution's `taskRunAt` differs from current task's `runAt`:
  *   → Execution is from a DIFFERENT scheduled run that's still running
