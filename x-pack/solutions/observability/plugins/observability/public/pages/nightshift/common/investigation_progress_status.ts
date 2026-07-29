@@ -17,11 +17,12 @@ export const getInvestigationProgressStatusLabel = (isInvestigated: boolean): st
         defaultMessage: 'Investigating',
       });
 
-export const isInvestigationInvestigated = (status: InvestigationStatus): boolean =>
+export const isInvestigationInvestigated = (status: InvestigationStatus): status is 'complete' =>
   status === 'complete';
 
-export const isInvestigationTerminalFailure = (status: InvestigationStatus): boolean =>
-  status === 'failed' || status === 'unavailable';
+export const isInvestigationTerminalFailure = (
+  status: InvestigationStatus
+): status is 'failed' | 'unavailable' => status === 'failed' || status === 'unavailable';
 
 export const getInvestigationWorkflowStatusLabel = (status: InvestigationStatus): string => {
   if (isInvestigationInvestigated(status)) {
