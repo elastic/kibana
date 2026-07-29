@@ -1,6 +1,6 @@
 /**
  * Test harness for the action-scoped collector's pure reducer
- * (action-scoped-collector.js). No test framework, plain assertions, exits
+ * (action-scoped-collector.mjs). No test framework, plain assertions, exits
  * non-zero on failure — same style as equivalence.test.mjs.
  *
  * This module is NOT exercised against a live browser here — it only tests
@@ -122,6 +122,77 @@ console.log('\n── Stuck request: still pending across a SECOND action (cumul
   assert(
     !second.level3.some((i) => i.type === 'pending_request'),
     'stuck-request → escalated finding replaces the plain pending_request, not both'
+  );
+}
+
+console.log('\n── Settle-then-repend: a request that fully resolves must not poison a LATER, unrelated pending sighting of the same signature ─');
+{
+  const pendingEvent = {
+    method: 'GET',
+    url: 'https://kibana.example/internal/entity_analytics/entity_store/engine_state',
+    status: null,
+    ok: null,
+    failure: null,
+    requestedAt: 0,
+    respondedAt: null,
+    resourceType: 'xhr',
+  };
+  const a1 = reduceAction({ network: [pendingEvent] });
+  assert(a1.level3.some((i) => i.type === 'pending_request'), 'settle-then-repend A1 → plain pending_request');
+
+  const a2 = reduceAction(
+    { network: [{ ...pendingEvent, status: 200, ok: true, failure: null, requestedAt: 1000, respondedAt: 1050 }] },
+    a1.state
+  );
+  assert(
+    !a2.level1.length && !a2.level2.length && !a2.level3.length,
+    'settle-then-repend A2 (settles cleanly) → no findings',
+    JSON.stringify(a2)
+  );
+
+  const a3 = reduceAction({ network: [{ ...pendingEvent, requestedAt: 2000 }] }, a2.state);
+  assert(
+    a3.level3.some((i) => i.type === 'pending_request'),
+    'settle-then-repend A3 (a brand-new pending request) → plain pending_request again, not stuck_request',
+    JSON.stringify(a3)
+  );
+  assert(
+    !a3.level2.some((i) => i.type === 'stuck_request'),
+    'settle-then-repend A3 → NOT misclassified as stuck_request just because the signature was pending two actions ago',
+    JSON.stringify(a3)
+  );
+}
+
+console.log('\n── Abandon-then-repend: an abandoned-by-navigation request must not poison a LATER pending sighting either ─');
+{
+  const pendingEvent = {
+    method: 'GET',
+    url: 'https://kibana.example/internal/entity_analytics/entity_store/engine_state',
+    status: null,
+    ok: null,
+    failure: null,
+    requestedAt: 0,
+    respondedAt: null,
+    resourceType: 'xhr',
+  };
+  const a1 = reduceAction({ network: [pendingEvent] });
+  const a2 = reduceAction({ network: [{ ...pendingEvent, requestedAt: 500, abandonedByNavigation: true }] }, a1.state);
+  assert(
+    a2.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
+    'abandon-then-repend A2 (abandoned after a genuine pending A1) → request_abandoned_by_navigation',
+    JSON.stringify(a2)
+  );
+
+  const a3 = reduceAction({ network: [{ ...pendingEvent, requestedAt: 1000 }] }, a2.state);
+  assert(
+    a3.level3.some((i) => i.type === 'pending_request'),
+    'abandon-then-repend A3 (a brand-new pending request) → plain pending_request, not stuck_request',
+    JSON.stringify(a3)
+  );
+  assert(
+    !a3.level2.some((i) => i.type === 'stuck_request'),
+    'abandon-then-repend A3 → NOT misclassified as stuck_request after an abandonment that followed a genuine pending sighting',
+    JSON.stringify(a3)
   );
 }
 
@@ -303,6 +374,10 @@ console.log('\n── URL redaction: credential-shaped query params are never pe
     'redactUrl → URLs with no sensitive params are returned unchanged'
   );
   assert(redactUrl('https://kibana.example/api') === 'https://kibana.example/api', 'redactUrl → URLs with no query string are returned unchanged');
+  assert(
+    redactUrl('https://kibana.example/api?token=abc123#somefragment') === 'https://kibana.example/api?token=%5BREDACTED%5D#somefragment',
+    'redactUrl → a hash fragment after a redacted sensitive param is preserved, not dropped'
+  );
 
   const withSecret = {
     method: 'GET',
@@ -342,6 +417,12 @@ console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (redu
       'https://kibana.example/api?q=1',
       'https://kibana.example/api',
       'https://kibana.example/api?token=abc&session=xyz&page=3',
+      // Regression case: the bridge's inline redact used to drop a trailing
+      // hash fragment whenever the sensitive param was the last query pair
+      // (it replaced the whole pair, hash included, with `key=[REDACTED]`),
+      // while redactUrl always carved the hash out separately and kept it.
+      'https://kibana.example/api?token=abc123#somefragment',
+      'https://kibana.example/api?q=1#somefragment',
     ];
     for (const url of cases) {
       assert(
@@ -359,7 +440,7 @@ console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (redu
 
 console.log('\n── CLI: module export and CLI invocation agree on classification ───────');
 {
-  // Exercised indirectly: the CLI entry point in action-scoped-collector.js
+  // Exercised indirectly: the CLI entry point in action-scoped-collector.mjs
   // calls the exact same reduceAction() this file already imports, so no
   // separate spawn-based test is needed to prove classification parity —
   // spawning is left to a lighter smoke check of argument handling.

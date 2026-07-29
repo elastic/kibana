@@ -4208,6 +4208,13 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
             "mode on its own initiative",
         )
         self.assertIn("collector_mode: legacy", example_yaml)
+        self.assertIn(
+            "was not recognized and legacy was used instead",
+            setup,
+            "expected explicit guidance that an unrecognized/typo'd "
+            "collector_mode value falls back to legacy with a visible "
+            "warning, not a silent coercion either way",
+        )
 
         # The shadow setup/self-test section must exist and precede the
         # per-step checklist, same ordering guarantee as the detector bridge.
@@ -4253,17 +4260,29 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         self.assertIn("PASS", spike_doc)
         self.assertIn("FAIL", spike_doc)
         self.assertIn(
-            "Do not set `collector_mode: shadow` in any real session until "
-            "this procedure has been run once",
+            "re-run this procedure yourself before setting "
+            "`collector_mode: shadow` in any real session",
             spike_doc,
+            "expected an explicit re-verification requirement for setups that "
+            "differ from whatever produced the last recorded PASS, not a "
+            "one-time-ever gate that goes stale silently",
         )
+        # The doc must not claim to be unverified while also containing a
+        # recorded PASS result — that self-contradiction is exactly what
+        # slipped through before (status header said "unverified" after a
+        # live PASS had already been recorded further down the same file).
+        self.assertIn("PASS", spike_doc)
+        self.assertNotIn("unverified against a live browser", spike_doc)
 
-        # The bridge doc must document both the install and drain snippets,
-        # never mention persisting a request/response body, and cross-link
-        # the spike doc rather than silently assuming the capability.
+        # The bridge doc must document the install/drain snippets, capture
+        # response status on the 'response' event (not an async .then() off
+        # 'requestfinished', which races with drain — see reducer history bug
+        # investigation), never mention persisting a request/response body,
+        # and cross-link the spike doc rather than silently assuming the
+        # capability.
         self.assertIn("action-scoped-collector-spike.md", collector_doc)
         self.assertIn("page.on('request'", collector_doc)
-        self.assertIn("page.on('requestfinished'", collector_doc)
+        self.assertIn("page.on('response'", collector_doc)
         self.assertIn("page.on('requestfailed'", collector_doc)
         self.assertIn("page.on('framenavigated'", collector_doc)
         self.assertNotIn("res.text()", collector_doc)

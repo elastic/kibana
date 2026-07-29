@@ -57,6 +57,7 @@
  */
 
 import { readFileSync } from 'fs';
+import { pathToFileURL } from 'url';
 
 // ── Redaction ────────────────────────────────────────────────────────────
 
@@ -281,12 +282,18 @@ export function reduceAction(action, priorState) {
     const priorEntry = history[sig] || { count: 0, firstPendingAt: null };
     history[sig] = {
       count: priorEntry.count + events.length,
+      // Reset whenever this signature has nothing pending *right now* —
+      // settled (succeeded/failed) or abandoned-by-navigation both count as
+      // "not pending". Without this reset, a signature that goes
+      // pending → settles → pending again (a brand-new request) would
+      // wrongly inherit the old timestamp and get misclassified as
+      // `stuck_request` on its second, unrelated sighting.
       firstPendingAt:
-        priorEntry.firstPendingAt != null
+        pendingNow.length === 0
+          ? null
+          : priorEntry.firstPendingAt != null
           ? priorEntry.firstPendingAt
-          : pendingNow.length > 0
-          ? Date.now()
-          : null,
+          : Date.now(),
     };
   }
 
@@ -313,7 +320,12 @@ export function reduceAction(action, priorState) {
 // ── CLI entry point ───────────────────────────────────────────────────────
 
 function isMainModule() {
-  return import.meta.url === `file://${process.argv[1]}`;
+  // `pathToFileURL` (unlike manual `file://${...}` concatenation) percent-
+  // encodes the path the same way Node computes `import.meta.url`, so this
+  // still matches on paths with spaces/unicode, and on Windows where
+  // `process.argv[1]` uses `\` separators that a raw template string would not.
+  if (!process.argv[1]) return false;
+  return import.meta.url === pathToFileURL(process.argv[1]).href;
 }
 
 if (isMainModule()) {

@@ -7,7 +7,7 @@
 ## Architecture
 
 ```
-page.on('request'/'requestfinished'/'requestfailed'/'framenavigated'/'console')
+page.on('request'/'response'/'requestfailed'/'framenavigated'/'console')
   → buffered on the Playwright-side page object itself (survives navigation, survives separate tool calls)
   → drained as plain JSON via a second browser_run_code_unsafe call (never response/request bodies)
   → classified by the pure reducer, action-scoped-collector.mjs (Node-side, unit-tested, no browser dependency)
@@ -27,20 +27,28 @@ async (page) => {
 
   page.__actionCollectorBuffer = [];
   page.__actionCollectorConsole = [];
-  page.__actionCollectorRequests = new Map();
+  // WeakMap, not Map: entries are only ever looked up by the Request object
+  // itself (never iterated), so once Playwright drops its own reference to an
+  // old Request (long after it settles), this entry becomes GC-eligible too
+  // instead of growing unboundedly for the life of the page.
+  page.__actionCollectorRequests = new WeakMap();
 
   const SENSITIVE = /^(api[-_]?key|token|password|passwd|secret|auth(orization)?|session|cookie|bearer|access[-_]?token|refresh[-_]?token)$/i;
   const redact = (url) => {
     const q = url.indexOf('?');
     if (q === -1) return url;
     const base = url.slice(0, q);
-    const rest = url.slice(q + 1).split('&').map((pair) => {
+    const query = url.slice(q + 1);
+    const h = query.indexOf('#');
+    const hash = h === -1 ? '' : query.slice(h);
+    const queryOnly = h === -1 ? query : query.slice(0, h);
+    const rest = queryOnly.split('&').map((pair) => {
       const eq = pair.indexOf('=');
       const key = eq === -1 ? pair : pair.slice(0, eq);
       try { if (SENSITIVE.test(decodeURIComponent(key))) return key + '=%5BREDACTED%5D'; } catch (e) {}
       return pair;
     }).join('&');
-    return base + '?' + rest;
+    return base + '?' + rest + hash;
   };
 
   page.on('request', (req) => {
@@ -52,15 +60,27 @@ async (page) => {
     };
     page.__actionCollectorBuffer.push(entry);
     page.__actionCollectorRequests.set(req, entry);
-    if (page.__actionCollectorBuffer.length > 1000) page.__actionCollectorBuffer.splice(0, 200);
+    // Defensive backstop only — normally the drain call below compacts
+    // already-reported entries out of the buffer on every checklist step, so
+    // this rarely has anything to do. If it ever does, it must never drop a
+    // still-pending entry: only entries already marked __reportedFinal (i.e.
+    // drain has nothing left to learn from them) are eligible for removal.
+    if (page.__actionCollectorBuffer.length > 2000) {
+      let removed = 0;
+      for (let i = 0; i < page.__actionCollectorBuffer.length && removed < 500; ) {
+        if (page.__actionCollectorBuffer[i].__reportedFinal) {
+          page.__actionCollectorBuffer.splice(i, 1);
+          removed++;
+        } else {
+          i++;
+        }
+      }
+    }
   });
-  page.on('requestfinished', (req) => {
-    const entry = page.__actionCollectorRequests.get(req);
+  page.on('response', (res) => {
+    const entry = page.__actionCollectorRequests.get(res.request());
     if (!entry) return;
-    req.response().then((res) => {
-      if (!res) return;
-      entry.status = res.status(); entry.ok = res.ok(); entry.respondedAt = Date.now();
-    }).catch(() => {});
+    entry.status = res.status(); entry.ok = res.ok(); entry.respondedAt = Date.now();
   });
   page.on('requestfailed', (req) => {
     const entry = page.__actionCollectorRequests.get(req);
@@ -99,12 +119,17 @@ async (page) => {
       resourceType: entry.resourceType, abandonedByNavigation: entry.abandonedByNavigation });
     if (entry.status != null || entry.failure != null || entry.abandonedByNavigation) entry.__reportedFinal = true;
   }
+  // Compact now that this drain has reported everything reportable: drop
+  // entries already marked __reportedFinal (this drain's or an earlier
+  // drain's) so the buffer stays bounded by "currently pending" over a long
+  // flow, without ever removing a pending entry drain still needs to see again.
+  page.__actionCollectorBuffer = (page.__actionCollectorBuffer || []).filter((e) => !e.__reportedFinal);
   const consoleOut = (page.__actionCollectorConsole || []).splice(0);
   return { network: out, console: consoleOut };
 }
 ```
 
-**Why drain doesn't simply clear the whole buffer:** a request that's still pending at drain time (no `status`/`failure` yet) is returned again on the *next* drain if it's still pending then — that's exactly how the reducer's cross-action `stuck_request` escalation (see `action-scoped-collector.mjs`) is meant to observe the same signature repeatedly across checklist steps. Only requests that have fully settled (succeeded, failed, or been abandoned by navigation) are marked `__reportedFinal` and never returned again. The buffer is capped at 1000 entries in the install snippet's `request` handler purely as a memory bound for very long flows — this never discards anything the reducer would still need, since old settled entries are worthless to it either way.
+**Why drain doesn't simply clear the whole buffer:** a request that's still pending at drain time (no `status`/`failure` yet) is returned again on the *next* drain if it's still pending then — that's exactly how the reducer's cross-action `stuck_request` escalation (see `action-scoped-collector.mjs`) is meant to observe the same signature repeatedly across checklist steps. Only requests that have fully settled (succeeded, failed, or been abandoned by navigation) are marked `__reportedFinal`, and drain compacts those out of the buffer immediately after reporting them so the buffer's steady-state size tracks "currently pending", not "everything ever seen". The `request` handler's own size cap is a defensive backstop only (see comment there) and, unlike a blind `splice`, is only ever allowed to remove entries already marked `__reportedFinal` — it must never discard a still-pending entry, since that would silently break `stuck_request` tracking for the rest of the flow.
 
 ## Reducer (Node-side — `action-scoped-collector.mjs`)
 
