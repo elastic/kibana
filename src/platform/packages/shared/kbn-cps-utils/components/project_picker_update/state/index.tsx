@@ -20,7 +20,7 @@ interface ProjectPickerContext {
   actions: ActionsFromReducers<ReturnType<typeof createStoreReducers>>;
 }
 
-export interface ProjectPickerStateProviderProps {
+export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState, 'isReadOnly'> {
   children: React.ReactNode;
   availableProjects: CPSProject[];
 }
@@ -50,12 +50,14 @@ export const useProjectPickerState = () => {
 export const ProjectPickerStateProvider = ({
   children,
   availableProjects,
+  isReadOnly,
 }: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
 
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: {
+      isReadOnly,
       filterExpressions: new Map(),
       filteringDimensions: [],
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),

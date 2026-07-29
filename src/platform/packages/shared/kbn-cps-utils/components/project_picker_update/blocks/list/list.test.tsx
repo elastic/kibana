@@ -12,10 +12,8 @@ import { render, screen, within } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import type { CPSProject } from '../../../../types';
-import { ProjectPickerList, getProjectPickerListContextMenuConfig } from './list';
+import { ProjectPickerList } from './list';
 import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
-import type { useProjectPickerActions } from '../../state';
-import type { ProjectPickerState } from '../../state/reducers';
 
 const createProject = (id: string, tags: Record<string, string> = {}): CPSProject => ({
   _id: id,
@@ -25,17 +23,6 @@ const createProject = (id: string, tags: Record<string, string> = {}): CPSProjec
   _region: 'us-east-1',
   _csp: 'AWS',
   ...tags,
-});
-
-const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map(),
-  excludedOverrides: [],
-  filteredProjectIds: ['p1', 'p2'],
-  visibleProjectIds: ['p1', 'p2'],
-  selectedProjects: ['p1', 'p2'],
-  ...overrides,
 });
 
 const defaultProps: Pick<ProjectPickerStateProviderProps, 'availableProjects'> = {
@@ -50,7 +37,7 @@ const defaultProps: Pick<ProjectPickerStateProviderProps, 'availableProjects'> =
 };
 
 const renderComponent = (
-  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects'>> = {}
+  props: Partial<Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'>> = {}
 ) => {
   return render(
     <ProjectPickerStateProvider {...defaultProps} {...props}>
@@ -117,27 +104,7 @@ describe('ProjectPickerList', () => {
       const projectA = screen.getAllByTestId('projectPickerListItem')[0];
       await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
 
-      const popover = await screen.findByLabelText('Project tags');
-      expect(popover).toBeInTheDocument();
-      expect(within(popover).getByText('env:prod-a')).toBeInTheDocument();
-      expect(screen.queryByText('env:prod-b')).not.toBeInTheDocument();
-    });
-
-    it('disables the add-filter badge when that tag filter is already applied', async () => {
-      const user = userEvent.setup();
-      renderTaggedList();
-
-      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
-      await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
-
-      const popover = await screen.findByLabelText('Project tags');
-      const addFilterButton = within(popover).getByRole('button', {
-        name: 'Add filter to project',
-      });
-
-      expect(addFilterButton).not.toBeDisabled();
-      await user.click(addFilterButton);
-      expect(addFilterButton).toBeDisabled();
+      await expect(screen.findByLabelText('Project tags')).resolves.toBeInTheDocument();
     });
 
     it('replaces an open context menu with tags from a different project', async () => {
@@ -184,15 +151,15 @@ describe('ProjectPickerList', () => {
       expect(screen.getAllByLabelText('Project context menu')).toHaveLength(1);
       expect(screen.queryByLabelText('Project tags')).not.toBeInTheDocument();
 
-      await user.click(screen.getByText('Exclude all other visible projects'));
+      await user.click(screen.getByText('Exclude only this project'));
 
       expect(screen.getByTestId('projectPickerListItemSwitch-project-a')).toHaveAttribute(
         'aria-checked',
-        'false'
+        'true'
       );
       expect(screen.getByTestId('projectPickerListItemSwitch-project-b')).toHaveAttribute(
         'aria-checked',
-        'true'
+        'false'
       );
     });
 
@@ -216,110 +183,37 @@ describe('ProjectPickerList', () => {
       expect(screen.queryByLabelText('Project tags')).not.toBeInTheDocument();
     });
   });
-});
 
-describe('getProjectPickerListContextMenuConfig', () => {
-  const actions = {
-    includeAllOtherVisibleProjects: jest.fn(),
-    excludeAllOtherVisibleProjects: jest.fn(),
-  } as unknown as ReturnType<typeof useProjectPickerActions>;
+  describe('read-only mode', () => {
+    const taggedProjects = [
+      createProject('project-a', { env: 'prod-a' }),
+      createProject('project-b', { env: 'prod-b' }),
+    ];
 
-  const [includeItem, excludeItem] = getProjectPickerListContextMenuConfig(actions);
-  const anchor = createProject('p1');
+    const renderReadOnlyList = () =>
+      renderComponent({ availableProjects: taggedProjects, isReadOnly: true });
 
-  const getIncludeDisabled = (state: ProjectPickerState, activeProject: CPSProject = anchor) =>
-    includeItem.isDisabled({ activeProject, state });
+    it('does not render inclusion switches or per-project context menus', () => {
+      renderReadOnlyList();
 
-  const getExcludeDisabled = (state: ProjectPickerState, activeProject: CPSProject = anchor) =>
-    excludeItem.isDisabled({ activeProject, state });
-
-  describe('Include all other visible projects', () => {
-    it('is disabled when nothing is excluded', () => {
-      expect(getIncludeDisabled(createMenuState())).toBe(true);
-    });
-
-    it('is disabled when only the anchor is excluded', () => {
+      expect(screen.queryByTestId('projectPickerListItemSwitch-project-a')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('projectPickerListItemSwitch-project-b')).not.toBeInTheDocument();
       expect(
-        getIncludeDisabled(
-          createMenuState({
-            excludedOverrides: ['p1'],
-            selectedProjects: ['p2'],
-          })
-        )
-      ).toBe(true);
-    });
-
-    it('is enabled when other projects are excluded', () => {
+        screen.queryByTestId('projectPickerListItemContextMenu-project-a')
+      ).not.toBeInTheDocument();
       expect(
-        getIncludeDisabled(
-          createMenuState({
-            excludedOverrides: ['p2'],
-            selectedProjects: ['p1'],
-          })
-        )
-      ).toBe(false);
+        screen.queryByTestId('projectPickerListItemContextMenu-project-b')
+      ).not.toBeInTheDocument();
     });
 
-    it('is enabled when multiple projects including the anchor are excluded', () => {
-      expect(
-        getIncludeDisabled(
-          createMenuState({
-            excludedOverrides: ['p1', 'p2'],
-            selectedProjects: [],
-          })
-        )
-      ).toBe(false);
-    });
-  });
+    it('still opens the tags popover when the tags badge is clicked', async () => {
+      const user = userEvent.setup();
+      renderReadOnlyList();
 
-  describe('Exclude all other visible projects', () => {
-    it('is disabled when only one project is selected', () => {
-      expect(
-        getExcludeDisabled(
-          createMenuState({
-            excludedOverrides: ['p2'],
-            selectedProjects: ['p1'],
-          })
-        )
-      ).toBe(true);
-    });
+      const projectA = screen.getAllByTestId('projectPickerListItem')[0];
+      await user.click(within(projectA).getByTestId('projectPickerListItemTags'));
 
-    it('is disabled when only the anchor is excluded', () => {
-      expect(
-        getExcludeDisabled(
-          createMenuState({
-            excludedOverrides: ['p1'],
-            selectedProjects: ['p2'],
-          })
-        )
-      ).toBe(true);
-    });
-
-    it('is disabled when the anchor is excluded and there other projects excluded', () => {
-      expect(
-        getExcludeDisabled(
-          createMenuState({
-            excludedOverrides: ['p1', 'p3'],
-            selectedProjects: ['p2'],
-          }),
-          createProject('p3')
-        )
-      ).toBe(true);
-    });
-
-    it('is enabled when multiple projects are selected', () => {
-      expect(getExcludeDisabled(createMenuState({ selectedProjects: ['p1', 'p2'] }))).toBe(false);
-    });
-
-    it('is enabled when multiple projects are excluded but the anchor is included', () => {
-      expect(
-        getExcludeDisabled(
-          createMenuState({
-            excludedOverrides: ['p2'],
-            selectedProjects: ['p1', 'p2'],
-          })
-        )
-      ).toBe(false);
+      await expect(screen.findByLabelText('Project tags')).resolves.toBeInTheDocument();
     });
   });
 });

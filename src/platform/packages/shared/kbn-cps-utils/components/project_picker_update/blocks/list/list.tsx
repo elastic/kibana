@@ -8,88 +8,21 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import type { EuiContextMenuItemProps } from '@elastic/eui';
-import {
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiWrappingPopover,
-  useEuiTheme,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CPSProject } from '../../../../types';
 import { ProjectPickerListItem, type ProjectPickerListItemProps } from './list_item';
 import { useProjectPickerActions, useProjectPickerState } from '../../state';
-import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from '../../state/derivatives';
+import { getIncludedVisibleProjectIds } from '../../state/derivatives';
 import { projectPickerListStyles } from './list.styles';
 import { getProjectTags } from '../../../utils';
-import { FilterBadge } from '../filter_badge/filter_badge';
-import type { FilterExpressionValue } from '../../utils/filter_input_codec';
-import { FilterOperator, getFilterExpressionLookupKey } from '../../utils/filter_input_codec';
-
-interface ProjectPickerListClickActionContext {
-  activeProject: CPSProject;
-  state: ReturnType<typeof useProjectPickerState>;
-}
-
-interface ProjectPickerListContextMenuItemProps
-  extends Pick<EuiContextMenuItemProps, 'icon' | 'external'> {
-  label: string;
-  onClick: (props: Pick<ProjectPickerListClickActionContext, 'activeProject'>) => void;
-  isDisabled: (props: ProjectPickerListClickActionContext) => boolean;
-}
+import { ProjectPickerListItemTagsPopover } from './list_item_tags_popover/list_item_tags_popover';
+import { ProjectPickerListItemContextMenu } from './list_item_context_menu/list_item_context_menu';
 
 type ActivePopover =
   | { kind: 'contextMenu'; project: CPSProject }
   | { kind: 'tags'; project: CPSProject }
   | null;
-
-export const getProjectPickerListContextMenuConfig = (
-  actions: ReturnType<typeof useProjectPickerActions>
-): Array<ProjectPickerListContextMenuItemProps> => {
-  return [
-    {
-      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.excludeAllVisibleProjects', {
-        defaultMessage: 'Include only this project',
-      }),
-      onClick: (props) => {
-        actions.includeOnlyProvidedProjectId({ anchorProjectId: props.activeProject._id });
-      },
-      isDisabled: (props) => {
-        const anchorProjectId = props.activeProject._id;
-        const otherVisibleIds = computeVisibleProjectIds(props.state).filter(
-          (id) => id !== anchorProjectId
-        );
-
-        return (
-          !props.state.excludedOverrides.includes(anchorProjectId) &&
-          otherVisibleIds.every((id) => props.state.excludedOverrides.includes(id))
-        );
-      },
-    },
-    {
-      label: i18n.translate('cpsUtils.projectPicker.list.contextMenu.includeAllVisibleProjects', {
-        defaultMessage: 'Exclude only this project',
-      }),
-      onClick: (props) => {
-        actions.excludeOnlyProvidedProjectId({ anchorProjectId: props.activeProject._id });
-      },
-      isDisabled: (props) => {
-        const anchorProjectId = props.activeProject._id;
-        const otherVisibleIds = computeVisibleProjectIds(props.state).filter(
-          (id) => id !== anchorProjectId
-        );
-
-        return (
-          props.state.excludedOverrides.includes(anchorProjectId) &&
-          otherVisibleIds.every((id) => !props.state.excludedOverrides.includes(id))
-        );
-      },
-    },
-  ];
-};
 
 export function ProjectPickerList() {
   const buttonRef = useRef<HTMLElement | null>(null);
@@ -100,10 +33,6 @@ export function ProjectPickerList() {
   const styles = projectPickerListStyles({ euiTheme });
 
   const includedVisibleProjectIds = useMemo(() => getIncludedVisibleProjectIds(state), [state]);
-
-  const projectPickerListContextMenuConfig = useMemo(() => {
-    return getProjectPickerListContextMenuConfig(actions);
-  }, [actions]);
 
   const visibleProjects = useMemo(
     () =>
@@ -175,114 +104,41 @@ export function ProjectPickerList() {
   const activeProject = activePopover?.project ?? null;
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
       {activePopover?.kind === 'contextMenu' && activeProject && buttonRef.current ? (
-        <EuiWrappingPopover
+        <ProjectPickerListItemContextMenu
           key={`contextMenu-${activeProject._id}`}
           button={buttonRef.current}
           isOpen={true}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-          aria-label={i18n.translate('cpsUtils.projectPicker.list.contextMenu.ariaLabel', {
-            defaultMessage: 'Project context menu',
-          })}
-          closePopover={closePopover}
-        >
-          <EuiContextMenuPanel
-            items={projectPickerListContextMenuConfig.map((item) => (
-              <EuiContextMenuItem
-                key={item.label}
-                onClick={item.onClick.bind(null, { activeProject })}
-                disabled={item.isDisabled({
-                  activeProject,
-                  state,
-                })}
-              >
-                {item.label}
-              </EuiContextMenuItem>
-            ))}
-          />
-        </EuiWrappingPopover>
+          activeProject={activeProject}
+          closeHandler={closePopover}
+        />
       ) : null}
       {activePopover?.kind === 'tags' && activeProject && buttonRef.current ? (
-        <EuiWrappingPopover
+        <ProjectPickerListItemTagsPopover
           key={`tags-${activeProject._id}`}
           button={buttonRef.current}
           isOpen={true}
-          css={styles.projectTagsBadgeContainer}
-          panelPaddingSize="s"
-          anchorPosition="downLeft"
-          aria-label={i18n.translate('cpsUtils.projectPicker.list.projectTags.ariaLabel', {
-            defaultMessage: 'Project tags',
-          })}
-          closePopover={closePopover}
-        >
-          <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
-            {getProjectTags(activeProject).map((tag) => {
-              const filter: FilterExpressionValue = {
-                operator: FilterOperator.EQUALS,
-                tagName: tag.tagName,
-                tagValue: tag.tagValue,
-              };
-
-              const isAlreadyAdded = state.filterExpressions.has(
-                getFilterExpressionLookupKey(filter)
-              );
-
-              return (
-                <EuiFlexItem key={`${tag.tagName}.${tag.tagValue}`} grow={false}>
-                  {React.createElement(isAlreadyAdded ? EuiToolTip : React.Fragment, {
-                    content: i18n.translate(
-                      'cpsUtils.projectPicker.list.projectTags.filterAlreadyAdded',
-                      {
-                        defaultMessage: 'Filter already added',
-                      }
-                    ),
-                    children: (
-                      <FilterBadge
-                        css={styles.projectTagsBadge}
-                        iconType="plusCircle"
-                        iconSide="right"
-                        onClick={() => {
-                          actions.addFilterExpression({
-                            expression: filter,
-                          });
-                        }}
-                        isDisabled={isAlreadyAdded}
-                        onClickAriaLabel={i18n.translate(
-                          'cpsUtils.projectPicker.list.projectTags.addFilterAriaLabel',
-                          {
-                            defaultMessage: 'Add filter to project',
-                          }
-                        )}
-                        filter={filter}
-                      />
-                    ),
-                  })}
-                </EuiFlexItem>
-              );
-            })}
-          </EuiFlexGroup>
-        </EuiWrappingPopover>
+          closeHandler={closePopover}
+          projectTags={getProjectTags(activeProject)}
+        />
       ) : null}
-      <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="projectPickerList">
-        {visibleProjects.map((project) => (
-          <EuiFlexItem key={project._id} css={styles.listItemContainer}>
-            <ProjectPickerListItem
-              isSelected={state.selectedProjects.includes(project._id)}
-              isToggleDisabled={
-                state.selectedProjects.includes(project._id) &&
-                includedVisibleProjectIds.length === 1
-              }
-              toggleDisabledMessage={toggleDisabledMessage}
-              project={project}
-              onContextMenu={onContextMenu}
-              onToggle={onToggle}
-              onLabelClick={onLabelClick}
-            />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </>
+      {visibleProjects.map((project) => (
+        <EuiFlexItem key={project._id} css={styles.listItemContainer}>
+          <ProjectPickerListItem
+            isSelected={state.selectedProjects.includes(project._id)}
+            isToggleDisabled={
+              state.selectedProjects.includes(project._id) && includedVisibleProjectIds.length === 1
+            }
+            toggleDisabledMessage={toggleDisabledMessage}
+            project={project}
+            onContextMenu={onContextMenu}
+            onToggle={onToggle}
+            onLabelClick={onLabelClick}
+            isReadOnly={state.isReadOnly}
+          />
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 }

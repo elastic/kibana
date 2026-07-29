@@ -23,6 +23,7 @@ export interface FilterEntry {
 }
 
 export interface ProjectPickerStoredState {
+  isReadOnly?: boolean;
   filteringDimensions: string[];
   filterExpressions: Map<string, FilterEntry>;
   availableProjects: Map<CPSProject['_id'], CPSProject>;

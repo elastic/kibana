@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 
-export const projectPickerListStyles = ({ euiTheme }: Pick<UseEuiTheme, 'euiTheme'>) => ({
-  listItemContainer: css({
-    padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
-    borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+export const projectTagsStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  projectTagsBadgeContainer: css({
+    maxWidth: '200px',
+    maxHeight: '268px',
+    overflowY: 'auto',
+  }),
+  projectTagsBadge: css({
+    maxWidth: 'max-content',
   }),
 });

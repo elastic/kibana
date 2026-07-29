@@ -24,6 +24,7 @@ import type { CPSProject } from '../../../../../types';
 import { getProjectTags, getSolutionIcon } from '../../../../utils';
 
 export interface ProjectPickerListItemProps {
+  isReadOnly?: boolean;
   isSelected: boolean;
   isToggleDisabled?: boolean;
   toggleDisabledMessage: string;
@@ -34,6 +35,7 @@ export interface ProjectPickerListItemProps {
 }
 
 export function ProjectPickerListItem({
+  isReadOnly,
   isSelected,
   isToggleDisabled = false,
   toggleDisabledMessage,
@@ -110,34 +112,36 @@ export function ProjectPickerListItem({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            {isToggleDisabled ? (
-              <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>
-                {switchControl}
+      {isReadOnly ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              {isToggleDisabled ? (
+                <EuiToolTip id={toggleTooltipId} content={toggleDisabledMessage}>
+                  {switchControl}
+                </EuiToolTip>
+              ) : (
+                switchControl
+              )}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                id={contextMenuTooltipId}
+                content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
+                  defaultMessage: 'Show context menu',
+                })}
+              >
+                <EuiButtonIcon
+                  iconType="ellipsis"
+                  onClick={onContextMenu.bind(null, project)}
+                  aria-labelledby={contextMenuTooltipId}
+                  data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
+                />
               </EuiToolTip>
-            ) : (
-              switchControl
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              id={contextMenuTooltipId}
-              content={i18n.translate('cpsUtils.projectPicker.listItem.contextMenu', {
-                defaultMessage: 'Show context menu',
-              })}
-            >
-              <EuiButtonIcon
-                iconType="ellipsis"
-                onClick={onContextMenu.bind(null, project)}
-                aria-labelledby={contextMenuTooltipId}
-                data-test-subj={`projectPickerListItemContextMenu-${project._id}`}
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

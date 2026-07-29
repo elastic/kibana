@@ -48,7 +48,7 @@ const getContextMenuItems = (
         actions.clearProjectFilters();
       },
       isDisabled: ({ state }) => {
-        return state.filterExpressions.size === 0;
+        return state.filterExpressions.size === 0 || Boolean(state.isReadOnly);
       },
     },
     {
@@ -60,7 +60,10 @@ const getContextMenuItems = (
         actions.revertToSpaceDefaults();
       },
       isDisabled: ({ state }) => {
-        return state.filterExpressions.size === 0 && state.excludedOverrides.length === 0;
+        return (
+          (state.filterExpressions.size === 0 && state.excludedOverrides.length === 0) ||
+          Boolean(state.isReadOnly)
+        );
       },
     },
   ],

@@ -57,7 +57,7 @@ describe('ProjectPickerListItem', () => {
     expect(props.onToggle).toHaveBeenCalledWith(props.project, true);
   });
 
-  it('should render the project icon with the correct type', async () => {
+  it('should render the project icon with the correct type', () => {
     renderComponent({
       project: {
         ...defaultProject,
@@ -65,10 +65,8 @@ describe('ProjectPickerListItem', () => {
       },
     });
 
-    expect(screen.getByTestId('projectPickerListItemIcon')).toHaveAttribute(
-      'data-euiicon-type',
-      'logoElasticsearch'
-    );
+    const item = screen.getByTestId('projectPickerListItem');
+    expect(item.querySelector('[data-euiicon-type="logoElasticsearch"]')).toBeInTheDocument();
   });
 
   it('should render the context menu button', async () => {
@@ -113,5 +111,37 @@ describe('ProjectPickerListItem', () => {
     await user.click(screen.getByTestId('projectPickerListItemTags'));
 
     expect(props.onLabelClick).toHaveBeenCalledWith(props.project, expect.any(Object));
+  });
+
+  describe('read-only mode', () => {
+    const projectWithTags = {
+      ...defaultProject,
+      env: 'prod',
+      team: 'search',
+    };
+
+    it('does not render the inclusion switch or context menu', () => {
+      renderComponent({
+        isReadOnly: true,
+        project: projectWithTags,
+      });
+
+      expect(screen.queryByTestId('projectPickerListItemSwitch-1')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('projectPickerListItemContextMenu-1')).not.toBeInTheDocument();
+    });
+
+    it('still renders the tags badge and invokes onLabelClick when clicked', async () => {
+      const user = userEvent.setup();
+
+      const { props } = renderComponent({
+        isReadOnly: true,
+        project: projectWithTags,
+      });
+
+      expect(screen.getByTestId('projectPickerListItemTags')).toHaveTextContent('2');
+      await user.click(screen.getByTestId('projectPickerListItemTags'));
+
+      expect(props.onLabelClick).toHaveBeenCalledWith(props.project, expect.any(Object));
+    });
   });
 });

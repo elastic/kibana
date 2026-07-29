@@ -13,9 +13,10 @@ import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from
 
 export function ProjectPicker({
   availableProjects,
+  isReadOnly,
 }: Omit<ProjectPickerStateProviderProps, 'children'>) {
   return (
-    <ProjectPickerStateProvider availableProjects={availableProjects}>
+    <ProjectPickerStateProvider availableProjects={availableProjects} isReadOnly={isReadOnly}>
       <ProjectPickerFrame>
         <ProjectPickerList />
       </ProjectPickerFrame>

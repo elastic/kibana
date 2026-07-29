@@ -274,26 +274,33 @@ export function ProjectPickerFilterDisplay({ onEditFilter }: ProjectPickerFilter
               <EuiFlexItem key={id} grow={false}>
                 <FilterBadge
                   filter={entry.expression}
-                  onClick={handleFilterBadgeClick.bind(null, id)}
                   style={{
                     width: 'fit-content',
                     opacity: entry.enabled ? 1 : 0.5,
                   }}
-                  onClickAriaLabel={i18n.translate(
-                    'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
-                    {
-                      defaultMessage: 'Click to view filter actions',
-                    }
-                  )}
-                  iconOnClick={handleFilterBadgeIconClick.bind(null, id)}
-                  iconOnClickAriaLabel={i18n.translate(
-                    'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
-                    {
-                      defaultMessage: 'Click to remove filter',
-                    }
-                  )}
-                  iconSide="right"
-                  iconType="cross"
+                  {...(state.isReadOnly
+                    ? {
+                        iconType: 'empty',
+                        iconSide: 'right',
+                      }
+                    : {
+                        iconSide: 'right',
+                        iconType: 'cross',
+                        iconOnClick: handleFilterBadgeIconClick.bind(null, id),
+                        iconOnClickAriaLabel: i18n.translate(
+                          'cpsUtils.projectPicker.filterDisplay.filterBadgeIconClickAriaLabel',
+                          {
+                            defaultMessage: 'Remove filter',
+                          }
+                        ),
+                        onClick: handleFilterBadgeClick.bind(null, id),
+                        onClickAriaLabel: i18n.translate(
+                          'cpsUtils.projectPicker.filterDisplay.filterBadgeClickAriaLabel',
+                          {
+                            defaultMessage: 'Click to view filter actions',
+                          }
+                        ),
+                      })}
                 />
               </EuiFlexItem>
             ))}

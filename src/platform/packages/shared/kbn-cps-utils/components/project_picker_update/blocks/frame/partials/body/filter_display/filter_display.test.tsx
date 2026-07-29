@@ -148,4 +148,22 @@ describe('ProjectPickerFilterDisplay', () => {
       expression: typeSecurityExpression,
     });
   });
+
+  describe('read-only mode', () => {
+    it('renders filter badge text without interactive controls', async () => {
+      const user = userEvent.setup();
+
+      renderComponent({
+        isReadOnly: true,
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      });
+
+      expect(screen.getByText('_type:security')).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Remove filter' })).not.toBeInTheDocument();
+
+      await user.click(screen.getByText('_type:security'));
+
+      expect(screen.queryByLabelText('Filter actions')).not.toBeInTheDocument();
+    });
+  });
 });
