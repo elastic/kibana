@@ -12,6 +12,7 @@ import {
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
   getChartDebugData,
+  offsetPickerTime,
   sumFirstNValues,
   test,
 } from '../../fixtures';
@@ -28,9 +29,6 @@ interface ScenarioResult {
   bars: Array<{ y: number }> | undefined;
   expectedDocumentCountBeforeUpgrade: number;
 }
-
-const offsetTime = (time: string, milliseconds: number): string =>
-  new Date(Date.parse(time) + milliseconds).toISOString();
 
 const runScenario = async (
   { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
@@ -92,8 +90,8 @@ const runScenario = async (
     // Start with another clean editor, matching the third FTR journey step.
     await pageObjects.lens.openFullEditor();
     await pageObjects.datePicker.setAbsoluteRange({
-      from: offsetTime(TIME_RANGE.beforeUpgrade, -60 * 60 * 1000),
-      to: offsetTime(TIME_RANGE.beforeUpgrade, 60 * 60 * 1000),
+      from: offsetPickerTime(TIME_RANGE.beforeUpgrade, -60 * 60 * 1000),
+      to: offsetPickerTime(TIME_RANGE.beforeUpgrade, 60 * 60 * 1000),
     });
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -110,8 +108,8 @@ const runScenario = async (
     expect(barsBeforeDowngrade?.some(({ y }) => y > 0)).toBe(true);
 
     await pageObjects.datePicker.setAbsoluteRange({
-      from: offsetTime(TIME_RANGE.afterUpgrade, 1000),
-      to: offsetTime(TIME_RANGE.afterUpgrade, 2 * 60 * 60 * 1000),
+      from: offsetPickerTime(TIME_RANGE.afterUpgrade, 1000),
+      to: offsetPickerTime(TIME_RANGE.afterUpgrade, 2 * 60 * 60 * 1000),
     });
     await pageObjects.lens.waitForVisualization('xyVisChart');
     const barsAfterDowngrade = (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars;

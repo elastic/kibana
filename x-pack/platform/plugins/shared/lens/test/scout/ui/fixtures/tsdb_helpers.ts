@@ -6,6 +6,7 @@
  */
 
 import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import moment from 'moment';
 import { test as baseTest } from '@kbn/scout';
 import type { ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
@@ -32,6 +33,12 @@ export interface TsdbScenarioContext {
 
 export const sumFirstNValues = (count: number, bars: Array<{ y: number }> | undefined): number =>
   (bars ?? []).slice(0, count).reduce((sum, bar) => sum + bar.y, 0);
+
+const PICKER_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
+
+/** Offsets a time string by the given milliseconds and returns a picker-formatted string. */
+export const offsetPickerTime = (time: string, milliseconds: number): string =>
+  moment.utc(time).add(milliseconds, 'milliseconds').format(PICKER_FORMAT);
 
 export interface DownsampleTSDBIndexOptions {
   isStream: boolean;
