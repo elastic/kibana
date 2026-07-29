@@ -112,14 +112,12 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
 
     const handleCommit = useCallback(
       (name: string, value: unknown) => {
+        const next = { ...values, [name]: value };
         setTouched((prev) => (prev[name] ? prev : { ...prev, [name]: true }));
-        setValues((prev) => {
-          const next = { ...prev, [name]: value };
-          onPreviewValuesChange?.(next);
-          return next;
-        });
+        setValues(next);
+        onPreviewValuesChange?.(next);
       },
-      [onPreviewValuesChange]
+      [onPreviewValuesChange, values]
     );
 
     const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(
