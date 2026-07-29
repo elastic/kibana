@@ -220,6 +220,14 @@ export class LensApp {
     await this.closeDimensionEditor();
   }
 
+  /** Enables empty rows for the current date histogram dimension. */
+  async enableIncludeEmptyRows() {
+    const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
+    await expect(includeEmptyRows).toHaveAttribute('aria-checked', 'false');
+    await includeEmptyRows.click();
+    await expect(includeEmptyRows).toHaveAttribute('aria-checked', 'true');
+  }
+
   /** Closes the open dimension editor flyout. */
   async closeDimensionEditor() {
     await this.closeDimensionEditorButton.click();
