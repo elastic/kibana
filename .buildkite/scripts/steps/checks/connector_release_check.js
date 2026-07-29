@@ -17,71 +17,59 @@
  * already handle actions of that type), so this is an existence check only.
  *
  * The comparison target is the *current serverless release* (rollback-safe: the
- * release pointer moves both directions). The base branch is used only to scope
- * findings to connectors this PR actually changed.
- *
- * Manifest shape: { schemaVersion: '1', connectors: [{ id, supportedFeatureIds }] }.
+ * release pointer moves both directions). Whether a connector already shipped is
+ * decided by its spec file existing at the released ref (see run_connector_release_check.js).
  */
 
 // ponytail: allowlist, not a config file — these are the only feature ids safe to
 // ship on a not-yet-released connector because they don't persist rollback-fragile
-// user actions. Add here if that ever changes.
+// user actions.
+// NOTE: `agentBuilder` is allowlisted only while the feature is not yet GA. Revisit
+// and remove this entry once agentBuilder reaches GA.
 const ALLOWED_INITIAL_FEATURE_IDS = ['agentBuilder'];
 
-const byId = (manifest) => new Map((manifest?.connectors ?? []).map((c) => [c.id, c]));
-
-const sameFeatures = (a, b) =>
-  JSON.stringify([...(a ?? [])].sort()) === JSON.stringify([...(b ?? [])].sort());
-
 /**
- * @param {object|null} head     manifest at the PR head (required)
- * @param {object|null} base     manifest at the merge-base (scoping only; may be null)
- * @param {object|null} released manifest at the serverless release SHA (may be null → fail-open)
+ * @param {Array<{id: string, supportedFeatureIds?: string[], existsInRelease: boolean}>} changedConnectors
+ *   Connectors whose spec files this PR changed. `existsInRelease` is true when the
+ *   spec file was already present at the serverless release ref.
+ * @param {boolean} releasedAvailable  false when the released ref could not be resolved → fail open
  * @param {{ allowedInitialFeatures?: string[] }} [opts]
  * @returns {{ findings: Array<{id, supportedFeatureIds, disallowedFeatureIds, message}>, note?: string }}
  */
-function classifyConnectorRelease(head, base, released, opts = {}) {
+function classifyConnectorRelease(changedConnectors, releasedAvailable, opts = {}) {
   const allowed = new Set(opts.allowedInitialFeatures ?? ALLOWED_INITIAL_FEATURE_IDS);
-  const headMap = byId(head);
-  const baseMap = byId(base);
 
   // Fail open: without a released baseline we cannot tell what is already shipped,
   // so we flag nothing and leave a note instead of blocking.
-  if (released === null || released === undefined) {
+  if (!releasedAvailable) {
     return {
       findings: [],
       note: 'Could not determine the connectors present in the current serverless release; skipping the 2-step release check for this run.',
     };
   }
-  const releasedIds = new Set(byId(released).keys());
 
   const findings = [];
-  for (const [id, headEntry] of headMap) {
-    const baseEntry = baseMap.get(id);
-
-    // Only evaluate connectors this PR introduces or whose features it changes.
-    const changedByThisPr =
-      baseEntry === undefined ||
-      !sameFeatures(headEntry.supportedFeatureIds, baseEntry.supportedFeatureIds);
-    if (!changedByThisPr) continue;
-
+  for (const connector of changedConnectors) {
     // Already in a release → the type is handled by the deployed system; anything goes.
-    if (releasedIds.has(id)) continue;
+    if (connector.existsInRelease) continue;
 
-    const disallowedFeatureIds = (headEntry.supportedFeatureIds ?? []).filter(
+    const disallowedFeatureIds = (connector.supportedFeatureIds ?? []).filter(
       (f) => !allowed.has(f)
     );
     if (disallowedFeatureIds.length === 0) continue; // empty or only allowed initial features
 
     findings.push({
-      id,
-      supportedFeatureIds: headEntry.supportedFeatureIds ?? [],
+      id: connector.id,
+      supportedFeatureIds: connector.supportedFeatureIds ?? [],
       disallowedFeatureIds,
       message:
-        `New connector \`${id}\` is not yet in the current serverless release but already declares ` +
-        `feature(s) [${disallowedFeatureIds.join(', ')}]. Ship it support-only first ` +
-        `(\`supportedFeatureIds: []\` or \`['${[...allowed].join("', '")}']\`), let it reach a ` +
-        `release, then enable other features in a follow-up PR.`,
+        `New connector \`${connector.id}\` is not yet in the current serverless release but already declares ` +
+        `feature(s) [${disallowedFeatureIds.join(
+          ', '
+        )}]. Ship it with no user-facing features first ` +
+        `(\`supportedFeatureIds: []\`${
+          allowed.size ? ` or \`['${[...allowed].join("', '")}']\`` : ''
+        }), let it reach a release, then enable other features in a follow-up PR.`,
     });
   }
 

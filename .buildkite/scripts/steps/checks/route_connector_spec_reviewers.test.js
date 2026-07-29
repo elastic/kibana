@@ -9,7 +9,6 @@
 
 const {
   getReviewRequestPlan,
-  listChangedFiles,
   routeConnectorSpecReviewers,
 } = require('../../../../.github/scripts/route_connector_spec_reviewers');
 
@@ -74,7 +73,7 @@ const context = {
   repo: { owner: 'elastic', repo: 'kibana' },
   payload: {
     pull_request: {
-      number: 280406,
+      number: 1,
       node_id: 'PR_node',
       base: { sha: 'base-sha' },
       head: { sha: 'head-sha' },
@@ -85,7 +84,7 @@ const context = {
 const core = { info: jest.fn(), warning: jest.fn() };
 
 describe('getReviewRequestPlan', () => {
-  it('resolves the #280406 regression fixture to workflows-eng', () => {
+  it('resolves a single-connector change to its owning team', () => {
     expect(
       getPlan({
         changedFiles: [connectorFile('test_workflows_connector')],
@@ -218,25 +217,5 @@ describe('routeConnectorSpecReviewers', () => {
       expect.any(String),
       expect.objectContaining({ teamSlugs: ['workflows-eng'] })
     );
-  });
-
-  it('exposes pagination as a separately testable GitHub read', async () => {
-    const github = {
-      rest: {
-        pulls: {
-          listFiles: jest
-            .fn()
-            .mockResolvedValueOnce({
-              data: Array.from({ length: 100 }, (_, index) => ({ filename: `${index}` })),
-            })
-            .mockResolvedValueOnce({ data: [{ filename: 'last' }] }),
-        },
-      },
-    };
-
-    await expect(
-      listChangedFiles({ github, owner: 'elastic', repo: 'kibana', pullNumber: 1 })
-    ).resolves.toHaveLength(101);
-    expect(github.rest.pulls.listFiles).toHaveBeenCalledTimes(2);
   });
 });

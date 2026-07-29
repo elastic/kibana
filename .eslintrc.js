@@ -2022,6 +2022,7 @@ module.exports = {
         'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
       },
     },
+
     /**
      * Lens overrides
      */

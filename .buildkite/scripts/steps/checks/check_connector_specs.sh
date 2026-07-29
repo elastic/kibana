@@ -6,23 +6,17 @@ source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
 
-echo --- Check connector specs release manifest
+echo --- Check connector specs release
 
 if ! is_pr; then
   echo "Not a PR build; skipping connector spec release check."
   exit 0
 fi
 
-# 1. Freshness (self-healing): keep the committed manifest in sync with the specs.
-#    check_for_changed_files auto-commits the regenerated manifest when auto-commit
-#    is enabled (the default), so a forgotten `node scripts/generate_connector_manifest`
-#    is fixed by the bot rather than blocking the author.
-node scripts/generate_connector_manifest
-check_for_changed_files "node scripts/generate_connector_manifest" true
-
-# 2. Advisory 2-step release policy check. This NEVER fails the build — it only
-#    posts/updates a PR comment. The comparison target is the current serverless
-#    release SHA (rollback-safe), scoped by the merge-base to this PR's changes.
+# Advisory 2-step release policy check. This NEVER fails the build; it only
+# posts/updates a PR comment. The connector list is read straight from the source
+# tree (no stored manifest): the comparison target is the current serverless
+# release SHA (rollback-safe), scoped by the merge-base to this PR's changes.
 RELEASED_REF=""
 if [[ "${GITHUB_PR_TARGET_BRANCH:-}" == "main" ]]; then
   if RELEASED_REF="$(node scripts/get_serverless_release_sha)"; then
