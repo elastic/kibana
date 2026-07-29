@@ -83,6 +83,7 @@ describe('Workflow routes', () => {
       getWorkflow: jest.fn(),
       getWorkflowsByIds: jest.fn(),
       getWorkflowsSourceByIds: jest.fn(),
+      findExistingWorkflowIds: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
       deleteWorkflows: jest.fn(),
@@ -549,6 +550,78 @@ describe('Workflow routes', () => {
 
       expect(handleRouteError).toHaveBeenCalledWith(response, err);
     });
+
+    it('dryRun=true returns existingIds without writing', async () => {
+      mockApi.findExistingWorkflowIds.mockResolvedValue(['a']);
+      const workflows = [
+        { id: 'a', yaml: 'name: A' },
+        { id: 'b', yaml: 'name: B' },
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: true },
+        body: { workflows },
+      });
+      (request as any).authzResult = {
+        [WorkflowsManagementApiActions.create]: true,
+        [WorkflowsManagementApiActions.update]: true,
+      };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      // Must call findExistingWorkflowIds with only the IDs derived from the body
+      expect(mockApi.findExistingWorkflowIds).toHaveBeenCalledWith(['a', 'b']);
+      // Must NOT attempt a real write
+      expect(mockApi.bulkCreateWorkflows).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: { existingIds: ['a'] } });
+    });
+
+    it('dryRun=true ignores workflows without an id', async () => {
+      mockApi.findExistingWorkflowIds.mockResolvedValue([]);
+      const workflows = [
+        { yaml: 'name: NoId' }, // no id field — server would generate one on real import
+        { id: 'has-id', yaml: 'name: HasId' },
+      ];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: true },
+        body: { workflows },
+      });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.create]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      // Only the workflow with an explicit id is checked — auto-IDs cannot conflict
+      expect(mockApi.findExistingWorkflowIds).toHaveBeenCalledWith(['has-id']);
+      expect(response.ok).toHaveBeenCalledWith({ body: { existingIds: [] } });
+    });
+
+    it('dryRun=false still performs a real bulkCreate', async () => {
+      const result = { created: [{ id: 'a' }], failed: [] };
+      mockApi.bulkCreateWorkflows.mockResolvedValue(result);
+      const workflows = [{ id: 'a', yaml: 'name: A' }];
+      const request = httpServerMock.createKibanaRequest({
+        method: 'post',
+        path: '/api/workflows',
+        query: { overwrite: false, dryRun: false },
+        body: { workflows },
+      });
+      (request as any).authzResult = { [WorkflowsManagementApiActions.create]: true };
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+
+      expect(mockApi.bulkCreateWorkflows).toHaveBeenCalledTimes(1);
+      expect(mockApi.findExistingWorkflowIds).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: result });
+    });
   });
 
   describe('DELETE:/api/workflows (bulk delete)', () => {
@@ -773,6 +846,55 @@ describe('Workflow routes', () => {
       expect(body.manifest.exportedCount).toBe(2);
       expect(body.manifest.version).toBe('1');
       expect(body.manifest.exportedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it('should return stored yaml verbatim even when definition is present', async () => {
+      // Validates the fix for elastic/security-team#18145 and #18049:
+      // the stored yaml (with correct enabled + user comments) must be preferred
+      // over re-serialising the parsed definition object.
+      const storedYaml = '# user comment\nname: Annotated Workflow\nenabled: true\nsteps: []';
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        {
+          id: 'w-annotated',
+          name: 'Annotated Workflow',
+          yaml: storedYaml,
+          definition: { name: 'Annotated Workflow', enabled: false, version: '1', steps: [] },
+        },
+      ]);
+
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-annotated'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+
+      // Must return the stored yaml, not a re-serialisation of definition
+      // (re-serialising definition would yield enabled: false and drop the comment)
+      expect(body.entries).toEqual([{ id: 'w-annotated', yaml: storedYaml }]);
+    });
+
+    it('should fall back to stringifyWorkflowDefinition when stored yaml is empty', async () => {
+      mockApi.getWorkflowsByIds.mockResolvedValue([
+        {
+          id: 'w-no-yaml',
+          name: 'No Yaml Workflow',
+          yaml: '',
+          definition: { name: 'No Yaml Workflow', enabled: true, version: '1', steps: [] },
+        },
+      ]);
+
+      const request = httpServerMock.createKibanaRequest({ body: { ids: ['w-no-yaml'] } });
+      const response = mockResponse();
+      const context = createLicensingContext() as any;
+
+      await routeHandlers[key].handler(context, request, response);
+      const { body } = (response.ok as jest.Mock).mock.calls[0][0];
+
+      // Fallback must still produce some YAML string (not empty / not crashing)
+      expect(body.entries[0].id).toBe('w-no-yaml');
+      expect(typeof body.entries[0].yaml).toBe('string');
+      expect(body.entries[0].yaml.length).toBeGreaterThan(0);
     });
 
     it('should log a warning when some workflow IDs are missing', async () => {

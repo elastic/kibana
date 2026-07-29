@@ -17,7 +17,7 @@ import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { getNextTabNumber, type TabItem } from '@kbn/unified-tabs';
-import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
+import { createAsyncThunk, miniSerializeError } from 'redux-toolkit-v1';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
 import type {
   InternalStateDependencies,

@@ -9,8 +9,6 @@ import { useCallback } from 'react';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSetUnifiedAlertsTags } from '../../../../../common/containers/unified_alerts/hooks/use_set_unified_alerts_tags';
 import { useSetAttacksTags } from '../../../../../common/containers/attacks/hooks/use_set_attacks_tags';
 
 import { useUpdateAttacksModal } from '../confirmation_modal/use_update_attacks_modal';
@@ -30,8 +28,6 @@ interface ApplyAttackTagsReturn {
  * Shows a confirmation modal to let users choose whether to update only attacks or both attacks and related alerts.
  */
 export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
-  const isPublicAttacksApiEnabled = useIsExperimentalFeatureEnabled('publicAttacksApiEnabled');
-  const { mutateAsync: setUnifiedAlertsTags } = useSetUnifiedAlertsTags();
   const { mutateAsync: setAttacksTags } = useSetAttacksTags();
   const showModalIfNeeded = useUpdateAttacksModal();
   const {
@@ -66,26 +62,17 @@ export const useApplyAttackTags = (): ApplyAttackTagsReturn => {
 
       setIsLoading?.(true);
       try {
-        if (isPublicAttacksApiEnabled) {
-          await setAttacksTags({
-            ids: attackIds,
-            tags,
-            update_related_alerts: result.updateAlerts,
-          });
-        } else {
-          const allIds = result.updateAlerts ? [...attackIds, ...relatedAlertIds] : attackIds;
-
-          await setUnifiedAlertsTags({
-            tags,
-            ids: allIds,
-          });
-        }
+        await setAttacksTags({
+          ids: attackIds,
+          tags,
+          update_related_alerts: result.updateAlerts,
+        });
         onSuccess?.();
       } finally {
         setIsLoading?.(false);
       }
     },
-    [isPublicAttacksApiEnabled, setAttacksTags, setUnifiedAlertsTags, showModalIfNeeded, telemetry]
+    [setAttacksTags, showModalIfNeeded, telemetry]
   );
 
   return { applyTags };

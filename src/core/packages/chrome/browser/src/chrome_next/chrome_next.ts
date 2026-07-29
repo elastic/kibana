@@ -35,7 +35,10 @@ export interface AppHeaderBadge {
   onClick?: () => void;
   onClickAriaLabel?: string;
   'data-test-subj'?: string;
-  /** @deprecated Used for compatibility with existing breadcrumb badge custom renderers. */
+  /**
+   * @deprecated Escape hatch for badges that cannot be represented with structured props.
+   * Prefer structured badge props for consistent behavior and styling.
+   */
   renderCustomBadge?: (props: { badgeText: string }) => ReactElement;
   /** Popover menu items for badge context menus. When provided, the badge becomes a dropdown trigger. */
   items?: AppHeaderBadgeItem[];
@@ -204,16 +207,56 @@ export interface AppHeaderEditableTitle {
 /** @public */
 export type AppHeaderTitle = string | AppHeaderEditableTitle;
 
-/** @public */
-export interface AppHeaderConfig {
+/**
+ * Outer header spacing. `standard` (also the default when omitted) is a 16px symmetric inset,
+ * `compact` is an 8px inset, and `flush` lets the surrounding layout own the inset. `bleed` and
+ * `largeBleed` must match a direct parent's 16px or 24px symmetric padding respectively (e.g. when
+ * the header is wrapped by `EuiPageTemplate`). Bleed modes are compatibility options for headers
+ * that cannot yet move outside the padded content section.
+ *
+ * @public
+ */
+export type AppHeaderSpacing = 'standard' | 'compact' | 'flush' | 'bleed' | 'largeBleed';
+
+/**
+ * Plain-text page description. Use the object form to add a URL rendered with a fixed
+ * "Learn more" label.
+ *
+ * @public
+ */
+export type AppHeaderDescription =
+  | string
+  | {
+      text: string;
+      learnMoreUrl: string;
+    };
+
+interface AppHeaderConfigBase {
   title?: AppHeaderTitle;
   back?: AppHeaderBack;
   tabs?: AppHeaderTab[];
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
+  /**
+   * @deprecated Temporary slot for `FavoriteButton` or a thin wrapper around it. Replace this with
+   * the typed favorite action API tracked in https://github.com/elastic/kibana/issues/271402.
+   */
   favorite?: ReactNode;
-  metadata?: AppHeaderMetadataItems;
+  spacing?: AppHeaderSpacing;
 }
+
+type AppHeaderSecondaryContent =
+  | {
+      description?: AppHeaderDescription;
+      metadata?: never;
+    }
+  | {
+      description?: never;
+      metadata?: AppHeaderMetadataItems;
+    };
+
+/** @public */
+export type AppHeaderConfig = AppHeaderConfigBase & AppHeaderSecondaryContent;
 
 /**
  * Chrome Next rollout APIs.
@@ -259,6 +302,14 @@ export interface ChromeNext {
   contextSwitcher: {
     /**
      * Set the context switcher content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
+  /** Project picker content. */
+  projectPicker: {
+    /**
+     * Set the project picker content for the Chrome-Next header.
      * Pass `undefined` to remove. Global — persists across app changes.
      */
     set(content?: ReactNode): void;

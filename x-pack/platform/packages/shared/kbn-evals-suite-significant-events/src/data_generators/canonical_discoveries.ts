@@ -9,7 +9,7 @@ import type { Discovery } from '@kbn/significant-events-schema';
 
 const CANONICAL_TIMESTAMP = '2026-01-01T00:00:00.000Z';
 
-const slugify = (value: string): string =>
+const normalizeEventIdSegment = (value: string): string =>
   value
     .trim()
     .toLowerCase()
@@ -39,7 +39,7 @@ export const canonicalDiscoveryFromGroundTruth = ({
     '@timestamp': discovery['@timestamp'] ?? CANONICAL_TIMESTAMP,
     kind: discovery.kind ?? 'discovery',
     discovery_id: discovery.discovery_id ?? `${scenarioId}-canonical`,
-    event_id: discovery.event_id ?? `${slugify(scenarioId)}__canonical`,
+    event_id: discovery.event_id ?? `${normalizeEventIdSegment(scenarioId)}__canonical`,
     stream_names: streamNames,
     symptom_hypothesis: discovery.symptom_hypothesis ?? '',
     title: discovery.title ?? '',
@@ -47,7 +47,12 @@ export const canonicalDiscoveryFromGroundTruth = ({
     severity: discovery.severity ?? '20-low',
     confidence: discovery.confidence ?? 0,
     processed: discovery.processed ?? false,
-    ...(discovery.signals ? { signals: discovery.signals } : {}),
+    // Strip discovery-side confirmation before judge evaluation.
+    ...(discovery.signals
+      ? {
+          signals: discovery.signals.map(({ confirmed: _omitted, ...rest }) => rest),
+        }
+      : {}),
     ...(discovery.causal_features ? { causal_features: discovery.causal_features } : {}),
     ...(discovery.blast_radius ? { blast_radius: discovery.blast_radius } : {}),
   };

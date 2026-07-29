@@ -120,6 +120,25 @@ describe('EventClient', () => {
   });
 
   describe('findLatestByCurrentStatePaginated', () => {
+    it('filters stable event IDs after latest-state reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({
+        eventIds: ['checkout-failure', 'payment-failure'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('event_id IN ("checkout-failure", "payment-failure")');
+      expect(dataQuery!.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('event_id IN')
+      );
+    });
+
     it('filters open state after latest-per-slug reduction', async () => {
       const { client, query } = createSearchClient({
         hits: [],
@@ -150,6 +169,25 @@ describe('EventClient', () => {
       expect(result.hits).toHaveLength(1);
       expect(result.hits[0].status).toBe('closed');
       expect(result.total).toBe(1);
+    });
+
+    it('filters severity after latest-per-slug reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({
+        severity: ['80-critical', '60-high'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('severity IN');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('severity IN')
+      );
     });
   });
 });

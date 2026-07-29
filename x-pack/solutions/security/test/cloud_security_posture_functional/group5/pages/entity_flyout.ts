@@ -44,6 +44,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
+        // This suite drives the legacy expandable flyout via `flyout` URL params (host-panel /
+        // user-panel) and asserts on legacy test subjects (`rightSection`). Disable the new flyout
+        // so those legacy panels render instead of being consumed by the flyout v2 legacy-URL
+        // interop, which translates the `flyout` param into the new (EUI) flyout.
+        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -61,6 +66,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         'securitySolution:enableAssetInventory': false,
         'securitySolution:entityStoreEnableV2': false,
       });
+      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     describe('entity relationships', () => {

@@ -18,6 +18,7 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/router-utils"
+    "@kbn/router-utils",
+    "@kbn/core-chrome-layout-utils"
   ]
 }

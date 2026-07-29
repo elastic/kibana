@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 
@@ -15,14 +16,17 @@ import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser'
 export const useDefaultDocumentFlyoutProperties = (): OverlaySystemFlyoutOpenOptions => {
   const { euiTheme } = useEuiTheme();
 
-  return {
-    maxWidth: euiTheme.breakpoint.xl,
-    minWidth: euiTheme.base * 24,
-    ownFocus: false,
-    paddingSize: 'm',
-    resizable: true,
-    size: 's',
-  };
+  return useMemo(
+    () => ({
+      maxWidth: euiTheme.breakpoint.xl,
+      minWidth: euiTheme.base * 24,
+      ownFocus: false,
+      paddingSize: 'm',
+      resizable: true,
+      size: 's',
+    }),
+    [euiTheme.breakpoint.xl, euiTheme.base]
+  );
 };
 
 /**

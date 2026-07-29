@@ -42,6 +42,65 @@ import {
 
 const DISPOSE_TIMEOUT_MS = 5_000;
 
+const isPromiseLike = (value: unknown): value is PromiseLike<unknown> =>
+  typeof value === 'object' &&
+  value !== null &&
+  typeof (value as { then?: unknown }).then === 'function';
+
+/** The value half of a raw resource-attribute entry: an AttributeValue, or a promise of one. */
+type ResolvedResourceValue = ReturnType<resources.Resource['getRawAttributes']>[number][1];
+
+/**
+ * Captures the requested resource-attribute values from the resolved attribute map so they can be
+ * re-emitted as per-record log attributes. Async-detected values (e.g. host.id from getMachineId) are
+ * skipped — per-record attributes must be resolved at emit time. Returns an empty object when nothing
+ * is requested/found.
+ */
+const capturePromotedResourceAttributes = (
+  resolved: ReadonlyMap<string, unknown>,
+  keys?: string[]
+): Attributes => {
+  const promoted: Attributes = {};
+  for (const key of keys ?? []) {
+    const value = resolved.get(key);
+    if (value != null && !isPromiseLike(value)) {
+      promoted[key] = value as AttributeValue;
+    }
+  }
+  return promoted;
+};
+
+/**
+ * A `fieldAdditions` template parsed once at construction so `append()` doesn't re-parse the regex on
+ * every record (audit logging is a hot path). `segments` are the literal/placeholder parts in order;
+ * `refs` are the referenced attribute keys, for the presence/scalar check.
+ */
+interface CompiledFieldAddition {
+  key: string;
+  refs: string[];
+  segments: Array<{ literal: string } | { ref: string }>;
+}
+
+/**
+ * Parses each `fieldAdditions` template into literal segments + placeholder refs. Splitting on the
+ * `{ref}` capturing group yields alternating literals (even indices) and refs (odd indices).
+ */
+const compileFieldAdditions = (
+  fieldAdditions?: Record<string, string>
+): CompiledFieldAddition[] | undefined => {
+  if (!fieldAdditions) {
+    return undefined;
+  }
+  return Object.entries(fieldAdditions).map(([key, template]) => {
+    const tokens = template.split(/\{([^}]+)\}/);
+    const segments = tokens.map((token, index) =>
+      index % 2 === 0 ? { literal: token } : { ref: token }
+    );
+    const refs = tokens.filter((_, index) => index % 2 === 1);
+    return { key, refs, segments };
+  });
+};
+
 /**
  * Maps a Kibana log level to the corresponding OTel SeverityNumber.
  * Returns `0` for filter-only levels ('all', 'off') so even though the level is incorrect, the record is still logged.
@@ -119,9 +178,21 @@ const resolveLayoutConfig = (config?: LayoutConfigType): LayoutConfigType => {
  * - When using the JSON layout, `meta` is already part of the structured body,
  *   so `log.meta` is omitted from attributes to avoid duplication.
  */
-const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes => {
+const toAttributes = (
+  record: LogRecord,
+  includeLogMeta: boolean,
+  fieldRenames?: Record<string, string | string[]>,
+  fieldDrops?: string[],
+  fieldDefaults?: Record<string, string | string[]>,
+  fieldUppercase?: string[],
+  compiledAdditions?: CompiledFieldAddition[],
+  promotedAttributes?: Attributes
+): Attributes => {
   const attrs: Attributes = {
     'log.logger': record.context,
+    // Resource attributes promoted to per-record attributes (captured once at construction). Seeded
+    // first so the field transforms below apply to them like any other attribute.
+    ...promotedAttributes,
   };
 
   if (record.transactionId) {
@@ -168,6 +239,63 @@ const toAttributes = (record: LogRecord, includeLogMeta: boolean): Attributes =>
     });
   }
 
+  if (fieldRenames) {
+    for (const [oldKey, newKeys] of Object.entries(fieldRenames)) {
+      if (oldKey in attrs) {
+        const value = attrs[oldKey];
+        delete attrs[oldKey];
+        const targets = Array.isArray(newKeys) ? newKeys : [newKeys];
+        for (const newKey of targets) {
+          attrs[newKey] = value;
+        }
+      }
+    }
+  }
+
+  // Derived attributes: build a value from a template referencing other flattened attributes.
+  // Runs after renames (so templates can reference renamed keys) and before drops (so a template
+  // may reference source fields that are then dropped, e.g. url.original from url.scheme/domain/path).
+  if (compiledAdditions) {
+    for (const { key, refs, segments } of compiledAdditions) {
+      // Templates may only reference scalar fields. Skip when any referenced field is missing,
+      // nullish, empty, or an array/object — so events that don't carry the source fields (e.g.
+      // non-http events for url.original) don't get a degenerate value, and array-valued attributes
+      // (e.g. source.ip, event.type) aren't silently comma-joined into the template.
+      const allUsable = refs.every((ref) => {
+        const value = attrs[ref];
+        return value != null && value !== '' && typeof value !== 'object';
+      });
+      if (!allUsable) {
+        continue;
+      }
+      attrs[key] = segments
+        .map((segment) => ('literal' in segment ? segment.literal : String(attrs[segment.ref])))
+        .join('');
+    }
+  }
+
+  if (fieldDrops) {
+    for (const key of fieldDrops) {
+      delete attrs[key];
+    }
+  }
+
+  if (fieldDefaults) {
+    for (const [key, value] of Object.entries(fieldDefaults)) {
+      if (!(key in attrs)) {
+        attrs[key] = value;
+      }
+    }
+  }
+
+  if (fieldUppercase) {
+    for (const key of fieldUppercase) {
+      if (typeof attrs[key] === 'string') {
+        attrs[key] = (attrs[key] as string).toUpperCase();
+      }
+    }
+  }
+
   return attrs;
 };
 
@@ -194,6 +322,32 @@ export class OtelAppender implements DisposableAppender {
     layout: schema.maybe(Layouts.configSchema),
     // Optional: user-provided attributes override the service attributes derived from APM config.
     attributes: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    // Allowlist of resource-attribute keys to include (default ['*'] = keep all).
+    includeResources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // Resource-attribute keys to also emit as per-record log attributes.
+    promoteResourceAttributes: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    // Template-based derived attributes: target key -> template with {field} placeholders.
+    fieldAdditions: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    fieldRenames: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
+      )
+    ),
+    fieldDrops: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    fieldUppercase: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 20 })),
+    fieldDefaults: schema.maybe(
+      schema.recordOf(
+        schema.string(),
+        schema.oneOf([
+          schema.string(),
+          schema.arrayOf(schema.string(), { minSize: 1, maxSize: 20 }),
+        ])
+      )
+    ),
     ssl: schema.maybe(
       schema.object(
         {
@@ -234,6 +388,12 @@ export class OtelAppender implements DisposableAppender {
   private readonly layout: Layout;
   /** True when using JSON layout: the full LogRecord is sent as `body.structured`. */
   private readonly useStructuredBody: boolean;
+  private readonly fieldRenames?: Record<string, string | string[]>;
+  private readonly fieldDrops?: string[];
+  private readonly fieldDefaults?: Record<string, string | string[]>;
+  private readonly fieldUppercase?: string[];
+  private readonly compiledAdditions?: CompiledFieldAddition[];
+  private readonly promotedAttributes: Attributes;
 
   constructor(config: OtelAppenderConfig) {
     const exporter = createExporter(config);
@@ -242,11 +402,62 @@ export class OtelAppender implements DisposableAppender {
     //   2. Derived: service.name / service.version / deployment.environment from the
     //      APM config singleton (mirrors how initTelemetry builds trace resources)
     //   3. User overrides: explicit attributes from kibana.yml (optional)
-    const resource = buildOtelResources().merge(
+    //
+    // The fully-resolved resource above is then shaped by two config knobs:
+    //   - includeResources: allowlist of keys to keep (default ['*'] = keep all).
+    //   - fieldDrops: denylist, applied to the resource only when includeResources includes '*'
+    //     (its default).
+    // An explicit allowlist fully governs the resource — a key it names is kept even if fieldDrops
+    // also lists it, because fieldDrops is primarily a per-record denylist (a field can be dropped
+    // from per-record attributes yet kept in the resource, e.g. audit logs' service.type).
+    const includeResources = config.includeResources ?? ['*'];
+    const includeAll = includeResources.includes('*');
+    const baseResource = buildOtelResources().merge(
       resources.resourceFromAttributes(config.attributes ?? {})
     );
+
+    // The default appender (keep everything, no drops) uses the merged resource directly. Only when
+    // we have to reshape it — filter the resource or promote attributes onto records — do we resolve
+    // the attributes ourselves.
+    const needsFilter = !includeAll || Boolean(config.fieldDrops?.length);
+    const needsPromotion = Boolean(config.promoteResourceAttributes?.length);
+    let resource: resources.Resource = baseResource;
+    let promoted: Attributes = {};
+
+    if (needsFilter || needsPromotion) {
+      // Resolve attribute precedence explicitly instead of trusting the order merge() concatenates
+      // raw entries in: config.attributes (kibana.yml / audit injection) are authoritative for the
+      // keys they set, so seed them first; the remaining detected keys then resolve first-wins,
+      // matching the SDK's public `.attributes` getter (`attrs[k] ??= v`). This keeps the override
+      // precedence correct even if the SDK ever changes merge()'s internal ordering. Reading raw
+      // entries preserves async values (e.g. host.id) for the SDK to await at export time.
+      const resolved = new Map<string, ResolvedResourceValue>(
+        Object.entries(config.attributes ?? {})
+      );
+      for (const [key, value] of baseResource.getRawAttributes()) {
+        if (!resolved.has(key)) {
+          resolved.set(key, value);
+        }
+      }
+
+      // Promotion captures from the resolved map BEFORE the allowlist below narrows it, so a key can
+      // be emitted per-record (e.g. project.id) even when it's dropped from the resource.
+      if (needsPromotion) {
+        promoted = capturePromotedResourceAttributes(resolved, config.promoteResourceAttributes);
+      }
+
+      if (needsFilter) {
+        // Explicit allowlist governs alone; otherwise (['*']) fall back to the fieldDrops denylist.
+        const keepAttribute = (key: string) =>
+          includeAll ? !config.fieldDrops?.includes(key) : includeResources.includes(key);
+        const kept = [...resolved].filter(([key]) => keepAttribute(key));
+        resource = resources.resourceFromAttributes(Object.fromEntries(kept));
+      }
+    }
+    this.promotedAttributes = promoted;
+
     this.loggerProvider = new LoggerProvider({
-      processors: [new BatchLogRecordProcessor(exporter)],
+      processors: [new BatchLogRecordProcessor({ exporter })],
       resource,
     });
     // The scope name 'kibana' identifies this instrumentation library.
@@ -258,6 +469,11 @@ export class OtelAppender implements DisposableAppender {
     // JSON layout → sanitised LogRecord as AnyValueMap → indexed as body.structured.
     // Pattern layout → formatted string → indexed as body.text (aliased to `message`).
     this.useStructuredBody = layoutConfig.type !== 'pattern';
+    this.fieldRenames = config.fieldRenames;
+    this.fieldDrops = config.fieldDrops;
+    this.fieldDefaults = config.fieldDefaults;
+    this.fieldUppercase = config.fieldUppercase;
+    this.compiledAdditions = compileFieldAdditions(config.fieldAdditions);
   }
 
   public append(record: LogRecord): void {
@@ -279,7 +495,16 @@ export class OtelAppender implements DisposableAppender {
       context: toTraceContext(record),
       // log.meta is omitted from attributes when using JSON layout because it
       // is already part of the structured body.
-      attributes: toAttributes(record, !this.useStructuredBody),
+      attributes: toAttributes(
+        record,
+        !this.useStructuredBody,
+        this.fieldRenames,
+        this.fieldDrops,
+        this.fieldDefaults,
+        this.fieldUppercase,
+        this.compiledAdditions,
+        this.promotedAttributes
+      ),
     });
   }
 

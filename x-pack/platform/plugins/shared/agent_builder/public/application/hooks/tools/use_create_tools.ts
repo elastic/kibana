@@ -9,7 +9,7 @@ import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
 import type { UseMutationOptions } from '@kbn/react-query';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import { useCallback, useMemo } from 'react';
 import type { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';
 import { queryKeys } from '../../query_keys';

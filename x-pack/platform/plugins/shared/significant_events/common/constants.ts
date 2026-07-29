@@ -12,7 +12,6 @@ export const ASSET_VERSION = 1;
 export const ATTACHMENT_SUGGESTIONS_LIMIT = 50;
 
 export const STREAMS_PRODUCER = 'streams';
-export const STREAMS_RULE_REGISTRATION_CONTEXT = 'streams';
 
 export const STREAMS_API_PRIVILEGES = {
   read: 'read_stream',
@@ -76,9 +75,36 @@ export const POLL_DELAY_SECONDS = 30;
  * performs a bounded number of discovery + triage passes so it can drain small
  * backlogs without creating an unbounded scheduled run.
  */
-export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES = 30;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_INTERVAL_MINUTES = 10;
+/**
+ * Target time window (minutes) within which every active rule must be scanned at least once.
+ * The detection workflow divides the fleet across `ceil(fleet / (targetCoverage / interval))`
+ * rules per run to honour this bound.
+ *
+ * Round-robin engages only when `targetCoverageMinutes > detectionIntervalMinutes`
+ * (scan_cycles = floor(coverage / interval) ≥ 2). When coverage ≤ interval, scan_cycles clamps
+ * to 1 and every active rule is processed on every run.
+ *
+ * At the default 10-minute detection interval this gives 3 cycles:
+ *   scan_cycles = floor(30 / 10) = 3  →  ~33% of the fleet per run, full coverage in 30 min.
+ */
+export const DEFAULT_SIG_EVENTS_TARGET_COVERAGE_MINUTES = 30;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_REVIEW_INTERVAL_MINUTES = 10;
 export const MIN_SIG_EVENTS_SCHEDULED_INTERVAL_MINUTES = 1;
+
+// Detection sensitivity tuning. The change_point aggregation requires between
+// MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS and MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS
+// date-histogram buckets, so detectionLookbackMinutes must be an exact multiple
+// of detectionBucketIntervalMinutes with a quotient inside those bounds — the
+// settings route validates the resolved pair.
+export const MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS = 22;
+export const MAX_SIG_EVENTS_CHANGE_POINT_BUCKETS = 1000;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES = 1;
+export const MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES = 1;
+export const MAX_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES = 30;
+export const DEFAULT_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES = 40;
+export const MIN_SIG_EVENTS_SCHEDULED_DETECTION_LOOKBACK_MINUTES =
+  MIN_SIG_EVENTS_CHANGE_POINT_BUCKETS * MIN_SIG_EVENTS_SCHEDULED_DETECTION_BUCKET_INTERVAL_MINUTES;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_DISCOVERY_BATCH_SIZE = 3;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_TRIAGE_BATCH_SIZE = 5;
 export const DEFAULT_SIG_EVENTS_SCHEDULED_MAX_REVIEW_PASSES = 3;
