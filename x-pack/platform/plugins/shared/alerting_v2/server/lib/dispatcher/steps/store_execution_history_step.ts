@@ -28,6 +28,7 @@ import {
   type DispatchFailureReason,
 } from './constants';
 import { getUnmatchedEpisodes } from './unmatched_episodes';
+import { episodeSubject } from './utils/subject';
 
 const RULE_REF_CAP = 50;
 
@@ -81,6 +82,12 @@ type DispatcherFields =
   | UnmatchedDispatcherFields
   | DispatchFailureDispatcherFields;
 
+interface UnmatchedGroup {
+  episodeIds: Set<string>;
+  space_id: string;
+  ruleId: RuleId | null;
+}
+
 @injectable()
 export class StoreExecutionHistoryStep implements DispatcherStep {
   public readonly name = 'store_execution_history';
@@ -133,11 +140,11 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
-    const unmatched = aggregateUnmatchedByRule(
+    const unmatched = aggregateUnmatchedBySubject(
       getUnmatchedEpisodes(dispatchable, dispatch, throttled)
     );
-    for (const [ruleId, episodeIds] of unmatched) {
-      this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });
+    for (const group of unmatched) {
+      this.emitUnmatchedSummary({ timestamp, executionUuid, group });
     }
 
     for (const failure of dispatchFailures) {
@@ -196,27 +203,24 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   private emitUnmatchedSummary({
     timestamp,
     executionUuid,
-    ruleId,
-    episodeIds,
-    rules,
+    group,
   }: {
     timestamp: string;
     executionUuid: string;
-    ruleId: RuleId;
-    episodeIds: Set<string>;
-    rules: Map<RuleId, Rule> | undefined;
+    group: UnmatchedGroup;
   }): void {
-    const rule = rules?.get(ruleId);
+    const savedObjects: SavedObjectRef[] =
+      group.ruleId != null ? [ruleRef({ id: group.ruleId, spaceId: group.space_id })] : [];
     this.eventLogService.logEvent(
       buildEvent({
         timestamp,
         executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
-        spaceId: rule?.spaceId ?? 'default',
-        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId })],
+        spaceId: group.space_id,
+        savedObjects,
         dispatcherFields: {
-          episode_count: episodeIds.size,
-          episode_ids: Array.from(episodeIds),
+          episode_count: group.episodeIds.size,
+          episode_ids: Array.from(group.episodeIds),
         },
       })
     );
@@ -233,7 +237,11 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     failure: DispatchFailure;
     rules: Map<RuleId, Rule> | undefined;
   }): void {
-    const ruleIds = Array.from(new Set(failure.episodes.map((episode) => episode.rule_id)));
+    const ruleIds = Array.from(
+      new Set(
+        failure.episodes.map((episode) => episode.rule_id).filter((id): id is string => id != null)
+      )
+    );
     const episodeIds = Array.from(new Set(failure.episodes.map((episode) => episode.episode_id)));
     const capped = ruleIds.slice(0, RULE_REF_CAP);
     const spillOver = ruleIds.slice(RULE_REF_CAP);
@@ -298,25 +306,32 @@ function aggregateByPolicy(
     }
     for (const episode of group.episodes) {
       summary.episodeIds.add(episode.episode_id);
-      summary.ruleIds.add(episode.rule_id);
+      if (episode.rule_id != null) {
+        summary.ruleIds.add(episode.rule_id);
+      }
     }
   }
   return summaries;
 }
 
-function aggregateUnmatchedByRule(
+function aggregateUnmatchedBySubject(
   unmatched: ReturnType<typeof getUnmatchedEpisodes>
-): Map<RuleId, Set<string>> {
-  const byRule = new Map<RuleId, Set<string>>();
+): UnmatchedGroup[] {
+  const bySubject = new Map<string, UnmatchedGroup>();
   for (const episode of unmatched) {
-    let ids = byRule.get(episode.rule_id);
-    if (!ids) {
-      ids = new Set();
-      byRule.set(episode.rule_id, ids);
+    const subject = episodeSubject(episode);
+    let group = bySubject.get(subject);
+    if (!group) {
+      group = {
+        episodeIds: new Set(),
+        space_id: episode.space_id,
+        ruleId: episode.rule_id,
+      };
+      bySubject.set(subject, group);
     }
-    ids.add(episode.episode_id);
+    group.episodeIds.add(episode.episode_id);
   }
-  return byRule;
+  return [...bySubject.values()];
 }
 
 function ruleRef({ id, spaceId }: { id: string; spaceId: string | undefined }): SavedObjectRef {

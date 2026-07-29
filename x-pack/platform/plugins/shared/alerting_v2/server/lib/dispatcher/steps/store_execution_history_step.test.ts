@@ -549,4 +549,72 @@ describe('StoreExecutionHistoryStep', () => {
     const [[event]] = eventLogger.logEvent.mock.calls;
     expect(event?.kibana?.alerting_v2?.dispatcher?.rule_ids).toBeUndefined();
   });
+
+  describe('external episode handling', () => {
+    it('two external episodes from different vendors produce separate unmatched events', async () => {
+      const pdEpisode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'default',
+        episode_id: 'pd-1',
+      });
+      const ddEpisode = createAlertEpisode({
+        source: 'datadog',
+        rule_id: null,
+        space_id: 'default',
+        episode_id: 'dd-1',
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatchable: [pdEpisode, ddEpisode],
+        })
+      );
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      const actions = eventLogger.logEvent.mock.calls.map(([event]) => event?.event?.action);
+      expect(actions).toEqual(['unmatched', 'unmatched']);
+      const episodeSets = eventLogger.logEvent.mock.calls.map(
+        ([event]) => event?.kibana?.alerting_v2?.dispatcher?.episode_ids
+      );
+      expect(episodeSets).toContainEqual(['pd-1']);
+      expect(episodeSets).toContainEqual(['dd-1']);
+    });
+
+    it('same vendor in two spaces produces separate unmatched events', async () => {
+      const episodes = ['space-a', 'space-b'].map((spaceId) =>
+        createAlertEpisode({
+          source: 'pagerduty',
+          rule_id: null,
+          space_id: spaceId,
+          episode_id: `pd-${spaceId}`,
+        })
+      );
+
+      await step.execute(createDispatcherPipelineState({ dispatchable: episodes }));
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+      const spaces = eventLogger.logEvent.mock.calls.map(([event]) => event?.kibana?.space_ids);
+      expect(spaces).toEqual([['space-a'], ['space-b']]);
+    });
+
+    it('external episode uses episode.space_id for the event space, not a rule space', async () => {
+      const pdEpisode = createAlertEpisode({
+        source: 'pagerduty',
+        rule_id: null,
+        space_id: 'my-space',
+        episode_id: 'pd-1',
+      });
+
+      await step.execute(
+        createDispatcherPipelineState({
+          dispatchable: [pdEpisode],
+        })
+      );
+
+      const [[event]] = eventLogger.logEvent.mock.calls;
+      expect(event?.kibana?.space_ids).toEqual(['my-space']);
+      expect(event?.kibana?.saved_objects).toEqual([]);
+    });
+  });
 });

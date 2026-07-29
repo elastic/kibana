@@ -115,6 +115,7 @@ export const EventSchema = schema.maybe(
                 uuid: ecsString(),
               })
             ),
+            data: ecsFlattened(),
           })
         ),
         alerting: schema.maybe(
