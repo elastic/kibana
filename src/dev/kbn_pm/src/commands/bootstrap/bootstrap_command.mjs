@@ -25,7 +25,6 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 import { bootstrapBuildkite } from './buildkite.mjs';
-import { patchUnicornMagicExports } from './patch_unicorn_magic_exports.mjs';
 
 const IS_CI = process.env.CI?.match(/(1|true)/i);
 
@@ -143,11 +142,6 @@ export const command = {
           })
         : undefined,
     ]);
-
-    // globby@16 needs unicorn-magic/node resolvable via CJS (Cypress tsx). Idempotent.
-    await time('patch unicorn-magic exports', async () => {
-      await patchUnicornMagicExports(log);
-    });
 
     await time('sort package json', async () => {
       await sortPackageJson(log);
