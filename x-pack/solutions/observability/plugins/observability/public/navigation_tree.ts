@@ -13,6 +13,12 @@ import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
+import {
+  getInstalledIntegrations,
+  getIntegrationDeepLinkId,
+  getIntegrationFavorites$,
+  type IntegrationSummary,
+} from './entity_centric_lab_integrations';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -49,6 +55,9 @@ function createNavTree({
   ingestHubAvailable,
   entityCentricLabEnabled,
   infraShortTermEnabled,
+  superShortTermEnabled,
+  favoriteIntegrationIds = [],
+  installedIntegrations = [],
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
@@ -57,22 +66,103 @@ function createNavTree({
   ingestHubAvailable?: boolean;
   entityCentricLabEnabled?: boolean;
   infraShortTermEnabled?: boolean;
+  superShortTermEnabled?: boolean;
+  favoriteIntegrationIds?: readonly string[];
+  installedIntegrations?: readonly IntegrationSummary[];
 }) {
-  // The two lab modes are mutually exclusive; entity-centric takes precedence
-  // if both advanced settings happen to be on. Infra-short-term reuses the
+  // The three lab modes are mutually exclusive; entity-centric takes precedence,
+  // then infra-short-term, then super-short-term. Infra-short-term reuses the
   // Entities panel but renames it to "Infrastructure" and scopes it to a
-  // reduced category set.
+  // reduced category set. Super-short-term renames it to "Infrastructure" too
+  // but swaps the categories for an integrations content hub.
   const infraShortTermMode = Boolean(infraShortTermEnabled) && !entityCentricLabEnabled;
+  const superShortTermMode =
+    Boolean(superShortTermEnabled) && !entityCentricLabEnabled && !infraShortTermMode;
+  const infraPanelMode = infraShortTermMode || superShortTermMode;
   const showEntitiesPanel =
-    Boolean(streamsAvailable) && (Boolean(entityCentricLabEnabled) || infraShortTermMode);
+    Boolean(streamsAvailable) &&
+    (Boolean(entityCentricLabEnabled) || infraShortTermMode || superShortTermMode);
 
-  const entitiesPanelTitle = infraShortTermMode
+  const entitiesPanelTitle = infraPanelMode
     ? i18n.translate('xpack.observability.obltNav.infrastructure', {
         defaultMessage: 'Infrastructure',
       })
     : i18n.translate('xpack.observability.obltNav.entities', {
         defaultMessage: 'Entities',
       });
+
+  // Super-short-term: the "Infrastructure" panel becomes an integrations hub
+  // mirroring the design mockup. A top group shows the existing Infrastructure
+  // touchpoints ("Infrastructure inventory", "Hosts") to illustrate where the
+  // hub fits in the current experience, then a "Starred integrations" section
+  // (the starred Overview page plus any starred integrations), then the full
+  // "All installed integrations" list. Each integration links to its detail
+  // page via a per-integration deep link registered in streams_app (a relative
+  // `href` would make the chrome nav throw and blank the whole side nav; an
+  // unresolved `link` is safely dropped instead).
+  const integrationNode = (integration: IntegrationSummary, prefix: string) => ({
+    id: `entityCentricLab-integration-${prefix}-${integration.id}`,
+    title: integration.name,
+    icon: integration.icon,
+    // The id is computed, but every installed integration has a matching
+    // `streams:integrations<Name>` deep link. Cast to a known member to satisfy
+    // the deep-link union; the runtime value is the real (resolvable) id.
+    link: `streams:${getIntegrationDeepLinkId(integration.id)}` as 'streams:integrations',
+  });
+
+  const favoriteIntegrations = favoriteIntegrationIds
+    .map((id) => installedIntegrations.find((integration) => integration.id === id))
+    .filter((integration): integration is IntegrationSummary => Boolean(integration));
+
+  const superShortTermPanelChildren = [
+    {
+      // Illustrative-only top group (no section header, matching the mockup).
+      // In super-short-term the existing Infrastructure experience is unchanged,
+      // so these point straight at the real Metrics inventory / Hosts pages
+      // rather than any lab page — they just show where the hub slots in.
+      children: [
+        {
+          id: 'entityCentricLab-infraInventory',
+          link: 'metrics:inventory' as const,
+          title: i18n.translate('xpack.observability.obltNav.integrations.inventory', {
+            defaultMessage: 'Infrastructure inventory',
+          }),
+        },
+        {
+          id: 'entityCentricLab-infraHosts',
+          link: 'metrics:hosts' as const,
+          // The "(24)" is a placeholder count; sentence-casing lowercases
+          // letters, so a numeric placeholder renders cleanly (unlike "(XX)").
+          title: i18n.translate('xpack.observability.obltNav.integrations.hosts', {
+            defaultMessage: 'Hosts (24)',
+          }),
+        },
+      ],
+    },
+    {
+      id: 'entityCentricLab-starredIntegrations',
+      title: i18n.translate('xpack.observability.obltNav.integrations.starred', {
+        defaultMessage: 'Starred integrations',
+      }),
+      children: [
+        {
+          id: 'entityCentricLab-integrationsOverview',
+          link: 'streams:integrations' as const,
+          title: i18n.translate('xpack.observability.obltNav.integrations.overview', {
+            defaultMessage: 'Overview',
+          }),
+        },
+        ...favoriteIntegrations.map((integration) => integrationNode(integration, 'starred')),
+      ],
+    },
+    {
+      id: 'entityCentricLab-allIntegrations',
+      title: i18n.translate('xpack.observability.obltNav.integrations.all', {
+        defaultMessage: 'All installed integrations',
+      }),
+      children: installedIntegrations.map((integration) => integrationNode(integration, 'all')),
+    },
+  ];
 
   // Cloud is a nested panel: clicking it navigates to the Cloud landing page,
   // while the chevron opens a sub-panel of providers (AWS / GCP / Azure), each
@@ -241,7 +331,9 @@ function createNavTree({
   // plus a "Manage entity types" shortcut. Infra-short-term shows "All
   // entities", the Cloud section (with AWS/GCP/Azure), then the remaining flat
   // categories (Databases, Kubernetes).
-  const entitiesPanelChildren = infraShortTermMode
+  const entitiesPanelChildren = superShortTermMode
+    ? superShortTermPanelChildren
+    : infraShortTermMode
     ? [
         entitiesAllSection,
         infraCloudSection,
@@ -321,7 +413,11 @@ function createNavTree({
               // titled "Infrastructure", scoped to a reduced category set, and
               // drops the "Manage entity types" entry entirely.
               id: 'entities',
-              link: 'streams:entitiesAll' as const,
+              // Super-short-term lands on the starred integrations Overview;
+              // the other lab modes land on the "All entities" inventory.
+              link: superShortTermMode
+                ? ('streams:integrations' as const)
+                : ('streams:entitiesAll' as const),
               // `cluster` renders three connected circles — reads as
               // "connected things / a network of entities" and is the closest
               // generic-entity metaphor available in the current EUI icon set.
@@ -1017,7 +1113,7 @@ function createNavTree({
 // `discover/server/ui_settings.ts`. Inlined here to avoid a cross-plugin
 // public import; the setting key is a stable public contract.
 const LAB_MODE_SETTING = 'discover:labMode';
-type LabMode = 'off' | 'entityCentric' | 'infraShortTerm';
+type LabMode = 'off' | 'entityCentric' | 'infraShortTerm' | 'superShortTerm';
 
 export const createDefinition = (
   coreStart: CoreStart,
@@ -1031,8 +1127,11 @@ export const createDefinition = (
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
     pluginsStart.ingestHub?.navigationAvailable$ || of(false),
     coreStart.settings.client.get$<LabMode>(LAB_MODE_SETTING, 'off'),
+    // Super-short-term lab: rebuild the integrations panel when the user stars
+    // or unstars an integration (store lives in @kbn/entity-centric-lab-flyout).
+    getIntegrationFavorites$(),
   ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable, labMode]) =>
+    map(([{ status }, chatExperience, ingestHubAvailable, labMode, favoriteIntegrationIds]) =>
       createNavTree({
         streamsAvailable: status === 'enabled',
         showAiAssistant: chatExperience !== AIChatExperience.Agent,
@@ -1041,6 +1140,9 @@ export const createDefinition = (
         ingestHubAvailable,
         entityCentricLabEnabled: labMode === 'entityCentric',
         infraShortTermEnabled: labMode === 'infraShortTerm',
+        superShortTermEnabled: labMode === 'superShortTerm',
+        favoriteIntegrationIds,
+        installedIntegrations: getInstalledIntegrations(),
       })
     )
   ),

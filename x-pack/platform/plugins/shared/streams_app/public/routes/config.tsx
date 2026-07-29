@@ -24,6 +24,8 @@ import {
   CloudServiceView,
   ManageEntityTypesView,
   SignificantEventsView,
+  IntegrationsOverviewView,
+  IntegrationDetailView,
 } from '../components/entity_centric_lab';
 
 /**
@@ -143,6 +145,23 @@ const streamsAppRoutes = {
         params: t.type({
           path: t.type({
             category: t.string,
+          }),
+        }),
+      },
+      /**
+       * Super-short-term lab: integrations content hub. `/integrations` is the
+       * starred Overview; `/integrations/{id}` is a single integration's detail
+       * page. Reached via the `streams:integrations` deep link and per-item
+       * hrefs from the Observability "Infrastructure" nav panel.
+       */
+      '/integrations': {
+        element: <IntegrationsOverviewView />,
+      },
+      '/integrations/{integrationId}': {
+        element: <IntegrationDetailView />,
+        params: t.type({
+          path: t.type({
+            integrationId: t.string,
           }),
         }),
       },

@@ -114,3 +114,20 @@ export {
   useChaosModeEnabled,
   getEffectiveEntityHealth,
 } from './src/chaos_mode';
+
+export {
+  INSTALLED_INTEGRATIONS,
+  getInstalledIntegrations,
+  getIntegrationSummary,
+  getIntegrationDeepLinkId,
+} from './src/integrations_registry';
+export type { IntegrationSummary } from './src/integrations_registry';
+
+export {
+  getFavoriteIntegrationIds,
+  isFavoriteIntegration,
+  setFavoriteIntegration,
+  toggleFavoriteIntegration,
+  getIntegrationFavorites$,
+  useFavoriteIntegrations,
+} from './src/integrations_favorites';

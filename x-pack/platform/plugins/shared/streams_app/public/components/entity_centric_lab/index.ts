@@ -13,3 +13,5 @@ export {
   CloudProviderView,
   CloudServiceView,
 } from './entities/category_entities_view';
+export { IntegrationsOverviewView } from './integrations/integrations_overview_view';
+export { IntegrationDetailView } from './integrations/integration_detail_view';

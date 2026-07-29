@@ -23,6 +23,7 @@ import { from, map, switchMap } from 'rxjs';
 import { css } from '@emotion/css';
 import ReactDOM from 'react-dom';
 import { registerEntityCentricLabAttachment } from '@kbn/entity-centric-lab-flyout';
+import { INSTALLED_INTEGRATIONS, getIntegrationDeepLinkId } from '@kbn/entity-centric-lab-flyout';
 import type {
   ConfigSchema,
   StreamsAppPublicSetup,
@@ -71,6 +72,19 @@ const cloudEntityDeepLinks = CLOUD_PROVIDERS.flatMap((provider) => {
     })),
   ];
 });
+
+/**
+ * Super-short-term lab: one deep link per installed integration
+ * (`integrationsAwsEc2` -> `/integrations/aws-ec2`), derived from the shared
+ * registry. The Observability "Infrastructure" nav references these ids via
+ * {@link getIntegrationDeepLinkId} so both sides stay in sync.
+ */
+const integrationDeepLinks = INSTALLED_INTEGRATIONS.map((integration) => ({
+  id: getIntegrationDeepLinkId(integration.id),
+  title: integration.name,
+  path: `/integrations/${integration.id}`,
+  visibleIn: [] as [],
+}));
 
 export const renderApp = ({
   appMountParameters,
@@ -248,6 +262,18 @@ export class StreamsAppPlugin
           path: '/entities/other',
           visibleIn: [],
         },
+        {
+          // Super-short-term lab: integrations content hub (starred Overview).
+          // Per-integration detail pages are reached via raw hrefs from the
+          // nav, so only this landing deep link is registered.
+          id: 'integrations',
+          title: i18n.translate('xpack.streams.deepLinks.integrationsTitle', {
+            defaultMessage: 'Integrations',
+          }),
+          path: '/integrations',
+          visibleIn: [],
+        },
+        ...integrationDeepLinks,
       ],
       updater$: from(startServicesPromise).pipe(
         switchMap(([_, pluginsStart]) =>

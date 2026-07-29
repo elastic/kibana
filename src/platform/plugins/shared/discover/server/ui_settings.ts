@@ -260,7 +260,7 @@ export const getUiSettings: (
     }),
     value: 'off',
     type: 'select',
-    options: ['off', 'entityCentric', 'infraShortTerm'],
+    options: ['off', 'entityCentric', 'infraShortTerm', 'superShortTerm'],
     optionLabels: {
       off: i18n.translate('discover.advancedSettings.labMode.optionOff', {
         defaultMessage: 'Off',
@@ -271,16 +271,20 @@ export const getUiSettings: (
       infraShortTerm: i18n.translate('discover.advancedSettings.labMode.optionInfraShortTerm', {
         defaultMessage: 'Infra-short term',
       }),
+      superShortTerm: i18n.translate('discover.advancedSettings.labMode.optionSuperShortTerm', {
+        defaultMessage: 'Super short term - integrations content only',
+      }),
     },
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.labMode.description', {
       defaultMessage:
-        'Experimental: pick a single prototype experience (only one can be active at a time). "Entity-centric" renders a panel of fake entity-centric log entries in Discover — clicking a service name opens an entity detail flyout — and exposes the full Entities section in the Observability nav. "Infra-short term" adds no Discover customization; it renames the Entities section to "Infrastructure" and scopes it to All entities, Cloud, Databases and Kubernetes. Refresh the page after changing this setting.',
+        'Experimental: pick a single prototype experience (only one can be active at a time). "Entity-centric" renders a panel of fake entity-centric log entries in Discover — clicking a service name opens an entity detail flyout — and exposes the full Entities section in the Observability nav. "Infra-short term" adds no Discover customization; it renames the Entities section to "Infrastructure" and scopes it to All entities, Cloud, Databases and Kubernetes. "Super short term" surfaces integrations content only. Refresh the page after changing this setting.',
     }),
     schema: schema.oneOf([
       schema.literal('off'),
       schema.literal('entityCentric'),
       schema.literal('infraShortTerm'),
+      schema.literal('superShortTerm'),
     ]),
     requiresPageReload: true,
   },

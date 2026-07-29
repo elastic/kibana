@@ -122,7 +122,18 @@ export type StreamsLinkId =
   | 'entitiesCloudAzureBlob'
   | 'entitiesMiddlewares'
   | 'entitiesLlms'
-  | 'entitiesOther';
+  | 'entitiesOther'
+  // Super-short-term lab: integrations content hub. `integrations` is the
+  // starred Overview; the per-integration detail deep links below are generated
+  // from the installed-integrations registry (kept in sync with
+  // `getIntegrationDeepLinkId` in `@kbn/entity-centric-lab-flyout`).
+  | 'integrations'
+  | 'integrationsAwsEc2'
+  | 'integrationsAwsLambda'
+  | 'integrationsAwsRds'
+  | 'integrationsAzure'
+  | 'integrationsKubernetes'
+  | 'integrationsSomethingElse';
 
 export type LinkId =
   | LogsLinkId
