@@ -65,7 +65,7 @@ export function registerUninstall(router: EntityStorePluginRouter) {
 
         await Promise.all(toUninstall.map((type) => assetManager.uninstall(type)));
 
-        const isFullUninstall = toUninstall.length === engines.length;
+        const isFullUninstall = toUninstall.length > 0 && toUninstall.length === engines.length;
         if (isFullUninstall) {
           // since engines are removed in parallel, the cleanup inside `assetManager.uninstall` might not have been called
           // so we call it here to ensure all namespace-scoped resources are cleaned up
