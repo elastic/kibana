@@ -6,10 +6,8 @@
  */
 
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -18,7 +16,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import type { CaseUI } from '../../../../../../common';
 import type { CaseConnector } from '../../../../../../common/types/domain';
@@ -44,10 +41,7 @@ import { useGetSupportedActionConnectors } from '../../../../../containers/confi
 import { useGetTemplate } from '../../../../templates_v2/hooks/use_get_template';
 import { KibanaServices } from '../../../../../common/lib/kibana';
 import { useShowLegacyCustomFields } from '../../../../../common/use_show_old_custom_fields';
-import {
-  useCasesFieldLibraryNavigation,
-  useConfigureCasesNavigation,
-} from '../../../../../common/navigation';
+import { CustomFieldsDeprecationCallout } from '../../../../case_form_fields/custom_fields_deprecation_callout';
 import * as configureCasesI18n from '../../../../configure_cases/translations';
 
 export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
@@ -66,8 +60,6 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
   const { showLegacyCustomFields } = useShowLegacyCustomFields(
     casesConfiguration?.customFields ?? []
   );
-  const { getCasesFieldLibraryUrl } = useCasesFieldLibraryNavigation();
-  const { getConfigureCasesUrl } = useConfigureCasesNavigation();
 
   const { data: templateData } = useGetTemplate(caseData.template?.id, caseData.template?.version, {
     includeDeleted: true,
@@ -155,38 +147,7 @@ export const CaseViewSidebar = ({ caseData }: { caseData: CaseUI }) => {
             >
               {isTemplatesV2Enabled ? (
                 <>
-                  <EuiCallOut
-                    announceOnMount
-                    title={redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE}
-                    color="warning"
-                    iconType="warning"
-                    size="s"
-                    data-test-subj="legacy-custom-fields-deprecation-callout"
-                  >
-                    <FormattedMessage
-                      id="xpack.cases.casesRedesign.details.legacyCustomFieldsDisclaimerBody"
-                      defaultMessage='These custom fields are deprecated and have already been migrated to the new system, so you may see the same fields in both places. Manage them in {customFieldsLink}. To stop showing them here, disable "{switchLabel}" in {settingsLink}.'
-                      values={{
-                        customFieldsLink: (
-                          <EuiLink
-                            href={getCasesFieldLibraryUrl()}
-                            data-test-subj="legacy-custom-fields-view-new-link"
-                          >
-                            {redesignI18n.LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS}
-                          </EuiLink>
-                        ),
-                        switchLabel: configureCasesI18n.SHOW_LEGACY_CUSTOM_FIELDS_AND_TEMPLATES,
-                        settingsLink: (
-                          <EuiLink
-                            href={getConfigureCasesUrl()}
-                            data-test-subj="legacy-custom-fields-view-settings-link"
-                          >
-                            {redesignI18n.LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS}
-                          </EuiLink>
-                        ),
-                      }}
-                    />
-                  </EuiCallOut>
+                  <CustomFieldsDeprecationCallout title={redesignI18n.LEGACY_CUSTOM_FIELDS_TITLE} />
                   <EuiSpacer size="m" />
                 </>
               ) : null}

@@ -12,6 +12,7 @@ import type { ExperimentalFeatures } from '../../../../common/experimental_featu
 import type { EntityAttachment } from './types';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
 import { EntityAttachmentCanvasContent } from './entity_attachment_canvas_content';
+import { useEntityAnalyticsAgentNavigation } from '../entity_analytics_agent_navigation_context';
 
 /**
  * Canvas-content dispatcher tests.
@@ -36,11 +37,11 @@ jest.mock('../../components/security_redux_embedded_provider', () => ({
 
 jest.mock('../../components/entity_card_flyout_overview_canvas', () => ({
   EntityCardFlyoutOverviewCanvas: (props: Record<string, unknown>) => (
-    <div data-test-subj="entityCardFlyoutOverviewCanvasMock">
-      {JSON.stringify(props.identifier)}
-    </div>
+    <div data-test-subj="entityCardFlyoutOverviewCanvasMock">{JSON.stringify(props)}</div>
   ),
 }));
+
+jest.mock('../entity_analytics_agent_navigation_context');
 
 jest.mock('./entity_card/entity_card', () => ({
   EntityCard: (props: Record<string, unknown>) => (
@@ -75,6 +76,9 @@ const renderCanvas = (data: unknown) =>
 describe('EntityAttachmentCanvasContent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (useEntityAnalyticsAgentNavigation as jest.Mock).mockReturnValue({
+      isNewFlyoutEnabled: false,
+    });
   });
 
   it('renders the flyout canvas inside SecurityReduxEmbeddedProvider for a single host entity', () => {
@@ -85,6 +89,18 @@ describe('EntityAttachmentCanvasContent', () => {
       'host-1'
     );
     expect(screen.queryByTestId('entityCardMock')).not.toBeInTheDocument();
+  });
+
+  it('hides section-header arrows when the new flyout is enabled', () => {
+    (useEntityAnalyticsAgentNavigation as jest.Mock).mockReturnValue({
+      isNewFlyoutEnabled: true,
+    });
+
+    renderCanvas({ identifierType: 'host', identifier: 'host-1' });
+
+    expect(screen.getByTestId('entityCardFlyoutOverviewCanvasMock')).toHaveTextContent(
+      '"hideHeaderIcons":true'
+    );
   });
 
   it('renders the flyout canvas inside SecurityReduxEmbeddedProvider for single user / service entities', () => {
