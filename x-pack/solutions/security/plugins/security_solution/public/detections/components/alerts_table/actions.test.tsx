@@ -428,6 +428,8 @@ describe('alert actions', () => {
             savedSearchId: null,
             savedSearch: null,
             isDataProviderVisible: false,
+            isSuperTimeline: false,
+            superTimelineSourceIds: [],
             rowHeight: 3,
             sampleSize: 500,
           },

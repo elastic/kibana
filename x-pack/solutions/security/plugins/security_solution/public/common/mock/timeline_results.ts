@@ -2105,6 +2105,8 @@ export const defaultTimelineProps: CreateTimelineProps = {
     savedSearchId: null,
     savedSearch: null,
     isDataProviderVisible: false,
+    isSuperTimeline: false,
+    superTimelineSourceIds: [],
     sampleSize: 500,
     rowHeight: 3,
   },
