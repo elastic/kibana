@@ -165,7 +165,7 @@ export function LayerControl({
               >
                 <EuiButtonIcon
                   className="mapLayerControl__closeLayerTOCButton"
-                  css={{ backgroundColor: euiTheme.colors.emptyShade }}
+                  css={{ backgroundColor: `${euiTheme.colors.emptyShade} !important` }}
                   onClick={closeLayerTOC}
                   iconType="menuRight"
                   color="text"
