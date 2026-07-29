@@ -1,5 +1,7 @@
 ---
 navigation_title: "PagerDuty"
+type: reference
+description: "Use the PagerDuty connector to trigger, acknowledge, and resolve PagerDuty alerts."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/pagerduty-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# PagerDuty connector and action [pagerduty-action-type]
+# PagerDuty connector [pagerduty-action-type]
 
 The PagerDuty connector enables you to trigger, acknowledge, and resolve PagerDuty alerts. In particular, it uses the [v2 Events API](https://v2.developer.pagerduty.com/docs/events-api-v2).
 

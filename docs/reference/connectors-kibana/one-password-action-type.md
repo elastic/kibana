@@ -1,5 +1,7 @@
 ---
 navigation_title: "1Password"
+type: reference
+description: "Use the 1Password connector to manage the users of a 1Password Enterprise Password Manager account."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -32,6 +34,8 @@ The connector authenticates using the OAuth 2.0 Client Credentials flow with `cl
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 
+## Connector actions [one-password-connector-actions]
+
 The 1Password connector has the following actions:
 
 List Users
@@ -56,7 +60,7 @@ Reactivate User
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [one-password-api-credentials]
+## Get credentials [one-password-api-credentials]
 
 To use the 1Password connector, you need OAuth 2.0 client credentials from a 1Password Enterprise Password Manager account:
 

@@ -22,19 +22,21 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Figma connectors support **API key (header)** authentication (a Figma personal access token sent in the `X-Figma-Token` header) or **OAuth 2.0 authorization code** (Figma signs the user in through {{kib}} and {{kib}} stores refreshable tokens). Select the authentication type when you create or edit the connector.
 
 API key (header)
-:   A Figma personal access token sent in the `X-Figma-Token` header. See [Get API credentials](#figma-api-credentials).
+:   A Figma personal access token sent in the `X-Figma-Token` header. See [Get credentials](#figma-api-credentials).
 
 OAuth 2.0 authorization code
 :   Uses an **OAuth app** registered in Figma. In {{kib}} you provide:
 
     - **Client ID** and **Client Secret**: from your Figma OAuth app
-    - **Redirect URI**: register {{kib}}'s OAuth callback in your Figma OAuth app (see [Get API credentials](#figma-api-credentials))
+    - **Redirect URI**: register {{kib}}'s OAuth callback in your Figma OAuth app (see [Get credentials](#figma-api-credentials))
 
     The connector automatically uses the correct Figma OAuth endpoints and scopes (`current_user:read`, `file_content:read`, and `projects:read`).
 
 ## Test connectors [figma-action-configuration]
 
 You can test connectors when creating or editing the connector in {{kib}}. The test verifies connectivity by calling the Figma API to fetch the current user (for example handle or email).
+
+## Connector actions [figma-connector-actions]
 
 The Figma connector has the following actions:
 
@@ -72,7 +74,7 @@ Figma does not provide a full-text search over files. Discovery is **hierarchica
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
 <a id="figma-api-credentials"></a>
-## Get API credentials [figma-api-credentials]
+## Get credentials [figma-api-credentials]
 
 The Figma connector supports two authentication methods: **OAuth 2.0 authorization code** (recommended) and **API key (header)** using a personal access token.
 

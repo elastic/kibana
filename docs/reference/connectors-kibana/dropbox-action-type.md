@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Dropbox connectors have the following configuration properties:
 
 **Authentication**
-:   Authenticates through Dropbox OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from a registered Dropbox app. For setup instructions, see [OAuth credentials](#dropbox-oauth-credentials).
+:   Authenticates through Dropbox OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from a registered Dropbox app. For setup instructions, see [Get credentials](#dropbox-oauth-credentials).
 
 ## Test connectors [dropbox-test-connector]
 
@@ -69,7 +69,7 @@ The Dropbox connector exposes the following actions:
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get OAuth credentials [dropbox-oauth-credentials]
+## Get credentials [dropbox-oauth-credentials]
 
 To use the Dropbox connector, you must register an app in the Dropbox App Console to obtain a Client ID and Client Secret.
 

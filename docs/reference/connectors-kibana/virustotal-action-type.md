@@ -1,5 +1,7 @@
 ---
 navigation_title: "VirusTotal"
+type: reference
+description: "Use the VirusTotal connector to scan files, analyze URLs and domains, and look up threat intelligence."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -23,6 +25,8 @@ API Key
 ## Test connectors [virustotal-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
+
+## Connector actions [virustotal-connector-actions]
 
 The VirusTotal connector has the following actions:
 
@@ -94,7 +98,7 @@ steps:
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [virustotal-api-credentials]
+## Get credentials [virustotal-api-credentials]
 
 To use the VirusTotal connector, you need an API key:
 

@@ -1,5 +1,6 @@
 ---
 navigation_title: "HubSpot"
+type: reference
 description: "Use the HubSpot connector to search and retrieve contacts, companies, deals, tickets, and engagements from HubSpot CRM."
 applies_to:
   stack: preview 9.4
@@ -19,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 HubSpot connectors support two authentication methods:
 
 **Access token (bearer)**
-:   Authenticates using a static token. Use a **Service Key** (recommended) from HubSpot Development, or a **Private App** access token (starts with `pat-`). See [Get API credentials](#hubspot-api-credentials) for both options.
+:   Authenticates using a static token. Use a **Service Key** (recommended) from HubSpot Development, or a **Private App** access token (starts with `pat-`). See [Get credentials](#hubspot-api-credentials) for both options.
 
     - **Private App Access Token**: The HubSpot access token.
 
@@ -29,6 +30,8 @@ HubSpot connectors support two authentication methods:
 ## Test connectors [hubspot-action-configuration]
 
 You can test connectors while creating or editing them in {{kib}}.
+
+## Connector actions [hubspot-connector-actions]
 
 The HubSpot connector has the following actions:
 
@@ -71,7 +74,7 @@ The HubSpot connector has the following actions:
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [hubspot-api-credentials]
+## Get credentials [hubspot-api-credentials]
 
 The connector supports three credential types: a Service Key (recommended for token auth), a Private App access token (legacy token auth), or OAuth via a Public App. Use a Service Key or OAuth when possible.
 

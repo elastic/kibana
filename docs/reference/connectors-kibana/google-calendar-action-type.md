@@ -20,19 +20,21 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Google Calendar connectors have the following configuration properties:
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get API credentials**.
+:   A Google OAuth 2.0 access token with Google Calendar API scopes. See **Get credentials**.
 
 OAuth 2.0 authorization code
 :   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you provide:
 
     - **Client ID** and **Client Secret**: from that OAuth client
-    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
+    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get credentials**)
 
     The connector automatically uses the correct Google OAuth endpoints and scope (`https://www.googleapis.com/auth/calendar.readonly`).
 
 ## Test connectors [google-calendar-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's calendar list from the Google Calendar API.
+
+## Connector actions [google-calendar-connector-actions]
 
 The Google Calendar connector has the following actions:
 
@@ -75,7 +77,7 @@ Use the **Action configuration settings** in the configuration reference for ale
 such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use
 `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [google-calendar-api-credentials]
+## Get credentials [google-calendar-api-credentials]
 
 ### OAuth 2.0 authorization code (recommended for ongoing use)
 

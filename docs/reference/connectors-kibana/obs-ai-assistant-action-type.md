@@ -3,11 +3,13 @@ applies_to:
   serverless: preview
   stack: preview
 navigation_title: "Observability AI Assistant"
+type: reference
+description: "Use the Observability AI Assistant connector to send alerts to the AI Assistant for AI-driven insights and custom actions."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/obs-ai-assistant-action-type.html
 ---
 
-# Observability AI Assistant connector and action [obs-ai-assistant-action-type]
+# Observability AI Assistant connector [obs-ai-assistant-action-type]
 
 The Observability AI Assistant connector sends alerts to the AI Assistant, to enable adding AI-driven insights and custom actions to your workflows.
 

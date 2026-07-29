@@ -1,5 +1,7 @@
 ---
 navigation_title: "Slack"
+type: reference
+description: "Use the Slack connector to send Slack messages with an incoming webhook or the Slack web API."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/slack-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: all
 ---
 
-# Slack connector and action [slack-action-type]
+# Slack connector [slack-action-type]
 
 The Slack connector uses incoming webhooks or an API method to send Slack messages.
 

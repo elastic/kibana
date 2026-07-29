@@ -1,5 +1,7 @@
 ---
 navigation_title: "D3 Security"
+type: reference
+description: "Use the D3 Security connector to send events to a D3 SOAR endpoint from rule actions."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/d3security-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# D3 Security connector and action [d3security-action-type]
+# D3 Security connector [d3security-action-type]
 
 The D3 Security connector uses [axios](https://github.com/axios/axios) to send a POST request to a D3 Security endpoint. You can use the connector for rule actions.
 

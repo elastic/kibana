@@ -1,5 +1,7 @@
 ---
 navigation_title: "SentinelOne"
+type: reference
+description: "Use the SentinelOne connector to run response actions through the SentinelOne Management Console REST API."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/sentinelone-action-type.html
 applies_to:
@@ -44,3 +46,6 @@ For example:
 :screenshot:
 :::
 
+## Connector networking configuration [sentinelone-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

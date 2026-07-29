@@ -7,7 +7,7 @@ applies_to:
   serverless: preview
 ---
 
-# Microsoft Teams connector [microsoft-teams-connector]
+# Microsoft Teams connector [microsoft-teams-action-type]
 
 The Microsoft Teams connector enables Workplace AI to search messages and browse teams, channels, and chats in Microsoft Teams using the Microsoft Graph API.
 
@@ -47,6 +47,8 @@ Tenant ID
 
 You can test connectors while creating or editing them in {{kib}}. The test verifies connectivity by listing the authenticated user's joined teams when using delegated auth, or all teams in the tenant when using app-only auth.
 
+## Connector actions [microsoft-teams-connector-actions]
+
 The Microsoft Teams connector has the following actions:
 
 **List joined teams**
@@ -84,7 +86,7 @@ The Microsoft Teams connector has the following actions:
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), add `graph.microsoft.com` and `login.microsoftonline.com` to the list.
 
-## Get API credentials [microsoft-teams-api-credentials]
+## Get credentials [microsoft-teams-api-credentials]
 
 To use the Microsoft Teams connector, you need a Microsoft Azure AD application with the required Graph API permissions.
 

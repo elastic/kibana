@@ -1,5 +1,7 @@
 ---
 navigation_title: "{{sn-itsm}}"
+type: reference
+description: "Use the ServiceNow ITSM connector to create ServiceNow incidents from rule actions and cases."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/servicenow-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: all
 ---
 
-# {{sn-itsm}} connector and action [servicenow-action-type]
+# {{sn-itsm}} connector [servicenow-action-type]
 
 The {{sn-itsm}} connector uses the [import set API](https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI) to create {{sn}} incidents. You can use the connector for rule actions and cases.
 

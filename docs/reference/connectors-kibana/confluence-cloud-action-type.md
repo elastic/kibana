@@ -26,11 +26,13 @@ Subdomain
 :   Your Atlassian subdomain (for example, `your-domain` for `https://your-domain.atlassian.net`).
 
 API token
-:   Your Atlassian API token for authentication. Refer to [Get API credentials](#confluence-cloud-api-credentials) for instructions.
+:   Your Atlassian API token for authentication. Refer to [Get credentials](#confluence-cloud-api-credentials) for instructions.
 
 ## Test connectors [confluence-cloud-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}.
+
+## Connector actions [confluence-cloud-connector-actions]
 
 The Confluence Cloud connector has the following actions:
 
@@ -65,7 +67,7 @@ Get space
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [confluence-cloud-api-credentials]
+## Get credentials [confluence-cloud-api-credentials]
 
 To use the Confluence Cloud connector, you need an Atlassian API token:
 

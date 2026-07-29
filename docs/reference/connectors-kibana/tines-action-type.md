@@ -1,5 +1,7 @@
 ---
 navigation_title: "Tines"
+type: reference
+description: "Use the Tines connector to send events to a Tines story with a webhook action."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/tines-action-type.html
 applies_to:
@@ -77,3 +79,7 @@ The message contains fields such as `alertId`, `date`, `_index`, `kibanaBaseUrl`
 The number of alerts (signals) can be found at `state.signals_count`.
 
 The alerts (signals) data is stored in the `context.alerts` array, following the [ECS](ecs://reference/ecs-field-reference.md) format.
+
+## Connector networking configuration [tines-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

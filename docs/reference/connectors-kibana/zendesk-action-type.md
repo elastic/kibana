@@ -7,11 +7,9 @@ applies_to:
   serverless: preview
 ---
 
-# Zendesk data source connector [zendesk-action-type]
+# Zendesk connector [zendesk-action-type]
 
 The Zendesk connector connects directly to the Zendesk API. It enables federated search of tickets, users, and organizations from Zendesk Support in Workplace AI and Agent Builder.
-
-## Overview
 
 This is a **custom connector** that uses Zendesk's REST API with Basic authentication (email and API token). You configure your Zendesk subdomain and credentials when creating the connector.
 
@@ -27,7 +25,7 @@ Subdomain
 Authentication
 :   Basic authentication. Use your Zendesk account **email** and **API token** (from **Admin Center** > **Apps and integrations** > **APIs** > **Zendesk API**). For API token authentication, the username must be in the form `your_email@example.com/token` and the password is your API token.
 
-## Available actions [zendesk-available-actions]
+## Connector actions [zendesk-connector-actions]
 
 | Action | Description |
 |--------|-------------|
@@ -40,7 +38,7 @@ Authentication
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [zendesk-api-credentials]
+## Get credentials [zendesk-api-credentials]
 
 1. Log in to your [Zendesk](https://www.zendesk.com/) account.
 2. Go to **Admin Center** > **Apps and integrations** > **APIs** > **Zendesk API**.

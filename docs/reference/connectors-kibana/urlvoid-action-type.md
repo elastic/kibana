@@ -1,5 +1,7 @@
 ---
 navigation_title: "URLVoid"
+type: reference
+description: "Use the URLVoid connector to check domain and URL reputation with multi-engine scanning."
 applies_to:
   stack: preview 9.3
   serverless: preview
@@ -24,6 +26,8 @@ API Key
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 
+## Connector actions [urlvoid-connector-actions]
+
 The URLVoid connector has the following actions:
 
 Scan Domain
@@ -45,7 +49,7 @@ Scan Domain Stats
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [urlvoid-api-credentials]
+## Get credentials [urlvoid-api-credentials]
 
 To use the URLVoid connector, you need an API key:
 

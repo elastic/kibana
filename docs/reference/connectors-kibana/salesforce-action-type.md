@@ -34,7 +34,7 @@ Authorization URL
     credentials only.
 
 Client ID
-:   The **Consumer Key** from your Salesforce External Client App OAuth settings (see **Get API credentials**).
+:   The **Consumer Key** from your Salesforce External Client App OAuth settings (see **Get credentials**).
 
 Client Secret
 :   The **Consumer Secret** from your Salesforce External Client App OAuth settings.
@@ -45,6 +45,8 @@ authorization URL is used only for the browser-based authorization step in the a
 ## Test connectors [salesforce-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by running a simple SOQL query (`SELECT Id FROM User LIMIT 1`).
+
+## Connector actions [salesforce-connector-actions]
 
 The Salesforce connector has the following actions:
 
@@ -84,7 +86,7 @@ Use the **Action configuration settings** in the configuration reference for ale
 such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use
 `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [salesforce-api-credentials]
+## Get credentials [salesforce-api-credentials]
 
 Use the following steps to obtain credentials for the connector’s OAuth 2.0 Client Credentials authentication. The
 steps below are subject to change as the Salesforce UI updates.

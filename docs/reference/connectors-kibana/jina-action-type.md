@@ -1,5 +1,7 @@
 ---
 navigation_title: "Jina Reader"
+type: reference
+description: "Use the Jina Reader connector to turn web pages into markdown and to search the web for better LLM grounding."
 applies_to:
   stack: preview 9.4+
   serverless: preview
@@ -29,6 +31,8 @@ Search URL
 ## Test connectors [jina-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
+
+## Connector actions [jina-connector-actions]
 
 The Jina Reader connector has the following actions:
 
@@ -70,7 +74,7 @@ File to Rendered Image
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings.
 You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [jina-api-credentials]
+## Get credentials [jina-api-credentials]
 
 To use the Jina Reader connector, you need an API key:
 

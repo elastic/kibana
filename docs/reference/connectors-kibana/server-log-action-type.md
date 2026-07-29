@@ -1,5 +1,7 @@
 ---
 navigation_title: "Server log"
+type: reference
+description: "Use the server log connector to write an entry to the Kibana server log."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/server-log-action-type.html
 applies_to:
@@ -8,7 +10,7 @@ applies_to:
     security: ga
 ---
 
-# Server log connector and action [server-log-action-type]
+# Server log connector [server-log-action-type]
 
 A server log connector writes an entry to the {{kib}} server log.
 

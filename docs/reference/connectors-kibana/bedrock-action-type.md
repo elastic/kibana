@@ -1,12 +1,14 @@
 ---
 navigation_title: "{{bedrock}}"
+type: reference
+description: "Use the Amazon Bedrock connector to send requests to the Amazon Bedrock API."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
 applies_to:
   stack: deprecated 9.5
   serverless: deprecated
 ---
-# {{bedrock}} connector and action [bedrock-action-type]
+# {{bedrock}} connector [bedrock-action-type]
 
 The {{bedrock}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{bedrock}}.
 

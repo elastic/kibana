@@ -1,5 +1,7 @@
 ---
 navigation_title: "Index"
+type: reference
+description: "Use the index connector to index a document into Elasticsearch."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/index-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: all
 ---
 
-# Index connector and action [index-action-type]
+# Index connector [index-action-type]
 
 An index connector indexes a document into {{es}}.
 

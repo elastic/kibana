@@ -20,13 +20,13 @@ You can create a Gmail connector in **{{stack-manage-app}} > {{connectors-ui}}**
 Gmail connectors use the following configuration:
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Gmail API scopes. See [Get API credentials](#gmail-api-credentials) for instructions.
+:   A Google OAuth 2.0 access token with Gmail API scopes. See [Get credentials](#gmail-api-credentials) for instructions.
 
 ## Test connectors [gmail-action-configuration]
 
 You can test connectors when creating or editing the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's profile from the Gmail API.
 
-## Available actions [gmail-available-actions]
+## Connector actions [gmail-connector-actions]
 
 | Action | Description |
 |--------|-------------|
@@ -43,7 +43,7 @@ You can test connectors when creating or editing the connector in {{kib}}. The t
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [gmail-api-credentials]
+## Get credentials [gmail-api-credentials]
 
 To use the Gmail connector, you need a Google OAuth 2.0 access token with Gmail API scopes. You can obtain one using the [Google OAuth 2.0 Playground](https://developers.google.com/oauthplayground/):
 

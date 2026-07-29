@@ -1,5 +1,7 @@
 ---
 navigation_title: "Brave Search"
+type: reference
+description: "Use the Brave Search connector to search the web for privacy-focused results with the Brave Search API."
 applies_to:
   stack: preview 9.3
   serverless: preview
@@ -24,6 +26,8 @@ API Key
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 
+## Connector actions [brave-search-connector-actions]
+
 The Brave Search connector has the following action:
 
 Web Search
@@ -37,7 +41,7 @@ Web Search
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings.
 You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [brave-search-api-credentials]
+## Get credentials [brave-search-api-credentials]
 
 To use the Brave Search connector, you need an API key:
 

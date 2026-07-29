@@ -1,5 +1,7 @@
 ---
 navigation_title: "{{ibm-r}}"
+type: reference
+description: "Use the IBM Resilient connector to create IBM Resilient incidents from rule actions and cases."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/resilient-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# {{ibm-r}} connector and action [resilient-action-type]
+# {{ibm-r}} connector [resilient-action-type]
 
 The {{ibm-r}} connector uses the [RESILIENT REST v2](https://developer.ibm.com/security/resilient/rest/) to create {{ibm-r}} incidents.
 

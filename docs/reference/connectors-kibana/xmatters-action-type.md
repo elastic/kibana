@@ -1,5 +1,7 @@
 ---
 navigation_title: "xMatters"
+type: reference
+description: "Use the xMatters connector to send actionable alerts to on-call xMatters resources."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/xmatters-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# xMatters connector and action [xmatters-action-type]
+# xMatters connector [xmatters-action-type]
 
 The xMatters connector uses the [xMatters Workflow for Elastic](https://help.xmatters.com/integrations/#cshid=Elastic) to send actionable alerts to on-call xMatters resources.
 

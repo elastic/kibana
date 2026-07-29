@@ -32,6 +32,8 @@ Maximum bytes billed
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies BigQuery API access by running a lightweight `SELECT 1` query in the configured project.
 
+## Connector actions [bigquery-connector-actions]
+
 The BigQuery connector has the following actions:
 
 Run query
@@ -80,7 +82,7 @@ For defense in depth, grant the connector service account only the BigQuery perm
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [bigquery-api-credentials]
+## Get credentials [bigquery-api-credentials]
 
 The BigQuery connector uses a Google Cloud service account JSON key.
 

@@ -23,11 +23,13 @@ Storage account URL
 :   The blob service endpoint for your storage account (for example, `https://myaccount.blob.core.windows.net`). Find this in the Azure Portal under your storage account **Endpoints**.
 
 Storage account name and key (Shared Key)
-:   The connector uses **Shared Key** authentication. Provide your storage account name and one of its account keys (from Azure Portal → Storage account → **Access keys**). The connector signs each request with HMAC-SHA256 per the [Azure REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/authorize-with-shared-key). When creating a connector via the data source API, credentials must be in the form `accountName:accountKey` (one line, first colon separates name from key; the key is base64 and must not contain colons). See [Get API credentials](#azure-blob-api-credentials).
+:   The connector uses **Shared Key** authentication. Provide your storage account name and one of its account keys (from Azure Portal → Storage account → **Access keys**). The connector signs each request with HMAC-SHA256 per the [Azure REST API](https://learn.microsoft.com/en-us/rest/api/storageservices/authorize-with-shared-key). When creating a connector via the data source API, credentials must be in the form `accountName:accountKey` (one line, first colon separates name from key; the key is base64 and must not contain colons). See [Get credentials](#azure-blob-api-credentials).
 
 ## Test connectors [azure-blob-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by calling the List Containers API with `maxresults=1`.
+
+## Connector actions [azure-blob-connector-actions]
 
 The Azure Blob Storage connector has the following actions:
 
@@ -54,7 +56,11 @@ Get blob properties
     - **container** (required): Container name.
     - **blobName** (required): Blob name (path).
 
-## Get API credentials [azure-blob-api-credentials]
+## Connector networking configuration [azure-blob-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+## Get credentials [azure-blob-api-credentials]
 
 The connector uses **Shared Key** (storage account key) authentication.
 

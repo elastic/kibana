@@ -53,6 +53,8 @@ The connector automatically uses the correct ServiceNow OAuth endpoints for your
 You can test connectors when you create or edit the connector in {{kib}}.
 The test verifies connectivity by querying the `sys_user` table, which any authenticated user can access.
 
+## Connector actions [servicenow-search-connector-actions]
+
 The ServiceNow connector has the following actions:
 
 Search
@@ -105,7 +107,7 @@ Get attachment
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [servicenow-search-api-credentials]
+## Get credentials [servicenow-search-api-credentials]
 
 ### OAuth 2.0 Client Credentials
 

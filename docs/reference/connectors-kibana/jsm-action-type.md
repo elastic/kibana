@@ -1,5 +1,7 @@
 ---
 navigation_title: "Jira Service Management"
+type: reference
+description: "Use the Jira Service Management connector to create and close Jira Service Management alerts."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/jsm-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# Jira Service Management connector and action [jsm-action-type]
+# Jira Service Management connector [jsm-action-type]
 
 An {{jsm}} connector enables you to create and close alerts in {{jsm}}. In particular, it uses the [{{jsm}} Integration Events API](https://developer.atlassian.com/cloud/jira/service-desk-ops/rest/v1/api-group-integration-events/#api-group-integration-events).
 

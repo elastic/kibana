@@ -1,5 +1,7 @@
 ---
 navigation_title: "Email"
+type: reference
+description: "Use the email connector to send email messages with the SMTP protocol."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/email-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: all
 ---
 
-# Email connector and action [email-action-type]
+# Email connector [email-action-type]
 
 The email connector uses the SMTP protocol to send mail messages. Email message text is sent as both plain text and html text.
 

@@ -38,6 +38,8 @@ Default Role
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by running `SELECT CURRENT_VERSION()` and returning the Snowflake version.
 
+## Connector actions [snowflake-connector-actions]
+
 The Snowflake connector has the following actions:
 
 Run query
@@ -145,7 +147,7 @@ For defense in depth, grant the connector credentials only the Snowflake privile
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [snowflake-api-credentials]
+## Get credentials [snowflake-api-credentials]
 
 The Snowflake connector supports two authentication methods: **OAuth Authorization Code** (recommended) and **Programmatic Access Token** (PAT).
 

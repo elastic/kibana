@@ -23,10 +23,10 @@ EARS (recommended)
 :   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required.
 
 OAuth Authorization Code
-:   Slack's OAuth v2 flow using your own Slack app. You will be redirected to Slack to authorize access to your workspace. Requires a Slack app with a Client ID, Client Secret, and the appropriate user token scopes. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth) for setup steps.
+:   Slack's OAuth v2 flow using your own Slack app. You will be redirected to Slack to authorize access to your workspace. Requires a Slack app with a Client ID, Client Secret, and the appropriate user token scopes. See [Get credentials (OAuth)](#slack-v2-api-credentials-oauth) for setup steps.
 
 Bot Token
-:   A long-lived Slack bot token (format: `xoxb-...`) from a Slack app. Paste the token directly — no OAuth redirect is required. See [Get API credentials (Bot Token)](#slack-v2-api-credentials-bot-token) for setup steps.
+:   A long-lived Slack bot token (format: `xoxb-...`) from a Slack app. Paste the token directly — no OAuth redirect is required. See [Get credentials (bot token)](#slack-v2-api-credentials-bot-token) for setup steps.
 
 ::::{note}
 The **Search messages** action requires a user token and is not available when using Bot Token authentication. Use **Get conversation history** to read messages from a specific channel instead.
@@ -35,6 +35,8 @@ The **Search messages** action requires a user token and is not available when u
 ## Test connectors [slack-v2-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by calling Slack `auth.test`.
+
+## Connector actions [slack-v2-connector-actions]
 
 The Slack (v2) connector has the following actions:
 
@@ -152,7 +154,7 @@ Send message
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list.
 
-## Get API credentials (OAuth) [slack-v2-api-credentials-oauth]
+## Get credentials (OAuth) [slack-v2-api-credentials-oauth]
 
 To use OAuth Authorization Code authentication, you need a Slack app configured for OAuth.
 
@@ -184,7 +186,7 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
 Additional scopes may be required for certain actions. For example, `groups:write` is needed to create private channels or invite users. Add scopes as needed under **User Token Scopes** in your Slack app configuration.
 ::::
 
-## Get API credentials (Bot Token) [slack-v2-api-credentials-bot-token]
+## Get credentials (bot token) [slack-v2-api-credentials-bot-token]
 
 To use Bot Token authentication, you need a Slack app with a bot token.
 

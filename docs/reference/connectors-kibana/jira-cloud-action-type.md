@@ -24,7 +24,7 @@ Subdomain
 
 Authentication type
 :   The method used to authenticate with Jira Cloud. Choose one of the following:
-    - **Basic**: Uses an email address and API token. Refer to [Get API credentials](#jira-cloud-api-credentials).
+    - **Basic**: Uses an email address and API token. Refer to [Get credentials](#jira-cloud-api-credentials).
     - **OAuth 2.0 Authorization Code**: Uses an OAuth app for delegated, per-user access. Refer to [Set up OAuth authentication](#jira-cloud-oauth-setup).
 
 #### Basic authentication fields
@@ -33,7 +33,7 @@ Email
 :   The email address associated with your Atlassian account.
 
 API token
-:   A Jira API token for authentication. Refer to [Get API credentials](#jira-cloud-api-credentials) for instructions.
+:   A Jira API token for authentication. Refer to [Get credentials](#jira-cloud-api-credentials) for instructions.
 
 #### OAuth 2.0 authentication fields
 
@@ -49,6 +49,8 @@ Cloud ID
 ## Test connectors [jira-cloud-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}.
+
+## Connector actions [jira-cloud-connector-actions]
 
 The Jira Cloud connector has the following actions:
 
@@ -82,7 +84,7 @@ Search users
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [jira-cloud-api-credentials]
+## Get credentials [jira-cloud-api-credentials]
 
 To use the Jira Cloud connector with Basic authentication, you need a Jira API token:
 

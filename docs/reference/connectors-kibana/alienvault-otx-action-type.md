@@ -1,5 +1,7 @@
 ---
 navigation_title: "AlienVault OTX"
+type: reference
+description: "Use the AlienVault OTX connector to retrieve community-driven threat intelligence about indicators and pulses."
 applies_to:
   stack: preview 9.3
   serverless: preview
@@ -23,6 +25,8 @@ API Key
 ## Test connectors [alienvault-otx-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
+
+## Connector actions [alienvault-otx-connector-actions]
 
 The AlienVault OTX connector has the following actions:
 
@@ -51,7 +55,7 @@ Get Related Pulses
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [alienvault-otx-api-credentials]
+## Get credentials [alienvault-otx-api-credentials]
 
 To use the AlienVault OTX connector, you need an API key:
 

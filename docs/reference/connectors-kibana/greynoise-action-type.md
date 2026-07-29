@@ -1,5 +1,7 @@
 ---
 navigation_title: "GreyNoise"
+type: reference
+description: "Use the GreyNoise connector to detect and classify the Internet scanning noise that is associated with an IP address."
 applies_to:
   stack: preview 9.3
   serverless: preview
@@ -24,6 +26,8 @@ API Key
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 
+## Connector actions [greynoise-connector-actions]
+
 The GreyNoise connector has the following actions:
 
 Get IP Context
@@ -46,7 +50,7 @@ RIOT Lookup
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [greynoise-api-credentials]
+## Get credentials [greynoise-api-credentials]
 
 To use the GreyNoise connector, you need an API key:
 

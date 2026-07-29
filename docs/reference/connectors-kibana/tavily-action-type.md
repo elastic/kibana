@@ -26,6 +26,8 @@ API Key
 
 You can test connectors when you create or edit the connector in {{kib}}.
 
+## Connector actions [tavily-connector-actions]
+
 The Tavily connector has the following actions:
 
 Search
@@ -63,7 +65,7 @@ Map
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [tavily-api-credentials]
+## Get credentials [tavily-api-credentials]
 
 To use the Tavily connector:
 

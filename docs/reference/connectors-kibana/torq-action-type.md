@@ -1,5 +1,7 @@
 ---
 navigation_title: "Torq"
+type: reference
+description: "Use the Torq connector to trigger Torq workflows with a Torq webhook."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/torq-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# Torq connector and action [torq-action-type]
+# Torq connector [torq-action-type]
 
 The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
 
@@ -48,3 +50,7 @@ Torq actions have the following configuration properties.
 
 Body
 :   JSON payload to send to Torq.
+
+## Connector networking configuration [torq-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

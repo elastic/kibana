@@ -33,7 +33,7 @@ Token URL
 
 You can test connectors when creating or editing the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's profile from Microsoft Graph.
 
-## Available actions [outlook-available-actions]
+## Connector actions [outlook-connector-actions]
 
 | Action | Description |
 |--------|-------------|
@@ -106,7 +106,7 @@ Parameters:
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), add `graph.microsoft.com` and `login.microsoftonline.com` to the list.
 
-## Get API credentials [outlook-api-credentials]
+## Get credentials [outlook-api-credentials]
 
 To use the Outlook connector, you need a Microsoft Entra ID application registration with the required Graph API permissions.
 

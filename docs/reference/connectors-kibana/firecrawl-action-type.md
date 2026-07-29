@@ -26,6 +26,8 @@ API Key (Bearer token)
 
 You can test connectors when you create or edit the connector in {{kib}}.
 
+## Connector actions [firecrawl-connector-actions]
+
 The Firecrawl connector has the following actions:
 
 `scrape`
@@ -63,7 +65,7 @@ The Firecrawl connector has the following actions:
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [firecrawl-api-credentials]
+## Get credentials [firecrawl-api-credentials]
 
 To use the Firecrawl connector:
 

@@ -1,5 +1,7 @@
 ---
 navigation_title: "{{gemini}}"
+type: reference
+description: "Use the Google Gemini connector to send requests to the Google Gemini API."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/gemini-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: deprecated
 ---
 
-# {{gemini}} connector and action [gemini-action-type]
+# {{gemini}} connector [gemini-action-type]
 
 The {{gemini}} connector uses [axios](https://github.com/axios/axios) to send a POST request to {{gemini}}.
 

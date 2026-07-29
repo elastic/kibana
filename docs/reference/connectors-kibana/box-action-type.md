@@ -23,7 +23,7 @@ MCP Server URL
 :   The URL of the remote Box MCP server. Defaults to `https://mcp.box.com`.
 
 Authentication
-:   Connects through Box's OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from the Box MCP server integration in the Admin Console. Refer to [OAuth credentials](#box-oauth-credentials) for setup instructions.
+:   Connects through Box's OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from the Box MCP server integration in the Admin Console. Refer to [Get credentials](#box-oauth-credentials) for setup instructions.
 
 ## Test connectors [box-test-connector]
 
@@ -109,7 +109,7 @@ Box Hubs are curated collections of files and folders organized around a topic o
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get OAuth credentials [box-oauth-credentials]
+## Get credentials [box-oauth-credentials]
 
 :::{important}
 The Box MCP server requires a Box enterprise account or a Box developer account. Personal (individual) Box accounts are not supported and will fail during authentication or when calling tools. However, all individual accounts can be turned into developer accounts by creating a custom OAuth app.

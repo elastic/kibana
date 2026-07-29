@@ -1,5 +1,7 @@
 ---
 navigation_title: "Jira"
+type: reference
+description: "Use the Jira connector to create Atlassian Jira issues from rule actions and cases."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/jira-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: all
 ---
 
-# Jira connector and action [jira-action-type]
+# Jira connector [jira-action-type]
 
 The Jira connector uses the [REST API v2](https://developer.atlassian.com/cloud/jira/platform/rest/v2/) to create Atlassian Jira issues.
 

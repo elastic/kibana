@@ -1,5 +1,7 @@
 ---
 navigation_title: "{{hive}}"
+type: reference
+description: "Use the TheHive connector to create TheHive cases and alerts from rule actions and cases."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/thehive-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# {{hive}} connector and action [thehive-action-type]
+# {{hive}} connector [thehive-action-type]
 
 {{hive}} connector uses the [{{hive}} (v1) REST API](https://docs.strangebee.com/thehive/api-docs/) to create cases and alerts. [8.16.0]
 
@@ -117,7 +119,7 @@ Body {applies_to}`stack: ga 9.1`
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Configure {{hive}} [configure-thehive]
+## Get credentials [configure-thehive]
 
 To generate an API key in {{hive}}:
 

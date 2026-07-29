@@ -1,5 +1,7 @@
 ---
 navigation_title: "Microsoft Teams"
+type: reference
+description: "Use the Microsoft Teams connector to send notifications to a Microsoft Teams channel with a webhook."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/teams-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: all
 ---
 
-# Microsoft Teams connector and action [teams-action-type]
+# Microsoft Teams connector [teams-action-type]
 
 The Microsoft Teams connector uses a webhook to send notifications.
 

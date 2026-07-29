@@ -20,11 +20,13 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Zoom connectors have the following configuration properties:
 
 Zoom access token
-:   A Zoom Server-to-Server OAuth access token. Generate one through the Zoom Marketplace or API (refer to [Get API credentials](#zoom-api-credentials)). Tokens expire after 1 hour.
+:   A Zoom Server-to-Server OAuth access token. Generate one through the Zoom Marketplace or API (refer to [Get credentials](#zoom-api-credentials)). Tokens expire after 1 hour.
 
 ## Test connectors [zoom-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by calling the `/users/me` endpoint and displaying the authenticated user's name.
+
+## Connector actions [zoom-connector-actions]
 
 The Zoom connector has the following actions:
 
@@ -84,7 +86,7 @@ Use *Who am I* to verify the connected user identity. Use *List user recordings*
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [zoom-api-credentials]
+## Get credentials [zoom-api-credentials]
 
 The Zoom connector supports two authentication methods: **OAuth Authorization Code** (recommended) and **Server-to-Server OAuth** (via Bearer token).
 

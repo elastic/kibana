@@ -1,5 +1,7 @@
 ---
 navigation_title: "OpenAI"
+type: reference
+description: "Use the OpenAI connector to send requests to OpenAI, Azure OpenAI, and other OpenAI-compatible providers."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/openai-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: deprecated
 ---
 
-# OpenAI connector and action [openai-action-type]
+# OpenAI connector [openai-action-type]
 
 The OpenAI connector uses [axios](https://github.com/axios/axios) to send a POST request to an OpenAI provider: 
 

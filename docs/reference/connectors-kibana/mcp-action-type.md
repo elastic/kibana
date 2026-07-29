@@ -1,5 +1,7 @@
 ---
 navigation_title: "MCP"
+type: reference
+description: "Use the MCP connector to retrieve and call the tools that remote Model Context Protocol (MCP) servers provide."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/mcp-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: preview
 ---
 
-# MCP connector and action [mcp-action-type]
+# MCP connector [mcp-action-type]
 The Model Context Protocol (MCP) connector communicates with remote [MCP](https://modelcontextprotocol.io/docs/getting-started/intro) servers to retrieve and call their tools. This connector is required to use external MCP tools in [Elastic Agent Builder](docs-content://explore-analyze/ai-features/elastic-agent-builder.md).
 
 ## Create connectors in {{kib}} [define-mcp-ui]
@@ -47,6 +49,8 @@ You can test connectors as you’re creating or editing the connector in {{kib}}
 :screenshot:
 :::
 
+## Connector actions [mcp-connector-actions]
+
 MCP connectors offer three actions:
 
 `test`
@@ -61,3 +65,7 @@ MCP connectors offer three actions:
 :::{tip}
 Call `listTools` first to understand how to correctly call an MCP server's tools, before using the `callTool` action. 
 :::
+
+## Connector networking configuration [mcp-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

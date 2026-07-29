@@ -22,8 +22,8 @@ Monday.com connectors have the following configuration properties:
 **Authentication** (recommended: OAuth 2.0)
 :   Choose one of two authentication methods:
 
-    - **OAuth 2.0** (recommended): Authenticates through Monday.com OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from a registered Monday.com app. For setup instructions, see [OAuth credentials](#monday-com-oauth-credentials).
-    - **Personal API Token**: Authenticates using a Monday.com personal API token sent as a Bearer token. Simpler to set up but scoped to a single user account. For setup instructions, see [Personal API token](#monday-com-personal-api-token).
+    - **OAuth 2.0** (recommended): Authenticates through Monday.com OAuth 2.0 Authorization Code flow. Requires a Client ID and Client Secret from a registered Monday.com app. For setup instructions, see [Get credentials](#monday-com-oauth-credentials).
+    - **Personal API Token**: Authenticates using a Monday.com personal API token sent as a Bearer token. Simpler to set up but scoped to a single user account. For setup instructions, see [Get credentials](#monday-com-personal-api-token).
 
 ## Test connectors [monday-com-test-connector]
 
@@ -101,7 +101,7 @@ The Monday.com connector exposes the following actions:
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get OAuth credentials [monday-com-oauth-credentials]
+## Get credentials (OAuth) [monday-com-oauth-credentials]
 
 To use the Monday.com connector, you must register an app in the Monday.com Developer Center to obtain a Client ID and Client Secret.
 
@@ -127,7 +127,7 @@ To use the Monday.com connector, you must register an app in the Monday.com Deve
 7. In {{kib}}, enter the values from the preceding table.
 8. Complete the authorization flow to connect your Monday.com account.
 
-## Get a Personal API token [monday-com-personal-api-token]
+## Get credentials (personal API token) [monday-com-personal-api-token]
 
 To use Personal API Token authentication:
 

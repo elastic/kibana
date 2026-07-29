@@ -1,5 +1,7 @@
 ---
 navigation_title: "CrowdStrike"
+type: reference
+description: "Use the CrowdStrike connector to run host actions and retrieve host information from the CrowdStrike Management Console."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/crowdstrike-action-type.html
 applies_to:
@@ -51,3 +53,6 @@ The CrowdStrike action has the following configuration properties:
 Agent IDs
 :   Get details about one or more CrowdStrike agent IDs.
 
+## Connector networking configuration [crowdstrike-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

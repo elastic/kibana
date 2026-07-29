@@ -1,5 +1,7 @@
 ---
 navigation_title: "Opsgenie"
+type: reference
+description: "Use the Opsgenie connector to create and close Opsgenie alerts."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/opsgenie-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# Opsgenie connector and action [opsgenie-action-type]
+# Opsgenie connector [opsgenie-action-type]
 
 An {{opsgenie}} connector enables you to create and close alerts in {{opsgenie}}. In particular, it uses the [{{opsgenie}} alert API](https://docs.opsgenie.com/docs/alert-api).
 

@@ -1,5 +1,7 @@
 ---
 navigation_title: "Amazon S3"
+type: reference
+description: "Use the Amazon S3 connector to list buckets, list the objects in a bucket, and download bucket objects."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -31,6 +33,8 @@ AWS Region
 
 You can test connectors as you're creating or editing the connector in {{kib}}. The test verifies connectivity by trying to access a list of available buckets for your authenticated account.
 
+## Connector actions [amazon-s3-connector-actions]
+
 The Amazon S3 connector has the following actions:
 
 List buckets
@@ -53,7 +57,11 @@ Download file
     - **maximumDownloadSizeBytes** (optional) the size in bytes that the connector is allowed to download the content for. Default of 128 KB. If the file to download exceeds this amount, a link to the object in the AWS S3 Bucket will be returned instead of the content.
 
 
-## Get API credentials [amazon-s3-api-credentials]
+## Connector networking configuration [amazon-s3-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+## Get credentials [amazon-s3-api-credentials]
 
 To use the Amazon S3 connector, you need an AWS Access Key ID, Secret Access Key, and Region for the account. Follow these steps to create or view your credentials:
 

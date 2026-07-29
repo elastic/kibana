@@ -1,16 +1,18 @@
 ---
 navigation_title: "Microsoft Defender for Endpoint"
+type: reference
+description: "Use the Microsoft Defender for Endpoint connector to run response actions on Microsoft Defender-enrolled hosts."
 applies_to:
   stack: ga
   serverless:
     observability: ga
     security: ga
 ---
-# Microsoft Defender for Endpoint connector and action
+# Microsoft Defender for Endpoint connector [defender-action-type]
 
 The Microsoft Defender for Endpoint connector enables you to perform actions on Microsoft Defender-enrolled hosts.
 
-## Create connectors in {{kib}}
+## Create connectors in {{kib}} [define-defender-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you're creating a rule. For example:
 
@@ -19,7 +21,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as 
 :screenshot:
 :::
 
-### Connector configuration
+### Connector configuration [defender-connector-configuration]
 
 Microsoft Defender for Endpoint connectors have the following configuration properties:
 
@@ -44,7 +46,7 @@ OAuth Server URL
 Tenant ID
 :   The tenant identifier for your app in the Azure portal.
 
-## Test connectors
+## Test connectors [defender-action-configuration]
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 For example:
@@ -54,7 +56,11 @@ For example:
 :screenshot:
 :::
 
-## Configure Microsoft Defender for Endpoint
+## Connector networking configuration [defender-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+## Get credentials [defender-credentials]
 
 Before you create the connector, you must create a new application on your Azure domain.
 The procedure to create an application is found in the [Microsoft Defender documentation](https://learn.microsoft.com/en-us/defender-endpoint/api/exposed-apis-create-app-webapp).

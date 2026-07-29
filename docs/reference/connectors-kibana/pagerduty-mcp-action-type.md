@@ -11,11 +11,15 @@ applies_to:
 
 The PagerDuty data source connects to PagerDuty through the PagerDuty MCP server to access incidents, escalation policies, schedules, on-calls, users, and teams. Use it in data and context sources and agentic workflows to search and retrieve PagerDuty data.
 
-## Add the PagerDuty data source
+## Create connectors in {{kib}} [define-pagerduty-mcp-ui]
 
-You add and configure the PagerDuty data source when setting up a data or context source in {{kib}}. You are prompted for an **API token**. Refer to [Get API credentials](#pagerduty-mcp-api-credentials) for instructions.
+You add and configure the PagerDuty data source when setting up a data or context source in {{kib}}. You are prompted for an **API token**. Refer to [Get credentials](#pagerduty-mcp-api-credentials) for instructions.
 
-## Get API credentials [pagerduty-mcp-api-credentials]
+## Connector networking configuration [pagerduty-mcp-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+## Get credentials [pagerduty-mcp-api-credentials]
 
 To use the PagerDuty data source, you need a PagerDuty **API token** (REST API). This is not the same as an integration key used for the alerting connector.
 

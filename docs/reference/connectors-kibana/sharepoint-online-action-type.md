@@ -59,6 +59,8 @@ Token URL
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by accessing the root SharePoint site.
 
+## Connector actions [sharepoint-online-connector-actions]
+
 The SharePoint Online connector has the following actions:
 
 Search
@@ -129,7 +131,7 @@ Use `getDriveItems` to fetch metadata and `downloadUrl`, decide which items are 
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [sharepoint-online-api-credentials]
+## Get credentials [sharepoint-online-api-credentials]
 
 ### OAuth client credentials (app-only auth)
 

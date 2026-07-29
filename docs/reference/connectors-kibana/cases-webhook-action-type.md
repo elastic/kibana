@@ -1,5 +1,7 @@
 ---
 navigation_title: "{{webhook-cm}}"
+type: reference
+description: "Use the Webhook - Case Management connector to create and update cases in an external case management web service."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/cases-webhook-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# {{webhook-cm}} connector and action [cases-webhook-action-type]
+# {{webhook-cm}} connector [cases-webhook-action-type]
 
 The {{webhook-cm}} connector uses [axios](https://github.com/axios/axios) to send POST, PUT, and GET requests to a case management RESTful API web service.
 

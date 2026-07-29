@@ -1,5 +1,7 @@
 ---
 navigation_title: "Webhook"
+type: reference
+description: "Use the Webhook connector to send a request to a web service from rule actions."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/webhook-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: all
 ---
 
-# Webhook connector and action [webhook-action-type]
+# Webhook connector [webhook-action-type]
 
 The Webhook connector uses [axios](https://github.com/axios/axios) to send a request to a web service.
 

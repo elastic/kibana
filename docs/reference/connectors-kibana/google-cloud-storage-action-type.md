@@ -20,19 +20,21 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Google Cloud Storage connectors support **Bearer Token** or **OAuth 2.0 authorization code** authentication.
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. See **Get API credentials**.
+:   A Google OAuth 2.0 access token with Cloud Storage and Resource Manager API scopes. See **Get credentials**.
 
 OAuth 2.0 authorization code
 :   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you provide:
 
     - **Client ID** and **Client Secret**: from that OAuth client
-    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
+    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get credentials**)
 
     The connector automatically uses the correct Google OAuth endpoints and scopes (`https://www.googleapis.com/auth/devstorage.read_only` and `https://www.googleapis.com/auth/cloudplatformprojects.readonly`).
 
 ## Test connectors [google-cloud-storage-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by calling the Google Cloud Storage API with the provided token.
+
+## Connector actions [google-cloud-storage-connector-actions]
 
 The Google Cloud Storage connector has the following actions:
 
@@ -71,7 +73,7 @@ Download object
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [google-cloud-storage-api-credentials]
+## Get credentials [google-cloud-storage-api-credentials]
 
 ### OAuth 2.0 authorization code (recommended for ongoing use)
 

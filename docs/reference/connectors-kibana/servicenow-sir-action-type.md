@@ -1,5 +1,7 @@
 ---
 navigation_title: "{{sn-sir}}"
+type: reference
+description: "Use the ServiceNow SecOps connector to create ServiceNow security incidents from rule actions and cases."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/servicenow-sir-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# {{sn-sir}} connector and action [servicenow-sir-action-type]
+# {{sn-sir}} connector [servicenow-sir-action-type]
 
 The {{sn-sir}} connector uses the [import set API](https://developer.servicenow.com/dev.do#!/reference/api/sandiego/rest/c_ImportSetAPI) to create {{sn}} security incidents. You can use the connector for rule actions and cases.
 

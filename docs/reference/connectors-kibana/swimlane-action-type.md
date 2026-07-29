@@ -1,5 +1,7 @@
 ---
 navigation_title: "Swimlane"
+type: reference
+description: "Use the Swimlane connector to create Swimlane records from rule actions and cases."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/swimlane-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# Swimlane connector and action [swimlane-action-type]
+# Swimlane connector [swimlane-action-type]
 
 The Swimlane connector uses the [Swimlane REST API](https://swimlane.com/knowledge-center/docs/developer-guide/rest-api/) to create Swimlane records.
 
@@ -58,3 +60,7 @@ Severity
 ::::{note}
 Alert ID and Rule Name are filled automatically. Specifically, Alert ID is set to `{{alert.id}}` and Rule Name to `{{rule.name}}`.
 ::::
+
+## Connector networking configuration [swimlane-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.

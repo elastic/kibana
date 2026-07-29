@@ -1,5 +1,7 @@
 ---
 navigation_title: "{{sn-itom}}"
+type: reference
+description: "Use the ServiceNow ITOM connector to create ServiceNow events from rule actions."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/servicenow-itom-action-type.html
 applies_to:
@@ -9,7 +11,7 @@ applies_to:
     security: ga
 ---
 
-# {{sn-itom}} connector and action [servicenow-itom-action-type]
+# {{sn-itom}} connector [servicenow-itom-action-type]
 
 The {{sn-itom}} connector uses the [event API](https://docs.servicenow.com/bundle/rome-it-operations-management/page/product/event-management/task/send-events-via-web-service.md) to create {{sn}} events. You can use the connector for rule actions.
 

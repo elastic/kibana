@@ -87,6 +87,8 @@ Use the `RBAC Reader`, `RBAC Writer`, or `RBAC Admin` built-in roles depending o
 
 You can test connectors when you create or edit the connector in {{kib}}. The test requests the API server version (`GET /version`) to verify connectivity and authentication.
 
+## Connector actions [kubernetes-connector-actions]
+
 The Kubernetes connector has the following actions:
 
 `request`
@@ -137,7 +139,7 @@ All mutating actions accept `dryRun: true`, which sends `?dryRun=All` so the API
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations. Because Kubernetes API servers are often reachable only on private hostnames or IP addresses, make sure the API server URL is permitted by `xpack.actions.allowedHosts`.
 
-## Get API credentials [kubernetes-api-credentials]
+## Get credentials [kubernetes-api-credentials]
 
 For managed clusters (GKE, EKS, AKS), use the cloud provider credentials described in [Authentication](#kubernetes-connector-authentication) instead of a cluster token. To use the **Service account token** method, create a service account and a scoped token:
 

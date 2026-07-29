@@ -22,19 +22,21 @@ Google Drive connectors support **Bearer Token** (a static access token you supp
 create or edit the connector.
 
 Bearer Token
-:   A Google OAuth 2.0 access token with Google Drive API scopes. See **Get API credentials**.
+:   A Google OAuth 2.0 access token with Google Drive API scopes. See **Get credentials**.
 
 OAuth 2.0 authorization code
 :   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you provide:
 
     - **Client ID** and **Client Secret**: from that OAuth client
-    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get API credentials**)
+    - **Redirect URI**: register {{kib}}’s OAuth callback in Google Cloud (see **Get credentials**)
 
     The connector automatically uses the correct Google OAuth endpoints and scopes (`https://www.googleapis.com/auth/drive.readonly` and `https://www.googleapis.com/auth/drive.metadata.readonly`).
 
 ## Test connectors [google-drive-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by fetching the authenticated user's information from the Google Drive API.
+
+## Connector actions [google-drive-connector-actions]
 
 The Google Drive connector has the following actions:
 
@@ -65,7 +67,7 @@ Get file metadata
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [google-drive-api-credentials]
+## Get credentials [google-drive-api-credentials]
 
 ### OAuth 2.0 authorization code (recommended for ongoing use)
 

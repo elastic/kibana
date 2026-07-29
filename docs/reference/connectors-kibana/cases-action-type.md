@@ -1,5 +1,7 @@
 ---
 navigation_title: "Cases"
+type: reference
+description: "Use the Cases connector to create cases in Kibana when alerts occur."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/cases-action-type.html
 applies_to:
@@ -7,7 +9,7 @@ applies_to:
   serverless: ga
 ---
 
-# Cases connector and action [cases-action-type]
+# Cases connector [cases-action-type]
 
 The Cases connector creates [Cases](docs-content://explore-analyze/alerts-cases/cases.md) in {{kib}} when alerts occur.
 

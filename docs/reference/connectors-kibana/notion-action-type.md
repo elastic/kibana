@@ -20,19 +20,21 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Notion connectors support **Bearer Token** (a static API token from an internal integration) or **OAuth 2.0 authorization code** (Notion signs the user in through {{kib}} and {{kib}} stores refreshable tokens). Select the authentication type when you create or edit the connector.
 
 Bearer Token
-:   A Notion internal integration token. See **Get API credentials**.
+:   A Notion internal integration token. See **Get credentials**.
 
 OAuth 2.0 authorization code
 :   Uses a **public integration** in Notion. In {{kib}} you provide:
 
     - **Client ID** and **Client Secret**: from your Notion public integration
-    - **Redirect URI**: register {{kib}}'s OAuth callback in your Notion integration settings (see **Get API credentials**)
+    - **Redirect URI**: register {{kib}}'s OAuth callback in your Notion integration settings (see **Get credentials**)
 
     The connector automatically uses the correct Notion OAuth endpoints and scopes.
 
 ## Test connectors [notion-action-configuration]
 
 You can test connectors when you create or edit the connector in {{kib}}.
+
+## Connector actions [notion-connector-actions]
 
 The Notion connector has the following actions:
 
@@ -62,7 +64,7 @@ Query Data Source
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
 
-## Get API credentials [notion-api-credentials]
+## Get credentials [notion-api-credentials]
 
 ### OAuth Authorization Code (recommended)
 

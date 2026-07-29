@@ -37,6 +37,10 @@ Token URL
 
 ## Test connectors [one-drive-action-configuration]
 
+You can test connectors when you create or edit the connector in {{kib}}.
+
+## Connector actions [one-drive-connector-actions]
+
 The OneDrive connector has the following actions:
 
 Get me
@@ -75,7 +79,11 @@ List recent files
 :   List files the authenticated user has recently accessed or modified.
     - `pageToken` (optional): Continuation token from a previous response's `nextPageToken` field to fetch the next page.
 
-## Get API credentials [one-drive-api-credentials]
+## Connector networking configuration [one-drive-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+## Get credentials [one-drive-api-credentials]
 
 To use the OneDrive connector, register an application in Microsoft Azure and grant it the required Microsoft Graph API permissions.
 

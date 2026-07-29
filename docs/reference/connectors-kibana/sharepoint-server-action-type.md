@@ -33,6 +33,8 @@ Password
 
 You can test connectors as you're creating or editing the connector in {{kib}}.
 
+## Connector actions [sharepoint-server-connector-actions]
+
 The SharePoint Server connector has the following actions:
 
 Get Web
@@ -72,7 +74,11 @@ Call REST API
     - **Body** (optional): Request body for POST requests.
 
 
-## Get API credentials [sharepoint-server-api-credentials]
+## Connector networking configuration [sharepoint-server-connector-networking-configuration]
+
+Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+## Get credentials [sharepoint-server-api-credentials]
 
 To use the SharePoint Server connector, you need:
 
