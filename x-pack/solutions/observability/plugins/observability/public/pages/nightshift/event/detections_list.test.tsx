@@ -142,7 +142,7 @@ describe('DetectionsList', () => {
     expect(screen.queryByText('No detections found for this event.')).not.toBeInTheDocument();
   });
 
-  it('shows one skeleton per cached detection while refetching', () => {
+  it('keeps cached detections visible while refetching', () => {
     setLifecycle({
       detections: [
         mockDetection({ detection_id: 'det-1', rule_name: 'first-detection' }),
@@ -152,9 +152,10 @@ describe('DetectionsList', () => {
     });
     renderList();
 
-    expect(screen.getAllByTestId('nightshiftDetectionCardSkeleton')).toHaveLength(2);
-    expect(screen.queryByTestId('nightshiftDetectionCard')).not.toBeInTheDocument();
-    expect(screen.queryByText('first-detection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionCardSkeleton')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('nightshiftDetectionCard')).toHaveLength(2);
+    expect(screen.getByText('first-detection')).toBeInTheDocument();
+    expect(screen.getByText('second-detection')).toBeInTheDocument();
   });
 
   it('shows the empty state when there are no detections', () => {

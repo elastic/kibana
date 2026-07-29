@@ -338,10 +338,9 @@ export function DetectionsList({
   );
   const streamFeaturesByStream = useFetchStreamFeaturesByStream(streamNames);
 
-  const cachedDetectionCount = data?.detections?.length ?? 0;
-  const isInitialLoading = isLoading && cachedDetectionCount === 0;
+  // Only skeleton on first load — keep cached cards visible during background refetch.
+  const isInitialLoading = isLoading && (data?.detections?.length ?? 0) === 0;
   const showDetectionSkeletons = !isError && isInitialLoading;
-  const skeletonCount = isInitialLoading ? INITIAL_DETECTION_SKELETON_COUNT : cachedDetectionCount;
 
   return (
     <>
@@ -381,7 +380,7 @@ export function DetectionsList({
 
       {showDetectionSkeletons && (
         <DetectionListPanel
-          items={Array.from({ length: skeletonCount }, (_, index) => (
+          items={Array.from({ length: INITIAL_DETECTION_SKELETON_COUNT }, (_, index) => (
             <DetectionCardSkeleton key={`nightshift-detection-skeleton-${index}`} />
           ))}
         />
