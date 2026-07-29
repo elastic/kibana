@@ -8,6 +8,7 @@ import React, { useMemo, useState, useRef, useLayoutEffect } from 'react';
 import { EuiFlexGroup, EuiBadge, useEuiTheme, EuiIcon, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 /** DistributionBar component props */
 export interface DistributionBarProps {
@@ -306,7 +307,10 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
                         <EuiIcon
                           type="cross"
                           size="m"
-                          aria-hidden={true}
+                          aria-label={i18n.translate(
+                            'securitySolutionPackages.distributionBar.removeFilterAriaLabel',
+                            { defaultMessage: 'Remove filter' }
+                          )}
                           onClick={(e) => {
                             e.stopPropagation();
                             setHoveredKey(null);
