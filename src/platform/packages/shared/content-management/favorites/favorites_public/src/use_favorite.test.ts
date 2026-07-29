@@ -24,6 +24,10 @@ const addMutate = jest.fn();
 const removeMutate = jest.fn();
 const reportAddFavoriteClick = jest.fn();
 const reportRemoveFavoriteClick = jest.fn();
+const favoritesClient = {
+  reportAddFavoriteClick,
+  reportRemoveFavoriteClick,
+};
 
 const setMocks = ({
   data,
@@ -35,6 +39,7 @@ const setMocks = ({
   isRemoving?: boolean;
 }) => {
   mockUseFavorites.mockReturnValue({ data } as ReturnType<typeof useFavorites>);
+  // New mutation result objects each call (TanStack Query v4), stable mutate fns.
   mockUseAddFavorite.mockReturnValue({
     isLoading: isAdding,
     mutate: addMutate,
@@ -43,10 +48,9 @@ const setMocks = ({
     isLoading: isRemoving,
     mutate: removeMutate,
   } as unknown as ReturnType<typeof useRemoveFavorite>);
-  mockUseFavoritesClient.mockReturnValue({
-    reportAddFavoriteClick,
-    reportRemoveFavoriteClick,
-  } as unknown as ReturnType<typeof useFavoritesClient>);
+  mockUseFavoritesClient.mockReturnValue(
+    favoritesClient as unknown as ReturnType<typeof useFavoritesClient>
+  );
 };
 
 describe('useFavorite', () => {
@@ -146,11 +150,13 @@ describe('useFavorite', () => {
   });
 
   it('returns a stable object identity across re-renders', () => {
+    // Mimic TanStack Query v4: new mutation result objects each render, stable mutate fns.
     setMocks({ data: { favoriteIds: ['dash-1'] } });
 
     const { result, rerender } = renderHook(() => useFavorite({ id: 'dash-1' }));
     const first = result.current;
 
+    setMocks({ data: { favoriteIds: ['dash-1'] } });
     rerender();
 
     expect(result.current).toBe(first);

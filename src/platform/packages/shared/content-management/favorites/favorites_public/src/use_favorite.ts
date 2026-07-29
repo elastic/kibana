@@ -24,13 +24,11 @@ export interface FavoriteToggleState {
  */
 export const useFavorite = ({ id }: { id?: string }): FavoriteToggleState | undefined => {
   const { data } = useFavorites({ enabled: !!id });
-  const removeFavorite = useRemoveFavorite();
-  const addFavorite = useAddFavorite();
+  const { isLoading: isRemoving, mutate: removeMutate } = useRemoveFavorite();
+  const { isLoading: isAdding, mutate: addMutate } = useAddFavorite();
   const favoritesClient = useFavoritesClient();
 
   const isPersistedFavorite = !!id && (data?.favoriteIds.includes(id) ?? false);
-  const isAdding = addFavorite.isLoading;
-  const isRemoving = removeFavorite.isLoading;
 
   const onToggle = useCallback(() => {
     if (!id || isAdding || isRemoving) {
@@ -39,12 +37,12 @@ export const useFavorite = ({ id }: { id?: string }): FavoriteToggleState | unde
 
     if (isPersistedFavorite) {
       favoritesClient?.reportRemoveFavoriteClick();
-      removeFavorite.mutate({ id });
+      removeMutate({ id });
     } else {
       favoritesClient?.reportAddFavoriteClick();
-      addFavorite.mutate({ id });
+      addMutate({ id });
     }
-  }, [addFavorite, favoritesClient, id, isAdding, isPersistedFavorite, isRemoving, removeFavorite]);
+  }, [addMutate, favoritesClient, id, isAdding, isPersistedFavorite, isRemoving, removeMutate]);
 
   const status: FavoriteButtonStatus | undefined =
     !id || !data
