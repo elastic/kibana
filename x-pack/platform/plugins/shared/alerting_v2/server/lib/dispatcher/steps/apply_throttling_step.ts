@@ -18,6 +18,7 @@ import type {
   ActionGroup,
   ActionGroupId,
   ActionPolicy,
+  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
@@ -35,7 +36,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
   ) {}
 
   public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { groups = [], policies = new Map(), input } = state;
+    const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
 
     if (groups.length === 0) {
       return { type: 'continue', data: { dispatch: [], throttled: [] } };
