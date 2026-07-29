@@ -271,10 +271,18 @@ export class WorkflowExecutionQueryService {
       must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
     }
 
-    const startedAtRange = buildTimeRangeFilter('startedAt', params.startedAfter, params.startedBefore);
+    const startedAtRange = buildTimeRangeFilter(
+      'startedAt',
+      params.startedAfter,
+      params.startedBefore
+    );
     if (startedAtRange) must.push(startedAtRange);
 
-    const finishedAtRange = buildTimeRangeFilter('finishedAt', params.finishedAfter, params.finishedBefore);
+    const finishedAtRange = buildTimeRangeFilter(
+      'finishedAt',
+      params.finishedAfter,
+      params.finishedBefore
+    );
     if (finishedAtRange) must.push(finishedAtRange);
 
     const managedMustNot = params.includeManagedExecutions
