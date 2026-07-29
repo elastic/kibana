@@ -8,8 +8,8 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
-import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { Provider } from 'react-redux-v7';
+import { createStore } from 'redux-v4';
 import { Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
@@ -108,21 +108,13 @@ jest.mock('../../../../common/hooks/timeline/use_investigate_in_timeline', () =>
   useInvestigateInTimeline: () => ({ investigateInTimeline: jest.fn() }),
 }));
 
-jest.mock('../../../../sourcerer/components/use_get_sourcerer_data_view', () => ({
-  useGetScopedSourcererDataView: () => ({
-    dataView: {
-      id: 'old-data-view',
-      getIndexPattern: jest.fn().mockReturnValue('old-data-view-pattern'),
-    },
-  }),
-}));
-
 jest.mock('../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: () => ({
     dataView: {
       id: 'experimental-data-view',
       getIndexPattern: jest.fn().mockReturnValue('experimental-data-view-pattern'),
     },
+    status: 'ready',
   }),
 }));
 

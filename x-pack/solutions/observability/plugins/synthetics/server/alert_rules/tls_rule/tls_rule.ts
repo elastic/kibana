@@ -26,7 +26,12 @@ import {
 } from '@kbn/observability-plugin/common';
 import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import type { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
-import { getCertSummary, getTLSAlertDocument, setTLSRecoveredAlertsContext } from './message_utils';
+import {
+  getCertSummary,
+  getTLSAlertDocument,
+  getTLSCertAlertId,
+  setTLSRecoveredAlertsContext,
+} from './message_utils';
 import type { SyntheticsCommonState } from '../../../common/runtime_types/alert_rules/common';
 import { TLSRuleExecutor } from './tls_rule_executor';
 import { TLS_CERTIFICATE } from '../../../common/constants/synthetics_alerts';
@@ -77,7 +82,7 @@ export const registerSyntheticsTLSCheckRule = (
       >
     ) => {
       const { state: ruleState, params, services, spaceId, previousStartedAt, rule } = options;
-      const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
+      const { alertsClient, savedObjectsClient, scopedClusterClient, uiSettingsClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
       }
@@ -91,7 +96,8 @@ export const registerSyntheticsTLSCheckRule = (
         server,
         syntheticsMonitorClient,
         spaceId,
-        rule.name
+        rule.name,
+        uiSettingsClient
       );
 
       const { foundCerts, certs, absoluteExpirationThreshold, absoluteAgeThreshold, latestPings } =
@@ -104,7 +110,14 @@ export const registerSyntheticsTLSCheckRule = (
           return;
         }
 
-        const alertId = cert.sha256;
+        // Lightweight HTTP/TCP certs use their sha256 fingerprint as the alert
+        // id; browser certs (which have no fingerprint) fall back to a stable
+        // subject-common-name + issuer identity. Certs with neither are skipped.
+        const alertId = getTLSCertAlertId(cert);
+        if (!alertId) {
+          return;
+        }
+
         const { uuid } = alertsClient.report({
           id: alertId,
           actionGroup: TLS_CERTIFICATE.id,

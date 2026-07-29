@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Only re-export the declarative `StarredFilter`. The heavy
+// `StarredFilterRenderer` is loaded lazily by `StarredFilter` (see
+// `./starred_filter.tsx`); tests and any direct consumers import it from
+// `./starred_filter_renderer` directly so the declarative barrel does not
+// statically pull the renderer into consumer bundles.
 export { StarredFilter, type StarredFilterProps } from './starred_filter';
-export { StarredFilterRenderer, type StarredFilterRendererProps } from './starred_filter_renderer';

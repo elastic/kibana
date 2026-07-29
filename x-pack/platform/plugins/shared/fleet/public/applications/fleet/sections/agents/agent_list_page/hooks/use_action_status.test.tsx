@@ -109,4 +109,56 @@ describe('useActionStatus', () => {
       title: 'An error happened while cancelling upgrade',
     });
   });
+
+  it('should post cancel and invoke callback on cancel unenrollment', async () => {
+    mockOpenConfirm.mockResolvedValue(true);
+    mockSendPostCancelAction.mockResolvedValue({});
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
+    await act(async () => {
+      await result.current.abortUnenroll(mockActionStatuses[0]);
+    });
+    expect(mockSendPostCancelAction).toHaveBeenCalledWith('action1');
+    expect(mockOnAbortSuccess).toHaveBeenCalled();
+    expect(mockOpenConfirm).toHaveBeenCalledWith(
+      expect.stringContaining('cancel the scheduled unenrollment of 1 agent'),
+      { title: 'Cancel unenrollment?' }
+    );
+  });
+
+  it('should post cancel and invoke callback on cancel unenrollment - plural', async () => {
+    mockOpenConfirm.mockResolvedValue(true);
+    mockSendPostCancelAction.mockResolvedValue({});
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
+    await act(async () => {
+      await result.current.abortUnenroll({ ...mockActionStatuses[0], nbAgentsAck: 0 });
+    });
+    expect(mockOpenConfirm).toHaveBeenCalledWith(
+      expect.stringContaining('cancel the scheduled unenrollment of 2 agents'),
+      { title: 'Cancel unenrollment?' }
+    );
+  });
+
+  it('should not call sendPostCancelAction if confirm is dismissed for unenrollment', async () => {
+    mockOpenConfirm.mockResolvedValue(false);
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
+    await act(async () => {
+      await result.current.abortUnenroll(mockActionStatuses[0]);
+    });
+    expect(mockSendPostCancelAction).not.toHaveBeenCalled();
+    expect(mockOnAbortSuccess).not.toHaveBeenCalled();
+  });
+
+  it('should report error on cancel unenrollment failure', async () => {
+    mockOpenConfirm.mockResolvedValue(true);
+    const error = new Error('unenroll error');
+    mockSendPostCancelAction.mockRejectedValue(error);
+    const { result } = renderHook(() => useActionStatus(mockOnAbortSuccess, false, 20, null));
+    await act(async () => {
+      await result.current.abortUnenroll(mockActionStatuses[0]);
+    });
+    expect(mockOnAbortSuccess).not.toHaveBeenCalled();
+    expect(mockErrorToast).toHaveBeenCalledWith(error, {
+      title: 'An error happened while cancelling unenrollment',
+    });
+  });
 });

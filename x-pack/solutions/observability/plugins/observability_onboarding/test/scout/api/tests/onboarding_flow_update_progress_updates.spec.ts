@@ -7,7 +7,6 @@
 
 import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
-import { OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE } from '../../../../server/saved_objects/observability_onboarding_status';
 import { ONBOARDING_COMMON_HEADERS } from '../fixtures/constants';
 import { apiTest } from '../fixtures';
 
@@ -15,21 +14,9 @@ apiTest.describe(
   'Observability onboarding POST flow step — updates saved state',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    let onboardingId = '';
-
-    apiTest.afterEach(async ({ kbnClient }) => {
-      if (onboardingId.length > 0) {
-        await kbnClient.savedObjects.delete({
-          type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-          id: onboardingId,
-        });
-        onboardingId = '';
-      }
-    });
-
     apiTest(
       'updates step progress (status only, then status with decoded message)',
-      async ({ apiClient, kbnClient, samlAuth }) => {
+      async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
         const adminHeaders = {
           ...ONBOARDING_COMMON_HEADERS,
@@ -45,14 +32,8 @@ apiTest.describe(
             }
           );
           expect(createFlowResponse).toHaveStatusCode(200);
-          onboardingId = (createFlowResponse.body as { onboardingFlow: { id: string } })
+          const onboardingId = (createFlowResponse.body as { onboardingFlow: { id: string } })
             .onboardingFlow.id;
-
-          const initialState = await kbnClient.savedObjects.get({
-            type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-            id: onboardingId,
-          });
-          expect(initialState.attributes.progress).toStrictEqual({});
 
           const step = { name: 'ea-download', status: 'complete' };
           const response = await apiClient.post(
@@ -65,11 +46,21 @@ apiTest.describe(
           );
           expect(response).toHaveStatusCode(200);
 
-          const savedState = await kbnClient.savedObjects.get({
-            type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-            id: onboardingId,
-          });
-          expect(savedState.attributes.progress?.[step.name]).toMatchObject({
+          const progressResponse = await apiClient.get(
+            `internal/observability_onboarding/flow/${onboardingId}/progress`,
+            {
+              headers: adminHeaders,
+              responseType: 'json',
+            }
+          );
+          expect(progressResponse).toHaveStatusCode(200);
+          expect(
+            (
+              progressResponse.body as {
+                progress: Record<string, { status: string; message?: string }>;
+              }
+            ).progress[step.name]
+          ).toMatchObject({
             status: step.status,
           });
         });
@@ -83,14 +74,8 @@ apiTest.describe(
             }
           );
           expect(createFlowResponse).toHaveStatusCode(200);
-          onboardingId = (createFlowResponse.body as { onboardingFlow: { id: string } })
+          const onboardingId = (createFlowResponse.body as { onboardingFlow: { id: string } })
             .onboardingFlow.id;
-
-          const initialState = await kbnClient.savedObjects.get({
-            type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-            id: onboardingId,
-          });
-          expect(initialState.attributes.progress).toStrictEqual({});
 
           const message = 'Download failed';
           const step = {
@@ -112,11 +97,21 @@ apiTest.describe(
           );
           expect(response).toHaveStatusCode(200);
 
-          const savedState = await kbnClient.savedObjects.get({
-            type: OBSERVABILITY_ONBOARDING_STATE_SAVED_OBJECT_TYPE,
-            id: onboardingId,
-          });
-          expect(savedState.attributes.progress?.[step.name]).toMatchObject({
+          const progressResponse = await apiClient.get(
+            `internal/observability_onboarding/flow/${onboardingId}/progress`,
+            {
+              headers: adminHeaders,
+              responseType: 'json',
+            }
+          );
+          expect(progressResponse).toHaveStatusCode(200);
+          expect(
+            (
+              progressResponse.body as {
+                progress: Record<string, { status: string; message?: string }>;
+              }
+            ).progress[step.name]
+          ).toMatchObject({
             status: step.status,
             message,
           });

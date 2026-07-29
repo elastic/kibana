@@ -7,7 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import type { SmlListItem } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
 
@@ -17,8 +17,14 @@ jest.mock('@kbn/connector-specs', () => ({
 
 const { getConnectorSpec } = jest.requireMock('@kbn/connector-specs');
 
+const mockFinder = {
+  find: jest.fn(),
+  close: jest.fn().mockResolvedValue(undefined),
+};
+
 const mockSavedObjectsClient = {
   get: jest.fn(),
+  createPointInTimeFinder: jest.fn().mockReturnValue(mockFinder),
 };
 
 const mockGetActionSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
@@ -59,13 +65,118 @@ describe('connectorSmlType', () => {
   });
 
   describe('list', () => {
-    it('yields nothing — connector indexing is event-driven only', async () => {
+    const makeSo = (id: string, namespaces: string[], updatedAt: string) => ({
+      id,
+      updated_at: updatedAt,
+      namespaces,
+    });
+
+    beforeEach(() => {
+      mockFinder.find.mockReset();
+      mockFinder.close.mockReset().mockResolvedValue(undefined);
+    });
+
+    it('yields items from a single page', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [
+            makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z'),
+            makeSo('conn-2', ['space-a'], '2024-01-02T00:00:00.000Z'),
+          ],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toEqual([
+        { id: 'conn-1', updatedAt: '2024-01-01T00:00:00.000Z', spaces: ['default'] },
+        { id: 'conn-2', updatedAt: '2024-01-02T00:00:00.000Z', spaces: ['space-a'] },
+      ]);
+    });
+
+    it('yields items across multiple pages', async () => {
+      async function* twoPages() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+        yield { saved_objects: [makeSo('conn-2', ['default'], '2024-01-02T00:00:00.000Z')] };
+      }
+      mockFinder.find.mockReturnValue(twoPages());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result).toHaveLength(2);
+      expect(result.map((r) => r.id)).toEqual(['conn-1', 'conn-2']);
+    });
+
+    it('yields nothing when there are no connectors', async () => {
+      async function* empty() {}
+      mockFinder.find.mockReturnValue(empty());
+
       const result = await collectPages(connectorSmlType.list(createContext() as never));
       expect(result).toEqual([]);
     });
+
+    it('calls createPointInTimeFinder with action type across all namespaces', async () => {
+      async function* empty() {}
+      mockFinder.find.mockReturnValue(empty());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(mockSavedObjectsClient.createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'action', namespaces: ['*'] })
+      );
+    });
+
+    it('closes the finder after iteration completes', async () => {
+      async function* singlePage() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(mockFinder.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('closes the finder even when iteration throws', async () => {
+      async function* throwing() {
+        yield { saved_objects: [makeSo('conn-1', ['default'], '2024-01-01T00:00:00.000Z')] };
+        throw new Error('ES error');
+      }
+      mockFinder.find.mockReturnValue(throwing());
+
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        'ES error'
+      );
+
+      expect(mockFinder.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('propagates error when createPointInTimeFinder throws (e.g. action type mappings absent)', async () => {
+      mockSavedObjectsClient.createPointInTimeFinder.mockImplementationOnce(() => {
+        throw new Error("Unknown saved object type: 'action' is not a registered type");
+      });
+
+      await expect(collectPages(connectorSmlType.list(createContext() as never))).rejects.toThrow(
+        "Unknown saved object type: 'action' is not a registered type"
+      );
+    });
+
+    it('falls back to empty spaces array when namespaces is undefined', async () => {
+      async function* singlePage() {
+        yield {
+          saved_objects: [{ id: 'conn-1', updated_at: '2024-01-01T00:00:00.000Z' }],
+        };
+      }
+      mockFinder.find.mockReturnValue(singlePage());
+
+      const result = await collectPages(connectorSmlType.list(createContext() as never));
+
+      expect(result[0].spaces).toEqual([]);
+    });
   });
 
-  describe('getSmlData', () => {
+  describe('getSmlEntry', () => {
     it('returns chunk with connector name and description in content', async () => {
       mockSavedObjectsClient.get.mockResolvedValue({
         id: 'conn-1',
@@ -83,26 +194,23 @@ describe('connectorSmlType', () => {
         actions: {},
       });
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
       expect(mockSavedObjectsClient.get).toHaveBeenCalledWith('action', 'conn-1');
       expect(result).toEqual({
-        chunks: [
-          {
-            type: 'connector',
-            title: 'My MCP Connector',
-            content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
-            permissions: ['action:execute'],
-          },
-        ],
+        type: 'connector',
+        title: 'My MCP Connector',
+        content: 'My MCP Connector\nMCP\nModel Context Protocol connector',
+        discovery_labels: [{ kind: 'shortcut', value: 'connector/My MCP Connector' }],
       });
+      expect(result).not.toHaveProperty('permissions');
     });
 
     it('returns undefined on error and logs warning', async () => {
       mockSavedObjectsClient.get.mockRejectedValue(new Error('Not found'));
       const context = createContext();
 
-      const result = await connectorSmlType.getSmlData!('missing-conn', context as never);
+      const result = await connectorSmlType.getSmlEntry!('missing-conn', context as never);
 
       expect(result).toBeUndefined();
       expect(context.logger.warn).toHaveBeenCalledWith(
@@ -127,10 +235,10 @@ describe('connectorSmlType', () => {
         actions: {},
       });
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
       // 'MCP' should appear only once even though name === displayName
-      expect(result!.chunks[0].content).toBe('MCP\nModel Context Protocol connector');
+      expect(result!.content).toBe('MCP\nModel Context Protocol connector');
     });
 
     it('includes sub-action descriptions when spec has isTool actions', async () => {
@@ -166,11 +274,11 @@ describe('connectorSmlType', () => {
         },
       });
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
-      expect(result!.chunks[0].content).toContain('searchMessages: Search Slack messages');
-      expect(result!.chunks[0].content).toContain('sendMessage: Send a message to a channel');
-      expect(result!.chunks[0].content).not.toContain('internalAction');
+      expect(result!.content).toContain('searchMessages: Search Slack messages');
+      expect(result!.content).toContain('sendMessage: Send a message to a channel');
+      expect(result!.content).not.toContain('internalAction');
     });
 
     it('handles missing optional fields gracefully', async () => {
@@ -183,13 +291,25 @@ describe('connectorSmlType', () => {
 
       getConnectorSpec.mockReturnValue(undefined);
 
-      const result = await connectorSmlType.getSmlData!('conn-1', createContext() as never);
+      const result = await connectorSmlType.getSmlEntry!('conn-1', createContext() as never);
 
-      expect(result!.chunks[0]).toEqual({
+      expect(result).toEqual({
         type: 'connector',
         title: 'Basic Connector',
         content: 'Basic Connector\n.unknown',
-        permissions: ['action:execute'],
+        discovery_labels: [{ kind: 'shortcut', value: 'connector/Basic Connector' }],
+      });
+    });
+  });
+
+  describe('getPermissions', () => {
+    it('returns the saved_object:action/get Kibana privilege', () => {
+      // The actions plugin gates connector reads on saved-object read access for the `action`
+      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
+      // so a regression to a non-existent privilege name fails loudly.
+      const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
+      expect(permissions).toEqual({
+        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
       });
     });
   });

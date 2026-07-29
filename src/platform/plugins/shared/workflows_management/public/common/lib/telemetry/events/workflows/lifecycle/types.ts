@@ -232,4 +232,8 @@ export interface ReportWorkflowEnabledStateChangedActionParams
    * Number of workflows in the bulk action (only present when isBulkAction is true)
    */
   bulkActionCount?: number;
+  /**
+   * Whether the workflow defines extension (event-driven) triggers when enabled state changed.
+   */
+  hasCustomEventTrigger?: boolean;
 }

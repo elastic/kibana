@@ -21,6 +21,7 @@ const createMocks = () => {
       page: 1,
       perPage: 100,
       totalEvents: 0,
+      searchMatches: null,
     }),
     countNewEventsSince: jest.fn(),
   };
@@ -35,9 +36,11 @@ const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks
   );
 
 describe('ListExecutionHistoryRoute', () => {
-  it('forwards page and perPage from the query to the client', async () => {
+  it('forwards page, perPage, search and outcome from the query to the client', async () => {
     const mocks = createMocks();
-    const request = httpServerMock.createKibanaRequest({ query: { page: 2, perPage: 25 } });
+    const request = httpServerMock.createKibanaRequest({
+      query: { page: 2, perPage: 25, search: 'foo', outcome: 'throttled' },
+    });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
@@ -46,10 +49,40 @@ describe('ListExecutionHistoryRoute', () => {
       request,
       page: 2,
       perPage: 25,
+      search: 'foo',
+      outcome: 'throttled',
     });
   });
 
-  it('passes undefined page/perPage when query is empty (defaults applied by client)', async () => {
+  it('forwards episodeIds from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { episodeIds: ['ep-1', 'ep-2'] },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+    );
+  });
+
+  it('forwards start_date from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { start_date: '2026-01-01T00:00:00.000Z' },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ start_date: '2026-01-01T00:00:00.000Z' })
+    );
+  });
+
+  it('passes undefined params when query is empty (defaults applied by client)', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest();
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
@@ -60,6 +93,8 @@ describe('ListExecutionHistoryRoute', () => {
       request,
       page: undefined,
       perPage: undefined,
+      search: undefined,
+      outcome: undefined,
     });
   });
 

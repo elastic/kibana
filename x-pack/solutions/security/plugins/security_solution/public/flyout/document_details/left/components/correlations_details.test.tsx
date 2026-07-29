@@ -45,6 +45,7 @@ const renderCorrelationDetails = () =>
 
 describe('CorrelationsDetails', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue({
       openPreviewPanel: jest.fn(),
     } as unknown as ReturnType<typeof useExpandableFlyoutApi>);

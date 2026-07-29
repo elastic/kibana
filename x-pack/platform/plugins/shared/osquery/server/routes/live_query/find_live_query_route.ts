@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { FindLiveQueryRequestQuerySchema } from '../../../common/api';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
@@ -29,6 +29,7 @@ import { findLiveQueryRequestQuerySchema } from '../../../common/api';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { findLiveQueryResponseSchema } from './response_schemas';
 
 export const findLiveQueryRoute = (
@@ -87,7 +88,7 @@ export const findLiveQueryRoute = (
                 },
                 spaceId,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 
@@ -133,7 +134,8 @@ export const findLiveQueryRoute = (
               const resultCountsMap = await getResultCountsForActions(
                 esClient,
                 allActionIds,
-                integrationNamespaces ?? [spaceId],
+                spaceId,
+                integrationNamespaces,
                 ccsEnabled
               );
 

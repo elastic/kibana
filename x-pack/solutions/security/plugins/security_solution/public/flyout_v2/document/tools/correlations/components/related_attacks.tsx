@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PageScope } from '../../../../../data_view_manager/constants';
@@ -33,9 +33,8 @@ export interface RelatedAttacksProps {
   /**
    * Callback to open an attack preview when clicking the expand button.
    * When not provided, the expand button column is hidden.
-   * // TODO make required once we have an attack flyout in the new flyout system
    */
-  onShowAttack?: (id: string, indexName: string) => void;
+  onShowAttack?: (id: string, indexName: string, title?: string) => void;
 }
 
 /**
@@ -55,18 +54,35 @@ export const RelatedAttacks: React.FC<RelatedAttacksProps> = ({
         ? [
             {
               render: (row: Record<string, unknown>) => (
-                <EuiButtonIcon
-                  iconType="expand"
-                  data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
-                  onClick={() => onShowAttack(row.id as string, row.index as string)}
-                  aria-label={i18n.translate(
+                <EuiToolTip
+                  content={i18n.translate(
                     'xpack.securitySolution.flyout.correlations.relatedAttacksPreviewButtonLabel',
                     {
                       defaultMessage: 'Preview attack with id {id}',
                       values: { id: row.id as string },
                     }
                   )}
-                />
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="expand"
+                    data-test-subj={`${CORRELATIONS_DETAILS_RELATED_ATTACKS_SECTION_TEST_ID}AlertPreviewButton`}
+                    onClick={() =>
+                      onShowAttack(
+                        row.id as string,
+                        row.index as string,
+                        row['kibana.alert.attack_discovery.title'] as string | undefined
+                      )
+                    }
+                    aria-label={i18n.translate(
+                      'xpack.securitySolution.flyout.correlations.relatedAttacksPreviewButtonLabel',
+                      {
+                        defaultMessage: 'Preview attack with id {id}',
+                        values: { id: row.id as string },
+                      }
+                    )}
+                  />
+                </EuiToolTip>
               ),
               width: '5%',
             } as CorrelationsCustomTableColumn,

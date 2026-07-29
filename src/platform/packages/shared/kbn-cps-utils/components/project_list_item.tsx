@@ -29,15 +29,16 @@ interface ProjectListItemProps {
   isOriginProject?: boolean;
 }
 
-const SOLUTION_ICONS: Record<string, string> = {
+const PROJECT_TYPE_ICONS: Record<string, string> = {
   elasticsearch: 'logoElasticsearch',
   es: 'logoElasticsearch',
   security: 'logoSecurity',
   observability: 'logoObservability',
+  vectordb: 'logoVectorDB',
 } as const;
 
 const getSolutionIcon = (solution: string): string => {
-  return SOLUTION_ICONS[solution] || 'empty';
+  return PROJECT_TYPE_ICONS[solution] || 'empty';
 };
 
 const CSP_LABELS: Record<string, string> = {

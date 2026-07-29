@@ -28,8 +28,10 @@ import {
   EuiSplitPanel,
   useEuiTheme,
   EuiCallOut,
+  EuiLoadingSpinner,
   EuiSwitch,
   EuiFormPrepend,
+  EuiToolTip,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type {
@@ -52,6 +54,7 @@ import {
 import { checkActionFormActionTypeEnabled, transformActionVariables } from '@kbn/alerts-ui-shared';
 import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
+import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import type {
@@ -155,9 +158,11 @@ export const ActionTypeForm = ({
     application: { capabilities },
     settings,
     http,
+    docLinks,
     notifications,
     unifiedSearch,
     data,
+    uiSettings,
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
@@ -259,7 +264,10 @@ export const ActionTypeForm = ({
   ]);
 
   const getDefaultParams = async () => {
-    const connectorType = await actionTypeRegistry.get(actionItem.actionTypeId);
+    if (!actionTypeRegistry.has(actionItem.actionTypeId)) {
+      return undefined;
+    }
+    const connectorType = actionTypeRegistry.get(actionItem.actionTypeId);
     let defaultParams;
     if (actionItem.group === recoveryActionGroup) {
       defaultParams = connectorType.defaultRecoveredActionParams;
@@ -412,7 +420,26 @@ export const ActionTypeForm = ({
     setActionFrequencyProperty('summary', summary, index);
   };
 
-  const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
+  const { actionTypeModel: actionTypeRegistered, isLoading: isLoadingActionTypeModel } =
+    useActionTypeModel({
+      actionTypeRegistry,
+      actionTypeId:
+        actionTypesIndex[actionConnector.actionTypeId]?.id ?? actionConnector.actionTypeId,
+      http,
+      docLinks,
+      uiSettings,
+    });
+
+  if (isLoadingActionTypeModel) {
+    return (
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" data-test-subj="actionTypeFormLoading" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   if (!actionTypeRegistered) return null;
   const allowGroupConnector = (actionTypeRegistered?.subtype ?? []).map((atr) => atr.id);
 
@@ -506,6 +533,10 @@ export const ActionTypeForm = ({
           <>
             {!hideNotifyWhen && <EuiSpacer size="s" />}
             <EuiSuperSelect
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.actionTypeForm.actionRunWhenAriaLabel',
+                { defaultMessage: 'Run when' }
+              )}
               prepend={
                 <EuiFormPrepend
                   inputId={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
@@ -652,7 +683,7 @@ export const ActionTypeForm = ({
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" aria-hidden={true} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -741,18 +772,28 @@ export const ActionTypeForm = ({
             </EuiFlexGroup>
           }
           extraAction={
-            <EuiButtonIcon
-              iconType="minusCircle"
-              color="danger"
-              className="actAccordionActionForm__extraAction"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
                 {
                   defaultMessage: 'Delete',
                 }
               )}
-              onClick={onDeleteAction}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="minusCircle"
+                color="danger"
+                className="actAccordionActionForm__extraAction"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                onClick={onDeleteAction}
+              />
+            </EuiToolTip>
           }
         >
           {accordionContent}

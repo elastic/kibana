@@ -85,7 +85,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
     evaluate('basic: pipeline error → score 0', async ({ executorClient }) => {
       await executorClient.runExperiment(
         {
-          dataset: CALIBRATION_DATASET,
+          datasets: [CALIBRATION_DATASET],
           task: async (): Promise<LeadGenerationTaskOutput> => ({
             leads: null,
             errors: ['Simulated pipeline error for calibration'],
@@ -98,7 +98,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
     evaluate('basic: lead missing required field (title) → score 0', async ({ executorClient }) => {
       await executorClient.runExperiment(
         {
-          dataset: CALIBRATION_DATASET,
+          datasets: [CALIBRATION_DATASET],
           task: async (): Promise<LeadGenerationTaskOutput> => ({
             leads: [
               {
@@ -127,7 +127,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
     evaluate('basic: priority out of range (>10) → score 0', async ({ executorClient }) => {
       await executorClient.runExperiment(
         {
-          dataset: CALIBRATION_DATASET,
+          datasets: [CALIBRATION_DATASET],
           task: async (): Promise<LeadGenerationTaskOutput> => ({
             leads: [
               {
@@ -162,7 +162,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, inferenceClient, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: CALIBRATION_DATASET,
+            datasets: [CALIBRATION_DATASET],
             task: async (): Promise<LeadGenerationTaskOutput> => ({
               leads: null,
               errors: ['Simulated pipeline error for rubric calibration'],
@@ -182,7 +182,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, inferenceClient, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: CALIBRATION_DATASET,
+            datasets: [CALIBRATION_DATASET],
             task: async (): Promise<LeadGenerationTaskOutput> => ({
               leads: null,
             }),
@@ -205,7 +205,7 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
         });
         await executorClient.runExperiment(
           {
-            dataset: CALIBRATION_DATASET,
+            datasets: [CALIBRATION_DATASET],
             task: async (): Promise<LeadGenerationTaskOutput> => ({
               leads: [
                 {
@@ -246,16 +246,18 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, leadGenerationClient, connector, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'lead generation: e2e smoke',
-              description: 'Basic smoke test for the lead generation pipeline',
-              examples: [
-                {
-                  input: {},
-                  output: { leads: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'lead generation: e2e smoke',
+                description: 'Basic smoke test for the lead generation pipeline',
+                examples: [
+                  {
+                    input: {},
+                    output: { leads: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) =>
               runLeadGeneration({
                 leadGenerationClient,
@@ -290,16 +292,18 @@ evaluate.describe('Lead Generation', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, leadGenerationClient, connector, log }) => {
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'lead generation: status smoke',
-              description: 'Verifies that the status endpoint tracks the last execution UUID',
-              examples: [
-                {
-                  input: {},
-                  output: { leads: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'lead generation: status smoke',
+                description: 'Verifies that the status endpoint tracks the last execution UUID',
+                examples: [
+                  {
+                    input: {},
+                    output: { leads: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) => {
               const result = await runLeadGeneration({
                 leadGenerationClient,

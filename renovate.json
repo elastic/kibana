@@ -40,7 +40,6 @@
         "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
-        "file-loader",
         "mini-css-extract-plugin",
         "sass-loader",
         "style-loader",
@@ -52,9 +51,7 @@
         "webpack-merge",
         "webpack-sources",
         "@statoscope/webpack-plugin",
-        "@types/webpack",
         "@types/webpack-bundle-analyzer",
-        "@types/webpack-env",
         "@types/webpack-sources"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -150,11 +147,11 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/obs-ai-team dependencies",
+      "groupName": "@elastic/nightshift-context-and-research-team dependencies",
       "matchDepNames": ["@arizeai/phoenix-client", "simple-statistics"],
-      "reviewers": ["team:obs-ai-team"],
+      "reviewers": ["team:nightshift-context-and-research-team"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-ai-team"],
+      "addLabels": ["Team:nightshift-context-and-research"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -239,7 +236,7 @@
     },
     {
       "groupName": "base64-js dependencies",
-      "matchDepNames": ["base64-js", "@types/base64-js"],
+      "matchDepNames": ["base64-js"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -256,7 +253,7 @@
     },
     {
       "groupName": "classnames dependencies",
-      "matchDepNames": ["classnames", "@types/classnames"],
+      "matchDepNames": ["classnames"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -274,7 +271,7 @@
     },
     {
       "groupName": "lz-string dependencies",
-      "matchDepNames": ["lz-string", "@types/lz-string"],
+      "matchDepNames": ["lz-string"],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:SharedUX"],
@@ -449,7 +446,7 @@
     },
     {
       "groupName": "@reduxjs/toolkit",
-      "matchDepNames": ["@reduxjs/toolkit", "immer"],
+      "matchDepNames": ["@reduxjs/toolkit", "immer", "redux-toolkit-v1", "immer-v9"],
       "reviewers": ["team:kibana-visualizations", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "enabled": true,
@@ -567,7 +564,6 @@
         "reflect-metadata",
         "type-detect",
         "utility-types",
-        "@types/fetch-mock",
         "@types/getos",
         "@types/mock-fs",
         "@types/node-fetch",
@@ -695,9 +691,9 @@
     {
       "groupName": "@elastic/ecs",
       "matchDepNames": ["@elastic/ecs"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "labels": ["release_note:skip", "backport:skip", "Team:obs-onboarding"],
+      "labels": ["release_note:skip", "backport:skip", "Team:streams-ui"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
@@ -915,8 +911,8 @@
       "enabled": true
     },
     {
-      "groupName": "micromatch/minimatch",
-      "matchDepNames": ["micromatch", "minimatch", "@types/micromatch", "@types/minimatch"],
+      "groupName": "minimatch",
+      "matchDepNames": ["minimatch"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -925,7 +921,7 @@
     },
     {
       "groupName": "nock",
-      "matchDepNames": ["nock", "@types/nock"],
+      "matchDepNames": ["nock"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1000,7 +996,7 @@
     },
     {
       "groupName": "polyfills",
-      "matchDepNames": ["blob-polyfill", "core-js", "qs"],
+      "matchDepNames": ["core-js", "qs"],
       "matchDepPatterns": ["polyfill"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1020,7 +1016,6 @@
     {
       "groupName": "CLI tooling",
       "matchDepNames": [
-        "argsplit",
         "chalk",
         "cli-progress",
         "cli-table3",
@@ -1105,8 +1100,7 @@
         "mocha-junit-reporter",
         "mocha-multi-reporters",
         "mochawesome",
-        "mochawesome-merge",
-        "regenerate"
+        "mochawesome-merge"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1161,7 +1155,7 @@
     },
     {
       "groupName": "source-map",
-      "matchDepNames": ["source-map", "source-map-support", "@types/source-map-support"],
+      "matchDepNames": ["source-map-support", "@types/source-map-support"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1318,7 +1312,7 @@
     },
     {
       "groupName": "workplace_ai gen-ai dependencies",
-      "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk"],
+      "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk", "just-bash"],
       "reviewers": ["team:search-kibana"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Search", "Team:Enterprise Search"],
@@ -1382,15 +1376,6 @@
     {
       "groupName": "borc",
       "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cpy",
-      "matchDepNames": ["cpy"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1541,7 +1526,7 @@
     },
     {
       "groupName": "reporting dependencies",
-      "matchDepNames": ["@types/extract-zip", "@types/pdfmake", "extract-zip", "pdfmake"],
+      "matchDepNames": ["@types/pdfmake", "extract-zip", "pdfmake"],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Reporting Services", "Team:ResponseOps"],
@@ -1855,7 +1840,7 @@
     },
     {
       "groupName": "redux-thunk",
-      "matchDepNames": ["redux-thunk"],
+      "matchDepNames": ["redux-thunk", "redux-thunk-v2"],
       "reviewers": ["team:kibana-presentation", "team:kibana-management", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
@@ -1872,20 +1857,18 @@
     {
       "groupName": "platform security modules",
       "matchDepNames": [
-        "dependency-check",
         "dependency-cruiser",
         "dompurify",
         "fast-deep-equal",
         "node-forge",
         "formik",
         "handlebars",
-        "js-sha256",
         "js-yaml",
+        "knip",
         "magic-bytes.js",
         "minimist",
         "object-hash",
         "require-in-the-middle",
-        "tape",
         "tough-cookie",
         "xml-crypto",
         "@elastic/node-crypto",
@@ -1893,8 +1876,7 @@
         "@types/lodash",
         "@types/minimist",
         "@types/node-forge",
-        "@types/object-hash",
-        "@types/tough-cookie"
+        "@types/object-hash"
       ],
       "reviewers": ["team:kibana-security"],
       "matchBaseBranches": ["main"],
@@ -1963,7 +1945,6 @@
       "groupName": "minify",
       "matchDepNames": [
         "gulp-brotli",
-        "terser",
         "terser-webpack-plugin"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -1978,7 +1959,6 @@
         "@testing-library/dom",
         "@testing-library/jest-dom",
         "@testing-library/react",
-        "@testing-library/react-hooks",
         "@testing-library/user-event"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -2000,17 +1980,14 @@
         "expect",
         "jest",
         "jest-canvas-mock",
-        "jest-cli",
         "jest-config",
         "jest-diff",
         "jest-environment-jsdom",
         "jest-matcher-utils",
         "jest-mock",
         "jest-runtime",
-        "jest-specific-snapshot",
         "jest-snapshot",
-        "jest-styled-components",
-        "mutation-observer"
+        "jest-styled-components"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2109,7 +2086,14 @@
     },
     {
       "groupName": "redux",
-      "matchDepNames": ["redux", "react-redux", "reselect"],
+      "matchDepNames": [
+        "redux",
+        "react-redux",
+        "reselect",
+        "redux-v4",
+        "react-redux-v7",
+        "reselect-v4"
+      ],
       "reviewers": [
         "team:search-kibana",
         "team:kibana-presentation",
@@ -2250,9 +2234,9 @@
     {
       "groupName": "XState4",
       "matchDepNames": ["xstate", "@xstate/react"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "separateMajorMinor": true,
       "allowedVersions": "<5.0.0",
@@ -2261,18 +2245,18 @@
     {
       "groupName": "constate",
       "matchDepNames": ["constate"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
     {
       "groupName": "Oniguruma to es",
       "matchDepNames": ["oniguruma-to-es"],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2282,9 +2266,9 @@
         "@atlaskit/pragmatic-drag-and-drop",
         "@atlaskit/pragmatic-drag-and-drop-hitbox"
       ],
-      "reviewers": ["team:obs-onboarding-team"],
+      "reviewers": ["team:streams-ui"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:obs-onboarding"],
+      "addLabels": ["Team:streams-ui"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2408,21 +2392,15 @@
     {
       "groupName": "re2js",
       "matchDepNames": ["re2js"],
-      "reviewers": ["team:kibana-visualizations", "dej611"],
+      "reviewers": ["team:kibana-visualizations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Visualizations"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "Serve swagger docs",
-      "matchDepNames": [
-        "@types/express",
-        "express",
-        "swagger-jsdoc",
-        "swagger-ui-express",
-        "zod-to-json-schema"
-      ],
+      "groupName": "express",
+      "matchDepNames": ["@types/express", "express", "zod-to-json-schema"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "addLabels": ["team:obs-entities"],
@@ -2468,6 +2446,15 @@
     {
       "groupName": "@elastic/request-converter",
       "matchDepNames": ["@elastic/request-converter"],
+      "reviewers": ["team:kibana-management"],
+      "matchBaseBranches": ["main"],
+      "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "@elastic/micro-jq",
+      "matchDepNames": ["@elastic/micro-jq"],
       "reviewers": ["team:kibana-management"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Kibana Management", "Feature:Console"],

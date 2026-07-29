@@ -8,12 +8,12 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
-  ALL_ROLE,
+  ALERTING_V2_ALERTS_ALL_ROLE,
+  ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   buildAlertEvent,
   getAckAlertActionUrl,
   NO_ACCESS_ROLE,
-  READ_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -28,18 +28,18 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_ALERTS_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest.afterAll(async ({ apiServices }) => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
-    await apiServices.alertingV2.alertActions.cleanUp();
+    await apiServices.alertingV2.alertActionsEvents.cleanUp();
   });
 
   apiTest('ack: writes an ack action and returns 204', async ({ apiClient, apiServices }) => {
@@ -58,7 +58,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: { episode_id: episodeId },
     });
     expect(response).toHaveStatusCode(204);
-    const actions = await apiServices.alertingV2.alertActions.find({
+    const actions = await apiServices.alertingV2.alertActionsEvents.find({
       ruleId,
       actionTypes: ['ack'],
     });
@@ -118,6 +118,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
       body: { episode_id: 'unknown-episode' },
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
   });
 
   apiTest(
@@ -137,13 +138,16 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
         body: { episode_id: 'unknown-episode' },
       });
       expect(response).toHaveStatusCode(404);
+      expect(response.body.code).toBe('ALERT_EVENT_NOT_FOUND');
     }
   );
 
   apiTest(
     'authorization: returns 403 for a user with read-only alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ALERTS_READ_ROLE
+      );
       const response = await apiClient.post(getAckAlertActionUrl('ack-authz-read-group'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { episode_id: 'ack-authz-read-episode' },

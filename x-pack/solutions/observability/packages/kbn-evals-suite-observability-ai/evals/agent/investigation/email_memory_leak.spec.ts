@@ -42,7 +42,7 @@ evaluate.describe(
         dataset: {
           name: 'email-memory-leak investigation',
           description:
-            'Evaluates whether the agent correctly investigates a memory leak in the email service (emailMemoryLeak feature flag). The email service accumulates memory on every order confirmation: it never clears its deliveries array and pads each email body by a large multiplier. The service has no error rate — it sends emails successfully. The leak is silent until the process OOMs. This tests whether the agent can identify a resource/memory issue in the absence of obvious service errors.',
+            'Evaluates whether the agent correctly investigates the otel-demo emailMemoryLeak scenario, where the email service silently accumulates memory without throwing errors.',
           examples: [
             {
               input: {

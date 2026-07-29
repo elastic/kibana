@@ -16,8 +16,8 @@ export interface SpacesTestFixtures extends ScoutTestFixtures {
 }
 
 export const test = baseTest.extend<SpacesTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async ({ pageObjects, page }, use) => {
-    const extendedPageObjects = extendPageObjects(pageObjects, page);
+  pageObjects: async ({ pageObjects, page, kbnUrl }, use) => {
+    const extendedPageObjects = extendPageObjects(pageObjects, page, kbnUrl);
     await use(extendedPageObjects);
   },
 });

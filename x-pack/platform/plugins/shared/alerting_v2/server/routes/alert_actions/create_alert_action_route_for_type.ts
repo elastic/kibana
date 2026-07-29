@@ -66,7 +66,7 @@ export const createAlertActionRouteForType = <
       },
       response: {
         204: {
-          description: 'Indicates a successful call.',
+          description: 'Returns the newly created alert action.',
         },
         400: {
           body: () => errorResponseSchema,

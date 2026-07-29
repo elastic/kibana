@@ -21,7 +21,6 @@ import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useFlyoutActions } from './use_flyout_actions';
 import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
-import type { DocViewerExtensionParams } from '../../context_awareness';
 import { DocumentType, useProfileAccessor } from '../../context_awareness';
 import { recordHasContext } from '../../context_awareness/profiles_manager/record_has_context';
 
@@ -42,7 +41,6 @@ export interface DiscoverGridFlyoutProps
   dataView: DataView;
   initialTabId?: string;
   docViewerRef?: DocViewerProps['ref'];
-  docViewerExtensionActions?: DocViewerExtensionParams['actions'];
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter?: DocViewFilterFn;
@@ -71,7 +69,6 @@ export function DiscoverGridFlyout({
   query,
   initialTabId,
   docViewerRef,
-  docViewerExtensionActions,
   onFilter,
   onClose,
   onRemoveColumn,
@@ -105,8 +102,8 @@ export function DiscoverGridFlyout({
       docViewsRegistry: (registry: DocViewsRegistry) => registry,
     }));
 
-    return getDocViewer({ actions: docViewerExtensionActions ?? {}, record: actualHit });
-  }, [actualHit, docViewerExtensionActions, getDocViewerAccessor]);
+    return getDocViewer({ record: actualHit });
+  }, [actualHit, getDocViewerAccessor]);
 
   useEffect(() => {
     dismissAllFlyoutsExceptFor(DiscoverFlyouts.docViewer);

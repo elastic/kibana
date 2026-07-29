@@ -23,7 +23,7 @@ import {
   USERS_PATH,
 } from '../../../common/constants';
 
-export const sourcererPaths = [
+export const dataViewPickerPaths = [
   ALERTS_PATH,
   DATA_QUALITY_PATH,
   `${RULES_PATH}/id/:id`,
@@ -52,8 +52,7 @@ const explorePaths = [
 ];
 
 export const getScopeFromPath = (
-  pathname: string,
-  newDataViewPickerEnabled?: boolean
+  pathname: string
 ): PageScope.default | PageScope.alerts | PageScope.attacks | PageScope.explore => {
   if (
     matchPath(pathname, {
@@ -65,7 +64,6 @@ export const getScopeFromPath = (
   }
 
   if (
-    newDataViewPickerEnabled &&
     matchPath(pathname, {
       path: attacksPaths,
       strict: false,
@@ -75,7 +73,6 @@ export const getScopeFromPath = (
   }
 
   if (
-    newDataViewPickerEnabled &&
     matchPath(pathname, {
       path: explorePaths,
       strict: false,
@@ -87,8 +84,8 @@ export const getScopeFromPath = (
   return PageScope.default;
 };
 
-export const showSourcererByPath = (pathname: string): boolean =>
+export const showDataViewPickerByPath = (pathname: string): boolean =>
   matchPath(pathname, {
-    path: sourcererPaths,
+    path: dataViewPickerPaths,
     strict: false,
   }) != null;

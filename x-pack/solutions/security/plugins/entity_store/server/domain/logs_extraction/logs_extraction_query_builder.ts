@@ -7,7 +7,7 @@
 
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { Condition } from '@kbn/streamlang';
-import { conditionToESQL } from '@kbn/streamlang';
+import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
 import { esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
@@ -16,13 +16,15 @@ import {
   type EntityField,
   type EntityType,
 } from '../../../common/domain/definitions/entity_schema';
-import { getEuidEsqlEvaluation } from '../../../common/domain/euid/esql';
+import {
+  getEuidEsqlEvaluation,
+  getFieldEvaluationsEsqlFromDefinition,
+} from '../../../common/domain/euid/esql';
 
 import {
   buildExtractionSourceClause,
-  buildLogPageProbeSourceClause,
-  buildFieldEvaluations,
   buildSetFieldsByCondition,
+  buildSetFieldsByConditionAssignments,
   type PaginationParams,
   type PaginationFields,
   type LogSlicePaginationParams,
@@ -38,8 +40,8 @@ import {
   fieldsToKeep,
   extractPaginationParams,
   buildPaginationSection,
-  hasFieldEvaluations,
   mapPostAggFilterFieldsToRecentForEsql,
+  NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
@@ -73,20 +75,6 @@ interface LogsExtractionQueryParams {
   logsPageCursorEnd?: LogSlicePaginationParams;
 }
 
-export function buildRemainingLogsCountQuery(params: {
-  indexPatterns: string[];
-  type: EntityType;
-  fromDateISO: string;
-  toDateISO: string;
-  logsPageCursorStart?: LogSlicePaginationParams;
-}): string {
-  return (
-    buildLogPageProbeSourceClause(params) +
-    `
-  | STATS document_count = COUNT()`
-  );
-}
-
 export function buildLogsExtractionEsqlQuery({
   indexPatterns,
   entityDefinition,
@@ -103,6 +91,8 @@ export function buildLogsExtractionEsqlQuery({
 
   const parts = [];
 
+  parts.push(`${NULLIFY_UNMAPPED_FIELDS_SETTING}`);
+
   // FROM and WHERE
   parts.push(
     buildExtractionSourceClause({
@@ -115,9 +105,13 @@ export function buildLogsExtractionEsqlQuery({
     })
   );
 
-  // Special evaluations for entity id
-  if (hasFieldEvaluations(entityDefinition)) {
-    parts.push(buildFieldEvaluations(entityDefinition));
+  // Single | EVAL stage: later assignments can reference columns from earlier ones.
+  {
+    const fieldEvalsEsql = getFieldEvaluationsEsqlFromDefinition(entityDefinition);
+    const euidEsql = getEuidEsqlEvaluation(type, recentData(ENGINE_METADATA_UNTYPED_ID_FIELD), {
+      withTypeId: false,
+    });
+    parts.push(`| EVAL ${fieldEvalsEsql ? `${fieldEvalsEsql},\n ${euidEsql}` : euidEsql}`);
   }
 
   if (entityDefinition.whenConditionTrueSetFieldsPreAgg?.length) {
@@ -125,13 +119,6 @@ export function buildLogsExtractionEsqlQuery({
       parts.push(buildSetFieldsByCondition(entry));
     }
   }
-
-  // Evaluation of the id without type so we can fallback to name
-  parts.push(
-    `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
-      withTypeId: false,
-    })}`
-  );
 
   // Main stats aggregation from incoming data
   parts.push(`| STATS
@@ -186,14 +173,15 @@ export function buildLogsExtractionEsqlQuery({
   }
 
   if (entityDefinition.whenConditionTrueSetFieldsAfterStats?.length) {
-    for (const entry of entityDefinition.whenConditionTrueSetFieldsAfterStats) {
-      parts.push(
-        buildSetFieldsByCondition(entry, {
+    // Merge all post-STATS overrides into a single | EVAL stage.
+    const postStatsAssignments = entityDefinition.whenConditionTrueSetFieldsAfterStats.map(
+      (entry) =>
+        buildSetFieldsByConditionAssignments(entry, {
           entityFields: fields,
           useRecentDataPrefix: true,
         })
-      );
-    }
+    );
+    parts.push(`| EVAL ${postStatsAssignments.join(',\n    ')}`);
   }
 
   // Perform the final merge of the fields between latest and recent data
@@ -222,6 +210,7 @@ export function extractMainPaginationParams(
 
 function mergedFieldStats(idFieldName: string, fields: EntityField[]): string {
   return fields
+    .filter((field) => field.retention.operation !== 'managed')
     .map((field) => {
       const { retention, destination: dest } = field;
       const recentDest = recentData(dest);

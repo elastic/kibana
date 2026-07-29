@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
-import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH } from '../constants';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import {
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+  ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
+} from '../constants';
 import { ExecutionHistoryApi } from './execution_history_api';
 
 describe('ExecutionHistoryApi', () => {
   const buildApi = () => {
-    const http = {
-      get: jest.fn().mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 }),
-    };
-    const api = new ExecutionHistoryApi(http as unknown as HttpStart);
+    const http = httpServiceMock.createStartContract();
+    http.get.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
+    const api = new ExecutionHistoryApi(http);
     return { api, http };
   };
 
@@ -29,13 +32,18 @@ describe('ExecutionHistoryApi', () => {
     );
   });
 
-  it('forwards page and perPage as query params', async () => {
+  it('forwards page, perPage, search and outcome as query params', async () => {
     const { api, http } = buildApi();
 
-    await api.listExecutionHistory({ page: 3, perPage: 25 });
+    await api.listExecutionHistory({
+      page: 3,
+      perPage: 25,
+      search: 'foo',
+      outcome: 'throttled',
+    });
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: 3, perPage: 25 },
+      query: { page: 3, perPage: 25, search: 'foo', outcome: 'throttled' },
     });
   });
 
@@ -45,7 +53,7 @@ describe('ExecutionHistoryApi', () => {
     await api.listExecutionHistory();
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: undefined, perPage: undefined },
+      query: { page: undefined, perPage: undefined, search: undefined, outcome: undefined },
     });
   });
 
@@ -67,5 +75,46 @@ describe('ExecutionHistoryApi', () => {
     http.get.mockRejectedValueOnce(new Error('boom'));
 
     await expect(api.listExecutionHistory()).rejects.toThrow('boom');
+  });
+
+  it('forwards search and outcome to countNewSince', async () => {
+    const { api, http } = buildApi();
+    await api.countNewSince('2026-01-01T00:00:00.000Z', { search: 'foo', outcome: 'throttled' });
+    expect(http.get).toHaveBeenCalledWith(
+      ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
+      { query: { since: '2026-01-01T00:00:00.000Z', search: 'foo', outcome: 'throttled' } }
+    );
+  });
+
+  it('GETs the rule execution history endpoint', async () => {
+    const { api, http } = buildApi();
+
+    await api.getRuleExecutions({ page: 1, perPage: 10 });
+
+    expect(http.get).toHaveBeenCalledWith(
+      ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
+      expect.any(Object)
+    );
+  });
+
+  it('forwards all query params to getRuleExecutions', async () => {
+    const { api, http } = buildApi();
+
+    const params = {
+      ruleId: ['r1', 'r2'],
+      outcome: ['failure' as const],
+      from: '2026-01-01T00:00:00Z',
+      to: '2026-01-02T00:00:00Z',
+      sort: 'duration' as const,
+      sortOrder: 'asc' as const,
+      page: 3,
+      perPage: 50,
+    };
+
+    await api.getRuleExecutions(params);
+
+    expect(http.get).toHaveBeenCalledWith(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
+      query: params,
+    });
   });
 });

@@ -17,6 +17,7 @@ export default createTestConfig({
     `--xpack.securitySolution.enableExperimental=${JSON.stringify([
       'disable:entityAnalyticsEntityStoreV2',
       'disable:entityAnalyticsWatchlistEnabled',
+      'riskScoreHistoryEnabled',
     ])}`,
     '--uiSettings.overrides.securitySolution:entityStoreEnableV2=false',
   ],

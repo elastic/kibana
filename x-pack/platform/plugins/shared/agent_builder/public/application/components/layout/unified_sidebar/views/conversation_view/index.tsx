@@ -82,7 +82,7 @@ export const ConversationSidebarView: React.FC = () => {
 
   const { conversations = [] } = useConversationList({ agentId });
   const hasConversations = conversations.length > 0;
-  const { removeAllErrors } = useStreamingContext();
+  const { removeAllErrors, removeError } = useStreamingContext();
 
   const isNewConversationRoute =
     conversationId === 'new' || pathname === appPaths.agent.root({ agentId });
@@ -134,8 +134,8 @@ export const ConversationSidebarView: React.FC = () => {
     navigateToAgentBuilderUrl(appPaths.agent.conversations.new({ agentId }));
   };
 
-  const handleConversationItemClick = () => {
-    removeAllErrors();
+  const handleConversationItemClick = (clickedConversationId: string) => {
+    removeError(clickedConversationId);
   };
 
   return (
@@ -272,7 +272,7 @@ export const ConversationSidebarView: React.FC = () => {
           currentConversationId={conversationId}
           onClose={() => setIsSearchModalOpen(false)}
           onSelectConversation={(id) => {
-            removeAllErrors();
+            removeError(id);
             navigateToAgentBuilderUrl(
               appPaths.agent.conversations.byId({ agentId, conversationId: id })
             );

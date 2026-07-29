@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
 
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import {
@@ -20,11 +20,13 @@ import {
   initializeTitleManager,
   timeRangeComparators,
   titleComparators,
+  useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subscription, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
-import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
+import { initializeStateApi } from '@kbn/presentation-publishing';
+import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
+import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
 import {
@@ -62,38 +64,28 @@ export const getSingleMetricViewerEmbeddableFactory = (
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
 
-      function serializeState() {
-        return {
+      const stateApi = initializeStateApi<SingleMetricViewerEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...timeRangeManager.getLatestState(),
           ...singleMetricManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<SingleMetricViewerEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           timeRangeManager.anyStateChange$,
           singleMetricManager.anyStateChange$
         ),
-        getComparators: () => {
-          return {
-            ...titleComparators,
-            ...timeRangeComparators,
-            ...singleMetricViewerComparators,
-            id: 'skip',
-            query: 'skip',
-            filters: 'skip',
-            refreshConfig: 'skip',
-          };
-        },
-        onReset: (lastSaved) => {
-          timeRangeManager.reinitializeState(lastSaved);
-          titleManager.reinitializeState(lastSaved);
-          if (lastSaved) singleMetricManager.reinitializeState(lastSaved);
+        getComparators: () => ({
+          ...titleComparators,
+          ...timeRangeComparators,
+          ...singleMetricViewerComparators,
+        }),
+        applySerializedState: (nextState) => {
+          timeRangeManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          singleMetricManager.reinitializeState(nextState);
         },
       });
 
@@ -134,10 +126,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
         ...titleManager.api,
         ...timeRangeManager.api,
         ...singleMetricManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         dataLoading$,
         blockingError$,
-        serializeState,
       });
 
       const { singleMetricViewerData$, onDestroy } = initializeSingleMetricViewerDataFetcher(
@@ -156,6 +147,35 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
           const { singleMetricViewerData, bounds, lastRefresh } =
             useStateFromPublishingSubject(singleMetricViewerData$);
+          const [isLoading, error] = useBatchedPublishingSubjects(dataLoading$, blockingError$);
+
+          const [hasRendered, setHasRendered] = useState(false);
+          const wrapperRef = useRef<HTMLDivElement>(null);
+
+          useEffect(() => {
+            if (isLoading) {
+              setHasRendered(false);
+            }
+          }, [isLoading]);
+
+          useEffect(
+            function dispatchRenderMessages() {
+              const el = wrapperRef.current;
+              if (!el) return;
+              if (error) {
+                dispatchRenderComplete(el);
+                return;
+              }
+              if (isLoading) {
+                dispatchRenderStart(el);
+                return;
+              }
+              if (hasRendered) {
+                dispatchRenderComplete(el);
+              }
+            },
+            [isLoading, hasRendered, error]
+          );
 
           useReactEmbeddableExecutionContext(
             services[0].executionContext,
@@ -183,15 +203,26 @@ export const getSingleMetricViewerEmbeddableFactory = (
               bounds={bounds}
               functionDescription={functionDescription}
               lastRefresh={lastRefresh}
-              onError={(error) => blockingError$.next(error)}
+              onError={(err) => {
+                blockingError$.next(err);
+                if (err) {
+                  dataLoading$.next(false);
+                }
+              }}
               selectedDetectorIndex={singleMetricViewerData?.selectedDetectorIndex}
               selectedEntities={singleMetricViewerData?.selectedEntities}
               selectedJobId={singleMetricViewerData?.jobIds[0]}
               forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
               onForecastIdChange={api.updateForecastId}
+              wrapperRef={wrapperRef}
+              isRenderComplete={error ? true : hasRendered}
+              onLoading={(loading) => {
+                dataLoading$.next(loading);
+              }}
               onRenderComplete={() => {
                 dataLoading$.next(false);
+                setHasRendered(true);
               }}
             />
           );

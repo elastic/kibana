@@ -216,10 +216,7 @@ export class UrlFormat extends FieldFormat {
 
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
         const fieldName = field?.name;
-        const linkContent =
-          fieldName && hit?.highlight?.[fieldName]
-            ? getHighlightReact(label, hit.highlight[fieldName])
-            : label;
+        const linkContent = getHighlightReact(label, fieldName, hit);
 
         return (
           <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">

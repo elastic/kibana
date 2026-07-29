@@ -56,16 +56,11 @@ function toErrorMessage(error: unknown): string {
 }
 
 export function getStatusCode(error: any): number | undefined {
-  // KbnClientRequesterError keeps the HTTP status on its `axiosError` after
-  // `clean()` strips `response`/top-level fields, so it must be checked
-  // alongside the more conventional shapes.
   return (
     error?.statusCode ??
     error?.status ??
     error?.response?.status ??
     error?.meta?.status ??
-    error?.axiosError?.status ??
-    error?.axiosError?.response?.status ??
     undefined
   );
 }
@@ -120,9 +115,16 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
     return { retry: true, retryAfterMs };
   }
 
-  // Common transient network issues (best-effort)
-  if (/ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND/i.test(message)) {
-    return { retry: true };
+  // Common transient network issues (best-effort).
+  // "other side closed" / "fetch failed" are SocketError signatures from undici when a
+  // keep-alive connection is closed by the server (e.g. Kibana's Node.js keepAliveTimeout)
+  // while the eval worker is busy with a long ES replay operation.
+  if (
+    /ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|other side closed|socket hang up|fetch failed/i.test(
+      message
+    )
+  ) {
+    return { retry: true, retryAfterMs };
   }
 
   return { retry: false };

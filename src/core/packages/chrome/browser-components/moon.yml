@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/core-application-common'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-browser'
+  - '@kbn/core-chrome-browser-navigation-utils'
   - '@kbn/core-chrome-browser-context'
   - '@kbn/core-chrome-browser-hooks'
   - '@kbn/core-chrome-browser-internal-types'
@@ -47,6 +48,8 @@ dependsOn:
   - '@kbn/test-jest-helpers'
   - '@kbn/use-observable'
   - '@kbn/shared-ux-utility'
+  - '@kbn/ui-chrome-layout'
+  - '@kbn/app-header'
 tags:
   - shared-browser
   - package

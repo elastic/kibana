@@ -19,12 +19,17 @@ import type {
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { WorkflowGraph } from '@kbn/workflows/graph';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
+import { callKibanaApi } from '../../lib/call_kibana_api';
 import type { WorkflowTemplatingEngine } from '../../templating_engine';
 import type { StepIoService } from '../step_io_service';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 const dependencies = mockContextDependencies();
+
+jest.mock('../../lib/call_kibana_api', () => ({
+  callKibanaApi: jest.fn(),
+}));
 
 jest.mock('../../utils', () => ({
   ...jest.requireActual<typeof import('../../utils')>('../../utils'),
@@ -66,7 +71,11 @@ describe('WorkflowContextManager', () => {
   };
   const fakeStackFrames: StackFrame[] = [];
 
-  function createTestContainer(workflow: WorkflowYaml) {
+  function createTestContainer(
+    workflow: WorkflowYaml,
+    options: { stackFrames?: StackFrame[] } = {}
+  ) {
+    const stackFrames = options.stackFrames ?? fakeStackFrames;
     const workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(workflow);
     const workflowExecutionState: WorkflowExecutionState = {} as WorkflowExecutionState;
     workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
@@ -120,6 +129,7 @@ describe('WorkflowContextManager', () => {
       hasEvictedOutputs: jest.fn().mockReturnValue(false),
       prepareForRead: jest.fn().mockResolvedValue(undefined),
       rehydrateOutputs: jest.fn().mockResolvedValue(undefined),
+      releaseReadPins: jest.fn(),
       releaseTransientlyRehydratedOutputs: jest.fn(),
       setStepInput: jest.fn((id: string, input: unknown) => stepInputs.set(id, input)),
       setStepOutput: jest.fn((id: string, output: unknown) => stepOutputs.set(id, output)),
@@ -161,7 +171,7 @@ describe('WorkflowContextManager', () => {
     const underTest = new WorkflowContextManager({
       templateEngine: templatingEngineMock,
       node: fakeNode as AtomicGraphNode,
-      stackFrames: fakeStackFrames,
+      stackFrames,
       workflowExecutionGraph,
       workflowExecutionState,
       stepIoService,
@@ -565,18 +575,19 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should have foreach equal to the inner foreach step state for step innerLogStep', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'outerForeachStep',
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+        },
+        {
+          stepId: 'innerForeachStep',
+          nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep', nodeType: 'enter-foreach' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        scopeStack: [
-          {
-            stepId: 'outerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
-          },
-          {
-            stepId: 'innerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
-          },
-        ],
       } as EsWorkflowExecution);
       testContainer.workflowExecutionState.getStepExecution = jest
         .fn()
@@ -654,14 +665,15 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should not override foreach context if contextOverride.foreach is not present', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'outerForeachStep',
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        scopeStack: [
-          {
-            stepId: 'outerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
-          },
-        ] as StackFrame[],
         context: {
           contextOverride: {
             foreach: {
@@ -699,14 +711,15 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should populate steps[foreachStepId] with item, items, index, total for a single foreach', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'outerForeachStep',
+          nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        scopeStack: [
-          {
-            stepId: 'outerForeachStep',
-            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
-          },
-        ] as StackFrame[],
       } as EsWorkflowExecution);
       testContainer.workflowExecutionState.getStepExecution = jest
         .fn()
@@ -745,18 +758,19 @@ describe('WorkflowContextManager', () => {
       const innerCurrentIndex = 1;
 
       beforeEach(() => {
+        const stackFrames: StackFrame[] = [
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+          },
+          {
+            stepId: 'innerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep', nodeType: 'enter-foreach' }],
+          },
+        ];
+        testContainer = createTestContainer(workflow, { stackFrames });
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
           workflowDefinition: workflow,
-          scopeStack: [
-            {
-              stepId: 'outerForeachStep',
-              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
-            },
-            {
-              stepId: 'innerForeachStep',
-              nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
-            },
-          ],
         } as EsWorkflowExecution);
         testContainer.workflowExecutionState.getStepExecution = jest
           .fn()
@@ -933,23 +947,23 @@ describe('WorkflowContextManager', () => {
       const innerIdx = 1;
 
       beforeEach(() => {
-        testContainer = createTestContainer(workflow);
+        const stackFrames: StackFrame[] = [
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+          },
+          {
+            stepId: 'innerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep', nodeType: 'enter-foreach' }],
+          },
+          {
+            stepId: 'deepForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_deepForeachStep', nodeType: 'enter-foreach' }],
+          },
+        ];
+        testContainer = createTestContainer(workflow, { stackFrames });
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
           workflowDefinition: workflow,
-          scopeStack: [
-            {
-              stepId: 'outerForeachStep',
-              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
-            },
-            {
-              stepId: 'innerForeachStep',
-              nestedScopes: [{ nodeId: 'enterForeach_innerForeachStep' }],
-            },
-            {
-              stepId: 'deepForeachStep',
-              nestedScopes: [{ nodeId: 'enterForeach_deepForeachStep' }],
-            },
-          ],
         } as EsWorkflowExecution);
         testContainer.workflowExecutionState.getStepExecution = jest
           .fn()
@@ -1032,14 +1046,15 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should produce empty items when foreach step input is null', () => {
+        const stackFrames: StackFrame[] = [
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+          },
+        ];
+        testContainer = createTestContainer(workflow, { stackFrames });
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
           workflowDefinition: workflow,
-          scopeStack: [
-            {
-              stepId: 'outerForeachStep',
-              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
-            },
-          ],
         } as EsWorkflowExecution);
         testContainer.workflowExecutionState.getStepExecution = jest
           .fn()
@@ -1062,14 +1077,15 @@ describe('WorkflowContextManager', () => {
       });
 
       it('should produce empty items when foreach step input has no foreach key', () => {
+        const stackFrames: StackFrame[] = [
+          {
+            stepId: 'outerForeachStep',
+            nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep', nodeType: 'enter-foreach' }],
+          },
+        ];
+        testContainer = createTestContainer(workflow, { stackFrames });
         testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
           workflowDefinition: workflow,
-          scopeStack: [
-            {
-              stepId: 'outerForeachStep',
-              nestedScopes: [{ nodeId: 'enterForeach_outerForeachStep' }],
-            },
-          ],
         } as EsWorkflowExecution);
         testContainer.workflowExecutionState.getStepExecution = jest
           .fn()
@@ -1123,14 +1139,15 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should populate while.iteration from step state', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'poll_loop',
+          nestedScopes: [{ nodeId: 'enterWhile_poll_loop', nodeType: 'enter-while' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        scopeStack: [
-          {
-            stepId: 'poll_loop',
-            nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
-          },
-        ] as StackFrame[],
       } as EsWorkflowExecution);
 
       testContainer.workflowExecutionState.getStepExecution = jest
@@ -1153,14 +1170,15 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should default iteration to 0 when state has no iteration', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'poll_loop',
+          nestedScopes: [{ nodeId: 'enterWhile_poll_loop', nodeType: 'enter-while' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        scopeStack: [
-          {
-            stepId: 'poll_loop',
-            nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
-          },
-        ] as StackFrame[],
       } as EsWorkflowExecution);
 
       testContainer.workflowExecutionState.getStepExecution = jest
@@ -1183,14 +1201,15 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should merge iteration into steps[stepId]', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'poll_loop',
+          nestedScopes: [{ nodeId: 'enterWhile_poll_loop', nodeType: 'enter-while' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        scopeStack: [
-          {
-            stepId: 'poll_loop',
-            nestedScopes: [{ nodeId: 'enterWhile_poll_loop' }],
-          },
-        ] as StackFrame[],
       } as EsWorkflowExecution);
 
       testContainer.workflowExecutionState.getStepExecution = jest
@@ -1223,18 +1242,19 @@ describe('WorkflowContextManager', () => {
     });
 
     it('should resolve nested while: while.iteration is innermost, outer accessible via steps', () => {
+      const stackFrames: StackFrame[] = [
+        {
+          stepId: 'outer_loop',
+          nestedScopes: [{ nodeId: 'enterWhile_outer_loop', nodeType: 'enter-while' }],
+        },
+        {
+          stepId: 'inner_loop',
+          nestedScopes: [{ nodeId: 'enterWhile_inner_loop', nodeType: 'enter-while' }],
+        },
+      ];
+      testContainer = createTestContainer(workflow, { stackFrames });
       testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
         workflowDefinition: workflow,
-        scopeStack: [
-          {
-            stepId: 'outer_loop',
-            nestedScopes: [{ nodeId: 'enterWhile_outer_loop' }],
-          },
-          {
-            stepId: 'inner_loop',
-            nestedScopes: [{ nodeId: 'enterWhile_inner_loop' }],
-          },
-        ] as StackFrame[],
       } as EsWorkflowExecution);
 
       testContainer.workflowExecutionState.getStepExecution = jest
@@ -1979,6 +1999,69 @@ describe('WorkflowContextManager', () => {
       // Resolver delegates to graph.getAllPredecessors — for step_a (no
       // predecessors) the resolver returns [].
       expect(args.predecessorsResolver(testContainer.underTest.node)).toEqual([]);
+    });
+  });
+
+  describe('callKibanaApi', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      triggers: [],
+      steps: [],
+    };
+
+    beforeEach(() => {
+      (callKibanaApi as jest.Mock).mockReset();
+    });
+
+    it('forwards the fake request, core start, cloud setup, and workflow run id to the helper', async () => {
+      const testContainer = createTestContainer(workflow);
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'workflow-run-123',
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: workflow,
+      } as unknown as EsWorkflowExecution);
+
+      (callKibanaApi as jest.Mock).mockResolvedValue({
+        status: 200,
+        headers: {},
+        body: { ok: true },
+      });
+
+      const result = await testContainer.underTest.callKibanaApi({
+        method: 'GET',
+        path: '/api/status',
+      });
+
+      expect(result).toEqual({ status: 200, headers: {}, body: { ok: true } });
+      expect(callKibanaApi).toHaveBeenCalledTimes(1);
+      const [deps, params] = (callKibanaApi as jest.Mock).mock.calls[0];
+      expect(deps.fakeRequest).toBe(
+        (testContainer.underTest as unknown as { fakeRequest: unknown }).fakeRequest
+      );
+      expect(deps.coreStart).toBe(
+        (testContainer.underTest as unknown as { coreStart: unknown }).coreStart
+      );
+      expect(deps.cloudSetup).toBe(dependencies.cloudSetup);
+      expect(deps.workflowRunId).toBe('workflow-run-123');
+      expect(params).toEqual({ method: 'GET', path: '/api/status' });
+    });
+
+    it('propagates errors from the helper', async () => {
+      const testContainer = createTestContainer(workflow);
+      testContainer.workflowExecutionState.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'workflow-run-err',
+        scopeStack: [] as StackFrame[],
+        workflowDefinition: workflow,
+      } as unknown as EsWorkflowExecution);
+
+      (callKibanaApi as jest.Mock).mockRejectedValue(new Error('HTTP 403: forbidden'));
+
+      await expect(
+        testContainer.underTest.callKibanaApi({ method: 'GET', path: '/api/forbidden' })
+      ).rejects.toThrow('HTTP 403: forbidden');
     });
   });
 });

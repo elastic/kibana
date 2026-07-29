@@ -10,10 +10,11 @@ import type { TaskManagerStartContract } from '../..';
 import type { ConcreteTaskInstance } from '../../task';
 import type { TaskManagerPluginsStart } from '../../plugin';
 import type { TaskManagerUiamProvisioningRunEventData } from '../event_based_telemetry';
+import type { LatestTaskStateSchema } from '../task_state';
 import { failedProvisioningRunTelemetry } from './build_provisioning_run_telemetry';
 
 export interface UiamProvisioningRunTaskOutcome {
-  state: { runs: number };
+  state: LatestTaskStateSchema;
   runAt?: Date;
   telemetry: TaskManagerUiamProvisioningRunEventData;
 }

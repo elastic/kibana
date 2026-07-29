@@ -23,12 +23,17 @@ import {
 export const CaseCreatedTriggerId = 'cases.caseCreated' as const;
 
 const baseCaseEventSchema = z.object({
-  owner: OwnerSchema.meta({ description: CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION }),
+  // We're adding `string()` to the union to allow for more lenient runtime checks in test envs.
+  // The OwnerSchema is still needed and should not be removed.
+  owner: z
+    .union([OwnerSchema, z.string().min(1).max(50)])
+    .meta({ description: CASE_TRIGGER_EVENT_SCHEMA_OWNER_DESCRIPTION }),
   caseId: z.string().meta({ description: CASE_TRIGGER_EVENT_SCHEMA_CASE_ID_DESCRIPTION }),
 });
 
 export const caseCreatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseCreatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: baseCaseEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.caseCreated.title', {
     defaultMessage: 'Cases - Case created',
@@ -69,6 +74,7 @@ const caseUpdatedEventSchema = baseCaseEventSchema.extend({
 
 export const caseUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseUpdatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: caseUpdatedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.caseUpdated.title', {
     defaultMessage: 'Cases - Case updated',
@@ -111,6 +117,7 @@ const caseStatusUpdatedEventSchema = baseCaseEventSchema.extend({
 
 export const caseStatusUpdatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CaseStatusUpdatedTriggerId,
+  stability: 'tech_preview',
   eventSchema: caseStatusUpdatedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.caseStatusUpdated.title', {
     defaultMessage: 'Cases - Case status updated',
@@ -156,6 +163,7 @@ const attachmentsAddedEventSchema = baseCaseEventSchema.extend({
 
 export const attachmentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: AttachmentsAddedTriggerId,
+  stability: 'tech_preview',
   eventSchema: attachmentsAddedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.attachmentsAdded.title', {
     defaultMessage: 'Cases - Attachments added',
@@ -213,6 +221,7 @@ const CommentsAddedEventSchema = baseCaseEventSchema.extend({
 
 export const commentsAddedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: CommentsAddedTriggerId,
+  stability: 'tech_preview',
   eventSchema: CommentsAddedEventSchema,
   title: i18n.translate('xpack.cases.workflowTriggers.commentsAdded.title', {
     defaultMessage: 'Cases - Comments added',

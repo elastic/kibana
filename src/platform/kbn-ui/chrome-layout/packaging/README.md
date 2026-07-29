@@ -18,10 +18,10 @@ Output lands in `../target/`:
 
 ## How it works
 
-Kibana-specific packages (`@kbn/core-chrome-layout-constants`,
-`@kbn/core-chrome-layout-utils`) are replaced at build time with local stubs
-under `react/services/`. The stubs provide the same runtime values without
-requiring the Kibana package graph.
+`@kbn/ui-chrome-layout-constants` and `@kbn/ui-chrome-layout-utils` are aliased
+at build time to their pre-built outputs under `../../chrome-layout-constants/target/`
+and `../../chrome-layout-utils/target/`. Run those packages' `build.sh` first if
+their targets are missing (Step 0 of this script does this automatically).
 
 ## Example app
 

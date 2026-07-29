@@ -14,6 +14,8 @@ import {
 } from '../../../../common/components/bulk_actions';
 import { UpdateMissingIndex } from './update_missing_index';
 import { type RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { MigrationTranslationResult } from '../../../../../../common/siem_migrations/constants';
+import type { BulkActionsItem } from '../../../../common/components/bulk_actions/types';
 import type { GetRuleMigrationTranslationStatsResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 const ReprocessFailedRulesButton = WithMissingPrivilegesTooltip(
@@ -60,6 +62,10 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
     const installSelectedRulesCallback = useCallback(() => {
       installSelectedRule?.();
     }, [installSelectedRule]);
+    const isRuleInstallable = useCallback(
+      (item: BulkActionsItem) => item.translation_result === MigrationTranslationResult.FULL,
+      []
+    );
     return (
       <EuiFlexGroup
         alignItems="center"
@@ -96,6 +102,7 @@ export const BulkActions: React.FC<BulkActionsProps> = memo(
               isLoading={isTableLoading}
               numberOfTranslatedItems={numberOfTranslatedRules}
               selectedItems={selectedRules}
+              isInstallable={isRuleInstallable}
             />
           </EuiFlexItem>
         )}

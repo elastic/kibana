@@ -47,6 +47,21 @@ const getBulkEnableRuleErrorSummary = () => {
   });
 };
 
+const getBulkCreateRuleErrorSummary = () => {
+  return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.bulkCreateSummary', {
+    defaultMessage: `Rules cannot be bulk created. The maximum number of runs per minute would be exceeded.`,
+  });
+};
+
+const getCloneRuleErrorSummary = (name: string) => {
+  return i18n.translate('xpack.alerting.ruleCircuitBreaker.error.cloneSummary', {
+    defaultMessage: `Rule ''{name}'' cannot be cloned. The maximum number of runs per minute would be exceeded.`,
+    values: {
+      name,
+    },
+  });
+};
+
 const getRuleCircuitBreakerErrorDetail = ({
   interval,
   intervalAvailable,
@@ -84,7 +99,7 @@ export const getRuleCircuitBreakerErrorMessage = ({
   name?: string;
   interval: number;
   intervalAvailable: number;
-  action: 'update' | 'create' | 'enable' | 'bulkEdit' | 'bulkEnable';
+  action: 'update' | 'create' | 'enable' | 'bulkEdit' | 'bulkEnable' | 'bulkCreate' | 'clone';
   rules?: number;
 }) => {
   let errorMessageSummary: string;
@@ -104,6 +119,12 @@ export const getRuleCircuitBreakerErrorMessage = ({
       break;
     case 'bulkEnable':
       errorMessageSummary = getBulkEnableRuleErrorSummary();
+      break;
+    case 'bulkCreate':
+      errorMessageSummary = getBulkCreateRuleErrorSummary();
+      break;
+    case 'clone':
+      errorMessageSummary = getCloneRuleErrorSummary(name);
       break;
   }
 

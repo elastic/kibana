@@ -10,6 +10,7 @@
 import {
   applyLiquidMask,
   classifyLiquidPosition,
+  findMaskedRangeAtOffset,
   isOffsetInsideMaskedRange,
 } from './classify_liquid_position';
 
@@ -36,7 +37,7 @@ describe('classifyLiquidPosition', () => {
     expect(result.kind).toBe('safe');
     if (result.kind === 'safe') {
       expect(result.maskedRanges).toEqual([
-        { start: text.indexOf('{{'), end: text.indexOf('}}') + 2 },
+        { start: text.indexOf('{{'), end: text.indexOf('}}') + 2, kind: 'expression' },
       ]);
     }
   });
@@ -66,7 +67,7 @@ describe('classifyLiquidPosition', () => {
     expect(result.kind).toBe('safe');
     if (result.kind === 'safe') {
       expect(result.maskedRanges).toEqual([
-        { start: text.indexOf('{#'), end: text.indexOf('#}') + 2 },
+        { start: text.indexOf('{#'), end: text.indexOf('#}') + 2, kind: 'comment' },
       ]);
     }
   });
@@ -83,7 +84,7 @@ describe('classifyLiquidPosition', () => {
     expect(result.kind).toBe('safe');
     if (result.kind === 'safe') {
       expect(result.maskedRanges).toEqual([
-        { start: text.indexOf('{{'), end: text.indexOf('}}') + 2 },
+        { start: text.indexOf('{{'), end: text.indexOf('}}') + 2, kind: 'expression' },
       ]);
     }
   });
@@ -124,7 +125,9 @@ describe('applyLiquidMask', () => {
 
   it('replaces each range with whitespace of the same length', () => {
     const text = 'WHERE host == "{{ env }}"';
-    const ranges = [{ start: text.indexOf('{{'), end: text.indexOf('}}') + 2 }];
+    const ranges = [
+      { start: text.indexOf('{{'), end: text.indexOf('}}') + 2, kind: 'expression' as const },
+    ];
     const masked = applyLiquidMask(text, ranges);
     expect(masked).toHaveLength(text.length);
     expect(masked).toBe('WHERE host == "         "');
@@ -133,8 +136,12 @@ describe('applyLiquidMask', () => {
   it('handles multiple non-overlapping ranges', () => {
     const text = 'a "{{ x }}" "{{ y }}" b';
     const ranges = [
-      { start: text.indexOf('{{ x'), end: text.indexOf('}}') + 2 },
-      { start: text.lastIndexOf('{{'), end: text.lastIndexOf('}}') + 2 },
+      { start: text.indexOf('{{ x'), end: text.indexOf('}}') + 2, kind: 'expression' as const },
+      {
+        start: text.lastIndexOf('{{'),
+        end: text.lastIndexOf('}}') + 2,
+        kind: 'expression' as const,
+      },
     ];
     const masked = applyLiquidMask(text, ranges);
     expect(masked).toHaveLength(text.length);
@@ -143,10 +150,26 @@ describe('applyLiquidMask', () => {
   });
 });
 
+describe('findMaskedRangeAtOffset', () => {
+  const ranges = [
+    { start: 10, end: 20, kind: 'comment' as const },
+    { start: 30, end: 40, kind: 'expression' as const },
+  ];
+
+  it('returns the containing range with its kind', () => {
+    expect(findMaskedRangeAtOffset(15, ranges)?.kind).toBe('comment');
+    expect(findMaskedRangeAtOffset(35, ranges)?.kind).toBe('expression');
+  });
+
+  it('returns null when offset is outside every range', () => {
+    expect(findMaskedRangeAtOffset(25, ranges)).toBeNull();
+  });
+});
+
 describe('isOffsetInsideMaskedRange', () => {
   const ranges = [
-    { start: 10, end: 20 },
-    { start: 30, end: 40 },
+    { start: 10, end: 20, kind: 'expression' as const },
+    { start: 30, end: 40, kind: 'expression' as const },
   ];
 
   it('is true for offsets inside a range', () => {

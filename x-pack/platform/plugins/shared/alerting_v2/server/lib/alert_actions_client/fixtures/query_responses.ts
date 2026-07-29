@@ -6,100 +6,65 @@
  */
 
 import type { EsqlQueryResponse, FieldValue } from '@elastic/elasticsearch/lib/api/types';
+import type { RawAlertEventRow } from '../types';
 
-export function getAlertEventESQLResponse(overrides?: {
-  '@timestamp'?: string;
-  group_hash?: string;
-  episode_id?: string;
-  rule_id?: string;
-  space_id?: string;
-}): EsqlQueryResponse {
-  return {
-    columns: [
-      { name: '@timestamp', type: 'date' },
-      { name: 'group_hash', type: 'keyword' },
-      { name: 'episode_id', type: 'keyword' },
-      { name: 'rule_id', type: 'keyword' },
-      { name: 'space_id', type: 'keyword' },
-    ],
-    values: [
-      [
-        overrides?.['@timestamp'] ?? '2025-01-01T00:00:00.000Z',
-        overrides?.group_hash ?? 'test-group-hash',
-        overrides?.episode_id ?? 'episode-1',
-        overrides?.rule_id ?? 'test-rule-id',
-        overrides?.space_id ?? 'default',
-      ],
-    ],
-  };
-}
+/**
+ * Canonical column order emitted by every alert-event ES|QL projection in
+ * this client (see the shared `KEEP …` clause in
+ * `context_loaders/load_latest_alert_events.ts`). Kept in lock-step with
+ * `RawAlertEventRow` so a new field on `AlertEventRecord` shows up here
+ * as a build failure until it's projected consistently across production
+ * and tests.
+ */
+const ALERT_EVENT_COLUMNS: ReadonlyArray<{ name: string; type: string }> = [
+  { name: '@timestamp', type: 'date' },
+  { name: 'group_hash', type: 'keyword' },
+  { name: 'episode_id', type: 'keyword' },
+  { name: 'episode_status', type: 'keyword' },
+  { name: 'episode_status_count', type: 'long' },
+  { name: 'rule_id', type: 'keyword' },
+  { name: 'rule_version', type: 'long' },
+  { name: 'space_id', type: 'keyword' },
+  { name: 'status', type: 'keyword' },
+  { name: 'source', type: 'keyword' },
+  { name: 'data_json', type: 'keyword' },
+  { name: 'severity', type: 'keyword' },
+];
 
-export function getEmptyESQLResponse(): EsqlQueryResponse {
-  return {
-    columns: [],
-    values: [],
-  };
-}
+const toAlertEventRow = (record: Partial<RawAlertEventRow>): FieldValue[] => [
+  record['@timestamp'] ?? '2025-01-01T00:00:00.000Z',
+  record.group_hash ?? 'test-group-hash',
+  record.episode_id ?? 'episode-1',
+  record.episode_status === undefined ? 'active' : record.episode_status,
+  record.episode_status_count === undefined ? null : record.episode_status_count,
+  record.rule_id ?? 'test-rule-id',
+  record.rule_version ?? 1,
+  record.space_id ?? 'default',
+  record.status ?? 'breached',
+  record.source ?? 'internal',
+  record.data_json === undefined ? null : record.data_json,
+  record.severity === undefined ? null : record.severity,
+];
 
-export function getBulkGetAlertActionsESQLResponse(
-  records: Array<{
-    episode_id?: string;
-    rule_id?: string;
-    group_hash?: string;
-    last_ack_action?: string | null;
-    last_deactivate_action?: string | null;
-    last_snooze_action?: string | null;
-    tags?: string[] | null;
-  }>
-): EsqlQueryResponse {
-  return {
-    columns: [
-      { name: 'episode_id', type: 'keyword' },
-      { name: 'rule_id', type: 'keyword' },
-      { name: 'group_hash', type: 'keyword' },
-      { name: 'last_ack_action', type: 'keyword' },
-      { name: 'last_deactivate_action', type: 'keyword' },
-      { name: 'last_snooze_action', type: 'keyword' },
-      { name: 'tags', type: 'keyword' },
-    ],
-    values: records.map(
-      (record) =>
-        [
-          record.episode_id ?? 'episode-1',
-          record.rule_id ?? 'test-rule-id',
-          record.group_hash ?? 'test-group-hash',
-          record.last_ack_action ?? null,
-          record.last_deactivate_action ?? null,
-          record.last_snooze_action ?? null,
-          record.tags ?? null,
-        ] as FieldValue[]
-    ),
-  };
-}
+/**
+ * Mocks an ES|QL response for the canonical alert-event projection
+ * (`RawAlertEventRow`). One function covers every alert-event loader in
+ * the client:
+ *
+ * - Single-route path (`loadLastAlertEventOrThrow`): pass one record (or
+ *   omit the argument to accept defaults).
+ * - Batched paths (`loadLatestAlertEvents`, `bulkLoadLatestAlertEvents`):
+ *   pass an array — one entry per returned row.
+ * - "No matches" case: pass an empty array.
+ */
+export const getAlertEventESQLResponse = (
+  records: ReadonlyArray<Partial<RawAlertEventRow>> = [{}]
+): EsqlQueryResponse => ({
+  columns: [...ALERT_EVENT_COLUMNS],
+  values: records.map(toAlertEventRow),
+});
 
-export function getBulkAlertEventsESQLResponse(
-  records: Array<{
-    '@timestamp'?: string;
-    group_hash?: string;
-    episode_id?: string;
-    rule_id?: string;
-    space_id?: string;
-  }>
-): EsqlQueryResponse {
-  return {
-    columns: [
-      { name: '@timestamp', type: 'date' },
-      { name: 'rule_id', type: 'keyword' },
-      { name: 'group_hash', type: 'keyword' },
-      { name: 'episode_id', type: 'keyword' },
-      { name: 'space_id', type: 'keyword' },
-    ],
-    values: records.map((record) => [
-      record['@timestamp'] ?? '2025-01-01T00:00:00.000Z',
-      record.rule_id ?? 'test-rule-id',
-      record.group_hash ?? 'test-group-hash',
-      record.episode_id ?? 'episode-1',
-      record.space_id ?? 'default',
-    ]),
-  };
-}
+export const getEmptyESQLResponse = (): EsqlQueryResponse => ({
+  columns: [],
+  values: [],
+});

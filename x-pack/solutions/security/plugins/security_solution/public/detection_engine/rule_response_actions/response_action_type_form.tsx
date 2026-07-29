@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -67,7 +68,7 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiIcon type={logo} size="m" />
+          <EuiIcon type={logo} size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText>{name}</EuiText>
@@ -78,20 +79,30 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
 
   const renderExtraContent = useMemo(() => {
     return (
-      <EuiButtonIcon
-        data-test-subj="remove-response-action"
-        iconType="minusCircle"
-        color="danger"
-        className="actAccordionActionForm__extraAction"
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.actionTypeForm.accordion.deleteIconAriaLabel',
           {
             defaultMessage: 'Delete',
           }
         )}
-        disabled={editDisabled}
-        onClick={handleDelete}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          data-test-subj="remove-response-action"
+          iconType="minusCircle"
+          color="danger"
+          className="actAccordionActionForm__extraAction"
+          aria-label={i18n.translate(
+            'xpack.securitySolution.actionTypeForm.accordion.deleteIconAriaLabel',
+            {
+              defaultMessage: 'Delete',
+            }
+          )}
+          disabled={editDisabled}
+          onClick={handleDelete}
+        />
+      </EuiToolTip>
     );
   }, [editDisabled, handleDelete]);
 

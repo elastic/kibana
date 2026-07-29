@@ -10,13 +10,18 @@
 import { transparentize, useEuiShadow, useEuiTheme } from '@elastic/eui';
 import { css as cssClassName } from '@emotion/css';
 import { useEffect, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { monaco } from '@kbn/monaco';
-import { selectEditorFocusedStepInfo } from '../../../../entities/workflows/store';
+import {
+  selectEditorFocusedStepInfo,
+  selectEditorFocusedTriggerInfo,
+} from '../../../../entities/workflows/store';
 import { FOCUSED_STEP_DECORATION_INSET_PX } from '../../styles/constants';
 
 export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEditor | null) => {
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
+  const focusedTriggerInfo = useSelector(selectEditorFocusedTriggerInfo);
+  const focusedInfo = focusedStepInfo ?? focusedTriggerInfo;
   const { euiTheme } = useEuiTheme();
 
   const borderColor = euiTheme.colors.vis.euiColorVis2;
@@ -57,14 +62,14 @@ export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEd
       return;
     }
 
-    if (!focusedStepInfo) {
+    if (!focusedInfo) {
       decorationsCollection.clear();
       return;
     }
 
     decorationsCollection.set([
       {
-        range: new monaco.Range(focusedStepInfo.lineStart, 1, focusedStepInfo.lineEnd, 1),
+        range: new monaco.Range(focusedInfo.lineStart, 1, focusedInfo.lineEnd, 1),
         options: {
           blockClassName,
           isWholeLine: true,
@@ -72,7 +77,7 @@ export const useFocusedStepDecoration = (editor: monaco.editor.IStandaloneCodeEd
         },
       },
     ]);
-  }, [editor, focusedStepInfo, blockClassName, decorationsCollection]);
+  }, [editor, focusedInfo, blockClassName, decorationsCollection]);
 
   // Cleanup effect: only clears decorations on unmount or when
   // editor/decorationsCollection changes, avoiding unnecessary clears

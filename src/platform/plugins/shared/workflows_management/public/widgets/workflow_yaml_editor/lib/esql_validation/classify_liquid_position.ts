@@ -31,9 +31,18 @@
  * `triggers[].on.condition` and step `if` conditions.
  */
 
+/**
+ * Which Liquid construct produced this masked span. Autocomplete uses it to
+ * distinguish a Liquid comment — where the user is writing prose and any
+ * popup is wrong — from a `{{ … }}` / `{% … %}` block where deferring to
+ * variable / Liquid completions is the right move.
+ */
+export type LiquidMaskedRangeKind = 'expression' | 'tag' | 'comment';
+
 export interface LiquidMaskedRange {
   start: number;
   end: number;
+  kind: LiquidMaskedRangeKind;
 }
 
 export type LiquidPositionClass =
@@ -133,7 +142,7 @@ function scanNormalState(text: string, i: number): ScanStep {
     return {
       nextState: 'normal',
       nextIndex: end,
-      maskedRange: { start: i, end },
+      maskedRange: { start: i, end, kind: 'comment' },
     };
   }
   return { nextState: 'normal', nextIndex: i + 1 };
@@ -150,12 +159,12 @@ function scanDoubleQuotedStringState(text: string, i: number): ScanStep {
 }
 
 function maskLiquidOrAdvance(text: string, i: number, state: ScannerState): ScanStep {
-  const close = matchLiquidOpen(text, i);
-  if (close !== -1) {
+  const opener = matchLiquidOpen(text, i);
+  if (opener !== null) {
     return {
       nextState: state,
-      nextIndex: close,
-      maskedRange: { start: i, end: close },
+      nextIndex: opener.end,
+      maskedRange: { start: i, end: opener.end, kind: opener.kind },
     };
   }
   return { nextState: state, nextIndex: i + 1 };
@@ -184,12 +193,20 @@ export function isOffsetInsideMaskedRange(
   offset: number,
   ranges: ReadonlyArray<LiquidMaskedRange>
 ): boolean {
+  return findMaskedRangeAtOffset(offset, ranges) !== null;
+}
+
+/** Returns the first masked range containing `offset` (end-exclusive), or `null`. */
+export function findMaskedRangeAtOffset(
+  offset: number,
+  ranges: ReadonlyArray<LiquidMaskedRange>
+): LiquidMaskedRange | null {
   for (const range of ranges) {
     if (offset >= range.start && offset < range.end) {
-      return true;
+      return range;
     }
   }
-  return false;
+  return null;
 }
 
 function startsAt(text: string, pos: number, marker: string): boolean {
@@ -204,18 +221,24 @@ function startsAt(text: string, pos: number, marker: string): boolean {
   return true;
 }
 
-function matchLiquidOpen(text: string, pos: number): number {
+interface LiquidOpenerMatch {
+  /** Offset one past the closing delimiter (`}}`, `%}`, or `#}`). */
+  end: number;
+  kind: LiquidMaskedRangeKind;
+}
+
+function matchLiquidOpen(text: string, pos: number): LiquidOpenerMatch | null {
   if (startsAt(text, pos, LIQUID_VAR_OPEN)) {
     const close = text.indexOf(LIQUID_VAR_CLOSE, pos + LIQUID_VAR_OPEN.length);
-    return close === -1 ? -1 : close + LIQUID_VAR_CLOSE.length;
+    return close === -1 ? null : { end: close + LIQUID_VAR_CLOSE.length, kind: 'expression' };
   }
   if (startsAt(text, pos, LIQUID_TAG_OPEN)) {
     const close = text.indexOf(LIQUID_TAG_CLOSE, pos + LIQUID_TAG_OPEN.length);
-    return close === -1 ? -1 : close + LIQUID_TAG_CLOSE.length;
+    return close === -1 ? null : { end: close + LIQUID_TAG_CLOSE.length, kind: 'tag' };
   }
   if (startsAt(text, pos, LIQUID_COMMENT_OPEN)) {
     const close = text.indexOf(LIQUID_COMMENT_CLOSE, pos + LIQUID_COMMENT_OPEN.length);
-    return close === -1 ? -1 : close + LIQUID_COMMENT_CLOSE.length;
+    return close === -1 ? null : { end: close + LIQUID_COMMENT_CLOSE.length, kind: 'comment' };
   }
-  return -1;
+  return null;
 }

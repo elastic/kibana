@@ -21,7 +21,7 @@
     "packaging/example/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-chrome-layout-constants",
-    "@kbn/core-chrome-layout-utils"
+    "@kbn/ui-chrome-layout-constants",
+    "@kbn/ui-chrome-layout-utils"
   ]
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
@@ -37,6 +38,7 @@ const create = () => {
   const backfillClient = backfillClientMock.create();
 
   const rulesClientParams: jest.Mocked<RulesClientContext> = {
+    request: httpServerMock.createKibanaRequest(),
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,
@@ -59,6 +61,7 @@ const create = () => {
     getAuthenticationAPIKey: jest.fn(),
     cloneAPIKey: jest.fn(),
     cloneApiKeysOnCreate: false,
+    invalidateApiKeyNow: jest.fn(),
     getAlertIndicesAlias: jest.fn(),
     alertsService: null,
     backfillClient,

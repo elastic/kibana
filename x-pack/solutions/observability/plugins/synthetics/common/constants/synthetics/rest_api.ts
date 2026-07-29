@@ -14,6 +14,7 @@ export enum SYNTHETICS_API_URLS {
   // public apis
   SYNTHETICS_MONITORS = '/api/synthetics/monitors',
   GET_SYNTHETICS_MONITOR = '/api/synthetics/monitors/{monitorId}',
+  SYNTHETICS_MONITORS_BULK_UPDATE = '/api/synthetics/monitors/_bulk_update',
   PRIVATE_LOCATIONS = `/api/synthetics/private_locations`,
   PARAMS = `/api/synthetics/params`,
   LATEST_TEST_RUN = '/api/synthetics/latest_test_run',
@@ -40,6 +41,7 @@ export enum SYNTHETICS_API_URLS {
   MONITOR_STATUS_HEATMAP = '/internal/synthetics/ping_heatmap',
   OVERVIEW_TRENDS = '/internal/synthetics/overview_trends',
   OVERVIEW_STATUS = `/internal/synthetics/overview_status`,
+  OVERVIEW_STATUS_STALE = `/internal/synthetics/overview_status/stale`,
   INDEX_SIZE = `/internal/synthetics/index_size`,
   AGENT_POLICIES = `/internal/synthetics/agent_policies`,
   PRIVATE_LOCATIONS_MONITORS = `/internal/synthetics/private_locations/monitors`,
@@ -56,6 +58,10 @@ export enum SYNTHETICS_API_URLS {
   TRIGGER_TASK_RUN = '/internal/synthetics/trigger_task_run/{taskType}',
 
   CERTS = '/internal/synthetics/certs',
+  CERTS_FACETS = '/internal/synthetics/certs/facets',
+
+  ERROR_GROUPS = '/internal/synthetics/error_groups',
+  ERROR_STATS = '/internal/synthetics/error_stats',
 
   SUGGESTIONS = `/internal/synthetics/suggestions`,
   MAINTENANCE_WINDOWS = `/internal/synthetics/monitors/maintenance_windows`,
@@ -72,4 +78,7 @@ export enum SYNTHETICS_API_URLS {
   INSPECT_TLS_RULE = '/internal/synthetics/inspect_tls_rule',
 
   MONITOR_SUMMARY_STATS = '/internal/synthetics/monitor/summary_stats',
+
+  /** Internal support bundle: monitors (redacted), indices, Fleet policies, locations, param keys. */
+  SYNTHETICS_DIAGNOSTICS = '/internal/synthetics/diagnostics',
 }

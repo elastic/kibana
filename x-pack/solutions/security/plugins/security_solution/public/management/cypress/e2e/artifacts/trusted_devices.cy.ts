@@ -93,7 +93,7 @@ describe(
 
         fields.forEach((field) => {
           selectField(field);
-          cy.getByTestSubj('trustedDevices-form-fieldSelect').should('contain', field);
+          cy.getByTestSubj('trustedDevices-form-entry0fieldSelect').should('contain', field);
         });
       });
 
@@ -101,7 +101,7 @@ describe(
         openTrustedDevices({ create: true });
         selectOs('Windows and Mac');
 
-        cy.getByTestSubj('trustedDevices-form-fieldSelect').click();
+        cy.getByTestSubj('trustedDevices-form-entry0fieldSelect').click();
 
         const availableFields: Array<'Host' | 'Device ID' | 'Manufacturer' | 'Product ID'> = [
           'Host',

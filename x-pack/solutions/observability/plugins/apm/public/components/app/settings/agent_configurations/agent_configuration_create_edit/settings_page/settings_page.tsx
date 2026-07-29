@@ -160,7 +160,7 @@ export function SettingsPage({
           updatedSettings = { ['']: '', ...prev.settings };
         } else {
           // Handle value change
-          updatedSettings = { ...prev.settings, [key]: value };
+          updatedSettings = { ...prev.settings, [key]: value ?? '' };
         }
 
         return {

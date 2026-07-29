@@ -38,7 +38,9 @@ export function createWaterfall(page: ScoutPage): Waterfall {
   return {
     container,
     sizeWarning: page.testSubj.locator('waterfallSizeWarning'),
-    sizeWarningDiscoverLink: page.testSubj.locator('waterfallSizeWarningDiscoverLink'),
+    sizeWarningDiscoverLink: page
+      .locator('.euiCallOutHeader__title')
+      .locator('[data-test-subj="waterfallSizeWarningDiscoverLink"]'),
     getItem(name: string): WaterfallItem {
       return getWaterfallItem(container, name);
     },

@@ -20,6 +20,8 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { listRulesOasExamples } from './list_rules_oas_example';
 
 @injectable()
 export class GetRulesRoute extends BaseAlertingRoute {
@@ -32,6 +34,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'List rules',
+    oasOperationObject: listRulesOasExamples,
   } as const;
   static schemas = {
     request: {
@@ -40,11 +43,11 @@ export class GetRulesRoute extends BaseAlertingRoute {
     response: {
       200: {
         body: () => findRulesResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns a paginated list of rules.',
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates an invalid schema or parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };

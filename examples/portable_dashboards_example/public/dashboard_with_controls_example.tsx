@@ -13,17 +13,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import { controlGroupStateBuilder } from '@kbn/control-group-renderer';
+import type { DashboardState } from '@kbn/dashboard-plugin/common';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
-import type { StartDeps } from './plugin';
 
-export const DashboardWithControlsExample = ({
-  dataView,
-  uiActions,
-}: {
-  dataView: DataView;
-  uiActions: StartDeps['uiActions'];
-}) => {
+export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
   const [dashboard, setDashboard] = useState<DashboardApi | undefined>();
 
   // add a filter debugger panel as soon as the dashboard becomes available
@@ -55,35 +48,38 @@ export const DashboardWithControlsExample = ({
       <EuiPanel hasBorder={true}>
         <DashboardRenderer
           getCreationOptions={async (): Promise<DashboardCreationOptions> => {
-            const controlGroupState = {};
-            await controlGroupStateBuilder.addDataControlFromField(
-              controlGroupState,
+            const dataViewId = dataView.id ?? '';
+            // Construct pinned panels in dashboard as-code shape (avoids control-group builder typing).
+            const pinnedPanels = [
               {
-                data_view_id: dataView.id ?? '',
-                title: 'Destination country',
-                field_name: 'geo.dest',
-                width: 'medium',
+                id: 'destination-country',
+                type: 'options_list_control',
+                width: 'medium' as const,
                 grow: false,
+                config: {
+                  data_view_id: dataViewId,
+                  field_name: 'geo.dest',
+                  title: 'Destination country',
+                },
               },
-              uiActions
-            );
-            await controlGroupStateBuilder.addDataControlFromField(
-              controlGroupState,
               {
-                data_view_id: dataView.id ?? '',
-                field_name: 'bytes',
-                width: 'medium',
+                id: 'bytes',
+                type: 'range_slider_control',
+                width: 'medium' as const,
                 grow: true,
-                title: 'Bytes',
+                config: {
+                  data_view_id: dataViewId,
+                  field_name: 'bytes',
+                  title: 'Bytes',
+                },
               },
-              uiActions
-            );
+            ] as DashboardState['pinned_panels'];
 
             return {
               getInitialInput: () => ({
-                timeRange: { from: 'now-30d', to: 'now' },
+                time_range: { from: 'now-30d', to: 'now' },
                 viewMode: 'view',
-                controlGroupState,
+                pinned_panels: pinnedPanels,
               }),
             };
           }}

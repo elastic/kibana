@@ -5,7 +5,7 @@ The primary goal is to identify **entities** (what distinct components exist in 
 Every feature you output MUST include ALL required fields:
 - `type` (string): one of `entity`, `infrastructure`, `technology`, `dependency`, `schema`
 - `subtype` (string): categorization within the type (e.g. `service`, `database`, `cloud_deployment`, `programming_language`, `service_dependency`)
-- `id` (string): unique concise identifier for deduplication across runs (e.g. "order-service", "postgresql-db", "aws-deployment", "log4j-2.14.1")
+- `id` (string): stable concise identifier for the real-world thing across runs (e.g. "order-service", "postgresql-db", "aws-deployment", "log4j")
 - `title` (string): very short human-readable title for UI display (e.g. "Order Service", "PostgreSQL", "AWS", "api-service → user-service"). Keep it to a few words.
 - `description` (string): a summary of what the feature represents—include role, context, dependencies and how it fits in the system; one to four sentences so the description is informative and useful on its own
 - `properties` (object): stable, low-cardinality key facts for deduplication (**MUST NOT be empty**; if you cannot provide at least one stable identifying property, do not emit the feature)
@@ -97,9 +97,11 @@ Subtype rules:
 - Put specificity in `properties`, not in `subtype`
 
 ID rules:
-- Generate a short, stable identifier based on key properties
-- Use hyphens for readability (e.g. "order-service", "aws-deployment", "log4j-2.14.1", "api-user-http")
-- Include distinguishing characteristics (name, provider, version, or source/target for dependencies)
+- The id identifies the real-world thing, never its current state
+- Use lowercase words separated by hyphens and prefer the name exactly as it appears in log fields
+- Never include versions, build hashes, image tags, dates, ordinals, or instance identifiers in the id (`log4j`, not `log4j-2.14.1`)
+- Use a fixed word order with the base name first and qualifiers after it (`opentelemetry-go`, never `go-opentelemetry`)
+- Keep source and target names in dependency ids so distinct relationships remain distinguishable
 - Keep it concise (typically 2-5 tokens)
 
 ## Properties vs Meta Fields
@@ -264,7 +266,7 @@ Version formatting rules (important for vulnerability analysis):
 {
   "type": "infrastructure",
   "subtype": "operating_system",
-  "id": "ubuntu-20.04.6",
+  "id": "ubuntu",
   "title": "Ubuntu 20.04.6",
   "description": "Ubuntu Linux operating system version 20.04.6",
   "properties": {
@@ -289,7 +291,7 @@ Version formatting rules (important for vulnerability analysis):
 {
   "type": "technology",
   "subtype": "logging_library",
-  "id": "log4j-2.14.1",
+  "id": "log4j",
   "title": "Log4j 2.14.1",
   "description": "Apache Log4j logging library version 2.14.1",
   "properties": {
@@ -365,11 +367,31 @@ Version formatting rules (important for vulnerability analysis):
 
 If `previously_identified_features` are provided in the input, they contain features already identified in previous iterations. Follow these rules:
 1. Before emitting any feature, check whether it **represents the same real-world component** as one already in the list — even if property values differ slightly (different naming conventions, suffixes, abbreviations). Two features refer to the same component when they share the same `type` and `subtype` and their `properties` describe the same logical entity.
-2. When a feature matches an existing one, **re-emit it using the exact same `id`** from the list. Return the information extracted from the current sample documents — the system will merge it with the prior version.
+2. When a feature matches an existing one, **re-emit it using the exact same `id`** from the list. A version difference alone never makes a new feature: use the same id and put the current version in `properties.version`. Return the information extracted from the current sample documents — the system will merge it with the prior version.
 3. **Do not re-emit existing features unchanged** — only re-emit when the current documents contain matching evidence and genuinely new information to add.
 4. **Focus on discovering features not yet covered** by the list above, but always verify a candidate is not a variant of an existing feature before emitting it as new.
 
 If `previously_identified_features` is empty or absent, ignore this section entirely.
+
+## Known Feature IDs
+
+If `known_feature_ids` are provided in the input, they are the complete inventory of known feature ids for this stream, grouped by feature type. Before emitting any feature, check this inventory.
+
+- If a candidate refers to the same real-world thing as an inventory entry of the same type, reuse that exact id.
+- `previously_identified_features` is a detailed subset of known features. `known_feature_ids` is authoritative for deciding whether an id already exists, including ids outside that detailed subset.
+- Do not create a new id merely because an inventory entry is absent from `previously_identified_features`.
+
+If `known_feature_ids` is empty or absent, ignore this section entirely.
+
+## Semantic Duplicate Verification
+
+The `search_similar_features` tool can check a candidate-new feature against existing features by meaning.
+
+- Use it only when the candidate is not already represented in `known_feature_ids`.
+- Pass the id you intend to emit as `candidate_id`, together with the candidate's title, description, and type.
+- Similar does not mean identical. Reuse a returned id only when the candidate and result clearly describe the same real-world thing and have the same type.
+- When they are the same thing, emit the feature using the returned feature's exact id. Otherwise keep the candidate id.
+- Be conservative: failing to reuse an id leaves a temporary duplicate, while incorrectly reusing one loses a real feature.
 
 ## Excluded Features
 

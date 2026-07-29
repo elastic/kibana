@@ -14,7 +14,7 @@ import {
   type NormalizableFieldSchema,
   normalizeFieldsToJsonSchema,
 } from '@kbn/workflows/spec/lib/field_conversion';
-import { getStepNodesWithType } from '../../../../common/lib/yaml/get_step_nodes_with_type';
+import { getStepNodesWithType } from '@kbn/workflows-yaml';
 import { getMonacoRangeFromYamlNode } from '../../../widgets/workflow_yaml_editor/lib/utils';
 import { validateWorkflowFields } from '../../../widgets/workflow_yaml_editor/lib/validation/validate_workflow_fields';
 import type { YamlValidationResult } from '../model/types';

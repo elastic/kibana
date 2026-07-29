@@ -7,69 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
-
 import { unscheduleWorkflowTasks } from './unschedule_workflow_tasks';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
-const logger = loggerMock.create();
-
 const makeMockScheduler = (): jest.Mocked<WorkflowTaskScheduler> =>
   ({
+    bulkUnscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
     unscheduleWorkflowTasks: jest.fn().mockResolvedValue(undefined),
   } as any);
 
 describe('unscheduleWorkflowTasks', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it('calls unscheduleWorkflowTasks for each workflow ID', async () => {
+  it('calls bulkUnscheduleWorkflowTasks with all workflow IDs', async () => {
     const scheduler = makeMockScheduler();
 
-    await unscheduleWorkflowTasks(['wf-1', 'wf-2', 'wf-3'], scheduler, logger);
+    await unscheduleWorkflowTasks(['wf-1', 'wf-2', 'wf-3'], scheduler);
 
-    expect(scheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(3);
-    expect(scheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-1');
-    expect(scheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-2');
-    expect(scheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('wf-3');
+    expect(scheduler.bulkUnscheduleWorkflowTasks).toHaveBeenCalledTimes(1);
+    expect(scheduler.bulkUnscheduleWorkflowTasks).toHaveBeenCalledWith(['wf-1', 'wf-2', 'wf-3']);
+    expect(scheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
   });
 
   it('does nothing when taskScheduler is null', async () => {
-    await unscheduleWorkflowTasks(['wf-1'], null, logger);
-
-    expect(logger.warn).not.toHaveBeenCalled();
+    await unscheduleWorkflowTasks(['wf-1'], null);
   });
 
   it('does nothing when ids array is empty', async () => {
     const scheduler = makeMockScheduler();
 
-    await unscheduleWorkflowTasks([], scheduler, logger);
+    await unscheduleWorkflowTasks([], scheduler);
 
-    expect(scheduler.unscheduleWorkflowTasks).not.toHaveBeenCalled();
-  });
-
-  it('logs warning but does not throw when an unschedule fails', async () => {
-    const scheduler = makeMockScheduler();
-    scheduler.unscheduleWorkflowTasks.mockRejectedValueOnce(new Error('task not found'));
-
-    await unscheduleWorkflowTasks(['wf-1'], scheduler, logger);
-
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to unschedule tasks for deleted workflow wf-1')
-    );
-  });
-
-  it('continues unscheduling remaining workflows when one fails', async () => {
-    const scheduler = makeMockScheduler();
-    scheduler.unscheduleWorkflowTasks
-      .mockRejectedValueOnce(new Error('first failed'))
-      .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error('third failed'));
-
-    await unscheduleWorkflowTasks(['wf-1', 'wf-2', 'wf-3'], scheduler, logger);
-
-    expect(scheduler.unscheduleWorkflowTasks).toHaveBeenCalledTimes(3);
-    expect(logger.warn).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('wf-3'));
+    expect(scheduler.bulkUnscheduleWorkflowTasks).not.toHaveBeenCalled();
   });
 });

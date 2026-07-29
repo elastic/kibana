@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
+  EuiButtonGroup,
   EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPageTemplate,
-  EuiProgress,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -23,140 +24,116 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../services';
-import { getTutorials } from './tutorial_data';
-import { useTutorialProgress } from './use_tutorial_progress';
+import { getTutorialContent, TUTORIAL_TOPICS } from './tutorial_data';
+import { ConnectToProject } from '../connection_details/connect_to_project';
+import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
+import { OnboardingPaths } from '../onboarding/components/onboarding_paths';
+import { TUTORIALS_PATH } from '../routes';
 
-export const TutorialsPage: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-  const { completed, markComplete } = useTutorialProgress();
+const ALL_TOPICS_ID = 'all';
+
+export const TutorialsPage = () => {
   const {
-    services: { docLinks, application },
+    services: { docLinks },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
+  const { elasticsearchUrl, apiKey, isLoading: isCredentialsLoading } = useOnboardingCredentials();
+  const [selectedTopic, setSelectedTopic] = useState(ALL_TOPICS_ID);
 
-  const tutorials = getTutorials(docLinks, application);
-  const total = tutorials.length;
-  const doneCount = tutorials.filter((t) => completed.has(t.id)).length;
-  const percent = total === 0 ? 0 : Math.round((doneCount / total) * 100);
+  const tutorials = getTutorialContent(docLinks);
+
+  const filteredTutorials =
+    selectedTopic === ALL_TOPICS_ID
+      ? tutorials
+      : tutorials.filter((t) => t.topic === selectedTopic);
+
+  const topicOptions = [
+    {
+      id: ALL_TOPICS_ID,
+      label: i18n.translate('vectordbOnboarding.tutorials.filter.all', { defaultMessage: 'All' }),
+      'data-telemetry-id': `vectordbOnboarding-tutorials-topicFilter-${ALL_TOPICS_ID}`,
+    },
+    ...Object.entries(TUTORIAL_TOPICS).map(([topicId, topic]) => ({
+      id: topicId,
+      label: topic.filter,
+      'data-telemetry-id': `vectordbOnboarding-tutorials-topicFilter-${topicId}`,
+    })),
+  ];
 
   return (
-    <EuiPageTemplate restrictWidth="1100px" panelled={false} grow={false}>
+    <EuiPageTemplate restrictWidth panelled={false} grow={false}>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
-        <EuiTitle size="l">
-          <h1>
-            {i18n.translate('vectordbOnboarding.tutorials.heading', {
-              defaultMessage: 'Vector search tutorials',
-            })}
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-        <EuiText color="subdued" size="s">
-          <p>
-            {i18n.translate('vectordbOnboarding.tutorials.subheading', {
-              defaultMessage:
-                'Hands-on guides for building, tuning, and shipping vector search in production.',
-            })}
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="m"
-          responsive={false}
-          data-test-subj="tutorialsCompletionTracker"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>
+        <EuiFlexGroup gutterSize="l" direction="column">
+          <EuiIcon size="xxl" type="logoVectorDB" aria-hidden={true} />
+          <EuiFlexGroup gutterSize="m" direction="column">
+            <EuiTitle size="l">
+              <h1>
                 <FormattedMessage
-                  id="vectordbOnboarding.tutorials.completionLabel"
-                  defaultMessage="{done} of {total} completed"
-                  values={{ done: doneCount, total }}
+                  id="vectordbOnboarding.tutorials.pageTitle"
+                  defaultMessage="Get started with your Elasticsearch Vector Database"
                 />
-              </strong>
+              </h1>
+            </EuiTitle>
+            <EuiText color="subdued" css={{ maxWidth: euiTheme.base * 36 }}>
+              <p>
+                <FormattedMessage
+                  id="vectordbOnboarding.tutorials.pageSubtitle"
+                  defaultMessage="Production-grade defaults, hybrid search, and your choice of generating embeddings or bringing your own."
+                />
+              </p>
             </EuiText>
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <ConnectToProject
+                elasticsearchUrl={elasticsearchUrl}
+                apiKey={apiKey}
+                isLoading={isCredentialsLoading}
+                telemetryPage="gettingStarted"
+                apiKeyButtonFill={false}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="xs" />
           <EuiFlexItem>
-            <EuiProgress
-              value={doneCount}
-              max={total}
-              size="s"
-              color={doneCount === total ? 'success' : 'primary'}
-              valueText={false}
-              aria-label={i18n.translate('vectordbOnboarding.tutorials.completionAria', {
-                defaultMessage: 'Tutorial completion',
-              })}
-            />
+            <OnboardingPaths origin={TUTORIALS_PATH} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {percent}%
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <EuiHorizontalRule margin="xs" />
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiButtonGroup
+                legend={i18n.translate('vectordbOnboarding.tutorials.topicSelect', {
+                  defaultMessage: 'Filter resources by topic',
+                })}
+                options={topicOptions}
+                idSelected={selectedTopic}
+                onChange={(id) => setSelectedTopic(id)}
+                data-test-subj="tutorialsTopicFilter"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiSpacer size="xl" />
-
-        <EuiFlexGrid columns={3} gutterSize="m">
-          {tutorials.map((tutorial) => {
-            const isDone = completed.has(tutorial.id);
-            return (
+          <EuiFlexGrid columns={3} gutterSize="m">
+            {filteredTutorials.map((tutorial) => (
               <EuiCard
                 key={tutorial.id}
                 data-test-subj={`tutorialCard-${tutorial.id}`}
+                data-telemetry-id={`vectordbOnboarding-tutorials-card-${tutorial.id}`}
                 href={tutorial.href}
-                target={tutorial.target}
-                onClick={tutorial.target === '_blank' ? () => markComplete(tutorial.id) : undefined}
-                icon={
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={tutorial.icon}
-                        size="xl"
-                        color={isDone ? 'success' : 'primary'}
-                        aria-hidden
-                      />
-                    </EuiFlexItem>
-                    {isDone ? (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="success" iconType="check">
-                          {i18n.translate('vectordbOnboarding.tutorials.done', {
-                            defaultMessage: 'Done',
-                          })}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    ) : null}
-                  </EuiFlexGroup>
-                }
+                target="_blank"
+                hasBorder
                 title={tutorial.title}
                 titleSize="xs"
                 paddingSize="l"
                 textAlign="left"
-                description={
-                  <>
-                    <EuiText size="s" color="subdued">
-                      <p>{tutorial.description}</p>
-                    </EuiText>
-                    <EuiSpacer size="s" />
-                    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="hollow" iconType="clock">
-                          {tutorial.duration}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                      {tutorial.tags.map((tag) => (
-                        <EuiFlexItem grow={false} key={tag}>
-                          <EuiBadge color={euiTheme.colors.lightShade}>{tag}</EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
-                  </>
+                description={tutorial.description}
+                footer={
+                  <EuiBadge iconType={TUTORIAL_TOPICS[tutorial.topic].icon}>
+                    {TUTORIAL_TOPICS[tutorial.topic].tag}
+                  </EuiBadge>
                 }
               />
-            );
-          })}
-        </EuiFlexGrid>
+            ))}
+          </EuiFlexGrid>
+        </EuiFlexGroup>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

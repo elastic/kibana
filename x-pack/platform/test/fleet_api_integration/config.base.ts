@@ -97,8 +97,10 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableSloTemplates: true,
           enableVersionSpecificPolicies: true,
           enableOpAMP: true,
-          enableIntegrationConditions: true,
           enableCloudOnboardingDeployments: true,
+          // Keep the legacy agentless APIs enabled here so the base suite exercises legacy behavior;
+          // config.agentless_legacy_disabled.ts overrides this to true for the rejection tests.
+          disableAgentlessLegacyAPI: false,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,

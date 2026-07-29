@@ -9,9 +9,10 @@ import type { GranularRulesFacetCategory } from './granular_rules_contract.gen';
 
 export const RULES_FACET_CATEGORY_TO_ATTRIBUTE: Record<GranularRulesFacetCategory, string> = {
   tags: 'alert.attributes.tags',
-  type: 'alert.attributes.alertTypeId',
   enabled: 'alert.attributes.enabled',
   updatedBy: 'alert.attributes.updatedBy',
   createdBy: 'alert.attributes.createdBy',
   lastRunOutcome: 'alert.attributes.lastRun.outcome',
+  isCustomized: 'alert.attributes.params.ruleSource.isCustomized',
+  type: 'alert.attributes.params.type',
 };

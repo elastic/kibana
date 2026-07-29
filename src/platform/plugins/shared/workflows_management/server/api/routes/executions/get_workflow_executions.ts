@@ -9,17 +9,27 @@
 
 import path from 'path';
 import { schema, type Type } from '@kbn/config-schema';
-import type { ExecutionStatus, ExecutionType, WorkflowExecutionSortField } from '@kbn/workflows';
+import type {
+  ExecutionStatus,
+  ExecutionType,
+  WorkflowExecutionCollapseField,
+  WorkflowExecutionSortField,
+} from '@kbn/workflows';
 import {
   ExecutionStatusValues,
   ExecutionTypeValues,
+  WorkflowExecutionCollapseFields,
   WorkflowExecutionSortFields,
 } from '@kbn/workflows';
 import type { SearchWorkflowExecutionsParams } from '../../workflows_management_service';
 import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, MAX_PAGE_SIZE, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from '../utils/route_security';
+import {
+  assertCanReadManagedWorkflowExecution,
+  hasWorkflowExecutionReadPrivilege,
+  WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
+} from '../utils/route_security';
 import { workflowIdParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
@@ -34,7 +44,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
     .get({
       path: '/api/workflows/workflow/{workflowId}/executions',
       access: 'public',
-      security: WORKFLOW_EXECUTION_READ_SECURITY,
+      security: WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY,
       summary: 'Get workflow executions',
       description: 'Retrieve a paginated list of executions for a specific workflow.',
       options: {
@@ -111,6 +121,16 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   },
                 })
               ),
+              collapse: schema.maybe(
+                schema.oneOf(
+                  WorkflowExecutionCollapseFields.map((field) => schema.literal(field)) as [
+                    Type<WorkflowExecutionCollapseField>
+                  ],
+                  {
+                    meta: { description: 'Field to collapse execution results by.' },
+                  }
+                )
+              ),
               sortField: schema.maybe(
                 schema.oneOf(
                   WorkflowExecutionSortFields.map((field) => schema.literal(field)) as [
@@ -156,8 +176,13 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
       },
       withAvailabilityCheck(async (context, request, response) => {
         try {
+          if (!hasWorkflowExecutionReadPrivilege(request)) {
+            return response.forbidden();
+          }
           const spaceId = spaces.getSpaceId(request);
           const { workflowId } = request.params;
+          const workflow = await api.getWorkflow(workflowId, spaceId);
+          assertCanReadManagedWorkflowExecution(request, workflow);
           const executedBy = request.query.executedBy;
           const params: SearchWorkflowExecutionsParams = {
             workflowId,
@@ -176,6 +201,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
             startedBefore: request.query.startedBefore,
             finishedAfter: request.query.finishedAfter,
             finishedBefore: request.query.finishedBefore,
+            collapse: request.query.collapse,
             sortField: request.query.sortField,
             sortOrder: request.query.sortOrder,
           };

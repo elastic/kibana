@@ -8,6 +8,10 @@
 import { useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { FieldSchema } from '../../../../common/types/domain/template/fields';
+import { TemplateSettingsSchema } from '../../../../common/types/domain/template/v1';
+import { CaseSeveritySchema } from '../../../../common/types/domain_zod/case/v1';
+import { CaseConnectorWithoutNameSchema } from '../../../../common/types/domain_zod/connector/v1';
+import { CaseAssigneesSchema } from '../../../../common/types/domain_zod/user/v1';
 import { MAX_TEMPLATES_PER_FILE, MAX_TOTAL_IMPORT_TEMPLATES } from '../constants';
 import { checkTemplateExists } from '../utils';
 import type { ValidatedFile } from './use_validate_yaml';
@@ -16,26 +20,51 @@ import * as i18n from '../translations';
 const ImportedDefinitionSchema = z.object({
   fields: z.array(FieldSchema).refine(
     (fields) => {
-      const fieldNames = new Set(fields.map((field) => field.name));
+      const fieldNames = new Set(
+        fields.map((field) => ('$ref' in field ? field.name ?? field.$ref : field.name))
+      );
       return fieldNames.size === fields.length;
     },
     { message: 'Field names must be unique.' }
   ),
 });
 
-const ImportedTemplateSchema = z.object({
-  templateId: z.string().optional(),
-  name: z.string().min(1),
-  owner: z.string().optional(),
-  description: z.string().optional(),
-  tags: z.array(z.string()).nullable().optional(),
-  severity: z.string().optional(),
-  category: z.string().nullable().optional(),
-  author: z.string().optional(),
-  templateVersion: z.number().optional(),
-  isDefault: z.boolean().optional(),
-  definition: ImportedDefinitionSchema.optional(),
-});
+const ImportedTemplateSchema = z
+  .object({
+    templateId: z.string().optional(),
+    // `.trim().min(1)` so a whitespace-only name (e.g. `name: '  '`) is rejected rather than
+    // producing a blank template; the trimmed value is what we persist.
+    template_name: z.string().trim().min(1).optional(),
+    // Legacy support for early preview builds before the snake_case convention.
+    templateName: z.string().trim().min(1).optional(),
+    name: z.string().trim().min(1).optional(),
+    template_description: z.string().optional(),
+    templateDescription: z.string().optional(),
+    template_tags: z.array(z.string()).nullable().optional(),
+    templateTags: z.array(z.string()).nullable().optional(),
+    title: z.string().optional(),
+    owner: z.string().optional(),
+    description: z.string().optional(),
+    tags: z.array(z.string()).nullable().optional(),
+    // Legacy top-level import shape support.
+    severity: CaseSeveritySchema.optional(),
+    category: z.string().nullable().optional(),
+    assignees: CaseAssigneesSchema.optional(),
+    connector: CaseConnectorWithoutNameSchema.optional(),
+    settings: TemplateSettingsSchema.optional(),
+    author: z.string().optional(),
+    templateVersion: z.number().optional(),
+    isDefault: z.boolean().optional(),
+    definition: ImportedDefinitionSchema.optional(),
+  })
+  .refine(
+    (template) =>
+      template.template_name != null || template.templateName != null || template.name != null,
+    {
+      message: 'Either template_name or name is required',
+      path: ['template_name'],
+    }
+  );
 
 type ImportedTemplate = z.infer<typeof ImportedTemplateSchema>;
 
@@ -45,8 +74,18 @@ export interface ParsedTemplateEntry {
   owner?: string;
   description?: string;
   tags?: string[];
-  severity?: string;
+  caseDefaults?: {
+    title?: string;
+    description?: string;
+    tags?: string[];
+    severity?: z.infer<typeof CaseSeveritySchema>;
+    category?: string | null;
+    assignees?: z.infer<typeof CaseAssigneesSchema>;
+  };
+  severity?: z.infer<typeof CaseSeveritySchema>;
   category?: string | null;
+  connector?: ImportedTemplate['connector'];
+  settings?: ImportedTemplate['settings'];
   author?: string;
   definition?: ImportedTemplate['definition'];
   sourceFileName: string;
@@ -87,14 +126,50 @@ export const useParseYaml = () => {
           const result = ImportedTemplateSchema.safeParse(doc);
 
           if (result.success) {
-            templates.push({
-              templateId: result.data.templateId,
-              name: result.data.name,
-              owner: result.data.owner,
+            // In a legacy file (no template_* keys at all) the top-level `name` is the template
+            // identity string, so it must NOT silently become the case-default title. When
+            // template_* keys are present, identity lives in those keys and the top-level `name` is a
+            // genuine top-level case default that maps to the case title. An explicit `title` (legacy
+            // import shape) always wins.
+            const hasTemplateMetadataKeys =
+              result.data.template_name != null ||
+              result.data.templateName != null ||
+              result.data.template_description != null ||
+              result.data.templateDescription != null ||
+              result.data.template_tags != null ||
+              result.data.templateTags != null;
+            const caseDefaults = {
+              title: result.data.title ?? (hasTemplateMetadataKeys ? result.data.name : undefined),
               description: result.data.description,
               tags: result.data.tags ?? undefined,
               severity: result.data.severity,
               category: result.data.category,
+              assignees: result.data.assignees,
+            };
+            templates.push({
+              templateId: result.data.templateId,
+              name: result.data.template_name ?? result.data.templateName ?? result.data.name ?? '',
+              owner: result.data.owner,
+              // Template identity description/tags come from the `template_*` keys. When those keys
+              // are present the top-level `description`/`tags` are CASE defaults (see caseDefaults
+              // above) and must NOT bleed into the template identity — otherwise a template whose
+              // only tags are case-default tags (e.g. a migrated/exported template with no template
+              // tags) would incorrectly copy them onto the template. The top-level fallback applies
+              // only to the legacy flat shape, where those keys are the template identity itself.
+              description:
+                result.data.template_description ??
+                result.data.templateDescription ??
+                (hasTemplateMetadataKeys ? undefined : result.data.description),
+              tags:
+                result.data.template_tags ??
+                result.data.templateTags ??
+                (hasTemplateMetadataKeys ? undefined : result.data.tags) ??
+                undefined,
+              caseDefaults,
+              severity: caseDefaults.severity,
+              category: caseDefaults.category,
+              connector: result.data.connector,
+              settings: result.data.settings,
               author: result.data.author,
               definition: result.data.definition,
               sourceFileName: file.name,

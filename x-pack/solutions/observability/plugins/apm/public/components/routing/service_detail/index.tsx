@@ -5,21 +5,25 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import qs from 'query-string';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { offsetRt } from '../../../../common/comparison_rt';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
+import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { environmentRt } from '../../../../common/environment_rt';
+import { environmentSchema } from '../../../../common/environment_rt';
 import {
   LatencyAggregationType,
-  latencyAggregationTypeRt,
+  latencyAggregationTypeSchema,
 } from '../../../../common/latency_aggregation_types';
+import {
+  DEFAULT_ANOMALY_THRESHOLD,
+  anomalyThresholdSchema,
+} from '../../../../common/anomaly_detection/anomaly_threshold';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import {
@@ -140,38 +144,43 @@ export const serviceDetailRoute = {
         <ApmServiceWrapper />
       </ApmTimeRangeMetadataContextProvider>
     ),
-    params: t.intersection([
-      t.type({
-        path: t.type({
-          serviceName: t.string,
+    params: z
+      .object({
+        path: z.object({
+          serviceName: z.string(),
         }),
-      }),
-      t.type({
-        query: t.intersection([
-          environmentRt,
-          t.type({
-            rangeFrom: t.string,
-            rangeTo: t.string,
-            kuery: t.string,
-            serviceGroup: t.string,
-            comparisonEnabled: toBooleanRt,
-          }),
-          t.partial({
-            latencyAggregationType: latencyAggregationTypeRt,
-            transactionType: t.string,
-            refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-            refreshInterval: t.string,
-          }),
-          offsetRt,
-        ]),
-      }),
-    ]),
+      })
+      .merge(
+        z.object({
+          query: environmentSchema
+            .merge(
+              z.object({
+                rangeFrom: z.string(),
+                rangeTo: z.string(),
+                kuery: z.string(),
+                serviceGroup: z.string(),
+                comparisonEnabled: toBooleanFromString,
+              })
+            )
+            .merge(
+              z.object({
+                latencyAggregationType: latencyAggregationTypeSchema.optional(),
+                anomalyThreshold: anomalyThresholdSchema.optional(),
+                transactionType: z.string().optional(),
+                refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+                refreshInterval: z.string().optional(),
+              })
+            )
+            .merge(offsetSchema),
+        })
+      ),
     defaults: {
       query: {
         kuery: '',
         environment: ENVIRONMENT_ALL.value,
         serviceGroup: '',
         latencyAggregationType: LatencyAggregationType.avg,
+        anomalyThreshold: DEFAULT_ANOMALY_THRESHOLD,
       },
     },
     children: {
@@ -187,13 +196,15 @@ export const serviceDetailRoute = {
             showTransactionTypeSelector: true,
           },
         }),
-        params: t.partial({
-          query: t.partial({
-            page: toNumberRt,
-            pageSize: toNumberRt,
-            sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-          }),
+        params: z.object({
+          query: z
+            .object({
+              page: z.coerce.number().optional(),
+              pageSize: z.coerce.number().optional(),
+              sortField: z.string().optional(),
+              sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+            })
+            .optional(),
         }),
       },
       '/services/{serviceName}/transactions': {
@@ -208,39 +219,40 @@ export const serviceDetailRoute = {
             showTimeComparison: true,
           },
         }),
-        params: t.partial({
-          query: t.partial({
-            page: toNumberRt,
-            pageSize: toNumberRt,
-            sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-          }),
+        params: z.object({
+          query: z
+            .object({
+              page: z.coerce.number().optional(),
+              pageSize: z.coerce.number().optional(),
+              sortField: z.string().optional(),
+              sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+            })
+            .optional(),
         }),
         children: {
           '/services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
-            params: t.type({
-              query: t.intersection([
-                t.intersection([
-                  t.type({
-                    comparisonEnabled: toBooleanRt,
-                    showCriticalPath: toBooleanRt,
-                  }),
-                  t.partial({ transactionName: t.string }),
-                ]),
-                t.partial({
-                  traceId: t.string,
-                  transactionId: t.string,
-                  flyoutDetailTab: t.string,
-                  sampleRangeTo: toNumberRt,
-                  sampleRangeFrom: toNumberRt,
-                  page: toNumberRt,
-                  pageSize: toNumberRt,
-                  sortField: t.string,
-                  sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-                }),
-                offsetRt,
-              ]),
+            params: z.object({
+              query: z
+                .object({
+                  comparisonEnabled: toBooleanFromString,
+                  showCriticalPath: toBooleanFromString,
+                })
+                .merge(z.object({ transactionName: z.string().optional() }))
+                .merge(
+                  z.object({
+                    traceId: z.string().optional(),
+                    transactionId: z.string().optional(),
+                    flyoutDetailTab: z.string().optional(),
+                    sampleRangeTo: z.coerce.number().optional(),
+                    sampleRangeFrom: z.coerce.number().optional(),
+                    page: z.coerce.number().optional(),
+                    pageSize: z.coerce.number().optional(),
+                    sortField: z.string().optional(),
+                    sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                  })
+                )
+                .merge(offsetSchema),
             }),
             defaults: {
               query: {
@@ -274,22 +286,24 @@ export const serviceDetailRoute = {
             showTimeComparison: true,
           },
         }),
-        params: t.partial({
-          query: t.partial({
-            page: toNumberRt,
-            pageSize: toNumberRt,
-            sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-          }),
+        params: z.object({
+          query: z
+            .object({
+              page: z.coerce.number().optional(),
+              pageSize: z.coerce.number().optional(),
+              sortField: z.string().optional(),
+              sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+            })
+            .optional(),
         }),
         children: {
           '/services/{serviceName}/errors/{groupId}': {
             element: <ErrorGroupDetails />,
-            params: t.type({
-              path: t.type({
-                groupId: t.string,
+            params: z.object({
+              path: z.object({
+                groupId: z.string(),
               }),
-              query: t.partial({ errorId: t.string }),
+              query: z.object({ errorId: z.string().optional() }),
             }),
           },
           '/services/{serviceName}/errors': {
@@ -311,9 +325,9 @@ export const serviceDetailRoute = {
           },
           '/services/{serviceName}/metrics/{id}': {
             element: <MetricsDetails />,
-            params: t.type({
-              path: t.type({
-                id: t.string,
+            params: z.object({
+              path: z.object({
+                id: z.string(),
               }),
             }),
           },
@@ -331,21 +345,23 @@ export const serviceDetailRoute = {
         children: {
           '/services/{serviceName}/nodes/{serviceNodeName}/metrics': {
             element: <RedirectNodeMetricsToMetricsDetails />,
-            params: t.type({
-              path: t.type({
-                serviceNodeName: t.string,
+            params: z.object({
+              path: z.object({
+                serviceNodeName: z.string(),
               }),
             }),
           },
           '/services/{serviceName}/nodes': {
             element: <RedirectNodesToMetrics />,
-            params: t.partial({
-              query: t.partial({
-                sortDirection: t.string,
-                sortField: t.string,
-                pageSize: t.string,
-                page: t.string,
-              }),
+            params: z.object({
+              query: z
+                .object({
+                  sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                  sortField: z.string().optional(),
+                  pageSize: z.coerce.number().optional(),
+                  page: z.coerce.number().optional(),
+                })
+                .optional(),
             }),
           },
         },
@@ -384,14 +400,18 @@ export const serviceDetailRoute = {
           }),
           element: <InfraOverview />,
         }),
-        params: t.partial({
-          query: t.partial({
-            detailTab: t.union([
-              t.literal(InfraTab.containers),
-              t.literal(InfraTab.pods),
-              t.literal(InfraTab.hosts),
-            ]),
-          }),
+        params: z.object({
+          query: z
+            .object({
+              detailTab: z
+                .union([
+                  z.literal(InfraTab.containers),
+                  z.literal(InfraTab.pods),
+                  z.literal(InfraTab.hosts),
+                ])
+                .optional(),
+            })
+            .optional(),
         }),
       },
       '/services/{serviceName}/alerts': {
@@ -407,14 +427,18 @@ export const serviceDetailRoute = {
           bottomHeaderContent: AlertsHeaderSearchBar,
           contentWrapper: AlertsSearchBarContextProvider,
         }),
-        params: t.partial({
-          query: t.partial({
-            alertStatus: t.union([
-              t.literal(ALERT_STATUS_ACTIVE),
-              t.literal(ALERT_STATUS_RECOVERED),
-              t.literal(ALERT_STATUS_ALL),
-            ]),
-          }),
+        params: z.object({
+          query: z
+            .object({
+              alertStatus: z
+                .union([
+                  z.literal(ALERT_STATUS_ACTIVE),
+                  z.literal(ALERT_STATUS_RECOVERED),
+                  z.literal(ALERT_STATUS_ALL),
+                ])
+                .optional(),
+            })
+            .optional(),
         }),
       },
       '/services/{serviceName}/profiling': {
@@ -438,10 +462,8 @@ export const serviceDetailRoute = {
           }),
           element: <ServiceDashboards />,
         }),
-        params: t.partial({
-          query: t.partial({
-            dashboardId: t.string,
-          }),
+        params: z.object({
+          query: z.object({ dashboardId: z.string().optional() }).optional(),
         }),
       },
       '/services/{serviceName}/': {

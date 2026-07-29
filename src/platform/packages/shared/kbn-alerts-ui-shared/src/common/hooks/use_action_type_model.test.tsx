@@ -11,7 +11,7 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { connectorsSpecs } from '@kbn/connector-specs';
 import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import { actionTypeRegistryMock } from '../test_utils/action_type_registry.mock';
@@ -19,6 +19,8 @@ import type { ActionTypeModel } from '../types';
 import { useActionTypeModel } from './use_action_type_model';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
+
+const mockDocLinks = docLinksServiceMock.createStartContract();
 
 describe('useActionTypeModel', () => {
   let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
@@ -80,6 +82,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: undefined,
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -89,7 +92,6 @@ describe('useActionTypeModel', () => {
       actionTypeModel: null,
       isLoading: false,
       error: null,
-      isFromSpec: false,
       refetch: expect.any(Function),
     });
   });
@@ -104,6 +106,7 @@ describe('useActionTypeModel', () => {
           actionTypeRegistry,
           actionTypeId: 'test-connector',
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -113,7 +116,6 @@ describe('useActionTypeModel', () => {
     expect(result.current.actionTypeModel).toBe(mockActionTypeModel);
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
 
     // Should not call HTTP get for registered connectors
     expect(mockHttp.get).not.toHaveBeenCalled();
@@ -128,8 +130,8 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -148,7 +150,6 @@ describe('useActionTypeModel', () => {
     // Verify model is returned
     expect(result.current.actionTypeModel).not.toBeNull();
     expect(result.current.actionTypeModel?.id).toBe('spec-connector');
-    expect(result.current.isFromSpec).toBe(true);
     expect(result.current.error).toBeNull();
   });
 
@@ -170,8 +171,8 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -186,7 +187,6 @@ describe('useActionTypeModel', () => {
       'Failed to parse connector spec schema for "spec-connector"'
     );
     expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
   });
 
   it('handles fetch errors correctly', async () => {
@@ -199,8 +199,8 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -212,31 +212,6 @@ describe('useActionTypeModel', () => {
 
     expect(result.current.error).toEqual(fetchError);
     expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
-  });
-
-  it('does not fetch for non-spec connectors not in registry', async () => {
-    actionTypeRegistry.has.mockReturnValue(false);
-
-    const { result } = renderHook(
-      () =>
-        useActionTypeModel({
-          actionTypeRegistry,
-          actionTypeId: 'unknown-connector',
-          http: mockHttp as any,
-          uiSettings: mockUiSettings as any,
-        }),
-      { wrapper: createWrapper() }
-    );
-
-    // Should not be loading (no fetch triggered)
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.error).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
-
-    // Should not call HTTP get for non-spec connectors
-    expect(mockHttp.get).not.toHaveBeenCalled();
   });
 
   it('transforms spec response into ActionTypeModel with correct properties', async () => {
@@ -248,8 +223,8 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: mockUiSettings as any,
         }),
       { wrapper: createWrapper() }
@@ -264,7 +239,6 @@ describe('useActionTypeModel', () => {
     expect(model?.id).toBe('spec-connector');
     expect(model?.actionTypeTitle).toBe('Spec Connector');
     expect(model?.selectMessage).toBe('A spec-based connector');
-    expect(model?.source).toBe(ACTION_TYPE_SOURCES.spec);
     expect(model?.isExperimental).toBe(false);
     expect(model?.actionConnectorFields).toBeDefined();
     expect(model?.actionParamsFields).toBeDefined();
@@ -291,8 +265,8 @@ describe('useActionTypeModel', () => {
         useActionTypeModel({
           actionTypeRegistry,
           actionTypeId: 'workflows-spec-connector',
-          source: ACTION_TYPE_SOURCES.spec,
           http: mockHttp as any,
+          docLinks: mockDocLinks,
           uiSettings: { get: uiSettingsGet } as any,
         }),
       { wrapper: createWrapper() }

@@ -38,9 +38,11 @@ dependsOn:
   - '@kbn/usage-api-plugin'
   - '@kbn/logging-mocks'
   - '@kbn/crypto'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/es-errors'
   - '@kbn/spaces-plugin'
-  - '@kbn/spaces-utils'
+  - '@kbn/core-spaces-common'
+  - '@kbn/i18n'
 tags:
   - plugin
   - prod

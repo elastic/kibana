@@ -10,6 +10,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import { isEmpty, isEqual } from 'lodash';
 import type { BulkEditResult } from '@kbn/alerting-plugin/server/rules_client/common/bulk_edit/types';
+import type { SecurityRuleChangeTracking } from '../../../../../../../common/detection_engine/rule_management/rule_change_tracking';
 import type { DetectionRulesAuthz } from '../../../../../../../common/detection_engine/rule_management/authz';
 import type {
   RulePatchProps,
@@ -41,6 +42,7 @@ interface PatchRuleOptions {
   rulePatch: RulePatchProps;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
+  changeTracking?: SecurityRuleChangeTracking;
 }
 
 export const patchRule = async ({
@@ -50,6 +52,7 @@ export const patchRule = async ({
   rulePatch,
   mlAuthz,
   rulesAuthz,
+  changeTracking,
 }: PatchRuleOptions): Promise<RuleResponse> => {
   const { rule_id: ruleId, id, ...rulePatchObjWithoutIds } = rulePatch;
 
@@ -111,6 +114,7 @@ export const patchRule = async ({
         rulesClient,
         ruleUpdate: { ...fieldsToPatch, rule_source: patchedRule.rule_source },
         existingRule,
+        changeTracking,
       });
 
     const patchErrors = formatBulkEditResultErrors(appliedPatchWithReadPrivs);
@@ -132,6 +136,7 @@ export const patchRule = async ({
     const patchedInternalRule = await rulesClient.update({
       id: existingRule.id,
       data: convertRuleResponseToAlertingRule(patchedRule, actionsClient),
+      changeTracking,
     });
 
     const { enabled } = await toggleRuleEnabledOnUpdate(rulesClient, existingRule, patchedRule);

@@ -55,7 +55,7 @@ export const HeaderExtension = ({ extension, display, containerClassName }: Prop
   if (!isMountPoint(extension)) {
     return (
       <Suspense fallback={null}>
-        <div className={containerClassName} style={style}>
+        <div css={mountPointContainerCss} className={containerClassName} style={style}>
           {extension}
         </div>
       </Suspense>

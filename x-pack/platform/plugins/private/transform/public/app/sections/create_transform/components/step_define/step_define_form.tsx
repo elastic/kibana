@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -172,7 +173,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     transformConfigQuery,
     requestPayload,
     runtimeMappings,
-    isDatePickerApplyEnabled ? timeRangeMs : undefined
+    isDatePickerApplyEnabled ? timeRangeMs : undefined,
+    props.overrides?.projectRouting
   );
 
   const copyToClipboardPivot = getTransformPreviewDevConsoleStatement(
@@ -192,7 +194,8 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
       validationStatus,
       requestPayload,
       runtimeMappings,
-      timeRangeMs
+      timeRangeMs,
+      props.overrides?.projectRouting
     ),
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
@@ -425,11 +428,16 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                           tooltipProps={{ disableScreenReaderOutput: true }}
                         >
                           {(copy: () => void) => (
-                            <EuiButtonIcon
-                              onClick={copy}
-                              iconType="copy"
-                              aria-label={copyToClipboardSourceDescription}
-                            />
+                            <EuiToolTip
+                              content={copyToClipboardSourceDescription}
+                              disableScreenReaderOutput
+                            >
+                              <EuiButtonIcon
+                                onClick={copy}
+                                iconType="copy"
+                                aria-label={copyToClipboardSourceDescription}
+                              />
+                            </EuiToolTip>
                           )}
                         </EuiCopy>
                       </EuiFlexItem>

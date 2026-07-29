@@ -27,7 +27,6 @@ const EPISODE_STATUS_VALUES = Object.values(alertEpisodeStatus);
 enum MatcherField {
   EpisodeStatus = 'episode_status',
   RuleName = 'rule.name',
-  RuleDescription = 'rule.description',
   RuleTags = 'rule.tags',
   RuleId = 'rule.id',
   EpisodeId = 'episode_id',
@@ -43,10 +42,6 @@ const RULE_SO_FIELD_CONFIG: Partial<Record<MatcherField, RuleSoFieldConfig>> = {
   [MatcherField.RuleName]: {
     searchField: 'metadata.name',
     accessor: (a) => a.metadata.name,
-  },
-  [MatcherField.RuleDescription]: {
-    searchField: 'metadata.description',
-    accessor: (a) => a.metadata.description,
   },
 };
 
@@ -166,7 +161,7 @@ export class MatcherSuggestionsService {
       page: 1,
       perPage: MAX_SUGGESTIONS,
       ...(query ? { search: `${getEscapedQuery(query)}*`, searchFields: [searchField] } : {}),
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
@@ -181,7 +176,7 @@ export class MatcherSuggestionsService {
       page: 1,
       perPage: 100,
       fields: ['metadata.tags'],
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 
@@ -207,7 +202,7 @@ export class MatcherSuggestionsService {
       type: RULE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 100,
-      sortField: 'updatedAt',
+      sortField: 'updated_at',
       sortOrder: 'desc',
     });
 

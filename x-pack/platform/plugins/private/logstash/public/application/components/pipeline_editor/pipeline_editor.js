@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
+import { MAX_PIPELINE_DESCRIPTION_LENGTH } from '../../../../common/constants/pipeline';
 import { CodeEditor } from '@kbn/code-editor';
 import {
   EuiButton,
@@ -307,6 +308,7 @@ class PipelineEditorUi extends React.Component {
             <EuiFieldText
               data-test-subj="inputDescription"
               fullWidth
+              maxLength={MAX_PIPELINE_DESCRIPTION_LENGTH}
               name="pipelineDescription"
               onChange={this.onPipelineDescriptionChange}
               value={this.state.pipeline.description || ''}
@@ -397,6 +399,9 @@ class PipelineEditorUi extends React.Component {
                 onChange={(e) => this.handleSettingChange('queue.type', e.target.value)}
                 options={PIPELINE_EDITOR.QUEUE_TYPES}
                 value={this.state.pipeline.settings['queue.type']}
+                aria-label={i18n.translate('xpack.logstash.pipelineEditor.queueTypeAriaLabel', {
+                  defaultMessage: 'Queue type',
+                })}
               />
             </FlexItemSetting>
             <FlexItemSetting

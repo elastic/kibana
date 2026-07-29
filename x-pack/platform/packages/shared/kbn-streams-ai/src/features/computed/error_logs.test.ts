@@ -12,6 +12,7 @@ import { errorLogsGenerator } from './error_logs';
 
 jest.mock('@kbn/ai-tools', () => ({
   getSampleDocumentsEsql: jest.fn(),
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS: 30_000,
 }));
 
 const getSampleDocumentsEsqlMock = jest.mocked(getSampleDocumentsEsql);

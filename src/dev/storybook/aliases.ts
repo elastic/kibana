@@ -17,6 +17,7 @@ export const storybookAliases = {
   cases: 'src/platform/packages/shared/kbn-cases-components/.storybook',
   cell_actions: 'src/platform/packages/shared/kbn-cell-actions/.storybook',
   chart_icons: 'src/platform/packages/shared/kbn-chart-icons/.storybook',
+  change_history_ui: 'x-pack/platform/packages/shared/kbn-change-history-ui/.storybook',
   cloud_security_posture_graph:
     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/.storybook',
   cloud: 'src/platform/packages/shared/cloud/.storybook',
@@ -50,6 +51,7 @@ export const storybookAliases = {
   infra: 'x-pack/solutions/observability/plugins/infra/.storybook',
   ingest_pipelines: 'x-pack/platform/packages/shared/ingest-pipelines/.storybook',
   kbn_split_button: 'src/platform/packages/private/kbn-split-button/.storybook',
+  kbn_ui: 'src/platform/kbn-ui/storybook-config',
   language_documentation_popover:
     'src/platform/packages/private/kbn-language-documentation/.storybook',
   lists: 'x-pack/solutions/security/plugins/lists/.storybook',

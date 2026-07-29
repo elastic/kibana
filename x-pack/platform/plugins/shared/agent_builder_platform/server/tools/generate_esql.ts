@@ -71,10 +71,8 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
       },
-      { esClient, modelProvider, logger, events, attachments }
+      { esClient, experimentalFeatures, modelProvider, logger, events, attachments }
     ) => {
-      const model = await modelProvider.getDefaultModel();
-
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const esqlResponse = await generateEsql({
@@ -84,7 +82,8 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         executeQuery,
         disableNamedParams,
         timeRange,
-        model,
+        includeDatasets: experimentalFeatures.datasets,
+        modelProvider,
         esClient: esClient.asCurrentUser,
         logger,
         events,

@@ -782,7 +782,10 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   }
 
   async getFileDownload(actionId: string, agentId: string): Promise<GetFileDownloadMethodResponse> {
+    this.log.debug(`getFileDownload(): actionId=${actionId}, agentId=${agentId}`);
+
     await this.ensureValidActionId(actionId);
+
     const {
       EndpointActions: {
         data: { command },
@@ -798,6 +801,8 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         400
       );
     }
+
+    this.log.debug(`Getting file download for action ID [${actionId}] command [${command}]`);
 
     let downloadStream: Readable | undefined;
     let fileName: string = 'download.zip';
@@ -880,6 +885,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
       throw e;
     }
+
+    downloadStream.on('error', (err) => {
+      this.log.error(
+        `Download stream error for action id [${actionId}][${command}]: ${err.message}`,
+        { error: err }
+      );
+    });
 
     return {
       stream: downloadStream,
@@ -1070,6 +1082,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
               requiresApproval: false,
               outputDestination: 'SentinelCloud',
               inputParams: reqIndexOptions.parameters?.scriptInput,
+              password: RESPONSE_ACTIONS_ZIP_PASSCODE.sentinel_one,
             },
           });
 

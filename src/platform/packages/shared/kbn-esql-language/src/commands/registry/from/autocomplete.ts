@@ -9,7 +9,12 @@
 import { SOURCES_TYPES } from '@kbn/esql-types';
 import type { ESQLAstAllCommands } from '@elastic/esql/types';
 import { isSubQuery, isSource } from '@elastic/esql';
-import { pipeCompleteItem, commaCompleteItem, buildSubqueryCompleteItems } from '../complete_items';
+import {
+  newLineCompleteItem,
+  newLineAndPipeCompleteItems,
+  commaCompleteItem,
+  buildSubqueryCompleteItems,
+} from '../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
@@ -71,9 +76,9 @@ async function handleFromAutocomplete(
   // Use commandText for pattern matching (e.g., /METADATA\s+$/ and trailing whitespace)
   // checks need to operate on the current command only, not the entire query
   const commandText = query.substring(command.location.min, cursorPos);
-  const subquerySuggestion =
+  const subquerySuggestions =
     commandText.length > command.name.length
-      ? buildSubqueryCompleteItems([command.name]).at(0)
+      ? buildSubqueryCompleteItems({ previewCommands: ['row', 'ts'] })
       : undefined;
   const indicesBrowserSuggestion = await getIndicesBrowserSuggestion({
     callbacks,
@@ -99,7 +104,7 @@ async function handleFromAutocomplete(
       context,
       innerText,
       command.location.min,
-      subquerySuggestion
+      subquerySuggestions
     );
     if (indicesBrowserSuggestion) {
       suggestions.unshift(indicesBrowserSuggestion);
@@ -122,7 +127,7 @@ async function handleFromAutocomplete(
     context,
     callbacks,
     indexes,
-    subquerySuggestion,
+    subquerySuggestions,
     {
       textBeforeCursor: innerText,
       commandStart: command.location.min, // Full-query offset of this FROM command.
@@ -141,7 +146,7 @@ function suggestInitialSources(
   context: ICommandContext | undefined,
   innerText: string,
   commandStart: number,
-  subquerySuggestion?: ISuggestionItem
+  subquerySuggestions?: ISuggestionItem[]
 ): ISuggestionItem[] {
   let sources = context?.sources ?? [];
 
@@ -157,8 +162,8 @@ function suggestInitialSources(
   const datasetSuggestions = buildDatasetsDefinitions(context?.datasets ?? [], []);
   const suggestions = [...sourceSuggestions, ...viewSuggestions, ...datasetSuggestions];
 
-  if (subquerySuggestion && shouldSuggestSubquery(context)) {
-    suggestions.push(subquerySuggestion);
+  if (subquerySuggestions && shouldSuggestSubquery(context)) {
+    suggestions.push(...subquerySuggestions);
   }
 
   return suggestions;
@@ -171,7 +176,11 @@ async function suggestNextActions(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined
 ): Promise<ISuggestionItem[]> {
-  const suggestions: ISuggestionItem[] = [pipeCompleteItem, commaCompleteItem, metadataSuggestion];
+  const suggestions: ISuggestionItem[] = [
+    ...newLineAndPipeCompleteItems,
+    commaCompleteItem,
+    metadataSuggestion,
+  ];
 
   const recommendedQueries = await getRecommendedQueriesSuggestions(
     context?.editorExtensions ?? EMPTY_EXTENSIONS,
@@ -189,7 +198,7 @@ async function suggestAdditionalSources(
   context: ICommandContext | undefined,
   callbacks: ICommandCallbacks | undefined,
   indexes: ReturnType<typeof getSourcesFromCommands>,
-  subquerySuggestion?: ISuggestionItem,
+  subquerySuggestions?: ISuggestionItem[],
   sourceReplacementContext?: {
     textBeforeCursor: string;
     commandStart: number;
@@ -227,8 +236,18 @@ async function suggestAdditionalSources(
     canRewriteFromToTs ? sourceReplacementContext : undefined
   );
 
-  if (subquerySuggestion && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
-    suggestions.push(subquerySuggestion);
+  if (subquerySuggestions && isRestartingExpression(innerText) && shouldSuggestSubquery(context)) {
+    suggestions.push(...subquerySuggestions);
+  }
+
+  if (isTypingIndexName) {
+    const indexNameStart = innerText.length - lastIndex.name.length;
+    suggestions.unshift({
+      ...newLineCompleteItem,
+      text: lastIndex.name + '\n',
+      filterText: lastIndex.name,
+      rangeToReplace: { start: indexNameStart, end: innerText.length },
+    });
   }
 
   return suggestions;

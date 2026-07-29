@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import { flow } from 'lodash';
+
+import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
+
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import type { SavedDashboardPanel, SavedDashboardSection } from '../../../dashboard_saved_object';
-import type { DashboardState, DashboardPanel, DashboardSection } from '../../types';
-import { embeddableService } from '../../../kibana_services';
+import { embeddableService, logger } from '../../../kibana_services';
+import type { DashboardPanel, DashboardSection, DashboardState, Warnings } from '../../types';
 import { getPanelReferences } from './get_panel_references';
 import { panelBwc } from './panel_bwc';
-import type { Warnings } from '../../types';
 
 export function transformPanelsOut(
   panelsJSON: string = '[]',
   sections: SavedDashboardSection[] = [],
-  containerReferences?: SavedObjectReference[],
-  isDashboardAppRequest: boolean = false
+  containerReferences: SavedObjectReference[] = [],
+  isDashboardAppRequest: boolean = false,
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): { panels: DashboardState['panels']; warnings: Warnings } {
   const topLevelPanels: DashboardPanel[] = [];
   const warnings: Warnings = [];
@@ -39,7 +42,15 @@ export function transformPanelsOut(
     };
   });
 
-  JSON.parse(panelsJSON).forEach((storedPanel: SavedDashboardPanel) => {
+  let parsedPanels;
+  try {
+    parsedPanels = JSON.parse(panelsJSON);
+  } catch (parseError) {
+    logger.warn(`Unable to parse panelsJSON. Error: ${parseError.message}`);
+    return { panels: [], warnings };
+  }
+
+  parsedPanels.forEach((storedPanel: SavedDashboardPanel) => {
     const storedPanelReferences = getPanelReferences(containerReferences ?? [], storedPanel);
     const { sectionId } = storedPanel.gridData;
     const { panel, panelReferences } = panelBwc(storedPanel, storedPanelReferences ?? []);
@@ -49,7 +60,8 @@ export function transformPanelsOut(
         panel,
         panelReferences,
         containerReferences,
-        isDashboardAppRequest
+        isDashboardAppRequest,
+        useGASchemas
       );
     } catch (e) {
       warnings.push({
@@ -77,6 +89,7 @@ export function transformPanelsOut(
       topLevelPanels.push(panelProperties);
     }
   });
+
   return {
     panels: [...topLevelPanels, ...Object.values(sectionsMap)],
     warnings,
@@ -93,8 +106,9 @@ const defaultTransform = (
 function transformPanel(
   panel: SavedDashboardPanel,
   panelReferences: SavedObjectReference[],
-  containerReferences?: SavedObjectReference[],
-  isDashboardAppRequest: boolean = false
+  containerReferences: SavedObjectReference[] = [],
+  isDashboardAppRequest: boolean = false,
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ) {
   const { embeddableConfig, gridData, panelIndex, type } = panel;
 
@@ -104,11 +118,27 @@ function transformPanel(
   // TODO remove when lens as code transforms are ready for production
   const transformType =
     type === LENS_EMBEDDABLE_TYPE && isDashboardAppRequest ? 'lens-dashboard-app' : type;
-  const transforms = embeddableService?.getTransforms(transformType);
 
-  const transformedPanelConfig =
-    transforms?.transformOut?.(embeddableConfig, panelReferences, containerReferences) ??
-    defaultTransform(embeddableConfig);
+  const transforms = embeddableService?.getTransforms(transformType);
+  let transformedPanelConfig =
+    transforms?.transformOut?.(
+      embeddableConfig,
+      panelReferences,
+      containerReferences,
+      undefined,
+      useGASchemas
+    ) ?? defaultTransform(embeddableConfig);
+
+  if (transforms?.schema) {
+    transformedPanelConfig = transforms.schema.validate(
+      transformedPanelConfig,
+      undefined,
+      undefined,
+      {
+        stripUnknownKeys: true,
+      }
+    );
+  }
 
   return {
     grid: restOfGrid,

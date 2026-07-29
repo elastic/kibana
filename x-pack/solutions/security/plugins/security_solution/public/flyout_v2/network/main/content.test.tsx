@@ -13,9 +13,7 @@ import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 import { useNetworkDetails } from '../../../explore/network/containers/details';
 import { useAnomaliesTableData } from '../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
@@ -34,9 +32,7 @@ jest.mock('../../../common/components/page_loader', () => ({
 jest.mock('../../../explore/network/containers/details');
 jest.mock('../../../common/components/ml/anomaly/use_anomalies_table_data');
 jest.mock('../../../common/components/ml/hooks/use_installed_security_jobs');
-jest.mock('../../../sourcerer/containers');
 jest.mock('../../../common/containers/use_global_time');
-jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../data_view_manager/hooks/use_selected_patterns');
 jest.mock('../../../common/hooks/use_invalid_filter_query');
@@ -47,9 +43,7 @@ jest.mock('../../../common/lib/kuery', () => ({
 const mockUseNetworkDetails = useNetworkDetails as jest.Mock;
 const mockUseAnomaliesTableData = useAnomaliesTableData as jest.Mock;
 const mockUseInstalledSecurityJobNameById = useInstalledSecurityJobNameById as jest.Mock;
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseGlobalTime = useGlobalTime as jest.Mock;
-const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 const mockUseDataView = useDataView as jest.Mock;
 const mockUseSelectedPatterns = useSelectedPatterns as jest.Mock;
 
@@ -69,12 +63,6 @@ describe('<Content />', () => {
       setQuery: jest.fn(),
     });
 
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      sourcererDataView: {},
-      selectedPatterns: ['auditbeat-*'],
-    });
-
     mockUseNetworkDetails.mockReturnValue([false, { id: 'test-id', networkDetails: {} }]);
 
     mockUseAnomaliesTableData.mockReturnValue([false, null]);
@@ -84,8 +72,6 @@ describe('<Content />', () => {
       jobNameById: {},
     });
 
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
-
     mockUseDataView.mockReturnValue({
       dataView: { matchedIndices: [] },
       status: 'ready',
@@ -94,36 +80,7 @@ describe('<Content />', () => {
     mockUseSelectedPatterns.mockReturnValue([]);
   });
 
-  it('should render IpOverview when indices exist', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <Content {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('ip-overview')).toBeInTheDocument();
-    expect(queryByTestId('empty-prompt')).not.toBeInTheDocument();
-  });
-
-  it('should render EmptyPrompt when indices do not exist', () => {
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: false,
-      sourcererDataView: {},
-      selectedPatterns: [],
-    });
-
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <Content {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('empty-prompt')).toBeInTheDocument();
-    expect(queryByTestId('ip-overview')).not.toBeInTheDocument();
-  });
-
-  it('should render PageLoader when newDataViewPickerEnabled is true and status is pristine', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  it('should render PageLoader status is pristine', () => {
     mockUseDataView.mockReturnValue({
       dataView: { matchedIndices: [] },
       status: 'pristine',
@@ -140,18 +97,12 @@ describe('<Content />', () => {
     expect(queryByTestId('empty-prompt')).not.toBeInTheDocument();
   });
 
-  it('should use experimental data view indices when newDataViewPickerEnabled is true', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  it('should use experimental data view indices when we have selected patterns', () => {
     mockUseDataView.mockReturnValue({
       dataView: { matchedIndices: ['logs-*'] },
       status: 'ready',
     });
     mockUseSelectedPatterns.mockReturnValue(['logs-*']);
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: false,
-      sourcererDataView: {},
-      selectedPatterns: [],
-    });
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
@@ -163,18 +114,12 @@ describe('<Content />', () => {
     expect(queryByTestId('empty-prompt')).not.toBeInTheDocument();
   });
 
-  it('should render EmptyPrompt when newDataViewPickerEnabled is true and no matched indices', () => {
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+  it('should render EmptyPrompt when no matched indices', () => {
     mockUseDataView.mockReturnValue({
       dataView: { matchedIndices: [] },
       status: 'ready',
     });
     mockUseSelectedPatterns.mockReturnValue([]);
-    mockUseSourcererDataView.mockReturnValue({
-      indicesExist: true,
-      sourcererDataView: {},
-      selectedPatterns: ['auditbeat-*'],
-    });
 
     const { getByTestId, queryByTestId } = render(
       <TestProviders>

@@ -570,8 +570,6 @@ class TimeseriesChartIntl extends Component {
       .attr('width', brushWidth)
       .attr('height', focusChartIncoming ?? focusChartHeight);
 
-    fcsGroup.append('g').classed('ml-annotations', true);
-
     // Add border round plot area.
     fcsGroup
       .append('rect')
@@ -614,6 +612,9 @@ class TimeseriesChartIntl extends Component {
       .attr('class', 'x axis')
       .attr('transform', 'translate(0,' + fcsHeight + ')');
     axes.append('g').attr('class', 'y axis');
+
+    // Appended after axes so that annotation chips paint above the y-axis gridlines.
+    fcsGroup.append('g').classed('ml-annotations', true);
 
     // Create the elements for the metric value line and model bounds area.
     fcsGroup.append('path').attr('class', 'area bounds');

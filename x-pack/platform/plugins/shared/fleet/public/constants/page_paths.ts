@@ -18,7 +18,6 @@ export type StaticPage =
   | 'uninstall_tokens'
   | 'data_streams'
   | 'settings'
-  | 'collectors'
   | 'settings_create_outputs'
   | 'settings_create_download_sources'
   | 'settings_create_fleet_server_hosts'
@@ -88,7 +87,6 @@ export const FLEET_ROUTING_PATHS = {
   enrollment_tokens: '/enrollment-tokens',
   uninstall_tokens: '/uninstall-tokens',
   data_streams: '/data-streams',
-  collectors: '/collectors',
   settings: '/settings',
   settings_create_fleet_server_hosts: '/settings/create-fleet-server-hosts',
   settings_edit_fleet_server_hosts: '/settings/fleet-server-hosts/:itemId',
@@ -262,16 +260,9 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({
-    pkgkey,
-    integration,
-    agentPolicyId,
-    useMultiPageLayout,
-    prerelease,
-  }) => {
+  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, prerelease }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
-      ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
       ...(prerelease ? { prerelease } : {}),
     });
     return [
@@ -318,7 +309,6 @@ export const pagePathGetters: {
   enrollment_tokens: () => [FLEET_BASE_PATH, '/enrollment-tokens'],
   uninstall_tokens: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.uninstall_tokens],
   data_streams: () => [FLEET_BASE_PATH, '/data-streams'],
-  collectors: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.collectors],
   settings: () => [FLEET_BASE_PATH, FLEET_ROUTING_PATHS.settings],
   settings_edit_fleet_server_hosts: ({ itemId }) => [
     FLEET_BASE_PATH,

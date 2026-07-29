@@ -84,6 +84,7 @@ export const MACHINE_LEARNING_DATA_FRAME_ANALYTICS_MAP = 'app/ml/data_frame_anal
 
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
+export const ALERT_DETECTIONS_URL = '/app/security/alert_detections';
 export const ALERTS_URL = '/app/security/alerts';
 export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';

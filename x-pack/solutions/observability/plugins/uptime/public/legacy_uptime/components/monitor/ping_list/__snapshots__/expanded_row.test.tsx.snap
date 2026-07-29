@@ -140,58 +140,76 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
     class="euiFlexItem emotion-euiFlexItem-grow-1"
   >
     <div
-      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
+      class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
+      data-size="m"
+      style="--euiCallOutTypeColor:#0B64DD"
     >
       <div
-        class="euiText emotion-euiText-s-euiTextColor-default"
+        class="css-1slkmya-wrapper"
       >
-        <dl
-          class="euiDescriptionList emotion-euiDescriptionList-row-left"
-          data-type="row"
+        <div
+          class="css-wlziyu-body"
         >
-          <dt
-            class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
+          <span
+            class="css-1qkppnb-icon"
+            data-euiicon-type="infoFill"
+          />
+          <div
+            class="css-ak2bmi-content"
           >
-            Response Body
-          </dt>
-          <dd
-            class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
-          >
             <div
-              class="euiText emotion-euiText-m"
+              class="euiText euiCallOut__additionalContent emotion-euiText-s-euiTextColor-default"
             >
-              Body size is 1MB.
-            </div>
-            <div
-              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-            />
-            <div
-              class="euiText emotion-euiText-m"
-            >
-              Body not recorded. Read our 
-              <a
-                class="euiLink emotion-euiLink-primary"
-                data-test-subj="syntheticsDocLinkForBodyDocsLink"
-                href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
-                rel="noopener noreferrer"
-                target="_blank"
+              <dl
+                class="euiDescriptionList emotion-euiDescriptionList-row-left"
+                data-type="row"
               >
-                docs
-                <span
-                  class="css-1j75qc1"
-                  data-euiicon-type="external"
-                  role="presentation"
-                />
-                <span
-                  class="emotion-euiScreenReaderOnly"
+                <dt
+                  class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal-s"
                 >
-                  (external, opens in a new tab or window)
-                </span>
-              </a>
-               for more information on recording response bodies.
+                  Response Body
+                </dt>
+                <dd
+                  class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
+                >
+                  <div
+                    class="euiText emotion-euiText-m"
+                  >
+                    Body size is 1MB.
+                  </div>
+                  <div
+                    class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                  />
+                  <div
+                    class="euiText emotion-euiText-m"
+                  >
+                    Body not recorded. Read our 
+                    <a
+                      class="euiLink emotion-euiLink-primary"
+                      data-test-subj="syntheticsDocLinkForBodyDocsLink"
+                      href="https://www.elastic.co/guide/en/beats/heartbeat/current/configuration-heartbeat-options.html#monitor-http-response"
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      docs
+                      <span
+                        class="css-1j75qc1"
+                        data-euiicon-type="external"
+                        role="presentation"
+                      />
+                      <span
+                        class="emotion-euiScreenReaderOnly"
+                      >
+                        (external, opens in a new tab or window)
+                      </span>
+                    </a>
+                     for more information on recording response bodies.
+                  </div>
+                </dd>
+              </dl>
             </div>
-          </dd>
-        </dl>
+          </div>
+        </div>
       </div>
     </div>
   </div>

@@ -6,8 +6,13 @@
  */
 
 import type { ConverseInput } from '@kbn/agent-builder-common';
-import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
-import { createEmptyConversation } from '../../../../test_utils/conversations';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
+import {
+  AgentPromptType,
+  AuthorizationStatus,
+  ConfirmationStatus,
+} from '@kbn/agent-builder-common/agents/prompts';
+import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
 import { createPromptManager, getAgentPromptStorageState, toolConfirmationId } from './prompts';
 
 describe('prompts utilities', () => {
@@ -157,6 +162,113 @@ describe('prompts utilities', () => {
 
         expect(result).toEqual({ status: ConfirmationStatus.accepted });
       });
+
+      it('returns an authorization prompt payload from askForAuthorization', () => {
+        const manager = createPromptManager();
+
+        const toolManager = manager.forTool({
+          toolId: 'test-tool',
+          toolCallId: 'call-123',
+          toolParams: {},
+        });
+
+        const result = toolManager.askForAuthorization({
+          id: 'tools.test-tool.authorization.conn-1',
+          connector_id: 'conn-1',
+          connector_name: 'Slack',
+          connector_type: '.slack2',
+          auth_method: 'oauth_authorization_code',
+        });
+
+        expect(result).toEqual({
+          prompt: {
+            type: AgentPromptType.authorization,
+            id: 'tools.test-tool.authorization.conn-1',
+            connector_id: 'conn-1',
+            connector_name: 'Slack',
+            connector_type: '.slack2',
+            auth_method: 'oauth_authorization_code',
+          },
+        });
+      });
+    });
+
+    describe('authorization status', () => {
+      it('returns unprompted when no entry exists', () => {
+        const manager = createPromptManager();
+
+        expect(manager.getAuthorizationStatus('unknown')).toEqual({
+          status: AuthorizationStatus.unprompted,
+        });
+      });
+
+      it('returns authorized when the user authorized', () => {
+        const manager = createPromptManager({
+          state: {
+            responses: {
+              'auth-prompt': {
+                type: AgentPromptType.authorization,
+                response: { authorized: true },
+              },
+            },
+          },
+        });
+
+        expect(manager.getAuthorizationStatus('auth-prompt')).toEqual({
+          status: AuthorizationStatus.authorized,
+        });
+      });
+
+      it('returns declined when the user declined', () => {
+        const manager = createPromptManager({
+          state: {
+            responses: {
+              'auth-prompt': {
+                type: AgentPromptType.authorization,
+                response: { authorized: false },
+              },
+            },
+          },
+        });
+
+        expect(manager.getAuthorizationStatus('auth-prompt')).toEqual({
+          status: AuthorizationStatus.declined,
+        });
+      });
+
+      it('throws when called against a confirmation entry', () => {
+        const manager = createPromptManager({
+          state: {
+            responses: {
+              'conf-prompt': {
+                type: AgentPromptType.confirmation,
+                response: { allow: true },
+              },
+            },
+          },
+        });
+
+        expect(() => manager.getAuthorizationStatus('conf-prompt')).toThrow(
+          'Trying to check authorization status of non-authorization prompt.'
+        );
+      });
+
+      it('getConfirmationStatus throws when called against an authorization entry', () => {
+        const manager = createPromptManager({
+          state: {
+            responses: {
+              'auth-prompt': {
+                type: AgentPromptType.authorization,
+                response: { authorized: true },
+              },
+            },
+          },
+        });
+
+        expect(() => manager.getConfirmationStatus('auth-prompt')).toThrow(
+          'Trying to check confirmation status of non-confirmation prompt.'
+        );
+      });
     });
   });
 
@@ -220,6 +332,121 @@ describe('prompts utilities', () => {
       expect(result.responses['new-prompt']).toEqual({
         type: AgentPromptType.confirmation,
         response: { allow: false },
+      });
+    });
+
+    it('discriminates confirmation and authorization responses when merging from input', () => {
+      const input: ConverseInput = {
+        prompts: {
+          'conf-prompt': { allow: true },
+          'auth-prompt': { authorized: true },
+        },
+      };
+
+      const result = getAgentPromptStorageState({ input });
+
+      expect(result.responses['conf-prompt']).toEqual({
+        type: AgentPromptType.confirmation,
+        response: { allow: true },
+      });
+      expect(result.responses['auth-prompt']).toEqual({
+        type: AgentPromptType.authorization,
+        response: { authorized: true },
+      });
+    });
+
+    describe('authorization scoping', () => {
+      const declinedResponse = {
+        type: AgentPromptType.authorization as const,
+        response: { authorized: false },
+      };
+      const authorizedResponse = {
+        type: AgentPromptType.authorization as const,
+        response: { authorized: true },
+      };
+      const confirmationResponse = {
+        type: AgentPromptType.confirmation as const,
+        response: { allow: true },
+      };
+
+      const conversationWith = ({
+        lastRoundStatus,
+        responses,
+      }: {
+        lastRoundStatus: ConversationRoundStatus;
+        responses: Record<
+          string,
+          typeof declinedResponse | typeof authorizedResponse | typeof confirmationResponse
+        >;
+      }) =>
+        createEmptyConversation({
+          rounds: [createRound({ status: lastRoundStatus })],
+          state: { prompt: { responses } },
+        });
+
+      it('drops carried-over declined authorization responses when starting a new round', () => {
+        const conversation = conversationWith({
+          lastRoundStatus: ConversationRoundStatus.completed,
+          responses: { 'auth-prompt': declinedResponse },
+        });
+
+        const result = getAgentPromptStorageState({ input: { message: 'hello' }, conversation });
+
+        expect(result.responses['auth-prompt']).toBeUndefined();
+      });
+
+      it('drops carried-over authorized responses when starting a new round', () => {
+        const conversation = conversationWith({
+          lastRoundStatus: ConversationRoundStatus.completed,
+          responses: { 'auth-prompt': authorizedResponse },
+        });
+
+        const result = getAgentPromptStorageState({ input: { message: 'hello' }, conversation });
+
+        expect(result.responses['auth-prompt']).toBeUndefined();
+      });
+
+      it('keeps carried-over authorization responses when resuming an interrupted round', () => {
+        const conversation = conversationWith({
+          lastRoundStatus: ConversationRoundStatus.awaitingPrompt,
+          responses: {
+            'declined-prompt': declinedResponse,
+            'authorized-prompt': authorizedResponse,
+          },
+        });
+
+        const result = getAgentPromptStorageState({
+          input: { prompts: { 'other-prompt': { authorized: false } } },
+          conversation,
+        });
+
+        expect(result.responses['declined-prompt']).toEqual(declinedResponse);
+        expect(result.responses['authorized-prompt']).toEqual(authorizedResponse);
+      });
+
+      it('keeps carried-over confirmation responses when starting a new round', () => {
+        const conversation = conversationWith({
+          lastRoundStatus: ConversationRoundStatus.completed,
+          responses: { 'conf-prompt': confirmationResponse },
+        });
+
+        const result = getAgentPromptStorageState({ input: { message: 'hello' }, conversation });
+
+        expect(result.responses['conf-prompt']).toEqual(confirmationResponse);
+      });
+
+      it('does not drop an authorization response supplied via input.prompts on a new round', () => {
+        const conversation = conversationWith({
+          lastRoundStatus: ConversationRoundStatus.completed,
+          responses: {},
+        });
+
+        const result = getAgentPromptStorageState({
+          input: { prompts: { 'auth-prompt': { authorized: false } } },
+          conversation,
+        });
+
+        expect(result.responses['auth-prompt']).toEqual(declinedResponse);
       });
     });
   });

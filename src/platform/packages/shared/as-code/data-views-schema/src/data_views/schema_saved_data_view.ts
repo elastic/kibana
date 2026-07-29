@@ -8,7 +8,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { fieldSettingsFieldNameSchema, indexPatternSchema, timeFieldSchema } from './common';
+import {
+  allowHiddenIndicesSchema,
+  fieldSettingsFieldNameSchema,
+  indexPatternSchema,
+  timeFieldSchema,
+  nameSchema,
+} from './common';
 import {
   savedCompositeRuntimeFieldSchema,
   savedPrimitiveRuntimeFieldSchema,
@@ -44,21 +50,15 @@ export const savedDataViewSpecSchema = schema.object(
         },
       })
     ),
-    name: schema.maybe(
-      schema.string({
-        minLength: 1,
-        maxLength: 256,
+    name: nameSchema,
+    allow_hidden_indices: allowHiddenIndicesSchema,
+    field_filters: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1, maxLength: 1000 }), {
+        maxSize: 10_000,
         meta: {
-          title: 'Data view name',
-          description: 'The name of the data view. Example: "Sample data view".',
-        },
-      })
-    ),
-    allow_hidden_indices: schema.maybe(
-      schema.boolean({
-        meta: {
-          title: 'Allow hidden and system indices',
-          description: 'When `true`, allows the data view to match hidden indices.',
+          title: 'Field filters',
+          description:
+            "Field filters can be used to exclude one or more fields when fetching a document. They may contain wildcards, such as `user*` which filters fields starting with 'user'.",
         },
       })
     ),

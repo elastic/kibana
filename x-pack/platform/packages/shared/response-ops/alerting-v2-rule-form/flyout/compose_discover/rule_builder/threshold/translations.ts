@@ -103,3 +103,19 @@ export const THRESHOLD_STEP_TITLE = i18n.translate(
   'xpack.alertingV2.ruleBuilder.threshold.stepTitle',
   { defaultMessage: 'Alert Condition' }
 );
+
+export const STAT_LABEL_REQUIRED_ERROR = i18n.translate(
+  'xpack.alertingV2.ruleBuilder.stats.labelRequiredError',
+  { defaultMessage: 'Label is required.' }
+);
+
+export const STAT_FIELD_REQUIRED_ERROR = i18n.translate(
+  'xpack.alertingV2.ruleBuilder.stats.fieldRequiredError',
+  { defaultMessage: 'Field is required.' }
+);
+
+export const EXPRESSION_UNKNOWN_REFERENCE_ERROR = (unknownLabels: string[]) =>
+  i18n.translate('xpack.alertingV2.ruleBuilder.evaluations.unknownReferenceError', {
+    defaultMessage: 'References unknown {count, plural, one {label} other {labels}}: {labels}',
+    values: { count: unknownLabels.length, labels: unknownLabels.join(', ') },
+  });

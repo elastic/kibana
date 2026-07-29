@@ -8,7 +8,8 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type { SmlTypeDefinition } from '@kbn/agent-context-layer-plugin/server';
+import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
@@ -29,9 +30,7 @@ interface ConnectorSmlTypeDeps {
 /**
  * Creates the SML type definition for connectors.
  *
- * Connectors are indexed into the SML exclusively via event-driven calls
- * in the connector lifecycle handler (onPostCreate / onPostDelete).
- * No crawling is needed — `list` yields nothing and `fetchFrequency` is omitted.
+ * Connectors are indexed into the SML via event-driven calls and during periodic crawls.
  */
 export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefinition => {
   const { getActionSavedObjectsClient, logger } = deps;
@@ -39,13 +38,26 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
   return {
     id: CONNECTOR_SML_TYPE,
 
-    // Connectors are indexed exclusively via event-driven lifecycle hooks.
-    // The list method yields nothing — no crawling is performed.
-    list: (_context) => ({
-      [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true as const, value: [] }) }),
-    }),
+    async *list(context) {
+      const finder = context.savedObjectsClient.createPointInTimeFinder({
+        type: 'action',
+        perPage: 1000,
+        namespaces: ['*'],
+      });
+      try {
+        for await (const response of finder.find()) {
+          yield response.saved_objects.map((so) => ({
+            id: so.id,
+            updatedAt: so.updated_at ?? new Date().toISOString(),
+            spaces: so.namespaces ?? [],
+          }));
+        }
+      } finally {
+        await finder.close();
+      }
+    },
 
-    getSmlData: async (originId, context) => {
+    getSmlEntry: async (originId, context) => {
       try {
         const so = await context.savedObjectsClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
@@ -68,14 +80,10 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         ];
 
         return {
-          chunks: [
-            {
-              type: CONNECTOR_SML_TYPE,
-              title: name,
-              content: contentParts.join('\n'),
-              permissions: ['action:execute'],
-            },
-          ],
+          type: CONNECTOR_SML_TYPE,
+          title: name,
+          content: contentParts.join('\n'),
+          discovery_labels: [{ kind: 'shortcut', value: `${CONNECTOR_SML_TYPE}/${name}` }],
         };
       } catch (error) {
         context.logger.warn(
@@ -85,16 +93,21 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       }
     },
 
+    requiredHiddenTypes: ['action'],
+
+    getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
+
     toAttachment: async (item, context) => {
       try {
         const soClient = await getActionSavedObjectsClient(context.request);
-        const so = await soClient.get('action', item.origin_id);
+        const originId = item.origin_id ?? '';
+        const so = await soClient.get('action', originId);
         const attrs = so.attributes as { name?: string; actionTypeId?: string };
-        const connectorName = attrs.name ?? item.origin_id;
+        const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
 
         const data: ConnectorAttachmentData = {
-          connector_id: item.origin_id,
+          connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
         };

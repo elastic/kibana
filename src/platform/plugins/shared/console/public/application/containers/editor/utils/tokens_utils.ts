@@ -12,6 +12,7 @@ import {
   digitRegex,
   equalsSignRegex,
   newLineRegex,
+  lettersRegex,
   numberStartRegex,
   questionMarkRegex,
   slashesRegex,
@@ -459,6 +460,21 @@ export const getLineTokens = (lineContent: string): string[] => {
  */
 export const containsUrlParams = (lineContent: string): boolean => {
   return questionMarkRegex.test(lineContent);
+};
+
+/*
+ * Whether the given line content could plausibly be the start of a request line.
+ * A request line either is empty (so the user can begin typing a method) or
+ * begins with letters (a potentially valid method like `g`, `GE`, `POST`). Lines
+ * that start with non-letter, non-whitespace characters (e.g. `"`, `{`, `[`, `,`)
+ * are body-like content and must not trigger method autocompletion.
+ */
+export const isRequestLineStart = (lineContent: string): boolean => {
+  const trimmed = lineContent.trim();
+  if (trimmed === '') {
+    return true;
+  }
+  return lettersRegex.test(trimmed.charAt(0));
 };
 
 /*

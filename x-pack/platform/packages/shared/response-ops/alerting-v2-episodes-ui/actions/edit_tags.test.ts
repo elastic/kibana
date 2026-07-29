@@ -62,7 +62,7 @@ describe('createEditTagsAction', () => {
   it('execute: opens flyout, POSTs deduped TAG items with tags array, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha', 'beta']);
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
 
     await createEditTagsAction(deps).execute({
@@ -75,7 +75,6 @@ describe('createEditTagsAction', () => {
     });
 
     expect(flyout.openTagsFlyout).toHaveBeenCalledWith(deps.overlays, deps.rendering, [], {
-      http: deps.http,
       expressions: deps.expressions,
       spaces: deps.spaces,
       queryClient: deps.queryClient,
@@ -90,7 +89,7 @@ describe('createEditTagsAction', () => {
   it('execute: passes last_tags into flyout when a single episode is selected', async () => {
     const deps = makeDeps();
     jest.spyOn(flyout, 'openTagsFlyout').mockResolvedValue(['alpha']);
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
 
     await createEditTagsAction(deps).execute({
       episodes: [makeEpisode({ last_tags: ['existing', 'tags'] })],
@@ -101,7 +100,6 @@ describe('createEditTagsAction', () => {
       deps.rendering,
       ['existing', 'tags'],
       {
-        http: deps.http,
         expressions: deps.expressions,
         spaces: deps.spaces,
         queryClient: deps.queryClient,

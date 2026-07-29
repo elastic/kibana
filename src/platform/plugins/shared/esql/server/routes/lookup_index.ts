@@ -16,6 +16,7 @@ import {
   LOOKUP_INDEX_UPDATE_ROUTE,
   LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
 } from '@kbn/esql-types';
+import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 export const registerLookupIndexRoutes = (
   router: IRouter,
@@ -26,7 +27,8 @@ export const registerLookupIndexRoutes = (
       path: `${LOOKUP_INDEX_UPDATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
         body: schema.object({
           // maxSize is added here to prevent DoS vulnerabilities https://github.com/elastic/kibana/pull/245533,
@@ -44,22 +46,36 @@ export const registerLookupIndexRoutes = (
       },
     },
     async (requestHandlerContext, request, response) => {
+      const { indexName } = request.params;
       try {
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
-
-        const indexName = request.params.indexName;
 
         const result = await client.bulk({
           index: indexName,
           operations: request.body.operations,
         });
 
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.update',
+          outcome: 'success',
+          'http.response.status_code': 200,
+        });
         return response.ok({
           body: result,
         });
       } catch (error) {
-        logger.get().debug(error);
+        const statusCode = getErrorStatusCode(error);
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.update',
+          outcome: 'failure',
+          'http.response.status_code': statusCode,
+        });
+        const message = error instanceof Error ? error.message : String(error);
+        logger.get().error(`Failed to bulk update lookup index "${indexName}": ${message}`, {
+          tags: ['esql', 'lookup_index', 'update'],
+          error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        });
         throw error;
       }
     }
@@ -70,7 +86,8 @@ export const registerLookupIndexRoutes = (
       path: `${LOOKUP_INDEX_CREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
       },
       security: {
@@ -84,11 +101,10 @@ export const registerLookupIndexRoutes = (
       },
     },
     async (requestHandlerContext, request, response) => {
+      const { indexName } = request.params;
       try {
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
-
-        const indexName = request.params.indexName;
 
         const result = await client.indices.create({
           index: indexName,
@@ -97,11 +113,26 @@ export const registerLookupIndexRoutes = (
           },
         });
 
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.create',
+          outcome: 'success',
+          'http.response.status_code': 200,
+        });
         return response.ok({
           body: result,
         });
       } catch (error) {
-        logger.get().debug(error);
+        const statusCode = getErrorStatusCode(error);
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.create',
+          outcome: 'failure',
+          'http.response.status_code': statusCode,
+        });
+        const message = error instanceof Error ? error.message : String(error);
+        logger.get().error(`Failed to create lookup index "${indexName}": ${message}`, {
+          tags: ['esql', 'lookup_index', 'create'],
+          error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        });
         throw error;
       }
     }
@@ -112,7 +143,8 @@ export const registerLookupIndexRoutes = (
       path: `${LOOKUP_INDEX_RECREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
       },
       security: {
@@ -126,11 +158,10 @@ export const registerLookupIndexRoutes = (
       },
     },
     async (requestHandlerContext, request, response) => {
+      const { indexName } = request.params;
       try {
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
-
-        const indexName = request.params.indexName;
 
         await client.indices.delete({
           index: indexName,
@@ -144,11 +175,26 @@ export const registerLookupIndexRoutes = (
           },
         });
 
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.recreate',
+          outcome: 'success',
+          'http.response.status_code': 200,
+        });
         return response.ok({
           body: result,
         });
       } catch (error) {
-        logger.get().debug(error);
+        const statusCode = getErrorStatusCode(error);
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.recreate',
+          outcome: 'failure',
+          'http.response.status_code': statusCode,
+        });
+        const message = error instanceof Error ? error.message : String(error);
+        logger.get().error(`Failed to recreate lookup index "${indexName}": ${message}`, {
+          tags: ['esql', 'lookup_index', 'recreate'],
+          error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        });
         throw error;
       }
     }
@@ -158,7 +204,8 @@ export const registerLookupIndexRoutes = (
     {
       path: LOOKUP_INDEX_PRIVILEGES_ROUTE,
       validate: {
-        query: schema.object({ indexName: schema.maybe(schema.string()) }),
+        // indexName may hold a comma-separated list of index names.
+        query: schema.object({ indexName: schema.maybe(schema.string({ maxLength: 1000 })) }),
       },
       security: {
         authz: {
@@ -186,11 +233,26 @@ export const registerLookupIndexRoutes = (
           ],
         });
 
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.privileges',
+          outcome: 'success',
+          'http.response.status_code': 200,
+        });
         return res.ok({
           body: indexPrivileges,
         });
       } catch (error) {
-        logger.get().debug(error);
+        const statusCode = getErrorStatusCode(error);
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.privileges',
+          outcome: 'failure',
+          'http.response.status_code': statusCode,
+        });
+        const message = error instanceof Error ? error.message : String(error);
+        logger.get().error(`Failed to check lookup index privileges: ${message}`, {
+          tags: ['esql', 'lookup_index', 'privileges'],
+          error: { stack_trace: error instanceof Error ? error.stack : undefined },
+        });
         throw error;
       }
     }
@@ -210,14 +272,14 @@ export const registerLookupIndexRoutes = (
           properties: schema.object({}, { unknowns: 'allow' }),
         }),
         params: schema.object({
-          indexName: schema.string(),
+          // Elasticsearch index names are limited to 255 bytes.
+          indexName: schema.string({ maxLength: 255 }),
         }),
       },
     },
     async (requestHandlerContext, request, response) => {
       const core = await requestHandlerContext.core;
       const esClient = core.elasticsearch.client.asCurrentUser;
-
       const { indexName } = request.params;
 
       try {
@@ -225,9 +287,26 @@ export const registerLookupIndexRoutes = (
           properties: request.body.properties,
           index: indexName,
         });
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.update_mappings',
+          outcome: 'success',
+          'http.response.status_code': 200,
+        });
         return response.ok({ body: responseBody });
       } catch (error) {
-        logger.get().debug(error);
+        const statusCode = getErrorStatusCode(error);
+        esqlRouteRequestCounter.add(1, {
+          route: 'lookup_index.update_mappings',
+          outcome: 'failure',
+          'http.response.status_code': statusCode,
+        });
+        const message = error instanceof Error ? error.message : String(error);
+        logger
+          .get()
+          .error(`Failed to update mappings for lookup index "${indexName}": ${message}`, {
+            tags: ['esql', 'lookup_index', 'update_mappings'],
+            error: { stack_trace: error instanceof Error ? error.stack : undefined },
+          });
         throw error;
       }
     }

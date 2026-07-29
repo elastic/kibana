@@ -10,16 +10,16 @@ import type { Logger } from '@kbn/core/server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { asyncForEach } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { InferenceClient, InferenceConnector } from '@kbn/inference-common';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
 
+import type { DefaultAttackDiscoveryGraph } from '@kbn/discoveries';
 import type { AttackDiscoveryGraphState } from '../../../langchain/graphs';
 import { getEvaluatorLlm } from '../helpers/get_evaluator_llm';
 import { getCustomEvaluator } from '../helpers/get_custom_evaluator';
 import { getDefaultPromptTemplate } from '../helpers/get_custom_evaluator/get_default_prompt_template';
 import { getGraphInputOverrides } from '../helpers/get_graph_input_overrides';
-import type { DefaultAttackDiscoveryGraph } from '../../graphs/default_attack_discovery_graph';
 
 /**
  * Runs an evaluation for each graph so they show up separately (resulting in
@@ -31,6 +31,7 @@ export const runEvaluations = async ({
   evaluatorConnectorId,
   datasetName,
   getInferenceConnectorById,
+  inferenceClient,
   graphs,
   langSmithApiKey,
   logger,
@@ -40,6 +41,7 @@ export const runEvaluations = async ({
   evaluatorConnectorId: string | undefined;
   datasetName: string;
   getInferenceConnectorById: (id: string) => Promise<InferenceConnector>;
+  inferenceClient?: InferenceClient;
   graphs: Array<{
     connector: InferenceConnector;
     graph: DefaultAttackDiscoveryGraph;
@@ -86,6 +88,7 @@ export const runEvaluations = async ({
         evaluatorConnectorId,
         experimentConnector: connector,
         getInferenceConnectorById,
+        inferenceClient,
         langSmithApiKey,
         logger,
       });

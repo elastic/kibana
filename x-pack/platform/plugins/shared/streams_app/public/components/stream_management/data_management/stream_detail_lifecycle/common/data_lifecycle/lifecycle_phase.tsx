@@ -11,7 +11,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +24,11 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
-import { usePhaseColors } from '@kbn/data-lifecycle-phases';
+import {
+  FrozenDefaultRepositoryRequiredCallout,
+  FrozenEnterpriseRequiredCallout,
+  usePhaseColors,
+} from '@kbn/data-lifecycle-phases';
 import { formatBytes } from '../../helpers/format_bytes';
 import { LifecyclePhaseButton } from './lifecycle_phase_button';
 import { isZeroAge } from '../../../../../../util/format_size_units';
@@ -37,6 +40,15 @@ interface BaseLifecyclePhaseProps {
   isReadOnly?: boolean;
   showEnterpriseCallout?: boolean;
   onUpgradeEnterprise?: () => void;
+  showDefaultRepositoryCallout?: boolean;
+  onCreateDefaultRepository?: () => void;
+  createDefaultRepositoryHref?: string;
+  manageRepositoriesUrl?: string;
+  hasExistingRepositories?: boolean;
+  onRefreshDefaultRepository?: () => void;
+  isRefreshingDefaultRepository?: boolean;
+  /** Stable schema phase id (e.g. 'frozen'). Separate from `label` which is a localized string. */
+  name?: string;
   label: string;
   minAge?: string;
   onClick?: () => void;
@@ -52,6 +64,8 @@ interface BaseLifecyclePhaseProps {
   isRemoveDisabled?: boolean;
   removeDisabledReason?: string;
   isEditLifecycleFlyoutOpen?: boolean;
+  /** While true, all click interactions are disabled: no popover opens and no navigation occurs. */
+  disableInteractions?: boolean;
 }
 
 interface DeleteLifecyclePhaseProps extends BaseLifecyclePhaseProps {
@@ -80,6 +94,14 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     isReadOnly = false,
     showEnterpriseCallout = false,
     onUpgradeEnterprise,
+    showDefaultRepositoryCallout = false,
+    onCreateDefaultRepository,
+    createDefaultRepositoryHref,
+    manageRepositoriesUrl,
+    hasExistingRepositories,
+    onRefreshDefaultRepository,
+    isRefreshingDefaultRepository,
+    name: nameProp,
     label,
     minAge,
     onClick,
@@ -95,16 +117,27 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
     isRemoveDisabled = false,
     removeDisabledReason,
     isEditLifecycleFlyoutOpen = false,
+    disableInteractions = false,
   } = props;
   const isDelete = props.isDelete === true;
   const prefix = testSubjPrefix ? `${testSubjPrefix}-` : '';
+  // Use the stable schema id for frozen-specific logic: the label is a localized display string
+  // (e.g. "Frozen" in English, translated in other locales) and is unreliable for comparisons.
+  const phaseId = nameProp ?? label.toLowerCase();
 
   const phaseColor = isDelete ? phaseColors.delete : color;
+  const showWarningIcon =
+    !isDelete &&
+    phaseId === 'frozen' &&
+    ((showEnterpriseCallout && Boolean(onUpgradeEnterprise)) || showDefaultRepositoryCallout);
 
   const handleClick = () => {
+    if (disableInteractions) {
+      return;
+    }
     if (isEditLifecycleFlyoutOpen) {
       // When the flyout is open, navigate to this phase instead of showing the popover
-      onEditPhase?.(label);
+      onEditPhase?.(phaseId);
       return;
     }
     setIsPopoverOpen(!isPopoverOpen);
@@ -118,8 +151,11 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
   const showDocumentCount = !isDelete && docsCount !== undefined;
   const showAgeBadge = minAge !== undefined && !isZeroAge(minAge);
   const showSearchableSnapshot =
-    !isDelete && (label === 'cold' || label === 'frozen') && searchableSnapshot !== undefined;
-  const canShowReadOnlyRow = !isDelete && (label === 'hot' || label === 'warm' || label === 'cold');
+    !isDelete &&
+    ((phaseId === 'cold' && searchableSnapshot !== undefined) ||
+      (phaseId === 'frozen' && (searchableSnapshot !== undefined || showDefaultRepositoryCallout)));
+  const canShowReadOnlyRow =
+    !isDelete && (phaseId === 'hot' || phaseId === 'warm' || phaseId === 'cold');
   const readOnlyValue = isReadOnly
     ? i18n.translate('xpack.streams.streamDetailLifecycle.readOnlyEnabled', {
         defaultMessage: 'Enabled',
@@ -142,9 +178,11 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
           size={size}
           testSubjPrefix={testSubjPrefix}
           isEditLifecycleFlyoutOpen={isEditLifecycleFlyoutOpen}
+          disableInteractions={disableInteractions}
+          showWarningIcon={showWarningIcon}
         />
       }
-      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen}
+      isOpen={isPopoverOpen && !isEditLifecycleFlyoutOpen && !disableInteractions}
       closePopover={closePopover}
       anchorPosition="upCenter"
       aria-labelledby={popoverTitleId}
@@ -191,7 +229,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                       data-test-subj={`lifecyclePhase-${label}-editButton`}
                       onClick={() => {
                         closePopover();
-                        onEditPhase(label ?? '');
+                        onEditPhase(phaseId);
                       }}
                     >
                       {i18n.translate('xpack.streams.streamDetailLifecycle.editPhaseButtonLabel', {
@@ -201,7 +239,7 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                   </EuiFlexItem>
                 )}
 
-                {label !== 'hot' && onRemovePhase && (
+                {phaseId !== 'hot' && onRemovePhase && (
                   <EuiFlexItem grow={false}>
                     {isRemoveDisabled && removeDisabledReason ? (
                       <EuiToolTip content={removeDisabledReason}>
@@ -222,24 +260,35 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                         />
                       </EuiToolTip>
                     ) : (
-                      <EuiButtonIcon
-                        iconType="trash"
-                        size="s"
-                        display="base"
-                        color="danger"
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
                           {
                             defaultMessage: 'Remove {phase} phase',
                             values: { phase: label ?? '' },
                           }
                         )}
-                        data-test-subj={`lifecyclePhase-${label}-removeButton`}
-                        onClick={() => {
-                          closePopover();
-                          onRemovePhase(label ?? '');
-                        }}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="trash"
+                          size="s"
+                          display="base"
+                          color="danger"
+                          aria-label={i18n.translate(
+                            'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
+                            {
+                              defaultMessage: 'Remove {phase} phase',
+                              values: { phase: label ?? '' },
+                            }
+                          )}
+                          data-test-subj={`lifecyclePhase-${label}-removeButton`}
+                          onClick={() => {
+                            closePopover();
+                            onRemovePhase(phaseId);
+                          }}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiFlexItem>
                 )}
@@ -249,49 +298,20 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
         </EuiFlexGroup>
       </EuiPopoverTitle>
       <div
-        style={{ width: '300px' }}
+        style={{ width: '360px' }}
         data-test-subj={`${prefix}lifecyclePhase-${label}-popoverContent`}
       >
-        {!isDelete && label === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
-          <EuiCallOut
-            size="s"
-            color="warning"
-            announceOnMount={false}
-            title={i18n.translate(
-              'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.title',
-              {
-                defaultMessage: 'Enterprise license required for frozen phase',
-              }
-            )}
-            data-test-subj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
-          >
-            <EuiText size="s" color="subdued">
-              {i18n.translate(
-                'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.body',
-                {
-                  defaultMessage:
-                    'Your current subscription tier does not support the frozen phase. This phase will be ignored until you remove it or upgrade your license.',
-                }
-              )}
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiButton
-              size="s"
-              fill
-              color="warning"
-              onClick={onUpgradeEnterprise}
-              data-test-subj={`${prefix}lifecyclePhase-${label}-upgradeEnterpriseButton`}
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailLifecycle.frozen.enterpriseRequiredCallout.upgradeButton',
-                {
-                  defaultMessage: 'Upgrade to enterprise',
-                }
-              )}
-            </EuiButton>
-          </EuiCallOut>
-        )}
         <div css={{ padding: euiTheme.size.m }}>
+          {!isDelete && phaseId === 'frozen' && showEnterpriseCallout && onUpgradeEnterprise && (
+            <>
+              <FrozenEnterpriseRequiredCallout
+                onUpgradeEnterprise={onUpgradeEnterprise}
+                calloutTestSubj={`${prefix}lifecyclePhase-${label}-enterpriseRequiredCallout`}
+                upgradeButtonTestSubj={`${prefix}lifecyclePhase-${label}-upgradeEnterpriseButton`}
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
           <EuiText size="s" data-test-subj={`${prefix}lifecyclePhase-${label}-description`}>
             <p>{description}</p>
           </EuiText>
@@ -383,28 +403,44 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
               </strong>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <strong>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailLifecycle.searchableSnapshot.snapshotRepository',
-                      {
-                        defaultMessage: 'Repository',
-                      }
-                    )}
-                  </strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText
-                  size="s"
-                  data-test-subj={`${prefix}lifecyclePhase-${label}-snapshotRepository`}
-                >
-                  {searchableSnapshot}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGrid>
+
+            {phaseId === 'frozen' && showDefaultRepositoryCallout ? (
+              <FrozenDefaultRepositoryRequiredCallout
+                onCreateDefaultRepository={onCreateDefaultRepository}
+                createDefaultRepositoryHref={createDefaultRepositoryHref}
+                manageRepositoriesUrl={manageRepositoriesUrl}
+                hasExistingRepositories={hasExistingRepositories}
+                onRefresh={onRefreshDefaultRepository}
+                isRefreshing={isRefreshingDefaultRepository}
+                calloutTestSubj={`${prefix}lifecyclePhase-${label}-defaultRepositoryRequiredCallout`}
+                createButtonTestSubj={`${prefix}lifecyclePhase-${label}-createDefaultRepositoryButton`}
+                manageRepositoriesButtonTestSubj={`${prefix}lifecyclePhase-${label}-manageRepositoriesButton`}
+                refreshButtonTestSubj={`${prefix}lifecyclePhase-${label}-refreshDefaultRepositoryButton`}
+              />
+            ) : (
+              <EuiFlexGrid columns={2} gutterSize="s">
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <strong>
+                      {i18n.translate(
+                        'xpack.streams.streamDetailLifecycle.searchableSnapshot.snapshotRepository',
+                        {
+                          defaultMessage: 'Repository',
+                        }
+                      )}
+                    </strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText
+                    size="s"
+                    data-test-subj={`${prefix}lifecyclePhase-${label}-snapshotRepository`}
+                  >
+                    {searchableSnapshot}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGrid>
+            )}
           </EuiPopoverFooter>
         )}
       </div>

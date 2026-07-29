@@ -16,3 +16,6 @@
  */
 export const APP_MENU_ITEM_LIMIT = 3;
 export const DEFAULT_POPOVER_WIDTH = 200;
+// Id of the share button in the app menu, used to extract the share action from the app menu config and use it in the app header menu.
+// Used as a temporary hack to be addressed by https://github.com/elastic/kibana/issues/271401
+export const APP_MENU_SHARE_ID = 'share';

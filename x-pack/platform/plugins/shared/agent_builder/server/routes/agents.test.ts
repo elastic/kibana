@@ -6,13 +6,14 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { AgentVisibility } from '@kbn/agent-builder-common';
+import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { registerAgentRoutes } from './agents';
 import type { RouteDependencies } from './types';
 import { publicApiPath } from '../../common/constants';
 
-describe('Agent Routes - experimental visibility gate', () => {
+describe('Agent Routes - experimental access-control gate', () => {
   const createPath = `${publicApiPath}/agents`;
   const updatePath = `${publicApiPath}/agents/{id}`;
   let routeHandlers: Record<
@@ -48,9 +49,9 @@ describe('Agent Routes - experimental visibility gate', () => {
     configuration: { tools: [] },
   };
 
-  const updateBodyWithVisibility = {
+  const updateBodyWithAccessControl = {
     name: 'Updated',
-    visibility: AgentVisibility.Private,
+    access_control: { access_mode: AgentAccessControlMode.Private },
   };
 
   const mockProfile = {
@@ -58,7 +59,7 @@ describe('Agent Routes - experimental visibility gate', () => {
     name: 'Test Agent',
     description: 'Test',
     configuration: { tools: [] },
-    visibility: AgentVisibility.Public,
+    access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
   };
 
   beforeEach(() => {
@@ -145,22 +146,28 @@ describe('Agent Routes - experimental visibility gate', () => {
   };
 
   describe('POST /agents (create)', () => {
-    it('allows create and calls service.create when experimental setting is true and visibility is provided', async () => {
+    it('allows create and calls service.create when access-control mode is provided', async () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
 
       const ctx = createMockContext(true);
       const request = {
-        body: { ...createBody, visibility: AgentVisibility.Shared },
+        body: {
+          ...createBody,
+          access_control: { access_mode: AgentAccessControlMode.Shared },
+        },
       };
 
       const result = await handler!(ctx, request, mockResponse);
 
-      expect(mockCreate).toHaveBeenCalledWith(request.body);
+      expect(mockCreate).toHaveBeenCalledWith({
+        ...createBody,
+        access_control: { access_mode: AgentAccessControlMode.Shared },
+      });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
 
-    it('allows create without visibility when experimental setting is false', async () => {
+    it('allows create without access control when experimental setting is false', async () => {
       const handler = getCreateHandler();
       expect(handler).toBeDefined();
 
@@ -175,23 +182,26 @@ describe('Agent Routes - experimental visibility gate', () => {
   });
 
   describe('PUT /agents/{id} (update)', () => {
-    it('allows update and calls service.update when experimental setting is true and visibility is provided', async () => {
+    it('allows update and calls service.update when access-control mode is provided', async () => {
       const handler = getUpdateHandler();
       expect(handler).toBeDefined();
 
       const ctx = createMockContext(true);
       const request = {
         params: { id: 'agent-1' },
-        body: updateBodyWithVisibility,
+        body: updateBodyWithAccessControl,
       };
 
       const result = await handler!(ctx, request, mockResponse);
 
-      expect(mockUpdate).toHaveBeenCalledWith('agent-1', request.body);
+      expect(mockUpdate).toHaveBeenCalledWith('agent-1', {
+        name: 'Updated',
+        access_control: { access_mode: AgentAccessControlMode.Private },
+      });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
 
-    it('allows non-visibility updates when experimental setting is false', async () => {
+    it('allows non-access-control updates when experimental setting is false', async () => {
       const handler = getUpdateHandler();
       expect(handler).toBeDefined();
 
@@ -206,5 +216,80 @@ describe('Agent Routes - experimental visibility gate', () => {
       expect(mockUpdate).toHaveBeenCalledWith('agent-1', { name: 'Updated Name' });
       expect(result).toMatchObject({ type: 'ok', body: mockProfile });
     });
+  });
+});
+
+describe('Agent Routes - request body schemas', () => {
+  const createPath = `${publicApiPath}/agents`;
+  const updatePath = `${publicApiPath}/agents/{id}`;
+  const routeSchemas: Record<string, ObjectType> = {};
+
+  beforeAll(() => {
+    const createVersionedRoute = (method: string, path: string) => ({
+      addVersion: jest.fn().mockImplementation((config: any) => {
+        if (config?.validate?.request?.body) {
+          routeSchemas[`${method}:${path}`] = config.validate.request.body;
+        }
+        return { addVersion: jest.fn() };
+      }),
+    });
+
+    const mockRouter = {
+      get: jest.fn(),
+      versioned: {
+        get: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('GET', config.path)
+          ),
+        post: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('POST', config.path)
+          ),
+        put: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('PUT', config.path)
+          ),
+        delete: jest
+          .fn()
+          .mockImplementation((config: { path: string }) =>
+            createVersionedRoute('DELETE', config.path)
+          ),
+      },
+    } as unknown as jest.Mocked<IRouter>;
+
+    registerAgentRoutes({
+      router: mockRouter,
+      getInternalServices: jest.fn(),
+      logger: loggingSystemMock.createLogger(),
+      analyticsService: undefined,
+    } as unknown as RouteDependencies);
+  });
+
+  const createBody = {
+    id: 'agent-1',
+    name: 'Test Agent',
+    description: 'Test',
+    configuration: { tools: [] },
+  };
+
+  it('rejects type on create (typed agents are created in code, not via the API)', () => {
+    const schema = routeSchemas[`POST:${createPath}`];
+
+    expect(() => schema.validate(createBody)).not.toThrow();
+    expect(() => schema.validate({ ...createBody, type: 'investigation' })).toThrow(
+      /'type' was unexpected/
+    );
+  });
+
+  it('rejects type on update (type is immutable)', () => {
+    const schema = routeSchemas[`PUT:${updatePath}`];
+
+    expect(() => schema.validate({ name: 'Updated' })).not.toThrow();
+    expect(() => schema.validate({ name: 'Updated', type: 'investigation' })).toThrow(
+      /'type' was unexpected/
+    );
   });
 });

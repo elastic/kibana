@@ -13,8 +13,6 @@ import {
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
-import { appContextService } from '../app_context';
-
 import {
   getInputId,
   storedPackagePoliciesToAgentInputs,
@@ -1615,12 +1613,6 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
     ...overrides,
   });
 
-  beforeAll(() => {
-    jest.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
-      enableIntegrationConditions: true,
-    } as any);
-  });
-
   afterAll(() => {
     jest.restoreAllMocks();
   });
@@ -1738,36 +1730,6 @@ describe('storedPackagePolicyToAgentInputs - condition handling', () => {
     });
     expect('condition' in result[0]).toBe(false);
     expect('condition' in (result[0].streams?.[0] ?? {})).toBe(false);
-  });
-
-  it('flag off: user conditions are ignored at every level (only template conditions emit)', () => {
-    const flagOff = jest
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableIntegrationConditions: false } as any);
-    const result = storedPackagePolicyToAgentInputs({
-      ...basePolicy,
-      condition: "${host.platform} == 'linux'",
-      inputs: [
-        makeInput({
-          condition: "${host.platform} != 'windows'",
-          compiled_input: { condition: "${host.name} == 'fleet-host'" },
-          streams: [
-            {
-              id: 'stream-1',
-              enabled: true,
-              data_stream: { dataset: 'foo', type: 'logs' },
-              condition: "arrayContains(${host.tags}, 'production')",
-              compiled_stream: {
-                condition: "arrayContains(${docker.labels}, 'monitor')",
-              } as any,
-            },
-          ],
-        }),
-      ],
-    });
-    expect(result[0].condition).toBe("${host.name} == 'fleet-host'");
-    expect(result[0].streams?.[0].condition).toBe("arrayContains(${docker.labels}, 'monitor')");
-    flagOff.mockRestore();
   });
 
   it('overrides.inputs[id].condition still wins (no regression)', () => {

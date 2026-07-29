@@ -2,6 +2,13 @@
 
 set -euo pipefail
 
+# This step only runs Node scripts and `playwright --list` (manifest generation,
+# selective-testing scope resolution, config discovery, run-order planning); it
+# never serves the Kibana UI. The dev-mode shared webpack bundles (monaco,
+# ui-shared-deps) are therefore never used, so skip building them during
+# bootstrap (this also skips the moon-cache download attempt).
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 
@@ -65,6 +72,12 @@ buildkite-agent artifact upload "$CODE_CHANGES_FILE"
 # Run Order" step computes its own scope independently, so it does not need
 # this artifact.
 buildkite-agent artifact upload "$TESTING_SCOPE_FILE"
+
+# Moon shadow-mode comparison (observational only); upload if present.
+CODE_CHANGES_MOON_SHADOW_FILE=".scout/code_changes.moon_shadow.json"
+if [[ -f "$CODE_CHANGES_MOON_SHADOW_FILE" ]]; then
+  buildkite-agent artifact upload "$CODE_CHANGES_MOON_SHADOW_FILE"
+fi
 
 SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
 

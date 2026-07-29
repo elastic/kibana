@@ -485,6 +485,7 @@ export class AuthenticationService {
             listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
             updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
             revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+            resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
           }
         : null,
 

@@ -87,6 +87,28 @@ describe('mustache lambdas', () => {
       );
     });
 
+    it('epoch millisecond string is successful', () => {
+      const timeStamp = '1669736864000';
+      const template = dedent`
+        {{#FormatDate}} {{timeStamp}} ; UTC; YYYY-MM-DDTHH:mm:ss.SSS {{/FormatDate}}
+      `.trim();
+
+      expect(renderMustacheString(logger, template, { timeStamp }, 'none').trim()).toEqual(
+        '2022-11-29T15:47:44.000'
+      );
+    });
+
+    it('nested FormatDate/EvalMath template resolving to an epoch millisecond string is successful', () => {
+      const date = '2022-11-29T15:47:44Z';
+      const template = dedent`
+        {{#FormatDate}} {{#EvalMath}} subtract( {{#FormatDate}} {{{date}}} ; UTC; x {{/FormatDate}} , 300000) {{/EvalMath}} ; UTC; YYYY-MM-DDThh:mm:ss.SSSZ {{/FormatDate}}
+      `.trim();
+
+      expect(renderMustacheString(logger, template, { date }, 'none').trim()).toEqual(
+        '2022-11-29T03:42:44.000+00:00'
+      );
+    });
+
     it('invalid timezone logs and returns error string', () => {
       const timeStamp = '2023-04-10T23:52:39';
       const template = dedent`

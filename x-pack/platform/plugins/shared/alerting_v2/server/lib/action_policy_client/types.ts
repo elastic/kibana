@@ -6,10 +6,9 @@
  */
 
 import type {
-  ActionPolicyBulkAction,
-  ActionPolicyDestinationType,
   ActionPolicyResponse,
   CreateActionPolicyDataInput,
+  MatchedActionPolicy,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 
@@ -32,27 +31,25 @@ export interface UpdateActionPolicyApiKeyParams {
   id: string;
 }
 
-export interface BulkActionActionPoliciesParams {
-  actions: ActionPolicyBulkAction[];
+/** Body shared by the by-ID action-policy bulk endpoints (delete/enable/disable/unsnooze/update_api_key). */
+export interface BulkActionPoliciesByIdsParams {
+  ids: string[];
 }
 
-export interface BulkActionActionPoliciesResponse {
-  processed: number;
-  total: number;
-  errors: Array<{ id: string; message: string }>;
+/** Body for the bulk snooze endpoint: the by-ID batch plus a shared expiry. */
+export interface BulkSnoozeActionPoliciesParams {
+  ids: string[];
+  snoozedUntil: string;
 }
+
 export type FindActionPoliciesSortField = 'name' | 'createdAt' | 'updatedAt';
 
 export interface FindActionPoliciesParams {
   page?: number;
   perPage?: number;
   search?: string;
-  destinationType?: ActionPolicyDestinationType;
-  createdBy?: string;
   enabled?: boolean;
   tags?: string[];
-  ruleId?: string;
-  type?: 'global' | 'single_rule';
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }
@@ -62,4 +59,15 @@ export interface FindActionPoliciesResponse {
   total: number;
   page: number;
   perPage: number;
+}
+
+export interface MatchActionPoliciesForRuleParams {
+  ruleId?: string;
+  ruleName?: string;
+  ruleTags?: string[];
+}
+
+export interface MatchActionPoliciesForRuleResponse {
+  items: MatchedActionPolicy[];
+  total: number;
 }

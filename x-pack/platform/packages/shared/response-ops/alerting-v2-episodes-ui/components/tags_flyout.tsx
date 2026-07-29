@@ -8,7 +8,6 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { QueryClient } from '@kbn/react-query';
@@ -18,7 +17,6 @@ import { AlertEpisodeTagsFlyout } from './actions/edit_episode_tags_flyout';
 
 interface TagsFlyoutInnerProps {
   currentTags: string[];
-  http: HttpStart;
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
   onConfirm: (tags: string[]) => void;
   onCancel: () => void;
@@ -28,7 +26,6 @@ interface TagsFlyoutInnerProps {
 // mount the content-only variant here to avoid nesting two flyouts.
 export const TagsFlyoutInner = ({
   currentTags,
-  http,
   services,
   onConfirm,
   onCancel,
@@ -37,9 +34,7 @@ export const TagsFlyoutInner = ({
     <AlertEpisodeTagsFlyout
       embedded
       onClose={onCancel}
-      groupHash=""
       currentTags={currentTags}
-      http={http}
       services={services}
       onSave={onConfirm}
     />
@@ -51,7 +46,6 @@ export const openTagsFlyout = (
   rendering: CoreStart['rendering'],
   currentTags: string[],
   deps: {
-    http: HttpStart;
     expressions: ExpressionsStart;
     spaces: SpacesPluginStart;
     queryClient: QueryClient;
@@ -67,7 +61,6 @@ export const openTagsFlyout = (
         <QueryClientProvider client={deps.queryClient}>
           <TagsFlyoutInner
             currentTags={currentTags}
-            http={deps.http}
             services={{ expressions: deps.expressions, spaces: deps.spaces }}
             onConfirm={(tags) => {
               ref.close();

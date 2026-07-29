@@ -532,6 +532,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       toolChoice,
       signal,
       timeout = DEFAULT_TIMEOUT_MS,
+      maxContentLength,
     }: ConverseParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseResponse> {
@@ -571,6 +572,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       data: requestBody,
       signal,
       timeout,
+      ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       responseSchema: ConverseResponseSchema,
     };
     const response = await this.request(requestArgs, connectorUsageCollector);
@@ -588,6 +590,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
     toolChoice,
     signal,
     timeout = DEFAULT_TIMEOUT_MS,
+    maxContentLength,
     connectorUsageCollector,
   }: ConverseStreamParams): Promise<ConverseActionResponse> {
     const modelId = reqModel ?? this.model;
@@ -633,6 +636,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
         responseType: 'stream',
         signal,
         timeout,
+        ...(maxContentLength !== undefined ? { maxContentLength } : {}),
       },
       connectorUsageCollector
     );
@@ -670,6 +674,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       toolChoice,
       signal,
       timeout = DEFAULT_TIMEOUT_MS,
+      maxContentLength,
     }: ConverseStreamParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<ConverseActionResponse> {
@@ -684,6 +689,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       toolChoice,
       signal,
       timeout,
+      maxContentLength,
       connectorUsageCollector,
     });
   }

@@ -13,6 +13,7 @@ import {
   MockApmPluginContextWrapper,
   mockApmPluginContextValue,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
+import { mockTelemetryClient } from '../../../services/telemetry/__mocks__/telemetry_client_mock';
 import { fromQuery } from '../../shared/links/url_helpers';
 import {
   MixedAgentCallout,
@@ -69,9 +70,14 @@ describe('MixedAgentCallout', () => {
     otelNative: { from: 1715100000000, to: 1715200000000 },
   };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('returns null when ingestionTimeRanges is undefined', () => {
     const { container } = renderWithWrapper(<MixedAgentCallout ingestionTimeRanges={undefined} />);
     expect(container.innerHTML).toBe('');
+    expect(mockTelemetryClient.reportMetricsCalloutLoaded).not.toHaveBeenCalled();
   });
 
   it('renders sequential callout for non-overlapping ranges', () => {
@@ -114,6 +120,50 @@ describe('MixedAgentCallout', () => {
 
     fireEvent.click(getByTestId('apmMetricsPreviousTimeRangeLink'));
     expect(onNavigate).toHaveBeenCalledWith('classicApm');
+  });
+
+  it('reports telemetry when a non-overlap classic APM time range link is clicked', () => {
+    const { getByTestId } = renderWithWrapper(
+      <MixedAgentCallout ingestionTimeRanges={sequentialRanges} />
+    );
+
+    fireEvent.click(getByTestId('apmMetricsPreviousTimeRangeLink'));
+
+    expect(mockTelemetryClient.reportMetricsCalloutDateRangeSelected).toHaveBeenCalledWith({
+      calloutType: 'non_overlap',
+      selectedInstrumentationType: 'classic_apm',
+    });
+  });
+
+  it('reports telemetry when an overlap OpenTelemetry time range link is clicked', () => {
+    const { getByTestId } = renderWithWrapper(
+      <MixedAgentCallout ingestionTimeRanges={overlappingRanges} />
+    );
+
+    fireEvent.click(getByTestId('apmMetricsCurrentTimeRangeLink'));
+
+    expect(mockTelemetryClient.reportMetricsCalloutDateRangeSelected).toHaveBeenCalledWith({
+      calloutType: 'overlap',
+      selectedInstrumentationType: 'otel_native',
+    });
+  });
+
+  it('reports telemetry when a non-overlap callout is loaded', () => {
+    renderWithWrapper(<MixedAgentCallout ingestionTimeRanges={sequentialRanges} />);
+
+    expect(mockTelemetryClient.reportMetricsCalloutLoaded).toHaveBeenCalledWith({
+      calloutType: 'non_overlap',
+      shownInstrumentationType: 'otel_native',
+    });
+  });
+
+  it('reports telemetry when an overlap callout is loaded', () => {
+    renderWithWrapper(<MixedAgentCallout ingestionTimeRanges={overlappingRanges} />);
+
+    expect(mockTelemetryClient.reportMetricsCalloutLoaded).toHaveBeenCalledWith({
+      calloutType: 'overlap',
+      shownInstrumentationType: 'otel_native',
+    });
   });
 
   it('shows the most recent instrumentation as current by default', () => {

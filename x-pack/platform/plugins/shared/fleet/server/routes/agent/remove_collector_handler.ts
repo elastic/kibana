@@ -45,8 +45,14 @@ export const postBulkRemoveCollectorsHandler: RequestHandler<
   const results = await AgentService.removeCollectors(esClient, soClient, {
     ...agentOptions,
     showInactive: request.body.includeInactive,
+    dryRun: request.body.dryRun,
   });
 
-  const body: PostBulkRemoveCollectorsResponse = { actionId: results.actionId };
+  if (request.body.dryRun) {
+    return response.ok({ body: { count: (results as { count: number }).count } });
+  }
+  const body: PostBulkRemoveCollectorsResponse = {
+    actionId: (results as { actionId: string }).actionId,
+  };
   return response.ok({ body });
 };

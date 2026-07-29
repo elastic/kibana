@@ -121,7 +121,7 @@ describe('YamlRuleForm component', () => {
     const initialYaml = dump({
       kind: 'alert',
       metadata: { name: 'Initial Rule', enabled: true },
-      evaluation: { query: { base: 'FROM logs-*' } },
+      query: { format: 'standalone', breach: 'FROM logs-*' },
     });
 
     render(<StatefulYamlRuleForm {...defaultProps} initialYaml={initialYaml} />, {
@@ -164,7 +164,7 @@ describe('YamlRuleForm component', () => {
       metadata: { name: 'Test Rule', enabled: true },
       time_field: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      evaluation: { query: { base: 'FROM logs-*' } },
+      query: { format: 'standalone', breach: 'FROM logs-*' },
     });
 
     fireEvent.change(editor, { target: { value: validYaml } });
@@ -246,7 +246,7 @@ describe('YamlRuleForm component', () => {
         metadata: { name: 'Blurred Name', enabled: true },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
-        evaluation: { query: { base: 'FROM logs-*' } },
+        query: { format: 'standalone', breach: 'FROM logs-*' },
       });
 
       render(

@@ -245,6 +245,22 @@ steps:
         soft_fail:
           - exit_status: 101
 
+      - label: 'API MKI - siem_migrations_rules:qa:serverless'
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh siem_migrations_rules:qa:serverless
+        key: siem_migrations_rules:qa:serverless
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-4
+        timeout_in_minutes: 120
+        retry:
+          automatic:
+            - exit_status: "1"
+              limit: 2
+        soft_fail:
+          - exit_status: 101
+
       - label: 'API MKI - explore:overview:runner:qa:serverless'
         command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh explore:overview:runner:qa:serverless
         key: explore:overview:runner:qa:serverless

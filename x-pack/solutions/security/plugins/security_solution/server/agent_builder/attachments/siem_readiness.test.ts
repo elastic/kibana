@@ -40,7 +40,7 @@ const qualityData = {
   actionableFindings: [
     {
       category: 'Endpoint',
-      severity: 'warning' as const,
+      severity: 'WARNING' as const,
       message: '3 incompatible fields',
       resource: 'logs-endpoint-default',
     },
@@ -63,7 +63,7 @@ const continuityData = {
   actionableFindings: [
     {
       category: 'Endpoint',
-      severity: 'critical' as const,
+      severity: 'CRITICAL' as const,
       message: '5 failed docs',
       resource: 'endpoint-pipeline',
     },
@@ -88,7 +88,7 @@ const retentionData = {
   actionableFindings: [
     {
       category: 'Cloud',
-      severity: 'warning' as const,
+      severity: 'WARNING' as const,
       message: 'Retention below 365d',
       resource: 'logs-cloud-default',
     },
