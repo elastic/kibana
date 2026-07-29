@@ -101,7 +101,6 @@ for (const item of items) {
 ### Or use a `throwIfAborted` helper
 
 ```ts
-// `AbortSignal` also exposes a native `signal.throwIfAborted()` you can call directly
 const throwIfAborted = (sig: AbortSignal) => {
   if (sig.aborted) throw new Error('Task aborted');
 };
@@ -111,6 +110,8 @@ for (const batch of batches) {
   await processBatch(batch, { signal });
 }
 ```
+
+Throwing is the simpler option, but when `run()` throws, Task Manager persists the state as it was *before* the run (`task_running/task_runner.ts`) — progress the run made is lost. Prefer the `return { state }` form above when a partial run is worth checkpointing.
 
 ```ts
 // Anti-pattern: ignore the signal entirely
