@@ -66,10 +66,16 @@ const uninstall = new Function(`return (${uninstallSrc});`)();
 
 // ── Fake Playwright primitives — just enough surface for the bridge ────────
 
+// Real Playwright Frame objects are stable object references (not strings),
+// which matters here: onFrameNavigated's WeakMap and `entry.frame === frame`
+// checks rely on reference identity, not value equality.
+const MAIN_FRAME = { name: 'main' };
+const IFRAME_1 = { name: 'iframe-1' };
+
 class FakePage extends EventEmitter {
   constructor() {
     super();
-    this._mainFrame = 'main';
+    this._mainFrame = MAIN_FRAME;
   }
   mainFrame() {
     return this._mainFrame;
@@ -83,12 +89,13 @@ class FakePage extends EventEmitter {
 // constructs it against a child/iframe frame object, so existing tests that
 // don't care about frame-scoping keep working unchanged.
 class FakeRequest {
-  constructor(method, url, resourceType = 'xhr', frame = 'main') {
+  constructor(method, url, resourceType = 'xhr', frame = MAIN_FRAME, isNavigationRequest = false) {
     this._method = method;
     this._url = url;
     this._resourceType = resourceType;
     this._failure = null;
     this._frame = frame;
+    this._isNavigationRequest = isNavigationRequest;
   }
   method() {
     return this._method;
@@ -104,6 +111,9 @@ class FakeRequest {
   }
   frame() {
     return this._frame;
+  }
+  isNavigationRequest() {
+    return this._isNavigationRequest;
   }
 }
 
@@ -139,6 +149,16 @@ class FakeConsoleMessage {
 
 function byId(events, id) {
   return events.find((e) => e.id === id);
+}
+
+// A REAL cross-document navigation always issues the document-fetching
+// request (isNavigationRequest() === true) before 'framenavigated' commits.
+// Use this whenever a test wants an actual navigation, as opposed to
+// emitting 'framenavigated' bare, which simulates a same-document
+// (pushState/hash) navigation instead.
+function navigate(page, frame, url = 'https://kibana.example/next-page') {
+  page.emit('request', new FakeRequest('GET', url, 'document', frame, true));
+  page.emit('framenavigated', frame);
 }
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -205,8 +225,9 @@ await install(page);
   const req = new FakeRequest('GET', 'https://kibana.example/api/slow-export');
   page.emit('request', req);
   page.emit('response', new FakeResponse(req, 200, true));
-  // Body never finishes — the frame navigates away instead.
-  page.emit('framenavigated', page.mainFrame());
+  // Body never finishes — the frame navigates away instead (a real
+  // cross-document navigation, not a same-document pushState).
+  navigate(page, page.mainFrame());
 
   const d = await drain(page);
   const entry = d.network[0];
@@ -292,10 +313,10 @@ console.log('\n── A main-frame navigation does NOT abandon an unrelated ifra
 page = new FakePage();
 await install(page);
 {
-  const iframeReq = new FakeRequest('GET', 'https://widget.example/data', 'xhr', 'iframe-1');
+  const iframeReq = new FakeRequest('GET', 'https://widget.example/data', 'xhr', IFRAME_1);
   page.emit('request', iframeReq);
   // The main frame navigates away — the iframe's own request is unrelated.
-  page.emit('framenavigated', page.mainFrame());
+  navigate(page, page.mainFrame());
 
   const d = await drain(page);
   const entry = d.network[0];
@@ -307,11 +328,13 @@ page = new FakePage();
 await install(page);
 {
   const mainReq = new FakeRequest('GET', 'https://kibana.example/api/main-still-open');
-  const iframeReq = new FakeRequest('GET', 'https://widget.example/data', 'xhr', 'iframe-1');
+  const iframeReq = new FakeRequest('GET', 'https://widget.example/data', 'xhr', IFRAME_1);
   page.emit('request', mainReq);
   page.emit('request', iframeReq);
   // Only the iframe navigates (e.g. it loads a new document internally).
-  page.emit('framenavigated', 'iframe-1');
+  // Deliberately a non-colliding URL for the navigation request itself, so
+  // it doesn't get confused with iframeReq's own "widget.example" URL below.
+  navigate(page, IFRAME_1);
 
   const d = await drain(page);
   const iframeEntry = d.network.find((e) => e.url.includes('widget.example'));
@@ -326,11 +349,46 @@ await install(page);
 {
   const req = new FakeRequest('GET', 'https://kibana.example/api/main-request');
   page.emit('request', req);
-  page.emit('framenavigated', page.mainFrame());
+  navigate(page, page.mainFrame());
 
   const d = await drain(page);
   const entry = d.network[0];
   assert(!!entry && entry.abandonedByNavigation === true, "the main frame's own request is still abandoned by the main frame's own navigation", JSON.stringify(d));
+}
+
+console.log('\n── A same-document (history.pushState) navigation does NOT abandon a still-running request ─');
+page = new FakePage();
+await install(page);
+{
+  const req = new FakeRequest('GET', 'https://kibana.example/api/still-loading');
+  page.emit('request', req);
+  // Playwright fires 'framenavigated' for pushState/hash-change navigation
+  // exactly like a real one — but NO document-fetching request precedes it,
+  // since nothing was actually torn down. Emitting 'framenavigated' bare
+  // (unlike the navigate() helper used elsewhere) simulates exactly that.
+  page.emit('framenavigated', page.mainFrame());
+
+  const d = await drain(page);
+  const entry = d.network[0];
+  assert(!!entry && entry.abandonedByNavigation === false, 'a same-document navigation must not mark a still-open request abandoned', JSON.stringify(d));
+  // It must still be able to escalate to pending_request/stuck_request on a
+  // later drain, exactly as if no navigation had happened at all.
+  const d2 = await drain(page);
+  assert(d2.network.length === 1 && d2.network[0].id === entry.id, 'the request is still returned on a later drain, not wrongly compacted out as if it had settled', JSON.stringify(d2));
+}
+
+console.log('\n── A real navigation immediately after a same-document one still abandons correctly (flag reset, not stuck) ─');
+page = new FakePage();
+await install(page);
+{
+  const req = new FakeRequest('GET', 'https://kibana.example/api/still-loading-2');
+  page.emit('request', req);
+  page.emit('framenavigated', page.mainFrame()); // pushState — must not abandon
+  navigate(page, page.mainFrame()); // a real navigation right after — must abandon
+
+  const d = await drain(page);
+  const entry = d.network.find((e) => e.url.includes('still-loading-2'));
+  assert(!!entry && entry.abandonedByNavigation === true, "a real navigation right after a same-document one still abandons — the flag reset on the pushState event doesn't wrongly suppress it", JSON.stringify(d));
 }
 
 // ══════════════════════════════════════════════════════════════════════════

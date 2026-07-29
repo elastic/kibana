@@ -4426,6 +4426,61 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         self.assertIn("tmp", resume_section)
         self.assertIn("collector-diffs", resume_section)
 
+    def test_shadow_collector_third_review_fixes(self):
+        # Third-round P2/minor review findings on PR #281418 (head d500100):
+        # an abandoned request's known status must not double-count as a
+        # silent_server_error or a settled attempt for duplicate/retry
+        # purposes; 'framenavigated' fires for same-document (pushState)
+        # navigations too, so abandonment must require a real
+        # document-fetching navigation request first; and the Install
+        # idempotency note must sit with Install, not under Uninstall.
+        collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
+            encoding="utf-8"
+        )
+        reducer = (SCRIPT_DIR / "action-scoped-collector.mjs").read_text(
+            encoding="utf-8"
+        )
+        bridge_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector-bridge.test.mjs"
+        ).read_text(encoding="utf-8")
+        reducer_test = (
+            SCRIPT_DIR / "__tests__" / "action-scoped-collector.test.mjs"
+        ).read_text(encoding="utf-8")
+
+        # abandonedByNavigation excluded from silent_server_error...
+        self.assertIn(
+            "ev.status < 500 || ev.abandonedByNavigation", reducer
+        )
+        # ...and from the "settled" set used for duplicate/retry/repeat.
+        self.assertIn(
+            "(ev.status != null || ev.failure != null) && !ev.abandonedByNavigation",
+            reducer,
+        )
+
+        # Same-document (pushState/hash) navigations fire 'framenavigated'
+        # just like a real one, but issue no request at all — abandonment
+        # must be gated on having actually seen a navigation-type request
+        # for that exact frame first.
+        self.assertIn("__actionCollectorNavRequestSeen", collector_doc)
+        self.assertIn("req.isNavigationRequest()", collector_doc)
+        self.assertIn("isNavigationRequest", bridge_test)
+
+        # Regression tests exist for both the reducer-side and bridge-side
+        # fixes, not just the fix itself.
+        self.assertIn("abandoned-then-retry", reducer_test)
+        self.assertIn("pushState", bridge_test)
+
+        # The Install idempotency note must appear before the Uninstall
+        # heading, not after it — otherwise it reads as describing
+        # Uninstall instead of Install.
+        install_note_idx = collector_doc.index("Install is idempotent by design")
+        uninstall_heading_idx = collector_doc.index("### Uninstall")
+        self.assertLess(
+            install_note_idx,
+            uninstall_heading_idx,
+            "the Install idempotency note must appear before the Uninstall heading",
+        )
+
     def test_head_probes_do_not_wait_for_a_response_body(self):
         # curl -X HEAD keeps waiting for a body that a HEAD response never
         # sends, so it stalls for the whole --max-time on keep-alive servers.

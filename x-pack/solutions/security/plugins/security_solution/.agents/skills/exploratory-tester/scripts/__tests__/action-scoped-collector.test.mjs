@@ -297,6 +297,52 @@ console.log('\n── Navigation reset: an in-flight request abandoned by naviga
   );
 }
 
+console.log('\n── An abandoned request with a known 5xx status is not a silent_server_error ──');
+{
+  // Headers arrived (status known) before the frame navigated away — the
+  // status is real, but the request never completed from the app's
+  // perspective. Reporting BOTH request_abandoned_by_navigation (Level 3)
+  // and silent_server_error (Level 1) for the exact same event is
+  // misleading double-counting, not two independent problems.
+  const r = reduceAction({
+    network: [
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/entity_analytics/monitoring/entity_source/status',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 0,
+        respondedAt: null,
+        resourceType: 'fetch',
+        abandonedByNavigation: true,
+      },
+    ],
+    console: [],
+  });
+  assert(!r.level1.some((i) => i.type === 'silent_server_error'), 'an abandoned request with a known 500 status → never Level 1 silent_server_error');
+  assert(r.level3.some((i) => i.type === 'request_abandoned_by_navigation'), 'still correctly reported as Level 3 request_abandoned_by_navigation');
+}
+
+console.log('\n── A same-URL retry right after an abandoned (not truly settled) request is not a duplicate/retry ─');
+{
+  // The first attempt was torn down by navigation mid-flight (status known
+  // from headers, but respondedAt never set) — from the app's perspective it
+  // never completed, so a genuinely new call to the same URL right after is
+  // a fresh first attempt, not a duplicate_api_call or retry_after_failure
+  // against a call that, in effect, never happened.
+  const r = reduceAction(json('action-abandoned-then-retry'));
+  assert(
+    !r.level2.some((i) => i.type === 'duplicate_api_call') && !r.level3.some((i) => i.type === 'retry_after_failure' || i.type === 'repeated_api_call'),
+    'action-abandoned-then-retry → the abandoned attempt is excluded, so the real attempt is never classified as a duplicate/retry/repeat',
+    JSON.stringify({ level2: r.level2, level3: r.level3 })
+  );
+  assert(
+    r.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
+    'action-abandoned-then-retry → the abandoned attempt is still reported on its own terms'
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // DUPLICATE CLASSIFICATION
 // ══════════════════════════════════════════════════════════════════════════

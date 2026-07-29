@@ -121,21 +121,25 @@ against your MCP setup — required reading before ever setting
 `collector_mode: shadow`.
 
 `action-scoped-collector.test.mjs` covers: silent 5xx with no matching
-console error, pending-vs-stuck-vs-abandoned-by-navigation classification
-(including settle-then-repend and same-drain settle+repend, both
-disambiguated by the bridge-assigned `id` — see the reducer's own header
-comment), a request whose headers arrived but whose body is still streaming
-(must read as pending, not settled), meaningfully different query strings
-never being grouped as duplicates, concurrent duplicate calls vs. an
-intentional retry-after-failure vs. the same call repeated far apart,
-known-noise (polling) suppression that still lets a genuinely failing
-polling endpoint through, deterministic spinner-timing escalation, URL
-redaction (including a parity check against the bridge doc's own inline copy
-of the same logic, a malformed-encoding fixture, a hash-fragment case, the
-full credential-shaped param-name list, and the per-value hashed placeholder
-that keeps different secret values from collapsing into one signature), a
-duplicate-window check against total span rather than only adjacent gaps,
-and a CLI-vs-module classification round trip.
+console error (and that an *abandoned* 5xx — headers arrived, then torn down
+by navigation — is never double-reported as both `request_abandoned_by_navigation`
+and `silent_server_error`), pending-vs-stuck-vs-abandoned-by-navigation
+classification (including settle-then-repend and same-drain settle+repend,
+both disambiguated by the bridge-assigned `id` — see the reducer's own
+header comment), a request whose headers arrived but whose body is still
+streaming (must read as pending, not settled), a same-URL retry right after
+an abandoned (never-truly-settled) attempt not being misread as a
+duplicate/retry/repeat, meaningfully different query strings never being
+grouped as duplicates, concurrent duplicate calls vs. an intentional
+retry-after-failure vs. the same call repeated far apart, known-noise
+(polling) suppression that still lets a genuinely failing polling endpoint
+through, deterministic spinner-timing escalation, URL redaction (including a
+parity check against the bridge doc's own inline copy of the same logic, a
+malformed-encoding fixture, a hash-fragment case, the full credential-shaped
+param-name list, and the per-value hashed placeholder that keeps different
+secret values from collapsing into one signature), a duplicate-window check
+against total span rather than only adjacent gaps, and a CLI-vs-module
+classification round trip.
 
 ```bash
 node __tests__/action-scoped-collector-bridge.test.mjs
@@ -154,9 +158,12 @@ reset, `response` (headers) vs. `requestfinished` (true completion) — a
 stalled body must still read as pending after headers arrive —
 navigation-abandonment scoped to the specific frame that navigated (an
 unrelated iframe's request is untouched by a main-frame nav, and a child
-frame's own navigation abandons only its own requests), console-text
-redaction including per-value differentiation, Uninstall removing exactly
-the collector's own six listeners (never an unrelated listener sharing the
-same event) and clearing state so a later install() re-attaches cleanly, and
-a second flow's install() call not inheriting a previous flow's leftover
-open request or console text.
+frame's own navigation abandons only its own requests), a same-document
+(`history.pushState()`) navigation — which Playwright reports via
+`framenavigated` exactly like a real one — never abandoning a still-running
+request (only a navigation preceded by an actual `isNavigationRequest()`
+request does), console-text redaction including per-value differentiation,
+Uninstall removing exactly the collector's own six listeners (never an
+unrelated listener sharing the same event) and clearing state so a later
+install() re-attaches cleanly, and a second flow's install() call not
+inheriting a previous flow's leftover open request or console text.

@@ -39,6 +39,15 @@ async (page) => {
   // instead of growing unboundedly for the life of the page.
   page.__actionCollectorRequests = new WeakMap();
   page.__actionCollectorNextId = 1;
+  // Also keyed by Frame, WeakMap for the same reason: records whether a real
+  // document-fetching navigation request (isNavigationRequest()) has been
+  // seen for that frame since the last time we processed a 'framenavigated'
+  // for it. history.pushState()/hash changes fire 'framenavigated' too, with
+  // no navigation request at all — without this check, every in-app SPA
+  // route change would wrongly abandon every still-open request on that
+  // frame, even though nothing was actually torn down. See "Why
+  // 'framenavigated' alone is not enough" below.
+  page.__actionCollectorNavRequestSeen = new WeakMap();
 
   // Non-cryptographic, deterministic — its only job is to turn two DIFFERENT
   // secret values into two DIFFERENT (but still opaque) placeholders. Without
@@ -80,6 +89,11 @@ async (page) => {
   const redactText = (text) => text.replace(SENSITIVE_KV, (_m, key, value) => key + '=%5BREDACTED:' + shortHash(value) + '%5D');
 
   const onRequest = (req) => {
+    // A real cross-document navigation always issues the document-fetching
+    // request itself first, before 'framenavigated' commits — this is the
+    // only public-API signal available to tell that apart from a same-
+    // document (pushState/hash) navigation, which issues no request at all.
+    if (req.isNavigationRequest()) page.__actionCollectorNavRequestSeen.set(req.frame(), true);
     const entry = {
       id: page.__actionCollectorNextId++,
       method: req.method(), url: redact(req.url()),
@@ -138,10 +152,19 @@ async (page) => {
   // must not be falsely marked abandoned. Symmetrically, a CHILD frame's own
   // navigation must abandon that child frame's own open requests — the old
   // `if (frame !== page.mainFrame()) return;` guard silently ignored those
-  // entirely. Frame objects are stable references across same-document
-  // (SPA/pushState) navigations, so this does not fire on every in-app route
-  // change — only on an actual frame/document replacement.
+  // entirely.
+  //
+  // 'framenavigated' fires for same-document navigations too (Playwright
+  // treats history.pushState()/hash changes as a navigation event), which
+  // tear down nothing — the JS context and every in-flight request survive
+  // unchanged. Only abandon this frame's open requests if a real
+  // document-fetching navigation request was actually seen for it since the
+  // last time this handler ran for it — see "Why 'framenavigated' alone is
+  // not enough" below.
   const onFrameNavigated = (frame) => {
+    const isRealDocumentNavigation = page.__actionCollectorNavRequestSeen.get(frame) === true;
+    page.__actionCollectorNavRequestSeen.set(frame, false);
+    if (!isRealDocumentNavigation) return;
     for (const entry of page.__actionCollectorBuffer) {
       if (entry.frame === frame && entry.respondedAt == null && entry.failure == null) {
         entry.abandonedByNavigation = true;
@@ -172,6 +195,10 @@ async (page) => {
 }
 ```
 
+**Install is idempotent by design, but NOT a no-op** — call it at the start of every flow, not just the session's first. The `if (page.__actionCollectorInstalled)` guard only skips re-attaching listeners and re-creating the `WeakMap`s; the buffer/console reset above it runs on every call, every flow, unconditionally.
+
+**Why 'framenavigated' alone is not enough.** Playwright fires it for same-document navigations (`history.pushState()`, hash changes) exactly as it does for a real navigation to a new document — nothing in the public `page.on('framenavigated', frame => ...)` signature distinguishes the two. Only a real cross-document navigation issues a document-fetching request first (`request.isNavigationRequest()`); a pushState-driven route change issues no request at all. `__actionCollectorNavRequestSeen` records that per-frame, and `onFrameNavigated` only abandons a frame's open requests when it's set, resetting it every time so a later same-document nav on the same frame doesn't inherit an earlier real navigation's flag.
+
 ### Uninstall (only when a session with `collector_mode: legacy` suspects this exact page/tab may have been left instrumented by an earlier `collector_mode: shadow` session — see "Reusing a page across sessions" below)
 
 ```js
@@ -183,6 +210,7 @@ async (page) => {
   }
   delete page.__actionCollectorHandlers;
   delete page.__actionCollectorRequests;
+  delete page.__actionCollectorNavRequestSeen;
   delete page.__actionCollectorBuffer;
   delete page.__actionCollectorConsole;
   delete page.__actionCollectorNextId;
@@ -190,8 +218,6 @@ async (page) => {
   return { uninstalled: true, wasInstalled: true };
 }
 ```
-
-**Idempotent by design, but NOT a no-op** — call this at the start of every flow, not just the session's first. The `if (page.__actionCollectorInstalled)` guard only skips re-attaching listeners and re-creating the `WeakMap`; the buffer/console reset above it runs on every call, every flow, unconditionally.
 
 **Redaction lives in (at least) two places on purpose.** The reducer's `redactUrl` (`action-scoped-collector.mjs`) and this inline `redact` copy must stay logically equivalent — the VM sandbox has no `require`, so this code cannot import the reducer's implementation. `action-scoped-collector.test.mjs` includes a parity test that evaluates this exact snippet's `redact` logic against the same inputs as `redactUrl` and asserts they agree, so drift between the two is caught by the existing test suite rather than only discovered live. `redactText` (console messages) has no reducer-side equivalent to stay in parity with — console text is never re-emitted by the reducer, so redacting it once here, before it is ever buffered or persisted, is the only place it needs to happen.
 

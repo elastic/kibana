@@ -55,6 +55,10 @@
  *     resourceType: string,      // 'xhr' | 'fetch' | 'document' | ... (informational only)
  *     abandonedByNavigation?: boolean, // set by the bridge when the frame navigated away
  *                                      // before this request settled — see "Navigation reset" below.
+ *                                      // Excluded from silent-error and duplicate/retry/settled
+ *                                      // classification even when `status` is non-null: headers
+ *                                      // can genuinely arrive before navigation tears the request
+ *                                      // down, but it never completed from the app's perspective.
  *     id?: number,                // bridge-assigned, unique per request instance for the page's
  *                                  // lifetime. Optional — hand-written fixtures may omit it, in which
  *                                  // case cross-call continuity for the same signature falls back to
@@ -220,8 +224,14 @@ export function reduceAction(action, priorState) {
     events.sort((a, b) => a.requestedAt - b.requestedAt);
 
     // ── Silent server errors: a 5xx that produced no console message ───────
+    // Excludes abandonedByNavigation: its `status` reflects headers that
+    // genuinely arrived, but the request never completed from the app's
+    // perspective — the page moved on before it could act on that response.
+    // Reporting it as a Level 1 silent_server_error alongside the Level 3
+    // request_abandoned_by_navigation finding for the exact same event would
+    // be misleading double-counting, not a second independent problem.
     for (const ev of events) {
-      if (ev.status == null || ev.status < 500) continue;
+      if (ev.status == null || ev.status < 500 || ev.abandonedByNavigation) continue;
       const alreadySurfaced = new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(path);
       if (alreadySurfaced) continue;
       level1.push({
@@ -298,7 +308,12 @@ export function reduceAction(action, priorState) {
     // Uses `status`/`failure` (known outcome), not `respondedAt` (full
     // completion) — classifying a duplicate/retry only needs to know each
     // attempt's outcome category, not whether its body finished downloading.
-    const settled = events.filter((ev) => ev.status != null || ev.failure != null);
+    // Excludes abandonedByNavigation: a request whose headers arrived but
+    // was then torn down by navigation never completed as a real call the
+    // app acted on. Counting it as a "settled" attempt let a same-URL retry
+    // after an abandoned request read as duplicate_api_call/retry_after_failure
+    // against a call that, from the app's perspective, never happened.
+    const settled = events.filter((ev) => (ev.status != null || ev.failure != null) && !ev.abandonedByNavigation);
     if (settled.length >= 2 && !isPolling(path)) {
       const firstFailed = settled[0].failure != null || (settled[0].status != null && settled[0].status >= 400);
       const laterSucceeded = settled
