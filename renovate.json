@@ -2224,14 +2224,6 @@
       "enabled": true
     },
     {
-      "groupName": "fuse.js",
-      "matchDepNames": ["fuse.js"],
-      "reviewers": ["team:observability-ui"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "XState4",
       "matchDepNames": ["xstate", "@xstate/react"],
       "reviewers": ["team:streams-ui"],

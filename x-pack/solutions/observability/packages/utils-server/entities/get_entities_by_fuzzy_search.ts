@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { castArray, orderBy } from 'lodash';
-import Fuse from 'fuse.js';
+import { castArray } from 'lodash';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+
+const escapeWildcardCharacters = (value: string): string => value.replace(/[\\*?]/g, '\\$&');
 
 export async function getEntitiesByFuzzySearch({
   esClient,
@@ -28,23 +29,57 @@ export async function getEntitiesByFuzzySearch({
 
   const [field, value] = Object.entries(entity)[0];
 
-  const { terms } = await esClient.client.termsEnum({
+  const response = await esClient.search('get_entities_by_fuzzy_search', {
     index: castArray(index).join(','),
-    field,
-    index_filter: {
-      range: {
-        '@timestamp': {
-          gte: new Date(start).toISOString(),
-          lte: new Date(end).toISOString(),
+    track_total_hits: false,
+    size: 0,
+    timeout: '2500ms',
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                gte: new Date(start).toISOString(),
+                lte: new Date(end).toISOString(),
+              },
+            },
+          },
+          {
+            bool: {
+              should: [
+                {
+                  fuzzy: {
+                    [field]: {
+                      value,
+                      fuzziness: 'AUTO',
+                    },
+                  },
+                },
+                {
+                  wildcard: {
+                    [field]: {
+                      value: `*${escapeWildcardCharacters(value)}*`,
+                      case_insensitive: true,
+                    },
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      suggestions: {
+        terms: {
+          field,
+          size: 5,
         },
       },
     },
-    size: 10_000,
   });
 
-  const results = new Fuse(terms, { includeScore: true, threshold: 0.75 }).search(value);
-
-  return orderBy(results, (result) => result.score, 'asc')
-    .slice(0, 5)
-    .map((result) => result.item);
+  return response.aggregations?.suggestions.buckets.map((bucket) => String(bucket.key)) ?? [];
 }
