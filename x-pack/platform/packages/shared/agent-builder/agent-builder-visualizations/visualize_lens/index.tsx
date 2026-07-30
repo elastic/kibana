@@ -7,9 +7,9 @@
 
 import type { TimeRange } from '@kbn/es-query';
 import React, { useCallback, useState } from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
   type ActionButton,
   type InlineRenderCallbacks,
@@ -51,17 +51,14 @@ export function VisualizeLens({
 
   if (error) {
     return (
-      <EuiCallOut
+      <KbnDangerCallout
         title={i18n.translate('xpack.agentBuilder.visualization.lens.errorTitle', {
           defaultMessage: 'Unable to render visualization',
         })}
-        color="danger"
-        iconType="error"
+        text={error.message}
         size="s"
         announceOnMount
-      >
-        <p>{error.message}</p>
-      </EuiCallOut>
+      />
     );
   }
 

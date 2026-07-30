@@ -188,6 +188,17 @@ export const ApiEndpoints = () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          {selectedEndpoint.additionalEndpoints.map((additionalEndpoint) => (
+            <React.Fragment key={additionalEndpoint.id}>
+              <EuiSpacer size="m" />
+              <EndpointField
+                url={additionalEndpoint.url}
+                isLoading={isLoading}
+                label={additionalEndpoint.label}
+                dataTestSubjSuffix={`-${additionalEndpoint.id}`}
+              />
+            </React.Fragment>
+          ))}
           {isMobile && canCreateApiKey && (
             <>
               <EuiSpacer size="m" />

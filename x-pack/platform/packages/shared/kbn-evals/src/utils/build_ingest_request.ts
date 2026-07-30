@@ -12,6 +12,11 @@ import type { BuildkiteCiMetadata } from './ci_metadata';
 import type { GitMetadata } from './git_metadata';
 import type { EvaluationCompleteEvent, DatasetRunResult } from '../types';
 
+// TODO: Keep this in sync with `buildScoreDocuments` in `@kbn/evals-runner`, the
+// workflow/plugin implementation of the same score-ingestion contract. The two are
+// separate builders that can drift silently and already differ in evaluator naming
+// (`Factuality` here vs `correctness.factuality` there); the intended fix is to
+// converge this SDK path onto `buildScoreDocuments`.
 const MAX_INGEST_BATCH_SIZE = 1000;
 
 type IngestScore = IngestScoresRequestBodyInput['scores'][number];
@@ -29,6 +34,7 @@ interface BuildIngestRequestArgs {
   suiteId?: string;
   executionId?: string;
   buildkiteMetadata?: BuildkiteCiMetadata;
+  spaceIds?: string[];
   log?: Pick<SomeDevLog, 'warning'>;
   source: BuildIngestRequestSource;
 }
@@ -139,6 +145,7 @@ export function buildIngestRequest({
   suiteId,
   executionId,
   buildkiteMetadata,
+  spaceIds,
   log,
   source,
 }: BuildIngestRequestArgs): IngestScoresRequestBodyInput[] {
@@ -177,6 +184,7 @@ export function buildIngestRequest({
       requests.push({
         experiment_id: experimentId,
         ...(experimentName != null && { experiment_name: experimentName }),
+        ...(spaceIds != null && spaceIds.length > 0 && { space_ids: spaceIds }),
         task_model: taskModelPayload,
         evaluator_model: evaluatorModelPayload,
         metadata: {
