@@ -33,9 +33,13 @@ export class FeatureControlsPage {
   }
 
   public get readOnlyBadge() {
-    return this.page
+    const classicBadge = this.page
       .getByTestId('headerBadge')
-      .or(this.page.getByTestId('appHeaderBadge'))
-      .filter({ visible: true });
+      .and(this.page.locator('[data-test-badge-label="Read only"]'));
+    const chromeNextBadge = this.page
+      .getByTestId('appHeaderBadge')
+      .filter({ hasText: 'Read only' });
+
+    return classicBadge.or(chromeNextBadge).filter({ visible: true });
   }
 }
