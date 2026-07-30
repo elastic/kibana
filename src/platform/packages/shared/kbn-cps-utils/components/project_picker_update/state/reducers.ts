@@ -57,6 +57,33 @@ const removeOverrides = (overrides: string[], projectIds: string[]): string[] =>
 export function createStoreReducers() {
   return {
     /**
+     * This action is used to set the entire store state, it should be used sparingly.
+     */
+    _setStoreState(
+      _state: ProjectPickerState,
+      payload: Pick<ProjectPickerState, 'availableProjects' | 'isReadOnly'> & {
+        filterExpressions?: FilterExpressionValue[];
+      }
+    ) {
+      return {
+        ..._state,
+        isReadOnly: payload.isReadOnly,
+        availableProjects: payload.availableProjects,
+        filterExpressions: new Map(
+          payload.filterExpressions?.map((expression) => [
+            getFilterExpressionLookupKey(expression),
+            { expression, enabled: true },
+          ])
+        ),
+        excludedOverrides: [],
+        // these states are derived values we reset them for completeness, their values will be recomputed based on the new state
+        filteringDimensions: [],
+        filteredProjectIds: [],
+        selectedProjects: [],
+        visibleProjectIds: [],
+      };
+    },
+    /**
      * Adds a new filter expression.
      */
     addFilterExpression: (
@@ -229,13 +256,6 @@ export function createStoreReducers() {
     undoProjectExclusion: (state: ProjectPickerState, payload: { projects: string[] }) => ({
       ...state,
       excludedOverrides: removeOverrides(state.excludedOverrides, payload.projects),
-    }),
-    /**
-     * Sets the available projects map.
-     */
-    setAvailableProjects: (state: ProjectPickerState, payload: { projects: CPSProject[] }) => ({
-      ...state,
-      availableProjects: new Map(payload.projects.map((project) => [project._id, project])),
     }),
     revertToSpaceDefaults: (state: ProjectPickerState) => ({
       ...state,

@@ -8,7 +8,13 @@
  */
 
 import { once } from 'lodash';
-import React, { useMemo, useContext, createContext, type PropsWithChildren } from 'react';
+import React, {
+  useMemo,
+  useContext,
+  createContext,
+  type PropsWithChildren,
+  useEffect,
+} from 'react';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import { createStoreReducers } from './reducers';
 import { type ProjectPickerState } from './reducers';
@@ -17,7 +23,7 @@ import { type CPSProject } from '../../../types';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
-  actions: ActionsFromReducers<ReturnType<typeof createStoreReducers>>;
+  actions: Omit<ActionsFromReducers<ReturnType<typeof createStoreReducers>>, '_setStoreState'>;
 }
 
 export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState, 'isReadOnly'> {
@@ -69,6 +75,14 @@ export const ProjectPickerStateProvider = ({
     reducers: projectPickerReducers,
     derivatives: [...projectPickerDerivatives],
   });
+
+  useEffect(() => {
+    store.actions._setStoreState({
+      isReadOnly,
+      availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
+      filterExpressions: [],
+    });
+  }, [availableProjects, isReadOnly, store.actions]);
 
   return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
 };
