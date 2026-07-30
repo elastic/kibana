@@ -219,3 +219,6 @@ src/platform/plugins/shared/workflows_execution_engine/docs/parallel_step_nested
 
 # Local eval evidence (scorecard artifacts, raw score docs)
 .eval-evidence/
+
+# Local dev-cell Kibana config with dev-only ES credentials — never committed.
+kibana.dev.cell.yml
