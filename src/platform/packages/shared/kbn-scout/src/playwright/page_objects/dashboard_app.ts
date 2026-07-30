@@ -235,7 +235,7 @@ export class DashboardApp {
   async clickCancelOutOfEditMode() {
     await expect(this.viewOnlyModeButton).toBeVisible();
     await this.viewOnlyModeButton.click();
-    await expect(this.editModeButton).toBeHidden();
+    await expect(this.editModeButton).toBeVisible();
   }
 
   async ensureViewMode() {
@@ -1110,11 +1110,11 @@ export class DashboardApp {
   async saveDashboardAsCopy(dashboardTitle?: string) {
     await this.quickSaveSecondaryButton.click();
     await this.interactiveSaveMenuItem.isVisible();
-    // The dashboard sometimes flags spurious unsaved changes on initial layout,
-    // which triggers a continuous toolbar re-render that nudges the popover by a
-    // pixel each frame and defeats Playwright's stability check. The menu item
-    // is visibly clickable; bypass actionability to land the click.
-    await this.interactiveSaveMenuItem.click({ force: true });
+    // The dashboard can continuously re-render the toolbar, making a pointer click
+    // fail Playwright stability checks. Focusing the menu item and activating it
+    // via keyboard avoids pointer actionability while preserving user behavior.
+    await this.interactiveSaveMenuItem.focus();
+    await this.page.keyboard.press('Enter');
     await expect(this.savedObjectTitleInput).toBeVisible();
 
     if (dashboardTitle !== undefined) {

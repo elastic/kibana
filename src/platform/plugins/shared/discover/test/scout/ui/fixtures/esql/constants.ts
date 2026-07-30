@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../ftr_provider_context';
+export const ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/esql_controls';
+export const ESQL_CONTROLS_SESSION_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/discover/session_with_control';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const browser = getService('browser');
-
-  describe('discover/esql_3', function () {
-    before(async function () {
-      await browser.setWindowSize(1600, 1200);
-    });
-
-    loadTestFile(require.resolve('./_index_editor'));
-  });
-}
+export const ESQL_CONTROLS_DASHBOARD_TITLE = 'ES|QL controls fixture dashboard';
+export const ESQL_CONTROLS_SAVED_SEARCH_TITLE = 'ESQL control unlink test';

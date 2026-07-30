@@ -89,7 +89,12 @@ export class KibanaCodeEditorWrapper {
       }, nthIndex);
     }).toPass({ timeout: 30_000 });
 
-    return result;
+    // Some editor content is programmatically inserted using a `\r\n`
+    // end-of-line sequence (e.g. Discover appending a `WHERE`/`AND` clause to
+    // an ES|QL query), while the rest of the model uses plain `\n`. Normalize
+    // to `\n` so callers can compare/assert on the value without worrying
+    // about mixed line endings.
+    return result.replace(/\r\n/g, '\n');
   }
 
   /**

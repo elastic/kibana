@@ -208,6 +208,23 @@ export class UnifiedFieldList {
     await this.page.testSubj.click(`field-${field}`);
   }
 
+  /**
+   * Remove a field from the selected fields (no-op if not selected)
+   */
+  async clickFieldListItemRemove(field: string): Promise<void> {
+    if (!(await this.isFieldSelected(field))) {
+      return;
+    }
+
+    await this.page.testSubj.click(`fieldToggle-${field}`);
+
+    await expect(
+      this.page.testSubj
+        .locator('fieldListGroupedSelectedFields')
+        .locator(`[data-test-subj="field-${field}"]`)
+    ).toHaveCount(0);
+  }
+
   async openFieldEditor(field: string): Promise<void> {
     await this.searchField(field);
     await expect(this.getAvailableField(field)).toBeVisible();
