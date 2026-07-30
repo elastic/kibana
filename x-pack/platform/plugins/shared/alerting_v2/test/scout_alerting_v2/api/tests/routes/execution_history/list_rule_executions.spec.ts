@@ -51,7 +51,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
 
       await apiServices.alertingV2.ruleExecutions.waitForRuns({ ruleId: rule.id, runs: 1 });
 
-      const response = await apiClient.get(listRuleExecutionsUrl({ ruleIds: [rule.id] }), {
+      const response = await apiClient.get(listRuleExecutionsUrl({ rule_ids: [rule.id] }), {
         headers: readerHeaders,
       });
 
@@ -99,7 +99,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
         spaceId: OTHER_SPACE_ID,
       });
 
-      const response = await apiClient.get(listRuleExecutionsUrl({ perPage: 100 }), {
+      const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 100 }), {
         headers: readerHeaders,
       });
 
@@ -132,14 +132,14 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
   });
 
   apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
-    const response = await apiClient.get(listRuleExecutionsUrl({ perPage: 0 }), {
+    const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 0 }), {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(listRuleExecutionsUrl({ perPage: 101 }), {
+    const response = await apiClient.get(listRuleExecutionsUrl({ per_page: 101 }), {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);

@@ -62,9 +62,9 @@ describe('useCountNewActionPolicyExecutions', () => {
     await waitFor(() => {
       expect(mockListActionPolicyExecutions).toHaveBeenCalledWith({
         start_date: '2026-01-01T00:00:00.000Z',
-        perPage: 0,
+        per_page: 0,
         search: 'foo',
-        ruleIds: ['rule-1'],
+        rule_ids: ['rule-1'],
         outcome: ['throttled'],
       });
     });

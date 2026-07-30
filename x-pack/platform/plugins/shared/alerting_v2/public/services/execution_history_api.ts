@@ -9,9 +9,9 @@ import { inject, injectable } from 'inversify';
 import type { HttpStart } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core-di-browser';
 import type {
-  ListRuleExecutionsQuery,
+  ListRuleExecutionsRequest,
   ListRuleExecutionsResponse,
-  ListPolicyExecutionHistoryParams,
+  ListPolicyExecutionHistoryRequest,
   ListPolicyExecutionHistoryResponse,
   PolicyExecutionHistoryItem,
   PolicyExecutionOutcomeFilter,
@@ -31,24 +31,24 @@ export type {
 export class ExecutionHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listActionPolicyExecutions(params: ListPolicyExecutionHistoryParams = {}) {
+  public async listActionPolicyExecutions(params: ListPolicyExecutionHistoryRequest = {}) {
     return this.http.get<ListPolicyExecutionHistoryResponse>(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
       {
         query: {
           page: params.page,
-          perPage: params.perPage,
+          per_page: params.per_page,
           search: params.search,
-          ruleIds: params.ruleIds,
+          rule_ids: params.rule_ids,
           outcome: params.outcome,
-          episodeIds: params.episodeIds,
+          episode_ids: params.episode_ids,
           start_date: params.start_date,
         },
       }
     );
   }
 
-  public async listRuleExecutions(params: Partial<ListRuleExecutionsQuery>) {
+  public async listRuleExecutions(params: Partial<ListRuleExecutionsRequest>) {
     return this.http.get<ListRuleExecutionsResponse>(ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH, {
       query: params,
     });

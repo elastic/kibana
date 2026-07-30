@@ -6,10 +6,8 @@
  */
 
 import type { WorkflowsSearchParams } from '@kbn/workflows';
-import type {
-  ListRuleExecutionsQuery,
-  PolicyExecutionOutcomeFilter,
-} from '@kbn/alerting-v2-schemas';
+import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
+import type { ListRuleExecutionsUiParams } from './use_fetch_rule_executions';
 
 export const ruleKeys = {
   all: ['rule'] as const,
@@ -84,7 +82,7 @@ export const executionHistoryKeys = {
 
 export const ruleExecutionKeys = {
   all: ['ruleExecution'] as const,
-  list: (filters: Partial<ListRuleExecutionsQuery>) =>
+  list: (filters: ListRuleExecutionsUiParams) =>
     [...ruleExecutionKeys.all, 'list', filters] as const,
 };
 

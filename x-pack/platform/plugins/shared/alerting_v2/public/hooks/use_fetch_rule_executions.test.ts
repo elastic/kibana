@@ -10,7 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
-import { useFetchRuleExecutions } from './use_fetch_rule_executions';
+import { toListRuleExecutionsRequest, useFetchRuleExecutions } from './use_fetch_rule_executions';
 
 jest.mock('@kbn/core-di-browser');
 
@@ -54,7 +54,7 @@ describe('useFetchRuleExecutions', () => {
     await waitFor(() => {
       expect(mockListRuleExecutions).toHaveBeenCalledWith({
         page: 2,
-        perPage: 50,
+        per_page: 50,
         outcome: ['failure'],
       });
     });
@@ -87,5 +87,31 @@ describe('useFetchRuleExecutions', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.error).toBe(error);
+  });
+});
+
+describe('toListRuleExecutionsRequest', () => {
+  it('maps camelCase view state to the snake_case request and translates the sort value', () => {
+    expect(
+      toListRuleExecutionsRequest({
+        page: 2,
+        perPage: 50,
+        ruleIds: ['rule-1'],
+        outcome: ['failure'],
+        from: '2026-01-01T00:00:00.000Z',
+        to: '2026-01-02T00:00:00.000Z',
+        sort: 'startedAt',
+        sortOrder: 'asc',
+      })
+    ).toEqual({
+      page: 2,
+      per_page: 50,
+      rule_ids: ['rule-1'],
+      outcome: ['failure'],
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      sort: 'started_at',
+      sort_order: 'asc',
+    });
   });
 });

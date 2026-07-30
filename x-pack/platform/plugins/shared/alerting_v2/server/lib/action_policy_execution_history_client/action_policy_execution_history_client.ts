@@ -45,7 +45,7 @@ const SEARCH_ID_CAP = 500;
 // Cap the per-page name-lookup batch.
 const MAX_RULES_PER_NAME_LOOKUP = 1000;
 
-export interface ListExecutionHistoryParams {
+export interface ListExecutionHistoryArgs {
   request: KibanaRequest;
   page?: number;
   perPage?: number;
@@ -57,7 +57,7 @@ export interface ListExecutionHistoryParams {
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
    * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
    */
-  start_date?: string;
+  startDate?: string;
 }
 
 export interface ListExecutionHistoryResult {
@@ -89,8 +89,8 @@ export class ActionPolicyExecutionHistoryClient {
     ruleIds,
     outcome,
     episodeIds,
-    start_date: startDate,
-  }: ListExecutionHistoryParams): Promise<ListExecutionHistoryResult> {
+    startDate,
+  }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
     const effectiveStartDate =
       startDate ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);

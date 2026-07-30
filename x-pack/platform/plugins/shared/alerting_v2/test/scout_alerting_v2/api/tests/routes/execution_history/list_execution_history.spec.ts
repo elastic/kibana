@@ -43,7 +43,7 @@ apiTest.describe(
     });
 
     apiTest('validation: accepts perPage=0 (count-only read)', async ({ apiClient }) => {
-      const response = await apiClient.get(getListExecutionHistoryUrl({ perPage: 0 }), {
+      const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 0 }), {
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(200);
@@ -53,7 +53,7 @@ apiTest.describe(
 
     apiTest('validation: accepts perPage at the maximum', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ perPage: EXECUTION_HISTORY_MAX_PER_PAGE }),
+        getListExecutionHistoryUrl({ per_page: EXECUTION_HISTORY_MAX_PER_PAGE }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(200);
@@ -62,7 +62,7 @@ apiTest.describe(
 
     apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ perPage: EXECUTION_HISTORY_MAX_PER_PAGE + 1 }),
+        getListExecutionHistoryUrl({ per_page: EXECUTION_HISTORY_MAX_PER_PAGE + 1 }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
@@ -71,7 +71,7 @@ apiTest.describe(
     apiTest('validation: rejects page * perPage above the result window', async ({ apiClient }) => {
       const perPage = EXECUTION_HISTORY_MAX_PER_PAGE;
       const page = Math.floor(EXECUTION_HISTORY_MAX_RESULT_WINDOW / perPage) + 1;
-      const response = await apiClient.get(getListExecutionHistoryUrl({ page, perPage }), {
+      const response = await apiClient.get(getListExecutionHistoryUrl({ page, per_page: perPage }), {
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
@@ -103,7 +103,7 @@ apiTest.describe(
 
     apiTest('validation: rejects non-numeric perPage', async ({ apiClient }) => {
       const response = await apiClient.get(
-        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?perPage=banana`,
+        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?per_page=banana`,
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);

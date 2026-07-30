@@ -38,9 +38,9 @@ export const useCountNewActionPolicyExecutions = ({
     queryFn: () =>
       executionHistoryApi.listActionPolicyExecutions({
         start_date: since,
-        perPage: 0,
+        per_page: 0,
         search,
-        ruleIds,
+        rule_ids: ruleIds,
         outcome,
       }),
     refetchOnWindowFocus: true,

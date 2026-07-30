@@ -7,8 +7,8 @@
 
 import type { z } from '@kbn/zod/v4';
 import type {
-  ListPolicyExecutionHistoryParams,
-  listRuleExecutionsQuerySchema,
+  ListPolicyExecutionHistoryRequest,
+  listRuleExecutionsRequestSchema,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_API_PATH,
@@ -24,7 +24,7 @@ import {
  * `.default(...)` are optional here, and array-like fields accept either a
  * single value or an array (the schema normalizes them at parse time).
  */
-type ListRuleExecutionsQueryInput = z.input<typeof listRuleExecutionsQuerySchema>;
+type ListRuleExecutionsQueryInput = z.input<typeof listRuleExecutionsRequestSchema>;
 
 /**
  * URL for a single rule resource: `${RULE_API_PATH}/${encodedId}`.
@@ -114,7 +114,7 @@ export const getDeactivateAlertActionUrl = (groupHash: string) =>
 
 export const BULK_ALERT_ACTION_URL = `${ALERT_API_PATH}/_bulk_action`;
 
-export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryParams): string => {
+export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {

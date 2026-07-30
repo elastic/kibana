@@ -35,7 +35,7 @@ const sharedFilterFields = {
     .describe(
       'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
     ),
-  ruleIds: z
+  rule_ids: z
     .preprocess(
       (v) => (v === undefined || Array.isArray(v) ? v : [v]),
       z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(EXECUTION_HISTORY_MAX_RULE_ID_FILTER)
@@ -51,29 +51,31 @@ const sharedFilterFields = {
     ),
 };
 
-export const listPolicyExecutionHistoryQuerySchema = z
+export const listPolicyExecutionHistoryRequestSchema = z
   .object({
     page: z.coerce
       .number()
       .int()
       .min(1)
       .max(EXECUTION_HISTORY_MAX_RESULT_WINDOW)
-      .default(1)
-      .describe('Page number (1-indexed).'),
-    perPage: z.coerce
+      .optional()
+      .describe('Page number (1-indexed). Defaults to 1.'),
+    per_page: z.coerce
       .number()
       .int()
       .min(0)
       .max(EXECUTION_HISTORY_MAX_PER_PAGE)
-      .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
-      .describe('Number of events per page.'),
+      .optional()
+      .describe(
+        `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
+      ),
     start_date: z.iso
       .datetime()
       .optional()
       .describe(
-        'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episodeIds — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
+        'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
       ),
-    episodeIds: z
+    episode_ids: z
       .preprocess(
         (v) => (v === undefined || Array.isArray(v) ? v : [v]),
         z
@@ -86,26 +88,23 @@ export const listPolicyExecutionHistoryQuerySchema = z
       ),
     ...sharedFilterFields,
   })
-  .refine(({ page, perPage }) => page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW, {
-    message: `page * perPage cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
-    path: ['page'],
-  });
+  .refine(
+    ({ page = 1, per_page: perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE }) =>
+      page * perPage <= EXECUTION_HISTORY_MAX_RESULT_WINDOW,
+    {
+      message: `page * per_page cannot exceed ${EXECUTION_HISTORY_MAX_RESULT_WINDOW}.`,
+      path: ['page'],
+    }
+  );
 
 /**
- * Request-side params for the list endpoint. All fields are optional: `page`
- * and `perPage` carry schema defaults, and the filters are opt-in. Kept as an
- * explicit interface (rather than `z.infer`) so callers building query strings
- * are not forced to supply the defaulted pagination fields.
+ * Request-side params for the list endpoint (snake_case API contract). All
+ * fields are optional: `page`/`per_page` default server-side and the filters
+ * are opt-in, so callers building query strings need not supply pagination.
  */
-export interface ListPolicyExecutionHistoryParams {
-  page?: number;
-  perPage?: number;
-  search?: string;
-  ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
-  episodeIds?: string[];
-  start_date?: string;
-}
+export type ListPolicyExecutionHistoryRequest = z.infer<
+  typeof listPolicyExecutionHistoryRequestSchema
+>;
 
 const namedRefSchema = z.object({
   id: z.string(),
