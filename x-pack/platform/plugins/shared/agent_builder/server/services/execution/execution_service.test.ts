@@ -33,7 +33,7 @@ jest.mock('./persistence', () => ({
 
 const conflictError = () =>
   Object.assign(new Error('version conflict'), {
-    meta: { statusCode: 409 },
+    statusCode: 409,
   });
 
 // Mock execution_runner module
