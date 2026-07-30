@@ -302,9 +302,12 @@ function ContextualGraphInner({
   const fitViewLabel = i18n.translate('xpack.apm.serviceMap.fitViewControl', {
     defaultMessage: 'Fit View',
   });
-  const viewFullMapButtonLabel = i18n.translate('xpack.apm.serviceMap.viewFullServiceMapButton', {
-    defaultMessage: 'View full service map',
-  });
+  const viewInServiceMapButtonLabel = i18n.translate(
+    'xpack.apm.serviceMap.viewInServiceMapButton',
+    {
+      defaultMessage: 'View in Service map',
+    }
+  );
 
   return (
     <ServiceMapHighlightProvider>
@@ -393,14 +396,14 @@ function ContextualGraphInner({
                       />
                     </EuiToolTip>
                     {fullMapHref && (
-                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+                      <EuiToolTip content={viewInServiceMapButtonLabel} disableScreenReaderOutput>
                         <EuiButtonIcon
                           display="empty"
                           color="text"
                           size="s"
                           iconType="apps"
                           href={fullMapHref}
-                          aria-label={viewFullMapButtonLabel}
+                          aria-label={viewInServiceMapButtonLabel}
                           data-test-subj="serviceMapViewFullMapButton"
                           css={mapToolbarControlIconCss}
                         />
