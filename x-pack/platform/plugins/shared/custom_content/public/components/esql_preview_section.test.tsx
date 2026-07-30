@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: () => null,
@@ -36,21 +37,9 @@ const defaultProps = {
 };
 
 describe('EsqlPreviewSection', () => {
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
-
-  afterAll(() => {
-    jest.useRealTimers();
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetESQLTimeField.mockResolvedValue(undefined);
-  });
-
-  afterEach(() => {
-    jest.clearAllTimers();
   });
 
   it('renders the accordion and preview button', () => {
@@ -59,30 +48,32 @@ describe('EsqlPreviewSection', () => {
     expect(screen.getByText('Preview data')).toBeInTheDocument();
   });
 
-  it('shows the time picker hint when query is non-empty and no time field is detected', async () => {
+  it('shows the time picker hint on mount when the query has no time field', async () => {
     mockGetESQLTimeField.mockResolvedValue(undefined);
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
-
-    act(() => {
-      jest.advanceTimersByTime(300);
-    });
     await act(async () => {});
 
     expect(screen.getByText(/connect to the dashboard time picker/i)).toBeInTheDocument();
   });
 
-  it('does not show the time picker hint when a time field is detected', async () => {
+  it('does not show the time picker hint on mount when a time field is detected', async () => {
     mockGetESQLTimeField.mockResolvedValue('@timestamp');
 
     render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
-
-    act(() => {
-      jest.advanceTimersByTime(300);
-    });
     await act(async () => {});
 
     expect(screen.queryByText(/connect to the dashboard time picker/i)).not.toBeInTheDocument();
+  });
+
+  it('shows the hint after clicking preview when the query has no time field', async () => {
+    mockGetESQLTimeField.mockResolvedValue(undefined);
+
+    render(<EsqlPreviewSection {...defaultProps} esqlQuery="FROM logs | LIMIT 10" />);
+    await userEvent.click(screen.getByRole('button', { name: 'Preview data' }));
+    await act(async () => {});
+
+    expect(screen.getByText(/connect to the dashboard time picker/i)).toBeInTheDocument();
   });
 
   it('shows the preview error callout when previewError is provided', () => {

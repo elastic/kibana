@@ -39,6 +39,23 @@ interface EsqlPreviewSectionProps {
 
 const MAX_PREVIEW_ROWS = 5;
 
+const detectTimeField = (
+  query: string,
+  setState: React.Dispatch<React.SetStateAction<string | undefined>>
+) => {
+  let cancelled = false;
+  getESQLTimeField({ query, http: getServices().core.http })
+    .then((field) => {
+      if (!cancelled) setState(field);
+    })
+    .catch(() => {
+      if (!cancelled) setState(undefined);
+    });
+  return () => {
+    cancelled = true;
+  };
+};
+
 export const EsqlPreviewSection = ({
   esqlQuery,
   onEsqlQueryChange,
@@ -51,29 +68,17 @@ export const EsqlPreviewSection = ({
   const columns = previewData?.columns ?? [];
 
   const [detectedTimeField, setDetectedTimeField] = useState<string | undefined>(undefined);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const initialQueryRef = useRef(esqlQuery);
 
   useEffect(() => {
-    let cancelled = false;
-    clearTimeout(debounceRef.current);
-    if (!esqlQuery.trim()) {
-      setDetectedTimeField(undefined);
-      return;
-    }
-    debounceRef.current = setTimeout(() => {
-      getESQLTimeField({ query: esqlQuery, http: getServices().core.http })
-        .then((field) => {
-          if (!cancelled) setDetectedTimeField(field);
-        })
-        .catch(() => {
-          if (!cancelled) setDetectedTimeField(undefined);
-        });
-    }, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(debounceRef.current);
-    };
-  }, [esqlQuery]);
+    const query = initialQueryRef.current;
+    return query.trim() ? detectTimeField(query, setDetectedTimeField) : undefined;
+  }, []);
+
+  const handlePreview = () => {
+    if (esqlQuery.trim()) detectTimeField(esqlQuery, setDetectedTimeField);
+    onPreview();
+  };
 
   return (
     <EuiAccordion
@@ -138,7 +143,7 @@ export const EsqlPreviewSection = ({
       <EuiButton
         size="s"
         isLoading={isPreviewLoading}
-        onClick={onPreview}
+        onClick={handlePreview}
         disabled={!esqlQuery.trim()}
         iconType="play"
       >
