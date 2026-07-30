@@ -48,15 +48,31 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   const [activeStreams, setActiveStreams] = useState<Map<string, ActiveStream>>(() => new Map());
   const [byConversationId, setByConversationId] = useState<Record<string, StreamRecord>>({});
 
-  const setActiveStream = useCallback((conversationId: string, value: ActiveStream) => {
-    setActiveStreams((prev) => new Map(prev).set(conversationId, value));
-  }, []);
+  const setActiveStream = useCallback(
+    (conversationId: string, value: Pick<ActiveStream, 'type'>) => {
+      setActiveStreams((prev) => {
+        const existing = prev.get(conversationId);
+        const next = new Map(prev);
+        next.set(conversationId, {
+          type: value.type,
+          count: (existing?.count ?? 0) + 1,
+        });
+        return next;
+      });
+    },
+    []
+  );
 
   const clearActiveStream = useCallback((conversationId: string) => {
     setActiveStreams((prev) => {
-      if (!prev.has(conversationId)) return prev;
+      const existing = prev.get(conversationId);
+      if (!existing) return prev;
       const next = new Map(prev);
-      next.delete(conversationId);
+      if (existing.count <= 1) {
+        next.delete(conversationId);
+      } else {
+        next.set(conversationId, { ...existing, count: existing.count - 1 });
+      }
       return next;
     });
   }, []);
