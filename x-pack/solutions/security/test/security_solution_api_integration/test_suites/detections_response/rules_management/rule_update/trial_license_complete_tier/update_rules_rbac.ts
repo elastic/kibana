@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { v4 as uuidV4 } from 'uuid';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
@@ -18,6 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const detectionsApi = getService('detectionsApi');
   const log = getService('log');
+  const utils = getService('securitySolutionUtils');
 
   describe('@ess @serverless @skipInServerlessMKI update_rules RBAC', () => {
     describe('@skipInServerless with rules_read_exceptions_all user role', () => {
@@ -339,6 +341,246 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.message).to.eql(
           'The current user does not have the permissions to edit the following fields: exceptions_list'
         );
+      });
+    });
+
+    // Exception-list edits through the generic Alerting API require exceptions-edit.
+    describe('@skipInServerless read-auth params via the generic Alerting API', () => {
+      const role = ROLES.rules_all_exceptions_none;
+
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
+      });
+
+      const exceptionsList = [
+        {
+          id: '1',
+          list_id: '123',
+          namespace_type: 'single' as const,
+          type: ExceptionListTypeEnum.DETECTION,
+        },
+      ];
+
+      const exceptionsListModified = [
+        {
+          id: '2',
+          list_id: '456',
+          namespace_type: 'single' as const,
+          type: ExceptionListTypeEnum.DETECTION,
+        },
+      ];
+
+      const getAlertingRuleBody = (current: Record<string, unknown>, params: unknown) => ({
+        name: current.name,
+        tags: current.tags,
+        schedule: current.schedule,
+        throttle: current.throttle ?? null,
+        notify_when: current.notify_when ?? null,
+        actions: current.actions,
+        params,
+      });
+
+      it('rejects attaching exception lists via PUT /api/alerting/rule when the user lacks exceptions-edit', async () => {
+        const existingRule = await createRule(supertest, log, getSimpleRule('rule-1'));
+        const restrictedSupertest = await utils.createSuperTest(role);
+
+        const { body: current } = await restrictedSupertest
+          .get(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const { body } = await restrictedSupertest
+          .put(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .send(getAlertingRuleBody(current, { ...current.params, exceptionsList }))
+          .expect(403);
+
+        expect(body.message).to.eql(
+          'The current user does not have the permissions to edit the following fields: exceptions_list'
+        );
+      });
+
+      it('rejects removing exception lists via PUT /api/alerting/rule when the user lacks exceptions-edit', async () => {
+        // Clearing a rule's exception lists is a privileged edit too.
+        const existingRule = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          exceptions_list: exceptionsList,
+        });
+        const restrictedSupertest = await utils.createSuperTest(role);
+
+        const { body: current } = await restrictedSupertest
+          .get(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const { body } = await restrictedSupertest
+          .put(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .send(getAlertingRuleBody(current, { ...current.params, exceptionsList: [] }))
+          .expect(403);
+
+        expect(body.message).to.eql(
+          'The current user does not have the permissions to edit the following fields: exceptions_list'
+        );
+      });
+
+      it('rejects modifying exception lists via PUT /api/alerting/rule when the user lacks exceptions-edit', async () => {
+        // Replacing the attached exception lists with different ones is gated too.
+        const existingRule = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          exceptions_list: exceptionsList,
+        });
+        const restrictedSupertest = await utils.createSuperTest(role);
+
+        const { body: current } = await restrictedSupertest
+          .get(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const { body } = await restrictedSupertest
+          .put(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .send(getAlertingRuleBody(current, { ...current.params, exceptionsList: exceptionsListModified }))
+          .expect(403);
+
+        expect(body.message).to.eql(
+          'The current user does not have the permissions to edit the following fields: exceptions_list'
+        );
+      });
+
+      it('allows editing other rule params via the Alerting API when exception lists are unchanged', async () => {
+        // Rule already has exceptions; editing an unrelated field leaves them untouched.
+        const existingRule = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          exceptions_list: exceptionsList,
+        });
+        const restrictedSupertest = await utils.createSuperTest(role);
+
+        const { body: current } = await restrictedSupertest
+          .get(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const { body } = await restrictedSupertest
+          .put(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .send({ ...getAlertingRuleBody(current, current.params), name: 'renamed via alerting' })
+          .expect(200);
+
+        expect(body.params.exceptionsList).to.eql(current.params.exceptionsList);
+      });
+
+      it('allows creating a rule with exception lists via the Alerting API without exceptions-edit', async () => {
+        // Create is not gated: import and duplication set exception lists at create time.
+        const seed = await createRule(supertest, log, getSimpleRule('seed-rule'));
+        const { body: seedAlerting } = await supertest
+          .get(`/api/alerting/rule/${seed.id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const restrictedSupertest = await utils.createSuperTest(role);
+
+        const { body } = await restrictedSupertest
+          .post(`/api/alerting/rule`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            rule_type_id: seedAlerting.rule_type_id,
+            consumer: seedAlerting.consumer,
+            name: 'created via alerting without exceptions-edit',
+            enabled: false,
+            tags: [],
+            schedule: seedAlerting.schedule,
+            actions: [],
+            params: { ...seedAlerting.params, ruleId: uuidV4(), exceptionsList },
+          })
+          .expect(200);
+
+        expect(body.params.exceptionsList).to.eql(exceptionsList);
+      });
+    });
+
+    // With exceptions-edit, attach/modify/remove through the generic Alerting API are allowed.
+    describe('@skipInServerless read-auth params via the generic Alerting API with exceptions-edit', () => {
+      const role = ROLES.rules_all_exceptions_all;
+
+      beforeEach(async () => {
+        await deleteAllRules(supertest, log);
+        await createUserAndRole(getService, role);
+      });
+
+      afterEach(async () => {
+        await deleteUserAndRole(getService, role);
+      });
+
+      const exceptionsList = [
+        {
+          id: '1',
+          list_id: '123',
+          namespace_type: 'single' as const,
+          type: ExceptionListTypeEnum.DETECTION,
+        },
+      ];
+
+      const exceptionsListModified = [
+        {
+          id: '2',
+          list_id: '456',
+          namespace_type: 'single' as const,
+          type: ExceptionListTypeEnum.DETECTION,
+        },
+      ];
+
+      // Seeds a rule, then sets its exception lists to `nextExceptions` via the Alerting API.
+      const editExceptionsViaAlerting = async (
+        seededExceptions: typeof exceptionsList | undefined,
+        nextExceptions: typeof exceptionsList
+      ) => {
+        const existingRule = await createRule(supertest, log, {
+          ...getSimpleRule('rule-1'),
+          ...(seededExceptions ? { exceptions_list: seededExceptions } : {}),
+        });
+        const authorizedSupertest = await utils.createSuperTest(role);
+
+        const { body: current } = await authorizedSupertest
+          .get(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        const { body } = await authorizedSupertest
+          .put(`/api/alerting/rule/${existingRule.id}`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            name: current.name,
+            tags: current.tags,
+            schedule: current.schedule,
+            throttle: current.throttle ?? null,
+            notify_when: current.notify_when ?? null,
+            actions: current.actions,
+            params: { ...current.params, exceptionsList: nextExceptions },
+          })
+          .expect(200);
+
+        return body;
+      };
+
+      it('allows attaching exception lists via PUT /api/alerting/rule', async () => {
+        const body = await editExceptionsViaAlerting(undefined, exceptionsList);
+        expect(body.params.exceptionsList).to.eql(exceptionsList);
+      });
+
+      it('allows modifying exception lists via PUT /api/alerting/rule', async () => {
+        const body = await editExceptionsViaAlerting(exceptionsList, exceptionsListModified);
+        expect(body.params.exceptionsList).to.eql(exceptionsListModified);
+      });
+
+      it('allows removing exception lists via PUT /api/alerting/rule', async () => {
+        const body = await editExceptionsViaAlerting(exceptionsList, []);
+        expect(body.params.exceptionsList).to.eql([]);
       });
     });
   });
