@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { GenericFtrProviderContext } from '@kbn/test';
-
-import type { services } from './services';
-
-export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
+export class InvalidConnectorSourceError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidConnectorSourceError';
+  }
+}

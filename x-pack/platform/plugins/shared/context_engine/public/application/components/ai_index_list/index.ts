@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { services } from '../api_integration/services';
+export { AiIndexList } from './ai_index_list';
