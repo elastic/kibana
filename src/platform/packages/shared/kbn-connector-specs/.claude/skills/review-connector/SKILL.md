@@ -30,6 +30,12 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   actions the connector actually provides. Keep to one sentence, ~15 words.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
+- **No numeric config fields**: Flag any `z.number()` (or `.int()`) field in the connector-level `config`
+  `schema`. The form-generator's widget registry has no numeric widget, so this throws `No widget found
+  for schema type: ZodNumberFormat` when a human opens the connector creation form — a runtime-only error
+  that passes type-check, lint, and mocked unit tests cleanly. It should instead be a `.regex(/^\d+$/)`-validated
+  string with `widget: 'text'`, coerced to a number in the handler. This does not apply to action `input`
+  schemas (never rendered as a form).
 - **Action param schema (Workflow editor)**: For custom connector actions, the Zod schema in the input handler should
   give each param a short, clear `.describe()` so the Workflow editor shows helpful descriptions when mapping inputs.
 - **Auth**: Auth type matches the service. **Auth format** (e.g. header value) must match the vendor's official docs;

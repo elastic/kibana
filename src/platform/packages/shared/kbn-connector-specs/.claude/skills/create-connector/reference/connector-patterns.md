@@ -240,6 +240,43 @@ schema: z.object({
 
 Available `.meta()` options: `label`, `widget`, `placeholder`, `helpText`, `hidden`, `sensitive`, `disabled`, `order`.
 
+**There is no widget for `z.number()` config fields — use a regex-validated string instead.** The
+form-generator's widget registry only has `text`, `password`, `select`, `formFieldset`, `hidden`, `object`,
+and `fileUpload`; there is no numeric widget. A config field typed `z.number()` (e.g. `z.number().int()`)
+throws `Error: No widget found for schema type: ZodNumberFormat. Please specify a widget in the schema
+metadata.` when the connector creation form renders it — and since this is a runtime UI error, not a type
+or lint error, it won't be caught by `node scripts/type_check` or unit tests. If a config value is
+conceptually numeric (an account ID, a port, a numeric tenant ID), define it as a `.regex()`-validated
+string with the `text` widget instead, and coerce it to a number in the handler where the underlying API
+needs a real number:
+
+```typescript
+schema: z.object({
+  accountId: z
+    .string()
+    .min(1)
+    .max(20)
+    .regex(/^\d+$/, 'Must be a numeric account ID.')
+    .describe('Numeric account ID this connector manages.')
+    .meta({ widget: 'text', label: 'Account ID', placeholder: '1234567' }),
+}),
+```
+
+```typescript
+const getAccountId = (ctx: ActionContext): number => {
+  const raw = ctx.config?.accountId as string | undefined;
+  const accountId = Number(raw);
+  if (!raw || Number.isNaN(accountId)) {
+    throw new Error('Connector is missing the required accountId configuration field.');
+  }
+  return accountId;
+};
+```
+
+This only applies to **connector-level `config` fields** (rendered by the form-generator). Action `input`
+schemas are never rendered as a form — `z.number()` is fine there since it's Agent Builder/Workflows that
+supplies the value, not a human typing into a UI widget.
+
 **ICU-unsafe characters in translated help text**: `metadata.description` and any `helpText`/label string
 that goes through `i18n.translate()` is parsed as an ICU message. A literal `<placeholder>` (e.g.
 `'found in the URL: example.com/<slug>/'`) is parsed as an unclosed XML tag and throws a `FORMAT_ERROR`

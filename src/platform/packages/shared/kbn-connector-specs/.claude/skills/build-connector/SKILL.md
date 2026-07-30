@@ -146,6 +146,12 @@ Args: $ARGUMENTS
 
 This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
 
+**If the user reports `Error: No widget found for schema type: ZodNumberFormat...`** when opening the
+connector creation form in the Kibana UI, a `z.number()` field was used in the connector's config
+`schema` — the form-generator has no numeric widget. Fix it per "There is no widget for `z.number()`
+config fields" in `create-connector/reference/connector-patterns.md` (regex-validated string + `text`
+widget, coerced to a number in the handler), then ask the user to retry.
+
 Mark task 5 as `completed`.
 
 ---
