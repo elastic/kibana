@@ -6978,7 +6978,21 @@ print("404")
         self.assertIn("four backward-compatible migrations", intro)
         self.assertNotIn("two backward-compatible migrations", intro)
         self.assertNotIn("three backward-compatible migrations", intro)
-        self.assertIn("apply all four", resume_section)
+
+        migrations_block = resume_section[
+            resume_section.index("**Migrations for sessions") :
+        ]
+        self.assertIn("apply all four", migrations_block)
+        # Top-level bullets only — the hash-gate sub-cases are nested
+        # "\n  - " (two-space indent), not "\n- ", so they don't inflate
+        # this count.
+        bullet_count = migrations_block.count("\n- ")
+        self.assertEqual(
+            bullet_count,
+            4,
+            "migration bullet count changed without updating the "
+            "'apply all four' / intro count text to match",
+        )
 
     def test_entity_analytics_does_not_mislabel_a_confirmed_bug_as_non_bug(self):
         # Review of PR #281618 at 25c2a08 (Review B): entity-analytics.md
