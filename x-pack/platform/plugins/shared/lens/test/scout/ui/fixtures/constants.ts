@@ -6,7 +6,8 @@
  */
 
 const LENS_SCOUT_FIXTURES_DIR = 'x-pack/platform/plugins/shared/lens/test/scout/ui/fixtures';
-const OPEN_IN_LENS_KBN_ARCHIVES_DIR = `${LENS_SCOUT_FIXTURES_DIR}/kbn_archives/open_in_lens`;
+const LENS_KBN_ARCHIVES_DIR = `${LENS_SCOUT_FIXTURES_DIR}/kbn_archives`;
+const OPEN_IN_LENS_KBN_ARCHIVES_DIR = `${LENS_KBN_ARCHIVES_DIR}/open_in_lens`;
 
 export const ES_ARCHIVE_PATHS = {
   LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
@@ -19,6 +20,23 @@ export const DATA_VIEW_ID = {
   LOGSTASH: 'logstash-*',
   LONG_WINDOW_LOGSTASH: 'long-window-logstash-*',
   FLIGHTS: 'kibana_sample_data_flights',
+  /** Wildcard data view bundled with `lens_basic.json`; matches `logstash-*` indices. */
+  LOGSTASH_WILDCARD: 'log*',
+} as const;
+
+/**
+ * Saved-object titles of the visualizations bundled in `lens_basic.json`.
+ * Because `scoutSpace.savedObjects.load()` imports with `createNewCopies: true`,
+ * original IDs are replaced by random UUIDs. Look up the new ID by title from
+ * the array returned by `load()`.
+ */
+export const LENS_BASIC_TITLES = {
+  /** Legacy Lens metric (`lnsLegacyMetric`). */
+  ARTIST_METRIC: 'Artistpreviouslyknownaslens',
+  /** XY chart. Split by top-3 values of `ip`, y = average of `bytes`. */
+  XY_VIS: 'lnsXYvis',
+  /** Pie chart. */
+  PIE_VIS: 'lnsPieVis',
 } as const;
 
 export const LOGSTASH_IN_RANGE_DATES = {
@@ -45,6 +63,11 @@ export const KBN_ARCHIVE_PATHS = {
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
   LONG_WINDOW_LOGSTASH_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/long_window_logstash_index_pattern.json`,
   KIBANA_SAMPLE_DATA_FLIGHTS_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/kibana_sample_data_flights_index_pattern.json`,
+  /**
+   * Ships the `logstash-*` and `log*` data views plus the three visualizations referenced by
+   * {@link LENS_BASIC_TITLES}.
+   */
+  LENS_BASIC: `${LENS_KBN_ARCHIVES_DIR}/lens_basic.json`,
   OPEN_IN_LENS: {
     TSVB: {
       METRIC: `${OPEN_IN_LENS_KBN_ARCHIVES_DIR}/tsvb/metric.json`,

@@ -72,8 +72,12 @@ export class VisualizeApp {
     });
   }
 
-  async openSavedVisualization(title: string) {
+  async clickSavedVisualization(title: string) {
     await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
+  }
+
+  async openSavedVisualization(title: string) {
+    await this.clickSavedVisualization(title);
     await this.waitForVisualizationLoaded();
   }
 
