@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
@@ -16,10 +15,7 @@ const TSDB_KBN_ARCHIVE =
 
 const DEFAULT_COLUMNS = ['message', 'extension', 'DestCountry'];
 
-// The switch-back scenario ('should render only available default columns after switching data
-// views') lives in default_columns_switch_back.spec.ts because it must exclude the serverless
-// observability target.
-spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
     await scoutSpace.savedObjects.load(TSDB_KBN_ARCHIVE);
@@ -45,6 +41,57 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       'DestCountry',
     ]);
   });
+
+  spaceTest(
+    'should render only available default columns after switching data views',
+    async ({ page, pageObjects }) => {
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
+        '@timestamp',
+        'message',
+        'extension',
+        'DestCountry',
+      ]);
+
+      await pageObjects.discover.selectDataView('Kibana Sample Data Logs (TSDB)');
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      // Wait for both an arriving and a departing column: the arriving one alone can't
+      // distinguish the reconciled state from a stale render that also contains it
+      await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
+        'timestamp',
+        'message',
+        'extension',
+      ]);
+
+      await pageObjects.discover.selectDataView('kibana_sample_data_flights');
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      // Arriving: DestCountry (absent in TSDB); departing: message and extension
+      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
+      await page.testSubj.locator('dataGridHeaderCell-extension').waitFor({ state: 'hidden' });
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
+        'timestamp',
+        'DestCountry',
+      ]);
+
+      await pageObjects.discover.selectDataView('logstash-*');
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      // Arriving: '@timestamp' (flights used 'timestamp'); departing: DestCountry
+      await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'visible' });
+      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
+        '@timestamp',
+        'extension',
+      ]);
+    }
+  );
 
   spaceTest(
     'should combine selected columns and default columns after switching data views',
