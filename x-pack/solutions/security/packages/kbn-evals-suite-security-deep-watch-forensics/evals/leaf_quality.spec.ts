@@ -46,6 +46,8 @@
 import { tags, selectEvaluators, getToolCallSteps, type Example } from '@kbn/evals';
 import { evaluate as base } from '../src/evaluate';
 import { FORENSIC_CASES } from '../src/dataset';
+import { seedForensicTimeline } from '../src/data_generators/forensic_data';
+import { cleanupSeededData } from '../src/data_generators/cleanup';
 import {
   DEEP_WATCH_TOOL_IDS,
   DEEP_WATCH_FORENSICS_SKILL_ID,
@@ -131,6 +133,22 @@ void leafEvaluators;
 const examples = buildExamples();
 
 base.describe('Deep Watch Forensics — L2 Leaf Quality', { tag: tags.stateful.classic }, () => {
+  // Seed endpoint telemetry for the fictional hosts referenced in
+  // ../src/dataset.ts. Without this, `execute_esql` always returns zero rows,
+  // `timeline_event_count` is pinned at 0 regardless of model, and the agent
+  // correctly-but-unhelpfully reports "insufficient evidence" instead of
+  // exercising the report-generation path. Root-caused and verified live
+  // 2026-07-30 (Haiku produced a full 10-event timeline once real telemetry
+  // existed for the same query pattern).
+  base.beforeAll(async ({ esClient, log }) => {
+    await cleanupSeededData({ esClient });
+    await seedForensicTimeline({ esClient }, log);
+  });
+
+  base.afterAll(async ({ esClient }) => {
+    await cleanupSeededData({ esClient });
+  });
+
   examples.forEach((example) => {
     base(
       example.id ?? `forensic-${example.metadata?.case_id ?? 'unknown'}`,
@@ -205,14 +223,14 @@ base.describe('Deep Watch Forensics — L2 Leaf Quality', { tag: tags.stateful.c
         for (const step of draftSteps) {
           const result = (
             step as {
-              result?: {
+              results?: Array<{
                 data?: {
                   timeline_event_count?: number;
                   validated_iocs?: Array<{ status: string }>;
                 };
-              };
+              }>;
             }
-          ).result;
+          ).results?.[0];
           if (result?.data) {
             timelineEvents = result.data.timeline_event_count ?? 0;
             validatedIocs = result.data.validated_iocs ?? [];

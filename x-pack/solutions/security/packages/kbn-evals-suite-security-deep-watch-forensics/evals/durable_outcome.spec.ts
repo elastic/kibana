@@ -25,11 +25,28 @@ import {
   DEEP_WATCH_FORENSICS_REPORTS_INDEX,
   agentBuilderDefaultAgentId,
 } from '../src/constants';
+import { seedForensicTimeline } from '../src/data_generators/forensic_data';
+import { cleanupSeededData } from '../src/data_generators/cleanup';
 
 evaluate.describe(
   'C3:L4 | Deep Watch Forensics — Durable Outcome',
   { tag: tags.stateful.classic },
   () => {
+    // See leaf_quality.spec.ts for the full rationale: without seeded
+    // `logs-endpoint.events.*` telemetry for DESKTOP-APT29, execute_esql
+    // always returns zero rows and the agent correctly refuses to draft a
+    // report rather than fabricate one — which is the right guardrail
+    // behavior, but means this L4 test can never exercise the durable-write
+    // path it's meant to score. Root-caused and verified live 2026-07-30.
+    evaluate.beforeAll(async ({ esClient, log }) => {
+      await cleanupSeededData({ esClient });
+      await seedForensicTimeline({ esClient }, log);
+    });
+
+    evaluate.afterAll(async ({ esClient }) => {
+      await cleanupSeededData({ esClient });
+    });
+
     const message =
       'Forensic investigation requested. APT29 lateral movement on DESKTOP-APT29. ' +
       'C2 IP 185.220.101.42. Perform deep forensic analysis and produce a DRAFT specialist report.';

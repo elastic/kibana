@@ -514,8 +514,14 @@ If approved: defer to **endpoint-response-actions** for execution. Do not execut
               details: details ? String(details).slice(0, 200) : null,
             });
           }
-        } catch {
-          // Telemetry query failed — timeline will be empty
+        } catch (e) {
+          // Non-fatal — timeline stays empty, but surface the real cause
+          // instead of silently swallowing it (this hid the field-name bug
+          // in leaf_quality.spec.ts's own scoring code during the 2026-07-30
+          // timeline-population investigation).
+          context.logger?.warn(
+            `deep_watch_forensics: timeline telemetry query failed: ${(e as Error).message}`
+          );
         }
 
         // Validate source IoCs against telemetry
