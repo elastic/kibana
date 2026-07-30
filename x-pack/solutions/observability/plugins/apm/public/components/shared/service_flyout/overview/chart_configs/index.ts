@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_schema';
-import type { ServiceSchemaType } from '../../../../../../common/service_schema_type';
+import type { ServiceSchemaType } from '@kbn/apm-types';
 import type { LatencyAggregationType } from '../../../../../../common/latency_aggregation_types';
 import {
   APM_ERROR_RATE_TITLE,

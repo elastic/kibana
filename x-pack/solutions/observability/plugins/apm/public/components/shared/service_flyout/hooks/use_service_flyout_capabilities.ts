@@ -7,8 +7,8 @@
 
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { HttpStart } from '@kbn/core/public';
+import type { ServiceSchemaType } from '@kbn/apm-types';
 import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceSchemaType } from '../../../../../common/service_schema_type';
 import type { ServiceFlyoutCapabilities } from '../service_flyout_context';
 
 interface Params {

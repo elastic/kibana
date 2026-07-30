@@ -6,15 +6,20 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { EnvironmentsResponse } from './environments';
+import type { ServiceSchemaType } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
 import { MAX_SERVICE_NAME_LENGTH } from '../../constants';
 
-export const unifiedEnvironmentsRoute = defineRoute<EnvironmentsResponse>()({
-  endpoint: 'GET /internal/apm/services/{serviceName}/unified_environments',
+export interface ServiceIngestionTypeResponse {
+  schema: ServiceSchemaType;
+}
+
+export const serviceIngestionTypeRoute = defineRoute<ServiceIngestionTypeResponse>()({
+  endpoint: 'GET /internal/apm/services/{serviceName}/ingestion_type',
   params: z.object({
     path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
-    query: rangeSchema,
+    query: environmentSchema.merge(rangeSchema),
   }),
 });

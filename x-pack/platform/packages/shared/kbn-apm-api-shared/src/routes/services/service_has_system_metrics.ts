@@ -6,15 +6,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { EnvironmentsResponse } from './environments';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
 import { rangeSchema } from '../../default_api_types';
 import { MAX_SERVICE_NAME_LENGTH } from '../../constants';
 
-export const unifiedEnvironmentsRoute = defineRoute<EnvironmentsResponse>()({
-  endpoint: 'GET /internal/apm/services/{serviceName}/unified_environments',
+export interface ServiceHasSystemMetricsResponse {
+  hasSystemMetrics: boolean;
+}
+
+export const serviceHasSystemMetricsRoute = defineRoute<ServiceHasSystemMetricsResponse>()({
+  endpoint: 'GET /internal/apm/services/{serviceName}/has_system_metrics',
   params: z.object({
     path: z.object({ serviceName: z.string().max(MAX_SERVICE_NAME_LENGTH) }),
-    query: rangeSchema,
+    query: environmentSchema.merge(rangeSchema),
   }),
 });
