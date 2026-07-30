@@ -35,6 +35,11 @@ regional/self-hosted domain variants. See "Research the Vendor API Before Writin
 found late (during manual testing or review) that trace back to skipping this step are expensive to fix
 one action at a time — verifying up front is cheaper.
 
+**If the vendor API is GraphQL**, docs examples and general familiarity are not enough to get input type
+names and field selections right — verify every hardcoded type/field name against the real schema via
+introspection before writing the handler. See "Verify GraphQL Schemas via Introspection" in
+[reference/custom-connector-setup.md](reference/custom-connector-setup.md).
+
 ## Step 2: Create the Connector Spec
 
 Create the connector spec in `src/platform/packages/shared/kbn-connector-specs/src/specs/{connector_name}/`.
@@ -140,6 +145,10 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
   required scope appears in all of them, not just one
 - Naming/casing inconsistencies vs. sibling connectors (e.g. `webpackChunkName` casing)
 - Doc wording that could misread "required" as applying only to the last-listed parameter
+- For GraphQL-backed connectors: every input type name and response field selection in a hardcoded
+  query/mutation string has been checked against the real schema via introspection, not just written from
+  a docs example or general knowledge — see "Verify GraphQL Schemas via Introspection" in
+  [reference/custom-connector-setup.md](reference/custom-connector-setup.md)
 
 This mirrors what the `review-connector` skill checks — running it yourself first means real review
 cycles catch new problems instead of re-flagging things you could have caught alone.

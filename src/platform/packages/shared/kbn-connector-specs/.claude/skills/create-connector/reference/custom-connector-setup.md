@@ -77,6 +77,50 @@ action you plan to implement, find the vendor's official API reference and confi
 Cross-reference this research against the fields you're about to add `.describe()` text for — the
 description should state the *verified* format/constraint, not an assumed one.
 
+### Verify GraphQL Schemas via Introspection
+
+If the vendor's API is GraphQL (NerdGraph, a custom GraphQL backend, etc.), do **not** trust a docs example,
+a blog post, or general familiarity with the vendor to get input type names, field selections, and
+enum/mutation argument shapes right — even docs pages sometimes show inconsistent or outdated examples, and
+it's easy to write a plausible-sounding type name (e.g. guessing an `XyzFilterInput`/`XyzTimeWindowInput`
+suffix pattern, or assuming a field exists on a response type because a similar field exists elsewhere)
+that simply doesn't exist in the real schema. This class of bug compiles fine and passes unit tests that
+mock the HTTP client, then fails with `Unknown type "..."` or `Cannot query field "..." on type "..."` the
+first time a real request hits the live API — a `build-connector` chat test or manual verification pass is
+usually the first time anyone would catch it.
+
+Before finalizing any query/mutation string, verify every referenced type and field against the schema
+itself using standard GraphQL introspection (`__schema`, `__type`), run through the connector's own
+authenticated client so you're checking against the exact account/schema version you'll actually call:
+
+1. Find the root query/mutation type name if you don't already know it:
+   ```graphql
+   { __schema { queryType { name } mutationType { name } } }
+   ```
+   (Don't assume it's literally `Query`/`Mutation` — some APIs name these differently, e.g. NerdGraph's
+   mutation root is `RootMutationType`.)
+2. List a root type's fields and their argument/return types to confirm a query or mutation exists with the
+   name and shape you expect:
+   ```graphql
+   { __type(name: "RootMutationType") { fields { name args { name type { name kind ofType { name kind } } } type { name kind ofType { name kind } } } } }
+   ```
+3. Drill into a specific input or output type's fields before relying on them:
+   ```graphql
+   { __type(name: "SomeFilterInput") { inputFields { name type { name kind ofType { name kind } } } } }
+   { __type(name: "SomeResponseType") { fields { name type { name kind ofType { name kind } } } } }
+   ```
+
+The simplest way to run these during development: temporarily add a throwaway action to the connector spec
+(e.g. `debugIntrospect`, `isTool: false`) whose handler sends one of the queries above through the same
+`graphqlRequest`/client helper the real actions use, call it once Kibana has hot-reloaded via the Actions
+`_execute` API, read the result, then **delete the debug action before committing** — it must never ship.
+Repeat for each type/field you're unsure about; each round only needs a single narrow query, so this is
+fast even across several iterations.
+
+Do this proactively for every hardcoded query/mutation string before live-testing, not only after a request
+fails — the cost of one introspection round-trip is far lower than a failed live test plus a fix-and-retest
+cycle.
+
 ## Implement the Connector Spec
 
 Fill in the generated spec stub with actions, handlers, auth config, and tests. Additionally, create a `types.ts` file alongside the spec for input schemas and types.

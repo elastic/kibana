@@ -213,6 +213,13 @@ If tools failed (tool results contain `"status":"failed"`):
      identity even though the ID format, payload shape, and endpoint are all otherwise correct. Retry with
      a different, real human user's ID from the same org before treating this as a connector bug — if that
      succeeds, the code is fine and this is just a property of the test data/account, not something to fix.
+   - `Unknown type "..."` or `Cannot query field "..." on type "..."` on a GraphQL-backed connector — the
+     hardcoded query/mutation string references a type or field name that doesn't exist in the vendor's
+     real schema (a guessed/hallucinated name, not a live-data problem). Don't guess a fix from docs
+     alone — verify the real name with a GraphQL introspection query (`__schema`/`__type`) run through a
+     temporary debug action, per "Verify GraphQL Schemas via Introspection" in
+     `create-connector/reference/custom-connector-setup.md`, then fix every occurrence of the wrong name
+     (check sibling queries/mutations in the same file for the same mistake) and re-test.
 3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 

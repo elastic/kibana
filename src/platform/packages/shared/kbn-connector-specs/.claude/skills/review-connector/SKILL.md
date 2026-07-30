@@ -101,6 +101,19 @@ actual documented behavior — flag them even without live access to the API, ba
   promises (e.g. `?include=services,groups`). Without it, those fields come back `null`/empty on a
   successful 200 response — flag any handler returning a "flattened" relationship field with no
   corresponding `include`/field-selection param in the request.
+- **Hardcoded GraphQL type/field names not verified against the real schema**: For any GraphQL-backed
+  connector (queries/mutations built as string templates), every input type name (`$filter: SomeInput`),
+  field selection, and return-type field must be checked against the vendor's *actual* schema, not just
+  a docs example or general familiarity with the vendor. Vendor docs pages frequently show simplified,
+  inconsistent, or outdated examples, and it's easy to write a plausible-sounding but nonexistent type
+  name (e.g. inventing an `XyzFilterInput` suffix, or assuming a field like `routingKey` exists on a
+  response type because it "sounds right"). These errors compile and pass mocked unit tests cleanly —
+  they only surface as `Unknown type "..."` or `Cannot query field "..." on type "..."` errors when a real
+  request hits the live API, so a code-only review can't catch them by inspection alone. If live testing
+  hasn't run yet, flag every GraphQL type/field name in the diff as unverified and recommend confirming it
+  via schema introspection (see `create-connector/reference/custom-connector-setup.md`'s "Verify GraphQL
+  Schemas via Introspection" section) before merging. If live testing already ran, confirm the PR
+  description's `## Validated` table calls out which query/mutation shapes were actually schema-verified.
 
 ### LLM Descriptions and Skill Content
 
