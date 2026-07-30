@@ -62,6 +62,18 @@ export interface AgentDefinition {
    */
   created_by?: UserIdAndName;
   /**
+   * ISO timestamp of when the agent was created.
+   */
+  created_at?: string;
+  /**
+   * Metadata for who last updated the agent.
+   */
+  updated_by?: UserIdAndName;
+  /**
+   * ISO timestamp of when the agent was last updated.
+   */
+  updated_at?: string;
+  /**
    * Optional labels used to organize or filter agents
    */
   labels?: string[];

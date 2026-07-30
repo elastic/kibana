@@ -31,6 +31,8 @@ const storageSettings = {
       avatar_symbol: types.keyword({}),
       created_by_id: types.keyword({}),
       created_by_name: types.keyword({}),
+      updated_by_id: types.keyword({}),
+      updated_by_name: types.keyword({}),
       access_control: types.object({
         properties: {
           access_mode: types.keyword({}),
@@ -70,6 +72,8 @@ export interface AgentProperties {
   avatar_symbol?: string;
   created_by_id?: string;
   created_by_name?: string;
+  updated_by_id?: string;
+  updated_by_name?: string;
   access_control?: AgentAccessControl;
   config: AgentConfigurationProperties;
   created_at: string;

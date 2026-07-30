@@ -56,11 +56,14 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
     color: ${euiTheme.colors.textSubdued};
   `;
 
-  let createdByUsername = agent.created_by?.username;
-  if (createdByUsername === SYSTEM_USER_ID) {
-    createdByUsername = overviewLabels.createdByElastic;
-  }
-  const byAuthorLabel = createdByUsername && overviewLabels.byAuthor(createdByUsername);
+  const resolveOwnerLabel = (username?: string) =>
+    username === SYSTEM_USER_ID ? overviewLabels.createdByElastic : username;
+
+  const createdByResolved = resolveOwnerLabel(agent.created_by?.username);
+  const byAuthorLabel = createdByResolved && overviewLabels.byAuthor(createdByResolved);
+
+  const updatedByResolved = resolveOwnerLabel(agent.updated_by?.username);
+  const lastUpdatedByLabel = updatedByResolved && overviewLabels.lastUpdatedBy(updatedByResolved);
 
   return (
     <>
@@ -79,6 +82,13 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
                       {byAuthorLabel}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+                {lastUpdatedByLabel && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s" color="subdued">
+                      {lastUpdatedByLabel}
                     </EuiText>
                   </EuiFlexItem>
                 )}

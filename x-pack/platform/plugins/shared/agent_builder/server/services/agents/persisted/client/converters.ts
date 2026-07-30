@@ -21,6 +21,9 @@ export type Document = Pick<GetResponse<AgentProperties>, '_id' | '_source'>;
 
 const defaultAgentType = chatAgentTypeId;
 
+const readOwner = (id?: string, name?: string): UserIdAndName | undefined =>
+  id || name ? { id, username: name ?? 'unknown' } : undefined;
+
 export const fromEs = (document: Document): PersistedAgentDefinition => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
@@ -41,13 +44,10 @@ export const fromEs = (document: Document): PersistedAgentDefinition => {
     avatar_color: document._source.avatar_color,
     avatar_symbol: document._source.avatar_symbol,
     access_control: normalizeAccessControl(document._source),
-    created_by:
-      document._source.created_by_id || document._source.created_by_name
-        ? {
-            id: document._source.created_by_id,
-            username: document._source.created_by_name ?? 'unknown',
-          }
-        : undefined,
+    created_by: readOwner(document._source.created_by_id, document._source.created_by_name),
+    created_at: document._source.created_at,
+    updated_by: readOwner(document._source.updated_by_id, document._source.updated_by_name),
+    updated_at: document._source.updated_at,
     configuration: {
       instructions: configuration.instructions,
       tools: configuration.tools,
@@ -106,11 +106,13 @@ export const updateRequestToEs = ({
   currentProps,
   update,
   updateDate,
+  user,
 }: {
   agentId: string;
   currentProps: AgentProperties;
   update: AgentUpdateRequest;
   updateDate: Date;
+  user: UserIdAndName;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
   const { configuration, access_control, ...restUpdate } = update;
@@ -136,6 +138,8 @@ export const updateRequestToEs = ({
       ...currentConfig,
       ...configuration,
     },
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: updateDate.toISOString(),
   };
 
@@ -146,14 +150,18 @@ export const accessControlUpdateToEs = ({
   currentProps,
   access_control,
   updateDate,
+  user,
 }: {
   currentProps: AgentProperties;
   access_control: AgentAccessControl;
   updateDate: Date;
+  user: UserIdAndName;
 }): AgentProperties => {
   return {
     ...currentProps,
     access_control,
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: updateDate.toISOString(),
   };
 };
