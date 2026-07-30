@@ -1,6 +1,12 @@
 # Bucketed Count-Across-Slices Fix — Design
 
-**Status:** Approved (2026-07-30)
+**Status:** SUPERSEDED (2026-07-30) by
+`docs/superpowers/specs/2026-07-30-daily-incremental-log-maintainer-design.md`.
+The daily-incremental design removes time-slicing for counting entirely, so the per-slice
+count-split bug this doc patched no longer exists and the accumulate-then-classify approach below is
+obsolete. Do not implement the accompanying plan
+(`docs/superpowers/plans/2026-07-30-bucketed-count-across-slices.md`). Retained for historical
+context only.
 
 **Goal:** Fix the correctness bug where time-slicing splits a bucketed maintainer's (`accesses_frequently` / `accesses_infrequently`) per-pair access counts across slices, causing genuinely-frequent actor→target pairs to be misclassified as infrequent.
 
