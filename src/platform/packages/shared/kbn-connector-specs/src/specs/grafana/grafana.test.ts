@@ -320,8 +320,9 @@ describe('Grafana', () => {
         tag: ['prod'],
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://acme.grafana.net/api/search', {
+      expect(mockClient.get).toHaveBeenCalledWith('(acme.grafana.net/redacted), {
         params: { query: 'prod', tag: ['prod'] },
+        paramsSerializer: { indexes: null },
         headers: {},
       });
       expect(result).toEqual({ results: [{ uid: 'd1', title: 'Prod overview' }] });
