@@ -6321,6 +6321,66 @@ print("404")
         )
         self.assertIn("not that consent is owed retroactively", resume_section)
 
+    def test_resume_migration_count_matches_bullet_list(self):
+        # Review of PR #281591 (pborgonovi): the Resume path intro said
+        # "the two backward-compatible migrations below", but two lines
+        # later "apply all three" introduced a list that has always had
+        # three bullets — the intro was never updated when the third
+        # bullet (knowledge_file.path full-path rewrite) was added. These
+        # files are read literally as instructions by an agent; one that
+        # trusts "two" could stop early and skip that third bullet, which
+        # is the one that keeps a resumed session from silently failing
+        # to find its knowledge file.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        intro = resume_section[: resume_section.index("**Migrations for sessions")]
+        self.assertIn("three backward-compatible migrations", intro)
+        self.assertNotIn("two backward-compatible migrations", intro)
+
+        migrations_block = resume_section[
+            resume_section.index("**Migrations for sessions") :
+        ]
+        self.assertIn("apply all three", migrations_block)
+        bullet_count = migrations_block.count("\n- ")
+        self.assertEqual(
+            bullet_count,
+            3,
+            "migration bullet count changed without updating the "
+            "'apply all three' / intro count text to match",
+        )
+
+    def test_wave_1_reruns_create_flow_spaces_for_resume_safety(self):
+        # Review of PR #281591 (pborgonovi): a parallel-mode session
+        # resumed after crashing between Phase 0 (writes space_id: null
+        # placeholders for every flow) and Phase 1 (create-flow-spaces.py)
+        # would jump straight from Resume to Phase 2 Wave 1 with
+        # space_id still null — Resume skips all of Phase 1
+        # unconditionally, and the existing resume migration only
+        # backfills space_id for single mode (parallel flows get theirs
+        # from create-flow-spaces.py, never from a static value). Every
+        # Wave 1 sub-agent would then construct an invalid /s/null/...
+        # navigation URL. Wave 1 must rerun create-flow-spaces.py itself
+        # before dispatch, exactly like Wave 2's step 6b and
+        # phases/2-investigation.md already do for the same hazard.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        wave1_section = explore[
+            explore.index("**Wave 1:**") : explore.index(
+                "**Wave 2 (investigation flows):**"
+            )
+        ]
+        self.assertIn("create-flow-spaces.py", wave1_section)
+        self.assertIn("unconditionally, before dispatching Wave 1", wave1_section)
+        self.assertIn("Resume path skips all of Phase 1 unconditionally", wave1_section)
+        self.assertIn("/s/null/", wave1_section)
+
+        # Must run before the dispatch step (step 3), not after.
+        self.assertLess(
+            wave1_section.index("create-flow-spaces.py"),
+            wave1_section.index("3. Dispatch sub-agents concurrently"),
+        )
+
     def test_wave_2_investigation_flows_get_space_ids(self):
         # P1 from review of PR #281591 (pre-existing, but in scope since
         # this PR rewrote the investigation-flow instructions): Wave 2
