@@ -11,6 +11,20 @@ import {
   NOTIFICATION_NAMESPACES,
   isRegisteredNotificationRef,
 } from './notification_registry_utils';
+import type { Severity } from './types';
+
+/**
+ * Visibility window per severity tier, in days.
+ * When querying notifications, we exclude docs older than their tier's TTL.
+ * The retention cleanup task deletes docs older than their tier's TTL.
+ * The longest TTL must stay within the data stream's 180d retention ceiling.
+ */
+export const SEVERITY_TTL_DAYS: Record<Severity, number> = {
+  info: 30,
+  warning: 60,
+  error: 180,
+  critical: 180,
+};
 
 /** Severity members, exported so producers reference `SEVERITY.warning` rather than a raw string. */
 export const SEVERITY = {

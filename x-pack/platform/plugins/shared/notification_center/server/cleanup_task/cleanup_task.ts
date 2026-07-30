@@ -12,21 +12,12 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
-import { SEVERITIES } from '../common/notification_schema';
-import type { Severity } from '../common/types';
-import { NOTIFICATION_DATA_STREAM_NAME } from './data_stream/notification_data_stream';
-import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from './types';
+import { SEVERITIES, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
+import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
 export const CLEANUP_TASK_TYPE = 'notification-center:cleanup';
 export const CLEANUP_TASK_ID = 'notification-center:cleanup';
-
-/** Per-severity retention window in days. Must stay ≤ the data stream's ILM ceiling (180d). */
-export const SEVERITY_RETENTION_DAYS: Record<Severity, number> = {
-  info: 30,
-  warning: 60,
-  error: 180,
-  critical: 180,
-};
 
 /**
  * Builds an ES query that matches all notification docs older than their severity's TTL.
@@ -39,7 +30,7 @@ export const buildCleanupQuery = () => ({
       bool: {
         filter: [
           { term: { severity } },
-          { range: { '@timestamp': { lt: `now-${SEVERITY_RETENTION_DAYS[severity]}d/d` } } },
+          { range: { '@timestamp': { lt: `now-${SEVERITY_TTL_DAYS[severity]}d/d` } } },
         ],
       },
     })),

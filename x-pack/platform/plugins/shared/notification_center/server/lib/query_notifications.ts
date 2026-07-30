@@ -8,10 +8,9 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import { notificationReadSchema } from '../common/notification_schema';
-import type { Notification, Severity } from '../common/types';
-import { getNotificationDataStreamClient } from './data_stream/notification_data_stream';
-import { SEVERITY_TTL_DAYS } from './severity_ttl';
+import { notificationReadSchema, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
+import type { Notification, Severity } from '../../common/types';
+import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
 
 /**
  * Ceiling on collapsed notifications fetched per query. Pagination happens in

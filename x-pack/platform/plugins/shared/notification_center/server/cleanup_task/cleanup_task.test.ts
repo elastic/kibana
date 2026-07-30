@@ -12,21 +12,21 @@ import {
   CLEANUP_TASK_TYPE,
   registerNotificationCleanupTask,
   scheduleNotificationCleanupTask,
-  SEVERITY_RETENTION_DAYS,
 } from './cleanup_task';
-import { NOTIFICATION_DATA_STREAM_NAME } from './data_stream/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
+import { SEVERITY_TTL_DAYS } from '../../common/notification_schema';
 
 describe('cleanup_task', () => {
   describe('SEVERITY_RETENTION_DAYS', () => {
     it('has correct TTLs per severity', () => {
-      expect(SEVERITY_RETENTION_DAYS.info).toBe(30);
-      expect(SEVERITY_RETENTION_DAYS.warning).toBe(60);
-      expect(SEVERITY_RETENTION_DAYS.error).toBe(180);
-      expect(SEVERITY_RETENTION_DAYS.critical).toBe(180);
+      expect(SEVERITY_TTL_DAYS.info).toBe(30);
+      expect(SEVERITY_TTL_DAYS.warning).toBe(60);
+      expect(SEVERITY_TTL_DAYS.error).toBe(180);
+      expect(SEVERITY_TTL_DAYS.critical).toBe(180);
     });
 
     it('all TTLs stay within the 180d ILM ceiling', () => {
-      for (const days of Object.values(SEVERITY_RETENTION_DAYS)) {
+      for (const days of Object.values(SEVERITY_TTL_DAYS)) {
         expect(days).toBeLessThanOrEqual(180);
       }
     });

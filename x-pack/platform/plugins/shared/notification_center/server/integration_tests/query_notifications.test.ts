@@ -15,8 +15,8 @@ import type { NotificationDocument } from '../../common/types';
 import {
   NOTIFICATION_DATA_STREAM_NAME,
   notificationDataStreamDefinition,
-} from '../data_stream/notification_data_stream';
-import { queryNotifications } from '../query_notifications';
+} from '../storage/notification_data_stream';
+import { queryNotifications } from '../lib/query_notifications';
 
 const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
