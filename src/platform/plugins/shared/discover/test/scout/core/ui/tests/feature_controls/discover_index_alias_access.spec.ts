@@ -9,7 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test } from '../../fixtures';
-import { DEFAULT_TIME_RANGE, DISCOVER_KBN_ARCHIVE } from '../../fixtures';
+import { DEFAULT_TIME_RANGE, KBN_ARCHIVES } from '../../fixtures';
 import { DISCOVER_ONLY_DATA_VIEWS_ROLE } from '../../fixtures/feature_controls/constants';
 
 const LOGSTASH_INDEX_NAME = 'logstash-2015.09.22';
@@ -23,7 +23,7 @@ test.describe(
       await esClient.indices.updateAliases({
         actions: [{ add: { index: LOGSTASH_INDEX_NAME, alias: ALIAS_NAME } }],
       });
-      await kbnClient.importExport.load(DISCOVER_KBN_ARCHIVE);
+      await kbnClient.importExport.load(KBN_ARCHIVES.DISCOVER);
       await kbnClient.savedObjects.create({
         type: 'index-pattern',
         attributes: { title: ALIAS_NAME, timeFieldName: '@timestamp' },

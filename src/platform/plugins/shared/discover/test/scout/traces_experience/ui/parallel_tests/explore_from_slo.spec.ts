@@ -29,7 +29,7 @@ const SLO_HISTORY_PARAMS = {
 spaceTest.describe(
   'Traces in Discover - Explore from SLO',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: ['@local-stateful-classic', ...tags.serverless.observability.complete],
   },
   () => {
     let sloIds: SloIds;

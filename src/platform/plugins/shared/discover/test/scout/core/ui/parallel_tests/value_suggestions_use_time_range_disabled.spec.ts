@@ -1,13 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { spaceTest, testData, assertionMessages } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Discover app - value suggestions: useTimeRange disabled',
@@ -16,10 +18,7 @@ spaceTest.describe(
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.LOGSTASH);
-      await scoutSpace.uiSettings.setDefaultTime({
-        from: testData.LOGSTASH_DEFAULT_START_TIME,
-        to: testData.LOGSTASH_DEFAULT_END_TIME,
-      });
+      await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
       await scoutSpace.uiSettings.set({ 'autocomplete:useTimeRange': false });
     });
 
@@ -41,7 +40,7 @@ spaceTest.describe(
       await page.testSubj.fill('queryInput', 'extension.raw : ');
       await expect(
         page.testSubj.locator('autoCompleteSuggestionText'),
-        assertionMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
+        testData.SUGGESTIONS_COUNT_ASSERTION_MESSAGE
       ).toHaveCount(5);
       const actualSuggestions = await page.testSubj
         .locator('autoCompleteSuggestionText')
@@ -50,11 +49,11 @@ spaceTest.describe(
     });
 
     spaceTest('show up if in range', async ({ page, pageObjects }) => {
-      await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_IN_RANGE_DATES);
+      await pageObjects.datePicker.setAbsoluteRange(testData.DEFAULT_TIME_RANGE_DISPLAY);
       await page.testSubj.fill('queryInput', 'extension.raw : ');
       await expect(
         page.testSubj.locator('autoCompleteSuggestionText'),
-        assertionMessages.QUERY_BAR_VALIDATION.SUGGESTIONS_COUNT
+        testData.SUGGESTIONS_COUNT_ASSERTION_MESSAGE
       ).toHaveCount(5);
       const actualSuggestions = await page.testSubj
         .locator('autoCompleteSuggestionText')

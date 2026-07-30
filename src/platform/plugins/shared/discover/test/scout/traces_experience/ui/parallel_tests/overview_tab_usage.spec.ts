@@ -37,7 +37,7 @@ const openOverviewTab = async (
 spaceTest.describe(
   'Traces in Discover - Overview tab content and actions',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: ['@local-stateful-classic', ...tags.serverless.observability.complete],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {

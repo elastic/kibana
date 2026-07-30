@@ -110,7 +110,7 @@ spaceTest.describe(
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
-      await scoutSpace.savedObjects.load(testData.DISCOVER_KBN_ARCHIVE);
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DISCOVER);
       await scoutSpace.uiSettings.setDefaultIndex(testData.DEFAULT_DATA_VIEW);
       await scoutSpace.uiSettings.setDefaultTime(testData.DEFAULT_TIME_RANGE);
       await scoutSpace.uiSettings.set({ 'discover:sampleRowsPerPage': PAGE_SIZE });

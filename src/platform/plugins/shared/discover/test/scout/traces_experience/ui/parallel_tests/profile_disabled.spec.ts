@@ -8,7 +8,6 @@
  */
 
 import type { SpaceSolutionView } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, TRACES, setupTracesExperience, teardownTracesExperience } from '../fixtures';
 
@@ -21,7 +20,7 @@ const NON_OBLT_VIEWS: Array<{ name: string; solutionView: SpaceSolutionView }> =
 spaceTest.describe(
   'Traces in Discover - Profile disabled in non-observability configs',
   {
-    tag: tags.stateful.all,
+    tag: '@local-stateful-classic',
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {

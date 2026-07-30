@@ -26,7 +26,6 @@ plugins:
     - data_views_as_code
     - dev_tools
     - discover
-    - discover_enhanced
     - embeddable_alerts_table
     - discoveries
     - entity_store

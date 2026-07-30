@@ -39,7 +39,7 @@ const openDocViewerAndTraceTimeline = async (pageObjects: {
 spaceTest.describe(
   'Traces in Discover - Flyout cascade-close Emotion cache stability',
   {
-    tag: [...tags.stateful.all, ...tags.serverless.observability.complete],
+    tag: ['@local-stateful-classic', ...tags.serverless.observability.complete],
   },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
