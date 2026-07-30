@@ -15,6 +15,7 @@ import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import type { EsDocSearchProps } from '@kbn/unified-doc-viewer-plugin/public/types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { AppHeader, type AppHeaderBack } from '@kbn/app-header';
 import { setBreadcrumbs } from '../../../utils/breadcrumbs';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { SingleDocViewer } from './single_doc_viewer';
@@ -56,102 +57,112 @@ export function Doc(props: DocProps) {
     onProcessRecord,
   });
 
+  const title = `${props.index}#${props.id}`;
+
   useEffect(() => {
     setBreadcrumbs({
       services,
-      titleBreadcrumbText: `${props.index}#${props.id}`,
+      titleBreadcrumbText: title,
       rootBreadcrumbPath: props.referrer,
     });
-  }, [chrome, props.referrer, props.index, props.id, dataView, locator, services]);
+  }, [chrome, props.referrer, props.index, props.id, dataView, locator, services, title]);
+
+  const back: AppHeaderBack = {
+    href: props.referrer ?? '#/',
+    label: i18n.translate('discover.doc.backButtonLabel', { defaultMessage: 'Discover' }),
+  };
 
   return (
-    <EuiPage>
-      <h1
-        id="singleDocTitle"
-        className="euiScreenReaderOnly"
-        data-test-subj="discoverSingleDocTitle"
-      >
-        {i18n.translate('discover.doc.pageTitle', {
-          defaultMessage: 'Single document - #{id}',
-          values: { id: props.id },
-        })}
-      </h1>
-      <EuiPageBody panelled paddingSize="m" panelProps={{ role: 'main' }}>
-        {reqState === ElasticRequestState.NotFoundDataView && (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            data-test-subj={`doc-msg-notFoundDataView`}
-            iconType="warning"
-            title={
-              <FormattedMessage
-                id="discover.doc.failedToLocateDataView"
-                defaultMessage="No data view matches ID {dataViewId}."
-                values={{ dataViewId: dataView.id }}
-              />
-            }
-          />
-        )}
-        {reqState === ElasticRequestState.NotFound && (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            data-test-subj={`doc-msg-notFound`}
-            iconType="warning"
-            title={
-              <FormattedMessage
-                id="discover.doc.failedToLocateDocumentDescription"
-                defaultMessage="Cannot find document"
-              />
-            }
-          >
-            <FormattedMessage
-              id="discover.doc.couldNotFindDocumentsDescription"
-              defaultMessage="No documents match that ID."
+    <>
+      <AppHeader title={title} back={back} spacing="compact" />
+      <EuiPage css={{ flex: '1 1 0', minHeight: 0 }}>
+        <h1
+          id="singleDocTitle"
+          className="euiScreenReaderOnly"
+          data-test-subj="discoverSingleDocTitle"
+        >
+          {i18n.translate('discover.doc.pageTitle', {
+            defaultMessage: 'Single document - #{id}',
+            values: { id: props.id },
+          })}
+        </h1>
+        <EuiPageBody panelled paddingSize="s" panelProps={{ role: 'main', hasShadow: false }}>
+          {reqState === ElasticRequestState.NotFoundDataView && (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              data-test-subj={`doc-msg-notFoundDataView`}
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="discover.doc.failedToLocateDataView"
+                  defaultMessage="No data view matches ID {dataViewId}."
+                  values={{ dataViewId: dataView.id }}
+                />
+              }
             />
-          </EuiCallOut>
-        )}
-
-        {reqState === ElasticRequestState.Error && (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            data-test-subj={`doc-msg-error`}
-            iconType="warning"
-            title={
+          )}
+          {reqState === ElasticRequestState.NotFound && (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              data-test-subj={`doc-msg-notFound`}
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="discover.doc.failedToLocateDocumentDescription"
+                  defaultMessage="Cannot find document"
+                />
+              }
+            >
               <FormattedMessage
-                id="discover.doc.failedToExecuteQueryDescription"
-                defaultMessage="Cannot run search"
+                id="discover.doc.couldNotFindDocumentsDescription"
+                defaultMessage="No documents match that ID."
               />
-            }
-          >
-            <FormattedMessage
-              id="discover.doc.somethingWentWrongDescription"
-              defaultMessage="{indexName} is missing."
-              values={{ indexName: props.index }}
-            />{' '}
-            <EuiLink href={indexExistsLink} target="_blank">
+            </EuiCallOut>
+          )}
+
+          {reqState === ElasticRequestState.Error && (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              data-test-subj={`doc-msg-error`}
+              iconType="warning"
+              title={
+                <FormattedMessage
+                  id="discover.doc.failedToExecuteQueryDescription"
+                  defaultMessage="Cannot run search"
+                />
+              }
+            >
               <FormattedMessage
-                id="discover.doc.somethingWentWrongDescriptionAddon"
-                defaultMessage="Please ensure the index exists."
-              />
-            </EuiLink>
-          </EuiCallOut>
-        )}
+                id="discover.doc.somethingWentWrongDescription"
+                defaultMessage="{indexName} is missing."
+                values={{ indexName: props.index }}
+              />{' '}
+              <EuiLink href={indexExistsLink} target="_blank">
+                <FormattedMessage
+                  id="discover.doc.somethingWentWrongDescriptionAddon"
+                  defaultMessage="Please ensure the index exists."
+                />
+              </EuiLink>
+            </EuiCallOut>
+          )}
 
-        {reqState === ElasticRequestState.Loading && (
-          <EuiCallOut announceOnMount data-test-subj={`doc-msg-loading`}>
-            <EuiLoadingSpinner size="m" />{' '}
-            <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
-          </EuiCallOut>
-        )}
+          {reqState === ElasticRequestState.Loading && (
+            <EuiCallOut announceOnMount data-test-subj={`doc-msg-loading`}>
+              <EuiLoadingSpinner size="m" />{' '}
+              <FormattedMessage id="discover.doc.loadingDescription" defaultMessage="Loading…" />
+            </EuiCallOut>
+          )}
 
-        {reqState === ElasticRequestState.Found && record !== null && dataView && (
-          <div data-test-subj="doc-hit">
-            <SingleDocViewer record={record} dataView={dataView} />
-          </div>
-        )}
-      </EuiPageBody>
-    </EuiPage>
+          {reqState === ElasticRequestState.Found && record !== null && dataView && (
+            <div data-test-subj="doc-hit">
+              <SingleDocViewer record={record} dataView={dataView} />
+            </div>
+          )}
+        </EuiPageBody>
+      </EuiPage>
+    </>
   );
 }

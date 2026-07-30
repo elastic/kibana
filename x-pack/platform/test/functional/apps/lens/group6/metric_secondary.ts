@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // now change to dynamic badge color
       await testSubjects.click('lnsMetric_color_mode_dynamic');
 
-      expect(await lens.getSecondaryMetricBadgeText()).to.be(`5,727.322\n↑`);
+      expect(await lens.getSecondaryMetricBadgeText()).to.be(`5,727.314\n↑`);
 
       // now show icon only
       await testSubjects.click('lnsMetric_secondary_trend_display_icon');
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // now show value only
       await testSubjects.click('lnsMetric_secondary_trend_display_value');
       // badge is there but icon is not there any more
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.314');
 
       // enable the Primary metric baseline
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
       // Comparing to the primary metric no longer renames the secondary metric
       expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,277.678\n↑');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('+8,276.686\n↑');
 
       await lens.closeDimensionEditor();
 
@@ -191,7 +191,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // The badge text should change while the name stays the same
       expect(await lens.getSecondaryMetricLabel()).to.contain('Average of bytes');
-      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.322\n↑');
+      expect(await lens.getSecondaryMetricBadgeText()).to.be('5,727.314\n↑');
 
       // Open secondary metric editor
       await lens.openDimensionEditor(

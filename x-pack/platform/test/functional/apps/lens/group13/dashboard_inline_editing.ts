@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: undefined,
           // The secondary metric name is hidden by default
           extraText: '19,986',
-          value: '5,727.322',
+          value: '5,727.314',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingTrendline: false,
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           title: 'Average of bytes',
           subtitle: undefined,
           extraText: '',
-          value: '5,727.322',
+          value: '5,727.314',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingTrendline: false,
