@@ -53,7 +53,7 @@ export type TileError = {
   error?: ErrorCause;
 };
 
-interface RuntimeLayerState {
+export interface RuntimeLayerState {
   __dataRequests?: DataRequestDescriptor[];
   __isPreviewLayer?: boolean;
   __trackedLayerDescriptor?:

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObject, SavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 
 /**
  * @public
@@ -34,7 +34,7 @@ export class SavedObjectsExportError extends Error {
     );
   }
 
-  static objectFetchError(objects: SavedObject[]) {
+  static objectFetchError(objects: SavedObjectErrorResult[]) {
     return new SavedObjectsExportError('object-fetch-error', 'Error fetching objects to export', {
       objects,
     });
