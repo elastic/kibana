@@ -30,6 +30,7 @@ import type {
   BadgeType as SourceBadgeType,
   SecondaryMenuItem as SourceSecondaryMenuItem,
   SecondaryMenuSection as SourceSecondaryMenuSection,
+  SecondaryMenuSubGroup as SourceSecondaryMenuSubGroup,
   SideNavLogo as SourceSideNavLogo,
 } from '../../types';
 
@@ -39,6 +40,7 @@ import type {
   NavigationProps as PackagedNavigationProps,
   SecondaryMenuItem as PackagedSecondaryMenuItem,
   SecondaryMenuSection as PackagedSecondaryMenuSection,
+  SecondaryMenuSubGroup as PackagedSecondaryMenuSubGroup,
   SideNavLogo as PackagedSideNavLogo,
 } from './types';
 
@@ -53,6 +55,7 @@ const _badgeType: ValidateBadgeType = true;
 // Structural types: packaged must be compatible with source.
 const _secondaryMenuItem: PackagedSecondaryMenuItem = {} as SourceSecondaryMenuItem;
 const _secondaryMenuSection: PackagedSecondaryMenuSection = {} as SourceSecondaryMenuSection;
+const _secondaryMenuSubGroup: PackagedSecondaryMenuSubGroup = {} as SourceSecondaryMenuSubGroup;
 const _sideNavLogo: PackagedSideNavLogo = {} as SourceSideNavLogo;
 
 // `NavigationProps` validation — suppressed because `MenuItem.iconType` is
@@ -63,6 +66,7 @@ const _navigationProps: PackagedNavigationProps = {} as SourceNavigationProps;
 void _badgeType;
 void _secondaryMenuItem;
 void _secondaryMenuSection;
+void _secondaryMenuSubGroup;
 void _sideNavLogo;
 void _navigationProps;
 

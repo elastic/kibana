@@ -16,6 +16,7 @@ import type { BadgeType } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 import { SecondaryMenuItemComponent } from './item';
 import { SecondaryMenuSectionComponent } from './section';
+import { SecondaryMenuSubGroupComponent } from './sub_group';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
 
 export interface SecondaryMenuProps {
@@ -30,6 +31,7 @@ interface SecondaryMenuComponent
   extends ForwardRefExoticComponent<SecondaryMenuProps & RefAttributes<HTMLDivElement>> {
   Item: typeof SecondaryMenuItemComponent;
   Section: typeof SecondaryMenuSectionComponent;
+  SubGroup: typeof SecondaryMenuSubGroupComponent;
 }
 
 const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
@@ -72,4 +74,5 @@ const SecondaryMenuBase = forwardRef<HTMLDivElement, SecondaryMenuProps>(
 export const SecondaryMenu = Object.assign(SecondaryMenuBase, {
   Item: SecondaryMenuItemComponent,
   Section: SecondaryMenuSectionComponent,
+  SubGroup: SecondaryMenuSubGroupComponent,
 }) satisfies SecondaryMenuComponent;

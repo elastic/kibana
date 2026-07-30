@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,7 +18,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useFavoritesState } from '@kbn/entity-centric-lab-flyout';
 import { StreamsAppPageTemplate } from '../../streams_app_page_template';
+import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { getFakeIntegrations, type FakeIntegration } from './fake_integrations';
 import {
@@ -70,11 +72,15 @@ const IntegrationSummaryCard = ({
 );
 
 /**
- * Super-short-term lab: the starred integrations "Overview". Aggregates one
- * summary card per favorited integration; empty until the user stars some.
+ * Super-short-term lab: the integrations "Overview". By default it aggregates a
+ * summary card per installed integration. When a `groupId` is supplied (the
+ * per-group overview auto-created once a starred group holds more than one
+ * integration), it scopes down to that group's members and titles the page with
+ * the group name.
  */
-export const IntegrationsOverviewView = () => {
+export const IntegrationsOverviewView = ({ groupId }: { groupId?: string } = {}) => {
   const router = useStreamsAppRouter();
+  const favoritesState = useFavoritesState();
 
   const openIntegration = useCallback(
     (integrationId: string) => {
@@ -86,18 +92,44 @@ export const IntegrationsOverviewView = () => {
     [router]
   );
 
-  const installedIntegrations = getFakeIntegrations();
+  const group = useMemo(
+    () => (groupId ? favoritesState.groups.find((candidate) => candidate.id === groupId) : undefined),
+    [favoritesState.groups, groupId]
+  );
+
+  const installedIntegrations = useMemo(() => {
+    const all = getFakeIntegrations();
+    if (!group) return all;
+    // Preserve the group's member ordering, dropping any ids no longer installed.
+    return group.integrationIds
+      .map((id) => all.find((integration) => integration.id === id))
+      .filter((integration): integration is FakeIntegration => Boolean(integration));
+  }, [group]);
+
+  const title = group
+    ? group.name
+    : i18n.translate('xpack.streams.entityCentricLab.integrations.overviewTitle', {
+        defaultMessage: 'All integrations',
+      });
+
+  const subtitle = group
+    ? i18n.translate('xpack.streams.entityCentricLab.integrations.groupOverviewSubtitle', {
+        defaultMessage:
+          '{count, plural, one {# integration} other {# integrations}} in this group. Open one to see everything it ships.',
+        values: { count: installedIntegrations.length },
+      })
+    : i18n.translate('xpack.streams.entityCentricLab.integrations.overviewSubtitle', {
+        defaultMessage:
+          '{count, plural, one {# installed integration} other {# installed integrations}}. Open one to see everything it ships.',
+        values: { count: installedIntegrations.length },
+      });
 
   return (
     <>
       <StreamsAppPageTemplate.Header
         pageTitle={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.streams.entityCentricLab.integrations.overviewTitle', {
-                defaultMessage: 'All integrations',
-              })}
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{title}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LabBadge />
             </EuiFlexItem>
@@ -108,11 +140,7 @@ export const IntegrationsOverviewView = () => {
         <EuiFlexGroup direction="column" gutterSize="l">
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.streams.entityCentricLab.integrations.overviewSubtitle', {
-                defaultMessage:
-                  '{count, plural, one {# installed integration} other {# installed integrations}}. Open one to see everything it ships.',
-                values: { count: installedIntegrations.length },
-              })}
+              {subtitle}
             </EuiText>
           </EuiFlexItem>
           {installedIntegrations.map((integration) => (
@@ -128,4 +156,15 @@ export const IntegrationsOverviewView = () => {
       </StreamsAppPageTemplate.Body>
     </>
   );
+};
+
+/**
+ * Route wrapper for `/integrations/groups/{groupId}` — reads the group id from
+ * the path and renders the group-scoped overview.
+ */
+export const IntegrationGroupOverviewView = () => {
+  const {
+    path: { groupId },
+  } = useStreamsAppParams('/integrations/groups/{groupId}');
+  return <IntegrationsOverviewView groupId={groupId} />;
 };

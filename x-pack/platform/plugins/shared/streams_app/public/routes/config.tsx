@@ -25,6 +25,7 @@ import {
   ManageEntityTypesView,
   SignificantEventsView,
   IntegrationsOverviewView,
+  IntegrationGroupOverviewView,
   IntegrationDetailView,
 } from '../components/entity_centric_lab';
 
@@ -156,6 +157,17 @@ const streamsAppRoutes = {
        */
       '/integrations': {
         element: <IntegrationsOverviewView />,
+      },
+      // Per-group overview, auto-linked from the nav once a starred group holds
+      // more than one integration. Declared before `/integrations/{integrationId}`
+      // so the extra `groups` segment is unambiguous.
+      '/integrations/groups/{groupId}': {
+        element: <IntegrationGroupOverviewView />,
+        params: t.type({
+          path: t.type({
+            groupId: t.string,
+          }),
+        }),
       },
       '/integrations/{integrationId}': {
         element: <IntegrationDetailView />,

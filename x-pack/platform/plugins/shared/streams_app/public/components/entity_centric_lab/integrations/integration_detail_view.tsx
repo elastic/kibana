@@ -846,6 +846,9 @@ const ResourcesSection = ({ integration }: { integration: FakeIntegration }) => 
         </EuiFlexItem>
       ))}
     </EuiFlexGrid>
+    {/* Accordion content clips overflow, so the card shadows sit flush against
+        the panel border — a bottom spacer gives them breathing room. */}
+    <EuiSpacer size="m" />
   </SectionPanel>
 );
 

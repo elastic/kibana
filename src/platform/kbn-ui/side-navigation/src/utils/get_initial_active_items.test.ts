@@ -96,4 +96,34 @@ describe('getActiveItems', () => {
     expect(result.secondaryItem).toBeNull();
     expect(result.isLogoActive).toBe(false);
   });
+
+  it('resolves a secondary item nested inside a section sub-group', () => {
+    const navWithSubGroup: NavigationStructure = {
+      primaryItems: [
+        createMenuItem('home', 'Home'),
+        createMenuItem('infra', 'Infrastructure', [
+          {
+            id: 'starred',
+            label: 'Starred',
+            items: [createSecondary('aws-ec2', 'AWS EC2')],
+            subGroups: [
+              {
+                id: 'group-aws',
+                label: 'AWS',
+                items: [createSecondary('aws-lambda', 'AWS Lambda')],
+              },
+            ],
+          },
+        ]),
+      ],
+      footerItems: [],
+    };
+
+    // The panel must stay open (primaryItem resolved) when the active page is a
+    // sub-group item, not just a flat section item.
+    const result = getActiveItems(navWithSubGroup, 'aws-lambda');
+    expect(result.primaryItem?.id).toBe('infra');
+    expect(result.secondaryItem?.id).toBe('aws-lambda');
+    expect(result.isLogoActive).toBe(false);
+  });
 });

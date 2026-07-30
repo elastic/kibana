@@ -43,6 +43,26 @@ export interface SecondaryMenuItem {
 }
 
 /**
+ * A named sub-group of items nested inside a secondary menu section.
+ * Renders as an indented label above its own list of items — one extra level
+ * of hierarchy below a section (used e.g. for user-defined "Starred" groups).
+ */
+export interface SecondaryMenuSubGroup {
+  /**
+   * The unique identifier of the sub-group.
+   */
+  id: string;
+  /**
+   * The label to display for the sub-group.
+   */
+  label: string;
+  /**
+   * The items contained in the sub-group.
+   */
+  items: SecondaryMenuItem[];
+}
+
+/**
  * A section grouping within a secondary menu.
  * Sections help organize related secondary menu items with optional headers.
  */
@@ -52,13 +72,20 @@ export interface SecondaryMenuSection {
    */
   id: string;
   /**
-   * The items contained in the secondary menu section.
+   * The items contained in the secondary menu section. When `subGroups` are
+   * present these render first (ungrouped), above the sub-groups.
    */
   items: SecondaryMenuItem[];
   /**
    * (optional) The label to display for the secondary menu section.
    */
   label?: string;
+  /**
+   * (optional) Named sub-groups rendered below the section's flat items. This is
+   * the one extra level of nesting the panel supports; sub-groups do not nest
+   * further.
+   */
+  subGroups?: SecondaryMenuSubGroup[];
 }
 
 /**

@@ -16,7 +16,10 @@ import type { Location } from 'history';
 import {
   getInstalledIntegrations,
   getIntegrationDeepLinkId,
-  getIntegrationFavorites$,
+  getFavoritesState$,
+  getNestedNavEnabled$,
+  getIntegrationsSearch$,
+  type FavoritesState,
   type IntegrationSummary,
 } from './entity_centric_lab_integrations';
 import type { ObservabilityPublicPluginsStart } from './plugin';
@@ -56,8 +59,11 @@ function createNavTree({
   entityCentricLabEnabled,
   infraShortTermEnabled,
   superShortTermEnabled,
-  favoriteIntegrationIds = [],
+  favoritesState = { ungrouped: [], groups: [] },
+  nestedNavEnabled = false,
   installedIntegrations = [],
+  integrationsSearchQuery = '',
+  toAbsoluteHref = (path: string) => path,
 }: {
   streamsAvailable?: boolean;
   showAiAssistant?: boolean;
@@ -67,8 +73,17 @@ function createNavTree({
   entityCentricLabEnabled?: boolean;
   infraShortTermEnabled?: boolean;
   superShortTermEnabled?: boolean;
-  favoriteIntegrationIds?: readonly string[];
+  favoritesState?: FavoritesState;
+  nestedNavEnabled?: boolean;
   installedIntegrations?: readonly IntegrationSummary[];
+  // Free-text nav filter for the super-short-term integrations panel; matches
+  // integration names across both the starred and installed lists.
+  integrationsSearchQuery?: string;
+  // Builds a fully-qualified (http[s]://) URL for a Kibana app path. Chrome's
+  // nav validation rejects any `href` that isn't an absolute URL, so this must
+  // include the origin — a bare `basePath.prepend()` path would throw and blank
+  // the whole side nav.
+  toAbsoluteHref?: (path: string) => string;
 }) {
   // The three lab modes are mutually exclusive; entity-centric takes precedence,
   // then infra-short-term, then super-short-term. Infra-short-term reuses the
@@ -110,55 +125,116 @@ function createNavTree({
     link: `streams:${getIntegrationDeepLinkId(integration.id)}` as 'streams:integrations',
   });
 
-  const favoriteIntegrations = favoriteIntegrationIds
-    .map((id) => installedIntegrations.find((integration) => integration.id === id))
-    .filter((integration): integration is IntegrationSummary => Boolean(integration));
+  const findIntegration = (id: string): IntegrationSummary | undefined =>
+    installedIntegrations.find((integration) => integration.id === id);
+
+  const toIntegrations = (ids: readonly string[]): IntegrationSummary[] =>
+    ids
+      .map(findIntegration)
+      .filter((integration): integration is IntegrationSummary => Boolean(integration));
+
+  // Nav search filter — matches integration names across both lists. Applied
+  // only to integration items; the "All integrations" overview link always
+  // stays visible so the panel never empties. The search box is gated behind the
+  // grouped-favorites toggle, so ignore any leftover query when it's off.
+  const normalizedQuery = (nestedNavEnabled ? integrationsSearchQuery : '').trim().toLowerCase();
+  const matchesQuery = (integration: IntegrationSummary): boolean =>
+    normalizedQuery.length === 0 || integration.name.toLowerCase().includes(normalizedQuery);
+  const filterByQuery = (integrations: IntegrationSummary[]): IntegrationSummary[] =>
+    integrations.filter(matchesQuery);
+
+  const favoriteIntegrationIds = [
+    ...favoritesState.ungrouped,
+    ...favoritesState.groups.flatMap((group) => group.integrationIds),
+  ];
+
+  // Ungrouped stars render as flat links; grouped stars render under their group
+  // (as a nav sub-group) only when the nested-nav opt-in is on. When it's off
+  // everything is a single flat list, matching the original behaviour.
+  const ungroupedFavoriteIntegrations = filterByQuery(
+    nestedNavEnabled
+      ? toIntegrations(favoritesState.ungrouped)
+      : toIntegrations(favoriteIntegrationIds)
+  );
+
+  const favoriteGroupNodes = nestedNavEnabled
+    ? favoritesState.groups
+        .map((group) => {
+          const groupIntegrations = filterByQuery(toIntegrations(group.integrationIds));
+          const integrationChildren = groupIntegrations.map((integration) =>
+            integrationNode(integration, `group-${group.id}`)
+          );
+          // As soon as a group holds more than one integration, lead it with an
+          // auto-generated group-scoped "Overview" (mirrors the top-level "All
+          // integrations" overview, filtered to this group). Uses an absolute
+          // href because the group id is dynamic — no static deep link exists.
+          const overviewPath = `/app/streams/integrations/groups/${group.id}`;
+          const overviewChild =
+            groupIntegrations.length > 1
+              ? [
+                  {
+                    id: `entityCentricLab-groupOverview-${group.id}`,
+                    href: toAbsoluteHref(overviewPath),
+                    title: i18n.translate(
+                      'xpack.observability.obltNav.integrations.groupOverview',
+                      { defaultMessage: 'Overview' }
+                    ),
+                    // href-only nodes aren't in the deep-link active set, so mark
+                    // active by URL to highlight it and keep the panel open.
+                    getIsActive: ({
+                      pathNameSerialized,
+                      prepend,
+                    }: {
+                      pathNameSerialized: string;
+                      prepend: (path: string) => string;
+                    }) => pathNameSerialized.startsWith(prepend(overviewPath)),
+                  },
+                ]
+              : [];
+          return {
+            id: group.id,
+            title: group.name,
+            // No `link`/`renderAs`: a childful, link-less node becomes a nav
+            // sub-group (one extra nesting level) in the chrome mapper.
+            children: [...overviewChild, ...integrationChildren],
+          };
+        })
+        // Empty groups persist in the store but have nothing to render in the
+        // nav; they reappear as soon as they contain an integration again.
+        .filter((group) => group.children.length > 0)
+    : [];
+
+  const starredSectionChildren = [
+    ...ungroupedFavoriteIntegrations.map((integration) => integrationNode(integration, 'starred')),
+    ...favoriteGroupNodes,
+  ];
 
   // A starred integration is pulled up into the "Starred integrations" section
   // and removed from "Installed integrations" so it appears exactly once. Two
   // nodes sharing the same deep link would otherwise make the chrome nav
   // highlight the first (starred) copy no matter which one was clicked.
-  const unstarredIntegrations = installedIntegrations.filter(
-    (integration) => !favoriteIntegrationIds.includes(integration.id)
+  const unstarredIntegrations = filterByQuery(
+    installedIntegrations.filter((integration) => !favoriteIntegrationIds.includes(integration.id))
   );
 
   const superShortTermPanelChildren = [
-    {
-      // Illustrative-only top group (no section header, matching the mockup).
-      // In super-short-term the existing Infrastructure experience is unchanged,
-      // so these point straight at the real Metrics inventory / Hosts pages
-      // rather than any lab page — they just show where the hub slots in.
-      children: [
-        {
-          id: 'entityCentricLab-infraInventory',
-          link: 'metrics:inventory' as const,
-          title: i18n.translate('xpack.observability.obltNav.integrations.inventory', {
-            defaultMessage: 'Infrastructure inventory',
-          }),
-        },
-        {
-          id: 'entityCentricLab-infraHosts',
-          link: 'metrics:hosts' as const,
-          // The "(24)" is a placeholder count; sentence-casing lowercases
-          // letters, so a numeric placeholder renders cleanly (unlike "(XX)").
-          title: i18n.translate('xpack.observability.obltNav.integrations.hosts', {
-            defaultMessage: 'Hosts (24)',
-          }),
-        },
-      ],
-    },
+    // The illustrative "Infrastructure inventory" / "Hosts" touchpoints and the
+    // integrations search box are rendered in the side-panel header (registered
+    // by streams_app) so the search sits directly above "Starred integrations",
+    // matching the design. Chrome side-nav sections can't host arbitrary content
+    // (like an input) between them, hence the header slot.
+    //
     // Only render the "Starred integrations" section when something is starred,
-    // to avoid an empty section header.
-    ...(favoriteIntegrations.length > 0
+    // to avoid an empty section header. Children are ungrouped stars followed by
+    // any user-defined groups (nested-nav mode only).
+    ...(starredSectionChildren.length > 0
       ? [
           {
             id: 'entityCentricLab-starredIntegrations',
             title: i18n.translate('xpack.observability.obltNav.integrations.starred', {
               defaultMessage: 'Starred integrations',
             }),
-            children: favoriteIntegrations.map((integration) =>
-              integrationNode(integration, 'starred')
-            ),
+            children: starredSectionChildren,
           },
         ]
       : []),
@@ -1146,23 +1222,41 @@ export const createDefinition = (
     coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
     pluginsStart.ingestHub?.navigationAvailable$ || of(false),
     coreStart.settings.client.get$<LabMode>(LAB_MODE_SETTING, 'off'),
-    // Super-short-term lab: rebuild the integrations panel when the user stars
-    // or unstars an integration (store lives in @kbn/entity-centric-lab-flyout).
-    getIntegrationFavorites$(),
+    // Super-short-term lab: rebuild the integrations panel when the user stars,
+    // unstars, or (re)groups an integration, or toggles nested-nav mode (store
+    // lives in @kbn/entity-centric-lab-flyout, mirrored locally).
+    getFavoritesState$(),
+    getNestedNavEnabled$(),
+    getIntegrationsSearch$(),
   ]).pipe(
-    map(([{ status }, chatExperience, ingestHubAvailable, labMode, favoriteIntegrationIds]) =>
-      createNavTree({
-        streamsAvailable: status === 'enabled',
-        showAiAssistant: chatExperience !== AIChatExperience.Agent,
-        isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
-        showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
+    map(
+      ([
+        { status },
+        chatExperience,
         ingestHubAvailable,
-        entityCentricLabEnabled: labMode === 'entityCentric',
-        infraShortTermEnabled: labMode === 'infraShortTerm',
-        superShortTermEnabled: labMode === 'superShortTerm',
-        favoriteIntegrationIds,
-        installedIntegrations: getInstalledIntegrations(),
-      })
+        labMode,
+        favoritesState,
+        nestedNavEnabled,
+        integrationsSearchQuery,
+      ]) =>
+        createNavTree({
+          streamsAvailable: status === 'enabled',
+          showAiAssistant: chatExperience !== AIChatExperience.Agent,
+          isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
+          showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
+          ingestHubAvailable,
+          entityCentricLabEnabled: labMode === 'entityCentric',
+          infraShortTermEnabled: labMode === 'infraShortTerm',
+          superShortTermEnabled: labMode === 'superShortTerm',
+          favoritesState,
+          nestedNavEnabled,
+          integrationsSearchQuery,
+          installedIntegrations: getInstalledIntegrations(),
+          // Chrome requires nav `href`s to be absolute URLs; prepend the origin
+          // to the basePath-qualified app path.
+          toAbsoluteHref: (path: string) =>
+            `${window.location.origin}${coreStart.http.basePath.prepend(path)}`,
+        })
     )
   ),
 });

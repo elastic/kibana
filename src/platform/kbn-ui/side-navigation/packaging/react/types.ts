@@ -45,15 +45,30 @@ export interface SecondaryMenuItem {
 }
 
 /**
+ * A named sub-group of items nested inside a secondary menu section (one extra
+ * level of hierarchy below a section).
+ */
+export interface SecondaryMenuSubGroup {
+  /** Unique identifier for this sub-group. */
+  id: string;
+  /** Display label for the sub-group. */
+  label: string;
+  /** Array of menu items in this sub-group. */
+  items: SecondaryMenuItem[];
+}
+
+/**
  * A section grouping within a secondary menu.
  */
 export interface SecondaryMenuSection {
   /** Unique identifier for this section. */
   id: string;
-  /** Array of menu items in this section. */
+  /** Array of menu items in this section (flat items, above any sub-groups). */
   items: SecondaryMenuItem[];
   /** Optional section header label (omit for unlabeled sections). */
   label?: string;
+  /** Optional named sub-groups rendered below the section's flat items. */
+  subGroups?: SecondaryMenuSubGroup[];
 }
 
 /**
@@ -120,8 +135,15 @@ export interface NavigationProps {
   onItemClick?: (item: MenuItem | SecondaryMenuItem | SideNavLogo) => void;
   /** Callback fired when the collapse button is toggled. Omit to hide the toggle button. */
   onToggleCollapsed?: (isCollapsed: boolean) => void;
-  /** Content to display inside the side panel footer. */
-  sidePanelFooter?: ReactNode;
+  /** Content to display inside the side panel footer. Either a static node or a
+   * render function receiving the opened panel's opener node. */
+  sidePanelFooter?: ReactNode | ((openerNode: MenuItem) => ReactNode);
+  /** Content to display at the top of the side panel. Either a static node or a
+   * render function receiving the opened panel's opener node. */
+  sidePanelHeader?: ReactNode | ((openerNode: MenuItem) => ReactNode);
+  /** Resolver returning an action node (e.g. a settings cog) rendered
+   * right-aligned on a side-panel section header, keyed by section id. */
+  getSectionAction?: (sectionId: string) => ReactNode;
   /** Optional `data-test-subj` attribute for testing purposes. */
   'data-test-subj'?: string;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -25,11 +25,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   isFavoriteIntegration,
-  toggleFavoriteIntegration,
+  removeFavoriteIntegration,
+  setFavoriteIntegration,
   useFavoriteIntegrations,
+  useNestedNavEnabled,
 } from '@kbn/entity-centric-lab-flyout';
 import type { FakeIntegration } from './fake_integrations';
 import { countEnabledRecommended, useIntegrationAssetsVersion } from './integration_assets_store';
+import { AddToFavoritesModal } from './favorites_group_modals';
 
 /**
  * Hollow "LAB" badge (with a flask glyph) marking every super-short-term
@@ -84,7 +87,13 @@ export const useEnabledAssetCount = (integration: FakeIntegration): number => {
   );
 };
 
-/** Star / unstar toggle. Subscribes so its filled/empty state stays in sync. */
+/**
+ * Star / unstar toggle. Subscribes so its filled/empty state stays in sync.
+ *
+ * With grouped favorites on, starring an unstarred integration opens a modal to
+ * pick/create a group (or leave it ungrouped); unstarring is always instant.
+ * With grouped favorites off, it's a plain toggle into the flat "ungrouped" set.
+ */
 export const StarToggleButton = ({
   integrationId,
   size = 'm',
@@ -93,24 +102,44 @@ export const StarToggleButton = ({
   size?: 'xs' | 's' | 'm';
 }) => {
   useFavoriteIntegrations();
+  const nestedNavEnabled = useNestedNavEnabled();
   const favorite = isFavoriteIntegration(integrationId);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const onClick = () => {
+    if (favorite) {
+      removeFavoriteIntegration(integrationId);
+      return;
+    }
+    if (nestedNavEnabled) {
+      setIsModalOpen(true);
+      return;
+    }
+    setFavoriteIntegration(integrationId, true);
+  };
+
   return (
-    <EuiButtonIcon
-      iconType={favorite ? 'starFilled' : 'starEmpty'}
-      color={favorite ? 'primary' : 'text'}
-      size={size}
-      aria-label={
-        favorite
-          ? i18n.translate('xpack.streams.entityCentricLab.integrations.unstar', {
-              defaultMessage: 'Remove from starred',
-            })
-          : i18n.translate('xpack.streams.entityCentricLab.integrations.star', {
-              defaultMessage: 'Add to starred',
-            })
-      }
-      onClick={() => toggleFavoriteIntegration(integrationId)}
-      data-test-subj={`entityCentricLabIntegrationStar-${integrationId}`}
-    />
+    <>
+      <EuiButtonIcon
+        iconType={favorite ? 'starFilled' : 'starEmpty'}
+        color={favorite ? 'primary' : 'text'}
+        size={size}
+        aria-label={
+          favorite
+            ? i18n.translate('xpack.streams.entityCentricLab.integrations.unstar', {
+                defaultMessage: 'Remove from starred',
+              })
+            : i18n.translate('xpack.streams.entityCentricLab.integrations.star', {
+                defaultMessage: 'Add to starred',
+              })
+        }
+        onClick={onClick}
+        data-test-subj={`entityCentricLabIntegrationStar-${integrationId}`}
+      />
+      {isModalOpen ? (
+        <AddToFavoritesModal integrationId={integrationId} onClose={() => setIsModalOpen(false)} />
+      ) : null}
+    </>
   );
 };
 

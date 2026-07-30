@@ -67,9 +67,25 @@ export interface NavigationProps {
    */
   onToggleCollapsed?: (isCollapsed: boolean) => void;
   /**
-   * (optional) Content to display inside the side panel footer.
+   * (optional) Content to display inside the side panel footer. Can be a static
+   * node, or a render function that receives the currently open panel's opener
+   * node so the footer can be scoped to a specific panel.
    */
-  sidePanelFooter?: ReactNode;
+  sidePanelFooter?: ReactNode | ((openerNode: MenuItem) => ReactNode);
+  /**
+   * (optional) Content to display at the top of the side panel, above the
+   * scrollable secondary menu. Can be a static node, or a render function that
+   * receives the currently open panel's opener node so the header can be scoped
+   * to a specific panel (e.g. a search box).
+   */
+  sidePanelHeader?: ReactNode | ((openerNode: MenuItem) => ReactNode);
+  /**
+   * (optional) Resolver returning an action node (e.g. a settings cog) rendered
+   * right-aligned on a side-panel section header, keyed by section id. Only
+   * applied in the expanded side panel; return `undefined` for sections that
+   * should not have an action.
+   */
+  getSectionAction?: (sectionId: string) => ReactNode;
   /**
    * (optional) data-test-subj attribute for testing purposes.
    */
@@ -85,6 +101,8 @@ export const Navigation = ({
   onToggleCollapsed,
   setWidth,
   sidePanelFooter,
+  sidePanelHeader,
+  getSectionAction,
   ...rest
 }: NavigationProps) => {
   const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
@@ -210,6 +228,32 @@ export const Navigation = ({
                                   </SideNav.SecondaryMenu.Item>
                                 );
                               })}
+                              {section.subGroups?.map((group) => (
+                                <SideNav.SecondaryMenu.SubGroup
+                                  key={group.id}
+                                  id={group.id}
+                                  label={group.label}
+                                >
+                                  {group.items.map((subItem) => (
+                                    <SideNav.SecondaryMenu.Item
+                                      key={subItem.id}
+                                      isHighlighted={subItem.id === visuallyActiveSubpageId}
+                                      isCurrent={actualActiveItemId === subItem.id}
+                                      isNew={getIsNewSecondary(subItem.id)}
+                                      onClick={() => {
+                                        onItemClick?.(subItem);
+                                        if (subItem.href) {
+                                          closePopover();
+                                        }
+                                      }}
+                                      testSubjPrefix={popoverItemPrefix}
+                                      {...subItem}
+                                    >
+                                      {subItem.label}
+                                    </SideNav.SecondaryMenu.Item>
+                                  ))}
+                                </SideNav.SecondaryMenu.SubGroup>
+                              ))}
                             </SideNav.SecondaryMenu.Section>
                           );
                         })}
@@ -421,11 +465,19 @@ export const Navigation = ({
       </SideNav>
 
       {isSidePanelOpen && openerNode && (
-        <SideNav.SidePanel footer={sidePanelFooter} openerNode={openerNode}>
+        <SideNav.SidePanel
+          footer={
+            typeof sidePanelFooter === 'function' ? sidePanelFooter(openerNode) : sidePanelFooter
+          }
+          openerNode={openerNode}
+        >
           {({ secondaryNavigationInstructionsId }) => {
             const firstNonEmptySectionIndex = openerNode.sections?.findIndex(
               (s) => s.items.length > 0
             );
+
+            const headerContent =
+              typeof sidePanelHeader === 'function' ? sidePanelHeader(openerNode) : sidePanelHeader;
 
             return (
               <SideNav.SecondaryMenu
@@ -434,8 +486,15 @@ export const Navigation = ({
                 title={openerNode.label}
                 isNew={getIsNewSecondary(openerNode.id)}
               >
+                {/* Opt-in slot rendered directly beneath the panel title, above
+                    the sections (e.g. an integrations search box). */}
+                {headerContent}
                 {openerNode.sections?.map((section, sectionIndex) => (
-                  <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                  <SideNav.SecondaryMenu.Section
+                    key={section.id}
+                    label={section.label}
+                    action={getSectionAction?.(section.id)}
+                  >
                     {section.items.map((subItem, subItemIndex) => {
                       const isFirstItem =
                         sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -458,6 +517,27 @@ export const Navigation = ({
                         </SideNav.SecondaryMenu.Item>
                       );
                     })}
+                    {section.subGroups?.map((group) => (
+                      <SideNav.SecondaryMenu.SubGroup
+                        key={group.id}
+                        id={group.id}
+                        label={group.label}
+                      >
+                        {group.items.map((subItem) => (
+                          <SideNav.SecondaryMenu.Item
+                            key={subItem.id}
+                            isCurrent={actualActiveItemId === subItem.id}
+                            isHighlighted={subItem.id === visuallyActiveSubpageId}
+                            isNew={getIsNewSecondary(subItem.id)}
+                            onClick={() => onItemClick?.(subItem)}
+                            testSubjPrefix={sidePanelItemPrefix}
+                            {...subItem}
+                          >
+                            {subItem.label}
+                          </SideNav.SecondaryMenu.Item>
+                        ))}
+                      </SideNav.SecondaryMenu.SubGroup>
+                    ))}
                   </SideNav.SecondaryMenu.Section>
                 ))}
               </SideNav.SecondaryMenu>

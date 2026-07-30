@@ -17,6 +17,7 @@ import type {
   NavigationStructure,
   SecondaryMenuItem,
   SecondaryMenuSection,
+  SecondaryMenuSubGroup,
   SideNavLogo,
 } from '@kbn/ui-side-navigation/types';
 import { toSentenceCase } from '@kbn/shared-ux-label-formatter';
@@ -201,7 +202,34 @@ export const toNavigationItems = (
             if (!child.children?.length) return null;
 
             const validChildren = filterValidSecondaryChildren(child.children);
-            const secondaryItems = validChildren.map(createSecondaryMenuItem);
+
+            // A section child that itself has children (and no href of its own)
+            // is one extra level of nesting: a sub-group (e.g. user-defined
+            // "Starred" groups). Leaf links stay as flat items. This is the only
+            // level of nesting supported below a section — grand-children of a
+            // sub-group are not descended into.
+            const secondaryItems: SecondaryMenuItem[] = [];
+            const subGroups: SecondaryMenuSubGroup[] = [];
+
+            for (const grandChild of validChildren) {
+              const isSubGroup = !grandChild.href && (grandChild.children?.length ?? 0) > 0;
+              if (isSubGroup) {
+                const groupItems = filterValidSecondaryChildren(grandChild.children!).map(
+                  createSecondaryMenuItem
+                );
+                if (groupItems.length > 0) {
+                  subGroups.push({
+                    id: grandChild.id,
+                    // Group names are user-authored — keep them verbatim rather
+                    // than sentence-casing like generated section titles.
+                    label: grandChild.title ?? '',
+                    items: groupItems,
+                  });
+                }
+              } else {
+                secondaryItems.push(createSecondaryMenuItem(grandChild));
+              }
+            }
 
             if (child.href) {
               warnOnce(
@@ -213,9 +241,10 @@ export const toNavigationItems = (
               id: child.id,
               label: child.title && toSentenceCase(child.title),
               items: secondaryItems,
+              ...(subGroups.length > 0 ? { subGroups } : {}),
             };
           })
-        ).filter((section) => section.items.length > 0); // Filter out empty sections;
+        ).filter((section) => section.items.length > 0 || (section.subGroups?.length ?? 0) > 0); // Filter out empty sections;
       }
 
       // If after all filtering there are no sections, we skip this menu item

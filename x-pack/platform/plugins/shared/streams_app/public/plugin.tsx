@@ -324,7 +324,7 @@ export class StreamsAppPlugin
     return {};
   }
 
-  start(_coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
+  start(coreStart: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppPublicStart {
     // Wire the entity-centric lab context attachment into Agent Builder so
     // the flyout's "Add to chat" pill renders with the entity name and a
     // rich inline snapshot instead of a generic "Text" label. The helper
@@ -332,6 +332,15 @@ export class StreamsAppPlugin
     if (pluginsStart.agentBuilder) {
       registerEntityCentricLabAttachment(pluginsStart.agentBuilder);
     }
+
+    // Super-short-term lab: register the Infrastructure side-panel footer
+    // (grouped-favorites toggle + "Manage groups"). Lazy so its UI deps stay
+    // out of the boot path; the renderer no-ops for other panels/modes.
+    import('./components/entity_centric_lab/integrations/nav_footer').then(
+      ({ registerIntegrationsNavFooter }) => {
+        registerIntegrationsNavFooter(coreStart);
+      }
+    );
 
     const locator = pluginsStart.share.url.locators.create(new StreamsAppLocatorDefinition());
     pluginsStart.streams.navigationStatus$.subscribe((status) => {

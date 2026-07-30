@@ -15,11 +15,17 @@ import { css } from '@emotion/react';
 export interface SecondaryMenuSectionProps {
   children: ReactNode;
   label?: string;
+  /**
+   * Optional action rendered right-aligned on the section header row (e.g. a
+   * settings cog). Only shown when the section has a header (a `label`).
+   */
+  action?: ReactNode;
 }
 
 export const SecondaryMenuSectionComponent = ({
   children,
   label,
+  action,
 }: SecondaryMenuSectionProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme, highContrastMode } = euiThemeContext;
@@ -60,6 +66,13 @@ export const SecondaryMenuSectionComponent = ({
     display: block;
   `;
 
+  const headerRowStyles = css`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: ${euiTheme.size.xs};
+  `;
+
   const listStyles = css`
     display: flex;
     flex-direction: column;
@@ -69,10 +82,15 @@ export const SecondaryMenuSectionComponent = ({
 
   return (
     <div css={secondaryMenuWrapperStyles} role="group" aria-labelledby={sectionId || undefined}>
-      {label && (
-        <EuiText id={sectionId} css={labelStyles} component="span">
-          {label}
-        </EuiText>
+      {(label || action) && (
+        <div css={headerRowStyles}>
+          {label && (
+            <EuiText id={sectionId} css={labelStyles} component="span">
+              {label}
+            </EuiText>
+          )}
+          {action}
+        </div>
       )}
       <ul css={listStyles} role="none">
         {children}

@@ -7,13 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import type {
+  MenuItem,
+  NavigationStructure,
+  SecondaryMenuItem,
+  SecondaryMenuSection,
+} from '../../types';
 
 export interface ActiveItemsState {
   primaryItem: MenuItem | null;
   secondaryItem: SecondaryMenuItem | null;
   isLogoActive: boolean;
 }
+
+/**
+ * Find a secondary item by id within a section, looking at both its flat items
+ * and any sub-group items (one extra nesting level). Sub-group items must be
+ * discoverable here or the panel would close when one is the active page.
+ */
+const findSecondaryItemInSection = (
+  section: SecondaryMenuSection,
+  activeItemId: string
+): SecondaryMenuItem | undefined =>
+  section.items.find((item) => item.id === activeItemId) ??
+  section.subGroups?.flatMap((subGroup) => subGroup.items).find((item) => item.id === activeItemId);
 
 /**
  * Utility function to determine the active menu items based on the `activeItemId`.
@@ -42,7 +59,7 @@ export const getActiveItems = (
     if (!primary.sections) continue;
 
     for (const section of primary.sections) {
-      const secondaryItem = section.items.find((item) => item.id === activeItemId);
+      const secondaryItem = findSecondaryItemInSection(section, activeItemId);
       if (secondaryItem) {
         return { primaryItem: primary, secondaryItem, isLogoActive: false };
       }
@@ -54,7 +71,7 @@ export const getActiveItems = (
     if (!footer.sections) continue;
 
     for (const section of footer.sections) {
-      const secondaryItem = section.items.find((item) => item.id === activeItemId);
+      const secondaryItem = findSecondaryItemInSection(section, activeItemId);
       if (secondaryItem) {
         return { primaryItem: footer, secondaryItem, isLogoActive: false };
       }

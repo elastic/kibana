@@ -290,3 +290,93 @@ describe('hidden panel link', () => {
     expect(activeItemId).toBe('stack_management');
   });
 });
+
+describe('secondary menu sub-groups', () => {
+  // A panel section whose child has its own children (and no href) is mapped to
+  // one extra level of nesting: a sub-group. Leaf links stay as flat items.
+  const buildTreeWithSubGroup = (): NavigationTreeDefinitionUI =>
+    ({
+      body: [
+        {
+          id: 'home',
+          title: 'Home',
+          href: '/app/home',
+          path: 'home',
+          renderAs: 'home',
+          icon: 'logoObservability',
+        },
+        {
+          id: 'infra',
+          title: 'Infrastructure',
+          renderAs: 'panelOpener',
+          path: 'infra',
+          children: [
+            {
+              id: 'starred',
+              title: 'Starred',
+              path: 'infra.starred',
+              children: [
+                {
+                  id: 'aws-ec2',
+                  title: 'AWS EC2',
+                  href: '/app/x/ec2',
+                  path: 'infra.starred.aws-ec2',
+                },
+                {
+                  // No href + children => sub-group.
+                  id: 'group-1',
+                  title: 'Prod',
+                  path: 'infra.starred.group-1',
+                  children: [
+                    {
+                      id: 'kubernetes',
+                      title: 'Kubernetes',
+                      href: '/app/x/k8s',
+                      path: 'infra.starred.group-1.kubernetes',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      footer: [],
+    } as unknown as NavigationTreeDefinitionUI);
+
+  it('renders leaf links as flat items and childful nodes as sub-groups', () => {
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(buildTreeWithSubGroup());
+
+    const infra = primaryItems.find((item) => item.id === 'infra');
+    expect(infra).toBeDefined();
+    const section = infra!.sections!.find((s) => s.id === 'starred');
+    expect(section).toBeDefined();
+
+    // Leaf link stays a flat item.
+    expect(section!.items.map((item) => item.id)).toEqual(['aws-ec2']);
+
+    // Childful, link-less node becomes a sub-group with its label verbatim.
+    expect(section!.subGroups).toHaveLength(1);
+    expect(section!.subGroups![0].id).toBe('group-1');
+    expect(section!.subGroups![0].label).toBe('Prod');
+    expect(section!.subGroups![0].items.map((item) => item.id)).toEqual(['kubernetes']);
+  });
+
+  it('keeps a section that only contains sub-groups (no flat items)', () => {
+    const tree = buildTreeWithSubGroup();
+    // Drop the leaf link so the section has only the sub-group.
+    (tree.body[1] as any).children[0].children.shift();
+
+    const {
+      navItems: { primaryItems },
+    } = createNavigationItems(tree);
+
+    const infra = primaryItems.find((item) => item.id === 'infra');
+    const section = infra!.sections!.find((s) => s.id === 'starred');
+    expect(section).toBeDefined();
+    expect(section!.items).toHaveLength(0);
+    expect(section!.subGroups).toHaveLength(1);
+  });
+});
