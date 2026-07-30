@@ -24,17 +24,19 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('primary body items are visible and linked', async () => {
-        const primaryDeepLinks = [
-          'discover',
-          'dashboards',
-          'workflows',
-          'observability-overview:alerts',
-        ];
+        const primaryDeepLinks = ['discover', 'dashboards', 'workflows'];
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
           await expect(item).toHaveAttribute('href', /.+/);
         }
+      });
+
+      await test.step('Alerts is in the More menu and linked', async () => {
+        await nav.openMoreMenu();
+        const alerts = nav.navItemInMoreByDeepLinkId('observability-overview:alerts');
+        await expect(alerts).toBeVisible();
+        await expect(alerts).toHaveAttribute('href', /.+/);
       });
 
       await test.step('Higher-tier-only nav items are absent', async () => {
@@ -107,10 +109,10 @@ test.describe(
         await expect(page.testSubj.locator('workflowsServerlessTierAccessDenied')).toBeVisible();
       });
 
-      await test.step('Alerts', async () => {
-        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
+      await test.step('Alerts (via More menu)', async () => {
+        await nav.openMoreMenu();
+        await nav.navItemInMoreByDeepLinkId('observability-overview:alerts').click();
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible();
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible();
       });
     });
 
