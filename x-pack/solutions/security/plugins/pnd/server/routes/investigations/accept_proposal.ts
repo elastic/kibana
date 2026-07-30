@@ -98,6 +98,7 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const registerAcceptProposalRoute = ({
   router,
   logger,
+  config,
   getSpaceId,
   getWorkflowsManagement,
   getInvestigationStore,
@@ -136,6 +137,20 @@ export const registerAcceptProposalRoute = ({
             const store = getInvestigationStore();
             if (store == null) return;
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            // In mock mode there is no ES document to mutate — mirrors reject/modify/escalate/
+            // defer's guard so accept doesn't diverge from its sibling routes.
+            if (!config.ui.useMockData) {
+              try {
+                await store.updateProposalStatus(
+                  esClient,
+                  proposalId,
+                  { status: 'approved' },
+                  request
+                );
+              } catch (statusError) {
+                logger.warn(`Failed to persist approved status: ${statusError}`);
+              }
+            }
             try {
               await store.recordDeepWatchOutcome(esClient, {
                 investigationId,
