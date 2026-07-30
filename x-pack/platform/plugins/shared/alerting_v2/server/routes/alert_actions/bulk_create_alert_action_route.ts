@@ -10,6 +10,7 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import {
   bulkCreateAlertActionBodySchema,
+  bulkResponseSchema,
   errorResponseSchema,
   type BulkCreateAlertActionBody,
 } from '@kbn/alerting-v2-schemas';
@@ -37,6 +38,11 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
       body: bulkCreateAlertActionBodySchema,
     },
     response: {
+      200: {
+        body: () => bulkResponseSchema,
+        description:
+          'Returns the number of created actions and per-item errors for actions that were not created.',
+      },
       400: {
         body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
@@ -56,13 +62,8 @@ export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { processed, total } = await this.alertActionsClient.createBulkActions(this.request.body);
+    const result = await this.alertActionsClient.createBulkActions(this.request.body);
 
-    return this.ctx.response.ok({
-      body: {
-        processed,
-        total,
-      },
-    });
+    return this.ctx.response.ok({ body: result });
   }
 }
