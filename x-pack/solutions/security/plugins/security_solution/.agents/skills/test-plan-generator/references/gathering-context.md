@@ -63,8 +63,23 @@ For each **Figma link**: use the Figma MCP. Extract component names and states, 
 The flow below is **metadata-first**:
 
 - `get_metadata` gives every structural fact a test plan needs — component names, hierarchy, node types — for typically 1–2 calls total per link.
-- `get_screenshot` gives visual verification when a scenario asserts on layout, section names, or CTAs. The default response is a short-lived URL plus a `curl` instruction (~300 bytes inline), so a `get_screenshot` **call** itself is effectively free in context terms. **Actually opening the returned PNG** — required whenever a scenario leans on visual layout or on a node's *name* (see Step 3 and *Name-vs-content mismatch* below) — consumes real vision tokens. The Step 5 cap below counts **opened PNGs**, not URL-only calls.
+- `get_screenshot` gives visual verification when a scenario asserts on layout, section names, or CTAs. Its response shape depends on the Figma MCP server / Cursor version: it may return a short-lived URL plus a `curl` instruction (~300 bytes inline), **or** the PNG bytes inline as base64. In the URL-only case the call itself is effectively free in context terms; in the base64 case the response already carries the pixels and the vision cost lands with the call. **Actually opening the returned PNG** — required whenever a scenario leans on visual layout or on a node's *name* (see Step 3 and *Name-vs-content mismatch* below) — consumes real vision tokens either way. The Step 5 cap below counts **opened PNGs** (the vision-token cost), whichever response format delivered them: a URL response that is never opened does not count, an inline-base64 response always does.
 - `get_design_context` is reserved for the rare case where a test asserts on pixel-precise layout or exact CSS identifiers that neither the screenshot nor the metadata can supply. Prefer the other two tools by default.
+
+### When each sub-step runs (phase map)
+
+The six sub-steps below do **not** all run at the same point in the main workflow. Follow this mapping so an early phase never spends screenshot budget or propagates a Sources Summary row it does not yet have:
+
+| Figma sub-step | Main-workflow phase where it runs | What actually happens |
+|---|---|---|
+| **Step 1** — Parse the URL | Main **Step 1** (context gathering — target issue, parent issue, sub-issues, PRs) | Extract `fileKey` / `nodeId`, route by URL shape. No MCP call yet in this phase. |
+| **Step 2** — Metadata inventory (`get_metadata`) | Main **Step 1** (same call site as Step 1 above) | One `get_metadata` per Figma link to build the structural inventory. Includes any `stop-and-ask` for canvas or oversized-section roots. |
+| **Step 3** — Targeted `get_screenshot` | Main **Step 3** (scenario drafting) | Only fetch — and open — a PNG when a scenario being drafted needs visual verification or a name-anchored check. |
+| **Step 4** — Escape hatch (`get_design_context`) | Main **Step 3** (scenario drafting) | Rare; only when a scenario needs identifiers metadata + screenshot cannot supply. |
+| **Step 5** — Session budget | Main **Step 3** (enforced whenever a `get_screenshot` / `get_design_context` call would fire) | Soft cap counted across the whole session. |
+| **Step 6** — Announce & propagate (Sources Summary / Known Limitations) | Main **Step 3** (draft output) and refreshed in main **Step 5** (draft coherence review) | Sources Summary row per Figma link and any Known Limitations entries — cannot be written until the scenarios that consume them exist. |
+
+Put concretely: during main **Step 1** ("apply the Figma flow" while gathering the target issue, parent, sub-issues, or PRs), run **only Figma Step 1 + Step 2** — nothing else. `get_screenshot`, `get_design_context`, and Sources Summary / Known Limitations propagation are deferred to main **Step 3** where the scenarios that motivate them are being written. Phrases like *"apply the full Figma flow"* elsewhere in this file are shorthand for that split — they never mean "spend screenshot budget while still gathering issues".
 
 ### Step 1 — Parse the URL
 
@@ -108,8 +123,12 @@ Once scenarios are being drafted (Step 3 of the main workflow), some assertions 
 For each such assertion:
 
 1. Pick the smallest node in the inventory that contains the visual detail (typically a single flyout frame or a specific state instance).
-2. Call `get_screenshot` on that node. Default parameters are fine — the response is a URL plus a `curl` instruction, not an inline PNG. The call itself is effectively free in context terms.
-3. Download the PNG via the `curl` instruction and read it. This step **consumes vision tokens** and counts against the Step 5 `get_screenshot` cap — the cap is on **opened PNGs**, not URL-only calls. Leave the URL in the Sources Summary as the reader-facing preview (the URL is short-lived — see Step 6).
+2. Call `get_screenshot` on that node. Default parameters are fine. The response is either a short-lived URL plus a `curl` instruction, **or** the PNG bytes inline as base64 — the two official Figma MCP response shapes; do not tune params to force one over the other. In the URL case the call itself is effectively free in context terms; in the inline-base64 case the pixels are already in the response.
+3. Actually **open** the PNG:
+   - **URL response** — fetch the PNG via the `curl` instruction and read it. Also leave the URL in the Sources Summary as the reader-facing preview (the URL is short-lived — see Step 6).
+   - **Inline base64 response** — the pixels are already attached to the response; no extra fetch is needed. There is no shareable URL to include in the Sources Summary in this case; use the node name/id as the reference instead of a link.
+
+   Either way, this step **consumes vision tokens** and counts against the Step 5 `get_screenshot` cap — the cap is on **opened PNGs**, whichever response format delivered them (URL-only responses that were never opened do not count).
 
 The only case where step 3 above can be skipped is a strict geometry check that can be answered from the URL alone (dimensions, aspect ratio in headers). Do not skip it for anything that depends on what the image actually depicts — including any assertion that cites the node name.
 
@@ -156,6 +175,7 @@ If a session hits the combined `get_screenshot` cap mid-draft, stop calling and 
   - The session budget cap fired mid-draft and remaining scenarios could not be visually verified.
   - `get_metadata` returned an error (deleted / restructured node) or the file was inaccessible.
   - A scenario would have benefited from `get_design_context` but the escape hatch was intentionally skipped — record the missing precision so the automation writer knows.
+  - **A screenshot revealed a name-vs-content mismatch** on a node (a frame whose layer name does not match what its PNG actually depicts — see Step 3, *Name-vs-content mismatch*). The Sources Summary row stays `✅` because the fetch itself worked, so without a KL entry the misleading metadata name would silently look authoritative. Name the node and the mismatch; the draft-coherence review's D6 check enforces this pairing (see [`draft-coherence-review.md`](draft-coherence-review.md#document-as-whole-coherence)).
 
   ```
   ⚠️ Figma canvas "🌈 Design Concepts": 3 of 40 direct-child frames catalogued
@@ -194,7 +214,7 @@ Check the "Relationships" or "Parent issue" section in the sidebar. If a parent 
 
 1. Fetch using `gh issue view <number> --repo <owner>/<repo> --json number,title,body,labels,comments`. Fall back to GitHub MCP if unavailable.
 2. For each **image URL** found: fetch and analyze.
-3. For each **Figma link** found: apply the full [Figma](#figma) flow above (URL parsing → metadata inventory → targeted screenshots → Sources Summary / Known Limitations propagation). Parent epics often contain the most complete designs — treat as high-value context.
+3. For each **Figma link** found: apply the [Figma](#figma) flow above, running the sub-steps that belong to main **Step 1** — Figma **Step 1** (URL parse) and Figma **Step 2** (metadata inventory only), per the [phase map](#when-each-sub-step-runs-phase-map). Screenshots, `get_design_context`, and Sources Summary / Known Limitations propagation are deferred to main **Step 3** when scenarios are being drafted, so do **not** spend those budgets here. Parent epics often contain the most complete designs — treat as high-value context; that value is realised later, when scenarios that reference the parent's Figma layout are actually written.
 4. Check comments for an existing test plan (body starts with `<!-- test-plan-generated -->`). If found, store as **parent test plan** — use it in Step 2 to understand what is already covered at the epic level.
 
 Constraints:

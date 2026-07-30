@@ -53,23 +53,23 @@ This step is critical. Without it, all GitHub API calls to `elastic` repositorie
 
 ## Step 2 — Ensure Figma access
 
-Make sure you can sign in to [figma.com](https://figma.com) with your `@elastic.co` account and open the Kibana / Security Solution designs. If your workspace access is set up correctly, no personal access token is needed — the Figma MCP options in Step 3 both use your account session (OAuth or the local Figma Desktop session), not a manually generated token.
+Make sure you can sign in to [figma.com](https://figma.com) with your `@elastic.co` account and open the Kibana / Security Solution designs. If your workspace access is set up correctly, no personal access token is needed — the Figma MCP setup in Step 3 uses OAuth against your account, not a manually generated token.
 
-> **If you had a `cursor-mcp` (or similarly named) personal access token from an earlier setup**, you can revoke it at [figma.com](https://figma.com) → profile avatar → **Settings** → **Personal access tokens**. It is no longer used by the flows below.
+> **If you had a `cursor-mcp` (or similarly named) personal access token from an earlier setup**, you can revoke it at [figma.com](https://figma.com) → profile avatar → **Settings** → **Personal access tokens**. It is no longer used by the flow below.
 
 ---
 
-## Step 3 — Enable the Figma MCP
+## Step 3 — Enable the Figma MCP via Cursor Integrations
 
-The Figma MCP allows the agent to fetch design context from linked Figma files. The test-plan-generator skill uses the **official Figma MCP tools** (`get_metadata`, `get_screenshot`, `get_design_context`, `get_figjam`), not the older Framelink `figma-developer-mcp` package — see the migration note at the bottom of this step if you had that configured.
+The Figma MCP allows the agent to fetch design context from linked Figma files. The test-plan-generator skill uses the **official Figma MCP tools** (`get_metadata`, `get_screenshot`, `get_design_context`, `get_figjam`) and drives them by the `fileKey` / `nodeId` extracted from each Figma URL found in an issue — often across multiple Figma files in a single session.
 
-Pick one of the two options below.
+**The Cursor Integrations flow is the only supported setup** for this skill. Cursor ships built-in support for the official Figma MCP and it accepts `fileKey` / `nodeId` params on every call, which is what the metadata-first flow in [`references/gathering-context.md`](../../../.agents/skills/test-plan-generator/references/gathering-context.md#figma) relies on.
+
+> **Why not the Figma Desktop dev-mode MCP server?** Figma Desktop's local MCP server operates on the file that is currently open in Figma Desktop, not on arbitrary `fileKey` values. It works well for interactive designer flows but breaks the skill's core assumption: given a Figma URL from an issue, resolve its file/node and read it. Using it here risks generating a test plan from whichever file happens to be open in Figma Desktop rather than the one the issue links to, with no obvious error surface. Use Cursor Integrations instead.
 
 > **Note on the GitHub MCP:** The GitHub MCP is optional. In practice, the agent works more reliably using the `gh` CLI for all GitHub interactions (reading issues, posting comments, navigating sub-issues). When the GitHub MCP is enabled alongside the agent doing complex multi-step work, it can interfere with parallel tool calls and cause Cursor to hang. The recommended setup is to use `gh` CLI as the primary GitHub tool and leave the GitHub MCP disabled unless you have a specific reason to enable it.
 
-### Option A — Cursor Integrations (recommended)
-
-Cursor ships built-in support for the official Figma MCP. This is the easiest path — no config file editing, no local server to run.
+### Setup
 
 1. Open **Cursor Settings** (`⌘ ,` on macOS)
 2. Go to the **Integrations** section
@@ -77,61 +77,21 @@ Cursor ships built-in support for the official Figma MCP. This is the easiest pa
 4. Sign in with your `@elastic.co` Figma account and authorize Cursor
 5. Verify: still in Cursor Settings, open the **MCP** tab and confirm Figma appears with a green status indicator. Hovering over it should show `get_metadata`, `get_screenshot`, `get_design_context`, and `get_figjam` among the available tools.
 
-The integration is managed by Cursor — no `mcp.json` entry is required.
+The integration is managed by Cursor — no `mcp.json` entry is required for Figma.
 
-### Option B — Figma Desktop local dev-mode MCP server (manual)
+### Migrating from older setups
 
-Use this option if you prefer running Figma's own local MCP server (e.g. because you already keep Figma Desktop open, or your Cursor version does not expose the Integrations tab).
-
-1. **In Figma Desktop**: open **Preferences** and enable **"Enable local MCP Server"**. Figma exposes it at `http://127.0.0.1:3845/mcp`.
-2. Open (or create) Cursor's `mcp.json`:
-   - **macOS / Linux:** `~/.cursor/mcp.json`
-   - **Windows:** `%APPDATA%\Cursor\mcp.json`
-3. Add the Figma entry:
-   ```json
-   {
-     "mcpServers": {
-       "figma": {
-         "url": "http://127.0.0.1:3845/mcp"
-       }
-     }
-   }
-   ```
-4. Fully quit and reopen Cursor.
-5. Verify: Cursor Settings → **MCP** should list `figma` with a green status and expose the same official tools listed in Option A.
-
-If you also want to enable the GitHub MCP (optional — see the note above), add it alongside Figma:
-```json
-{
-  "mcpServers": {
-    "github": {
-      "type": "http",
-      "url": "https://api.githubcopilot.com/mcp/",
-      "headers": {
-        "Authorization": "Bearer YOUR_GITHUB_TOKEN_HERE"
-      }
-    },
-    "figma": {
-      "url": "http://127.0.0.1:3845/mcp"
-    }
+- **Framelink `figma-developer-mcp` (older npm package).** Earlier versions of this guide asked you to install this package via `npx`. It exposes different tools (`get_figma_data`, `download_figma_images`) that the test-plan-generator skill no longer calls — the metadata-first flow relies on the official tools listed above. Remove any `mcp.json` entry that looks like:
+  ```json
+  "figma": {
+    "command": "npx",
+    "args": ["-y", "figma-developer-mcp", "--figma-api-key=…", "--stdio"]
   }
-}
-```
+  ```
+  before enabling Cursor Integrations. Otherwise Cursor connects to Framelink's server, the skill's Figma calls fail with "tool not found", and the setup silently falls back to metadata-less scenarios.
+- **Figma Desktop local dev-mode MCP entry.** If your `mcp.json` has an entry pointing at `http://127.0.0.1:3845/mcp` (Figma Desktop's local MCP server), remove it before enabling Cursor Integrations — for the reason called out above, it is not a drop-in replacement for URL-driven fetches and can silently target the wrong file.
 
-### Migrating from the older Framelink setup
-
-Earlier versions of this guide asked you to install the Framelink `figma-developer-mcp` npm package via `npx`. That package exposes different tools (`get_figma_data`, `download_figma_images`), which the test-plan-generator skill no longer calls — the metadata-first Figma flow in [`references/gathering-context.md`](../../../.agents/skills/test-plan-generator/references/gathering-context.md#figma) relies on the official tools listed above. If your `mcp.json` still contains an entry like:
-
-```json
-"figma": {
-  "command": "npx",
-  "args": ["-y", "figma-developer-mcp", "--figma-api-key=…", "--stdio"]
-}
-```
-
-remove that entry before enabling Option A (or replace it with the Option B entry above). Otherwise Cursor will connect to Framelink's server, the skill's Figma calls will fail with "tool not found", and the setup will silently fall back to metadata-less scenarios.
-
-> If a server shows as disconnected in Cursor Settings → MCP, double-check the token/URL values and that the JSON in `mcp.json` has no syntax errors. Use [jsonlint.com](https://jsonlint.com) to validate if needed.
+> If Figma shows as disconnected in Cursor Settings → MCP, sign out of the integration and reconnect. If `mcp.json` has other entries and Cursor reports a JSON error, validate with [jsonlint.com](https://jsonlint.com).
 
 ---
 
@@ -284,15 +244,15 @@ The GitHub MCP is optional — the agent uses `gh` CLI as the primary method for
 
 ### Figma MCP not connecting
 
-Both Step 3 options (Cursor Integrations, or Figma Desktop's local dev-mode MCP server) result in a connection Cursor shows in **Cursor Settings → MCP**. If that entry is red / disconnected:
+The Cursor Integrations flow from Step 3 results in a connection Cursor shows in **Cursor Settings → MCP**. If that entry is red / disconnected:
 
-- **Option A (Cursor Integrations):** open Cursor Settings → **Integrations** → **Figma** and re-run **Connect**. Make sure you are signed in with your `@elastic.co` Figma account. Fully quit and reopen Cursor after connecting.
-- **Option B (manual `mcp.json`):** confirm Figma Desktop is running with **"Enable local MCP Server"** turned on in Preferences, and that `mcp.json` points at `http://127.0.0.1:3845/mcp` with no trailing typos. Validate the JSON via [jsonlint.com](https://jsonlint.com). Fully quit and reopen Cursor after edits.
+- Open Cursor Settings → **Integrations** → **Figma** and re-run **Connect**. Make sure you are signed in with your `@elastic.co` Figma account. Fully quit and reopen Cursor after connecting.
 - **If you followed an older version of this guide** and installed Framelink's `figma-developer-mcp` npm package via `npx`, remove that entry from `mcp.json` — the skill no longer calls Framelink's tools and Cursor will surface a "tool not found" style error when the skill runs. See the migration note at the bottom of Step 3.
+- **If your `mcp.json` has a Figma Desktop local dev-mode entry** (`http://127.0.0.1:3845/mcp`), remove it before connecting via Integrations. That server does not accept `fileKey` params, so the skill can silently generate a test plan against whichever file happens to be open in Figma Desktop instead of the one the issue links to. See the note in Step 3 for why the Cursor Integrations flow is the only supported setup.
 
 ### "Cannot read Figma file"
 
-Make sure the Figma file is shared with your `@elastic.co` account and that whichever Figma MCP option you chose in Step 3 is using that account. The MCP can only access files your account can view — Option A via the OAuth session you connected in Cursor Settings, Option B via the account currently signed in to Figma Desktop.
+Make sure the Figma file is shared with your `@elastic.co` account and that the OAuth session you connected in Cursor Settings → Integrations → Figma (Step 3) is using that account. The MCP can only access files your account can view.
 
 ### The agent says it cannot connect to GitHub and falls back to `gh` CLI
 

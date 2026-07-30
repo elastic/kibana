@@ -284,10 +284,10 @@ _If Fail or Blocked, reply to this comment with details (env, build, repro steps
 
 The worked example above uses "no Figma available" as its Known Limitations entry. When a Figma URL **is** available, the skill follows the metadata-first flow in [`gathering-context.md`](gathering-context.md#figma): one `get_metadata` call to catalogue the structure, then targeted `get_screenshot` calls only for scenarios that assert on visual layout. The Sources Summary and Known Limitations sections change to reflect what was actually fetched.
 
-**Common case — metadata + a few screenshots.** Most UI plans need visual anchoring for the P0 flyout and a handful of state variations. Sources Summary:
+**Common case — metadata + a few opened PNGs.** Most UI plans need visual anchoring for the P0 flyout and a handful of state variations. Sources Summary (the count `3` reflects **opened PNGs** — the vision-token cost the Step 5 budget in [`gathering-context.md`](gathering-context.md#figma) is measured in — not raw `get_screenshot` calls):
 
 ```markdown
-| Figma — Alert flyout redesign (frame) | ✅ Metadata read + 3 screenshots for visual verification |
+| Figma — Alert flyout redesign (frame) | ✅ Metadata read + 3 opened PNGs for visual verification |
 ```
 
 The status cell should also include the (short-lived) screenshot URLs the Figma MCP returned so the reviewer can open them without re-running the skill; drop them if they have already expired. No Known Limitations entry is needed for this case — coverage is complete.
@@ -316,14 +316,14 @@ Known Limitations entry (added alongside any other limitations):
 
 Both entries must appear together — the Sources Summary row on its own is not enough. Step 3 scenario writing and the Issue Clarity Assessment UX / UI dimension read Known Limitations to decide whether the Figma context is complete, and would otherwise treat a `✅` status as full coverage.
 
-**Budget-reached case.** When the session's `get_screenshot` budget bites mid-draft — usually on very large multi-flyout epics — the remaining scenarios have to be written from metadata alone. Surface it so the reader knows which parts lack visual anchoring:
+**Budget-reached case.** When the session's screenshot budget bites mid-draft — usually on very large multi-flyout epics — the remaining scenarios have to be written from metadata alone. Surface it so the reader knows which parts lack visual anchoring. Both entries use the same "opened PNGs" unit as the budget itself in [`gathering-context.md`](gathering-context.md#figma):
 
 ```markdown
-| Figma — 9.5 Flyouts overhaul (section) | ⚠️ Screenshot budget reached (8 screenshots taken — remaining scenarios verified from metadata only) |
+| Figma — 9.5 Flyouts overhaul (section) | ⚠️ Screenshot budget reached (8 PNGs opened — remaining scenarios verified from metadata only) |
 ```
 
 ```markdown
-- ⚠️ Figma section "9.5 Flyouts overhaul": 8 screenshots covered the P0 Alert / User / Host / Attack flyouts and their default states. Screenshots for the expanded-state variants (nodes named `Alert - expanded`, `User - expanded`, `Host - expanded`, `Attack - expanded`) were not fetched because the per-session screenshot budget was reached; the corresponding scenarios were written from metadata names only and may miss visual-layout details.
+- ⚠️ Figma section "9.5 Flyouts overhaul": the 8 opened PNGs covered the P0 Alert / User / Host / Attack flyouts and their default states. The expanded-state variants (nodes named `Alert - expanded`, `User - expanded`, `Host - expanded`, `Attack - expanded`) were not opened because the per-session opened-PNGs budget was reached; the corresponding scenarios were written from metadata names only and may miss visual-layout details.
 ```
 
 Unlike the narrowed case, the budget-reached case is fully recoverable — bumping the session budget or splitting the plan into per-flyout runs completes the coverage in a subsequent iteration without changing the plan's design intent.
@@ -331,7 +331,7 @@ Unlike the narrowed case, the budget-reached case is fully recoverable — bumpi
 **Name-vs-content mismatch case.** Figma layer names are authored by designers and can drift from what the layer actually renders (a frame labelled `Analyzer` that ends up showing a Notes flyout, an `Alert v2` frame that still holds the old design, etc.). When `get_screenshot` reveals such a mismatch — per the rules in [`gathering-context.md`](gathering-context.md#figma) — the affected node retains a successful Sources Summary status (the fetch worked), but a Known Limitations entry must record the mismatch so downstream reviewers do not treat the metadata inventory as authoritative for that node:
 
 ```markdown
-| Figma — Flyout-design-per-release, "New system" (section) | ✅ Metadata read + 3 screenshots for visual verification |
+| Figma — Flyout-design-per-release, "New system" (section) | ✅ Metadata read + 3 opened PNGs for visual verification |
 ```
 
 ```markdown
