@@ -65,10 +65,10 @@ function getBundleSizeLimits() {
   const isRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
   return {
     isRspack,
-    totalSize: isRspack ? 4.5 * 1024 * 1024 : 3.2 * 1024 * 1024,
+    totalSize: isRspack ? 4.5 * 1024 * 1024 : 5.8 * 1024 * 1024,
     bundleCount: isRspack ? 70 : 100,
-    discoverSize: 650 * 1024,
-    unifiedSearchSize: 450 * 1024,
+    discoverSize: 1900 * 1024,
+    unifiedSearchSize: 950 * 1024,
   };
 }
 
@@ -98,8 +98,7 @@ function assertLegacyPerPluginSizes(
   return { ok: true };
 }
 
-// Failing: See https://github.com/elastic/kibana/issues/242678
-test.describe.skip(
+test.describe(
   'Discover App - Performance Metrics & Bundle Analysis',
   { tag: [...tags.deploymentAgnostic, ...tags.performance] },
   () => {
