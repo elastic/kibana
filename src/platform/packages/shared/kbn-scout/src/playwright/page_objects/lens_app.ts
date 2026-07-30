@@ -903,18 +903,42 @@ export class LensApp {
   /**
    * Sets the format of the currently open dimension, and optionally its decimal places
    * and suffix/prefix text.
+   *
+   * Suffix commits via `useDebouncedValue` (~256ms) and its onChange spreads the current
+   * format params. Setting decimals *before* that debounce flushes can race: a stale
+   * closure still holding the default `decimals: 2` overwrites a just-applied custom
+   * decimals value. Apply (and flush) the suffix first, then set decimals last.
    */
   async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
     await this.page.components
       .comboBox('indexPattern-dimension-format')
       .setSelectedOptions([format]);
+
+    if (options?.prefix != null) {
+      const suffixInput = this.page.testSubj.locator('indexPattern-dimension-formatSuffix');
+      await suffixInput.waitFor({ state: 'visible' });
+      await suffixInput.fill(options.prefix);
+      await this.page.keyboard.press('Tab');
+      // Let the suffix debounce commit before any subsequent decimals edit.
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await this.page.waitForTimeout(300);
+    }
+
     if (options?.decimals != null) {
-      const decimalsInput = this.page.testSubj.locator('indexPattern-dimension-formatDecimals');
+      // EuiRange with `showInput` stamps `data-test-subj` on both the number input and the
+      // range slider; target the number input explicitly to avoid a strict-mode violation.
+      const decimalsInput = this.page.locator(
+        'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
+      );
+      await decimalsInput.waitFor({ state: 'visible' });
       await decimalsInput.fill(`${options.decimals}`);
       await this.page.keyboard.press('Tab');
-    }
-    if (options?.prefix != null) {
-      await this.page.testSubj.locator('indexPattern-dimension-formatSuffix').fill(options.prefix);
+      await this.page.waitForFunction((expected) => {
+        const el = document.querySelector(
+          'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
+        );
+        return el instanceof HTMLInputElement && el.value === expected;
+      }, `${options.decimals}`);
     }
   }
 
