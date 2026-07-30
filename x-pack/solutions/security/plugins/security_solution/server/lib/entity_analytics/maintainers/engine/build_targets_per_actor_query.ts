@@ -109,6 +109,79 @@ ${statsClause}
 }
 
 /**
+ * Minimized ES|QL builder for local-namespace configs (system_auth, system_security).
+ *
+ * Skips the full namespace/EUID EVAL chain. Hardcodes `@local` as namespace,
+ * reads only `user.email`, `user.name`, `host.id`. Measured ~26× faster than
+ * the full builder on logs-system.auth (~700M docs, 30d lookback).
+ *
+ * Only valid for integrations whose data exclusively uses the `@local`
+ * namespace. The flag `localNamespaceFastPath` on the config opts in.
+ */
+function buildLocalNamespaceFastPathEsql(
+  config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
+  namespace: string
+): string {
+  const indexPattern = config.indexPattern(namespace);
+  const actorFields = config.customActor?.fields ?? ['user.email', 'user.name'];
+
+  const actorPresenceGate = actorFields
+    .map((f) => `(\`${f}\` IS NOT NULL AND \`${f}\` != "")`)
+    .join(' OR ');
+
+  // For host-targeted configs with requireTargetEntityIdExists, gate on host.id directly
+  // (avoids the full EUID-exists DSL — we know the target is always host.id for these configs).
+  const targetGate =
+    config.requireTargetEntityIdExists && config.targetEntityType === 'host'
+      ? '\n    AND (`host.id` IS NOT NULL AND `host.id` != "")'
+      : '';
+
+  // Actor EUID: CONCAT("user:", COALESCE(user.email, user.name), "@", host.id, "@local")
+  // Uses COALESCE over actor fields in declaration order.
+  const coalesceArgs = actorFields.map((f) => `TO_STRING(\`${f}\`)`).join(', ');
+  const actorEval = `| EVAL ${ENGINE_COLUMNS.actor} = CONCAT("user:", COALESCE(${coalesceArgs}), "@", TO_STRING(\`host.id\`), "@local")`;
+
+  const targetEval =
+    config.targetEntityType === 'host'
+      ? `| EVAL targetEntityId = CONCAT("host:", TO_STRING(\`host.id\`))`
+      : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', { withTypeId: true })}`;
+
+  const statsClause =
+    config.kind === 'bucketed'
+      ? (() => {
+          const {
+            threshold,
+            aboveThresholdRelationship: above,
+            belowThresholdRelationship: below,
+          } = config.bucketTargetByThreshold;
+          const aboveCol = ENGINE_COLUMNS.bucketAbove(above);
+          const belowCol = ENGINE_COLUMNS.bucketBelow(below);
+          return `| STATS access_count = COUNT(*) BY ${ENGINE_COLUMNS.actor}, targetEntityId
+| EVAL access_type = CASE(
+    access_count >= ${threshold}, "${above}",
+    "${below}"
+  )
+| STATS targets = VALUES(targetEntityId) BY access_type, ${ENGINE_COLUMNS.actor}
+| STATS
+    ${aboveCol} = VALUES(targets) WHERE access_type == "${above}",
+    ${belowCol} = VALUES(targets) WHERE access_type == "${below}"
+  BY ${ENGINE_COLUMNS.actor}`;
+        })()
+      : `| STATS ${ENGINE_COLUMNS.flat(config.relationshipKey)} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}`;
+
+  return `FROM ${indexPattern}
+| WHERE ${config.esqlWhereClause}
+    AND (${actorPresenceGate})${targetGate}
+${actorEval}
+| WHERE COALESCE(${ENGINE_COLUMNS.actor}, "") != ""
+${targetEval}
+| MV_EXPAND targetEntityId
+| WHERE COALESCE(targetEntityId, "") != ""
+${statsClause}
+| LIMIT ${COMPOSITE_PAGE_SIZE}`;
+}
+
+/**
  * Builds the ES|QL query for the given integration config.
  *
  * The engine always prepends `ESQL_ENGINE_PREAMBLE` to the result so that
@@ -121,15 +194,22 @@ ${statsClause}
  *   results (see `parseTargetsPerActorRows` for the warning safety net).
  *   Override functions MUST NOT include `SET unmapped_fields="nullify"`
  *   themselves — the engine prepends it.
+ * - `kind: 'standard' | 'bucketed'` with `localNamespaceFastPath` → uses the
+ *   minimized fast-path builder (skips namespace/EUID EVAL chain, hardcodes
+ *   `@local`). Measured ~26× faster on large indices.
  * - `kind: 'standard' | 'bucketed'` → uses the default ES|QL builder.
  */
 export const buildTargetsPerActorQuery = (
   config: RelationshipIntegrationConfig,
   namespace: string
 ): string => {
-  const body =
-    config.kind === 'override'
-      ? config.esqlQueryOverride(namespace)
-      : buildRelationshipEsql(config, namespace);
+  let body: string;
+  if (config.kind === 'override') {
+    body = config.esqlQueryOverride(namespace);
+  } else if (config.localNamespaceFastPath) {
+    body = buildLocalNamespaceFastPathEsql(config, namespace);
+  } else {
+    body = buildRelationshipEsql(config, namespace);
+  }
   return `${ESQL_ENGINE_PREAMBLE}\n${body}`;
 };

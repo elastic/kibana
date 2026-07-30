@@ -312,6 +312,102 @@ describe('buildTargetsPerActorQuery (targets per actor)', () => {
     });
   });
 
+  describe('localNamespaceFastPath', () => {
+    const fastPathStandard: RelationshipIntegrationConfig = {
+      kind: 'standard',
+      id: 'system_auth',
+      name: 'System Auth',
+      indexPattern: (ns) => `logs-system.auth-${ns}`,
+      relationshipKey: 'communicates_with',
+      targetEntityType: 'host',
+      requireTargetEntityIdExists: true,
+      localNamespaceFastPath: true,
+      customActor: { fields: ['user.email', 'user.name'] },
+      esqlWhereClause: `(MV_CONTAINS(TO_STRING(event.category), "authentication") OR MV_CONTAINS(TO_STRING(event.category), "session"))
+    AND event.action == "ssh_login"
+    AND event.outcome == "success"`,
+    };
+
+    const fastPathBucketed: RelationshipIntegrationConfig = {
+      kind: 'bucketed',
+      id: 'system_auth',
+      name: 'System Auth',
+      indexPattern: (ns) => `logs-system.auth-${ns}`,
+      targetEntityType: 'host',
+      bucketTargetByThreshold: {
+        threshold: 4,
+        aboveThresholdRelationship: 'accesses_frequently',
+        belowThresholdRelationship: 'accesses_infrequently',
+      },
+      requireTargetEntityIdExists: true,
+      localNamespaceFastPath: true,
+      customActor: { fields: ['user.email', 'user.name'] },
+      esqlWhereClause: `(MV_CONTAINS(TO_STRING(event.category), "authentication") OR MV_CONTAINS(TO_STRING(event.category), "session"))
+    AND event.action == "ssh_login"
+    AND event.outcome == "success"`,
+    };
+
+    it('does NOT include entity.namespace EVAL chain', () => {
+      const query = buildTargetsPerActorQuery(fastPathStandard, 'default');
+      expect(query).not.toContain('entity.namespace');
+      expect(query).not.toContain('_src_entity_namespace');
+      expect(query).not.toContain('getFieldEvaluations');
+    });
+
+    it('hardcodes @local in the actorUserId EVAL expression', () => {
+      const query = buildTargetsPerActorQuery(fastPathStandard, 'default');
+      expect(query).toContain('@local');
+      expect(query).toContain('actorUserId');
+    });
+
+    it('uses CONCAT with user.email / user.name COALESCE for actor EUID', () => {
+      const query = buildTargetsPerActorQuery(fastPathStandard, 'default');
+      expect(query).toContain('`user.email`');
+      expect(query).toContain('`user.name`');
+      expect(query).toContain('`host.id`');
+    });
+
+    it('includes host.id IS NOT NULL gate (requireTargetEntityIdExists fast-path equivalent)', () => {
+      const query = buildTargetsPerActorQuery(fastPathStandard, 'default');
+      expect(query).toContain('`host.id` IS NOT NULL');
+      expect(query).toContain('`host.id` != ""');
+    });
+
+    it('emits correct STATS column for standard kind', () => {
+      const query = buildTargetsPerActorQuery(fastPathStandard, 'default');
+      expect(query).toContain('communicates_with = VALUES(targetEntityId)');
+    });
+
+    it('emits bucketed STATS block for bucketed kind', () => {
+      const query = buildTargetsPerActorQuery(fastPathBucketed, 'default');
+      expect(query).toContain('accesses_frequently');
+      expect(query).toContain('accesses_infrequently');
+      expect(query).toContain('access_count = COUNT(*)');
+    });
+
+    it('still includes LIMIT', () => {
+      const query = buildTargetsPerActorQuery(fastPathStandard, 'default');
+      expect(query).toContain('| LIMIT 3500');
+    });
+
+    it('still prepends the engine preamble exactly once', () => {
+      const query = buildTargetsPerActorQuery(fastPathStandard, 'default');
+      const matches = query.match(/SET unmapped_fields="nullify";/g) ?? [];
+      expect(matches).toHaveLength(1);
+    });
+
+    it('uses the namespace-derived index pattern', () => {
+      expect(buildTargetsPerActorQuery(fastPathStandard, 'prod')).toContain(
+        'logs-system.auth-prod'
+      );
+    });
+
+    it('does NOT emit entity.namespace or EUID chain for fast-path bucketed', () => {
+      const query = buildTargetsPerActorQuery(fastPathBucketed, 'default');
+      expect(query).not.toContain('entity.namespace');
+    });
+  });
+
   // Regression guard for an ES|QL quirk where `WHERE col IS NOT NULL`
   // evaluates to FALSE for every row when `col` is produced by CONCAT() over
   // a CASE() with nested CASE arms (as the user EUID actorEval does). Using
