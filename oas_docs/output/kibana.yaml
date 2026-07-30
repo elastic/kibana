@@ -46661,6 +46661,7 @@ paths:
               type: string
             maxItems: 100
             type: array
+            x-state: Generally available; added in 9.6.0
         - description: A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, library items matching any of the tag names are excluded. If the same name is shared by multiple tags, items matching any of those tags are excluded.
           in: query
           name: excluded_tag_names
@@ -46670,6 +46671,7 @@ paths:
               type: string
             maxItems: 100
             type: array
+            x-state: Generally available; added in 9.6.0
       responses:
         '200':
           content:
