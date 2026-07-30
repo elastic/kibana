@@ -1496,7 +1496,6 @@
         "react-dropzone",
         "react-recompose",
         "react-shortcuts",
-        "redux-thunks",
         "@types/react-recompose"
       ],
       "reviewers": ["team:kibana-presentation"],
@@ -1839,7 +1838,7 @@
     },
     {
       "groupName": "redux-thunk",
-      "matchDepNames": ["redux-thunk", "redux-thunk-v2"],
+      "matchDepNames": ["redux-thunk-v2"],
       "reviewers": ["team:kibana-presentation", "team:kibana-management", "team:security-solution"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
