@@ -52,7 +52,7 @@ The Databricks connector exposes the following actions:
 :   List job runs in the workspace. Returns run metadata including state, start time, and task results. Optionally filter by job ID or active-only runs.
     - `jobId` (optional): Filter to runs from a specific job.
     - `activeOnly` (optional): If `true`, return only active runs (`PENDING`, `RUNNING`, `TERMINATING`).
-    - `limit` (optional): Maximum number of runs to return (default 25, max 100).
+    - `limit` (optional): Maximum number of runs to return (default 20, max 25).
     - `pageToken` (optional): Cursor from a previous response for pagination.
 
 `getRun`
@@ -75,8 +75,8 @@ The Databricks connector exposes the following actions:
 `repairRun` _(workflow only)_
 :   Re-run failed tasks in a completed job run without re-running tasks that succeeded. Returns a `repair_id`.
     - `runId` (required): The run ID to repair.
-    - `rerunTasks` (optional): Task keys to re-run. Omit to re-run all failed tasks.
-    - `rerunAllFailedTasks` (optional): If `true`, re-run all failed tasks.
+    - `rerunTasks` (optional): One or more task keys to re-run. Mutually exclusive with `rerunAllFailedTasks`.
+    - `rerunAllFailedTasks` (optional): Set to `true` to re-run all failed tasks. Mutually exclusive with `rerunTasks`. Exactly one of `rerunTasks` or `rerunAllFailedTasks: true` must be provided.
     - `latestRepairId` (optional): ID of the most recent repair when chaining multiple repairs.
 
 ### Clusters
@@ -116,10 +116,10 @@ The Databricks connector exposes the following actions:
 
 ### Utilities
 
-`listTools`
+`listTools` (workflow-only)
 :   List all tools available on the connected Databricks MCP server. Use this to discover server capabilities and verify exact tool names before using `callTool`. Different Databricks MCP servers expose different tools — the SQL server provides `execute_sql`, `execute_sql_read_only`, and `poll_sql_result`, while the Genie server provides `query_space` and `poll_response`.
 
-`callTool`
+`callTool` (workflow-only)
 :   Call any tool on the Databricks MCP server directly by name. Use this as an escape hatch for tools not yet exposed as named actions, or for tools on non-SQL Databricks MCP servers such as Genie (`query_space`) or AI Search. Use `listTools` first to discover available tool names and their arguments.
     - `name` (required): Name of the Databricks MCP tool to call (for example, `execute_sql`).
     - `arguments` (optional): Arguments to pass to the tool as a key-value map.

@@ -213,7 +213,7 @@ describe('Databricks', () => {
   });
 
   describe('listTools action', () => {
-    it('is exposed as a tool', () => {
+    it('is not exposed as a tool (workflow-only)', () => {
       expect(Databricks.actions.listTools.isTool).toBe(false);
     });
 
@@ -376,16 +376,11 @@ describe('Databricks', () => {
       expect(Databricks.actions.repairRun.isTool).toBe(false);
     });
 
-    it('defaults to rerun_all_failed_tasks=true when neither selector is provided', async () => {
-      const input = parse('repairRun', { runId: 455644833 });
-      await Databricks.actions.repairRun.handler(mockContext, input);
-      expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/repair`, {
-        run_id: 455644833,
-        rerun_all_failed_tasks: true,
-      });
+    it('rejects when neither selector is provided', () => {
+      expect(() => parse('repairRun', { runId: 455644833 })).toThrow('Specify exactly one');
     });
 
-    it('sends rerun_all_failed_tasks=true when explicitly set', async () => {
+    it('sends rerun_all_failed_tasks=true when rerunAllFailedTasks: true', async () => {
       const input = parse('repairRun', { runId: 455644833, rerunAllFailedTasks: true });
       await Databricks.actions.repairRun.handler(mockContext, input);
       expect(mockPost).toHaveBeenCalledWith(`${WORKSPACE_ORIGIN}/api/2.1/jobs/runs/repair`, {
@@ -415,7 +410,17 @@ describe('Databricks', () => {
           rerunTasks: ['task_a'],
           rerunAllFailedTasks: true,
         })
-      ).toThrow('rerunTasks and rerunAllFailedTasks are mutually exclusive');
+      ).toThrow('Specify exactly one');
+    });
+
+    it('rejects when rerunTasks is an empty array', () => {
+      expect(() => parse('repairRun', { runId: 455644833, rerunTasks: [] })).toThrow();
+    });
+
+    it('rejects when rerunAllFailedTasks is false and no rerunTasks provided', () => {
+      expect(() => parse('repairRun', { runId: 455644833, rerunAllFailedTasks: false })).toThrow(
+        'Specify exactly one'
+      );
     });
   });
 

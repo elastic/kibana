@@ -158,22 +158,27 @@ export const RepairRunInputSchema = lazySchema(() =>
       runId: z.number().describe('The run ID to repair. Example: 455644833'),
       rerunTasks: z
         .array(z.string().max(200))
+        .min(1)
         .optional()
-        .describe(
-          'Task keys to re-run. Mutually exclusive with rerunAllFailedTasks. Omit both to re-run all failed tasks.'
-        ),
+        .describe('Task keys to re-run. Mutually exclusive with rerunAllFailedTasks.'),
       rerunAllFailedTasks: z
         .boolean()
         .optional()
-        .describe('If true, re-run all failed tasks. Mutually exclusive with rerunTasks.'),
+        .describe('Set to true to re-run all failed tasks. Mutually exclusive with rerunTasks.'),
       latestRepairId: z
         .number()
         .optional()
         .describe('ID of the most recent repair run. Required when chaining multiple repairs.'),
     })
-    .refine((v) => !(v.rerunTasks !== undefined && v.rerunAllFailedTasks !== undefined), {
-      message: 'rerunTasks and rerunAllFailedTasks are mutually exclusive',
-    })
+    .refine(
+      (v) =>
+        (v.rerunTasks !== undefined && v.rerunAllFailedTasks === undefined) ||
+        (v.rerunTasks === undefined && v.rerunAllFailedTasks === true),
+      {
+        message:
+          'Specify exactly one: rerunTasks (one or more task keys) or rerunAllFailedTasks: true',
+      }
+    )
 );
 export type RepairRunInput = z.infer<typeof RepairRunInputSchema>;
 

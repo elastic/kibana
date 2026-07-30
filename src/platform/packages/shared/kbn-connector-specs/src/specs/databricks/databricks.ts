@@ -327,8 +327,8 @@ export const Databricks: ConnectorSpec = {
     repairRun: {
       isTool: false,
       description:
-        'Re-run one or more failed tasks in a completed job run without re-running tasks that succeeded. ' +
-        'Specify rerunTasks to target specific task keys, or set rerunAllFailedTasks to retry everything that failed. ' +
+        'Re-run failed tasks in a completed job run without re-running tasks that succeeded. ' +
+        'Specify exactly one: rerunTasks (one or more task keys) to target specific tasks, or rerunAllFailedTasks: true to retry everything that failed. ' +
         'Returns a repair_id — use getRun to track the repaired run.',
       input: RepairRunInputSchema,
       handler: async (ctx, input: RepairRunInput) => {
@@ -336,7 +336,7 @@ export const Databricks: ConnectorSpec = {
         if (input.rerunTasks !== undefined) {
           body.rerun_tasks = input.rerunTasks;
         } else {
-          body.rerun_all_failed_tasks = input.rerunAllFailedTasks ?? true;
+          body.rerun_all_failed_tasks = true;
         }
         if (input.latestRepairId !== undefined) body.latest_repair_id = input.latestRepairId;
         const { data } = await ctx.client.post(
