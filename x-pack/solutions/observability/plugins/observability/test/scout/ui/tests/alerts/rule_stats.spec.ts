@@ -26,42 +26,46 @@ const ANOMALY_RULE_PARAMS = {
   environment: 'ENVIRONMENT_ALL',
 };
 
-test.describe('Observability alerts - rule stats', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
-  test.beforeEach(async ({ apiServices, browserAuth }) => {
-    await apiServices.alerting.cleanup.deleteAllRules();
-    await browserAuth.loginAsAdmin();
-  });
+test.describe(
+  'Observability alerts - rule stats',
+  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  () => {
+    test.beforeEach(async ({ apiServices, browserAuth }) => {
+      await apiServices.alerting.cleanup.deleteAllRules();
+      await browserAuth.loginAsAdmin();
+    });
 
-  test.afterAll(async ({ apiServices }) => {
-    await apiServices.alerting.cleanup.deleteAllRules();
-  });
+    test.afterAll(async ({ apiServices }) => {
+      await apiServices.alerting.cleanup.deleteAllRules();
+    });
 
-  test('shows the expected rule, disabled, muted and error counts', async ({
-    apiServices,
-    pageObjects,
-  }) => {
-    const ids: string[] = [];
-    for (const name of RULE_NAMES) {
-      const { data } = await apiServices.alerting.rules.create({
-        name,
-        ruleTypeId: 'apm.anomaly',
-        consumer: 'alerts',
-        params: ANOMALY_RULE_PARAMS,
-        schedule: { interval: '1m' },
-        actions: [],
-      });
-      ids.push(data.id);
-    }
+    test('shows the expected rule, disabled, muted and error counts', async ({
+      apiServices,
+      pageObjects,
+    }) => {
+      const ids: string[] = [];
+      for (const name of RULE_NAMES) {
+        const { data } = await apiServices.alerting.rules.create({
+          name,
+          ruleTypeId: 'apm.anomaly',
+          consumer: 'alerts',
+          params: ANOMALY_RULE_PARAMS,
+          schedule: { interval: '1m' },
+          actions: [],
+        });
+        ids.push(data.id);
+      }
 
-    await apiServices.alerting.rules.disable(ids[1]);
-    await apiServices.alerting.rules.muteAll(ids[5]);
+      await apiServices.alerting.rules.disable(ids[1]);
+      await apiServices.alerting.rules.muteAll(ids[5]);
 
-    await pageObjects.alertsTablePage.goto();
+      await pageObjects.alertsTablePage.goto();
 
-    const { alertsTablePage } = pageObjects;
-    await expect.poll(() => alertsTablePage.getRuleStatValue('statRuleCount')).toBe(6);
-    await expect.poll(() => alertsTablePage.getRuleStatValue('statDisabled')).toBe(1);
-    await expect.poll(() => alertsTablePage.getRuleStatValue('statMuted')).toBe(1);
-    await expect.poll(() => alertsTablePage.getRuleStatValue('statErrors')).toBe(0);
-  });
-});
+      const { alertsTablePage } = pageObjects;
+      await expect.poll(() => alertsTablePage.getRuleStatValue('statRuleCount')).toBe(6);
+      await expect.poll(() => alertsTablePage.getRuleStatValue('statDisabled')).toBe(1);
+      await expect.poll(() => alertsTablePage.getRuleStatValue('statMuted')).toBe(1);
+      await expect.poll(() => alertsTablePage.getRuleStatValue('statErrors')).toBe(0);
+    });
+  }
+);

@@ -17,7 +17,7 @@ import { CASES_ALL_WITH_ALERTS_ROLE } from '../../fixtures/roles';
 // Failing: See https://github.com/elastic/kibana/issues/275595
 test.describe.skip(
   'Observability alerts - add to case (all privileges)',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);

@@ -19,7 +19,7 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // Failing: See https://github.com/elastic/kibana/issues/274168
 test.describe.skip(
   'Observability alerts - status controls',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);
