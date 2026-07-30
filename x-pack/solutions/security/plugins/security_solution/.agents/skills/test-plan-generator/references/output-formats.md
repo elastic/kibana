@@ -80,6 +80,7 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 - [ ] No two scenarios test the same thing with different wording
 - [ ] No scenario tests something not described in the issue, sub-issues, linked PRs, or Figma designs
 - [ ] Scenarios are ordered by priority: P0 first, then P1, then P2
+- [ ] The owning team's critical-workflows map was consulted per [`critical-workflows.md`](critical-workflows.md) before finalizing priorities — either a matching map was loaded and its P0 / P1 tables informed the per-scenario priority assignments, or the [no-map fallback](critical-workflows.md#lookup-precedence) fired and Known Limitations contains the note `⚠️ No team critical-workflows map was applied — priority was derived from abstract impact rules only.` verbatim
 
 **Across the full test plan:**
 - [ ] All acceptance criteria listed in the Acceptance Criteria section are covered by at least one scenario
