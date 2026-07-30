@@ -205,10 +205,23 @@ export const MAX_CASE_ID_LENGTH = 512 as const; // ES `_id` upper bound; connect
 export const MAX_TEMPLATE_VERSION_STRING_LENGTH = 10 as const;
 export const MAX_TEMPLATE_NAME_LENGTH = 50 as const;
 export const MAX_TEMPLATE_DESCRIPTION_LENGTH = 1000 as const;
+export const MAX_TEMPLATE_DEFINITION_LENGTH = 30000 as const;
 export const MAX_TEMPLATES_LENGTH = 10 as const;
 export const MAX_TEMPLATE_TAG_LENGTH = 50 as const;
 export const MAX_TAGS_PER_TEMPLATE = 10 as const;
 export const MAX_FIELD_DEFINITIONS_PER_OWNER = 200 as const;
+/**
+ * Templates-v2 resource limits, enforced on new writes only. They bound the
+ * number of live templates per owner, fields in a template, and a single
+ * extended-field value without limiting template version history.
+ */
+export const MAX_TEMPLATES_PER_OWNER = 200 as const;
+export const MAX_FIELDS_PER_TEMPLATE = 200 as const;
+/**
+ * Backstop on the UTF-8 byte size of a single stored extended-field value.
+ * Lucene rejects keyword terms over 32,766 bytes.
+ */
+export const MAX_EXTENDED_FIELD_VALUE_BYTES = 30000 as const;
 export const MAX_FILENAME_LENGTH = 160 as const;
 export const MAX_CUSTOM_OBSERVABLE_TYPES_LABEL_LENGTH = 50 as const;
 export const MAX_USER_ACTION_SEARCH_LENGTH = 256 as const;
@@ -313,6 +326,7 @@ export const LOCAL_STORAGE_KEYS = {
   casesListBannerDismissed: 'cases.list.banner.dismissed.v1',
   caseDetailsTourSeen: 'cases.caseView.tour.seen.v1',
   templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
+  templatesListInfoPanelDismissed: 'cases.templates.list.infoPanel.dismissed.v1',
   showLegacyCustomFields: 'cases.showLegacyCustomFields',
 };
 
