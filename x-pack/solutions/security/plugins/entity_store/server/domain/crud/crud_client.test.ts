@@ -56,6 +56,178 @@ describe('CRUDClient', () => {
         client.bulkUpdateEntity({ objects: [{ type: 'generic', doc: entity }] })
       ).rejects.toThrow(EntityStoreNotInstalledError);
     });
+
+    it('createEntitiesFromSource throws EntityStoreNotInstalledError when index does not exist', async () => {
+      esClient.indices.exists.mockResolvedValue(false);
+
+      await expect(
+        client.createEntitiesFromSource([
+          {
+            type: 'host',
+            source: { host: { id: 'host-1' } },
+            createdBy: 'risk_score_maintainer',
+          },
+        ])
+      ).rejects.toThrow(EntityStoreNotInstalledError);
+    });
+  });
+
+  describe('createEntitiesFromSource', () => {
+    beforeEach(() => {
+      esClient.indices.exists.mockResolvedValue(true);
+    });
+
+    // esClient.bulk's `operations` request field is optional in the ES client types; every
+    // assertion below relies on it having been passed.
+    const getBulkOperations = (callIndex: number) => {
+      const operations = esClient.bulk.mock.calls[callIndex][0].operations;
+      if (!operations) {
+        throw new Error(`expected esClient.bulk call ${callIndex} to include operations`);
+      }
+      return operations;
+    };
+
+    it('rejects policy-ineligible requests without calling bulk', async () => {
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { name: 'server1' } }, // no host.id
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: [],
+        rejected: [{ reason: 'host_missing_host_id' }],
+      });
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('creates policy-accepted entities via a create-only bulk request', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'host',
+          source: { host: { id: 'host-1', name: 'server1' } },
+          createdBy: 'risk_score_maintainer',
+          fields: { 'entity.risk.calculated_score_norm': 70 },
+        },
+      ]);
+
+      expect(result).toEqual({ created: ['host:host-1'], alreadyExists: [], rejected: [] });
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+
+      const operations = getBulkOperations(0);
+      expect(operations[0]).toEqual({ create: { _id: hashEuid('host:host-1') } });
+      const createdDoc = operations[1] as Entity;
+      expect(createdDoc.entity).toMatchObject({
+        id: 'host:host-1',
+        name: 'server1',
+        created_by: 'risk_score_maintainer',
+        EngineMetadata: { Type: 'host', UntypedId: 'host-1' },
+        risk: { calculated_score_norm: 70 },
+      });
+      expect((createdDoc as any).host).toEqual({ id: 'host-1' });
+    });
+
+    it('creates local-namespace users with entity.confidence and composed entity.name', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'user',
+          source: { user: { name: 'alice' }, host: { id: 'host-1', name: 'workstation-1' } },
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result.created).toEqual(['user:alice@host-1@local']);
+      const operations = getBulkOperations(0);
+      const createdDoc = operations[1] as Entity;
+      expect(createdDoc.entity).toMatchObject({
+        id: 'user:alice@host-1@local',
+        namespace: 'local',
+        confidence: 'medium',
+        name: 'alice@workstation-1',
+        created_by: 'risk_score_maintainer',
+      });
+    });
+
+    it('routes per-item 409 conflicts to alreadyExists (race with another creator)', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: hashEuid('service:api-gateway'),
+              status: 409,
+              error: { type: 'version_conflict_engine_exception' },
+            },
+          },
+        ],
+      } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'service',
+          source: { service: { name: 'api-gateway' } },
+          createdBy: 'logs_extraction',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: [],
+        alreadyExists: ['service:api-gateway'],
+        rejected: [],
+      });
+    });
+
+    it('drops entities that fail for a reason other than a conflict, and logs a warning', async () => {
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: hashEuid('service:api-gateway'),
+              status: 500,
+              error: { type: 'some_other_exception' },
+            },
+          },
+        ],
+      } as any);
+
+      const result = await client.createEntitiesFromSource([
+        {
+          type: 'service',
+          source: { service: { name: 'api-gateway' } },
+          createdBy: 'logs_extraction',
+        },
+      ]);
+
+      expect(result).toEqual({ created: [], alreadyExists: [], rejected: [] });
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('some_other_exception'));
+    });
+
+    it('mixes created, rejected, and untouched-by-bulk results across a batch', async () => {
+      esClient.bulk.mockResolvedValue({ errors: false, items: [] } as any);
+
+      const result = await client.createEntitiesFromSource([
+        { type: 'host', source: { host: { id: 'host-1' } }, createdBy: 'risk_score_maintainer' },
+        {
+          type: 'generic',
+          source: { entity: { id: 'anything' } },
+          createdBy: 'risk_score_maintainer',
+        },
+      ]);
+
+      expect(result).toEqual({
+        created: ['host:host-1'],
+        alreadyExists: [],
+        rejected: [{ reason: 'entity_type_not_creatable' }],
+      });
+    });
   });
 
   describe('asset criticality trigger emit', () => {

@@ -43,6 +43,10 @@ import {
   mapPostAggFilterFieldsToRecentForEsql,
   NULLIFY_UNMAPPED_FIELDS_SETTING,
 } from './query_builder_commons';
+import {
+  ENTITY_CREATED_BY_FIELD,
+  ENTITY_CREATED_BY,
+} from '../../../common/domain/definitions/common_fields';
 
 export const HASHED_ID_FIELD = 'entity.hashedId';
 
@@ -243,6 +247,9 @@ function customFieldEvalLogic(type: EntityType, entityTypeFallback?: string): st
     )}, ${ENTITY_NAME_FIELD}, ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)})`,
     `${ENGINE_METADATA_TYPE_FIELD} = "${type}"`,
     `${HASHED_ID_FIELD} = HASH("${HASH_ALG}", ${recentData(MAIN_ENTITY_ID_FIELD)})`,
+    // Provenance: keep a maintainer's stamp when already present (e.g. create-if-missing),
+    // otherwise stamp extraction as the creator (also backfills pre-existing entities).
+    `${ENTITY_CREATED_BY_FIELD} = COALESCE(${ENTITY_CREATED_BY_FIELD}, "${ENTITY_CREATED_BY.LogsExtraction}")`,
   ];
 
   if (entityTypeFallback) {

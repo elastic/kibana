@@ -13,6 +13,10 @@ export interface RunMetrics {
   scoresWrittenResetToZero: number;
   pagesProcessed: number;
   lookupPrunedDocs: number;
+  /** Entities created by the create-if-missing path during base scoring. */
+  entitiesCreated: number;
+  /** not_in_store scores dropped by the create-if-missing path during base scoring. */
+  entitiesCreateRejected: number;
 }
 
 const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
@@ -21,6 +25,8 @@ const METRIC_KEYS: ReadonlyArray<keyof RunMetrics> = [
   'scoresWrittenResetToZero',
   'pagesProcessed',
   'lookupPrunedDocs',
+  'entitiesCreated',
+  'entitiesCreateRejected',
 ];
 
 const emptyMetrics = (): RunMetrics => ({
@@ -29,6 +35,8 @@ const emptyMetrics = (): RunMetrics => ({
   scoresWrittenResetToZero: 0,
   pagesProcessed: 0,
   lookupPrunedDocs: 0,
+  entitiesCreated: 0,
+  entitiesCreateRejected: 0,
 });
 
 const scoresWrittenTotal = (metrics: RunMetrics): number =>
@@ -62,10 +70,14 @@ export const createRunMetricsTracker = () => {
       summary: {
         scoresWritten: number;
         pagesProcessed: number;
+        entitiesCreated: number;
+        entitiesCreateRejected: number;
       }
     ) => {
       target.scoresWrittenBase = summary.scoresWritten;
       target.pagesProcessed = summary.pagesProcessed;
+      target.entitiesCreated = summary.entitiesCreated;
+      target.entitiesCreateRejected = summary.entitiesCreateRejected;
     },
 
     recordResolution: (target: RunMetrics, result: StepResult) => {

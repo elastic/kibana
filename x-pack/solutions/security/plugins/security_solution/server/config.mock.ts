@@ -40,6 +40,7 @@ export const createMockConfig = (): ConfigType => {
     entityAnalytics: {
       riskEngine: {
         alertSampleSizePerShard: 10_000,
+        createMissingEntities: true,
       },
       assetCriticality: {
         csvUpload: {

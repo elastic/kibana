@@ -215,6 +215,7 @@ describe('score_base_entities', () => {
         logger,
         writer,
         idBasedRiskScoringEnabled: false,
+        createMissingEntities: false,
         ...baseParams,
       });
 
@@ -225,6 +226,8 @@ describe('score_base_entities', () => {
       expect(writtenScores[0].id_value).toBe('user:in-store@okta');
 
       expect(summary.scoresWritten).toBe(1);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entitiesCreateRejected).toBe(0);
     });
 
     it('writes no scores when no entity on the page is in the entity store', async () => {
@@ -247,12 +250,199 @@ describe('score_base_entities', () => {
         logger,
         writer,
         idBasedRiskScoringEnabled: false,
+        createMissingEntities: false,
         ...baseParams,
       });
 
       const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
       expect(writtenScores).toHaveLength(0);
       expect(summary.scoresWritten).toBe(0);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entitiesCreateRejected).toBe(0);
+    });
+  });
+
+  describe('scoreBaseEntities create-if-missing path', () => {
+    const buildWriter = (): RiskEngineDataWriter =>
+      ({
+        bulk: jest
+          .fn<Promise<{ errors: never[]; docs_written: number; took: number }>, [unknown]>()
+          .mockImplementation(async (params) => {
+            const [scoresArr] = Object.values(params as Record<string, unknown[]>);
+            return { errors: [], docs_written: scoresArr.length, took: 1 };
+          }),
+      } as unknown as RiskEngineDataWriter);
+
+    beforeEach(() => {
+      crudClient = {
+        listEntities: jest.fn(),
+        createEntitiesFromSource: jest.fn(),
+        bulkUpdateEntity: jest.fn().mockResolvedValue([]),
+      } as unknown as EntityUpdateClient;
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [],
+        nextSearchAfter: undefined,
+      });
+    });
+
+    it('creates a missing entity and writes its score to the risk index but not the entity store', async () => {
+      mockCompositeAggPage(esClient, ['user:new@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:new@okta')],
+      });
+      // fetchAlertIdentityDocs's terms+top_hits lookup for the missing EUID.
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:new@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'new' } } }] } },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: ['user:new@okta'],
+        alreadyExists: [],
+        rejected: [],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      expect(writer.bulk).toHaveBeenCalledTimes(1);
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(1);
+      expect(writtenScores[0].id_value).toBe('user:new@okta');
+
+      // Created entities carry entity.risk.* already, so no redundant entity-store update.
+      expect(crudClient.bulkUpdateEntity).not.toHaveBeenCalled();
+
+      expect(summary.scoresWritten).toBe(1);
+      expect(summary.entitiesCreated).toBe(1);
+      expect(summary.entitiesCreateRejected).toBe(0);
+    });
+
+    it('routes a 409 race to the entity store update path in addition to the risk index', async () => {
+      mockCompositeAggPage(esClient, ['user:raced@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:raced@okta')],
+      });
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:raced@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'raced' } } }] } },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: [],
+        alreadyExists: ['user:raced@okta'],
+        rejected: [],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(1);
+      expect(crudClient.bulkUpdateEntity).toHaveBeenCalledTimes(1);
+
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entitiesCreateRejected).toBe(0);
+    });
+
+    it('drops policy-rejected candidates and counts them, without writing anything for them', async () => {
+      mockCompositeAggPage(esClient, ['user:rejected@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:rejected@okta')],
+      });
+      (esClient.search as jest.Mock).mockResolvedValueOnce({
+        aggregations: {
+          by_entity_id: {
+            buckets: [
+              {
+                key: 'user:rejected@okta',
+                latest: { hits: { hits: [{ _source: { user: { name: 'rejected' } } }] } },
+              },
+            ],
+          },
+        },
+      });
+      (crudClient.createEntitiesFromSource as jest.Mock).mockResolvedValue({
+        created: [],
+        alreadyExists: [],
+        rejected: [{ reason: 'user_not_local_namespace' }],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: true,
+        ...baseParams,
+      });
+
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(0);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entitiesCreateRejected).toBe(1);
+    });
+
+    it('restores the pre-existing drop behaviour when the kill switch is off', async () => {
+      mockCompositeAggPage(esClient, ['user:phantom@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:phantom@okta')],
+      });
+
+      const writer = buildWriter();
+
+      const summary = await scoreBaseEntities({
+        esClient,
+        crudClient,
+        logger,
+        writer,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: false,
+        ...baseParams,
+      });
+
+      // No lookup for a representative alert doc, no create call.
+      expect(esClient.search as jest.Mock).toHaveBeenCalledTimes(1); // composite agg page only
+      expect(crudClient.createEntitiesFromSource).not.toHaveBeenCalled();
+      const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
+      expect(writtenScores).toHaveLength(0);
+      expect(summary.entitiesCreated).toBe(0);
+      expect(summary.entitiesCreateRejected).toBe(0);
     });
   });
 });

@@ -462,6 +462,8 @@ interface Phase1BaseScoringSummary extends StageSummaryBase {
   stage: 'phase1_base_scoring';
   pagesProcessed?: number;
   scoresWritten?: number;
+  entitiesCreated?: number;
+  entitiesCreateRejected?: number;
 }
 
 interface Phase2ResolutionScoringSummary extends StageSummaryBase {
@@ -566,6 +568,22 @@ export const RISK_SCORE_MAINTAINER_STAGE_SUMMARY_EVENT: EventTypeOpts<RiskScoreM
       scoresWritten: {
         type: 'long',
         _meta: { optional: true, description: 'Risk score docs written in this stage' },
+      },
+      entitiesCreated: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description:
+            'Entities created by the create-if-missing path during base scoring (phase1_base_scoring only)',
+        },
+      },
+      entitiesCreateRejected: {
+        type: 'long',
+        _meta: {
+          optional: true,
+          description:
+            'not_in_store scores dropped by the create-if-missing path during base scoring (no representative alert document, or the creation policy rejected the candidate)',
+        },
       },
       entitiesIterated: {
         type: 'long',

@@ -193,3 +193,6 @@ export type {
   AiSummaryMetadataStaleness,
   AiSummaryMetadataStalenessSnapshot,
 } from './domain/entity_metadata/ai_summary_metadata';
+
+export { ENTITY_CREATED_BY } from './domain/definitions/common_fields';
+export type { EntityCreatedBy } from './domain/definitions/common_fields';

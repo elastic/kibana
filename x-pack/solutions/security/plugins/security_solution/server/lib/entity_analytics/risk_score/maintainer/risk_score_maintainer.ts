@@ -87,6 +87,13 @@ interface LoadedRunConfig {
   configuration: RiskEngineConfiguration;
   alertsIndex: string;
   idBasedRiskScoringEnabled: boolean;
+  /**
+   * Gates the risk score maintainer's create-if-missing path (Phase 1 base scoring only).
+   * Requires both `idBasedRiskScoringEnabled` and the
+   * `xpack.securitySolution.entityAnalytics.riskEngine.createMissingEntities` kill switch, so
+   * creation can be disabled independently without turning off dual-write.
+   */
+  createMissingEntitiesEnabled: boolean;
   watchlistConfigs: Awaited<ReturnType<typeof fetchWatchlistConfigs>>;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
   sampleSize: number;
@@ -379,6 +386,8 @@ const loadRunConfiguration = async ({
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
   const idBasedRiskScoringEnabled = await getIsIdBasedRiskScoringEnabled(uiSettingsClient);
+  const createMissingEntitiesEnabled =
+    idBasedRiskScoringEnabled && (entityAnalyticsConfig?.riskEngine?.createMissingEntities ?? true);
   const watchlistConfigs = await fetchWatchlistConfigs({
     soClient: internalSoClient,
     esClient,
@@ -399,6 +408,7 @@ const loadRunConfiguration = async ({
     configuration,
     alertsIndex,
     idBasedRiskScoringEnabled,
+    createMissingEntitiesEnabled,
     watchlistConfigs,
     writer,
     sampleSize,
@@ -482,6 +492,7 @@ const executeEntityTypeRun = async ({
       watchlistConfigs: runConfig.watchlistConfigs,
       abortSignal,
       idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+      createMissingEntities: runConfig.createMissingEntitiesEnabled,
       writer: runConfig.writer,
     });
     runLogger.debug('completed base scoring pass');
@@ -489,6 +500,8 @@ const executeEntityTypeRun = async ({
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
       scoresWritten: baseSummary.scoresWritten,
+      entitiesCreated: baseSummary.entitiesCreated,
+      entitiesCreateRejected: baseSummary.entitiesCreateRejected,
     });
   } catch (error) {
     const errorMessage = telemetryReporter.getErrorMessage(error);

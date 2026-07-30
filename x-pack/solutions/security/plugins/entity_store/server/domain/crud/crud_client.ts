@@ -27,7 +27,11 @@ import {
   EntityStoreNotInstalledError,
 } from '../errors';
 import { buildEntityListSourceFilter } from '../../../common/domain/definitions/entity_list_source';
+import { getEntityCreationCandidate } from '../../../common/domain/definitions/entity_creation_policy';
+import type { EntityCreationRejectionReason } from '../../../common/domain/definitions/entity_creation_policy';
+import type { EntityCreatedBy } from '../../../common/domain/definitions/common_fields';
 import { validateAndTransformDoc } from './utils';
+import { buildEntityFromSource } from './entity_from_source';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
@@ -88,8 +92,28 @@ interface BulkUpdateEntityParams {
   force?: boolean;
 }
 
+export interface CreateEntityFromSourceRequest {
+  type: EntityType;
+  /** Representative source document (e.g. an alert `_source`) used to derive identity + policy gates. */
+  source: unknown;
+  /** Provenance stamp written to `entity.created_by`. */
+  createdBy: EntityCreatedBy;
+  /** Additional dot-path fields to merge onto the created doc (e.g. `entity.risk.calculated_score`). */
+  fields?: Record<string, unknown>;
+}
+
+export interface CreateEntitiesFromSourceResult {
+  /** EUIDs successfully created. */
+  created: string[];
+  /** EUIDs that already existed by the time the bulk create ran (race with another creator). */
+  alreadyExists: string[];
+  /** Requests that never reached Elasticsearch because the creation policy rejected them. */
+  rejected: Array<{ reason: EntityCreationRejectionReason }>;
+}
+
 // EntityUpdateClient is the maintainer-safe CRUD surface: all CRUD methods
-// except create/delete.
+// except create/delete. createEntitiesFromSource is intentionally included — it is a scoped,
+// policy-gated create path (see entity_creation_policy.ts), not the unrestricted createEntity.
 export type EntityUpdateClient = Omit<CRUDClient, 'createEntity' | 'deleteEntity'>;
 
 export class CRUDClient {
@@ -172,6 +196,26 @@ export class CRUDClient {
 
     Object.defineProperty(this, 'bulkUpdateEntity', {
       value: tracedBulkUpdateEntity,
+      configurable: true,
+      writable: true,
+    });
+
+    const baseCreateEntitiesFromSource = this.createEntitiesFromSource.bind(this);
+    const tracedCreateEntitiesFromSource = (
+      requests: CreateEntityFromSourceRequest[]
+    ): Promise<CreateEntitiesFromSourceResult> =>
+      runWithSpan({
+        name: 'entityStore.crud.create_entities_from_source',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'create_entities_from_source',
+          'entity_store.requests.count': requests.length,
+        },
+        cb: () => baseCreateEntitiesFromSource(requests),
+      });
+
+    Object.defineProperty(this, 'createEntitiesFromSource', {
+      value: tracedCreateEntitiesFromSource,
       configurable: true,
       writable: true,
     });
@@ -420,6 +464,87 @@ export class CRUDClient {
       }
       throw error;
     }
+  }
+
+  /**
+   * Scoped, policy-gated create path for maintainers (e.g. the risk score maintainer's
+   * create-if-missing step). Unlike {@link createEntity}, callers never supply a document
+   * directly: each request's `source` (a representative alert `_source`) is run through
+   * {@link getEntityCreationCandidate} first, so only EUID-valid, policy-accepted identifiers
+   * (e.g. medium-confidence local users, hosts with `host.id`) are ever written.
+   *
+   * Issues one `create`-only bulk request so a document that already exists (e.g. created
+   * concurrently by logs extraction) surfaces as a per-item 409 in `alreadyExists`, rather than
+   * silently overwriting it — callers should fall back to the update path for those ids.
+   */
+  public async createEntitiesFromSource(
+    requests: CreateEntityFromSourceRequest[]
+  ): Promise<CreateEntitiesFromSourceResult> {
+    await this.assertInstalled();
+
+    const result: CreateEntitiesFromSourceResult = { created: [], alreadyExists: [], rejected: [] };
+    const operations: Array<BulkOperationContainer | Entity> = [];
+    const euids: string[] = [];
+
+    for (const request of requests) {
+      const candidate = getEntityCreationCandidate(request.type, request.source);
+      if (!candidate.accepted) {
+        result.rejected.push({ reason: candidate.reason });
+        continue;
+      }
+
+      const doc = buildEntityFromSource({
+        entityType: request.type,
+        candidate,
+        source: request.source,
+        createdBy: request.createdBy,
+        fields: request.fields,
+      });
+
+      const valid = validateAndTransformDoc(
+        'create',
+        request.type,
+        this.namespace,
+        doc,
+        candidate.euid,
+        true
+      );
+
+      operations.push({ create: { _id: hashEuid(valid.id) } }, valid.doc as Entity);
+      euids.push(valid.id);
+    }
+
+    if (operations.length === 0) {
+      return result;
+    }
+
+    this.logger.debug(`createEntitiesFromSource: attempting to create ${euids.length} entities`);
+    const resp = await this.esClient.bulk({
+      index: getLatestEntitiesIndexName(this.namespace),
+      operations,
+      refresh: 'wait_for',
+    });
+
+    if (!resp.errors) {
+      result.created.push(...euids);
+      return result;
+    }
+
+    resp.items.forEach((item, i) => {
+      const outcome = Object.values(item)[0] as { status: number; error?: { type?: string } };
+      const euid = euids[i];
+      if (outcome.status === 409 || outcome.error?.type === 'version_conflict_engine_exception') {
+        result.alreadyExists.push(euid);
+      } else if (outcome.error) {
+        this.logger.warn(
+          `createEntitiesFromSource: failed to create entity ${euid}: ${outcome.error.type}`
+        );
+      } else {
+        result.created.push(euid);
+      }
+    });
+
+    return result;
   }
 
   public async deleteEntity(id: string): Promise<void> {
