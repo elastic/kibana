@@ -37,7 +37,12 @@ describe('getMonitorSummaryStatsRoute', () => {
       term: { 'observer.geo.name': 'North America - US East' },
     });
     // Sanity: aggregations are turned into the summary payload.
-    expect(result).toEqual({ availability: 96, medianDuration: 250, errorCount: 4, totalRuns: 100 });
+    expect(result).toEqual({
+      availability: 96,
+      medianDuration: 250,
+      errorCount: 4,
+      totalRuns: 100,
+    });
   });
 
   // Regression: autodiscovery/heartbeat pings carry no observer.geo.name and are
@@ -52,6 +57,11 @@ describe('getMonitorSummaryStatsRoute', () => {
     expect(filters).not.toContainEqual({
       term: { 'observer.geo.name': HEARTBEAT_UNMAPPED_LOCATION_LABEL },
     });
-    expect(result).toEqual({ availability: 96, medianDuration: 250, errorCount: 4, totalRuns: 100 });
+    expect(result).toEqual({
+      availability: 96,
+      medianDuration: 250,
+      errorCount: 4,
+      totalRuns: 100,
+    });
   });
 });
