@@ -31,7 +31,7 @@ const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => s
  * The dedicated `scout_alerting_v2` config forces the feature on and therefore
  * cannot cover the disabled cases.
  */
-apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', () => {
+apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
   // Reset both gates after every test. `.unset()` / DELETE are safe no-ops when
   // no user value is set, so we can reset unconditionally — this also guards
   // against a partial write where an update reaches the server but a later
@@ -46,7 +46,7 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
   });
 
   apiTest(
-    'does not list the rule-management skill when neither gate is enabled',
+    'does not list the alerting V2 skills when neither gate is enabled',
     { tag: tags.deploymentAgnostic },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
@@ -68,7 +68,7 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
   );
 
   apiTest(
-    'does not list the rule-management skill when only experimental features are enabled',
+    'does not list the alerting V2 skills when only experimental features are enabled',
     { tag: tags.deploymentAgnostic },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
@@ -93,7 +93,7 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
   // Toggling `alerting:v2:enabled` on requires the Alerting V2 plugin, which only
   // ships enabled on stateful; on serverless the plugin is disabled.
   apiTest(
-    'does not list the rule-management skill when only alerting:v2:enabled is on',
+    'does not list the alerting V2 skills when only alerting:v2:enabled is on',
     { tag: tags.stateful.classic },
     async ({ apiClient, requestAuth }) => {
       const { apiKeyHeader } = await requestAuth.getApiKeyForAdmin();
@@ -116,7 +116,7 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
   );
 
   apiTest(
-    'lists the rule-management skill once both gates are enabled',
+    'lists the alerting V2 skills once both gates are enabled',
     { tag: tags.stateful.classic },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
