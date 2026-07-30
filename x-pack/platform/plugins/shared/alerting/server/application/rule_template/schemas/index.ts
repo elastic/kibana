@@ -23,4 +23,3 @@ export const ruleTemplateSchema = schema.object({
   description: schema.maybe(schema.string()),
   engine: schema.maybe(schema.string()),
 });
-

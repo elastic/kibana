@@ -555,6 +555,4 @@ export type {
   AlertingV2RawRuleTemplate,
 } from './saved_objects/schemas/raw_rule_template';
 
-
-
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
