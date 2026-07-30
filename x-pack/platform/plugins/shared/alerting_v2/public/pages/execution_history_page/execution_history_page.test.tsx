@@ -60,10 +60,10 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => (
   useAlertingRulesCache: () => ({ rulesCache: {}, loading: false, error: undefined }),
 }));
 
-const mockUseCountNewExecutionHistoryEvents = jest.fn();
-jest.mock('../../hooks/use_count_new_execution_history_events', () => ({
-  useCountNewExecutionHistoryEvents: (...args: unknown[]) =>
-    mockUseCountNewExecutionHistoryEvents(...args),
+const mockUseCountNewActionPolicyExecutions = jest.fn();
+jest.mock('../../hooks/use_count_new_action_policy_executions', () => ({
+  useCountNewActionPolicyExecutions: (...args: unknown[]) =>
+    mockUseCountNewActionPolicyExecutions(...args),
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -199,7 +199,7 @@ const switchToPoliciesTab = async () => {
 describe('ExecutionHistoryPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 0 } });
+    mockUseCountNewActionPolicyExecutions.mockReturnValue({ data: { totalEvents: 0 } });
     mockRuleExecutionFetchResult();
   });
 
@@ -504,7 +504,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('shows the new-events banner when count > 0', async () => {
       mockFetchResult();
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 3 } });
+      mockUseCountNewActionPolicyExecutions.mockReturnValue({ data: { totalEvents: 3 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -514,7 +514,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('hides the new-events banner when count is 0', async () => {
       mockFetchResult();
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 0 } });
+      mockUseCountNewActionPolicyExecutions.mockReturnValue({ data: { totalEvents: 0 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -523,7 +523,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('hides the banner when in error state even if count > 0', async () => {
       mockFetchResult({ isError: true });
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 5 } });
+      mockUseCountNewActionPolicyExecutions.mockReturnValue({ data: { totalEvents: 5 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -532,7 +532,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('clicking "Load new events" resets to page 1 and refetches', async () => {
       mockFetchResult();
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 2 } });
+      mockUseCountNewActionPolicyExecutions.mockReturnValue({ data: { totalEvents: 2 } });
       renderPage();
       await switchToPoliciesTab();
 
@@ -543,7 +543,7 @@ describe('ExecutionHistoryPage', () => {
 
     it('keeps the banner visible with a loading button while the fetch is in flight', async () => {
       mockFetchResult({ isFetching: true });
-      mockUseCountNewExecutionHistoryEvents.mockReturnValue({ data: { totalEvents: 2 } });
+      mockUseCountNewActionPolicyExecutions.mockReturnValue({ data: { totalEvents: 2 } });
       renderPage();
       await switchToPoliciesTab();
 

@@ -6,6 +6,7 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { EXECUTION_HISTORY_DEFAULT_PER_PAGE } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyClient } from '../action_policy_client/action_policy_client';
 import type { RulesClient } from '../rules_client';
 import type { EventLogServiceContract } from '../services/event_log_service/event_log_service';
@@ -424,7 +425,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         expect(result).toEqual({
           items: [],
           page: 1,
-          perPage: 0,
+          perPage: EXECUTION_HISTORY_DEFAULT_PER_PAGE,
           totalEvents: 0,
           searchMatches: { policies: 0, rules: 0, cap: 500 },
         });

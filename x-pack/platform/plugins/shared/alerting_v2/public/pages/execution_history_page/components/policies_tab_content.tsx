@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, type CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PolicyExecutionOutcomeFilter } from '@kbn/alerting-v2-schemas';
-import { useCountNewExecutionHistoryEvents } from '../../../hooks/use_count_new_execution_history_events';
+import { useCountNewActionPolicyExecutions } from '../../../hooks/use_count_new_action_policy_executions';
 import { useFetchExecutionHistory } from '../../../hooks/use_fetch_execution_history';
 import type { PolicyExecutionHistoryItem } from '../../../services/execution_history_api';
 import {
@@ -57,7 +57,7 @@ export const PoliciesTabContent = ({ onPolicyClick, onRuleClick, activeRuleId }:
     outcome: outcomeParam,
   });
 
-  const { data: newCountData } = useCountNewExecutionHistoryEvents({
+  const { data: newCountData } = useCountNewActionPolicyExecutions({
     since: lastSeenAt,
     search: searchParam,
     ruleIds: ruleIdsParam,

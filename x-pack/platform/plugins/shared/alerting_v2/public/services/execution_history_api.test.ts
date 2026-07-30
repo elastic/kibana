@@ -23,7 +23,7 @@ describe('ExecutionHistoryApi', () => {
   it('GETs the action policy execution history endpoint', async () => {
     const { api, http } = buildApi();
 
-    await api.listExecutionHistory();
+    await api.listActionPolicyExecutions();
 
     expect(http.get).toHaveBeenCalledWith(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
@@ -34,7 +34,7 @@ describe('ExecutionHistoryApi', () => {
   it('forwards page, perPage, search, outcome and start_date as query params', async () => {
     const { api, http } = buildApi();
 
-    await api.listExecutionHistory({
+    await api.listActionPolicyExecutions({
       page: 3,
       perPage: 25,
       search: 'foo',
@@ -58,7 +58,7 @@ describe('ExecutionHistoryApi', () => {
   it('passes undefined query params when not provided', async () => {
     const { api, http } = buildApi();
 
-    await api.listExecutionHistory();
+    await api.listActionPolicyExecutions();
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
       query: {
@@ -76,7 +76,7 @@ describe('ExecutionHistoryApi', () => {
   it('supports a count-only read via perPage=0 and start_date', async () => {
     const { api, http } = buildApi();
 
-    await api.listExecutionHistory({ start_date: '2026-01-01T00:00:00.000Z', perPage: 0 });
+    await api.listActionPolicyExecutions({ start_date: '2026-01-01T00:00:00.000Z', perPage: 0 });
 
     expect(http.get).toHaveBeenCalledWith(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
@@ -96,14 +96,16 @@ describe('ExecutionHistoryApi', () => {
     };
     http.get.mockResolvedValueOnce(fakeResponse);
 
-    await expect(api.listExecutionHistory({ page: 2, perPage: 25 })).resolves.toEqual(fakeResponse);
+    await expect(api.listActionPolicyExecutions({ page: 2, perPage: 25 })).resolves.toEqual(
+      fakeResponse
+    );
   });
 
   it('propagates errors from http.get', async () => {
     const { api, http } = buildApi();
     http.get.mockRejectedValueOnce(new Error('boom'));
 
-    await expect(api.listExecutionHistory()).rejects.toThrow('boom');
+    await expect(api.listActionPolicyExecutions()).rejects.toThrow('boom');
   });
 
   it('GETs the rule execution history endpoint', async () => {

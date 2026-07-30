@@ -10,7 +10,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
-import { useCountNewExecutionHistoryEvents } from './use_count_new_execution_history_events';
+import { useCountNewActionPolicyExecutions } from './use_count_new_action_policy_executions';
 
 jest.mock('@kbn/core-di-browser');
 
@@ -26,21 +26,21 @@ const createWrapper = () => {
     React.createElement(QueryClientProvider, { client: queryClient }, children);
 };
 
-describe('useCountNewExecutionHistoryEvents', () => {
-  const mockListExecutionHistory = jest.fn();
+describe('useCountNewActionPolicyExecutions', () => {
+  const mockListActionPolicyExecutions = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseService.mockImplementation((service: unknown) => {
       if (service === ExecutionHistoryApi) {
-        return { listExecutionHistory: mockListExecutionHistory } as any;
+        return { listActionPolicyExecutions: mockListActionPolicyExecutions } as any;
       }
       return undefined as any;
     });
   });
 
   it('reads the count from the list endpoint with perPage=0 and the provided filters', async () => {
-    mockListExecutionHistory.mockResolvedValue({
+    mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
       perPage: 0,
@@ -50,7 +50,7 @@ describe('useCountNewExecutionHistoryEvents', () => {
 
     renderHook(
       () =>
-        useCountNewExecutionHistoryEvents({
+        useCountNewActionPolicyExecutions({
           since: '2026-01-01T00:00:00.000Z',
           search: 'foo',
           ruleIds: ['rule-1'],
@@ -60,7 +60,7 @@ describe('useCountNewExecutionHistoryEvents', () => {
     );
 
     await waitFor(() => {
-      expect(mockListExecutionHistory).toHaveBeenCalledWith({
+      expect(mockListActionPolicyExecutions).toHaveBeenCalledWith({
         start_date: '2026-01-01T00:00:00.000Z',
         perPage: 0,
         search: 'foo',
@@ -78,10 +78,10 @@ describe('useCountNewExecutionHistoryEvents', () => {
       totalEvents: 42,
       searchMatches: null,
     };
-    mockListExecutionHistory.mockResolvedValue(fakeResponse);
+    mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 
     const { result } = renderHook(
-      () => useCountNewExecutionHistoryEvents({ since: '2026-01-01T00:00:00.000Z' }),
+      () => useCountNewActionPolicyExecutions({ since: '2026-01-01T00:00:00.000Z' }),
       { wrapper: createWrapper() }
     );
 
@@ -92,7 +92,7 @@ describe('useCountNewExecutionHistoryEvents', () => {
   it('does not fetch when disabled', async () => {
     renderHook(
       () =>
-        useCountNewExecutionHistoryEvents({
+        useCountNewActionPolicyExecutions({
           since: '2026-01-01T00:00:00.000Z',
           enabled: false,
         }),
@@ -100,6 +100,6 @@ describe('useCountNewExecutionHistoryEvents', () => {
     );
 
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(mockListExecutionHistory).not.toHaveBeenCalled();
+    expect(mockListActionPolicyExecutions).not.toHaveBeenCalled();
   });
 });

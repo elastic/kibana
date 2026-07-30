@@ -12,16 +12,12 @@ import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nodeBuilder, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import {
+  EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   type PolicyExecutionHistoryItem,
   type RuleResponse,
   type PolicyExecutionOutcomeFilter,
   type SearchMatchCounts,
 } from '@kbn/alerting-v2-schemas';
-
-// Cap the per-page name-lookup batch. Independent from the embedded rules cap
-// in the response — broad policies can reference thousands of ids in a single
-// event but we only need names for ids that will actually render.
-const MAX_RULES_PER_NAME_LOOKUP = 1000;
 import { ActionPolicyClient } from '../action_policy_client';
 import { RulesClient } from '../rules_client';
 import { WorkflowsManagementApiToken } from '../dispatcher/steps/dispatch_step_tokens';
@@ -45,6 +41,9 @@ import {
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
 const SEARCH_ID_CAP = 500;
+
+// Cap the per-page name-lookup batch.
+const MAX_RULES_PER_NAME_LOOKUP = 1000;
 
 export interface ListExecutionHistoryParams {
   request: KibanaRequest;
@@ -103,7 +102,7 @@ export class ActionPolicyExecutionHistoryClient {
       return {
         items: [],
         page: page ?? 1,
-        perPage: perPage ?? 0,
+        perPage: perPage ?? EXECUTION_HISTORY_DEFAULT_PER_PAGE,
         totalEvents: 0,
         searchMatches: matchingSearchIds.matches,
       };

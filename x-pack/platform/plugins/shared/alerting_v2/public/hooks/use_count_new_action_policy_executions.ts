@@ -16,7 +16,7 @@ import { executionHistoryKeys } from './query_key_factory';
 
 const POLL_INTERVAL_MS = 10_000;
 
-interface UseCountNewExecutionHistoryEventsParams {
+interface UseCountNewActionPolicyExecutionsParams {
   since: string;
   search?: string;
   ruleIds?: string[];
@@ -24,19 +24,19 @@ interface UseCountNewExecutionHistoryEventsParams {
   enabled?: boolean;
 }
 
-export const useCountNewExecutionHistoryEvents = ({
+export const useCountNewActionPolicyExecutions = ({
   since,
   search,
   ruleIds,
   outcome,
   enabled = true,
-}: UseCountNewExecutionHistoryEventsParams) => {
+}: UseCountNewActionPolicyExecutionsParams) => {
   const executionHistoryApi = useService(ExecutionHistoryApi);
 
   return useQuery<ListPolicyExecutionHistoryResponse, Error>({
-    queryKey: executionHistoryKeys.countSince(since, { search, ruleIds, outcome }),
+    queryKey: executionHistoryKeys.newEventsSince(since, { search, ruleIds, outcome }),
     queryFn: () =>
-      executionHistoryApi.listExecutionHistory({
+      executionHistoryApi.listActionPolicyExecutions({
         start_date: since,
         perPage: 0,
         search,

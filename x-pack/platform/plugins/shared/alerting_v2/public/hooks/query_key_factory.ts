@@ -72,14 +72,14 @@ export const executionHistoryKeys = {
     episodeIds?: string[];
     startDate?: string;
   }) => [...executionHistoryKeys.all, 'list', filters] as const,
-  countSince: (
+  newEventsSince: (
     since: string,
     filters: {
       search?: string;
       ruleIds?: string[];
       outcome?: PolicyExecutionOutcomeFilter;
     } = {}
-  ) => [...executionHistoryKeys.all, 'countSince', since, filters] as const,
+  ) => [...executionHistoryKeys.all, 'newEventsSince', since, filters] as const,
 };
 
 export const ruleExecutionKeys = {

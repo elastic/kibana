@@ -95,10 +95,8 @@ apiTest.describe(
 
     apiTest('validation: rejects an unknown outcome value', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ outcome: ['nope'] as any }),
-        {
-          headers: readerHeaders,
-        }
+        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?outcome=nope`,
+        { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
     });

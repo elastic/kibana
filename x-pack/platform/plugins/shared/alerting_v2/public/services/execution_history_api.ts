@@ -31,7 +31,7 @@ export type {
 export class ExecutionHistoryApi {
   constructor(@inject(CoreStart('http')) private readonly http: HttpStart) {}
 
-  public async listExecutionHistory(params: ListPolicyExecutionHistoryParams = {}) {
+  public async listActionPolicyExecutions(params: ListPolicyExecutionHistoryParams = {}) {
     return this.http.get<ListPolicyExecutionHistoryResponse>(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
       {

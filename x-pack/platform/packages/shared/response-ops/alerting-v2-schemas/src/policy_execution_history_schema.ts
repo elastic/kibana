@@ -149,9 +149,10 @@ export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
 
 export const listPolicyExecutionHistoryResponseSchema = z.object({
   items: z.array(policyExecutionHistoryItemSchema),
-  page: z.number(),
-  perPage: z.number(),
-  totalEvents: z.number(),
+  page: z.number().int().min(1),
+  // Allows 0 for count-only reads (perPage=0), unlike the rule executions response.
+  perPage: z.number().int().min(0),
+  totalEvents: z.number().int().nonnegative(),
   searchMatches: searchMatchCountsSchema
     .nullable()
     .describe(
