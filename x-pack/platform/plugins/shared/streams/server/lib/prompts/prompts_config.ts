@@ -22,6 +22,16 @@ export const streamsPromptsSOAttributesV3 = streamsPromptsSOAttributesV2.extends
   systemsPromptOverride: schema.maybe(schema.string()),
 });
 
+/**
+ * Only `featurePromptOverride` and `significantEventsPromptOverride` are live. Two fields remain
+ * declared but inert:
+ *   - `descriptionPromptOverride` (v2) was writable and returned, but no LLM call ever consumed it —
+ *     the description route passes `overviewDescriptionPrompt` directly.
+ *   - `systemsPromptOverride` (v3) was never writable or readable.
+ * Both are optional and unmapped (`properties: {}`), so leaving them declared costs nothing and
+ * avoids a model version that would clean up no data. Nothing can write them: the route body schema,
+ * `defaultsPrompts` and `getPrompt()` all omit them.
+ */
 export type PromptsConfigAttributes = TypeOf<typeof streamsPromptsSOAttributesV3>;
 
 export const getStreamsPromptsSavedObject = (): SavedObjectsType => {
