@@ -10,3 +10,4 @@ export DISABLE_BOOTSTRAP_VALIDATION=false
 .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
 .buildkite/scripts/steps/code_generation/osquery_codegen.sh
 .buildkite/scripts/steps/code_generation/cases_codegen.sh
+.buildkite/scripts/steps/code_generation/workflow_step_schema.sh
