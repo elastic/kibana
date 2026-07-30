@@ -40,6 +40,7 @@ describe('transformWorkflowFormData', () => {
         workflow_id: 'workflow-123',
         wait_for_completion: true,
       },
+      confirmation: { askUser: 'never' },
       type: ToolType.workflow,
       tags: ['test', 'workflow'],
     };
@@ -73,12 +74,12 @@ describe('transformWorkflowFormData', () => {
       expect(result).toEqual(mockTool);
     });
 
-    it('omits confirmation entirely when confirmation_ask_user is never', () => {
+    it('sets confirmation when confirmation_ask_user is never', () => {
       const result = transformFormDataToWorkflowTool({
         ...mockFormData,
         confirmation_ask_user: 'never',
       });
-      expect(result.confirmation).toBeUndefined();
+      expect(result.confirmation).toEqual({ askUser: 'never' });
     });
 
     it('sets confirmation when confirmation_ask_user is once', () => {
@@ -118,7 +119,7 @@ describe('transformWorkflowFormData', () => {
         ...mockFormData,
         confirmation_ask_user: 'never',
       });
-      expect(result.confirmation).toBeUndefined();
+      expect(result.confirmation).toEqual({ askUser: 'never' });
     });
   });
 
@@ -142,7 +143,7 @@ describe('transformWorkflowFormData', () => {
         ...mockFormData,
         confirmation_ask_user: 'never',
       });
-      expect(result.confirmation).toBeUndefined();
+      expect(result.confirmation).toEqual({ askUser: 'never' });
     });
   });
 });

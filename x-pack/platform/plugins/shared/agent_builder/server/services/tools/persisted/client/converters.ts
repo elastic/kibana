@@ -66,7 +66,15 @@ export const updateDocument = ({
       ...current.configuration,
       ...update.configuration,
     },
-    confirmation: update.confirmation,
+    ...(current.confirmation || update.confirmation
+      ? {
+          confirmation: {
+            ...(current.confirmation ?? {}),
+            ...(update.confirmation ?? {}),
+          },
+        }
+      : {}),
+
     updated_at: updateDate.toISOString(),
   };
 };

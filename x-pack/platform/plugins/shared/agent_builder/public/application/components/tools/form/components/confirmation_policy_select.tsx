@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-common';
 import { i18nMessages } from '../i18n';
 import type { ToolConfirmationFormData } from '../types/tool_form_types';
 
@@ -16,7 +17,7 @@ interface ConfirmationPolicySelectProps {
   'data-test-subj'?: string;
 }
 
-const confirmationOptions = [
+const confirmationOptions: Array<{ value: ToolConfirmationPolicyMode; text: string }> = [
   { value: 'never' as const, text: i18nMessages.configuration.form.confirmation.neverOption },
   { value: 'once' as const, text: i18nMessages.configuration.form.confirmation.onceOption },
   { value: 'always' as const, text: i18nMessages.configuration.form.confirmation.alwaysOption },

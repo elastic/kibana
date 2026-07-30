@@ -36,6 +36,7 @@ describe('transformMcpFormData', () => {
       connector_id: 'connector-123',
       tool_name: 'my_mcp_tool_name',
     },
+    confirmation: { askUser: 'never' },
     type: ToolType.mcp,
     tags: ['test', 'mcp'],
   };
@@ -78,12 +79,12 @@ describe('transformMcpFormData', () => {
       expect(result).toEqual(defaultMcpTool);
     });
 
-    it('omits confirmation entirely when confirmation_ask_user is never', () => {
+    it('sets confirmation when confirmation_ask_user is never', () => {
       const result = transformFormDataToMcpTool({
         ...formData,
         confirmation_ask_user: 'never',
       });
-      expect(result.confirmation).toBeUndefined();
+      expect(result.confirmation).toEqual({ askUser: 'never' });
     });
 
     it('sets confirmation when confirmation_ask_user is once', () => {
@@ -123,7 +124,7 @@ describe('transformMcpFormData', () => {
         ...formData,
         confirmation_ask_user: 'never',
       });
-      expect(result.confirmation).toBeUndefined();
+      expect(result.confirmation).toMatchObject({ askUser: 'never' });
     });
   });
 
@@ -147,7 +148,7 @@ describe('transformMcpFormData', () => {
         ...formData,
         confirmation_ask_user: 'never',
       });
-      expect(result.confirmation).toBeUndefined();
+      expect(result.confirmation).toEqual({ askUser: 'never' });
     });
   });
 });

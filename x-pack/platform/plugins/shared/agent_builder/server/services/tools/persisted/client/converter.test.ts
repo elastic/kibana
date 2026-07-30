@@ -170,35 +170,7 @@ describe('updateDocument', () => {
     });
   });
 
-  it('removes confirmation when the update omits it', () => {
-    const actualUpdateDate = new Date();
-
-    const currentProps: ToolProperties = {
-      id: 'id',
-      type: ToolType.esql,
-      space: 'some-space',
-      description: 'foo',
-      configuration: {},
-      confirmation: { askUser: 'once' },
-      tags: [],
-      created_at: creationDate,
-      updated_at: updateDate,
-    };
-
-    const update: ToolTypeUpdateParams = {
-      description: 'updated desc',
-    };
-
-    const merged = updateDocument({
-      current: currentProps,
-      update,
-      updateDate: actualUpdateDate,
-    });
-
-    expect(merged.confirmation).toBeUndefined();
-  });
-
-  it('replaces confirmation entirely rather than merging it', () => {
+  it('updates confirmation when provided', () => {
     const actualUpdateDate = new Date();
 
     const currentProps: ToolProperties = {
@@ -224,5 +196,60 @@ describe('updateDocument', () => {
     });
 
     expect(merged.confirmation).toEqual({ askUser: 'always' });
+  });
+
+  it('can set confirmation if previously undefined', () => {
+    const actualUpdateDate = new Date();
+
+    const currentProps: ToolProperties = {
+      id: 'id',
+      type: ToolType.esql,
+      space: 'some-space',
+      description: 'foo',
+      configuration: {},
+      tags: [],
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const update: ToolTypeUpdateParams = {
+      confirmation: { askUser: 'always' },
+    };
+
+    const merged = updateDocument({
+      current: currentProps,
+      update,
+      updateDate: actualUpdateDate,
+    });
+
+    expect(merged.confirmation).toEqual({ askUser: 'always' });
+  });
+
+  it('retains existing confirmation if omitted from update', () => {
+    const actualUpdateDate = new Date();
+
+    const currentProps: ToolProperties = {
+      id: 'id',
+      type: ToolType.esql,
+      space: 'some-space',
+      description: 'foo',
+      configuration: {},
+      confirmation: { askUser: 'once' },
+      tags: [],
+      created_at: creationDate,
+      updated_at: updateDate,
+    };
+
+    const update: ToolTypeUpdateParams = {
+      description: 'foobar',
+    };
+
+    const merged = updateDocument({
+      current: currentProps,
+      update,
+      updateDate: actualUpdateDate,
+    });
+
+    expect(merged.confirmation?.askUser).toEqual('once');
   });
 });

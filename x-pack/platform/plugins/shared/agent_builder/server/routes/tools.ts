@@ -167,11 +167,13 @@ export function registerToolsRoutes({
               confirmation: schema.maybe(
                 schema.object(
                   {
-                    askUser: schema.oneOf([
-                      schema.literal('once'),
-                      schema.literal('always'),
-                      schema.literal('never'),
-                    ]),
+                    askUser: schema.maybe(
+                      schema.oneOf([
+                        schema.literal('once'),
+                        schema.literal('always'),
+                        schema.literal('never'),
+                      ])
+                    ),
                   },
                   {
                     meta: {
@@ -270,11 +272,13 @@ export function registerToolsRoutes({
               confirmation: schema.maybe(
                 schema.object(
                   {
-                    askUser: schema.oneOf([
-                      schema.literal('once'),
-                      schema.literal('always'),
-                      schema.literal('never'),
-                    ]),
+                    askUser: schema.maybe(
+                      schema.oneOf([
+                        schema.literal('once'),
+                        schema.literal('always'),
+                        schema.literal('never'),
+                      ])
+                    ),
                   },
                   {
                     meta: {
