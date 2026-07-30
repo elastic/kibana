@@ -73,6 +73,14 @@ const backToKqlLabel = i18n.translate('esqlEditor.visor.backToKql', {
   defaultMessage: 'Back to KQL',
 });
 
+const enterHintFilterLabel = i18n.translate('esqlEditor.visor.enterHintFilter', {
+  defaultMessage: 'Filter',
+});
+
+const enterHintGenerateLabel = i18n.translate('esqlEditor.visor.enterHintGenerate', {
+  defaultMessage: 'Generate query',
+});
+
 export function QuickSearchVisor({
   query,
   isSpaceReduced,
@@ -428,7 +436,16 @@ export function QuickSearchVisor({
                 </EuiFlexItem>
                 {searchValue.trim() && (
                   <EuiFlexItem grow={false} css={styles.enterHint}>
-                    <EuiIcon type="returnKey" size="s" aria-hidden={true} />
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="returnKey" size="s" aria-hidden={true} />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {enterHintFilterLabel}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -488,7 +505,16 @@ export function QuickSearchVisor({
                 ) : (
                   nlValue.trim() && (
                     <EuiFlexItem grow={false} css={styles.enterHint}>
-                      <EuiIcon type="returnKey" size="s" aria-hidden={true} />
+                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="returnKey" size="s" aria-hidden={true} />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="xs" color="subdued">
+                            {enterHintGenerateLabel}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                   )
                 )}
