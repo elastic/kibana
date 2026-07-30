@@ -10,7 +10,7 @@ import type { KilledProcessDescendant } from '../../../../../common/endpoint/typ
 export interface ProcessTreeNode {
   /** The process data for this PID that was provided on input */
   data: KilledProcessDescendant;
-  /** Child processes, keyed by their PID */
+  /** Child processes, keyed by their PID. Could be an empty object if no children */
   children: ProcessTree;
 }
 

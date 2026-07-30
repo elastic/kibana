@@ -116,6 +116,11 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                       })
                     }
 
+                    {/* FIXME:PT Delete once tree implementation is done*/}
+                    <div
+                      style={{ height: '100px', borderBottom: '1px solid', marginBottom: '2em' }}
+                    />
+
                     {hostActionOutput.descendants && (
                       <ProcessTree
                         processList={hostActionOutput.descendants}
