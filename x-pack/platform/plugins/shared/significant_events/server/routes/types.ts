@@ -50,7 +50,7 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   tuningConfig: SignificantEventsTuningConfig;
 }
 
-export interface RouteDependencies {
+export type SignificantEventsRouteHandlerResources = {
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
@@ -60,7 +60,4 @@ export interface RouteDependencies {
   workflowClients: WorkflowClients;
   maintenanceService: SignificantEventsMaintenanceService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
-}
-
-export type SignificantEventsRouteHandlerResources = RouteDependencies &
-  DefaultRouteHandlerResources;
+} & DefaultRouteHandlerResources;
