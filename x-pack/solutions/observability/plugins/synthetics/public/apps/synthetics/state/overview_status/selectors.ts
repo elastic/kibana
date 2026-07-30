@@ -59,6 +59,14 @@ export const getStatusByConfig = (
 export const isExternalOverviewMonitor = (monitor: OverviewStatusMetaData): boolean =>
   monitor.origin === 'heartbeat' || Boolean(monitor.remote);
 
+/**
+ * Whether the overview status request has completed at least once (success or
+ * failure). Persists across refreshes, unlike `loaded` (success-only) and the
+ * transient `error`, so consumers can distinguish "settled" from "still pending".
+ */
+export const selectOverviewStatusSettled = (state: SyntheticsAppState): boolean =>
+  state.overviewStatus.settled;
+
 export const selectOverviewStatus = createSelector(
   (state: SyntheticsAppState) => state.overviewStatus,
   (state: SyntheticsAppState) => state.overview.groupBy.field,

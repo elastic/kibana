@@ -21,6 +21,7 @@ const mockUseOverviewStatus = jest.fn((_opts?: { scopeStatusByLocation: boolean 
   error: undefined,
   loading: false,
   loaded: false,
+  settled: false,
   allConfigs: [] as unknown[],
 }));
 
@@ -31,6 +32,7 @@ jest.mock('../hooks/use_overview_status', () => ({
     error: undefined,
     loading: false,
     loaded: false,
+    settled: false,
     allConfigs: [],
   })),
 }));
@@ -172,6 +174,7 @@ describe('OverviewPage wiring', () => {
       error: undefined,
       loading: false,
       loaded: true,
+      settled: true,
       allConfigs: [],
     });
 
@@ -193,6 +196,7 @@ describe('OverviewPage wiring', () => {
       error: undefined,
       loading: false,
       loaded: true,
+      settled: true,
       allConfigs: [{ configId: 'hb-1', origin: 'heartbeat' }],
     });
 
@@ -217,6 +221,7 @@ describe('OverviewPage wiring', () => {
       error: undefined,
       loading: false,
       loaded: true,
+      settled: true,
       allConfigs: [{ configId: 'deleted-1' }],
     });
 
@@ -238,11 +243,38 @@ describe('OverviewPage wiring', () => {
       error: undefined,
       loading: false,
       loaded: false,
+      settled: false,
       allConfigs: [],
     });
 
     const history = renderPage();
 
     expect(history.location.pathname).toBe('/overview');
+  });
+
+  it('redirects to Getting Started when the overview status request failed (settled, not loaded)', () => {
+    // A failed overview-status request never flips `loaded`, and its `error` is
+    // cleared almost immediately by the OverviewStatus toast effect. The persistent
+    // `settled` flag is what lets a truly empty deployment whose status request
+    // fails still reach Getting Started instead of hanging on an empty overview.
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined, // already cleared by the toast effect by the time we render
+      loading: false,
+      loaded: false,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage();
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
   });
 });

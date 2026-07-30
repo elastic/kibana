@@ -61,7 +61,11 @@ export const OverviewPage: React.FC = () => {
 
   const { isEnabled, loading: enablementLoading } = useEnablement();
 
-  const { allConfigs, loaded: overviewLoaded } = useOverviewStatus({
+  const {
+    allConfigs,
+    loaded: overviewLoaded,
+    settled: overviewSettled,
+  } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
 
@@ -74,15 +78,21 @@ export const OverviewPage: React.FC = () => {
 
   // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
   // so they are absent from `absoluteTotal` but present in the overview status
-  // `allConfigs`. Wait for the overview status to load and keep the page mounted when it
+  // `allConfigs`. Wait for the overview status to settle and keep the page mounted when it
   // holds such monitors, so we don't redirect to Getting Started (and flash the grid)
   // when the only monitors are ping-driven.
+  //
+  // `overviewSettled` is true once the status request has completed, success OR failure.
+  // A failed request must still count as settled: the reducer never flips `loaded` on
+  // error (and the `error` flag is cleared by the OverviewStatus toast effect), so gating
+  // on those alone would strand a truly empty deployment on an empty overview whenever the
+  // status request fails.
   const hasNoMonitors =
     !search &&
     !enablementLoading &&
     monitorsLoaded &&
     absoluteTotal === 0 &&
-    overviewLoaded &&
+    overviewSettled &&
     !allConfigs.some(isExternalOverviewMonitor);
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {

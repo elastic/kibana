@@ -34,7 +34,7 @@ export const MonitorManagementPage: React.FC = () => {
 
   const { error: enablementError, isEnabled, loading: enablementLoading } = useEnablement();
 
-  const { allConfigs, loaded: overviewLoaded } = useOverviewStatus({
+  const { allConfigs, settled: overviewSettled } = useOverviewStatus({
     scopeStatusByLocation: false,
   });
 
@@ -47,8 +47,13 @@ export const MonitorManagementPage: React.FC = () => {
   // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
   // so they are absent from `absoluteTotal` but surface in the overview status
   // `allConfigs`. Don't redirect to Getting Started when the only monitors are ping-driven.
+  //
+  // `overviewSettled` is true once the status request has completed, success OR failure.
+  // A failed request must still count as settled (the reducer never flips `loaded` on
+  // error, and `error` is transient), otherwise a truly empty deployment would be stranded
+  // on the management page whenever the status request fails.
   const hasNoMonitors =
-    absoluteTotal === 0 && overviewLoaded && !allConfigs.some(isExternalOverviewMonitor);
+    absoluteTotal === 0 && overviewSettled && !allConfigs.some(isExternalOverviewMonitor);
 
   if (isEnabled && !monitorsLoading && loaded && hasNoMonitors) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
