@@ -169,7 +169,7 @@ const runScenario = async (
     await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
     await page.testSubj.click('lnsXY_annotation_query');
     await pageObjects.lens.style.configureQueryAnnotation({
-      queryString: 'request: *',
+      queryString: 'host.name: *',
       timeField,
       textDecoration: { type: 'name' },
       extraFields,
@@ -185,11 +185,11 @@ const runScenario = async (
 
   const annotationVisible =
     await test.step('visualize an annotation layer from a LogsDB stream', async () =>
-      checkAnnotationLayer('@timestamp', ['request', 'utc_time']));
+      checkAnnotationLayer('@timestamp', ['host.name', 'utc_time']));
 
   const annotationAltTimeFieldVisible =
     await test.step('visualize an annotation layer using another time field', async () =>
-      checkAnnotationLayer('utc_time', ['request', '@timestamp']));
+      checkAnnotationLayer('utc_time', ['host.name', '@timestamp']));
 
   await test.step('visualize ES|QL queries based on a LogsDB stream', async () => {
     await page.gotoApp('discover');

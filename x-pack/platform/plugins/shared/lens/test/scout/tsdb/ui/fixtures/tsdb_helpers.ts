@@ -306,6 +306,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
             ).toISOString(),
             request: `/lens-tsdb-test/${indexOffset % 5}`,
             bytes: Math.floor(Math.random() * 10000),
+            host: { name: `host-${indexOffset % 3}` },
             ...(removeTSDBFields ? {} : { bytes_counter: 5000 }),
           })
         );
