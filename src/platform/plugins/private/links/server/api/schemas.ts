@@ -72,7 +72,7 @@ export const linksArraySchema = z
 
 // Shared schema for layout - used by both saved objects and embeddables
 export const layoutSchema = z
-  .union([z.literal(LINKS_HORIZONTAL_LAYOUT), z.literal(LINKS_VERTICAL_LAYOUT)])
+  .enum([LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT])
   .optional()
   .meta({
     description: 'Whether to display the links in a horizontal or vertical layout.',
