@@ -1,5 +1,5 @@
 {
-  "sha1": "5159ef0602de8561b6268b7d4b137d172af55adb",
+  "sha1": "b71f3552e6e9ea5c4deb6be11f07f203299485d6",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -232,45 +232,6 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/inspector.spec.ts",
         "line": 35,
-        "column": 12
-      }
-    },
-    {
-      "id": "fbba41df9190271-71337924280cc0e",
-      "title": "Discover tabs - navigation goes back to the last active tab when returning from Surrounding Docs page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/navigation.spec.ts",
-        "line": 33,
-        "column": 12
-      }
-    },
-    {
-      "id": "fbba41df9190271-ca1a4d5ac2c4cf9",
-      "title": "Discover tabs - navigation returns to the last active tab from Single Doc page",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/navigation.spec.ts",
-        "line": 92,
-        "column": 12
-      }
-    },
-    {
-      "id": "fbba41df9190271-2fa468ec2b3afdd",
-      "title": "Discover tabs - navigation restores the latest tabs when returning via app navigation",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/tabs/ui/parallel_tests/navigation.spec.ts",
-        "line": 121,
         "column": 12
       }
     },
