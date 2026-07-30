@@ -95,8 +95,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
 
   const { dataView, status: dataViewStatus } = useDataView(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const dataViewLoading = useMemo(() => dataViewStatus !== 'ready', [dataViewStatus]);
   const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 

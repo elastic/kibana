@@ -30,12 +30,29 @@ export type ConnectionValue = (typeof CONNECTION_VALUES)[number];
 export type AnomalySeverityValue = (typeof ANOMALY_SEVERITY_VALUES)[number];
 export type MapOrientationValue = (typeof MAP_ORIENTATION_VALUES)[number];
 
+/** Cap for multi-service highlight lists persisted on dashboard panels. */
+export const HIGHLIGHTED_SERVICE_NAMES_MAX_SIZE = 50;
+
+/** Max length for single string fields on service map panel state (names, env, group id). */
+export const SERVICE_MAP_STRING_MAX_LENGTH = 1024;
+
+/** Max length for panel kuery. */
+export const SERVICE_MAP_KUERY_MAX_LENGTH = 2048;
+
 export const serviceMapCustomStateSchema = z
   .object({
-    environment: z.string().max(1024).default(ENVIRONMENT_ALL.value),
-    kuery: z.string().max(2048).optional(),
-    service_name: z.string().max(1024).optional(),
-    service_group_id: z.string().max(1024).optional(),
+    environment: z.string().max(SERVICE_MAP_STRING_MAX_LENGTH).default(ENVIRONMENT_ALL.value),
+    kuery: z.string().max(SERVICE_MAP_KUERY_MAX_LENGTH).optional(),
+    service_name: z.string().max(SERVICE_MAP_STRING_MAX_LENGTH).optional(),
+    /**
+     * Multi-service context highlight (aligned with global Service name Controls).
+     * When a single service is selected, prefer `service_name` (filter + highlight).
+     */
+    highlighted_service_names: z
+      .array(z.string().max(SERVICE_MAP_STRING_MAX_LENGTH))
+      .max(HIGHLIGHTED_SERVICE_NAMES_MAX_SIZE)
+      .optional(),
+    service_group_id: z.string().max(SERVICE_MAP_STRING_MAX_LENGTH).optional(),
     map_orientation: z.enum(MAP_ORIENTATION_VALUES).optional(),
     sync_with_dashboard_filters: z.boolean().optional(),
     alert_status_filter: z

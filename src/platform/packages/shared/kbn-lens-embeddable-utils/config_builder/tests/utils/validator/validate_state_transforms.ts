@@ -25,6 +25,7 @@ const strictChartTypes = new Set([
   'region_map',
   'metric',
   'legacy_metric',
+  'xy',
 ]);
 
 /**

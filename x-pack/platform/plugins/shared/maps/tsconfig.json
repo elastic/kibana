@@ -103,7 +103,8 @@
     "@kbn/crypto-browser",
     "@kbn/cps",
     "@kbn/kql",
-    "@kbn/cps-utils"
+    "@kbn/cps-utils",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*"

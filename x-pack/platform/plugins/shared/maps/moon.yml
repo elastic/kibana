@@ -107,6 +107,7 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/kql'
   - '@kbn/cps-utils'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

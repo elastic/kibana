@@ -2848,9 +2848,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3307,9 +3317,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -63514,6 +63534,7 @@ paths:
                           - count: 7
                             date: '2025-01-15T12:00:00.000Z'
                         rule_backed: false
+                        rule_uuid: 9fdfcf5a-4e1d-5ee3-b05d-7bc2b014e81c
                         severity_score: 75
                         stream_name: logs.nginx
                         title: Error count by host
@@ -65545,7 +65566,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -67062,7 +67083,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -74173,6 +74194,12 @@ components:
         hide_title:
           description: When true, the panel title is hidden. Defaults to false.
           type: boolean
+        highlighted_service_names:
+          items:
+            maxLength: 1024
+            type: string
+          maxItems: 50
+          type: array
         kuery:
           maxLength: 2048
           type: string
@@ -78680,6 +78707,9 @@ components:
           description: The ID of the API key in the Security API.
           type: string
         created_at:
+          type: string
+        expire_at:
+          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
           type: string
         hidden:
           type: boolean
@@ -90294,6 +90324,8 @@ components:
       additionalProperties: false
       properties:
         expiration:
+          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
+          maxLength: 20
           type: string
         name:
           type: string
@@ -114922,6 +114954,9 @@ components:
           items:
             type: string
           type: array
+        hasManualEntities:
+          description: Indicates whether the watchlist contains manually assigned entities
+          type: boolean
         id:
           description: The unique ID of the watchlist
           type: string
