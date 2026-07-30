@@ -35,10 +35,17 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
 - **Auth**: Auth type matches the service. **Auth format** (e.g. header value) must match the vendor's official docs;
   document or link how to obtain tokens. For OAuth, use defaults/overrides so users only fill instance URL, client ID,
   client secret where possible.
-- **Per-action auth scopes**: Check whether any action (especially delete/bulk/admin operations) needs a
-  scope beyond the connector's baseline. The auth field's `helpText` and the docs page's credential-setup
-  steps must both mention every scope actually required — not just the minimum to authenticate. Flag any
-  action whose required scope isn't documented in at least one of those two places.
+- **Per-action auth scopes — every location, not just one**: Check whether any action (especially
+  delete/bulk/admin operations, or ones hitting a different API sub-resource like alert/rule endpoints)
+  needs a scope beyond the connector's baseline. A scope requirement is typically stated in *three*
+  places, and they must all agree: the auth field's in-product `helpText`, the docs page's
+  "Authentication"/config summary line, and the docs page's "Get API credentials" setup steps. It is NOT
+  enough for the scope to appear in just one of these — grep the diff for every scope string mentioned in
+  any of the three, diff the sets, and flag a mismatch even if the *docs* are internally correct but the
+  in-product `helpText` (what most users will actually see when creating the connector) is missing it, or
+  vice versa. This exact failure mode shipped once already: the docs' setup steps correctly listed an
+  extra scope needed for two actions, but the in-UI helpText and the docs' own Authentication summary line
+  did not, so a user following the in-UI hint got a 403.
 - **`test.enabled`**: If the spec defines a `test` block, it must include `enabled: true`. Without it, the
   handler compiles and type-checks fine, but the "Test connector" button stays disabled in the Kibana UI.
   Flag any `test` block missing `enabled: true`.

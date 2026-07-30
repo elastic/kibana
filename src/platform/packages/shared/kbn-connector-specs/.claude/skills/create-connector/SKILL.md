@@ -134,6 +134,10 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
 - A user-supplied or config-derived value (ID, slug, org name) interpolated into a URL path segment
   without `encodeURIComponent()` — search the whole file for `` `${baseUrl} `` and check every `${...}`
   after it
+- Auth scopes mentioned inconsistently across the three places a user might see them: the auth field's
+  `helpText`, the docs page's "Authentication" summary line, and the docs page's "Get API credentials"
+  setup steps. Grep for the scope names across all three files/sections and confirm every action's
+  required scope appears in all of them, not just one
 - Naming/casing inconsistencies vs. sibling connectors (e.g. `webpackChunkName` casing)
 - Doc wording that could misread "required" as applying only to the last-listed parameter
 

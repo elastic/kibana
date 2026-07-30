@@ -48,9 +48,14 @@ action you plan to implement, find the vendor's official API reference and confi
   `?id[]=1&id[]=2`, or a comma-joined string? Axios's default array serialization (`id[]=1&id[]=2`) is
   not universal; check the docs and, if needed, set a custom `paramsSerializer`.
 - **Per-action auth scopes**: list every scope/permission each action actually requires (not just the
-  minimum to authenticate), especially for destructive or admin actions (delete, bulk update). The auth
-  `helpText` and the docs page's credential-setup steps must mention the scope needed for **every**
-  action, not just the most common ones.
+  minimum to authenticate), especially for destructive or admin actions (delete, bulk update) or actions
+  that hit a different API sub-resource (e.g. an alert/rule endpoint vs. the main resource). Once you have
+  the full list, write it into **every** place a user might see it — the auth field's `helpText`, the docs
+  page's "Authentication" summary line, and the docs page's "Get API credentials" setup steps — and use the
+  exact same scope names in all three. Writing it correctly in only one of these is the same bug as not
+  documenting it at all: a user creating the connector sees the in-product `helpText`, not the docs, so an
+  extra scope that's only in the docs' setup steps still produces a 403 for anyone who follows the in-UI
+  hint.
 - **Regional/self-hosted variants**: does the service run on multiple regional domains (e.g.
   `us.example.com`, `eu.example.com`) in addition to a default SaaS host, or support self-hosting? If so,
   the base-URL config field's help text must say so — otherwise requests silently 404 for a subset of users.
