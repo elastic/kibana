@@ -2919,9 +2919,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3378,9 +3388,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -69702,6 +69722,7 @@ paths:
                           - count: 7
                             date: '2025-01-15T12:00:00.000Z'
                         rule_backed: false
+                        rule_uuid: 9fdfcf5a-4e1d-5ee3-b05d-7bc2b014e81c
                         severity_score: 75
                         stream_name: logs.nginx
                         title: Error count by host
