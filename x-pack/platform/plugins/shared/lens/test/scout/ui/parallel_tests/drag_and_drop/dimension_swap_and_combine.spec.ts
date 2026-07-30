@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup, testData } from '../../fixtures';
 
@@ -15,7 +15,7 @@ import { createLogstashLensEditorSuiteSetup, testData } from '../../fixtures';
  */
 spaceTest.describe(
   'Lens drag and drop duplicate swap and combine',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     const suiteSetup = createLogstashLensEditorSuiteSetup();
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
-spaceTest.describe('Lens heatmap palette', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
     enableChartDebug: true,
   });

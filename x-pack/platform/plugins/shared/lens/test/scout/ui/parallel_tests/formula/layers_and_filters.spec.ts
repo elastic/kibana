@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup } from '../../fixtures';
 
-spaceTest.describe('Lens formula layers and filters', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens formula layers and filters', { tag: '@local-stateful-classic' }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup();
 
   spaceTest.beforeAll(suiteSetup.beforeAll);

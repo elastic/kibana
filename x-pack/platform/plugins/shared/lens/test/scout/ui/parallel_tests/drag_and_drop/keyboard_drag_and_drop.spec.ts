@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { createLogstashLensEditorSuiteSetup } from '../../fixtures';
 
 /**
  * Migrated from FTR `group5/drag_and_drop.ts` keyboard DnD journey.
  */
-spaceTest.describe('Lens keyboard drag and drop', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens keyboard drag and drop', { tag: '@local-stateful-classic' }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup();
 
   spaceTest.beforeAll(suiteSetup.beforeAll);
