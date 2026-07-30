@@ -6799,6 +6799,229 @@ print("404")
         )
         self.assertIn("Compact by design", entity_analytics)
 
+        # security-solution.md must not duplicate its canonical
+        # `## Known non-bugs` entries into a second "detail" section
+        # (real regression fixed after review of PR #281618 at 25c2a08):
+        # an earlier revision added the canonical section but *kept* the
+        # pre-existing sections around under "— detail" names, duplicating
+        # 5 of 6 entries verbatim with zero new information, and creating
+        # a heading-name collision risk (`## Known non-bugs` vs `## Known
+        # non-bugs — detail`) for the exact prose instruction in Step 3b
+        # that says "reads only the `## Known non-bugs` section" — a
+        # prefix-based reading of that instruction could plausibly pull
+        # in the "detail" section too. There must be exactly one section
+        # whose name is (or starts with) "Known non-bugs".
+        security_solution = (KNOWLEDGE_DIR / "security-solution.md").read_text(
+            encoding="utf-8"
+        )
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(KNOWLEDGE_HASH_SCRIPT),
+                "--file",
+                str(KNOWLEDGE_DIR / "security-solution.md"),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        sections = json.loads(result.stdout)["sections"]
+        known_non_bug_sections = [s for s in sections if s.startswith("Known non-bugs")]
+        self.assertEqual(
+            known_non_bug_sections,
+            ["Known non-bugs"],
+            "security-solution.md must have exactly one section named "
+            "'Known non-bugs', with no '— detail' duplicate",
+        )
+        self.assertNotIn("— detail", security_solution)
+        self.assertNotIn("Same entries as", security_solution)
+
+    def test_stale_step_0f_references_are_updated_to_0g(self):
+        # Review of PR #281618 at 25c2a08 (all three review agents): Step
+        # 0f (knowledge-file approval) was renamed to Step 0g earlier in
+        # this same PR, but three prose cross-references to it were
+        # missed. These files are read literally as instructions or
+        # documentation by an agent; a stale step number sends a reader
+        # to the wrong section (Step 0f is now "Review Specs content",
+        # unrelated to knowledge approval).
+        report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
+        hash_script = KNOWLEDGE_HASH_SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("Step 0f", report)
+        self.assertNotIn("Step 0f", hash_script)
+        self.assertIn("Step 0g", report)
+        self.assertIn("Step 0g", hash_script)
+
+    def test_subagent_prompt_hash_verify_command_is_directly_executable(self):
+        # Review of PR #281618 at 25c2a08 (Review B): the inline prose in
+        # subagent-prompt.md told a sub-agent to run bare
+        # `knowledge-hash.py --file ... --verify ...`, which is not on
+        # $PATH and has no interpreter prefix — a literal follower gets
+        # "command not found". phases/2-flow-core.md already has the
+        # correct form (python3 + full repo-relative path); the template
+        # must match it exactly, not just parenthetically mention where
+        # the script "lives".
+        prompt = (TEMPLATE_DIR / "subagent-prompt.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "python3 x-pack/solutions/security/plugins/security_solution/"
+            ".agents/skills/exploratory-tester/scripts/knowledge-hash.py",
+            prompt,
+        )
+        self.assertNotIn("run `knowledge-hash.py", prompt)
+
+    def test_knowledge_hash_script_handles_non_utf8_without_crashing(self):
+        # Review of PR #281618 at 25c2a08 (all three review agents):
+        # path.read_text(encoding="utf-8") raised an uncaught
+        # UnicodeDecodeError on invalid UTF-8 instead of the script's own
+        # documented JSON-or-exit-1 contract, so a caller following the
+        # module docstring's usage instructions would see a raw Python
+        # traceback instead of a parseable result.
+        with tempfile.TemporaryDirectory() as tmp:
+            bad_file = Path(tmp) / "bad.md"
+            bad_file.write_bytes(b"# Heading\n\xff\xfe not valid utf-8\n")
+
+            result = subprocess.run(
+                [sys.executable, str(KNOWLEDGE_HASH_SCRIPT), "--file", str(bad_file)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertFalse(payload["exists"])
+            self.assertIsNone(payload["sha256"])
+
+            verify_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(KNOWLEDGE_HASH_SCRIPT),
+                    "--file",
+                    str(bad_file),
+                    "--verify",
+                    "anyhash",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(verify_result.returncode, 1)
+
+    def test_readme_documents_knowledge_hash_script(self):
+        # Review of PR #281618 at 25c2a08 (Review A): every other CLI
+        # entry point in this directory is described in README.md;
+        # knowledge-hash.py was added by this PR without a matching entry.
+        readme = (SCRIPT_DIR / "README.md").read_text(encoding="utf-8")
+        self.assertIn("knowledge-hash.py", readme)
+        self.assertIn("--verify", readme)
+        self.assertIn("Step 0g", readme)
+
+    def test_resume_sha256_null_with_prior_approval_requires_reapproval(self):
+        # Review of PR #281618 at 25c2a08 (Review A + Review B, both
+        # flagged this): the original migration backfilled a missing
+        # sha256 from *today's* file content while leaving a pre-existing
+        # `approved: true` untouched and never re-prompting. That binds a
+        # stale yes/no to unseen bytes -- exactly the failure hash-gating
+        # exists to prevent -- for the one population of sessions
+        # transitioning into the hash-gated world. Only an `approved:
+        # false` (nothing was ever actually approved) may still be
+        # silently backfilled without re-prompting.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        hash_gate = resume_section[resume_section.index("**Hash-gate re-verification") :]
+
+        self.assertIn(
+            "`knowledge_file.sha256` is `null` and `approved` is `false`",
+            hash_gate,
+        )
+        self.assertIn(
+            "`knowledge_file.sha256` is `null` and `approved` is `true`",
+            hash_gate,
+        )
+        null_true_case = hash_gate[
+            hash_gate.index("`approved` is `true`**") :
+            hash_gate.index("`knowledge_file.sha256` is non-null and matches")
+        ]
+        self.assertIn("do **not** silently backfill", null_true_case)
+        self.assertIn(
+            "display the file's current full contents and ask the same "
+            "yes/no question as Step 0g",
+            null_true_case,
+        )
+
+    def test_resume_migration_intro_count_matches_bullet_list(self):
+        # Same class of bug as pborgonovi's review of PR #281591 (the
+        # intro sentence disagreeing with the actual bullet count below
+        # it) reintroduced here: Task 6 added a fourth migration bullet
+        # (hash-gate re-verification) and updated "apply all three" to
+        # "apply all four", but never updated this file's own separate
+        # Resume-path intro sentence to match.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        intro = resume_section[: resume_section.index("**Migrations for sessions")]
+        self.assertIn("four backward-compatible migrations", intro)
+        self.assertNotIn("two backward-compatible migrations", intro)
+        self.assertNotIn("three backward-compatible migrations", intro)
+        self.assertIn("apply all four", resume_section)
+
+    def test_entity_analytics_does_not_mislabel_a_confirmed_bug_as_non_bug(self):
+        # Review of PR #281618 at 25c2a08 (Review B): entity-analytics.md
+        # had a `totalComment: 0` entry sitting inside `## Known
+        # non-bugs` whose own text said "this is a confirmed product bug
+        # ... Do not suppress." Step 3b's new heading-only suppression
+        # rule (this same PR) mechanically suppresses anything under that
+        # heading with no exception for an entry's own inline caveat, so
+        # this made an existing miscategorization far more dangerous. A
+        # confirmed bug must never appear inside `## Known non-bugs`.
+        entity_analytics = (KNOWLEDGE_DIR / "entity-analytics.md").read_text(
+            encoding="utf-8"
+        )
+        known_non_bugs = entity_analytics[
+            entity_analytics.index("## Known non-bugs") :
+            entity_analytics.index("## Navigation patterns")
+        ]
+        self.assertNotIn("confirmed product bug", known_non_bugs)
+        self.assertNotIn("totalComment", known_non_bugs)
+
+    def test_archive_checklist_table_is_not_split_by_later_content(self):
+        # Review of PR #281618 at 25c2a08 (Review B): archiving two
+        # "Session findings" sections into
+        # entity-analytics-archive-2026-07-15.md inserted ~50 lines
+        # between the checklist-coverage table's row F and its final row
+        # G, leaving G as an orphaned line at end-of-file, disconnected
+        # from the table it belongs to.
+        archive = (KNOWLEDGE_DIR / "entity-analytics-archive-2026-07-15.md").read_text(
+            encoding="utf-8"
+        )
+        table_start = archive.index("## Checklist coverage per journey")
+        # The next blank-line-preceded "---" after the table header is
+        # the section's own closing rule; everything between the header
+        # and that rule must be the table itself, ending in row G with no
+        # other content in between.
+        table_end = archive.index("\n---\n", table_start)
+        table_block = archive[table_start:table_end]
+        rows = [line for line in table_block.splitlines() if line.startswith("| ")]
+        self.assertEqual(len(rows), 8, table_block)  # header separator row A-G (8 total incl. header)
+        self.assertTrue(rows[-1].startswith("| G —"), rows[-1])
+        self.assertNotIn("| G —", archive[table_end:])
+
+    def test_archive_does_not_contain_plaintext_credentials(self):
+        # Review of PR #281618 at 25c2a08 (Review B, P1): the archive
+        # file carried literal test-account passwords
+        # (`cases-read-tester / ReadOnly123!`, `cases-all-tester /
+        # AllCases123!`) copied verbatim from entity-analytics.md. Even
+        # though these describe a since-torn-down ephemeral test
+        # environment, plaintext credentials should never be committed.
+        archive = (KNOWLEDGE_DIR / "entity-analytics-archive-2026-07-15.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("ReadOnly123", archive)
+        self.assertNotIn("AllCases123", archive)
+        # The usernames (non-secret) may still be referenced for context.
+        self.assertIn("cases-read-tester", archive)
+
 
 if __name__ == "__main__":
     unittest.main()

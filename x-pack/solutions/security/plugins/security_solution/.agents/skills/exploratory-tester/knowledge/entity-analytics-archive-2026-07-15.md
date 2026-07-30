@@ -155,6 +155,7 @@
 | D — Asset Criticality Management | 1, 3 | Entity store index missing |
 | E — Host/User Risk Investigation | 1 | No security data |
 | F — Entity Resolution Administration | 1 | API 404 |
+| G — Watchlists Management | 1 | EA Off, no URL |
 
 ---
 
@@ -200,9 +201,8 @@ Key confirmed findings from the first two sessions (10 flows, all 5 checklist st
 
 ### Privilege testing gap (action required for future runs)
 
-Both #277724 and #277736 require EA ES index read privileges in addition to Kibana cases privileges. Test roles `cases-read-role` and `cases-all-limited-role` were missing these; EA home rendered "Privileges required" and entity flyout was unreachable. Add five ES index `read` privileges (listed under Navigation patterns above) to both roles. Also add Machine Learning (read) Kibana feature for `cases-read-role`. Test users remain in environment (`cases-read-tester / ReadOnly123!`, `cases-all-tester / AllCases123!`).
+Both #277724 and #277736 require EA ES index read privileges in addition to Kibana cases privileges. Test roles `cases-read-role` and `cases-all-limited-role` were missing these; EA home rendered "Privileges required" and entity flyout was unreachable. Add five ES index `read` privileges (listed under Navigation patterns above) to both roles. Also add Machine Learning (read) Kibana feature for `cases-read-role`. Test users (`cases-read-tester`, `cases-all-tester`) remain in that session's now-torn-down environment — credentials intentionally not recorded here; recreate fresh test users per `phases/1-wait-and-login.md` for any future run.
 
 ### Upgrade compatibility (positive, Flow 12)
 
 Case `6252d052` created 2026-07-14 renders correctly in Kibana 9.5.0 build 106168 — entity attachment records intact, metadata fields present, flyout opens, Activity tab shows stored snapshots. No schema migration breakage. `totalComment: 5` via resolve endpoint matches UI badge.
-| G — Watchlists Management | 1 | EA Off, no URL |

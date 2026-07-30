@@ -12,7 +12,7 @@ this section — never `## Tracked open issues (not for suppression)` below,
 which tracks currently-open, unresolved bugs that must never be silently
 treated as noise.
 
-- `Executing inline script violates Content Security Policy` on every page — ECH infrastructure, explicitly expected (see "Known console errors on ECH" below for detail).
+- `Executing inline script violates Content Security Policy` on every page — ECH infrastructure, explicitly expected.
 - `Failed to load resource: 404 @ /internal/cloud/solution` on every page — ECH-specific missing route, not a product bug.
 - `GET /internal/cloud/solution` → 404 on ECH — known noise, ignorable.
 - Entity store disabled → `/internal/risk_score/engine/settings` → 500 — expected behavior when EA is off, not a bug.
@@ -73,14 +73,6 @@ treated as noise.
 
 **Known inconsistency (open)**: Alerts page picker disabled for non-admin but Overview dashboard (same scope) is enabled.
 
-## Known console errors on ECH — detail
-
-Same entries as `## Known non-bugs` above; kept here with their original
-per-page detail. Suppression matching itself reads only `## Known non-bugs`.
-
-- `Executing inline script violates Content Security Policy` — every page, ECH infrastructure
-- `Failed to load resource: 404 @ /internal/cloud/solution` — every page, ECH-specific missing route
-
 ## Managed Security Solution data views (PR #238549+)
 
 - `Security solution default` — alerts scope (Alerts page, Overview dashboard)
@@ -115,14 +107,6 @@ observation below, not silently suppress it as noise.
 - **Lens KPI metric "field can not be used for filtering" TypeErrors** (F-L1-01): Observed in Session 1 across all Explore pages. **Not reproducible in Session 2** (41/41 KPI panels rendered cleanly). Intermittent or data-dependent. Check if it reproduces with a cold cache or different date range.
 - **`/api/security_solution/initialize` called multiple times per navigation**: 4× on Alerts page, 2× on Hosts page. Duplicate `data_views/fields` fetches (3×) on both pages. Possible React component re-mount issue from Data View Manager initialization.
 - **ES|QL tab in Timeline auto-executes empty query on mount**: Shows "1 error" immediately before user types anything. Error: `action_request_validation_exception: [query] is required`.
-
-## Known non-bugs — detail (pre-existing, do not re-log)
-
-Same entries as `## Known non-bugs` above; kept here for detail.
-
-- Entity store disabled → `/internal/risk_score/engine/settings` → 500 (expected behavior when EA is off)
-- `/internal/alerting/rules/gaps/auto_fill_scheduler/...` → 404 (may be missing in some builds)
-- `/internal/osquery/fleet_wrapper/agents` → 404 (Osquery integration not installed on ECH)
 
 ## Timeline interaction notes
 

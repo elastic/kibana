@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compute and verify SHA-256 hashes for exploratory-tester knowledge files.
 
-Knowledge-file approval (see `phases/0-setup.md` Step 0f) is hash-gated: a
+Knowledge-file approval (see `phases/0-setup.md` Step 0g) is hash-gated: a
 user's yes/no confirmation is only reusable across a session resume, or
 between the orchestrator and a dispatched sub-agent, while the file's
 content is byte-identical to what was actually reviewed. Any edit
@@ -51,7 +51,15 @@ def list_sections(text: str) -> list[str]:
 def hash_file(path: Path) -> dict:
     if not path.is_file():
         return {"exists": False, "sha256": None, "sections": []}
-    text = path.read_text(encoding="utf-8")
+    try:
+        text = path.read_text(encoding="utf-8")
+    except UnicodeDecodeError:
+        # A knowledge file is hand-maintained markdown and should always be
+        # valid UTF-8; if it somehow isn't, there is nothing meaningful to
+        # hash or gate against. Report it the same as a missing file rather
+        # than letting an uncaught traceback reach a caller that only knows
+        # how to parse this script's JSON contract.
+        return {"exists": False, "sha256": None, "sections": []}
     return {
         "exists": True,
         "sha256": sha256_text(text),

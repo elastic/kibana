@@ -141,7 +141,7 @@ Initial structure:
 
 Append confirmed false positives to `## Known non-bugs`. Append new navigation patterns to `## Navigation patterns`.
 
-**Never add any other top-level (`##`) section to the active knowledge file** — no `## Session findings`, `## Confirmed bugs`, per-session narrative summary, or checklist-coverage table. This file is loaded (and, per `phases/0-setup.md` Step 0f, re-displayed to the user) in full on every future session for this area, so every extra section is paid for on every load. This session's full narrative already lives in `$SESSION_DIR/report.md` and `findings-flow-*.md` — that is where a future session (or the `prior_session_dir` cross-reference) looks up detail, not the knowledge file. If a specific bug is worth tracking so future sessions recognize it as reproduced rather than re-discovering it, it belongs in `config.json → known_open_bugs` (see Step 3b), not as prose here.
+**Never add any other top-level (`##`) section to the active knowledge file** — no `## Session findings`, `## Confirmed bugs`, per-session narrative summary, or checklist-coverage table. This file is loaded (and, per `phases/0-setup.md` Step 0g, re-displayed to the user) in full on every future session for this area, so every extra section is paid for on every load. This session's full narrative already lives in `$SESSION_DIR/report.md` and `findings-flow-*.md` — that is where a future session (or the `prior_session_dir` cross-reference) looks up detail, not the knowledge file. If a specific bug is worth tracking so future sessions recognize it as reproduced rather than re-discovering it, it belongs in `config.json → known_open_bugs` (see Step 3b), not as prose here.
 
 Check line count before updating:
 ```bash
@@ -161,7 +161,7 @@ git add x-pack/solutions/security/plugins/security_solution/.agents/skills/explo
 git commit -m "knowledge(exploratory-tester): update <area_slug> after session on $(date -u +%Y-%m-%d)"
 ```
 
-**This write invalidates any other session's already-persisted approval of this file** — the next session (fresh or resumed) that reads it will recompute its hash in `phases/0-setup.md` Step 0f, find it no longer matches a previously stored `knowledge_file.sha256`, and re-display + re-approve rather than silently reusing stale consent. This is intentional and requires no extra action here.
+**This write invalidates any other session's already-persisted approval of this file** — the next session (fresh or resumed) that reads it will recompute its hash in `phases/0-setup.md` Step 0g, find it no longer matches a previously stored `knowledge_file.sha256`, and re-display + re-approve rather than silently reusing stale consent. This is intentional and requires no extra action here.
 
 ---
 

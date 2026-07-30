@@ -26,7 +26,6 @@ sections.
 - Double-click on "Select" button in case picker creates exactly 1 attachment — modal unmounts on first click, second click is detached no-op.
 - Risk score shown as "N/A" for entities directly indexed (bypassing risk engine pipeline) — test-setup artifact; the risk engine must run for `entity.risk` fields to populate correctly.
 - `launchdarkly.com ERR_NETWORK_IO_SUSPENDED` — infrastructure noise, not a product bug.
-- `totalComment: 0` on `GET /api/cases/{id}` for entity attachments — **this is a confirmed product bug (L2-03)**, not noise. Do not suppress.
 
 ## Navigation patterns
 
