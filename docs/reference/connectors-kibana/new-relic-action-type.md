@@ -24,28 +24,33 @@ You can create a New Relic connector in **{{stack-manage-app}} > {{connectors-ui
 User API Key
 :   A New Relic User API key (prefixed `NRAK-`). Create one under your user profile > API keys.
 
+Account ID
+:   The numeric New Relic account ID this connector operates against. Found in the New Relic UI under your account name, or in account-scoped URLs as `one.newrelic.com/accounts/<accountId>`. To manage another account, create a separate connector instance.
+
 Region
 :   The data center hosting your New Relic account: `us` (default), `eu`, or `jp`. Determines which NerdGraph endpoint is used.
 
 ## Available actions [new-relic-available-actions]
 
+All actions below operate on the account ID configured on the connector.
+
 | Action | Description |
 |--------|-------------|
-| `acknowledgeIssue` | Acknowledge an AI issue via `aiIssuesAckIssue`. Parameters: `accountId`, `issueId` (both required). |
-| `unacknowledgeIssue` | Reverse an acknowledgement via `aiIssuesUnackIssue`. Parameters: `accountId`, `issueId` (both required). |
-| `resolveIssue` | Resolve/close an AI issue via `aiIssuesResolveIssue`. Parameters: `accountId`, `issueId` (both required). |
-| `listIssues` | List AI issues with optional `states`, `priority`, `entityGuids`, `since`/`until`, and `cursor` filters. Parameters: `accountId` (required). |
-| `listIncidents` | List the individual incidents grouped under issues, with the same filter shape as `listIssues`. Parameters: `accountId` (required). |
-| `createMutingRule` | Create a muting rule via `alertsMutingRuleCreate`. Parameters: `accountId`, `name`, `condition` (all required), `description`, `enabled`. |
-| `updateMutingRule` | Update an existing muting rule via `alertsMutingRuleUpdate`. Parameters: `accountId`, `mutingRuleId` (required), `name`, `description`, `enabled`, `condition`. |
-| `deleteMutingRule` | Delete a muting rule via `alertsMutingRuleDelete`. Parameters: `accountId`, `mutingRuleId` (both required). |
-| `listMutingRules` | List existing muting rules for an account. Parameters: `accountId` (required). |
-| `runNrqlQuery` | Run an NRQL query and return the results. Parameters: `accountId`, `nrql` (both required), `timeoutSeconds`. |
+| `acknowledgeIssue` | Acknowledge an AI issue via `aiIssuesAckIssue`. Parameters: `issueId` (required). |
+| `unacknowledgeIssue` | Reverse an acknowledgement via `aiIssuesUnackIssue`. Parameters: `issueId` (required). |
+| `resolveIssue` | Resolve/close an AI issue via `aiIssuesResolveIssue`. Parameters: `issueId` (required). |
+| `listIssues` | List AI issues with optional `states`, `priority`, `entityGuids`, `since`/`until`, and `cursor` filters. |
+| `listIncidents` | List the individual incidents grouped under issues, with the same filter shape as `listIssues`. |
+| `createMutingRule` | Create a muting rule via `alertsMutingRuleCreate`. Parameters: `name`, `condition` (both required), `description`, `enabled`. |
+| `updateMutingRule` | Update an existing muting rule via `alertsMutingRuleUpdate`. Parameters: `mutingRuleId` (required), `name`, `description`, `enabled`, `condition`. |
+| `deleteMutingRule` | Delete a muting rule via `alertsMutingRuleDelete`. Parameters: `mutingRuleId` (required). |
+| `listMutingRules` | List existing muting rules for the account. |
+| `runNrqlQuery` | Run an NRQL query and return the results. Parameters: `nrql` (required), `timeoutSeconds`. |
 | `createDeploymentMarker` | Record a change event via `changeTrackingCreateEvent`. Parameters: `entityGuid` (required), `version`, `description`, `user`, `deploymentType`, `groupId`, `timestamp`. |
-| `listAlertPolicies` | List alert policies, optionally filtered by name. Parameters: `accountId` (required), `nameFilter`, `cursor`. |
-| `listNrqlConditions` | List the NRQL conditions under a policy. Parameters: `accountId`, `policyId` (both required). |
-| `createAlertPolicy` | Provision a new alert policy via `alertsPolicyCreate`. Parameters: `accountId`, `name` (both required), `incidentPreference`. |
-| `createNrqlCondition` | Create a static NRQL alert condition via `alertsNrqlConditionStaticCreate`. Parameters: `accountId`, `policyId`, `name`, `nrql`, `thresholdOperator`, `thresholdValue`, `thresholdDurationSeconds` (all required), `enabled`. |
+| `listAlertPolicies` | List alert policies, optionally filtered by name. Parameters: `nameFilter`, `cursor`. |
+| `listNrqlConditions` | List the NRQL conditions under a policy. Parameters: `policyId` (required). |
+| `createAlertPolicy` | Provision a new alert policy via `alertsPolicyCreate`. Parameters: `name` (required), `incidentPreference`. |
+| `createNrqlCondition` | Create a static NRQL alert condition via `alertsNrqlConditionStaticCreate`. Parameters: `policyId`, `name`, `nrql`, `thresholdOperator`, `thresholdValue`, `thresholdDurationSeconds` (all required), `enabled`. |
 
 ## Connector networking configuration [new-relic-connector-networking-configuration]
 
@@ -57,5 +62,5 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 2. Go to your user profile menu > **API keys**.
 3. Create a new **User** key.
 4. Copy the key and store it securely.
-5. Note which region your account is hosted in (US, EU, or JP) — you'll need to select it when configuring the connector.
-6. When configuring the connector, enter the key as the User API Key.
+5. Note your account ID (visible in the New Relic UI under your account name, or in account-scoped URLs) and which region your account is hosted in (US, EU, or JP) — you'll need both when configuring the connector.
+6. When configuring the connector, enter the key as the User API Key, and set the Account ID and Region fields.

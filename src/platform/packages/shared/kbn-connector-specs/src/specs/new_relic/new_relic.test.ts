@@ -23,7 +23,7 @@ describe('NewRelic', () => {
 
   const mockContext = {
     client: mockClient,
-    config: { region: 'us' },
+    config: { region: 'us', accountId: 123 },
     log: { debug: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
 
@@ -63,10 +63,12 @@ describe('NewRelic', () => {
       mockClient.post.mockResolvedValue({
         data: { data: { aiIssuesAckIssue: { error: null, result: { issueId: 'i1' } } } },
       });
-      const euContext = { ...mockContext, config: { region: 'eu' } } as unknown as ActionContext;
+      const euContext = {
+        ...mockContext,
+        config: { region: 'eu', accountId: 123 },
+      } as unknown as ActionContext;
 
       await NewRelic.actions.acknowledgeIssue.handler(euContext, {
-        accountId: 123,
         issueId: 'i1',
       });
 
@@ -81,10 +83,12 @@ describe('NewRelic', () => {
       mockClient.post.mockResolvedValue({
         data: { data: { aiIssuesAckIssue: { error: null, result: { issueId: 'i1' } } } },
       });
-      const jpContext = { ...mockContext, config: { region: 'jp' } } as unknown as ActionContext;
+      const jpContext = {
+        ...mockContext,
+        config: { region: 'jp', accountId: 123 },
+      } as unknown as ActionContext;
 
       await NewRelic.actions.acknowledgeIssue.handler(jpContext, {
-        accountId: 123,
         issueId: 'i1',
       });
 
@@ -110,7 +114,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.acknowledgeIssue.handler(mockContext, {
-        accountId: 123,
         issueId: 'i1',
       });
 
@@ -128,7 +131,7 @@ describe('NewRelic', () => {
       });
 
       await expect(
-        NewRelic.actions.acknowledgeIssue.handler(mockContext, { accountId: 123, issueId: 'bad' })
+        NewRelic.actions.acknowledgeIssue.handler(mockContext, { issueId: 'bad' })
       ).rejects.toThrow('issue not found');
     });
 
@@ -139,7 +142,7 @@ describe('NewRelic', () => {
       });
 
       await expect(
-        NewRelic.actions.acknowledgeIssue.handler(mockContext, { accountId: 123, issueId: 'i1' })
+        NewRelic.actions.acknowledgeIssue.handler(mockContext, { issueId: 'i1' })
       ).rejects.toThrow('New Relic acknowledgeIssue failed (status 403): Forbidden');
     });
 
@@ -149,7 +152,7 @@ describe('NewRelic', () => {
       });
 
       await expect(
-        NewRelic.actions.acknowledgeIssue.handler(mockContext, { accountId: 123, issueId: 'i1' })
+        NewRelic.actions.acknowledgeIssue.handler(mockContext, { issueId: 'i1' })
       ).rejects.toThrow('New Relic acknowledgeIssue failed: Unauthorized');
     });
   });
@@ -161,7 +164,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.unacknowledgeIssue.handler(mockContext, {
-        accountId: 123,
         issueId: 'i1',
       });
 
@@ -180,7 +182,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.resolveIssue.handler(mockContext, {
-        accountId: 123,
         issueId: 'i1',
       });
 
@@ -208,7 +209,6 @@ describe('NewRelic', () => {
       jest.useFakeTimers().setSystemTime(now);
 
       const result = await NewRelic.actions.listIssues.handler(mockContext, {
-        accountId: 123,
         states: ['ACTIVATED'],
         priority: ['CRITICAL'],
         since: '2024-01-01T00:00:00Z',
@@ -241,7 +241,7 @@ describe('NewRelic', () => {
       });
 
       const until = '2024-01-02T00:00:00Z';
-      await NewRelic.actions.listIssues.handler(mockContext, { accountId: 123, until });
+      await NewRelic.actions.listIssues.handler(mockContext, { until });
 
       expect(mockClient.post).toHaveBeenCalledWith(
         US_ENDPOINT,
@@ -264,7 +264,7 @@ describe('NewRelic', () => {
         },
       });
 
-      await NewRelic.actions.listIssues.handler(mockContext, { accountId: 123 });
+      await NewRelic.actions.listIssues.handler(mockContext, {});
 
       expect(mockClient.post).toHaveBeenCalledWith(
         US_ENDPOINT,
@@ -291,7 +291,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.listIncidents.handler(mockContext, {
-        accountId: 123,
         entityGuids: ['guid1'],
       });
 
@@ -306,7 +305,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.createMutingRule.handler(mockContext, {
-        accountId: 123,
         name: 'Deploy window',
         enabled: true,
         condition: {
@@ -334,7 +332,6 @@ describe('NewRelic', () => {
       });
 
       await NewRelic.actions.updateMutingRule.handler(mockContext, {
-        accountId: 123,
         mutingRuleId: 'mr1',
         enabled: false,
       });
@@ -350,7 +347,6 @@ describe('NewRelic', () => {
 
     it('should reject NewRelicUpdateMutingRuleInputSchema with no fields to update', () => {
       const result = NewRelicUpdateMutingRuleInputSchema.safeParse({
-        accountId: 123,
         mutingRuleId: 'mr1',
       });
       expect(result.success).toBe(false);
@@ -362,7 +358,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.deleteMutingRule.handler(mockContext, {
-        accountId: 123,
         mutingRuleId: 'mr1',
       });
 
@@ -376,9 +371,7 @@ describe('NewRelic', () => {
         },
       });
 
-      const result = await NewRelic.actions.listMutingRules.handler(mockContext, {
-        accountId: 123,
-      });
+      const result = await NewRelic.actions.listMutingRules.handler(mockContext, {});
 
       expect(result).toEqual({ mutingRules: [{ id: 'mr1' }, { id: 'mr2' }] });
     });
@@ -391,7 +384,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.runNrqlQuery.handler(mockContext, {
-        accountId: 123,
         nrql: 'SELECT count(*) FROM Transaction SINCE 1 HOUR AGO',
       });
 
@@ -505,7 +497,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.listAlertPolicies.handler(mockContext, {
-        accountId: 123,
         nameFilter: 'prod',
       });
 
@@ -533,7 +524,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.listNrqlConditions.handler(mockContext, {
-        accountId: 123,
         policyId: 'p1',
       });
 
@@ -548,7 +538,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.createAlertPolicy.handler(mockContext, {
-        accountId: 123,
         name: 'My Policy',
       });
 
@@ -572,7 +561,6 @@ describe('NewRelic', () => {
       });
 
       const result = await NewRelic.actions.createNrqlCondition.handler(mockContext, {
-        accountId: 123,
         policyId: 'p1',
         name: 'High errors',
         nrql: 'SELECT count(*) FROM TransactionError',

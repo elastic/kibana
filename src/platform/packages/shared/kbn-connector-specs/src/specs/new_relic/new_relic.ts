@@ -37,7 +37,6 @@ import type {
   NewRelicCreateMutingRuleInput,
   NewRelicUpdateMutingRuleInput,
   NewRelicDeleteMutingRuleInput,
-  NewRelicListMutingRulesInput,
   NewRelicRunNrqlQueryInput,
   NewRelicCreateDeploymentMarkerInput,
   NewRelicListAlertPoliciesInput,
@@ -65,6 +64,14 @@ interface GraphQlResponse<T> {
 const buildEndpoint = (ctx: ActionContext): string => {
   const region = ((ctx.config?.region as string | undefined) ?? 'us').toLowerCase();
   return REGION_ENDPOINTS[region] ?? REGION_ENDPOINTS.us;
+};
+
+const getAccountId = (ctx: ActionContext): number => {
+  const accountId = ctx.config?.accountId as number | undefined;
+  if (accountId === undefined || accountId === null) {
+    throw new Error('New Relic connector is missing the required accountId configuration field.');
+  }
+  return accountId;
 };
 
 async function graphqlRequest<T>(
@@ -163,6 +170,20 @@ export const NewRelic: ConnectorSpec = {
 
   schema: lazySchema(() =>
     z.object({
+      accountId: z
+        .number()
+        .int()
+        .describe('New Relic account ID this connector manages.')
+        .meta({
+          label: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.accountId.label', {
+            defaultMessage: 'Account ID',
+          }),
+          placeholder: '1234567',
+          helpText: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.accountId.helpText', {
+            defaultMessage:
+              'The numeric New Relic account ID this connector operates against. Found in the New Relic UI under your account name, or in account-scoped URLs as one.newrelic.com/accounts/<accountId>. To manage another account, create a separate connector instance.',
+          }),
+        }),
       region: z
         .enum(['us', 'eu', 'jp'])
         .default('us')
@@ -198,7 +219,7 @@ export const NewRelic: ConnectorSpec = {
               result { action accountId issueId }
             }
           }`,
-          { accountId: input.accountId, issueId: input.issueId },
+          { accountId: getAccountId(ctx), issueId: input.issueId },
           AI_ISSUES_HEADERS
         );
         if (data.aiIssuesAckIssue.error) {
@@ -225,7 +246,7 @@ export const NewRelic: ConnectorSpec = {
               result { action accountId issueId }
             }
           }`,
-          { accountId: input.accountId, issueId: input.issueId },
+          { accountId: getAccountId(ctx), issueId: input.issueId },
           AI_ISSUES_HEADERS
         );
         if (data.aiIssuesUnackIssue.error) {
@@ -252,7 +273,7 @@ export const NewRelic: ConnectorSpec = {
               result { action accountId issueId }
             }
           }`,
-          { accountId: input.accountId, issueId: input.issueId },
+          { accountId: getAccountId(ctx), issueId: input.issueId },
           AI_ISSUES_HEADERS
         );
         if (data.aiIssuesResolveIssue.error) {
@@ -318,7 +339,7 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: input.accountId,
+            accountId: getAccountId(ctx),
             filter: Object.keys(filter).length ? filter : undefined,
             timeWindow,
             cursor: input.cursor,
@@ -378,7 +399,7 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: input.accountId,
+            accountId: getAccountId(ctx),
             filter: Object.keys(filter).length ? filter : undefined,
             timeWindow,
             cursor: input.cursor,
@@ -409,7 +430,7 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: input.accountId,
+            accountId: getAccountId(ctx),
             rule: {
               name: input.name,
               description: input.description,
@@ -445,7 +466,7 @@ export const NewRelic: ConnectorSpec = {
               condition { operator conditions { attribute operator values } }
             }
           }`,
-          { accountId: input.accountId, id: input.mutingRuleId, rule }
+          { accountId: getAccountId(ctx), id: input.mutingRuleId, rule }
         );
         return data.alertsMutingRuleUpdate;
       },
@@ -463,7 +484,7 @@ export const NewRelic: ConnectorSpec = {
           `mutation($accountId: Int!, $id: ID!) {
             alertsMutingRuleDelete(accountId: $accountId, id: $id) { id }
           }`,
-          { accountId: input.accountId, id: input.mutingRuleId }
+          { accountId: getAccountId(ctx), id: input.mutingRuleId }
         );
         return data.alertsMutingRuleDelete;
       },
@@ -474,7 +495,7 @@ export const NewRelic: ConnectorSpec = {
       description:
         'List existing New Relic muting rules for an account, so a workflow can check for an existing rule before creating or deleting one (idempotency).',
       input: NewRelicListMutingRulesInputSchema,
-      handler: async (ctx, input: NewRelicListMutingRulesInput) => {
+      handler: async (ctx) => {
         const data = await graphqlRequest<{
           actor: {
             account: { alerts: { mutingRules: Array<Record<string, unknown>> } };
@@ -497,7 +518,7 @@ export const NewRelic: ConnectorSpec = {
               }
             }
           }`,
-          { accountId: input.accountId }
+          { accountId: getAccountId(ctx) }
         );
         return { mutingRules: data.actor.account.alerts.mutingRules };
       },
@@ -526,7 +547,7 @@ export const NewRelic: ConnectorSpec = {
               }
             }
           }`,
-          { accountId: input.accountId, nrql: input.nrql, timeout: input.timeoutSeconds ?? 70 }
+          { accountId: getAccountId(ctx), nrql: input.nrql, timeout: input.timeoutSeconds ?? 70 }
         );
         return data.actor.account.nrql;
       },
@@ -607,7 +628,7 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: input.accountId,
+            accountId: getAccountId(ctx),
             searchCriteria: input.nameFilter ? { nameLike: input.nameFilter } : undefined,
             cursor: input.cursor,
           }
@@ -649,7 +670,7 @@ export const NewRelic: ConnectorSpec = {
               }
             }
           }`,
-          { accountId: input.accountId, searchCriteria: { policyId: input.policyId } }
+          { accountId: getAccountId(ctx), searchCriteria: { policyId: input.policyId } }
         );
         return { nrqlConditions: data.actor.account.alerts.nrqlConditionsSearch.nrqlConditions };
       },
@@ -672,7 +693,7 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: input.accountId,
+            accountId: getAccountId(ctx),
             policy: {
               name: input.name,
               incidentPreference: input.incidentPreference ?? 'PER_POLICY',
@@ -703,7 +724,7 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: input.accountId,
+            accountId: getAccountId(ctx),
             policyId: input.policyId,
             condition: {
               name: input.name,
@@ -748,7 +769,7 @@ export const NewRelic: ConnectorSpec = {
   skill: [
     '## New Relic Connector Usage Guide',
     '',
-    'This connector wraps New Relic NerdGraph (GraphQL). All actions require an `accountId` (the New Relic account owning the data).',
+    'This connector wraps New Relic NerdGraph (GraphQL) and is scoped to a single New Relic account, configured once on the connector as `accountId`. To manage a different account, create a separate connector instance.',
     '',
     '### Issue Triage Flow',
     '',

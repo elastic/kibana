@@ -50,7 +50,6 @@ const MutingRuleConditionGroupSchema = z.object({
 
 export const NewRelicAcknowledgeIssueInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID that owns the issue.'),
     issueId: z
       .string()
       .max(200)
@@ -61,7 +60,6 @@ export type NewRelicAcknowledgeIssueInput = z.infer<typeof NewRelicAcknowledgeIs
 
 export const NewRelicUnacknowledgeIssueInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID that owns the issue.'),
     issueId: z.string().max(200).describe('ID of the AI issue to unacknowledge.'),
   })
 );
@@ -69,7 +67,6 @@ export type NewRelicUnacknowledgeIssueInput = z.infer<typeof NewRelicUnacknowled
 
 export const NewRelicResolveIssueInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID that owns the issue.'),
     issueId: z.string().max(200).describe('ID of the AI issue to resolve/close.'),
   })
 );
@@ -77,7 +74,6 @@ export type NewRelicResolveIssueInput = z.infer<typeof NewRelicResolveIssueInput
 
 export const NewRelicListIssuesInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID to list issues for.'),
     states: z
       .array(z.enum(['ACTIVATED', 'CREATED', 'DEACTIVATED', 'CLOSED']))
       .optional()
@@ -114,7 +110,6 @@ export type NewRelicListIssuesInput = z.infer<typeof NewRelicListIssuesInputSche
 
 export const NewRelicListIncidentsInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID to list incidents for.'),
     states: z
       .array(z.enum(['CREATED', 'CLOSED']))
       .optional()
@@ -151,7 +146,6 @@ export type NewRelicListIncidentsInput = z.infer<typeof NewRelicListIncidentsInp
 
 export const NewRelicCreateMutingRuleInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID to create the muting rule in.'),
     name: z
       .string()
       .max(200)
@@ -172,7 +166,6 @@ export type NewRelicCreateMutingRuleInput = z.infer<typeof NewRelicCreateMutingR
 export const NewRelicUpdateMutingRuleInputSchema = lazySchema(() =>
   z
     .object({
-      accountId: z.number().int().describe('New Relic account ID that owns the muting rule.'),
       mutingRuleId: z.string().max(200).describe('ID of the muting rule to update.'),
       name: z.string().max(200).optional().describe('New name for the rule.'),
       description: z.string().max(1000).optional().describe('New description for the rule.'),
@@ -194,22 +187,16 @@ export type NewRelicUpdateMutingRuleInput = z.infer<typeof NewRelicUpdateMutingR
 
 export const NewRelicDeleteMutingRuleInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID that owns the muting rule.'),
     mutingRuleId: z.string().max(200).describe('ID of the muting rule to delete.'),
   })
 );
 export type NewRelicDeleteMutingRuleInput = z.infer<typeof NewRelicDeleteMutingRuleInputSchema>;
 
-export const NewRelicListMutingRulesInputSchema = lazySchema(() =>
-  z.object({
-    accountId: z.number().int().describe('New Relic account ID to list muting rules for.'),
-  })
-);
+export const NewRelicListMutingRulesInputSchema = lazySchema(() => z.object({}));
 export type NewRelicListMutingRulesInput = z.infer<typeof NewRelicListMutingRulesInputSchema>;
 
 export const NewRelicRunNrqlQueryInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID to run the query against.'),
     nrql: z
       .string()
       .max(4000)
@@ -268,7 +255,6 @@ export type NewRelicCreateDeploymentMarkerInput = z.infer<
 
 export const NewRelicListAlertPoliciesInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID to list alert policies for.'),
     nameFilter: z
       .string()
       .max(200)
@@ -285,7 +271,6 @@ export type NewRelicListAlertPoliciesInput = z.infer<typeof NewRelicListAlertPol
 
 export const NewRelicListNrqlConditionsInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID that owns the policy.'),
     policyId: z.string().max(200).describe('ID of the alert policy to list NRQL conditions for.'),
   })
 );
@@ -293,7 +278,6 @@ export type NewRelicListNrqlConditionsInput = z.infer<typeof NewRelicListNrqlCon
 
 export const NewRelicCreateAlertPolicyInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID to create the policy in.'),
     name: z.string().max(200).describe('Name of the new alert policy.'),
     incidentPreference: z
       .enum(['PER_POLICY', 'PER_CONDITION', 'PER_CONDITION_AND_TARGET'])
@@ -305,7 +289,6 @@ export type NewRelicCreateAlertPolicyInput = z.infer<typeof NewRelicCreateAlertP
 
 export const NewRelicCreateNrqlConditionInputSchema = lazySchema(() =>
   z.object({
-    accountId: z.number().int().describe('New Relic account ID to create the condition in.'),
     policyId: z.string().max(200).describe('ID of the alert policy to attach the condition to.'),
     name: z.string().max(200).describe('Name of the NRQL condition.'),
     nrql: z
