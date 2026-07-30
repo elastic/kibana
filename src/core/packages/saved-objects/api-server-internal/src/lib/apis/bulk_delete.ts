@@ -156,25 +156,33 @@ export const performBulkDelete = async <T>(
 
   // Capture pre-delete attributes for the diff audit event (feature-gated). A dedicated
   // mget keyed by object covers both single- and multi-namespace types correctly, and a
-  // normal (diff-disabled) bulk delete pays nothing extra.
+  // normal (diff-disabled) bulk delete pays nothing extra. Results are matched back to
+  // objects by the returned `_id` (not by array position), so a reordered or partial mget
+  // response can never misattribute one object's attributes to another in the audit log.
   if (securityExtension?.savedObjectDiffEnabled) {
+    const beforeAttrsRequests = validObjects.map(({ value: { type, id } }) => ({
+      rawId: serializer.generateRawId(namespace, type, id),
+      type,
+      id,
+    }));
+    const objectByRawId = new Map(beforeAttrsRequests.map((req) => [req.rawId, req]));
     const beforeDocs = await client.mget<SavedObjectsRawDocSource>(
       {
-        docs: validObjects.map(({ value: { type, id } }) => ({
-          _id: serializer.generateRawId(namespace, type, id),
+        docs: beforeAttrsRequests.map(({ rawId, type }) => ({
+          _id: rawId,
           _index: commonHelper.getIndexForType(type),
           _source: [type],
         })),
       },
       { ignore: [404] }
     );
-    beforeDocs.docs?.forEach((doc, i) => {
-      const { type, id } = validObjects[i].value;
-      const attrs = isMgetDoc(doc)
-        ? (doc._source as SavedObjectsRawDocSource | undefined)?.[type]
-        : undefined;
+    beforeDocs.docs?.forEach((doc) => {
+      if (!isMgetDoc(doc)) return;
+      const target = objectByRawId.get(doc._id);
+      if (!target) return;
+      const attrs = (doc._source as SavedObjectsRawDocSource | undefined)?.[target.type];
       if (attrs) {
-        beforeAttributesMap.set(`${type}:${id}`, attrs as Record<string, unknown>);
+        beforeAttributesMap.set(`${target.type}:${target.id}`, attrs as Record<string, unknown>);
       }
     });
   }

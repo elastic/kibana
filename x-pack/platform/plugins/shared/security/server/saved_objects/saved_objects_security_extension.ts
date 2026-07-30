@@ -851,7 +851,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   }
 
   emitAuditEvent(params: {
-    action: string;
+    action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
     savedObject: { type: string; id: string; name?: string };
     outcome: 'success';
     before: Record<string, unknown>;
@@ -894,6 +894,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     });
 
     this.addAuditEvent({
+      // `action` is the narrow SO-diff union; cast to the internal AuditAction enum.
       action: params.action as AuditAction,
       savedObject: { type, id, name },
       outcome: params.outcome,

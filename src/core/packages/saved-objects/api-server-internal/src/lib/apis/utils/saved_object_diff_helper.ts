@@ -78,8 +78,12 @@ export const emitSavedObjectDiffAuditEvent = ({
       fieldsToRedact,
     });
   } catch (error) {
+    // This runs after the ES write has committed, so it must never throw. Use String(error)
+    // rather than error.message, which would throw if a non-Error (e.g. null) was thrown.
     logger.error(
-      `Failed to emit saved object diff audit event for ${savedObject.type}:${savedObject.id}: ${error.message}`
+      `Failed to emit saved object diff audit event for ${savedObject.type}:${
+        savedObject.id
+      }: ${String(error)}`
     );
   }
 };

@@ -611,7 +611,7 @@ export interface ISavedObjectsSecurityExtension {
    * Called by the SO repository after a successful ES write when saved object diff is enabled.
    */
   emitAuditEvent: (params: {
-    action: string;
+    action: 'saved_object_create' | 'saved_object_update' | 'saved_object_delete';
     savedObject: { type: string; id: string; name?: string };
     outcome: 'success';
     before: Record<string, unknown>;
