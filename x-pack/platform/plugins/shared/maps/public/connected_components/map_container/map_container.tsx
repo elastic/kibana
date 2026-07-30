@@ -8,7 +8,7 @@
 import '../../_index.scss';
 import React, { Component } from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiCallOut, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter } from '@kbn/es-query';
@@ -17,6 +17,7 @@ import type { Observable, Subscription } from 'rxjs';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { css, Global } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { MBMap } from '../mb_map';
 import { RightSideControls } from '../right_side_controls';
 import { Timeslider } from '../timeslider';
@@ -269,16 +270,13 @@ export class MapContainer extends Component<Props, State> {
           data-title={this.props.title}
           data-description={this.props.description}
         >
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={i18n.translate('xpack.maps.map.initializeErrorTitle', {
               defaultMessage: 'Unable to initialize map',
             })}
-            color="danger"
-            iconType="cross"
-          >
-            <p>{mapInitError}</p>
-          </EuiCallOut>
+            text={mapInitError}
+          />
         </div>
       );
     }

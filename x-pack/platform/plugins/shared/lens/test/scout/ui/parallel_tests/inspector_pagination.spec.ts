@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 
 const INSPECTOR_PAGE_SIZE = 10;
 
-spaceTest.describe('Lens inspector pagination', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens inspector pagination', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,

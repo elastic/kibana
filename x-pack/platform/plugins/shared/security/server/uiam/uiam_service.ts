@@ -30,6 +30,7 @@ import type {
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -257,11 +258,13 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse>;
 
   /**
@@ -432,6 +435,7 @@ export class UiamService implements UiamServicePublic {
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
 
+    const startTime = performance.now();
     try {
       const response = await UiamService.#parseUiamResponse(
         await fetch(url.toString(), {
@@ -454,8 +458,16 @@ export class UiamService implements UiamServicePublic {
         );
       }
 
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'success',
+      });
+
       return response.token;
     } catch (err) {
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'failure',
+      });
+
       this.#logger.error(
         () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );
@@ -742,7 +754,8 @@ export class UiamService implements UiamServicePublic {
   async listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth connections.');
@@ -753,6 +766,9 @@ export class UiamService implements UiamServicePublic {
       }
       if (connectionId) {
         url.searchParams.set('connection_id', connectionId);
+      }
+      if (projectId) {
+        url.searchParams.set('project_id', projectId);
       }
 
       const response = await UiamService.#parseUiamResponse(
