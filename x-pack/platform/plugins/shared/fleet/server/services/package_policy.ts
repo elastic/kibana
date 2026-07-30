@@ -1275,11 +1275,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         );
 
       // If possible, return the experimental features map for the package policy's `package` field
-      if (
-        installation &&
-        !installation.error &&
-        installation.attributes?.experimental_data_stream_features
-      ) {
+      if (installation && installation.attributes?.experimental_data_stream_features) {
         packagePolicy.package.experimental_data_stream_features =
           installation.attributes?.experimental_data_stream_features;
       }

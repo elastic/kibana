@@ -10,8 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { asPrettyString, getHighlightReact, shortenDottedString } from '../utils';
+import { highlightTags } from '../utils/highlight/highlight_tags';
 import { FieldFormat } from '../field_format';
-import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
+import type { ReactContextTypeHit, ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FIELD_FORMAT_IDS } from '../types';
 
 const TRANSFORM_OPTIONS = [
@@ -59,6 +60,9 @@ const TRANSFORM_OPTIONS = [
   },
 ];
 const DEFAULT_TRANSFORM_OPTION = false;
+
+// Highlight tag sentinels that are not affected by text transforms (lowercase/uppercase).
+const HIGHLIGHT_TAG_SENTINELS = { pre: '\u0000', post: '\u0001' };
 
 /** @public */
 export class StringFormat extends FieldFormat {
@@ -137,6 +141,48 @@ export class StringFormat extends FieldFormat {
     const formatted = this.textConvert(val);
     const fieldName = field?.name;
 
-    return getHighlightReact(formatted, fieldName, hit);
+    return getHighlightReact(
+      formatted,
+      fieldName,
+      this.applyTransformsToHighlightHit(hit, fieldName)
+    );
   };
+
+  /**
+   * Applies the selected transform (if any) to the highlighted snippets so they still align with
+   * the transformed field value. Only case transforms (lower/upper/title) are handled: they
+   * preserve character positions, so each snippet can be transformed as a whole. Short Dots,
+   *  Base64 and URL Param move characters around, so they are left out and their highlights are simply dropped.
+   */
+  private applyTransformsToHighlightHit(
+    hit: ReactContextTypeHit | undefined,
+    fieldName: string | undefined
+  ): ReactContextTypeHit | undefined {
+    const substrings = fieldName ? hit?.highlight?.[fieldName] : undefined;
+    if (!hit || !fieldName || !substrings?.length) return hit;
+
+    const caseTransforms: Record<string, (text: string) => string> = {
+      lower: (text) => text.toLowerCase(),
+      upper: (text) => text.toUpperCase(),
+      title: (text) => this.toTitleCase(text),
+    };
+    const transform = caseTransforms[this.param('transform')];
+    if (!transform) return hit;
+
+    const { pre, post } = highlightTags;
+    const { pre: preSentinel, post: postSentinel } = HIGHLIGHT_TAG_SENTINELS;
+
+    return {
+      ...hit,
+      highlight: {
+        ...hit.highlight,
+        [fieldName]: substrings.map((snippet) => {
+          const masked = snippet.split(pre).join(preSentinel).split(post).join(postSentinel);
+          const transformed = transform(masked);
+          const unmasked = transformed.split(preSentinel).join(pre).split(postSentinel).join(post);
+          return unmasked;
+        }),
+      },
+    };
+  }
 }

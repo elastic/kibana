@@ -308,7 +308,7 @@ describe('ActionPolicyExecutionHistoryClient', () => {
         const request = httpServerMock.createKibanaRequest();
         const startDate = '2026-01-01T00:00:00.000Z';
 
-        await client.listExecutionHistory({ request, episodeIds: ['ep-1'], start_date: startDate });
+        await client.listExecutionHistory({ request, episodeIds: ['ep-1'], startDate });
 
         expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
           expect.objectContaining({ startDate, episodeIds: ['ep-1'] })
