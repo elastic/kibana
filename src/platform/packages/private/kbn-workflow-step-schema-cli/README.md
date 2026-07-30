@@ -110,6 +110,64 @@ an identical schema yields a byte-identical `index.json` across runs.
 Consumers read `index.json`, then fetch each variant's `schema.json` and verify
 its bytes against the manifest `sha256`.
 
+## CI generation and CDN publishing
+
+The artifact is generated in CI and committed to the repo, then published to the
+CDN from the release/serverless build pipelines.
+
+### Generation (committed to the repo)
+
+The generation is a task masked as a Jest integration test
+(`integration_tests/generate_schema.test.ts`), following the same convention as
+other "generation/check" integration tests (e.g. the encrypted-saved-objects
+`ci_checks`). It boots a real, all-solutions Kibana
+(`createRootWithCorePlugins({}, { oss: false })` over a trial-license ES),
+generates the artifact in-process using this package's own modules (the same
+steps the CLI runs), and writes the committed artifact directly to:
+
+```
+generated/release/{index.json,strict/schema.json,template/schema.json}
+generated/serverless/{index.json,strict/schema.json,template/schema.json}
+```
+
+The two channels share identical schema bytes; only `index.json.channel`
+differs. The output is deterministic (placeholder `buildHash` on a source
+Kibana, key-sorted and timestamp-free), so re-generation is a no-op unless the
+schema actually changed.
+
+Because it is a generation task rather than a suite test, the config is excluded
+from the general jest_integration lane
+(`.buildkite/disabled_jest_configs.json`). It runs only via
+`.buildkite/scripts/steps/code_generation/workflow_step_schema.sh`, which invokes
+the config and then calls `check_for_changed_files`, so any drift is
+auto-committed back to the PR (the moon.yml pattern). Set
+`WORKFLOW_SCHEMA_OUTPUT_DIR` to write elsewhere (e.g. under the gitignored
+`target/`) when experimenting locally.
+
+### CDN layout
+
+Published to the workflows CDN bucket (`elastic-workflows-library-prod`, served
+at `https://workflows.elastic.co`) under a `/schema/v1` prefix, a sibling of the
+Workflow Template Library's `/library` prefix:
+
+```
+schema/v1/<version>/release/{index.json,strict/schema.json,template/schema.json}
+schema/v1/serverless/{index.json,strict/schema.json,template/schema.json}
+```
+
+- **Release** (`.buildkite/scripts/steps/artifacts/publish.sh`, gated on
+  `RELEASE_BUILD=true`): version cut, every RC, and GA overwrite
+  `schema/v1/<version>/release`. Nightly snapshots are not published.
+- **Serverless** (`.buildkite/scripts/steps/artifacts/docker_image.sh`, on the
+  main-branch image promotion): rolling overwrite of `schema/v1/serverless`.
+
+Both call the shared `.buildkite/scripts/steps/workflow_step_schema/publish_schema.sh`,
+which reads the GCS service-account key from Vault
+(`kv/ci-shared/workflows-library/gcs-publish`, field `credentials`), stamps the
+real `kibanaVersion`/`buildHash` onto the published `index.json` (the committed
+copy keeps the placeholder), and `gcloud storage rsync`s the bytes with
+`cache-control: public, max-age=300`.
+
 ## Limitations (accepted)
 
 - **Permissive superset**: accepts any step that exists in *some* flavor. It does

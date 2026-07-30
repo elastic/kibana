@@ -110,6 +110,14 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] || [[ "${DRY_RUN:-}" =~ ^(
   $KIBANA_SUMMARY
 EOF
 
+  # Publish the workflow step-schema artifact to the CDN for every release build
+  # (version cut, all RCs, and GA) - each overwrites schema/v1/<version>/release.
+  # Skipped for nightly snapshots and dry runs.
+  if [[ "$RELEASE_BUILD" == "true" ]] && [[ ! "${DRY_RUN:-}" =~ ^(1|true)$ ]]; then
+    echo "--- Publish workflow step schema to CDN"
+    .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh release
+  fi
+
 else
   echo "Skipping publish for untracked branch $BUILDKITE_BRANCH"
 fi

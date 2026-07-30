@@ -165,6 +165,11 @@ fi
 # and the respective stack components of course.
 echo "--- Trigger image tag update"
 if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  # A main-branch serverless image build is promoted/deployed; publish the
+  # workflow step-schema artifact to the rolling serverless CDN path.
+  echo "--- Publish workflow step schema to CDN"
+  .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless
+
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - label: "Trigger cve-slo-status pipeline for $KIBANA_IMAGE"
