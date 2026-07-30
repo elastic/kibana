@@ -253,6 +253,29 @@ describe('DataView list component', () => {
       expect(changeDataViewSpy).not.toHaveBeenCalled();
     });
 
+    it('should render only one selected data source when both current IDs are set', async () => {
+      renderWithContainer(
+        <DataViewsList
+          {...props}
+          currentDataViewId="dataview-1"
+          currentDiscoverSessionId="discover-session-1"
+          discoverSessionsList={discoverSessions}
+          showDataSourceTypeFilter={true}
+        />
+      );
+
+      await waitFor(() => {
+        expect(screen.getByRole('option', { name: /^dataview-1 / })).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
+        expect(screen.getByRole('option', { name: /^Discover session 1 / })).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+      });
+    });
+
     it('should filter by data source type', async () => {
       const user = userEvent.setup();
 

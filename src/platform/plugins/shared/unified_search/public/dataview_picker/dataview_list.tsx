@@ -202,6 +202,16 @@ export function DataViewsList({
     [selectedDataSourceTypes]
   );
 
+  const selectedDataSource = currentDiscoverSessionId
+    ? {
+        dataSourceType: DATA_SOURCE_TYPES.DISCOVER_SESSION,
+        id: currentDiscoverSessionId,
+      }
+    : {
+        dataSourceType: DATA_SOURCE_TYPES.DATA_VIEW,
+        id: currentDataViewId,
+      };
+
   return (
     <EuiSelectable<{
       key?: string;
@@ -225,10 +235,8 @@ export function DataViewsList({
         value: dataSource.id,
         'data-source-type': dataSource.dataSourceType,
         checked:
-          (dataSource.dataSourceType === DATA_SOURCE_TYPES.DATA_VIEW &&
-            dataSource.id === currentDataViewId) ||
-          (dataSource.dataSourceType === DATA_SOURCE_TYPES.DISCOVER_SESSION &&
-            dataSource.id === currentDiscoverSessionId)
+          dataSource.dataSourceType === selectedDataSource.dataSourceType &&
+          dataSource.id === selectedDataSource.id
             ? 'on'
             : undefined,
         'data-test-subj':
