@@ -132,6 +132,61 @@ describe('AnsibleControllerConnector', () => {
         })
       ).rejects.toThrow('not permitted');
     });
+
+    it('rejects password reset / privilege escalation via PATCH on the user object itself', async () => {
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'PATCH',
+          path: '/users/5/',
+          body: { password: 'new-password' },
+        })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'PATCH',
+          path: '/users/5/',
+          body: { is_superuser: true },
+        })
+      ).rejects.toThrow('not permitted');
+    });
+
+    it('rejects user creation via relative path', async () => {
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'POST',
+          path: '/users/',
+          body: { username: 'evil', is_superuser: true },
+        })
+      ).rejects.toThrow('not permitted');
+    });
+
+    it('rejects mutations to relative-path prefixes that resolve to blocked absolute paths', async () => {
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'POST',
+          path: '/tokens/',
+          body: {},
+        })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'GET',
+          path: '/tokens/',
+        })
+      ).rejects.toThrow('not permitted');
+    });
+
+    it('still allows reading (GET) the users collection', async () => {
+      mockRequest.mockResolvedValue(okResponse({ count: 0, results: [] }));
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'GET',
+          path: '/users/',
+        })
+      ).resolves.toEqual({ count: 0, results: [] });
+    });
   });
 
   describe('listJobTemplates', () => {

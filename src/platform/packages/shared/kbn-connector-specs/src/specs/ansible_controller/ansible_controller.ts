@@ -63,8 +63,6 @@ const BLOCKED_PATH_PREFIXES = [
   '/websocket/',
   '/api/v2/tokens',
   '/api/controller/v2/tokens',
-  '/api/v2/users/',
-  '/api/controller/v2/users/',
 ] as const;
 
 interface ControllerConfig {
@@ -98,17 +96,21 @@ interface ControllerRequestOptions {
 
 const stripTrailingSlash = (url: string): string => url.replace(/\/+$/, '');
 
-const assertPathAllowed = (path: string): void => {
+const assertRawPathValid = (path: string): void => {
   if (!path.startsWith('/')) {
     throw new Error('Ansible Controller API path must start with "/"');
   }
+};
+
+// NOTE: `path` here must already be resolved to its fully-qualified `/api/...` form (see
+// `resolveApiPath`), not the connector's relative-to-`apiBasePath` input path. Matching against
+// the raw input would let the relative-path convention (e.g. `/users/`, `/tokens/`) bypass these
+// fully-qualified prefixes entirely.
+const assertPathAllowed = (path: string): void => {
   const pathOnly = (path.split(/[?#]/, 1)[0] ?? path).toLowerCase();
   for (const prefix of BLOCKED_PATH_PREFIXES) {
     if (pathOnly === prefix || pathOnly.startsWith(prefix.endsWith('/') ? prefix : `${prefix}/`)) {
-      // tokens list GET is ok to block for write-ish; users endpoint writes blocked via method checks below
-      if (prefix.includes('/tokens') || prefix.includes('/websocket')) {
-        throw new Error(`Requests to "${prefix}" are not permitted via this connector`);
-      }
+      throw new Error(`Requests to "${prefix}" are not permitted via this connector`);
     }
   }
   if (pathOnly.includes('/websocket')) {
@@ -125,10 +127,13 @@ const assertRequestAllowed = (method: HttpMethod, path: string): void => {
       pathOnly.includes('/credentials/') ||
       pathOnly.includes('/credential_types/') ||
       pathOnly.includes('/tokens/') ||
-      /\/users\/[^/]+\/(password|tokens)/.test(pathOnly)
+      // Blocks the whole users collection, not just `/password/` or `/tokens/` sub-paths: AWX/
+      // Controller resets a password or escalates `is_superuser` via `PATCH` on the user object
+      // itself (e.g. `PATCH /api/v2/users/5/`), and creates users via `POST /api/v2/users/`.
+      pathOnly.includes('/users/')
     ) {
       throw new Error(
-        `Mutating requests to credential/token/user-secret paths are not permitted via this connector`
+        `Mutating requests to credential/token/user paths are not permitted via this connector`
       );
     }
   }
@@ -203,24 +208,33 @@ const getConfig = (ctx: ActionContext): ControllerConfig => {
   };
 };
 
-const resolveUrl = (config: ControllerConfig, path: string, absoluteFromRoot?: boolean): string => {
+/** Resolves `path` to its fully-qualified `/api/...` form, applying `apiBasePath` when relative. */
+const resolveApiPath = (
+  config: ControllerConfig,
+  path: string,
+  absoluteFromRoot?: boolean
+): string => {
   if (absoluteFromRoot || path.startsWith('/api/')) {
-    return `${config.apiUrl}${path}`;
+    return path;
   }
-  return `${config.apiUrl}${config.apiBasePath}${path}`;
+  return `${config.apiBasePath}${path}`;
 };
 
 const controllerRequest = async (
   ctx: ActionContext,
   options: ControllerRequestOptions
 ): Promise<unknown> => {
-  assertRequestAllowed(options.method, options.path);
+  assertRawPathValid(options.path);
   const config = getConfig(ctx);
+  const apiPath = resolveApiPath(config, options.path, options.absoluteFromRoot);
+  // Guard against the fully-qualified path so relative inputs (the connector's documented
+  // convention) can't bypass prefix-based blocks meant for `/api/...` forms.
+  assertRequestAllowed(options.method, apiPath);
   const client = ctx.client as AxiosInstance;
   try {
     const response = await client.request({
       method: options.method,
-      url: resolveUrl(config, options.path, options.absoluteFromRoot),
+      url: `${config.apiUrl}${apiPath}`,
       ...(options.params ? { params: options.params } : {}),
       ...(options.data !== undefined ? { data: options.data } : {}),
       ...(options.responseType ? { responseType: options.responseType } : {}),
