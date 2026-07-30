@@ -22,19 +22,26 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApplyFiltersPopover } from './apply_filters_popover';
 import type { GraphFiltersState } from './apply_filters_popover';
 import { useGraphInteractionTool } from './graph_interaction_tool_context';
-import { DISPLAY_SHORTCUT, formatToolShortcutAriaLabel } from './graph_keyboard_shortcuts';
+import {
+  DISPLAY_SHORTCUT,
+  formatToolShortcutAriaLabel,
+  SEARCH_TOOL_SHORTCUT,
+} from './graph_keyboard_shortcuts';
 import { ToolShortcutTooltip } from './tool_shortcut_tooltip';
 import { GraphControlTooltip } from './graph_control_tooltip';
 import { GraphKeyboardShortcutsPanel } from './graph_keyboard_shortcuts_panel';
 import { GraphSearchPanel } from './graph_search_panel';
 import { focusGraphFindInPageInput } from './graph_find_in_page';
 import type { NodeViewModel } from '../types';
+import { hasActiveEntityFilters } from './graph_entity_filters';
 import { useGraphSearchContext } from './graph_search_context';
+import { GraphNotificationBadge } from '../graph_notification_badge';
 import { isOriginEntityOrEventNode } from '../graph/graph_origin_utils';
 import { DISPLAY_STARTING_POINT_TOUR_STORAGE_KEY } from '../../common/constants';
 import {
   GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID,
   GRAPH_BOTTOM_BAR_KEYBOARD_SHORTCUTS_ID,
+  GRAPH_BOTTOM_BAR_SEARCH_ID,
 } from '../test_ids';
 
 const investigateInTimelineLabel = i18n.translate(
@@ -52,6 +59,11 @@ const displayLabel = i18n.translate(
   { defaultMessage: 'Display' }
 );
 
+const searchLabel = i18n.translate('securitySolutionPackages.csp.graph.controls.bottomBar.search', {
+  defaultMessage: 'Search',
+});
+
+const searchAriaLabel = formatToolShortcutAriaLabel(searchLabel, SEARCH_TOOL_SHORTCUT);
 const displayAriaLabel = formatToolShortcutAriaLabel(displayLabel, DISPLAY_SHORTCUT);
 
 const displayStartingPointTourTitle = i18n.translate(
@@ -71,6 +83,7 @@ const BOTTOM_BAR_HEIGHT = 48;
 const BOTTOM_BAR_BUTTON_SIZE = 32;
 const BOTTOM_BAR_BUTTON_RADIUS = 4;
 const BOTTOM_BAR_SECTION_GAP = 8;
+const SEARCH_DISPLAY_GAP = 4;
 /** EUI medium drop shadow for the bottom bar panel. */
 const BOTTOM_BAR_SHADOW = 'm' as const;
 
@@ -80,6 +93,8 @@ export interface BottomBarProps extends CommonProps {
   filtersState: GraphFiltersState;
   onFiltersChange: (next: GraphFiltersState) => void;
   nodes: NodeViewModel[];
+  /** When false, hides the in-graph search control (Option B). Defaults to true. */
+  showInGraphSearch?: boolean;
 }
 
 export const BottomBar = ({
@@ -88,6 +103,7 @@ export const BottomBar = ({
   filtersState,
   onFiltersChange,
   nodes,
+  showInGraphSearch = true,
   ...props
 }: BottomBarProps) => {
   const { euiTheme } = useEuiTheme();
@@ -143,20 +159,42 @@ export const BottomBar = ({
   }, [registerApplyFiltersToggle, toggleApplyFiltersPanel]);
 
   useEffect(() => {
+    if (!showInGraphSearch) {
+      return;
+    }
+
     registerSearchPanelToggle(toggleSearchPanel);
 
     return () => {
       registerSearchPanelToggle(null);
     };
-  }, [registerSearchPanelToggle, toggleSearchPanel]);
+  }, [registerSearchPanelToggle, showInGraphSearch, toggleSearchPanel]);
 
   useEffect(() => {
+    if (!showInGraphSearch) {
+      return;
+    }
+
     registerFocusSearchInput(focusSearchInput);
 
     return () => {
       registerFocusSearchInput(null);
     };
-  }, [registerFocusSearchInput, focusSearchInput]);
+  }, [focusSearchInput, registerFocusSearchInput, showInGraphSearch]);
+
+  const entityFilterCount = useMemo(() => {
+    let count = 0;
+    if (entityFilters.riskScoreMin !== null) {
+      count += 1;
+    }
+    if (entityFilters.assetCriticality.length > 0) {
+      count += 1;
+    }
+    if (entityFilters.newEntitiesWindow !== null) {
+      count += 1;
+    }
+    return count;
+  }, [entityFilters]);
 
   const hasOriginNodes = useMemo(() => nodes.some(isOriginEntityOrEventNode), [nodes]);
 
@@ -215,6 +253,13 @@ export const BottomBar = ({
     flex-shrink: 0;
   `;
 
+  const searchDisplayGroupCss = css`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: ${SEARCH_DISPLAY_GAP}px;
+  `;
+
   const handleKeyboardShortcutsClick = () => {
     setIsKeyboardShortcutsOpen((isOpen) => {
       const next = !isOpen;
@@ -257,80 +302,117 @@ export const BottomBar = ({
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          {/* Keep search panel mounted for S / Cmd+K shortcuts without a bottom-bar icon. */}
-          <GraphSearchPanel
-            isOpen={isSearchOpen}
-            onClose={closeSearchPanel}
-            nodes={nodes}
-            entityFilters={entityFilters}
-            onEntityFiltersChange={setEntityFilters}
-          >
-            <span
-              css={css`
-                position: absolute;
-                width: 0;
-                height: 0;
-                overflow: hidden;
-              `}
-              aria-hidden={true}
-            />
-          </GraphSearchPanel>
+          <div css={searchDisplayGroupCss}>
+            {showInGraphSearch ? (
+              <GraphSearchPanel
+                isOpen={isSearchOpen}
+                onClose={closeSearchPanel}
+                nodes={nodes}
+                entityFilters={entityFilters}
+                onEntityFiltersChange={setEntityFilters}
+              >
+                <GraphControlTooltip
+                  content={
+                    <ToolShortcutTooltip label={searchLabel} shortcut={SEARCH_TOOL_SHORTCUT} />
+                  }
+                  position="top"
+                  disableScreenReaderOutput
+                >
+                  <div
+                    css={css`
+                      position: relative;
+                      display: inline-flex;
+                    `}
+                  >
+                    <EuiButtonIcon
+                      iconType="query"
+                      aria-label={searchAriaLabel}
+                      size="m"
+                      color={
+                        isSearchOpen || hasActiveEntityFilters(entityFilters) ? 'primary' : 'text'
+                      }
+                      css={controlButtonCss}
+                      data-test-subj={GRAPH_BOTTOM_BAR_SEARCH_ID}
+                      onClick={toggleSearchPanel}
+                    />
+                    {entityFilterCount > 0 && (
+                      <GraphNotificationBadge
+                        css={css`
+                          position: absolute;
+                          right: -4px;
+                          bottom: -4px;
+                          pointer-events: none;
+                        `}
+                      >
+                        {entityFilterCount > 99 ? '99+' : entityFilterCount}
+                      </GraphNotificationBadge>
+                    )}
+                  </div>
+                </GraphControlTooltip>
+              </GraphSearchPanel>
+            ) : null}
 
-          <EuiTourStep
-            anchorPosition="upCenter"
-            title={displayStartingPointTourTitle}
-            content={displayStartingPointTourContent}
-            isStepOpen={isDisplayTourOpen}
-            onFinish={dismissDisplayTour}
-            step={1}
-            stepsTotal={1}
-            maxWidth={350}
-          >
-            <ApplyFiltersPopover
-              isOpen={isFiltersOpen}
-              onClose={() => setIsFiltersOpen(false)}
-              filtersState={filtersState}
-              onFiltersChange={onFiltersChange}
+            <EuiTourStep
+              anchorPosition="upCenter"
+              title={displayStartingPointTourTitle}
+              content={displayStartingPointTourContent}
+              isStepOpen={isDisplayTourOpen}
+              onFinish={dismissDisplayTour}
+              step={1}
+              stepsTotal={1}
+              maxWidth={350}
             >
+              <ApplyFiltersPopover
+                isOpen={isFiltersOpen}
+                onClose={() => setIsFiltersOpen(false)}
+                filtersState={filtersState}
+                onFiltersChange={onFiltersChange}
+              >
+                <GraphControlTooltip
+                  content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}
+                  position="top"
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    iconType="layers"
+                    aria-label={displayAriaLabel}
+                    size="m"
+                    color={isFiltersOpen ? 'primary' : 'text'}
+                    css={controlButtonCss}
+                    data-test-subj={GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID}
+                    onClick={() => {
+                      toggleApplyFiltersPanel();
+                      dismissDisplayTour();
+                    }}
+                  />
+                </GraphControlTooltip>
+              </ApplyFiltersPopover>
+            </EuiTourStep>
+          </div>
+        </EuiFlexItem>
+
+        {showInvestigateInTimeline && (
+          <>
+            <EuiFlexItem grow={false}>
+              <div css={verticalDividerCss} aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <GraphControlTooltip
-                content={<ToolShortcutTooltip label={displayLabel} shortcut={DISPLAY_SHORTCUT} />}
+                content={investigateInTimelineLabel}
                 position="top"
                 disableScreenReaderOutput
               >
                 <EuiButtonIcon
-                  iconType="layers"
-                  aria-label={displayAriaLabel}
+                  iconType="timeline"
+                  aria-label={investigateInTimelineLabel}
                   size="m"
-                  color={isFiltersOpen ? 'primary' : 'text'}
+                  color="text"
                   css={controlButtonCss}
-                  data-test-subj={GRAPH_BOTTOM_BAR_APPLY_FILTERS_ID}
-                  onClick={() => {
-                    toggleApplyFiltersPanel();
-                    dismissDisplayTour();
-                  }}
+                  onClick={onInvestigateInTimeline}
                 />
               </GraphControlTooltip>
-            </ApplyFiltersPopover>
-          </EuiTourStep>
-        </EuiFlexItem>
-
-        {showInvestigateInTimeline && (
-          <EuiFlexItem grow={false}>
-            <GraphControlTooltip
-              content={investigateInTimelineLabel}
-              position="top"
-              disableScreenReaderOutput
-            >
-              <EuiButtonIcon
-                iconType="timeline"
-                aria-label={investigateInTimelineLabel}
-                size="m"
-                color="text"
-                css={controlButtonCss}
-                onClick={onInvestigateInTimeline}
-              />
-            </GraphControlTooltip>
-          </EuiFlexItem>
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
     </div>

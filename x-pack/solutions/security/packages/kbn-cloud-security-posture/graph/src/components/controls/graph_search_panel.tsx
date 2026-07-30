@@ -20,6 +20,8 @@ export interface GraphSearchPanelProps extends PropsWithChildren {
   nodes: NodeViewModel[];
   entityFilters: GraphEntityFiltersState;
   onEntityFiltersChange: (next: GraphEntityFiltersState) => void;
+  /** Popover anchor relative to the trigger button. */
+  anchorPosition?: 'upCenter' | 'leftDown' | 'leftUp' | 'downCenter';
 }
 
 export const GraphSearchPanel = ({
@@ -29,6 +31,7 @@ export const GraphSearchPanel = ({
   entityFilters,
   onEntityFiltersChange,
   children,
+  anchorPosition = 'upCenter',
 }: GraphSearchPanelProps) => {
   const { euiTheme } = useEuiTheme();
   const fullscreenContext = useGraphFullscreenContext();
@@ -45,7 +48,7 @@ export const GraphSearchPanel = ({
       button={children}
       isOpen={isOpen}
       closePopover={onClose}
-      anchorPosition="upCenter"
+      anchorPosition={anchorPosition}
       panelPaddingSize="none"
       container={fullscreenContext?.overlayContainerRef.current ?? undefined}
     >

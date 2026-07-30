@@ -22,10 +22,6 @@ describe('useGraphInteractionKeyboardShortcuts', () => {
       })
     );
 
-    document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyV', key: 'v', bubbles: true }));
-    document.dispatchEvent(
-      new KeyboardEvent('keydown', { code: 'Space', key: ' ', bubbles: true })
-    );
     document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyS', key: 's', bubbles: true }));
     document.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyD', key: 'd', bubbles: true }));
     document.dispatchEvent(
@@ -38,21 +34,20 @@ describe('useGraphInteractionKeyboardShortcuts', () => {
   });
 
   it('ignores shortcuts while typing in an input', () => {
-    const onToggleSearchPanel = jest.fn();
+    const onToggleApplyFiltersPanel = jest.fn();
     const input = document.createElement('input');
     document.body.appendChild(input);
     input.focus();
 
     renderHook(() =>
       useGraphInteractionKeyboardShortcuts({
-        onToggleApplyFiltersPanel: jest.fn(),
-        onToggleSearchPanel,
+        onToggleApplyFiltersPanel,
       })
     );
 
-    input.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyS', bubbles: true }));
+    input.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyD', bubbles: true }));
 
-    expect(onToggleSearchPanel).not.toHaveBeenCalled();
+    expect(onToggleApplyFiltersPanel).not.toHaveBeenCalled();
 
     input.remove();
   });

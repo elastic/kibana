@@ -13,7 +13,6 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { Controls, type ControlsProps } from './controls';
 import {
   GRAPH_CONTROLS_FIT_VIEW_ID,
-  GRAPH_CONTROLS_CENTER_ID,
   GRAPH_CONTROLS_FULL_SCREEN_ID,
   GRAPH_CONTROLS_ZOOM_IN_ID,
   GRAPH_CONTROLS_ZOOM_OUT_ID,
@@ -43,8 +42,8 @@ const renderWithProviders = (props: ControlsProps = defaultProps) => {
 describe('Controls', () => {
   beforeEach(() => {
     useReactFlowMock.mockReturnValue({
-      zoomIn: jest.fn(),
-      zoomOut: jest.fn(),
+      getZoom: jest.fn(() => 1),
+      zoomTo: jest.fn(),
       fitView: jest.fn(),
     });
 
@@ -86,7 +85,7 @@ describe('Controls', () => {
 
       fireEvent.click(getByTestId(GRAPH_CONTROLS_ZOOM_IN_ID));
 
-      expect(useReactFlowMock().zoomIn).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1.12, { duration: undefined });
       expect(onZoomIn).toHaveBeenCalled();
     });
 
@@ -96,7 +95,7 @@ describe('Controls', () => {
 
       fireEvent.click(getByTestId(GRAPH_CONTROLS_ZOOM_OUT_ID));
 
-      expect(useReactFlowMock().zoomOut).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1 / 1.12, { duration: undefined });
       expect(onZoomOut).toHaveBeenCalled();
     });
 
@@ -345,13 +344,13 @@ describe('Controls', () => {
       expect(document.activeElement).toBe(zoomInButton);
       // Test keyboard activation
       await user.keyboard('{Enter}');
-      expect(useReactFlowMock().zoomIn).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1.12, { duration: undefined });
 
       // Test tab navigation and keyboard activation - zoom out
       await user.tab();
       expect(document.activeElement).toBe(zoomOutButton);
       await user.keyboard('{Enter}');
-      expect(useReactFlowMock().zoomOut).toHaveBeenCalled();
+      expect(useReactFlowMock().zoomTo).toHaveBeenCalledWith(1 / 1.12, { duration: undefined });
 
       // Test tab navigation and keyboard activation - center
       await user.tab();

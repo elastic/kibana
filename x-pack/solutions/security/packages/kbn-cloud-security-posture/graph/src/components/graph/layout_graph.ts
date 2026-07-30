@@ -7,11 +7,16 @@
 
 import Dagre from '@dagrejs/dagre';
 import type { Node, Edge } from '@xyflow/react';
-import type { EdgeViewModel, NodeViewModel, Size } from '../types';
+import type { EdgeViewModel, NodeViewModel, Size, EntityNodeViewModel } from '../types';
 import { getStackNodeStyle } from '../node/styles';
-import { isEntityNode, isConnectorNode, isStackNode, isStackedLabel } from '../utils';
 import {
-  GRID_SIZE,
+  isEntityNode,
+  isConnectorNode,
+  isStackNode,
+  isStackedLabel,
+  showStackedShape,
+} from '../utils';
+import {
   STACK_NODE_VERTICAL_PADDING,
   STACK_NODE_HORIZONTAL_PADDING,
   NODE_HEIGHT,
@@ -38,11 +43,59 @@ const GRAPH_NODE_SEP = GRAPH_LAYOUT_NODE_SEP;
 
 const GRID_SIZE_OFFSET = LAYOUT_GRID_SIZE_OFFSET;
 
+/** Card header block: 12px padding + 40px icon + 12px padding. */
+const CARD_LAYOUT_HEADER_HEIGHT = 64;
+/** Card body outer padding (top + bottom). */
+const CARD_LAYOUT_BODY_PADDING = 24;
+/** Approximate height of one metadata field block (label + value). */
+const CARD_LAYOUT_METADATA_BLOCK = 40;
+/** Vertical gap between metadata sections in the card body. */
+const CARD_LAYOUT_SECTION_GAP = 16;
+/** Grouped-entity stack tab under the card. */
+const CARD_LAYOUT_GROUP_STACK = 8;
+
 /**
- * Layout height for entity cards when DOM measurement is unavailable.
- * Sized for fully expanded cards with grouped metadata.
+ * Estimates entity card height from visible metadata so Dagre can pack nodes
+ * tightly (close but non-overlapping) instead of always reserving the max card.
  */
-const CARD_NODE_LAYOUT_HEIGHT = CARD_NODE_DEFAULT_HEIGHT + GRID_SIZE_OFFSET * 4;
+const estimateEntityCardLayoutHeight = (data: EntityNodeViewModel): number => {
+  const showIp = Boolean(data.ips && data.ips.length > 0);
+  const showGeo = Boolean(data.countryCodes && data.countryCodes.length > 0);
+  const showCriticality = Boolean(data.assetCriticality || data.assetCriticalityCounts);
+  const showRisk =
+    data.riskScore !== undefined ||
+    (data.riskScoreMin !== undefined && data.riskScoreMax !== undefined);
+  const showEntityId = Boolean(data.showEntityId);
+  const hasBody = showIp || showGeo || showEntityId || showCriticality || showRisk;
+
+  let height = CARD_LAYOUT_HEADER_HEIGHT;
+
+  if (hasBody) {
+    height += CARD_LAYOUT_BODY_PADDING;
+
+    if (showIp || showGeo) {
+      height += CARD_LAYOUT_METADATA_BLOCK;
+    }
+
+    if (showEntityId) {
+      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+    }
+
+    if (showCriticality) {
+      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+    }
+
+    if (showRisk) {
+      height += CARD_LAYOUT_SECTION_GAP + CARD_LAYOUT_METADATA_BLOCK;
+    }
+  }
+
+  if (showStackedShape(data.count)) {
+    height += CARD_LAYOUT_GROUP_STACK;
+  }
+
+  return Math.min(height, CARD_NODE_DEFAULT_HEIGHT);
+};
 
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
@@ -105,7 +158,7 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
-      size.height = node.measured?.height ?? CARD_NODE_LAYOUT_HEIGHT;
+      size.height = node.measured?.height ?? estimateEntityCardLayoutHeight(node.data);
     }
 
     if (!nodesById[node.id]) {
@@ -133,21 +186,12 @@ export const layoutGraph = (
     nodesById
   );
 
-  alignOriginSpineInPlace(
-    g,
-    nodesById,
-    edges,
-    stackedNodeIds,
-    (nodeId: string) => {
-      const node = nodesById[nodeId]?.data;
-      return node !== undefined && isStackedLabel(node);
-    }
-  );
-
-  resolveRankOverlapsInPlace(g, (nodeId: string) => {
+  alignOriginSpineInPlace(g, nodesById, edges, stackedNodeIds, (nodeId: string) => {
     const node = nodesById[nodeId]?.data;
     return node !== undefined && isStackedLabel(node);
   });
+
+  resolveRankOverlapsInPlace(g, () => true);
 
   const layoutedNodes = nodes.map((node) => {
     // For stacked nodes, we want to keep the original position relative to the parent
@@ -177,7 +221,7 @@ export const layoutGraph = (
     }
 
     if (isEntityNode(node.data)) {
-      const nodeHeight = dagreNode.height ?? CARD_NODE_LAYOUT_HEIGHT;
+      const nodeHeight = dagreNode.height ?? estimateEntityCardLayoutHeight(node.data);
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
       const y = Math.round(dagreNode.y - nodeHeight / 2);
 
@@ -360,8 +404,6 @@ const handleMultipleChildren = (
       setY(nodeId, snapped(centerY));
       topEdge += heights[index] + GRID_SIZE_OFFSET;
     }
-
-    return;
   } else {
     const centerY = calculateCenterY(children, Y);
     prevNodeY[currNode] = currY;
@@ -578,40 +620,33 @@ const resolveRankOverlapsInPlace = (
   const nodesByRank = new Map<number, string[]>();
 
   for (const nodeId of g.nodes()) {
-    if (!filter(nodeId)) {
-      continue;
+    if (filter(nodeId)) {
+      const dagreNode = g.node(nodeId) as Dagre.Node;
+      const rankKey = Math.round(dagreNode.x);
+      const rankNodes = nodesByRank.get(rankKey) ?? [];
+
+      rankNodes.push(nodeId);
+      nodesByRank.set(rankKey, rankNodes);
     }
-
-    const dagreNode = g.node(nodeId) as Dagre.Node;
-    const rankKey = Math.round(dagreNode.x);
-    const rankNodes = nodesByRank.get(rankKey) ?? [];
-
-    rankNodes.push(nodeId);
-    nodesByRank.set(rankKey, rankNodes);
   }
 
   for (const rankNodeIds of nodesByRank.values()) {
-    if (rankNodeIds.length < 2) {
-      continue;
-    }
+    if (rankNodeIds.length >= 2) {
+      const sorted = [...rankNodeIds].sort(
+        (left, right) => (g.node(left) as Dagre.Node).y - (g.node(right) as Dagre.Node).y
+      );
 
-    const sorted = [...rankNodeIds].sort(
-      (left, right) => (g.node(left) as Dagre.Node).y - (g.node(right) as Dagre.Node).y
-    );
+      for (let index = 1; index < sorted.length; index += 1) {
+        const previousNode = g.node(sorted[index - 1]) as Dagre.Node;
+        const currentNode = g.node(sorted[index]) as Dagre.Node;
+        const previousHeight = previousNode.height ?? NODE_HEIGHT;
+        const currentHeight = currentNode.height ?? NODE_HEIGHT;
+        const minCenterY =
+          previousNode.y + previousHeight / 2 + GRAPH_LAYOUT_MIN_NODE_GAP + currentHeight / 2;
 
-    for (let index = 1; index < sorted.length; index += 1) {
-      const previousNode = g.node(sorted[index - 1]) as Dagre.Node;
-      const currentNode = g.node(sorted[index]) as Dagre.Node;
-      const previousHeight = previousNode.height ?? NODE_HEIGHT;
-      const currentHeight = currentNode.height ?? NODE_HEIGHT;
-      const minCenterY =
-        previousNode.y +
-        previousHeight / 2 +
-        GRAPH_LAYOUT_MIN_NODE_GAP +
-        currentHeight / 2;
-
-      if (currentNode.y < minCenterY) {
-        currentNode.y = snapped(minCenterY);
+        if (currentNode.y < minCenterY) {
+          currentNode.y = snapped(minCenterY);
+        }
       }
     }
   }

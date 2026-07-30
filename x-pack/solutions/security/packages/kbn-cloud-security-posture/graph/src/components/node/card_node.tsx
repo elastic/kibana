@@ -609,7 +609,6 @@ const SimplifiedCard = ({
           <EuiIcon
             type={resolvedIcon}
             size="l"
-            color="primary"
             aria-hidden={true}
             css={css`
               svg {
@@ -717,9 +716,10 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const headerPrimaryText = isGroup ? entityTypeLabel ?? entityName : entityName;
   const headerSecondaryText = isGroup ? undefined : entityTypeLabel;
 
+  // Figma entity card (node 13969:2409): Borders/Base/Prominent, Backgrounds/Light/Primary header.
   const defaultBorderColor = euiTheme.colors.borderBaseProminent;
-  const activeBorderColor = euiTheme.colors.primary;
-  const headerBg = euiTheme.colors.backgroundBasePrimary;
+  const activeBorderColor = euiTheme.colors.borderBasePrimary;
+  const headerBg = euiTheme.colors.backgroundLightPrimary;
   const cardBg = euiTheme.colors.backgroundBasePlain;
   const iconBorderColor = euiTheme.colors.borderBaseProminent;
   const iconBg = euiTheme.colors.backgroundBasePlain;
@@ -797,7 +797,7 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
                   <EntityGroupCountBadge count={count} />
                 </IconCountBadge>
               )}
-              <EuiIcon type={resolvedIcon} size="l" color="primary" aria-hidden={true} />
+              <EuiIcon type={resolvedIcon} size="l" aria-hidden={true} />
             </IconBox>
 
             <HeaderText>

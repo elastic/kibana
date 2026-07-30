@@ -15,6 +15,8 @@ import {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID,
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID,
 } from '../test_ids';
+import { GraphInteractionToolContext } from './graph_interaction_tool_context';
+import { GraphSearchProvider } from './graph_search_context';
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([false, jest.fn()]));
 const SEARCH_BAR_TOUR_TITLE = 'Refine your view with search';
@@ -52,7 +54,20 @@ beforeEach(() => {
 const renderWithProviders = (props: ActionsProps = defaultProps) => {
   return render(
     <EuiThemeProvider>
-      <Actions {...props} />
+      <GraphInteractionToolContext.Provider
+        value={{
+          interactionTool: 'select',
+          setInteractionTool: jest.fn(),
+          registerApplyFiltersToggle: jest.fn(),
+          registerSearchPanelToggle: jest.fn(),
+          registerFocusSearchInput: jest.fn(),
+          openInGraphSearch: jest.fn(),
+        }}
+      >
+        <GraphSearchProvider>
+          <Actions {...props} />
+        </GraphSearchProvider>
+      </GraphInteractionToolContext.Provider>
     </EuiThemeProvider>
   );
 };

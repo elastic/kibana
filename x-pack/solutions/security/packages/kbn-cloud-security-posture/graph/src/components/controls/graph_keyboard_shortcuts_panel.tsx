@@ -23,7 +23,6 @@ import {
   DISPLAY_SHORTCUT,
   FIT_TO_SCREEN_SHORTCUT,
   FULL_SCREEN_SHORTCUT,
-  MULTI_SELECT_SHORTCUT,
   SEARCH_TOOL_SHORTCUT,
   ZOOM_IN_SHORTCUT,
   ZOOM_OUT_SHORTCUT,
@@ -36,15 +35,6 @@ const panelTitle = i18n.translate(
 );
 
 const shortcuts = [
-  {
-    label: i18n.translate(
-      'securitySolutionPackages.csp.graph.controls.keyboardShortcuts.multiSelect',
-      {
-        defaultMessage: 'Multi-select',
-      }
-    ),
-    keys: [MULTI_SELECT_SHORTCUT],
-  },
   {
     label: i18n.translate('securitySolutionPackages.csp.graph.controls.keyboardShortcuts.search', {
       defaultMessage: 'Open search',

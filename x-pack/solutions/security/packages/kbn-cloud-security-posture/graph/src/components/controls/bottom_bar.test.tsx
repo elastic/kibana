@@ -65,6 +65,7 @@ const renderBottomBar = (
               registerApplyFiltersToggle,
               registerSearchPanelToggle,
               registerFocusSearchInput,
+              openInGraphSearch: jest.fn(),
             }}
           >
             <BottomBar

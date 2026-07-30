@@ -14,6 +14,8 @@ export interface GraphInteractionToolContextValue {
   registerApplyFiltersToggle: (toggle: PanelToggleHandler | null) => void;
   registerSearchPanelToggle: (toggle: PanelToggleHandler | null) => void;
   registerFocusSearchInput: (focus: FocusSearchInputHandler | null) => void;
+  /** Opens the in-graph find/filter panel (find-in-page). */
+  openInGraphSearch: () => void;
 }
 
 export const GraphInteractionToolContext = createContext<GraphInteractionToolContextValue | null>(

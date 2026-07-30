@@ -36,6 +36,7 @@ export const GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}ShowEventDetails` as const;
 
 export const GRAPH_ACTIONS_TOGGLE_SEARCH_ID = `${GRAPH_INVESTIGATION_TEST_ID}ToggleSearch` as const;
+export const GRAPH_ACTIONS_SEARCH_MENU_ID = `${GRAPH_INVESTIGATION_TEST_ID}SearchMenu` as const;
 export const GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}InvestigateInTimeline` as const;
 
@@ -63,8 +64,7 @@ export const GRAPH_EDGE_ID = `${GRAPH_INVESTIGATION_TEST_ID}Edge` as const;
 export const GRAPH_STACKED_SHAPE_ID = `${GRAPH_INVESTIGATION_TEST_ID}StackedShape` as const;
 
 export const GRAPH_MINIMAP_ID = `${GRAPH_INVESTIGATION_TEST_ID}Minimap` as const;
-export const GRAPH_MINIMAP_COLLAPSE_ID = `${GRAPH_INVESTIGATION_TEST_ID}MinimapCollapse` as const;
-export const GRAPH_MINIMAP_EXPAND_ID = `${GRAPH_INVESTIGATION_TEST_ID}MinimapExpand` as const;
+export const GRAPH_MINIMAP_TOGGLE_ID = `${GRAPH_INVESTIGATION_TEST_ID}MinimapToggle` as const;
 export const GRAPH_MINIMAP_ENTITY_NODE_ID =
   `${GRAPH_INVESTIGATION_TEST_ID}MinimapEntityNode` as const;
 export const GRAPH_MINIMAP_LABEL_NODE_ID =

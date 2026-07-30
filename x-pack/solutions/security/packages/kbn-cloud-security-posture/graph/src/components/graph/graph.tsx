@@ -9,6 +9,7 @@ import React, { useState, useCallback, useEffect, useRef, memo, useMemo } from '
 import { size, isEmpty, isEqual, xorWith } from 'lodash';
 import {
   Background,
+  BackgroundVariant,
   Panel,
   Position,
   ReactFlow,
@@ -34,11 +35,20 @@ import { DefaultEdge } from '../edge';
 import { mapEdgeViewModelToReactFlowEdge } from '../edge/edge_processing';
 import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
-import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
+import {
+  ONLY_RENDER_VISIBLE_ELEMENTS,
+  GRID_SIZE,
+  GRAPH_BACKGROUND_COLOR,
+  GRAPH_BACKGROUND_DOT_COLOR,
+  GRAPH_BACKGROUND_DOT_GAP,
+  GRAPH_BACKGROUND_DOT_SIZE,
+  GRAPH_MAX_ZOOM,
+  GRAPH_MIN_ZOOM,
+} from '../constants';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
-import { Controls, CONTROL_PANEL_MARGIN } from '../controls/controls';
+import { Controls, CONTROL_PANEL_MARGIN_LEFT } from '../controls/controls';
 import { GraphInteractionToolContext } from '../controls/graph_interaction_tool_context';
 import { GRAPH_ID } from '../test_ids';
 import { useGraphFullscreen } from '../../hooks/use_graph_fullscreen';
@@ -124,7 +134,9 @@ const edgeTypes = {
 };
 
 const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
-  duration: 200,
+  duration: 350,
+  minZoom: GRAPH_MIN_ZOOM,
+  maxZoom: GRAPH_MAX_ZOOM,
 };
 
 const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
@@ -202,22 +214,18 @@ export const Graph = memo<GraphProps>(
         }
 
         for (const change of changes) {
-          if (change.type !== 'position' || change.dragging !== false || !change.position) {
-            continue;
-          }
+          if (change.type === 'position' && change.dragging === false && change.position) {
+            const layoutPosition = layoutPositionsRef.current.get(change.id);
 
-          const layoutPosition = layoutPositionsRef.current.get(change.id);
+            if (layoutPosition) {
+              const deltaX = Math.abs(change.position.x - layoutPosition.x);
+              const deltaY = Math.abs(change.position.y - layoutPosition.y);
 
-          if (!layoutPosition) {
-            continue;
-          }
-
-          const deltaX = Math.abs(change.position.x - layoutPosition.x);
-          const deltaY = Math.abs(change.position.y - layoutPosition.y);
-
-          if (deltaX > GRID_SIZE || deltaY > GRID_SIZE) {
-            setUseBundledEdgeRouting(false);
-            break;
+              if (deltaX > GRID_SIZE || deltaY > GRID_SIZE) {
+                setUseBundledEdgeRouting(false);
+                break;
+              }
+            }
           }
         }
       },
@@ -246,6 +254,9 @@ export const Graph = memo<GraphProps>(
           setEdges(initialEdges);
         }, 0);
       }
+      // highlightOriginsOnly is applied via the nodes/edges effect below; this effect
+      // only re-processes when interactive mode changes.
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [applyLayoutedNodes, interactive, setEdges]);
 
     // Filter the ids of those nodes that are origin events
@@ -407,6 +418,7 @@ export const Graph = memo<GraphProps>(
       edges,
       setNodes,
       setEdges,
+      applyLayoutedNodes,
       isGraphInteractive,
       highlightOriginsOnly,
       onCenterGraphAfterRefresh,
@@ -463,6 +475,10 @@ export const Graph = memo<GraphProps>(
       focusSearchInputRef.current?.();
     }, []);
 
+    const openInGraphSearch = useCallback(() => {
+      focusSearchInputRef.current?.();
+    }, []);
+
     useGraphInteractionKeyboardShortcuts({
       enabled: interactive,
       onToggleApplyFiltersPanel: handleToggleApplyFiltersShortcut,
@@ -497,8 +513,14 @@ export const Graph = memo<GraphProps>(
         registerApplyFiltersToggle,
         registerSearchPanelToggle,
         registerFocusSearchInput,
+        openInGraphSearch,
       }),
-      [registerApplyFiltersToggle, registerSearchPanelToggle, registerFocusSearchInput]
+      [
+        registerApplyFiltersToggle,
+        registerSearchPanelToggle,
+        registerFocusSearchInput,
+        openInGraphSearch,
+      ]
     );
 
     const canDragInteract = isGraphInteractive && !isLocked;
@@ -506,12 +528,13 @@ export const Graph = memo<GraphProps>(
     const reactFlowClassName = useMemo(
       () =>
         [
+          highlightOriginsOnly ? 'graph-highlight-origins-only' : null,
           searchFlowClasses.searchActive ? GRAPH_IN_PAGE_SEARCH_ACTIVE_CLASS : null,
           searchFlowClasses.filtersActive ? GRAPH_ENTITY_FILTERS_ACTIVE_CLASS : null,
         ]
           .filter(Boolean)
           .join(' '),
-      [searchFlowClasses]
+      [highlightOriginsOnly, searchFlowClasses]
     );
 
     const fullscreenContainerCss = css`
@@ -520,7 +543,7 @@ export const Graph = memo<GraphProps>(
         height: 100%;
         display: flex;
         flex-direction: column;
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        background-color: ${GRAPH_BACKGROUND_COLOR};
 
         .react-flow {
           flex: 1;
@@ -585,21 +608,29 @@ export const Graph = memo<GraphProps>(
                   onNodesChange={handleNodesChange}
                   onEdgesChange={onEdgesChange}
                   proOptions={{ hideAttribution: true }}
+                  // React Flow overview-style interaction:
+                  // - left-drag empty canvas pans
+                  // - trackpad two-finger scroll pans
+                  // - pinch / Meta+scroll zooms
+                  // - click/drag nodes to select and move (no tool buttons)
+                  // - Space temporarily enables pan (RF default panActivationKeyCode)
+                  // - Shift+drag for marquee selection
                   panOnDrag={canDragInteract}
-                  panActivationKeyCode={null}
+                  panOnScroll={canDragInteract}
+                  panOnScrollSpeed={0.5}
                   selectionOnDrag={false}
                   selectionMode={SelectionMode.Partial}
-                  selectionKeyCode={canDragInteract ? 'Shift' : null}
-                  multiSelectionKeyCode={canDragInteract ? 'Shift' : null}
-                  selectNodesOnDrag={false}
+                  selectionKeyCode="Shift"
+                  multiSelectionKeyCode={undefined}
+                  selectNodesOnDrag={true}
                   elementsSelectable={canDragInteract}
-                  zoomOnScroll={isGraphInteractive && !isLocked}
-                  zoomOnPinch={isGraphInteractive && !isLocked}
-                  zoomOnDoubleClick={isGraphInteractive && !isLocked}
+                  zoomOnScroll={canDragInteract}
+                  zoomOnPinch={canDragInteract}
+                  zoomOnDoubleClick={canDragInteract}
                   preventScrolling={interactive}
                   nodesDraggable={canDragInteract}
-                  maxZoom={1.3}
-                  minZoom={0.1}
+                  maxZoom={GRAPH_MAX_ZOOM}
+                  minZoom={GRAPH_MIN_ZOOM}
                 >
                   <GraphSearchEffects nodes={nodes} onFlowClassesChange={setSearchFlowClasses} />
                   <GraphSelectionHandlers />
@@ -607,7 +638,7 @@ export const Graph = memo<GraphProps>(
                   {interactive && (
                     <Panel
                       position="bottom-left"
-                      style={{ marginLeft: CONTROL_PANEL_MARGIN, overflow: 'visible' }}
+                      style={{ marginLeft: CONTROL_PANEL_MARGIN_LEFT, overflow: 'visible' }}
                     >
                       <Controls
                         fitViewOptions={fitViewOptions}
@@ -618,7 +649,14 @@ export const Graph = memo<GraphProps>(
                     </Panel>
                   )}
                   {children}
-                  <Background id={backgroundId} bgColor={euiTheme.colors.backgroundBaseSubdued} />
+                  <Background
+                    id={backgroundId}
+                    variant={BackgroundVariant.Dots}
+                    gap={GRAPH_BACKGROUND_DOT_GAP}
+                    size={GRAPH_BACKGROUND_DOT_SIZE}
+                    bgColor={GRAPH_BACKGROUND_COLOR}
+                    color={GRAPH_BACKGROUND_DOT_COLOR}
+                  />
                   {interactive && showMinimap && (
                     <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
                   )}

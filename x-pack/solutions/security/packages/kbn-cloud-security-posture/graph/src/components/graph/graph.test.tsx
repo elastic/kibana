@@ -182,7 +182,7 @@ describe('<Graph />', () => {
   });
 
   describe('centering after refresh', () => {
-    const fitViewOptions = { duration: 200 };
+    const fitViewOptions = { duration: 350 };
 
     const initialNodes: NodeViewModel[] = [
       {
@@ -422,7 +422,7 @@ describe('<Graph />', () => {
         // Should center graph on new nodes (default behavior)
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
         expect(mockFitView).toHaveBeenCalledWith({
-          duration: 200,
+          duration: 350,
           nodes: [{ id: newNodes[0].id }],
         });
       });
@@ -480,7 +480,7 @@ describe('<Graph />', () => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
 
         // no "nodes" key -> fit entire graph into view
-        expect(mockFitView).toHaveBeenCalledWith({ duration: 200 });
+        expect(mockFitView).toHaveBeenCalledWith({ duration: 350 });
       });
     });
 
@@ -583,7 +583,7 @@ describe('<Graph />', () => {
       await waitFor(() => {
         expect(onCenterGraphAfterRefresh).toHaveBeenCalledWith(newNodes);
         expect(mockFitView).toHaveBeenCalledWith({
-          duration: 200,
+          duration: 350,
           nodes: [{ id: 'entity1' }, { id: 'entity2' }],
         });
       });
