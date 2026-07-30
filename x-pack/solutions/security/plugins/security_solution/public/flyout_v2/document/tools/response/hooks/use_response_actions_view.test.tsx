@@ -12,8 +12,10 @@ import { useResponseActionsView } from './use_response_actions_view';
 import { mockSearchHit } from '../../../../../flyout/document_details/shared/mocks/mock_search_hit';
 import { useGetAutomatedActionList } from '../../../../../management/hooks/response_actions/use_get_automated_action_list';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
+import { TestProviders } from '../../../../../common/mock';
 import {
   RESPONSE_ACTIONS_VIEW_WRAPPER_TEST_ID,
+  RESPONSE_ERROR_TEST_ID,
   RESPONSE_NO_DATA_TEST_ID,
 } from '../components/test_ids';
 import { ResponseActionsEmptyPrompt } from '../../../../../common/components/response_actions/response_actions_empty_prompt';
@@ -121,5 +123,24 @@ describe('useResponseActionsView', () => {
     expect(getByTestId('responseActionsEmptyPromptMock')).toBeInTheDocument();
     expect(queryByTestId(RESPONSE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
     expect(responseActionsEmptyPromptMock).toHaveBeenCalledWith({ type: 'endpoint' }, {});
+  });
+
+  it('renders an error callout when the fetch failed, rather than the no-data message', () => {
+    useGetAutomatedActionListMock.mockReturnValue({
+      data: undefined,
+      isFetched: true,
+      isError: true,
+    });
+
+    const { result } = renderHook(() =>
+      useResponseActionsView({
+        hit,
+      })
+    );
+
+    const { getByTestId, queryByTestId } = render(<TestProviders>{result.current}</TestProviders>);
+
+    expect(getByTestId(RESPONSE_ERROR_TEST_ID)).toBeInTheDocument();
+    expect(queryByTestId(RESPONSE_NO_DATA_TEST_ID)).not.toBeInTheDocument();
   });
 });

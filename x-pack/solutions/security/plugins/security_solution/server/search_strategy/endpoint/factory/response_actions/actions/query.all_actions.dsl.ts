@@ -12,6 +12,7 @@ import { OSQUERY_ACTIONS_INDEX } from '@kbn/osquery-plugin/common/constants';
 import type { EndpointAuthz } from '../../../../../../common/endpoint/types/authz';
 import type { ActionRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import { prefixIndexPatternsWithCcs } from '../../../../../endpoint/utils/ccs_utils';
 
 const EndpointFieldsLimited = [
   'EndpointActions.action_id',
@@ -21,7 +22,7 @@ const EndpointFieldsLimited = [
 ];
 
 export const buildResponseActionsQuery = (
-  { alertIds, sort }: ActionRequestOptions,
+  { alertIds, sort, ccsEnabled }: ActionRequestOptions,
   authz: EndpointAuthz | void
 ): ISearchRequestParams => {
   const fields = authz?.canAccessEndpointActionsLogManagement
@@ -30,7 +31,10 @@ export const buildResponseActionsQuery = (
 
   const dslQuery = {
     allow_no_indices: true,
-    index: [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX],
+    index: prefixIndexPatternsWithCcs(
+      [ENDPOINT_ACTIONS_INDEX, OSQUERY_ACTIONS_INDEX].join(','),
+      ccsEnabled ?? false
+    ).split(','),
     ignore_unavailable: true,
     fields,
     _source: false,

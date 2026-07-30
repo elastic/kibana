@@ -19,8 +19,13 @@ import { endpointSearchStrategyProvider } from '.';
 describe('endpointSearchStrategyProvider', () => {
   type SearchArgs = Parameters<ReturnType<typeof endpointSearchStrategyProvider>['search']>;
 
-  const buildProvider = (authzOverrides: Partial<EndpointAuthz> = {}) => {
-    const search = jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 0, hits: [] } } }));
+  const buildProvider = (
+    authzOverrides: Partial<EndpointAuthz> = {},
+    { cpsEnabled = false }: { cpsEnabled?: boolean } = {}
+  ) => {
+    const searchResponse = of({ rawResponse: { hits: { total: 0, hits: [] } } });
+    const search = jest.fn().mockReturnValue(searchResponse);
+    const scopedSearch = jest.fn().mockReturnValue(searchResponse);
     const data = {
       search: { searchAsInternalUser: { search } },
     } as unknown as PluginStart;
@@ -29,10 +34,19 @@ describe('endpointSearchStrategyProvider', () => {
       .mockResolvedValue(getEndpointAuthzInitialStateMock(authzOverrides));
     const isCcsEnabled = jest.fn().mockResolvedValue(false);
     const endpointContext = {
-      service: { getEndpointAuthz, isCcsEnabled },
+      service: {
+        getEndpointAuthz,
+        isCcsEnabled,
+        isCpsEnabled: jest.fn().mockReturnValue(cpsEnabled),
+        getScopedSearchClient: jest.fn().mockReturnValue({ search: scopedSearch }),
+      },
     } as unknown as EndpointAppContext;
 
-    return { provider: endpointSearchStrategyProvider(data, endpointContext), search };
+    return {
+      provider: endpointSearchStrategyProvider(data, endpointContext),
+      search,
+      scopedSearch,
+    };
   };
 
   const deps = {
@@ -63,5 +77,35 @@ describe('endpointSearchStrategyProvider', () => {
     await lastValueFrom(provider.search(request, options, deps));
 
     expect(search).toHaveBeenCalledTimes(1);
+  });
+
+  describe('and CPS is enabled', () => {
+    it('dispatches Defend-owned queries through the scoped search client', async () => {
+      const { provider, search, scopedSearch } = buildProvider(
+        { canAccessEndpointActionsLogManagement: true },
+        { cpsEnabled: true }
+      );
+
+      await lastValueFrom(provider.search(request, options, deps));
+
+      expect(search).not.toHaveBeenCalled();
+      expect(scopedSearch).toHaveBeenCalledTimes(1);
+    });
+
+    it('overrides the strategy name so the scoped client does not recurse into this strategy', async () => {
+      const { provider, scopedSearch } = buildProvider(
+        { canAccessEndpointActionsLogManagement: true },
+        { cpsEnabled: true }
+      );
+
+      await lastValueFrom(
+        provider.search(request, { strategy: 'endpointResponseActions' } as SearchArgs[1], deps)
+      );
+
+      expect(scopedSearch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ strategy: 'ese' })
+      );
+    });
   });
 });
