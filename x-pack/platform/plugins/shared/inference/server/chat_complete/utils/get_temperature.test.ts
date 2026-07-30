@@ -70,7 +70,10 @@ describe('getTemperatureIfValid', () => {
     'us.anthropic.claude-opus-4_8-v1:0',
     'claude-haiku-5',
     'claude-sonnet-50',
+    'claude-sonnet-4.50',
     'claude-opus-4.80',
+    'anthropic-claude-4.50-sonnet',
+    'anthropic-claude-5.0-sonnet',
   ].forEach((modelId) => {
     it(`returns an empty object for an unrecognized Claude model ${modelId}`, () => {
       expect(getTemperatureIfValid(0.7, { modelId })).toEqual({});
@@ -84,6 +87,9 @@ describe('getTemperatureIfValid', () => {
     'us.anthropic.claude-opus-4-1-v1:0',
     'claude-opus-4.5-20251101',
     'claude-opus-4-6',
+    'anthropic-claude-4.5-haiku',
+    'anthropic-claude-4.5-opus',
+    'anthropic-claude-4.6-sonnet',
   ].forEach((modelId) => {
     it(`keeps temperature for a supported Claude model ${modelId}`, () => {
       expect(getTemperatureIfValid(0.7, { modelId })).toEqual({
@@ -122,7 +128,11 @@ describe('getTemperatureIfValid', () => {
     } as unknown as InferenceConnector;
 
     expect(
-      getTemperatureIfValid(undefined, { connector, modelName: 'llm-gateway/gpt-5.2-chat' })
+      getTemperatureIfValid(undefined, {
+        connector,
+        modelName: 'llm-gateway/gpt-5.2-chat',
+        modelId: 'anthropic-claude-5.0-sonnet',
+      })
     ).toEqual({
       temperature: 0.25,
     });

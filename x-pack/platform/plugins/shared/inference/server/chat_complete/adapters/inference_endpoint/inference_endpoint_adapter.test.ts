@@ -241,7 +241,7 @@ describe('inferenceEndpointAdapter', () => {
         .chatComplete({
           ...defaultArgs,
           messages: [{ role: MessageRole.User, content: 'question' }],
-          endpointModelId: 'claude-sonnet-4.5',
+          endpointModelId: 'anthropic-claude-4.6-sonnet',
         })
         .subscribe(noop);
 

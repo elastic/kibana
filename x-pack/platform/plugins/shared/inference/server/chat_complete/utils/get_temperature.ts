@@ -8,54 +8,62 @@ import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
 const OPENAI_MODELS_WITHOUT_TEMPERATURE = ['o1', 'o3', 'gpt-5'];
+
+interface TemperatureModelOptions {
+  connector?: InferenceConnector;
+  modelName?: string;
+  modelId?: string;
+}
+
 // Omit temperature for unrecognized Claude models until Elasticsearch exposes parameter capabilities.
-const CLAUDE_MODELS_WITH_TEMPERATURE = [
-  'claude-haiku-4-5',
-  'claude-sonnet-4-5',
-  'claude-sonnet-4-6',
-  'claude-opus-4-1',
-  'claude-opus-4-5',
-  'claude-opus-4-6',
-];
+const CLAUDE_MODEL_KEYS_WITH_TEMPERATURE = new Set([
+  'haiku-4-5',
+  'sonnet-4-5',
+  'sonnet-4-6',
+  'opus-4-1',
+  'opus-4-5',
+  'opus-4-6',
+]);
+
+const CLAUDE_VARIANT_FIRST_PATTERN = /-claude-(haiku|sonnet|opus)-(\d+-\d+)-/;
+const CLAUDE_VERSION_FIRST_PATTERN = /-claude-(\d+-\d+)-(haiku|sonnet|opus)-/;
 
 const normalizeModelId = (modelId: string) => modelId.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
-const shouldExcludeTemperatureForModelId = (modelId: string) => {
-  const normalizedModelId = `-${normalizeModelId(modelId)}-`;
-  const isClaudeModel = normalizedModelId.includes('-claude-');
-  const isKnownToSupportTemperature = CLAUDE_MODELS_WITH_TEMPERATURE.some((model) =>
-    normalizedModelId.includes(`-${model}-`)
-  );
-  return isClaudeModel && !isKnownToSupportTemperature;
-};
-
-export const getTemperatureIfValid = (
-  temperature?: number,
-  {
-    connector,
-    modelName,
-    modelId,
-  }: {
-    connector?: InferenceConnector;
-    modelName?: string;
-    modelId?: string;
-  } = {}
-) => {
-  // Escape hatch: if user sets temperature in the connector config, use it by default (including 0).
-  // This should take priority over any automatic model-based exclusions.
-  const connectorTemperature = connector?.config?.temperature;
-  if (
-    typeof connectorTemperature === 'number' &&
-    isFinite(connectorTemperature) &&
-    connectorTemperature >= 0
-  ) {
-    return { temperature: connectorTemperature };
+// Providers order Claude model names differently, so convert them to one key before checking support.
+const getClaudeModelKey = (normalizedModelId: string) => {
+  const variantFirstMatch = normalizedModelId.match(CLAUDE_VARIANT_FIRST_PATTERN);
+  if (variantFirstMatch) {
+    const [, variant, version] = variantFirstMatch;
+    return `${variant}-${version}`;
   }
 
+  // EIS model IDs put the version before the variant.
+  const versionFirstMatch = normalizedModelId.match(CLAUDE_VERSION_FIRST_PATTERN);
+  if (versionFirstMatch) {
+    const [, version, variant] = versionFirstMatch;
+    return `${variant}-${version}`;
+  }
+};
+
+const shouldExcludeTemperatureForModelId = (modelId: string): boolean => {
+  const normalizedModelId = `-${normalizeModelId(modelId)}-`;
+  if (!normalizedModelId.includes('-claude-')) {
+    return false;
+  }
+
+  const modelKey = getClaudeModelKey(normalizedModelId);
+  return modelKey === undefined || !CLAUDE_MODEL_KEYS_WITH_TEMPERATURE.has(modelKey);
+};
+
+const shouldExcludeTemperature = ({
+  connector,
+  modelName,
+  modelId,
+}: TemperatureModelOptions): boolean => {
   const model =
     modelName ?? connector?.config?.providerConfig?.model_id ?? connector?.config?.defaultModel;
 
-  let shouldExcludeTemperature = false;
   if (
     (connector?.type === InferenceConnectorType.OpenAI ||
       connector?.type === InferenceConnectorType.Inference) &&
@@ -66,17 +74,33 @@ export const getTemperatureIfValid = (
     // Temperature support is determined by the base model name (segment after the last `/`).
     const baseModelName = normalizedModelName.split('/').pop() ?? normalizedModelName;
 
-    shouldExcludeTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some(
+    const isOpenAIModelWithoutTemperature = OPENAI_MODELS_WITHOUT_TEMPERATURE.some(
       // e.g `openai/gpt-5` or `gpt-5-xxx` or `llm-gateway/gpt-5.2-chat`
       (m) => baseModelName.startsWith(m) || baseModelName.endsWith(m)
     );
+    if (isOpenAIModelWithoutTemperature) {
+      return true;
+    }
   }
 
-  shouldExcludeTemperature =
-    shouldExcludeTemperature ||
-    (typeof modelId === 'string' && shouldExcludeTemperatureForModelId(modelId));
+  return typeof modelId === 'string' && shouldExcludeTemperatureForModelId(modelId);
+};
 
-  if (shouldExcludeTemperature) {
+export const getTemperatureIfValid = (
+  temperature?: number,
+  options: TemperatureModelOptions = {}
+) => {
+  const connectorTemperature = options.connector?.config?.temperature;
+  // Escape hatch: connector-configured temperature takes priority over model exclusions.
+  if (
+    typeof connectorTemperature === 'number' &&
+    isFinite(connectorTemperature) &&
+    connectorTemperature >= 0
+  ) {
+    return { temperature: connectorTemperature };
+  }
+
+  if (shouldExcludeTemperature(options)) {
     // Some models reject temperature entirely, so use the provider default.
     return {};
   }
