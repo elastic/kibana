@@ -22,6 +22,8 @@ export const APP_HEADER_TEST_SUBJECTS = {
   badge: 'appHeaderBadge',
   sharePrefix: 'appHeaderShare',
   favorite: 'appHeaderFavorite',
+  favoriteButton: 'appHeaderFavoriteButton',
+  description: 'appHeaderDescription',
   metadata: 'appHeaderMetadata',
   tabs: 'appHeaderTabs',
   badgesOverflow: 'appHeaderBadgesOverflow',
