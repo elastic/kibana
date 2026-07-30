@@ -39,7 +39,7 @@ evaluate.describe(
             name: 'alerting-v2: rule-management notification setup',
             description:
               'Exercises the cross-skill notification setup flow. Turn 1 is a fully-specified ' +
-              'compose request on the seeded host-metrics index; after composing the complete ' +
+              'composed rule creation request on the seeded host-metrics index; after composing the complete ' +
               'alert rule the agent should proactively offer to set up email notifications. ' +
               'Turn 2 accepts: the agent should load the action-policy-management skill (and ' +
               'workflow-authoring), generate a notification workflow (an email connector is ' +
