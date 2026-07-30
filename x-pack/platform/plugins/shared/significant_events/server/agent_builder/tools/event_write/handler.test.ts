@@ -544,6 +544,58 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
   });
 
+  it('does not skip when the candidate has a different change_point_type for the same rule', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
+      '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout'],
+      signals: [
+        {
+          type: 'detection',
+          metadata: {
+            rule_uuid: 'rule-abc',
+            rule_name: 'High Latency',
+            change_point_type: 'spike',
+          },
+          confirmed: true,
+        } as never,
+      ],
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    // Submitted with a dip for the same rule — different change_point_type → bypass dedup
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [
+        {
+          ...dedupInput,
+          signals: [
+            {
+              type: 'detection',
+              metadata: {
+                rule_uuid: 'rule-abc',
+                rule_name: 'High Latency',
+                change_point_type: 'dip',
+              },
+              confirmed: true,
+            } as never,
+          ],
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+  });
+
   it('does not skip when the matching event is older than the dedup window', async () => {
     const oldEvent = {
       event_id: 'old-event-id',

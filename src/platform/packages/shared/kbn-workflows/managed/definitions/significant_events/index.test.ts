@@ -15,6 +15,7 @@ interface WorkflowStep {
   condition?: string;
   steps?: WorkflowStep[];
   with?: Record<string, string>;
+  foreach?: string;
 }
 
 interface ParsedWorkflow {
@@ -53,12 +54,12 @@ describe('significant events persistence workflow contracts', () => {
     );
   });
 
-  it('gates triage stamping and investigations on confirmed event writes', () => {
-    expect(requireStep(triage, 'compute_written_event_ids').with?.written_event_ids).toContain(
+  it('gates triage investigations on confirmed event writes', () => {
+    expect(requireStep(triage, 'count_open_events').with?.openCount).toContain(
       "reject: 'written', false"
     );
-    expect(requireStep(triage, 'check_event_written').condition).toContain(
-      'variables.written_event_ids contains'
+    expect(requireStep(triage, 'foreach_significant_event').foreach).toContain(
+      "reject: 'written', false"
     );
     expect(requireStep(triage, 'gate_investigatable_severity').condition).toContain(
       'foreach.item.event_uuid != null'

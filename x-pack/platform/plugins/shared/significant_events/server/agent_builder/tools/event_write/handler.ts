@@ -130,6 +130,32 @@ const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   return [...new Set(uuids)];
 };
 
+/**
+ * Returns true when any submitted detection signal has a different `change_point_type` than the
+ * candidate event's signal for the same rule UUID. A changed change-point type means the
+ * alerting engine observed a new pattern (e.g. spike → dip) and the write represents a different
+ * operational state — it must not be suppressed as a duplicate of the prior write.
+ */
+const hasChangedChangePointType = (
+  submitted: SignalEntry[] | undefined,
+  candidate: SignificantEvent
+): boolean => {
+  const submittedDetections = (submitted ?? []).filter(
+    (s): s is Extract<SignalEntry, { type: 'detection' }> => s.type === 'detection'
+  );
+  const candidateByRule = new Map(
+    (candidate.signals ?? [])
+      .filter((s): s is Extract<SignalEntry, { type: 'detection' }> => s.type === 'detection')
+      .map((s) => [s.metadata.rule_uuid, s])
+  );
+
+  return submittedDetections.some((s) => {
+    const existing = candidateByRule.get(s.metadata.rule_uuid);
+    if (!existing) return false;
+    return s.metadata.change_point_type !== existing.metadata.change_point_type;
+  });
+};
+
 /** Stable stream-and-rules identity used only for duplicate detection within the configured window. */
 export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): string => {
   const primaryStream = [...streamNames].sort()[0] ?? 'unknown';
@@ -352,7 +378,8 @@ export async function eventsWriteBulkHandler({
           activeStatuses.includes(ev.status) &&
           ev['@timestamp'] >= candidate.windowFrom &&
           makeFingerprint(ev.stream_names ?? [], extractRuleUuids(ev.signals)) ===
-            candidate.fingerprint
+            candidate.fingerprint &&
+          !hasChangedChangePointType(candidate.input.signals, ev)
       );
       if (duplicate) {
         const existingEventId = duplicate.event_id ?? candidate.eventId;
