@@ -7,12 +7,43 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ProcessResult } from './process_result';
 import type { ProcessTreeNode } from '../utils/build_process_tree';
 import { buildProcessTree } from '../utils/build_process_tree';
 import type { KilledProcessDescendant } from '../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
+
+const nodeConnectorStyles = css`
+  .top,
+  .bottom {
+    width: 1em;
+  }
+  .top {
+    height: 0.7em;
+  }
+  .bottom {
+    height: 1em;
+  }
+
+  &.childNode {
+    .top,
+    .bottom {
+      border-left: 1px solid;
+    }
+    .top {
+      border-bottom: 1px solid;
+    }
+  }
+
+  &.lastChildNode {
+    .top {
+      border-left: 1px solid;
+      border-bottom: 1px solid;
+    }
+  }
+`;
 
 export interface ProcessTreeProps {
   processList: KilledProcessDescendant[];
@@ -71,13 +102,35 @@ interface TreeNodeProps {
 const TreeNode = memo<TreeNodeProps>(({ process, children, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
+  const nodeConnectorClassName = useMemo(() => {
+    let classNameList = nodeConnectorStyles;
+
+    if (children) {
+      classNameList += ' childNode';
+    } else {
+      classNameList += ' lastChildNode';
+    }
+
+    return classNameList;
+  }, [children]);
+
   return (
     <EuiFlexGroup data-test-subj={getTestId()} responsive={false} gutterSize="xs" wrap={false}>
-      <EuiFlexItem grow={false}>{'+'}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <div className={nodeConnectorClassName}>
+          <div className="top" />
+          <div className="bottom" />
+        </div>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xs" wrap={false}>
           <EuiFlexItem grow={false} data-test-subj={getTestId('details')}>
-            <ProcessResult command={'kill-process'} processResult={process} />
+            <ProcessResult
+              command={'kill-process'}
+              processResult={process}
+              data-test-subj={getTestId('details')}
+            />
+            <EuiSpacer size="xs" />
           </EuiFlexItem>
           <EuiFlexItem data-test-subj={getTestId('children')}>{children}</EuiFlexItem>
         </EuiFlexGroup>

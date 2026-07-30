@@ -96,37 +96,16 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                 {hostActionOutput && hostActionOutput.descendants && (
                   <div>
                     <EuiSpacer />
-
                     <FormattedMessage
                       id="xpack.securitySolution.management.killProcessActionResult.descendantsLabel"
                       defaultMessage="Descendants ({count})"
                       values={{ count: hostActionOutput.descendants.length }}
                     />
-
-                    {
-                      // FIXME:PT delete once tree view is implemented
-                      hostActionOutput.descendants.map((descendantResult) => {
-                        return (
-                          <ProcessResult
-                            command={command}
-                            processResult={descendantResult}
-                            key={`pid-${descendantResult.pid}`}
-                          />
-                        );
-                      })
-                    }
-
-                    {/* FIXME:PT Delete once tree implementation is done*/}
-                    <div
-                      style={{ height: '100px', borderBottom: '1px solid', marginBottom: '2em' }}
+                    <EuiSpacer size="s" />
+                    <ProcessTree
+                      processList={hostActionOutput.descendants}
+                      data-test-subj={getTestId(`${agentId}-processTree`)}
                     />
-
-                    {hostActionOutput.descendants && (
-                      <ProcessTree
-                        processList={hostActionOutput.descendants}
-                        data-test-subj={getTestId(`${agentId}-processTree`)}
-                      />
-                    )}
                   </div>
                 )}
               </div>
