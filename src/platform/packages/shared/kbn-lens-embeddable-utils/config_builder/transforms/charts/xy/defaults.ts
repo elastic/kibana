@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SeriesType } from '@kbn/lens-common';
+import type { AreaFillOption } from '@kbn/expression-xy-plugin/common';
 import type { ColorMappingCategoricalType } from '../../../schema/color';
 
 /**
@@ -25,9 +27,27 @@ export const DEFAULT_POINTS_VISIBILITY = 'auto' as const;
 export const DEFAULT_LINES_INTERPOLATION = 'linear' as const;
 export const DEFAULT_BARS_MINIMUM_HEIGHT = 1;
 export const DEFAULT_AREAS_FILL_OPACITY = 0.3;
-export const DEFAULT_AREAS_FILL = 'solid' as const;
+export const DEFAULT_AREAS_GRADIENT_FILL_OPACITY = 0.6;
 export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',
   palette: 'elastic_line_optimized',
   mapping: [],
+};
+
+export const DEFAULT_AREAS_FILL = 'solid' as const;
+
+export const getDefaultAreaFill = (seriesTypes: SeriesType[]) => {
+  if (seriesTypes.includes('area_percentage_stacked') || seriesTypes.includes('area_stacked')) {
+    return 'solid' as const;
+  }
+  if (seriesTypes.includes('area')) {
+    return 'gradient' as const;
+  }
+  return undefined;
+};
+
+export const getDefaultAreaFillOpacity = (fillOption: AreaFillOption | undefined) => {
+  return fillOption === 'gradient'
+    ? DEFAULT_AREAS_GRADIENT_FILL_OPACITY
+    : DEFAULT_AREAS_FILL_OPACITY;
 };

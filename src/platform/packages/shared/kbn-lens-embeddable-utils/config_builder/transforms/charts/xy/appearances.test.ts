@@ -11,7 +11,6 @@ import type { XYConfig } from '../../../schema/charts/xy';
 import {
   convertStylingToAPIFormat,
   convertStylingToStateFormat,
-  type LayerPresence,
   type XYLensAppearanceState,
 } from './appearances';
 import {
@@ -25,30 +24,28 @@ import {
   DEFAULT_POINTS_VISIBILITY,
 } from './defaults';
 
-const allLayersPresent: LayerPresence = { hasBars: true, hasLines: true, hasAreas: true };
-
 describe('XY Appearances Transforms', () => {
   it('should return empty state when given empty API config', () => {
     const apiConfig: XYConfig['styling'] = {};
-    const result = convertStylingToStateFormat(apiConfig, {
-      hasBars: true,
-      hasLines: true,
-      hasAreas: false,
-    });
+    const result = convertStylingToStateFormat(apiConfig, ['line']);
     expect(result).toEqual({});
   });
 
-  it('should default areaFill to solid when omitted and area layers exist', () => {
-    expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, allLayersPresent)).toEqual(
+  it('should default areaFill when omitted, unstacked to gradient and stacked to solid', () => {
+    expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, ['area_stacked'])).toEqual(
       {
         fillOpacity: 0.5,
-        areaFill: DEFAULT_AREAS_FILL,
+        areaFill: 'solid' as const,
       }
     );
+    expect(convertStylingToStateFormat({ areas: { fill_opacity: 0.5 } }, ['area'])).toEqual({
+      fillOpacity: 0.5,
+      areaFill: 'gradient' as const,
+    });
   });
 
   it('should fill styling defaults when converting empty state to API format', () => {
-    const result = convertStylingToAPIFormat({}, allLayersPresent);
+    const result = convertStylingToAPIFormat({}, ['area_stacked', 'bar_stacked', 'line']);
     expect(result.bars?.minimum_height).toBe(DEFAULT_BARS_MINIMUM_HEIGHT);
     expect(result.areas?.fill_opacity).toBe(DEFAULT_AREAS_FILL_OPACITY);
     expect(result.areas?.fill).toBe(DEFAULT_AREAS_FILL);
@@ -60,10 +57,7 @@ describe('XY Appearances Transforms', () => {
   });
 
   it('should omit bars styling when no bar layers exist', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: false, hasLines: true, hasAreas: true }
-    );
+    const result = convertStylingToAPIFormat({}, ['line', 'area']);
     expect(result.bars).toBeUndefined();
     expect(result.areas).toBeDefined();
     expect(result.points).toBeDefined();
@@ -71,10 +65,7 @@ describe('XY Appearances Transforms', () => {
   });
 
   it('should include interpolation when area layers exist without line layers', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: true, hasLines: false, hasAreas: true }
-    );
+    const result = convertStylingToAPIFormat({}, ['area_stacked', 'bar']);
     expect(result.interpolation).toBeDefined();
     expect(result.bars).toBeDefined();
     expect(result.areas).toBeDefined();
@@ -82,10 +73,7 @@ describe('XY Appearances Transforms', () => {
   });
 
   it('should omit areas styling when no area layers exist', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: true, hasLines: true, hasAreas: false }
-    );
+    const result = convertStylingToAPIFormat({}, ['bar_stacked', 'line']);
     expect(result.areas).toBeUndefined();
     expect(result.bars).toBeDefined();
     expect(result.interpolation).toBeDefined();
@@ -93,10 +81,7 @@ describe('XY Appearances Transforms', () => {
   });
 
   it('should omit points, interpolation, and fitting when no line or area layers exist', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: true, hasLines: false, hasAreas: false }
-    );
+    const result = convertStylingToAPIFormat({}, ['bar']);
     expect(result.points).toBeUndefined();
     expect(result.interpolation).toBeUndefined();
     expect(result.fitting).toBeUndefined();
@@ -106,37 +91,31 @@ describe('XY Appearances Transforms', () => {
   it('should include fitting under styling when line layers exist', () => {
     const result = convertStylingToAPIFormat(
       { fittingFunction: 'Linear', emphasizeFitting: true, endValue: 'Zero' },
-      { hasBars: false, hasLines: true, hasAreas: false }
+      ['line']
     );
     expect(result.fitting).toEqual({ type: 'linear', emphasize: true, extend: 'zero' });
   });
 
   it('should include fitting under styling when area layers exist', () => {
-    const result = convertStylingToAPIFormat(
-      { fittingFunction: 'Average' },
-      { hasBars: false, hasLines: false, hasAreas: true }
-    );
+    const result = convertStylingToAPIFormat({ fittingFunction: 'Average' }, ['area']);
     expect(result.fitting).toEqual({ type: 'average' });
   });
 
   it('should include points styling when only area layers exist', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: false, hasLines: false, hasAreas: true }
-    );
+    const result = convertStylingToAPIFormat({}, ['area_percentage_stacked']);
     expect(result.points).toBeDefined();
   });
 
   it('should negate hideEndzones when converting to partial_buckets.visible', () => {
-    const hidden = convertStylingToAPIFormat({ hideEndzones: true }, allLayersPresent);
+    const hidden = convertStylingToAPIFormat({ hideEndzones: true }, ['line']);
     expect(hidden.overlays?.partial_buckets?.visible).toBe(false);
 
-    const shown = convertStylingToAPIFormat({ hideEndzones: false }, allLayersPresent);
+    const shown = convertStylingToAPIFormat({ hideEndzones: false }, ['line']);
     expect(shown.overlays?.partial_buckets?.visible).toBe(true);
   });
 
   it('should use DEFAULT_PARTIAL_BUCKETS_VISIBLE when hideEndzones is omitted', () => {
-    const result = convertStylingToAPIFormat({}, allLayersPresent);
+    const result = convertStylingToAPIFormat({}, ['line']);
     expect(result.overlays?.partial_buckets?.visible).toBe(DEFAULT_PARTIAL_BUCKETS_VISIBLE);
   });
 
@@ -145,7 +124,7 @@ describe('XY Appearances Transforms', () => {
       {
         overlays: { partial_buckets: { visible: false } },
       },
-      allLayersPresent
+      ['line']
     );
     expect(hidden.hideEndzones).toBe(true);
 
@@ -153,39 +132,30 @@ describe('XY Appearances Transforms', () => {
       {
         overlays: { partial_buckets: { visible: true } },
       },
-      allLayersPresent
+      ['line']
     );
     expect(shown.hideEndzones).toBe(false);
   });
 
   it('should omit hideEndzones when partial_buckets is absent', () => {
-    const result = convertStylingToStateFormat({}, allLayersPresent);
+    const result = convertStylingToStateFormat({}, ['line']);
     expect(result.hideEndzones).toBeUndefined();
   });
 
   it('should always include overlays regardless of layer types', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: true, hasLines: false, hasAreas: false }
-    );
+    const result = convertStylingToAPIFormat({}, ['bar']);
     expect(result.overlays).toBeDefined();
     expect(result.overlays?.partial_buckets).toBeDefined();
     expect(result.overlays?.current_time_marker).toBeDefined();
   });
 
   it('should include data_labels under bars when bar layers exist', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: true, hasLines: false, hasAreas: false }
-    );
+    const result = convertStylingToAPIFormat({}, ['bar']);
     expect(result.bars?.data_labels?.visible).toBe(DEFAULT_DATA_LABELS_VISIBLE);
   });
 
   it('should omit data_labels when no bar layers exist', () => {
-    const result = convertStylingToAPIFormat(
-      {},
-      { hasBars: false, hasLines: true, hasAreas: false }
-    );
+    const result = convertStylingToAPIFormat({}, ['line']);
     expect(result.bars).toBeUndefined();
   });
 
@@ -201,8 +171,8 @@ describe('XY Appearances Transforms', () => {
       areas: { fill_opacity: 0.5, fill: 'gradient' },
       fitting: { type: 'linear', emphasize: true, extend: 'zero' },
     };
-    const state = convertStylingToStateFormat(original, allLayersPresent);
-    const result = convertStylingToAPIFormat(state, allLayersPresent);
+    const state = convertStylingToStateFormat(original, ['area', 'bar_stacked', 'line']);
+    const result = convertStylingToAPIFormat(state, ['area', 'bar_stacked', 'line']);
 
     expect(result.overlays?.partial_buckets).toEqual(original.overlays?.partial_buckets);
     expect(result.overlays?.current_time_marker).toEqual(original.overlays?.current_time_marker);
@@ -230,8 +200,8 @@ describe('XY Appearances Transforms', () => {
       endValue: 'Zero' as const,
     };
 
-    const api = convertStylingToAPIFormat(original, allLayersPresent);
-    const result = convertStylingToStateFormat(api, allLayersPresent);
+    const api = convertStylingToAPIFormat(original, ['area', 'bar_stacked', 'line']);
+    const result = convertStylingToStateFormat(api, ['area', 'bar_stacked', 'line']);
 
     expect(result.valueLabels).toBe(original.valueLabels);
     expect(result.curveType).toBe(original.curveType);

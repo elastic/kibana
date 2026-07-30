@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { XYVisualizationState as XYVisualizationState } from '@kbn/lens-common';
+import type { SeriesType, XYVisualizationState as XYVisualizationState } from '@kbn/lens-common';
 import type { XYCurveType, FittingFunction, EndValue } from '@kbn/expression-xy-plugin/common';
 import type { $Values } from 'utility-types';
 import type { XYConfig } from '../../../schema/charts/xy';
 import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import {
-  DEFAULT_AREAS_FILL,
-  DEFAULT_AREAS_FILL_OPACITY,
   DEFAULT_BARS_MINIMUM_HEIGHT,
   DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
   DEFAULT_DATA_LABELS_VISIBLE,
   DEFAULT_LINES_INTERPOLATION,
   DEFAULT_PARTIAL_BUCKETS_VISIBLE,
   DEFAULT_POINTS_VISIBILITY,
+  getDefaultAreaFill,
+  getDefaultAreaFillOpacity,
 } from './defaults';
 
 type XYStyling = NonNullable<XYConfig['styling']>;
@@ -74,17 +74,41 @@ const extendCompat = getReversibleMappings<
   ['nearest', 'Nearest'],
 ]);
 
-export interface LayerPresence {
-  hasBars: boolean;
-  hasLines: boolean;
-  hasAreas: boolean;
+function getLayerPresence(seriesTypes: SeriesType[]) {
+  return seriesTypes.reduce(
+    (acc, type) => {
+      if (type.startsWith('bar')) {
+        acc.hasBars = true;
+      } else if (type.startsWith('area')) {
+        acc.hasAreas = true;
+      } else if (type === 'line') {
+        acc.hasLines = true;
+      }
+      return acc;
+    },
+    { hasBars: false, hasLines: false, hasAreas: false }
+  );
 }
 
 export function convertStylingToAPIFormat(
   config: XYLensAppearanceState,
-  layerPresence: LayerPresence
+  seriesTypes: SeriesType[]
 ): XYStyling {
+  const layerPresence = getLayerPresence(seriesTypes);
   const hasLinesOrAreas = layerPresence.hasLines || layerPresence.hasAreas;
+
+  const areas = (() => {
+    if (!layerPresence.hasAreas) {
+      return undefined;
+    }
+    const fillOption = config.areaFill ?? getDefaultAreaFill(seriesTypes);
+    const fillOpacity = config.fillOpacity ?? getDefaultAreaFillOpacity(fillOption);
+    return {
+      fill_opacity: fillOpacity,
+      fill: fillOption,
+    };
+  })();
+
   return stripUndefined<XYStyling>({
     // Chart-level (always present)
     overlays: {
@@ -108,12 +132,7 @@ export function convertStylingToAPIFormat(
         }
       : undefined,
     // Series-type specific (alphabetical)
-    areas: layerPresence.hasAreas
-      ? {
-          fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
-          fill: config.areaFill ?? DEFAULT_AREAS_FILL,
-        }
-      : undefined,
+    areas,
     bars: layerPresence.hasBars
       ? {
           minimum_height: config.minBarHeight ?? DEFAULT_BARS_MINIMUM_HEIGHT,
@@ -146,7 +165,7 @@ function convertFittingToAPIFormat(
 
 export function convertStylingToStateFormat(
   config: XYStyling,
-  layerPresence: LayerPresence
+  seriesTypes: SeriesType[]
 ): XYLensAppearanceState {
   return stripUndefined<XYLensAppearanceState>({
     hideEndzones:
@@ -164,7 +183,7 @@ export function convertStylingToStateFormat(
     curveType: curveTypeCompat.toState(config.interpolation),
     minBarHeight: config.bars?.minimum_height,
     fillOpacity: config.areas?.fill_opacity,
-    areaFill: layerPresence.hasAreas ? config.areas?.fill ?? DEFAULT_AREAS_FILL : undefined,
+    areaFill: config.areas?.fill ?? getDefaultAreaFill(seriesTypes),
     fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
     emphasizeFitting: config.fitting?.emphasize,
     endValue: extendCompat.toState(config.fitting?.extend),
