@@ -6,9 +6,13 @@
  */
 
 import { GetPolicyResponseSchema } from '../../../../common/api/endpoint';
+import type { GetPolicyResponseByAgentIdOptions } from './service';
 import { getESQueryPolicyResponseByAgentID, getPolicyResponseByAgentId } from './service';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { createMockEndpointAppContextService } from '../../mocks';
+import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { EndpointInternalFleetServicesInterfaceMocked } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 import { createEndpointFleetServicesFactoryMock } from '../../services/fleet/endpoint_fleet_services_factory.mocks';
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
@@ -51,10 +55,20 @@ describe('Policy Response Services', () => {
   describe('getPolicyResponseByAgentId()', () => {
     let esClientMock: ElasticsearchClientMock;
     let fleetServicesMock: EndpointInternalFleetServicesInterfaceMocked;
+    let endpointServiceMock: ReturnType<typeof createMockEndpointAppContextService>;
+    let fetchOptions: GetPolicyResponseByAgentIdOptions;
 
     beforeEach(() => {
       esClientMock = elasticsearchServiceMock.createElasticsearchClient();
       fleetServicesMock = createEndpointFleetServicesFactoryMock().service.asInternalUser();
+      endpointServiceMock = createMockEndpointAppContextService();
+      fetchOptions = {
+        agentID: '1-2-3',
+        esClient: esClientMock,
+        endpointService: endpointServiceMock,
+        fleetServices: fleetServicesMock,
+        ccsEnabled: false,
+      };
 
       applyEsClientSearchMock({
         esClientMock,
@@ -68,7 +82,7 @@ describe('Policy Response Services', () => {
     });
 
     it('should search using the agent id provided on input', async () => {
-      await getPolicyResponseByAgentId('1-2-3', esClientMock, fleetServicesMock, false);
+      await getPolicyResponseByAgentId(fetchOptions);
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -86,7 +100,8 @@ describe('Policy Response Services', () => {
     });
 
     it('should search using the CCS-prefixed policy index when ccs is enabled', async () => {
-      await getPolicyResponseByAgentId('1-2-3', esClientMock, fleetServicesMock, true);
+      fetchOptions.ccsEnabled = true;
+      await getPolicyResponseByAgentId(fetchOptions);
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -96,9 +111,62 @@ describe('Policy Response Services', () => {
     });
 
     it('should validate that agent id is in current space', async () => {
-      await getPolicyResponseByAgentId('1-2-3', esClientMock, fleetServicesMock, false);
+      await getPolicyResponseByAgentId(fetchOptions);
 
       expect(fleetServicesMock.ensureInCurrentSpace).toHaveBeenCalledWith({ agentIds: ['1-2-3'] });
+    });
+
+    describe('and CPS is enabled', () => {
+      let readEsClientMock: ElasticsearchClientMock;
+
+      beforeEach(() => {
+        readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
+        applyEsClientSearchMock({
+          esClientMock: readEsClientMock,
+          index: policyIndexPattern,
+          response: EndpointPolicyResponseGenerator.toEsSearchResponse([
+            EndpointPolicyResponseGenerator.toEsSearchHit(
+              new EndpointPolicyResponseGenerator('seed').generate({ agent: { id: '1-2-3' } })
+            ),
+          ]),
+        });
+
+        endpointServiceMock.isCpsEnabled.mockReturnValue(true);
+        endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
+        fetchOptions.request = httpServerMock.createKibanaRequest();
+      });
+
+      it('should read as the request user so the search can fan out to linked projects', async () => {
+        await getPolicyResponseByAgentId(fetchOptions);
+
+        expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(fetchOptions.request);
+        expect(readEsClientMock.search).toHaveBeenCalled();
+        expect(esClientMock.search).not.toHaveBeenCalled();
+      });
+
+      it('should return the policy response of an agent that is not enrolled in this project', async () => {
+        fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(
+          new Error('Agent ID(s) not found: [1-2-3]')
+        );
+        (
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+        ).mockResolvedValue([]);
+
+        await expect(getPolicyResponseByAgentId(fetchOptions)).resolves.toEqual(
+          expect.objectContaining({ policy_response: expect.anything() })
+        );
+      });
+
+      it('should still hide an agent that is enrolled in this project but in another space', async () => {
+        const spaceError = new Error('Agent ID(s) not found: [1-2-3]');
+
+        fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(spaceError);
+        (
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+        ).mockResolvedValue([new FleetAgentGenerator('seed').generate({ id: '1-2-3' })]);
+
+        await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow(spaceError);
+      });
     });
   });
 });

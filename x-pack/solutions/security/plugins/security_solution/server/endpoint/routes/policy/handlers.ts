@@ -32,7 +32,14 @@ export const getHostPolicyResponseHandler = function (
 
     try {
       const agentId = request.query.agentId;
-      const doc = await getPolicyResponseByAgentId(agentId, esClient, fleetServices, ccsEnabled);
+      const doc = await getPolicyResponseByAgentId({
+        agentID: agentId,
+        esClient,
+        endpointService: endpointAppContextServices,
+        fleetServices,
+        ccsEnabled,
+        request,
+      });
 
       if (doc) {
         return response.ok({ body: doc });
