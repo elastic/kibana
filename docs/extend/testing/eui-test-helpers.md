@@ -10,7 +10,7 @@ description: Use and contribute EUI Component Objects from @elastic/eui-test-hel
 The package lives in the `elastic/eui` monorepo (`packages/test-helpers`) but was inspired by, and is consumed through, Scout.
 
 ::::::{tip}
-Use the built-in methods your test framework provides for simple, native-like components. Reach for a Component Object only when a component is non-trivial to drive reliably (portals, virtualization, async state).
+Use the built-in methods your test framework provides for basic, native-like components. Reach for a Component Object only when a component is non-trivial to drive reliably (portals, virtualization, async state).
 ::::::
 
 ## Usage in Scout [scout-eui-test-helpers-usage]
@@ -33,7 +33,7 @@ Each factory takes the component's root `data-test-subj` and an optional `scope`
 const comboBox = page.components.comboBox('dataViewSelector', someFlyout);
 ```
 
-## Scope: what belongs here [scout-eui-test-helpers-scope]
+## Scope: What belongs here [scout-eui-test-helpers-scope]
 
 - **In scope**: enabling consumer end-to-end tests to set up and tear down component state reliably, so the test can focus on its actual assertion instead of navigating EUI's DOM.
 - **Out of scope**: testing EUI component behavior. EUI already has RTL unit tests, Cypress E2E tests, and Loki VRT tests for that. A method added only to exercise an EUI feature (e.g. "click the clear button to verify `onChange` fires") belongs in EUI's own suite. The package's validation tests prove **the helper itself works**; they don't substitute for EUI's tests.
@@ -56,7 +56,7 @@ Build the object in Kibana, iterating against real specs, before porting it to E
 ::::::::{step} Validate against Kibana in CI
 Local runs cover only a slice. Open a draft Kibana PR and run CI to confirm the specs that use the helper pass across every stateful/serverless lane.
 
-**Read first-attempt failures, not just the final status.** Scout retries a failed spec once, so a lane can be green overall while its first attempt failed. A first-attempt failure in a spec that uses your helper often points to helper flakiness (a race the retry hides). Fix it before publishing.
+**Read first-attempt failures, not only the final status.** Scout retries a failed spec once, so a lane can be green overall while its first attempt failed. A first-attempt failure in a spec that uses your helper often points to helper flakiness (a race the retry hides). Fix it before publishing.
 
 ::::::::
 
@@ -72,7 +72,7 @@ See [Validate against Kibana before publishing](#scout-eui-test-helpers-validate
 
 :::::::::
 
-When authoring the object, follow the design principles, directory structure, and spec conventions in the [package CONTRIBUTING guide](https://github.com/elastic/eui/blob/main/packages/test-helpers/CONTRIBUTING.md). It's the source of truth for how helpers are structured and kept stable against EUI's evolving DOM.
+When authoring the object, follow the design principles, directory structure, and spec conventions in the [package CONTRIBUTING guide](https://github.com/elastic/eui/blob/main/packages/test-helpers/CONTRIBUTING.md). It's the source of truth for how helpers are structured and kept stable against the evolving EUI DOM.
 
 ## Validate against Kibana before publishing [scout-eui-test-helpers-validate]
 
