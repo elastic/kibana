@@ -68,7 +68,7 @@ export function useServiceFlyoutCapabilities({
       return {
         loading: false,
         error: undefined,
-        schema: 'unknown' as const,
+        schema: 'unknown',
         ...CAPABILITIES_BY_SCHEMA.unknown,
       };
     }
