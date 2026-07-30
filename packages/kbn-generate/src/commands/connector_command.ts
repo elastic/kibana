@@ -296,29 +296,53 @@ export const ConnectorCommand: GenerateCommand = {
         let pastFirstCategory = false;
         let sawFirstCategoryItem = false;
         const newLines: string[] = [];
+        // Blank lines between the first category's last item and the next category's header must
+        // stay attached to that header (as its separator), not get displaced by an entry inserted
+        // after them. Hold them back until we know what follows.
+        let pendingBlankLines: string[] = [];
 
         for (const line of rawLines) {
+          const isBlank = line.trim() === '';
+
           if (!inserted && isCategoryHeader(line) && sawFirstCategoryItem) {
-            // Reached the end of the first category without finding an alphabetical spot.
-            newLines.push(newEntry);
+            // Reached the end of the first category without finding an alphabetical spot: the new
+            // entry belongs right after the last item, before the blank separator.
+            newLines.push(newEntry, ...pendingBlankLines, line);
+            pendingBlankLines = [];
             inserted = true;
             pastFirstCategory = true;
+            continue;
           }
+
           if (!inserted && !pastFirstCategory && isListItem(line)) {
+            newLines.push(...pendingBlankLines);
+            pendingBlankLines = [];
             const match = line.match(/\[([^\]]+)\]/);
             if (match && match[1] > displayName) {
-              newLines.push(newEntry);
+              newLines.push(newEntry, line);
               inserted = true;
-            } else if (match) {
-              sawFirstCategoryItem = true;
+            } else {
+              if (match) {
+                sawFirstCategoryItem = true;
+              }
+              newLines.push(line);
             }
+            continue;
           }
-          newLines.push(line);
+
+          if (!inserted && !pastFirstCategory && isBlank) {
+            pendingBlankLines.push(line);
+            continue;
+          }
+
+          newLines.push(...pendingBlankLines, line);
+          pendingBlankLines = [];
         }
 
         if (!inserted) {
           newLines.push(newEntry);
         }
+        newLines.push(...pendingBlankLines);
 
         await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + (hadTrailingNewline ? '\n' : ''));
         log.info('Updated', Path.relative(REPO_ROOT, SNIPPET_FILE));
