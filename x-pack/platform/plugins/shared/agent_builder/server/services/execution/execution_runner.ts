@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import {
+  merge,
+  of,
+  filter,
+  tap,
+  catchError,
+  throwError,
+  EMPTY,
+  shareReplay,
+  ignoreElements,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -184,15 +194,17 @@ const handleConversationExecution = async ({
     action,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  const title$ =
+  // Generate title (for CREATE) or use existing title (for UPDATE).
+  // shareReplay so persistence and the span attribute share one emission.
+  const title$ = (
     conversation.operation === 'CREATE'
       ? generateTitle({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
         })
-      : of(conversation.title);
+      : of(conversation.title)
+  ).pipe(shareReplay(1));
 
   // Persist conversation (optional)
   const persistenceEvents$ = storeConversation
@@ -231,11 +243,16 @@ const handleConversationExecution = async ({
       opikHeaders,
     },
     (span) => {
-      title$.subscribe((title) => {
-        span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
-      });
+      const titleAttr$ = storeConversation
+        ? title$.pipe(
+            tap((title) => {
+              span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
+            }),
+            ignoreElements()
+          )
+        : EMPTY;
 
-      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
           try {
