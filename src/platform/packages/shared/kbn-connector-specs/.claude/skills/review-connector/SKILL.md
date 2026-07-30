@@ -77,6 +77,13 @@ actual documented behavior — flag them even without live access to the API, ba
 - **Regional/self-hosted base URLs**: If the connector has a configurable base URL, check that its help
   text/docs mention any regional SaaS domains or self-hosted deployment patterns the vendor supports — a
   connector that only mentions the single default domain will 404 for a subset of real accounts.
+- **Unencoded URL path segments**: Any handler that interpolates a user-supplied or config-derived value
+  (an ID, slug, or org name) into a URL path segment — e.g. `` `${baseUrl}/issues/${input.issueId}/` `` —
+  must wrap it in `encodeURIComponent()`. Input schemas typically only bound length (`.max()`), not
+  character set, so a value containing `/`, `?`, `#`, or a space is valid input that will otherwise
+  corrupt the request path. Check every `${...}` inside a URL template literal, including config values
+  like an organization slug. This is easy to miss in review because the code "looks like" normal template
+  interpolation, and easy to miss in tests that only exercise plain alphanumeric IDs.
 
 ### LLM Descriptions and Skill Content
 

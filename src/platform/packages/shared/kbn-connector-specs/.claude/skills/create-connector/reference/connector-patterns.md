@@ -89,7 +89,14 @@ export const YourConnector: ConnectorSpec = {
       description: 'Retrieve full details for a single item by ID. Use the IDs returned by the search action.',
       input: GetItemInputSchema,
       handler: async (ctx, input: GetItemInput) => {
-        const response = await ctx.request({ method: 'GET', url: `/items/${input.id}` });
+        // Always encodeURIComponent() a user-supplied value interpolated into a URL
+        // path segment — schemas typically only bound length, not character set, so
+        // an id/slug containing "/", "?", "#", or a space would otherwise corrupt
+        // the request path.
+        const response = await ctx.request({
+          method: 'GET',
+          url: `/items/${encodeURIComponent(input.id)}`,
+        });
         return response.data;
       },
     },
@@ -479,6 +486,15 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   interpolated into a search/filter expression (not just used as a URL path segment or opaque body value),
   constrain it to the expected character set (e.g. `.regex(/^[A-Za-z0-9+/=_-]+$/)` for a base64url GUID) so
   it can't be used to inject query syntax.
+- **`encodeURIComponent()` every ID/slug used as a URL path segment** — this is a handler-side fix, not a
+  schema constraint (a `.max()`-bound string is still a valid path segment value; it just needs escaping
+  before interpolation). Any handler that builds a URL with `` `${baseUrl}/things/${input.id}/` `` must wrap
+  the interpolated value: `` `${baseUrl}/things/${encodeURIComponent(input.id)}/` ``. Apply this to every
+  id/slug in the URL, including a connector-config value like an org slug (encode it once at the point
+  it's read from config, so every handler that uses it is safe automatically). Without this, a value
+  containing `/`, `?`, `#`, or a space corrupts the request path instead of erroring — and it's easy to
+  miss because unit tests that hardcode a plain alphanumeric ID in both the input and the expected URL
+  never exercise the encoding path.
 
 ```typescript
 export const SearchInputSchema = z.object({

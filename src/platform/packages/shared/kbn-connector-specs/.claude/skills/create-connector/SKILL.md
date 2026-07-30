@@ -131,6 +131,9 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
 - Update-action inputs where every field is optional — should they `.refine()` to require at least one?
 - ID/GUID-like fields that flow into a query or filter string without a format constraint (regex) — an
   unconstrained value here is an injection risk
+- A user-supplied or config-derived value (ID, slug, org name) interpolated into a URL path segment
+  without `encodeURIComponent()` — search the whole file for `` `${baseUrl} `` and check every `${...}`
+  after it
 - Naming/casing inconsistencies vs. sibling connectors (e.g. `webpackChunkName` casing)
 - Doc wording that could misread "required" as applying only to the last-listed parameter
 
