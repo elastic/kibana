@@ -25,6 +25,7 @@ export const DEFAULT_OUTPUT: NewOutput = {
   name: 'default',
   is_default: true,
   is_default_monitoring: true,
+  is_default_otel: false,
   type: outputType.Elasticsearch,
   hosts: [''],
 };
