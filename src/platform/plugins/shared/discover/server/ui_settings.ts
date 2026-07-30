@@ -70,6 +70,7 @@ export const getUiSettings: (
     }),
     category: ['discover'],
     schema: schema.string({
+      maxLength: 5000,
       validate: (value) => {
         const trimmedValue = value.trim();
         if (!trimmedValue) {
