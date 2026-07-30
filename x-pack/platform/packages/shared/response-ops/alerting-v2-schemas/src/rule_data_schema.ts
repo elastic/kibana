@@ -580,7 +580,7 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
       .int()
       .min(1)
       .describe(
-        'Strictly increasing version of the rule configuration, incremented on every change. Used on generated rule events as `rule.version`.'
+        'Monotonically increasing integer number representing a rule configuration version, incremented on every change. Used on generated rule events as `rule.version`.'
       ),
   }),
   enabled: z.boolean().describe('Whether the rule is enabled.'),

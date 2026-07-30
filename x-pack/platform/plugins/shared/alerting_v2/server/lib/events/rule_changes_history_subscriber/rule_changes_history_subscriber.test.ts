@@ -27,7 +27,7 @@ import type { AlertingDomainEvent, AlertingPublisherContext } from '../domain_ev
 import { createEventBusMock } from '../event_bus/event_bus.mock';
 import type { EventBus, Subscription } from '../event_bus';
 import { RuleChangesHistorySubscriber } from './rule_changes_history_subscriber';
-import { RULE_CHANGES_HISTORY_MAPPINGS } from './mappings';
+import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
 
 type CapturedHandler = (
   event: AlertingDomainEvent,
@@ -76,7 +76,7 @@ describe('RuleChangesHistorySubscriber', () => {
     it('subscribes one handler per mapping, using each mapping event type', () => {
       subscriber.start();
 
-      const mappingEventTypes = Object.keys(RULE_CHANGES_HISTORY_MAPPINGS);
+      const mappingEventTypes = Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP);
       expect(bus.subscribe).toHaveBeenCalledTimes(mappingEventTypes.length);
 
       const subscribedEventTypes = bus.subscribe.mock.calls.map(([eventType]) => eventType);
@@ -204,7 +204,7 @@ describe('RuleChangesHistorySubscriber', () => {
       });
 
       subscriber.start();
-      expect(unsubscribers.length).toBe(Object.keys(RULE_CHANGES_HISTORY_MAPPINGS).length);
+      expect(unsubscribers.length).toBe(Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP).length);
 
       subscriber.stop();
 

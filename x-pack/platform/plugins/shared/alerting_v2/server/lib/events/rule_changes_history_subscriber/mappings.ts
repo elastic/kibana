@@ -32,7 +32,9 @@ export interface RuleChangesHistoryMapping {
  * pair logged for it. Enable/disable are ordinary configuration changes, so both
  * categorise as `change`.
  */
-export const RULE_CHANGES_HISTORY_MAPPINGS: Record<RuleEvent['type'], RuleChangesHistoryMapping> = {
+export const RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP: Readonly<
+  Record<RuleEvent['type'], RuleChangesHistoryMapping>
+> = {
   [RULE_CREATED_EVENT_TYPE]: { action: RuleChangesHistoryAction.ruleCreate, eventType: 'creation' },
   [RULE_UPDATED_EVENT_TYPE]: { action: RuleChangesHistoryAction.ruleUpdate, eventType: 'change' },
   [RULE_ENABLED_EVENT_TYPE]: { action: RuleChangesHistoryAction.ruleEnable, eventType: 'change' },

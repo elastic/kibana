@@ -25,7 +25,7 @@ import {
   type AlertingPublisherContext,
 } from '../domain_events';
 import type { EventBus, Subscription } from '../event_bus';
-import { RULE_CHANGES_HISTORY_MAPPINGS } from './mappings';
+import { RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP } from './mappings';
 
 /** Strips the saved-object OCC token that is not meaningful for change history or restore. */
 const toRuleChangesHistorySnapshot = (rule: RuleResponse): RuleChangesHistorySnapshot => {
@@ -67,7 +67,7 @@ export class RuleChangesHistorySubscriber {
       return;
     }
 
-    for (const eventType of Object.keys(RULE_CHANGES_HISTORY_MAPPINGS) as Array<
+    for (const eventType of Object.keys(RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP) as Array<
       RuleEvent['type']
     >) {
       const subscription = this.bus.subscribe(eventType, (event, context) =>
@@ -95,7 +95,7 @@ export class RuleChangesHistorySubscriber {
       return;
     }
 
-    const { action, eventType } = RULE_CHANGES_HISTORY_MAPPINGS[event.type];
+    const { action, eventType } = RULE_LIFECYCLE_TO_CHANGES_HISTORY_MAP[event.type];
 
     try {
       const profile = await this.userProfile.getCurrent({ request: context.request });
