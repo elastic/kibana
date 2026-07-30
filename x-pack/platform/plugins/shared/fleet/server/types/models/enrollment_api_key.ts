@@ -41,7 +41,6 @@ export const EnrollmentAPIKeySchema = schema.object(
         },
       })
     ),
-    hidden: schema.maybe(schema.boolean()),
   },
   { meta: { id: 'enrollment_api_key' } }
 );

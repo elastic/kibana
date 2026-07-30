@@ -15,7 +15,6 @@ export interface EnrollmentAPIKey {
   policy_id?: string;
   created_at: string;
   expire_at?: string;
-  hidden?: boolean;
 }
 
 // Generated
