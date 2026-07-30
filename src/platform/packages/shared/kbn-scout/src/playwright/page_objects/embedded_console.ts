@@ -13,9 +13,16 @@ import type { ScoutPage } from '..';
 /**
  * The embedded (persistent) console rendered at the bottom of solution and
  * management pages (e.g. Ingest Pipelines, Index Management) by the `console`
- * plugin. Availability is gated by the `devTools:enablePersistentConsole` UI
- * setting and the `console.ui.embeddedEnabled` config (both default to true;
- * disabled on serverless observability and security projects).
+ * plugin. Availability is gated by all of the following (see the console
+ * plugin's `start`):
+ * - the `console.ui.enabled` config (defaults to true),
+ * - the `console.ui.embeddedEnabled` config (defaults to true; disabled on
+ *   serverless observability and security projects),
+ * - the `devTools:enablePersistentConsole` UI setting (defaults to true), and
+ * - the current role having the `dev_tools` feature capability
+ *   (`capabilities.dev_tools.show === true`).
+ * A role without Dev Tools access will not get the console even with the two
+ * configs and the UI setting enabled.
  */
 export class EmbeddedConsole {
   readonly section: Locator;
