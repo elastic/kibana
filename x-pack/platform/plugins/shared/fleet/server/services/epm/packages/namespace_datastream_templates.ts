@@ -505,6 +505,27 @@ export async function syncNamespaceTemplates({
 export type { NamespaceConflictWarning };
 
 /**
+ * Logs one `warn`-level line per detected namespace conflict. Shared by the single-package
+ * and bulk-update handlers to avoid duplicating the formatting logic.
+ */
+export function logNamespaceConflictWarnings(
+  logger: ReturnType<typeof appContextService.getLogger>,
+  handlerName: string,
+  warnings: NamespaceConflictWarning[]
+): void {
+  for (const w of warnings) {
+    logger.warn(
+      `[${handlerName}] Pre-existing index template conflict for data stream ` +
+        `"${w.dataStreamName}" (namespace "${w.namespace}"): base template ` +
+        `"${w.baseTemplateName}" is overridden. Conflicting templates: [${w.conflictingTemplates
+          .map((t) => `${t.name} (priority ${t.priority}, ${t.conflictType})`)
+          .join(', ')}]. Remove or adjust the priority of the conflicting template, ` +
+        `then opt the namespace out and back in to retry.`
+    );
+  }
+}
+
+/**
  * Checks all data streams of a package against the given namespaces for pre-existing
  * index template conflicts. Returns one `NamespaceConflictWarning` per conflicting
  * (dataStream, namespace) pair. Non-fatal: any error during an individual check is

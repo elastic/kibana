@@ -317,6 +317,15 @@ export const SettingsPage: React.FC<Props> = memo(
             }
           } catch {
             // Fail open: if the check itself errors, proceed with the save.
+            notifications.toasts.addWarning(
+              i18n.translate(
+                'xpack.fleet.integrations.namespaceCustomization.conflictCheckFailed',
+                {
+                  defaultMessage:
+                    'Could not check for index template conflicts. Proceeding without the check.',
+                }
+              )
+            );
           }
         }
         saveNamespaceCustomization(next);
@@ -324,6 +333,7 @@ export const SettingsPage: React.FC<Props> = memo(
       [
         namespaceCustomizationEnabledFor,
         namespacePreflight,
+        notifications,
         packageInfo.name,
         saveNamespaceCustomization,
       ]

@@ -51,10 +51,11 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
         {conflicts.map((w) =>
           w.conflictingTemplates.map((t) => (
             <li key={`${w.dataStreamName}-${w.namespace}-${t.name}`}>
+              <EuiSpacer size="s" />
               {t.conflictType === 'overrides_fleet' && (
                 <FormattedMessage
                   id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.overridesFleet"
-                  defaultMessage="{dataStream}: will be overridden by {template} (priority: {priority})"
+                  defaultMessage="Fleet's {dataStream} namespace template will be overridden by {template} (priority: {priority})"
                   values={{
                     dataStream: <EuiCode>{w.dataStreamName}</EuiCode>,
                     template: <EuiCode>{t.name}</EuiCode>,
@@ -65,7 +66,7 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
               {t.conflictType === 'blocked_by_same_priority' && (
                 <FormattedMessage
                   id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.blockedBySamePriority"
-                  defaultMessage="{dataStream}: cannot be created because {template} (priority {priority}) has the same priority"
+                  defaultMessage="Fleet's {dataStream} namespace template cannot be created because {template} (priority {priority}) has the same priority"
                   values={{
                     dataStream: <EuiCode>{w.dataStreamName}</EuiCode>,
                     template: <EuiCode>{t.name}</EuiCode>,
@@ -76,7 +77,7 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
               {t.conflictType === 'overridden_by_fleet' && (
                 <FormattedMessage
                   id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.overriddenByFleet"
-                  defaultMessage="{dataStream}: will override {template} (priority {priority})"
+                  defaultMessage="Fleet's {dataStream} namespace template will override {template} (priority {priority})"
                   values={{
                     dataStream: <EuiCode>{w.dataStreamName}</EuiCode>,
                     template: <EuiCode>{t.name}</EuiCode>,

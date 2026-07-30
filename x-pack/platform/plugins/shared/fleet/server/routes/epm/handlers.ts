@@ -113,7 +113,10 @@ import {
   rollbackInstallation,
 } from '../../services/epm/packages/rollback';
 import { updatePackage, reviewUpgrade } from '../../services/epm/packages/update';
-import { runNamespacePreflightCheck } from '../../services/epm/packages/namespace_datastream_templates';
+import {
+  runNamespacePreflightCheck,
+  logNamespaceConflictWarnings,
+} from '../../services/epm/packages/namespace_datastream_templates';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 import { scheduleSyncIlmPolicyTask } from '../../tasks/sync_ilm_policy_task';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
@@ -428,19 +431,11 @@ export const updatePackageHandler: FleetRequestHandler<
       });
       if (detected.length > 0) {
         warnings = detected;
-        const logger = appContextService.getLogger();
-        for (const w of detected) {
-          logger.warn(
-            `[updatePackageHandler] Pre-existing index template conflict for data stream ` +
-              `"${w.dataStreamName}" (namespace "${w.namespace}"): base template ` +
-              `"${
-                w.baseTemplateName
-              }" is overridden. Conflicting templates: [${w.conflictingTemplates
-                .map((t) => `${t.name} (priority ${t.priority}, ${t.conflictType})`)
-                .join(', ')}]. Remove or adjust the priority of the conflicting template, ` +
-              `then opt the namespace out and back in to retry.`
-          );
-        }
+        logNamespaceConflictWarnings(
+          appContextService.getLogger(),
+          'updatePackageHandler',
+          detected
+        );
       }
     } catch (err) {
       // Fail open: a failed pre-flight check must never block the operation.

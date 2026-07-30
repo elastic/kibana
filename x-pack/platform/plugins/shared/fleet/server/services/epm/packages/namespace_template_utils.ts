@@ -101,10 +101,10 @@ function classifyConflict(templatePriority: number, nsPriority: number): Conflic
 }
 
 /** Minimal shape of one item from GET /_index_template. */
-type IndexTemplateEntry = {
+interface IndexTemplateEntry {
   name: string;
   index_template: { index_patterns?: string | string[]; priority?: number };
-};
+}
 
 /**
  * Filters a pre-fetched list of index templates down to those whose index_patterns
@@ -266,6 +266,16 @@ export async function checkNamespaceConflict({
       excludeNames: new Set([baseTemplateName, nsTemplateName]),
       nsPriority,
     });
+
+    if (conflictingTemplates.length === 0) {
+      // The simulate indicated a conflict but we could not identify any conflicting template
+      // (e.g. allTemplates was empty because the fetch failed). Return null so callers never
+      // receive an empty warning that has no actionable detail.
+      logger.debug(
+        `[${logContext}] conflict indicated by simulate but no conflicting templates identified for ${nsTemplateName}; skipping warning`
+      );
+      return null;
+    }
 
     return {
       dataStreamName: indexName,

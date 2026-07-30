@@ -21,7 +21,10 @@ import type {
   GetOneBulkOperationPackagesRequestSchema,
 } from '../../types';
 import { updatePackage } from '../../services/epm/packages/update';
-import { runNamespacePreflightCheck } from '../../services/epm/packages/namespace_datastream_templates';
+import {
+  runNamespacePreflightCheck,
+  logNamespaceConflictWarnings,
+} from '../../services/epm/packages/namespace_datastream_templates';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 import {
   getAllowedNamespacePrefixesForSpace,
@@ -276,17 +279,11 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
             });
             if (detected.length > 0) {
               warnings = detected;
-              const logger = appContextService.getLogger();
-              for (const w of detected) {
-                logger.warn(
-                  `[postBulkNamespaceCustomizationHandler] Pre-existing index template conflict ` +
-                    `for data stream "${w.dataStreamName}" (namespace "${w.namespace}"): base ` +
-                    `template "${w.baseTemplateName}" is overridden. Conflicting templates: ` +
-                    `[${w.conflictingTemplates
-                      .map((t) => `${t.name} (priority ${t.priority}, ${t.conflictType})`)
-                      .join(', ')}].`
-                );
-              }
+              logNamespaceConflictWarnings(
+                appContextService.getLogger(),
+                'postBulkNamespaceCustomizationHandler',
+                detected
+              );
             }
           } catch (err) {
             appContextService
