@@ -77,6 +77,8 @@ export const TextInput = ({
     latestValue.current = inputValue;
   }, [inputValue]);
 
+  useEffect(() => () => debouncedValidate.cancel(), [debouncedValidate]);
+
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;
 
