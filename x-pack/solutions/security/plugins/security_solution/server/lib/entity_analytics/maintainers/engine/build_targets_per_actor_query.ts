@@ -195,7 +195,9 @@ function buildLocalNamespaceFastPathEsql(
     ${belowCol} = VALUES(targets) WHERE access_type == "${below}"
   BY ${ENGINE_COLUMNS.actor}`;
         })()
-      : `| STATS ${ENGINE_COLUMNS.flat(config.relationshipKey)} = VALUES(targetEntityId) BY ${ENGINE_COLUMNS.actor}`;
+      : `| STATS ${ENGINE_COLUMNS.flat(config.relationshipKey)} = VALUES(targetEntityId) BY ${
+          ENGINE_COLUMNS.actor
+        }`;
 
   return `FROM ${indexPattern}
 | WHERE ${config.esqlWhereClause}

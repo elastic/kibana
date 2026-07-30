@@ -137,9 +137,7 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     });
 
     it('system_security has localNamespaceFastPath: true', () => {
-      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find(
-        (c) => c.id === 'system_security'
-      );
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'system_security');
       expect(cfg?.localNamespaceFastPath).toBe(true);
     });
 
