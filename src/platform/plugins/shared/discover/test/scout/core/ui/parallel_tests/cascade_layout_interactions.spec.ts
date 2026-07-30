@@ -11,7 +11,7 @@
  * Covers the ES|QL grouped ("cascade") layout's end-to-end UI interactions:
  * the layout renders with a group count, a row's context menu opens,
  * fullscreen works, and opting out of / back into grouping (plus switching
- * to classic mode) doesn't error.
+ * to classic mode) renders the expected layout.
  */
 
 import { EuiDataGridWrapper } from '@kbn/scout';
@@ -46,7 +46,7 @@ spaceTest.describe(
     spaceTest(
       'renders grouped results, supports row actions and fullscreen, and switches modes without errors',
       async ({ page, pageObjects }) => {
-        const { discover } = pageObjects;
+        const { dataGrid, discover } = pageObjects;
 
         await spaceTest.step(
           'a grouping query that exceeds the suggested group limit does not show the cascade layout',
@@ -96,22 +96,19 @@ spaceTest.describe(
           expect(await expandedRowGrid.getRowsCount()).toBeGreaterThan(0);
         });
 
-        await spaceTest.step(
-          'opting out of grouping shows the flat layout with no errors',
-          async () => {
-            await page.testSubj.click('discoverEnableCascadeLayoutSwitch');
-            await expect(page.testSubj.locator('discoverGroupBySelectionList')).toBeVisible();
+        await spaceTest.step('opting out of grouping shows the flat doc table', async () => {
+          await page.testSubj.click('discoverEnableCascadeLayoutSwitch');
+          await expect(page.testSubj.locator('discoverGroupBySelectionList')).toBeVisible();
 
-            await page.testSubj.click('discoverCascadeLayoutOptOutButton');
-            await discover.waitUntilTabIsLoaded();
+          await page.testSubj.click('discoverCascadeLayoutOptOutButton');
+          await discover.waitUntilTabIsLoaded();
 
-            expect(await discover.isShowingCascadeLayout()).toBe(false);
-            await expect(discover.getErrorCalloutMessage()).toBeHidden();
-          }
-        );
+          expect(await discover.isShowingCascadeLayout()).toBe(false);
+          await dataGrid.waitForDocTableRendered();
+        });
 
         await spaceTest.step(
-          're-selecting the group field and switching to classic mode works with no errors',
+          're-selecting the group field and switching to classic mode works',
           async () => {
             await page.testSubj.click('discoverEnableCascadeLayoutSwitch');
             await expect(page.testSubj.locator('discoverGroupBySelectionList')).toBeVisible();
@@ -121,7 +118,7 @@ spaceTest.describe(
             expect(await discover.isShowingCascadeLayout()).toBe(true);
 
             await discover.selectClassicMode();
-            await expect(discover.getErrorCalloutMessage()).toBeHidden();
+            await dataGrid.waitForDocTableRendered();
           }
         );
       }

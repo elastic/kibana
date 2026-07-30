@@ -144,9 +144,9 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'keeps the fetch active when switching tabs quickly',
-      async ({ pageObjects, network }) => {
-        const { discover, unifiedTabs } = pageObjects;
+      'keeps an expanded row fetch active when switching tabs quickly',
+      async ({ page, pageObjects, network }) => {
+        const { dataGrid, discover, unifiedTabs } = pageObjects;
 
         expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
         await unifiedTabs.createNewTab();
@@ -156,17 +156,27 @@ spaceTest.describe(
         await discover.waitUntilTabIsLoaded();
         const [firstRowId] = await discover.getCascadeLayoutVisibleRowIds();
 
-        const requestCount = await network.countMatchingRequests(ESQL_ASYNC_ENDPOINT, async () => {
-          // Click without waiting for the row to finish expanding so the fetch
-          // is still in flight when tabs are switched away and back.
+        await network.trackMatchingRequests(ESQL_ASYNC_ENDPOINT, async (getRequestCount) => {
+          // Click without waiting for expansion so the fetch starts before switching
+          // away and returning to this tab.
+          const initialRequest = page.waitForRequest((request) =>
+            request.url().includes(ESQL_ASYNC_ENDPOINT)
+          );
           await discover.clickCascadeRowToggle(firstRowId);
           await unifiedTabs.selectTab(1);
+          await initialRequest;
+
+          const requestCountBeforeReturning = getRequestCount();
+          expect(requestCountBeforeReturning).toBeGreaterThan(0);
+
           await unifiedTabs.selectTab(0);
           await discover.waitUntilTabIsLoaded();
-        });
 
-        expect(requestCount).toBeGreaterThan(0);
-        expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).toBe(true);
+          expect(await discover.isCascadeLayoutRowExpanded(firstRowId)).toBe(true);
+          await dataGrid.waitForDocTableRendered();
+
+          expect(getRequestCount()).toBe(requestCountBeforeReturning);
+        });
       }
     );
   }
