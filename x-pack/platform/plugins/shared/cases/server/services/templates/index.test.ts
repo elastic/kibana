@@ -1633,6 +1633,40 @@ describe('TemplatesService', () => {
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
 
+    it('allows a same-owner update when the owner is at the template limit', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+            owner: 'securitySolution',
+          })
+        );
+      unsecuredSavedObjectsClient.find.mockResolvedValue(
+        createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
+      );
+
+      await service.updateTemplate('template-id', {
+        name: 'Updated',
+        owner: 'securitySolution',
+        definition: buildDefinition('Updated'),
+      });
+
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalledWith(
+        expect.objectContaining({ perPage: 0 })
+      );
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        CASE_TEMPLATE_SAVED_OBJECT,
+        expect.objectContaining({ name: 'Updated', owner: 'securitySolution' }),
+        expect.any(Object)
+      );
+    });
+
     it('rejects create when a definition declares too many fields', async () => {
       const service = createService();
 
