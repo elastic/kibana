@@ -930,16 +930,6 @@ export class LensApp {
     await this.page.keyboard.press('Tab');
   }
 
-  /**
-   * Enables the "Include empty rows" switch in the open index-pattern dimension editor and
-   * waits for it to register as checked before returning.
-   */
-  async enableIncludeEmptyRows() {
-    const includeEmptyRowsSwitch = this.page.testSubj.locator('indexPattern-include-empty-rows');
-    await includeEmptyRowsSwitch.click();
-    await expect(includeEmptyRowsSwitch).toHaveAttribute('aria-checked', 'true');
-  }
-
   async openMessageList() {
     const trigger = this.page.testSubj.locator('lens-message-list-trigger');
     await trigger.click();
