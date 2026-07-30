@@ -90,7 +90,7 @@ export const ListMonitorsInputSchema = z.object({
     .min(1)
     .max(1000)
     .optional()
-    .describe('Number of monitors per page (1–1000). Defaults to Datadog\'s page size.'),
+    .describe("Number of monitors per page (1–1000). Defaults to Datadog's page size."),
 });
 export type ListMonitorsInput = z.infer<typeof ListMonitorsInputSchema>;
 
@@ -142,13 +142,8 @@ export const UnmuteMonitorInputSchema = z.object({
     .string()
     .max(MAX_SCOPE_LENGTH)
     .optional()
-    .describe(
-      'Optional scope to unmute, e.g. "host:i-12345". Omit to unmute the whole monitor.'
-    ),
-  allScopes: z
-    .boolean()
-    .optional()
-    .describe('When true, unmute every scoped mute on the monitor.'),
+    .describe('Optional scope to unmute, e.g. "host:i-12345". Omit to unmute the whole monitor.'),
+  allScopes: z.boolean().optional().describe('When true, unmute every scoped mute on the monitor.'),
 });
 export type UnmuteMonitorInput = z.infer<typeof UnmuteMonitorInputSchema>;
 
@@ -196,16 +191,12 @@ export const ScheduleDowntimeInputSchema = z.object({
     .string()
     .min(1)
     .max(64)
-    .describe(
-      'Downtime start as an ISO 8601 timestamp. Example: "2024-06-01T10:00:00Z".'
-    ),
+    .describe('Downtime start as an ISO 8601 timestamp. Example: "2024-06-01T10:00:00Z".'),
   end: z
     .string()
     .min(1)
     .max(64)
-    .describe(
-      'Downtime end as an ISO 8601 timestamp. Example: "2024-06-01T12:00:00Z".'
-    ),
+    .describe('Downtime end as an ISO 8601 timestamp. Example: "2024-06-01T12:00:00Z".'),
   message: z
     .string()
     .max(MAX_TEXT_LENGTH)
@@ -249,9 +240,7 @@ export const CreateIncidentInputSchema = z.object({
   severity: z
     .enum(['SEV-1', 'SEV-2', 'SEV-3', 'SEV-4', 'SEV-5', 'UNKNOWN'])
     .optional()
-    .describe(
-      'Incident severity. Example: "SEV-2". Defaults to Datadog\'s default when omitted.'
-    ),
+    .describe('Incident severity. Example: "SEV-2". Defaults to Datadog\'s default when omitted.'),
   detectionMethod: z
     .enum(['customer', 'employee', 'monitor', 'other', 'unknown'])
     .optional()
@@ -271,12 +260,7 @@ export const UpdateIncidentInputSchema = z
       .min(1)
       .max(MAX_ID_LENGTH)
       .describe('Incident UUID returned by createIncident.'),
-    title: z
-      .string()
-      .min(1)
-      .max(MAX_TITLE_LENGTH)
-      .optional()
-      .describe('Updated incident title.'),
+    title: z.string().min(1).max(MAX_TITLE_LENGTH).optional().describe('Updated incident title.'),
     customerImpacted: z.boolean().optional().describe('Updated customer-impacted flag.'),
     severity: z
       .enum(['SEV-1', 'SEV-2', 'SEV-3', 'SEV-4', 'SEV-5', 'UNKNOWN'])
@@ -294,8 +278,7 @@ export const UpdateIncidentInputSchema = z
       value.severity !== undefined ||
       value.state !== undefined,
     {
-      message:
-        'Provide at least one field to update: title, customerImpacted, severity, or state.',
+      message: 'Provide at least one field to update: title, customerImpacted, severity, or state.',
     }
   );
 export type UpdateIncidentInput = z.infer<typeof UpdateIncidentInputSchema>;
@@ -306,11 +289,7 @@ export const PostEventInputSchema = z.object({
     .min(1)
     .max(MAX_TITLE_LENGTH)
     .describe('Event title shown in the Datadog Events Explorer.'),
-  text: z
-    .string()
-    .min(1)
-    .max(MAX_TEXT_LENGTH)
-    .describe('Event body text. Supports markdown.'),
+  text: z.string().min(1).max(MAX_TEXT_LENGTH).describe('Event body text. Supports markdown.'),
   tags: tagsSchema
     .optional()
     .describe('Optional tags for the event. Example: ["env:prod", "source:kibana"].'),
@@ -337,17 +316,9 @@ export const QueryTimeseriesInputSchema = z.object({
     .string()
     .min(1)
     .max(MAX_QUERY_LENGTH)
-    .describe(
-      'Datadog metric query. Example: "avg:system.cpu.user{env:prod} by {host}".'
-    ),
-  from: z
-    .number()
-    .int()
-    .describe('Start of the query window as a Unix timestamp in seconds.'),
-  to: z
-    .number()
-    .int()
-    .describe('End of the query window as a Unix timestamp in seconds.'),
+    .describe('Datadog metric query. Example: "avg:system.cpu.user{env:prod} by {host}".'),
+  from: z.number().int().describe('Start of the query window as a Unix timestamp in seconds.'),
+  to: z.number().int().describe('End of the query window as a Unix timestamp in seconds.'),
 });
 export type QueryTimeseriesInput = z.infer<typeof QueryTimeseriesInputSchema>;
 
@@ -370,9 +341,7 @@ export const SearchLogsInputSchema = z.object({
     .string()
     .min(1)
     .max(64)
-    .describe(
-      'End of the time window as an ISO 8601 timestamp. Example: "2024-01-15T01:00:00Z".'
-    ),
+    .describe('End of the time window as an ISO 8601 timestamp. Example: "2024-01-15T01:00:00Z".'),
   indexes: z
     .array(z.string().min(1).max(200))
     .max(20)
@@ -388,7 +357,9 @@ export const SearchLogsInputSchema = z.object({
   sort: z
     .enum(['timestamp', '-timestamp'])
     .optional()
-    .describe('Sort order. Use "-timestamp" for newest first (default) or "timestamp" for oldest first.'),
+    .describe(
+      'Sort order. Use "-timestamp" for newest first (default) or "timestamp" for oldest first.'
+    ),
   storageTier: z
     .enum(['indexes', 'online-archives', 'flex'])
     .optional()

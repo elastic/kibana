@@ -157,14 +157,17 @@ describe('Datadog', () => {
         limit: 25,
       });
 
-      expect(mockClient.post).toHaveBeenCalledWith('https://api.datadoghq.com/api/v2/events/search', {
-        filter: {
-          query: 'source:alert service:api',
-          from: 'now-1h',
-          to: 'now',
-        },
-        page: { limit: 25 },
-      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.datadoghq.com/api/v2/events/search',
+        {
+          filter: {
+            query: 'source:alert service:api',
+            from: 'now-1h',
+            to: 'now',
+          },
+          page: { limit: 25 },
+        }
+      );
     });
 
     it('should not double-prefix source when already present', async () => {

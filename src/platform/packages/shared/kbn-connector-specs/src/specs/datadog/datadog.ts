@@ -51,9 +51,7 @@ import {
 const applyDatadogAuthHeaders = (ctx: ActionContext): void => {
   const secrets = ctx.secrets;
   if (!secrets || secrets.authType !== 'basic') {
-    throw new Error(
-      'Datadog connector requires API Key and Application Key (basic auth secrets).'
-    );
+    throw new Error('Datadog connector requires API Key and Application Key (basic auth secrets).');
   }
   const apiKey = secrets.username;
   const applicationKey = secrets.password;
@@ -572,9 +570,9 @@ export const Datadog: ConnectorSpec = {
     '- `scheduleDowntime` uses the v2 downtime API (JSON:API body). `cancelDowntime` expects the v2 downtime UUID.',
     '- `getAlertEvents` prefixes `source:alert` when the query does not already include a `source:` clause.',
     '- Metric `from`/`to` for `queryTimeseries` are Unix seconds; log/event windows use ISO 8601 (or relative strings such as `now-1h`).',
-    '- `createIncident` / `updateIncident` put severity and state under `fields` as `{ type: \"dropdown\", value: \"SEV-2\" }` / `{ type: \"dropdown\", value: \"resolved\" }`. Do not send top-level `severity` (some orgs return HTTP 500).',
-    '- `updateIncident` can return 403 \"required seat\" when the Datadog org lacks an Incident Management seat for the Application Key user.',
-    '- `searchLogs` requires Log Management with at least one valid index; otherwise Datadog returns 400 \"No valid indexes specified\".',
+    '- `createIncident` / `updateIncident` put severity and state under `fields` as `{ type: "dropdown", value: "SEV-2" }` / `{ type: "dropdown", value: "resolved" }`. Do not send top-level `severity` (some orgs return HTTP 500).',
+    '- `updateIncident` can return 403 "required seat" when the Datadog org lacks an Incident Management seat for the Application Key user.',
+    '- `searchLogs` requires Log Management with at least one valid index; otherwise Datadog returns 400 "No valid indexes specified".',
   ].join('\n'),
 
   test: {
