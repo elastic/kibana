@@ -12,6 +12,7 @@ import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useApplyTemplate } from '../../../hooks/use_apply_template';
 import { useConversation } from '../../../hooks/use_conversation';
+import { useToasts } from '../../../hooks/use_toasts';
 
 const LABELS = {
   placeholder: i18n.translate('xpack.agentBuilder.templateSelector.placeholder', {
@@ -20,12 +21,16 @@ const LABELS = {
   ariaLabel: i18n.translate('xpack.agentBuilder.templateSelector.ariaLabel', {
     defaultMessage: 'Apply a template to this conversation',
   }),
+  applyError: i18n.translate('xpack.agentBuilder.templateSelector.applyError', {
+    defaultMessage: 'Failed to apply template',
+  }),
 };
 
 export const TemplateSelector: React.FC = () => {
   const { conversationId } = useConversationContext();
   const { conversation } = useConversation();
   const applyTemplate = useApplyTemplate(conversationId);
+  const { addErrorToast } = useToasts();
   const [isApplying, setIsApplying] = useState(false);
 
   if (!CONVERSATION_TEMPLATES.length || !conversationId) {
@@ -43,6 +48,8 @@ export const TemplateSelector: React.FC = () => {
     setIsApplying(true);
     try {
       await applyTemplate(templateId);
+    } catch (err) {
+      addErrorToast({ title: LABELS.applyError, text: err?.message });
     } finally {
       setIsApplying(false);
     }

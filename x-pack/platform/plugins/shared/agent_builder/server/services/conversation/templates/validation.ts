@@ -56,6 +56,11 @@ const validateType = (
       break;
     case 'keyword':
     case 'text':
+      if (typeof value !== 'string') {
+        throw createBadRequestError(
+          `Template "${templateId}" field "${name}": value must be a string, got "${typeof value}"`
+        );
+      }
       break;
   }
 };

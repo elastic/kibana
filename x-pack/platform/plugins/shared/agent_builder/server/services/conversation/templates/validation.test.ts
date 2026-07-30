@@ -109,6 +109,16 @@ describe('validateSingleField', () => {
       expect(() => validateSingleField(TEMPLATE_ID, kw, 'anything')).not.toThrow();
       expect(() => validateSingleField(TEMPLATE_ID, tx, 'anything')).not.toThrow();
     });
+
+    it('throws for a boolean value on a keyword field', () => {
+      const f = makeField({ type: 'keyword' });
+      expect(() => validateSingleField(TEMPLATE_ID, f, true)).toThrow('must be a string');
+    });
+
+    it('throws for a boolean value on a text field', () => {
+      const f = makeField({ type: 'text' });
+      expect(() => validateSingleField(TEMPLATE_ID, f, false)).toThrow('must be a string');
+    });
   });
 
   describe('allowed_values rule', () => {
