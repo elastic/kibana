@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '@kbn/cross-cluster-replication-plugin/common/constants';
 import type { ApiClientFixture, EsClient, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../common/constants';
 import { apiTest, testData, registerSelfReferentialRemote, removeRemote } from '../fixtures';
 
 const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
@@ -139,27 +139,27 @@ apiTest.describe('CCR follower indices API', { tag: tags.stateful.classic }, () 
     expect(response.body.attributes.error.reason).toContain('no such index');
   });
 
-  apiTest('creates a follower for an existing leader and reads it back', async ({
-    apiClient,
-    esClient,
-  }) => {
-    const leaderIndex = await createLeaderIndex(esClient, 'create-read');
+  apiTest(
+    'creates a follower for an existing leader and reads it back',
+    async ({ apiClient, esClient }) => {
+      const leaderIndex = await createLeaderIndex(esClient, 'create-read');
 
-    const createResponse = await createFollowerIndex(apiClient, 'create-read', {
-      remoteCluster: FOLLOWER_REMOTE_CLUSTER,
-      leaderIndex,
-    });
+      const createResponse = await createFollowerIndex(apiClient, 'create-read', {
+        remoteCluster: FOLLOWER_REMOTE_CLUSTER,
+        leaderIndex,
+      });
 
-    expect(createResponse).toHaveStatusCode(200);
-    // ES can respond without acknowledging shard follow; only assert the follow
-    // was created to avoid the `follow_index_shards_acked` race.
-    expect(createResponse.body.follow_index_created).toBe(true);
+      expect(createResponse).toHaveStatusCode(200);
+      // ES can respond without acknowledging shard follow; only assert the follow
+      // was created to avoid the `follow_index_shards_acked` race.
+      expect(createResponse.body.follow_index_created).toBe(true);
 
-    const getResponse = await getFollowerIndex(apiClient, 'create-read');
-    expect(getResponse).toHaveStatusCode(200);
-    expect(getResponse.body.leaderIndex).toBe(leaderIndex);
-    expect(getResponse.body.remoteCluster).toBe(FOLLOWER_REMOTE_CLUSTER);
-  });
+      const getResponse = await getFollowerIndex(apiClient, 'create-read');
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body.leaderIndex).toBe(leaderIndex);
+      expect(getResponse.body.remoteCluster).toBe(FOLLOWER_REMOTE_CLUSTER);
+    }
+  );
 
   apiTest('returns a 404 when the follower index does not exist', async ({ apiClient }) => {
     const response = await getFollowerIndex(apiClient, 'missing');
@@ -196,22 +196,22 @@ apiTest.describe('CCR follower indices API', { tag: tags.stateful.classic }, () 
     expect(updated.maxReadRequestOperationCount).toBe(updatedValue);
   });
 
-  apiTest('hard-coded advanced-settings defaults match Elasticsearch', async ({
-    apiClient,
-    esClient,
-  }) => {
-    // Create a follower without advanced settings so ES fills in its defaults,
-    // then confirm they match the values hard-coded in the plugin client.
-    const leaderIndex = await createLeaderIndex(esClient, 'defaults');
+  apiTest(
+    'hard-coded advanced-settings defaults match Elasticsearch',
+    async ({ apiClient, esClient }) => {
+      // Create a follower without advanced settings so ES fills in its defaults,
+      // then confirm they match the values hard-coded in the plugin client.
+      const leaderIndex = await createLeaderIndex(esClient, 'defaults');
 
-    await createFollowerIndex(apiClient, 'defaults', {
-      remoteCluster: FOLLOWER_REMOTE_CLUSTER,
-      leaderIndex,
-    });
+      await createFollowerIndex(apiClient, 'defaults', {
+        remoteCluster: FOLLOWER_REMOTE_CLUSTER,
+        leaderIndex,
+      });
 
-    const body = await waitForFollowerActive(apiClient, 'defaults');
-    for (const [key, value] of Object.entries(FOLLOWER_INDEX_ADVANCED_SETTINGS)) {
-      expect(body[key]).toStrictEqual(value);
+      const body = await waitForFollowerActive(apiClient, 'defaults');
+      for (const [key, value] of Object.entries(FOLLOWER_INDEX_ADVANCED_SETTINGS)) {
+        expect(body[key]).toStrictEqual(value);
+      }
     }
-  });
+  );
 });

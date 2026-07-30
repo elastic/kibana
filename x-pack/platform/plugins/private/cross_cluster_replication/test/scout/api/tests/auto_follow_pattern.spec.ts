@@ -69,39 +69,40 @@ apiTest.describe('CCR auto-follow patterns API', { tag: tags.stateful.classic },
     expect(response.body.attributes.error.reason).toContain('no such remote cluster');
   });
 
-  apiTest('creates and reads an auto-follow pattern for a known remote cluster', async ({
-    apiClient,
-  }) => {
-    const id = 'pattern-known-cluster';
+  apiTest(
+    'creates and reads an auto-follow pattern for a known remote cluster',
+    async ({ apiClient }) => {
+      const id = 'pattern-known-cluster';
 
-    const createResponse = await apiClient.post(`${API_BASE_PATH}/auto_follow_patterns`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-      body: JSON.stringify({
-        id,
+      const createResponse = await apiClient.post(`${API_BASE_PATH}/auto_follow_patterns`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+        body: JSON.stringify({
+          id,
+          remoteCluster: AUTO_FOLLOW_REMOTE_CLUSTER,
+          leaderIndexPatterns: LEADER_INDEX_PATTERNS,
+          followIndexPattern: '{{leader_index}}_follower',
+        }),
+      });
+
+      expect(createResponse).toHaveStatusCode(200);
+      expect(createResponse.body.acknowledged).toBe(true);
+
+      const getResponse = await apiClient.get(`${API_BASE_PATH}/auto_follow_patterns/${id}`, {
+        headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
+        responseType: 'json',
+      });
+
+      expect(getResponse).toHaveStatusCode(200);
+      expect(getResponse.body).toStrictEqual({
+        name: id,
         remoteCluster: AUTO_FOLLOW_REMOTE_CLUSTER,
+        active: true,
         leaderIndexPatterns: LEADER_INDEX_PATTERNS,
         followIndexPattern: '{{leader_index}}_follower',
-      }),
-    });
-
-    expect(createResponse).toHaveStatusCode(200);
-    expect(createResponse.body.acknowledged).toBe(true);
-
-    const getResponse = await apiClient.get(`${API_BASE_PATH}/auto_follow_patterns/${id}`, {
-      headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
-      responseType: 'json',
-    });
-
-    expect(getResponse).toHaveStatusCode(200);
-    expect(getResponse.body).toStrictEqual({
-      name: id,
-      remoteCluster: AUTO_FOLLOW_REMOTE_CLUSTER,
-      active: true,
-      leaderIndexPatterns: LEADER_INDEX_PATTERNS,
-      followIndexPattern: '{{leader_index}}_follower',
-    });
-  });
+      });
+    }
+  );
 
   apiTest('returns a 404 when the auto-follow pattern is not found', async ({ apiClient }) => {
     const response = await apiClient.get(`${API_BASE_PATH}/auto_follow_patterns/missing-pattern`, {
@@ -110,6 +111,6 @@ apiTest.describe('CCR auto-follow patterns API', { tag: tags.stateful.classic },
     });
 
     expect(response).toHaveStatusCode(404);
-    expect(response.body.attributes.error.reason).not.toBe(undefined);
+    expect(response.body.attributes.error.reason).toBeDefined();
   });
 });
