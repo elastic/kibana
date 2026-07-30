@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { CSSObject } from '@emotion/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import type { EbtClickAttrs } from '@kbn/ebt-click';
+import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
 import { getEbtProps } from '@kbn/ebt-click';
 import { APM_EBT_ACTIONS } from '../../app/ebt_constants';
 import {
@@ -80,7 +80,7 @@ export function EnvironmentSelect({
   compressed?: boolean;
   hideLabel?: boolean;
   cssOverride?: CSSObject;
-  ebt?: Omit<EbtClickAttrs, 'action'>;
+  ebt?: EbtClickAttrsWithoutAction;
 }) {
   const { isSmall } = useBreakpoints();
   const fullWidth = fullWidthProp ?? isSmall;

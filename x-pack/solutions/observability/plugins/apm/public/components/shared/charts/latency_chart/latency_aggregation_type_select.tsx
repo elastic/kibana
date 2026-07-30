@@ -8,7 +8,7 @@
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { EbtClickAttrs } from '@kbn/ebt-click';
+import type { EbtClickAttrsWithoutAction } from '@kbn/ebt-click';
 import { getEbtProps } from '@kbn/ebt-click';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
@@ -26,7 +26,7 @@ export function LatencyAggregationTypeSelect({
 }: {
   latencyAggregationType?: LatencyAggregationType;
   onChange: (value: LatencyAggregationType) => void;
-  ebt?: Omit<EbtClickAttrs, 'action'>;
+  ebt?: EbtClickAttrsWithoutAction;
 }) {
   return (
     <EuiSelect
