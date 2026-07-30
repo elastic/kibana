@@ -14,6 +14,7 @@ import {
   MAX_TITLE_LENGTH,
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
 } from '../../../common/constants';
 import type { CasePostRequest } from '../../../common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
@@ -709,6 +710,26 @@ describe('bulkCreate', () => {
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Failed to bulk create cases: Error: invalid keys \\"foo\\""`
       );
+    });
+
+    it('rejects an extended field value that exceeds the maximum byte size before writing', async () => {
+      await expect(
+        bulkCreate(
+          {
+            cases: getCases({
+              extended_fields: {
+                large_as_keyword: 'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1),
+              },
+            }),
+          },
+          clientArgs,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        `Failed to bulk create cases: Error: Invalid extended_fields: Extended field "large_as_keyword" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
     });
   });
 
