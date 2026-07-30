@@ -96,6 +96,12 @@ and template documents, because the agent executes those code blocks verbatim:
 - Ownership is never downgraded silently: discarding a reservation this session
   made requires `--confirm-preexisting`, so a resource cannot vanish from both
   the pending list and the cleanup list.
+- `../phases/0-setup.md`'s environment/GitHub-input/CCS routes (Steps 0a/0b)
+  point to on-demand files — `0-managed-environment.md`,
+  `0-user-provided-environment.md`, `0-github-input.md`, `0-ccs.md` — instead
+  of inlining every route's content on every session. The untrusted-content
+  security rules in `0-github-input.md` are never dropped or weakened by that
+  move, and the hard-stop pointer to it is read before any `gh` command runs.
 
 ## `__tests__/` — the detector-injector JS harness
 
