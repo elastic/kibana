@@ -93,6 +93,7 @@ dependsOn:
   - '@kbn/core-analytics-server-mocks'
   - '@kbn/cps-server-utils'
   - '@kbn/cps-utils'
+  - '@kbn/core-saved-objects-common'
 tags:
   - plugin
   - prod
