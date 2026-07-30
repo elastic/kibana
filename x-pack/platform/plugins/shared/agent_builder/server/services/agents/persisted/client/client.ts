@@ -522,6 +522,7 @@ class AgentClientImpl implements AgentClient {
       currentProps: document._source,
       update: profileUpdate,
       updateDate: new Date(),
+      user: this.user,
     });
 
     await this.storage.getClient().index({
