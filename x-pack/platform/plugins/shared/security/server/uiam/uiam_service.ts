@@ -258,11 +258,13 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse>;
 
   /**
@@ -752,7 +754,8 @@ export class UiamService implements UiamServicePublic {
   async listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth connections.');
@@ -763,6 +766,9 @@ export class UiamService implements UiamServicePublic {
       }
       if (connectionId) {
         url.searchParams.set('connection_id', connectionId);
+      }
+      if (projectId) {
+        url.searchParams.set('project_id', projectId);
       }
 
       const response = await UiamService.#parseUiamResponse(
