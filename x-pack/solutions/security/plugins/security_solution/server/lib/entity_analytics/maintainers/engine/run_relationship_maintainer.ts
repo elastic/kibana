@@ -13,12 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
 
-import type {
-  RelationshipIntegrationConfig,
-  CompositeAfterKey,
-  CompositeBucket,
-  EntityRelationshipRecord,
-} from './types';
+import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
 import {
   buildActorDiscoveryQuery,
   buildActorPageFilter,
@@ -70,6 +65,17 @@ function isIndexNotFound(err: unknown): boolean {
 
 function errMsg(err: unknown): string {
   return err instanceof Error ? err.message : JSON.stringify(err);
+}
+
+function mergeRelTypeApplied(
+  a: Record<string, number>,
+  b: Record<string, number>
+): Record<string, number> {
+  const merged = { ...a };
+  for (const [k, v] of Object.entries(b)) {
+    merged[k] = (merged[k] ?? 0) + v;
+  }
+  return merged;
 }
 
 /** Returns the actor page on success, null to stop iteration (index missing or aborted), throws on real error. */
@@ -188,13 +194,24 @@ async function runIntegration(
   let iterations = 0;
   let truncated = false;
   let totalBuckets = 0;
-  const records: EntityRelationshipRecord[] = [];
+  let totalRecordsCount = 0;
   const timeoutMs = requestTimeoutMs ?? DEFAULT_ESQL_TIMEOUT_MS;
   const transportOpts: { signal?: AbortSignal; requestTimeout?: number } = {
     requestTimeout: timeoutMs,
   };
   if (signal) transportOpts.signal = signal;
   let outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error' = 'producing';
+
+  // Per-page write accumulators — initialized before the loop, accumulated inside.
+  let totalWriteResult: WriteEntityIdsResult = {
+    updated: 0,
+    notFound: 0,
+    errors: 0,
+    droppedTargets: 0,
+    relationshipTypeApplied: {},
+    succeededEntityIds: new Set(),
+  };
+  let totalMetadataResult: WriteRelationshipMetadatasResult = { docsAttempted: 0, docsApplied: 0 };
 
   try {
     do {
@@ -249,8 +266,74 @@ async function runIntegration(
 
       const { columns, values } = esqlResult;
       const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
-      records.push(...pageRecords);
       logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
+      totalRecordsCount += pageRecords.length;
+
+      // Stream per-page: write entity IDs immediately after parsing each page.
+      // Both writes are inside the loop so any transport failure sets outcome:
+      // 'error' and the outer loop continues to other integrations.
+      if (pageRecords.length > 0) {
+        const pageWrite = await writeEntityIds(
+          crudClient,
+          logger,
+          pageRecords,
+          esClient,
+          namespace,
+          config.validateTargetIds
+        );
+        const { validTargetIds, succeededEntityIds } = pageWrite;
+        // Only write metadata for actors that actually landed in the latest index.
+        // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
+        // the metadata write for that actor so the two stores stay in sync.
+        const actorFiltered = pageRecords.filter(
+          (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
+        );
+        // When target validation also ran, further restrict to the validated target set.
+        const metadataRecords = validTargetIds
+          ? actorFiltered.flatMap((r) => {
+              const filteredRels: Record<string, string[]> = {};
+              for (const [relType, targetEuids] of Object.entries(r.relationships)) {
+                const valid = targetEuids.filter((id) => validTargetIds.has(id));
+                if (valid.length > 0) filteredRels[relType] = valid;
+              }
+              return Object.keys(filteredRels).length > 0
+                ? [{ ...r, relationships: filteredRels }]
+                : [];
+            })
+          : actorFiltered;
+        const pageMetadata = await writeRelationshipMetadatas(
+          entityMetadataClient,
+          logger,
+          metadataRecords,
+          {
+            scanId: metadataContext.scanId,
+            lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
+            entitySource: config.id,
+            observedAt: metadataContext.observedAt,
+          }
+        );
+
+        // Accumulate counters across pages.
+        totalWriteResult = {
+          updated: totalWriteResult.updated + pageWrite.updated,
+          notFound: totalWriteResult.notFound + pageWrite.notFound,
+          errors: totalWriteResult.errors + pageWrite.errors,
+          droppedTargets: totalWriteResult.droppedTargets + pageWrite.droppedTargets,
+          relationshipTypeApplied: mergeRelTypeApplied(
+            totalWriteResult.relationshipTypeApplied,
+            pageWrite.relationshipTypeApplied
+          ),
+          succeededEntityIds: new Set([
+            ...totalWriteResult.succeededEntityIds,
+            ...pageWrite.succeededEntityIds,
+          ]),
+          validTargetIds: pageWrite.validTargetIds,
+        };
+        totalMetadataResult = {
+          docsAttempted: totalMetadataResult.docsAttempted + pageMetadata.docsAttempted,
+          docsApplied: totalMetadataResult.docsApplied + pageMetadata.docsApplied,
+        };
+      }
 
       // Composite agg's documented termination contract is "stop when after_key
       // is absent." Trust newAfterKey directly rather than inferring termination
@@ -260,57 +343,14 @@ async function runIntegration(
       afterKey = newAfterKey;
     } while (afterKey);
 
-    // Stream per-integration: write latest entities first, then metadata.
-    // Both writes are inside the try so any transport failure sets outcome:
-    // 'error' and the outer loop continues to other integrations.
-    const write = await writeEntityIds(
-      crudClient,
-      logger,
-      records,
-      esClient,
-      namespace,
-      config.validateTargetIds
-    );
-    // Only write metadata for actors that actually landed in the latest index.
-    // When bulkUpdateEntity returns a 404 (actor not yet extracted), we skip
-    // the metadata write for that actor so the two stores stay in sync.
-    const { validTargetIds, succeededEntityIds } = write;
-    const actorFilteredRecords = records.filter(
-      (r) => r.entityId !== null && succeededEntityIds.has(r.entityId)
-    );
-
-    // When target validation also ran, further restrict to the validated target set.
-    const metadataRecords = validTargetIds
-      ? actorFilteredRecords.flatMap((r) => {
-          const filteredRels: Record<string, string[]> = {};
-          for (const [relType, targetEuids] of Object.entries(r.relationships)) {
-            const valid = targetEuids.filter((id) => validTargetIds.has(id));
-            if (valid.length > 0) filteredRels[relType] = valid;
-          }
-          return Object.keys(filteredRels).length > 0
-            ? [{ ...r, relationships: filteredRels }]
-            : [];
-        })
-      : actorFilteredRecords;
-    const metadata = await writeRelationshipMetadatas(
-      entityMetadataClient,
-      logger,
-      metadataRecords,
-      {
-        scanId: metadataContext.scanId,
-        lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
-        entitySource: config.id,
-        observedAt: metadataContext.observedAt,
-      }
-    );
     // When truncated, the final loop pass incremented `iterations` before
     // breaking without fetching a page — clamp to actual pages completed.
     const completedIterations = truncated ? MAX_ITERATIONS : iterations;
     return {
       buckets: totalBuckets,
-      recordsCount: records.length,
-      write,
-      metadata,
+      recordsCount: totalRecordsCount,
+      write: totalWriteResult,
+      metadata: totalMetadataResult,
       outcome,
       iterations: completedIterations,
       truncated,
@@ -319,7 +359,7 @@ async function runIntegration(
     logger.error(`[${config.id}] Integration failed: ${errMsg(err)}`);
     return {
       buckets: totalBuckets,
-      recordsCount: records.length,
+      recordsCount: totalRecordsCount,
       write: {
         updated: 0,
         notFound: 0,

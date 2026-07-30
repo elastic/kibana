@@ -1440,6 +1440,61 @@ describe('runRelationshipMaintainer', () => {
     });
   });
 
+  describe('per-page write', () => {
+    it('calls bulkUpdateEntity once per page when there are multiple pages', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient, bulkUpdate } = makeClients();
+
+      // Page 1: returns after_key so pagination continues
+      search.mockResolvedValueOnce({
+        aggregations: {
+          users: {
+            buckets: [{ key: { 'user.name': 'alice' }, doc_count: 1 }],
+            after_key: { 'user.name': 'alice' },
+          },
+        },
+      });
+      // Page 2: no after_key — last page
+      search.mockResolvedValueOnce({
+        aggregations: {
+          users: {
+            buckets: [{ key: { 'user.name': 'bob' }, doc_count: 1 }],
+          },
+        },
+      });
+
+      esql.mockResolvedValue({
+        columns: [
+          { name: 'actorUserId', type: 'keyword' },
+          { name: 'communicates_with', type: 'keyword' },
+        ],
+        values: [['user:alice@host1@local', 'host:h1']],
+      });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [
+          {
+            kind: 'standard',
+            id: 'system_auth',
+            name: 'System Auth',
+            indexPattern: (ns) => `logs-system.auth-${ns}`,
+            relationshipKey: 'communicates_with',
+            targetEntityType: 'host',
+            esqlWhereClause: 'event.action == "ssh_login"',
+          },
+        ],
+      });
+
+      // bulkUpdateEntity called once per non-empty page (2 pages, both have esql results)
+      expect(bulkUpdate).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('CPS read client routing', () => {
     it('uses cpsEsClient for both search and esql.query when provided, leaving esClient untouched', async () => {
       const { esClient, search: localSearch, esql: localEsql } = makeEsClient();
