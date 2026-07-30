@@ -92,7 +92,8 @@
     "@kbn/presentation-util",
     "@kbn/cps",
     "@kbn/scout",
-    "@kbn/ml-anomaly-utils"
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-plugin"
   ],
   "exclude": ["target/**/*"]
 }
