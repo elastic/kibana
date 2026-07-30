@@ -3,7 +3,7 @@ navigation_title: "Rootly"
 type: reference
 description: "Use the Rootly connector to declare, read, and drive incidents through their lifecycle, and triage, acknowledge, and resolve alerts using the Rootly API."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
