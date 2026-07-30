@@ -85,15 +85,23 @@ type DiscoverAppMenuActionOrSubmenu =
 type WithDiscoverAppMenuAction<BaseItem> = Omit<BaseItem, 'run' | 'items'> &
   DiscoverAppMenuActionOrSubmenu;
 
+type WithDiscoverAppMenuOrder<BaseItem> = Omit<BaseItem, 'order'> & {
+  order: number;
+};
+
 /**
  * Discover-specific popover item with typed run action and nested items
  */
-export type DiscoverAppMenuPopoverItem = WithDiscoverAppMenuAction<AppMenuPopoverItem>;
+export type DiscoverAppMenuPopoverItem = WithDiscoverAppMenuAction<
+  WithDiscoverAppMenuOrder<AppMenuPopoverItem>
+>;
 
 /**
  * Discover-specific menu item type with typed run action and items
  */
-export type DiscoverAppMenuItemType = WithDiscoverAppMenuAction<AppMenuItemType>;
+export type DiscoverAppMenuItemType = WithDiscoverAppMenuAction<
+  WithDiscoverAppMenuOrder<AppMenuItemType>
+>;
 
 /**
  * Discover-specific primary action item with typed run action

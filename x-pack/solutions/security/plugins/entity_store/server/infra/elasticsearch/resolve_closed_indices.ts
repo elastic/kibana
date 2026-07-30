@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pLimit from 'p-limit';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
@@ -43,6 +44,7 @@ const toArray = (v: string | string[]): string[] => ([] as string[]).concat(v);
 // becomes %2C (3 bytes). Elasticsearch's Netty HTTP server rejects request lines > 4096 bytes,
 // so we cap each batch well below that limit.
 const MAX_URL_NAMES_BYTES = 3_500;
+const BATCH_CONCURRENCY_LIMIT = 30;
 
 const chunkByUrlLength = (names: string[]): string[][] => {
   const chunks: string[][] = [];
@@ -98,10 +100,12 @@ export const resolveClosedIndexAdjustments = async (
       // The first resolveIndex call returns backing index names without open/closed attributes,
       // so a second round is needed to learn their status. Batching avoids a
       // too_long_http_line_exception when many backing indices would push the URL past the
-      // Elasticsearch Netty limit of 4096 bytes.
+      // Elasticsearch Netty limit of 4096 bytes. Concurrency is capped to avoid overwhelming
+      // the cluster when there are many chunks.
+      const limit = pLimit(BATCH_CONCURRENCY_LIMIT);
       const batchResults = await Promise.all(
         chunkByUrlLength(backingIndexNames).map((chunk) =>
-          esClient.indices.resolveIndex(resolveArgs(chunk))
+          limit(() => esClient.indices.resolveIndex(resolveArgs(chunk)))
         )
       );
 
@@ -128,11 +132,10 @@ export const resolveClosedIndexAdjustments = async (
     const negations = [...closedStandaloneNegations, ...dataStreamNegations];
 
     if (negations.length > 0 || openBackingIndices.length > 0) {
+      const preview = negations.slice(0, 20).join(', ');
+      const overflow = negations.length > 20 ? ` … and ${negations.length - 20} more` : '';
       logger.warn(
-        `Detected closed backing indices. Excluding data streams/indices: ${negations.join(', ')}` +
-          (openBackingIndices.length > 0
-            ? `; adding open backing indices back: ${openBackingIndices.join(', ')}`
-            : '')
+        `Detected closed backing indices. Excluding data streams/indices: ${preview}${overflow}`
       );
     }
 

@@ -436,20 +436,31 @@ describe('parser corpus: textToTimeRange (English)', () => {
       {
         input: 'last 7 minutes',
         options: { roundRelativeTime: true },
-        note: 'true infers rounding from the offset unit (m → /m)',
-        expected: { start: 'now-7m/m', end: 'now', startOffset: offset(-7, 'm', 'm') },
+        note: 'true infers rounding one unit finer than the offset unit (m → /s)',
+        expected: { start: 'now-7m/s', end: 'now', startOffset: offset(-7, 'm', 's') },
       },
       {
         input: 'last 7 days',
         options: { roundRelativeTime: true },
-        note: 'day-and-above rounds to /d',
-        expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
+        note: 'days round to /h; week-and-above rounds to /d',
+        expected: { start: 'now-7d/h', end: 'now', startOffset: offset(-7, 'd', 'h') },
+      },
+      {
+        input: 'now-7d/d to now-1d/d',
+        options: { roundRelativeTime: true },
+        note: 'true rounds both bounds, each by its own offset unit (existing rounding kept)',
+        expected: {
+          start: 'now-7d/d',
+          end: 'now-1d/d',
+          startOffset: offset(-7, 'd', 'd'),
+          endOffset: offset(-1, 'd', 'd'),
+        },
       },
       {
         input: 'now-7d/d',
         options: { roundRelativeTime: false },
-        note: 'false strips an existing rounding suffix from the start bound',
-        expected: { start: 'now-7d', end: 'now', startOffset: offset(-7, 'd') },
+        note: 'false preserves an existing rounding suffix',
+        expected: { start: 'now-7d/d', end: 'now', startOffset: offset(-7, 'd', 'd') },
       },
     ]);
   });
@@ -533,8 +544,8 @@ describe('parser corpus: prettifyValue (English)', () => {
     runPrettify([
       {
         input: 'now-7d/d to now',
-        note: 'past range ending at now → start shorthand, rounding stripped from start',
-        expected: '-7d',
+        note: 'past range ending at now → start shorthand, rounding preserved',
+        expected: '-7d/d',
       },
       {
         input: 'now to now+1d',
@@ -543,8 +554,8 @@ describe('parser corpus: prettifyValue (English)', () => {
       },
       {
         input: 'now-30d/d to now-7d/d',
-        note: 'two offsets → start strips rounding, end keeps it',
-        expected: '-30d to -7d/d',
+        note: 'two offsets → both keep their rounding',
+        expected: '-30d/d to -7d/d',
       },
       {
         input: 'now-7d',

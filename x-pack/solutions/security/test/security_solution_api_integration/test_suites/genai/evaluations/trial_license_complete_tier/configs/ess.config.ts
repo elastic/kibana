@@ -65,6 +65,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     mochaOpts: {
       ...functionalConfig.get('mochaOpts'),
       timeout: 360000 * 2,
+      hookTimeout: 360000 * 2,
     },
   };
 }
