@@ -348,6 +348,35 @@ EOF
         EVAL_MODEL_GROUPS: "${EVAL_MODEL_GROUPS:-}"
         EVAL_SERVER_CONFIG_SET: "${EVAL_SERVER_CONFIG_SET:-}"
 EOF
+      elif [[ -n "${FRESH_BASELINE_PR_EXPERIMENT_ID:-}" ]]; then
+        # Fresh-baseline mode: emit the post-comparison step inside the fanout so
+        # it starts only after all model steps have written their execution IDs to
+        # Buildkite metadata.
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+      - label: "LLM Evals: ${EVAL_SUITE_ID} (fresh baseline comparison)"
+        key: "kbn-evals-${group_key_safe}-fresh-compare"
+        command: "bash .buildkite/scripts/steps/evals/post_eval_comment.sh"
+        env:
+          KBN_EVALS: "1"
+          EVAL_SUITE_ID: "${EVAL_SUITE_ID}"
+          EVAL_SUITE_IDS: "${EVAL_SUITE_ID}"
+          GITHUB_PR_NUMBER: "${EVAL_PR_NUMBER:-}"
+          FRESH_BASELINE_PR_EXPERIMENT_ID: "${FRESH_BASELINE_PR_EXPERIMENT_ID}"
+        depends_on:
+EOF
+        for key in "${fanout_step_keys[@]}"; do
+          printf '          - "%s"\n' "$key" >>"$FANOUT_PIPELINE_FILE"
+        done
+        cat >>"$FANOUT_PIPELINE_FILE" <<EOF
+        timeout_in_minutes: 10
+        allow_dependency_failure: true
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
+          preemptible: true
+EOF
       fi
 
       if ! buildkite-agent pipeline upload "$FANOUT_PIPELINE_FILE"; then
