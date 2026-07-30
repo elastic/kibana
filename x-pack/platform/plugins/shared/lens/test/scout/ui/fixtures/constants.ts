@@ -60,12 +60,9 @@ export const AD_HOC_DATA_VIEW_NAME = 'logstash-2015*' as const;
 
 const PLATFORM_KBN_ARCHIVER_DIR = 'src/platform/test/functional/fixtures/kbn_archiver';
 
-const FTR_LENS_KBN_ARCHIVES_DIR = 'x-pack/platform/test/functional/fixtures/kbn_archives/lens';
-
 export const KBN_ARCHIVE_PATHS = {
   ESQL_CONVERSION_DASHBOARD: `${LENS_SCOUT_FIXTURES_DIR}/esql_conversion_dashboard.json`,
   /** Saved Lens objects including `lnsXYvis` (group5 formula transition). */
-  LENS_BASIC: `${FTR_LENS_KBN_ARCHIVES_DIR}/lens_basic.json`,
   LONG_WINDOW_LOGSTASH_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/long_window_logstash_index_pattern.json`,
   KIBANA_SAMPLE_DATA_FLIGHTS_INDEX_PATTERN: `${PLATFORM_KBN_ARCHIVER_DIR}/kibana_sample_data_flights_index_pattern.json`,
   /**
