@@ -23,9 +23,8 @@ describe('DatadogConnector', () => {
     log: {},
     config: { site: 'datadoghq.com' },
     secrets: {
-      authType: 'basic',
-      username: 'test-api-key',
-      password: 'test-app-key',
+      authType: 'bearer',
+      token: 'ddsat_test-token',
     },
   } as unknown as ActionContext;
 
@@ -39,31 +38,25 @@ describe('DatadogConnector', () => {
     expect(getConnectorSpec('.datadog')?.metadata.id).toBe('.datadog');
   });
 
-  it('test validates API key then lists monitors', async () => {
-    mockClient.get.mockResolvedValueOnce({ data: { valid: true } }).mockResolvedValueOnce({
+  it('uses bearer auth (not basic / dual-header)', () => {
+    const types = DatadogConnector.auth?.types?.map((t) => t.type) ?? [];
+    expect(types).toEqual(['bearer']);
+    expect(types).not.toContain('basic');
+    expect(types).not.toContain('api_key_header');
+  });
+
+  it('test probes monitors with page_size 1', async () => {
+    mockClient.get.mockResolvedValueOnce({
       data: [{ id: 1, name: 'm' }],
     });
 
     const result = await DatadogConnector.test!.handler(mockContext);
 
-    expect(mockClient.get).toHaveBeenNthCalledWith(
-      1,
-      'https://api.datadoghq.com/api/v1/validate',
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          'DD-API-KEY': 'test-api-key',
-          'DD-APPLICATION-KEY': 'test-app-key',
-        }),
-      })
-    );
-    expect(mockClient.get).toHaveBeenNthCalledWith(
-      2,
+    expect(mockClient.get).toHaveBeenCalledWith(
       'https://api.datadoghq.com/api/v1/monitor',
       expect.objectContaining({ params: { page_size: 1 } })
     );
-    expect(result).toEqual(
-      expect.objectContaining({ ok: true, site: 'datadoghq.com' })
-    );
+    expect(result).toEqual(expect.objectContaining({ ok: true, site: 'datadoghq.com' }));
   });
 
   it('registerWebhook posts payload template', async () => {
@@ -84,8 +77,7 @@ describe('DatadogConnector', () => {
         url: 'https://example.com/hook',
         payload: DATADOG_WEBHOOK_PAYLOAD_TEMPLATE,
         custom_headers: JSON.stringify({ Authorization: 'Bearer secret-token' }),
-      },
-      expect.any(Object)
+      }
     );
     expect(result).toEqual(
       expect.objectContaining({ name: 'kibana-test', url: 'https://example.com/hook' })
@@ -104,12 +96,9 @@ describe('DatadogConnector', () => {
 
     expect(mockClient.post).toHaveBeenCalledWith(
       'https://api.datadoghq.com/api/v1/monitor/309422658/mute',
-      { scope: 'host:web01' },
-      expect.any(Object)
+      { scope: 'host:web01' }
     );
-    expect(result).toEqual(
-      expect.objectContaining({ id: 309422658, overallState: 'Alert' })
-    );
+    expect(result).toEqual(expect.objectContaining({ id: 309422658, overallState: 'Alert' }));
   });
 
   it('listMonitors maps monitor summaries', async () => {

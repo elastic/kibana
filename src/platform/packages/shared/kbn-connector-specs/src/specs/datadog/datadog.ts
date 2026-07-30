@@ -10,15 +10,16 @@
 /**
  * Datadog connector (`.datadog`)
  *
- * General Datadog integration for Workflows / Agent Builder / Alerting.
+ * General Datadog integration for Workflows / Agent Builder.
  * First action group covers monitors + webhook registration; additional
  * Datadog API domains (downtimes, events, hosts, metrics, incidents) should
  * be added as actions on this same connector — do not create `.datadog_*`
  * variants for each domain.
  *
- * Auth uses basic-auth fields relabeled as API Key + Application Key (both
- * encrypted). Handlers send DD-API-KEY / DD-APPLICATION-KEY headers; Datadog
- * ignores the unused HTTP Basic Authorization header.
+ * Auth: Datadog Personal Access Token (PAT) or Service Access Token (SAT)
+ * via native `bearer` (`Authorization: Bearer <token>`). Prefer SAT for
+ * automation (optional never-expire). Classic API key + application key
+ * dual-header auth is not supported.
  */
 
 import { i18n } from '@kbn/i18n';
@@ -40,12 +41,6 @@ import {
   type WebhookNameInput,
 } from './types';
 
-interface DatadogSecrets {
-  authType?: string;
-  username?: string;
-  password?: string;
-}
-
 interface DatadogConfig {
   site?: string;
 }
@@ -57,20 +52,6 @@ function getSite(ctx: ActionContext): string {
 
 function getBaseUrl(ctx: ActionContext): string {
   return `https://api.${getSite(ctx)}`;
-}
-
-function getDdHeaders(ctx: ActionContext): Record<string, string> {
-  const secrets = (ctx.secrets ?? {}) as DatadogSecrets;
-  const apiKey = secrets.username;
-  const applicationKey = secrets.password;
-  if (!apiKey || !applicationKey) {
-    throw new Error('Datadog API Key and Application Key are required');
-  }
-  return {
-    'DD-API-KEY': apiKey,
-    'DD-APPLICATION-KEY': applicationKey,
-    'Content-Type': 'application/json',
-  };
 }
 
 export const DatadogConnector: ConnectorSpec = {
@@ -94,35 +75,23 @@ export const DatadogConnector: ConnectorSpec = {
   auth: {
     types: [
       {
-        type: 'basic',
+        type: 'bearer',
+        defaults: {},
         overrides: {
-          label: i18n.translate('connectorSpecs.datadog.auth.label', {
-            defaultMessage: 'API Key + Application Key',
+          label: i18n.translate('connectorSpecs.datadog.auth.bearer.label', {
+            defaultMessage: 'Access token (PAT / SAT)',
           }),
           meta: {
-            username: {
-              label: i18n.translate('connectorSpecs.datadog.auth.apiKey.label', {
-                defaultMessage: 'API Key',
-              }),
-              helpText: i18n.translate('connectorSpecs.datadog.auth.apiKey.helpText', {
-                defaultMessage:
-                  'Datadog API key (DD-API-KEY). Organization Settings → API Keys.',
-              }),
-              placeholder: '••••••••',
+            token: {
               sensitive: true,
-            },
-            password: {
-              label: i18n.translate('connectorSpecs.datadog.auth.applicationKey.label', {
-                defaultMessage: 'Application Key',
+              label: i18n.translate('connectorSpecs.datadog.auth.bearer.token.label', {
+                defaultMessage: 'Access token',
               }),
-              helpText: i18n.translate(
-                'connectorSpecs.datadog.auth.applicationKey.helpText',
-                {
-                  defaultMessage:
-                    'Datadog application key (DD-APPLICATION-KEY). Organization Settings → Application Keys.',
-                }
-              ),
-              placeholder: '••••••••',
+              helpText: i18n.translate('connectorSpecs.datadog.auth.bearer.token.helpText', {
+                defaultMessage:
+                  'A Datadog Personal Access Token (ddpat_…) or Service Access Token (ddsat_…). Prefer a Service Access Token for automation (Organization Settings → Service Accounts). Classic API key + application key pairs are not supported.',
+              }),
+              placeholder: 'ddsat_… or ddpat_…',
             },
           },
         },
@@ -153,7 +122,9 @@ export const DatadogConnector: ConnectorSpec = {
   skill: [
     '## Datadog connector',
     '',
-    'General Datadog integration. Alerting actions use Monitors + Webhooks Integration APIs;',
+    'General Datadog integration. Auth with a Personal Access Token (PAT) or',
+    'Service Access Token (SAT) as Bearer — prefer SAT for automation.',
+    'Alerting actions use Monitors + Webhooks Integration APIs;',
     'additional domains (downtimes, events, hosts, metrics, incidents) belong on this same connector.',
     '',
     '### Alerting setup',
@@ -184,10 +155,10 @@ export const DatadogConnector: ConnectorSpec = {
             Authorization: `Bearer ${input.customAuthHeader}`,
           });
         }
+        // Bearer auth is applied by the auth type on ctx.client defaults.
         const response = await ctx.client.post(
           `${getBaseUrl(ctx)}/api/v1/integration/webhooks/configuration/webhooks`,
-          body,
-          { headers: getDdHeaders(ctx) }
+          body
         );
         return {
           name: response.data?.name ?? input.name,
@@ -205,8 +176,7 @@ export const DatadogConnector: ConnectorSpec = {
         const response = await ctx.client.get(
           `${getBaseUrl(ctx)}/api/v1/integration/webhooks/configuration/webhooks/${encodeURIComponent(
             input.name
-          )}`,
-          { headers: getDdHeaders(ctx) }
+          )}`
         );
         return response.data;
       },
@@ -220,8 +190,7 @@ export const DatadogConnector: ConnectorSpec = {
         await ctx.client.delete(
           `${getBaseUrl(ctx)}/api/v1/integration/webhooks/configuration/webhooks/${encodeURIComponent(
             input.name
-          )}`,
-          { headers: getDdHeaders(ctx) }
+          )}`
         );
         return { deleted: true, name: input.name };
       },
@@ -238,8 +207,7 @@ export const DatadogConnector: ConnectorSpec = {
         if (input.end !== undefined) body.end = input.end;
         const response = await ctx.client.post(
           `${getBaseUrl(ctx)}/api/v1/monitor/${input.monitorId}/mute`,
-          body,
-          { headers: getDdHeaders(ctx) }
+          body
         );
         return {
           id: response.data?.id ?? input.monitorId,
@@ -257,8 +225,7 @@ export const DatadogConnector: ConnectorSpec = {
       handler: async (ctx, input: UnmuteMonitorInput) => {
         const response = await ctx.client.post(
           `${getBaseUrl(ctx)}/api/v1/monitor/${input.monitorId}/unmute`,
-          {},
-          { headers: getDdHeaders(ctx) }
+          {}
         );
         return {
           id: response.data?.id ?? input.monitorId,
@@ -276,7 +243,6 @@ export const DatadogConnector: ConnectorSpec = {
         const response = await ctx.client.get(
           `${getBaseUrl(ctx)}/api/v1/monitor/${input.monitorId}`,
           {
-            headers: getDdHeaders(ctx),
             params: { with_downtimes: true },
           }
         );
@@ -300,7 +266,6 @@ export const DatadogConnector: ConnectorSpec = {
       input: ListMonitorsInputSchema,
       handler: async (ctx, input: ListMonitorsInput) => {
         const response = await ctx.client.get(`${getBaseUrl(ctx)}/api/v1/monitor`, {
-          headers: getDdHeaders(ctx),
           params: {
             name: input.name,
             tags: input.tags,
@@ -326,16 +291,12 @@ export const DatadogConnector: ConnectorSpec = {
 
   test: {
     description: i18n.translate('connectorSpecs.datadog.test.description', {
-      defaultMessage: 'Validates Datadog API Key and Application Key',
+      defaultMessage: 'Validates the Datadog access token (PAT or SAT)',
     }),
     handler: async (ctx) => {
-      const headers = getDdHeaders(ctx);
-      const base = getBaseUrl(ctx);
-      // Validate API key
-      await ctx.client.get(`${base}/api/v1/validate`, { headers });
-      // Validate application key (requires app key on monitor list)
-      await ctx.client.get(`${base}/api/v1/monitor`, {
-        headers,
+      // Bearer PATs/SATs are not API keys — /api/v1/validate is the wrong probe.
+      // A lightweight authenticated monitors list verifies token + scopes.
+      await ctx.client.get(`${getBaseUrl(ctx)}/api/v1/monitor`, {
         params: { page_size: 1 },
       });
       return {
