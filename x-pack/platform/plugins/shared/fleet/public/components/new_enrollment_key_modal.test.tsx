@@ -35,7 +35,7 @@ const MOCK_POLICIES = [
 ] as AgentPolicy[];
 
 describe('NewEnrollmentTokenModal', () => {
-  it('excludes managed and agentless policies from the policy selector', async () => {
+  it('excludes managed policies from the policy selector', async () => {
     const testRenderer = createFleetTestRendererMock();
 
     // Add a second normal policy so the dropdown actually shows items when opened
@@ -55,9 +55,8 @@ describe('NewEnrollmentTokenModal', () => {
 
     // "Normal Policy 2" should be available (Normal Policy 1 is auto-selected so not in the list)
     expect(results.getByText('Normal Policy 2')).toBeInTheDocument();
-    // Managed and agentless policies should never appear
+    // Managed policies should never appear
     expect(results.queryByText('Managed Policy')).toBeNull();
-    expect(results.queryByText('Agentless Policy')).toBeNull();
   });
 
   it('renders the expiration field', () => {
@@ -178,20 +177,20 @@ describe('NewEnrollmentTokenModal', () => {
     });
   });
 
-  it('renders with no options when all policies are managed or agentless', () => {
+  it('renders with no options when all policies are managed', () => {
     const testRenderer = createFleetTestRendererMock();
-    const policiesAllExcluded = [
+    const policiesAllManaged = [
       { id: 'managed-policy', name: 'Managed Policy', revision: 1, is_managed: true },
-      { id: 'agentless-policy', name: 'Agentless Policy', revision: 1, supports_agentless: true },
+      { id: 'managed-policy-2', name: 'Managed Policy 2', revision: 1, is_managed: true },
     ] as AgentPolicy[];
 
     const results = testRenderer.render(
-      <NewEnrollmentTokenModal agentPolicies={policiesAllExcluded} onClose={jest.fn()} />
+      <NewEnrollmentTokenModal agentPolicies={policiesAllManaged} onClose={jest.fn()} />
     );
 
     expect(results.getByTestId('createEnrollmentTokenSelectField')).toBeInTheDocument();
     // The combobox should be empty — no pre-selected value
     expect(results.queryByText('Managed Policy')).toBeNull();
-    expect(results.queryByText('Agentless Policy')).toBeNull();
+    expect(results.queryByText('Managed Policy 2')).toBeNull();
   });
 });
