@@ -9,14 +9,19 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { AlertAiInsightProps, ErrorSampleAiInsightProps } from './components/insights';
+import type {
+  ErrorSampleAiInsightProps,
+  AlertAskAiAssistantButtonProps,
+  ServiceInvestigateButtonProps,
+} from './components/insights';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ObservabilityAgentBuilderPluginPublicSetup {}
 
 export interface ObservabilityAgentBuilderPluginPublicStart {
-  getAlertAIInsight: () => ComponentType<AlertAiInsightProps>;
+  getAlertAskAiAssistantButton: () => ComponentType<AlertAskAiAssistantButtonProps>;
   getErrorSampleAIInsight: () => ComponentType<ErrorSampleAiInsightProps>;
+  getServiceInvestigateButton: () => ComponentType<ServiceInvestigateButtonProps>;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

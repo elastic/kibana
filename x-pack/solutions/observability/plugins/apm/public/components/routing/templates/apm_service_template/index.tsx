@@ -70,7 +70,8 @@ function TemplateWithContext({
   } = useApmParams('/services/{serviceName}/*');
   const history = useHistory();
   const location = useLocation();
-  const { agentBuilder } = useApmPluginContext();
+  const { agentBuilder, observabilityAgentBuilder } = useApmPluginContext();
+  const ServiceInvestigateButton = observabilityAgentBuilder?.getServiceInvestigateButton();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
@@ -161,7 +162,17 @@ function TemplateWithContext({
           }
           pageHeader={{
             tabs,
-            rightSideItems: [<AnalyzeDataButton />],
+            rightSideItems: [
+              ServiceInvestigateButton ? (
+                <ServiceInvestigateButton
+                  serviceName={serviceName}
+                  environment={environment}
+                  start={start}
+                  end={end}
+                />
+              ) : null,
+              <AnalyzeDataButton />,
+            ].filter(Boolean),
             pageTitle: (
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>

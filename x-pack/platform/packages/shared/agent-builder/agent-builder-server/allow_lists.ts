@@ -45,6 +45,8 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_runtime_metrics`,
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
+  `${internalNamespaces.observability}.get_apm_timeseries`,
+  `${internalNamespaces.observability}.get_apm_metrics`,
 
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
@@ -205,6 +207,8 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+  'observability.investigate-apm-alert',
+  'observability.investigate-apm-service',
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
@@ -303,6 +307,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+  'observability.apm-metrics',
+  'observability.apm-timeseries',
+  'observability.apm-related-alerts',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

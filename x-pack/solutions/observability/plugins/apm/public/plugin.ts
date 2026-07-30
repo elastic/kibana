@@ -109,7 +109,12 @@ import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
 import type { ApmCoreSetup } from './components/alerting/utils/create_lazy_component_with_context';
 import { registerEmbeddables } from './embeddable/register_embeddables';
-import { registerServiceMapAttachment } from './agent_builder/attachment_types';
+import {
+  registerServiceMapAttachment,
+  registerApmMetricsAttachment,
+  registerApmTimeseriesAttachment,
+  registerApmRelatedAlertsAttachment,
+} from './agent_builder/attachment_types';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
@@ -549,6 +554,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     }
     if (plugins.agentBuilder) {
       registerServiceMapAttachment(plugins.agentBuilder!.attachments);
+      registerApmMetricsAttachment(plugins.agentBuilder!.attachments);
+      registerApmTimeseriesAttachment(plugins.agentBuilder!.attachments);
+      registerApmRelatedAlertsAttachment(plugins.agentBuilder!.attachments);
     }
     plugins.observabilityAIAssistant?.service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./assistant_functions');

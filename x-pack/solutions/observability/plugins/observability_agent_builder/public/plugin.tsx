@@ -13,10 +13,11 @@ import type {
   ObservabilityAgentBuilderPluginStartDependencies,
 } from './types';
 import {
-  createAlertAIInsight,
+  createAlertAskAiAssistantButton,
   createErrorSampleAIInsight,
   createLogAIInsight,
   createLogsAIInsightRenderer,
+  createServiceInvestigateButton,
 } from './components/insights';
 import { registerAttachmentUiDefinitions } from './attachment_types';
 import { registerTelemetryEventTypes } from './analytics';
@@ -59,8 +60,9 @@ export class ObservabilityAgentBuilderPlugin
     });
 
     return {
-      getAlertAIInsight: () => createAlertAIInsight(core, plugins),
+      getAlertAskAiAssistantButton: () => createAlertAskAiAssistantButton(core, plugins),
       getErrorSampleAIInsight: () => createErrorSampleAIInsight(core, plugins),
+      getServiceInvestigateButton: () => createServiceInvestigateButton(core, plugins),
     };
   }
 

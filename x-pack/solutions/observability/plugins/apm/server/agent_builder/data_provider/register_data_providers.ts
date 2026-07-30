@@ -24,6 +24,12 @@ import { buildApmToolResources } from '../utils/build_apm_tool_resources';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getTransaction } from '../../routes/transactions/get_transaction';
 import { getTransactionByName } from '../../routes/transactions/get_transaction_by_name';
+import {
+  getApmTimeseriesForAttachment,
+  getApmMetricsForAttachment,
+} from './get_apm_attachment_data';
+import { getServiceMapServiceBadges } from '../../routes/service_map/get_service_map_service_badges';
+import { getRelatedAlertsForAttachment } from './get_related_alerts_for_attachment';
 
 export function registerDataProviders({
   core,
@@ -304,6 +310,121 @@ export function registerDataProviders({
         transactionId: resolvedTransactionId,
         traceId: resolvedTraceId,
       };
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmTimeseries',
+    async ({ request, serviceName, environment, kqlFilter, metric, latencyType, start, end }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
+
+      return getApmTimeseriesForAttachment({
+        apmEventClient,
+        serviceName,
+        environment,
+        kqlFilter,
+        metric,
+        latencyType,
+        start,
+        end,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'apmMetrics',
+    async ({
+      request,
+      serviceName,
+      environment,
+      kqlFilter,
+      latencyType,
+      currentStart,
+      currentEnd,
+      baselineStart,
+      baselineEnd,
+    }) => {
+      const { apmEventClient } = await buildApmToolResources({ core, plugins, request });
+
+      return getApmMetricsForAttachment({
+        apmEventClient,
+        serviceName,
+        environment,
+        kqlFilter,
+        latencyType,
+        currentStart,
+        currentEnd,
+        baselineStart,
+        baselineEnd,
+      });
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'servicesAlertsAndSlo',
+    async ({ request, serviceNames, environment, kuery, start, end }) => {
+      const { apmAlertsClient, sloClient } = await buildApmToolResources({
+        core,
+        plugins,
+        request,
+      });
+
+      const { alerts, slos } = await getServiceMapServiceBadges({
+        serviceNames,
+        environment: environment ?? ENVIRONMENT_ALL.value,
+        start: parseDatemath(start),
+        end: parseDatemath(end),
+        kuery,
+        apmAlertsClient,
+        sloClient,
+      });
+
+      // Merge the alert + SLO arrays into a single map keyed by service name,
+      // shaped to drop straight into the service-map attachment's `nodeMetadata`.
+      const nodeMetadata: Record<
+        string,
+        { alertsCount?: number; sloStatus?: string; sloCount?: number }
+      > = {};
+      for (const alert of alerts) {
+        nodeMetadata[alert.serviceName] = {
+          ...nodeMetadata[alert.serviceName],
+          alertsCount: alert.alertsCount,
+        };
+      }
+      for (const slo of slos) {
+        nodeMetadata[slo.serviceName] = {
+          ...nodeMetadata[slo.serviceName],
+          sloStatus: slo.sloStatus,
+          sloCount: slo.sloCount,
+        };
+      }
+      return nodeMetadata;
+    }
+  );
+
+  observabilityAgentBuilder.registerDataProvider(
+    'relatedAlerts',
+    async ({ request, serviceName, environment, start, end }) => {
+      const { apmAlertsClient } = await buildApmToolResources({ core, plugins, request });
+
+      if (!apmAlertsClient) {
+        return [];
+      }
+
+      const startMs = parseDatemath(start);
+      const endMs = parseDatemath(end);
+
+      if (!startMs || !endMs) {
+        throw new Error('Invalid date range provided for relatedAlerts data provider.');
+      }
+
+      return getRelatedAlertsForAttachment({
+        apmAlertsClient,
+        serviceName,
+        environment,
+        start: startMs,
+        end: endMs,
+      });
     }
   );
 }
