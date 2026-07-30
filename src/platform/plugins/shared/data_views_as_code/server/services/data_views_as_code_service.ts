@@ -84,7 +84,9 @@ export class DataViewsAsCodeService {
   public async create(spec: AsCodeSavedDataView) {
     const invalidFormatTypes = this.getInvalidFieldFormatTypes(spec);
     if (invalidFormatTypes.length > 0) {
-      throw new Error(`Invalid field format types: ${invalidFormatTypes.join(', ')}`);
+      throw new Boom(`Invalid field format types: ${invalidFormatTypes.join(', ')}`, {
+        statusCode: 400,
+      });
     }
 
     const dataViewSpec = toStoredDataView(spec);

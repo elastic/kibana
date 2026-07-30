@@ -415,7 +415,7 @@ describe('DataViewsAsCodeService', () => {
       });
     });
 
-    it('should throw when field format type is invalid', async () => {
+    it('should throw a 400 boom when field format type is invalid', async () => {
       const { service, mockDataViewsService, mockFieldFormats } = createService();
 
       mockFieldFormats.has.mockReturnValue(false);
@@ -432,7 +432,11 @@ describe('DataViewsAsCodeService', () => {
             },
           },
         })
-      ).rejects.toThrow('Invalid field format types: not-a-real-format');
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: 'Invalid field format types: not-a-real-format',
+      });
 
       expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
     });
