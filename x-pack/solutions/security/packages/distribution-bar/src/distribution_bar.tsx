@@ -185,37 +185,59 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
   useLayoutEffect(() => {
     if (!barContainerRef.current) return;
 
-    const containerRect = barContainerRef.current.getBoundingClientRect();
-    const flippedMap: Record<string, boolean> = {};
+    const recalculate = () => {
+      if (!barContainerRef.current) return;
 
-    stats.forEach((stat) => {
-      const partElement = partRefs.current[stat.key];
-      const tooltipContentElement = tooltipContentRefs.current[stat.key];
-      if (!partElement || !tooltipContentElement) return;
+      try {
+        const containerRect = barContainerRef.current.getBoundingClientRect();
+        const flippedMap: Record<string, boolean> = {};
 
-      const partRect = partElement.getBoundingClientRect();
-      const tooltipContentRect = tooltipContentElement.getBoundingClientRect();
+        stats.forEach((stat) => {
+          const partElement = partRefs.current[stat.key];
+          const tooltipContentElement = tooltipContentRefs.current[stat.key];
+          if (!partElement || !tooltipContentElement) return;
 
-      // Flip to left-aligned when right-aligned would overflow the left edge AND the right
-      // side of the segment has at least as much room as the left side. This prevents the
-      // flipped tooltip from causing a worse right overflow than the original left overflow.
-      const tooltipLeftEdge = partRect.right - tooltipContentRect.width;
-      if (tooltipLeftEdge < containerRect.left) {
-        const spaceOnRight = containerRect.right - partRect.left;
-        const spaceOnLeft = partRect.right - containerRect.left;
-        if (spaceOnRight >= spaceOnLeft) {
-          flippedMap[stat.key] = true;
-        }
+          const partRect = partElement.getBoundingClientRect();
+          const tooltipContentRect = tooltipContentElement.getBoundingClientRect();
+
+          // Flip to left-aligned when right-aligned would overflow the left edge AND the right
+          // side of the segment has at least as much room as the left side. This prevents the
+          // flipped tooltip from causing a worse right overflow than the original left overflow.
+          const tooltipLeftEdge = partRect.right - tooltipContentRect.width;
+          if (tooltipLeftEdge < containerRect.left) {
+            const spaceOnRight = containerRect.right - partRect.left;
+            const spaceOnLeft = partRect.right - containerRect.left;
+            if (spaceOnRight >= spaceOnLeft) {
+              flippedMap[stat.key] = true;
+            }
+          }
+        });
+
+        // Use functional update to bail out when nothing changed
+        setShouldFlipTooltip((prev) => {
+          const hasChanged = stats.some(
+            (stat) => (prev[stat.key] ?? false) !== (flippedMap[stat.key] ?? false)
+          );
+          return hasChanged ? flippedMap : prev;
+        });
+      } catch (e) {
+        // non-critical layout calculation — swallow errors to avoid crashing the component
       }
-    });
+    };
 
-    // Use functional update to bail out when nothing changed
-    setShouldFlipTooltip((prev) => {
-      const hasChanged = stats.some(
-        (stat) => (prev[stat.key] ?? false) !== (flippedMap[stat.key] ?? false)
-      );
-      return hasChanged ? flippedMap : prev;
+    recalculate();
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const observer = new ResizeObserver(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(recalculate, 50);
     });
+    observer.observe(barContainerRef.current);
+
+    return () => {
+      clearTimeout(debounceTimer);
+      observer.disconnect();
+    };
   }, [stats]);
 
   const parts = stats.map((stat, index) => {
