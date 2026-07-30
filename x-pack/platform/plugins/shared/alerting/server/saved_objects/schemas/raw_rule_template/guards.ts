@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import {
+import type {
   alertingV1RawRuleTemplateSchemaV4,
   alertingV2RawRuleTemplateSchemaV4,
   rawRuleTemplateSchema,
