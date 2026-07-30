@@ -10895,8 +10895,6 @@
     "xpack.agentBuilder.conversation.staleAttachments.dismissButton": "Rejeter",
     "xpack.agentBuilder.conversation.staleAttachments.stageButton": "Utiliser les versions mises à jour",
     "xpack.agentBuilder.conversation.staleAttachments.title": "Certaines pièces jointes sont obsolètes",
-    "xpack.agentBuilder.conversation.toolResponseFlyout.text": "Examinez la réponse à l'appel d'outil dans cette étape",
-    "xpack.agentBuilder.conversation.toolResponseFlyout.title": "Examiner la réponse de l'outil",
     "xpack.agentBuilder.conversationActions.actions": "Plus",
     "xpack.agentBuilder.conversationActions.actionsAriaLabel": "Plus",
     "xpack.agentBuilder.conversationActions.agentDetails": "Détails de l'agent",

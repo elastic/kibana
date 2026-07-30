@@ -10940,8 +10940,6 @@
     "xpack.agentBuilder.conversation.staleAttachments.dismissButton": "閉じる",
     "xpack.agentBuilder.conversation.staleAttachments.stageButton": "更新されたバージョンを使用",
     "xpack.agentBuilder.conversation.staleAttachments.title": "添付ファイルの一部が古くなっています",
-    "xpack.agentBuilder.conversation.toolResponseFlyout.text": "このステップでツール呼び出しへの応答を検査します",
-    "xpack.agentBuilder.conversation.toolResponseFlyout.title": "ツールの応答を検査",
     "xpack.agentBuilder.conversationActions.actions": "詳細",
     "xpack.agentBuilder.conversationActions.actionsAriaLabel": "詳細",
     "xpack.agentBuilder.conversationActions.agentDetails": "エージェントの詳細",
