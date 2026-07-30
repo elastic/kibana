@@ -8,6 +8,7 @@ import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiBadge, useEuiTheme, EuiIcon, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
 /** DistributionBar component props */
 export interface DistributionBarProps {
@@ -226,12 +227,20 @@ export const DistributionBar: React.FC<DistributionBarProps> = React.memo(functi
               <EuiBadge color="hollow" css={styles.tooltipBadgeRight}>
                 <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="dot" size="s" color={stat.color} />
+                    <EuiIcon type="dot" size="s" color={stat.color} aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>{stat.label ?? stat.key}</EuiFlexItem>
                   {stat.isCurrentFilter && stat.reset && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="cross" size="m" onClick={stat.reset} />
+                      <EuiIcon
+                        type="cross"
+                        size="m"
+                        onClick={stat.reset}
+                        aria-label={i18n.translate(
+                          'securitySolutionPackages.distributionBar.removeFilterAriaLabel',
+                          { defaultMessage: 'Remove filter' }
+                        )}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

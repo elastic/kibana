@@ -240,6 +240,10 @@ export const ConnectorIconsMap: Map<
 
   [
     '.grafana',
-    lazy(() => import(/* webpackChunkName: "connectorIcongrafana" */ './specs/grafana/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconGrafana" */ './specs/grafana/icon')),
+  ],
+  [
+    '.sentry',
+    lazy(() => import(/* webpackChunkName: "connectorIconSentry" */ './specs/sentry/icon')),
   ],
 ]);
