@@ -1441,14 +1441,14 @@ describe('actions schemas', () => {
       }).toThrow();
     });
 
-    it('should only accept process, kernel or physical as value for type', () => {
+    it('should only accept process, kernel or raw as value for type', () => {
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
       Object.assign(memDumpBody.parameters, { type: 'process', pid: 1 });
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
-      memDumpBody.parameters = { type: 'physical' };
+      memDumpBody.parameters = { type: 'raw' };
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
 
@@ -1466,17 +1466,17 @@ describe('actions schemas', () => {
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 
-    it('should accept type of physical without pid or entity id', () => {
-      memDumpBody.parameters = { type: 'physical' };
+    it('should accept type of raw without pid or entity id', () => {
+      memDumpBody.parameters = { type: 'raw' };
 
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).not.toThrow();
     });
 
-    it('should throw if pid or entity id is used with type = physical', () => {
-      memDumpBody.parameters = { type: 'physical', pid: 1 };
+    it('should throw if pid or entity id is used with type = raw', () => {
+      memDumpBody.parameters = { type: 'raw', pid: 1 };
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
 
-      memDumpBody.parameters = { type: 'physical', entity_id: 'some-value' };
+      memDumpBody.parameters = { type: 'raw', entity_id: 'some-value' };
       expect(() => MemoryDumpActionRequestSchema.body.validate(memDumpBody)).toThrow();
     });
 

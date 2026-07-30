@@ -736,10 +736,10 @@ describe('EndpointActionsClient', () => {
     });
 
     it.each`
-      title         | params
-      ${'kernel'}   | ${{ type: 'kernel' }}
-      ${'physical'} | ${{ type: 'physical' }}
-      ${'process'}  | ${{ type: 'process', pid: '123' }}
+      title        | params
+      ${'kernel'}  | ${{ type: 'kernel' }}
+      ${'raw'}     | ${{ type: 'raw' }}
+      ${'process'} | ${{ type: 'process', pid: '123' }}
     `(
       'should validate that agent supports memory dump of $title',
       async ({ params: memoryDumpParameters }) => {
@@ -753,9 +753,9 @@ describe('EndpointActionsClient', () => {
           ]),
         });
 
-        if (memoryDumpParameters.type === 'physical') {
+        if (memoryDumpParameters.type === 'raw') {
           // @ts-expect-error update of readonly property is ok here
-          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+          classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
             true;
         }
 
@@ -772,9 +772,9 @@ describe('EndpointActionsClient', () => {
       }
     );
 
-    it('should validate that agent supports memory dump of physical', async () => {
+    it('should validate that agent supports memory dump of raw', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
         true;
 
       const generator = new EndpointMetadataGenerator('seed');
@@ -791,7 +791,7 @@ describe('EndpointActionsClient', () => {
         endpointActionsClient.memoryDump(
           responseActionsClientMock.createMemoryDumpActionOption({
             ...getCommonResponseActionOptions(),
-            parameters: { type: 'physical' },
+            parameters: { type: 'raw' },
           })
         )
       ).rejects.toThrow(
@@ -799,24 +799,24 @@ describe('EndpointActionsClient', () => {
       );
     });
 
-    it('should error when `physical` type is used but the feature flag is disabled', async () => {
+    it('should error when `raw` type is used but the feature flag is disabled', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
         false;
 
       await expect(
         endpointActionsClient.memoryDump(
           responseActionsClientMock.createMemoryDumpActionOption({
             ...getCommonResponseActionOptions(),
-            parameters: { type: 'physical' },
+            parameters: { type: 'raw' },
           })
         )
-      ).rejects.toThrow('memory-dump `physical` type is not enabled');
+      ).rejects.toThrow('memory-dump `raw` type is not enabled');
     });
 
-    it('should process `physical` memory dump when the agent supports it', async () => {
+    it('should process `raw` memory dump when the agent supports it', async () => {
       // @ts-expect-error mocking this for testing purposes
-      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical =
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw =
         true;
 
       const generator = new EndpointMetadataGenerator('seed');
@@ -835,13 +835,11 @@ describe('EndpointActionsClient', () => {
         endpointActionsClient.memoryDump(
           responseActionsClientMock.createMemoryDumpActionOption({
             ...getCommonResponseActionOptions(),
-            parameters: { type: 'physical' },
+            parameters: { type: 'raw' },
           })
         )
       ).resolves.toBeDefined();
 
-      // Fleet action request, which is dispatched down to the Endpoint, should have
-      // been created with `type: raw` for `memory-dump --physical`
       expect(
         (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
       ).toHaveBeenCalledWith(

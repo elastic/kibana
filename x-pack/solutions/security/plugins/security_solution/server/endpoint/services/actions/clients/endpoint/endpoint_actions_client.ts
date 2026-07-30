@@ -138,14 +138,14 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     if (actionRequest.command === 'memory-dump') {
       const memDumpType = actionRequest.parameters.type;
 
-      // Memory Dump `physical` type is gated behind a feature flag
+      // Memory Dump `raw` type is gated behind a feature flag
       if (
-        memDumpType === 'physical' &&
-        !this.options.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpPhysical
+        memDumpType === 'raw' &&
+        !this.options.endpointService.experimentalFeatures.responseActionsEndpointMemoryDumpRaw
       ) {
         return {
           isValid: false,
-          error: new ResponseActionsClientError('memory-dump `physical` type is not enabled', 400),
+          error: new ResponseActionsClientError('memory-dump `raw` type is not enabled', 400),
         };
       }
 
@@ -161,7 +161,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
           (memDumpType === 'process' &&
             !endpointMeta.Endpoint.capabilities?.includes('memdump_process')) ||
-          (memDumpType === 'physical' &&
+          (memDumpType === 'raw' &&
             !endpointMeta.Endpoint.capabilities?.includes('memdump_physical'))
         ) {
           unsupportedAgents.push(
@@ -367,14 +367,6 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             actionReq.comment ? ` ${actionReq.comment}` : ''
           }`;
         }
-      }
-
-      // For `memory-dump --physical` we pass down `type: raw` instead
-      if (
-        command === 'memory-dump' &&
-        (actionParams as ResponseActionMemoryDumpParameters).type === 'physical'
-      ) {
-        actionParams = { ...actionParams, type: 'raw' };
       }
 
       try {

@@ -17,7 +17,7 @@ export const MemoryDumpActionRequestSchema = {
         type: schema.oneOf([
           schema.literal('process'),
           schema.literal('kernel'),
-          schema.literal('physical'),
+          schema.literal('raw'),
         ]),
         pid: schema.maybe(schema.number({ min: 1 })),
         entity_id: schema.maybe(
@@ -35,7 +35,7 @@ export const MemoryDumpActionRequestSchema = {
       {
         validate: (parameters) => {
           if (
-            (parameters.type === 'kernel' || parameters.type === 'physical') &&
+            (parameters.type === 'kernel' || parameters.type === 'raw') &&
             (parameters.pid || parameters.entity_id)
           ) {
             return '"pid" and "entity_id" parameters only supported for type of "process"';
