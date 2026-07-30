@@ -40942,7 +40942,6 @@
     "xpack.securitySolution.detectionEngine.rules.stepScheduleTitle": "Zeitplan",
     "xpack.securitySolution.detectionEngine.rules.update.successfullySavedRuleTitle": "{ruleName} wurde gespeichert",
     "xpack.securitySolution.detectionEngine.rules.updateButtonTitle": "Aktualisieren",
-    "xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle": "Einige Elastic-Regeln haben verfügbare Updates. Aktualisieren Sie sie, um sicherzustellen, dass Sie das beste Erkennungserlebnis erhalten. Überprüfen und aktualisieren Sie in {link}.",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.eqlQueryLabel": "EQL-Abfrage",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.esqlQueryLabel": "ESQL-Abfrage",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.kqlQueryLabel": "KQL-Abfrage",
