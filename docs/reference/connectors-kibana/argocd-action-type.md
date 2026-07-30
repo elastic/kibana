@@ -3,7 +3,7 @@ navigation_title: "Argo CD"
 type: reference
 description: "Use the Argo CD connector to manage GitOps applications — sync, inspect health and resources, and diagnose failed deploys."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
