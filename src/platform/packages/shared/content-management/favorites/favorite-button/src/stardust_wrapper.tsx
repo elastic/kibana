@@ -8,7 +8,7 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { euiCanAnimate, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -17,6 +17,8 @@ const buttonSize = 24; // 24px is the default size for EuiButtonIcon xs, TODO: c
 const stardustRadius = 8;
 const stardustSize = buttonSize + stardustRadius; // should be larger than the button size to nicely overlap
 const stardustOffset = (stardustSize - buttonSize) / 2;
+/** Longest stardust CSS animation (`sparkles-*`); keep class until it can finish. */
+export const STARDUST_ANIMATION_MS = 650;
 
 const stardustContainerStyles = css`
   @keyframes popping {
@@ -109,6 +111,22 @@ export const StardustWrapper = ({
   children,
 }: PropsWithChildren<{ className?: string; active: boolean }>) => {
   const { euiTheme } = useEuiTheme();
+  const [showActive, setShowActive] = useState(active);
+
+  useEffect(() => {
+    if (active) {
+      setShowActive(true);
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setShowActive(false);
+    }, STARDUST_ANIMATION_MS);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [active]);
 
   return (
     <div
@@ -120,7 +138,7 @@ export const StardustWrapper = ({
         ${euiButtonIconStylesDisableAnimation}
       `}
       className={classNames(className, {
-        'stardust-active': active,
+        'stardust-active': showActive,
       })}
     >
       {children}
