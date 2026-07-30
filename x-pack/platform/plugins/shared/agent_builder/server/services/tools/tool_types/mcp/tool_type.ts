@@ -10,7 +10,8 @@ import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { McpToolConfig } from '@kbn/agent-builder-common/tools';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { ListToolsResponse } from '@kbn/mcp-client';
+import type { ListToolsResponse, ToolAnnotations } from '@kbn/mcp-client';
+import { ConfirmationStatus } from '@kbn/agent-builder-common/agents';
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 import type { Logger } from '@kbn/core/server';
 import type { ToolTypeDefinition } from '../definitions';
@@ -66,6 +67,30 @@ async function getMcpToolInputSchema({
     return tool?.inputSchema;
   } catch (error) {
     // Connector not found or other error - return undefined so getSchema will throw
+    return undefined;
+  }
+}
+
+/**
+ * Retrieves the annotations for a specific MCP tool by calling listTools on the connector.
+ * Returns undefined if the connector or tool is not found.
+ */
+async function getMcpToolAnnotations({
+  actions,
+  request,
+  connectorId,
+  toolName,
+}: {
+  actions: ActionsPluginStart;
+  request: KibanaRequest;
+  connectorId: string;
+  toolName: string;
+}): Promise<ToolAnnotations | undefined> {
+  try {
+    const { tools } = await listMcpTools({ actions, request, connectorId });
+    const tool = tools.find((t) => t.name === toolName);
+    return tool?.annotations;
+  } catch {
     return undefined;
   }
 }
@@ -182,6 +207,42 @@ export const getMcpToolType = ({
             logger.debug(
               `Executing MCP tool: connector=${config.connector_id}, tool=${config.tool_name}`
             );
+
+            const annotations = await getMcpToolAnnotations({
+              actions,
+              request,
+              connectorId: config.connector_id,
+              toolName: config.tool_name,
+            });
+
+            if (annotations?.destructiveHint) {
+              const confirmId = `tools.${context.callContext.toolId}.confirmation.destructive.${config.connector_id}.${config.tool_name}`;
+              const { status } = context.prompts.checkConfirmationStatus(confirmId);
+
+              if (status === ConfirmationStatus.unprompted) {
+                return context.prompts.askForConfirmation({
+                  id: confirmId,
+                  title: `Confirm: ${config.tool_name}`,
+                  message: `The '${config.tool_name}' action may have irreversible side effects. Do you want to proceed?`,
+                  confirm_text: 'Proceed',
+                  cancel_text: 'Cancel',
+                });
+              }
+
+              if (status === ConfirmationStatus.rejected) {
+                return {
+                  results: [
+                    {
+                      type: ToolResultType.error,
+                      data: {
+                        message: `The user cancelled the '${config.tool_name}' action. Do not retry.`,
+                      },
+                    },
+                  ],
+                };
+              }
+              // ConfirmationStatus.accepted: fall through to execution
+            }
 
             try {
               const result = await executeMcpTool({
