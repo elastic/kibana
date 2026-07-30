@@ -12,12 +12,15 @@ import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EuiFlyoutMenuPagination, EuiFlyoutProps } from '@elastic/eui';
+import type {
+  EuiFlyoutMenuCustomAction,
+  EuiFlyoutMenuPagination,
+  EuiFlyoutProps,
+} from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiHorizontalRule,
   EuiPortal,
   EuiSpacer,
   isDOMNode,
@@ -42,7 +45,10 @@ export interface UnifiedDocViewerFlyoutProps
   'data-test-subj'?: string;
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
-  flyoutActions?: React.ReactNode;
+  /**
+   * Icon actions rendered in the flyout menu bar, immediately to the left of the close button.
+   */
+  flyoutMenuCustomActions?: EuiFlyoutMenuCustomAction[];
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
   originDocType?: string;
@@ -88,7 +94,7 @@ export function UnifiedDocViewerFlyout({
   'data-test-subj': dataTestSubj,
   flyoutTitle,
   flyoutDefaultWidth,
-  flyoutActions,
+  flyoutMenuCustomActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
   originDocType,
@@ -138,10 +144,6 @@ export function UnifiedDocViewerFlyout({
 
     return getIndexByDocId(hits, id);
   }, [hits, hit, pageCount]);
-
-  // Discover is the only caller that passes flyoutActions and already gates on
-  // !isESQLQuery, so this keeps the subheader only when actions are renderable.
-  const renderSubheader = !isEsqlQuery && flyoutActions;
 
   const setPage = useCallback(
     (index: number) => {
@@ -269,6 +271,8 @@ export function UnifiedDocViewerFlyout({
               'data-test-subj': 'docViewerRowDetailsTitle',
               hideTitle: false,
               pagination,
+              // Custom actions sit in the top-right, immediately left of the close button.
+              customActions: flyoutMenuCustomActions,
             }}
             className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
             onClose={onClose}
@@ -291,14 +295,6 @@ export function UnifiedDocViewerFlyout({
             {...a11yProps}
           >
             {screenReaderDescription}
-            {renderSubheader && (
-              <>
-                <div css={{ paddingBlock: euiTheme.size.s, paddingInline: euiTheme.size.m }}>
-                  {flyoutActions}
-                </div>
-                <EuiHorizontalRule margin="none" />
-              </>
-            )}
             <EuiFlyoutBody>
               {renderCustomHeader && (
                 <>

@@ -37,6 +37,10 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
         <div data-test-subj="mockFlyoutTitle">
           {props.flyoutTitle ?? (props.isEsqlQuery ? 'Result' : 'Document')}
         </div>
+        {/* EUI's Jest flyout stub ignores flyoutMenuProps; surface actions for assertions. */}
+        <div data-test-subj="mockFlyoutMenuActions">
+          {(props.flyoutMenuCustomActions ?? []).map((action) => action['aria-label']).join('|')}
+        </div>
         <OriginalFlyout
           {...props}
           {...(mockRenderCustomHeader ? { renderCustomHeader: mockRenderCustomHeader } : {})}
@@ -115,9 +119,9 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view without timefield', async () => {
     const { props, user } = await renderComponent({});
 
-    expect(screen.getByTestId('docTableRowAction')).toHaveAttribute(
-      'href',
-      'mock-doc-redirect-url'
+    expect(screen.getByTestId('mockFlyoutMenuActions')).toHaveTextContent('View single document');
+    expect(screen.getByTestId('mockFlyoutMenuActions')).not.toHaveTextContent(
+      'View surrounding documents'
     );
 
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
@@ -127,10 +131,9 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view with timefield', async () => {
     const { props, user } = await renderComponent({ dataView: dataViewWithTimefieldMock });
 
-    const actions = screen.getAllByTestId('docTableRowAction');
-    expect(actions.length).toBe(2);
-    expect(actions[0]).toHaveAttribute('href', 'mock-doc-redirect-url');
-    expect(actions[1]).toHaveAttribute('href', 'mock-context-redirect-url');
+    expect(screen.getByTestId('mockFlyoutMenuActions')).toHaveTextContent(
+      'View single document|View surrounding documents'
+    );
 
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(props.onClose).toHaveBeenCalled();
@@ -191,7 +194,7 @@ describe('Discover flyout', function () {
       query: { esql: 'FROM indexpattern' },
     });
 
-    expect(screen.queryByTestId('docTableRowAction')).not.toBeInTheDocument();
+    expect(screen.getByTestId('mockFlyoutMenuActions')).toHaveTextContent('');
     expect(screen.getByTestId('mockFlyoutTitle')).toHaveTextContent('Result');
   });
 

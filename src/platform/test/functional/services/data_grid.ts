@@ -586,7 +586,10 @@ export class DataGridService extends FtrService {
 
   public async getRowActions(): Promise<WebElementWrapper[]> {
     const detailsRow = await this.testSubjects.find('docViewerFlyout');
-    return await detailsRow.findAllByTestSubject('~docTableRowAction');
+    // EUI flyout menu customActions expose aria-label only (no data-test-subj).
+    return await detailsRow.findAllByCssSelector(
+      'button[aria-label="View single document"], button[aria-label="View surrounding documents"]'
+    );
   }
 
   public async openColMenuByField(field: string) {

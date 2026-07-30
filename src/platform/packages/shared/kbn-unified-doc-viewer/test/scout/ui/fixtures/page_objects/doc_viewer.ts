@@ -83,7 +83,12 @@ export class DocViewer {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     await flyout.waitFor({ state: 'visible' });
 
-    return flyout.locator('[data-test-subj*="docTableRowAction"]').count();
+    // EUI flyout menu customActions expose aria-label only (no data-test-subj).
+    return flyout
+      .getByRole('button', {
+        name: /View single document|View surrounding documents/,
+      })
+      .count();
   }
 
   async getJsonCodeEditorValue(): Promise<string> {

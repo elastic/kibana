@@ -7,51 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MouseEvent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import type { EuiFlyoutMenuCustomAction } from '@elastic/eui';
 import type { UseNavigationProps } from '../../hooks/use_navigation_props';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
-import type { FlyoutActionItem } from './types';
+
+const asUnhandledClick = (handler: (event: MouseEvent) => void): (() => void) => {
+  return () => {
+    handler({ preventDefault() {} } as MouseEvent);
+  };
+};
 
 export const useFlyoutActions = (
   props: UseNavigationProps
-): { flyoutActions: FlyoutActionItem[] } => {
+): { flyoutMenuCustomActions: EuiFlyoutMenuCustomAction[] } => {
   const { dataView } = props;
-  const { singleDocHref, contextViewHref, onOpenSingleDoc, onOpenContextView } =
-    useNavigationProps(props);
+  const { onOpenSingleDoc, onOpenContextView } = useNavigationProps(props);
 
-  const flyoutActions = useMemo(() => {
-    const actions: FlyoutActionItem[] = [
+  const flyoutMenuCustomActions = useMemo(() => {
+    const actions: Array<EuiFlyoutMenuCustomAction & { enabled: boolean }> = [
       {
-        id: 'singleDocument',
         enabled: true,
-        dataTestSubj: 'docTableRowAction',
         iconType: 'document',
-        href: singleDocHref,
-        onClick: onOpenSingleDoc,
-        label: i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkLabel', {
+        'aria-label': i18n.translate('discover.grid.tableRow.viewSingleDocumentLinkLabel', {
           defaultMessage: 'View single document',
         }),
+        onClick: asUnhandledClick(onOpenSingleDoc),
       },
       {
-        id: 'surroundingDocument',
         enabled: Boolean(dataView.isTimeBased() && dataView.id),
-        dataTestSubj: 'docTableRowAction',
         iconType: 'documents',
-        href: contextViewHref,
-        onClick: onOpenContextView,
-        label: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkLabel', {
+        'aria-label': i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsLinkLabel', {
           defaultMessage: 'View surrounding documents',
         }),
-        helpText: i18n.translate('discover.grid.tableRow.viewSurroundingDocumentsHover', {
-          defaultMessage:
-            'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.',
-        }),
+        onClick: asUnhandledClick(onOpenContextView),
       },
     ];
 
-    return actions.filter((action) => action.enabled);
-  }, [contextViewHref, dataView, onOpenContextView, onOpenSingleDoc, singleDocHref]);
+    return actions
+      .filter((action) => action.enabled)
+      .map(({ enabled: _enabled, ...action }) => action);
+  }, [dataView, onOpenContextView, onOpenSingleDoc]);
 
-  return { flyoutActions };
+  return { flyoutMenuCustomActions };
 };
