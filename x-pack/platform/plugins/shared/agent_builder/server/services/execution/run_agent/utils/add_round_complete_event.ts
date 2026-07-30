@@ -71,6 +71,7 @@ import type { ConvertedEvents } from '../convert_graph_events';
 import { isFinalStateEvent } from '../events';
 import type { CompactedConversation } from './conversation_compactor';
 import type { RelevantSkillSelection } from './relevant_skills/select_relevant_skills';
+import { formatAttachmentsMetadata } from './attachment_presentation';
 
 type SourceEvents = ConvertedEvents;
 
@@ -174,6 +175,16 @@ export const addRoundCompleteEvent = ({
               });
 
           round.state = buildRoundState({ round, events, stateManager });
+
+          if (round.input.attachment_refs && round.input.attachment_refs.length > 0) {
+            const attachmentContext = formatAttachmentsMetadata(
+              round.input.attachment_refs,
+              attachmentStateManager
+            );
+            if (attachmentContext) {
+              round.input = { ...round.input, attachment_context: attachmentContext };
+            }
+          }
 
           const workspaceId = getWorkspaceId?.();
           const event: RoundCompleteEvent = {
@@ -305,7 +316,7 @@ const mergeRoundInput = (previous: RoundInput, next: RoundInput): RoundInput => 
   };
 };
 
-const mergeAttachmentRefs = (
+export const mergeAttachmentRefs = (
   previous?: AttachmentVersionRef[],
   next?: AttachmentVersionRef[]
 ): AttachmentVersionRef[] | undefined => {
@@ -462,7 +473,9 @@ const createRound = ({
     state: undefined,
     input: {
       ...input,
-      ...(attachmentRefs.length > 0 ? { attachment_refs: attachmentRefs } : {}),
+      ...(attachmentRefs.length > 0
+        ? { attachment_refs: mergeAttachmentRefs(input.attachment_refs, attachmentRefs) }
+        : {}),
     },
     steps,
     ...(origin ? { origin: { type: origin.type } } : {}),

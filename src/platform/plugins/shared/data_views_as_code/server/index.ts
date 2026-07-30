@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export async function plugin() {
+import type { PluginInitializerContext } from '@kbn/core/server';
+
+export async function plugin(initializerContext: PluginInitializerContext) {
   const { DataViewsAsCodeServerPlugin } = await import('./plugin');
-  return new DataViewsAsCodeServerPlugin();
+  return new DataViewsAsCodeServerPlugin(initializerContext);
 }
