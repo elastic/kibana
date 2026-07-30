@@ -10,6 +10,7 @@ import type {
   SavedObjectsFindResponse,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type {
   AttachmentAttributes,
   AttachmentTotals,
@@ -37,7 +38,7 @@ import {
   GetTagsResponseRt,
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
-import { createCaseError } from '../../common/error';
+import { createCaseError, isSOError } from '../../common/error';
 import {
   countAlertsForID,
   flattenCaseSavedObject,
@@ -151,7 +152,7 @@ export const getCasesByAlertID = async (
     // if there was an error retrieving one of the cases (maybe it was deleted, but the alert comment still existed)
     // just ignore it
     const validCasesInfo = casesInfo.saved_objects.filter(
-      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => caseInfo.error === undefined
+      (caseInfo): caseInfo is SavedObject<CaseTransformedAttributes> => !isSOError(caseInfo)
     );
 
     ensureSavedObjectsAreAuthorized(
@@ -301,6 +302,10 @@ export const resolve = async (
     }: SavedObjectsResolveResponse<CaseAttributes> = await caseService.getResolveCase({
       id,
     });
+
+    if (isSavedObjectErrorResult(resolvedSavedObject)) {
+      throw new Error(resolvedSavedObject.error.message);
+    }
 
     await authorization.ensureAuthorized({
       operation: Operations.resolveCase,

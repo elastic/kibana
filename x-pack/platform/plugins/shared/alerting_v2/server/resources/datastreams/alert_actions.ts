@@ -44,7 +44,7 @@ export const alertActionSchema = z.object({
   action_type: z.string(),
   episode_id: z.string().optional(),
   episode_status: z.string().optional(),
-  rule_id: z.string(),
+  rule_id: z.string().nullable(),
   action_group_id: z.string().optional(),
   source: z.string().optional(),
   tags: z.array(z.string()).optional(),

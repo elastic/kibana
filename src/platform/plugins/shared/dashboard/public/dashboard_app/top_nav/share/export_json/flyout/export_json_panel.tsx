@@ -14,7 +14,6 @@ import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCopy,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -29,6 +28,7 @@ import {
 import { css } from '@emotion/react';
 import { CodeEditor, XJsonLang } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { coreServices, shareService } from '../../../../../services/kibana_services';
 import type { ExportJsonSanitizedState } from './types';
 
@@ -69,24 +69,19 @@ function WarningsCallout({
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiCallOut
-        color="warning"
-        iconType="alert"
+      <KbnWarningCallout
         title={i18n.translate('dashboard.exportJson.warningsTitle', {
           defaultMessage: 'Unsupported properties were removed',
+        })}
+        text={i18n.translate('dashboard.exportJson.warningsSummary', {
+          defaultMessage:
+            '{count} item{count, plural, one {} other {s}} removed from the JSON source.',
+          values: { count: warnings.length },
         })}
         size="s"
         data-test-subj="dashboardExportSourceWarnings"
         onDismiss={onDismiss}
       >
-        <EuiText size="s" color="subdued">
-          {i18n.translate('dashboard.exportJson.warningsSummary', {
-            defaultMessage:
-              '{count} item{count, plural, one {} other {s}} removed from the JSON source.',
-            values: { count: warnings.length },
-          })}
-        </EuiText>
-
         <EuiAccordion
           id={accordionId}
           initialIsOpen={false}
@@ -116,7 +111,7 @@ function WarningsCallout({
             </EuiText>
           ) : null}
         </EuiAccordion>
-      </EuiCallOut>
+      </KbnWarningCallout>
     </EuiFlexItem>
   );
 }
