@@ -42692,7 +42692,6 @@
     "xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.description": "アセット重要度により、重要度と業務への影響度に基づいて、エンティティを分類できます。アセット重要度を使用すると、アラートのトリアージ、脅威ハンティング、調査活動の優先度を示す指針が得られます。",
     "xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.documentationLink": "アセット重要度ドキュメント",
     "xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.intro": "テキストファイルを使用したエンティティのインポートの一環として、インポートされたエンティティのアセット重要度を設定することもできます。",
-    "xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.missingPermissionsDescription": "この機能にアクセスするには、{index}インデックスパターンの書き込み権限が必要です。サポートについては、管理者にお問い合わせください。",
     "xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.noPermissionTitle": "CSVアップロードを実行する十分なインデックス権限がありません",
     "xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.tabTitle": "アセット重要度",
     "xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.title": "アセット重要度とは何ですか？",
