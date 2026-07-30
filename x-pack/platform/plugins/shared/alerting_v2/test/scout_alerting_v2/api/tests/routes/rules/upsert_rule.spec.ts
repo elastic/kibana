@@ -155,6 +155,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData(),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -166,6 +167,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: invalidBody,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject body with missing metadata', async ({ apiClient }) => {
@@ -175,6 +177,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: should reject body with empty metadata.name', async ({ apiClient }) => {
@@ -183,6 +186,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: buildCreateRuleData({ metadata: { name: '' } }),
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -193,6 +197,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ metadata: { name: 'a'.repeat(MAX_NAME_LENGTH + 1) } }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -209,6 +214,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: invalidBody,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -220,6 +226,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: { ...buildCreateRuleData(), unknownField: 'nope' },
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -236,6 +243,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -249,6 +257,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -260,6 +269,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ schedule: { every: '1s' } }),
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -271,6 +281,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       }),
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -298,7 +309,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(403);
       // Verify no rule was created.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).not.toContain(id);
     }
   );
@@ -313,7 +324,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ metadata: { name: 'attempted' } }),
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).not.toContain(id);
     }
   );
