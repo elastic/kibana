@@ -36,6 +36,20 @@ export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState
   initialProjectRouting?: ProjectRouting;
   originProjectId: string;
   defaultProjectRoutingGetter: () => ProjectRouting;
+  /**
+   * Controls how project IDs are encoded into the routing string.
+   *
+   * - `dynamic` (default): `_id:*` with exclusions. Filter rules stay live;
+   *   newly linked projects can match without re-saving.
+   * - `snapshot`: explicit `_id:…` clauses for each selected project.
+   *   Resulting in a routing query that is frozen to the current selection. Having this is useful in configuring space defaults.
+   *
+   * @default 'dynamic'
+   */
+  projectRoutingStrategy?: 'dynamic' | 'snapshot';
+  /**
+   * Callback function invoked with the project routing string when the project selection changes
+   */
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
 }
 
@@ -121,6 +135,7 @@ export const ProjectPickerStateProvider = ({
   isReadOnly,
   originProjectId,
   onProjectRoutingChange,
+  projectRoutingStrategy = 'dynamic',
   defaultProjectRoutingGetter,
 }: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
@@ -173,13 +188,23 @@ export const ProjectPickerStateProvider = ({
           filterEntry.enabled ? projectRoutingCodec.encode(filterEntry.expression) : null
         )
         .concat(
-          '_id:*',
-          store.state.excludedOverrides.map((override) => `NOT _id:${override}`)
+          projectRoutingStrategy === 'dynamic'
+            ? [
+                '_id:*',
+                store.state.excludedOverrides.map((override) => `NOT _id:${override}`),
+              ].flat()
+            : store.state.selectedProjects.map((id) => `_id:${id}`)
         )
         .filter(Boolean)
         .join(' AND ')
     );
-  }, [store.state.filterExpressions, store.state.excludedOverrides, onProjectRoutingChange]);
+  }, [
+    store.state.filterExpressions,
+    store.state.selectedProjects,
+    store.state.excludedOverrides,
+    onProjectRoutingChange,
+    projectRoutingStrategy,
+  ]);
 
   return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
 };

@@ -48,7 +48,20 @@ export default {
 
 export const ProjectPickerStory: StoryObj<ComponentProps<typeof ProjectPicker>> = {
   name: 'ProjectPicker',
+  argTypes: {
+    isReadOnly: {
+      control: {
+        type: 'boolean',
+      },
+    },
+    projectRoutingStrategy: {
+      control: 'select',
+      options: ['dynamic', 'snapshot'],
+    },
+  },
   args: {
+    isReadOnly: false,
+    projectRoutingStrategy: 'dynamic',
     availableProjects: createProjects(),
     defaultProjectRoutingGetter: () => '_alias:origin',
     onProjectRoutingChange: action('onProjectRoutingChange'),
