@@ -25,10 +25,19 @@ spaceTest.describe(
       await scoutSpace.savedObjects.load(LONG_WINDOW_LOGSTASH_KBN_ARCHIVE);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsPrivilegedUser();
+      // Register the drain promise before goto so it captures the initial-load ESE requests.
+      // waitUntilSearchingHasFinished() has a 2-second appear-timeout that can return before the
+      // chart ESE response arrives in CI, causing it to bleed into the next test's listener window.
+      let eseCount = 0;
+      const drainInitialLoad = page
+        .waitForResponse((r) => r.url().includes(ESE_ENDPOINT) && ++eseCount >= 2, {
+          timeout: 30_000,
+        })
+        .catch(() => {});
       await pageObjects.discover.goto({ queryMode: 'classic' });
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await drainInitialLoad;
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace }) => {
@@ -37,10 +46,18 @@ spaceTest.describe(
 
     spaceTest(
       'should send 2 search requests (documents + chart) on page load',
-      async ({ page, pageObjects, network }) => {
+      async ({ page, network }) => {
         const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          // Register the counter before reload so the listener is live when requests fire.
+          // waitUntilSearchingHasFinished() uses a 2-second appear-timeout that can expire before
+          // the ESE responses arrive in CI, closing the countMatchingRequests window too early.
+          let eseCount = 0;
+          const waitForBothResponses = page.waitForResponse(
+            (r) => r.url().includes(ESE_ENDPOINT) && ++eseCount >= 2,
+            { timeout: 30_000 }
+          );
           await page.reload();
-          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await waitForBothResponses;
         });
         expect(count).toBe(2);
       }
