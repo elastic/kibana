@@ -46796,14 +46796,11 @@ paths:
                 description:
                   type: string
                 layout:
-                  anyOf:
-                    - enum:
-                        - horizontal
-                      type: string
-                    - enum:
-                        - vertical
-                      type: string
                   description: Whether to display the links in a horizontal or vertical layout.
+                  enum:
+                    - horizontal
+                    - vertical
+                  type: string
                 links:
                   description: The list of links to display.
                   items:
@@ -46876,14 +46873,11 @@ paths:
                       description:
                         type: string
                       layout:
-                        anyOf:
-                          - enum:
-                              - horizontal
-                            type: string
-                          - enum:
-                              - vertical
-                            type: string
                         description: Whether to display the links in a horizontal or vertical layout.
+                        enum:
+                          - horizontal
+                          - vertical
+                        type: string
                       links:
                         description: The list of links to display.
                         items:
@@ -47096,14 +47090,11 @@ paths:
                       description:
                         type: string
                       layout:
-                        anyOf:
-                          - enum:
-                              - horizontal
-                            type: string
-                          - enum:
-                              - vertical
-                            type: string
                         description: Whether to display the links in a horizontal or vertical layout.
+                        enum:
+                          - horizontal
+                          - vertical
+                        type: string
                       links:
                         description: The list of links to display.
                         items:
@@ -47220,14 +47211,11 @@ paths:
                 description:
                   type: string
                 layout:
-                  anyOf:
-                    - enum:
-                        - horizontal
-                      type: string
-                    - enum:
-                        - vertical
-                      type: string
                   description: Whether to display the links in a horizontal or vertical layout.
+                  enum:
+                    - horizontal
+                    - vertical
+                  type: string
                 links:
                   description: The list of links to display.
                   items:
@@ -97171,14 +97159,11 @@ components:
                   description: When true, the panel title is hidden. Defaults to false.
                   type: boolean
                 layout:
-                  anyOf:
-                    - enum:
-                        - horizontal
-                      type: string
-                    - enum:
-                        - vertical
-                      type: string
                   description: Whether to display the links in a horizontal or vertical layout.
+                  enum:
+                    - horizontal
+                    - vertical
+                  type: string
                 links:
                   description: The list of links to display.
                   items:
@@ -98973,14 +98958,11 @@ components:
             description:
               type: string
             layout:
-              anyOf:
-                - enum:
-                    - horizontal
-                  type: string
-                - enum:
-                    - vertical
-                  type: string
               description: Whether to display the links in a horizontal or vertical layout.
+              enum:
+                - horizontal
+                - vertical
+              type: string
             links:
               description: The list of links to display.
               items:
