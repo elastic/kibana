@@ -6,6 +6,15 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "description": "",
+      "retain": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    },
     "methods": [
       "POST"
     ],

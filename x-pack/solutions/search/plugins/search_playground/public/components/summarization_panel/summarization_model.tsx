@@ -73,7 +73,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
                   css={{ overflow: 'hidden', textOverflow: 'ellipsis', textWrap: 'nowrap' }}
                 >
                   <EuiToolTip content={model.connectorName} disableScreenReaderOutput>
-                    <span>{model.connectorName}</span>
+                    <span tabIndex={0}>{model.connectorName}</span>
                   </EuiToolTip>
                 </EuiText>
               )}

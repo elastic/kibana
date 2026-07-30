@@ -99,12 +99,14 @@ toc:
           - file: connectors-kibana/jira-cloud-action-type.md
           - file: connectors-kibana/kubernetes-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
+          - file: connectors-kibana/monday-com-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
           - file: connectors-kibana/outlook-action-type.md
           - file: connectors-kibana/pagerduty-mcp-action-type.md
           - file: connectors-kibana/salesforce-action-type.md
+          - file: connectors-kibana/sentry-action-type.md
           - file: connectors-kibana/servicenow-search-action-type.md
           - file: connectors-kibana/sharepoint-online-action-type.md
           - file: connectors-kibana/sharepoint-server-action-type.md
