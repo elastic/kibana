@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { SourcePicker } from './source_picker';
-export type { SelectedSource, SourceType } from './types';
+export class InvalidConnectorSourceError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidConnectorSourceError';
+  }
+}

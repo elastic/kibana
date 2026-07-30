@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { SourcePicker } from './source_picker';
-export type { SelectedSource, SourceType } from './types';
+export { AiIndexList } from './ai_index_list';
