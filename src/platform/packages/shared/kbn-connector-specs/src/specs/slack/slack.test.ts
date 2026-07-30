@@ -9,7 +9,6 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { requireTestHandler } from '../../test_helpers';
 import { Slack } from './slack';
 import {
   SlackGetConversationHistoryInputSchema,
@@ -1504,7 +1503,7 @@ describe('Slack', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(Slack);
+    const testSpec = Slack.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

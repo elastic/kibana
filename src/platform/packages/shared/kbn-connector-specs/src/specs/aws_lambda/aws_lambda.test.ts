@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { AwsLambdaConnector } from './aws_lambda';
 
 describe('AwsLambdaConnector', () => {
@@ -421,7 +420,7 @@ describe('AwsLambdaConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(AwsLambdaConnector);
+    const testSpec = AwsLambdaConnector.test;
 
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({

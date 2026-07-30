@@ -9,7 +9,6 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { requireTestHandler } from '../../test_helpers';
 import { BigQuery } from './bigquery';
 
 describe('BigQuery', () => {
@@ -266,7 +265,7 @@ describe('BigQuery', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(BigQuery);
+    const testSpec = BigQuery.test;
 
     it('should return success when SELECT 1 succeeds', async () => {
       mockClient.post.mockResolvedValue({

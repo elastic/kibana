@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../../connector_spec';
-import { requireTestHandler } from '../../../test_helpers';
 import { JiraConnector } from './jira';
 
 describe('JiraConnector', () => {
@@ -308,7 +307,7 @@ describe('JiraConnector', () => {
   // ===========================================================================
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(JiraConnector);
+    const testSpec = JiraConnector.test;
 
     it('should call /rest/api/3/myself and return {}', async () => {
       mockClient.get.mockResolvedValue({ data: { accountId: 'abc123', displayName: 'Alice' } });

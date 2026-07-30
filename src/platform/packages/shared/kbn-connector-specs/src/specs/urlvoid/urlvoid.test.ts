@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { URLVoidConnector } from './urlvoid';
 
 describe('URLVoidConnector', () => {
@@ -232,7 +231,7 @@ describe('URLVoidConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(URLVoidConnector);
+    const testSpec = URLVoidConnector.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

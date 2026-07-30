@@ -13,7 +13,6 @@ import {
 } from '../../connector_utils';
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { GoogleDriveConnector } from './google_drive';
 
 describe('GoogleDriveConnector', () => {
@@ -793,7 +792,7 @@ describe('GoogleDriveConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(GoogleDriveConnector);
+    const testSpec = GoogleDriveConnector.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

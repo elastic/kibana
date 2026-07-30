@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { FigmaConnector } from './figma';
 
 describe('FigmaConnector', () => {
@@ -269,7 +268,7 @@ describe('FigmaConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(FigmaConnector);
+    const testSpec = FigmaConnector.test;
 
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({

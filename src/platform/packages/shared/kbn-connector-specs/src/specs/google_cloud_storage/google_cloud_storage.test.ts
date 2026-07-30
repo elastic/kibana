@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { GoogleCloudStorageConnector } from './google_cloud_storage';
 
 describe('GoogleCloudStorageConnector', () => {
@@ -452,7 +451,7 @@ describe('GoogleCloudStorageConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(GoogleCloudStorageConnector);
+    const testSpec = GoogleCloudStorageConnector.test;
 
     it('should return {} on 200 success', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });

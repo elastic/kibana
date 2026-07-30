@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { AlienVaultOTXConnector } from './alienvault_otx';
 
 describe('AlienVaultOTXConnector', () => {
@@ -190,7 +189,7 @@ describe('AlienVaultOTXConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(AlienVaultOTXConnector);
+    const testSpec = AlienVaultOTXConnector.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

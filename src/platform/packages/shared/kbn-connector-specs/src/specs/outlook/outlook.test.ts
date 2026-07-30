@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { Outlook } from './outlook';
 
 const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
@@ -396,7 +395,7 @@ describe('Outlook', () => {
   // ===========================================================================
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(Outlook);
+    const testSpec = Outlook.test;
 
     it('should return ok: true for delegated auth on success', async () => {
       mockClient.get.mockResolvedValue({

@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { AbuseIPDBConnector } from './abuseipdb';
 
 describe('AbuseIPDBConnector', () => {
@@ -201,7 +200,7 @@ describe('AbuseIPDBConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(AbuseIPDBConnector);
+    const testSpec = AbuseIPDBConnector.test;
 
     it('should be opted in for the Test tab', () => {
       expect(testSpec.enabled).toBe(true);

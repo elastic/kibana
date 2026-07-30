@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../../connector_spec';
-import { requireTestHandler } from '../../../test_helpers';
 import { ConfluenceCloudConnector } from './confluence';
 
 describe('ConfluenceCloudConnector', () => {
@@ -196,7 +195,7 @@ describe('ConfluenceCloudConnector', () => {
   // ===========================================================================
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(ConfluenceCloudConnector);
+    const testSpec = ConfluenceCloudConnector.test;
 
     it('should call /wiki/api/v2/spaces and return {}', async () => {
       mockClient.get.mockResolvedValue({ data: { results: [] } });

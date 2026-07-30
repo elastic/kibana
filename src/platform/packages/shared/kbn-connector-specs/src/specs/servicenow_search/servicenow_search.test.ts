@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { ServicenowSearch } from './servicenow_search';
 
 interface ServiceNowListResponse {
@@ -694,7 +693,7 @@ describe('ServicenowSearch', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(ServicenowSearch);
+    const testSpec = ServicenowSearch.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { PagerdutyConnector } from './pagerduty';
 
 const mockCallTool = jest.fn();
@@ -248,7 +247,7 @@ describe('PagerdutyConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(PagerdutyConnector);
+    const testSpec = PagerdutyConnector.test;
 
     it('returns {} on successful connection', async () => {
       const result = await testSpec.handler(mockContext);

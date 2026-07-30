@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { SalesforceConnector } from './salesforce';
 
 describe('SalesforceConnector', () => {
@@ -293,7 +292,7 @@ describe('SalesforceConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(SalesforceConnector);
+    const testSpec = SalesforceConnector.test;
 
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({

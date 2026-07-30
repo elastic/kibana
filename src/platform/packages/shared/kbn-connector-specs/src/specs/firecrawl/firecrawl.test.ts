@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { FirecrawlConnector } from './firecrawl';
 
 describe('FirecrawlConnector', () => {
@@ -351,7 +350,7 @@ describe('FirecrawlConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(FirecrawlConnector);
+    const testSpec = FirecrawlConnector.test;
 
     it('should return success when API is accessible', async () => {
       mockClient.post.mockResolvedValue({ data: { success: true } });

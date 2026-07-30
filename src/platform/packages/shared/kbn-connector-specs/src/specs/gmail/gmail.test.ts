@@ -9,7 +9,6 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { GmailConnector } from './gmail';
 
 const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
@@ -351,7 +350,7 @@ describe('GmailConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(GmailConnector);
+    const testSpec = GmailConnector.test;
 
     it('should return ok: true when profile is fetched', async () => {
       const mockResponse = {

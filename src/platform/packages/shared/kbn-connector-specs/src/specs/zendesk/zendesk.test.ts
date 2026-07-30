@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { ZendeskConnector } from './zendesk';
 
 describe('ZendeskConnector', () => {
@@ -143,7 +142,7 @@ describe('ZendeskConnector', () => {
   // ===========================================================================
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(ZendeskConnector);
+    const testSpec = ZendeskConnector.test;
 
     it('should call /users/me.json and return {}', async () => {
       mockClient.get.mockResolvedValue({ data: { user: { id: 1, name: 'Alice' } } });

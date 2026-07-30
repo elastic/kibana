@@ -9,7 +9,6 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { GoogleCalendar } from './google_calendar';
 
 const API_BASE = 'https://www.googleapis.com/calendar/v3';
@@ -402,7 +401,7 @@ describe('GoogleCalendar', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(GoogleCalendar);
+    const testSpec = GoogleCalendar.test;
 
     it('should return {} on successful connection', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { items: [] } });

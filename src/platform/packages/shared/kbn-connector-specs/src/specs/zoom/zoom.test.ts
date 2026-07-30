@@ -9,7 +9,6 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { Zoom } from './zoom';
 
 interface ZoomPaginatedResponse<T = unknown> {
@@ -783,7 +782,7 @@ describe('Zoom', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(Zoom);
+    const testSpec = Zoom.test;
 
     it('should return success with full name', async () => {
       const mockResponse = {

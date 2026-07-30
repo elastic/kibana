@@ -9,7 +9,6 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { NotionConnector } from './notion';
 
 describe('NotionConnector', () => {
@@ -336,7 +335,7 @@ describe('NotionConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(NotionConnector);
+    const testSpec = NotionConnector.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

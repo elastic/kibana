@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { SharepointOnline } from './sharepoint_online';
 
 /**
@@ -1448,7 +1447,7 @@ describe('SharepointOnline', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(SharepointOnline);
+    const testSpec = SharepointOnline.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

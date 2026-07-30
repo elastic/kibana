@@ -9,7 +9,6 @@
 
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { OnePasswordConnector } from './one_password';
 
 const BASE_URL = 'https://api.1password.com/v1beta1';
@@ -257,7 +256,7 @@ describe('OnePasswordConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(OnePasswordConnector);
+    const testSpec = OnePasswordConnector.test;
 
     it('should return success when API is accessible', async () => {
       (mockClient.get as jest.Mock).mockResolvedValue({ status: 200, data: { results: [] } });

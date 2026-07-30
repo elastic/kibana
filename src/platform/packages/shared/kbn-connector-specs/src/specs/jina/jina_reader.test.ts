@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { JinaReaderConnector } from './jina_reader';
 
 interface HttpError extends Error {
@@ -691,7 +690,7 @@ describe('JinaReaderConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(JinaReaderConnector);
+    const testSpec = JinaReaderConnector.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

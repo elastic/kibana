@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { BraveSearchConnector } from './brave_search';
 
 describe('BraveSearchConnector', () => {
@@ -165,7 +164,7 @@ describe('BraveSearchConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(BraveSearchConnector);
+    const testSpec = BraveSearchConnector.test;
 
     it('should return success when API is accessible', async () => {
       const result = await testSpec.handler(mockContext);

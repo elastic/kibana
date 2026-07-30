@@ -9,7 +9,6 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { requireTestHandler } from '../../test_helpers';
 import { OneDrive } from './one_drive';
 
 const mockGet = jest.fn();
@@ -469,7 +468,7 @@ describe('OneDrive', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(OneDrive);
+    const testSpec = OneDrive.test;
 
     it('returns {} on success', async () => {
       mockGet.mockResolvedValue({

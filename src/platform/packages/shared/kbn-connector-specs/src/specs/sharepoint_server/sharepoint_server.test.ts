@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { SharepointServer } from './sharepoint_server';
 
 const SITE_URL = 'https://sharepoint.company.com';
@@ -324,7 +323,7 @@ describe('SharepointServer', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(SharepointServer);
+    const testSpec = SharepointServer.test;
 
     it('should return {} on success', async () => {
       mockClient.get.mockResolvedValue({ data: { value: 'Team Site' } });

@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { HubSpotConnector } from './hubspot';
 
 describe('HubSpotConnector', () => {
@@ -496,7 +495,7 @@ describe('HubSpotConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(HubSpotConnector);
+    const testSpec = HubSpotConnector.test;
 
     it('should return ok when contacts endpoint returns 200', async () => {
       mockClient.get.mockResolvedValue({ status: 200, data: { results: [] } });

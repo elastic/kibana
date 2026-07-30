@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { AzureBlob } from './azure_blob';
 
 describe('AzureBlob', () => {
@@ -179,7 +178,7 @@ describe('AzureBlob', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(AzureBlob);
+    const testSpec = AzureBlob.test;
 
     it('should succeed when list containers returns', async () => {
       mockClient.get.mockResolvedValue({

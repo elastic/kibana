@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { GreyNoiseConnector } from './greynoise';
 
 describe('GreyNoiseConnector', () => {
@@ -211,7 +210,7 @@ describe('GreyNoiseConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(GreyNoiseConnector);
+    const testSpec = GreyNoiseConnector.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {

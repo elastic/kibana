@@ -9,7 +9,6 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { GithubConnector } from './github';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -460,7 +459,7 @@ describe('GithubConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(GithubConnector);
+    const testSpec = GithubConnector.test;
 
     it('returns empty object on successful connection', async () => {
       const result = await testSpec.handler(mockContext);

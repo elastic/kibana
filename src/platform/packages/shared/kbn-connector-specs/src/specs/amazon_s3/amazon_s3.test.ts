@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 
 const mockListAmazonS3Buckets = jest.fn();
 const mockListAmazonS3BucketObjects = jest.fn();
@@ -335,7 +334,7 @@ describe('AmazonS3', () => {
   // ===========================================================================
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(AmazonS3);
+    const testSpec = AmazonS3.test;
 
     it('should return {} when buckets are listed successfully', async () => {
       mockListAmazonS3Buckets.mockResolvedValue({ buckets: [{ name: 'my-bucket' }] });

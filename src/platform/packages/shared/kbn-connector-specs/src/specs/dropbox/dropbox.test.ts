@@ -9,7 +9,6 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
-import { requireTestHandler } from '../../test_helpers';
 import { Dropbox } from './dropbox';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -368,7 +367,7 @@ describe('Dropbox', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(Dropbox);
+    const testSpec = Dropbox.test;
 
     it('returns empty object on successful connection', async () => {
       const result = await testSpec.handler(mockContext);

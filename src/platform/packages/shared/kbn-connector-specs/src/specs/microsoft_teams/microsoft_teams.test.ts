@@ -9,7 +9,6 @@
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { MicrosoftTeams } from './microsoft_teams';
 
 interface GraphCollectionResponse<T = unknown> {
@@ -911,7 +910,7 @@ describe('MicrosoftTeams', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(MicrosoftTeams);
+    const testSpec = MicrosoftTeams.test;
 
     it('should use /me/joinedTeams for delegated auth (bearer)', async () => {
       const mockResponse = {

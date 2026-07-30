@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { GcpCloudFunctionsConnector } from './gcp_cloud_functions';
 
 jest.mock('../../auth_types/gcp_jwt_helpers', () => {
@@ -382,7 +381,7 @@ describe('GcpCloudFunctionsConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(GcpCloudFunctionsConnector);
+    const testSpec = GcpCloudFunctionsConnector.test;
 
     it('should return success when API is accessible', async () => {
       mockClient.get.mockResolvedValue({ data: { services: [] } });

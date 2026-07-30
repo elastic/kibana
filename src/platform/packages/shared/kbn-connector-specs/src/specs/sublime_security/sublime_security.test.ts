@@ -9,7 +9,6 @@
 
 import type { AxiosInstance } from 'axios';
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { SublimeSecurityConnector } from './sublime_security';
 import { SearchMessageGroupsInputSchema } from './types';
 import type { SublimeMessageGroupSummary } from './types';
@@ -524,7 +523,7 @@ describe('SublimeSecurityConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(SublimeSecurityConnector);
+    const testSpec = SublimeSecurityConnector.test;
 
     it('is enabled and lists one mailbox on success', async () => {
       expect(testSpec.enabled).toBe(true);

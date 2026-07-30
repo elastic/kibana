@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { requireTestHandler } from '../../test_helpers';
 import { ShodanConnector } from './shodan';
 
 describe('ShodanConnector', () => {
@@ -215,7 +214,7 @@ describe('ShodanConnector', () => {
   });
 
   describe('test handler', () => {
-    const testSpec = requireTestHandler(ShodanConnector);
+    const testSpec = ShodanConnector.test;
 
     it('should return success when API is accessible', async () => {
       const mockResponse = {
