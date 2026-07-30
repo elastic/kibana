@@ -135,10 +135,7 @@ export function getImportedSavedObjectId(
 }
 
 /** Resolves a dashboard id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
-export function getImportedDashboardId(
-  imported: ImportedSavedObject[],
-  dashboardTitle: string
-): string {
+function getImportedDashboardId(imported: ImportedSavedObject[], dashboardTitle: string): string {
   return getImportedSavedObjectId(imported, 'dashboard', dashboardTitle);
 }
 
