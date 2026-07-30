@@ -463,6 +463,11 @@ export function ComposeDiscoverFlyout({
   const [dateRange, setDateRange] = useState({ dateStart: 'now-15m', dateEnd: 'now' });
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
+  /*
+   * One-way RHF -> sandbox draft push. `sandboxTimeField` must stay out of the deps:
+   * with it, the effect re-fires on its own output and reverts the user's in-progress
+   * sandbox selection back to the committed form value (#281806).
+   */
   useEffect(() => {
     if (watchedTimeField) {
       setSandboxTimeField(watchedTimeField);

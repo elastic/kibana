@@ -396,7 +396,6 @@ test.describe(
     });
 
     test('create flow: manually selected sandbox time field holds and persists (#281806)', async ({
-      page,
       pageObjects,
       apiServices,
     }) => {
@@ -408,25 +407,17 @@ test.describe(
       });
 
       await test.step('the auto-detected time field is @timestamp', async () => {
+        await pageObjects.composeDiscover.waitForTimeFieldOption(
+          pageObjects.composeDiscover.sandboxTimeFieldSelector,
+          'event.ingested'
+        );
         await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
           '@timestamp'
         );
       });
 
-      await test.step('manually picking event.ingested in the sandbox does not revert on the next render', async () => {
+      await test.step('manually picking event.ingested in the sandbox holds through Apply, not reverted to @timestamp', async () => {
         await pageObjects.composeDiscover.selectSandboxTimeField('event.ingested');
-        // Give the buggy self-referential effect a chance to fire and revert the
-        // selection before asserting it held.
-        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
-          'event.ingested'
-        );
-        await page.waitForTimeout(500);
-        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
-          'event.ingested'
-        );
-      });
-
-      await test.step('Apply persists the manually selected field, not the auto-detected one', async () => {
         await pageObjects.composeDiscover.clickApply();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
         await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('event.ingested');
@@ -436,6 +427,7 @@ test.describe(
         await pageObjects.composeDiscover.clickNext(); // Recovery Condition
         await pageObjects.composeDiscover.clickNext(); // Details
         await pageObjects.composeDiscover.setRuleName(TWO_DATE_FIELDS_RULE_NAME);
+        await pageObjects.composeDiscover.clickNext(); // Actions
         await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
       });

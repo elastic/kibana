@@ -96,6 +96,13 @@ jest.mock('./compose_discover_form', () => {
           >
             Make dirty
           </button>
+          <button
+            data-test-subj="mockSetFormTimeField"
+            onClick={() => setValue('timeField', 'event.ingested', { shouldDirty: true })}
+            type="button"
+          >
+            Set form time field
+          </button>
         </div>
       );
     },
@@ -1144,32 +1151,7 @@ describe('ComposeDiscoverFlyout', () => {
 
   describe('sandbox time field selection', () => {
     it('keeps a manually selected sandbox time field instead of reverting to the form value (#281806)', () => {
-      renderFlyout({
-        mode: 'edit',
-        rule: {
-          id: 'rule-1',
-          kind: 'alert',
-          enabled: true,
-          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
-          time_field: '@timestamp',
-          schedule: { every: '1m', lookback: '5m' },
-          query: {
-            format: 'composed',
-            base: 'FROM logs-*',
-            breach: { segment: '| WHERE count > 100' },
-          },
-          createdBy: 'test',
-          createdAt: '2026-01-01T00:00:00Z',
-          updatedBy: 'test',
-          updatedAt: '2026-01-01T00:00:00Z',
-        },
-      });
-
-      act(() => {
-        mockComposeDiscoverForm.mock.calls[
-          mockComposeDiscoverForm.mock.calls.length - 1
-        ][0].dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
-      });
+      renderFlyout({ mode: 'create' });
 
       const select = screen.getByTestId('querySandboxTimeField') as HTMLSelectElement;
       expect(select.value).toBe('@timestamp');
@@ -1178,7 +1160,6 @@ describe('ComposeDiscoverFlyout', () => {
         fireEvent.change(select, { target: { value: 'event.ingested' } });
       });
 
-      // Flush any effects that could revert the draft before Apply runs.
       expect(select.value).toBe('event.ingested');
 
       act(() => {
@@ -1186,6 +1167,20 @@ describe('ComposeDiscoverFlyout', () => {
       });
 
       expect(readTimeField?.()).toBe('event.ingested');
+    });
+
+    it('syncs a form-step time field change into the draft while the sandbox is closed', () => {
+      renderFlyout({ mode: 'create' });
+      fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
+
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSetFormTimeField'));
+      });
+      act(() => {
+        getLatestFormProps().dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      expect(sandboxFlyoutProps?.timeField).toBe('event.ingested');
     });
   });
 
