@@ -7,27 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const DotText = require('@kbn/dot-text');
-
-/** @type {import('./types').Transform} */
-const dotTextTransform = (path, source, cache) => {
-  const key = cache.getKey(path, source);
-
-  const cached = cache.getCode(key);
-  if (cached) {
-    return cached;
-  }
-
-  const code = DotText.getJsSourceSync({
-    content: source,
-    path,
-  }).source;
-
-  cache.update(key, {
-    code,
-  });
-
-  return code;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-swc-register'],
 };
-
-module.exports = { dotTextTransform };
