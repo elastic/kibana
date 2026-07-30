@@ -50,4 +50,5 @@ export * from './specs/dropbox/dropbox';
 export * from './specs/one_drive/one_drive';
 export * from './specs/sublime_security/sublime_security';
 export * from './specs/kubernetes/kubernetes';
+export * from './specs/rootly/rootly';
 export * from './specs/sentry/sentry';
