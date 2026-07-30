@@ -14,10 +14,14 @@ import type { FieldCopyAction } from '../../../common/types';
 import { csvToIngestPipeline } from '../../lib';
 import type { RouteDependencies } from '../../types';
 
-// The UI accepts files up to the `fileUpload:maxFileSize` setting, which is capped
-// at ABSOLUTE_MAX_FILE_SIZE_BYTES, so the route must accept the same upper bound.
+// The UI accepts files up to the `fileUpload:maxFileSize` setting, which is capped at
+// ABSOLUTE_MAX_FILE_SIZE_BYTES. Use that same ceiling for both the HTTP payload limit and
+// schema maxLength so large CSV uploads are not rejected at the global `server.maxPayload`
+// default before this route's validation runs.
+export const parseCsvMaxFileBytes = ABSOLUTE_MAX_FILE_SIZE_BYTES;
+
 export const parseCsvBodySchema = schema.object({
-  file: schema.string({ maxLength: ABSOLUTE_MAX_FILE_SIZE_BYTES }),
+  file: schema.string({ maxLength: parseCsvMaxFileBytes }),
   copyAction: schema.string({ maxLength: 64 }) as Type<FieldCopyAction>,
 });
 
@@ -31,6 +35,11 @@ export const registerParseCsvRoute = ({ router }: RouteDependencies): void => {
         authz: {
           enabled: false,
           reason: 'Manually implements ES priv check to match mgmt app',
+        },
+      },
+      options: {
+        body: {
+          maxBytes: parseCsvMaxFileBytes,
         },
       },
       validate: {
