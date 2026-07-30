@@ -107,7 +107,7 @@ describe('QueryRuleOrchestrator', () => {
       expect(rulesManagementClient.createRule).toHaveBeenCalledTimes(1);
       expect(rulesManagementClient.createRule).toHaveBeenCalledWith(
         expect.any(String),
-        expect.objectContaining({ name: 'OOM errors' })
+        expect.objectContaining({ name: 'OOM errors (match count)' })
       );
 
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
@@ -132,6 +132,84 @@ describe('QueryRuleOrchestrator', () => {
       expect(rulesManagementClient.createRule).toHaveBeenCalledTimes(1);
       const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
       expect(bulkOps[0].index.query.rule_backed).toBe(true);
+    });
+
+    it('stores unsupported MATCH queries as unbacked instead of failing install', async () => {
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator();
+      const unsupported = makeQuery({
+        id: 'keep-before-where',
+        severity_score: 90,
+        esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
+      });
+
+      await orchestrator.syncQueries(definition, [unsupported]);
+
+      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(bulkOps[0].index.query.rule_backed).toBe(false);
+      expect(bulkOps[0].index.query.id).toBe('keep-before-where');
+    });
+
+    it('demotes a previously backed query that becomes unsupported MATCH', async () => {
+      const existing = makeLink({
+        id: 'was-backed',
+        severity_score: 90,
+        ruleBacked: true,
+        esql: { query: 'FROM logs-* | WHERE level == "error"' },
+      });
+      const { orchestrator, rulesManagementClient, writer } = createOrchestrator({
+        currentLinks: [existing],
+      });
+      const next = makeQuery({
+        id: 'was-backed',
+        severity_score: 90,
+        esql: { query: 'FROM logs-* | KEEP message | WHERE level == "error"' },
+      });
+
+      await orchestrator.syncQueries(definition, [next], { currentLinks: [existing] });
+
+      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+      expect(rulesManagementClient.bulkDeleteRules).toHaveBeenCalledWith(['rule-was-backed']);
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      expect(bulkOps[0].index.query.rule_backed).toBe(false);
+    });
+
+    it('skips unsupported MATCH shapes during promoteQueries', async () => {
+      const unsupported = makeLink({
+        id: 'bad-match',
+        severity_score: 90,
+        ruleBacked: false,
+        esql: { query: 'FROM logs-* | EVAL x = 1 | WHERE level == "error"' },
+      });
+      const { orchestrator, rulesManagementClient } = createOrchestrator({
+        currentLinks: [unsupported],
+      });
+
+      const result = await orchestrator.promoteQueries(definition, ['bad-match']);
+
+      // Counted apart from STATS: the user's remedy is to rewrite the query.
+      expect(result).toEqual({ promoted: 0, skipped_stats: 0, skipped_ineligible: 1 });
+      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
+    });
+
+    it('counts skipped STATS queries under their own reason', async () => {
+      const stats = makeLink({
+        id: 'stats-ki',
+        type: 'stats',
+        ruleBacked: false,
+        esql: {
+          query:
+            'FROM logs | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+        },
+      });
+      const { orchestrator, rulesManagementClient } = createOrchestrator({
+        currentLinks: [stats],
+      });
+
+      const result = await orchestrator.promoteQueries(definition, ['stats-ki']);
+
+      expect(result).toEqual({ promoted: 0, skipped_stats: 1, skipped_ineligible: 0 });
+      expect(rulesManagementClient.createRule).not.toHaveBeenCalled();
     });
   });
 
@@ -166,7 +244,7 @@ describe('QueryRuleOrchestrator', () => {
           title: 'Error query',
           description: 'desc',
           type: 'match',
-          esql: { query: 'FROM logs-* | LIMIT 1' },
+          esql: { query: 'FROM logs-*' },
           features: [{ id: 'feat-1' }],
         },
         ...overrides,

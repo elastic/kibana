@@ -15,6 +15,741 @@
         "api"
       ]
     },
+    "data_autocomplete_rules": {
+      "index_patterns": "",
+      "composed_of": [],
+      "template": {
+        "aliases": {
+          "*": {
+            "filter": {
+              "__scope_link": "GLOBAL.query"
+            },
+            "index_routing": "",
+            "is_hidden": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "is_write_index": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "routing": "",
+            "search_routing": ""
+          }
+        },
+        "mappings": {
+          "all_field": {
+            "analyzer": "",
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "omit_norms": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "search_analyzer": "",
+            "similarity": "",
+            "store": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vector_offsets": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vector_payloads": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vector_positions": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "store_term_vectors": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "date_detection": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "dynamic": {
+            "__one_of": [
+              "strict",
+              "runtime",
+              "true",
+              "false"
+            ]
+          },
+          "dynamic_date_formats": [],
+          "dynamic_templates": [
+            {
+              "*": {
+                "mapping": {
+                  "meta": {
+                    "*": ""
+                  },
+                  "fields": {
+                    "*": {}
+                  }
+                },
+                "runtime": {
+                  "fields": {
+                    "*": {
+                      "type": {
+                        "__one_of": [
+                          "boolean",
+                          "composite",
+                          "date",
+                          "double",
+                          "geo_point",
+                          "geo_shape",
+                          "ip",
+                          "keyword",
+                          "long",
+                          "lookup"
+                        ]
+                      }
+                    }
+                  },
+                  "fetch_fields": {
+                    "__any_of": [
+                      {
+                        "field": "",
+                        "format": ""
+                      },
+                      ""
+                    ]
+                  },
+                  "format": "",
+                  "input_field": "",
+                  "target_field": "",
+                  "target_index": "",
+                  "script": {
+                    "__one_of": [
+                      {
+                        "source": "",
+                        "id": "",
+                        "params": {},
+                        "lang": {
+                          "__one_of": [
+                            "painless",
+                            "expression",
+                            "mustache",
+                            "java"
+                          ]
+                        },
+                        "options": {
+                          "*": ""
+                        }
+                      },
+                      ""
+                    ]
+                  },
+                  "on_script_error": {
+                    "__one_of": [
+                      "fail",
+                      "continue"
+                    ]
+                  },
+                  "type": {
+                    "__one_of": [
+                      "boolean",
+                      "composite",
+                      "date",
+                      "double",
+                      "geo_point",
+                      "geo_shape",
+                      "ip",
+                      "keyword",
+                      "long",
+                      "lookup"
+                    ]
+                  }
+                },
+                "match": "",
+                "path_match": "",
+                "unmatch": "",
+                "path_unmatch": "",
+                "match_mapping_type": "",
+                "unmatch_mapping_type": "",
+                "match_pattern": {
+                  "__one_of": [
+                    "simple",
+                    "regex"
+                  ]
+                }
+              }
+            }
+          ],
+          "_field_names": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "index_field": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "_meta": {},
+          "numeric_detection": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "properties": {
+            "*": {
+              "meta": {
+                "*": ""
+              },
+              "fields": {
+                "*": {}
+              }
+            }
+          },
+          "_routing": {
+            "required": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "_size": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          },
+          "_source": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "excludes": [],
+            "includes": [],
+            "mode": {
+              "__one_of": [
+                "disabled",
+                "stored",
+                "synthetic"
+              ]
+            }
+          },
+          "runtime": {
+            "*": {
+              "fields": {
+                "*": {
+                  "type": {
+                    "__one_of": [
+                      "boolean",
+                      "composite",
+                      "date",
+                      "double",
+                      "geo_point",
+                      "geo_shape",
+                      "ip",
+                      "keyword",
+                      "long",
+                      "lookup"
+                    ]
+                  }
+                }
+              },
+              "fetch_fields": {
+                "__any_of": [
+                  {
+                    "field": "",
+                    "format": ""
+                  },
+                  ""
+                ]
+              },
+              "format": "",
+              "input_field": "",
+              "target_field": "",
+              "target_index": "",
+              "script": {
+                "__one_of": [
+                  {
+                    "source": "",
+                    "id": "",
+                    "params": {},
+                    "lang": {
+                      "__one_of": [
+                        "painless",
+                        "expression",
+                        "mustache",
+                        "java"
+                      ]
+                    },
+                    "options": {
+                      "*": ""
+                    }
+                  },
+                  ""
+                ]
+              },
+              "on_script_error": {
+                "__one_of": [
+                  "fail",
+                  "continue"
+                ]
+              },
+              "type": {
+                "__one_of": [
+                  "boolean",
+                  "composite",
+                  "date",
+                  "double",
+                  "geo_point",
+                  "geo_shape",
+                  "ip",
+                  "keyword",
+                  "long",
+                  "lookup"
+                ]
+              }
+            }
+          },
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "subobjects": {
+            "__one_of": [
+              "true",
+              "false"
+            ]
+          },
+          "_data_stream_timestamp": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            }
+          }
+        },
+        "settings": {
+          "index": {},
+          "mode": "",
+          "routing_path": "",
+          "soft_deletes": {
+            "enabled": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "retention_lease": {
+              "period": ""
+            }
+          },
+          "sort": {
+            "field": "",
+            "order": {
+              "__one_of": [
+                "asc",
+                "desc"
+              ]
+            },
+            "mode": {
+              "__one_of": [
+                "min",
+                "max"
+              ]
+            },
+            "missing": {
+              "__one_of": [
+                "_last",
+                "_first"
+              ]
+            }
+          },
+          "number_of_routing_shards": "",
+          "check_on_startup": {
+            "__one_of": [
+              "true",
+              "false",
+              "checksum"
+            ]
+          },
+          "codec": "",
+          "routing_partition_size": "",
+          "load_fixed_bitset_filters_eagerly": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "hidden": "",
+          "auto_expand_replicas": "",
+          "merge": {
+            "scheduler": {
+              "max_thread_count": "",
+              "max_merge_count": ""
+            }
+          },
+          "search": {
+            "idle": {
+              "after": ""
+            },
+            "slowlog": {
+              "level": "",
+              "source": "",
+              "reformat": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              },
+              "threshold": {
+                "query": {
+                  "warn": "",
+                  "info": "",
+                  "debug": "",
+                  "trace": ""
+                },
+                "fetch": {
+                  "warn": "",
+                  "info": "",
+                  "debug": "",
+                  "trace": ""
+                }
+              }
+            }
+          },
+          "refresh_interval": "",
+          "max_result_window": "",
+          "max_inner_result_window": "",
+          "max_rescore_window": "",
+          "max_docvalue_fields_search": "",
+          "max_script_fields": "",
+          "max_ngram_diff": "",
+          "max_shingle_diff": "",
+          "blocks": {
+            "read_only": "",
+            "read_only_allow_delete": "",
+            "read": "",
+            "write": "",
+            "metadata": ""
+          },
+          "max_refresh_listeners": "",
+          "analyze": {
+            "max_token_count": ""
+          },
+          "highlight": {
+            "max_analyzed_offset": ""
+          },
+          "max_terms_count": "",
+          "max_regex_length": "",
+          "routing": {
+            "allocation": {
+              "enable": {
+                "__one_of": [
+                  "all",
+                  "primaries",
+                  "new_primaries",
+                  "none"
+                ]
+              },
+              "include": {
+                "_tier_preference": "",
+                "_id": ""
+              },
+              "initial_recovery": {
+                "_id": ""
+              },
+              "disk": {
+                "threshold_enabled": ""
+              }
+            },
+            "rebalance": {
+              "enable": {
+                "__one_of": [
+                  "all",
+                  "primaries",
+                  "replicas",
+                  "none"
+                ]
+              }
+            }
+          },
+          "unassigned": {
+            "node_left": {
+              "delayed_timeout": ""
+            }
+          },
+          "gc_deletes": "",
+          "default_pipeline": "",
+          "final_pipeline": "",
+          "lifecycle": {
+            "name": "",
+            "indexing_complete": "",
+            "origination_date": "",
+            "parse_origination_date": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "step": {
+              "wait_time_threshold": ""
+            },
+            "rollover_alias": "",
+            "prefer_ilm": ""
+          },
+          "provided_name": "",
+          "creation_date": "",
+          "creation_date_string": "",
+          "uuid": "",
+          "version": {
+            "created": "",
+            "created_string": ""
+          },
+          "verified_before_close": "",
+          "format": "",
+          "max_slices_per_scroll": "",
+          "translog": {
+            "sync_interval": "",
+            "durability": {
+              "__one_of": [
+                "request",
+                "async"
+              ]
+            },
+            "flush_threshold_size": "",
+            "retention": {
+              "size": "",
+              "age": ""
+            }
+          },
+          "query_string": {
+            "lenient": ""
+          },
+          "priority": "",
+          "top_metrics_max_size": "",
+          "analysis": {
+            "analyzer": {
+              "*": {}
+            },
+            "char_filter": {
+              "*": ""
+            },
+            "filter": {
+              "*": ""
+            },
+            "normalizer": {
+              "*": {}
+            },
+            "tokenizer": {
+              "*": ""
+            }
+          },
+          "settings": {},
+          "time_series": {
+            "end_time": "",
+            "start_time": "",
+            "temporality_field": ""
+          },
+          "queries": {
+            "cache": {
+              "enabled": {
+                "__one_of": [
+                  true,
+                  false
+                ]
+              }
+            }
+          },
+          "similarity": {
+            "*": {}
+          },
+          "mapping": {
+            "coerce": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "total_fields": {
+              "limit": "",
+              "ignore_dynamic_beyond_limit": ""
+            },
+            "depth": {
+              "limit": ""
+            },
+            "nested_fields": {
+              "limit": ""
+            },
+            "nested_objects": {
+              "limit": ""
+            },
+            "field_name_length": {
+              "limit": ""
+            },
+            "dimension_fields": {
+              "limit": ""
+            },
+            "source": {
+              "mode": {
+                "__one_of": [
+                  "disabled",
+                  "stored",
+                  "synthetic"
+                ]
+              }
+            },
+            "ignore_malformed": ""
+          },
+          "indexing.slowlog": {
+            "level": "",
+            "source": "",
+            "reformat": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "threshold": {
+              "index": {
+                "warn": "",
+                "info": "",
+                "debug": "",
+                "trace": ""
+              }
+            }
+          },
+          "indexing_pressure": {
+            "memory": {
+              "limit": ""
+            }
+          },
+          "store": {
+            "type": {
+              "__one_of": [
+                "fs",
+                "niofs",
+                "mmapfs",
+                "hybridfs"
+              ]
+            },
+            "allow_mmap": {
+              "__one_of": [
+                true,
+                false
+              ]
+            },
+            "stats_refresh_interval": ""
+          }
+        },
+        "lifecycle": {
+          "data_retention": "",
+          "effective_retention": "",
+          "retention_determined_by": {
+            "__one_of": [
+              "data_stream_configuration",
+              "default_global_retention",
+              "max_global_retention",
+              "default_failures_retention"
+            ]
+          },
+          "downsampling": [
+            {
+              "after": "",
+              "fixed_interval": ""
+            }
+          ],
+          "downsampling_method": {
+            "__one_of": [
+              "aggregate",
+              "last_value"
+            ]
+          },
+          "enabled": {
+            "__one_of": [
+              true,
+              false
+            ]
+          },
+          "frozen_after": ""
+        },
+        "data_stream_options": ""
+      },
+      "data_stream": {
+        "hidden": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "allow_custom_routing": {
+          "__one_of": [
+            true,
+            false
+          ]
+        },
+        "failure_store": {
+          "__one_of": [
+            true,
+            false
+          ]
+        }
+      },
+      "priority": "",
+      "version": "",
+      "_meta": {},
+      "allow_auto_create": {
+        "__one_of": [
+          true,
+          false
+        ]
+      },
+      "ignore_missing_component_templates": [],
+      "deprecated": {
+        "__one_of": [
+          true,
+          false
+        ]
+      }
+    },
     "methods": [
       "PUT",
       "POST"
