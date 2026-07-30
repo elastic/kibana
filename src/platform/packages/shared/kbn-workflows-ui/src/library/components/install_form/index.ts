@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const WorkflowsPageName = {
-  list: 'list',
-  library: 'library',
-  executions: 'executions',
-} as const;
-
-export type WorkflowsPageName = (typeof WorkflowsPageName)[keyof typeof WorkflowsPageName];
+export { InstallForm, type InstallFormProps } from './install_form';
+export { ConnectorField, type ConnectorFieldProps } from './connector_field';
+export {
+  TemplateInstallSection,
+  type TemplateInstallSectionProps,
+} from './template_install_section';
