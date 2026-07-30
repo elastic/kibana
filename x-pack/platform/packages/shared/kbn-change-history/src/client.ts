@@ -396,15 +396,15 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
     aggregations: Record<string, AggregationsAggregate> | undefined,
     field: ChangeHistoryAggregateField
   ): Pick<GetChangeHistoryByFieldResult, 'buckets' | 'sumOtherDocCount'> {
-    const valuesAgg = aggregations?.[field];
-    if (valuesAgg === undefined) {
+    const candidate = aggregations?.[field] as
+      | {
+          sum_other_doc_count?: number;
+          buckets?: Array<{ key?: unknown; doc_count?: number }>;
+        }
+      | undefined;
+    if (candidate === undefined) {
       return { buckets: [], sumOtherDocCount: 0 };
     }
-
-    const candidate = valuesAgg as {
-      sum_other_doc_count?: number;
-      buckets?: Array<{ key?: unknown; doc_count?: number }>;
-    };
 
     if (typeof candidate.sum_other_doc_count !== 'number' || !Array.isArray(candidate.buckets)) {
       this.logger.warn(

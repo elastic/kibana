@@ -226,7 +226,6 @@ describe('ChangeHistoryClient', () => {
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
           'user.name': {
-            doc_count_error_upper_bound: 0,
             sum_other_doc_count: 3,
             buckets: [
               { key: 'alice', doc_count: 2 },
@@ -323,7 +322,6 @@ describe('ChangeHistoryClient', () => {
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
           'user.name': {
-            doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [
               { key: 123, doc_count: 1 },
@@ -347,7 +345,6 @@ describe('ChangeHistoryClient', () => {
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
           'user.name': {
-            doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [{ key: '', doc_count: 1 }],
           },
@@ -365,12 +362,10 @@ describe('ChangeHistoryClient', () => {
         hits: { total: { value: 0 }, hits: [] },
         aggregations: {
           'user.name': {
-            doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
             buckets: [{ key: 'alice', doc_count: 2 }],
           },
           'event.action': {
-            doc_count_error_upper_bound: 0,
             sum_other_doc_count: 1,
             buckets: [
               { key: 'rule_update', doc_count: 3 },
