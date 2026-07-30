@@ -10,10 +10,10 @@ import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react'
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiText,
   EuiToolTip,
   type EuiComboBoxOptionOption,
@@ -383,6 +383,20 @@ export function QuickSearchVisor({
                 responsive={false}
                 css={styles.searchInner}
               >
+                {showAskAiButton && (
+                  <EuiFlexItem grow={false} css={styles.askAiIconWrapper}>
+                    <EuiToolTip content={askAiLabel}>
+                      <EuiButtonIcon
+                        iconType="sparkles"
+                        onClick={onAskAiClick}
+                        color="primary"
+                        size="s"
+                        aria-label={askAiLabel}
+                        data-test-subj="esqlVisorAskAiButton"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                )}
                 <EuiFlexItem>
                   <KQLComponent
                     iconType=""
@@ -400,17 +414,9 @@ export function QuickSearchVisor({
                     isClearable={false}
                   />
                 </EuiFlexItem>
-                {showAskAiButton && (
-                  <EuiFlexItem grow={false} css={styles.askAiButtonWrapper}>
-                    <EuiButton
-                      iconType="sparkles"
-                      onClick={onAskAiClick}
-                      color="primary"
-                      size="s"
-                      data-test-subj="esqlVisorAskAiButton"
-                    >
-                      {askAiLabel}
-                    </EuiButton>
+                {searchValue.trim() && (
+                  <EuiFlexItem grow={false} css={styles.enterHint}>
+                    <EuiIcon type="returnKey" size="s" />
                   </EuiFlexItem>
                 )}
               </EuiFlexGroup>
@@ -423,6 +429,18 @@ export function QuickSearchVisor({
                 responsive={false}
                 css={styles.searchInner}
               >
+                <EuiFlexItem grow={false} css={styles.askAiIconWrapper}>
+                  <EuiToolTip content={backToKqlLabel}>
+                    <EuiButtonIcon
+                      iconType="editorUndo"
+                      onClick={onBackToKql}
+                      color="text"
+                      size="s"
+                      aria-label={backToKqlLabel}
+                      data-test-subj="esqlVisorBackToKql"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
                 <EuiFlexItem css={styles.nlFormControl}>
                   <NLInput
                     value={nlValue}
@@ -456,17 +474,11 @@ export function QuickSearchVisor({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ) : (
-                  <EuiFlexItem grow={false} css={styles.submitButtonWrapper}>
-                    <EuiToolTip content={backToKqlLabel}>
-                      <EuiButtonIcon
-                        iconType="returnKey"
-                        aria-label={backToKqlLabel}
-                        onClick={onBackToKql}
-                        color="text"
-                        data-test-subj="esqlVisorBackToKql"
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                  nlValue.trim() && (
+                    <EuiFlexItem grow={false} css={styles.enterHint}>
+                      <EuiIcon type="returnKey" size="s" />
+                    </EuiFlexItem>
+                  )
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>

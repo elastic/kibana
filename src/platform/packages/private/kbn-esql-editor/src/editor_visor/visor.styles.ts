@@ -110,13 +110,20 @@ export const visorStyles = (
       padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
     `,
-    askAiButtonWrapper: css`
+    askAiIconWrapper: css`
       padding-left: ${euiTheme.size.xs};
+      padding-right: ${euiTheme.size.xxs};
       flex-shrink: 0;
+    `,
+    enterHint: css`
+      padding-right: ${euiTheme.size.xs};
+      flex-shrink: 0;
+      color: ${euiTheme.colors.subduedText};
     `,
     nlInputWrapper: css`
       justify-content: center;
-      padding: ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.xs} ${euiTheme.size.s};
+      padding-left: ${euiTheme.size.s};
+      padding-right: ${euiTheme.size.xs};
       min-width: 0;
     `,
     nlInput: css`
