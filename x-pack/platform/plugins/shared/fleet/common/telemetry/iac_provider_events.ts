@@ -20,7 +20,6 @@ export type IacProviderRenderFlow = 'cloud_connector';
 
 export interface IacProviderRenderRequestedFields {
   flow: IacProviderRenderFlow;
-  policyGroup: string;
   integrationCount: number;
 }
 
@@ -44,10 +43,6 @@ export const IAC_PROVIDER_RENDER_REQUESTED_EVENT: EventTypeOpts<IacProviderRende
       flow: {
         type: 'keyword',
         _meta: { description: 'The Kibana flow that requested the render.' },
-      },
-      policyGroup: {
-        type: 'keyword',
-        _meta: { description: 'Cloud connector policy group the render covers.' },
       },
       integrationCount: {
         type: 'integer',

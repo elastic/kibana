@@ -12,16 +12,35 @@ export const RenderIacTemplateRequestSchema = {
     provider: schema.oneOf([schema.literal('aws')], {
       meta: { description: 'The cloud provider the template targets. Only AWS is supported.' },
     }),
-    packageName: schema.string({
-      minLength: 1,
-      maxLength: 255,
-      meta: { description: 'EPR package name of the integration being set up.' },
+    flow: schema.oneOf([schema.literal('cloud_connector')], {
+      meta: { description: 'The Kibana flow requesting the render; reported in telemetry.' },
     }),
-    policyTemplate: schema.string({
-      minLength: 1,
-      maxLength: 255,
-      meta: { description: 'Policy template name within the package.' },
-    }),
+    integrations: schema.arrayOf(
+      schema.object({
+        name: schema.string({
+          minLength: 1,
+          maxLength: 255,
+          meta: { description: 'EPR package name.' },
+        }),
+        policyTemplates: schema.arrayOf(
+          schema.string({ minLength: 1, maxLength: 255 }),
+          {
+            minSize: 1,
+            meta: {
+              description:
+                'Policy template names whose inputs to include. Multiple values merge same-package entries.',
+            },
+          }
+        ),
+      }),
+      {
+        minSize: 1,
+        // Each entry costs a registry fetch; policy groups are small (2-3
+        // integrations), so this cap only exists to bound abuse.
+        maxSize: 10,
+        meta: { description: 'Integrations to render the template for.' },
+      }
+    ),
   }),
 };
 

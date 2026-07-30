@@ -9,7 +9,10 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiAccordion, EuiSpacer, EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ } from '../../../../common/services/cloud_connectors/test_subjects';
+import {
+  CLOUD_CONNECTOR_NAME_INPUT_TEST_SUBJ,
+  CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ,
+} from '../../../../common/services/cloud_connectors/test_subjects';
 import {
   extractRawCredentialVars,
   getCredentialKeyFromVarName,
@@ -36,18 +39,14 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
   accountType = ORGANIZATION_ACCOUNT,
   iacTemplateUrl,
 }) => {
-  const {
-    templateUrl: cloudConnectorRemoteRoleTemplate,
-    launchTemplate,
-    isRendering,
-    renderError,
-  } = useCloudConnectorTemplate({
-    cloud,
-    accountType,
-    iacTemplateUrl,
-    packageName: packageInfo?.name,
-    policyTemplate: newPolicy?.inputs?.find((input) => input.enabled)?.policy_template,
-  });
+  const { launchButtonProps, isDisabled, isGeneratingTemplate, templateGenerationError } =
+    useCloudConnectorTemplate({
+      cloud,
+      accountType,
+      iacTemplateUrl,
+      packageName: packageInfo?.name,
+      policyTemplate: newPolicy?.inputs?.find((input) => input.enabled)?.policy_template,
+    });
 
   // Use accessor to get vars from the correct location (package-level or input-level)
   const inputVars = extractRawCredentialVars(newPolicy, packageInfo);
@@ -87,24 +86,22 @@ export const AWSCloudConnectorForm: React.FC<CloudConnectorFormProps> = ({
         data-test-subj="launchCloudFormationAgentlessButton"
         iconSide="left"
         iconType="rocket"
-        isLoading={isRendering}
-        isDisabled={!cloudConnectorRemoteRoleTemplate && !launchTemplate}
-        {...(launchTemplate
-          ? { onClick: launchTemplate }
-          : { href: cloudConnectorRemoteRoleTemplate, target: '_blank' })}
+        isLoading={isGeneratingTemplate}
+        isDisabled={isDisabled}
+        {...launchButtonProps}
       >
         <FormattedMessage
           id="xpack.fleet.cloudConnector.aws.launchCloudFormationButton"
           defaultMessage="Launch CloudFormation"
         />
       </EuiButton>
-      {renderError && (
+      {templateGenerationError && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
             announceOnMount
-            data-test-subj="cloudConnectorRenderErrorCallout"
-            title={renderError}
+            data-test-subj={CLOUD_CONNECTOR_TEMPLATE_GENERATION_ERROR_CALLOUT_TEST_SUBJ}
+            title={templateGenerationError}
             color="danger"
             iconType="error"
             size="s"

@@ -57,17 +57,38 @@ describe('useCloudConnectorTemplate', () => {
     windowOpenSpy.mockRestore();
   });
 
+  const launch = async (result: { current: ReturnType<typeof useCloudConnectorTemplate> }) => {
+    const { launchButtonProps } = result.current;
+    if (!('onClick' in launchButtonProps)) {
+      throw new Error('expected onClick launch button props');
+    }
+    await act(async () => {
+      await launchButtonProps.onClick();
+    });
+  };
+
   describe('when the IaC Provider is disabled', () => {
     beforeEach(() => {
       mockedUseIacProvider.mockReturnValue({ isIacProviderEnabled: false });
     });
 
-    it('returns the static template URL and no launch handler', () => {
+    it('returns href button props with the static template URL', () => {
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
 
-      expect(result.current.templateUrl).toContain('param_ElasticResourceId=kibana-component-id');
-      expect(result.current.launchTemplate).toBeUndefined();
-      expect(result.current.isRendering).toBe(false);
+      expect(result.current.launchButtonProps).toEqual({
+        href: expect.stringContaining('param_ElasticResourceId=kibana-component-id'),
+        target: '_blank',
+      });
+      expect(result.current.isDisabled).toBe(false);
+      expect(result.current.isGeneratingTemplate).toBe(false);
+    });
+
+    it('is disabled when no static template URL can be built', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
+      );
+
+      expect(result.current.isDisabled).toBe(true);
     });
   });
 
@@ -76,11 +97,12 @@ describe('useCloudConnectorTemplate', () => {
       mockedUseIacProvider.mockReturnValue({ isIacProviderEnabled: true });
     });
 
-    it('returns a launch handler instead of a static URL', () => {
+    it('returns onClick button props instead of an href', () => {
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
 
-      expect(result.current.templateUrl).toBeUndefined();
-      expect(result.current.launchTemplate).toBeDefined();
+      expect(result.current.launchButtonProps).toHaveProperty('onClick');
+      expect(result.current.launchButtonProps).not.toHaveProperty('href');
+      expect(result.current.isDisabled).toBe(false);
     });
 
     it('renders just-in-time and opens the quick-create URL with the artifactUrl', async () => {
@@ -93,14 +115,17 @@ describe('useCloudConnectorTemplate', () => {
       } as any);
 
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
-      await act(async () => {
-        await result.current.launchTemplate!();
-      });
+      await launch(result);
 
+      // cloud_security_posture/cspm is in security_audit_policy_group which also
+      // includes cloud_asset_inventory/asset_inventory — the whole group is sent.
       expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
         provider: 'aws',
-        packageName: 'cloud_security_posture',
-        policyTemplate: 'cspm',
+        flow: 'cloud_connector',
+        integrations: [
+          { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+          { name: 'cloud_asset_inventory', policyTemplates: ['asset_inventory'] },
+        ],
       });
       const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
       expect(openedUrl).toContain(
@@ -117,9 +142,7 @@ describe('useCloudConnectorTemplate', () => {
       } as any);
 
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
-      await act(async () => {
-        await result.current.launchTemplate!();
-      });
+      await launch(result);
 
       const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
       expect(openedUrl).toContain('static.example');
@@ -127,7 +150,7 @@ describe('useCloudConnectorTemplate', () => {
         flow: 'cloud_connector',
         reason: 'render_failed',
       });
-      expect(result.current.renderError).toBeUndefined();
+      expect(result.current.templateGenerationError).toBeUndefined();
     });
 
     it('surfaces an error when the render fails and no static fallback exists', async () => {
@@ -139,12 +162,10 @@ describe('useCloudConnectorTemplate', () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
       );
-      await act(async () => {
-        await result.current.launchTemplate!();
-      });
+      await launch(result);
 
       expect(windowOpenSpy).not.toHaveBeenCalled();
-      expect(result.current.renderError).toBeDefined();
+      expect(result.current.templateGenerationError).toBeDefined();
     });
   });
 });

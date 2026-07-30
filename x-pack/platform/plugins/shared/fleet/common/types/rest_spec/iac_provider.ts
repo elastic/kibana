@@ -5,10 +5,25 @@
  * 2.0.
  */
 
+import type { IacProviderRenderFlow } from '../../telemetry/iac_provider_events';
+
+export interface RenderIacTemplateIntegration {
+  /** EPR package name. */
+  name: string;
+  /**
+   * Policy template names whose inputs should be included in the rendered
+   * template. Multiple values are used when the same package appears in more
+   * than one entry of a policy group (e.g. `guardduty` + `s3` in the AWS
+   * global connector group both live in the `aws` package).
+   */
+  policyTemplates: string[];
+}
+
 export interface RenderIacTemplateRequest {
   provider: 'aws';
-  packageName: string;
-  policyTemplate: string;
+  /** The Kibana flow requesting the render; reported in telemetry. */
+  flow: IacProviderRenderFlow;
+  integrations: RenderIacTemplateIntegration[];
 }
 
 export interface RenderIacTemplateResponse {

@@ -7,7 +7,11 @@
 
 import { httpServerMock } from '@kbn/core/server/mocks';
 
-import { IacProviderRenderError, IacProviderUnavailableError } from '../../errors';
+import {
+  IacProviderRenderError,
+  IacProviderUnavailableError,
+  PackageNotFoundError,
+} from '../../errors';
 import { appContextService } from '../../services/app_context';
 import { iacProviderService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
@@ -83,8 +87,8 @@ describe('renderIacTemplateHandler', () => {
       buildContext(),
       buildRequest({
         provider: 'aws',
-        packageName: 'cloud_security_posture',
-        policyTemplate: 'cspm',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
       }),
       response
     );
@@ -93,18 +97,7 @@ describe('renderIacTemplateHandler', () => {
     expect(mockedRenderTemplate).not.toHaveBeenCalled();
   });
 
-  it('returns 400 when the integration is not in the allowlist', async () => {
-    await renderIacTemplateHandler(
-      buildContext(),
-      buildRequest({ provider: 'aws', packageName: 'nginx', policyTemplate: 'nginx' }),
-      response
-    );
-
-    expect(response.badRequest).toHaveBeenCalled();
-    expect(mockedRenderTemplate).not.toHaveBeenCalled();
-  });
-
-  it('expands the whole policy group and filters inputs to the provider', async () => {
+  it('resolves version and provider-relevant inputs for each requested integration', async () => {
     mockedGetPackageInfo.mockImplementation(
       async ({ pkgName }) =>
         (pkgName === 'cloud_security_posture' ? CSPM_PACKAGE_INFO : CAI_PACKAGE_INFO) as any
@@ -118,8 +111,11 @@ describe('renderIacTemplateHandler', () => {
       buildContext(),
       buildRequest({
         provider: 'aws',
-        packageName: 'cloud_security_posture',
-        policyTemplate: 'cspm',
+        flow: 'cloud_connector',
+        integrations: [
+          { name: 'cloud_security_posture', policyTemplates: ['cspm'] },
+          { name: 'cloud_asset_inventory', policyTemplates: ['asset_inventory'] },
+        ],
       }),
       response
     );
@@ -151,8 +147,7 @@ describe('renderIacTemplateHandler', () => {
     );
   });
 
-  it('merges same-package group entries into one integration with the union of inputs', async () => {
-    // aws_global_policy_group: aws/guardduty + aws/s3 — same EPR package.
+  it('merges multiple policyTemplates for the same package into one integration', async () => {
     mockedGetPackageInfo.mockResolvedValue({
       name: 'aws',
       version: '7.1.0',
@@ -169,7 +164,11 @@ describe('renderIacTemplateHandler', () => {
 
     await renderIacTemplateHandler(
       buildContext(),
-      buildRequest({ provider: 'aws', packageName: 'aws', policyTemplate: 'guardduty' }),
+      buildRequest({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'aws', policyTemplates: ['guardduty', 's3'] }],
+      }),
       response
     );
 
@@ -180,8 +179,7 @@ describe('renderIacTemplateHandler', () => {
         {
           name: 'aws',
           version: '7.1.0',
-          // guardduty + s3 inputs, deduplicated; cloudtrail (not in the
-          // policy group) excluded
+          // guardduty + s3 inputs, deduplicated; cloudtrail (not requested) excluded
           enabledInputs: ['aws-s3', 'aws-cloudwatch'],
         },
       ],
@@ -198,8 +196,8 @@ describe('renderIacTemplateHandler', () => {
       buildContext(),
       buildRequest({
         provider: 'aws',
-        packageName: 'cloud_security_posture',
-        policyTemplate: 'cspm',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
       }),
       response
     );
@@ -221,6 +219,32 @@ describe('renderIacTemplateHandler', () => {
     );
   });
 
+  it('returns 404 without an error log when a requested package does not exist', async () => {
+    mockedGetPackageInfo.mockRejectedValue(
+      new PackageNotFoundError('[no_such_package] package not installed or found in registry')
+    );
+
+    await renderIacTemplateHandler(
+      buildContext(),
+      buildRequest({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'no_such_package', policyTemplates: ['whatever'] }],
+      }),
+      response
+    );
+
+    expect(response.notFound).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ message: expect.stringContaining('no_such_package') }),
+      })
+    );
+    expect(appContextService.getLogger().get().error).not.toHaveBeenCalled();
+    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, httpStatus: 404 })
+    );
+  });
+
   it('maps provider unavailability to 502', async () => {
     mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
     mockedRenderTemplate.mockRejectedValue(new IacProviderUnavailableError('no response'));
@@ -229,8 +253,8 @@ describe('renderIacTemplateHandler', () => {
       buildContext(),
       buildRequest({
         provider: 'aws',
-        packageName: 'cloud_security_posture',
-        policyTemplate: 'cspm',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
       }),
       response
     );
