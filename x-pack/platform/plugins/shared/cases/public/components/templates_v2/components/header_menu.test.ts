@@ -37,16 +37,26 @@ describe('getTemplateFormMenu', () => {
     'disables saving and identifies where to fix validation errors',
     (metadataErrors, hasYamlValidationErrors, expectedTooltipContent) => {
       const menu = getMenu({ metadataErrors, hasYamlValidationErrors });
+      const { primaryActionItem } = menu;
 
-      expect(menu.primaryActionItem.disableButton).toBe(true);
-      expect(menu.primaryActionItem.tooltipContent).toBe(expectedTooltipContent);
+      if (primaryActionItem == null) {
+        throw new Error('Expected a primary template save action.');
+      }
+
+      expect(primaryActionItem.disableButton).toBe(true);
+      expect(primaryActionItem.tooltipContent).toBe(expectedTooltipContent);
     }
   );
 
   it('leaves saving enabled when YAML and Configuration are valid', () => {
     const menu = getMenu();
+    const { primaryActionItem } = menu;
 
-    expect(menu.primaryActionItem.disableButton).toBe(false);
-    expect(menu.primaryActionItem.tooltipContent).toBeUndefined();
+    if (primaryActionItem == null) {
+      throw new Error('Expected a primary template save action.');
+    }
+
+    expect(primaryActionItem.disableButton).toBe(false);
+    expect(primaryActionItem.tooltipContent).toBeUndefined();
   });
 });
