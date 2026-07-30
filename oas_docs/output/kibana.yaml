@@ -87296,6 +87296,12 @@ components:
         hide_title:
           description: When true, the panel title is hidden. Defaults to false.
           type: boolean
+        highlighted_service_names:
+          items:
+            maxLength: 1024
+            type: string
+          maxItems: 50
+          type: array
         kuery:
           maxLength: 2048
           type: string
