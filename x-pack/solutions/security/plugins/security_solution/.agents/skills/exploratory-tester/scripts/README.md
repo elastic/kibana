@@ -87,7 +87,7 @@ inside a normal `yarn kbn bootstrap`'d checkout.
     generated file wasn't regenerated to match.
   - **Lifecycle** — the bridge-missing/fallback condition, reinjection
     after a simulated navigation, and idempotency of redundant reinjection,
-    matching the contract `../phases/2-explore.md` depends on.
+    matching the contract `../phases/2-flow-core.md` depends on.
 - `fixtures/` — DOM/console/network fixtures shared by all of the above.
 
 This suite is also not part of Kibana CI (same reasoning as the Python
@@ -108,8 +108,8 @@ own header comment for the exact shape) into the same
 plus a `state` object to carry cumulative history (e.g. a pending request
 that's still pending several checklist steps later) between calls in the
 same flow. Also runnable as a CLI (`node action-scoped-collector.mjs
-<events.json> [<prior-state.json>]`) — `phases/2-explore.md` invokes it this
-way in shadow mode.
+<events.json> [<prior-state.json>]`) — `phases/2-flow-core.md` invokes it
+this way in shadow mode.
 
 The actual event collection happens elsewhere: Playwright-side, inside a
 `browser_run_code_unsafe` call, because that sandbox has no `require`/`import`
