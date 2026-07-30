@@ -240,6 +240,10 @@ export const ConnectorIconsMap: Map<
 
   [
     '.new_relic',
-    lazy(() => import(/* webpackChunkName: "connectorIconnewrelic" */ './specs/new_relic/icon')),
+    lazy(() => import(/* webpackChunkName: "connectorIconNewRelic" */ './specs/new_relic/icon')),
+  ],
+  [
+    '.sentry',
+    lazy(() => import(/* webpackChunkName: "connectorIconSentry" */ './specs/sentry/icon')),
   ],
 ]);
