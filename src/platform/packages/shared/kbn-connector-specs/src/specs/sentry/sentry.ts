@@ -122,7 +122,7 @@ export const Sentry: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.sentry.auth.bearer.token.helpText',
                 {
                   defaultMessage:
-                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add event:admin too if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
+                    'A Sentry auth token with org:read, project:read, event:read, and event:write scopes (add alerts:write if you plan to provision issue alert rules, and event:admin if you plan to use deleteIssue). Create one as an internal integration (Settings > Developer Settings) or a personal auth token.',
                 }
               ),
             },
