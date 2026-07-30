@@ -9,11 +9,10 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, IToasts } from '@kbn/core/public';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
-import { RULES_CONTENT_LIST_ID } from '../constants';
 import { RulesApi, type BulkResponse } from '../services/rules_api';
 import type { BulkSelection } from './use_bulk_select';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesListView } from './invalidate_rules_content_list';
 
 const getHttpFetchErrorMessage = (error: unknown): string | undefined => {
   const httpError = error as IHttpFetchError<{ message?: string }>;
@@ -76,11 +75,8 @@ export const useBulkEnableRules = () => {
           })
         );
       }
+      void invalidateRulesListView();
       queryClient.invalidateQueries(ruleKeys.lists());
-      // Content List uses its own QueryClient.
-      void contentListQueryClient.invalidateQueries({
-        queryKey: contentListKeys.all(RULES_CONTENT_LIST_ID),
-      });
     },
     onError: (error) => {
       addBulkMutationDangerToast(
@@ -119,11 +115,8 @@ export const useBulkDisableRules = () => {
           })
         );
       }
+      void invalidateRulesListView();
       queryClient.invalidateQueries(ruleKeys.lists());
-      // Content List uses its own QueryClient.
-      void contentListQueryClient.invalidateQueries({
-        queryKey: contentListKeys.all(RULES_CONTENT_LIST_ID),
-      });
     },
     onError: (error) => {
       addBulkMutationDangerToast(

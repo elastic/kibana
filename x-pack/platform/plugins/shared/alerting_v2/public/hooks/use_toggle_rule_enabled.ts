@@ -8,10 +8,9 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
-import { RULES_CONTENT_LIST_ID } from '../constants';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesListView } from './invalidate_rules_content_list';
 
 export const useToggleRuleEnabled = () => {
   const rulesApi = useService(RulesApi);
@@ -35,12 +34,9 @@ export const useToggleRuleEnabled = () => {
       );
 
       await Promise.all([
+        invalidateRulesListView(),
         queryClient.invalidateQueries(ruleKeys.lists()),
         queryClient.invalidateQueries(ruleKeys.detail(variables.id)),
-        // Content List uses its own QueryClient.
-        contentListQueryClient.invalidateQueries({
-          queryKey: contentListKeys.all(RULES_CONTENT_LIST_ID),
-        }),
       ]);
     },
     onError: () => {

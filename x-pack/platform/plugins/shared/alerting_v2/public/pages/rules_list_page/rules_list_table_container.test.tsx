@@ -73,7 +73,7 @@ jest.mock('../../hooks/use_run_rule', () => ({
   useRunRule: () => mockUseRunRule(),
 }));
 
-const mockToRulesQueryParams = jest.fn(() => ({
+const mockToRulesQueryParams = jest.fn((..._args: unknown[]) => ({
   filter: undefined as string | undefined,
   search: undefined as string | undefined,
 }));
@@ -276,6 +276,32 @@ describe('RulesListTableContainer', () => {
 
       await waitFor(() => {
         expect(screen.queryByTestId('deleteRuleConfirmationModal')).not.toBeInTheDocument();
+      });
+    });
+
+    it('deselects a checked row once its delete succeeds, so a stale ID cannot leak into a later bulk action', async () => {
+      renderContainer();
+      await waitForRules();
+
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+      expect(screen.getByTestId('checkboxSelectRow-rule-1')).toBeChecked();
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      const [, options] = mockDeleteMutate.mock.calls[0];
+      options.onSuccess();
+
+      await waitFor(() => {
+        expect(screen.getByTestId('checkboxSelectRow-rule-1')).not.toBeChecked();
       });
     });
   });

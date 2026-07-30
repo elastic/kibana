@@ -33,7 +33,9 @@ export interface RulesQueryParams {
  * mapper so select-all never targets a different set than the table shows.
  *
  * Enabled filter values are `'true'` / `'false'` (matching the rules status
- * filter UI). Kind filter values are `'alert'` / `'signal'`.
+ * filter UI). Kind filter values are `'alert'` / `'signal'`. Both are
+ * single-select popovers, so only the first included value is honored and
+ * exclusions are not offered.
  *
  * Narrows filter dimensions with a cast (same pattern as action policies) because
  * `getIncludeExcludeFilter` is not part of `@kbn/content-list-provider`'s public
@@ -49,6 +51,7 @@ export const toRulesQueryParams = (filters: ActiveFilters): RulesQueryParams => 
       enabled: enabled?.include?.[0],
       kind: kind?.include?.[0],
       tags: tags?.include,
+      excludedTags: tags?.exclude,
     }),
     search: filters.search || undefined,
   };

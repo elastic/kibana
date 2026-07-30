@@ -8,10 +8,9 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
-import { RULES_CONTENT_LIST_ID } from '../constants';
 import { RulesApi } from '../services/rules_api';
 import { ruleKeys } from './query_key_factory';
+import { invalidateRulesContentList } from './invalidate_rules_content_list';
 
 export const useDeleteRule = () => {
   const rulesApi = useService(RulesApi);
@@ -27,16 +26,10 @@ export const useDeleteRule = () => {
           values: { ruleName: name },
         })
       );
+      void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.tags());
       queryClient.invalidateQueries(ruleKeys.details());
-      // Content List uses its own QueryClient; tags under the provider land there too.
-      void contentListQueryClient.invalidateQueries({
-        queryKey: contentListKeys.all(RULES_CONTENT_LIST_ID),
-      });
-      void contentListQueryClient.invalidateQueries({
-        queryKey: [...ruleKeys.all, 'tags'],
-      });
     },
     onError: () => {
       toasts.addDanger(

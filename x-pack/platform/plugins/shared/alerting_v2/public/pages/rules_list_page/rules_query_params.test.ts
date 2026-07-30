@@ -65,12 +65,33 @@ describe('toRulesQueryParams', () => {
     });
   });
 
-  it('ignores exclude-only filter dimensions for list params', () => {
+  it('maps excluded tags to a negated KQL filter', () => {
+    expect(
+      toRulesQueryParams({
+        [TAG_FILTER_ID]: { exclude: ['prod'] },
+      })
+    ).toEqual({
+      filter: 'NOT (metadata.tags: "prod")',
+    });
+  });
+
+  it('intersects included and excluded tags with free-text search', () => {
+    expect(
+      toRulesQueryParams({
+        search: 'cpu',
+        [TAG_FILTER_ID]: { include: ['prod'], exclude: ['staging'] },
+      })
+    ).toEqual({
+      filter: '(metadata.tags: "prod") AND NOT (metadata.tags: "staging")',
+      search: 'cpu',
+    });
+  });
+
+  it('ignores exclusions on the single-select status and mode dimensions', () => {
     expect(
       toRulesQueryParams({
         [ENABLED_FILTER_ID]: { exclude: ['true'] },
         [KIND_FILTER_ID]: { exclude: ['signal'] },
-        [TAG_FILTER_ID]: { exclude: ['prod'] },
       })
     ).toEqual({});
   });
