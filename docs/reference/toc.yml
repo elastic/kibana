@@ -102,6 +102,7 @@ toc:
           - file: connectors-kibana/kubernetes-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/monday-com-action-type.md
+          - file: connectors-kibana/new-relic-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
