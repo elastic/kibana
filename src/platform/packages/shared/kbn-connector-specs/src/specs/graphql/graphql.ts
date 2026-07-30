@@ -214,7 +214,7 @@ export const GraphQLConnector: ConnectorSpec = {
             token: {
               helpText: i18n.translate('connectorSpecs.graphQL.auth.bearer.token.helpText', {
                 defaultMessage:
-                  'OAuth access token, JWT, or API access token sent as Authorization: Bearer <token>.',
+                  'OAuth access token, JWT, or API access token sent in the Authorization header as a Bearer token.',
               }),
             },
           },
