@@ -47,6 +47,6 @@ export const createCustomContentContextAttachmentType = (): AttachmentTypeDefini
     }),
   }),
   getAgentDescription: () =>
-    'A custom content panel context containing the current HTML template and optional ES|QL query. Use the update_panel tool to propose refined templates or query changes.',
+    'A custom content panel context containing the current HTML template and optional ES|QL query. Use the custom_content_update_panel tool to propose refined templates or query changes.',
   getTools: () => [],
 });
