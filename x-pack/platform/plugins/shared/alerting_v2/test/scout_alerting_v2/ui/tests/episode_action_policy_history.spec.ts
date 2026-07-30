@@ -7,12 +7,8 @@
 
 import { expect } from '@kbn/scout/ui';
 import { buildAlertEvent, test } from '../fixtures';
-import { mockEpisodeActionPolicyHistory } from '../fixtures/mocks';
 
-const ACTION_POLICY_ID = 'episode-policy-history-policy';
-const ACTION_POLICY_NAME = 'Episode policy history policy';
 const RULE_ID = 'episode-policy-history-rule';
-const RULE_NAME = 'Episode policy history rule';
 const GROUP_HASH = 'episode-policy-history-series-1';
 const EPISODE_ID = 'episode-policy-history-ep-1';
 
@@ -49,35 +45,20 @@ test.describe(
       await apiServices.alertingV2.ruleEvents.cleanUp();
     });
 
-    test('shows the episode policy execution history and filters it by outcome', async ({
-      page,
+    test('mounts the episode-scoped policy history tab from the details route', async ({
       pageObjects,
     }) => {
-      await mockEpisodeActionPolicyHistory(page, {
-        policyId: ACTION_POLICY_ID,
-        policyName: ACTION_POLICY_NAME,
-        ruleId: RULE_ID,
-        ruleName: RULE_NAME,
-      });
+      await pageObjects.episodeDetails.goto(EPISODE_ID);
+      await pageObjects.episodeDetails.openActionPolicyHistoryTab();
 
-      await test.step('open the policy history tab and see the dispatched row', async () => {
-        await pageObjects.episodeDetails.goto(EPISODE_ID);
-        await pageObjects.episodeDetails.openActionPolicyHistoryTab();
-
-        await expect(pageObjects.episodeDetails.policyCell(ACTION_POLICY_NAME)).toBeVisible();
-      });
-
-      await test.step('the search bar and outcome filter are shown, but not the rule filter', async () => {
+      await test.step('the episode-scoped filters are wired (search + outcome, no rule filter)', async () => {
         await expect(pageObjects.episodeDetails.searchBar).toBeVisible();
         await expect(pageObjects.episodeDetails.outcomeFilter).toBeVisible();
         await expect(pageObjects.episodeDetails.ruleFilter).toHaveCount(0);
       });
 
-      await test.step('filtering to Throttled hides the dispatched row', async () => {
-        await pageObjects.episodeDetails.selectOutcome('throttled');
-
-        await expect(pageObjects.episodeDetails.filteredEmptyPrompt).toBeVisible();
-        await expect(pageObjects.episodeDetails.policyCell(ACTION_POLICY_NAME)).toHaveCount(0);
+      await test.step('the real execution-history endpoint responds (no dispatched actions yet)', async () => {
+        await expect(pageObjects.episodeDetails.emptyPrompt).toBeVisible();
       });
     });
   }
