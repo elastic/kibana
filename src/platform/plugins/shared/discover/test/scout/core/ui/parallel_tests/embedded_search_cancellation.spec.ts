@@ -88,7 +88,7 @@ spaceTest.describe(
         const esqlRequestPromise = page.waitForRequest(
           (req) => req.url().endsWith('/esql_async') && req.method() === 'POST'
         );
-        await pageObjects.dashboard.openDashboardWithId(dashboardId, false);
+        await pageObjects.dashboard.openDashboardWithId(dashboardId, { waitForRender: false });
         await esqlRequestPromise;
 
         expect(

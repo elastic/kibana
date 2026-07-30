@@ -44,7 +44,7 @@ spaceTest.describe(
           (req) => req.url().endsWith('/internal/search/esql_async') && req.method() === 'POST'
         );
         // Open dashboard WITHOUT waiting for render
-        await pageObjects.dashboard.openDashboardWithId(dashboardId, false);
+        await pageObjects.dashboard.openDashboardWithId(dashboardId, { waitForRender: false });
         await vegaRequestPromise;
 
         // Navigate away and verify cancellation DELETE request is sent

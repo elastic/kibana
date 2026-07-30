@@ -144,9 +144,12 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
-  async openDashboardWithId(id: string, waitForRender = true) {
+  async openDashboardWithId(
+    id: string,
+    opts: { waitForRender?: boolean } = { waitForRender: true }
+  ) {
     await this.page.gotoApp('dashboards', { hash: `/view/${id}` });
-    if (waitForRender) {
+    if (opts.waitForRender) {
       await this.waitForRenderComplete();
     }
   }

@@ -59,7 +59,7 @@ spaceTest.describe(
         );
 
         // Open dashboard WITHOUT waiting for render
-        await pageObjects.dashboard.openDashboardWithId(dashboardId, false);
+        await pageObjects.dashboard.openDashboardWithId(dashboardId, { waitForRender: false });
 
         // Wait for the map to initiate the ES|QL search (stalled by error_query)
         await esqlRequestPromise;
