@@ -96,7 +96,6 @@ dependsOn:
   - '@kbn/cps'
   - '@kbn/scout'
   - '@kbn/ml-anomaly-utils'
-  - '@kbn/ml-plugin'
 tags:
   - plugin
   - prod
