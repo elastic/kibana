@@ -278,12 +278,9 @@ export const Datadog: ConnectorSpec = {
         try {
           const response = await ctx.client.post(
             `${baseUrl}/api/v1/monitor/${encodeURIComponent(String(input.monitorId))}/mute`,
-            undefined,
             {
-              params: {
-                scope: input.scope,
-                end: input.end,
-              },
+              scope: input.scope,
+              end: input.end,
             }
           );
           return response.data;
@@ -304,12 +301,9 @@ export const Datadog: ConnectorSpec = {
         try {
           const response = await ctx.client.post(
             `${baseUrl}/api/v1/monitor/${encodeURIComponent(String(input.monitorId))}/unmute`,
-            undefined,
             {
-              params: {
-                scope: input.scope,
-                all_scopes: input.allScopes,
-              },
+              scope: input.scope,
+              all_scopes: input.allScopes,
             }
           );
           return response.data;
