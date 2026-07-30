@@ -6,7 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
 import { z } from '@kbn/zod';
 
 const filterExpressionPattern = /^(-?)([^:]*):(.*)$/;
@@ -195,34 +194,3 @@ export function getFilterExpressionLookupKey(expression: FilterExpressionValue):
   }
   return encoded;
 }
-
-/**
- * codec to derive valid project routing schemas from the CPS project picker filter expressions,
- * {@link https://www.elastic.co/docs/explore-analyze/cross-project-search/cross-project-search-project-routing see project routing documentation}
- */
-export const projectRoutingCodec = z.codec(z.string().nullable(), FilterExpressionSchema, {
-  encode: ({ operator, tagName, tagValue }) => {
-    switch (operator) {
-      case FilterOperator.EQUALS:
-        return `${tagName}:${tagValue}`;
-      case FilterOperator.NOT_EQUALS:
-        return `${tagName}:* AND NOT ${tagName}:${tagValue}`;
-      case FilterOperator.ONE_OF:
-        return `${tagValue.map((value) => `${tagName}:${value}`).join(' OR ')}`;
-      case FilterOperator.NOT_ONE_OF:
-        return `${tagName}:* AND NOT (${tagValue
-          .map((value) => `${tagName}:${value}`)
-          .join(' OR ')})`;
-      case FilterOperator.EXISTS:
-        return `${tagName}:*`;
-      case FilterOperator.NOT_EXISTS:
-        return `NOT ${tagName}:*`;
-      default:
-        return null;
-    }
-  },
-  decode: (value) => {
-    // We don't support decoding project routing schema to filter expressions just yet,
-    throw new Error('Not implemented');
-  },
-});

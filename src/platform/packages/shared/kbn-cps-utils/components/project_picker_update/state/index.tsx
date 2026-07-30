@@ -23,7 +23,7 @@ import { type ProjectPickerState } from './reducers';
 import { projectPickerDerivatives } from './derivatives';
 import { type CPSProject } from '../../../types';
 import { getFilterExpressionLookupKey } from '../utils/filter_input_codec';
-import { type ProjectRoutingExpression, projectRoutingCodec } from '../utils/project_routing_codec';
+import { type ProjectRoutingExpression, projectRoutingCodec, ROUTING_WILDCARD } from '../utils/project_routing_codec';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
@@ -190,7 +190,7 @@ export const ProjectPickerStateProvider = ({
         .concat(
           projectRoutingStrategy === 'dynamic'
             ? [
-                '_id:*',
+                `_id:${ROUTING_WILDCARD}`,
                 store.state.excludedOverrides.map((override) => `NOT _id:${override}`),
               ].flat()
             : store.state.selectedProjects.map((id) => `_id:${id}`)
