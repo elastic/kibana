@@ -53,8 +53,8 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -102,7 +102,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         const requestBodyData = req.body;
         if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
           throw new Error('visualizationType is required');
