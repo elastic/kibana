@@ -464,10 +464,10 @@ export function ComposeDiscoverFlyout({
 
   const watchedTimeField = useWatch({ control: methods.control, name: 'timeField' });
   useEffect(() => {
-    if (watchedTimeField && watchedTimeField !== sandboxTimeField) {
+    if (watchedTimeField) {
       setSandboxTimeField(watchedTimeField);
     }
-  }, [watchedTimeField, sandboxTimeField]);
+  }, [watchedTimeField]);
 
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   const watchedQuery = useWatch({ control: methods.control, name: 'query' });

@@ -84,6 +84,7 @@ jest.mock('./compose_discover_form', () => {
       const { setValue, getValues } = useFormContext<FormValues>();
       readCommittedQuery = () => getValues('query');
       readRecoveryStrategy = () => getValues('recoveryStrategy');
+      readTimeField = () => getValues('timeField');
       return (
         <div data-test-subj="composeDiscoverFormMock">
           {/* Keep query rules mounted so validateStep → trigger(['query']) can fail. */}
@@ -104,6 +105,9 @@ jest.mock('./compose_discover_form', () => {
 interface SandboxFlyoutMockProps {
   query: RuleQuery;
   onQueryChange?: (query: RuleQuery) => void;
+  timeField?: string;
+  onTimeFieldChange?: (timeField: string) => void;
+  timeFieldOptions?: Array<{ value: string; text: string }>;
   onApply?: () => void;
   onClose: () => void;
   helpText?: React.ReactNode;
@@ -113,6 +117,7 @@ interface SandboxFlyoutMockProps {
 let sandboxFlyoutProps: SandboxFlyoutMockProps | undefined;
 let readCommittedQuery: (() => RuleQuery) | undefined;
 let readRecoveryStrategy: (() => FormValues['recoveryStrategy']) | undefined;
+let readTimeField: (() => FormValues['timeField']) | undefined;
 
 jest.mock('./query_sandbox_flyout', () => ({
   QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
@@ -121,6 +126,20 @@ jest.mock('./query_sandbox_flyout', () => ({
       <div data-test-subj="composeDiscoverChildMock">
         <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
         <div data-test-subj="mockSandboxHeaderActions">{props.headerActions}</div>
+        {props.onTimeFieldChange ? (
+          // eslint-disable-next-line jsx-a11y/no-onchange
+          <select
+            data-test-subj="querySandboxTimeField"
+            value={props.timeField}
+            onChange={(e) => props.onTimeFieldChange?.(e.target.value)}
+          >
+            {props.timeFieldOptions?.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.text}
+              </option>
+            ))}
+          </select>
+        ) : null}
         {props.onApply ? (
           <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
             Apply
@@ -148,7 +167,10 @@ jest.mock('./use_split_query_completion', () => ({
 
 jest.mock('./use_resolve_time_field', () => ({
   useResolveTimeField: () => ({
-    timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+    timeFieldOptions: [
+      { value: '@timestamp', text: '@timestamp' },
+      { value: 'event.ingested', text: 'event.ingested' },
+    ],
     isTimeFieldResolved: true,
   }),
 }));
@@ -268,6 +290,7 @@ describe('ComposeDiscoverFlyout', () => {
     sandboxFlyoutProps = undefined;
     readCommittedQuery = undefined;
     readRecoveryStrategy = undefined;
+    readTimeField = undefined;
     mockParseYamlToFormValues = (yaml) => ({
       values: yaml ? defaultYamlFormValues : null,
       error: null,
@@ -1116,6 +1139,53 @@ describe('ComposeDiscoverFlyout', () => {
       });
 
       expect(readCommittedQuery?.()).toEqual(secondRecoveryEdit);
+    });
+  });
+
+  describe('sandbox time field selection', () => {
+    it('keeps a manually selected sandbox time field instead of reverting to the form value (#281806)', () => {
+      renderFlyout({
+        mode: 'edit',
+        rule: {
+          id: 'rule-1',
+          kind: 'alert',
+          enabled: true,
+          metadata: { name: 'Edit rule', owner: 'test', tags: [] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: {
+            format: 'composed',
+            base: 'FROM logs-*',
+            breach: { segment: '| WHERE count > 100' },
+          },
+          createdBy: 'test',
+          createdAt: '2026-01-01T00:00:00Z',
+          updatedBy: 'test',
+          updatedAt: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      act(() => {
+        mockComposeDiscoverForm.mock.calls[
+          mockComposeDiscoverForm.mock.calls.length - 1
+        ][0].dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: 0, isAlert: true });
+      });
+
+      const select = screen.getByTestId('querySandboxTimeField') as HTMLSelectElement;
+      expect(select.value).toBe('@timestamp');
+
+      act(() => {
+        fireEvent.change(select, { target: { value: 'event.ingested' } });
+      });
+
+      // Flush any effects that could revert the draft before Apply runs.
+      expect(select.value).toBe('event.ingested');
+
+      act(() => {
+        fireEvent.click(screen.getByTestId('mockSandboxApply'));
+      });
+
+      expect(readTimeField?.()).toBe('event.ingested');
     });
   });
 
