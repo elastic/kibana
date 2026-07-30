@@ -66,7 +66,9 @@ When `agentBuilder` is available (optional plugin dependency), the panel partici
 
 ### 1. Refine via chat
 
-"Generate with chat" in the flyout attaches the current template and query as a `platform.custom_content.panel_context` attachment and opens the AI chat sidebar. A `custom_content_update_panel` browser tool is registered so the LLM can call back into the panel to set a new template or query directly.
+"Refine with chat" in the flyout attaches the current template, query, and panel ID as a `platform.custom_content.panel_context` attachment and opens the AI chat sidebar. The attachment includes an `embeddable_id` field that identifies which panel on the dashboard owns the session.
+
+A server-side builtin tool (`custom_content_update_panel`) is registered in `server/tools/update_custom_content_tool.ts`. When the LLM calls it, the tool validates the template (rejects `<script>` tags), merges the new values with the stored attachment, and updates it with `actor: agent`. The embeddable subscribes to `RoundCompleteEvent` and applies the update when it sees an agent-authored change to its own attachment (matched by `embeddable_id`).
 
 The attachment type is registered server-side in `server/attachment_types/custom_content_context.ts` and client-side in `public/attachment_types/custom_content_context.ts`. The session is scoped per panel via a tag (`custom_content-<embeddableId>`), so concurrent panels don't share chat context.
 

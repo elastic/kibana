@@ -15,17 +15,21 @@ import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
-import { CUSTOM_CONTENT_SCRIPT_PATTERN } from '../../common/constants';
+import {
+  CUSTOM_CONTENT_SCRIPT_PATTERN,
+  CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
+  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
+} from '../../common/constants';
 
 const updateCustomContentSchema = z.object({
   template: z
     .string()
-    .max(100_000)
+    .max(CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH)
     .optional()
     .describe('New HTML template (LiquidJS, no JavaScript). Replaces the current template.'),
   esqlQuery: z
     .string()
-    .max(10_000)
+    .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
     .nullable()
     .optional()
     .describe(
