@@ -122,7 +122,6 @@ export const visorStyles = (
     `,
     nlInputWrapper: css`
       justify-content: center;
-      padding-left: ${euiTheme.size.s};
       padding-right: ${euiTheme.size.xs};
       min-width: 0;
     `,
