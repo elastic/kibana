@@ -279,6 +279,39 @@ describe('Grafana', () => {
     });
   });
 
+  describe('listAnnotations action', () => {
+    it('should list annotations with no filters by default', async () => {
+      mockClient.get.mockResolvedValue({ data: [{ id: 1, text: 'Deploy v1.2.3' }] });
+
+      const result = await Grafana.actions.listAnnotations.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://acme.grafana.net/api/annotations', {
+        params: {},
+        paramsSerializer: { indexes: null },
+        headers: {},
+      });
+      expect(result).toEqual({ annotations: [{ id: 1, text: 'Deploy v1.2.3' }] });
+    });
+
+    it('should filter by dashboardUID, tags, and time range', async () => {
+      mockClient.get.mockResolvedValue({ data: [{ id: 2, text: 'Incident window' }] });
+
+      await Grafana.actions.listAnnotations.handler(mockContext, {
+        dashboardUID: 'd1',
+        tags: ['incident'],
+        from: 1000,
+        to: 2000,
+        limit: 50,
+      });
+
+      expect(mockClient.get).toHaveBeenCalledWith('https://acme.grafana.net/api/annotations', {
+        params: { dashboardUID: 'd1', tags: ['incident'], from: 1000, to: 2000, limit: 50 },
+        paramsSerializer: { indexes: null },
+        headers: {},
+      });
+    });
+  });
+
   describe('updateAnnotation action', () => {
     it('should patch only provided fields', async () => {
       mockClient.patch.mockResolvedValue({ data: { id: 1, timeEnd: 3000 } });
@@ -320,7 +353,7 @@ describe('Grafana', () => {
         tag: ['prod'],
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('(acme.grafana.net/redacted)', {
+      expect(mockClient.get).toHaveBeenCalledWith('https://acme.grafana.net/api/search', {
         params: { query: 'prod', tag: ['prod'] },
         paramsSerializer: { indexes: null },
         headers: {},

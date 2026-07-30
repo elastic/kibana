@@ -23,6 +23,7 @@ import {
   GrafanaCreateAnnotationInputSchema,
   GrafanaUpdateAnnotationInputSchema,
   GrafanaDeleteAnnotationInputSchema,
+  GrafanaListAnnotationsInputSchema,
   GrafanaSearchDashboardsInputSchema,
   GrafanaGetDashboardInputSchema,
   GrafanaListContactPointsInputSchema,
@@ -36,6 +37,7 @@ import {
   type GrafanaCreateAnnotationInput,
   type GrafanaUpdateAnnotationInput,
   type GrafanaDeleteAnnotationInput,
+  type GrafanaListAnnotationsInput,
   type GrafanaSearchDashboardsInput,
   type GrafanaGetDashboardInput,
   type GrafanaListContactPointsInput,
@@ -277,6 +279,32 @@ export const Grafana: ConnectorSpec = {
       },
     },
 
+    listAnnotations: {
+      isTool: true,
+      description:
+        'List Grafana annotations, filterable by dashboard, tags, and time range, so a workflow can find the annotationId of an annotation posted earlier (e.g. to resolve/clean up an incident annotation) instead of relying on an ID from an earlier createAnnotation response.',
+      input: GrafanaListAnnotationsInputSchema,
+      handler: async (ctx, input: GrafanaListAnnotationsInput) => {
+        const params: Record<string, string | number | string[]> = {};
+        if (input.dashboardUID) params.dashboardUID = input.dashboardUID;
+        if (input.tags) params.tags = input.tags;
+        if (input.from !== undefined) params.from = input.from;
+        if (input.to !== undefined) params.to = input.to;
+        if (input.limit) params.limit = input.limit;
+        try {
+          const response = await ctx.client.get(`${buildBaseUrl(ctx)}/api/annotations`, {
+            params,
+            // Grafana's /api/annotations expects the repeated `?tags=a&tags=b` form, same as /api/search.
+            paramsSerializer: { indexes: null },
+            headers: buildHeaders(ctx),
+          });
+          return { annotations: response.data };
+        } catch (error) {
+          throw formatGrafanaError('listAnnotations', error);
+        }
+      },
+    },
+
     createAnnotation: {
       isTool: true,
       description:
@@ -470,6 +498,7 @@ export const Grafana: ConnectorSpec = {
     'Before creating a silence, call listSilences (or getSilence with a known ID) to check whether the target alert is already muted.',
     'createSilence requires matchers, startsAt/endsAt (RFC3339), a comment, and createdBy — do not pass an id when creating. Use deleteSilence to expire a silence early once the underlying issue is resolved.',
     'Use createAnnotation to post workflow context (deploys, remediation runs, incident open/close) onto a dashboard; omit dashboardUID for an org-wide annotation. Pass timeEnd on createAnnotation for a range annotation, or call updateAnnotation with timeEnd afterward to mark an existing annotation resolved.',
+    'Use listAnnotations (filterable by dashboardUID, tags, and from/to) to find the annotationId of an annotation posted earlier in a different session, before calling updateAnnotation or deleteAnnotation on it.',
     'Use searchDashboards to resolve a dashboard UID by title or tag before calling getDashboard or attaching an annotation to a specific dashboard/panel.',
     'listContactPoints, listMuteTimings, and getNotificationPolicyTree describe how alerts are routed — use them to answer "who gets notified" questions rather than to change alert state directly.',
   ].join('\n'),

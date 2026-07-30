@@ -148,6 +148,37 @@ export const GrafanaDeleteAnnotationInputSchema = z.object({
 });
 export type GrafanaDeleteAnnotationInput = z.infer<typeof GrafanaDeleteAnnotationInputSchema>;
 
+export const GrafanaListAnnotationsInputSchema = z.object({
+  dashboardUID: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .optional()
+    .describe('Filter to annotations attached to this dashboard.'),
+  tags: z
+    .array(z.string().max(100))
+    .max(20)
+    .optional()
+    .describe('Filter to annotations having all of these tags.'),
+  from: z
+    .number()
+    .int()
+    .optional()
+    .describe('Epoch milliseconds lower bound for the annotation time range.'),
+  to: z
+    .number()
+    .int()
+    .optional()
+    .describe('Epoch milliseconds upper bound for the annotation time range.'),
+  limit: z
+    .number()
+    .int()
+    .min(1)
+    .max(1000)
+    .optional()
+    .describe('Maximum results to return (1-1000). Defaults to 100.'),
+});
+export type GrafanaListAnnotationsInput = z.infer<typeof GrafanaListAnnotationsInputSchema>;
+
 export const GrafanaSearchDashboardsInputSchema = z.object({
   query: z
     .string()
