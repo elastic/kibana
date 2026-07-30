@@ -33,6 +33,7 @@ import {
   EuiLink,
   EuiFilterGroup,
   EuiFilterButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -149,7 +150,12 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
   onClickViewAgents,
 }) => {
   const instanceUid = useRef(uuidv4());
-  const { cloud, docLinks } = useStartServices();
+  const { cloud, docLinks, application } = useStartServices();
+  // api_keys.save maps to manage_own_api_key, which is necessary but not sufficient —
+  // the server also requires apm event:write. In the rare case where a user has
+  // manage_own_api_key but not apm event:write the button is enabled and the server
+  // returns a 403; the error handler in use_managed_otlp surfaces the server's message.
+  const canCreateApiKey = Boolean(application.capabilities.api_keys?.save);
 
   const esApiKey = useGetCreateApiKey();
   const motlp = useManagedOtlp();
@@ -598,18 +604,36 @@ export const AddCollectorFlyout: React.FunctionComponent<AddCollectorFlyoutProps
               <EuiSpacer size="s" />
               <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={onCreateApiKey}
-                    isLoading={isCreatingApiKey}
-                    isDisabled={!!apiKeyEncoded}
-                    iconType={apiKeyEncoded ? 'check' : undefined}
-                    color={apiKeyEncoded ? 'success' : 'primary'}
+                  <EuiToolTip
+                    content={
+                      !canCreateApiKey
+                        ? i18n.translate(
+                            'xpack.fleet.addCollectorFlyout.createApiKeyNoPermissionTooltip',
+                            {
+                              defaultMessage:
+                                "You don't have permission to create API keys. Contact your administrator.",
+                            }
+                          )
+                        : undefined
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
-                      defaultMessage="Create API key"
-                    />
-                  </EuiButton>
+                    <EuiButton
+                      onClick={onCreateApiKey}
+                      isLoading={isCreatingApiKey}
+                      isDisabled={!!apiKeyEncoded || !canCreateApiKey}
+                      // aria-disabled keeps the button focusable and sets pointer-events:none so
+                      // the EuiToolTip anchor span receives hover events cross-browser.
+                      // Scoped to !canCreateApiKey only — the apiKeyEncoded case has no tooltip.
+                      hasAriaDisabled={!canCreateApiKey}
+                      iconType={apiKeyEncoded ? 'check' : undefined}
+                      color={apiKeyEncoded ? 'success' : 'primary'}
+                    >
+                      <FormattedMessage
+                        id="xpack.fleet.addCollectorFlyout.createApiKeyButton"
+                        defaultMessage="Create API key"
+                      />
+                    </EuiButton>
+                  </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
