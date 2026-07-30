@@ -1546,7 +1546,7 @@ describe('RulesClient', () => {
   });
 
   describe('bulkDisableRules', () => {
-    it('disables enabled rules and calls bulkDisable on task manager', async () => {
+    it('disables enabled rules and removes their executor tasks', async () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
@@ -1575,7 +1575,10 @@ describe('RulesClient', () => {
         }),
       ]);
 
-      expect(taskManager.bulkDisable).toHaveBeenCalledWith(['task:rule-1']);
+      // Executor tasks are removed (not flagged disabled) to match single disable
+      // and keep re-enable's `bulkSchedule` from conflicting on an existing task id.
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1']);
+      expect(taskManager.bulkDisable).not.toHaveBeenCalled();
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
@@ -1595,7 +1598,7 @@ describe('RulesClient', () => {
       const res = await client.bulkDisableRules({ ids: ['rule-1'] });
 
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
-      expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+      expect(taskManager.bulkRemove).not.toHaveBeenCalled();
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
 
@@ -1620,7 +1623,7 @@ describe('RulesClient', () => {
       ]);
     });
 
-    it('continues even if bulkDisable on task manager fails', async () => {
+    it('logs a warning and still counts the rule as affected when task removal fails', async () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
@@ -1635,10 +1638,12 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkUpdate.mockResolvedValueOnce([{ id: 'rule-1', success: true }]);
 
       getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-1');
-      taskManager.bulkDisable.mockRejectedValueOnce(new Error('task disable failed'));
+      taskManager.bulkRemove.mockRejectedValueOnce(new Error('task removal failed'));
 
       const res = await client.bulkDisableRules({ ids: ['rule-1'] });
 
+      expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('task removal failed'));
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });
 
@@ -1804,7 +1809,7 @@ describe('RulesClient', () => {
         const res = await client.disableRulesByQuery({ filter: 'enabled: true', force: true });
 
         expect(rulesSavedObjectService.bulkUpdate).toHaveBeenCalled();
-        expect(taskManager.bulkDisable).toHaveBeenCalledWith(['task:rule-1']);
+        expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1']);
         expect(res).toEqual({ affected_count: 1, errors: [] });
       });
     });
@@ -1868,7 +1873,7 @@ describe('RulesClient', () => {
         expect(rulesSavedObjectService.getRuleIdsByQuery).not.toHaveBeenCalled();
         expect(rulesSavedObjectService.bulkGetByIds).not.toHaveBeenCalled();
         expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
-        expect(taskManager.bulkDisable).not.toHaveBeenCalled();
+        expect(taskManager.bulkRemove).not.toHaveBeenCalled();
       });
 
       it('executes when total equals the cap exactly (boundary is inclusive)', async () => {

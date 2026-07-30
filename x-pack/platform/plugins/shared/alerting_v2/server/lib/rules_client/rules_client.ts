@@ -64,7 +64,7 @@ import type {
   BulkResponse,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesParams,
+  FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
   RuleResponse,
@@ -638,7 +638,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
+  public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
@@ -918,9 +918,21 @@ export class RulesClient {
 
     if (disabledTaskIds.length > 0) {
       try {
-        await this.taskManager.bulkDisable(disabledTaskIds);
-      } catch {
-        // Task disable failure is non-fatal for bulk operations.
+        // Remove the executor tasks rather than flagging them `enabled: false`.
+        // The v2 model is "task exists ⟺ rule enabled": both enable paths create
+        // the task (single `ensureScheduled`, bulk `bulkSchedule`) instead of
+        // re-activating it, so leaving a disabled task doc behind would (a) diverge
+        // from single disable (`removeIfExists`) and (b) make re-enable conflict on
+        // the existing task id, stranding the rule in disabled.
+        await this.taskManager.bulkRemove(disabledTaskIds);
+      } catch (e) {
+        // Task removal failure is non-fatal for the bulk response, but the rules
+        // were already persisted as disabled while their executor tasks keep
+        // running. Log so the divergence is observable rather than silent.
+        const failure = e instanceof Error ? e.message : String(e);
+        this.logger.warn({
+          message: `Failed to remove executor tasks for ${disabledTaskIds.length} rule(s); they are disabled but will keep running: ${failure}`,
+        });
       }
     }
 

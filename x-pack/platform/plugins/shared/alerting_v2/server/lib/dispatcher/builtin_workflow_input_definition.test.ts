@@ -35,6 +35,8 @@ const _payloadKeyGuard: Record<keyof ActionPolicyWorkflowPayload, true> = {
 const _episodeKeyGuard: Record<keyof AlertEpisode, true> = {
   last_event_timestamp: true,
   rule_id: true,
+  source: true,
+  space_id: true,
   group_hash: true,
   episode_id: true,
   episode_status: true,
