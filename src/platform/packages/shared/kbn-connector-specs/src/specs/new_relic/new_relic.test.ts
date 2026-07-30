@@ -10,7 +10,10 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { NewRelic } from './new_relic';
-import { NewRelicCreateDeploymentMarkerInputSchema } from './types';
+import {
+  NewRelicCreateDeploymentMarkerInputSchema,
+  NewRelicUpdateMutingRuleInputSchema,
+} from './types';
 
 describe('NewRelic', () => {
   const mockClient = {
@@ -343,6 +346,14 @@ describe('NewRelic', () => {
         }),
         expect.any(Object)
       );
+    });
+
+    it('should reject NewRelicUpdateMutingRuleInputSchema with no fields to update', () => {
+      const result = NewRelicUpdateMutingRuleInputSchema.safeParse({
+        accountId: 123,
+        mutingRuleId: 'mr1',
+      });
+      expect(result.success).toBe(false);
     });
 
     it('deleteMutingRule should delete by id', async () => {

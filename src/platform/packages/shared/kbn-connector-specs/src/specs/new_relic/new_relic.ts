@@ -732,7 +732,7 @@ export const NewRelic: ConnectorSpec = {
 
   test: {
     enabled: true,
-    description: i18n.translate('connectorSpecs.newRelic.test.description', {
+    description: i18n.translate('core.kibanaConnectorSpecs.newRelic.test.description', {
       defaultMessage: 'Verifies connectivity by requesting the current NerdGraph user context.',
     }),
     handler: async (ctx) => {

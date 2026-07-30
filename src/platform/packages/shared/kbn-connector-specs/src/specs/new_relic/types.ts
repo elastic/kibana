@@ -170,16 +170,25 @@ export const NewRelicCreateMutingRuleInputSchema = lazySchema(() =>
 export type NewRelicCreateMutingRuleInput = z.infer<typeof NewRelicCreateMutingRuleInputSchema>;
 
 export const NewRelicUpdateMutingRuleInputSchema = lazySchema(() =>
-  z.object({
-    accountId: z.number().int().describe('New Relic account ID that owns the muting rule.'),
-    mutingRuleId: z.string().max(200).describe('ID of the muting rule to update.'),
-    name: z.string().max(200).optional().describe('New name for the rule.'),
-    description: z.string().max(1000).optional().describe('New description for the rule.'),
-    enabled: z.boolean().optional().describe('Enable or disable the rule.'),
-    condition: MutingRuleConditionGroupSchema.optional().describe(
-      'Replacement condition group for the rule.'
-    ),
-  })
+  z
+    .object({
+      accountId: z.number().int().describe('New Relic account ID that owns the muting rule.'),
+      mutingRuleId: z.string().max(200).describe('ID of the muting rule to update.'),
+      name: z.string().max(200).optional().describe('New name for the rule.'),
+      description: z.string().max(1000).optional().describe('New description for the rule.'),
+      enabled: z.boolean().optional().describe('Enable or disable the rule.'),
+      condition: MutingRuleConditionGroupSchema.optional().describe(
+        'Replacement condition group for the rule.'
+      ),
+    })
+    .refine(
+      (v) =>
+        v.name !== undefined ||
+        v.description !== undefined ||
+        v.enabled !== undefined ||
+        v.condition !== undefined,
+      { message: 'At least one of name, description, enabled, or condition must be provided.' }
+    )
 );
 export type NewRelicUpdateMutingRuleInput = z.infer<typeof NewRelicUpdateMutingRuleInputSchema>;
 
