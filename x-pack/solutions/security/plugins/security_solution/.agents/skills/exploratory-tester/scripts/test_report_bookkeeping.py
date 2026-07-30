@@ -127,10 +127,71 @@ class SignatureTests(unittest.TestCase):
 
     def test_screenshot_and_video_evidence_excluded_from_signature(self):
         sig_a = parse_findings.compute_signature(
-            level=1, checklist_step_number=None, title="T", evidence=["Screenshot: `a.png`"]
+            level=1,
+            checklist_step_number=None,
+            title="T",
+            evidence=["Screenshot: `a.png`"],
+            current_behavior="Same underlying bug, described identically.",
         )
         sig_b = parse_findings.compute_signature(
-            level=1, checklist_step_number=None, title="T", evidence=["Screenshot: `b.png`"]
+            level=1,
+            checklist_step_number=None,
+            title="T",
+            evidence=["Screenshot: `b.png`"],
+            current_behavior="Same underlying bug, described identically.",
+        )
+        self.assertEqual(sig_a, sig_b)
+
+    def test_artifact_only_evidence_falls_back_to_current_behavior_not_just_title(self):
+        # Regression test: when every evidence line is Screenshot:/Video:
+        # (so evidence_keys is empty), the signature used to collapse to
+        # level + checklist_step_number + title alone. Two *different*
+        # findings sharing a generic title, level, and checklist step (with
+        # no evidence facts to disambiguate) would then incorrectly merge
+        # into one group, discarding one of them from the report body
+        # (its evidence still gets unioned in, but its own prose does not
+        # survive as a separate finding).
+        sig_same_bug_a = parse_findings.compute_signature(
+            level=3,
+            checklist_step_number=1,
+            title="Layout looks off",
+            evidence=["Screenshot: `a.png`"],
+            current_behavior="The sidebar overlaps the main panel by ~4px.",
+        )
+        sig_same_bug_b = parse_findings.compute_signature(
+            level=3,
+            checklist_step_number=1,
+            title="Layout looks off",
+            evidence=["Screenshot: `b.png`"],
+            current_behavior="The sidebar overlaps the main panel by ~4px.",
+        )
+        sig_different_bug = parse_findings.compute_signature(
+            level=3,
+            checklist_step_number=1,
+            title="Layout looks off",
+            evidence=["Screenshot: `c.png`"],
+            current_behavior="The footer text is unreadable against the background.",
+        )
+        self.assertEqual(sig_same_bug_a, sig_same_bug_b)
+        self.assertNotEqual(sig_same_bug_a, sig_different_bug)
+
+    def test_current_behavior_ignored_when_evidence_facts_exist(self):
+        # The prose fallback must only ever be consulted when there are no
+        # evidence facts — reworded current_behavior must not break dedup
+        # for the common (has-evidence-facts) case.
+        sig_a = parse_findings.compute_signature(
+            level=2,
+            checklist_step_number=1,
+            title="T",
+            evidence=["Network: `GET /x` \u2192 500"],
+            current_behavior="First phrasing of the bug.",
+        )
+        sig_b = parse_findings.compute_signature(
+            level=2,
+            checklist_step_number=1,
+            title="T",
+            evidence=["Network: `GET /x` \u2192 500"],
+            current_behavior="Completely different phrasing of the same bug.",
         )
         self.assertEqual(sig_a, sig_b)
 
@@ -209,11 +270,58 @@ class ParseFindingsFileTests(unittest.TestCase):
             path.write_text(
                 "<!-- flow: X | started: 2026-01-01T00:00:00Z | ended: "
                 "2026-01-01T00:01:00Z | duration: 1m 0s -->\n"
-                "Browser session lost mid-flow; no further steps attempted.\n",
+                "Remaining steps: skipped: session lost\n",
                 encoding="utf-8",
             )
             flow_header, _findings = parse_findings.parse_findings_file(path)
             self.assertTrue(flow_header["session_lost"])
+
+    def test_session_lost_is_not_detected_from_unrelated_prose(self):
+        # Regression test: the detector used to be a bare "session lost"
+        # substring search over the whole file, which would false-positive
+        # on a finding merely *describing* session loss as a product
+        # symptom (unrelated to this skill's own browser session). Only the
+        # literal `phases/2-flow-core.md` convention (`skipped: session
+        # lost`) should trip it.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "findings-flow-1.md"
+            path.write_text(
+                "<!-- flow: X | started: 2026-01-01T00:00:00Z | ended: "
+                "2026-01-01T00:01:00Z | duration: 1m 0s -->\n\n"
+                "## Finding: User session lost on idle timeout without warning\n\n"
+                "**Level:** 2\n\n"
+                "### Current behavior\n"
+                "The user's session lost all state after 5 minutes idle with no "
+                "warning toast.\n\n"
+                "### Evidence\n- Console: idle timeout fired\n",
+                encoding="utf-8",
+            )
+            flow_header, _findings = parse_findings.parse_findings_file(path)
+            self.assertFalse(flow_header["session_lost"])
+
+    def test_explicit_status_marker_takes_priority_over_session_lost_heuristic(self):
+        # Regression test: session_lost used to be checked before
+        # status_override in render-report.py, so a spurious heuristic
+        # match could silently override an explicit, deliberate marker.
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "findings-flow-1.md"
+            path.write_text(
+                "<!-- flow: X | started: 2026-01-01T00:00:00Z | ended: "
+                "2026-01-01T00:01:00Z | duration: 1m 0s -->\n"
+                "<!-- status: blocked | reason: unrelated blocker -->\n"
+                "Remaining steps: skipped: session lost\n",
+                encoding="utf-8",
+            )
+            flow_header, _findings = parse_findings.parse_findings_file(path)
+            self.assertTrue(flow_header["session_lost"])
+            self.assertEqual(flow_header["status_override"]["status"], "blocked")
+            rows = render_report.compute_flow_rows(
+                flows=[{"name": "X", "timeout_minutes": 5}],
+                flow_headers={1: flow_header},
+                flow_status_overrides={},
+            )
+            self.assertEqual(rows[0]["status"], "blocked")
+            self.assertEqual(rows[0]["reason"], "unrelated blocker")
 
     def test_cli_writes_jsonl_and_reports_count(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -265,6 +373,101 @@ class GroupFindingsTests(unittest.TestCase):
         ]
         merged = render_report.group_findings(findings)
         self.assertEqual(merged[0]["evidence"], ["A"])
+
+
+class ApplySuppressionsTests(unittest.TestCase):
+    """Regression coverage for the P1 finding from PR review: suppressing a
+    finding by title used to silently drop *every* finding sharing that
+    exact title, including any Level 1 one — bypassing the "Level 1 is
+    never suppressed" invariant without raising an error."""
+
+    def test_suppressing_a_shared_title_never_silently_drops_the_level_1_one(self):
+        findings_by_level = {
+            1: [
+                {
+                    "title": "500 error on save",
+                    "level": 1,
+                    "signature": "sig-l1",
+                    "evidence": ["real bug evidence"],
+                }
+            ],
+            2: [],
+            3: [
+                {
+                    "title": "500 error on save",
+                    "level": 3,
+                    "signature": "sig-l3",
+                    "evidence": ["unrelated observation"],
+                }
+            ],
+        }
+        suppressions = [{"title": "500 error on save", "reason": "known noise"}]
+        with self.assertRaises(ValueError) as ctx:
+            render_report.apply_suppressions(findings_by_level, suppressions)
+        self.assertIn("Level 1", str(ctx.exception))
+        # Refusing must be all-or-nothing for that title: re-inspecting the
+        # *input* dict (untouched, since apply_suppressions raises before
+        # returning anything) confirms the Level 1 finding was never at risk
+        # of a partial mutation.
+        self.assertEqual(len(findings_by_level[1]), 1)
+        self.assertEqual(len(findings_by_level[3]), 1)
+
+    def test_suppressing_a_title_with_no_level_1_match_still_works(self):
+        findings_by_level = {
+            1: [],
+            2: [
+                {
+                    "title": "Duplicate privilege-check calls",
+                    "level": 2,
+                    "signature": "sig-a",
+                    "evidence": ["e1"],
+                }
+            ],
+            3: [
+                {
+                    "title": "Duplicate privilege-check calls",
+                    "level": 3,
+                    "signature": "sig-b",
+                    "evidence": ["e2"],
+                }
+            ],
+        }
+        suppressions = [{"title": "Duplicate privilege-check calls", "reason": "known noise"}]
+        remaining, suppressed_rows = render_report.apply_suppressions(
+            findings_by_level, suppressions
+        )
+        self.assertEqual(remaining[2], [])
+        self.assertEqual(remaining[3], [])
+        self.assertEqual(len(suppressed_rows), 1)
+
+    def test_suppression_removes_by_signature_not_by_title_string(self):
+        # Two distinct findings that happen to share a title: suppressing
+        # them (both Level 2/3, no Level 1 involved) must remove both by
+        # signature, not leave one behind due to title-keyed overwriting.
+        findings_by_level = {
+            1: [],
+            2: [
+                {
+                    "title": "Layout looks off",
+                    "level": 2,
+                    "signature": "sig-x",
+                    "evidence": ["e1"],
+                }
+            ],
+            3: [
+                {
+                    "title": "Layout looks off",
+                    "level": 3,
+                    "signature": "sig-y",
+                    "evidence": ["e2"],
+                }
+            ],
+        }
+        remaining, _rows = render_report.apply_suppressions(
+            findings_by_level, [{"title": "Layout looks off", "reason": "cosmetic, known"}]
+        )
+        self.assertEqual(remaining[2], [])
+        self.assertEqual(remaining[3], [])
 
 
 class RenderReportGoldenTests(unittest.TestCase):
@@ -410,6 +613,52 @@ class RenderReportGoldenTests(unittest.TestCase):
             )
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("never suppressed", result.stderr)
+
+    def test_status_reason_is_rendered_not_discarded(self):
+        report_text, _ = self._render(overrides=BASIC_SESSION / "overrides.json")
+        timing = report_text[report_text.index("## Timing & Cost") : report_text.index("## Summary")]
+        self.assertIn("blocked \u2014 ML jobs failed to provision", timing)
+        summary_section = report_text[
+            report_text.index("## Summary") : report_text.index("## Level 1")
+        ]
+        self.assertIn("blocked \u2014 ML jobs failed to provision", summary_section)
+
+    def test_missing_findings_jsonl_is_a_hard_error_not_an_empty_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out_path = Path(tmp) / "report.md"
+            result = run_render(
+                "--config",
+                str(BASIC_SESSION / "config.json"),
+                "--findings-jsonl",
+                str(Path(tmp) / "does-not-exist.jsonl"),
+                "--out",
+                str(out_path),
+                "--now",
+                "2026-07-06T11:30:00Z",
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("findings JSONL not found", result.stderr)
+            self.assertFalse(out_path.exists())
+
+    def test_config_missing_session_started_at_is_a_clean_error_not_a_keyerror(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bad_config = Path(tmp) / "config.json"
+            config = json.loads((BASIC_SESSION / "config.json").read_text(encoding="utf-8"))
+            del config["session_started_at"]
+            bad_config.write_text(json.dumps(config), encoding="utf-8")
+            result = run_render(
+                "--config",
+                str(bad_config),
+                "--findings-jsonl",
+                str(self.findings_jsonl),
+                "--out",
+                str(Path(tmp) / "report.md"),
+                "--now",
+                "2026-07-06T11:30:00Z",
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("session_started_at", result.stderr)
+            self.assertNotIn("Traceback", result.stderr)
 
     def test_unknown_suppression_title_is_a_hard_error(self):
         with tempfile.TemporaryDirectory() as tmp:

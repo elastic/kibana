@@ -26,13 +26,15 @@ What stays deterministic (computed here, not asked of the model):
 
 What stays a model judgment call, passed in via `--overrides` (a single
 JSON file; see below) rather than inferred:
-  - `flow_status`: the *reason* a flow shows "not started" / "blocked" /
-    "cap reached" / "timed out" rather than "completed". A flow with parsed
-    timing data defaults to "completed" even when it ran over its budget —
-    "over budget" and "timed out" are not the same thing (a flow can run
-    long and still complete all 5 checklist steps; only the model knows
-    whether steps were actually skipped). A flow with no findings file
-    defaults to "not started" unless overridden.
+  - `flow_status`: why a flow shows "not started" / "blocked" /
+    "cap reached" / "timed out" rather than "completed" — both the status
+    and its required `reason` are rendered in the Timing & Cost table's
+    Status cell (`<status> — <reason>`), never silently collected and
+    dropped. A flow with parsed timing data defaults to "completed" even
+    when it ran over its budget — "over budget" and "timed out" are not the
+    same thing (a flow can run long and still complete all 5 checklist
+    steps; only the model knows whether steps were actually skipped). A
+    flow with no findings file defaults to "not started" unless overridden.
   - `skipped_steps`: which checklist steps within a flow were skipped
     (populates the "Skipped" table) — the script has no way to know this
     from data alone.
@@ -41,7 +43,9 @@ JSON file; see below) rather than inferred:
     model; this script only mechanically moves an already-decided
     suppression into the "Known / Suppressed" table and recomputes counts).
     Suppressing a Level 1 finding is a hard error — Level 1 findings are
-    never suppressed.
+    never suppressed, even if an unrelated Level 2/3 finding happens to
+    share its exact title (matched by signature, not by title text, once a
+    title is confirmed safe to suppress).
 
 `--overrides` schema (all keys optional):
 {
@@ -162,12 +166,20 @@ def compute_flow_rows(
         if header:
             duration_seconds = header.get("duration_seconds")
             status_override = header.get("status_override")
-            if header.get("session_lost"):
-                status = STATUS_SESSION_LOST
-            elif status_override:
+            reason = None
+            # Explicit signals (a marker written deliberately in the file,
+            # or a decision passed via --overrides) always take priority
+            # over the "skipped: session lost" text heuristic below — a
+            # model that already recorded a specific status/reason knows
+            # more than a substring match over its own prose does.
+            if status_override:
                 status = status_override["status"]
+                reason = status_override.get("reason")
             elif override:
                 status = override["status"]
+                reason = override.get("reason")
+            elif header.get("session_lost"):
+                status = STATUS_SESSION_LOST
             else:
                 status = STATUS_COMPLETED
             over = None
@@ -183,10 +195,12 @@ def compute_flow_rows(
                     "timeout_minutes": timeout_minutes,
                     "over": over,
                     "status": status,
+                    "reason": reason,
                 }
             )
         else:
             status = override["status"] if override else STATUS_NOT_STARTED
+            reason = override.get("reason") if override else None
             rows.append(
                 {
                     "flow_number": flow_number,
@@ -197,9 +211,24 @@ def compute_flow_rows(
                     "timeout_minutes": timeout_minutes,
                     "over": None,
                     "status": status,
+                    "reason": reason,
                 }
             )
     return rows
+
+
+def status_display(row: dict[str, Any]) -> str:
+    """Status text for display, with the override/marker reason appended.
+
+    A `flow_status` override or `<!-- status: ... -->` marker is required to
+    carry a reason (see `templates/finding-format.md` and the `--overrides`
+    schema above) — surface it here rather than parsing and then discarding
+    it, so "blocked" alone in the report doesn't leave the reader to guess
+    why.
+    """
+    if row.get("reason"):
+        return f"{row['status']} \u2014 {row['reason']}"
+    return row["status"]
 
 
 def render_evidence_block(evidence: list[str]) -> str:
@@ -261,30 +290,44 @@ def apply_suppressions(
     findings_by_level: dict[int, list[dict[str, Any]]],
     suppressions: list[dict[str, str]],
 ) -> tuple[dict[int, list[dict[str, Any]]], list[dict[str, str]]]:
-    by_title: dict[str, tuple[int, dict[str, Any]]] = {}
+    # Titles are a display convenience, not a unique identifier — nothing in
+    # the schema forbids two genuinely different findings (different levels,
+    # different evidence) from sharing a title (parse-findings.py's own
+    # dedup signature deliberately does not treat title alone as identity).
+    # A suppression instruction only carries a title (that's all Step 3b
+    # sees in report.md), so match ALL findings sharing that title, and if
+    # ANY of them is Level 1, refuse the suppression entirely rather than
+    # guessing which one was meant — silently dropping one out of several
+    # same-titled findings is exactly the failure this function exists to
+    # prevent.
+    by_title: dict[str, list[tuple[int, dict[str, Any]]]] = {}
     for level, findings in findings_by_level.items():
         for finding in findings:
-            by_title[finding["title"]] = (level, finding)
+            by_title.setdefault(finding["title"], []).append((level, finding))
 
     suppressed_rows: list[dict[str, str]] = []
-    suppressed_titles: set[str] = set()
+    suppressed_signatures: set[str] = set()
     for suppression in suppressions:
         title = suppression["title"]
-        if title not in by_title:
+        matches = by_title.get(title)
+        if not matches:
             raise ValueError(
                 f"--overrides suppressions references unknown finding title: {title!r}"
             )
-        level, _finding = by_title[title]
-        if level == 1:
+        level1_matches = [finding for level, finding in matches if level == 1]
+        if level1_matches:
             raise ValueError(
-                f"Refusing to suppress Level 1 finding {title!r} — confirmed bugs "
-                "are never suppressed"
+                f"Refusing to suppress {title!r} — a Level 1 finding shares this "
+                "exact title (confirmed bugs are never suppressed); give the "
+                "findings distinct titles if this collision is unintentional, "
+                "or drop this suppression if it was meant for the Level 1 one"
             )
-        suppressed_titles.add(title)
+        for _level, finding in matches:
+            suppressed_signatures.add(finding["signature"])
         suppressed_rows.append({"title": title, "reason": suppression["reason"]})
 
     remaining = {
-        level: [finding for finding in findings if finding["title"] not in suppressed_titles]
+        level: [finding for finding in findings if finding["signature"] not in suppressed_signatures]
         for level, findings in findings_by_level.items()
     }
     return remaining, suppressed_rows
@@ -332,6 +375,8 @@ def render_report(
     )
     space_id = config.get("space_id") or environment.get("space_id", "exploratory-testing")
 
+    if "session_started_at" not in config:
+        raise ValueError("config.json is missing required key: session_started_at")
     session_started_at = parse_iso(config["session_started_at"])
     total_seconds = (now - session_started_at).total_seconds()
     session_timeout_minutes = config.get("session_timeout_minutes")
@@ -382,7 +427,7 @@ def render_report(
                 duration=row["duration_raw"] or "-",
                 budget=budget,
                 over=over_symbol,
-                status=row["status"],
+                status=status_display(row),
             )
         )
     total_over_symbol = "\u26a0\ufe0f over cap" if session_over else "\u2713"
@@ -410,7 +455,7 @@ def render_report(
     lines.append(f"- Known / suppressed: {len(suppressed_rows)}")
     lines.append(f"- **Flows completed:** {len(completed_rows)} of {len(flow_rows)}")
     if incomplete_rows:
-        listed = "; ".join(f"{row['name']} ({row['status']})" for row in incomplete_rows)
+        listed = "; ".join(f"{row['name']} ({status_display(row)})" for row in incomplete_rows)
         lines.append(f"- **Flows not fully completed:** {len(incomplete_rows)} - {listed}")
     else:
         lines.append("- **Flows not fully completed:** 0")
@@ -553,9 +598,30 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("one of --session-dir or --out is required")
         return 2  # pragma: no cover
 
-    config = json.loads(config_path.read_text(encoding="utf-8"))
-    findings_records = load_jsonl(findings_path) if findings_path.exists() else []
-    overrides = json.loads(Path(args.overrides).read_text(encoding="utf-8")) if args.overrides else {}
+    try:
+        config = json.loads(config_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        print(f"error: config not found: {config_path}", file=sys.stderr)
+        return 1
+
+    if not findings_path.exists():
+        print(
+            f"error: findings JSONL not found: {findings_path} — run parse-findings.py "
+            "first (a session with zero findings still needs an existing, "
+            "possibly-empty, findings.jsonl)",
+            file=sys.stderr,
+        )
+        return 1
+    findings_records = load_jsonl(findings_path)
+
+    if args.overrides:
+        try:
+            overrides = json.loads(Path(args.overrides).read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            print(f"error: overrides file not found: {args.overrides}", file=sys.stderr)
+            return 1
+    else:
+        overrides = {}
     now = parse_iso(args.now) if args.now else datetime.now(timezone.utc)
 
     try:
