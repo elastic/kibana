@@ -28,7 +28,7 @@ export const disablePrivilegeMonitoringEngineRoute = (
       path: MONITORING_ENGINE_DISABLE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics-manage`],
         },
       },
       options: {
