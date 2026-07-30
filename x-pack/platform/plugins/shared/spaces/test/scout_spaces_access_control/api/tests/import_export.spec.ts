@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import supertest from 'supertest';
-import { format as formatUrl } from 'url';
+import FormData from 'form-data';
 
-import type { ScoutTestConfig } from '@kbn/scout';
+import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
 import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
@@ -19,6 +18,7 @@ import {
   accessControlForbiddenError,
   objectPath as accessControlObjectPath,
   adminBasicAuthHeader,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   loginAsKibanaAdmin,
   loginAsNotObjectOwner,
@@ -31,60 +31,55 @@ import {
   withXsrf,
 } from '../common/access_control';
 
-type SupertestAgent = ReturnType<typeof supertest>;
-
 const OVERWRITE_FORBIDDEN_ERROR = {
   ...accessControlForbiddenError('Overwriting'),
   type: 'unknown',
 };
 
-const createAgent = (config: ScoutTestConfig): SupertestAgent =>
-  supertest(formatUrl(config.hosts.kibana), config.http2 ? { http2: true } : {});
-
-const applyHeaders = (req: supertest.Test, headers: Record<string, string>): supertest.Test => {
-  let request = req;
-  for (const [key, value] of Object.entries(headers)) {
-    request = request.set(key, value);
+/** Builds the multipart body (NDJSON `file` plus optional extra fields) for the import routes. */
+const buildImportFormData = (
+  toImport: object[],
+  extraFields: Record<string, string> = {}
+): { buffer: Buffer; headers: Record<string, string> } => {
+  const requestBody = toImport.map((obj) => JSON.stringify(obj)).join('\n');
+  const formData = new FormData();
+  for (const [key, value] of Object.entries(extraFields)) {
+    formData.append(key, value);
   }
-  return request;
+  formData.append('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson');
+  return { buffer: formData.getBuffer(), headers: formData.getHeaders() };
 };
 
 const importObjects = (
-  agent: SupertestAgent,
+  apiClient: ApiClientFixture,
   headers: Record<string, string>,
   toImport: object[],
   {
     overwrite = false,
     createNewCopies = true,
   }: { overwrite?: boolean; createNewCopies?: boolean } = {}
-) => {
-  const requestBody = toImport.map((obj) => JSON.stringify(obj)).join('\n');
+): Promise<ApiClientResponse> => {
   const query = overwrite ? '?overwrite=true' : createNewCopies ? '?createNewCopies=true' : '';
-  // Paths must not start with a leading slash: `formatUrl` yields a base URL with a trailing
-  // slash, so a leading slash would produce a double slash (`//api/...`) and a 404.
-  const req = applyHeaders(
-    agent.post(`api/saved_objects/_import${query}`).set('kbn-xsrf', 'true'),
-    headers
-  );
-  return req.attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson');
+  const formData = buildImportFormData(toImport);
+  return apiClient.post(`/api/saved_objects/_import${query}`, {
+    headers: { ...withXsrf(headers), ...formData.headers },
+    body: formData.buffer,
+  });
 };
 
 const resolveImportErrors = (
-  agent: SupertestAgent,
+  apiClient: ApiClientFixture,
   headers: Record<string, string>,
   toImport: object[],
   retries: object[],
   { createNewCopies = true }: { createNewCopies?: boolean } = {}
-) => {
-  const requestBody = toImport.map((obj) => JSON.stringify(obj)).join('\n');
+): Promise<ApiClientResponse> => {
   const query = createNewCopies ? '?createNewCopies=true' : '';
-  const req = applyHeaders(
-    agent.post(`api/saved_objects/_resolve_import_errors${query}`).set('kbn-xsrf', 'true'),
-    headers
-  );
-  return req
-    .field('retries', JSON.stringify(retries))
-    .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson');
+  const formData = buildImportFormData(toImport, { retries: JSON.stringify(retries) });
+  return apiClient.post(`/api/saved_objects/_resolve_import_errors${query}`, {
+    headers: { ...withXsrf(headers), ...formData.headers },
+    body: formData.buffer,
+  });
 };
 
 const EXCLUDED_META = {
@@ -134,10 +129,13 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
     await setupAccessControlUsers({ esClient, kbnClient });
   });
 
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
+  });
+
   apiTest(
     'should reject import of objects with unexpected access control metadata (unsupported types)',
-    async ({ apiClient, config }) => {
-      const agent = createAgent(config);
+    async ({ apiClient }) => {
       const { cookieHeader } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -153,8 +151,8 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         EXCLUDED_META,
       ];
 
-      const response = await importObjects(agent, cookieHeader, toImport);
-      expect(response.status).toBe(200);
+      const response = await importObjects(apiClient, cookieHeader, toImport);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.successResults).toBeUndefined();
       expect(Array.isArray(response.body.errors)).toBe(true);
       expect(response.body.errors).toHaveLength(1);
@@ -164,8 +162,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
 
   apiTest(
     `should apply the current user as owner, and 'default' access mode, only to supported object types`,
-    async ({ apiClient, config }) => {
-      const agent = createAgent(config);
+    async ({ apiClient }) => {
       const { cookieHeader, profileUid: testProfileId } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -184,8 +181,8 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         EXCLUDED_META,
       ];
 
-      const response = await importObjects(agent, cookieHeader, toImport);
-      expect(response.status).toBe(200);
+      const response = await importObjects(apiClient, cookieHeader, toImport);
+      expect(response).toHaveStatusCode(200);
       const results = response.body.successResults;
       expect(Array.isArray(results)).toBe(true);
       expect(results).toHaveLength(2);
@@ -210,7 +207,6 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     'should create objects supporting access control without access control metadata if there is no profile ID',
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const toImport = [
         buildImportObject({
           id: '11111111111111111111111111111111',
@@ -223,10 +219,10 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         EXCLUDED_META,
       ];
 
-      const response = await importObjects(agent, adminBasicAuthHeader(), toImport, {
+      const response = await importObjects(apiClient, adminBasicAuthHeader(config), toImport, {
         createNewCopies: true,
       });
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.success).toBe(true);
       expect(response.body.successCount).toBe(2);
       const results = response.body.successResults;
@@ -238,13 +234,13 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
       expect(results[1].destinationId).toBeDefined();
 
       const acGet = await apiClient.get(accessControlObjectPath(results[0].destinationId), {
-        headers: withXsrf(adminBasicAuthHeader()),
+        headers: withXsrf(adminBasicAuthHeader(config)),
       });
       expect(acGet).toHaveStatusCode(200);
       expect(acGet.body.accessControl).toBeUndefined();
 
       const nonAcGet = await apiClient.get(nonAccessControlObjectPath(results[1].destinationId), {
-        headers: withXsrf(adminBasicAuthHeader()),
+        headers: withXsrf(adminBasicAuthHeader(config)),
       });
       expect(nonAcGet).toHaveStatusCode(200);
       expect(nonAcGet.body.accessControl).toBeUndefined();
@@ -253,8 +249,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
 
   apiTest(
     'should apply defaults to objects with no access control metadata',
-    async ({ apiClient, config }) => {
-      const agent = createAgent(config);
+    async ({ apiClient }) => {
       const { cookieHeader, profileUid: testProfileId } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -270,8 +265,8 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         { ...EXCLUDED_META, exportedCount: 2 },
       ];
 
-      const response = await importObjects(agent, cookieHeader, toImport);
-      expect(response.status).toBe(200);
+      const response = await importObjects(apiClient, cookieHeader, toImport);
+      expect(response).toHaveStatusCode(200);
       const results = response.body.successResults;
       expect(Array.isArray(results)).toBe(true);
       expect(results).toHaveLength(2);
@@ -296,9 +291,9 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     'should disallow overwrite of owned objects if not owned by the current user',
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const { cookieHeader: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const adminCreate = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
@@ -336,11 +331,11 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         { ...EXCLUDED_META, exportedCount: 2 },
       ];
 
-      const response = await importObjects(agent, testUserCookie, toImport, {
+      const response = await importObjects(apiClient, testUserCookie, toImport, {
         overwrite: true,
         createNewCopies: false,
       });
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.successCount).toBe(1);
       expect(response.body.success).toBe(false);
       expect(response.body.successResults).toStrictEqual([
@@ -367,9 +362,9 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     'should throw if the import only contains objects that are not overwritable by the current user',
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const { cookieHeader: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
 
       const firstCreate = await apiClient.post(CREATE_PATH, {
@@ -408,11 +403,11 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         { ...EXCLUDED_META, exportedCount: 2 },
       ];
 
-      const response = await importObjects(agent, testUserCookie, toImport, {
+      const response = await importObjects(apiClient, testUserCookie, toImport, {
         overwrite: true,
         createNewCopies: false,
       });
-      expect(response.status).toBe(403);
+      expect(response).toHaveStatusCode(403);
       expect(response.body.statusCode).toBe(403);
       expect(response.body.error).toBe('Forbidden');
       expect(response.body.message).toContain(
@@ -428,8 +423,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
 
   apiTest(
     'should allow overwrite of owned objects, but maintain original access control metadata, if owned by the current user',
-    async ({ apiClient, config }) => {
-      const agent = createAgent(config);
+    async ({ apiClient }) => {
       const { cookieHeader: testUserCookie, profileUid: testProfileId } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -455,11 +449,11 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         EXCLUDED_META,
       ];
 
-      const response = await importObjects(agent, testUserCookie, toImport, {
+      const response = await importObjects(apiClient, testUserCookie, toImport, {
         overwrite: true,
         createNewCopies: false,
       });
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       const results = response.body.successResults;
       expect(Array.isArray(results)).toBe(true);
       expect(results).toHaveLength(1);
@@ -479,7 +473,6 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     'should allow overwrite of owned objects, but maintain original access control metadata, if admin',
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const { cookieHeader: testUserCookie, profileUid: testProfileId } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -496,7 +489,8 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
       expect(createResponse.body.accessControl.owner).toBe(testProfileId);
 
       const { cookieHeader: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       expect(adminProfileId).not.toBe(testProfileId);
 
@@ -510,11 +504,11 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         EXCLUDED_META,
       ];
 
-      const response = await importObjects(agent, adminCookie, toImport, {
+      const response = await importObjects(apiClient, adminCookie, toImport, {
         overwrite: true,
         createNewCopies: false,
       });
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       const results = response.body.successResults;
       expect(Array.isArray(results)).toBe(true);
       expect(results).toHaveLength(1);
@@ -532,8 +526,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
     }
   );
 
-  apiTest('should retain all access control metadata on export', async ({ apiClient, config }) => {
-    const agent = createAgent(config);
+  apiTest('should retain all access control metadata on export', async ({ apiClient }) => {
     const { cookieHeader: testUserCookie, profileUid: testProfileId } = await loginAsObjectOwner(
       apiClient,
       TEST_USER_USERNAME,
@@ -557,17 +550,22 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
     expect(nonAcCreate.body.accessControl).toBeUndefined();
     const nonReadOnlyId = nonAcCreate.body.id;
 
-    const exportResponse = await applyHeaders(
-      agent.post('api/saved_objects/_export').set('kbn-xsrf', 'true'),
-      testUserCookie
-    ).send({
-      objects: [
-        { type: ACCESS_CONTROL_TYPE, id: readOnlyId },
-        { type: NON_ACCESS_CONTROL_TYPE, id: nonReadOnlyId },
-      ],
+    // The export endpoint responds with NDJSON, not JSON: request the raw body as a buffer.
+    const exportResponse = await apiClient.post('/api/saved_objects/_export', {
+      headers: withXsrf(testUserCookie),
+      responseType: 'buffer',
+      body: {
+        objects: [
+          { type: ACCESS_CONTROL_TYPE, id: readOnlyId },
+          { type: NON_ACCESS_CONTROL_TYPE, id: nonReadOnlyId },
+        ],
+      },
     });
-    expect(exportResponse.status).toBe(200);
-    const results = exportResponse.text.split('\n').map((line: string) => JSON.parse(line));
+    expect(exportResponse).toHaveStatusCode(200);
+    const results = exportResponse.body
+      .toString('utf8')
+      .split('\n')
+      .map((line: string) => JSON.parse(line));
     expect(Array.isArray(results)).toBe(true);
     expect(results).toHaveLength(3);
 
@@ -584,9 +582,9 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     `should allow 'createNewCopies' global option on resolve import errors`,
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const { cookieHeader: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
 
       const adminCreate = await apiClient.post(CREATE_PATH, {
@@ -622,7 +620,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
       ];
 
       const response = await resolveImportErrors(
-        agent,
+        apiClient,
         testUserCookie,
         toImport,
         [
@@ -631,7 +629,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         ],
         { createNewCopies: true }
       );
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.successCount).toBe(2);
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.successResults)).toBe(true);
@@ -654,9 +652,9 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     'should disallow overwrite retry for write-restricted objects not owned by the current user',
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const { cookieHeader: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
 
       const adminCreate = await apiClient.post(CREATE_PATH, {
@@ -696,7 +694,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
       ];
 
       const response = await resolveImportErrors(
-        agent,
+        apiClient,
         testUserCookie,
         toImport,
         [
@@ -705,7 +703,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         ],
         { createNewCopies: false }
       );
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.successCount).toBe(1);
       expect(response.body.success).toBe(false);
       expect(response.body.successResults).toStrictEqual([
@@ -732,9 +730,9 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     'should disallow create new retry with same ID for write-restricted objects not owned by the current user',
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const { cookieHeader: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
 
       const adminCreate = await apiClient.post(CREATE_PATH, {
@@ -770,7 +768,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
       ];
 
       const response = await resolveImportErrors(
-        agent,
+        apiClient,
         testUserCookie,
         toImport,
         [
@@ -785,7 +783,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         ],
         { createNewCopies: false }
       );
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.successCount).toBe(1);
       expect(response.body.success).toBe(false);
       expect(response.body.successResults).toStrictEqual([
@@ -811,9 +809,9 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
   apiTest(
     'should allow create new retry with destination ID for write-restricted objects not owned by the current user',
     async ({ apiClient, config }) => {
-      const agent = createAgent(config);
       const { cookieHeader: adminCookie, profileUid: adminProfileId } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
 
       const adminCreate = await apiClient.post(CREATE_PATH, {
@@ -851,7 +849,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
       const destinationId = `${adminObjId}_new`;
 
       const response = await resolveImportErrors(
-        agent,
+        apiClient,
         testUserCookie,
         toImport,
         [
@@ -867,7 +865,7 @@ apiTest.describe('spaces access control - import/export', { tag: tags.stateful.c
         ],
         { createNewCopies: false }
       );
-      expect(response.status).toBe(200);
+      expect(response).toHaveStatusCode(200);
       expect(response.body.successCount).toBe(2);
       expect(response.body.success).toBe(true);
       expect(response.body.successResults).toStrictEqual([

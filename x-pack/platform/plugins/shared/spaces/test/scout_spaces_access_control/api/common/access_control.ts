@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { ApiClientFixture, EsClient, KbnClient } from '@kbn/scout';
+import type {
+  ApiClientFixture,
+  EsClient,
+  KbnClient,
+  ScoutLogger,
+  ScoutTestConfig,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 /** Saved-object types registered by the `access_control_test_plugin`. */
@@ -54,23 +60,25 @@ export const createOwnedObject = async (
   return { id: res.body.id as string, type: res.body.type as string, body: res.body };
 };
 
-/** Kibana admin (superuser). */
-export const ADMIN_USERNAME = 'elastic';
-export const ADMIN_PASSWORD = 'changeme';
+/**
+ * Password assigned to the native users these suites provision; the admin (superuser)
+ * credentials are not hardcoded and instead come from the Scout config (`config.auth`).
+ */
+const PROVISIONED_USER_PASSWORD = 'scout_ac_password';
 
 /**
  * Non-admin object owner used across the suites; provisioned as a native user with the
  * `kibana_savedobjects_editor` role.
  */
 export const TEST_USER_USERNAME = 'test_user';
-export const TEST_USER_PASSWORD = 'changeme';
+export const TEST_USER_PASSWORD = PROVISIONED_USER_PASSWORD;
 
 /** Non-owner with enough privileges to call the APIs, but without `manage_access_control`. */
 export const ACCESS_CONTROL_EDITOR_USERNAME = 'access_control_editor';
-export const ACCESS_CONTROL_EDITOR_PASSWORD = 'changeme';
+export const ACCESS_CONTROL_EDITOR_PASSWORD = PROVISIONED_USER_PASSWORD;
 
 export const SIMPLE_USER_USERNAME = 'simple_user';
-export const SIMPLE_USER_PASSWORD = 'changeme';
+export const SIMPLE_USER_PASSWORD = PROVISIONED_USER_PASSWORD;
 
 /**
  * Custom Kibana role granting `dev_tools` + `savedObjectsManagement` across all spaces (but NOT
@@ -137,8 +145,11 @@ export const login = async (
   return { cookieHeader, profileUid: meResponse.body.profile_uid };
 };
 
-export const loginAsKibanaAdmin = (apiClient: ApiClientFixture): Promise<LoginResult> =>
-  login(apiClient, ADMIN_USERNAME, ADMIN_PASSWORD);
+/** Logs in as the admin (superuser) whose credentials come from the Scout config. */
+export const loginAsKibanaAdmin = (
+  apiClient: ApiClientFixture,
+  config: ScoutTestConfig
+): Promise<LoginResult> => login(apiClient, config.auth.username, config.auth.password);
 
 export const loginAsObjectOwner = (
   apiClient: ApiClientFixture,
@@ -149,9 +160,11 @@ export const loginAsObjectOwner = (
 /** Same as {@link loginAsObjectOwner}; separate name only for call-site readability. */
 export const loginAsNotObjectOwner = loginAsObjectOwner;
 
-/** Basic auth header for `elastic`, used for the "no active user profile" cases. */
-export const adminBasicAuthHeader = (): Record<string, string> => ({
-  Authorization: `Basic ${Buffer.from(`${ADMIN_USERNAME}:${ADMIN_PASSWORD}`).toString('base64')}`,
+/** Basic auth header for the Scout config admin, used for the "no active user profile" cases. */
+export const adminBasicAuthHeader = (config: ScoutTestConfig): Record<string, string> => ({
+  Authorization: `Basic ${Buffer.from(`${config.auth.username}:${config.auth.password}`).toString(
+    'base64'
+  )}`,
 });
 
 /** Merges the mandatory `kbn-xsrf` header with any auth headers (cookie or basic). */
@@ -246,4 +259,28 @@ export const setupAccessControlUsers = async ({
   await createTestUser(esClient);
   await createAccessControlEditorUser(esClient);
   await createSimpleUser(esClient);
+};
+
+/**
+ * Deletes every saved object of the test-plugin types created by a suite, regardless of owner
+ * or access mode. Intended for `apiTest.afterAll`.
+ *
+ * Uses `kbnClient.savedObjects.clean` (the `ftr_apis` `_clean` route): both types are registered
+ * non-hidden, the route deletes with `force: true`, and `kbnClient` authenticates as the Scout
+ * config admin (superuser), which holds `manage_access_control` and therefore may delete
+ * write-restricted objects owned by other users. Defensive by design: deleting zero objects is a
+ * no-op, and any cleanup failure is logged instead of failing the suite.
+ *
+ * Deliberately does NOT remove the shared native users/role from
+ * {@link setupAccessControlUsers}: other specs in the same run reuse them.
+ */
+export const cleanupAccessControlObjects = async (
+  kbnClient: KbnClient,
+  log?: ScoutLogger
+): Promise<void> => {
+  try {
+    await kbnClient.savedObjects.clean({ types: [ACCESS_CONTROL_TYPE, NON_ACCESS_CONTROL_TYPE] });
+  } catch (error) {
+    log?.warning(`Failed to clean up access control test saved objects: ${error}`);
+  }
 };

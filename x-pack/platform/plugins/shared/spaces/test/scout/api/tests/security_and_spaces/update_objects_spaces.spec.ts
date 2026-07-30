@@ -24,8 +24,9 @@ import {
 
 const createTestCases = (spaceId: string): UpdateObjectsSpacesTestCase[] => {
   const eachSpace = [DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID];
-  // Note: alias-deletion cases are intentionally excluded (covered in the spaces_only suite,
-  // and there is no authZ-specific logic affecting alias deletion).
+  // Note: alias-deletion cases are intentionally excluded (covered by
+  // `tests/update_objects_spaces_lifecycle.spec.ts`, and there is no authZ-specific logic
+  // affecting alias deletion).
   return [
     { objects: [CASES.EACH_SPACE], spacesToAdd: ['*'], spacesToRemove: [] },
     {

@@ -13,6 +13,7 @@ import {
   accessControlForbiddenError,
   activateSimpleUserProfile,
   BULK_DELETE_PATH,
+  cleanupAccessControlObjects,
   createOwnedObject,
   createSimpleUser,
   loginAsKibanaAdmin,
@@ -33,6 +34,10 @@ const DELETE_FORBIDDEN = accessControlForbiddenError('Deleting');
 apiTest.describe('spaces access control - #bulk_delete', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ esClient, kbnClient }) => {
     await setupAccessControlUsers({ esClient, kbnClient });
+  });
+
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
   });
 
   apiTest('allows owner to bulk delete objects in write-restricted mode', async ({ apiClient }) => {
@@ -103,7 +108,7 @@ apiTest.describe('spaces access control - #bulk_delete', { tag: tags.stateful.cl
     }
   );
 
-  apiTest('allows admin to bulk delete objects they do not own', async ({ apiClient }) => {
+  apiTest('allows admin to bulk delete objects they do not own', async ({ apiClient, config }) => {
     const { cookieHeader: ownerCookie } = await loginAsObjectOwner(
       apiClient,
       TEST_USER_USERNAME,
@@ -122,7 +127,7 @@ apiTest.describe('spaces access control - #bulk_delete', { tag: tags.stateful.cl
       { id: second.id, type: second.type },
     ];
 
-    const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+    const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
     const res = await apiClient.post(BULK_DELETE_PATH, {
       headers: withXsrf(adminCookie),
       body: { objects },
@@ -334,7 +339,7 @@ apiTest.describe('spaces access control - #bulk_delete', { tag: tags.stateful.cl
 
   apiTest(
     'rejects if owner no longer has adequate RBAC privileges',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, esClient, config }) => {
       await createSimpleUser(esClient, ['kibana_savedobjects_editor']);
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
@@ -357,7 +362,7 @@ apiTest.describe('spaces access control - #bulk_delete', { tag: tags.stateful.cl
       // revoke privileges
       await createSimpleUser(esClient, ['viewer']);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const get1 = await apiClient.get(objectPath(first.id), { headers: withXsrf(adminCookie) });
       expect(get1.body.accessControl.owner).toBe(ownerProfileUid);
       const get2 = await apiClient.get(objectPath(second.id), { headers: withXsrf(adminCookie) });
@@ -415,7 +420,7 @@ apiTest.describe('spaces access control - #bulk_delete', { tag: tags.stateful.cl
 
   apiTest(
     'allow admin to force bulk delete objects marked as write-restricted',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: ownerCookie } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -434,7 +439,7 @@ apiTest.describe('spaces access control - #bulk_delete', { tag: tags.stateful.cl
         { id: second.id, type: second.type },
       ];
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const res = await apiClient.post(BULK_DELETE_PATH, {
         headers: withXsrf(adminCookie),
         body: { objects, force: true },

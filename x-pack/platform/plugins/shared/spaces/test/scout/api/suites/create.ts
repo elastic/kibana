@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { createExpectRbacForbidden, roleHeaders } from '../common/api_helpers';
@@ -12,14 +13,9 @@ import type { RoleName } from '../common/roles';
 import { getTestScenariosForSpace, SOLUTION_ES_DISABLED_FEATURES } from '../common/spaces';
 import { apiTest } from '../fixtures';
 
-interface ApiResponse {
-  statusCode: number;
-  body: Record<string, any>;
-}
-
 interface CreateTest {
   statusCode: number;
-  response: (resp: ApiResponse) => void;
+  response: (resp: ApiClientResponse) => void;
 }
 
 export interface CreateTests {
@@ -35,14 +31,14 @@ interface CreateTestDefinition {
   tests: CreateTests;
 }
 
-export const expectConflictResponse = (resp: ApiResponse) => {
+export const expectConflictResponse = (resp: ApiClientResponse) => {
   expect(Object.keys(resp.body).sort()).toStrictEqual(['error', 'message', 'statusCode']);
   expect(resp.body.error).toBe('Conflict');
   expect(resp.body.statusCode).toBe(409);
   expect(resp.body.message).toMatch(/A space with the identifier .*/);
 };
 
-export const expectNewSpaceResult = (resp: ApiResponse) => {
+export const expectNewSpaceResult = (resp: ApiClientResponse) => {
   expect(resp.body).toStrictEqual({
     name: 'marketing',
     id: 'marketing',
@@ -56,7 +52,7 @@ export const expectRbacForbiddenResponse = createExpectRbacForbidden(
   'Unauthorized to create spaces'
 );
 
-export const expectReservedSpecifiedResult = (resp: ApiResponse) => {
+export const expectReservedSpecifiedResult = (resp: ApiClientResponse) => {
   expect(resp.body).toStrictEqual({
     name: 'reserved space',
     id: 'reserved',
@@ -66,7 +62,7 @@ export const expectReservedSpecifiedResult = (resp: ApiResponse) => {
   });
 };
 
-export const expectSolutionSpecifiedResult = (resp: ApiResponse) => {
+export const expectSolutionSpecifiedResult = (resp: ApiClientResponse) => {
   const disabledFeatures = [...resp.body.disabledFeatures].sort();
 
   expect({ ...resp.body, disabledFeatures }).toStrictEqual({
@@ -94,10 +90,21 @@ export const expectSolutionSpecifiedResult = (resp: ApiResponse) => {
  */
 export const createTest = (description: string, { user, spaceId, tests }: CreateTestDefinition) => {
   apiTest.describe(description, () => {
+    apiTest.afterEach(async ({ apiServices }) => {
+      // Delete any transient space a scenario may have created, unconditionally: an inline
+      // cleanup gated on the response status would be skipped when a status assertion throws
+      // first (e.g. an unexpected 200 in a forbidden scenario) or the test crashes mid-way,
+      // leaking the space and cascading 409s into every later matrix entry. The delete
+      // tolerates 404s, so this is a no-op for scenarios that created nothing.
+      for (const id of ['marketing', 'reserved', 'solution']) {
+        await apiServices.spaces.delete(id);
+      }
+    });
+
     getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
       apiTest(
         `should return ${tests.newSpace.statusCode} ${scenario}`,
-        async ({ apiClient, apiServices, samlAuth }) => {
+        async ({ apiClient, samlAuth }) => {
           const response = await apiClient.post(`${urlPrefix}/api/spaces/space`, {
             headers: await roleHeaders(samlAuth, user),
             body: {
@@ -110,9 +117,6 @@ export const createTest = (description: string, { user, spaceId, tests }: Create
           });
 
           expect(response).toHaveStatusCode(tests.newSpace.statusCode);
-          if (response.statusCode === 200) {
-            await apiServices.spaces.delete('marketing');
-          }
           tests.newSpace.response(response);
         }
       );
@@ -138,7 +142,7 @@ export const createTest = (description: string, { user, spaceId, tests }: Create
 
       apiTest(
         `should return ${tests.reservedSpecified.statusCode} and ignore _reserved ${scenario}`,
-        async ({ apiClient, apiServices, samlAuth }) => {
+        async ({ apiClient, samlAuth }) => {
           const response = await apiClient.post(`${urlPrefix}/api/spaces/space`, {
             headers: await roleHeaders(samlAuth, user),
             body: {
@@ -152,16 +156,13 @@ export const createTest = (description: string, { user, spaceId, tests }: Create
           });
 
           expect(response).toHaveStatusCode(tests.reservedSpecified.statusCode);
-          if (response.statusCode === 200) {
-            await apiServices.spaces.delete('reserved');
-          }
           tests.reservedSpecified.response(response);
         }
       );
 
       apiTest(
         `should return ${tests.solutionSpecified.statusCode} when solution is specified ${scenario}`,
-        async ({ apiClient, apiServices, config, samlAuth }) => {
+        async ({ apiClient, config, samlAuth }) => {
           const isServerless = config.serverless;
           const expectedStatusCode = isServerless ? 400 : tests.solutionSpecified.statusCode;
 
@@ -178,9 +179,6 @@ export const createTest = (description: string, { user, spaceId, tests }: Create
           });
 
           expect(response).toHaveStatusCode(expectedStatusCode);
-          if (response.statusCode === 200) {
-            await apiServices.spaces.delete('solution');
-          }
           if (!isServerless) {
             tests.solutionSpecified.response(response);
           }

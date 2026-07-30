@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { createExpectRbacForbidden, roleHeaders } from '../common/api_helpers';
@@ -12,14 +13,9 @@ import type { RoleName } from '../common/roles';
 import { getUrlPrefix } from '../common/spaces';
 import { apiTest } from '../fixtures';
 
-interface ApiResponse {
-  statusCode: number;
-  body: Record<string, any>;
-}
-
 interface UpdateTest {
   statusCode: number;
-  response: (resp: ApiResponse) => void;
+  response: (resp: ApiClientResponse) => void;
 }
 
 export interface UpdateTests {
@@ -38,7 +34,7 @@ export const expectRbacForbidden = createExpectRbacForbidden('Unauthorized to up
 
 export { expectNotFound } from '../common/api_helpers';
 
-export const expectDefaultSpaceResult = (resp: ApiResponse) => {
+export const expectDefaultSpaceResult = (resp: ApiClientResponse) => {
   expect(resp.body).toStrictEqual({
     name: 'the new default',
     id: 'default',
@@ -49,7 +45,7 @@ export const expectDefaultSpaceResult = (resp: ApiResponse) => {
   });
 };
 
-export const expectAlreadyExistsResult = (resp: ApiResponse) => {
+export const expectAlreadyExistsResult = (resp: ApiClientResponse) => {
   expect(resp.body).toStrictEqual({
     name: 'space 1',
     id: 'space_1',

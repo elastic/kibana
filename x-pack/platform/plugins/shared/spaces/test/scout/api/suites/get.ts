@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {
@@ -16,14 +17,9 @@ import type { RoleName } from '../common/roles';
 import { getTestScenariosForSpace, SOLUTION_ES_DISABLED_FEATURES } from '../common/spaces';
 import { apiTest } from '../fixtures';
 
-interface ApiResponse {
-  statusCode: number;
-  body: Record<string, any>;
-}
-
 interface GetTest {
   statusCode: number;
-  response: (resp: ApiResponse) => void;
+  response: (resp: ApiClientResponse) => void;
 }
 
 export interface GetTests {
@@ -66,7 +62,7 @@ const EXPECTED_SPACES: Record<string, Record<string, any>> = {
   },
 };
 
-export const createExpectResults = (spaceId: string) => (resp: ApiResponse) => {
+export const createExpectResults = (spaceId: string) => (resp: ApiClientResponse) => {
   const expectedSpace = EXPECTED_SPACES[spaceId];
   const disabledFeatures = [...(resp.body.disabledFeatures ?? [])].sort();
 

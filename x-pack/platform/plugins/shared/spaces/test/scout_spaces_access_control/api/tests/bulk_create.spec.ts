@@ -14,6 +14,7 @@ import {
   ACCESS_CONTROL_TYPE,
   accessControlForbiddenError,
   BULK_CREATE_PATH,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createOwnedObject,
   createSimpleUser,
@@ -35,6 +36,10 @@ const OVERWRITE_FORBIDDEN = accessControlForbiddenError('Overwriting');
 apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ esClient, kbnClient }) => {
     await setupAccessControlUsers({ esClient, kbnClient });
+  });
+
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
   });
 
   apiTest('should create write-restricted objects', async ({ apiClient }) => {
@@ -92,41 +97,45 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
     }
   });
 
-  apiTest('allows non-owner to overwrite objects in default mode', async ({ apiClient }) => {
-    const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-      apiClient
-    );
-    const first = await createOwnedObject(apiClient, adminCookie, {
-      type: ACCESS_CONTROL_TYPE,
-      isWriteRestricted: false,
-    });
-    const second = await createOwnedObject(apiClient, adminCookie, {
-      type: ACCESS_CONTROL_TYPE,
-      isWriteRestricted: false,
-    });
-    const objects = [
-      { id: first.id, type: first.type },
-      { id: second.id, type: second.type },
-    ];
+  apiTest(
+    'allows non-owner to overwrite objects in default mode',
+    async ({ apiClient, config }) => {
+      const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
+        apiClient,
+        config
+      );
+      const first = await createOwnedObject(apiClient, adminCookie, {
+        type: ACCESS_CONTROL_TYPE,
+        isWriteRestricted: false,
+      });
+      const second = await createOwnedObject(apiClient, adminCookie, {
+        type: ACCESS_CONTROL_TYPE,
+        isWriteRestricted: false,
+      });
+      const objects = [
+        { id: first.id, type: first.type },
+        { id: second.id, type: second.type },
+      ];
 
-    const { cookieHeader: notOwnerCookie } = await loginAsNotObjectOwner(
-      apiClient,
-      ACCESS_CONTROL_EDITOR_USERNAME,
-      ACCESS_CONTROL_EDITOR_PASSWORD
-    );
-    const res = await apiClient.post(`${BULK_CREATE_PATH}?overwrite=true`, {
-      headers: withXsrf(notOwnerCookie),
-      body: { objects },
-    });
-    expect(res).toHaveStatusCode(200);
-    expect(res.body.saved_objects).toHaveLength(2);
-    expect(res.body.saved_objects[0].accessControl.owner).toBe(adminProfileUid);
-    expect(res.body.saved_objects[0].accessControl.accessMode).toBe('default');
-    expect(res.body.saved_objects[1].accessControl.owner).toBe(adminProfileUid);
-    expect(res.body.saved_objects[1].accessControl.accessMode).toBe('default');
-  });
+      const { cookieHeader: notOwnerCookie } = await loginAsNotObjectOwner(
+        apiClient,
+        ACCESS_CONTROL_EDITOR_USERNAME,
+        ACCESS_CONTROL_EDITOR_PASSWORD
+      );
+      const res = await apiClient.post(`${BULK_CREATE_PATH}?overwrite=true`, {
+        headers: withXsrf(notOwnerCookie),
+        body: { objects },
+      });
+      expect(res).toHaveStatusCode(200);
+      expect(res.body.saved_objects).toHaveLength(2);
+      expect(res.body.saved_objects[0].accessControl.owner).toBe(adminProfileUid);
+      expect(res.body.saved_objects[0].accessControl.accessMode).toBe('default');
+      expect(res.body.saved_objects[1].accessControl.owner).toBe(adminProfileUid);
+      expect(res.body.saved_objects[1].accessControl.accessMode).toBe('default');
+    }
+  );
 
-  apiTest('allows admin to overwrite objects they do not own', async ({ apiClient }) => {
+  apiTest('allows admin to overwrite objects they do not own', async ({ apiClient, config }) => {
     const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
       apiClient,
       TEST_USER_USERNAME,
@@ -145,7 +154,7 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
       { id: second.id, type: second.type },
     ];
 
-    const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+    const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
     const res = await apiClient.post(`${BULK_CREATE_PATH}?overwrite=true`, {
       headers: withXsrf(adminCookie),
       body: { objects },
@@ -161,9 +170,10 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
 
   apiTest(
     'rejects when overwriting and all objects are write-restricted and inaccessible',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const first = await createOwnedObject(apiClient, adminCookie, {
         type: ACCESS_CONTROL_TYPE,
@@ -211,9 +221,10 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
 
   apiTest(
     'returns status when overwriting and all objects are write-restricted but some are owned by current user',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const first = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
@@ -259,9 +270,10 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
 
   apiTest(
     'returns status when overwriting and some objects are in default mode',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const first = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
@@ -305,9 +317,10 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
 
   apiTest(
     'returns status when overwriting and some authorized types do not support access control',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const first = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
@@ -352,7 +365,7 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
 
   apiTest(
     'rejects when overwriting by owner if RBAC privileges are revoked',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, esClient, config }) => {
       await createSimpleUser(esClient, ['kibana_savedobjects_editor']);
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
@@ -381,7 +394,7 @@ apiTest.describe('spaces access control - #bulk_create', { tag: tags.stateful.cl
       // revoke privileges
       await createSimpleUser(esClient, ['viewer']);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const get1 = await apiClient.get(objectPath(objectId1), { headers: withXsrf(adminCookie) });
       expect(get1.body.accessControl.owner).toBe(ownerProfileUid);
       const get2 = await apiClient.get(objectPath(objectId2), { headers: withXsrf(adminCookie) });

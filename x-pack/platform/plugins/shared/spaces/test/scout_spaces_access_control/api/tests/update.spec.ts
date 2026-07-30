@@ -12,6 +12,7 @@ import {
   ACCESS_CONTROL_EDITOR_PASSWORD,
   ACCESS_CONTROL_EDITOR_USERNAME,
   ACCESS_CONTROL_TYPE,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createSimpleUser,
   loginAsKibanaAdmin,
@@ -29,6 +30,10 @@ import {
 apiTest.describe('spaces access control - #update', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ esClient, kbnClient }) => {
     await setupAccessControlUsers({ esClient, kbnClient });
+  });
+
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
   });
 
   apiTest(
@@ -61,9 +66,10 @@ apiTest.describe('spaces access control - #update', { tag: tags.stateful.classic
 
   apiTest(
     'should throw when updating write-restricted objects owned by a different user when not admin',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const createResponse = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
@@ -91,8 +97,8 @@ apiTest.describe('spaces access control - #update', { tag: tags.stateful.classic
 
   apiTest(
     'objects with default accessMode can be modified by non-owners',
-    async ({ apiClient, esClient }) => {
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+    async ({ apiClient, esClient, config }) => {
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const response = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
         body: { type: ACCESS_CONTROL_TYPE },
@@ -116,32 +122,35 @@ apiTest.describe('spaces access control - #update', { tag: tags.stateful.classic
     }
   );
 
-  apiTest('allows admin to update objects owned by different user', async ({ apiClient }) => {
-    const { cookieHeader: ownerCookie } = await loginAsObjectOwner(
-      apiClient,
-      TEST_USER_USERNAME,
-      TEST_USER_PASSWORD
-    );
-    const createResponse = await apiClient.post(CREATE_PATH, {
-      headers: withXsrf(ownerCookie),
-      body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
-    });
-    expect(createResponse).toHaveStatusCode(200);
-    const objectId = createResponse.body.id;
+  apiTest(
+    'allows admin to update objects owned by different user',
+    async ({ apiClient, config }) => {
+      const { cookieHeader: ownerCookie } = await loginAsObjectOwner(
+        apiClient,
+        TEST_USER_USERNAME,
+        TEST_USER_PASSWORD
+      );
+      const createResponse = await apiClient.post(CREATE_PATH, {
+        headers: withXsrf(ownerCookie),
+        body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      const objectId = createResponse.body.id;
 
-    const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
-    const updateResponse = await apiClient.put(UPDATE_PATH, {
-      headers: withXsrf(adminCookie),
-      body: { objectId, type: ACCESS_CONTROL_TYPE },
-    });
-    expect(updateResponse).toHaveStatusCode(200);
-    expect(updateResponse.body.id).toBe(objectId);
-    expect(updateResponse.body.attributes.description).toBe('updated description');
-  });
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
+      const updateResponse = await apiClient.put(UPDATE_PATH, {
+        headers: withXsrf(adminCookie),
+        body: { objectId, type: ACCESS_CONTROL_TYPE },
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+      expect(updateResponse.body.id).toBe(objectId);
+      expect(updateResponse.body.attributes.description).toBe('updated description');
+    }
+  );
 
   apiTest(
     'should throw when updating write-restricted objects by owner with revoked RBAC privileges',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, esClient, config }) => {
       await createSimpleUser(esClient, ['kibana_savedobjects_editor']);
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
@@ -161,7 +170,7 @@ apiTest.describe('spaces access control - #update', { tag: tags.stateful.classic
       // revoke privileges
       await createSimpleUser(esClient, ['viewer']);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const getResponse = await apiClient.get(`/access_control_objects/${objectId}`, {
         headers: withXsrf(adminCookie),
       });

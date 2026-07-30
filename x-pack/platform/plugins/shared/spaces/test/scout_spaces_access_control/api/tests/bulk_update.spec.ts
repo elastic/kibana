@@ -13,6 +13,7 @@ import {
   accessControlForbiddenError,
   activateSimpleUserProfile,
   BULK_UPDATE_PATH,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createOwnedObject,
   createSimpleUser,
@@ -33,6 +34,10 @@ const UPDATE_FORBIDDEN = accessControlForbiddenError('Updating');
 apiTest.describe('spaces access control - #bulk_update', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ esClient, kbnClient }) => {
     await setupAccessControlUsers({ esClient, kbnClient });
+  });
+
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
   });
 
   apiTest(
@@ -73,7 +78,7 @@ apiTest.describe('spaces access control - #bulk_update', { tag: tags.stateful.cl
 
   apiTest(
     'allows admin to bulk update objects marked as write restricted',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -92,7 +97,7 @@ apiTest.describe('spaces access control - #bulk_update', { tag: tags.stateful.cl
         { id: second.id, type: second.type },
       ];
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const res = await apiClient.post(BULK_UPDATE_PATH, {
         headers: withXsrf(adminCookie),
         body: { objects },
@@ -338,7 +343,7 @@ apiTest.describe('spaces access control - #bulk_update', { tag: tags.stateful.cl
 
   apiTest(
     'rejects if owner no longer has adequate RBAC privileges',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, esClient, config }) => {
       await createSimpleUser(esClient, ['kibana_savedobjects_editor']);
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
@@ -369,7 +374,7 @@ apiTest.describe('spaces access control - #bulk_update', { tag: tags.stateful.cl
       // revoke privileges
       await createSimpleUser(esClient, ['viewer']);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const get1 = await apiClient.get(`/access_control_objects/${objectId1}`, {
         headers: withXsrf(adminCookie),
       });

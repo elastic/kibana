@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { roleHeaders } from '../common/api_helpers';
@@ -83,7 +84,7 @@ const verifyResult = (
   testCase: GetShareableReferencesTestCase,
   statusCode: 200 | 403,
   authorizedSpace: string | undefined,
-  response: { body: Record<string, any> }
+  response: ApiClientResponse
 ) => {
   if (statusCode === 403) {
     expect(response.body).toStrictEqual({

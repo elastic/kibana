@@ -18,6 +18,7 @@ import {
   BULK_UPDATE_PATH,
   CHANGE_MODE_PATH,
   CHANGE_OWNER_PATH,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createSimpleUser,
   loginAsKibanaAdmin,
@@ -52,10 +53,14 @@ apiTest.describe('spaces access control - feature disabled', { tag: tags.statefu
     await setupAccessControlUsers({ esClient, kbnClient });
   });
 
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
+  });
+
   // #create
 
-  apiTest('rejects creating a write-restricted object', async ({ apiClient }) => {
-    const { cookieHeader } = await loginAsKibanaAdmin(apiClient);
+  apiTest('rejects creating a write-restricted object', async ({ apiClient, config }) => {
+    const { cookieHeader } = await loginAsKibanaAdmin(apiClient, config);
     const response = await createObject(apiClient, cookieHeader, {
       type: ACCESS_CONTROL_TYPE,
       isWriteRestricted: true,
@@ -65,18 +70,21 @@ apiTest.describe('spaces access control - feature disabled', { tag: tags.statefu
     expect(response.body.message).toContain(NOT_SUPPORTED_MESSAGE);
   });
 
-  apiTest('allows creating an object without access control metadata', async ({ apiClient }) => {
-    const { cookieHeader } = await loginAsKibanaAdmin(apiClient);
-    const response = await createObject(apiClient, cookieHeader, { type: ACCESS_CONTROL_TYPE });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.accessControl).toBeUndefined();
-    expect(response.body.type).toBe(ACCESS_CONTROL_TYPE);
-  });
+  apiTest(
+    'allows creating an object without access control metadata',
+    async ({ apiClient, config }) => {
+      const { cookieHeader } = await loginAsKibanaAdmin(apiClient, config);
+      const response = await createObject(apiClient, cookieHeader, { type: ACCESS_CONTROL_TYPE });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.accessControl).toBeUndefined();
+      expect(response.body.type).toBe(ACCESS_CONTROL_TYPE);
+    }
+  );
 
   apiTest(
     'allows creating an object when there is no active user profile',
-    async ({ apiClient }) => {
-      const response = await createObject(apiClient, adminBasicAuthHeader(), {
+    async ({ apiClient, config }) => {
+      const response = await createObject(apiClient, adminBasicAuthHeader(config), {
         type: ACCESS_CONTROL_TYPE,
       });
       expect(response).toHaveStatusCode(200);
@@ -161,8 +169,8 @@ apiTest.describe('spaces access control - feature disabled', { tag: tags.statefu
 
   apiTest(
     'returns error status when attempting to create write-restricted objects',
-    async ({ apiClient }) => {
-      const { cookieHeader } = await loginAsKibanaAdmin(apiClient);
+    async ({ apiClient, config }) => {
+      const { cookieHeader } = await loginAsKibanaAdmin(apiClient, config);
       const response = await apiClient.post(BULK_CREATE_PATH, {
         headers: withXsrf(cookieHeader),
         body: {
@@ -201,21 +209,24 @@ apiTest.describe('spaces access control - feature disabled', { tag: tags.statefu
     }
   });
 
-  apiTest('allows creating objects when there is no active user profile', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_CREATE_PATH, {
-      headers: withXsrf(adminBasicAuthHeader()),
-      body: { objects: [{ type: ACCESS_CONTROL_TYPE }, { type: ACCESS_CONTROL_TYPE }] },
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.saved_objects).toHaveLength(2);
-    for (const obj of response.body.saved_objects) {
-      expect(obj.accessControl).toBeUndefined();
-      const getResponse = await getObject(apiClient, adminBasicAuthHeader(), obj.id);
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body.accessControl).toBeUndefined();
-      expect(getResponse.body.createdBy).toBeUndefined();
+  apiTest(
+    'allows creating objects when there is no active user profile',
+    async ({ apiClient, config }) => {
+      const response = await apiClient.post(BULK_CREATE_PATH, {
+        headers: withXsrf(adminBasicAuthHeader(config)),
+        body: { objects: [{ type: ACCESS_CONTROL_TYPE }, { type: ACCESS_CONTROL_TYPE }] },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.saved_objects).toHaveLength(2);
+      for (const obj of response.body.saved_objects) {
+        expect(obj.accessControl).toBeUndefined();
+        const getResponse = await getObject(apiClient, adminBasicAuthHeader(config), obj.id);
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.accessControl).toBeUndefined();
+        expect(getResponse.body.createdBy).toBeUndefined();
+      }
     }
-  });
+  );
 
   apiTest('allows overwriting objects by the creating user', async ({ apiClient }) => {
     const { cookieHeader } = await loginAsObjectOwner(

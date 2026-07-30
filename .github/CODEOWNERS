@@ -2559,7 +2559,6 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/accessibility/apps/group1/roles.ts @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/users.ts @elastic/kibana-security
 /x-pack/platform/test/api_integration/apis/security/ @elastic/kibana-security
-/x-pack/platform/test/api_integration/apis/spaces/ @elastic/kibana-security
 /x-pack/platform/test/api_integration_basic/apis/security/ @elastic/kibana-security
 /x-pack/platform/test/ui_capabilities/ @elastic/kibana-security
 /x-pack/platform/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security

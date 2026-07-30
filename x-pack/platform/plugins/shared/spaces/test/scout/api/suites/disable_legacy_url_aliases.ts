@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { roleHeaders } from '../common/api_helpers';
@@ -83,7 +84,7 @@ const verifyResult = async (
   esClient: Client,
   testCase: DisableLegacyUrlAliasesTestCase,
   statusCode: 204 | 403,
-  response: { body: Record<string, any> }
+  response: ApiClientResponse
 ) => {
   const { targetSpace, targetType, sourceId, expectFound } = testCase;
 

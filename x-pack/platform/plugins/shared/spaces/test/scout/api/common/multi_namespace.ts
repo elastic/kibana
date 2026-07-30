@@ -20,6 +20,11 @@ export const CASES = {
   SPACE_1_AND_SPACE_2: { id: 'space_1_and_space_2', existingNamespaces: ['space_1', 'space_2'] },
   EACH_SPACE: { id: 'each_space', existingNamespaces: ['default', 'space_1', 'space_2'] },
   ALL_SPACES: { id: 'all_spaces', existingNamespaces: ['*'] },
+  ALIAS_DELETE_INCLUSIVE: {
+    id: 'alias_delete_inclusive',
+    existingNamespaces: ['default', 'space_1', 'space_2'],
+  },
+  ALIAS_DELETE_EXCLUSIVE: { id: 'alias_delete_exclusive', existingNamespaces: ['*'] },
   DOES_NOT_EXIST: { id: 'does_not_exist', existingNamespaces: [] as string[] },
 } as const;
 

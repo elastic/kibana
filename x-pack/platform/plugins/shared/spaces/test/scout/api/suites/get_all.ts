@@ -5,20 +5,16 @@
  * 2.0.
  */
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { createExpectRbacForbidden, type MatrixUser, roleHeaders } from '../common/api_helpers';
 import { getTestScenariosForSpace, SOLUTION_ES_DISABLED_FEATURES } from '../common/spaces';
 import { apiTest } from '../fixtures';
 
-interface ApiResponse {
-  statusCode: number;
-  body: unknown;
-}
-
 interface GetAllTest {
   statusCode: number;
-  response: (resp: ApiResponse) => void;
+  response: (resp: ApiClientResponse) => void;
 }
 
 export interface GetAllTests {
@@ -107,7 +103,7 @@ const findExpectedSpace = (spaceIds: string[], id: string) =>
  */
 const buildExpectResults =
   (authorizedPurposes: AuthorizedPurposes | undefined, spaceIds: string[]) =>
-  (resp: ApiResponse) => {
+  (resp: ApiClientResponse) => {
     const spaces = resp.body as SpaceResult[];
     const actual: unknown[] = [];
     const expected: unknown[] = [];

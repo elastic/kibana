@@ -15,6 +15,7 @@ import {
   activateSimpleUserProfile,
   adminBasicAuthHeader,
   CHANGE_OWNER_PATH,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createSimpleUser,
   loginAsKibanaAdmin,
@@ -36,6 +37,10 @@ apiTest.describe(
   () => {
     apiTest.beforeAll(async ({ esClient, kbnClient }) => {
       await setupAccessControlUsers({ esClient, kbnClient });
+    });
+
+    apiTest.afterAll(async ({ kbnClient, log }) => {
+      await cleanupAccessControlObjects(kbnClient, log);
     });
 
     apiTest(
@@ -75,10 +80,11 @@ apiTest.describe(
 
     apiTest(
       'should throw when transferring ownership of object owned by a different user and not admin',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, esClient, config }) => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile(esClient);
         const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          apiClient
+          apiClient,
+          config
         );
         const createResponse = await apiClient.post(CREATE_PATH, {
           headers: withXsrf(adminCookie),
@@ -109,7 +115,7 @@ apiTest.describe(
 
     apiTest(
       'should allow admins to transfer ownership of any object',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, esClient, config }) => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile(esClient);
         const { cookieHeader: ownerCookie, profileUid } = await loginAsObjectOwner(
           apiClient,
@@ -124,7 +130,7 @@ apiTest.describe(
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl.owner).toBe(profileUid);
 
-        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
         const transferResponse = await apiClient.put(CHANGE_OWNER_PATH, {
           headers: withXsrf(adminCookie),
           body: {
@@ -144,14 +150,14 @@ apiTest.describe(
 
     apiTest(
       'should allow bulk transfer ownership of allowed objects',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, esClient, config }) => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile(esClient);
         const { cookieHeader: ownerCookie } = await loginAsObjectOwner(
           apiClient,
           TEST_USER_USERNAME,
           TEST_USER_PASSWORD
         );
-        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
 
         const firstCreate = await apiClient.post(CREATE_PATH, {
           headers: withXsrf(ownerCookie),
@@ -195,18 +201,18 @@ apiTest.describe(
 
     apiTest(
       'sets the default mode when setting the ownership of an object without access control metadata',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, esClient, config }) => {
         const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile(esClient);
 
         const createResponse = await apiClient.post(CREATE_PATH, {
-          headers: withXsrf(adminBasicAuthHeader()),
+          headers: withXsrf(adminBasicAuthHeader(config)),
           body: { type: ACCESS_CONTROL_TYPE },
         });
         expect(createResponse).toHaveStatusCode(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).toBeUndefined();
 
-        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
         const getBefore = await apiClient.get(objectPath(objectId), {
           headers: withXsrf(adminCookie),
         });
@@ -233,7 +239,7 @@ apiTest.describe(
 
     apiTest(
       'should throw when transferring ownership of write-restricted objects if owner RBAC privileges are revoked',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, esClient, config }) => {
         const { cookieHeader: testUserCookie, profileUid: testUserProfileUid } =
           await loginAsObjectOwner(apiClient, TEST_USER_USERNAME, TEST_USER_PASSWORD);
 
@@ -252,7 +258,7 @@ apiTest.describe(
         // revoke privileges
         await createSimpleUser(esClient, ['viewer']);
 
-        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
         const getResponse = await apiClient.get(objectPath(objectId), {
           headers: withXsrf(adminCookie),
         });

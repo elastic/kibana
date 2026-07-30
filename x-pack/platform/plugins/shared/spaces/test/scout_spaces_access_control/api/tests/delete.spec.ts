@@ -12,6 +12,7 @@ import {
   ACCESS_CONTROL_EDITOR_PASSWORD,
   ACCESS_CONTROL_EDITOR_USERNAME,
   ACCESS_CONTROL_TYPE,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createSimpleUser,
   loginAsKibanaAdmin,
@@ -29,6 +30,10 @@ import {
 apiTest.describe('spaces access control - #delete', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ esClient, kbnClient }) => {
     await setupAccessControlUsers({ esClient, kbnClient });
+  });
+
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
   });
 
   apiTest('allow owner to delete object marked as write-restricted', async ({ apiClient }) => {
@@ -51,40 +56,44 @@ apiTest.describe('spaces access control - #delete', { tag: tags.stateful.classic
     expect(deleteResponse).toHaveStatusCode(200);
   });
 
-  apiTest('allows admin to delete object marked as write-restricted', async ({ apiClient }) => {
-    const { cookieHeader: ownerCookie, profileUid } = await loginAsObjectOwner(
-      apiClient,
-      TEST_USER_USERNAME,
-      TEST_USER_PASSWORD
-    );
-    const createResponse = await apiClient.post(CREATE_PATH, {
-      headers: withXsrf(ownerCookie),
-      body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
-    });
-    expect(createResponse).toHaveStatusCode(200);
-    const objectId = createResponse.body.id;
-    expect(createResponse.body.accessControl.owner).toBe(profileUid);
+  apiTest(
+    'allows admin to delete object marked as write-restricted',
+    async ({ apiClient, config }) => {
+      const { cookieHeader: ownerCookie, profileUid } = await loginAsObjectOwner(
+        apiClient,
+        TEST_USER_USERNAME,
+        TEST_USER_PASSWORD
+      );
+      const createResponse = await apiClient.post(CREATE_PATH, {
+        headers: withXsrf(ownerCookie),
+        body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
+      });
+      expect(createResponse).toHaveStatusCode(200);
+      const objectId = createResponse.body.id;
+      expect(createResponse.body.accessControl.owner).toBe(profileUid);
 
-    const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
-    const deleteResponse = await apiClient.delete(objectPath(objectId), {
-      headers: withXsrf(adminCookie),
-    });
-    expect(deleteResponse).toHaveStatusCode(200);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
+      const deleteResponse = await apiClient.delete(objectPath(objectId), {
+        headers: withXsrf(adminCookie),
+      });
+      expect(deleteResponse).toHaveStatusCode(200);
 
-    const getResponse = await apiClient.get(objectPath(objectId), {
-      headers: withXsrf(adminCookie),
-    });
-    expect(getResponse).toHaveStatusCode(404);
-    expect(getResponse.body.message).toContain(
-      `Saved object [${ACCESS_CONTROL_TYPE}/${objectId}] not found`
-    );
-  });
+      const getResponse = await apiClient.get(objectPath(objectId), {
+        headers: withXsrf(adminCookie),
+      });
+      expect(getResponse).toHaveStatusCode(404);
+      expect(getResponse.body.message).toContain(
+        `Saved object [${ACCESS_CONTROL_TYPE}/${objectId}] not found`
+      );
+    }
+  );
 
   apiTest(
     'throws when trying to delete write-restricted object owned by a different user when not admin',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const createResponse = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
@@ -107,8 +116,8 @@ apiTest.describe('spaces access control - #delete', { tag: tags.stateful.classic
     }
   );
 
-  apiTest('allows non-owner to delete object in default mode', async ({ apiClient }) => {
-    const { cookieHeader: ownerCookie } = await loginAsKibanaAdmin(apiClient);
+  apiTest('allows non-owner to delete object in default mode', async ({ apiClient, config }) => {
+    const { cookieHeader: ownerCookie } = await loginAsKibanaAdmin(apiClient, config);
     const createResponse = await apiClient.post(CREATE_PATH, {
       headers: withXsrf(ownerCookie),
       body: { type: ACCESS_CONTROL_TYPE },
@@ -129,7 +138,7 @@ apiTest.describe('spaces access control - #delete', { tag: tags.stateful.classic
 
   apiTest(
     'throws when trying to delete write-restricted object by owner with revoked RBAC privileges',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, esClient, config }) => {
       await createSimpleUser(esClient, ['kibana_savedobjects_editor']);
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
@@ -147,7 +156,7 @@ apiTest.describe('spaces access control - #delete', { tag: tags.stateful.classic
       // revoke privileges
       await createSimpleUser(esClient, ['viewer']);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const getResponse = await apiClient.get(objectPath(objectId), {
         headers: withXsrf(adminCookie),
       });

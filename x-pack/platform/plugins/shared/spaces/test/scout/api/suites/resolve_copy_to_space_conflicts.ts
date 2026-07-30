@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/scout';
+import type { ApiClientResponse, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { createExpectRbacForbidden, roleHeaders } from '../common/api_helpers';
@@ -22,16 +22,14 @@ import { apiTest } from '../fixtures';
 const DEFAULT_SPACE_ID = 'default';
 export const NON_EXISTENT_SPACE_ID = 'non_existent_space';
 
-interface ApiResponse {
-  statusCode: number;
-  body: Record<string, any>;
-}
-
 export interface ResolveResponseContext {
   kbnClient: KbnClient;
 }
 
-export type ResolveResponseFn = (resp: ApiResponse, ctx: ResolveResponseContext) => Promise<void>;
+export type ResolveResponseFn = (
+  resp: ApiClientResponse,
+  ctx: ResolveResponseContext
+) => Promise<void>;
 
 interface ResolveCopyToSpaceTest {
   statusCode: number;
@@ -305,8 +303,8 @@ export const createMultiNamespaceTestCases =
       overwrite: boolean;
       destinationId?: string;
     }) => ({ space_2: [overwriteRetry] });
-    const getResult = (response: ApiResponse) => response.body.space_2;
-    const expectSavedObjectForbiddenResponse = (response: ApiResponse) => {
+    const getResult = (response: ApiClientResponse) => response.body.space_2;
+    const expectSavedObjectForbiddenResponse = (response: ApiClientResponse) => {
       expect(response.body).toStrictEqual({
         space_2: {
           success: false,
@@ -322,7 +320,7 @@ export const createMultiNamespaceTestCases =
       });
     };
     const expectSavedObjectSuccessResponse = (
-      response: ApiResponse,
+      response: ApiClientResponse,
       id: string,
       destinationId?: string
     ) => {

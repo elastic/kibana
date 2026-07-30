@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { createExpectRbacForbidden, roleHeaders } from '../common/api_helpers';
@@ -23,16 +24,11 @@ import { apiTest } from '../fixtures';
 
 const DEFAULT_SPACE_ID = 'default';
 
-interface ApiResponse {
-  statusCode: number;
-  body: Record<string, any>;
-}
-
 export interface CopyResponseContext {
   esClient: Client;
 }
 
-export type CopyResponseFn = (resp: ApiResponse, ctx: CopyResponseContext) => Promise<void>;
+export type CopyResponseFn = (resp: ApiClientResponse, ctx: CopyResponseContext) => Promise<void>;
 
 interface CopyToSpaceTest {
   statusCode: number;
@@ -448,8 +444,8 @@ export const createMultiNamespaceTestCases =
     const inexactMatchIdC = `conflict_1c_default_and_space_1`;
     const ambiguousConflictId = `conflict_2_${spaceId}`;
 
-    const getResult = (response: ApiResponse) => response.body.space_2;
-    const expectSavedObjectForbiddenResponse = (response: ApiResponse) => {
+    const getResult = (response: ApiClientResponse) => response.body.space_2;
+    const expectSavedObjectForbiddenResponse = (response: ApiClientResponse) => {
       expect(response.body).toStrictEqual({
         space_2: {
           success: false,
@@ -465,7 +461,11 @@ export const createMultiNamespaceTestCases =
       });
     };
 
-    const expectNewCopyResponse = (response: ApiResponse, sourceId: string, title: string) => {
+    const expectNewCopyResponse = (
+      response: ApiClientResponse,
+      sourceId: string,
+      title: string
+    ) => {
       const { success, successCount, successResults, errors } = getResult(response);
       expect(success).toBe(true);
       expect(successCount).toBe(1);
@@ -839,16 +839,10 @@ export const copyToSpaceTest = (
           : ['error', 'message', 'statusCode'];
         expect(Object.keys(response.body).sort()).toStrictEqual(expectedBodyKeys);
         const noConflictResp = is200
-          ? {
-              statusCode: response.statusCode,
-              body: { [noConflictDestination]: response.body[noConflictDestination] },
-            }
+          ? { ...response, body: { [noConflictDestination]: response.body[noConflictDestination] } }
           : response;
         const conflictResp = is200
-          ? {
-              statusCode: response.statusCode,
-              body: { [conflictDestination]: response.body[conflictDestination] },
-            }
+          ? { ...response, body: { [conflictDestination]: response.body[conflictDestination] } }
           : response;
 
         await tests.multipleSpaces.noConflictsResponse(noConflictResp, { esClient });

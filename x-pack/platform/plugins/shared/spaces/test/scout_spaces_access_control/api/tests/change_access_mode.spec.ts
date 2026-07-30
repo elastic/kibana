@@ -13,6 +13,7 @@ import {
   activateSimpleUserProfile,
   adminBasicAuthHeader,
   CHANGE_MODE_PATH,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createSimpleUser,
   loginAsKibanaAdmin,
@@ -37,81 +38,91 @@ apiTest.describe(
       await setupAccessControlUsers({ esClient, kbnClient });
     });
 
-    apiTest('should allow admins to change access mode of any object', async ({ apiClient }) => {
-      const { cookieHeader: ownerCookie, profileUid } = await loginAsObjectOwner(
-        apiClient,
-        TEST_USER_USERNAME,
-        TEST_USER_PASSWORD
-      );
-      const createResponse = await apiClient.post(CREATE_PATH, {
-        headers: withXsrf(ownerCookie),
-        body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: false },
-      });
-      expect(createResponse).toHaveStatusCode(200);
-      const objectId = createResponse.body.id;
-      expect(createResponse.body.accessControl.owner).toBe(profileUid);
-
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
-      const response = await apiClient.put(CHANGE_MODE_PATH, {
-        headers: withXsrf(adminCookie),
-        body: {
-          objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-          newAccessMode: 'write_restricted',
-        },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.objects).toHaveLength(1);
-      expect(response.body.objects[0].id).toBe(objectId);
-      expect(response.body.objects[0].type).toBe(ACCESS_CONTROL_TYPE);
-
-      const getResponse = await apiClient.get(objectPath(objectId), {
-        headers: withXsrf(ownerCookie),
-      });
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body.accessControl.accessMode).toBe('write_restricted');
+    apiTest.afterAll(async ({ kbnClient, log }) => {
+      await cleanupAccessControlObjects(kbnClient, log);
     });
 
-    apiTest('allow owner to update object data after access mode change', async ({ apiClient }) => {
-      const { cookieHeader: ownerCookie, profileUid } = await loginAsObjectOwner(
-        apiClient,
-        TEST_USER_USERNAME,
-        TEST_USER_PASSWORD
-      );
-      const createResponse = await apiClient.post(CREATE_PATH, {
-        headers: withXsrf(ownerCookie),
-        body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: false },
-      });
-      expect(createResponse).toHaveStatusCode(200);
-      const objectId = createResponse.body.id;
-      expect(createResponse.body.accessControl.owner).toBe(profileUid);
+    apiTest(
+      'should allow admins to change access mode of any object',
+      async ({ apiClient, config }) => {
+        const { cookieHeader: ownerCookie, profileUid } = await loginAsObjectOwner(
+          apiClient,
+          TEST_USER_USERNAME,
+          TEST_USER_PASSWORD
+        );
+        const createResponse = await apiClient.post(CREATE_PATH, {
+          headers: withXsrf(ownerCookie),
+          body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: false },
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl.owner).toBe(profileUid);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
-      const response = await apiClient.put(CHANGE_MODE_PATH, {
-        headers: withXsrf(ownerCookie),
-        body: {
-          objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
-          newAccessMode: 'write_restricted',
-        },
-      });
-      expect(response).toHaveStatusCode(200);
-      expect(response.body.objects).toHaveLength(1);
-      expect(response.body.objects[0].id).toBe(objectId);
-      expect(response.body.objects[0].type).toBe(ACCESS_CONTROL_TYPE);
+        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
+        const response = await apiClient.put(CHANGE_MODE_PATH, {
+          headers: withXsrf(adminCookie),
+          body: {
+            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+            newAccessMode: 'write_restricted',
+          },
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.objects).toHaveLength(1);
+        expect(response.body.objects[0].id).toBe(objectId);
+        expect(response.body.objects[0].type).toBe(ACCESS_CONTROL_TYPE);
 
-      const getResponse = await apiClient.get(objectPath(objectId), {
-        headers: withXsrf(adminCookie),
-      });
-      expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body.accessControl.accessMode).toBe('write_restricted');
+        const getResponse = await apiClient.get(objectPath(objectId), {
+          headers: withXsrf(ownerCookie),
+        });
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.accessControl.accessMode).toBe('write_restricted');
+      }
+    );
 
-      const updateResponse = await apiClient.put(UPDATE_PATH, {
-        headers: withXsrf(ownerCookie),
-        body: { objectId, type: ACCESS_CONTROL_TYPE },
-      });
-      expect(updateResponse).toHaveStatusCode(200);
-      expect(updateResponse.body.id).toBe(objectId);
-      expect(updateResponse.body.attributes.description).toBe('updated description');
-    });
+    apiTest(
+      'allow owner to update object data after access mode change',
+      async ({ apiClient, config }) => {
+        const { cookieHeader: ownerCookie, profileUid } = await loginAsObjectOwner(
+          apiClient,
+          TEST_USER_USERNAME,
+          TEST_USER_PASSWORD
+        );
+        const createResponse = await apiClient.post(CREATE_PATH, {
+          headers: withXsrf(ownerCookie),
+          body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: false },
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        const objectId = createResponse.body.id;
+        expect(createResponse.body.accessControl.owner).toBe(profileUid);
+
+        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
+        const response = await apiClient.put(CHANGE_MODE_PATH, {
+          headers: withXsrf(ownerCookie),
+          body: {
+            objects: [{ id: objectId, type: ACCESS_CONTROL_TYPE }],
+            newAccessMode: 'write_restricted',
+          },
+        });
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.objects).toHaveLength(1);
+        expect(response.body.objects[0].id).toBe(objectId);
+        expect(response.body.objects[0].type).toBe(ACCESS_CONTROL_TYPE);
+
+        const getResponse = await apiClient.get(objectPath(objectId), {
+          headers: withXsrf(adminCookie),
+        });
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.accessControl.accessMode).toBe('write_restricted');
+
+        const updateResponse = await apiClient.put(UPDATE_PATH, {
+          headers: withXsrf(ownerCookie),
+          body: { objectId, type: ACCESS_CONTROL_TYPE },
+        });
+        expect(updateResponse).toHaveStatusCode(200);
+        expect(updateResponse.body.id).toBe(objectId);
+        expect(updateResponse.body.attributes.description).toBe('updated description');
+      }
+    );
 
     apiTest(
       'should throw when trying to change access mode on write restricted objects when not owner',
@@ -195,9 +206,9 @@ apiTest.describe(
 
     apiTest(
       'sets the current user as the owner when setting the mode of an object without access control metadata',
-      async ({ apiClient }) => {
+      async ({ apiClient, config }) => {
         const createResponse = await apiClient.post(CREATE_PATH, {
-          headers: withXsrf(adminBasicAuthHeader()),
+          headers: withXsrf(adminBasicAuthHeader(config)),
           body: { type: ACCESS_CONTROL_TYPE },
         });
         expect(createResponse).toHaveStatusCode(200);
@@ -205,7 +216,8 @@ apiTest.describe(
         expect(createResponse.body.accessControl).toBeUndefined();
 
         const { cookieHeader: adminCookie, profileUid: adminProfileUid } = await loginAsKibanaAdmin(
-          apiClient
+          apiClient,
+          config
         );
         const getBefore = await apiClient.get(objectPath(objectId), {
           headers: withXsrf(adminCookie),
@@ -233,7 +245,7 @@ apiTest.describe(
 
     apiTest(
       'should throw when trying to change access mode if owner RBAC privileges are revoked',
-      async ({ apiClient, esClient }) => {
+      async ({ apiClient, esClient, config }) => {
         const { cookieHeader: testUserCookie } = await loginAsObjectOwner(
           apiClient,
           TEST_USER_USERNAME,
@@ -256,7 +268,7 @@ apiTest.describe(
         // revoke privileges
         await createSimpleUser(esClient, ['viewer']);
 
-        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+        const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
         const getResponse = await apiClient.get(objectPath(objectId), {
           headers: withXsrf(adminCookie),
         });

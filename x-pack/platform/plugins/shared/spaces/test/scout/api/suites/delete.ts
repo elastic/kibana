@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { createExpectRbacForbidden, roleHeaders } from '../common/api_helpers';
@@ -19,18 +20,13 @@ import {
 import { getTestScenariosForSpace, SPACE_2 } from '../common/spaces';
 import { apiTest } from '../fixtures';
 
-interface ApiResponse {
-  statusCode: number;
-  body: Record<string, any>;
-}
-
 interface ResponseContext {
   esClient: Client;
 }
 
 interface DeleteTest {
   statusCode: number;
-  response: (resp: ApiResponse, ctx: ResponseContext) => Promise<void> | void;
+  response: (resp: ApiClientResponse, ctx: ResponseContext) => Promise<void> | void;
 }
 
 export interface DeleteTests {
@@ -45,6 +41,12 @@ interface DeleteTestDefinition {
   tests: DeleteTests;
 }
 
+/**
+ * Polls `check` until it returns true or the timeout elapses. A local helper on purpose:
+ * `@kbn/scout/api` exposes a deliberately restricted `expect` without `expect.poll` /
+ * `toPass` (see `kbn-scout/src/playwright/matchers/api/README.md`), so polling
+ * eventually-consistent ES state needs a hand-rolled loop in API suites.
+ */
 const waitFor = async (label: string, timeoutMs: number, check: () => Promise<boolean>) => {
   const start = Date.now();
   let lastError: unknown;
@@ -65,7 +67,7 @@ export const expectRbacForbidden = createExpectRbacForbidden('Unauthorized to de
 
 export { expectNotFound } from '../common/api_helpers';
 
-export const expectReservedSpaceResult = (resp: ApiResponse) => {
+export const expectReservedSpaceResult = (resp: ApiClientResponse) => {
   expect(resp.body).toStrictEqual({
     error: 'Bad Request',
     statusCode: 400,
@@ -77,7 +79,10 @@ export const expectReservedSpaceResult = (resp: ApiResponse) => {
  * Asserts that deleting `space_2` cascaded correctly: the space's own objects are
  * gone and any multi-namespace object no longer references `space_2`.
  */
-export const expectEmptyResult = async (_resp: ApiResponse, { esClient }: ResponseContext) => {
+export const expectEmptyResult = async (
+  _resp: ApiClientResponse,
+  { esClient }: ResponseContext
+) => {
   await waitFor('space_2 to be deleted', 5000, async () => {
     const response = await getAggregatedSpaceData(esClient, [
       'visualization',

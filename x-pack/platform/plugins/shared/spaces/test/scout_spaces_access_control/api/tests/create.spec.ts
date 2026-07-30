@@ -13,6 +13,7 @@ import {
   ACCESS_CONTROL_EDITOR_USERNAME,
   ACCESS_CONTROL_TYPE,
   adminBasicAuthHeader,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   createSimpleUser,
   loginAsKibanaAdmin,
@@ -31,8 +32,12 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
     await setupAccessControlUsers({ esClient, kbnClient });
   });
 
-  apiTest('should create a write-restricted object', async ({ apiClient }) => {
-    const { cookieHeader, profileUid } = await loginAsKibanaAdmin(apiClient);
+  apiTest.afterAll(async ({ kbnClient, log }) => {
+    await cleanupAccessControlObjects(kbnClient, log);
+  });
+
+  apiTest('should create a write-restricted object', async ({ apiClient, config }) => {
+    const { cookieHeader, profileUid } = await loginAsKibanaAdmin(apiClient, config);
     const response = await apiClient.post(CREATE_PATH, {
       headers: withXsrf(cookieHeader),
       body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
@@ -46,9 +51,9 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
   apiTest(
     'creates objects that support access control without metadata when there is no active user profile',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const response = await apiClient.post(CREATE_PATH, {
-        headers: withXsrf(adminBasicAuthHeader()),
+        headers: withXsrf(adminBasicAuthHeader(config)),
         body: { type: ACCESS_CONTROL_TYPE },
       });
       expect(response).toHaveStatusCode(200);
@@ -56,7 +61,7 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
       expect(response.body.type).toBe(ACCESS_CONTROL_TYPE);
 
       const getResponse = await apiClient.get(`/access_control_objects/${response.body.id}`, {
-        headers: withXsrf(adminBasicAuthHeader()),
+        headers: withXsrf(adminBasicAuthHeader(config)),
       });
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body.accessControl).toBeUndefined();
@@ -65,9 +70,9 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
   apiTest(
     'allows creating an object supporting access control with no metadata when there is no active user profile and no access mode is provided',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const response = await apiClient.post(CREATE_PATH, {
-        headers: withXsrf(adminBasicAuthHeader()),
+        headers: withXsrf(adminBasicAuthHeader(config)),
         body: { type: ACCESS_CONTROL_TYPE },
       });
       expect(response).toHaveStatusCode(200);
@@ -76,7 +81,7 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
       const createdId = response.body.id;
       const getResponse = await apiClient.get(`/access_control_objects/${createdId}`, {
-        headers: withXsrf(adminBasicAuthHeader()),
+        headers: withXsrf(adminBasicAuthHeader(config)),
       });
       expect(getResponse).toHaveStatusCode(200);
       expect(getResponse.body.accessControl).toBeUndefined();
@@ -87,9 +92,9 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
   apiTest(
     'should throw when trying to create an access control object with no user',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const response = await apiClient.post(CREATE_PATH, {
-        headers: withXsrf(adminBasicAuthHeader()),
+        headers: withXsrf(adminBasicAuthHeader(config)),
         body: { type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
       });
       expect(response).toHaveStatusCode(400);
@@ -127,7 +132,7 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
   apiTest(
     'should throw when overwriting an object owned by current user if RBAC privileges are revoked',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, esClient, config }) => {
       await createSimpleUser(esClient, ['kibana_savedobjects_editor']);
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
@@ -147,7 +152,7 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
       // revoke privileges
       await createSimpleUser(esClient, ['viewer']);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const getResponse = await apiClient.get(`/access_control_objects/${objectId}`, {
         headers: withXsrf(adminCookie),
       });
@@ -170,7 +175,7 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
   apiTest(
     'should allow overwriting an object owned by another user if admin',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: ownerCookie, profileUid: ownerProfileUid } = await loginAsObjectOwner(
         apiClient,
         TEST_USER_USERNAME,
@@ -186,7 +191,7 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
       expect(createResponse.body.accessControl.accessMode).toBe('write_restricted');
       expect(createResponse.body.accessControl.owner).toBe(ownerProfileUid);
 
-      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient);
+      const { cookieHeader: adminCookie } = await loginAsKibanaAdmin(apiClient, config);
       const overwriteResponse = await apiClient.post(`${CREATE_PATH}?overwrite=true`, {
         headers: withXsrf(adminCookie),
         body: { id: objectId, type: ACCESS_CONTROL_TYPE, isWriteRestricted: true },
@@ -200,9 +205,10 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
   apiTest(
     'should allow overwriting an object owned by another user if in default mode',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const createResponse = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),
@@ -233,9 +239,10 @@ apiTest.describe('spaces access control - #create', { tag: tags.stateful.classic
 
   apiTest(
     'should reject overwriting an object owned by another user if not admin',
-    async ({ apiClient }) => {
+    async ({ apiClient, config }) => {
       const { cookieHeader: adminCookie, profileUid: adminUid } = await loginAsKibanaAdmin(
-        apiClient
+        apiClient,
+        config
       );
       const createResponse = await apiClient.post(CREATE_PATH, {
         headers: withXsrf(adminCookie),

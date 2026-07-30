@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/api';
 
 import {
   ACCESS_CONTROL_TYPE,
+  cleanupAccessControlObjects,
   CREATE_PATH,
   loginAsKibanaAdmin,
   setupAccessControlUsers,
@@ -24,10 +25,14 @@ apiTest.describe(
       await setupAccessControlUsers({ esClient, kbnClient });
     });
 
+    apiTest.afterAll(async ({ kbnClient, log }) => {
+      await cleanupAccessControlObjects(kbnClient, log);
+    });
+
     apiTest(
       'types supporting access control are created with default access mode when not specified',
-      async ({ apiClient }) => {
-        const { cookieHeader, profileUid } = await loginAsKibanaAdmin(apiClient);
+      async ({ apiClient, config }) => {
+        const { cookieHeader, profileUid } = await loginAsKibanaAdmin(apiClient, config);
 
         const response = await apiClient.post(CREATE_PATH, {
           headers: withXsrf(cookieHeader),

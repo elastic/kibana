@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { Client } from '@elastic/elasticsearch';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { uniq, without } from 'lodash';
 
+import type { ApiClientResponse } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import { roleHeaders } from '../common/api_helpers';
@@ -22,11 +25,21 @@ export interface UpdateObjectsSpacesTestCase {
   objects: Array<{
     id: string;
     existingNamespaces: readonly string[];
+    /**
+     * If defined, asserts the total number of `legacy-url-alias` documents equals the
+     * archive baseline ({@link ALIAS_COUNT_BASELINE}) plus this difference — aliases in a
+     * space are deleted when the object they point to is unshared from that space.
+     * Requires an `esClient` capable of searching the `.kibana*` system indices.
+     */
+    expectAliasDifference?: number;
     failure?: 404;
   }>;
   spacesToAdd: string[];
   spacesToRemove: string[];
 }
+
+/** Number of `legacy-url-alias` documents seeded by the shared spaces ES archive. */
+const ALIAS_COUNT_BASELINE = 6;
 
 export interface UpdateObjectsSpacesTestDefinition {
   title: string;
@@ -81,11 +94,13 @@ export const createTestDefinitions = (
   }));
 };
 
-const verifyResult = (
+export const verifyResult = async (
   testCase: UpdateObjectsSpacesTestCase,
   statusCode: 200 | 403,
   authorizedSpace: string | undefined,
-  response: { body: Record<string, any> }
+  response: ApiClientResponse,
+  /** Required by test cases carrying `expectAliasDifference`; must be able to search `.kibana*`. */
+  esClient?: Client
 ) => {
   if (statusCode === 403) {
     expect(response.body).toStrictEqual({
@@ -99,7 +114,8 @@ const verifyResult = (
   const { objects, spacesToAdd, spacesToRemove } = testCase;
   const apiObjects = response.body.objects as Array<Record<string, any>>;
 
-  objects.forEach(({ id, existingNamespaces, failure }, i) => {
+  let hasRefreshed = false;
+  for (const [i, { id, existingNamespaces, expectAliasDifference, failure }] of objects.entries()) {
     const object = apiObjects[i];
 
     if (failure === 404) {
@@ -108,7 +124,7 @@ const verifyResult = (
         error: 'Not Found',
         message: `Saved object [${TYPE}/${id}] not found`,
       });
-      return;
+      continue;
     }
 
     const expectedSpaces = without(
@@ -119,7 +135,28 @@ const verifyResult = (
     expect(object.type).toBe(TYPE);
     expect(object.id).toBe(id);
     expect([...object.spaces].sort()).toStrictEqual([...expectedSpaces].sort());
-  });
+
+    if (expectAliasDifference !== undefined) {
+      if (!esClient) {
+        throw new Error('esClient is required for test cases with `expectAliasDifference`');
+      }
+      if (!hasRefreshed) {
+        // alias deletion uses `refresh: false`, so refresh the indices before searching
+        await esClient.indices.refresh({ index: '.kibana*', ignore_unavailable: true });
+        hasRefreshed = true;
+      }
+      const searchResponse = await esClient.search({
+        index: '.kibana*',
+        ignore_unavailable: true,
+        size: 0,
+        query: { terms: { type: ['legacy-url-alias'] } },
+        track_total_hits: true,
+      });
+      expect((searchResponse.hits.total as SearchTotalHits).value).toBe(
+        ALIAS_COUNT_BASELINE + expectAliasDifference
+      );
+    }
+  }
 };
 
 /**
@@ -128,8 +165,8 @@ const verifyResult = (
  * `POST /api/spaces/_update_objects_spaces` from the target space's URL context for each
  * test case, asserting the response (and redacted `spaces`) match expectations.
  *
- * Note: the alias-deletion cases are intentionally excluded, so no `expectAliasDifference` /
- * ES alias-count assertions are included.
+ * Note: the authorization matrices don't use `expectAliasDifference`; the alias-deletion and
+ * share-lifecycle behavior is covered by `tests/update_objects_spaces_lifecycle.spec.ts`.
  */
 export const updateTest = (
   description: string,
@@ -154,7 +191,12 @@ export const updateTest = (
           );
 
           expect(response).toHaveStatusCode(test.responseStatusCode);
-          verifyResult(test.testCase, test.responseStatusCode, test.authorizedSpace, response);
+          await verifyResult(
+            test.testCase,
+            test.responseStatusCode,
+            test.authorizedSpace,
+            response
+          );
         }
       );
     }
