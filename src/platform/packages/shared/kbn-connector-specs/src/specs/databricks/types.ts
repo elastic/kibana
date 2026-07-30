@@ -158,6 +158,7 @@ export const RepairRunInputSchema = lazySchema(() =>
       runId: z.number().describe('The run ID to repair. Example: 455644833'),
       rerunTasks: z
         .array(z.string().max(200))
+        .max(50)
         .min(1)
         .optional()
         .describe('Task keys to re-run. Mutually exclusive with rerunAllFailedTasks.'),
