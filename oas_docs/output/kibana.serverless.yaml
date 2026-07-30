@@ -289,6 +289,12 @@ tags:
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery
+  - description: |
+      Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space.
+
+      A single request can run one or more initialization flows. Each flow provisions a specific set of assets (for example, list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, or detection rule monitoring assets). The response reports a per-flow result so you can tell which flows completed and which returned an error.
+    name: Security Solution Initialization API
+    x-displayName: Security solution initialization
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
@@ -50819,6 +50825,83 @@ paths:
             curl \
              --request GET 'http://localhost:5601/api/security_ai_assistant/prompts/_find?page=1&per_page=20' \
              --header "Authorization: $API_KEY"
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/security_solution/initialize:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Run one or more Security Solution initialization flows for the current space.
+        Each flow provisions a specific set of assets, for example list indices,
+        security data views, prebuilt detection rules, endpoint protection, AI prompts,
+        or detection rule monitoring assets. Only the requested flows are run, and the
+        response reports a result for each one.
+      operationId: InitializeSecuritySolution
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  flows:
+                    - init-prebuilt-rules
+                    - init-endpoint-protection
+                    - init-ai-prompts
+            schema:
+              type: object
+              properties:
+                flows:
+                  items:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowId'
+                  minItems: 1
+                  type: array
+              required:
+                - flows
+        description: The initialization flows to run.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    flows:
+                      init-ai-prompts:
+                        payload:
+                          install_status: installed
+                          name: security_ai_prompts
+                          version: 8.17.1
+                        status: ready
+                      init-endpoint-protection:
+                        payload:
+                          install_status: already_installed
+                          name: endpoint
+                          version: 8.17.1
+                        status: ready
+                      init-prebuilt-rules:
+                        payload:
+                          install_status: installed
+                          name: security_detection_engine
+                          version: 8.17.1
+                        status: ready
+              schema:
+                type: object
+                properties:
+                  flows:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowsResult'
+                required:
+                  - flows
+          description: Indicates a successful call. Returns a result for each requested flow.
+      summary: Initialize security solution flows
+      tags:
+        - Security Solution Initialization API
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -126509,6 +126592,144 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
+    Security_Solution_Initialization_API_CreateListIndicesReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_DataViewPayload:
+      type: object
+      properties:
+        id:
+          type: string
+        patternList:
+          items:
+            type: string
+          type: array
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - patternList
+    Security_Solution_Initialization_API_InitializationFlowErrorResult:
+      type: object
+      properties:
+        error:
+          nullable: true
+          type: string
+        status:
+          enum:
+            - error
+          type: string
+      required:
+        - status
+        - error
+    Security_Solution_Initialization_API_InitializationFlowId:
+      description: Identifier for an initialization flow.
+      enum:
+        - create-list-indices
+        - security-data-views
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-rule-monitoring
+      type: string
+    Security_Solution_Initialization_API_InitializationFlowsResult:
+      description: Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
+      type: object
+      properties:
+        create-list-indices:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_CreateListIndicesReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-ai-prompts:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-detection-rule-monitoring:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-endpoint-protection:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-prebuilt-rules:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        security-data-views:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_SecurityDataViewsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+    Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_PackageInstallReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            install_status:
+              description: Fleet package installation status (e.g., installed, already_installed).
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+          required:
+            - name
+            - version
+            - install_status
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
+    Security_Solution_Initialization_API_SecurityDataViewsReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            alertDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            attackDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            defaultDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            kibanaDataViews:
+              items:
+                $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+              type: array
+            signalIndexName:
+              type: string
+          required:
+            - defaultDataView
+            - alertDataView
+            - kibanaDataViews
+            - signalIndexName
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
     Security_Timeline_API_AssociatedFilterType:
       description: |
         How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).

@@ -40,7 +40,9 @@ interface StreamMock {
   write: (data: string) => void;
   fail: () => void;
   end: () => void;
+  destroy: jest.Mock;
   transform: Transform;
+  on: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   once: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
   removeListener: (event: string, listener: (...args: unknown[]) => void) => StreamMock;
 }
@@ -48,11 +50,14 @@ interface StreamMock {
 const coreSetupMock = coreMock.createSetup();
 const mockEventTracker = eventTrackerMock.create();
 
-function createStreamMock(): StreamMock {
+function createStreamMock({
+  seqNo = 10,
+  primaryTerm = 20,
+}: Partial<Record<'seqNo' | 'primaryTerm', number>> = {}): StreamMock {
   const transform: Transform = new Transform({});
   const mock = {
-    getSeqNo: () => 10,
-    getPrimaryTerm: () => 20,
+    getSeqNo: () => seqNo,
+    getPrimaryTerm: () => primaryTerm,
     write: (data: string) => {
       transform.push(`${data}\n`);
     },
@@ -63,6 +68,11 @@ function createStreamMock(): StreamMock {
     transform,
     end: () => {
       transform.end();
+    },
+    destroy: jest.fn(),
+    on: (event: string, listener: (...args: unknown[]) => void) => {
+      transform.on(event, listener);
+      return mock;
     },
     once: (event: string, listener: (...args: unknown[]) => void) => {
       transform.once(event, listener);
@@ -77,8 +87,9 @@ function createStreamMock(): StreamMock {
 }
 
 const mockStream = createStreamMock();
+const mockGetContentStream = jest.fn();
 jest.mock('../content_stream', () => ({
-  getContentStream: () => mockStream,
+  getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
   finishedWithNoPendingCallbacks: () => Promise.resolve(),
 }));
 
@@ -182,6 +193,7 @@ describe('Run Scheduled Report Task', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    mockGetContentStream.mockImplementation(() => mockStream);
     logger = loggingSystemMock.createLogger();
     soClient.get = jest.fn().mockImplementation(async () => {
       return scheduledReport;
@@ -208,6 +220,11 @@ describe('Run Scheduled Report Task', () => {
     emailNotificationService = new EmailNotificationService({
       notifications,
     });
+  });
+
+  afterEach(() => {
+    // some tests enable fake timers; restore real timers even if they fail mid-test
+    jest.useRealTimers();
   });
 
   it('Instance setup', () => {
@@ -835,6 +852,134 @@ describe('Run Scheduled Report Task', () => {
       completed_at: expect.any(String),
       error: expect.objectContaining({ name: 'Error', message: 'failure generating report' }),
     });
+    jest.useRealTimers();
+  });
+
+  // Regression test for https://github.com/elastic/kibana/issues/255230: after an attempt advances
+  // the doc's seq_no, the retry must refresh the OCC values instead of reusing the stale ones.
+  it('retries with fresh seq_no/primary_term and tears down the failed stream', async () => {
+    jest.useFakeTimers();
+    configType = createMockConfigSchema({ capture: { maxAttempts: 2 } });
+    mockReporting = await createMockReportingCore(configType);
+
+    // the doc's actual seq_no/primary_term after attempt 1's writeHead advanced it
+    const freshSeqNo = 42;
+    const freshPrimaryTerm = 354001;
+
+    // attempt 1 fails, attempt 2 succeeds
+    const runThisTaskFn = jest
+      .fn()
+      .mockImplementationOnce(() => {
+        throw new Error('failure generating report');
+      })
+      .mockResolvedValueOnce({ content_type: 'text/csv' });
+    mockReporting.getExportTypesRegistry().register({
+      id: 'test2',
+      name: 'Test2',
+      setup: jest.fn(),
+      start: jest.fn(),
+      createJob: () => new Promise(() => {}),
+      runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
+      jobContentEncoding: 'base64',
+      jobContentExtension: 'csv',
+      jobType: 'test2',
+      validLicenses: [],
+    } as unknown as ExportType);
+
+    const streamAttempt1 = createStreamMock({ seqNo: freshSeqNo, primaryTerm: freshPrimaryTerm });
+    const streamAttempt2 = createStreamMock({ seqNo: 43, primaryTerm: freshPrimaryTerm });
+    mockGetContentStream
+      .mockImplementationOnce(() => streamAttempt1)
+      .mockImplementationOnce(() => streamAttempt2);
+
+    // refreshReportSeqNo re-fetches the doc; return the advanced values
+    const { asInternalUser: esClient } = await mockReporting.getEsClient();
+    (esClient.get as unknown as jest.Mock).mockResolvedValue({
+      _id: savedReportData._id,
+      _index: savedReportData._index,
+      _seq_no: freshSeqNo,
+      _primary_term: freshPrimaryTerm,
+      found: true,
+      _source: { ...savedReportData, jobtype: 'test2' },
+    });
+
+    const store = await mockReporting.getStore();
+    const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+    store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+    store.setReportError = jest.fn(() =>
+      Promise.resolve({
+        _id: savedReportData._id,
+        jobtype: 'test2',
+        status: 'processing',
+      } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+    );
+    mockReporting.getEventTracker = jest.fn().mockReturnValue(mockEventTracker);
+
+    const task = new RunScheduledReportTask({
+      reporting: mockReporting,
+      config: configType,
+      logger,
+    });
+    jest
+      // @ts-expect-error TS compilation fails: this overrides a private method of the RunScheduledReportTask instance
+      .spyOn(task, 'completeJob')
+      .mockResolvedValue({
+        _id: savedReportData._id,
+        jobtype: 'test2',
+        status: 'completed',
+      } as never);
+
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager, emailNotificationService);
+
+    const taskDef = task.getTaskDefinition();
+    const taskRunner = taskDef.createTaskRunner({
+      taskInstance: {
+        id: 'report-so-id',
+        runAt: new Date('2023-10-01T00:00:00Z'),
+        params: {
+          id: 'report-so-id',
+          jobtype: 'test2',
+          schedule: {
+            rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+          },
+        },
+      },
+      fakeRequest: fakeRawRequest,
+    } as unknown as RunContext);
+
+    const runPromise = taskRunner.run();
+    // Advance past all retry delays
+    for (let i = 0; i < 10; i++) {
+      await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+    }
+    await runPromise;
+
+    expect(runThisTaskFn).toHaveBeenCalledTimes(2);
+    expect(mockGetContentStream).toHaveBeenCalledTimes(2);
+
+    // attempt 1 uses the OCC values from claim time
+    expect(mockGetContentStream.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        if_seq_no: savedReportData._seq_no,
+        if_primary_term: savedReportData._primary_term,
+      })
+    );
+
+    // the retry must use the doc's current (refreshed) values, not the stale ones
+    expect(mockGetContentStream.mock.calls[1][1]).toEqual(
+      expect.objectContaining({
+        if_seq_no: freshSeqNo,
+        if_primary_term: freshPrimaryTerm,
+      })
+    );
+
+    // the failed attempt's stream must be torn down so it can't keep writing
+    expect(streamAttempt1.destroy).toHaveBeenCalled();
+
     jest.useRealTimers();
   });
 
