@@ -12,6 +12,17 @@ import { RulesApi } from '../services/rules_api';
 import { isNotFoundError } from '../utils/is_not_found_error';
 import { ruleKeys } from './query_key_factory';
 
+/**
+ * No `staleTime` is set here on purpose: `useQueryClient()`'s context
+ * resolution means rule mutation hooks (e.g. `useToggleRuleEnabled`) can end
+ * up invalidating a different `QueryClient` instance than the one this hook
+ * reads from — e.g. when the mutation is triggered from a component nested
+ * under the rules list's `ContentListProvider`, which nests its own
+ * `QueryClient` (see `invalidate_rules_content_list.ts`). Relying on the
+ * default `staleTime: 0` (always refetch on mount) papers over that gap. If
+ * you add a `staleTime` here, first make invalidation reach this hook's
+ * cache reliably regardless of where the mutation was triggered from.
+ */
 export const useFetchRule = (id: string | undefined) => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
