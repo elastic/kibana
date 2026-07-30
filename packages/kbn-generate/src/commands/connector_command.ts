@@ -43,7 +43,6 @@ const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/data-context-sources-conn
 const TOC_FILE = Path.resolve(REPO_ROOT, 'docs/reference/toc.yml');
 const TOC_SECTION_FILE = 'connectors-kibana/data-context-sources-connectors.md';
 
-
 export const ConnectorCommand: GenerateCommand = {
   name: 'connector',
   description:
