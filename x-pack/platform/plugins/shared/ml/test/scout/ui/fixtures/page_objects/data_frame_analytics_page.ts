@@ -46,13 +46,19 @@ export class DataFrameAnalyticsPage {
 
   async selectSource(sourceName: string): Promise<void> {
     // EuiBasicTable sets aria-busy="true" while loading and removes it when done;
-    // wait for it to clear before typing so the search fires against a stable list.
-    await this.page.testSubj
-      .locator('savedObjectsFinderTable')
-      .locator('table:not([aria-busy="true"])')
-      .waitFor({ state: 'visible', timeout: 40_000 });
-    await this.page.testSubj.locator('savedObjectFinderSearchInput').fill(sourceName);
-    // fill() triggers a 300 ms debounced API search; wait explicitly for slow CI environments.
+    // wait for the initial load to clear before searching.
+    const resultsTable = this.page.testSubj.locator('savedObjectsFinderTable');
+    const settledResultsTable = resultsTable.locator('table:not([aria-busy="true"])');
+    await settledResultsTable.waitFor({ state: 'visible', timeout: 40_000 });
+
+    // SavedObjectFinder uses an incremental EuiSearchBar with a 300 ms debounce.
+    // Sequential keyboard events reliably trigger the full EUI search interaction;
+    // the matching result is the definitive signal that the search completed.
+    const searchInput = this.page.testSubj.locator('savedObjectFinderSearchInput');
+    await searchInput.click();
+    await searchInput.clear();
+    await searchInput.type(sourceName, { delay: 50 });
+
     const resultItem = this.page.testSubj.locator(`savedObjectTitle${sourceName}`);
     await resultItem.waitFor({ state: 'visible', timeout: 40_000 });
     await resultItem.click();

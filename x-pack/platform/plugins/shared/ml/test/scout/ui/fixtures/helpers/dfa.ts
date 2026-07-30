@@ -6,6 +6,7 @@
  */
 
 import type { KbnClient, ApiServicesFixture, EsClient } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { ML_TEST_DASHBOARD_ATTRIBUTES } from '../constants';
 
 interface CleanupDfaTestArgs {
@@ -29,6 +30,19 @@ export const createMLTestDashboard = async (kbnClient: KbnClient): Promise<strin
     attributes: ML_TEST_DASHBOARD_ATTRIBUTES,
   });
   return dashboard.id;
+};
+
+export const waitForTrainingDocs = async (
+  apiServices: ApiServicesFixture,
+  jobId: string
+): Promise<void> => {
+  // A newly started job can briefly report as stopped before training begins.
+  await expect
+    .poll(async () => (await apiServices.ml.dataFrameAnalytics.getStats(jobId)).hasTrainingDocs, {
+      timeout: 60_000,
+      intervals: [3_000],
+    })
+    .toBe(true);
 };
 
 /**

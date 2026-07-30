@@ -16,7 +16,11 @@
 
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
-import { createMLTestDashboard, cleanupDfaTest } from '../fixtures/helpers/dfa';
+import {
+  createMLTestDashboard,
+  cleanupDfaTest,
+  waitForTrainingDocs,
+} from '../fixtures/helpers/dfa';
 
 // ── Test data ────────────────────────────────────────────────────────────────
 
@@ -257,6 +261,7 @@ test.describe('outlier detection creation', { tag: '@local-stateful-classic' }, 
       // Create and start the job, navigate back to the job list
       await dataFrameAnalytics.createAndStartJob();
 
+      await waitForTrainingDocs(apiServices, testData.jobId);
       await apiServices.ml.dataFrameAnalytics.waitForStopped(testData.jobId);
 
       // Navigate to the job list and verify key table elements

@@ -18,10 +18,10 @@
  * depend on the DFA feature which is not yet verified on serverless.
  */
 
-import type { ApiServicesFixture, ScoutPage } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, ML_USERS } from '../fixtures';
-import { cleanupDfaCloningTest } from '../fixtures/helpers/dfa';
+import { cleanupDfaCloningTest, waitForTrainingDocs } from '../fixtures/helpers/dfa';
 
 // ── Shared timestamp ensures unique job IDs per test run ─────────────────────
 
@@ -151,19 +151,6 @@ const assertValidationCalloutCount = async (
   await expect(validationCallouts).toHaveCount(expectedCount);
 };
 
-const waitForTrainingDocs = async (
-  apiServices: ApiServicesFixture,
-  jobId: string
-): Promise<void> => {
-  // The job can briefly report as stopped before training starts.
-  await expect
-    .poll(async () => (await apiServices.ml.dataFrameAnalytics.getStats(jobId)).hasTrainingDocs, {
-      timeout: 60_000,
-      intervals: [3_000],
-    })
-    .toBe(true);
-};
-
 // ── Spec ──────────────────────────────────────────────────────────────────────
 
 test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
@@ -272,9 +259,7 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
       await dataFrameAnalytics.filterByJobId(CLASSIFICATION.jobId);
       await dataFrameAnalytics.cloneJob(CLASSIFICATION.jobId);
 
-      await expect(page.testSubj.locator('mlDataFrameAnalyticsWizardHeaderTitle')).toContainText(
-        'Clone job'
-      );
+      await expect(page.testSubj.locator('appHeaderTitle')).toContainText('Clone job');
       await expect(
         page.testSubj.locator('mlAnalyticsCreateJobWizardConfigurationStep active')
       ).toBeVisible();
@@ -389,9 +374,7 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
       await dataFrameAnalytics.filterByJobId(OUTLIER.jobId);
       await dataFrameAnalytics.cloneJob(OUTLIER.jobId);
 
-      await expect(page.testSubj.locator('mlDataFrameAnalyticsWizardHeaderTitle')).toContainText(
-        'Clone job'
-      );
+      await expect(page.testSubj.locator('appHeaderTitle')).toContainText('Clone job');
       await expect(
         page.testSubj.locator('mlAnalyticsCreateJobWizardConfigurationStep active')
       ).toBeVisible();
@@ -484,9 +467,7 @@ test.describe('DFA job cloning', { tag: '@local-stateful-classic' }, () => {
       await dataFrameAnalytics.filterByJobId(REGRESSION.jobId);
       await dataFrameAnalytics.cloneJob(REGRESSION.jobId);
 
-      await expect(page.testSubj.locator('mlDataFrameAnalyticsWizardHeaderTitle')).toContainText(
-        'Clone job'
-      );
+      await expect(page.testSubj.locator('appHeaderTitle')).toContainText('Clone job');
       await expect(
         page.testSubj.locator('mlAnalyticsCreateJobWizardConfigurationStep active')
       ).toBeVisible();
