@@ -290,7 +290,7 @@ The worked example above uses "no Figma available" as its Known Limitations entr
 | Figma — Alert flyout redesign (frame) | ✅ Metadata read + 3 opened PNGs for visual verification |
 ```
 
-The status cell should also include the (short-lived) screenshot URLs the Figma MCP returned so the reviewer can open them without re-running the skill; drop them if they have already expired. No Known Limitations entry is needed for this case — coverage is complete.
+If the `get_screenshot` responses returned URLs, include those (short-lived) URLs inline in the status cell so the reviewer can open them without re-running the skill; drop them if they have already expired. If the responses came back as inline base64 (no shareable URL), reference the node by name/id instead of a link — see [`output-formats.md`](output-formats.md#sources-summary) and [`gathering-context.md`](gathering-context.md#step-3--add-visual-verification-with-get_screenshot-only-where-needed) for the rule. Either way, no Known Limitations entry is needed for this case — coverage is complete.
 
 **Metadata-only case — small feature, no visual assertion needed.** When every scenario can be written from named components alone (e.g. *"the User flyout opens when clicking the user avatar"* without asserting on its internal layout), no screenshots are needed:
 

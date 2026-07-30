@@ -169,7 +169,7 @@ If a session hits the combined `get_screenshot` cap mid-draft, stop calling and 
 
 ### Step 6 — Announce and propagate
 
-- **Sources Summary.** One row per Figma link, describing what was fetched. Use one of the status cells from [`output-formats.md`](output-formats.md#sources-summary) — e.g. `✅ Metadata read (N fetchable children catalogued)` or `✅ Metadata read + 3 screenshots for visual verification`. When a screenshot was fetched, the URL from `get_screenshot` should be included in the status cell so the reader can open it — the URL is short-lived (Figma expires it after ~15 minutes), so treat it as a preview, not a stable reference.
+- **Sources Summary.** One row per Figma link, describing what was fetched. Use one of the status cells from [`output-formats.md`](output-formats.md#sources-summary) — e.g. `✅ Metadata read (N fetchable children catalogued)` or `✅ Metadata read + 3 opened PNGs for visual verification`. When a screenshot was fetched **and the response returned a URL**, include that URL from `get_screenshot` in the status cell so the reader can open it — the URL is short-lived (Figma expires it after ~15 minutes), so treat it as a preview, not a stable reference. For **inline-base64 responses** (no shareable URL), use the node name/id as the reference in the status cell instead — do not fabricate a URL. This mirrors the URL vs. inline-base64 distinction in Step 3 above.
 - **Known Limitations.** Only add a ⚠️ entry when coverage is genuinely incomplete:
   - The user narrowed a canvas via stop-and-ask (`section` / `canvas`), and specific children were excluded from the inventory.
   - The session budget cap fired mid-draft and remaining scenarios could not be visually verified.
