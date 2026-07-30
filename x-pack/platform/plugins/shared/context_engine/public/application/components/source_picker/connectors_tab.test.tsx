@@ -7,6 +7,7 @@
 
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -38,7 +39,10 @@ const renderConnectorsTab = ({
   selectedConnectorIds = [],
   onToggle = jest.fn(),
 }: RenderConnectorsTabOptions = {}) => {
-  const services = coreMock.createStart();
+  const services = {
+    ...coreMock.createStart(),
+    triggersActionsUi: triggersActionsUiMock.createStart(),
+  };
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   render(

@@ -5,26 +5,39 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import type { IconSize } from '@elastic/eui';
+import { EuiIcon, EuiSkeletonCircle } from '@elastic/eui';
+import type { EuiSkeletonCircleProps, IconSize, IconType } from '@elastic/eui';
 import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import React, { Suspense } from 'react';
+import { useKibana } from '../hooks/use_kibana';
 
 export interface ConnectorTypeIconProps {
   actionTypeId?: string;
   size?: IconSize;
 }
 
+const toSkeletonSize = (size: IconSize): EuiSkeletonCircleProps['size'] => {
+  if (size === 'original') return 'm';
+  if (size === 'xxl') return 'xl';
+  return size;
+};
+
 export const ConnectorTypeIcon = ({ actionTypeId, size = 'm' }: ConnectorTypeIconProps) => {
-  const LazyIcon = actionTypeId ? ConnectorIconsMap.get(actionTypeId) : null;
+  const {
+    services: { triggersActionsUi },
+  } = useKibana();
 
-  if (LazyIcon) {
-    return (
-      <Suspense fallback={<EuiIcon type="plugs" size={size} aria-hidden={true} />}>
-        <LazyIcon size={size} />
-      </Suspense>
-    );
-  }
+  const { actionTypeRegistry } = triggersActionsUi;
 
-  return <EuiIcon type="plugs" size={size} aria-hidden={true} />;
+  const iconType: IconType =
+    (actionTypeId && ConnectorIconsMap.get(actionTypeId)) ?? // v2 connector icons
+    (actionTypeId && actionTypeRegistry.has(actionTypeId)
+      ? actionTypeRegistry.get(actionTypeId).iconClass // legacy connector icons
+      : 'plugs');
+
+  return (
+    <Suspense fallback={<EuiSkeletonCircle size={toSkeletonSize(size)} />}>
+      <EuiIcon type={iconType} size={size} aria-hidden={true} />
+    </Suspense>
+  );
 };
