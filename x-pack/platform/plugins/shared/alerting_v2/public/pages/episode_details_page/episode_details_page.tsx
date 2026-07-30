@@ -72,8 +72,7 @@ const episodeDataRuleNameSchema = z
   .min(1)
   .transform((s) => JSON.parse(s) as unknown)
   .pipe(z.object({ rule_name: z.string() }).passthrough())
-  .transform((o) => o.rule_name)
-  .catch(undefined);
+  .transform((o) => o.rule_name);
 
 interface EpisodeRouteParams {
   episodeId: string;
@@ -136,7 +135,10 @@ export function EpisodeDetailsPage() {
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
-  const episodeDataRuleName = episodeDataRuleNameSchema.parse(episode?.episode_data);
+  const episodeDataRuleNameResult = episodeDataRuleNameSchema.safeParse(episode?.episode_data);
+  const episodeDataRuleName = episodeDataRuleNameResult.success
+    ? episodeDataRuleNameResult.data
+    : undefined;
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name

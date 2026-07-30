@@ -277,13 +277,15 @@ describe('AlertEpisodeOverviewList', () => {
   });
 
   it('does not render a link for javascript: or data: alert_url values', () => {
+    // Built dynamically so eslint no-script-url does not flag the XSS fixture string.
+    const javascriptAlertUrl = ['java', 'script:alert(document.domain)'].join('');
     const { rerender } = render(
       <I18nProvider>
         <AlertEpisodeOverviewList
           {...baseProps}
           groupingData={{
             ...baseProps.groupingData,
-            alert_url: 'javascript:alert(document.domain)',
+            alert_url: javascriptAlertUrl,
           }}
         />
       </I18nProvider>

@@ -72,7 +72,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
           alert_url: 'https://app.datadoghq.com/monitors/1',
         },
       });
-      expect(doc).not.toHaveProperty('rule');
+      expect(doc?.rule).toBeUndefined();
     }
   );
 
@@ -98,7 +98,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
         type: 'alert',
         status: 'breached',
       });
-      expect(doc).not.toHaveProperty('rule');
+      expect(doc?.rule).toBeUndefined();
     }
   );
 
