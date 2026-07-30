@@ -129,13 +129,15 @@ describe('addRoundCompleteEvent', () => {
     });
   });
 
-  // Shared fixture used by the author test below and the runFreshRound helper.
-  const messageCompleteEvent: ChatEvent = {
-    type: ChatEventType.messageComplete,
-    data: { message_id: 'message-1', message_content: 'Done' },
-  };
-
   it('stamps the resolved author on the round when there is no origin', async () => {
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: {
+        message_id: 'message-1',
+        message_content: 'Done',
+      },
+    };
+
     const events = await firstValueFrom(
       of(
         createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
@@ -158,11 +160,6 @@ describe('addRoundCompleteEvent', () => {
     expect(roundCompleteEvent?.data.round.origin).toBeUndefined();
   });
 
-  // Runs a fresh (non-pending) round with an optional relevant-skills selection.
-  const runFreshRound = (
-    relevantSkillsSelection?: Parameters<typeof addRoundCompleteEvent>[0]['relevantSkillsSelection']
-  ) =>
-    firstValueFrom(
   const typeDefStub = {
     getTypeDefinition: (type: string) => ({
       id: type,
@@ -248,10 +245,6 @@ describe('addRoundCompleteEvent', () => {
       ).pipe(
         addRoundCompleteEvent({
           ...createDeps(),
-          pendingRound: undefined,
-          userInput: { message: 'do a thing' },
-          startTime: new Date('2026-01-01T00:00:00.000Z'),
-          relevantSkillsSelection,
           attachmentStateManager,
           pendingRound: undefined,
           userInput: { message: 'hello' },
@@ -261,35 +254,6 @@ describe('addRoundCompleteEvent', () => {
       )
     );
 
-  it('adds a relevant_skills step for a fresh round when a non-empty selection is provided', async () => {
-    const skills = [
-      {
-        id: 'a.alpha',
-        name: 'alpha',
-        path: '/p/SKILL.md',
-        description: 'Alpha',
-        relevance_note: 'fits',
-      },
-    ];
-    const events = await runFreshRound({ skills });
-
-    const round = events.find(isRoundCompleteEvent)?.data.round;
-    const step = round?.steps.find(isRelevantSkillsStep);
-    expect(step).toBeDefined();
-    expect(step?.source).toBe('implicit');
-    expect(step?.skills).toEqual(skills);
-  });
-
-  it('adds no relevant_skills step when the selection is empty', async () => {
-    const events = await runFreshRound({ skills: [] });
-    const round = events.find(isRoundCompleteEvent)?.data.round;
-    expect(round?.steps.some(isRelevantSkillsStep)).toBe(false);
-  });
-
-  it('adds no relevant_skills step when no selection is provided', async () => {
-    const events = await runFreshRound(undefined);
-    const round = events.find(isRoundCompleteEvent)?.data.round;
-    expect(round?.steps.some(isRelevantSkillsStep)).toBe(false);
     const roundCompleteEvent = events.find(isRoundCompleteEvent);
 
     expect(roundCompleteEvent?.data.round.input.attachment_refs).toEqual([
@@ -374,5 +338,61 @@ describe('addRoundCompleteEvent', () => {
       'attachment_id="this-round"'
     );
     expect(roundCompleteEvent?.data.round.input.attachment_context).not.toContain('earlier');
+  });
+
+  // Runs a fresh (non-pending) round with an optional relevant-skills selection.
+  const runFreshRound = (
+    relevantSkillsSelection?: Parameters<typeof addRoundCompleteEvent>[0]['relevantSkillsSelection']
+  ) => {
+    const messageCompleteEvent: ChatEvent = {
+      type: ChatEventType.messageComplete,
+      data: { message_id: 'message-1', message_content: 'Done' },
+    };
+    return firstValueFrom(
+      of(
+        createFinalStateEvent({ currentCycle: 0, errorCount: 0 } as never) as ConvertedEvents,
+        messageCompleteEvent as ConvertedEvents
+      ).pipe(
+        addRoundCompleteEvent({
+          ...createDeps(),
+          pendingRound: undefined,
+          userInput: { message: 'do a thing' },
+          startTime: new Date('2026-01-01T00:00:00.000Z'),
+          relevantSkillsSelection,
+        }),
+        toArray()
+      )
+    );
+  };
+
+  it('adds a relevant_skills step for a fresh round when a non-empty selection is provided', async () => {
+    const skills = [
+      {
+        id: 'a.alpha',
+        name: 'alpha',
+        path: '/p/SKILL.md',
+        description: 'Alpha',
+        relevance_note: 'fits',
+      },
+    ];
+    const events = await runFreshRound({ skills });
+
+    const round = events.find(isRoundCompleteEvent)?.data.round;
+    const step = round?.steps.find(isRelevantSkillsStep);
+    expect(step).toBeDefined();
+    expect(step?.source).toBe('implicit');
+    expect(step?.skills).toEqual(skills);
+  });
+
+  it('adds no relevant_skills step when the selection is empty', async () => {
+    const events = await runFreshRound({ skills: [] });
+    const round = events.find(isRoundCompleteEvent)?.data.round;
+    expect(round?.steps.some(isRelevantSkillsStep)).toBe(false);
+  });
+
+  it('adds no relevant_skills step when no selection is provided', async () => {
+    const events = await runFreshRound(undefined);
+    const round = events.find(isRoundCompleteEvent)?.data.round;
+    expect(round?.steps.some(isRelevantSkillsStep)).toBe(false);
   });
 });
