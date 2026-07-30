@@ -23,9 +23,12 @@ describe('Dynatrace', () => {
     delete: jest.fn(),
   };
 
+  const authHeaders = { Authorization: 'Api-Token dt0c01.test.token' };
+
   const mockContext = {
     client: mockClient,
     config: { environmentUrl: 'https://abc123.live.dynatrace.com' },
+    secrets: { authType: 'api_key_header', apiToken: 'dt0c01.test.token' },
     log: { debug: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
 
@@ -52,7 +55,7 @@ describe('Dynatrace', () => {
     expect(Dynatrace.metadata.isTechnicalPreview).toBe(true);
   });
 
-  it('should support api_key_header auth on Authorization', () => {
+  it('should support api_key_header auth storing apiToken', () => {
     const types = (Dynatrace.auth?.types as Array<string | { type: string }>).map((t) =>
       typeof t === 'string' ? t : t.type
     );
@@ -61,7 +64,78 @@ describe('Dynatrace', () => {
       Dynatrace.auth?.types as Array<string | { type: string; defaults?: unknown }>
     ).find((t) => typeof t !== 'string' && t.type === 'api_key_header');
     expect(apiKey && typeof apiKey !== 'string' ? apiKey.defaults : undefined).toEqual({
-      headerField: 'Authorization',
+      headerField: 'apiToken',
+    });
+  });
+
+  describe('environment URL normalization', () => {
+    it('rewrites *.apps.dynatrace.com UI hosts to *.live.dynatrace.com for API calls', async () => {
+      mockClient.get.mockResolvedValue({ data: { problems: [] } });
+      const ctx = {
+        ...mockContext,
+        config: { environmentUrl: 'https://wkf10640.apps.dynatrace.com' },
+      } as unknown as ActionContext;
+      await Dynatrace.actions.listProblems.handler(ctx, {});
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://wkf10640.live.dynatrace.com/api/v2/problems',
+        expect.any(Object)
+      );
+    });
+
+    it('rewrites *.live.apps.dynatrace.com to *.live.dynatrace.com', async () => {
+      mockClient.get.mockResolvedValue({ data: { problems: [] } });
+      const ctx = {
+        ...mockContext,
+        config: { environmentUrl: 'https://wkf10640.live.apps.dynatrace.com/' },
+      } as unknown as ActionContext;
+      await Dynatrace.actions.listProblems.handler(ctx, {});
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://wkf10640.live.dynatrace.com/api/v2/problems',
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('auth header normalization', () => {
+    it('prefixes a raw apiToken with Api-Token on requests', async () => {
+      mockClient.get.mockResolvedValue({ data: { problems: [] } });
+      await Dynatrace.actions.listProblems.handler(mockContext, {});
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://abc123.live.dynatrace.com/api/v2/problems',
+        expect.objectContaining({
+          headers: { Authorization: 'Api-Token dt0c01.test.token' },
+        })
+      );
+    });
+
+    it('preserves an Api-Token prefix already present on the secret', async () => {
+      mockClient.get.mockResolvedValue({ data: { problems: [] } });
+      const ctx = {
+        ...mockContext,
+        secrets: { authType: 'api_key_header', apiToken: 'Api-Token dt0c01.already.prefixed' },
+      } as unknown as ActionContext;
+      await Dynatrace.actions.listProblems.handler(ctx, {});
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://abc123.live.dynatrace.com/api/v2/problems',
+        expect.objectContaining({
+          headers: { Authorization: 'Api-Token dt0c01.already.prefixed' },
+        })
+      );
+    });
+
+    it('preserves a Bearer prefix already present on the secret', async () => {
+      mockClient.get.mockResolvedValue({ data: { problems: [] } });
+      const ctx = {
+        ...mockContext,
+        secrets: { authType: 'api_key_header', apiToken: 'Bearer platform-token' },
+      } as unknown as ActionContext;
+      await Dynatrace.actions.listProblems.handler(ctx, {});
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://abc123.live.dynatrace.com/api/v2/problems',
+        expect.objectContaining({
+          headers: { Authorization: 'Bearer platform-token' },
+        })
+      );
     });
   });
 
@@ -100,6 +174,7 @@ describe('Dynatrace', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/problems',
         {
+          headers: authHeaders,
           params: {
             problemSelector: 'status("OPEN")',
             pageSize: 10,
@@ -116,7 +191,7 @@ describe('Dynatrace', () => {
       await Dynatrace.actions.getProblem.handler(mockContext, { problemId: 'p/1' });
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/problems/p%2F1',
-        { params: {} }
+        { headers: authHeaders, params: {} }
       );
     });
   });
@@ -133,7 +208,8 @@ describe('Dynatrace', () => {
       });
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/problems/p1/close',
-        { message: 'Fixed' }
+        { message: 'Fixed' },
+        { headers: authHeaders }
       );
       expect(result).toEqual({ problemId: 'p1', closing: true });
     });
@@ -158,7 +234,8 @@ describe('Dynatrace', () => {
       });
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/problems/p1/comments',
-        { message: 'Investigating', context: 'workflow-run-1' }
+        { message: 'Investigating', context: 'workflow-run-1' },
+        { headers: authHeaders }
       );
     });
   });
@@ -172,7 +249,7 @@ describe('Dynatrace', () => {
       });
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/problems/p1/comments',
-        { params: { pageSize: 20 } }
+        { headers: authHeaders, params: { pageSize: 20 } }
       );
     });
   });
@@ -195,7 +272,8 @@ describe('Dynatrace', () => {
           title: 'Deploy v1.2',
           entitySelector: 'type(SERVICE),entityName.equals("api")',
           properties: { version: '1.2' },
-        }
+        },
+        { headers: authHeaders }
       );
     });
 
@@ -221,6 +299,7 @@ describe('Dynatrace', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/events',
         {
+          headers: authHeaders,
           params: {
             eventSelector: 'eventType("CUSTOM_INFO")',
             from: 'now-1h',
@@ -233,7 +312,8 @@ describe('Dynatrace', () => {
       mockClient.get.mockResolvedValue({ data: { eventId: 'a/b' } });
       await Dynatrace.actions.getEvent.handler(mockContext, { eventId: 'a/b' });
       expect(mockClient.get).toHaveBeenCalledWith(
-        'https://abc123.live.dynatrace.com/api/v2/events/a%2Fb'
+        'https://abc123.live.dynatrace.com/api/v2/events/a%2Fb',
+        { headers: authHeaders }
       );
     });
   });
@@ -249,6 +329,7 @@ describe('Dynatrace', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/metrics/query',
         {
+          headers: authHeaders,
           params: {
             metricSelector: 'builtin:host.cpu.usage:avg',
             from: 'now-1h',
@@ -267,6 +348,7 @@ describe('Dynatrace', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/metrics',
         {
+          headers: authHeaders,
           params: {
             metricSelector: 'builtin:host.*',
             fields: 'unit',
@@ -282,7 +364,7 @@ describe('Dynatrace', () => {
       });
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/metrics/builtin%3Ahost.cpu.usage',
-        { params: {} }
+        { headers: authHeaders, params: {} }
       );
     });
   });
@@ -297,6 +379,7 @@ describe('Dynatrace', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/entities',
         {
+          headers: authHeaders,
           params: {
             entitySelector: 'type("HOST")',
             pageSize: 5,
@@ -310,7 +393,7 @@ describe('Dynatrace', () => {
       await Dynatrace.actions.getEntity.handler(mockContext, { entityId: 'HOST/1' });
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/entities/HOST%2F1',
-        { params: {} }
+        { headers: authHeaders, params: {} }
       );
     });
   });
@@ -346,7 +429,8 @@ describe('Dynatrace', () => {
               },
             },
           },
-        ]
+        ],
+        { headers: authHeaders }
       );
       expect(result).toEqual([{ objectId: 'obj-1' }]);
     });
@@ -361,6 +445,7 @@ describe('Dynatrace', () => {
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/settings/objects',
         {
+          headers: authHeaders,
           params: {
             schemaIds: 'builtin:maintenance-windows',
             pageSize: 10,
@@ -375,7 +460,8 @@ describe('Dynatrace', () => {
         objectId: 'obj/1',
       });
       expect(mockClient.delete).toHaveBeenCalledWith(
-        'https://abc123.live.dynatrace.com/api/v2/settings/objects/obj%2F1'
+        'https://abc123.live.dynatrace.com/api/v2/settings/objects/obj%2F1',
+        { headers: authHeaders }
       );
       expect(result).toEqual({ deleted: true, objectId: 'obj/1' });
     });
@@ -392,7 +478,7 @@ describe('Dynatrace', () => {
       const result = await testHandler(mockContext);
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://abc123.live.dynatrace.com/api/v2/problems',
-        { params: { pageSize: 1 } }
+        { headers: authHeaders, params: { pageSize: 1 } }
       );
       expect(result).toEqual({ ok: true });
     });

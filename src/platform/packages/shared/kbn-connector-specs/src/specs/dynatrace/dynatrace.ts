@@ -50,6 +50,34 @@ import type {
 
 const MAINTENANCE_WINDOW_SCHEMA_ID = 'builtin:maintenance-windows';
 
+/**
+ * Normalize a user-supplied Dynatrace environment URL to the Environment API host.
+ * The web UI often lives on `*.apps.dynatrace.com` (or `*.live.apps.dynatrace.com`);
+ * Environment API calls must use `*.live.dynatrace.com` (or Managed / ActiveGate forms).
+ */
+const normalizeEnvironmentUrl = (raw: string): string => {
+  const trimmed = raw.trim().replace(/\/$/, '');
+  try {
+    const url = new URL(trimmed);
+    const host = url.hostname.toLowerCase();
+    // https://{id}.apps.dynatrace.com → https://{id}.live.dynatrace.com
+    const appsMatch = host.match(/^([a-z0-9-]+)\.apps\.dynatrace\.com$/);
+    if (appsMatch) {
+      url.hostname = `${appsMatch[1]}.live.dynatrace.com`;
+      return url.toString().replace(/\/$/, '');
+    }
+    // https://{id}.live.apps.dynatrace.com → https://{id}.live.dynatrace.com
+    const liveAppsMatch = host.match(/^([a-z0-9-]+)\.live\.apps\.dynatrace\.com$/);
+    if (liveAppsMatch) {
+      url.hostname = `${liveAppsMatch[1]}.live.dynatrace.com`;
+      return url.toString().replace(/\/$/, '');
+    }
+  } catch {
+    // Fall through and use the raw value; request will surface a clear error.
+  }
+  return trimmed;
+};
+
 const buildBaseUrl = (ctx: ActionContext): string => {
   const raw = ctx.config?.environmentUrl as string | undefined;
   if (!raw || typeof raw !== 'string' || !raw.trim()) {
@@ -57,7 +85,34 @@ const buildBaseUrl = (ctx: ActionContext): string => {
       'Dynatrace connector is missing the required environmentUrl configuration field.'
     );
   }
-  return `${raw.replace(/\/$/, '')}/api/v2`;
+  return `${normalizeEnvironmentUrl(raw)}/api/v2`;
+};
+
+/**
+ * Dynatrace Environment API expects `Authorization: Api-Token <token>`.
+ * Users often paste the raw token only; Dynatrace then returns a misleading
+ * 401 asking for a Bearer prefix. Accept raw or already-prefixed values and
+ * always send a correct Authorization header on the request (overrides any
+ * accidental default from api_key_header storage).
+ */
+const buildDynatraceAuthHeader = (rawToken: string): string => {
+  const trimmed = rawToken.trim();
+  if (/^(Api-Token|Bearer)\s+\S+/i.test(trimmed)) {
+    return trimmed;
+  }
+  return `Api-Token ${trimmed}`;
+};
+
+const getAuthHeaders = (ctx: ActionContext): { Authorization: string } => {
+  const secrets = ctx.secrets as Record<string, unknown> | undefined;
+  const raw =
+    (typeof secrets?.apiToken === 'string' && secrets.apiToken) ||
+    (typeof secrets?.Authorization === 'string' && secrets.Authorization) ||
+    '';
+  if (!raw.trim()) {
+    throw new Error('Dynatrace connector is missing the API token.');
+  }
+  return { Authorization: buildDynatraceAuthHeader(raw) };
 };
 
 function formatDynatraceError(action: string, error: unknown): Error {
@@ -81,6 +136,34 @@ const pickDefined = (
   return out;
 };
 
+interface RequestExtras {
+  params?: Record<string, string | number>;
+  headers?: Record<string, string>;
+}
+
+const dtGet = async <T>(ctx: ActionContext, path: string, extras: RequestExtras = {}) =>
+  ctx.client.get<T>(`${buildBaseUrl(ctx)}${path}`, {
+    ...extras,
+    headers: { ...getAuthHeaders(ctx), ...extras.headers },
+  });
+
+const dtPost = async <T>(
+  ctx: ActionContext,
+  path: string,
+  body?: unknown,
+  extras: RequestExtras = {}
+) =>
+  ctx.client.post<T>(`${buildBaseUrl(ctx)}${path}`, body, {
+    ...extras,
+    headers: { ...getAuthHeaders(ctx), ...extras.headers },
+  });
+
+const dtDelete = async <T>(ctx: ActionContext, path: string, extras: RequestExtras = {}) =>
+  ctx.client.delete<T>(`${buildBaseUrl(ctx)}${path}`, {
+    ...extras,
+    headers: { ...getAuthHeaders(ctx), ...extras.headers },
+  });
+
 export const Dynatrace: ConnectorSpec = {
   metadata: {
     id: '.dynatrace',
@@ -99,10 +182,12 @@ export const Dynatrace: ConnectorSpec = {
       {
         type: 'api_key_header',
         isRecommended: true,
-        defaults: { headerField: 'Authorization' },
+        // Store under apiToken (not Authorization) so the framework does not set a
+        // bare Authorization default; handlers send Authorization: Api-Token <token>.
+        defaults: { headerField: 'apiToken' },
         overrides: {
           meta: {
-            Authorization: {
+            apiToken: {
               label: i18n.translate('core.kibanaConnectorSpecs.dynatrace.auth.apiToken.label', {
                 defaultMessage: 'API token',
               }),
@@ -110,10 +195,10 @@ export const Dynatrace: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.dynatrace.auth.apiToken.helpText',
                 {
                   defaultMessage:
-                    'Required token scopes: problems.read, problems.write, events.read, events.ingest, metrics.read, entities.read, settings.read, settings.write. Create the token under Access tokens in Dynatrace and paste it as Api-Token YOUR_TOKEN (include the Api-Token prefix).',
+                    'Paste your Dynatrace API token value only (for example dt0c01....). Do not include a prefix — the connector sends Authorization: Api-Token automatically. Required scopes: problems.read, problems.write, events.read, events.ingest, metrics.read, entities.read, settings.read, settings.write.',
                 }
               ),
-              placeholder: 'Api-Token dt0c01.{{YOUR_TOKEN}}',
+              placeholder: 'dt0c01.{{YOUR_TOKEN}}',
             },
           },
         },
@@ -135,7 +220,7 @@ export const Dynatrace: ConnectorSpec = {
             'core.kibanaConnectorSpecs.dynatrace.config.environmentUrl.helpText',
             {
               defaultMessage:
-                'Base URL of your Dynatrace environment, without a trailing /api/v2. SaaS: https://your-environment-id.live.dynatrace.com. Managed: https://your-domain/e/your-environment-id. Environment ActiveGate: https://your-activegate-domain:9999/e/your-environment-id.',
+                'Environment API base URL, without /api/v2. SaaS must use https://your-environment-id.live.dynatrace.com (not the *.apps.dynatrace.com UI host). Managed: https://your-domain/e/your-environment-id. Environment ActiveGate: https://your-activegate-domain:9999/e/your-environment-id. Trial/sandbox environments still use the .live.dynatrace.com API host.',
             }
           ),
         }),
@@ -154,7 +239,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceListProblemsInputSchema,
       handler: async (ctx, input: DynatraceListProblemsInput) => {
         try {
-          const response = await ctx.client.get(`${buildBaseUrl(ctx)}/problems`, {
+          const response = await dtGet(ctx, '/problems', {
             params: pickDefined({
               problemSelector: input.problemSelector,
               entitySelector: input.entitySelector,
@@ -180,10 +265,9 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceGetProblemInputSchema,
       handler: async (ctx, input: DynatraceGetProblemInput) => {
         try {
-          const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/problems/${encodeURIComponent(input.problemId)}`,
-            { params: pickDefined({ fields: input.fields }) }
-          );
+          const response = await dtGet(ctx, `/problems/${encodeURIComponent(input.problemId)}`, {
+            params: pickDefined({ fields: input.fields }),
+          });
           return response.data;
         } catch (error) {
           throw formatDynatraceError('getProblem', error);
@@ -198,8 +282,9 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceCloseProblemInputSchema,
       handler: async (ctx, input: DynatraceCloseProblemInput) => {
         try {
-          const response = await ctx.client.post(
-            `${buildBaseUrl(ctx)}/problems/${encodeURIComponent(input.problemId)}/close`,
+          const response = await dtPost(
+            ctx,
+            `/problems/${encodeURIComponent(input.problemId)}/close`,
             { message: input.message }
           );
           if (response.status === 204) {
@@ -221,8 +306,9 @@ export const Dynatrace: ConnectorSpec = {
         try {
           const body: { message: string; context?: string } = { message: input.message };
           if (input.context !== undefined) body.context = input.context;
-          const response = await ctx.client.post(
-            `${buildBaseUrl(ctx)}/problems/${encodeURIComponent(input.problemId)}/comments`,
+          const response = await dtPost(
+            ctx,
+            `/problems/${encodeURIComponent(input.problemId)}/comments`,
             body
           );
           return { status: response.status, problemId: input.problemId };
@@ -239,8 +325,9 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceListProblemCommentsInputSchema,
       handler: async (ctx, input: DynatraceListProblemCommentsInput) => {
         try {
-          const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/problems/${encodeURIComponent(input.problemId)}/comments`,
+          const response = await dtGet(
+            ctx,
+            `/problems/${encodeURIComponent(input.problemId)}/comments`,
             {
               params: pickDefined({
                 pageSize: input.pageSize,
@@ -271,7 +358,7 @@ export const Dynatrace: ConnectorSpec = {
           if (input.startTime !== undefined) body.startTime = input.startTime;
           if (input.endTime !== undefined) body.endTime = input.endTime;
           if (input.timeout !== undefined) body.timeout = input.timeout;
-          const response = await ctx.client.post(`${buildBaseUrl(ctx)}/events/ingest`, body);
+          const response = await dtPost(ctx, '/events/ingest', body);
           return response.data;
         } catch (error) {
           throw formatDynatraceError('ingestEvent', error);
@@ -286,7 +373,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceListEventsInputSchema,
       handler: async (ctx, input: DynatraceListEventsInput) => {
         try {
-          const response = await ctx.client.get(`${buildBaseUrl(ctx)}/events`, {
+          const response = await dtGet(ctx, '/events', {
             params: pickDefined({
               eventSelector: input.eventSelector,
               entitySelector: input.entitySelector,
@@ -309,9 +396,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceGetEventInputSchema,
       handler: async (ctx, input: DynatraceGetEventInput) => {
         try {
-          const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/events/${encodeURIComponent(input.eventId)}`
-          );
+          const response = await dtGet(ctx, `/events/${encodeURIComponent(input.eventId)}`);
           return response.data;
         } catch (error) {
           throw formatDynatraceError('getEvent', error);
@@ -326,7 +411,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceQueryMetricsInputSchema,
       handler: async (ctx, input: DynatraceQueryMetricsInput) => {
         try {
-          const response = await ctx.client.get(`${buildBaseUrl(ctx)}/metrics/query`, {
+          const response = await dtGet(ctx, '/metrics/query', {
             params: pickDefined({
               metricSelector: input.metricSelector,
               from: input.from,
@@ -349,7 +434,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceListMetricsInputSchema,
       handler: async (ctx, input: DynatraceListMetricsInput) => {
         try {
-          const response = await ctx.client.get(`${buildBaseUrl(ctx)}/metrics`, {
+          const response = await dtGet(ctx, '/metrics', {
             params: pickDefined({
               metricSelector: input.metricSelector,
               text: input.text,
@@ -372,10 +457,9 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceGetMetricDescriptorInputSchema,
       handler: async (ctx, input: DynatraceGetMetricDescriptorInput) => {
         try {
-          const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/metrics/${encodeURIComponent(input.metricId)}`,
-            { params: pickDefined({ fields: input.fields }) }
-          );
+          const response = await dtGet(ctx, `/metrics/${encodeURIComponent(input.metricId)}`, {
+            params: pickDefined({ fields: input.fields }),
+          });
           return response.data;
         } catch (error) {
           throw formatDynatraceError('getMetricDescriptor', error);
@@ -390,7 +474,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceListEntitiesInputSchema,
       handler: async (ctx, input: DynatraceListEntitiesInput) => {
         try {
-          const response = await ctx.client.get(`${buildBaseUrl(ctx)}/entities`, {
+          const response = await dtGet(ctx, '/entities', {
             params: pickDefined({
               entitySelector: input.entitySelector,
               from: input.from,
@@ -414,16 +498,13 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceGetEntityInputSchema,
       handler: async (ctx, input: DynatraceGetEntityInput) => {
         try {
-          const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/entities/${encodeURIComponent(input.entityId)}`,
-            {
-              params: pickDefined({
-                fields: input.fields,
-                from: input.from,
-                to: input.to,
-              }),
-            }
-          );
+          const response = await dtGet(ctx, `/entities/${encodeURIComponent(input.entityId)}`, {
+            params: pickDefined({
+              fields: input.fields,
+              from: input.from,
+              to: input.to,
+            }),
+          });
           return response.data;
         } catch (error) {
           throw formatDynatraceError('getEntity', error);
@@ -456,7 +537,7 @@ export const Dynatrace: ConnectorSpec = {
           };
           if (input.description !== undefined) value.description = input.description;
 
-          const response = await ctx.client.post(`${buildBaseUrl(ctx)}/settings/objects`, [
+          const response = await dtPost(ctx, '/settings/objects', [
             {
               schemaId: MAINTENANCE_WINDOW_SCHEMA_ID,
               scope: 'environment',
@@ -477,7 +558,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceListMaintenanceWindowsInputSchema,
       handler: async (ctx, input: DynatraceListMaintenanceWindowsInput) => {
         try {
-          const response = await ctx.client.get(`${buildBaseUrl(ctx)}/settings/objects`, {
+          const response = await dtGet(ctx, '/settings/objects', {
             params: pickDefined({
               schemaIds: MAINTENANCE_WINDOW_SCHEMA_ID,
               pageSize: input.pageSize,
@@ -499,9 +580,7 @@ export const Dynatrace: ConnectorSpec = {
       input: DynatraceDeleteMaintenanceWindowInputSchema,
       handler: async (ctx, input: DynatraceDeleteMaintenanceWindowInput) => {
         try {
-          await ctx.client.delete(
-            `${buildBaseUrl(ctx)}/settings/objects/${encodeURIComponent(input.objectId)}`
-          );
+          await dtDelete(ctx, `/settings/objects/${encodeURIComponent(input.objectId)}`);
           return { deleted: true, objectId: input.objectId };
         } catch (error) {
           throw formatDynatraceError('deleteMaintenanceWindow', error);
@@ -517,7 +596,7 @@ export const Dynatrace: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       try {
-        await ctx.client.get(`${buildBaseUrl(ctx)}/problems`, { params: { pageSize: 1 } });
+        await dtGet(ctx, '/problems', { params: { pageSize: 1 } });
         return { ok: true };
       } catch (error) {
         throw formatDynatraceError('test', error);
@@ -531,7 +610,7 @@ export const Dynatrace: ConnectorSpec = {
     'Use this connector to drive Davis problem triage, gather metric/entity evidence, ingest workflow events, and manage maintenance windows against a Dynatrace environment.',
     '',
     '### Authentication',
-    '- The Authorization secret must be entered as `Api-Token YOUR_TOKEN` (include the `Api-Token` prefix), matching Dynatrace Environment API auth.',
+    '- Paste the raw API token only (e.g. `dt0c01....`); the connector sends `Authorization: Api-Token <token>` automatically.',
     `- Token scopes needed: problems.read, problems.write, events.read, events.ingest, metrics.read, entities.read, settings.read, settings.write.`,
     '',
     '### Common patterns',
