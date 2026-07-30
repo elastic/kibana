@@ -924,6 +924,11 @@ export class StreamsApp {
       await expect(this.page.getByTestId('streamsAppStreamDetailEnrichmentRootSteps')).toBeVisible({
         timeout,
       });
+      if (expectItems) {
+        // `.all()` takes an instant snapshot and does NOT auto-wait. The root-steps panel
+        // mounts before the step blocks hydrate, so wait for the first matching block first.
+        await this.page.getByTestId(testId).first().waitFor({ state: 'visible', timeout });
+      }
     } catch {
       // If the list is not visible, it might be empty or not rendered yet
       return [];
