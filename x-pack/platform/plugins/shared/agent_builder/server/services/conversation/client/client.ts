@@ -288,9 +288,24 @@ class ConversationClientImpl implements ConversationClient {
 
     validateTemplateFields(template);
     const templateMetadata = buildMetadataFromFields(template.definition.fields);
+
+    // Remove keys that were owned by the previously-applied template so switching
+    // templates does not leave orphan keys from the old template. Keys that were not
+    // part of any template (user-defined) are preserved unchanged.
+    const previousTemplateFieldNames = existing.template_id
+      ? new Set(getTemplate(existing.template_id)?.definition.fields?.map((f) => f.name) ?? [])
+      : new Set<string>();
+
+    const cleanedExistingMetadata = Object.fromEntries(
+      Object.entries(existing.metadata ?? {}).filter(
+        ([key]) => !previousTemplateFieldNames.has(key)
+      )
+    );
+
+    // New template defaults always win for template-owned keys; user-defined keys survive.
     const metadata: Record<string, string | boolean> = {
+      ...cleanedExistingMetadata,
       ...templateMetadata,
-      ...(existing.metadata ?? {}),
     };
 
     return this.update(

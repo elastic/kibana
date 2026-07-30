@@ -7,10 +7,20 @@
 
 import React, { useState } from 'react';
 import { EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { useApplyTemplate } from '../../../hooks/use_apply_template';
 import { useConversation } from '../../../hooks/use_conversation';
+
+const LABELS = {
+  placeholder: i18n.translate('xpack.agentBuilder.templateSelector.placeholder', {
+    defaultMessage: 'Apply template…',
+  }),
+  ariaLabel: i18n.translate('xpack.agentBuilder.templateSelector.ariaLabel', {
+    defaultMessage: 'Apply a template to this conversation',
+  }),
+};
 
 export const TemplateSelector: React.FC = () => {
   const { conversationId } = useConversationContext();
@@ -23,7 +33,7 @@ export const TemplateSelector: React.FC = () => {
   }
 
   const options = [
-    { value: '', text: 'Apply template…' },
+    { value: '', text: LABELS.placeholder },
     ...CONVERSATION_TEMPLATES.map((t) => ({ value: t.id, text: t.name })),
   ];
 
@@ -45,7 +55,7 @@ export const TemplateSelector: React.FC = () => {
       value={conversation?.template_id ?? ''}
       onChange={handleChange}
       disabled={isApplying}
-      aria-label="Apply a template to this conversation"
+      aria-label={LABELS.ariaLabel}
     />
   );
 };

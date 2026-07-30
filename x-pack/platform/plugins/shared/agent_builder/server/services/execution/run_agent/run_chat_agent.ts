@@ -200,17 +200,26 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   ]);
 
   const conversationId = conversation?.id;
-  const currentMetadata = conversation?.metadata;
   const updateConversationMetadata =
     conversationId && conversation?.template_id
       ? async (updates: Record<string, string | boolean>) => {
           // Use asInternalUser — conversation docs live in a system (dot-prefixed) index
           // that is not accessible to regular user credentials, matching the pattern
           // used by ConversationService.getScopedClient.
+          //
+          // Use a Painless script update rather than a doc merge so that each call
+          // merges into the *current* persisted metadata rather than a stale snapshot
+          // captured at run start. Without this, a second call to set_conversation_metadata
+          // in the same run would silently discard the first call's keys.
           await context.esClient.asInternalUser.update({
             index: conversationIndexName,
             id: conversationId,
-            doc: { metadata: { ...currentMetadata, ...updates } },
+            script: {
+              lang: 'painless',
+              source:
+                'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
+              params: { updates },
+            },
             retry_on_conflict: 3,
           });
         }

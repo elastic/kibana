@@ -849,4 +849,134 @@ describe('conversation model converters', () => {
       });
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Template fields: metadata + template_id round-trips
+  // ---------------------------------------------------------------------------
+
+  describe('metadata and template_id round-trips', () => {
+    describe('fromEs', () => {
+      it('deserializes metadata and template_id when present in the document', () => {
+        const doc: ConversationDocument = {
+          _id: 'conv-tmpl',
+          _source: {
+            agent_id: 'agent_id',
+            title: 'Template conv',
+            user_id: 'user_id',
+            user_name: 'user_name',
+            space: 'space',
+            conversation_rounds: [],
+            created_at: creationDate,
+            updated_at: updateDate,
+            template_id: 'security.account-compromise',
+            metadata: { severity: 'high', is_confirmed: true },
+          },
+        };
+
+        const result = fromEs(doc);
+
+        expect(result.template_id).toBe('security.account-compromise');
+        expect(result.metadata).toEqual({ severity: 'high', is_confirmed: true });
+      });
+
+      it('omits metadata and template_id when absent from the document', () => {
+        const doc: ConversationDocument = {
+          _id: 'conv-no-tmpl',
+          _source: {
+            agent_id: 'agent_id',
+            title: 'No template',
+            user_id: 'user_id',
+            user_name: 'user_name',
+            space: 'space',
+            conversation_rounds: [],
+            created_at: creationDate,
+            updated_at: updateDate,
+          },
+        };
+
+        const result = fromEs(doc);
+
+        expect(result.template_id).toBeUndefined();
+        expect(result.metadata).toBeUndefined();
+      });
+    });
+
+    describe('toEs', () => {
+      it('serializes metadata and template_id when present on the conversation', () => {
+        const conversation: Conversation = {
+          id: 'conv-tmpl',
+          agent_id: 'agent_id',
+          title: 'Template conv',
+          user: { id: 'user_id', username: 'user_name' },
+          created_at: creationDate,
+          updated_at: updateDate,
+          rounds: [],
+          template_id: 'security.phishing',
+          metadata: { severity: 'low', is_confirmed: false },
+        };
+
+        const result = toEs(conversation, 'space');
+
+        expect(result.template_id).toBe('security.phishing');
+        expect(result.metadata).toEqual({ severity: 'low', is_confirmed: false });
+      });
+
+      it('does not include template_id or metadata when absent', () => {
+        const conversation: Conversation = {
+          id: 'conv-no-tmpl',
+          agent_id: 'agent_id',
+          title: 'No template',
+          user: { id: 'user_id', username: 'user_name' },
+          created_at: creationDate,
+          updated_at: updateDate,
+          rounds: [],
+        };
+
+        const result = toEs(conversation, 'space');
+
+        expect(result.template_id).toBeUndefined();
+        expect(result.metadata).toBeUndefined();
+      });
+    });
+
+    describe('createRequestToEs', () => {
+      it('serializes metadata and template_id from a create request', () => {
+        const conversation = {
+          agent_id: 'agent_id',
+          title: 'Template conv',
+          rounds: [] as Conversation['rounds'],
+          template_id: 'security.malware',
+          metadata: { severity: 'critical' } as Record<string, string | boolean>,
+        };
+
+        const result = createRequestToEs({
+          conversation,
+          space: 'space',
+          currentUser: { id: 'user_id', username: 'user_name' },
+          creationDate: new Date(creationDate),
+        });
+
+        expect(result.template_id).toBe('security.malware');
+        expect(result.metadata).toEqual({ severity: 'critical' });
+      });
+
+      it('omits template_id and metadata when not provided in the create request', () => {
+        const conversation = {
+          agent_id: 'agent_id',
+          title: 'No template',
+          rounds: [] as Conversation['rounds'],
+        };
+
+        const result = createRequestToEs({
+          conversation,
+          space: 'space',
+          currentUser: { id: 'user_id', username: 'user_name' },
+          creationDate: new Date(creationDate),
+        });
+
+        expect(result.template_id).toBeUndefined();
+        expect(result.metadata).toBeUndefined();
+      });
+    });
+  });
 });

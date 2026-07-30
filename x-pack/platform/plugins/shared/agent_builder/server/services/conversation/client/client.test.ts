@@ -8,9 +8,14 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
+import type { ConversationTemplate } from '@kbn/agent-builder-common';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
+
+jest.mock('../templates/registry');
+import { getTemplate } from '../templates/registry';
+const getTemplateMock = getTemplate as jest.MockedFn<typeof getTemplate>;
 
 const testSpace = 'default';
 
@@ -573,6 +578,251 @@ describe('ConversationClient', () => {
       mockEsClient.delete.mockRejectedValue(serverError);
 
       await expect(client.delete('conversation-1')).rejects.toBe(serverError);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Template-related tests
+  // ---------------------------------------------------------------------------
+
+  const makeTemplate = (
+    id: string,
+    fields: ConversationTemplate['definition']['fields'] = []
+  ): ConversationTemplate => ({
+    id,
+    name: `Template ${id}`,
+    description: 'A test template',
+    definition: { fields },
+  });
+
+  const createConversationDocumentWithTemplate = ({
+    templateId,
+    metadata = {},
+  }: {
+    templateId?: string;
+    metadata?: Record<string, string | boolean>;
+  } = {}): Document =>
+    ({
+      _id: 'conversation-1',
+      _seq_no: 1,
+      _primary_term: 1,
+      _source: {
+        agent_id: 'agent-1',
+        user_id: 'user-1',
+        user_name: 'test-user',
+        space: testSpace,
+        title: 'Conversation 1',
+        created_at: '2024-09-04T06:44:17.944Z',
+        updated_at: '2025-08-04T06:44:19.123Z',
+        read: false,
+        conversation_rounds: [],
+        access_control: { access_mode: ConversationAccessControlMode.Private },
+        ...(templateId ? { template_id: templateId } : {}),
+        ...(Object.keys(metadata).length ? { metadata } : {}),
+      },
+    } as Document);
+
+  describe('applyTemplate', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockEsClient.index.mockResolvedValue({});
+    });
+
+    it('throws a bad-request error when the template id is unknown', async () => {
+      getTemplateMock.mockReturnValue(undefined);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate()] },
+      });
+
+      await expect(
+        client.applyTemplate('conversation-1', 'unknown-template')
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('Template not found'),
+      });
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('seeds template default values into metadata', async () => {
+      const template = makeTemplate('tmpl-a', [
+        { name: 'severity', type: 'keyword', description: 'Severity', value: 'low' },
+        { name: 'region', type: 'keyword', description: 'Region' }, // no default
+      ]);
+      getTemplateMock.mockReturnValue(template);
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate()] },
+      });
+
+      await client.applyTemplate('conversation-1', 'tmpl-a');
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            metadata: { severity: 'low' }, // only the field with a default value
+            template_id: 'tmpl-a',
+          }),
+        })
+      );
+    });
+
+    it('clears orphan keys from the previously-applied template when switching', async () => {
+      const templateA = makeTemplate('tmpl-a', [
+        { name: 'old_key', type: 'keyword', description: 'Old key', value: 'old_value' },
+      ]);
+      const templateB = makeTemplate('tmpl-b', [
+        { name: 'new_key', type: 'keyword', description: 'New key', value: 'new_value' },
+      ]);
+
+      // First call: resolve the old template (getDocumentWithAccess in applyTemplate)
+      // Second call: resolve the new template (getDocumentWithAccess inside update)
+      getTemplateMock.mockImplementation((id: string) =>
+        id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
+      );
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-a',
+              metadata: { old_key: 'old_value' },
+            }),
+          ],
+        },
+      });
+
+      await client.applyTemplate('conversation-1', 'tmpl-b');
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            // old_key must NOT appear; new_key must be seeded from template B
+            metadata: { new_key: 'new_value' },
+            template_id: 'tmpl-b',
+          }),
+        })
+      );
+    });
+
+    it('preserves non-template user-defined metadata keys when switching templates', async () => {
+      const templateA = makeTemplate('tmpl-a', [
+        { name: 'tmpl_a_key', type: 'keyword', description: 'Template A key' },
+      ]);
+      const templateB = makeTemplate('tmpl-b', [
+        { name: 'tmpl_b_key', type: 'keyword', description: 'Template B key', value: 'b_val' },
+      ]);
+
+      getTemplateMock.mockImplementation((id: string) =>
+        id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
+      );
+
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: 'tmpl-a',
+              metadata: {
+                tmpl_a_key: 'set_by_user', // owned by template A — should be cleared
+                user_custom_key: 'stays', // NOT owned by any template — should survive
+              },
+            }),
+          ],
+        },
+      });
+
+      await client.applyTemplate('conversation-1', 'tmpl-b');
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            metadata: {
+              user_custom_key: 'stays', // user key survives
+              tmpl_b_key: 'b_val', // new template default applied
+              // tmpl_a_key: absent — cleared because it belonged to template A
+            },
+          }),
+        })
+      );
+    });
+
+    it('enforces owner access — throws for conversations owned by another user', async () => {
+      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a'));
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
+        },
+      });
+
+      await expect(client.applyTemplate('conversation-1', 'tmpl-a')).rejects.toMatchObject({
+        message: expect.stringContaining('conversation-1'),
+      });
+    });
+  });
+
+  describe('create with template', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockEsClient.index.mockResolvedValue({ result: 'created' });
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocumentWithTemplate()] },
+      });
+    });
+
+    it('seeds metadata from template fields that have a default value', async () => {
+      const template = makeTemplate('tmpl-seed', [
+        { name: 'priority', type: 'keyword', description: 'Priority', value: 'medium' },
+        { name: 'no_default_field', type: 'text', description: 'Empty' },
+      ]);
+      getTemplateMock.mockReturnValue(template);
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        template_id: 'tmpl-seed',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            metadata: { priority: 'medium' }, // only fields with defaults
+            template_id: 'tmpl-seed',
+          }),
+        })
+      );
+    });
+
+    it('does not set template_id or metadata when the template id is unknown', async () => {
+      getTemplateMock.mockReturnValue(undefined);
+
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+        template_id: 'non-existent',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.not.objectContaining({ template_id: expect.anything() }),
+        })
+      );
+    });
+
+    it('creates without a template when template_id is not provided', async () => {
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(getTemplateMock).not.toHaveBeenCalled();
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.not.objectContaining({ template_id: expect.anything() }),
+        })
+      );
     });
   });
 });
