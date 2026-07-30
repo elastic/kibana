@@ -356,8 +356,6 @@ describe('resolveResource', () => {
     });
 
     it('bypasses _resolve/index for a named-cluster CCS pattern and uses _field_caps', async () => {
-      // Simulate ES 9.4: _resolve/index throws security_exception for CCS expressions
-      // when remote_cluster_client role is absent (non-404 → old code re-threw this).
       esClient.indices.resolveIndex.mockRejectedValue(
         new esErrors.ResponseError({
           statusCode: 403,
