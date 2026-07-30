@@ -700,9 +700,7 @@ describe('runNamespacePreflightCheck', () => {
     esClient.indices.getIndexTemplate.mockImplementation((params: any) => {
       if (params?.name) {
         // NS template check: does not exist yet
-        return Promise.reject(
-          Object.assign(new Error('Not found'), { meta: { statusCode: 404 } })
-        );
+        return Promise.reject(Object.assign(new Error('Not found'), { meta: { statusCode: 404 } }));
       }
       // All-templates fetch fails
       return Promise.reject(new Error('network error'));
@@ -730,9 +728,7 @@ describe('runNamespacePreflightCheck', () => {
     esClient.indices.getIndexTemplate.mockImplementation((params: any) => {
       if (params?.name) {
         // NS template check: does not exist yet
-        return Promise.reject(
-          Object.assign(new Error('Not found'), { meta: { statusCode: 404 } })
-        );
+        return Promise.reject(Object.assign(new Error('Not found'), { meta: { statusCode: 404 } }));
       }
       // All-templates fetch: return a conflicting clone template
       return Promise.resolve({
