@@ -57,14 +57,7 @@ export function registerSearchRoute(
       },
       validate: {
         request: {
-          // Only supports object schemas, so we need to extend the schema to include the legacy tags schema
-          query: asCodeSearchRequestSchema.extend({
-            // use union, validated per-type in handler
-            tags: z.union([
-              asCodeSearchRequestSchema.shape.tags,
-              legacySearchRequestParamsSchema.shape.tags,
-            ]),
-          }),
+          query: asCodeSearchRequestSchema,
         },
         response: {
           400: {
