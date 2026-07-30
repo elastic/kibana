@@ -70,7 +70,7 @@ Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw si
 
 ## Notifications via Action Policies
 
-Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** (notification policies) — space-wide saved objects that send matched episodes to workflow destinations.
+Notifications are not configured on the rule itself. Alert episodes are matched and dispatched by **action policies** (notification policies) — space-scoped saved objects that send matched episodes to workflow destinations.
 
 When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
       },
