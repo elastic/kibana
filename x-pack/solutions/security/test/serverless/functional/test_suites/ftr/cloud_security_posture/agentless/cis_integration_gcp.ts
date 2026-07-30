@@ -30,6 +30,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const mockAgentlessApiService = setupMockServer();
       mockApiServer = mockAgentlessApiService.listen(8089);
 
+      // Ensure CSP is installed — prior suites in this FTR config (e.g. cis_integration_aws)
+      // delete the package in their after hook, so we can't rely on the server-args preinstall.
+      await supertest
+        .post('/api/fleet/epm/packages/cloud_security_posture')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
       cisIntegrationGcp = pageObjects.cisAddIntegration.cisGcp;
