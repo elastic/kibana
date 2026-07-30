@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IKibanaResponse, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
+import type {
+  IKibanaResponse,
+  OnRequestValidationError,
+  RouteConfigOptions,
+  RouteMethod,
+} from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schemas';
 import { injectable } from 'inversify';
@@ -87,6 +92,43 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   };
 
   /**
+   * Documents the 400 emitted by {@link BaseAlertingRoute.onRequestValidationError}
+   * for routes that validate requests. Kibana core validates the mapped
+   * response against this metadata in dev mode and surfaces it in the generated
+   * OAS. Subclasses that declare their own 400 (e.g. a domain-specific
+   * description) override it via the `validate` getter's merge.
+   */
+  protected static readonly requestValidationErrorResponse: NonNullable<
+    AlertingRouteSchemas['response']
+  >[number] = {
+    body: () => errorResponseSchema,
+    description: 'Indicates the request failed schema validation.',
+  };
+
+  /**
+   * Maps a request schema-validation failure to the alerting v2
+   * {@link ErrorResponse} shape so validation errors are indistinguishable from
+   * the domain errors produced by {@link BaseAlertingRoute.onError}. Wired into
+   * `validate.onRequestValidationError` by the `validate` getter for routes that
+   * declare request schemas. `bypassErrorFormat` keeps the flat body verbatim,
+   * matching `errorResponseSchema` (see `onError` for the rationale).
+   */
+  protected static readonly onRequestValidationError: OnRequestValidationError = (
+    error,
+    _request,
+    response
+  ) => {
+    const body: ErrorResponse = {
+      code: deriveErrorCodeFromStatus(400),
+      error: 'Bad Request',
+      message: error.message,
+      details: { source: error.source },
+    };
+
+    return response.customError({ statusCode: 400, body, bypassErrorFormat: true });
+  };
+
+  /**
    * Subclasses declare raw Zod request schemas and response descriptors here.
    * The `validate` static getter below delegates to `computeRouteValidate`
    * which wraps the request schemas with `buildRouteValidationWithZod` so
@@ -95,13 +137,23 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   protected static schemas: AlertingRouteSchemas = {};
 
   public static get validate() {
-    const merged: AlertingRouteSchemas = {
-      ...this.schemas,
-      response: {
-        ...this.commonResponses,
-        ...(this.schemas.response ?? {}),
-      },
+    const { request } = this.schemas;
+    const hasRequestSchemas = Boolean(request && (request.params || request.query || request.body));
+
+    const response: NonNullable<AlertingRouteSchemas['response']> = {
+      ...this.commonResponses,
+      ...(this.schemas.response ?? {}),
     };
+
+    const merged: AlertingRouteSchemas = { ...this.schemas, response };
+
+    if (hasRequestSchemas) {
+      if (response[400] === undefined) {
+        response[400] = this.requestValidationErrorResponse;
+      }
+      merged.onRequestValidationError = this.onRequestValidationError;
+    }
+
     return computeRouteValidate(merged);
   }
 

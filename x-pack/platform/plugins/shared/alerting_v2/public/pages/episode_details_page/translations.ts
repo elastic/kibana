@@ -36,6 +36,13 @@ export const TIMELINE_TAB_TITLE = i18n.translate(
   }
 );
 
+export const ACTION_POLICY_HISTORY_TAB_TITLE = i18n.translate(
+  'xpack.alertingV2.episodeDetails.mainTabActionPolicyHistory',
+  {
+    defaultMessage: 'Policy history',
+  }
+);
+
 /** --- Duration (sidebar) --- */
 export const FORMAT_EPISODE_DURATION_MS = (ms: number): string => {
   if (ms < 1000) {
