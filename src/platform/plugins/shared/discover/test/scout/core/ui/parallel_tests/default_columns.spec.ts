@@ -13,6 +13,8 @@ import { spaceTest } from '../fixtures';
 
 const TSDB_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb';
+const FLIGHTS_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
 const DEFAULT_COLUMNS = ['message', 'extension', 'DestCountry'];
 
@@ -21,9 +23,8 @@ const DEFAULT_COLUMNS = ['message', 'extension', 'DestCountry'];
 // observability target.
 spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
-    // Loads kbn_archiver/discover (logstash-* data view) + sets defaultIndex + timepicker.
-    // loadFlightsDataView: true also loads kbn_archiver/kibana_sample_data_flights_index_pattern.
-    await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
+    await discoverScoutSpace.setupDiscoverDefaults();
+    await scoutSpace.savedObjects.load(FLIGHTS_KBN_ARCHIVE);
     await scoutSpace.savedObjects.load(TSDB_KBN_ARCHIVE);
   });
 
@@ -39,10 +40,8 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('should render default columns', async ({ page, pageObjects }) => {
-    // DestCountry is the distinguishing default column; its presence confirms all defaults rendered
-    await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'visible' });
-    expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+  spaceTest('should render default columns', async ({ pageObjects }) => {
+    expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
       '@timestamp',
       'message',
       'extension',
@@ -62,7 +61,7 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await page.testSubj.locator('dataGridHeaderCell-bytes').waitFor({ state: 'visible' });
       await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
       await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
-      expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         '@timestamp',
         'extension',
         'bytes',
@@ -76,7 +75,7 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
       await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'visible' });
       await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'hidden' });
-      expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         'timestamp',
         'extension',
         'bytes',
@@ -90,7 +89,7 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       // Arriving: '@timestamp' (TSDB used 'timestamp'); departing: message
       await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'visible' });
       await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
-      expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         '@timestamp',
         'extension',
         'bytes',
@@ -105,8 +104,7 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
 
-      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'visible' });
-      expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         '@timestamp',
         'message',
         'extension',
@@ -121,7 +119,7 @@ spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic },
       // because discover:modifyColumnsOnSwitch is off
       await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
       await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'hidden' });
-      expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+      expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         'timestamp',
         'message',
         'extension',

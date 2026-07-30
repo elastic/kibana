@@ -13,6 +13,8 @@ import { spaceTest } from '../fixtures';
 
 const TSDB_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb';
+const FLIGHTS_KBN_ARCHIVE =
+  'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
 const DEFAULT_COLUMNS = ['message', 'extension', 'DestCountry'];
 
@@ -33,9 +35,8 @@ spaceTest.describe(
   { tag: EXCLUDING_SERVERLESS_OBSERVABILITY_TAGS },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
-      // Loads kbn_archiver/discover (logstash-* data view) + sets defaultIndex + timepicker.
-      // loadFlightsDataView: true also loads kbn_archiver/kibana_sample_data_flights_index_pattern.
-      await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
+      await discoverScoutSpace.setupDiscoverDefaults();
+      await scoutSpace.savedObjects.load(FLIGHTS_KBN_ARCHIVE);
       await scoutSpace.savedObjects.load(TSDB_KBN_ARCHIVE);
     });
 
@@ -54,8 +55,7 @@ spaceTest.describe(
     spaceTest(
       'should render only available default columns after switching data views',
       async ({ page, pageObjects }) => {
-        await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'visible' });
-        expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+        expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
           '@timestamp',
           'message',
           'extension',
@@ -70,7 +70,7 @@ spaceTest.describe(
         // distinguish the reconciled state from a stale render that also contains it
         await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
         await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
-        expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+        expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
           'timestamp',
           'message',
           'extension',
@@ -84,7 +84,7 @@ spaceTest.describe(
         await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'visible' });
         await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
         await page.testSubj.locator('dataGridHeaderCell-extension').waitFor({ state: 'hidden' });
-        expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+        expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
           'timestamp',
           'DestCountry',
         ]);
@@ -96,7 +96,7 @@ spaceTest.describe(
         // Arriving: '@timestamp' (flights used 'timestamp'); departing: DestCountry
         await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'visible' });
         await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
-        expect(await pageObjects.discover.getDocHeader()).toStrictEqual([
+        expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
           '@timestamp',
           'extension',
         ]);
