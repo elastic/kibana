@@ -57,7 +57,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
     const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
       if ('esqlQuery' in update) esqlQuery$.next(update.esqlQuery);
-      if (update.template !== undefined) template$.next(update.template);
+      if ('template' in update) template$.next(update.template);
     };
 
     const stateApi = initializeStateApi<CustomContentEmbeddableState>({

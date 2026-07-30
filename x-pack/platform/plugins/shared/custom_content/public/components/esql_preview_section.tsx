@@ -61,9 +61,13 @@ export const EsqlPreviewSection = ({
       return;
     }
     debounceRef.current = setTimeout(() => {
-      getESQLTimeField({ query: esqlQuery, http: getServices().core.http }).then((field) => {
-        if (!cancelled) setDetectedTimeField(field);
-      });
+      getESQLTimeField({ query: esqlQuery, http: getServices().core.http })
+        .then((field) => {
+          if (!cancelled) setDetectedTimeField(field);
+        })
+        .catch(() => {
+          if (!cancelled) setDetectedTimeField(undefined);
+        });
     }, 300);
     return () => {
       cancelled = true;
