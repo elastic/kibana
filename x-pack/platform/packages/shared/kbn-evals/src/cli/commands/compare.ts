@@ -35,7 +35,7 @@ export const compareCmd: Command<void> = {
     --suite            Suite ID filter for baseline lookup and score filtering
     --format           Output format: "terminal" (default) or "markdown"
     --kibana-url       Kibana URL for generating compare page links in markdown
-    --output           Write markdown output to a file instead of stdout
+    --output           Append markdown output to a file instead of stdout
     --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
 
   Environment:
@@ -49,7 +49,7 @@ export const compareCmd: Command<void> = {
       --suite            Suite ID filter for baseline lookup and score filtering
       --format           Output format: "terminal" (default) or "markdown"
       --kibana-url       Kibana URL for generating compare page links in markdown
-      --output           Write markdown output to a file instead of stdout
+      --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
     `,
   },
