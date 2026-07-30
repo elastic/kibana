@@ -738,7 +738,7 @@ describe('runNamespacePreflightCheck', () => {
             index_template: { index_patterns: ['logs-nginx.access-*'], priority: 300 },
           },
         ],
-      });
+      } as any) as any;
     });
     // Base template is in overlapping (losing) → conflict indicated for every simulated index
     esClient.indices.simulateIndexTemplate.mockResolvedValue({
