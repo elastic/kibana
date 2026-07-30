@@ -25,7 +25,6 @@ interface Opts<H> {
   logger: Logger;
   initialPollInterval: number;
   pollInterval$: Observable<number>;
-  pollIntervalDelay$?: Observable<number>;
   /**
    * Emits when a Kibana node requests an immediate claim cycle (e.g. via `runSoon`),
    * triggering a cycle right away instead of waiting for the next `pollInterval`.
@@ -56,7 +55,6 @@ export function createTaskPoller<T, H>({
   logger,
   initialPollInterval,
   pollInterval$,
-  pollIntervalDelay$,
   claimNudge$,
   getCapacity,
   work,
@@ -149,12 +147,6 @@ export function createTaskPoller<T, H>({
       pollInterval = interval;
       logger.debug(`Task poller now using interval of ${interval}ms`);
     });
-    if (pollIntervalDelay$) {
-      pollIntervalDelay$.subscribe((delay) => {
-        pollIntervalDelay = delay;
-        logger.debug(`Task poller now delaying emission by ${delay}ms`);
-      });
-    }
     if (claimNudge$) {
       claimNudge$.subscribe(() => {
         logger.debug('Task poller received a claim nudge, running a claim cycle immediately');
