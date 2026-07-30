@@ -158,7 +158,6 @@
     {
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
-        "callsites",
         "chance",
         "cheerio",
         "@types/chance",
@@ -2041,15 +2040,6 @@
       "enabled": true
     },
     {
-      "groupName": "redux-saga-testing",
-      "matchDepNames": ["redux-saga-testing"],
-      "reviewers": ["team:actionable-obs-team"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
       "reviewers": ["team:actionable-obs-team"],
@@ -2353,11 +2343,9 @@
       "groupName": "Response Ops misc dependencies",
       "matchDepNames": [
         "@types/stats-lite",
-        "@types/textarea-caret",
         "email-addresses",
         "murmurhash",
-        "stats-lite",
-        "textarea-caret"
+        "stats-lite"
       ],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
