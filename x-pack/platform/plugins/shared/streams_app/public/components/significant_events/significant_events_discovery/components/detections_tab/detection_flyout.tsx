@@ -131,7 +131,9 @@ export const DetectionFlyout = ({ detection, onClose }: DetectionFlyoutProps) =>
           <EuiFlexItem>
             <FlyoutMetadataCard title={STATUS_LABEL}>
               <EuiToolTip content={STATUS_TOOLTIP}>
-                <EuiBadge color={status.color}>{status.label}</EuiBadge>
+                <EuiBadge color={status.color} tabIndex={0}>
+                  {status.label}
+                </EuiBadge>
               </EuiToolTip>
             </FlyoutMetadataCard>
           </EuiFlexItem>
