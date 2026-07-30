@@ -454,7 +454,7 @@ apiTest.describe('Update rule API', { tag: '@local-stateful-classic' }, () => {
         body: { state_transition: { pending_count: 3, pending_timeframe: '5m' } },
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('BAD_REQUEST');
+      expect(response.body.code).toBe('INVALID_STATE_TRANSITION');
     }
   );
 
