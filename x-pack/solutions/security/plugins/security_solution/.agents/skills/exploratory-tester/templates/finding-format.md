@@ -14,26 +14,19 @@ order and delimiters exactly as shown.
 
 **Optional status-override marker.** A flow whose status is not simply
 "completed" for a reason the renderer cannot infer from timing data alone —
-`blocked` (an unresolvable prerequisite) or a genuine `timed out` (steps
-really were skipped, as opposed to merely running over budget) — may record
-that judgment call once, anywhere in the file. **A reason is required** — it
-is rendered directly in the report's Status cell, never silently dropped:
+`blocked` (an unresolvable prerequisite), or a mid-flow `session lost` — may
+record that judgment call once, anywhere in the file:
 
 ```markdown
 <!-- status: blocked | reason: <short reason> -->
 ```
 
-A browser session dropped mid-flow doesn't need this marker — follow
-`phases/2-flow-core.md`'s existing `skipped: session lost` convention and
-`parse-findings.py` detects it automatically. (If you also add this marker
-for the same flow with a different status, the marker wins — see
-`phases/3-report.md` Step 3a for the exact priority order.)
-
-`render-report.py`'s `--overrides` (`flow_status` key) covers the same
-cases, plus `not started` flows that never got a findings file at all, for
-when the orchestrator determines the status only after the flow file was
-written, or never wrote one. Either mechanism is fine; don't set both for
-the same flow.
+`render-report.py` also has an `--overrides` flow for the same two cases
+(and for `not started` flows that never got a findings file at all) when the
+orchestrator determines the status only after the flow file was written, or
+never wrote one. Either mechanism is fine; don't set both for the same flow.
+Do not use this marker for "timed out" — see the note on that status in
+`phases/3-report.md` Step 3a.
 
 ## Level 1 / 2 finding
 

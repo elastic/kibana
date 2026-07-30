@@ -49,16 +49,6 @@ time) fails to collide at all.
     epoch-millisecond numbers, the `/s/<space>/` prefix) and pure artifact
     paths (Screenshot/Video — always session/flow-specific, carry no
     bug-identity signal) excluded entirely.
-  - a normalized fallback fingerprint of `current_behavior`, but ONLY when
-    every evidence line was artifact-only (so the fact-set above is empty).
-    Without this, two unrelated findings at the same level and checklist
-    step with a generic, coincidentally-identical title and nothing but
-    screenshots/video for evidence would merge into one group — there would
-    be no factual signal left to tell them apart. This fallback is narrower
-    and more prose-sensitive than the fact-set match above (it *will* fail
-    to collide the same bug reworded across flows in this specific
-    zero-evidence-facts case) — that tradeoff only applies when there is
-    truly no other signal to go on.
 
 Evidence facts are a more precise fingerprint of "is this the same bug" than
 free-form prose, and are far less sensitive to how the model happened to
@@ -95,12 +85,6 @@ STATUS_OVERRIDE_RE = re.compile(
     r"^<!--\s*status:\s*(?P<status>[a-z ]+?)\s*\|\s*reason:\s*(?P<reason>.+?)\s*-->\s*$",
     re.MULTILINE | re.IGNORECASE,
 )
-# Matches only the literal convention `phases/2-flow-core.md` documents for
-# a browser-session drop mid-flow (`skipped: session lost`), not a bare
-# "session lost" substring — free-form prose describing session loss as a
-# *product* symptom (rather than this skill's own browser session) must
-# never trip this.
-SESSION_LOST_RE = re.compile(r"skipped:\s*session lost", re.IGNORECASE)
 BLOCK_START_RE = re.compile(r"^##\s+(Finding|Observation):\s*(.+?)\s*$", re.MULTILINE)
 FIELD_RE = re.compile(r"^\*\*(Level|Flow|Role|Checklist step):\*\*\s*(.*)$")
 SUBHEADING_RE = re.compile(r"^###\s+(.+?)\s*$")
@@ -195,7 +179,6 @@ def compute_signature(
     checklist_step_number: int | None,
     title: str,
     evidence: list[str],
-    current_behavior: str = "",
 ) -> str:
     evidence_keys = sorted(
         {key for line in evidence if (key := normalize_evidence_line(line)) is not None}
@@ -205,13 +188,6 @@ def compute_signature(
         "checklist_step_number": checklist_step_number,
         "title_key": normalize_text(title),
         "evidence_keys": evidence_keys,
-        # Only consulted when there are no evidence facts at all (e.g. a
-        # finding whose only evidence is Screenshot:/Video: lines) — see the
-        # module docstring's "Structured dedup signature" section. Leaving
-        # this out of every signature (rather than always including it)
-        # keeps the primary, fact-based match exactly as prose-insensitive
-        # as before for the common case where evidence facts exist.
-        "prose_fallback": normalize_text(current_behavior) if not evidence_keys else None,
     }
     canonical = json.dumps(payload, sort_keys=True)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
@@ -275,7 +251,7 @@ def parse_findings_file(path: Path) -> tuple[dict[str, Any] | None, list[dict[st
 
     header_match = FLOW_HEADER_RE.search(text)
     override_match = STATUS_OVERRIDE_RE.search(text)
-    session_lost = bool(SESSION_LOST_RE.search(text))
+    session_lost = "session lost" in text.lower()
 
     flow_header: dict[str, Any] | None = None
     default_flow_name: str | None = None
@@ -363,7 +339,6 @@ def parse_findings_file(path: Path) -> tuple[dict[str, Any] | None, list[dict[st
                     checklist_step_number=checklist_step_number,
                     title=title,
                     evidence=evidence,
-                    current_behavior=current_behavior,
                 ),
                 "source_file": path.name,
                 "finding_index": index,

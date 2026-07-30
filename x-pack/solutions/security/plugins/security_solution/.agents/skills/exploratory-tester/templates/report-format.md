@@ -34,12 +34,10 @@ Compute per-flow duration from the `<!-- flow: ... | started: <ISO> | ended: <IS
 
 | Flow | Source | Started | Duration | Budget | Over? | Status |
 |---|---|---|---|---|---|---|
-| <flow name> | specified / agent / investigation (↳ <finding title>) | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out — <reason> / blocked — <reason> / not started / session lost / cap reached — <reason> |
+| <flow name> | specified / agent / investigation (↳ <finding title>) | <ISO start> | <Xm Ys> | <timeout_minutes>m | ✓ / ⚠️ over | completed / timed out / blocked / not started / session lost / cap reached |
 | **Total session** | — | <session_started_at> | **<Xh Ym>** | <session_timeout_minutes>m cap | ✓ / ⚠️ over cap | — |
 
-**Status definitions:** every status except `completed`/`not started`/`session
-lost` requires a `reason`, rendered directly in the Status cell as
-`<status> — <reason>` — never collected and then silently dropped.
+**Status definitions:**
 - `completed` — all 5 checklist steps were attempted. This is the renderer's
   default for any flow with parsed timing data and no explicit override —
   **including** a flow that ran over its per-flow budget: "over budget" (the
@@ -48,14 +46,12 @@ lost` requires a `reason`, rendered directly in the Status cell as
 - `timed out` — per-flow time budget exhausted; list which steps were
   skipped. Never inferred from duration alone — pass it via `--overrides`
   (`flow_status`) or the file's `<!-- status: ... -->` marker.
-- `blocked` — unresolvable prerequisite; state the blocker (via marker or override)
+- `blocked` — unresolvable prerequisite; state the blocker (via override)
 - `not started` — flow never reached (session ended before it started) —
   the renderer's default for any flow with no findings file and no override
 - `cap reached` — session time cap fired before this flow began (via override)
-- `session lost` — browser session lost mid-flow; detected automatically
-  from the literal `skipped: session lost` phrase (`phases/2-flow-core.md`'s
-  own convention), or via an explicit marker/override, which always takes
-  priority over that detection
+- `session lost` — browser session lost mid-flow (detected automatically
+  from a `session lost` marker in the findings file, or via override)
 
 **Reading the table:**
 - **Over?** for individual flows: ⚠️ if `Duration > Budget`
@@ -112,11 +108,7 @@ _If empty: no deferred flows — session covered everything identified._
 
 This table (and the corresponding removal from the Level 2/3 sections above,
 and the Summary counts) is populated by re-running `render-report.py` with
-the same accumulated `overrides.json` (now including a `suppressions` key)
-once Step 3b has decided which findings match — see `phases/3-report.md`.
-The *decision* of what matches stays a model judgment call reading
-untrusted knowledge-file content; the *mechanics* of moving a row and
-recomputing counts do not. A suppression is matched by title but resolved
-against every finding sharing that title, refusing (hard error) if any of
-them is Level 1 — so a same-titled Level 1 and Level 2/3 finding can never
-have the Level 1 one silently dropped by a suppression aimed at the other.
+`--overrides` once Step 3b has decided which findings match — see
+`phases/3-report.md`. The *decision* of what matches stays a model judgment
+call reading untrusted knowledge-file content; the *mechanics* of moving a
+row and recomputing counts do not.
