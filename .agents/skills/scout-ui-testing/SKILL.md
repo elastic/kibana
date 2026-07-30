@@ -39,7 +39,20 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 ## Page objects (UI)
 
 - Prefer `page.testSubj.locator(...)`, role/label locators; avoid brittle CSS.
-- Keep selectors + interactions inside the page object class. **Do not use `expect` assertions in page objects** — use `waitForSelector` for waiting on elements. Assertions belong in test specs only.
+- Keep selectors + interactions inside the page object class. **Do not use `expect` assertions in page objects** — use `waitForSelector` or `locator.waitFor()` for waiting on elements. Assertions belong in test specs only.
+- **Attribute waits in page objects** — when a page object needs to confirm an element reached a specific attribute state (e.g. after a click toggles `aria-checked`), do **not** use `expect(el).toHaveAttribute(...)`. Instead, compose a locator with `.and()` and call `.waitFor()`:
+  ```ts
+  // ✅ page object — wait for attribute without asserting
+  await includeEmptyRows.click();
+  await includeEmptyRows
+    .and(this.page.locator('[aria-checked="true"]'))
+    .waitFor({ state: 'visible' });
+
+  // ❌ page object — do not use expect
+  await includeEmptyRows.click();
+  await expect(includeEmptyRows).toHaveAttribute('aria-checked', 'true');
+  ```
+  This applies to any attribute check (`aria-pressed`, `aria-selected`, `aria-expanded`, `disabled`, etc.). The `.and()` locator composition auto-retries until the combined selector matches, equivalent to an assertion but without pulling `expect` into the page object.
 - **Keep route mocks out of page objects** — page objects are for UI interactions only. Put `page.route()` mocks in a dedicated `fixtures/mocks.ts` file as standalone functions that accept `page` as a parameter. See `cloud_security_posture/test/scout_cspm_agentless/ui/fixtures/mocks.ts` for the reference pattern.
 - Don't make API calls from page objects (use `apiServices`/`kbnClient` in hooks instead).
 - Register plugin page objects by extending the `pageObjects` fixture in `test/scout*/ui/fixtures/index.ts`.
