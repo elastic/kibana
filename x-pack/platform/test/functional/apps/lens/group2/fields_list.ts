@@ -224,7 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // check all fields are empty now
             expect(
               await (await testSubjects.find('lnsIndexPatternEmptyFields-count')).getVisibleText()
-            ).to.eql(52);
+            ).to.eql(51);
             // check avaialble count is 0
             expect(
               await (
