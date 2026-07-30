@@ -3,7 +3,7 @@ navigation_title: "Ansible Control Server"
 type: reference
 description: "Use the Ansible Control Server connector to launch and monitor Ansible Automation Controller / AWX jobs."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
