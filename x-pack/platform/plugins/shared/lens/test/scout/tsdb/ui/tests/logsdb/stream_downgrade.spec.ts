@@ -8,11 +8,9 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
   offsetPickerTime,
-  sumFirstNValues,
   test,
 } from '../../fixtures';
 import type { TsdbScenarioContext, TsdbScenarioIndex } from '../../fixtures';
@@ -44,14 +42,13 @@ interface ScenarioResult {
   annotationVisible: boolean;
   /** Whether the annotation layer rendered with utc_time time field. */
   annotationAltTimeFieldVisible: boolean;
-  expectedDocumentCountBeforeRollover: number;
 }
 
 const runScenario = async (
   { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
   indexes: TsdbScenarioIndex[]
 ): Promise<ScenarioResult> => {
-  const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
+  await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
 
   const bars = await test.step('visualize date histogram chart', async () => {
     await pageObjects.lens.workspace.openFullEditor();
@@ -67,7 +64,7 @@ const runScenario = async (
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
       operation: 'min',
-      field: 'bytes_counter',
+      field: 'bytes',
     });
 
     await pageObjects.lens.waitForVisualization('xyVisChart');
@@ -92,7 +89,7 @@ const runScenario = async (
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'min',
-        field: 'bytes_counter',
+        field: 'bytes',
       });
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
@@ -130,7 +127,7 @@ const runScenario = async (
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
         operation: 'min',
-        field: 'bytes_counter',
+        field: 'bytes',
       });
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
@@ -153,7 +150,7 @@ const runScenario = async (
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
       operation: 'min',
-      field: 'bytes_counter',
+      field: 'bytes',
     });
     await pageObjects.lens.layers.createLayer('annotations');
 
@@ -196,7 +193,7 @@ const runScenario = async (
 
     const esqlQuery = `from ${indexes
       .map(({ index }) => index)
-      .join(', ')} | stats averageB = avg(bytes) by request`;
+      .join(', ')} | stats averageB = avg(bytes) by extension`;
     await pageObjects.discover.writeAndSubmitEsqlQuery(esqlQuery);
     await pageObjects.discover.waitUntilSearchingHasFinished();
 
@@ -225,7 +222,6 @@ const runScenario = async (
     altDateFieldBars,
     annotationVisible,
     annotationAltTimeFieldVisible,
-    expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
   };
 };
 
@@ -244,16 +240,13 @@ const assertDowngradeResult = (
   expect.soft(result.bars.some(({ y }) => y > 0)).toBe(true);
 
   if (includesBaseStream) {
-    // Boundary checks only apply when the downgraded base stream is in the data view
+    // Boundary checks only apply when the downgraded base stream is in the data view.
+    // The FTR asserted bars[0].y > 0 and bars[last].y > 0 — data visible on both sides
+    // of the downgrade rollover. Using min(bytes) (not count), so no document-count assertions.
     expect.soft(result.hasDataBeforeDowngrade).toBe(true);
     expect.soft(result.hasDataAfterDowngrade).toBe(true);
-    const columnsToCheck = Math.floor(result.bars.length / 2);
-    expect
-      .soft(sumFirstNValues(columnsToCheck, result.bars))
-      .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-    expect
-      .soft(sumFirstNValues(columnsToCheck, [...result.bars].reverse()))
-      .toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+    expect.soft(result.bars[0]?.y).toBeGreaterThan(0);
+    expect.soft(result.bars[result.bars.length - 1]?.y).toBeGreaterThan(0);
   }
 
   // Date histogram with utc_time

@@ -183,6 +183,9 @@ const getTsdbMapping = ({
   '@timestamp': { type: 'date' },
   utc_time: { type: 'date' },
   bytes: { type: 'long' },
+  extension: {
+    type: 'keyword',
+  },
   request: {
     type: 'keyword',
     ...(includeTimeSeriesMetadata ? { time_series_dimension: true } : {}),
@@ -306,6 +309,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
             ).toISOString(),
             request: `/lens-tsdb-test/${indexOffset % 5}`,
             bytes: Math.floor(Math.random() * 10000),
+            extension: ['deb', 'rpm', 'zip', 'gz', 'tar'][indexOffset % 5],
             host: { name: `host-${indexOffset % 3}` },
             ...(removeTSDBFields ? {} : { bytes_counter: 5000 }),
           })
