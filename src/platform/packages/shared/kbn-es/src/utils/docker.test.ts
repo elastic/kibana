@@ -905,6 +905,9 @@ describe('setupServerlessVolumes()', () => {
     const settings = JSON.parse(
       await Fsp.readFile(join(SERVERLESS_OPERATOR_PATH, 'settings.json'), 'utf-8')
     );
+    expect(settings.state.project.tags).toEqual(
+      expect.objectContaining({ _csp: 'aws', _region: 'eu-west-1' })
+    );
     expect(settings.state.cluster_secrets.string_secrets).toEqual(stringSecretsFixture);
   });
 
