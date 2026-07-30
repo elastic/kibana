@@ -16,8 +16,8 @@ import {
   FLYOUT_TYPE,
 } from '../../common/lib/telemetry';
 import {
-  defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import {
@@ -216,6 +216,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
@@ -249,7 +250,7 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
       session: FLYOUT_SESSION_KIND.START,
       ...(title !== undefined ? { title } : {}),
     }),
-    [historyKey]
+    [defaultToolsFlyoutProperties, historyKey]
   );
 
   // Main entity flyouts.
