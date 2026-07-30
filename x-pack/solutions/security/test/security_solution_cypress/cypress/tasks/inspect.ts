@@ -48,7 +48,7 @@ export const openLensVisualizationsInspectModal = (
       }
 
       cy.wrap($el).realHover();
-      cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click();
+      cy.wrap($el).find(EMBEDDABLE_PANEL_TOGGLE_ICON).click({ force: true });
       cy.get(EMBEDDABLE_PANEL_INSPECT).click();
 
       onOpen();
