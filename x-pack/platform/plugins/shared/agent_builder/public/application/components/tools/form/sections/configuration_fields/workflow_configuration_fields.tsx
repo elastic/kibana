@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCheckbox, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiCheckbox } from '@elastic/eui';
 import { useFormContext, Controller } from 'react-hook-form';
+import { ConfirmationPolicySelect } from '../../components/confirmation_policy_select';
 import { WorkflowPicker } from '../../components/workflow/workflow_picker';
 import type { WorkflowToolFormData } from '../../types/tool_form_types';
 import { i18nMessages } from '../../i18n';
@@ -50,33 +51,10 @@ export const WorkflowConfiguration = () => {
           )}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18nMessages.configuration.form.confirmation.label}
-        helpText={i18nMessages.configuration.form.confirmation.helpText}
-        isInvalid={!!errors.confirmation_ask_user}
-        error={errors.confirmation_ask_user?.message}
-      >
-        <Controller
-          control={control}
-          name="confirmation_ask_user"
-          render={({ field: { ref, onChange, value, ...field } }) => (
-            <EuiSelect
-              id="agentBuilderWorkflowToolConfirmationPolicySelect"
-              options={[
-                { value: 'never', text: i18nMessages.configuration.form.confirmation.neverOption },
-                { value: 'once', text: i18nMessages.configuration.form.confirmation.onceOption },
-                {
-                  value: 'always',
-                  text: i18nMessages.configuration.form.confirmation.alwaysOption,
-                },
-              ]}
-              value={value ?? 'never'}
-              onChange={(e) => onChange(e.target.value)}
-              {...field}
-            />
-          )}
-        />
-      </EuiFormRow>
+      <ConfirmationPolicySelect
+        id="agentBuilderWorkflowToolConfirmationPolicySelect"
+        data-test-subj="agentBuilderWorkflowToolConfirmationPolicySelect"
+      />
     </>
   );
 };
