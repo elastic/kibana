@@ -2262,10 +2262,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@71.1.3":
-  version "71.1.3"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.1.3.tgz#001adfc7567df4aa804c09a6b01a8b019c667596"
-  integrity sha512-UfjGXD1Sgel5WSE4fBqtHq37dj7rPXxLTNSmzbjRbKBenK9aBlUJI6O/adKBBYO/2v9rJ7+3VwcEu/ysGi+MkQ==
+"@elastic/charts@71.1.4":
+  version "71.1.4"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-71.1.4.tgz#5535280cb7c4990d08e54685da430142f3a5c731"
+  integrity sha512-egazwKsO++aa5XJz0vqqBkl7onsSmqPWmX+IES1pxz1nio3Efcq542AZjHqqo8PhlbgfR85btqCD0DSc0UJ2+g==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2286,7 +2286,7 @@
     redux "^4.2.1"
     ts-debounce "^4.0.0"
     utility-types "^3.10.0"
-    uuid "^9"
+    uuid "^14.0.0"
 
 "@elastic/datemath@5.0.3":
   version "5.0.3"
@@ -33349,6 +33349,11 @@ uuid@^13.0.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-13.0.2.tgz#41bc9c07b12f665089c205f6507976adbdf84ff8"
   integrity sha512-vzi9uRZ926x4XV73S/4qQaTwPXM2JBj6/6lI/byHH1jOpCzb0zDbfytgA9LcN/hzb2l7WQSQnxITOVx5un/wGw==
 
+uuid@^14.0.0:
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-14.0.1.tgz#8a5975b3e038902bfd169a10b5202f5ec0cf3faf"
+  integrity sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==
+
 uuid@^3.3.3:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
@@ -33359,7 +33364,7 @@ uuid@^8.0.0, uuid@^8.3.0, uuid@^8.3.2:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
-uuid@^9, uuid@^9.0.0:
+uuid@^9.0.0:
   version "9.0.1"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
   integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
