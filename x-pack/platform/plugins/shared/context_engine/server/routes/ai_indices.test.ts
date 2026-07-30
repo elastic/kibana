@@ -738,7 +738,11 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_get', type: ['access'], outcome: 'success' }),
+            event: expect.objectContaining({
+              action: 'ai_index_get',
+              type: ['access'],
+              outcome: 'success',
+            }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
@@ -768,7 +772,11 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_list', type: ['access'], outcome: 'success' }),
+            event: expect.objectContaining({
+              action: 'ai_index_list',
+              type: ['access'],
+              outcome: 'success',
+            }),
             kibana: { saved_object: undefined },
           })
         );
@@ -798,7 +806,11 @@ describe('ai indices routes', () => {
         expect(auditLogger.log).toHaveBeenCalledTimes(1);
         expect(auditLogger.log).toHaveBeenCalledWith(
           expect.objectContaining({
-            event: expect.objectContaining({ action: 'ai_index_delete', type: ['deletion'], outcome: 'success' }),
+            event: expect.objectContaining({
+              action: 'ai_index_delete',
+              type: ['deletion'],
+              outcome: 'success',
+            }),
             kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
