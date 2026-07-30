@@ -60,12 +60,12 @@ export function getChartDefinitions({
   const otelScope: ServiceScope = { serviceName, environment };
   const metricScope: ServiceScope = { serviceName, environment };
   const isOtel = schema === 'otel';
-  const indexes = isOtel ? otelIndexes : transactionIndexes;
+  const chartIndices = isOtel ? otelIndexes : transactionIndexes;
 
   return {
     keyMetrics: [
       getLatencyChart({
-        indexes,
+        indices: chartIndices,
         latencyAggregationType,
         titleAction: latencyTitleAction,
         buildQuery: isOtel
@@ -73,14 +73,14 @@ export function getChartDefinitions({
           : (idx, agg) => buildApmLatencyQuery(idx, ecsScope, agg),
       }),
       getErrorRateChart({
-        indexes,
+        indices: chartIndices,
         title: isOtel ? OTEL_ERROR_RATE_TITLE : APM_ERROR_RATE_TITLE,
         buildQuery: isOtel
           ? (idx) => buildOtelErrorRateQuery(idx, otelScope)
           : (idx) => buildApmErrorRateQuery(idx, ecsScope),
       }),
       getThroughputChart({
-        indexes,
+        indices: chartIndices,
         buildQuery: isOtel
           ? (idx) => buildOtelThroughputQuery(idx, otelScope)
           : (idx) => buildApmThroughputQuery(idx, ecsScope),

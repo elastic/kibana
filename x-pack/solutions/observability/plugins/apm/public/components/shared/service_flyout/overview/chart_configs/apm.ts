@@ -36,16 +36,16 @@ import type {
 } from './shared';
 
 function createApmBaseQuery({
-  indexes,
+  indices,
   processorEvent,
   scope,
 }: {
-  indexes: string;
+  indices: string;
   processorEvent: FlyoutLensChartProcessorEvent;
   scope: ServiceScope & { transactionType?: string };
 }): ComposerQuery {
   const { transactionType } = scope;
-  const query = esql.from(indexes).where`${esql.col(PROCESSOR_EVENT)} == ${processorEvent}`;
+  const query = esql.from(indices).where`${esql.col(PROCESSOR_EVENT)} == ${processorEvent}`;
   if (transactionType) {
     query.where`${esql.col(TRANSACTION_TYPE)} == ${transactionType}`;
   }
@@ -54,24 +54,24 @@ function createApmBaseQuery({
 }
 
 export function buildApmLatencyQuery(
-  indexes: string,
+  indices: string,
   scope: EcsServiceScope,
   aggregation: string
 ): ComposerQuery {
-  const query = createApmBaseQuery({ indexes, processorEvent: 'transaction', scope });
+  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
   query.pipe(`EVAL duration_ms = TO_DOUBLE(${TRANSACTION_DURATION}) / 1000`);
   query.pipe(`STATS ${aggregation} BY ${TIME_BUCKET_BY}`);
   return query;
 }
 
-export function buildApmThroughputQuery(indexes: string, scope: EcsServiceScope): ComposerQuery {
-  const query = createApmBaseQuery({ indexes, processorEvent: 'transaction', scope });
+export function buildApmThroughputQuery(indices: string, scope: EcsServiceScope): ComposerQuery {
+  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
   query.pipe(`STATS COUNT(*) BY ${TIME_BUCKET_BY}`);
   return query;
 }
 
-export function buildApmErrorRateQuery(indexes: string, scope: EcsServiceScope): ComposerQuery {
-  const query = createApmBaseQuery({ indexes, processorEvent: 'transaction', scope });
+export function buildApmErrorRateQuery(indices: string, scope: EcsServiceScope): ComposerQuery {
+  const query = createApmBaseQuery({ indices, processorEvent: 'transaction', scope });
   query.pipe(
     `STATS failure = COUNT(*) WHERE TO_STRING(${EVENT_OUTCOME}) == "failure", all = COUNT(*) WHERE (TO_STRING(${EVENT_OUTCOME}) IN ("failure", "success")) BY ${TIME_BUCKET_BY}`
   );
@@ -87,7 +87,7 @@ export const APM_ERROR_RATE_TITLE = i18n.translate(
 );
 
 export function getCpuUsageChart(
-  indexes: string | undefined,
+  indices: string | undefined,
   scope: ServiceScope
 ): FlyoutLensChartConfigDefinition {
   const cpuUsage = `AVG(TO_DOUBLE(${METRIC_SYSTEM_CPU_PERCENT}))`;
@@ -98,9 +98,9 @@ export function getCpuUsageChart(
   return buildChartDefinition({
     id: 'cpuUsage',
     title,
-    indexes,
+    indices,
     buildQuery: (idx) => {
-      const query = createApmBaseQuery({ indexes: idx, processorEvent: 'metric', scope });
+      const query = createApmBaseQuery({ indices: idx, processorEvent: 'metric', scope });
       query.pipe(`WHERE TO_DOUBLE(${METRIC_SYSTEM_CPU_PERCENT}) IS NOT NULL`);
       query.pipe(`STATS ${cpuUsage} BY ${TIME_BUCKET_BY}`);
       return query;
@@ -119,7 +119,7 @@ export function getCpuUsageChart(
 }
 
 export function getMemoryUsageChart(
-  indexes: string | undefined,
+  indices: string | undefined,
   scope: ServiceScope
 ): FlyoutLensChartConfigDefinition {
   const title = i18n.translate('xpack.apm.serviceFlyout.memoryUsageChartTitle', {
@@ -129,9 +129,9 @@ export function getMemoryUsageChart(
   return buildChartDefinition({
     id: 'memoryUsage',
     title,
-    indexes,
+    indices,
     buildQuery: (idx) => {
-      const query = createApmBaseQuery({ indexes: idx, processorEvent: 'metric', scope });
+      const query = createApmBaseQuery({ indices: idx, processorEvent: 'metric', scope });
       query.pipe(`EVAL cgroup_usage = TO_DOUBLE(${METRIC_CGROUP_MEMORY_USAGE_BYTES})`);
       query.pipe(`EVAL cgroup_limit = TO_DOUBLE(${METRIC_CGROUP_MEMORY_LIMIT_BYTES})`);
       query.pipe(`EVAL sys_free = TO_DOUBLE(${METRIC_SYSTEM_FREE_MEMORY})`);

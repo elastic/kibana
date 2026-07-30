@@ -62,13 +62,13 @@ export function getLatencyChartType(latencyAggregationType: LatencyAggregationTy
 // buildQuery receives the aggregation expression so the STATS column name matches
 // the yAxis value without the caller having to compute it twice.
 export function getLatencyChart({
-  indexes,
+  indices,
   buildQuery,
   latencyAggregationType,
   titleAction,
 }: {
-  indexes: string | undefined;
-  buildQuery: (indexes: string, aggregation: string) => ComposerQuery;
+  indices: string | undefined;
+  buildQuery: (indices: string, aggregation: string) => ComposerQuery;
   latencyAggregationType: LatencyAggregationType;
   titleAction?: ReactNode;
 }): FlyoutLensChartConfigDefinition {
@@ -80,7 +80,7 @@ export function getLatencyChart({
       defaultMessage: 'Latency',
     }),
     titleAction,
-    indexes,
+    indices,
     buildQuery: (idx) => buildQuery(idx, aggregation),
     yAxis: [
       {
@@ -96,18 +96,18 @@ export function getLatencyChart({
 }
 
 export function getThroughputChart({
-  indexes,
+  indices,
   buildQuery,
 }: {
-  indexes: string | undefined;
-  buildQuery: (indexes: string) => ComposerQuery;
+  indices: string | undefined;
+  buildQuery: (indices: string) => ComposerQuery;
 }): FlyoutLensChartConfigDefinition {
   return buildChartDefinition({
     id: 'throughput',
     title: i18n.translate('xpack.apm.serviceFlyout.throughputChartTitle', {
       defaultMessage: 'Throughput',
     }),
-    indexes,
+    indices,
     buildQuery,
     yAxis: [
       {
@@ -124,18 +124,18 @@ export function getThroughputChart({
 }
 
 export function getErrorRateChart({
-  indexes,
+  indices,
   buildQuery,
   title,
 }: {
-  indexes: string | undefined;
-  buildQuery: (indexes: string) => ComposerQuery;
+  indices: string | undefined;
+  buildQuery: (indices: string) => ComposerQuery;
   title: string;
 }): FlyoutLensChartConfigDefinition {
   return buildChartDefinition({
     id: 'failedTransactionRate',
     title,
-    indexes,
+    indices,
     buildQuery,
     yBounds: { mode: 'custom', lowerBound: 0, upperBound: 1 },
     yAxis: [

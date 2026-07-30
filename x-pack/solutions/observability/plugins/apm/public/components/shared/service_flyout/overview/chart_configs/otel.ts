@@ -13,36 +13,36 @@ import { TIME_BUCKET_BY, TIME_BUCKET_FIELD, applyServiceFilters } from './shared
 import type { ServiceScope } from './shared';
 
 function createOtelBaseQuery({
-  indexes,
+  indices,
   scope,
 }: {
-  indexes: string;
+  indices: string;
   scope: ServiceScope;
 }): ComposerQuery {
-  const query = esql.from(indexes).where`${esql.col(KIND)} IN ("Server", "Consumer")`;
+  const query = esql.from(indices).where`${esql.col(KIND)} IN ("Server", "Consumer")`;
   applyServiceFilters(query, scope);
   return query;
 }
 
 export function buildOtelLatencyQuery(
-  indexes: string,
+  indices: string,
   scope: ServiceScope,
   aggregation: string
 ): ComposerQuery {
-  const query = createOtelBaseQuery({ indexes, scope });
+  const query = createOtelBaseQuery({ indices, scope });
   query.pipe(`EVAL duration_ms = TO_DOUBLE(${DURATION}) / 1000000`);
   query.pipe(`STATS ${aggregation} BY ${TIME_BUCKET_BY}`);
   return query;
 }
 
-export function buildOtelThroughputQuery(indexes: string, scope: ServiceScope): ComposerQuery {
-  const query = createOtelBaseQuery({ indexes, scope });
+export function buildOtelThroughputQuery(indices: string, scope: ServiceScope): ComposerQuery {
+  const query = createOtelBaseQuery({ indices, scope });
   query.pipe(`STATS COUNT(*) BY ${TIME_BUCKET_BY}`);
   return query;
 }
 
-export function buildOtelErrorRateQuery(indexes: string, scope: ServiceScope): ComposerQuery {
-  const query = createOtelBaseQuery({ indexes, scope });
+export function buildOtelErrorRateQuery(indices: string, scope: ServiceScope): ComposerQuery {
+  const query = createOtelBaseQuery({ indices, scope });
   query.pipe(
     `STATS failure = COUNT(*) WHERE TO_STRING(${STATUS_CODE}) == "Error", all = COUNT(*) BY ${TIME_BUCKET_BY}`
   );

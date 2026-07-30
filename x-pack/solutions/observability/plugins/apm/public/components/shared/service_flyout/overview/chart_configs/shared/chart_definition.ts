@@ -23,7 +23,7 @@ export function buildChartDefinition({
   id,
   title,
   titleAction,
-  indexes,
+  indices,
   buildQuery,
   yAxis,
   yBounds,
@@ -31,19 +31,19 @@ export function buildChartDefinition({
   id: string;
   title: string;
   titleAction?: ReactNode;
-  indexes: string | undefined;
-  buildQuery: (indexes: string) => ComposerQuery;
+  indices: string | undefined;
+  buildQuery: (indices: string) => ComposerQuery;
   yAxis: LensYAxis[];
   yBounds?: LensYBounds;
 }): FlyoutLensChartConfigDefinition {
-  if (!indexes) {
+  if (!indices) {
     return { id, title, titleAction };
   }
 
   const config: LensESQLConfig = {
     chartType: 'xy',
     title,
-    dataset: { esql: `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${printQuery(buildQuery(indexes))}` },
+    dataset: { esql: `${ESQL_NULLIFY_UNMAPPED_FIELDS}\n${printQuery(buildQuery(indices))}` },
     layers: [
       {
         type: 'series',

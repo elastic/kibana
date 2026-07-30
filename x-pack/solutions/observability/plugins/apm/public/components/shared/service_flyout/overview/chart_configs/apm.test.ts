@@ -56,7 +56,7 @@ describe('APM chart configs', () => {
   describe('getLatencyChart / buildApmLatencyQuery', () => {
     it('builds avg latency from average transaction duration', () => {
       const chart = getLatencyChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
       });
@@ -69,7 +69,7 @@ describe('APM chart configs', () => {
 
     it('builds p95 percentile latency', () => {
       const chart = getLatencyChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.p95,
         buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
       });
@@ -82,7 +82,7 @@ describe('APM chart configs', () => {
 
     it('builds p99 percentile latency', () => {
       const chart = getLatencyChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.p99,
         buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
       });
@@ -95,7 +95,7 @@ describe('APM chart configs', () => {
 
     it('filters by the literal sentinel and missing field when environment is ENVIRONMENT_NOT_DEFINED', () => {
       const chart = getLatencyChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) =>
           buildApmLatencyQuery(idx, { ...SCOPE, environment: ENVIRONMENT_NOT_DEFINED.value }, agg),
@@ -108,7 +108,7 @@ describe('APM chart configs', () => {
 
     it('omits the environment clause when environment is ENVIRONMENT_ALL', () => {
       const chart = getLatencyChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) =>
           buildApmLatencyQuery(idx, { ...SCOPE, environment: ENVIRONMENT_ALL.value }, agg),
@@ -121,7 +121,7 @@ describe('APM chart configs', () => {
 
     it('omits the transaction type clause when transactionType is empty string', () => {
       const chart = getLatencyChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) => buildApmLatencyQuery(idx, { ...SCOPE, transactionType: '' }, agg),
       });
@@ -129,9 +129,9 @@ describe('APM chart configs', () => {
       expect(esqlOf(chart.config)).not.toContain('transaction.type');
     });
 
-    it('returns no config when indexes are undefined', () => {
+    it('returns no config when indices are undefined', () => {
       const chart = getLatencyChart({
-        indexes: undefined,
+        indices: undefined,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
       });
@@ -142,7 +142,7 @@ describe('APM chart configs', () => {
 
     it('attaches the title action to the chart definition', () => {
       const chart = getLatencyChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         titleAction: 'latency-action',
         buildQuery: (idx, agg) => buildApmLatencyQuery(idx, SCOPE, agg),
@@ -155,7 +155,7 @@ describe('APM chart configs', () => {
   describe('getThroughputChart / buildApmThroughputQuery', () => {
     it('builds throughput from a raw count per bucket', () => {
       const chart = getThroughputChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         buildQuery: (idx) => buildApmThroughputQuery(idx, SCOPE),
       });
 
@@ -169,7 +169,7 @@ describe('APM chart configs', () => {
   describe('getErrorRateChart / buildApmErrorRateQuery', () => {
     it('builds failed transaction rate from the event.outcome failure ratio excluding unknown', () => {
       const chart = getErrorRateChart({
-        indexes: TRANSACTION_INDEXES,
+        indices: TRANSACTION_INDEXES,
         title: APM_ERROR_RATE_TITLE,
         buildQuery: (idx) => buildApmErrorRateQuery(idx, SCOPE),
       });

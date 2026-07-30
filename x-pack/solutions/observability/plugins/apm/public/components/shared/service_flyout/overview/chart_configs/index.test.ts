@@ -74,12 +74,12 @@ describe('service flyout chart_configs', () => {
       const { keyMetrics } = buildDefinitions();
 
       keyMetrics.forEach(({ config }) => {
-        // single index pattern — not combined with span indexes
+        // single index pattern — not combined with span indices
         expect(config?.dataset.esql).toContain(`FROM ${TRANSACTION_INDEXES} |`);
       });
     });
 
-    it('combines transaction and span indexes for OTel key metrics', () => {
+    it('combines transaction and span indices for OTel key metrics', () => {
       const { keyMetrics } = buildDefinitions({ schema: 'otel' });
 
       keyMetrics.forEach(({ config }) => {

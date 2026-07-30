@@ -49,7 +49,7 @@ describe('OTel chart configs', () => {
   describe('getLatencyChart / buildOtelLatencyQuery', () => {
     it('builds avg latency by converting nanosecond duration to milliseconds', () => {
       const chart = getLatencyChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) => buildOtelLatencyQuery(idx, SCOPE, agg),
       });
@@ -62,7 +62,7 @@ describe('OTel chart configs', () => {
 
     it('builds p95 percentile latency', () => {
       const chart = getLatencyChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         latencyAggregationType: LatencyAggregationType.p95,
         buildQuery: (idx, agg) => buildOtelLatencyQuery(idx, SCOPE, agg),
       });
@@ -73,7 +73,7 @@ describe('OTel chart configs', () => {
 
     it('builds p99 percentile latency', () => {
       const chart = getLatencyChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         latencyAggregationType: LatencyAggregationType.p99,
         buildQuery: (idx, agg) => buildOtelLatencyQuery(idx, SCOPE, agg),
       });
@@ -84,7 +84,7 @@ describe('OTel chart configs', () => {
 
     it('does not filter by transaction type', () => {
       const chart = getLatencyChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) => buildOtelLatencyQuery(idx, SCOPE, agg),
       });
@@ -94,7 +94,7 @@ describe('OTel chart configs', () => {
 
     it('filters by sentinel string OR IS NULL when environment is ENVIRONMENT_NOT_DEFINED', () => {
       const chart = getLatencyChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) =>
           buildOtelLatencyQuery(idx, { ...SCOPE, environment: ENVIRONMENT_NOT_DEFINED.value }, agg),
@@ -107,7 +107,7 @@ describe('OTel chart configs', () => {
 
     it('omits the environment clause when environment is ENVIRONMENT_ALL', () => {
       const chart = getLatencyChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) =>
           buildOtelLatencyQuery(idx, { ...SCOPE, environment: ENVIRONMENT_ALL.value }, agg),
@@ -116,9 +116,9 @@ describe('OTel chart configs', () => {
       expect(esqlOf(chart.config)).not.toContain('service.environment');
     });
 
-    it('returns no config when indexes are undefined', () => {
+    it('returns no config when indices are undefined', () => {
       const chart = getLatencyChart({
-        indexes: undefined,
+        indices: undefined,
         latencyAggregationType: LatencyAggregationType.avg,
         buildQuery: (idx, agg) => buildOtelLatencyQuery(idx, SCOPE, agg),
       });
@@ -129,7 +129,7 @@ describe('OTel chart configs', () => {
 
     it('attaches the title action to the chart definition', () => {
       const chart = getLatencyChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         latencyAggregationType: LatencyAggregationType.avg,
         titleAction: 'latency-action',
         buildQuery: (idx, agg) => buildOtelLatencyQuery(idx, SCOPE, agg),
@@ -142,7 +142,7 @@ describe('OTel chart configs', () => {
   describe('getThroughputChart / buildOtelThroughputQuery', () => {
     it('builds throughput from a raw count of server and consumer spans per bucket', () => {
       const chart = getThroughputChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         buildQuery: (idx) => buildOtelThroughputQuery(idx, SCOPE),
       });
 
@@ -156,7 +156,7 @@ describe('OTel chart configs', () => {
   describe('getErrorRateChart / buildOtelErrorRateQuery', () => {
     it('builds error rate using status.code with all spans as the denominator', () => {
       const chart = getErrorRateChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         title: OTEL_ERROR_RATE_TITLE,
         buildQuery: (idx) => buildOtelErrorRateQuery(idx, SCOPE),
       });
@@ -174,7 +174,7 @@ describe('OTel chart configs', () => {
 
     it('counts all spans regardless of status in the denominator', () => {
       const chart = getErrorRateChart({
-        indexes: OTEL_INDEXES,
+        indices: OTEL_INDEXES,
         title: OTEL_ERROR_RATE_TITLE,
         buildQuery: (idx) => buildOtelErrorRateQuery(idx, SCOPE),
       });
