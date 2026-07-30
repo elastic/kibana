@@ -86,6 +86,3 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  * filter.
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
-
-/** Maximum length for the execution-history free-text search string. */
-export const EXECUTION_HISTORY_SEARCH_MAX_LENGTH = 200;

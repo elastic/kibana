@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema } from './common';
+import { arrayOrSingleSchema, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
   EXECUTION_HISTORY_MAX_PER_PAGE,
@@ -63,18 +63,10 @@ export const listRuleExecutionsRequestSchema = z
       .default('started_at')
       .describe('Sort field. Defaults to started_at.'),
     sort_order: z.enum(['asc', 'desc']).default('desc').describe('Sort direction.'),
-    page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(EXECUTION_HISTORY_MAX_RESULT_WINDOW)
+    page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .default(1)
       .describe(`Page number.`),
-    per_page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(EXECUTION_HISTORY_MAX_PER_PAGE)
+    per_page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .default(EXECUTION_HISTORY_DEFAULT_PER_PAGE)
       .describe(`Number of results per page.`),
   })

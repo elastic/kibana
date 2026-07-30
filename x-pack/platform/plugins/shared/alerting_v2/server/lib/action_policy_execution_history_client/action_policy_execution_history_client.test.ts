@@ -143,15 +143,15 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       );
     });
 
-    it('forwards page and perPage through to the service (defaults applied upstream)', async () => {
+    it('applies the default page and perPage when the caller omits them', async () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();
 
       await client.listExecutionHistory({ request });
 
       const args = eventLogService.findActionPolicyExecutionEvents.mock.calls[0][0];
-      expect(args.page).toBeUndefined();
-      expect(args.perPage).toBeUndefined();
+      expect(args.page).toBe(1);
+      expect(args.perPage).toBe(EXECUTION_HISTORY_DEFAULT_PER_PAGE);
     });
 
     it('passes the request-scoped spaceId to event log + workflows lookup', async () => {

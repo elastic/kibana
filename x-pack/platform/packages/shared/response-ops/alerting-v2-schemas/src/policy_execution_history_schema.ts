@@ -6,15 +6,23 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { arrayOrSingleSchema } from './common';
+import { arrayOrSingleSchema, queryIntSchema } from './common';
 import {
   ID_MAX_LENGTH,
+  MAX_SEARCH_LENGTH,
   EXECUTION_HISTORY_MAX_PER_PAGE,
   EXECUTION_HISTORY_DEFAULT_PER_PAGE,
   EXECUTION_HISTORY_MAX_RESULT_WINDOW,
   EXECUTION_HISTORY_MAX_RULE_ID_FILTER,
-  EXECUTION_HISTORY_SEARCH_MAX_LENGTH,
 } from './constants';
+
+/**
+ * Id filter shared by the rule_ids and episode_ids query params.
+ */
+const idFilterArraySchema = arrayOrSingleSchema(
+  z.string().trim().min(1).max(ID_MAX_LENGTH),
+  EXECUTION_HISTORY_MAX_RULE_ID_FILTER
+);
 
 export const policyExecutionOutcomeSchema = z.enum(['dispatched', 'throttled']);
 export type PolicyExecutionOutcome = z.infer<typeof policyExecutionOutcomeSchema>;
@@ -30,16 +38,12 @@ const sharedFilterFields = {
     .string()
     .trim()
     .min(1)
-    .max(EXECUTION_HISTORY_SEARCH_MAX_LENGTH)
+    .max(MAX_SEARCH_LENGTH)
     .optional()
     .describe(
       'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
     ),
-  rule_ids: z
-    .preprocess(
-      (v) => (v === undefined || Array.isArray(v) ? v : [v]),
-      z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(EXECUTION_HISTORY_MAX_RULE_ID_FILTER)
-    )
+  rule_ids: idFilterArraySchema
     .optional()
     .describe(
       'Explicit rule filter. Narrows events to those referencing at least one of the provided rule ids. Also unions with the search filter if both are provided.'
@@ -53,18 +57,10 @@ const sharedFilterFields = {
 
 export const listPolicyExecutionHistoryRequestSchema = z
   .object({
-    page: z.coerce
-      .number()
-      .int()
-      .min(1)
-      .max(EXECUTION_HISTORY_MAX_RESULT_WINDOW)
+    page: queryIntSchema({ min: 1, max: EXECUTION_HISTORY_MAX_RESULT_WINDOW })
       .optional()
       .describe('Page number (1-indexed). Defaults to 1.'),
-    per_page: z.coerce
-      .number()
-      .int()
-      .min(0)
-      .max(EXECUTION_HISTORY_MAX_PER_PAGE)
+    per_page: queryIntSchema({ min: 0, max: EXECUTION_HISTORY_MAX_PER_PAGE })
       .optional()
       .describe(
         `Number of events per page. Defaults to ${EXECUTION_HISTORY_DEFAULT_PER_PAGE}. Pass 0 for a count-only read.`
@@ -75,13 +71,7 @@ export const listPolicyExecutionHistoryRequestSchema = z
       .describe(
         'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of episode_ids — e.g. set it to an episode’s start time to scope results to that episode’s lifetime.'
       ),
-    episode_ids: z
-      .preprocess(
-        (v) => (v === undefined || Array.isArray(v) ? v : [v]),
-        z
-          .array(z.string().trim().min(1).max(ID_MAX_LENGTH))
-          .max(EXECUTION_HISTORY_MAX_RULE_ID_FILTER)
-      )
+    episode_ids: idFilterArraySchema
       .optional()
       .describe(
         'Episode filter. Narrows events to those referencing at least one of the provided episode ids.'

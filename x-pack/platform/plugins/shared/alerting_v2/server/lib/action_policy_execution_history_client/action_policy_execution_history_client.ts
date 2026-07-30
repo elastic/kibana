@@ -40,6 +40,9 @@ import {
 // explicit `start_date`.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
+// Pagination defaults applied when the caller omits them
+const DEFAULT_PAGE = 1;
+
 const SEARCH_ID_CAP = 500;
 
 // Cap the per-page name-lookup batch.
@@ -83,8 +86,8 @@ export class ActionPolicyExecutionHistoryClient {
 
   public async listExecutionHistory({
     request,
-    page,
-    perPage,
+    page = DEFAULT_PAGE,
+    perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
     ruleIds,
     outcome,
@@ -101,8 +104,8 @@ export class ActionPolicyExecutionHistoryClient {
     if (searchIsActive && !matchingSearchIds.hasMatches) {
       return {
         items: [],
-        page: page ?? 1,
-        perPage: perPage ?? EXECUTION_HISTORY_DEFAULT_PER_PAGE,
+        page,
+        perPage,
         totalEvents: 0,
         searchMatches: matchingSearchIds.matches,
       };
