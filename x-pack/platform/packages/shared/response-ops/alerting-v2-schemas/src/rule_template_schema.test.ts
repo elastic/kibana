@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { createRuleDataBaseSchema } from './rule_data_schema';
+import { createRuleDataSchema } from './rule_data_schema';
 import { ruleTemplateDataSchema } from './rule_template_schema';
 
 const exampleTemplateAttributes = {
@@ -95,11 +95,31 @@ describe('ruleTemplateDataSchema', () => {
       })
     ).toThrow();
   });
+
+  it('applies create-rule refines under rule', () => {
+    const { state_transition: _stateTransition, ...ruleWithoutStateTransition } =
+      exampleTemplateAttributes.rule;
+
+    expect(() =>
+      ruleTemplateDataSchema.parse({
+        engine: 'v2',
+        rule: {
+          ...ruleWithoutStateTransition,
+          kind: 'signal',
+          query: {
+            format: 'standalone',
+            breach: { query: 'FROM logs-* | KEEP @timestamp | LIMIT 1' },
+          },
+          recovery_strategy: 'no_breach',
+        },
+      })
+    ).toThrow(/Signal rules cannot set recovery_strategy/);
+  });
 });
 
 /**
- * Tripwire: template.rule must stay derived from the create-rule base
- * (same Zod object), not a forked copy.
+ * Tripwire: template.rule must stay the full create-rule schema
+ * (same Zod value, including refines), not a forked copy.
  */
 describe('rule template create-rule schema coupling', () => {
   const toStableJsonSchema = (schema: z.ZodType) => {
@@ -115,26 +135,26 @@ describe('rule template create-rule schema coupling', () => {
   });
 
   it('reuses create-rule schema by reference under rule', () => {
-    if (ruleTemplateDataSchema.shape.rule !== createRuleDataBaseSchema) {
+    if (ruleTemplateDataSchema.shape.rule !== createRuleDataSchema) {
       throw new Error(
-        'Rule template field "rule" is not the same Zod schema as createRuleDataBaseSchema. ' +
-          'Keep ruleTemplateDataSchema = z.object({ engine, rule: createRuleDataBaseSchema }).'
+        'Rule template field "rule" is not the same Zod schema as createRuleDataSchema. ' +
+          'Keep ruleTemplateDataSchema = z.object({ engine, rule: createRuleDataSchema }).'
       );
     }
   });
 
   /**
-   * Full structural snapshot of the create-rule base schema.
+   * Full structural snapshot of the create-rule schema.
    * When create-rule changes, update this snapshot and confirm the template
-   * schema still nests the same base under `rule`.
+   * schema still nests the same schema under `rule`.
    */
   it('matches the snapshot of the full create-rule JSON schema', () => {
     expect({
-      hint: 'Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataSchema.rule still uses createRuleDataBaseSchema.',
-      schema: toStableJsonSchema(createRuleDataBaseSchema),
+      hint: 'Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataSchema.rule still uses createRuleDataSchema.',
+      schema: toStableJsonSchema(createRuleDataSchema),
     }).toMatchInlineSnapshot(`
       Object {
-        "hint": "Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataSchema.rule still uses createRuleDataBaseSchema.",
+        "hint": "Create-rule schema changed. Update this snapshot and confirm ruleTemplateDataSchema.rule still uses createRuleDataSchema.",
         "schema": Object {
           "additionalProperties": false,
           "properties": Object {
@@ -472,7 +492,7 @@ describe('rule template create-rule schema coupling', () => {
   });
 
   it('template JSON schema is engine plus create-rule under rule', () => {
-    const createJson = toStableJsonSchema(createRuleDataBaseSchema);
+    const createJson = toStableJsonSchema(createRuleDataSchema);
     const templateJson = toStableJsonSchema(ruleTemplateDataSchema) as {
       properties?: Record<string, unknown>;
       required?: string[];
@@ -493,11 +513,11 @@ describe('rule template create-rule schema coupling', () => {
     });
 
     expect({
-      hint: 'Rule template rule property must match createRuleDataBaseSchema. Keep rule: createRuleDataBaseSchema.',
+      hint: 'Rule template rule property must match createRuleDataSchema. Keep rule: createRuleDataSchema.',
       rule: templateJson.properties?.rule,
       createRule: createJson,
     }).toEqual({
-      hint: 'Rule template rule property must match createRuleDataBaseSchema. Keep rule: createRuleDataBaseSchema.',
+      hint: 'Rule template rule property must match createRuleDataSchema. Keep rule: createRuleDataSchema.',
       rule: createJson,
       createRule: createJson,
     });

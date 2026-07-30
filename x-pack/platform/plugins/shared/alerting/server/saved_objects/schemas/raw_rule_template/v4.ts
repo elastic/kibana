@@ -20,7 +20,7 @@ export const alertingV1RawRuleTemplateSchemaV4 = rawRuleTemplateSchemaV3.extends
  *
  * Create-rule fields live under `rule` as an opaque bag so the SO schema does not
  * duplicate `@kbn/alerting-v2-schemas` create-rule validation. Full validation of
- * `rule` is owned by Zod (`ruleTemplateDataSchema`).
+ * `rule` (including create-rule refines) is owned by Zod (`ruleTemplateDataSchema`).
  */
 export const alertingV2RawRuleTemplateSchemaV4 = schema.object({
   engine: schema.literal('v2'),

@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  createRuleDataSchema,
-  type CreateRuleData,
-  type RuleTemplateData,
-} from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleTemplateData } from '@kbn/alerting-v2-schemas';
 
 export const createRuleDataFromTemplate = (template: RuleTemplateData): CreateRuleData => {
-  return createRuleDataSchema.parse(template.rule);
+  return template.rule;
 };
