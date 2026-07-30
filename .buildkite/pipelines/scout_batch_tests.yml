@@ -1,0 +1,90 @@
+env:
+  TEST_BROWSER_HEADLESS: 1
+
+steps:
+  - command: .buildkite/scripts/lifecycle/pre_build.sh
+    label: Pre-Build
+    key: pre-build
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait
+
+  - command: .buildkite/scripts/steps/store_cache.sh
+    label: Store Cache for build
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    depends_on:
+      - terrazzo-initial-pipeline-upload
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-highcpu-8
+      diskSizeGb: 130
+
+  - command: .buildkite/scripts/steps/build_kibana.sh
+    label: Build Kibana Distribution
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
+      diskSizeGb: 150
+    key: build
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    depends_on: pre-build
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - wait
+
+  # SCOUT_TEST_CHANNELS is set by each schedule in the pipeline resource definition,
+  # selecting the appropriate batch channel (ci-batch-3h, ci-batch-daily, or
+  # ci-batch-weekly). Manual builds default to testChannels.default if not set.
+  - command: .buildkite/scripts/steps/test/scout/test_run_builder.sh
+    label: 'Scout Test Run Builder'
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2d-standard-8
+      diskSizeGb: 130
+    key: build_scout_tests
+    timeout_in_minutes: 20
+    env:
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
+      SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS: 300
+      SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES: 5
+      SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES: 30
+      SELECTIVE_TESTING_ENABLED: 'false'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/scripts/lifecycle/post_build.sh
+    label: Post-Build
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2

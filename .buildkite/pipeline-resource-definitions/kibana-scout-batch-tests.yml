@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-scout-batch-tests
+  description: Runs Scout tests on a schedule for the batch test channels (ci-batch-3h, ci-batch-daily, ci-batch-weekly)
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-scout-batch-tests'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / scout / batch-tests
+      description: Runs Scout tests on a schedule for the batch test channels
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/scout_batch_tests.yml
+      skip_intermediate_builds: false
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      schedules:
+        'ci-batch-3h (main)':
+          cronline: '0 */3 * * *'
+          message: Scout batch tests - ci-batch-3h
+          branch: main
+          env:
+            SCOUT_TEST_CHANNELS: ci-batch-3h
+        'ci-batch-daily (main)':
+          cronline: '0 2 * * *'
+          message: Scout batch tests - ci-batch-daily
+          branch: main
+          env:
+            SCOUT_TEST_CHANNELS: ci-batch-daily
+        'ci-batch-weekly (main)':
+          cronline: '0 3 * * 1'
+          message: Scout batch tests - ci-batch-weekly
+          branch: main
+          env:
+            SCOUT_TEST_CHANNELS: ci-batch-weekly
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      tags:
+        - kibana
