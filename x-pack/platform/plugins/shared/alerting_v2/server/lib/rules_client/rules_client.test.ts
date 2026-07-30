@@ -87,6 +87,10 @@ describe('RulesClient', () => {
 
     ensureRuleExecutorTaskScheduledMock.mockResolvedValue({ id: 'task-123' });
     getRuleExecutorTaskIdMock.mockReturnValue('task:fallback');
+
+    // `bulkRemove` resolves with a per-task status array; default to an
+    // all-succeeded response so the drift inspection has a shape to read.
+    taskManager.bulkRemove.mockResolvedValue({ statuses: [] });
   });
 
   afterAll(() => {
@@ -1421,24 +1425,71 @@ describe('RulesClient', () => {
       const res = await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
 
       // The saved objects are gone (affected), but the orphan tasks are flagged.
+      // We assert only on the machine-readable `error.code`; the human-readable
+      // message is intentionally not pinned so wording changes don't break tests.
       expect(res.affected_count).toBe(2);
       expect(res.errors).toEqual([
-        {
-          id: 'rule-1',
-          error: {
-            code: 'TASK_MANAGER_DRIFT',
-            message: expect.stringContaining('task removal failed'),
-          },
-        },
-        {
-          id: 'rule-2',
-          error: {
-            code: 'TASK_MANAGER_DRIFT',
-            message: expect.stringContaining('task removal failed'),
-          },
-        },
+        { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
+        { id: 'rule-2', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('surfaces TASK_MANAGER_DRIFT for per-task failures in the bulkRemove statuses (no throw)', async () => {
+      const client = createClient();
+
+      getRuleExecutorTaskIdMock
+        .mockReturnValueOnce('task:rule-1')
+        .mockReturnValueOnce('task:rule-2');
+
+      rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([
+        { id: 'rule-1', success: true },
+        { id: 'rule-2', success: true },
+      ]);
+
+      taskManager.bulkRemove.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'task:rule-1',
+            type: 'task',
+            success: false,
+            error: { error: 'Internal', message: 'boom', statusCode: 500 },
+          },
+          { id: 'task:rule-2', type: 'task', success: true },
+        ],
+      });
+
+      const res = await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
+
+      expect(res.affected_count).toBe(2);
+      expect(res.errors).toEqual([
+        { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
+      ]);
+      expect(mockLogger.error).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores missing tasks (404) in the bulkRemove statuses — the task is already gone', async () => {
+      const client = createClient();
+
+      getRuleExecutorTaskIdMock.mockReturnValueOnce('task:rule-1');
+
+      rulesSavedObjectService.bulkDelete.mockResolvedValueOnce([{ id: 'rule-1', success: true }]);
+
+      taskManager.bulkRemove.mockResolvedValueOnce({
+        statuses: [
+          {
+            id: 'task:rule-1',
+            type: 'task',
+            success: false,
+            error: { error: 'Not Found', message: 'not found', statusCode: 404 },
+          },
+        ],
+      });
+
+      const res = await client.bulkDeleteRules({ ids: ['rule-1'] });
+
+      expect(res).toEqual({ affected_count: 1, errors: [] });
+      expect(mockLogger.error).not.toHaveBeenCalled();
     });
 
     it('returns a zero-affected empty response when ids is an empty array', async () => {
@@ -1533,24 +1584,49 @@ describe('RulesClient', () => {
         { id: 'rule-1', attributes: disabledAttrs, version: 'v1' },
       ]);
 
+      getRuleExecutorTaskIdMock.mockReturnValue('task:rule-1');
       taskManager.bulkSchedule.mockRejectedValueOnce(new Error('Failed to grant UIAM API key'));
 
       const res = await client.bulkEnableRules({ ids: ['rule-1'] });
 
       // Scheduling failed first, so the saved object is never flipped to enabled.
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1']);
       expect(res.affected_count).toBe(0);
       expect(res.errors).toEqual([
-        {
-          id: 'rule-1',
-          error: {
-            code: 'TASK_MANAGER_DRIFT',
-            message: expect.stringContaining('Failed to grant UIAM API key'),
-          },
-        },
+        { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
       expect(ruleEventPublisher.emitRuleEnabled).not.toHaveBeenCalled();
+    });
+
+    it('rolls back partially scheduled tasks when bulkSchedule throws', async () => {
+      const client = createClient();
+
+      const disabledAttrs = createRuleSoAttributes({
+        metadata: { name: 'disabled-rule' },
+        enabled: false,
+      });
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        { id: 'rule-1', attributes: disabledAttrs, version: 'v1' },
+        { id: 'rule-2', attributes: disabledAttrs, version: 'v1' },
+      ]);
+
+      getRuleExecutorTaskIdMock.mockImplementation(
+        ({ ruleId }: { ruleId: string }) => `task:${ruleId}`
+      );
+      taskManager.bulkSchedule.mockRejectedValueOnce(new Error('partial schedule failure'));
+
+      const res = await client.bulkEnableRules({ ids: ['rule-1', 'rule-2'] });
+
+      expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
+      expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1', 'task:rule-2']);
+      expect(res.affected_count).toBe(0);
+      expect(res.errors).toEqual([
+        { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
+        { id: 'rule-2', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
+      ]);
     });
 
     it('cancels the just-scheduled task when the saved object update fails', async () => {
@@ -1759,13 +1835,7 @@ describe('RulesClient', () => {
       // The saved object is disabled (affected), but the task drift is flagged.
       expect(res.affected_count).toBe(1);
       expect(res.errors).toEqual([
-        {
-          id: 'rule-1',
-          error: {
-            code: 'TASK_MANAGER_DRIFT',
-            message: expect.stringContaining('task removal failed'),
-          },
-        },
+        { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
     });
