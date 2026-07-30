@@ -182,7 +182,7 @@ export const severitySchema = z.enum(SEVERITY_OPTIONS).describe(dedent`
     "80-critical" = the most severe. Any ONE qualifies independently:
       - a site-wide/global outage affecting all or most customers;
       - a confirmed failure that fully blocks a customer-facing operation for everyone who reaches it (no successful completions on the affected path);
-      - or confirmed active exposure of PII, PCI, CVV, SSN, credentials, secrets, tokens.
+      - or confirmed active exposure of PII, PCI DSS, SSN, credentials, secrets, tokens.
       A single mandatory service, dependency, or endpoint can establish this when its failure blocks the operation end-to-end; unrelated services do not also need to fail.
     "60-high" = confirmed and severe but not global: the operation still completes for some users while broadly degraded, intermittent, or partially failing, or the confirmed impact reaches a significant customer subset.
     "40-medium" = meaningful but bounded: minor confirmed degradation with limited reach, or plausible customer impact that is not yet confirmed (incomplete evidence, telemetry gap, unverified).
@@ -238,7 +238,7 @@ export const significantEventBaseSchema = z.object({
     .optional()
     .describe(
       dedent`
-        Provisional, evidence-grounded explanation of the observed signals. In one sentence, name the affected flow or entity, observed symptom, and best-supported mechanism. 
+        Provisional, evidence-grounded technical explanation of the observed signals. In one sentence, start with the deepest root cause first, often present in causal_features, then describe how it propagates downstream through blast_radius and finally the impacted flows, clients or users. 
 
         ${NO_RAW_SENSITIVE_VALUES_RULE}
         `

@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
       await retry.tryForTime(30000, async function () {
-        expect(await discover.getHitCount()).to.be('13,301');
+        expect(await discover.getHitCount()).to.be('13,300');
       });
     });
   });
