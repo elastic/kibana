@@ -12,14 +12,19 @@ import {
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
   getChartDebugData,
+  offsetPickerTime,
   sumFirstNValues,
   test,
 } from '../../fixtures';
 import type { TsdbScenarioContext, TsdbScenarioIndex } from '../../fixtures';
 
+const ONE_SECOND = 1000;
+const ONE_HOUR = 60 * 60 * 1000;
+const TWO_HOURS = 2 * ONE_HOUR;
+
 const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
 // Serverless Security's editor role grants data access to the sample-data namespace.
-const BASE_STREAM = `kibana_sample_data_lens_tsdb_upgrade_${RESOURCE_SUFFIX}`;
+const BASE_STREAM = `kibana_sample_data_lens_tsdb_downgrade_${RESOURCE_SUFFIX}`;
 const REGULAR_INDEX = `kibana_sample_data_lens_tsdb_regular_${RESOURCE_SUFFIX}`;
 const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_tsdb_additional_${RESOURCE_SUFFIX}`;
 const TIME_RANGE = createTsdbScenarioTimeRange();
@@ -27,10 +32,19 @@ const TIME_RANGE = createTsdbScenarioTimeRange();
 interface ScenarioResult {
   /** Count of `lns-indexPatternDimension-average incompatible` elements. */
   incompatibleAverageCount: number;
-  counterBars: Array<{ y: number }>;
-  countBars: Array<{ y: number }>;
+  /** Bar chart data from the full time range with empty rows enabled. */
+  bars: Array<{ y: number }>;
+  /** Whether the before-downgrade time window contains any data. */
+  hasDataBeforeDowngrade: boolean;
+  /** Whether the after-downgrade time window contains any data. */
+  hasDataAfterDowngrade: boolean;
   expectedDocumentCountBeforeRollover: number;
 }
+
+// The downgraded base stream has mixed backing-index mappings (old TSDB + new regular).
+// Elasticsearch field caps reports metric_conflicts_indices and omits time_series_metric,
+// so Lens sees bytes_counter as a plain numeric field and keeps Average enabled — even when
+// another pure TSDB stream is added to the data view.
 
 const runScenario = async (
   { page, pageObjects, tsdbScenario }: TsdbScenarioContext,
@@ -60,26 +74,45 @@ const runScenario = async (
       return count;
     });
 
-  const { counterBars, countBars } =
-    await test.step('visualize counter data before and after the upgrade', async () => {
-      // Each step needs an empty editor, so reload Lens to clear prior dimensions.
+  const bars = await test.step('visualize count data before and after the downgrade', async () => {
+    // Each step needs an empty editor, so reload Lens to clear prior dimensions.
+    await pageObjects.lens.openFullEditor();
+    await pageObjects.lens.configureDimension({
+      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+      operation: 'date_histogram',
+      field: '@timestamp',
+      keepOpen: true,
+    });
+
+    // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars cover
+    // the complete range before and after the stream rollover.
+    await pageObjects.lens.enableIncludeEmptyRows();
+    await pageObjects.lens.closeDimensionEditor();
+
+    await pageObjects.lens.configureDimension({
+      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+      operation: 'count',
+    });
+
+    await pageObjects.lens.waitForVisualization('xyVisChart');
+    const chartData = await getChartDebugData(page, 'xyVisChart');
+    const chartBars = chartData.bars?.[0]?.bars ?? [];
+    expect(chartBars.length).toBeGreaterThan(0);
+    return chartBars;
+  });
+
+  const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
+    await test.step('visualize data on both sides of the downgrade boundary', async () => {
+      // Reload Lens for a clean editor before narrowing the time window.
       await pageObjects.lens.openFullEditor();
+      await pageObjects.datePicker.setAbsoluteRange({
+        from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
+        to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
+      });
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',
-        keepOpen: true,
-      });
-
-      // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars
-      // cover the complete range before and after the stream rollover.
-      await pageObjects.lens.enableIncludeEmptyRows();
-      await pageObjects.lens.closeDimensionEditor();
-
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'min',
-        field: 'bytes_counter',
       });
       await pageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -87,50 +120,58 @@ const runScenario = async (
       });
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
-      const chartData = await getChartDebugData(page, 'xyVisChart');
-      const counterSeries = chartData.bars?.[0]?.bars ?? [];
-      const countSeries = chartData.bars?.[1]?.bars ?? [];
-      expect(counterSeries.length).toBeGreaterThan(0);
-      expect(countSeries.length).toBeGreaterThan(0);
-      return { counterBars: counterSeries, countBars: countSeries };
+      const barsBeforeDowngrade =
+        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
+
+      await pageObjects.datePicker.setAbsoluteRange({
+        from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
+        to: offsetPickerTime(TIME_RANGE.afterRollover, TWO_HOURS),
+      });
+      await pageObjects.lens.waitForVisualization('xyVisChart');
+      const barsAfterDowngrade =
+        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
+
+      return {
+        hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
+        hasDataAfterDowngrade: barsAfterDowngrade.some(({ y }) => y > 0),
+      };
     });
 
   return {
     incompatibleAverageCount,
-    counterBars,
-    countBars,
+    bars,
+    hasDataBeforeDowngrade,
+    hasDataAfterDowngrade,
     expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
   };
 };
 
-const getScenarioData = ({ counterBars, countBars }: ScenarioResult) => {
+const getScenarioData = ({ bars }: ScenarioResult) => {
   // Bucket boundaries can vary with chart interval selection. Lens does not count a downsample
   // target as an additional contribution beside its source stream.
-  const columnsToCheck = Math.floor(countBars.length / 2);
+  const columnsToCheck = Math.floor(bars.length / 2);
   return {
-    firstCounter: counterBars[0]?.y,
-    lastCounter: counterBars[counterBars.length - 1]?.y,
-    beforeUpgradeCount: sumFirstNValues(columnsToCheck, countBars),
-    afterUpgradeCount: sumFirstNValues(columnsToCheck, [...countBars].reverse()),
+    beforeDowngrade: sumFirstNValues(columnsToCheck, bars),
+    afterDowngrade: sumFirstNValues(columnsToCheck, [...bars].reverse()),
   };
 };
 
-const assertUpgradeResult = (result: ScenarioResult) => {
+const assertDowngradeResult = (result: ScenarioResult) => {
   expect.soft(result.incompatibleAverageCount).toBe(0);
-  const data = getScenarioData(result);
-  expect.soft(data.firstCounter).toBe(5000);
-  expect.soft(data.lastCounter).toBe(5000);
+  expect.soft(result.hasDataBeforeDowngrade).toBe(true);
+  expect.soft(result.hasDataAfterDowngrade).toBe(true);
+  const counts = getScenarioData(result);
   expect
-    .soft(data.beforeUpgradeCount)
+    .soft(counts.beforeDowngrade)
     .toBeGreaterThan(result.expectedDocumentCountBeforeRollover - 1);
-  expect.soft(data.afterUpgradeCount).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+  expect.soft(counts.afterDowngrade).toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
 };
 
-test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
+test.describe('Lens TSDB stream downgrade scenarios', { tag: tags.deploymentAgnostic }, () => {
   let cleanupBaseStream: (() => Promise<void>) | undefined;
 
   test.beforeAll(async ({ tsdbHelper }) => {
-    const baseStream = await tsdbHelper.createUpgradedStream(BASE_STREAM, TIME_RANGE);
+    const baseStream = await tsdbHelper.createDowngradedStream(BASE_STREAM, TIME_RANGE);
     cleanupBaseStream = baseStream.cleanup;
   });
 
@@ -143,16 +184,16 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
     await cleanupBaseStream?.();
   });
 
-  test('supports an upgraded TSDB data stream without additional indices', async ({
+  test('supports a downgraded TSDB data stream without additional indices', async ({
     page,
     pageObjects,
     tsdbScenario,
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
-    assertUpgradeResult(result);
+    assertDowngradeResult(result);
   });
 
-  test('supports an upgraded TSDB data stream with a regular index', async ({
+  test('supports a downgraded TSDB data stream with a regular index', async ({
     page,
     pageObjects,
     tsdbScenario,
@@ -161,10 +202,10 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
     ]);
-    assertUpgradeResult(result);
+    assertDowngradeResult(result);
   });
 
-  test('supports an upgraded TSDB data stream with a downsampled TSDB stream', async ({
+  test('supports a downgraded TSDB data stream with a downsampled TSDB stream', async ({
     page,
     pageObjects,
     tsdbScenario,
@@ -173,10 +214,10 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    assertUpgradeResult(result);
+    assertDowngradeResult(result);
   });
 
-  test('supports an upgraded TSDB data stream with regular and downsampled resources', async ({
+  test('supports a downgraded TSDB data stream with regular and downsampled resources', async ({
     page,
     pageObjects,
     tsdbScenario,
@@ -186,10 +227,10 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: REGULAR_INDEX, create: true, removeTSDBFields: true },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb', downsample: true },
     ]);
-    assertUpgradeResult(result);
+    assertDowngradeResult(result);
   });
 
-  test('supports an upgraded TSDB data stream with another TSDB stream', async ({
+  test('supports a downgraded TSDB data stream with another TSDB stream', async ({
     page,
     pageObjects,
     tsdbScenario,
@@ -198,6 +239,6 @@ test.describe('Lens TSDB stream upgrade scenarios', { tag: tags.deploymentAgnost
       { index: BASE_STREAM },
       { index: ADDITIONAL_TSDB_STREAM, create: true, mode: 'tsdb' },
     ]);
-    assertUpgradeResult(result);
+    assertDowngradeResult(result);
   });
 });
