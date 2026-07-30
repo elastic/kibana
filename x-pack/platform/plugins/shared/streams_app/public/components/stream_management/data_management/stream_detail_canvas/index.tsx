@@ -38,6 +38,7 @@ import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import type { ClassicCanvasNode } from './types';
 import { StreamFlyout } from '../../../stream_flyout';
+import { useStreamsFlyoutRouter } from '../../../../hooks/use_streams_flyout_router';
 
 const KEYBOARD_INSTRUCTIONS_ID = 'streamsCanvasKbdInstructions';
 
@@ -73,7 +74,7 @@ function ClassicStreamsCanvas() {
       },
     },
   } = useKibana();
-  const [flyout, setFlyout] = useState<string | null>(null);
+  const { flyout, setFlyout } = useStreamsFlyoutRouter();
 
   const { value, loading } = useStreamsAppFetch(
     ({ signal }) => streamsRepositoryClient.fetch('GET /internal/streams/classic', { signal }),
@@ -172,14 +173,19 @@ function ClassicStreamsCanvas() {
     [closeContextMenu]
   );
 
-  const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>((event, node) => {
-    if (node.type === 'destination' && !event.shiftKey) {
-      event.preventDefault();
-      setFlyout(node.data.title);
-    }
-  }, []);
+  const onNodeClick = useCallback<NodeMouseHandler<ClassicCanvasNode>>(
+    (event, node) => {
+      if (node.type === 'destination' && !event.shiftKey) {
+        event.preventDefault();
+        setFlyout(node.data.title);
+      }
+    },
+    [setFlyout]
+  );
 
-  const onCloseFlyout = useCallback(() => setFlyout(null), []);
+  const onCloseFlyout = useCallback(() => {
+    setFlyout(null);
+  }, [setFlyout]);
 
   const reopenContextMenu = useCallback(
     (position: ContextMenuPosition) => setContextMenu({ position, target: 'pane' }),
@@ -238,7 +244,7 @@ function ClassicStreamsCanvas() {
         setFlyout(selectedNode.data.title);
       }
     }
-  }, [nodes]);
+  }, [nodes, setFlyout]);
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 

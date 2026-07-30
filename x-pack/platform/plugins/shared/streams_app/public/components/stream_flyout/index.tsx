@@ -40,6 +40,7 @@ import { ViewInDiscoverButton } from './discover_button';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
+import { useStreamsFlyoutRouter } from '../../hooks/use_streams_flyout_router';
 
 const TABS = [
   {
@@ -79,8 +80,8 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   const { loading, definition } = useStreamFlyoutDetail();
   const { push } = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
+  const { tabLink, selectedTab } = useStreamsFlyoutRouter();
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
-  const [selectedTab, selectTab] = useState('overview');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const headerId = useGeneratedHtmlId();
   const abortController = useAbortController();
@@ -117,14 +118,14 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
       TABS.map(({ id, label }) => (
         <EuiTab
           isSelected={id === selectedTab}
-          onClick={() => selectTab(id)}
           key={id}
+          href={tabLink(id)}
           data-test-subj={`streamsCanvasFlyoutTab-${id}`}
         >
           {label}
         </EuiTab>
       )),
-    [selectedTab]
+    [selectedTab, tabLink]
   );
 
   const page = useMemo(
