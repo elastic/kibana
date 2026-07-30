@@ -16,9 +16,9 @@ import { ConnectorsTab } from './connectors_tab';
 import type { DataConnector } from '../../hooks/use_data_connectors';
 
 const CONNECTORS: DataConnector[] = [
-  { id: 'connector-gdrive', name: 'Google Drive' },
-  { id: 'connector-github', name: 'GitHub' },
-  { id: 'connector-notion', name: 'Notion' },
+  { id: 'connector-gdrive', name: 'Google Drive', actionTypeId: '.google_drive' },
+  { id: 'connector-github', name: 'GitHub', actionTypeId: '.github' },
+  { id: 'connector-notion', name: 'Notion', actionTypeId: '.notion' },
 ];
 
 const CONNECTORS_DEEP_LINK_ID = 'triggersActionsConnectors';
