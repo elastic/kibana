@@ -133,13 +133,9 @@ When `previously_identified_features` is provided:
 3. Re-emit only when current documents have matching evidence and genuinely new information
 4. Prefer uncovered features, but verify candidates are not variants of existing ones first
 
-If empty or absent, ignore this subsection.
-
 ### Known feature IDs
 
 When `known_feature_ids` is provided (complete inventory of known ids by type): check it before emitting. Reuse the exact id when a candidate is the same real-world thing of the same type. `previously_identified_features` is a detailed subset; `known_feature_ids` is authoritative for whether an id exists, including ids outside that subset. Reuse the inventory id even when its entry is missing from the detailed subset.
-
-If empty or absent, ignore this subsection.
 
 ### Semantic duplicate verification
 
@@ -147,15 +143,13 @@ Use `search_similar_features` only when the candidate is not already in `known_f
 
 ## Excluded Features
 
-When `excluded_features` is provided, suppress a feature only when it represents the **exact same real-world component** with 100% certainty. Generate similar-but-different components, basing the decision on component identity rather than naming patterns, shared type/subtype, or overlapping tags.
+When `excluded_features` is provided, suppress a feature only when it represents the **exact same real-world component** with 100% certainty. Features that are similar but represent different components must still be generated. Base the decision on component identity rather than naming patterns, shared type/subtype, or overlapping tags.
 
-For each skipped match, add to `ignored_features`: `feature_id`, `feature_title`, `excluded_feature_id`, and a one-sentence `reason`.
-
-If empty or absent, leave `ignored_features` as `[]`.
+For each skipped match, add to `ignored_features`: `feature_id`, `feature_title`, `excluded_feature_id`, and a one-sentence `reason`. When no match is suppressed, leave `ignored_features` as `[]`.
 
 ## Examples
 
-One example per type family. Rules above win when an example is silent.
+One example per type family, plus an indirectly-inferred case. Rules above win when an example is silent. Confidence in these examples tracks how direct the evidence is: named identifiers score high, structure- and pattern-based inference scores lower.
 
 **Example 1 — Entity with filter**
 ```
@@ -236,11 +230,10 @@ One example per type family. Rules above win when an example is silent.
   "properties": { "source": "api-service", "target": "user-service", "protocol": "http" },
   "confidence": 85,
   "evidence": [
-    "service.name=api-service peer.service=user-service http.method=GET http.route=/users",
-    "service.name=api-service peer.service=user-service http.method=GET http.route=/users/:id",
-    "service.name=api-service peer.service=user-service http.method=POST http.route=/users/search"
+    "service.name=api-service peer.service=user-service http.route=/users",
+    "upstream=user-service:8080 request=GET /users"
   ],
-  "evidence_doc_ids": ["b7aa021", "cc12d90", "d31ef02"],
+  "evidence_doc_ids": ["b7aa021", "cc12d90"],
   "tags": ["dependency", "http"],
   "meta": {
     "endpoints": ["/users", "/users/:id", "/users/search"],
@@ -258,7 +251,7 @@ One example per type family. Rules above win when an example is silent.
   "title": "ECS",
   "description": "Elastic Common Schema inferred from field names and structure",
   "properties": { "schema_family": "ecs", "ecs_version": "8.11.0" },
-  "confidence": 95,
+  "confidence": 80,
   "evidence": ["ecs.version=8.11.0", "@timestamp present", "service.name present"],
   "evidence_doc_ids": ["a1b2c3d"],
   "tags": ["schema", "ecs"],
@@ -266,11 +259,30 @@ One example per type family. Rules above win when an example is silent.
 }
 ```
 
+**Example 6 — Technology inferred with lower confidence**
+```
+{
+  "type": "technology",
+  "subtype": "programming_language",
+  "id": "python",
+  "title": "Python",
+  "description": "Python programming language, inferred from traceback patterns",
+  "properties": { "language": "python" },
+  "confidence": 45,
+  "evidence": [
+    "Traceback (most recent call last):",
+    "File \"/app/main.py\", line 42, in handle_request"
+  ],
+  "evidence_doc_ids": ["3a77c10"],
+  "tags": ["technology", "inferred"],
+  "meta": { "note": "Inferred from Python-style traceback format and .py file references" }
+}
+```
+
 ## Success Criteria
 
 - Prioritize entities, then dependencies, then standalone infrastructure/technology/schema
 - Extract all evidenced features at/above the confidence threshold; prefer fewer, higher-confidence features over speculative ones
-- Sort by descending `confidence` (ties: alphabetical `type`, then `subtype`)
 - Dependencies: explicit relationship evidence only; aggregate/cap endpoints in `meta.endpoints`
 - Entities: omit when the named component is unclear; include a valid `filter` unless none is available
 - Schema: one feature per evident family; short `properties` only

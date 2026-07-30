@@ -55,8 +55,6 @@ const featuresSchema = {
           },
           evidence: {
             type: 'array',
-            minItems: 2,
-            maxItems: 5,
             items: {
               type: 'string',
             },
@@ -118,7 +116,6 @@ const featuresSchema = {
                 },
               },
             },
-            oneOf: [{ required: ['field', 'eq'] }, { required: ['and'] }, { required: ['or'] }],
             additionalProperties: false,
             description:
               'Optional condition used to scope filtering to the corresponding feature. Allowed forms: single equality `{field, eq}` or one-level `{and: [...]}` / `{or: [...]}` of equality conditions.',
@@ -139,9 +136,7 @@ const featuresSchema = {
           'properties',
           'confidence',
           'evidence',
-          'evidence_doc_ids',
           'tags',
-          'meta',
         ],
       },
     },

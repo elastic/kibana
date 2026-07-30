@@ -55,6 +55,8 @@ Features are stable facts about real system components that are explicitly suppo
 - `evidence_doc_ids` is the minimal set of sample-document `_id` values covering the evidence; use `[]` only when no `_id` is available or evidence is aggregate/system-wide
 - Version formatting: normalized numeric in `properties.version`; labels/codenames/build metadata in `meta.raw_version`
 
+Schema note: the finalize schema must not add hard bounds that reject an otherwise usable payload (no `maxItems`/`minItems` on `evidence`, no `oneOf` on `filter`, and no newly required optional fields). Express those as guidance here and enforce them in code.
+
 ## Deduplication (single section)
 State each rule once under one Deduplication heading covering:
 1. **Consolidate vs separate**: consolidate when properties belong to the same logical component; separate distinct concerns; emit one feature per real-world component
@@ -77,22 +79,27 @@ Return features via the finalize_features tool (call exactly once).
 
 **Success criteria** (bullet list, not prose restating the schema):
 - Prioritize entities, then dependencies, then standalone infrastructure/technology/schema
-- Extract all evidenced features at/above the threshold; prefer fewer, higher-confidence features over speculative ones; sort by descending confidence
+- Extract all evidenced features at/above the threshold; prefer fewer, higher-confidence features over speculative ones
 - Entity threshold + filter defaults as above
 - Dependency anti-spam: explicit relationship evidence only; aggregate/cap endpoints in `meta.endpoints`
 - Schema: one feature per family; short properties; evidence only from `sample_documents`
 
 ## Examples to Include
-One complete JSON example per feature-type family (5 total), each containing every schema field:
+One complete JSON example per feature-type family, plus one indirectly-inferred case (6 total), each containing every schema field:
 1. Entity with filter (service + technology context)
 2. Infrastructure showing properties vs meta (cloud provider vs regions/AZs)
 3. Technology with version
 4. Dependency with endpoint aggregation in meta
 5. Schema (short properties)
+6. Technology inferred from stack-trace patterns: low confidence, `"inferred"` tag, inference explained in `meta.note`
 
 Keep every example internally consistent: each value in `properties` and `meta` must be supported by its example evidence.
 
-Limit examples to the five type families rather than adding variants that restate Naming or Deduplication rules.
+Example confidence values must demonstrate the confidence bands, not just the top one: features named by explicit identifiers score high, while features inferred from structure or patterns (schema families, dependencies, technologies from stack traces) score lower.
+
+Example evidence must obey the Evidence rules it is meant to teach — diversify the aspect each line covers instead of repeating one relationship with a different path.
+
+Beyond these, do not add variants that only restate Naming or Deduplication rules.
 
 ## Prompt Structure
 1. Opening: define features, primary goal (entities + dependencies), required fields
@@ -104,9 +111,11 @@ Limit examples to the five type families rather than adding variants that restat
 7. Evidence & Versions
 8. Deduplication (consolidation + previously identified + known ids + semantic search — one section)
 9. Excluded Features
-10. Examples (5, one per type family)
+10. Examples (6: one per type family plus an inferred case)
 11. Success Criteria bullets
 12. Closing: build one deduplicated list, call finalize_features exactly once
+
+Each input-dependent section opens by naming the input it applies to ("When `previously_identified_features` is provided"), so no section needs a trailing "if empty or absent, ignore this" line. Assembling these sections conditionally at runtime would drop them from first-pass calls entirely; that is tracked separately and must not be assumed here.
 
 ## Style Requirements
 - Keep prompt concise; state each rule once
