@@ -426,8 +426,12 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     // because task manager does not retry recurring tasks.
     let jobTimedOut: boolean = false;
     const timerId = setTimeout(() => {
-      cancellationToken.cancel();
       jobTimedOut = true;
+      try {
+        cancellationToken.cancel();
+      } catch (err) {
+        errorLogger(this.logger, 'Error cancelling timed-out report', err);
+      }
     }, this.queueTimeout);
 
     const runTaskPromise = exportType.runTask({
@@ -518,7 +522,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     // Keep a separate local stack for each task run
     return ({ taskInstance, fakeRequest }: RunContext) => {
       let jobId: string;
-      let output: PerformJobResults;
+      let output: PerformJobResults | undefined;
       let cancellationToken: CancellationToken | undefined;
       const { retryAt: taskRetryAt, startedAt: taskStartedAt } = taskInstance;
 
@@ -628,6 +632,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                     this.throwIfKibanaShutsDown(),
                     rejectIfStreamError,
                   ]);
+
+                  if (output.timedOut) {
+                    throw new QueueTimeoutError();
+                  }
                 } catch (raceErr) {
                   stream.removeListener('error', streamErrorReject!);
                   // performJob may still reject after losing the race; swallow it to avoid an
@@ -640,10 +648,6 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   // concurrently with the next attempt.
                   stream.destroy();
                   throw raceErr;
-                }
-
-                if (output.timedOut) {
-                  throw new QueueTimeoutError();
                 }
 
                 // Removing so errors in _final are handled only by finishedWithNoPendingCallbacks
