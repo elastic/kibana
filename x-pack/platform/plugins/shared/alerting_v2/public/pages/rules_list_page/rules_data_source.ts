@@ -14,6 +14,7 @@ import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
 import { RULES_CONTENT_LIST_ID } from '../../constants';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesApi } from '../../services/rules_api';
+import { toFindRulesRequest } from '../../hooks/use_fetch_rules';
 import { toRulesQueryParams } from './rules_query_params';
 
 export { RULES_CONTENT_LIST_ID };
@@ -61,14 +62,16 @@ export const useRulesDataSource = (): DataSourceConfig => {
       const { filter, search } = toRulesQueryParams(filters);
 
       try {
-        const response = await rulesApi.listRules({
-          page: page.index + 1,
-          perPage: page.size,
-          filter,
-          search,
-          sortField: toApiSortField(sort?.field),
-          sortOrder: sort?.direction,
-        });
+        const response = await rulesApi.listRules(
+          toFindRulesRequest({
+            page: page.index + 1,
+            perPage: page.size,
+            filter,
+            search,
+            sortField: toApiSortField(sort?.field),
+            sortOrder: sort?.direction,
+          })
+        );
 
         return {
           items: response.items.map(toContentListItem),

@@ -33,6 +33,14 @@ jest.mock('../hooks/use_fetch_stream_features', () => ({
   }),
 }));
 
+jest.mock('./change_point_lens_chart', () => ({
+  ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
+    <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>
+      [Logs] Spike
+    </div>
+  ),
+}));
+
 jest.mock('../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
@@ -205,11 +213,15 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('Impacted entities')).not.toBeInTheDocument();
   });
 
-  it('renders the trend section', () => {
+  it('renders the Lens occurrence chart in the trend section', () => {
     renderFlyout();
 
     expect(screen.getByText('Trend')).toBeInTheDocument();
     expect(screen.getByText('[Logs] Spike')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionLensChart')).toHaveAttribute(
+      'data-rule-uuid',
+      mockDetection.rule_uuid
+    );
   });
 
   it('renders the ES|QL query with an Open in Discover button', () => {
