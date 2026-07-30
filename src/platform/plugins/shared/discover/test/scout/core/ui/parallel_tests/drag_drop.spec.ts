@@ -56,8 +56,9 @@ spaceTest.describe('Discover drag and drop', { tag: tags.deploymentAgnostic }, (
   spaceTest(
     'should support dragging and dropping a field onto the grid (with keyboard)',
     async ({ page, pageObjects }) => {
-      // Stable after waitUntilSidebarHasLoaded() in beforeEach
-      expect(await pageObjects.discover.getDocHeader()).toStrictEqual(['@timestamp', 'Summary']);
+      await expect
+        .poll(() => pageObjects.discover.getDocHeader())
+        .toStrictEqual(['@timestamp', 'Summary']);
 
       await pageObjects.discover.dragFieldToGridWithKeyboard('@message');
 

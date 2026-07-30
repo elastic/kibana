@@ -116,24 +116,6 @@ export class DiscoverApp {
     await this.waitUntilFieldListHasCountOfFields();
   }
 
-  /**
-   * Creates a temporary ("ad hoc") data view from the search-bar switcher by typing `name` and
-   * clicking "Explore matching indices". Use this when no saved data view exists for the pattern.
-   * For saved data views, use `selectDataView` instead.
-   */
-  async selectAdHocDataView(name: string) {
-    await this.hideTabPreview();
-    const dataViewSwitch = await this.getVisibleDataViewSwitch();
-    await dataViewSwitch.click();
-    const switcher = this.page.testSubj.locator('indexPattern-switcher');
-    await switcher.waitFor({ state: 'visible' });
-    await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
-    await this.page.testSubj.locator('explore-matching-indices-button').click();
-    await switcher.waitFor({ state: 'hidden' });
-    await expect(this.getSelectedDataView()).toHaveText(name);
-    await this.waitUntilFieldListHasCountOfFields();
-  }
-
   getSelectedDataView(): Locator {
     return this.page.testSubj
       .locator('discover-dataView-switch-link')

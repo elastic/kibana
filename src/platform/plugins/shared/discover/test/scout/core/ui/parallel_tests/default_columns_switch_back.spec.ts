@@ -7,36 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
 const TSDB_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb';
-const FLIGHTS_KBN_ARCHIVE =
-  'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
 const DEFAULT_COLUMNS = ['message', 'extension', 'DestCountry'];
 
-// In serverless Observability, 'logstash-*' resolves the logs data source profile, and Discover
-// restores the per-profile app state snapshot when switching BACK to a data view of a previously
-// resolved profile (see discover_data_state_container.ts). The restored snapshot (the initial
-// default columns) overrides the discover:modifyColumnsOnSwitch reconciliation asserted here, so
-// this scenario runs everywhere except serverless Observability. It lives in its own file because
-// Scout allows only one root describe (and tag set) per spec file.
-const EXCLUDING_SERVERLESS_OBSERVABILITY_TAGS = [
-  ...tags.stateful.all,
-  ...tags.serverless.search,
-  ...tags.serverless.security.complete,
-];
-
 spaceTest.describe(
   'Discover default columns - switching data views',
-  { tag: EXCLUDING_SERVERLESS_OBSERVABILITY_TAGS },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
-      await discoverScoutSpace.setupDiscoverDefaults();
-      await scoutSpace.savedObjects.load(FLIGHTS_KBN_ARCHIVE);
+      await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
       await scoutSpace.savedObjects.load(TSDB_KBN_ARCHIVE);
     });
 

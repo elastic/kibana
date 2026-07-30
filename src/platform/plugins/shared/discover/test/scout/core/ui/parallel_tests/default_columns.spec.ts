@@ -13,8 +13,6 @@ import { spaceTest } from '../fixtures';
 
 const TSDB_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb';
-const FLIGHTS_KBN_ARCHIVE =
-  'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern';
 
 const DEFAULT_COLUMNS = ['message', 'extension', 'DestCountry'];
 
@@ -23,8 +21,7 @@ const DEFAULT_COLUMNS = ['message', 'extension', 'DestCountry'];
 // observability target.
 spaceTest.describe('Discover default columns', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
-    await discoverScoutSpace.setupDiscoverDefaults();
-    await scoutSpace.savedObjects.load(FLIGHTS_KBN_ARCHIVE);
+    await discoverScoutSpace.setupDiscoverDefaults({ loadFlightsDataView: true });
     await scoutSpace.savedObjects.load(TSDB_KBN_ARCHIVE);
   });
 
