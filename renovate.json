@@ -2040,15 +2040,6 @@
       "enabled": true
     },
     {
-      "groupName": "redux-saga-testing",
-      "matchDepNames": ["redux-saga-testing"],
-      "reviewers": ["team:actionable-obs-team"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "form-data",
       "matchDepNames": ["form-data"],
       "reviewers": ["team:actionable-obs-team"],
