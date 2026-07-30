@@ -150,6 +150,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Alerting
   'rule-management',
+  'action-policy-management',
 
   // Platform – Dashboard
   'dashboard-management',

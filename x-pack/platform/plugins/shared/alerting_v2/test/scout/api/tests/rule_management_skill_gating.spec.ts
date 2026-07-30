@@ -14,14 +14,16 @@ const SKILLS_API = '/api/agent_builder/skills';
 const GLOBAL_SETTINGS_API = '/api/kibana/global_settings';
 const ALERTING_V2_ENABLED_SETTING = 'alerting:v2:enabled';
 const RULE_MANAGEMENT_SKILL_ID = 'rule-management';
+const ACTION_POLICY_MANAGEMENT_SKILL_ID = 'action-policy-management';
+const ALERTING_V2_SKILL_IDS = [RULE_MANAGEMENT_SKILL_ID, ACTION_POLICY_MANAGEMENT_SKILL_ID];
 
 const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => skill.id);
 
-// The alerting V2 `rule-management` skill is a built-in Agent Builder skill that
-// is gated behind BOTH the agent builder experimental-features advanced setting
-// AND the `alerting:v2:enabled` advanced setting. Both must be enabled for the
-// skill to be listed, so this suite exercises each gate independently as well as
-// the combined case.
+// Alerting V2 Agent Builder skills (`rule-management` and
+// `action-policy-management`) are gated behind BOTH the agent builder
+// experimental-features advanced setting AND the `alerting:v2:enabled`
+// advanced setting. Both must be enabled for the skills to be listed, so this
+// suite exercises each gate independently as well as the combined case.
 //
 // This is the canonical gating suite because the generic Scout config leaves
 // `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
@@ -57,7 +59,9 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       // Anchor against a positive signal so a regressed/empty skills endpoint
       // can't make this negative assertion pass vacuously.
       expect(response.body.results.length).toBeGreaterThan(0);
-      expect(getSkillIds(response.body.results)).not.toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).not.toContain(skillId);
+      }
     }
   );
 
@@ -78,7 +82,9 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
       expect(response.body.results.length).toBeGreaterThan(0);
-      expect(getSkillIds(response.body.results)).not.toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).not.toContain(skillId);
+      }
     }
   );
 
@@ -101,7 +107,9 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
       expect(response.body.results.length).toBeGreaterThan(0);
-      expect(getSkillIds(response.body.results)).not.toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).not.toContain(skillId);
+      }
     }
   );
 
@@ -125,7 +133,9 @@ apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', (
       const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
       expect(response).toHaveStatusCode(200);
       expect(Array.isArray(response.body.results)).toBe(true);
-      expect(getSkillIds(response.body.results)).toContain(RULE_MANAGEMENT_SKILL_ID);
+      for (const skillId of ALERTING_V2_SKILL_IDS) {
+        expect(getSkillIds(response.body.results)).toContain(skillId);
+      }
     }
   );
 });
