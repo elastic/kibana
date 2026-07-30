@@ -213,9 +213,9 @@ describe('createSecurityRuleParamsAuthorizer', () => {
           } as Partial<RuleParams>),
           {
             request,
-            previousParams: paramsWith({ exceptionsList: [exceptionListItem()] } as Partial<
-              RuleParams
-            >),
+            previousParams: paramsWith({
+              exceptionsList: [exceptionListItem()],
+            } as Partial<RuleParams>),
           }
         )
       ).resolves.toBeUndefined();
@@ -234,9 +234,9 @@ describe('createSecurityRuleParamsAuthorizer', () => {
           } as Partial<RuleParams>),
           {
             request,
-            previousParams: paramsWith({ exceptionsList: [exceptionListItem()] } as Partial<
-              RuleParams
-            >),
+            previousParams: paramsWith({
+              exceptionsList: [exceptionListItem()],
+            } as Partial<RuleParams>),
           }
         )
         .catch((e) => e);
@@ -252,9 +252,9 @@ describe('createSecurityRuleParamsAuthorizer', () => {
       await expect(
         buildAuthorizer().authorize(paramsWith({ exceptionsList: [] } as Partial<RuleParams>), {
           request,
-          previousParams: paramsWith({ exceptionsList: [exceptionListItem()] } as Partial<
-            RuleParams
-          >),
+          previousParams: paramsWith({
+            exceptionsList: [exceptionListItem()],
+          } as Partial<RuleParams>),
         })
       ).resolves.toBeUndefined();
     });
@@ -269,9 +269,9 @@ describe('createSecurityRuleParamsAuthorizer', () => {
       const error = await buildAuthorizer()
         .authorize(paramsWith({ exceptionsList: [] } as Partial<RuleParams>), {
           request,
-          previousParams: paramsWith({ exceptionsList: [exceptionListItem()] } as Partial<
-            RuleParams
-          >),
+          previousParams: paramsWith({
+            exceptionsList: [exceptionListItem()],
+          } as Partial<RuleParams>),
         })
         .catch((e) => e);
 
@@ -328,9 +328,10 @@ describe('createSecurityRuleParamsAuthorizer', () => {
           } as Partial<RuleParams>),
           {
             request,
-            previousParams: paramsWith({ exceptionsList: [], note: 'original' } as Partial<
-              RuleParams
-            >),
+            previousParams: paramsWith({
+              exceptionsList: [],
+              note: 'original',
+            } as Partial<RuleParams>),
           }
         )
         .catch((e) => e);

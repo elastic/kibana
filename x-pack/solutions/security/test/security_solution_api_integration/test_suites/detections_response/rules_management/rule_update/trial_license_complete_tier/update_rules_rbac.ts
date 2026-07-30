@@ -445,7 +445,12 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await restrictedSupertest
           .put(`/api/alerting/rule/${existingRule.id}`)
           .set('kbn-xsrf', 'true')
-          .send(getAlertingRuleBody(current, { ...current.params, exceptionsList: exceptionsListModified }))
+          .send(
+            getAlertingRuleBody(current, {
+              ...current.params,
+              exceptionsList: exceptionsListModified,
+            })
+          )
           .expect(403);
 
         expect(body.message).to.eql(
