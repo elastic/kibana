@@ -9,4 +9,3 @@ export { AutomationRow } from './automation_row';
 export { AutomationsPanel } from './automations_panel';
 export { DescriptionPanel } from './description_panel';
 export { SourcesPanel } from './sources_panel';
-export { SourceRow } from './source_row';

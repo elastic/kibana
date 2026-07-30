@@ -1,5 +1,5 @@
 {
-  "sha1": "0003a0774e38dbb89267392697e4f4a382c3583f",
+  "sha1": "2791da551a8cb70fee06af67ce59004045cf5808",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -604,6 +604,20 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/dispatcher.spec.ts",
         "line": 1811,
+        "column": 10
+      }
+    },
+    {
+      "id": "07bf964a0bc027a-a519d776f8731e1",
+      "title": "Dispatcher dispatches external alerts (source-based episodes with no rule_id)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/dispatcher.spec.ts",
+        "line": 1849,
         "column": 10
       }
     },

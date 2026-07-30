@@ -126,7 +126,8 @@
     "@kbn/core-user-activity-server",
     "@kbn/core-test-helpers-test-utils",
     "@kbn/app-header",
-    "@kbn/core-chrome-browser-hooks"
+    "@kbn/core-chrome-browser-hooks",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*"
