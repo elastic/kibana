@@ -215,7 +215,7 @@ describe('generateSampleFromJsonSchema', () => {
     });
 
     it('returns undefined for ["null"] with properties, consistent with string "null"', () => {
-      const schema = { properties: { name: { type: 'string' } }, required: ['name'] } as const;
+      const schema = { properties: { name: { type: 'string' } }, required: ['name'] };
       expect(generateSampleFromJsonSchema({ type: 'null', ...schema })).toBeUndefined();
       expect(generateSampleFromJsonSchema({ type: ['null'], ...schema })).toBeUndefined();
     });
