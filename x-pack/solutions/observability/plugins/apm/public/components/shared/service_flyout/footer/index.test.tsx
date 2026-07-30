@@ -110,6 +110,7 @@ describe('ServiceFlyoutFooter', () => {
     const logsAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openLogsInDiscover');
     expect(logsAction).toHaveAttribute('href', '/app/discover/logs');
     expect(logsAction).toHaveAttribute('data-ebt-action', 'openInDiscover');
+    expect(logsAction).toHaveAttribute('data-ebt-element', 'serviceFlyoutActionsMenu');
     expect(logsAction).toHaveAttribute('data-ebt-detail', 'logs');
 
     const alertsAction = screen.getByTestId('serviceFlyoutActionsMenuItem-openAlerts');
