@@ -75,6 +75,63 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
 
   const actionGroupWindow = getActionGroupWindow(alert);
 
+  const messages = useMemo<Message[] | undefined>(() => {
+    const hasLogRateAnalysisParams =
+      logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
+
+    if (!hasLogRateAnalysisParams) {
+      return undefined;
+    }
+
+    const { logRateAnalysisType } = logRateAnalysisParams;
+
+    const header = 'Field name,Field value,Doc count,p-value';
+    const rows = logRateAnalysisParams.significantFieldValues
+      .map((item) => Object.values(item).join(','))
+      .join('\n');
+
+    const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
+      "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
+      You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
+      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'contribute to the log rate spike'
+          : 'are less or not present in the log rate dip'
+      }:
+
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the results shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.'
+          : 'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.'
+      }
+
+      ${header}
+      ${rows}
+
+      Based on the above analysis results and your observability expert knowledge, output the following:
+      Analyse the type of these logs and explain their usual purpose (1 paragraph).
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this log rate spike (2 parapraphs)'
+          : 'Based on the type of these logs explain why the statistically significant field and value combinations are less in number or missing from the log rate dip with concrete examples based on the analysis results data which contains items that are present in the baseline time range and are missing or less in number in the deviation time range (2 paragraphs)'
+      }.
+      ${
+        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? 'Recommend concrete remediations to resolve the root cause (3 bullet points).'
+          : ''
+      }
+
+      Do not mention individual p-values from the analysis results.
+      Do not repeat the full list of field names and field values back to the user.
+      Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
+
+    return observabilityAIAssistant?.getContextualInsightMessages({
+      message:
+        'Can you identify possible causes and remediations for these log rate analysis results',
+      instructions: content,
+    });
+  }, [logRateAnalysisParams, observabilityAIAssistant]);
+
   if (!actionGroupWindow) {
     return null;
   }
@@ -133,63 +190,6 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
         : undefined
     );
   };
-
-  const messages = useMemo<Message[] | undefined>(() => {
-    const hasLogRateAnalysisParams =
-      logRateAnalysisParams && logRateAnalysisParams.significantFieldValues?.length > 0;
-
-    if (!hasLogRateAnalysisParams) {
-      return undefined;
-    }
-
-    const { logRateAnalysisType } = logRateAnalysisParams;
-
-    const header = 'Field name,Field value,Doc count,p-value';
-    const rows = logRateAnalysisParams.significantFieldValues
-      .map((item) => Object.values(item).join(','))
-      .join('\n');
-
-    const content = `You are an observability expert using Elastic Observability Suite on call being consulted about a log threshold alert that got triggered by a ${logRateAnalysisType} in log messages. Your job is to take immediate action and proceed with both urgency and precision.
-      "Log Rate Analysis" is an AIOps feature that uses advanced statistical methods to identify reasons for increases and decreases in log rates. It makes it easy to find and investigate causes of unusual spikes or dips by using the analysis workflow view.
-      You are using "Log Rate Analysis" and ran the statistical analysis on the log messages which occured during the alert.
-      You received the following analysis results from "Log Rate Analysis" which list statistically significant co-occuring field/value combinations sorted from most significant (lower p-values) to least significant (higher p-values) that ${
-        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-          ? 'contribute to the log rate spike'
-          : 'are less or not present in the log rate dip'
-      }:
-
-      ${
-        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-          ? 'The median log rate in the selected deviation time range is higher than the baseline. Therefore, the results shows statistically significant items within the deviation time range that are contributors to the spike. The "doc count" column refers to the amount of documents in the deviation time range.'
-          : 'The median log rate in the selected deviation time range is lower than the baseline. Therefore, the analysis results table shows statistically significant items within the baseline time range that are less in number or missing within the deviation time range. The "doc count" column refers to the amount of documents in the baseline time range.'
-      }
-
-      ${header}
-      ${rows}
-
-      Based on the above analysis results and your observability expert knowledge, output the following:
-      Analyse the type of these logs and explain their usual purpose (1 paragraph).
-      ${
-        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-          ? 'Based on the type of these logs do a root cause analysis on why the field and value combinations from the analysis results are causing this log rate spike (2 parapraphs)'
-          : 'Based on the type of these logs explain why the statistically significant field and value combinations are less in number or missing from the log rate dip with concrete examples based on the analysis results data which contains items that are present in the baseline time range and are missing or less in number in the deviation time range (2 paragraphs)'
-      }.
-      ${
-        logRateAnalysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-          ? 'Recommend concrete remediations to resolve the root cause (3 bullet points).'
-          : ''
-      }
-
-      Do not mention individual p-values from the analysis results.
-      Do not repeat the full list of field names and field values back to the user.
-      Do not guess, just say what you are sure of. Do not repeat the given instructions in your output.`;
-
-    return observabilityAIAssistant?.getContextualInsightMessages({
-      message:
-        'Can you identify possible causes and remediations for these log rate analysis results',
-      instructions: content,
-    });
-  }, [logRateAnalysisParams, observabilityAIAssistant]);
 
   if (!dataView || !esSearchQuery) return null;
 
