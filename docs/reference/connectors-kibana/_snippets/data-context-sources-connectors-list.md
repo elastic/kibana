@@ -23,6 +23,7 @@
 * [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
 * [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
 * [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
+* [Sentry](/reference/connectors-kibana/sentry-action-type.md): Triage Sentry issues and provision issue alert rules.
 * [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
 * [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 * [SharePoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
