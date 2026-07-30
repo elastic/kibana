@@ -19,20 +19,20 @@ const HoverableUserWithAvatarComponent: React.FC<HoverableUserWithAvatarProps> =
   boldName,
 }) => {
   return (
-    <UserToolTip userInfo={userInfo}>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <CaseUserAvatar size="s" userInfo={userInfo} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction={'column'} gutterSize="none">
-            <EuiFlexItem>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <CaseUserAvatar size="s" userInfo={userInfo} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction={'column'} gutterSize="none">
+          <EuiFlexItem>
+            <UserToolTip userInfo={userInfo}>
               <Username userInfo={userInfo} boldName={boldName} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </UserToolTip>
+            </UserToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 HoverableUserWithAvatarComponent.displayName = 'HoverableUserWithAvatar';
