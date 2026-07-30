@@ -68,8 +68,11 @@ steps:
       inputs:
         # Same fix as Dark Watch's run_dark_worker: workflow.execute populates
         # context.inputs on the child, never context.event -- event.escalation is always
-        # undefined when Deep is invoked from Dark's escalate_to_deep step.
-        escalation: '${{ inputs.escalation | default: trigger.context }}'
+        # undefined when Deep is invoked from Dark's escalate_to_deep step. There is no
+        # `trigger` context key at all (buildWorkflowContext only exposes
+        # event/inputs/output/workflow/consts), so the prior `default: trigger.context`
+        # fallback never resolved; dropped rather than replaced.
+        escalation: '${{ inputs.escalation }}'
   - name: emit_draft_proposal
     # Draft-only proposal; HIL-gated. No response action executes here.
     type: kibana.request

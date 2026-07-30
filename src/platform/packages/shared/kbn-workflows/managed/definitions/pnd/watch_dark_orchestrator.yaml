@@ -77,9 +77,12 @@ steps:
         # child (confirmed: buildWorkflowExecutionDocument only ever sets context.event from
         # an *event-driven* trigger, never from workflow.execute's inputs argument). Read
         # inputs.escalation to match how run_floor_worker reads inputs.alertId /
-        # inputs.investigationId from its own invocation. trigger.context remains the
-        # fallback for a bare manual/scheduled trigger with no escalation payload at all.
-        escalation: '${{ inputs.escalation | default: trigger.context }}'
+        # inputs.investigationId from its own invocation. There is no `trigger` context key
+        # at all (buildWorkflowContext only exposes event/inputs/output/workflow/consts —
+        # see workflows_execution_engine build_workflow_context.ts), so the prior
+        # `default: trigger.context` fallback never resolved; dropped rather than replaced,
+        # since a bare manual/scheduled Dark Watch run has no escalation payload to fall back to.
+        escalation: '${{ inputs.escalation }}'
   - name: emit_proposal
     type: kibana.request
     on-failure:

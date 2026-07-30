@@ -56,7 +56,13 @@ steps:
     with:
       workflow-id: 'system-security-watch-ad-continuation-worker'
       inputs:
-        discovery: '${{ event.discovery | default: trigger.context }}'
+        # Manual-trigger orchestrator (no scheduled/alert trigger declared) — the discovery
+        # payload arrives via `inputs.discovery` on invocation, same as Floor Watch's
+        # inputs.alertId. There is no `trigger` context key at all (buildWorkflowContext only
+        # exposes event/inputs/output/workflow/consts — see workflows_execution_engine
+        # build_workflow_context.ts), so the prior `default: trigger.context` fallback never
+        # resolved.
+        discovery: '${{ event.discovery | default: inputs.discovery }}'
         investigationId: '{{ event.investigationId }}'
   - name: emit_proposal
     type: kibana.request

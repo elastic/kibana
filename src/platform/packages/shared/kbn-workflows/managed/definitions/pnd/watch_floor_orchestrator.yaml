@@ -63,9 +63,11 @@ steps:
         # Real alert-trigger events carry `event.alerts[]` (AlertEventSchema:
         # { _id, _index, kibana.alert, '@timestamp' }[]), not a flat
         # `event.alertId` — there is no such field on the real trigger event.
-        # `trigger.context.alertId` remains as a manual-trigger / on-demand
-        # fallback path.
-        alertId: '{{ event.alerts[0]._id | default: trigger.context.alertId }}'
+        # Manual / on-demand invocations supply `inputs.alertId` instead:
+        # buildWorkflowContext only exposes event/inputs/output/workflow/consts
+        # (see workflows_execution_engine build_workflow_context.ts), so there
+        # is no `trigger` context key to fall back to.
+        alertId: '{{ event.alerts[0]._id | default: inputs.alertId }}'
         # Floor Watch is the sole entry point into the escalation chain (Dark/Deep/Detection
         # all inherit investigationId from Floor via the escalation.investigationId payload —
         # see watch_dark_worker.yaml / watch_deep_worker.yaml). Nothing upstream of Floor ever
@@ -73,7 +75,7 @@ steps:
         # in event.alerts[]), so mint one here, deterministically derived from the alert (not
         # uuidv4) so a re-triggered run against the same alert lands on the same Investigation
         # instead of opening a duplicate one each time.
-        investigationId: "inv-floor-{{ event.alerts[0]._id | default: trigger.context.alertId }}"
+        investigationId: "inv-floor-{{ event.alerts[0]._id | default: inputs.alertId }}"
         event: '{{ event | json }}'
   - name: emit_proposal
     # Turn the worker classification into a canonical Proposal + evidence + eval record.
