@@ -75,6 +75,10 @@ export function LogRateAnalysisPanel({ slo, alert, rule }: Props) {
 
   const actionGroupWindow = getActionGroupWindow(alert);
 
+  if (!actionGroupWindow) {
+    return null;
+  }
+
   const alertRange = {
     from: moment(alert.start),
     to: alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]) : moment(new Date()),
