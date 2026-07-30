@@ -106,3 +106,8 @@ steps:
         # Conditional Detection Change Signal (delta #1) — the emit route attaches it to the
         # Investigation only when non-empty. `| json` renders the gaps array to a JSON string.
         detectionChangeSignalGaps: "{{ steps.assess_discovery.output.structured_output.detection_change_signal.gaps | default: '' | json }}"
+        # Model/connector/latency provenance (E&T requirement) — sourced from the ai.agent
+        # step's own usage metadata rather than guessed.
+        modelId: '{{ steps.assess_discovery.output.metadata.usage.modelId | default: "unknown" }}'
+        connectorId: '{{ steps.assess_discovery.output.metadata.usage.connectorId | default: "unknown" }}'
+        latencyMs: '${{ steps.assess_discovery.output.metadata.usage.latencyMs | default: 0 }}'

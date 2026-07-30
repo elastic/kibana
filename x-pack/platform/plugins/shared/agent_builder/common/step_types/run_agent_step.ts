@@ -148,6 +148,13 @@ export const OutputSchema = z.object({
           .max(512)
           .optional()
           .describe('Id of the LLM connector used for this step, when reported by the model.'),
+        modelId: z
+          .string()
+          .max(512)
+          .optional()
+          .describe(
+            "Model identifier from the provider response for this step, when reported by the model. A step uses one connector today, so the last real value is the step's model."
+          ),
         inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
         outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
         cachedTokens: z
@@ -155,6 +162,10 @@ export const OutputSchema = z.object({
           .optional()
           .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
         totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
+        latencyMs: z
+          .number()
+          .optional()
+          .describe('Wall-clock milliseconds spent executing this step, start to finish.'),
       }),
     })
     .describe('Step execution metadata, including token usage across all LLM rounds.')

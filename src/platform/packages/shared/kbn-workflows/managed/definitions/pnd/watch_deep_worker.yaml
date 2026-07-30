@@ -155,3 +155,8 @@ steps:
         # server (WorkerRunSchema.detectionChangeSignal is optional) drops it — nothing is attached to
         # the Investigation. sourceWatch/runId/investigationId are stamped by the server on attach.
         detectionChangeSignalGaps: '{{ steps.forensic_investigation.output.structured_output.detection_change_signal.gaps | json }}'
+        # Model/connector/latency provenance (E&T requirement) — sourced from the ai.agent
+        # step's own usage metadata rather than guessed.
+        modelId: '{{ steps.forensic_investigation.output.metadata.usage.modelId | default: "unknown" }}'
+        connectorId: '{{ steps.forensic_investigation.output.metadata.usage.connectorId | default: "unknown" }}'
+        latencyMs: '${{ steps.forensic_investigation.output.metadata.usage.latencyMs | default: 0 }}'

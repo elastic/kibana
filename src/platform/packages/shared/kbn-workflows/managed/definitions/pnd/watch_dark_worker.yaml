@@ -126,3 +126,8 @@ steps:
         # server (WorkerRunSchema.detectionChangeSignal is optional) drops it — nothing is attached to
         # the Investigation. sourceWatch/runId/investigationId are stamped by the server on attach.
         detectionChangeSignalGaps: '{{ steps.threat_intel_hunt.output.structured_output.detection_change_signal.gaps | json }}'
+        # Model/connector/latency provenance (E&T requirement) — sourced from the ai.agent
+        # step's own usage metadata rather than guessed.
+        modelId: '{{ steps.threat_intel_hunt.output.metadata.usage.modelId | default: "unknown" }}'
+        connectorId: '{{ steps.threat_intel_hunt.output.metadata.usage.connectorId | default: "unknown" }}'
+        latencyMs: '${{ steps.threat_intel_hunt.output.metadata.usage.latencyMs | default: 0 }}'

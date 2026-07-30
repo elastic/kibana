@@ -100,3 +100,9 @@ steps:
         # (WorkerRunSchema.ruleTuningTrigger is optional, built only when reason is present) attaches
         # nothing. This is the Detection-Watch-subscribable Rule Tuning trigger source.
         ruleTuningTriggerReason: "{%- if steps.triage_alerts.output.structured_output.classification == 'false_positive' -%}false_positive{%- endif -%}"
+        # Model/connector/latency provenance (E&T requirement) — sourced from the ai.agent
+        # step's own usage metadata rather than guessed, so the WorkerEvaluationRecord's
+        # provenance block reflects what actually ran instead of a hardcoded 'unknown'.
+        modelId: '{{ steps.triage_alerts.output.metadata.usage.modelId | default: "unknown" }}'
+        connectorId: '{{ steps.triage_alerts.output.metadata.usage.connectorId | default: "unknown" }}'
+        latencyMs: '${{ steps.triage_alerts.output.metadata.usage.latencyMs | default: 0 }}'

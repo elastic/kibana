@@ -54,8 +54,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
     handler: async (context) => {
       // Accumulate token usage outside the try/catch so partial counts are
       // preserved even if the event stream errors mid-execution.
+      const startTime = Date.now();
       const usage: {
         connectorId?: string;
+        modelId?: string;
         inputTokens: number;
         outputTokens: number;
         cachedTokens: number;
@@ -168,6 +170,11 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
                   if (modelUsage.connector_id && modelUsage.connector_id !== 'unknown') {
                     usage.connectorId = modelUsage.connector_id;
                   }
+                  // Same last-real-value rationale as connectorId above: a step uses one
+                  // model today, and `model` is only populated when the provider reported it.
+                  if (modelUsage.model) {
+                    usage.modelId = modelUsage.model;
+                  }
                   usage.inputTokens += modelUsage.input_tokens;
                   usage.outputTokens += modelUsage.output_tokens;
                   usage.cachedTokens += modelUsage.cached_input_tokens ?? 0;
@@ -205,7 +212,7 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
             message: outputMessage,
             structured_output: round.response.structured_output,
             ...(outputConversationId && { conversation_id: outputConversationId }),
-            metadata: { usage },
+            metadata: { usage: { ...usage, latencyMs: Date.now() - startTime } },
           },
         };
       } catch (error) {
@@ -214,7 +221,10 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           error instanceof Error ? error : new Error(String(error))
         );
         return {
-          output: { message: '', metadata: { usage } },
+          output: {
+            message: '',
+            metadata: { usage: { ...usage, latencyMs: Date.now() - startTime } },
+          },
           error: error instanceof Error ? error : new Error(String(error)),
         };
       }

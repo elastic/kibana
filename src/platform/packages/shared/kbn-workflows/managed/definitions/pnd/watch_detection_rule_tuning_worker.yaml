@@ -89,3 +89,8 @@ steps:
         proposedRule:
           name: '{{ steps.draft_tuning.output.structured_output.target_rule }}'
           query: '{{ steps.draft_tuning.output.structured_output.proposed_change }}'
+        # Model/connector/latency provenance (E&T requirement) — sourced from the ai.agent
+        # step's own usage metadata rather than guessed.
+        modelId: '{{ steps.draft_tuning.output.metadata.usage.modelId | default: "unknown" }}'
+        connectorId: '{{ steps.draft_tuning.output.metadata.usage.connectorId | default: "unknown" }}'
+        latencyMs: '${{ steps.draft_tuning.output.metadata.usage.latencyMs | default: 0 }}'
