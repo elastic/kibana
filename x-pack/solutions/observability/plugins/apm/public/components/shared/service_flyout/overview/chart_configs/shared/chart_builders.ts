@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { LatencyAggregationType } from '../../../../../../../common/latency_aggregation_types';
 import { ChartType } from '../../../../charts/helper/get_timeseries_color';
 import { buildChartDefinition, seriesColor } from './chart_definition';
-import type { FlyoutLensChartConfigDefinition, LensYAxis } from './types';
+import type { FlyoutLensChartConfigDefinition } from './types';
 
 interface LatencyAggregationConfig {
   label: string;
@@ -91,7 +91,7 @@ export function getLatencyChart({
         suffix: ' ms',
         seriesColor: seriesColor(getLatencyChartType(latencyAggregationType)),
       },
-    ] as LensYAxis[],
+    ],
   });
 }
 
@@ -119,7 +119,7 @@ export function getThroughputChart({
         decimals: 0,
         seriesColor: seriesColor(ChartType.THROUGHPUT),
       },
-    ] as LensYAxis[],
+    ],
   });
 }
 
@@ -146,6 +146,6 @@ export function getErrorRateChart({
         decimals: 1,
         seriesColor: seriesColor(ChartType.FAILED_TRANSACTION_RATE),
       },
-    ] as LensYAxis[],
+    ],
   });
 }
