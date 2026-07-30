@@ -154,23 +154,28 @@ export function initializeLayoutManager(
   let lastSavedLayout = initialLayout;
 
   let lastSavedChildState = initialChildState;
-  const resetLayout = (state: DashboardState) => {
+  const resetLayout = async (state: DashboardState) => {
     const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
       state.panels,
       state.pinned_panels
     );
 
-    layout$.next({ ...layoutToApply });
+    if (!arePanelLayoutsEqual(layout$.getValue(), layoutToApply)) {
+      layout$.next({ ...layoutToApply });
+    }
     currentChildState = { ...childStateToApply };
 
     let childrenModified = false;
     const currentChildren = { ...children$.value };
+    const setStatePromises: Promise[] = [];
     for (const uuid of Object.keys(currentChildren)) {
       if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
         const nextChildState = childStateToApply[uuid];
+        console.log('HERE');
         if (apiHasSerializableState(child)) {
-          child.applySerializedState(nextChildState);
+          console.log('before', uuid);
+          setStatePromises.push(child.applySerializedState(nextChildState));
         }
       } else {
         // if reset resulted in panel removal, we need to update the list of children
@@ -178,6 +183,8 @@ export function initializeLayoutManager(
         delete currentChildState[uuid];
         childrenModified = true;
       }
+      await Promise.all(setStatePromises);
+      console.log('after', uuid);
     }
     if (childrenModified) children$.next(currentChildren);
   };
@@ -540,6 +547,7 @@ export function initializeLayoutManager(
             )
           ),
           map(([[currentLayout, childrenChanges]]) => {
+            console.log({ currentLayout, childrenChanges });
             const hasPanelChanges =
               childrenChanges.some(
                 (childChanges) =>

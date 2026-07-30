@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatestWith, debounceTime, map, of, startWith } from 'rxjs';
+import { combineLatestWith, debounceTime, map, of, share, startWith } from 'rxjs';
 import type { HasSerializableState } from '../../has_serializable_state';
 import type { PublishesUnsavedChanges } from '../../publishes_unsaved_changes';
 import { type StateComparators, areComparatorsEqual } from '../../../state_manager';
@@ -49,7 +49,7 @@ export const initializeStateApi = <StateType extends object = object>({
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState();
-
+      console.log({ uuid, lastSavedState, currentState });
       // check state equality
       return !areComparatorsEqual(
         getComparators(),
@@ -65,7 +65,8 @@ export const initializeStateApi = <StateType extends object = object>({
           return `child: ${childLabel}, key: ${key}`;
         }
       );
-    })
+    }),
+    share()
   );
 
   return { anyStateChange$, applySerializedState, hasUnsavedChanges$, serializeState };

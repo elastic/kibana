@@ -19,7 +19,7 @@ import {
   apiPublishesSettings,
   initializeStateApi,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, debounceTime, merge, tap } from 'rxjs';
+import { BehaviorSubject, debounceTime, merge, share, tap } from 'rxjs';
 import {
   ON_APPLY_FILTER,
   ON_CLICK_VALUE,
@@ -127,11 +127,37 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
       },
       anyStateChange$: merge(
-        drilldownsManager.anyStateChange$,
-        crossPanelActions.anyStateChange$,
-        reduxSync.anyStateChange$,
-        titleManager.anyStateChange$,
-        timeRangeManager.anyStateChange$
+        drilldownsManager.anyStateChange$.pipe(
+          tap(() => {
+            console.log('drilldownsManager');
+          })
+        ),
+        crossPanelActions.anyStateChange$.pipe(
+          tap(() => {
+            console.log('crossPanelActions');
+          })
+        ),
+        reduxSync.anyStateChange$.pipe(
+          tap(() => {
+            console.log('reduxSync');
+          })
+        ),
+        titleManager.anyStateChange$.pipe(
+          tap(() => {
+            console.log('title manager');
+          })
+        ),
+        timeRangeManager.anyStateChange$.pipe(
+          tap(() => {
+            console.log('time range  manager');
+          })
+        )
+      ).pipe(
+        tap((val) => {
+          debugger;
+          console.log('overall state', { val });
+        }),
+        share()
       ),
       getComparators: () => {
         return {
@@ -146,6 +172,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         };
       },
       applySerializedState: async (nextState) => {
+        console.log('----before');
         stateLoading$.next(true);
 
         drilldownsManager.reinitializeState(nextState);
@@ -153,9 +180,10 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         titleManager.reinitializeState(nextState);
 
         await savedMap.reset(nextState);
-        await new Promise((resolve) => setTimeout(resolve, 256)); // wait for map extent to stabilize
+        // await new Promise((resolve) => setTimeout(resolve, 256)); // wait for map extent to stabilize
 
         stateLoading$.next(false);
+        console.log('----after');
       },
     });
 

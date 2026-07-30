@@ -249,10 +249,12 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     if (requiresNewBuffer) {
       getInspectorAdapters(getState()).vectorTiles.setTiles(getTilesForExtent(nextZoom, extent));
     }
+    console.log({ prevZoom, nextZoom, updateZoom: Math.abs(prevZoom - nextZoom) >= 0.5 });
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapViewContext: {
         ...mapExtentState,
+        ...(Math.abs(prevZoom - nextZoom) < 0.5 ? { zoom: prevZoom } : { zoom: nextZoom }),
         buffer: requiresNewBuffer
           ? expandToTileBoundaries(extent, Math.ceil(nextZoom))
           : prevBuffer,

@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, withLatestFrom } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  filter,
+  map,
+  withLatestFrom,
+  switchMap,
+} from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
@@ -31,7 +39,7 @@ export function initializeHistoryManager({
   >['internalApi']['unsavedChanges$'];
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
   getState: () => DashboardState;
-  setState: (state: DashboardState) => void;
+  setState: (state: DashboardState) => Promise<void>;
   dataLoadingManager: ReturnType<typeof initializeDataLoadingManager>;
 }): {
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
@@ -79,13 +87,21 @@ export function initializeHistoryManager({
       })
     )
     .subscribe(([[state]]) => {
+      console.log('NEXT STATE', getState());
       dashboardCurrentState$.next(getState());
     });
 
   // when the history's state updates, respond by setting state on the Dashboard
-  const historyStateSubscription = historyApi.currentState$.subscribe((newState) => {
-    setState(newState);
-  });
+  const historyStateSubscription = historyApi.currentState$
+    .pipe(
+      switchMap(async (newState) => {
+        console.log('before', { setState: newState });
+        await setState(newState);
+      })
+    )
+    .subscribe(() => {
+      console.log('after set state');
+    });
 
   return {
     api: historyApi,

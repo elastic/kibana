@@ -20,6 +20,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   initializeStateApi,
+  type StateComparators,
 } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import {
@@ -42,6 +43,14 @@ const defaultFieldListState: WithAllKeys<FieldListRuntimeState> = {
   dataViewId: undefined,
   selectedFieldNames: undefined,
   dataViews: undefined,
+};
+
+const fieldListComparators: StateComparators<FieldListRuntimeState> = {
+  selectedFieldNames: (a, b) => {
+    return (a?.slice().sort().join(',') ?? '') === (b?.slice().sort().join(',') ?? '');
+  },
+  dataViewId: 'referenceEquality',
+  dataViews: 'skip',
 };
 
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
@@ -102,7 +111,11 @@ export const getFieldListFactory = (
       const allDataViews = await dataViews.getIdsWithTitle();
       const subscriptions = new Subscription();
       const titleManager = initializeTitleManager(initialState ?? {});
-      const fieldListStateManager = initializeStateManager(state, defaultFieldListState);
+      const fieldListStateManager = initializeStateManager(
+        state,
+        defaultFieldListState,
+        fieldListComparators
+      );
 
       // Whenever the data view changes, we want to update the data views and reset the selectedFields in the field list state manager.
       subscriptions.add(

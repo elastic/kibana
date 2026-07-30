@@ -6,7 +6,17 @@
  */
 
 import type { Subscription } from 'rxjs';
-import { BehaviorSubject, debounceTime, filter, map, merge, skip, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  debounceTime,
+  distinctUntilChanged,
+  filter,
+  map,
+  merge,
+  share,
+  skip,
+  tap,
+} from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
@@ -41,6 +51,7 @@ import {
   setEventHandlers,
 } from '../reducers/non_serializable_instances';
 import type { SavedMap } from '../routes';
+import type { ComparatorFunction } from 'joi';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -71,7 +82,7 @@ export const reduxSyncComparators: StateComparators<
     if (a.lat !== b.lat) return false;
     if (a.lon !== b.lon) return false;
     // Map may not restore reset zoom exactly
-    return Math.abs(a.zoom - b.zoom) < 0.05;
+    return Math.abs(a.zoom - b.zoom) < 0.5;
   },
   mapBuffer: 'skip',
   openTOCDetails: 'deepEquality',
@@ -123,7 +134,13 @@ export function initializeReduxSync({
     }
 
     const nextMapCenterAndZoom = getMapCenterAndZoom(store.getState());
-    if (!fastIsEqual(mapCenterAndZoom$.value, nextMapCenterAndZoom)) {
+    if (
+      !(reduxSyncComparators.mapCenter as ComparatorFunction)(
+        mapCenterAndZoom$.value,
+        nextMapCenterAndZoom
+      )
+    ) {
+      console.log({ prev: mapCenterAndZoom$.getValue(), nextMapCenterAndZoom });
       mapCenterAndZoom$.next(nextMapCenterAndZoom);
     }
 
@@ -226,20 +243,34 @@ export function initializeReduxSync({
     anyStateChange$: merge(
       hiddenLayers$.pipe(
         skip(1),
-        map(() => undefined)
+        map(() => undefined),
+        tap(() => {
+          console.log('hiddenLayers$ STATE CHANGE');
+        })
       ),
       isLayerTOCOpen$.pipe(
         skip(1),
-        map(() => undefined)
+        map(() => undefined),
+        tap(() => {
+          console.log('oisLayerTOCOpen$ STATE CHANGE');
+        })
       ),
       mapCenterAndZoom$.pipe(
         skip(1),
+        distinctUntilChanged(reduxSyncComparators.mapCenter as ComparatorFunction),
+        tap((val) => {
+          console.log('mapCenterAndZoom$ STATE CHANGE', { val });
+        }),
         map(() => undefined)
       ),
       openTOCDetails$.pipe(
         skip(1),
         map(() => undefined)
       )
+    ).pipe(
+      tap(() => {
+        console.log('REDUXX STATE CHANGE');
+      })
     ),
     getLatestState: () => {
       return {
@@ -249,6 +280,17 @@ export function initializeReduxSync({
         mapCenter: mapCenterAndZoom$.value,
         openTOCDetails: openTOCDetails$.value,
       };
+    },
+    reinitializeState: (
+      nextState: Pick<
+        MapEmbeddableState,
+        'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'
+      >
+    ) => {
+      if (nextState.hiddenLayers !== undefined) hiddenLayers$.next(nextState.hiddenLayers);
+      if (nextState.isLayerTOCOpen !== undefined) isLayerTOCOpen$.next(nextState.isLayerTOCOpen);
+      if (nextState.mapCenter !== undefined) mapCenterAndZoom$.next(nextState.mapCenter);
+      if (nextState.openTOCDetails !== undefined) openTOCDetails$.next(nextState.openTOCDetails);
     },
   };
 }

@@ -53,5 +53,5 @@ export interface TitlesApi
     PublishesWritableHideBorder {}
 
 export const initializeTitleManager = (initialTitlesState: SerializedTitles): TitleManager => {
-  return initializeStateManager(initialTitlesState, defaultTitlesState);
+  return initializeStateManager(initialTitlesState, defaultTitlesState, titleComparators);
 };

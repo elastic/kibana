@@ -35,12 +35,14 @@ export function startTrackingHistory<T extends object = {}>({
   const stateSubscription = state$
     .pipe(map(mapState), pairwise())
     .subscribe(([previous, current]) => {
+      console.log({ undoOrRedoAction });
       if (undoOrRedoAction) {
         // do not add to history if state change is coming from undo or redo action
         undoOrRedoAction = false;
         return;
       }
       const diff = jsondiffpatch.diff(previous, current);
+      console.log({ previous, current, diff });
       if (!diff) return;
 
       const pointer = pointer$.getValue();
@@ -53,6 +55,10 @@ export function startTrackingHistory<T extends object = {}>({
       }
       // add the new patch to the top of the history stack and increment (see note) the pointer
       history.push(diff);
+
+      console.log({ history: [...history] });
+      debugger;
+
       pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
     });
 

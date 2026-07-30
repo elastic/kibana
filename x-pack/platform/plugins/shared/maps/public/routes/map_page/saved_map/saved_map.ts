@@ -542,6 +542,7 @@ export class SavedMap {
   private async _getStoreAttributes() {
     const state: MapStoreState = this._store.getState();
     const mapSettings = getMapSettings(state);
+
     return {
       adHocDataViews: await this._getAdHocDataViews(),
       center: getMapCenter(state),

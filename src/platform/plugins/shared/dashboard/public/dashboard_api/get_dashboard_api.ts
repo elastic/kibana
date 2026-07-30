@@ -147,8 +147,8 @@ export function getDashboardApi({
 
   const approximationManager = initializeApproximationManager(initialState);
 
-  function setState(state: DashboardState) {
-    layoutManager.internalApi.reset(state);
+  async function setState(state: DashboardState) {
+    await layoutManager.internalApi.reset(state);
     unifiedSearchManager.internalApi.reset(state);
     projectRoutingManager?.internalApi.reset(state);
     approximationManager.internalApi.reset(state);
