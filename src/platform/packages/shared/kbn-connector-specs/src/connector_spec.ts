@@ -237,11 +237,6 @@ export interface ActionAnnotations {
    * result as calling it once (e.g., a PUT that overwrites vs. an append).
    */
   idempotentHint?: boolean;
-  /**
-   * The action interacts with systems outside Kibana (external APIs, third-party
-   * services). Most connector actions will have this set to true.
-   */
-  openWorldHint?: boolean;
 }
 
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {

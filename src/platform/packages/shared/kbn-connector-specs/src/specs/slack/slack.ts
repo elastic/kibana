@@ -268,7 +268,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/assistant.search.context
     searchMessages: {
       isTool: true,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Search Slack messages by keyword. Returns matching messages with channel, sender, timestamp, and permalink. Use the dedicated fromUser, inChannel, after, and before parameters for filtering — do not embed Slack search operators in the query string.',
       input: SlackSearchMessagesInputSchema,
@@ -366,7 +366,7 @@ export const Slack: ConnectorSpec = {
 
     listChannels: {
       isTool: true,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'List Slack channels/conversations the token can see (one page per call). Use this to answer which channels exist or to browse IDs before sendMessage. Pass nextCursor from the previous response to fetch the next page. Prefer this over many resolveChannelId calls for discovery.',
       input: SlackListChannelsInputSchema,
@@ -424,7 +424,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.list
     resolveChannelId: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true },
       description:
         'Look up a Slack channel/conversation ID from a human-readable channel name (e.g. "general" or "#general"). Use before sendMessage when you already know the target name but need its ID. To list or explore channels, use listChannels instead of many resolveChannelId calls.',
       input: SlackResolveChannelIdInputSchema,
@@ -503,7 +503,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.history
     getConversationHistory: {
       isTool: true,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'Fetch a page of recent messages from a Slack channel or DM. Returns messages newest-first. Pass nextCursor from the response to fetch older pages.',
       input: SlackGetConversationHistoryInputSchema,
@@ -580,7 +580,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.info
     getConversationInfo: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true },
       description:
         'Look up metadata for a single Slack channel or DM by ID. Returns the channel object (name, privacy, membership, topic, purpose).',
       input: SlackGetConversationInfoInputSchema,
@@ -622,7 +622,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.lookupByEmail
     lookupUserByEmail: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true },
       description:
         'Find a Slack user by email address. Returns the matching user object including id, name, and profile. Throws if no user has that email.',
       input: SlackLookupUserByEmailInputSchema,
@@ -657,7 +657,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.list
     listUsers: {
       isTool: true,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'List Slack workspace users (one page per call). Pass nextCursor from the previous response to fetch the next page.',
       input: SlackListUsersInputSchema,
@@ -735,7 +735,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/users.conversations
     listUserConversations: {
       isTool: true,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'List the channels/conversations a Slack user is a member of (one page per call). Omit user to list for the authenticated user. Pass nextCursor to fetch the next page.',
       input: SlackListUserConversationsInputSchema,
@@ -795,7 +795,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/auth.test
     whoAmI: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true },
       description:
         'Return the identity the Slack connector is authenticated as. Useful before sendMessage to confirm the workspace, or to resolve "me" to a user ID for other actions.',
       input: SlackWhoAmIInputSchema,
@@ -840,7 +840,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/files.info
     getFileInfo: {
       isTool: true,
-      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true, idempotentHint: true },
       description:
         'Look up a single Slack file by ID. Returns the file metadata (name, mimetype, size, urls, sharing channels).',
       input: SlackGetFileInfoInputSchema,
@@ -875,7 +875,7 @@ export const Slack: ConnectorSpec = {
     // Classic-paginated: uses `page`/`pages`, not cursor-based pagination.
     listFiles: {
       isTool: true,
-      annotations: { readOnlyHint: true, openWorldHint: true },
+      annotations: { readOnlyHint: true },
       description:
         'List Slack files (one page per call). Filter by channel, user, time range, or types. Pass nextPage from the previous response to fetch the next page.',
       input: SlackListFilesInputSchema,
@@ -950,7 +950,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.create
     createConversation: {
       isTool: false,
-      annotations: { destructiveHint: true, openWorldHint: true },
+      annotations: { destructiveHint: true },
       description:
         'Create a new Slack channel (public or private). Returns the created channel object including its ID.',
       input: SlackCreateConversationInputSchema,
@@ -1003,7 +1003,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/conversations.invite
     inviteToConversation: {
       isTool: false,
-      annotations: { destructiveHint: true, idempotentHint: true, openWorldHint: true },
+      annotations: { destructiveHint: true, idempotentHint: true },
       description: 'Invite one or more users to a Slack channel by channel ID and user IDs.',
       input: SlackInviteToConversationInputSchema,
       handler: async (ctx, input) => {
@@ -1055,7 +1055,7 @@ export const Slack: ConnectorSpec = {
     // https://api.slack.com/methods/chat.postMessage
     sendMessage: {
       isTool: true,
-      annotations: { destructiveHint: true, openWorldHint: true },
+      annotations: { destructiveHint: true },
       description:
         'Send a message to a Slack channel or DM. Requires a channel ID. Use listChannels to discover channels, or resolveChannelId when you know the channel name and need its ID. Returns the message timestamp, which can be used as threadTs to post a reply in a thread.',
       input: SlackSendMessageInputSchema,
