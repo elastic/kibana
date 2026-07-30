@@ -23,7 +23,7 @@ describe('NewRelic', () => {
 
   const mockContext = {
     client: mockClient,
-    config: { region: 'us', accountId: 123 },
+    config: { region: 'us', accountId: '123' },
     log: { debug: jest.fn(), error: jest.fn() },
   } as unknown as ActionContext;
 
@@ -58,6 +58,41 @@ describe('NewRelic', () => {
     expect(types).toContain('api_key_header');
   });
 
+  describe('config schema', () => {
+    // accountId is stored as a regex-validated string (not z.number()) because the
+    // connector config form-generator has no widget for numeric Zod schemas.
+    it('should accept a numeric-string accountId', () => {
+      if (!NewRelic.schema) throw new Error('Config schema not defined');
+      const result = NewRelic.schema.safeParse({ accountId: '8342677', region: 'us' });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject a non-numeric accountId', () => {
+      if (!NewRelic.schema) throw new Error('Config schema not defined');
+      const result = NewRelic.schema.safeParse({ accountId: 'abc123', region: 'us' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject a missing accountId', () => {
+      if (!NewRelic.schema) throw new Error('Config schema not defined');
+      const result = NewRelic.schema.safeParse({ region: 'us' });
+      expect(result.success).toBe(false);
+    });
+
+    it('handler should throw a clear error when accountId is missing from config', async () => {
+      const noAccountContext = {
+        ...mockContext,
+        config: { region: 'us' },
+      } as unknown as ActionContext;
+
+      await expect(
+        NewRelic.actions.acknowledgeIssue.handler(noAccountContext, { issueId: 'i1' })
+      ).rejects.toThrow(
+        'New Relic connector is missing the required accountId configuration field.'
+      );
+    });
+  });
+
   describe('region endpoint resolution', () => {
     it('uses the EU endpoint when region is eu', async () => {
       mockClient.post.mockResolvedValue({
@@ -65,7 +100,7 @@ describe('NewRelic', () => {
       });
       const euContext = {
         ...mockContext,
-        config: { region: 'eu', accountId: 123 },
+        config: { region: 'eu', accountId: '123' },
       } as unknown as ActionContext;
 
       await NewRelic.actions.acknowledgeIssue.handler(euContext, {
@@ -85,7 +120,7 @@ describe('NewRelic', () => {
       });
       const jpContext = {
         ...mockContext,
-        config: { region: 'jp', accountId: 123 },
+        config: { region: 'jp', accountId: '123' },
       } as unknown as ActionContext;
 
       await NewRelic.actions.acknowledgeIssue.handler(jpContext, {

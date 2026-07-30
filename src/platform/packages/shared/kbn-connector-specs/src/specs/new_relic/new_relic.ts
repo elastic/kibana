@@ -67,8 +67,11 @@ const buildEndpoint = (ctx: ActionContext): string => {
 };
 
 const getAccountId = (ctx: ActionContext): number => {
-  const accountId = ctx.config?.accountId as number | undefined;
-  if (accountId === undefined || accountId === null) {
+  // Stored as a regex-validated string in config (see schema below) since the connector
+  // config form has no numeric widget; NerdGraph's GraphQL variables need a real number.
+  const raw = ctx.config?.accountId as string | number | undefined;
+  const accountId = typeof raw === 'number' ? raw : Number(raw);
+  if (!raw || Number.isNaN(accountId)) {
     throw new Error('New Relic connector is missing the required accountId configuration field.');
   }
   return accountId;
@@ -171,10 +174,13 @@ export const NewRelic: ConnectorSpec = {
   schema: lazySchema(() =>
     z.object({
       accountId: z
-        .number()
-        .int()
+        .string()
+        .min(1)
+        .max(20)
+        .regex(/^\d+$/, 'Must be a numeric New Relic account ID.')
         .describe('New Relic account ID this connector manages.')
         .meta({
+          widget: 'text',
           label: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.accountId.label', {
             defaultMessage: 'Account ID',
           }),
