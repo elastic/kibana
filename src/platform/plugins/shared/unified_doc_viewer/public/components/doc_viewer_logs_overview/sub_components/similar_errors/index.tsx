@@ -9,6 +9,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
 import {
   getLogExceptionTypeFieldWithFallback,
   getMessageFieldWithFallbacks,
@@ -19,6 +20,7 @@ import { getFieldValueWithFallback } from '@kbn/discover-utils/src/utils';
 import { ContentFrameworkSection } from '../../../content_framework/lazy_content_framework_section';
 import { useDataSourcesContext } from '../../../../hooks/use_data_sources';
 import { getEsqlQuery } from './get_esql_query';
+import { useQueryableEsqlColumns } from './use_queryable_esql_columns';
 import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
 import { buildSectionDescription, type FieldInfo } from './build_section_description';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../hooks/use_discover_link_and_esql_query';
@@ -29,10 +31,28 @@ const createFieldInfo = (value: unknown, field: string | undefined): FieldInfo |
   return value && field ? { value, field } : undefined;
 };
 
+interface SimilarErrorFields {
+  serviceName?: FieldInfo;
+  culprit?: FieldInfo;
+  message?: FieldInfo;
+  type?: FieldInfo;
+}
+
+const hasErrorIdentifyingField = ({ culprit, message, type }: SimilarErrorFields): boolean =>
+  Boolean(culprit || message || type);
+
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.title',
   {
     defaultMessage: 'Similar errors',
+  }
+);
+
+const unavailableMessage = i18n.translate(
+  'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.unavailable',
+  {
+    defaultMessage:
+      "Similar errors can't be displayed because the fields of this document are missing or have conflicting mappings in the configured log sources.",
   }
 );
 
@@ -66,15 +86,13 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     ? String(timestampValue[0])
     : String(timestampValue);
 
-  const sectionDescription = useMemo(
-    () =>
-      buildSectionDescription({
-        serviceName: createFieldInfo(serviceNameValue, serviceNameField),
-        culprit: createFieldInfo(culpritValue, culpritField),
-        message: createFieldInfo(messageValue, messageField),
-        type: createFieldInfo(typeValue, typeField),
-        groupingName: createFieldInfo(groupingNameValue, groupingNameField),
-      }),
+  const fields = useMemo<SimilarErrorFields>(
+    () => ({
+      serviceName: createFieldInfo(serviceNameValue, serviceNameField),
+      culprit: createFieldInfo(culpritValue, culpritField),
+      message: createFieldInfo(messageValue, messageField),
+      type: createFieldInfo(typeValue, typeField),
+    }),
     [
       serviceNameValue,
       serviceNameField,
@@ -84,28 +102,71 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       messageField,
       typeValue,
       typeField,
-      groupingNameValue,
-      groupingNameField,
     ]
   );
 
+  // Similar errors are anchored on the service name plus at least one
+  // error-identifying field.
+  const shouldRender = Boolean(fields.serviceName) && hasErrorIdentifyingField(fields);
+
+  // The WHERE clause below runs against the all-logs index pattern, not the
+  // current document's index. Any referenced column that is unmapped or has
+  // conflicting mappings across that pattern fails the whole ES|QL query with
+  // a verification_exception, so resolve the pattern's columns first and only
+  // query the fields that are usable.
+  const { queryableColumns, loading: resolvingColumns } = useQueryableEsqlColumns(
+    shouldRender ? indexes.logs : undefined
+  );
+
+  const queryable = useMemo(() => {
+    // Fail open while resolving or if resolution failed (`queryableColumns`
+    // undefined): treat every field as queryable. Each field is gated on the
+    // column the generated query references, which is not always the column
+    // the document's value came from: `getEsqlQuery` builds the service name
+    // and culprit predicates on the canonical ECS columns even when the value
+    // was read from an OTel fallback field.
+    const gate = (info?: FieldInfo, queryColumn = info?.field ?? '') =>
+      info && (!queryableColumns || queryableColumns.has(queryColumn)) ? info : undefined;
+    return {
+      serviceName: gate(fields.serviceName, fieldConstants.SERVICE_NAME_FIELD),
+      culprit: gate(fields.culprit, fieldConstants.ERROR_CULPRIT_FIELD),
+      message: gate(fields.message),
+      type: gate(fields.type),
+    };
+  }, [fields, queryableColumns]);
+  const hasQueryableErrorField = hasErrorIdentifyingField(queryable);
+
+  const sectionDescription = useMemo(
+    () =>
+      buildSectionDescription({
+        ...queryable,
+        groupingName: createFieldInfo(groupingNameValue, groupingNameField),
+      }),
+    [queryable, groupingNameValue, groupingNameField]
+  );
+
   const esqlQueryWhereClause = useMemo(() => {
+    // A match on service.name alone is too broad to present as similar errors,
+    // so require at least one queryable error-identifying predicate.
+    if (resolvingColumns || !hasQueryableErrorField) {
+      return undefined;
+    }
     return getEsqlQuery({
-      serviceName: serviceNameValue ? String(serviceNameValue) : undefined,
-      culprit: culpritValue ? String(culpritValue) : undefined,
-      message:
-        messageValue && messageField
-          ? { fieldName: messageField, value: String(messageValue) }
-          : undefined,
-      type:
-        typeValue && typeField
-          ? {
-              fieldName: typeField,
-              value: Array.isArray(typeValue) ? typeValue.map(String) : String(typeValue),
-            }
-          : undefined,
+      serviceName: queryable.serviceName ? String(queryable.serviceName.value) : undefined,
+      culprit: queryable.culprit ? String(queryable.culprit.value) : undefined,
+      message: queryable.message
+        ? { fieldName: queryable.message.field, value: String(queryable.message.value) }
+        : undefined,
+      type: queryable.type
+        ? {
+            fieldName: queryable.type.field,
+            value: Array.isArray(queryable.type.value)
+              ? queryable.type.value.map(String)
+              : String(queryable.type.value),
+          }
+        : undefined,
     });
-  }, [serviceNameValue, culpritValue, messageValue, messageField, typeValue, typeField]);
+  }, [resolvingColumns, hasQueryableErrorField, queryable]);
 
   const { discoverUrl, esqlQueryString } = useDiscoverLinkAndEsqlQuery({
     indexPattern: indexes.logs,
@@ -128,10 +189,11 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
     [openInDiscoverSectionAction]
   );
 
-  const hasAtLeastOneErrorField = culpritValue || messageValue || typeValue;
-  if (!serviceNameValue || !hasAtLeastOneErrorField) {
+  if (!shouldRender) {
     return undefined;
   }
+
+  const showUnavailableCallout = !resolvingColumns && !esqlQueryWhereClause;
 
   return (
     <ContentFrameworkSection
@@ -141,10 +203,19 @@ export function SimilarErrors({ hit }: SimilarErrorsProps) {
       actions={actions}
       description={sectionDescription}
     >
-      <SimilarErrorsOccurrencesChart
-        baseEsqlQuery={esqlQueryWhereClause}
-        currentDocumentTimestamp={normalizedTimestamp}
-      />
+      {showUnavailableCallout ? (
+        <EuiCallOut
+          announceOnMount
+          size="s"
+          title={unavailableMessage}
+          data-test-subj="docViewerSimilarErrorsUnavailableCallout"
+        />
+      ) : (
+        <SimilarErrorsOccurrencesChart
+          baseEsqlQuery={esqlQueryWhereClause}
+          currentDocumentTimestamp={normalizedTimestamp}
+        />
+      )}
     </ContentFrameworkSection>
   );
 }

@@ -139,7 +139,7 @@ export function convertStylingToAPIFormat(
           data_labels: {
             visible:
               config.valueLabels != null
-                ? config.valueLabels === 'show'
+                ? config.valueLabels !== 'hide'
                 : DEFAULT_DATA_LABELS_VISIBLE,
           },
         }
