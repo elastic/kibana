@@ -229,6 +229,9 @@ describe('OsqueryManagedPolicyCreateImportExtension', () => {
       await userEvent.click(screen.getByRole('button', { name: 'Osquery config' }));
 
       expect(screen.getByText('Proceed with caution')).toBeInTheDocument();
+      expect(
+        screen.getByText(/Using a custom Osquery package is an advanced configuration/)
+      ).toBeInTheDocument();
       expect(screen.getByText('Select or drag and drop osquery config file')).toBeInTheDocument();
       expect(screen.getByText('Example config')).toBeInTheDocument();
     });
