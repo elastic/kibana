@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import { ChatEventType } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
+import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 
 let capturedOnTemplateChange: ((t: string) => void) | undefined;
 
@@ -37,7 +41,6 @@ jest.mock('./components/custom_content_component', () => ({
 let capturedFlyoutProps:
   | {
       onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
-      onAgentUpdate: (update: { template?: string; esqlQuery?: string }) => void;
       onClose: () => void;
     }
   | undefined;
@@ -49,8 +52,10 @@ jest.mock('./components/edit_custom_content_flyout', () => ({
   },
 }));
 
+let mockAgentBuilder: unknown;
+
 jest.mock('./services', () => ({
-  getServices: () => ({ agentBuilder: undefined, core: { http: {} }, search: jest.fn() }),
+  getServices: () => ({ agentBuilder: mockAgentBuilder, core: { http: {} }, search: jest.fn() }),
 }));
 
 const baseState: CustomContentEmbeddableState = {
@@ -76,6 +81,10 @@ const buildEmbeddable = async (initialState: CustomContentEmbeddableState) => {
 };
 
 describe('customContentEmbeddableFactory', () => {
+  afterEach(() => {
+    mockAgentBuilder = undefined;
+  });
+
   describe('serializeState', () => {
     it('round-trips prompt and template from initial state', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
@@ -213,22 +222,6 @@ describe('customContentEmbeddableFactory', () => {
       expect(state.template).toBe('<div>new</div>');
     });
 
-    it('`handleAgentUpdate` updates state', async () => {
-      const { embeddable } = await buildEmbeddable(baseState);
-      await act(async () => render(<embeddable.Component />));
-
-      await act(async () => embeddable.api.onEdit());
-      await waitFor(() =>
-        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
-      );
-
-      await act(async () =>
-        capturedFlyoutProps!.onAgentUpdate({ template: '<p>agent result</p>' })
-      );
-
-      expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
-    });
-
     it('closing the flyout via `onClose`', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
@@ -240,6 +233,114 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => capturedFlyoutProps!.onClose());
       await waitFor(() => expect(screen.queryByTestId('mockEditCustomContentFlyout')).toBeNull());
+    });
+  });
+
+  describe('agent event subscription', () => {
+    it('applies template update from RoundCompleteEvent attachment', async () => {
+      const chatEvents$ = new Subject<any>();
+      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => chatEvents$),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            input: {
+              attachment_refs: [
+                {
+                  attachment_id: 'att-1',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+              ],
+            },
+          },
+          attachments: [
+            {
+              id: 'att-1',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: {
+                    panel_template: '<p>agent result</p>',
+                    embeddable_id: 'test-uuid',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      await act(async () => chatEvents$.next(roundCompleteEvent));
+
+      expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
+    });
+
+    it('ignores events for a different embeddable_id', async () => {
+      const chatEvents$ = new Subject<any>();
+      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => chatEvents$),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      const roundCompleteEvent = {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            input: {
+              attachment_refs: [
+                {
+                  attachment_id: 'att-1',
+                  version: 2,
+                  operation: 'updated',
+                  actor: ATTACHMENT_REF_ACTOR.agent,
+                },
+              ],
+            },
+          },
+          attachments: [
+            {
+              id: 'att-1',
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              current_version: 2,
+              versions: [
+                {
+                  version: 2,
+                  data: {
+                    panel_template: '<p>other panel</p>',
+                    embeddable_id: 'different-uuid',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+
+      await act(async () => chatEvents$.next(roundCompleteEvent));
+
+      expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
     });
   });
 });

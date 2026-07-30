@@ -21,7 +21,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
-import { BehaviorSubject, map, merge, skip } from 'rxjs';
+import { BehaviorSubject, EMPTY, map, merge, skip, switchMap } from 'rxjs';
+import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getServices } from './services';
+import {
+  CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+  type CustomContentContextAttachmentData,
+} from '../common/panel_context_attachment';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '../common/constants';
 import { CustomContentComponent } from './components/custom_content_component';
@@ -149,13 +157,45 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           []
         );
 
-        const handleAgentUpdate = useCallback(
-          (update: { template?: string; esqlQuery?: string }) => {
-            applyConfigUpdate(update);
-            setGenerationVersion((v) => v + 1);
-          },
-          []
-        );
+        useEffect(() => {
+          const { agentBuilder } = getServices();
+          if (!agentBuilder) return;
+
+          const sub = agentBuilder.events.ui.activeConversation$
+            .pipe(
+              switchMap((conversation) =>
+                conversation?.id ? agentBuilder.events.getChatEvents$(conversation.id) : EMPTY
+              )
+            )
+            .subscribe((event) => {
+              if (!isRoundCompleteEvent(event)) return;
+
+              const updatedRef = event.data.round.input.attachment_refs?.find(
+                (ref) =>
+                  ref.actor === ATTACHMENT_REF_ACTOR.agent &&
+                  (ref.operation === 'updated' || ref.operation === 'created')
+              );
+              if (!updatedRef) return;
+
+              const updatedAttachment = event.data.attachments?.find(
+                (a) =>
+                  a.id === updatedRef.attachment_id &&
+                  a.type === CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE
+              );
+              if (!updatedAttachment) return;
+
+              const data = getLatestVersion(updatedAttachment)?.data as
+                | CustomContentContextAttachmentData
+                | undefined;
+              if (!data || data.embeddable_id !== uuid) return;
+
+              template$.next(data.panel_template);
+              esqlQuery$.next(data.esql_query);
+              setGenerationVersion((v) => v + 1);
+            });
+
+          return () => sub.unsubscribe();
+        }, []);
 
         const handleFlyoutClose = useCallback(() => {
           isFlyoutOpen$.next(false);
@@ -181,7 +221,6 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   timeRange={timeRange}
                   panelTitle={panelTitle ?? undefined}
                   onSave={handleFlyoutSave}
-                  onAgentUpdate={handleAgentUpdate}
                   onClose={handleFlyoutClose}
                 />
               </Suspense>

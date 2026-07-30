@@ -13,6 +13,7 @@ export const customContentContextAttachmentDataSchema = z.object({
   panel_template: z.string(),
   esql_query: z.string().optional(),
   panel_title: z.string().optional(),
+  embeddable_id: z.string(),
 });
 
 export type CustomContentContextAttachmentData = z.infer<

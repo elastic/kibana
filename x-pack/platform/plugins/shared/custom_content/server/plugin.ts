@@ -11,6 +11,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { registerGenerateRoute } from './routes/generate_route';
 import { createCustomContentContextAttachmentType } from './attachment_types/custom_content_context';
+import { createUpdateCustomContentTool } from './tools/update_custom_content_tool';
 
 interface SetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
@@ -34,6 +35,9 @@ export class CustomContentPlugin implements Plugin<void, void, SetupDeps, StartD
         createCustomContentContextAttachmentType() as Parameters<
           typeof agentBuilder.attachments.registerType
         >[0]
+      );
+      agentBuilder.tools.register(
+        createUpdateCustomContentTool() as Parameters<typeof agentBuilder.tools.register>[0]
       );
     }
   }

@@ -47,7 +47,6 @@ const baseFlyoutState = {
   handlePreview: jest.fn(),
 };
 
-const setChatConfig = jest.fn();
 const openChat = jest.fn();
 
 const defaultProps = {
@@ -56,7 +55,6 @@ const defaultProps = {
   template: undefined as string | undefined,
   timeRange: undefined,
   onSave: jest.fn(),
-  onAgentUpdate: jest.fn(),
   onClose: jest.fn(),
 };
 
@@ -64,7 +62,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockUseEditFlyoutState.mockReturnValue(baseFlyoutState);
   (getServices as jest.Mock).mockReturnValue({
-    agentBuilder: { setChatConfig, openChat },
+    agentBuilder: { openChat },
   });
 });
 
@@ -147,8 +145,12 @@ describe('EditCustomContentFlyout', () => {
       expect(openChat).toHaveBeenCalledWith(
         expect.objectContaining({
           sessionTag: 'custom_content-panel-1',
-          attachments: [expect.objectContaining({ type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE })],
-          browserApiTools: [expect.objectContaining({ id: 'custom_content_update_panel' })],
+          attachments: [
+            expect.objectContaining({
+              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+              data: expect.objectContaining({ embeddable_id: 'panel-1' }),
+            }),
+          ],
         })
       );
     });

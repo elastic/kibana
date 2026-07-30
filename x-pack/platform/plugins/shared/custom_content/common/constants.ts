@@ -24,3 +24,5 @@ export const CUSTOM_CONTENT_CSP_META =
 export const CUSTOM_CONTENT_ENABLED_FLAG_KEY = 'dashboard.customContent.enabled';
 
 export const CUSTOM_CONTENT_REFINE_SESSION_TAG = 'custom_content';
+
+export const CUSTOM_CONTENT_SCRIPT_PATTERN = /<script[\s>/]/i;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiBetaBadge,
   EuiButtonEmpty,
@@ -31,11 +31,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { getServices } from '../services';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
-import {
-  buildCustomContentContextAttachment,
-  createUpdateCustomContentConfigTool,
-  type UpdateCustomContentConfigParams,
-} from '../utils/chat_integration';
+import { buildCustomContentContextAttachment } from '../utils/chat_integration';
 import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../../common/constants';
 
 export interface EditCustomContentFlyoutProps {
@@ -46,7 +42,6 @@ export interface EditCustomContentFlyoutProps {
   panelTitle?: string;
   isNewPanel?: boolean;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
-  onAgentUpdate: (params: UpdateCustomContentConfigParams) => void;
   onClose: () => void;
 }
 
@@ -58,7 +53,6 @@ export const EditCustomContentFlyout = ({
   panelTitle,
   isNewPanel,
   onSave,
-  onAgentUpdate,
   onClose,
 }: EditCustomContentFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
@@ -76,22 +70,21 @@ export const EditCustomContentFlyout = ({
     handlePreview,
   } = useEditFlyoutState({ esqlQuery, template, timeRange });
 
-  const updateTool = useMemo(
-    () => createUpdateCustomContentConfigTool(onAgentUpdate),
-    [onAgentUpdate]
-  );
-
   const handleGenerateWithChat = useCallback(() => {
     if (!agentBuilder) return;
     agentBuilder.openChat({
       attachments: [
-        buildCustomContentContextAttachment(draftTemplate, draftEsqlQuery || undefined, panelTitle),
+        buildCustomContentContextAttachment(
+          draftTemplate,
+          draftEsqlQuery || undefined,
+          embeddableId,
+          panelTitle
+        ),
       ],
-      browserApiTools: [updateTool],
       sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${embeddableId}`,
     });
     onClose();
-  }, [agentBuilder, draftTemplate, draftEsqlQuery, updateTool, embeddableId, panelTitle, onClose]);
+  }, [agentBuilder, draftTemplate, draftEsqlQuery, embeddableId, panelTitle, onClose]);
 
   const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
 
