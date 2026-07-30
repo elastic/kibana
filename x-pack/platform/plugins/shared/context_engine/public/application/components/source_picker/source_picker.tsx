@@ -153,7 +153,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column" gutterSize="s">
-            {selectedSources.map((source) => {
+            {selectedSources.map((source, index) => {
               const { label, typeLabel, iconType, content } = getSourceDisplay(
                 source.type,
                 source.value,
@@ -166,7 +166,7 @@ export const SourcePicker = ({ selectedSources, onChange }: SourcePickerProps) =
                     typeLabel={typeLabel}
                     iconType={iconType}
                     onRemove={() => removeSource(source)}
-                    data-test-subj={`contextSelected-${source.type}-${source.id}`}
+                    data-test-subj={`contextSelectedSource-${source.type}-${index}`}
                   >
                     {content}
                   </SourceRow>

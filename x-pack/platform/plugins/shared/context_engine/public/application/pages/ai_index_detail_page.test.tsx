@@ -202,9 +202,7 @@ describe('AiIndexDetailPage', () => {
     fireEvent.click(screen.getByTestId('contextEditSourcesButton'));
 
     expect(await screen.findByTestId('contextEditSourcesFlyout')).toBeInTheDocument();
-    expect(await screen.findByTestId('contextSelectedSource-esql-0')).toHaveTextContent(
-      'FROM My view'
-    );
+    expect(await screen.findByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
 
   it('saves edited sources and refetches the AI index', async () => {

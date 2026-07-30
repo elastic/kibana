@@ -134,7 +134,7 @@ describe('SourcePicker', () => {
 
     fireEvent.click(await screen.findByText('Google Drive'));
 
-    const row = await screen.findByTestId('contextSelectedSource-connector-gdrive');
+    const row = await screen.findByTestId('contextSelectedSource-connector-0');
     expect(row).toHaveTextContent('Google Drive');
   });
 
@@ -155,9 +155,7 @@ describe('SourcePicker', () => {
     await waitFor(() => expect(services.http.get).toHaveBeenCalled());
 
     await waitFor(() =>
-      expect(screen.getByTestId('contextSelectedSource-connector-github')).toHaveTextContent(
-        'GitHub'
-      )
+      expect(screen.getByTestId('contextSelectedSource-connector-0')).toHaveTextContent('GitHub')
     );
   });
 

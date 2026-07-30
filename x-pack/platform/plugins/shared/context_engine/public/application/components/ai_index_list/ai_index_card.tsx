@@ -83,13 +83,13 @@ export const AiIndexCard = ({ aiIndex, href }: { aiIndex: AiIndexHttpItem; href:
           </EuiFlexItem>
         )}
 
-        <EuiFlexItem grow={false}>
-          <EuiText size="s" color="subdued" data-test-subj="contextAiIndexCardDescription">
-            {aiIndex.description !== undefined && (
+        {aiIndex.description !== undefined && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" color="subdued" data-test-subj="contextAiIndexCardDescription">
               <EuiTextBlockTruncate lines={2}>{aiIndex.description}</EuiTextBlockTruncate>
-            )}
-          </EuiText>
-        </EuiFlexItem>
+            </EuiText>
+          </EuiFlexItem>
+        )}
 
         <EuiFlexItem grow={false}>
           <EuiBadgeGroup gutterSize="s">
