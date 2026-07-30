@@ -90,7 +90,7 @@ function formatDatadogError(action: string, error: unknown): Error {
   const data = err.response?.data;
   let detail = err.message;
   if (data) {
-    if (Array.isArray(data.errors)) {
+    if (Array.isArray(data.errors) && data.errors.length > 0) {
       detail = data.errors
         .map((e) => (typeof e === 'string' ? e : e.detail ?? e.title ?? JSON.stringify(e)))
         .join('; ');
@@ -98,6 +98,12 @@ function formatDatadogError(action: string, error: unknown): Error {
       detail = data.error;
     } else if (typeof data.status === 'string') {
       detail = data.status;
+    } else {
+      try {
+        detail = JSON.stringify(data);
+      } catch {
+        detail = String(data);
+      }
     }
   }
   return new Error(
@@ -370,26 +376,34 @@ export const Datadog: ConnectorSpec = {
     createIncident: {
       isTool: true,
       description:
-        'Create a Datadog incident (for example when an alert crosses a severity threshold). Returns the new incident including its ID for later updateIncident calls.',
+        'Create a Datadog incident (for example when an alert crosses a severity threshold). Returns the new incident including its ID for later updateIncident calls. Requires Datadog Incident Management to be enabled on the account.',
       input: CreateIncidentInputSchema,
       handler: async (ctx, input: CreateIncidentInput) => {
         applyDatadogAuthHeaders(ctx);
         const baseUrl = getBaseUrl(ctx);
-        const fields: Record<string, { value: string }> = {};
+        // Datadog Incident Management single-select fields use
+        // `{ type: 'dropdown', value: '<string>' }` (see IncidentFieldAttributesSingleValue).
+        // Do not send top-level `severity` — some orgs return HTTP 500 for that shape.
+        const fields: Record<string, unknown> = {};
         if (input.severity) {
-          fields.severity = { value: input.severity };
+          fields.severity = {
+            type: 'dropdown',
+            value: input.severity,
+          };
         }
         if (input.detectionMethod) {
-          fields.detection_method = { value: input.detectionMethod };
-        }
-        if (!fields.state) {
-          fields.state = { value: 'active' };
+          fields.detection_method = {
+            type: 'dropdown',
+            value: input.detectionMethod,
+          };
         }
         const attributes: Record<string, unknown> = {
           title: input.title,
           customer_impacted: input.customerImpacted ?? false,
-          fields,
         };
+        if (Object.keys(fields).length > 0) {
+          attributes.fields = fields;
+        }
         if (input.initialCell) {
           attributes.initial_cells = [
             {
@@ -429,13 +443,21 @@ export const Datadog: ConnectorSpec = {
         if (input.customerImpacted !== undefined) {
           attributes.customer_impacted = input.customerImpacted;
         }
+        const fields: Record<string, unknown> = {};
         if (input.state !== undefined) {
-          attributes.state = input.state;
+          fields.state = {
+            type: 'dropdown',
+            value: input.state,
+          };
         }
         if (input.severity !== undefined) {
-          attributes.fields = {
-            severity: { value: input.severity },
+          fields.severity = {
+            type: 'dropdown',
+            value: input.severity,
           };
+        }
+        if (Object.keys(fields).length > 0) {
+          attributes.fields = fields;
         }
         try {
           const response = await ctx.client.patch(
@@ -505,7 +527,7 @@ export const Datadog: ConnectorSpec = {
     searchLogs: {
       isTool: true,
       description:
-        'Search Datadog logs over a time range and optional indexes. Use matching log events as evidence during alert triage or incident response.',
+        'Search Datadog logs over a time range and optional indexes. Use matching log events as evidence during alert triage or incident response. Requires Log Management with at least one valid index on the Datadog account; pass indexes (e.g. ["main"]) when the account does not search all indexes by default.',
       input: SearchLogsInputSchema,
       handler: async (ctx, input: SearchLogsInput) => {
         applyDatadogAuthHeaders(ctx);
@@ -550,6 +572,9 @@ export const Datadog: ConnectorSpec = {
     '- `scheduleDowntime` uses the v2 downtime API (JSON:API body). `cancelDowntime` expects the v2 downtime UUID.',
     '- `getAlertEvents` prefixes `source:alert` when the query does not already include a `source:` clause.',
     '- Metric `from`/`to` for `queryTimeseries` are Unix seconds; log/event windows use ISO 8601 (or relative strings such as `now-1h`).',
+    '- `createIncident` / `updateIncident` put severity and state under `fields` as `{ type: \"dropdown\", value: \"SEV-2\" }` / `{ type: \"dropdown\", value: \"resolved\" }`. Do not send top-level `severity` (some orgs return HTTP 500).',
+    '- `updateIncident` can return 403 \"required seat\" when the Datadog org lacks an Incident Management seat for the Application Key user.',
+    '- `searchLogs` requires Log Management with at least one valid index; otherwise Datadog returns 400 \"No valid indexes specified\".',
   ].join('\n'),
 
   test: {

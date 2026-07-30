@@ -298,8 +298,35 @@ describe('Datadog', () => {
             title: 'API outage',
             customer_impacted: true,
             fields: {
-              severity: { value: 'SEV-2' },
-              state: { value: 'active' },
+              severity: {
+                type: 'dropdown',
+                value: 'SEV-2',
+              },
+            },
+          },
+        },
+      });
+    });
+
+    it('should include detection_method in fields when provided', async () => {
+      mockClient.post.mockResolvedValue({ data: { data: { id: 'inc-1' } } });
+
+      await Datadog.actions.createIncident.handler(mockContext, {
+        title: 'API outage',
+        detectionMethod: 'monitor',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith('https://api.datadoghq.com/api/v2/incidents', {
+        data: {
+          type: 'incidents',
+          attributes: {
+            title: 'API outage',
+            customer_impacted: false,
+            fields: {
+              detection_method: {
+                type: 'dropdown',
+                value: 'monitor',
+              },
             },
           },
         },
@@ -320,7 +347,14 @@ describe('Datadog', () => {
           data: {
             id: 'inc-1',
             type: 'incidents',
-            attributes: { state: 'resolved' },
+            attributes: {
+              fields: {
+                state: {
+                  type: 'dropdown',
+                  value: 'resolved',
+                },
+              },
+            },
           },
         }
       );
