@@ -18,6 +18,10 @@ import {
   getColorMappingNormalizer,
   getFormBasedDatasourceState,
 } from './common';
+import {
+  getDefaultAreaFill,
+  getDefaultAreaFillOpacity,
+} from '../../../../transforms/charts/xy/defaults';
 
 // Default colorMappings in Lens state format, mirroring what fromColorMappingAPIToLensState
 // produces for DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING and DEFAULT_CATEGORICAL_COLOR_MAPPING.
@@ -220,7 +224,9 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
         } else if (!layer.palette) {
           // No colorMapping, no palette → the transform always adds a default
           layer.colorMapping =
-            layer.seriesType === 'line' ? DEFAULT_LINE_COLOR_MAPPING : DEFAULT_COLOR_MAPPING;
+            layer.seriesType === 'line' || layer.seriesType === 'area'
+              ? DEFAULT_LINE_COLOR_MAPPING
+              : DEFAULT_COLOR_MAPPING;
         }
         // If only palette present (legacy) → round-trip preserves palette; leave as-is.
 
@@ -310,8 +316,15 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
     } else {
       delete viz.curveType; // curveType only preserved for line/area charts
     }
-    if (hasAreas) viz.fillOpacity ??= 0.3;
-    if (!hasAreas) delete viz.fillOpacity; // fillOpacity only preserved for area charts
+    if (hasAreas) {
+      // Mirrors convertStylingToStateFormat / convertStylingToAPIFormat defaults
+      const seriesTypes = dataLayers.map((l: any) => l.seriesType);
+      viz.areaFill ??= getDefaultAreaFill(seriesTypes);
+      viz.fillOpacity ??= getDefaultAreaFillOpacity(viz.areaFill);
+    } else {
+      delete viz.fillOpacity; // fillOpacity only preserved for area charts
+      delete viz.areaFill;
+    }
 
     // xExtent: X axis only supports fit/custom (full is coerced to fit=dataBounds by the transform)
     if (!viz.xExtent || viz.xExtent.mode === 'full') {
