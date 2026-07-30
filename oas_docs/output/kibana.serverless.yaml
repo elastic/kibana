@@ -77102,28 +77102,20 @@ components:
             type: object
             properties:
               alignment:
-                anyOf:
-                  - enum:
-                      - left
-                    type: string
-                  - enum:
-                      - center
-                    type: string
-                  - enum:
-                      - right
-                    type: string
                 default: left
                 description: Alignment of the rows.
+                enum:
+                  - left
+                  - center
+                  - right
+                type: string
               apply_color_to:
                 anyOf:
-                  - anyOf:
-                      - enum:
-                          - value
-                        type: string
-                      - enum:
-                          - background
-                        type: string
-                    description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                  - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                    enum:
+                      - value
+                      - background
+                    type: string
                   - enum:
                       - badge
                     type: string
@@ -77205,28 +77197,20 @@ components:
       additionalProperties: false
       properties:
         alignment:
-          anyOf:
-            - enum:
-                - left
-              type: string
-            - enum:
-                - center
-              type: string
-            - enum:
-                - right
-              type: string
           default: right
           description: Alignment of the columns.
+          enum:
+            - left
+            - center
+            - right
+          type: string
         apply_color_to:
           anyOf:
-            - anyOf:
-                - enum:
-                    - value
-                  type: string
-                - enum:
-                    - background
-                  type: string
-              description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+            - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+              enum:
+                - value
+                - background
+              type: string
             - enum:
                 - badge
               type: string
@@ -77356,28 +77340,20 @@ components:
                 type: object
                 properties:
                   alignment:
-                    anyOf:
-                      - enum:
-                          - left
-                        type: string
-                      - enum:
-                          - center
-                        type: string
-                      - enum:
-                          - right
-                        type: string
                     default: right
                     description: Alignment of the columns.
+                    enum:
+                      - left
+                      - center
+                      - right
+                    type: string
                   apply_color_to:
                     anyOf:
-                      - anyOf:
-                          - enum:
-                              - value
-                            type: string
-                          - enum:
-                              - background
-                            type: string
-                        description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
                       - enum:
                           - badge
                         type: string
@@ -77445,28 +77421,20 @@ components:
                 type: object
                 properties:
                   alignment:
-                    anyOf:
-                      - enum:
-                          - left
-                        type: string
-                      - enum:
-                          - center
-                        type: string
-                      - enum:
-                          - right
-                        type: string
                     default: left
                     description: Alignment of the rows.
+                    enum:
+                      - left
+                      - center
+                      - right
+                    type: string
                   apply_color_to:
                     anyOf:
-                      - anyOf:
-                          - enum:
-                              - value
-                            type: string
-                          - enum:
-                              - background
-                            type: string
-                        description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                      - description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
                       - enum:
                           - badge
                         type: string
@@ -80249,16 +80217,11 @@ components:
       description: Circular gauge shape.
       properties:
         type:
-          anyOf:
-            - enum:
-                - circle
-              type: string
-            - enum:
-                - semi_circle
-              type: string
-            - enum:
-                - arc
-              type: string
+          enum:
+            - circle
+            - semi_circle
+            - arc
+          type: string
       required:
         - type
       title: Shape (Circular)
@@ -81394,19 +81357,12 @@ components:
       description: Legend configuration
       properties:
         position:
-          anyOf:
-            - enum:
-                - top
-              type: string
-            - enum:
-                - bottom
-              type: string
-            - enum:
-                - left
-              type: string
-            - enum:
-                - right
-              type: string
+          enum:
+            - top
+            - bottom
+            - left
+            - right
+          type: string
         size:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_legendSize'
         truncate_after_lines:
@@ -82367,14 +82323,11 @@ components:
           description: A query expression in KQL or Lucene syntax.
           type: string
         language:
-          anyOf:
-            - enum:
-                - kql
-              type: string
-            - enum:
-                - lucene
-              type: string
           description: Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.
+          enum:
+            - kql
+            - lucene
+          type: string
       required:
         - expression
         - language
@@ -82666,23 +82619,17 @@ components:
           type: object
           properties:
             by:
-              anyOf:
-                - enum:
-                    - _count
-                  type: string
-                - enum:
-                    - _key
-                  type: string
               description: The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.
+              enum:
+                - _count
+                - _key
+              type: string
             direction:
-              anyOf:
-                - enum:
-                    - asc
-                  type: string
-                - enum:
-                    - desc
-                  type: string
               description: The sort direction. `asc` sorts ascending and `desc` sorts descending.
+              enum:
+                - asc
+                - desc
+              type: string
           required:
             - by
             - direction
@@ -82785,23 +82732,17 @@ components:
           type: object
           properties:
             by:
-              anyOf:
-                - enum:
-                    - _count
-                  type: string
-                - enum:
-                    - _key
-                  type: string
               description: The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.
+              enum:
+                - _count
+                - _key
+              type: string
             direction:
-              anyOf:
-                - enum:
-                    - asc
-                  type: string
-                - enum:
-                    - desc
-                  type: string
               description: The sort direction. `asc` sorts ascending and `desc` sorts descending.
+              enum:
+                - asc
+                - desc
+              type: string
           required:
             - by
             - direction
@@ -83545,14 +83486,11 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  anyOf:
-                                    - enum:
-                                        - asc
-                                      type: string
-                                    - enum:
-                                        - desc
-                                      type: string
                                   description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  enum:
+                                    - asc
+                                    - desc
+                                  type: string
                                 name:
                                   description: The name of the field to sort by.
                                   type: string
@@ -83654,14 +83592,11 @@ components:
                               type: object
                               properties:
                                 direction:
-                                  anyOf:
-                                    - enum:
-                                        - asc
-                                      type: string
-                                    - enum:
-                                        - desc
-                                      type: string
                                   description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                                  enum:
+                                    - asc
+                                    - desc
+                                  type: string
                                 name:
                                   description: The name of the field to sort by.
                                   type: string
@@ -83805,14 +83740,11 @@ components:
                         type: object
                         properties:
                           direction:
-                            anyOf:
-                              - enum:
-                                  - asc
-                                type: string
-                              - enum:
-                                  - desc
-                                type: string
                             description: 'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.'
+                            enum:
+                              - asc
+                              - desc
+                            type: string
                           name:
                             description: The name of the field to sort by.
                             type: string
@@ -85529,14 +85461,11 @@ components:
           description: The legacy palette name.
           type: string
         range:
-          anyOf:
-            - enum:
-                - absolute
-              type: string
-            - enum:
-                - percentage
-              type: string
           description: Determines whether the range is interpreted as absolute or as a percentage of the data.
+          enum:
+            - absolute
+            - percentage
+          type: string
         shift:
           description: When `true`, shifts the palette colors so they start from a different offset. Defaults to `false`.
           type: boolean
@@ -85708,14 +85637,11 @@ components:
               type: object
               properties:
                 apply_color_to:
-                  anyOf:
-                    - enum:
-                        - value
-                      type: string
-                    - enum:
-                        - background
-                      type: string
                   description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                  enum:
+                    - value
+                    - background
+                  type: string
                 color:
                   anyOf:
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
@@ -85731,15 +85657,12 @@ components:
                   type: object
                   properties:
                     alignment:
-                      anyOf:
-                        - enum:
-                            - top
-                          type: string
-                        - enum:
-                            - bottom
-                          type: string
                       default: top
                       description: Label alignment
+                      enum:
+                        - top
+                        - bottom
+                      type: string
                 size:
                   anyOf:
                     - enum:
@@ -85768,18 +85691,13 @@ components:
                   type: object
                   properties:
                     alignment:
-                      anyOf:
-                        - enum:
-                            - left
-                          type: string
-                        - enum:
-                            - center
-                          type: string
-                        - enum:
-                            - right
-                          type: string
                       default: left
                       description: Value alignment
+                      enum:
+                        - left
+                        - center
+                        - right
+                      type: string
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_filterSimple'
         sampling:
@@ -85812,22 +85730,15 @@ components:
     Kibana_HTTP_APIs_legacyMetricUniqueCountMetric:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_uniqueCountMetricOperation'
     Kibana_HTTP_APIs_legendPosition:
-      anyOf:
-        - enum:
-            - top
-          type: string
-        - enum:
-            - bottom
-          type: string
-        - enum:
-            - left
-          type: string
-        - enum:
-            - right
-          type: string
       default: right
       description: Legend Position.
+      enum:
+        - top
+        - bottom
+        - left
+        - right
       title: Legend Position
+      type: string
     Kibana_HTTP_APIs_legendSize:
       anyOf:
         - enum:
@@ -86962,14 +86873,11 @@ components:
               - type: object
                 properties:
                   apply_color_to:
-                    anyOf:
-                      - enum:
-                          - value
-                        type: string
-                      - enum:
-                          - background
-                        type: string
                     description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                    enum:
+                      - value
+                      - background
+                    type: string
                   background_chart:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryVizESQL'
                   color:
@@ -87055,15 +86963,12 @@ components:
       description: Icon configuration for the metric chart
       properties:
         alignment:
-          anyOf:
-            - enum:
-                - left
-              type: string
-            - enum:
-                - right
-              type: string
           default: right
           description: 'Icon alignment. Accepted values: `left`, `right`. Defaults to `right`.'
+          enum:
+            - left
+            - right
+          type: string
         name:
           anyOf:
             - enum:
@@ -87184,14 +87089,11 @@ components:
                   - type: object
                     properties:
                       apply_color_to:
-                        anyOf:
-                          - enum:
-                              - value
-                            type: string
-                          - enum:
-                              - background
-                            type: string
                         description: 'Color target: `value` colors the metric text, `background` colors the cell or panel background.'
+                        enum:
+                          - value
+                          - background
+                        type: string
                       background_chart:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_metricComplementaryViz'
                       color:
@@ -87779,49 +87681,34 @@ components:
               type: object
               properties:
                 alignment:
-                  anyOf:
-                    - enum:
-                        - left
-                      type: string
-                    - enum:
-                        - center
-                      type: string
-                    - enum:
-                        - right
-                      type: string
                   default: left
                   description: 'Horizontal alignment for the title and subtitle text. Accepted values: `left`, `center`, `right`. Defaults to `left`.'
+                  enum:
+                    - left
+                    - center
+                    - right
+                  type: string
             position:
-              anyOf:
-                - enum:
-                    - top
-                  type: string
-                - enum:
-                    - middle
-                  type: string
-                - enum:
-                    - bottom
-                  type: string
               default: bottom
               description: Position of the primary metric value (top, middle, or bottom).
+              enum:
+                - top
+                - middle
+                - bottom
+              type: string
             value:
               additionalProperties: false
               description: Primary metric value configuration
               type: object
               properties:
                 alignment:
-                  anyOf:
-                    - enum:
-                        - left
-                      type: string
-                    - enum:
-                        - center
-                      type: string
-                    - enum:
-                        - right
-                      type: string
                   default: right
                   description: 'Alignment for the primary metric value. Accepted values: `left`, `center`, `right`. Defaults to `right`.'
+                  enum:
+                    - left
+                    - center
+                    - right
+                  type: string
                 sizing:
                   anyOf:
                     - enum:
@@ -87841,15 +87728,12 @@ components:
               type: object
               properties:
                 placement:
-                  anyOf:
-                    - enum:
-                        - before
-                      type: string
-                    - enum:
-                        - after
-                      type: string
                   default: before
                   description: Label placement relative to the secondary metric value (before or after).
+                  enum:
+                    - before
+                    - after
+                  type: string
                 visible:
                   default: true
                   description: When `true`, displays the label.
@@ -87860,18 +87744,13 @@ components:
               type: object
               properties:
                 alignment:
-                  anyOf:
-                    - enum:
-                        - left
-                      type: string
-                    - enum:
-                        - center
-                      type: string
-                    - enum:
-                        - right
-                      type: string
                   default: right
                   description: 'Alignment for secondary values. Accepted values: `left`, `center`, `right`. Defaults to `right`.'
+                  enum:
+                    - left
+                    - center
+                    - right
+                  type: string
     Kibana_HTTP_APIs_minMaxAvgMedianStdDevMetricOperation:
       additionalProperties: false
       properties:
@@ -87886,22 +87765,13 @@ components:
           description: Label for the operation
           type: string
         operation:
-          anyOf:
-            - enum:
-                - min
-              type: string
-            - enum:
-                - max
-              type: string
-            - enum:
-                - average
-              type: string
-            - enum:
-                - median
-              type: string
-            - enum:
-                - standard_deviation
-              type: string
+          enum:
+            - min
+            - max
+            - average
+            - median
+            - standard_deviation
+          type: string
         reduced_time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_operationReducedTimeRangeSetting'
         time_scale:
@@ -91183,14 +91053,11 @@ components:
           description: Suffix appended to the formatted value.
           type: string
         type:
-          anyOf:
-            - enum:
-                - number
-              type: string
-            - enum:
-                - percent
-              type: string
           description: 'Value format type: `number` for plain numbers, `percent` for percentages.'
+          enum:
+            - number
+            - percent
+          type: string
       required:
         - type
       title: Numeric Format
@@ -97445,31 +97312,16 @@ components:
           description: Numeric field to be used for the custom operation.
           type: string
         operation:
-          anyOf:
-            - enum:
-                - min
-              type: string
-            - enum:
-                - max
-              type: string
-            - enum:
-                - average
-              type: string
-            - enum:
-                - median
-              type: string
-            - enum:
-                - standard_deviation
-              type: string
-            - enum:
-                - unique_count
-              type: string
-            - enum:
-                - sum
-              type: string
-            - enum:
-                - last_value
-              type: string
+          enum:
+            - min
+            - max
+            - average
+            - median
+            - standard_deviation
+            - unique_count
+            - sum
+            - last_value
+          type: string
         type:
           enum:
             - custom
@@ -99404,14 +99256,11 @@ components:
           description: Show metric values on the chart
           type: boolean
     Kibana_HTTP_APIs_vis_api_direction:
-      anyOf:
-        - enum:
-            - asc
-          type: string
-        - enum:
-            - desc
-          type: string
       description: Direction
+      enum:
+        - asc
+        - desc
+      type: string
     Kibana_HTTP_APIs_vis_api_domain_custom:
       additionalProperties: false
       description: Uses explicitly provided domain bounds (min and max).
@@ -99464,26 +99313,18 @@ components:
       description: Whether to round axis domain bounds outward to readable “nice” values (for example 1, 5, 10, 100) instead of exact data min/max.
       type: boolean
     Kibana_HTTP_APIs_vis_api_orientation:
-      anyOf:
-        - enum:
-            - horizontal
-          type: string
-        - enum:
-            - vertical
-          type: string
-        - enum:
-            - angled
-          type: string
       description: Orientation
+      enum:
+        - horizontal
+        - vertical
+        - angled
+      type: string
     Kibana_HTTP_APIs_vis_api_simple_orientation:
-      anyOf:
-        - enum:
-            - horizontal
-          type: string
-        - enum:
-            - vertical
-          type: string
       description: Orientation
+      enum:
+        - horizontal
+        - vertical
+      type: string
     Kibana_HTTP_APIs_vis_api_xy_axis_config:
       additionalProperties: false
       description: Axis configuration for X, Y, and Y2 axes. The Y axis is on the start (leading) side, the Y2 axis is on the end (trailing) side.
@@ -101941,20 +101782,13 @@ components:
             - inside
           type: string
         position:
-          anyOf:
-            - enum:
-                - top_left
-              type: string
-            - enum:
-                - top_right
-              type: string
-            - enum:
-                - bottom_left
-              type: string
-            - enum:
-                - bottom_right
-              type: string
           description: Legend position inside the chart
+          enum:
+            - top_left
+            - top_right
+            - bottom_left
+            - bottom_right
+          type: string
         series_header:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLegendSeriesHeader'
         statistics:
@@ -102069,13 +101903,10 @@ components:
             - outside
           type: string
         position:
-          anyOf:
-            - enum:
-                - top
-              type: string
-            - enum:
-                - bottom
-              type: string
+          enum:
+            - top
+            - bottom
+          type: string
         series_header:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLegendSeriesHeader'
         statistics:
@@ -102178,13 +102009,10 @@ components:
             - outside
           type: string
         position:
-          anyOf:
-            - enum:
-                - left
-              type: string
-            - enum:
-                - right
-              type: string
+          enum:
+            - left
+            - right
+          type: string
         series_header:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_xyLegendSeriesHeader'
         size:
