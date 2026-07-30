@@ -52,3 +52,4 @@ export * from './specs/sublime_security/sublime_security';
 export * from './specs/kubernetes/kubernetes';
 export * from './specs/rootly/rootly';
 export * from './specs/sentry/sentry';
+export * from './specs/datadog/datadog';
