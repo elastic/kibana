@@ -12,7 +12,7 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { Draggable } from '@kbn/dom-drag-drop';
+import { Draggable, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
@@ -215,6 +215,15 @@ export interface UnifiedFieldListItemProps {
    * Optional stream name to fetch stream-specific field descriptions
    */
   streamNames?: string[];
+  /**
+   * Items of the same group ("Selected fields") which can be reordered via drag and drop.
+   * Enables reordering when it contains more than one item and `onReorderField` is provided.
+   */
+  reorderableGroup?: Array<{ id: string }>;
+  /**
+   * Callback to move the dragged field to the position of the target field within the workspace
+   */
+  onReorderField?: (sourceFieldName: string, targetFieldName: string) => void;
 }
 
 function UnifiedFieldListItemComponent({
@@ -241,8 +250,11 @@ function UnifiedFieldListItemComponent({
   size,
   additionalFilters,
   streamNames,
+  reorderableGroup,
+  onReorderField,
 }: UnifiedFieldListItemProps) {
   const [infoIsOpen, setOpen] = useState(false);
+  const [{ dragging }] = useDragDropContext();
 
   const isBreakdownSupported =
     searchMode === 'documents' ? fieldSupportsBreakdown(field) : isESQLFieldGroupable(field);
@@ -370,6 +382,35 @@ function UnifiedFieldListItemComponent({
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
   const isDragDisabled =
     alwaysShowActionButton || stateService.creationOptions.disableFieldListItemDragAndDrop;
+  const isReorderable = Boolean(
+    onReorderField && reorderableGroup && reorderableGroup.length > 1 && !isDragDisabled
+  );
+  // only treat the items as drop targets while an item of the same group is being dragged
+  const isReorderDropTargetActive = Boolean(
+    isReorderable && dragging && reorderableGroup?.some((item) => item.id === dragging.id)
+  );
+  const dndDataTestSubjPrefix =
+    stateService.creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
+    'unifiedFieldListItemDnD';
+
+  const fieldItemButton = (
+    <FieldItemButton
+      fieldSearchHighlight={highlight}
+      isEmpty={isEmpty}
+      isActive={infoIsOpen}
+      withDragIcon={!isDragDisabled}
+      flush={alwaysShowActionButton ? 'both' : undefined}
+      shouldAlwaysShowAction={alwaysShowActionButton}
+      onClick={field.type !== '_source' ? togglePopover : undefined}
+      {...getCommonFieldItemButtonProps({
+        stateService,
+        field,
+        isSelected,
+        toggleDisplay,
+        size,
+      })}
+    />
+  );
 
   return (
     <FieldPopover
@@ -382,27 +423,24 @@ function UnifiedFieldListItemComponent({
           value={value}
           onDragStart={closePopover}
           isDisabled={isDragDisabled}
-          dataTestSubj={`${
-            stateService.creationOptions.dataTestSubj?.fieldListItemDndDataTestSubjPrefix ??
-            'unifiedFieldListItemDnD'
-          }-${field.name}`}
+          reorderableGroup={isReorderable ? reorderableGroup : undefined}
+          dataTestSubj={`${dndDataTestSubjPrefix}-${field.name}`}
         >
-          <FieldItemButton
-            fieldSearchHighlight={highlight}
-            isEmpty={isEmpty}
-            isActive={infoIsOpen}
-            withDragIcon={!isDragDisabled}
-            flush={alwaysShowActionButton ? 'both' : undefined}
-            shouldAlwaysShowAction={alwaysShowActionButton}
-            onClick={field.type !== '_source' ? togglePopover : undefined}
-            {...getCommonFieldItemButtonProps({
-              stateService,
-              field,
-              isSelected,
-              toggleDisplay,
-              size,
-            })}
-          />
+          {isReorderable && reorderableGroup && onReorderField ? (
+            <Droppable
+              order={order}
+              value={value}
+              isDisabled={!isReorderDropTargetActive}
+              dropTypes={dragging && dragging.id !== field.name ? ['reorder'] : []}
+              reorderableGroup={reorderableGroup}
+              onDrop={(source) => onReorderField(source.id, field.name)}
+              dataTestSubj={`${dndDataTestSubjPrefix}-reorderTarget-${field.name}`}
+            >
+              <div>{fieldItemButton}</div>
+            </Droppable>
+          ) : (
+            fieldItemButton
+          )}
         </Draggable>
       }
       closePopover={closePopover}

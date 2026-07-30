@@ -82,6 +82,11 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Prop to pass additional field groups to the field list
    */
   additionalFieldGroups?: AdditionalFieldGroups;
+  /**
+   * Callback to move a selected field to another position within the workspace (table columns).
+   * When provided, the "Selected fields" section becomes reorderable via drag and drop.
+   */
+  onMoveFieldInWorkspace?: (fieldName: string, targetIndex: number) => void;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -173,6 +178,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   additionalFilters,
   additionalFieldGroups,
   streamNames,
+  onMoveFieldInWorkspace,
 }) => {
   const styles = useMemoCss(componentStyles);
 
@@ -241,6 +247,43 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       additionalFieldGroups,
     });
 
+  // Reordering of the "Selected fields" section is only possible when all selected fields
+  // are visible, i.e. the list is not narrowed down by a field name search or type filter.
+  // Otherwise, the visible position of a field would not match its position in the workspace.
+  const selectedFieldsGroup = fieldListGroupedProps.fieldGroups[FieldsGroupNames.SelectedFields];
+  const isSelectedFieldsReorderable = Boolean(
+    onMoveFieldInWorkspace &&
+      selectedFieldsState.selectedFields.length > 1 &&
+      selectedFieldsGroup?.fields.length === selectedFieldsState.selectedFields.length
+  );
+
+  const reorderableSelectedFields = useMemo(
+    () =>
+      isSelectedFieldsReorderable
+        ? selectedFieldsState.selectedFields.map((field) => ({ id: field.name }))
+        : undefined,
+    [isSelectedFieldsReorderable, selectedFieldsState.selectedFields]
+  );
+
+  const onReorderSelectedField = useCallback(
+    (sourceFieldName: string, targetFieldName: string) => {
+      if (!onMoveFieldInWorkspace || sourceFieldName === targetFieldName) {
+        return;
+      }
+      const selectedFieldNames = selectedFieldsState.selectedFields.map((field) => field.name);
+      const sourceIndex = selectedFieldNames.indexOf(sourceFieldName);
+      const targetIndex = selectedFieldNames.indexOf(targetFieldName);
+      if (sourceIndex === -1 || targetIndex === -1) {
+        return;
+      }
+      onMoveFieldInWorkspace(
+        sourceFieldName,
+        sourceIndex < targetIndex ? targetIndex - 1 : targetIndex
+      );
+    },
+    [onMoveFieldInWorkspace, selectedFieldsState.selectedFields]
+  );
+
   useEffect(() => {
     if (
       searchMode !== 'documents' ||
@@ -262,7 +305,15 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
 
   const renderFieldItem: FieldListGroupedProps<DataViewField>['renderFieldItem'] = useCallback(
     ({ field, groupName, groupIndex, itemIndex, fieldSearchHighlight }) => (
-      <li key={`field${field.name}`} data-attr-field={field.name}>
+      <li
+        key={`field${field.name}`}
+        data-attr-field={field.name}
+        css={
+          groupName === FieldsGroupNames.SelectedFields && reorderableSelectedFields
+            ? styles.reorderableFieldItem
+            : undefined
+        }
+      >
         <UnifiedFieldListItem
           additionalFilters={additionalFilters}
           alwaysShowActionButton={alwaysShowActionButton}
@@ -290,6 +341,12 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           trackUiMetric={trackUiMetric}
           workspaceSelectedFieldNames={workspaceSelectedFieldNames}
           streamNames={streamNames}
+          reorderableGroup={
+            groupName === FieldsGroupNames.SelectedFields ? reorderableSelectedFields : undefined
+          }
+          onReorderField={
+            groupName === FieldsGroupNames.SelectedFields ? onReorderSelectedField : undefined
+          }
         />
       </li>
     ),
@@ -312,6 +369,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       selectedFieldsState.selectedFieldsMap,
       additionalFilters,
       streamNames,
+      reorderableSelectedFields,
+      onReorderSelectedField,
+      styles.reorderableFieldItem,
     ]
   );
 
@@ -415,6 +475,9 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 renderFieldItem={renderFieldItem}
                 localStorageKeyPrefix={stateService.creationOptions.localStorageKeyPrefix}
                 muteScreenReader={!isFieldNameSearchFocused}
+                reorderableGroupNames={
+                  isSelectedFieldsReorderable ? [FieldsGroupNames.SelectedFields] : undefined
+                }
               />
             ) : (
               <EuiFlexItem grow />
@@ -548,6 +611,10 @@ const componentStyles = {
   },
   sidebarGroup: css({
     height: '100%',
+  }),
+  // to properly contain the absolutely-positioned reorder drop target of an item
+  reorderableFieldItem: css({
+    position: 'relative',
   }),
   sidebarPrependedItem: ({ euiTheme }: UseEuiTheme) =>
     css({

@@ -9,6 +9,7 @@
 
 import type { UnifiedFieldListItemProps } from './field_list_item';
 import React from 'react';
+import type { ReactNode } from 'react';
 import userEvent from '@testing-library/user-event';
 import { createStateService } from '../services/state_service';
 import { DataViewField } from '@kbn/data-views-plugin/public';
@@ -18,6 +19,27 @@ import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen, waitFor, within } from '@testing-library/react';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UnifiedFieldListItem } from './field_list_item';
+
+let mockDragging: { id: string } | undefined;
+let lastDroppableProps:
+  | {
+      isDisabled?: boolean;
+      dropTypes?: string[];
+      onDrop?: (source: { id: string }) => void;
+      dataTestSubj?: string;
+    }
+  | undefined;
+
+jest.mock('@kbn/dom-drag-drop', () => {
+  return {
+    Draggable: ({ children }: { children: ReactNode }) => <>{children}</>,
+    Droppable: ({ children, ...props }: { children: ReactNode; dataTestSubj?: string }) => {
+      lastDroppableProps = props;
+      return <div data-test-subj={props.dataTestSubj}>{children}</div>;
+    },
+    useDragDropContext: () => [{ dragging: mockDragging }],
+  };
+});
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -44,12 +66,23 @@ const renderComponent = async ({
   field,
   isBreakdownSupported = true,
   selected = false,
+  alwaysShowActionButton = false,
+  reorderableGroup,
+  onReorderField,
+  dragging,
 }: {
   canFilter?: boolean;
   field?: DataViewField;
   isBreakdownSupported?: boolean;
   selected?: boolean;
+  alwaysShowActionButton?: boolean;
+  reorderableGroup?: UnifiedFieldListItemProps['reorderableGroup'];
+  onReorderField?: UnifiedFieldListItemProps['onReorderField'];
+  dragging?: { id: string };
 }) => {
+  mockDragging = dragging;
+  lastDroppableProps = undefined;
+
   const finalField =
     field ??
     new DataViewField({
@@ -79,9 +112,12 @@ const renderComponent = async ({
     isEmpty: false,
     isSelected: selected,
     itemIndex: 0,
+    alwaysShowActionButton,
     onAddFieldToWorkspace: jest.fn(),
     onEditField: jest.fn(),
     onRemoveFieldFromWorkspace: jest.fn(),
+    onReorderField,
+    reorderableGroup,
     searchMode: 'documents',
     services: getServicesMock(),
     size: 'xs',
@@ -277,6 +313,52 @@ describe('UnifiedFieldListItem', () => {
 
     expect(
       screen.queryByRole('button', { name: 'Add "extension.keyword" field' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('activates reorder drop target only for drags from the same reorderable group', async () => {
+    const reorderableGroup = [{ id: 'bytes' }, { id: 'machine.os.raw' }];
+    const onReorderField = jest.fn();
+
+    await renderComponent({
+      reorderableGroup,
+      onReorderField,
+      dragging: { id: 'outside.field' },
+    });
+    expect(lastDroppableProps?.isDisabled).toBe(true);
+
+    await renderComponent({
+      reorderableGroup,
+      onReorderField,
+      dragging: { id: 'machine.os.raw' },
+    });
+    expect(lastDroppableProps?.isDisabled).toBe(false);
+    expect(lastDroppableProps?.dropTypes).toEqual(['reorder']);
+  });
+
+  it('calls onReorderField with source and target ids on drop', async () => {
+    const onReorderField = jest.fn();
+
+    await renderComponent({
+      reorderableGroup: [{ id: 'bytes' }, { id: 'machine.os.raw' }],
+      onReorderField,
+      dragging: { id: 'machine.os.raw' },
+    });
+
+    lastDroppableProps?.onDrop?.({ id: 'machine.os.raw' });
+    expect(onReorderField).toHaveBeenCalledWith('machine.os.raw', 'bytes');
+  });
+
+  it('disables reorder when drag and drop is disabled', async () => {
+    await renderComponent({
+      alwaysShowActionButton: true,
+      reorderableGroup: [{ id: 'bytes' }, { id: 'machine.os.raw' }],
+      onReorderField: jest.fn(),
+      dragging: { id: 'machine.os.raw' },
+    });
+
+    expect(
+      screen.queryByTestId('unifiedFieldListItemDnD-reorderTarget-bytes')
     ).not.toBeInTheDocument();
   });
 });
