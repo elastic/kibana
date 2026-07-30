@@ -108,6 +108,10 @@ const INTROSPECTION_QUERY = `
               ofType {
                 name
                 kind
+                ofType {
+                  name
+                  kind
+                }
               }
             }
           }
@@ -120,6 +124,14 @@ const INTROSPECTION_QUERY = `
               ofType {
                 name
                 kind
+                ofType {
+                  name
+                  kind
+                  ofType {
+                    name
+                    kind
+                  }
+                }
               }
             }
             defaultValue
@@ -134,6 +146,14 @@ const INTROSPECTION_QUERY = `
             ofType {
               name
               kind
+              ofType {
+                name
+                kind
+                ofType {
+                  name
+                  kind
+                }
+              }
             }
           }
           defaultValue
@@ -425,13 +445,12 @@ export const GraphQLConnector: ConnectorSpec = {
               })
             : err.message ?? 'Unknown error';
 
-        return {
-          ok: false,
-          message: i18n.translate('connectorSpecs.graphQL.test.failureMessage', {
+        throw new Error(
+          i18n.translate('connectorSpecs.graphQL.test.failureMessage', {
             defaultMessage: 'Failed to connect to the GraphQL endpoint: {reason}',
             values: { reason },
-          }),
-        };
+          })
+        );
       }
     },
   },
@@ -470,6 +489,6 @@ export const GraphQLConnector: ConnectorSpec = {
     '- Some APIs require the `operationName` field when the document contains multiple operations.',
     '- Introspection may be disabled on production endpoints for security; ' +
       'consult the API documentation if `introspect` fails.',
-    '- The `mutation` action is available to workflows but is not exposed as an agent tool.',
+    '- The `mutation` action is not exposed as an agent tool.',
   ].join('\n'),
 };

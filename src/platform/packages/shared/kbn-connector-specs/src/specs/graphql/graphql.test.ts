@@ -426,36 +426,29 @@ describe('GraphQLConnector', () => {
       expect(result.message).toContain('Query');
     });
 
-    it('returns ok=false when the request throws', async () => {
+    it('throws when the request fails', async () => {
       mockClient.post.mockRejectedValue(new Error('network error'));
 
       if (!GraphQLConnector.test) throw new Error('test not defined');
-      const result = await GraphQLConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('network error');
+      await expect(GraphQLConnector.test.handler(mockContext)).rejects.toThrow('network error');
     });
 
-    it('returns ok=false with auth message on 401', async () => {
+    it('throws with auth message on 401', async () => {
       const err = Object.assign(new Error('Unauthorized'), { response: { status: 401 } });
       mockClient.post.mockRejectedValue(err);
 
       if (!GraphQLConnector.test) throw new Error('test not defined');
-      const result = await GraphQLConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Authentication failed');
+      await expect(GraphQLConnector.test.handler(mockContext)).rejects.toThrow(
+        'Authentication failed'
+      );
     });
 
-    it('returns ok=false with access message on 403', async () => {
+    it('throws with access message on 403', async () => {
       const err = Object.assign(new Error('Forbidden'), { response: { status: 403 } });
       mockClient.post.mockRejectedValue(err);
 
       if (!GraphQLConnector.test) throw new Error('test not defined');
-      const result = await GraphQLConnector.test.handler(mockContext);
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toContain('Access denied');
+      await expect(GraphQLConnector.test.handler(mockContext)).rejects.toThrow('Access denied');
     });
 
     it('sends the minimal introspection probe to the configured url', async () => {
