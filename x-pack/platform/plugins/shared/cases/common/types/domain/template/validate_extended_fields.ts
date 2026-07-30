@@ -149,7 +149,7 @@ export const validateExtendedFields = (
   fields: Array<RefField | InlineField>,
   { partial = false, onClose = false }: { partial?: boolean; onClose?: boolean } = {}
 ): string[] => {
-  const errors: string[] = [];
+  let errors: string[] = [];
   // Display-only fields (e.g. MARKDOWN) hold no value and are excluded from a case's stored
   // `extended_fields`, so they take no part in value/required validation. Dropping them here also
   // ensures their snake key is treated as an unknown key if it is ever submitted.
@@ -164,7 +164,7 @@ export const validateExtendedFields = (
       errors.push(`Unknown extended field key: "${key}"`);
     }
   }
-  errors.push(...validateExtendedFieldValueSizes(extendedFields));
+  errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
 
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};
