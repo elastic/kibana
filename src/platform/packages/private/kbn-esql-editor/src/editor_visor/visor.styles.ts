@@ -115,6 +115,16 @@ export const visorStyles = (
       padding-right: ${euiTheme.size.xxs};
       flex-shrink: 0;
     `,
+    aiBadgeWrapper: css`
+      padding-left: ${euiTheme.size.xs};
+      padding-right: ${euiTheme.size.s};
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      .euiBadge__icon {
+        cursor: pointer;
+      }
+    `,
     enterHint: css`
       padding-right: ${euiTheme.size.xs};
       flex-shrink: 0;
