@@ -81,6 +81,7 @@ const createRunContextMock = (overrides: Partial<RunContext> = {}): RunContext =
   taskInstance: createTaskMock(),
   signal: new AbortController().signal,
   executionUuid: 'test-execution-uuid',
+  setCustomTaskRunEventFields: jest.fn(),
   ...overrides,
 });
 

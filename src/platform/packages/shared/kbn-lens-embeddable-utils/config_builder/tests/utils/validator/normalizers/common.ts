@@ -135,8 +135,14 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
-      adHocDataView.name = indexPattern;
       adHocDataView.title = indexPattern;
+      // An ES|QL ad-hoc data view has no dedicated `name` in the `{ type: 'esql', query }` data
+      // source; the transform re-derives both title and name from the query's index pattern
+      // (getAdHocDataViewSpec: `name = dataView.name ?? dataView.index`). This mirrors the DataView
+      // runtime, where `getName() = name || title` and a freshly created ES|QL data view
+      // (getESQLAdHocDataview) sets only `title = queryIndexPattern`, so the effective name is the
+      // query index pattern.
+      adHocDataView.name = adHocDataView.title;
       // The transform re-derives the time field from the ES|QL query rather than trusting the
       // persisted value (getAdHocDataViewSpec <- getDataSourceIndex.esql), so align the stored
       // timeFieldName here instead of skipping it entirely.
@@ -164,15 +170,16 @@ function normalizeESQLAdHocDataViews(
 
     if (layer.index) {
       // Mutate the existing layer ref in place to keep references; fall back to pushing if no existing ref is found.
+      // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
       const layerRefName = `indexpattern-datasource-layer-${layerId}`;
       const existingRef = refs.find((r) => r.name === layerRefName);
       if (existingRef) {
         existingRef.id = layer.index;
-        existingRef.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+        // intentionally keep existingRef.name unchanged (still layerId)
       } else {
         refs.push({
           id: layer.index,
-          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+          name: layerRefName,
           type: 'index-pattern',
         });
       }
@@ -208,16 +215,18 @@ function normalizeFormBasedAdHocDataViews(
 
       delete adHocDataViews[adHocId];
       adHocDataView.id = newId;
-      adHocDataView.name = adHocDataView.title ?? adHocDataView.name;
+      // A custom form-based name round-trips verbatim
       adHocDataViews[newId] = adHocDataView;
+      // mirror the transform's `name = name ?? index` (title === index for form-based)
+      adHocDataView.name = adHocDataView.name ?? adHocDataView.title;
 
       if (ref) {
         ref.id = newId;
-        ref.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+        // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
       } else {
         refs.push({
           id: newId,
-          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+          name: `indexpattern-datasource-layer-${layerId}`,
           type: 'index-pattern',
         });
       }
@@ -701,6 +710,21 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     // replace layer in reference name (filter references are dropped)
     attributes.references = normalizeReferences(attributes, layerRemapping, filterRefNames);
 
+    // Remap internalReferences layer IDs using layerRemapping.
+    // normalizeFormBasedAdHocDataViews / normalizeESQLAdHocDataViews now keep the original layer UUID
+    // in the ref name so we can apply the same replacement logic here.
+    if (attributes.state.internalReferences?.length) {
+      attributes.state.internalReferences = attributes.state.internalReferences.map((ref) => {
+        let name = ref.name;
+        layerRemapping.forEach(([oldId, newId]) => {
+          if (oldId && name.includes(oldId)) {
+            name = name.replace(oldId, newId);
+          }
+        });
+        return name !== ref.name ? { ...ref, name } : ref;
+      });
+    }
+
     const layerIdMap = new Map(layerRemapping);
     const columnIdMap = new Map(columnRemapping);
 
@@ -775,6 +799,18 @@ export const getCommonNormalizer = <T extends LensAttributes>(
                   columnRemapping.find(([oldColumn]) => oldColumn === colId)?.[1] ?? colId
               );
 
+            // Add canonical column IDs that are in layer.columns but were missing from the
+            // original columnOrder (e.g. breakdown or inner-reference columns omitted in older SOs).
+            // Maintain `inOrder` as entries are pushed to prevent duplicates when multiple original
+            // column IDs share the same canonical name (e.g. two layers both mapped to 'line_breakdown').
+            const inOrder = new Set(layer.columnOrder);
+            for (const [, newCol] of columnRemapping) {
+              if (newCol && layer.columns[newCol] && !inOrder.has(newCol)) {
+                layer.columnOrder.push(newCol);
+                inOrder.add(newCol);
+              }
+            }
+
             // Datatable uses its own canonical (rows → splits → metrics) sort in
             // the datatable normalizer. For every other chart, alphabetical
             // canonicalization is fine because column order does not drive
@@ -837,6 +873,9 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     attributes.references = attributes.references.filter((reference) => {
       return !(reference.type === 'index-pattern' && reference.name.startsWith('filter-ref-'));
     });
+
+    // Sort references to match normalizeReferences ordering applied on the original side
+    attributes.references = orderBy(attributes.references, ['name', 'id', 'type']);
 
     attributes.state.needsRefresh = attributes.state.needsRefresh ?? false;
 

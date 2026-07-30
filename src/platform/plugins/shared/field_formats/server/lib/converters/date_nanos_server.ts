@@ -23,13 +23,15 @@ class DateNanosFormatServer extends DateNanosFormat {
     const pattern = this.param('pattern');
     const timezone = options?.timezone || this.param('timezone');
     const fractPattern = analysePatternForFract(pattern);
-    const fallbackPattern = this.param('patternFallback');
+    const fallbackPattern = this.param('fallbackPattern');
 
     const timezoneChanged = this.timeZone !== timezone;
     const datePatternChanged = this.memoizedPattern !== pattern;
-    if (timezoneChanged || datePatternChanged) {
+    const fallbackPatternChanged = this.memoizedFallbackPattern !== fallbackPattern;
+    if (timezoneChanged || datePatternChanged || fallbackPatternChanged) {
       this.timeZone = timezone;
       this.memoizedPattern = pattern;
+      this.memoizedFallbackPattern = fallbackPattern;
 
       this.memoizedConverter = memoize((value: string | number) => {
         if (value === null || value === undefined) {

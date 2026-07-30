@@ -13,13 +13,15 @@ import type {
   RouteMethod,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type Boom from '@hapi/boom';
+import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
+import { logRequest, writeErrorHandler } from '@kbn/as-code-utils';
+import { ValidationError } from '@kbn/config-schema';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import type { ErrorIndexPatternNotFound } from '@kbn/data-views-plugin/server/error';
 import { DuplicateDataViewError } from '@kbn/data-views-plugin/common';
+import type { ErrorIndexPatternNotFound } from '@kbn/data-views-plugin/server/error';
 import type { DataViewsAsCodeServerPluginStartDependencies } from '../types';
 import { DataViewsAsCodeService } from '../services/data_views_as_code_service';
+import type { RegisterRouteArgs } from './types';
 
 export async function getDataViewsAsCodeService(
   ctx: RequestHandlerContext,
@@ -38,79 +40,42 @@ export async function getDataViewsAsCodeService(
   return new DataViewsAsCodeService(dataViewsService, core.savedObjects.getClient());
 }
 
-interface ErrorResponseBody {
-  message: string;
-  attributes?: object;
-}
-
-interface ErrorWithData {
-  data?: object;
-}
-
 /**
- * This higher order request handler makes sure that errors are returned with
- * body formatted in the following shape:
- *
- * ```json
- * {
- *   "message": "...",
- *   "attributes": {}
- * }
- * ```
+ * This higher order request handler makes sure that requests to the data views as code
+ * endpoints go through the telemetry and in case of erroring are handled correctly.
  */
-export const handleErrors =
+export const requestHandler =
   <P, Q, B, Context extends RequestHandlerContext, Method extends RouteMethod>(
+    args: Pick<RegisterRouteArgs, 'logger' | 'usageCounter'>,
     handler: RequestHandler<P, Q, B, Context, Method>
   ): RequestHandler<P, Q, B, Context, Method> =>
-  async (context, request, response) => {
-    try {
-      return await handler(context, request, response);
-    } catch (error) {
-      if (error instanceof Error) {
-        const body: ErrorResponseBody = {
-          message: error.message,
-        };
-
-        if (typeof (error as ErrorWithData).data === 'object') {
-          body.attributes = (error as ErrorWithData).data;
-        }
-
-        const is404 =
+  async (context, request, response) =>
+    telemetryHandler(request, { usageCounter: args.usageCounter }, async () => {
+      try {
+        return await handler(context, request, response);
+      } catch (error: any) {
+        const isNotFound =
+          (error.isBoom && error.output.statusCode === 404) ||
           (error as ErrorIndexPatternNotFound).is404 ||
-          (error as Boom.Boom)?.output?.statusCode === 404 ||
           error instanceof SavedObjectNotFound;
-
-        if (is404) {
-          return response.notFound({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
+        if (isNotFound) {
+          logRequest(args.logger, request, 'debug', error.message);
+          return response.notFound({ body: { message: error.message } });
         }
 
         const isConflict =
-          SavedObjectsErrorHelpers.isConflictError(error) ||
-          error instanceof DuplicateDataViewError ||
-          (error as Boom.Boom)?.output?.statusCode === 409;
-
+          (error.isBoom && error.output.statusCode === 409) ||
+          error instanceof DuplicateDataViewError;
         if (isConflict) {
-          return response.conflict({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body,
-          });
+          logRequest(args.logger, request, 'debug', error.message);
+          return response.conflict({ body: { message: error.message } });
         }
 
-        return response.badRequest({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body,
-        });
-      }
+        if (error instanceof ValidationError) {
+          logRequest(args.logger, request, 'error', error.message);
+          throw error;
+        }
 
-      throw error;
-    }
-  };
+        return writeErrorHandler(error, response, args.logger, request);
+      }
+    });
