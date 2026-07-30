@@ -15,6 +15,8 @@ import {
   kafkaSaslMechanism,
   kafkaVerificationModes,
   MAX_HOSTS,
+  otlpCompressionType,
+  otlpProtocol,
   outputType,
 } from '../../../common/constants';
 
@@ -349,11 +351,111 @@ const KafkaUpdateSchema = {
   ),
 };
 
+/**
+ * OTLP schemas
+ */
+
+const OtlpExporterSchema = schema.object({
+  endpoint: schema.string(),
+  protocol: schema.oneOf([
+    schema.literal(otlpProtocol.Grpc),
+    schema.literal(otlpProtocol.HttpProtobuf),
+  ]),
+  api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  headers: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  compression: schema.maybe(
+    schema.oneOf([
+      schema.literal(otlpCompressionType.Gzip),
+      schema.literal(otlpCompressionType.Snappy),
+      schema.literal(otlpCompressionType.Zstd),
+      schema.literal(otlpCompressionType.None),
+    ])
+  ),
+  timeout: schema.maybe(schema.string()),
+  tls: schema.maybe(
+    schema.object({
+      insecure: schema.maybe(schema.boolean()),
+      insecure_skip_verify: schema.maybe(schema.boolean()),
+      ca_pem: schema.maybe(schema.string()),
+      cert_pem: schema.maybe(schema.string()),
+      key_pem: schema.maybe(schema.string()),
+      include_system_ca_certs_pool: schema.maybe(schema.boolean()),
+      min_version: schema.maybe(schema.string()),
+      max_version: schema.maybe(schema.string()),
+      reload_interval: schema.maybe(schema.string()),
+    })
+  ),
+  sending_queue: schema.maybe(
+    schema.object({
+      enabled: schema.maybe(schema.boolean()),
+      num_consumers: schema.maybe(schema.number()),
+      queue_size: schema.maybe(schema.number()),
+      sizer: schema.maybe(
+        schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')])
+      ),
+      wait_for_result: schema.maybe(schema.boolean()),
+      block_on_overflow: schema.maybe(schema.boolean()),
+    })
+  ),
+  retry_on_failure: schema.maybe(
+    schema.object({
+      enabled: schema.maybe(schema.boolean()),
+      initial_interval: schema.maybe(schema.string()),
+      max_interval: schema.maybe(schema.string()),
+      max_elapsed_time: schema.maybe(schema.string()),
+      multiplier: schema.maybe(schema.number()),
+    })
+  ),
+  http: schema.maybe(
+    schema.object({
+      encoding: schema.maybe(schema.oneOf([schema.literal('proto'), schema.literal('json')])),
+      traces_endpoint: schema.maybe(schema.string()),
+      metrics_endpoint: schema.maybe(schema.string()),
+      logs_endpoint: schema.maybe(schema.string()),
+      profiles_endpoint: schema.maybe(schema.string()),
+      read_buffer_size: schema.maybe(schema.number()),
+      write_buffer_size: schema.maybe(schema.number()),
+    })
+  ),
+});
+
+const OtlpSecretsSchema = schema.maybe(
+  schema.object({
+    otlp_exporter: schema.maybe(
+      schema.object({
+        api_key: schema.maybe(secretRefSchema),
+        tls: schema.maybe(
+          schema.object({
+            key_pem: schema.maybe(secretRefSchema),
+          })
+        ),
+      })
+    ),
+  })
+);
+
+export const OtlpSchema = {
+  ...BaseSchema,
+  type: schema.literal(outputType.Otlp),
+  otlp_exporter: OtlpExporterSchema,
+  secrets: OtlpSecretsSchema,
+};
+
+export const OtlpUpdateSchema = {
+  ...UpdateSchema,
+  type: schema.maybe(schema.literal(outputType.Otlp)),
+  otlp_exporter: schema.maybe(OtlpExporterSchema),
+  secrets: OtlpSecretsSchema,
+};
+
+// TODO: uncomment OtlpSchema entries in each union below when service-layer OTLP CRUD is
+// activated in the follow-up PR.
 export const OutputSchema = schema.discriminatedUnion('type', [
   schema.object({ ...ElasticSearchSchema }, { meta: { id: 'output_elasticsearch' } }),
   schema.object({ ...RemoteElasticSearchSchema }, { meta: { id: 'output_remote_elasticsearch' } }),
   schema.object({ ...LogstashSchema }, { meta: { id: 'output_logstash' } }),
   schema.object({ ...KafkaSchema }, { meta: { id: 'output_kafka' } }),
+  // schema.object({ ...OtlpSchema }, { meta: { id: 'output_otlp' } }),
 ]);
 
 // Separate schema for create operations: uses distinct meta IDs so OAS codegen
@@ -367,6 +469,7 @@ export const NewOutputSchema = schema.discriminatedUnion('type', [
   ),
   schema.object({ ...LogstashSchema }, { meta: { id: 'new_output_logstash' } }),
   schema.object({ ...KafkaSchema }, { meta: { id: 'new_output_kafka' } }),
+  // schema.object({ ...OtlpSchema }, { meta: { id: 'new_output_otlp' } }),
 ]);
 
 const OutputResponseSharedSchema = {
@@ -392,6 +495,7 @@ export const OutputResponseItemSchema = schema
       { ...KafkaSchema, ...OutputResponseSharedSchema },
       { meta: { id: 'output_response_kafka' } }
     ),
+    // schema.object({ ...OtlpSchema }, { meta: { id: 'output_response_otlp' } }),
   ])
   .extendsDeep({
     unknowns: 'allow',
@@ -409,4 +513,5 @@ export const UpdateOutputSchema = schema.oneOf([
   ),
   schema.object({ ...LogstashUpdateSchema }, { meta: { id: 'update_output_logstash' } }),
   schema.object({ ...KafkaUpdateSchema }, { meta: { id: 'update_output_kafka' } }),
+  // schema.object({ ...OtlpUpdateSchema }, { meta: { id: 'update_output_otlp' } }),
 ]);

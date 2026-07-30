@@ -7,7 +7,13 @@
 
 import type { outputType } from '../../constants';
 import type { BaseSSLSecrets, ValueOf } from '..';
-import type { kafkaAuthType, kafkaCompressionType, kafkaSaslMechanism } from '../../constants';
+import type {
+  kafkaAuthType,
+  kafkaCompressionType,
+  kafkaSaslMechanism,
+  otlpProtocol,
+  otlpCompressionType,
+} from '../../constants';
 import type { kafkaPartitionType } from '../../constants';
 import type { kafkaTopicWhenType } from '../../constants';
 import type { kafkaAcknowledgeReliabilityLevel } from '../../constants';
@@ -30,10 +36,16 @@ export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'lat
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
+  is_default_otel?: boolean;
   is_internal?: boolean;
   is_preconfigured?: boolean;
   name: string;
   type: ValueOf<OutputType>;
+  allow_edit?: string[];
+}
+
+interface BeatsBaseOutput extends NewBaseOutput {
+  proxy_id?: string | null;
   hosts?: string[];
   ca_sha256?: string | null;
   ca_trusted_fingerprint?: string | null;
@@ -44,9 +56,7 @@ interface NewBaseOutput {
     key?: string;
     verification_mode?: ValueOf<KafkaVerificationMode>;
   } | null;
-  proxy_id?: string | null;
   shipper?: ShipperOutput | null;
-  allow_edit?: string[];
   secrets?: BaseSSLSecrets;
   preset?: OutputPreset;
   write_to_logs_streams?: boolean | null;
@@ -57,11 +67,11 @@ export interface OtelExporterOutput {
   otel_disable_beatsauth?: boolean | null;
 }
 
-export interface NewElasticsearchOutput extends NewBaseOutput, OtelExporterOutput {
+export interface NewElasticsearchOutput extends BeatsBaseOutput, OtelExporterOutput {
   type: OutputType['Elasticsearch'];
 }
 
-export interface NewRemoteElasticsearchOutput extends NewBaseOutput, OtelExporterOutput {
+export interface NewRemoteElasticsearchOutput extends BeatsBaseOutput, OtelExporterOutput {
   type: OutputType['RemoteElasticsearch'];
   service_token?: string | null;
   secrets?: RemoteESOutputSecrets;
@@ -71,15 +81,98 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput, OtelExporte
   sync_uninstalled_integrations?: boolean;
 }
 
-export interface NewLogstashOutput extends NewBaseOutput {
+export interface NewLogstashOutput extends BeatsBaseOutput {
   type: OutputType['Logstash'];
 }
 
-export type NewOutput =
+export type OtlpOutputProtocol = ValueOf<typeof otlpProtocol>;
+
+// gRPC supports the full set; HTTP only supports gzip/none (enforced by service validation)
+export type OtlpGrpcCompression = ValueOf<typeof otlpCompressionType>;
+export type OtlpHttpCompression = 'gzip' | 'none';
+
+export interface OtlpExporterConfig {
+  endpoint: string;
+  protocol: OtlpOutputProtocol;
+  api_key?: string;
+  headers?: Record<string, string>;
+  compression?: OtlpGrpcCompression;
+  timeout?: string;
+  tls?: {
+    insecure?: boolean;
+    insecure_skip_verify?: boolean;
+    ca_pem?: string;
+    cert_pem?: string;
+    key_pem?: string;
+    include_system_ca_certs_pool?: boolean;
+    min_version?: string;
+    max_version?: string;
+    reload_interval?: string;
+  };
+  sending_queue?: {
+    enabled?: boolean;
+    num_consumers?: number;
+    queue_size?: number;
+    sizer?: 'requests' | 'items' | 'bytes';
+    wait_for_result?: boolean;
+    block_on_overflow?: boolean;
+  };
+  retry_on_failure?: {
+    enabled?: boolean;
+    initial_interval?: string;
+    max_interval?: string;
+    max_elapsed_time?: string;
+    multiplier?: number;
+  };
+  // http contains fields that are only valid when protocol is 'http/protobuf' (enforced by schema validation)
+  http?: {
+    encoding?: 'proto' | 'json';
+    traces_endpoint?: string;
+    metrics_endpoint?: string;
+    logs_endpoint?: string;
+    profiles_endpoint?: string;
+    read_buffer_size?: number;
+    write_buffer_size?: number;
+  };
+}
+
+// Fields omitted from v1 — candidates for follow-up investigation:
+// tls.server_name_override (SNI override), tls.cipher_suites, tls.curve_preferences,
+// sending_queue.storage (persistent queue), sending_queue.batch.*,
+// grpc.balancer_name, grpc.keepalive.*
+
+export interface NewOtlpOutput extends NewBaseOutput {
+  type: OutputType['Otlp'];
+  otlp_exporter: OtlpExporterConfig;
+  secrets?: OtlpOutputSecrets;
+}
+
+interface OtlpOutputSecrets {
+  otlp_exporter?: {
+    api_key?: SOSecret;
+    tls?: {
+      key_pem?: SOSecret;
+    };
+  };
+}
+
+export type PresetCapableOutput = NewElasticsearchOutput | NewRemoteElasticsearchOutput;
+
+export type NewBeatsOutput =
   | NewElasticsearchOutput
   | NewRemoteElasticsearchOutput
   | NewLogstashOutput
   | KafkaOutput;
+
+// TODO: add `| NewOtlpOutput` when service-layer OTLP CRUD is activated in the follow-up PR
+export type NewOutput = NewBeatsOutput;
+
+export type UpdateOutput =
+  | Partial<NewElasticsearchOutput>
+  | Partial<NewRemoteElasticsearchOutput>
+  | Partial<NewLogstashOutput>
+  | Partial<KafkaOutput>
+  | Partial<NewOtlpOutput>;
 
 export type Output = NewOutput & {
   id: string;
@@ -98,9 +191,8 @@ export interface ShipperOutput {
   max_batch_bytes?: number | null;
 }
 
-export interface KafkaOutput extends NewBaseOutput {
+export interface KafkaOutput extends BeatsBaseOutput {
   type: OutputType['Kafka'];
-  hosts?: string[];
   client_id?: string;
   version?: string;
   key?: string;

@@ -790,6 +790,11 @@ export const getSavedObjectTypes = (
             type: 'keyword',
             index: false,
           },
+          otlp_exporter: {
+            type: 'object',
+            dynamic: false,
+          },
+          is_default_otel: { type: 'boolean' },
         },
       },
       modelVersions: {
@@ -929,6 +934,28 @@ export const getSavedObjectTypes = (
                 string,
                 unknown
               >;
+              return rest;
+            },
+            create: schema.object({}, { unknowns: 'allow' }),
+          },
+        },
+        '11': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                otlp_exporter: { type: 'object', dynamic: false },
+                is_default_otel: { type: 'boolean' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (unknownAttributes: unknown) => {
+              const {
+                otlp_exporter: _,
+                is_default_otel: __,
+                ...rest
+              } = unknownAttributes as Record<string, unknown>;
               return rest;
             },
             create: schema.object({}, { unknowns: 'allow' }),
