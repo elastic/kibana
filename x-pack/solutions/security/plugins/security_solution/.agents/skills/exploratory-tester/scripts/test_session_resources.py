@@ -6743,6 +6743,20 @@ print("404")
             "is **not** suppressed", step_3b
         )
 
+    def test_report_step_3b_explains_why_it_skips_hash_verify(self):
+        # Review of PR #281618 at 25c2a08 (judgment-call suggestion, not a
+        # bug): unlike templates/subagent-prompt.md and phases/2-flow-core.md,
+        # Step 3b's own knowledge-file read has no --verify call before it.
+        # That asymmetry is intentional (this read is same-process,
+        # same-session, right after the approval that covers it — never a
+        # dispatched sub-agent or a resumed session reading a stale
+        # approval) but easy for a future reviewer to flag as an
+        # inconsistency without an explanation on the record.
+        report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
+        step_3b = report[report.index("## Step 3b") : report.index("## Step 3c")]
+        self.assertIn("does **not** need a `knowledge-hash.py --verify`", step_3b)
+        self.assertIn("same orchestrator process", step_3b)
+
     def test_report_step_3d_forbids_narrative_sections_in_active_knowledge_file(self):
         # Task 6 checklist: "Remove historical finding narratives from
         # active worker knowledge; retain them in archives for explicit
