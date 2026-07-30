@@ -18,7 +18,7 @@ import { ENGINE_COLUMNS } from './columns';
 
 /**
  * "At least one of these fields exists and is non-empty" ES|QL fragment.
- *
+ *user.name
  * Used as the actor-presence gate (the `AND (...)` clause appended after
  * `esqlWhereClause`) when the config supplies its own `customActor.fields`.
  * The default path (no `customActor`) keeps using
@@ -112,18 +112,38 @@ ${statsClause}
  * Minimized ES|QL builder for local-namespace configs (system_auth, system_security).
  *
  * Skips the full namespace/EUID EVAL chain. Hardcodes `@local` as namespace,
- * reads only `user.email`, `user.name`, `host.id`. Measured ~26× faster than
- * the full builder on logs-system.auth (~700M docs, 30d lookback).
+ * reads only `user.name` (or whatever fields `customActor.fields` declares),
+ * plus `host.id`. Measured ~26× faster than the full builder on
+ * logs-system.auth (~700M docs, 30d lookback).
  *
  * Only valid for integrations whose data exclusively uses the `@local`
  * namespace. The flag `localNamespaceFastPath` on the config opts in.
+ *
+ * Host target EUID uses `host.id` only (no `host.name`/`host.hostname`
+ * fallback). Only valid for integrations whose host events always carry
+ * `host.id` (e.g. SSH logon, Windows logon).
+ *
+ * Actor EUID field order: `user.name` is always placed first in the COALESCE,
+ * regardless of the order declared in `customActor.fields`. The canonical
+ * local-namespace user EUID (from the entity store's user definitions) is
+ * `user:<user.name>@<host.id>@local` — `user.email` is presence-only. Placing
+ * `user.email` first would produce `user:alice@corp.com@h1@local` when
+ * `user.email` is present, silently mismatching the entity store's
+ * `user:alice@h1@local` and causing 404s on every write.
  */
 function buildLocalNamespaceFastPathEsql(
   config: StandardRelationshipIntegrationConfig | BucketedRelationshipIntegrationConfig,
   namespace: string
 ): string {
+  if (config.requireTargetEntityIdExists && config.targetEntityType !== 'host') {
+    throw new Error(
+      `localNamespaceFastPath does not support requireTargetEntityIdExists with non-host targetEntityType ('${config.targetEntityType}'). ` +
+        'Use the standard builder for this config.'
+    );
+  }
+
   const indexPattern = config.indexPattern(namespace);
-  const actorFields = config.customActor?.fields ?? ['user.email', 'user.name'];
+  const actorFields = config.customActor?.fields ?? ['user.name'];
 
   const actorPresenceGate = actorFields
     .map((f) => `(\`${f}\` IS NOT NULL AND \`${f}\` != "")`)
@@ -136,15 +156,23 @@ function buildLocalNamespaceFastPathEsql(
       ? '\n    AND (`host.id` IS NOT NULL AND `host.id` != "")'
       : '';
 
-  // Actor EUID: CONCAT("user:", COALESCE(user.email, user.name), "@", host.id, "@local")
-  // Uses COALESCE over actor fields in declaration order.
-  const coalesceArgs = actorFields.map((f) => `TO_STRING(\`${f}\`)`).join(', ');
+  // Actor EUID: CONCAT("user:", COALESCE(user.name, ...), "@", host.id, "@local")
+  // user.name is always first — canonical local EUID uses user.name, not user.email.
+  // user.email (if in actorFields) is useful for the presence gate above but must
+  // not precede user.name in the COALESCE or we'd produce user:email@host@local
+  // instead of the entity-store canonical user:name@host@local.
+  const eidFields = [...actorFields].sort((a, b) =>
+    a === 'user.name' ? -1 : b === 'user.name' ? 1 : 0
+  );
+  const coalesceArgs = eidFields.map((f) => `TO_STRING(\`${f}\`)`).join(', ');
   const actorEval = `| EVAL ${ENGINE_COLUMNS.actor} = CONCAT("user:", COALESCE(${coalesceArgs}), "@", TO_STRING(\`host.id\`), "@local")`;
 
   const targetEval =
     config.targetEntityType === 'host'
       ? `| EVAL targetEntityId = CONCAT("host:", TO_STRING(\`host.id\`))`
-      : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', { withTypeId: true })}`;
+      : `| EVAL ${euid.esql.getEuidEvaluation(config.targetEntityType, 'targetEntityId', {
+          withTypeId: true,
+        })}`;
 
   const statsClause =
     config.kind === 'bucketed'
