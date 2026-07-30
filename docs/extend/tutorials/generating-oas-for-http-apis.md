@@ -229,12 +229,9 @@ To add examples to the endpoint we created above you could do the following:
 The strength of this approach is your examples are captured in code and type
 checked at dev time. So any shape errors should be caught as you author.
 
-<details>
-
-<summary>I have prexisting YAML based examples I'd like to use!</summary>
-
-If you pre-existing examples created in YAML that you would like
-to use the following approach:
+:::{dropdown} I have pre-existing YAML based examples I'd like to use!
+If you have pre-existing examples created in YAML that you would like
+to use, take the following approach:
 
 ```typescript
 import path from 'node:path';
@@ -296,8 +293,7 @@ x-codeSamples:
     POST kbn:/api/agent_builder/tools
     {...}
 ```
-
-</details>
+:::
 
 #### 3. Generating OAS
 

@@ -374,17 +374,19 @@ Both requests and responses should be `application/json`, unless there is a good
 
 `GET`, `PUT`, `POST` should return the same shape of data for the same resource.
 
-`GET /api/my_domain/my_resources/{id}` <br />
-=> <br />
-`{ "id": "1", "name": "My resource" }`<br /><br />
+```
+GET /api/my_domain/my_resources/{id}
+# responds with:
+{ "id": "1", "name": "My resource" }
 
-`POST /api/my_domain/my_resources/{id} { "id": "1", "name": "My resource" }`<br />
-=> <br />
-`{ "id": "1", "name": "My resource" }`<br /><br />
+POST /api/my_domain/my_resources/{id} { "id": "1", "name": "My resource" }
+# responds with:
+{ "id": "1", "name": "My resource" }
 
-`GET /api/my_domain/my_resources` <br />
-=> <br />
-`{ items: [{ "id": "1", "name": "My resource" }], page: 1, per_page: 10, total: 100 }`
+GET /api/my_domain/my_resources
+# responds with:
+{ "items": [{ "id": "1", "name": "My resource" }], "page": 1, "per_page": 10, "total": 100 }
+```
 
 See the section on data modelling for more guidance.
 
