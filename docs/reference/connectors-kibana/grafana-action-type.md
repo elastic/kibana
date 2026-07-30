@@ -3,7 +3,7 @@ navigation_title: "Grafana"
 type: reference
 description: "Use the Grafana connector to read alerts and rules, manage silences, post dashboard annotations, and search dashboards using the Grafana HTTP API."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
