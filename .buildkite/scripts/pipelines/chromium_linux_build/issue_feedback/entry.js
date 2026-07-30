@@ -34,6 +34,18 @@ const AdmZip = require('adm-zip');
  */
 
 /**
+ * @description maps the platform identifiers used by chrome for testing to the keys the path file
+ * transform expects, see {@link import('./transform_path_file').ChromiumUpdateConfigMap}.
+ * Platforms absent from this map are not consumed by Kibana and are skipped.
+ */
+const chromeForTestingConfigKeys = {
+  win64: 'win64',
+  'mac-x64': 'mac_x64',
+  'mac-arm64': 'mac_arm64',
+  linux64: 'linux_x64',
+};
+
+/**
  * @description helper to invoke binaries on the machine running this script
  * @param {string} file
  * @param {string[]} fileArguments
@@ -195,11 +207,9 @@ const getSha256Hash = async (filePath) => {
 
   await Promise.all(
     (matchedChromeConfig?.downloads['chrome-headless-shell'] ?? []).map(async (download) => {
-      if (
-        download.platform === 'win64' ||
-        download.platform === 'mac-x64' ||
-        download.platform === 'mac-arm64'
-      ) {
+      const configKey = chromeForTestingConfigKeys[download.platform];
+
+      if (configKey) {
         console.log(`---Attempting downloading for ${download.platform} chrome-headless-shell \n`);
 
         const url = new URL(download.url);
@@ -225,7 +235,7 @@ const getSha256Hash = async (filePath) => {
           }`
         );
 
-        config[download.platform.replace('-', '_')] = {
+        config[configKey] = {
           archiveChecksum,
           binaryChecksum,
         };
@@ -233,10 +243,13 @@ const getSha256Hash = async (filePath) => {
     })
   );
 
-  console.log('--Attempting download of persisted artifacts for linux chromium from prior step');
+  console.log(
+    '--Attempting download of persisted artifacts for custom built linux chromium from prior step'
+  );
 
+  // linux x64 is provided by chrome for testing, only arm64 still requires a custom build
   await Promise.all(
-    ['arm64', 'x64'].map(async (arch) => {
+    ['arm64'].map(async (arch) => {
       await $(
         'buildkite-agent',
         [
@@ -329,7 +342,7 @@ const getSha256Hash = async (filePath) => {
       '--title',
       prTitle,
       '--body',
-      `Closes #${process.env.GITHUB_ISSUE_NUMBER} \n\n This PR updates puppeteer to version \`${process.env.PUPPETEER_VERSION}\` and updates the chromium paths to the latest known good version for windows and mac where the chromium revision is \`${chromiumRevision}\` and version is \`${chromiumVersion}\`.\nFor linux a custom build was triggered to build chromium binaries for both x64 and arm64. \n\n\n **NB** This PR should be tested before merging it in as puppeteer might have breaking changes we are not aware of`,
+      `Closes #${process.env.GITHUB_ISSUE_NUMBER} \n\n This PR updates puppeteer to version \`${process.env.PUPPETEER_VERSION}\` and updates the chromium paths to the latest known good version for windows, mac and linux x64 where the chromium revision is \`${chromiumRevision}\` and version is \`${chromiumVersion}\`.\nFor linux arm64 a custom build was triggered as chrome for testing does not publish that variant. \n\n\n **NB** This PR should be tested before merging it in as puppeteer might have breaking changes we are not aware of`,
       '--base',
       'main',
       '--head',

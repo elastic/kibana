@@ -15,12 +15,12 @@ build, using the
 [`headless_shell`](https://chromium.googlesource.com/chromium/src/+/5cf4b8b13ed518472038170f8de9db2f6c258fe4/headless)
 build target. There are no (trustworthy) sources of these builds available elsewhere.
 
-Fortunately, creating the custom builds is only necessary for Linux. When you have a build
-of Kibana for Linux, or if you use a Linux desktop to develop Kibana, you have a copy of
-`headless_shell` bundled inside. When you have a Windows or Mac build of Kibana, or use
-either of those for development, you have a copy of the full build of Chromium, which
-was downloaded from the main [Chromium download
-location](https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html).
+Fortunately, creating the custom builds is only necessary for Linux arm64. Every other platform,
+including Linux x64, consumes the `chrome-headless-shell` archives published by the Chrome team via
+[chrome for testing](https://github.com/GoogleChromeLabs/chrome-for-testing#json-api-endpoints),
+which have no X11 dependency. See `ChromiumArchivePaths.packages` in
+`src/platform/packages/private/kbn-screenshotting-server/src/paths.ts` for the source each platform
+resolves to.
 
 ## Build Script Usage
 

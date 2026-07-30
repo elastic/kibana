@@ -38,8 +38,9 @@ const transformOptions = {
       archiveChecksum: '4fd9484cf67790b5bbff39be62d5835f6848a326a68b4be1b83dc22a4336efa1',
       binaryChecksum: '46054cfc2be47f7822008e29674baefd82912cdae107fbe07027cbe84622c0b9',
     },
+    // linux x64 is provided by chrome for testing, so unlike arm64 it has no archiveFilename that
+    // varies per build
     linux_x64: {
-      archiveFilename: 'chromium-cffa127-locales-linux_x64.zip',
       archiveChecksum: '082d3bcabe0a04c4ec7f90d8e425f9c63147015964aa0d3b59a1cccd66571939',
       binaryChecksum: 'a22ecc374131998d7ed05b2f433a1a8a819e3ae3b9c4dfa92311cf11ac9e34e1',
     },
@@ -54,6 +55,31 @@ const transformOptions = {
 const runnerOptions = {
   parser: 'tsx',
   extensions: 'ts',
+};
+
+const runTransform = (): string =>
+  applyTransform(pathFileTransform, transformOptions, { source: pathFileContents }, runnerOptions);
+
+/**
+ * Identifies each package in the paths file by a property the transform never rewrites, so
+ * assertions can be scoped to a single package rather than the entire file.
+ */
+const packageMarkers: Record<keyof typeof transformOptions.updateConfig, string> = {
+  mac_x64: "archivePath: 'mac-x64'",
+  mac_arm64: "archivePath: 'mac-arm64'",
+  win64: "archivePath: 'win64'",
+  linux_x64: "archivePath: 'linux64'",
+  linux_arm64: "binaryRelativePath: 'headless_shell-linux_arm64/headless_shell'",
+};
+
+const extractPackageBlock = (source: string, marker: string): string => {
+  const markerIndex = source.indexOf(marker);
+
+  if (markerIndex === -1) {
+    throw new Error(`Unable to find a package matching "${marker}" in the transform output`);
+  }
+
+  return source.slice(source.lastIndexOf('{', markerIndex), source.indexOf('}', markerIndex));
 };
 
 describe('transform_path_file', () => {
@@ -89,17 +115,33 @@ describe('transform_path_file', () => {
     }).toThrow('Expected updateConfig to be defined');
   });
 
+  // A transform that matches no package still returns a valid source string, so these assertions
+  // guard against the transform silently going stale when `paths.ts` changes shape.
+  it.each(Object.keys(packageMarkers) as Array<keyof typeof packageMarkers>)(
+    'writes the provided %s values into the matching package',
+    (platform) => {
+      const packageBlock = extractPackageBlock(runTransform(), packageMarkers[platform]);
+
+      Object.values(transformOptions.updateConfig[platform]).forEach((expectedValue) => {
+        expect(packageBlock).toContain(expectedValue);
+      });
+    }
+  );
+
+  it('updates the version of every chrome for testing package', () => {
+    const versionMatches = runTransform().match(
+      new RegExp(`version: ['"]${transformOptions.chromiumVersion}['"]`, 'g')
+    );
+
+    // every package except the custom linux arm64 build is pinned to a chromium version
+    expect(versionMatches).toHaveLength(4);
+  });
+
   // This test fails because a change was made to the `kbn-screenshotting-server/src/paths.ts` file that is not reflected
   // in the transform being tested.
   // See entry.js for an example on how you might verify that the script creates the right modification in the paths file,
   // when you've made changes that match the expected output update the test snapshot to match the new output
   it('transform output matches our expectation', () => {
-    const output = applyTransform(
-      pathFileTransform,
-      transformOptions,
-      { source: pathFileContents },
-      runnerOptions
-    );
-    expect(output).toMatchSnapshot('updated_paths_file');
+    expect(runTransform()).toMatchSnapshot('updated_paths_file');
   });
 });
