@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { PndConfig } from './config';
 import { PndPlugin } from './plugin';
 import { installStatic } from './managed_workflows/install_static';
 import { registerOwner } from './managed_workflows/register_owner';
 import { registerRoutes } from './routes/register_routes';
+
+const httpServerRequest = () => httpServerMock.createKibanaRequest();
 
 jest.mock('./managed_workflows/register_owner', () => ({
   registerOwner: jest.fn(),
@@ -117,6 +119,72 @@ describe('PndPlugin feature-flag gating', () => {
           workflowsExtensions,
         })
       );
+    });
+
+    it('resolves a scoped conversation client through the deferred agentBuilder getter once start() wires it up', async () => {
+      const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
+      const coreSetup = coreMock.createSetup();
+      const features = { registerKibanaFeature: jest.fn() };
+      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+
+      // setup() registers routes with a getConversationClient closure that
+      // reads `this.agentBuilder` lazily — capture it here, before
+      // agentBuilder is actually assigned in start().
+      plugin.setup(
+        coreSetup as never,
+        {
+          features,
+          workflowsExtensions,
+          workflowsManagement: { management: {} },
+        } as never
+      );
+
+      const { getConversationClient } = (registerRoutes as jest.Mock).mock.calls[0][0];
+      // Before start(), this.agentBuilder is still undefined.
+      expect(getConversationClient(httpServerRequest())).toBeUndefined();
+
+      const scopedClient = { some: 'client' };
+      const getScopedClient = jest.fn().mockReturnValue(scopedClient);
+      const coreStart = coreMock.createStart();
+
+      plugin.start(coreStart, {
+        spaces: undefined,
+        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        agentBuilder: { conversations: { getScopedClient, getScopedWriterClient: jest.fn() } },
+      } as never);
+
+      const request = httpServerRequest();
+      expect(getConversationClient(request)).toBe(scopedClient);
+      expect(getScopedClient).toHaveBeenCalledWith({ request });
+    });
+
+    it('degrades getConversationClient to undefined when agentBuilder is unavailable', () => {
+      const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
+      const coreSetup = coreMock.createSetup();
+      const features = { registerKibanaFeature: jest.fn() };
+      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+
+      plugin.setup(
+        coreSetup as never,
+        {
+          features,
+          workflowsExtensions,
+          workflowsManagement: { management: {} },
+        } as never
+      );
+
+      const { getConversationClient } = (registerRoutes as jest.Mock).mock.calls[0][0];
+
+      const coreStart = coreMock.createStart();
+      // agentBuilder plugin not enabled — start() leaves it undefined.
+      plugin.start(coreStart, {
+        spaces: undefined,
+        workflowsExtensions: { initManagedWorkflowsClient: jest.fn() },
+        agentBuilder: undefined,
+      } as never);
+
+      expect(() => getConversationClient(httpServerRequest())).not.toThrow();
+      expect(getConversationClient(httpServerRequest())).toBeUndefined();
     });
   });
 });
