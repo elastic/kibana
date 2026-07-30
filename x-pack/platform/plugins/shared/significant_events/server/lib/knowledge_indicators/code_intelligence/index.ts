@@ -46,6 +46,13 @@ export {
 } from './discover_logging_sites';
 export { classifyLoggingSites, type ClassifyLoggingSitesOptions } from './classify_logging_sites';
 export {
+  listIndexedRepos,
+  discoverCandidateRoots,
+  type DiscoverCandidateRootsOptions,
+  type DiscoverCandidateRootsResult,
+} from './discover_services';
+export { classifyServices, type ClassifyServicesOptions } from './classify_services';
+export {
   generatePredictiveQueries,
   buildPredictiveEsql,
   isValidEsqlSyntax,
@@ -75,4 +82,9 @@ export type {
   LoggingCandidate,
   LoggingCandidateVia,
   LogSignature,
+  IacSignal,
+  IacKind,
+  IndexedRepoRef,
+  ServiceCandidateRoot,
+  DiscoveredService,
 } from './types';

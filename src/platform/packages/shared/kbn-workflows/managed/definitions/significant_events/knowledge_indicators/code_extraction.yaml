@@ -1,21 +1,20 @@
 # Sourcerer-driven KI (Knowledge Indicator) extraction proof of concept.
 #
-# A single agent pass discovers deployable services across the repositories
-# indexed in Sourcerer. The workflow then fans out one request per service to
-# the Significant Events KI endpoint, which deterministically greps the indexed
-# source for that service's production logging call sites (no second agent pass)
-# and sends the verified source analysis to the KI pipeline.
+# Fully deterministic + LLM-classify pipeline (no agentic passes):
+#  1. _discover_services greps the indexed corpus for deploy markers/manifests to
+#     find candidate service roots, then one batched classify call judges which
+#     are real services and collapses env/region duplicates.
+#  2. The workflow fans out one request per service to _identify_service, which
+#     greps that service's production logging call sites and classifies them.
 #
-# The `sourcerer` agent is installed independently by `sourcerer setup` (its
-# read-only code tools + skills pre-exist), so this workflow only drives it; if
-# the agent is absent the plugin does not install/enable this workflow (see the
-# code-intelligence agent-presence gate). `agent-id` must stay in sync with
-# `CODE_INTELLIGENCE_AGENT_ID` in the plugin (YAML cannot import the constant).
+# Both stages read the Sourcerer index (`sourcerer-v1-*`) server-side; the corpus
+# is populated out of band by `sourcerer setup` + indexing. The plugin gates
+# install/enable on the sourcerer agent's presence as a proxy for "Sourcerer is
+# set up" (the agent itself is no longer called by this workflow; re-pointing the
+# gate at the index is a follow-up).
 #
 # It runs manually and on a schedule; the fingerprint noop guard keeps unchanged
-# runs cheap. This is the substrate swap point: when the Agent Builder code
-# sandbox arrives, repoint `agent-id` and rewrite the tool guidance in the two
-# agent messages below.
+# runs cheap.
 
 version: '1'
 name: 'Code KI Extraction'
@@ -45,119 +44,26 @@ triggers:
         required: false
         description: 'Connector ID for the code-intelligence (Sourcerer) agent.'
 steps:
-  - name: identify_services
-    type: ai.agent
-    agent-id: sourcerer
-    connector-id: '${{ inputs.agentConnectorId }}'
-    plugin-id: 'significant_events'
-    aggregate-by: 'significant_events'
+  - name: discover_services
+    type: kibana.request
     with:
-      message: |
-        Task: SERVICE_DISCOVERY
-
-        Discover every independently deployable service in every repository indexed in Sourcerer.
-
-        First call sourcerer.refs.list (git_org="*", git_repo="*") to enumerate the indexed repositories and
-        their refs. For each repository pick the ref to analyze and record its full git.commit from the
-        refs.list result; use that exact commit in every subsequent sourcerer.files.* and sourcerer.code.*
-        call (scope every call with git_org, git_repo, git_commit). Never guess a commit.
-
-        Explore structure with sourcerer.files.ls and read specific files with sourcerer.files.cat /
-        sourcerer.files.head. Use sourcerer.code.grep (regex, file/line order) for exact identifiers,
-        config keys, or deployment-manifest markers, and sourcerer.code.search (BM25) when you know the
-        concept but not the location. Prefer one grep per keyword over complex alternations.
-
-        A service has its own entrypoint, build target, deployment manifest, or container. Exclude libraries,
-        shared packages, tests, examples, generated code, and config-only directories.
-
-        For every service return the repository (as "org/repo") and immutable gitSha (the full git.commit),
-        its repository-relative serviceRoot, emitted service.name, primary language, deployment evidence, and
-        any version or telemetry metadata verified in source. Also report repository language weights and IaC
-        file signals. Repeat repository metadata for each service so every item is self-contained. Never guess.
-      schema:
-        type: object
-        properties:
-          services:
-            type: array
-            items:
-              type: object
-              properties:
-                repository:
-                  type: string
-                gitSha:
-                  type: string
-                  description: 'Full immutable Git commit SHA used for all evidence.'
-                serviceRoot:
-                  type: string
-                  description: 'Repository-relative root directory for this deployable service.'
-                name:
-                  type: string
-                  description: 'The service.name emitted by this service.'
-                language:
-                  type: string
-                repositoryLanguages:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      language:
-                        type: string
-                      count:
-                        type: number
-                        description: 'Non-negative relative weight used to rank repository languages.'
-                    required: [language, count]
-                iacSignals:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      kind:
-                        type: string
-                        enum: [kubernetes, helm, compose, terraform, pulumi, cloudformation]
-                      path:
-                        type: string
-                    required: [kind, path]
-                version:
-                  type: string
-                environmentVariables:
-                  type: array
-                  items:
-                    type: string
-                configPaths:
-                  type: array
-                  items:
-                    type: string
-                loggingPattern:
-                  type: string
-                tracing:
-                  type: boolean
-                evidence:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      path:
-                        type: string
-                      line:
-                        type: integer
-                      snippet:
-                        type: string
-                    required: [path]
-              required: [repository, gitSha, serviceRoot, name]
-        required: [services]
-    timeout: 900s
+      method: POST
+      path: '/internal/streams/code_intelligence/_discover_services'
+      headers:
+        x-elastic-internal-origin: 'kibana'
+      body: {}
     on-failure:
       continue: false
 
   - name: has_services
     type: if
-    condition: '${{ steps.identify_services.error == null and steps.identify_services.output.structured_output.services != null }}'
+    condition: '${{ steps.discover_services.error == null and steps.discover_services.output.services != null }}'
     steps:
       # Intentionally serial for the POC so the per-service workload is observable
       # without concurrency-induced bursts.
       - name: process_services
         type: foreach
-        foreach: '${{ steps.identify_services.output.structured_output.services }}'
+        foreach: '${{ steps.discover_services.output.services }}'
         max-concurrency: 1
         iteration-on-failure:
           continue: true
@@ -178,12 +84,6 @@ steps:
                   name: '{{ foreach.item.name }}'
                   serviceRoot: '{{ foreach.item.serviceRoot }}'
                   language: '{{ foreach.item.language }}'
-                  version: '{{ foreach.item.version }}'
-                  environmentVariables: '${{ foreach.item.environmentVariables }}'
-                  configPaths: '${{ foreach.item.configPaths }}'
-                  loggingPattern: '{{ foreach.item.loggingPattern }}'
-                  tracing: '${{ foreach.item.tracing }}'
-                  evidence: '${{ foreach.item.evidence }}'
             on-failure:
               retry:
                 max-attempts: 2

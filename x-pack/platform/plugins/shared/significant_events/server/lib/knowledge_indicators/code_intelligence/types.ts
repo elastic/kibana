@@ -79,6 +79,50 @@ export interface LoggingCandidate {
   language?: string;
 }
 
+/** An indexed repository ref enumerated from the Sourcerer refs index. */
+export interface IndexedRepoRef {
+  /** `"org/repo"`. */
+  repository: string;
+  org: string;
+  repo: string;
+  /** Immutable commit SHA to scope every subsequent grep to. */
+  gitSha: string;
+  /** Branch/tag name, if recorded. */
+  ref?: string;
+}
+
+/**
+ * A directory flagged by deterministic marker/manifest grep as a *candidate*
+ * deployable service, before the classifier judges + collapses it. Produced by
+ * {@link discoverCandidateRoots}; consumed by {@link classifyServices}.
+ */
+export interface ServiceCandidateRoot {
+  /** `"org/repo"`. */
+  repository: string;
+  gitSha: string;
+  /** Repository-relative directory holding the marker(s). */
+  serviceRoot: string;
+  /** Deploy-marker basenames found in this root (e.g. `Dockerfile`, `go.mod`). */
+  markers: string[];
+  /** Language implied by the markers (deterministic), or `unknown`. */
+  language: string;
+}
+
+/**
+ * A logical service after {@link classifyServices} judges candidate roots and
+ * collapses environment/region duplicates. Shaped to match the `services[]`
+ * items the extraction workflow's `_identify_service` fan-out already consumes.
+ */
+export interface DiscoveredService {
+  repository: string;
+  gitSha: string;
+  serviceRoot: string;
+  name: string;
+  language: string;
+  repositoryLanguages?: LanguageCount[];
+  iacSignals?: IacSignal[];
+}
+
 /**
  * A log statement extracted from a logging chunk: its severity level and the
  * static (non-interpolated) portion of the message used to build a match query.

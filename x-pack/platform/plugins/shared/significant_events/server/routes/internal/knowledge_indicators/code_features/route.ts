@@ -30,8 +30,14 @@ import {
   linkServiceEntities,
   discoverLoggingSites,
   classifyLoggingSites,
+  listIndexedRepos,
+  discoverCandidateRoots,
+  classifyServices,
   isCodeIntelligenceAgentAvailable,
   CODE_INTELLIGENCE_AGENT_ID,
+  type ServiceCandidateRoot,
+  type IacSignal,
+  type DiscoveredService,
   type ServiceCodeMetadata,
   type StreamSamplingSource,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
@@ -646,11 +652,99 @@ const identifyServiceRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
+// Deterministic service discovery (Stage 4).
+//
+// Replaces the `ai.agent` SERVICE_DISCOVERY pass: enumerates indexed repos from
+// the Sourcerer refs index, greps deploy-marker + manifest file paths to derive
+// candidate service roots (+ marker-implied language + IaC signals) with NO LLM,
+// then runs ONE batched classify call to judge which roots are real deployable
+// services and collapse environment/region duplicates into logical services.
+// Returns the `services[]` shape the extraction workflow's `_identify_service`
+// fan-out already consumes, so the workflow just swaps its agent step for a
+// request to this route.
+// ---------------------------------------------------------------------------
+
+const discoverServicesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/code_intelligence/_discover_services',
+  options: {
+    access: 'internal',
+    summary: 'Deterministically discover deployable services across indexed repositories',
+    timeout: { idleSocket: 600_000 },
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({}),
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ services: DiscoveredService[] }> => {
+    const scopedClients = await getScopedClients({ request });
+    const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
+
+    await assertSignificantEventsAccess({ server, licensing });
+
+    const routeLogger = logger.get('code_intelligence', 'discover_services');
+    const esClient = scopedClusterClient.asCurrentUser;
+
+    // Enumerate indexed repos, then grep candidate roots + manifests per repo.
+    const repos = await listIndexedRepos({ esClient, logger: routeLogger });
+    if (repos.length === 0) {
+      return { services: [] };
+    }
+
+    const candidates: ServiceCandidateRoot[] = [];
+    const manifestPathsByRepo = new Map<string, string[]>();
+    const iacSignalsByRepo = new Map<string, IacSignal[]>();
+    for (const repo of repos) {
+      const {
+        candidates: roots,
+        manifestPaths,
+        iacSignals,
+      } = await discoverCandidateRoots({
+        esClient,
+        repo,
+        logger: routeLogger,
+      });
+      candidates.push(...roots);
+      manifestPathsByRepo.set(repo.repository, manifestPaths);
+      iacSignalsByRepo.set(repo.repository, iacSignals);
+    }
+
+    if (candidates.length === 0) {
+      return { services: [] };
+    }
+
+    const connectorId = await resolveConnectorForFeature({
+      searchInferenceEndpoints: server.searchInferenceEndpoints,
+      featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+      featureName: 'service discovery classification',
+      request,
+    });
+
+    const services = await classifyServices({
+      inferenceClient,
+      connectorId,
+      candidates,
+      manifestPathsByRepo,
+      iacSignalsByRepo,
+      logger: routeLogger,
+    });
+
+    return { services };
+  },
+});
+
+// ---------------------------------------------------------------------------
 // Run code intelligence across all indexed repositories on demand.
 //
 // Triggers the managed "Continuous Code KI Extraction" workflow for the current
 // space (singleton per space — reuses a running execution). The workflow's
-// `ai.agent` step enumerates services and fans out to `_identify_service`, so
+// discovery step enumerates services and fans out to `_identify_service`, so
 // this returns immediately with the execution id rather than blocking on the
 // full run. Backs the discovery Code Intelligence tab "Identify features &
 // queries" button.
@@ -835,6 +929,7 @@ export const internalKICodeFeaturesRoutes = {
   ...listCodeKnowledgeIndicatorsRoute,
   ...serviceDistributionRoute,
   ...identifyServiceRoute,
+  ...discoverServicesRoute,
   ...runCodeIntelligenceRoute,
   ...codeIntelligenceRunStatusRoute,
   ...reconcileKnowledgeIndicatorsRoute,

@@ -173,3 +173,76 @@ export const anchoredPhrasePatterns = (phrase: string): string[] => [
   `.*\\"[^\\"]*${phrase}[^\\"]*\\".*`,
   `.*'[^']*${phrase}[^']*'.*`,
 ];
+
+/**
+ * Elasticsearch index written by Sourcerer's ref indexer — one document per
+ * indexed git ref (`git.org`, `git.repo`, `git.commit`, `git.ref`,
+ * `files_count`, `lines_count`, `status`). Stage-4 service discovery enumerates
+ * the indexed repositories + their immutable commits from here (server-side
+ * equivalent of the agent's `sourcerer.refs.list`).
+ */
+export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*' as const;
+
+/**
+ * Build/deploy marker basenames that flag a directory as a candidate deployable
+ * service, mapped to the primary language they imply. Language falls out of the
+ * marker deterministically (no LLM, no drift). A directory containing any of
+ * these is a candidate root; the classifier ({@link classifyServices}) then
+ * judges which candidates are real services and collapses env/region duplicates.
+ *
+ * Tier-1 boundary (same philosophy as the logger idioms): convention-named
+ * markers only. A service with a bespoke build (bare `Makefile`, custom deploy)
+ * is missed; the set is intentionally extensible.
+ */
+export const SERVICE_DEPLOY_MARKERS: ReadonlyArray<{ marker: string; language: string }> = [
+  { marker: 'go.mod', language: 'Go' },
+  { marker: 'Cargo.toml', language: 'Rust' },
+  { marker: 'pom.xml', language: 'Java' },
+  { marker: 'build.gradle', language: 'Java' },
+  { marker: '.csproj', language: 'C#' },
+  { marker: 'pyproject.toml', language: 'Python' },
+  { marker: 'requirements.txt', language: 'Python' },
+  { marker: 'Gemfile', language: 'Ruby' },
+  { marker: 'composer.json', language: 'PHP' },
+  { marker: 'package.json', language: 'JavaScript/TypeScript' },
+  { marker: 'CMakeLists.txt', language: 'C++' },
+  { marker: 'mix.exs', language: 'Elixir' },
+  // Dockerfile is the near-universal deploy marker but implies no language on its
+  // own; language is resolved from a co-located build marker when present.
+  { marker: 'Dockerfile', language: '' },
+] as const;
+
+/**
+ * Lucene RLIKE patterns (matched against `file.path`) that flag a file as a
+ * deployment MANIFEST — declaring runtime services, including third-party images
+ * with no build marker (kafka, datastores, collectors). Feeding the classifier
+ * the manifest *paths* (not contents) keeps discovery cheap; the manifest is the
+ * repo's own authoritative service list. Format-agnostic on purpose (compose,
+ * k8s, helm, ECS, serverless, nomad).
+ */
+export const MANIFEST_PATH_PATTERNS: readonly string[] = [
+  '.*docker-compose.*[.]ya?ml',
+  '.*compose([.][a-z]+)?[.]ya?ml',
+  '.*/k8s/.*[.]ya?ml',
+  '.*/kubernetes/.*[.]ya?ml',
+  '.*[Cc]hart[.]ya?ml',
+  '.*values[.]ya?ml',
+  '.*deployment[.]ya?ml',
+  '.*kustomization[.]ya?ml',
+  '.*task-def.*[.]json',
+  '.*serverless[.](yml|yaml|ts|js)',
+  '.*[.]nomad',
+] as const;
+
+/**
+ * Recognized IaC marker basenames mapped to the {@link IacKind} the schema uses.
+ * Used to attach `iacSignals` to the discovered repository without an LLM.
+ */
+export const IAC_PATH_MARKERS: ReadonlyArray<{ pattern: string; kind: string }> = [
+  { pattern: '.*[.]tf', kind: 'terraform' },
+  { pattern: '.*[Cc]hart[.]ya?ml', kind: 'helm' },
+  { pattern: '.*docker-compose.*[.]ya?ml', kind: 'compose' },
+  { pattern: '.*compose([.][a-z]+)?[.]ya?ml', kind: 'compose' },
+  { pattern: '.*kustomization[.]ya?ml', kind: 'kubernetes' },
+  { pattern: '.*/k8s/.*[.]ya?ml', kind: 'kubernetes' },
+] as const;
