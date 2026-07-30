@@ -47,6 +47,15 @@ action you plan to implement, find the vendor's official API reference and confi
 - **Array/list query parameters**: how does the API expect repeated values encoded — `?id=1&id=2`,
   `?id[]=1&id[]=2`, or a comma-joined string? Axios's default array serialization (`id[]=1&id[]=2`) is
   not universal; check the docs and, if needed, set a custom `paramsSerializer`.
+- **Query string vs. request body for optional modifier params**: for a `POST`/`PATCH` action whose only
+  required input is a path segment (an ID) but that also accepts optional modifiers (`scope`, `filters`,
+  `all_X` flags, an expiry timestamp), check the vendor's docs for whether those modifiers are read from
+  the query string or the JSON body — do not assume, and do not infer it from a similar sibling action in
+  the same file. Two actions that look like a natural pair (e.g. a resource's mute/unmute, or enable/
+  disable) can each independently get this wrong; comparing them to each other won't surface the mistake
+  if both share it. A wrong transport here doesn't error — the vendor accepts the request and silently
+  ignores the misplaced param, so the bug only shows up if a test or live-testing pass actually sets that
+  optional param to a non-default value.
 - **Per-action auth scopes**: list every scope/permission each action actually requires (not just the
   minimum to authenticate), especially for destructive or admin actions (delete, bulk update) or actions
   that hit a different API sub-resource (e.g. an alert/rule endpoint vs. the main resource). Once you have

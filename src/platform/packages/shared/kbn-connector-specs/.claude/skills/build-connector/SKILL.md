@@ -44,7 +44,8 @@ Then begin working through the tasks in order.
 It's tempting, when asked to build many connectors, to build the code for all of them first (Task 1-3)
 and defer activation/live-testing (Tasks 4-11) until later. In practice this is where most real bugs
 surface — disabled test buttons, ICU parse errors, endpoints that reject partial updates, query params
-the vendor rejects, wrong auth scopes — none of which unit tests or a code-only review catch, because
+the vendor rejects, an optional modifier param silently sent to the wrong place (query string vs. body),
+wrong auth scopes — none of which unit tests or a code-only review catch, because
 they only show up when the spec is actually loaded and exercised in a running Kibana. If the user
 explicitly asks to defer live testing for a batch, still run the self-review checklist from
 `create-connector`'s Step 4 ("Self-review before handing off") on every connector before considering it
@@ -226,6 +227,14 @@ If tools failed (tool results contain `"status":"failed"`):
      temporary debug action, per "Verify GraphQL Schemas via Introspection" in
      `create-connector/reference/custom-connector-setup.md`, then fix every occurrence of the wrong name
      (check sibling queries/mutations in the same file for the same mistake) and re-test.
+   - **No error at all, but an optional modifier param (`scope`, a filter, an `all_X` flag) appears to have
+     no effect** — e.g. a scoped mute/unmute or a filtered update behaves like an unscoped/unfiltered one.
+     This is not a flaky vendor or a bad test value; it means the handler is sending that param in the
+     query string when the vendor expects the request body (or vice versa), and the vendor is silently
+     ignoring the misplaced field instead of erroring. Check the action's real API docs for where that
+     specific param belongs, fix the handler, and check any sibling action (e.g. the corresponding
+     mute/unmute or enable/disable pair) for the same mistake — don't assume the sibling is correct just
+     because it wasn't the one that failed.
 3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 
@@ -282,6 +291,12 @@ Args: <agent-id>
 
 Use a more specific prompt this time, something like:
 > Search for recent items and give me a detailed summary of what you find.
+
+**If any action has optional modifier params** (`scope`, filters, `all_X` flags, an expiry timestamp)
+beyond its required fields, make sure this test (or an earlier one) actually causes the agent to set at
+least one of them to a non-default value, not just the required-fields-only happy path. A query-param-vs-
+body mismatch on an optional param doesn't error — the vendor silently ignores it — so a test that never
+sets the param will pass even though the feature is broken.
 
 Verify the agent successfully calls tools, gets results, and produces a useful response.
 
