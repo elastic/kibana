@@ -60,6 +60,7 @@ import type {
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
+import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
@@ -116,6 +117,7 @@ export interface Updatable {
     options: { validate: boolean; doc: ConcreteTaskInstance }
   ): Promise<ConcreteTaskInstance>;
   remove(id: string): Promise<void>;
+  get(id: string): Promise<ConcreteTaskInstance | null>;
 }
 
 type Opts = {
@@ -931,7 +933,13 @@ export class TaskManagerRunner implements TaskRunner {
               { tags: [this.id, this.taskType] }
             );
           } else {
-            throw error;
+            await resolveTaskDocumentConflicts({
+              taskId: this.id,
+              partialTask,
+              originalTask: this.instance.task,
+              bufferedTaskStore: this.bufferedTaskStore,
+              logger: this.logger,
+            });
           }
         }
       }
