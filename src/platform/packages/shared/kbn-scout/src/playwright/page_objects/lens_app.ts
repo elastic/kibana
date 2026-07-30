@@ -604,7 +604,8 @@ export class LensApp {
     const fieldLocator = this.getFieldListPanelFieldLocator(field);
     await fieldLocator.waitFor({ state: 'visible' });
     const fieldTestSubj =
-      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+      (await fieldLocator.getAttribute('data-test-subj')) ??
+      `lnsFieldListPanelField-${this.getFieldAttrName(field)}`;
     await this.html5DragAndDrop(fieldTestSubj, 'lnsWorkspace');
     await this.waitForLensDragDropToFinish();
     if (visualizationTestSubj) {
@@ -1033,10 +1034,22 @@ export class LensApp {
     await this.page.testSubj.locator('fieldListLoading').waitFor({ state: 'hidden' });
   }
 
+  /** Maps a caller-facing field id to its internal field-list `data-attr-field`/test-subj suffix. */
+  private getFieldAttrName(field: string): string {
+    // The document-count field is stored internally as `___records___`; callers pass `records`.
+    return field === 'records' ? '___records___' : field;
+  }
+
   private getFieldListPanelFieldLocator(field: string) {
+    const attrField = this.getFieldAttrName(field);
+    if (field === 'records') {
+      // The document-count field always has type `document`, so the field-grouping hook
+      // routes it to the special-fields list — a plain <ul> with no container test-subj
+      // (unlike Available/Selected Fields, which are rendered as accordions). Match on
+      // the attribute directly.
+      return this.page.locator(`[data-attr-field="${attrField}"]`);
+    }
     // Prefer Available Fields — the same field can also appear under Selected Fields after use.
-    // The document-count field is stored as `___records___`; callers pass its bare id `records`.
-    const attrField = field === 'records' ? '___records___' : field;
     return this.page.locator(
       `[data-test-subj="lnsIndexPatternAvailableFields"] [data-attr-field="${attrField}"]`
     );
@@ -1051,7 +1064,8 @@ export class LensApp {
     const fieldLocator = this.getFieldListPanelFieldLocator(field);
     await fieldLocator.waitFor({ state: 'visible' });
     const fieldTestSubj =
-      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+      (await fieldLocator.getAttribute('data-test-subj')) ??
+      `lnsFieldListPanelField-${this.getFieldAttrName(field)}`;
 
     await this.page.evaluate((fromSel: string) => {
       interface Transfer {
@@ -1366,7 +1380,8 @@ export class LensApp {
     const fieldLocator = this.getFieldListPanelFieldLocator(field);
     await fieldLocator.waitFor({ state: 'visible' });
     const fieldTestSubj =
-      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+      (await fieldLocator.getAttribute('data-test-subj')) ??
+      `lnsFieldListPanelField-${this.getFieldAttrName(field)}`;
     await this.page.testSubj.locator(dimension).waitFor({ state: 'visible' });
     await this.html5DragAndDrop(fieldTestSubj, dimension);
     await this.waitForLensDragDropToFinish();
@@ -1533,7 +1548,8 @@ export class LensApp {
     const fieldLocator = this.getFieldListPanelFieldLocator(field);
     await fieldLocator.waitFor({ state: 'visible' });
     const fieldTestSubj =
-      (await fieldLocator.getAttribute('data-test-subj')) ?? `lnsFieldListPanelField-${field}`;
+      (await fieldLocator.getAttribute('data-test-subj')) ??
+      `lnsFieldListPanelField-${this.getFieldAttrName(field)}`;
     await this.dragEnterDrop(
       fieldTestSubj,
       `${to} > lnsDragDrop-domDroppable`,
