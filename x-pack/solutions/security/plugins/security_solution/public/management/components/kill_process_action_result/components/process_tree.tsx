@@ -126,7 +126,7 @@ const TreeNode = memo<TreeNodeProps>(({ process, children, 'data-test-subj': dat
             />
             <EuiSpacer size="xs" />
           </EuiFlexItem>
-          <EuiFlexItem data-test-subj={getTestId('children')}>{children}</EuiFlexItem>
+          {children && <EuiFlexItem data-test-subj={getTestId('children')}>{children}</EuiFlexItem>}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

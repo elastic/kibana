@@ -81,6 +81,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                   id="xpack.securitySolution.management.killProcessActionResult.processInfo"
                   defaultMessage="Action result:"
                 />
+                <EuiSpacer size="s" />
 
                 {hostActionOutput ? (
                   <ProcessResult command={command} processResult={hostActionOutput} />
@@ -93,7 +94,7 @@ export const KillSuspendProcessActionResult = memo<KillSuspendProcessActionResul
                   </div>
                 )}
 
-                {hostActionOutput && hostActionOutput.descendants && (
+                {hostActionOutput && hostActionOutput.descendants && command === 'kill-process' && (
                   <div>
                     <EuiSpacer />
                     <FormattedMessage
