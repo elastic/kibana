@@ -134,6 +134,17 @@ describe('Grafana', () => {
       );
       expect(result).toEqual({ uid: 'r1', condition: 'A' });
     });
+
+    it('should URL-encode a uid containing reserved characters', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      await Grafana.actions.getAlertRule.handler(mockContext, { uid: 'r/1#2' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://acme.grafana.net/api/v1/provisioning/alert-rules/r%2F1%232',
+        { headers: {} }
+      );
+    });
   });
 
   describe('listSilences / getSilence actions', () => {
@@ -159,6 +170,17 @@ describe('Grafana', () => {
         { headers: {} }
       );
       expect(result).toEqual({ id: 's1', status: { state: 'active' } });
+    });
+
+    it('should URL-encode a silenceId containing reserved characters', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      await Grafana.actions.getSilence.handler(mockContext, { silenceId: 's/1 2' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://acme.grafana.net/api/alertmanager/grafana/api/v2/silence/s%2F1%202',
+        { headers: {} }
+      );
     });
   });
 
@@ -200,6 +222,17 @@ describe('Grafana', () => {
         { headers: {} }
       );
       expect(result).toEqual({ deleted: true, silenceId: 's1' });
+    });
+
+    it('should URL-encode a silenceId containing reserved characters', async () => {
+      mockClient.delete.mockResolvedValue({ data: {} });
+
+      await Grafana.actions.deleteSilence.handler(mockContext, { silenceId: 's/1 2' });
+
+      expect(mockClient.delete).toHaveBeenCalledWith(
+        'https://acme.grafana.net/api/alertmanager/grafana/api/v2/silence/s%2F1%202',
+        { headers: {} }
+      );
     });
   });
 
@@ -306,6 +339,17 @@ describe('Grafana', () => {
         { headers: {} }
       );
       expect(result).toEqual({ dashboard: { uid: 'd1' }, meta: {} });
+    });
+
+    it('should URL-encode a uid containing reserved characters', async () => {
+      mockClient.get.mockResolvedValue({ data: {} });
+
+      await Grafana.actions.getDashboard.handler(mockContext, { uid: 'd/1#2' });
+
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://acme.grafana.net/api/dashboards/uid/d%2F1%232',
+        { headers: {} }
+      );
     });
   });
 

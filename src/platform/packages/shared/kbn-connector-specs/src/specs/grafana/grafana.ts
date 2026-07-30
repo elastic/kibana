@@ -185,7 +185,7 @@ export const Grafana: ConnectorSpec = {
       handler: async (ctx, input: GrafanaGetAlertRuleInput) => {
         try {
           const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/api/v1/provisioning/alert-rules/${input.uid}`,
+            `${buildBaseUrl(ctx)}/api/v1/provisioning/alert-rules/${encodeURIComponent(input.uid)}`,
             { headers: buildHeaders(ctx) }
           );
           return response.data;
@@ -220,7 +220,9 @@ export const Grafana: ConnectorSpec = {
       handler: async (ctx, input: GrafanaGetSilenceInput) => {
         try {
           const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silence/${input.silenceId}`,
+            `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silence/${encodeURIComponent(
+              input.silenceId
+            )}`,
             { headers: buildHeaders(ctx) }
           );
           return response.data;
@@ -263,7 +265,9 @@ export const Grafana: ConnectorSpec = {
       handler: async (ctx, input: GrafanaDeleteSilenceInput) => {
         try {
           await ctx.client.delete(
-            `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silence/${input.silenceId}`,
+            `${buildBaseUrl(ctx)}/api/alertmanager/grafana/api/v2/silence/${encodeURIComponent(
+              input.silenceId
+            )}`,
             { headers: buildHeaders(ctx) }
           );
           return { deleted: true, silenceId: input.silenceId };
@@ -369,7 +373,7 @@ export const Grafana: ConnectorSpec = {
       handler: async (ctx, input: GrafanaGetDashboardInput) => {
         try {
           const response = await ctx.client.get(
-            `${buildBaseUrl(ctx)}/api/dashboards/uid/${input.uid}`,
+            `${buildBaseUrl(ctx)}/api/dashboards/uid/${encodeURIComponent(input.uid)}`,
             { headers: buildHeaders(ctx) }
           );
           return response.data;
