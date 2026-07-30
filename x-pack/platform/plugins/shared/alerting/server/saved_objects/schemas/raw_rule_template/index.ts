@@ -29,7 +29,4 @@ export type RawRuleTemplate = TypeOf<typeof rawRuleTemplateSchema>;
 export type AlertingV1RawRuleTemplate = TypeOf<typeof alertingV1RawRuleTemplateSchemaV4>;
 export type AlertingV2RawRuleTemplate = TypeOf<typeof alertingV2RawRuleTemplateSchemaV4>;
 
-export {
-  assertAlertingV1RawRuleTemplate,
-  isAlertingV2RawRuleTemplate,
-} from './guards';
+export { assertAlertingV1RawRuleTemplate, isAlertingV2RawRuleTemplate } from './guards';

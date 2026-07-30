@@ -18,8 +18,7 @@ type AlertingV2RawRuleTemplate = TypeOf<typeof alertingV2RawRuleTemplateSchemaV4
 
 export const isAlertingV2RawRuleTemplate = (
   attributes: RawRuleTemplate
-): attributes is AlertingV2RawRuleTemplate =>
-  attributes.engine === 'v2' && 'rule' in attributes;
+): attributes is AlertingV2RawRuleTemplate => attributes.engine === 'v2' && 'rule' in attributes;
 
 /**
  * Narrows raw template attributes to the Fleet / alerting v1 shape used by the

@@ -21,16 +21,11 @@ export interface FindRuleTemplatesSoParams {
 }
 
 const buildExcludeAlertingV2EngineFilter = (): KueryNode => {
-  const engineIsV2 = nodeBuilder.is(
-    `${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.engine`,
-    'v2'
-  );
+  const engineIsV2 = nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.engine`, 'v2');
   return fromKueryExpression(`not ${toKqlExpression(engineIsV2)}`);
 };
 
-const combineFilters = (
-  nodes: Array<KueryNode | undefined>
-): KueryNode | undefined => {
+const combineFilters = (nodes: Array<KueryNode | undefined>): KueryNode | undefined => {
   const filters = nodes.filter((node): node is KueryNode => node != null);
   if (filters.length === 0) {
     return undefined;
