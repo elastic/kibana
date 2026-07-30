@@ -15,3 +15,26 @@ xpack.agentBuilder.enabled: true
 xpack.security.authc.providers:
   basic.basic1:
     order: 0
+xpack.actions.preconfigured:
+  eis-anthropic-claude-4-5-haiku:
+    name: "EIS anthropic-claude-4.5-haiku"
+    actionTypeId: .inference
+    config:
+      provider: elastic
+      taskType: chat_completion
+      inferenceId: ".anthropic-claude-4.5-haiku-chat_completion"
+      providerConfig:
+        model_id: anthropic-claude-4.5-haiku
+    secrets: {}
+    exposeConfig: true
+  eis-anthropic-claude-4-6-sonnet:
+    name: "EIS anthropic-claude-4.6-sonnet"
+    actionTypeId: .inference
+    config:
+      provider: elastic
+      taskType: chat_completion
+      inferenceId: ".anthropic-claude-4.6-sonnet-chat_completion"
+      providerConfig:
+        model_id: anthropic-claude-4.6-sonnet
+    secrets: {}
+    exposeConfig: true

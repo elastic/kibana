@@ -228,9 +228,10 @@ export const buildQueueItems = (
 const BriefCard: React.FC<{
   item: QueueItem;
   accent: string;
+  ink: string;
   onOpen: () => void;
   onOpenChat: () => void;
-}> = ({ item, accent, onOpen, onOpenChat }) => {
+}> = ({ item, accent, ink, onOpen, onOpenChat }) => {
   const { investigation, proposal } = item;
   const inMotion = investigation.status === 'in-progress';
   const isDecided = isDecidedInvestigation(investigation);
@@ -276,7 +277,7 @@ const BriefCard: React.FC<{
                 border-radius: 7px;
                 font-size: 12px;
                 font-weight: 700;
-                color: ${accent};
+                color: ${ink};
                 background-color: ${transparentize(accent, 0.12)};
               `}
             >
@@ -475,6 +476,8 @@ export const BriefPage: React.FC = () => {
     return groups;
   }, [filtered]);
 
+  // T1 border-left accent: the raw palette token (bold enough for a 3px rule,
+  // but several variants fail AA as *text* ink — see severityInk below).
   const bucketAccent = (bucket: Exclude<i18n.BriefBucket, 'all'>): string => {
     switch (bucket) {
       case 'contain':
@@ -485,8 +488,31 @@ export const BriefPage: React.FC = () => {
         return euiTheme.colors.primary;
       case 'tune':
         return euiTheme.colors.accent;
+      case 'create':
+        return euiTheme.colors.success;
       default:
         return euiTheme.border.color;
+    }
+  };
+
+  // T1 score-chip ink: `escalate`'s warning and `create`'s (missing) default
+  // fall-through both fail WCAG AA (4.5:1) for 12px/700 text on a 12%-alpha
+  // wash of the same accent. Use EUI's AA-safe `text*` pairs instead of the
+  // raw palette token so every variant is legible on a light surface.
+  const severityInk = (bucket: Exclude<i18n.BriefBucket, 'all'>): string => {
+    switch (bucket) {
+      case 'contain':
+        return euiTheme.colors.textDanger;
+      case 'escalate':
+        return euiTheme.colors.textWarning;
+      case 'investigate':
+        return euiTheme.colors.textPrimary;
+      case 'tune':
+        return euiTheme.colors.textAccent;
+      case 'create':
+        return euiTheme.colors.textSuccess;
+      default:
+        return euiTheme.colors.textSubdued;
     }
   };
 
@@ -629,6 +655,7 @@ export const BriefPage: React.FC = () => {
                     <BriefCard
                       item={item}
                       accent={bucketAccent(group.id)}
+                      ink={severityInk(group.id)}
                       onOpen={() => history.push(item.href)}
                       onOpenChat={() => history.push('/chats')}
                     />
