@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent, waitFor, act } from '@testing-library/react';
+import type { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 
 import type { TextInputProps } from './text_input';
 import { TextInput } from './text_input';
@@ -39,6 +40,10 @@ describe('TextInput', () => {
     onInputChange.mockClear();
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('renders without errors', () => {
     const { container } = render(wrap(<TextInput {...defaultProps} />));
     expect(container).toBeInTheDocument();
@@ -50,17 +55,15 @@ describe('TextInput', () => {
     expect(input).toHaveValue('initial value');
   });
 
-  it('calls the onInputChange prop when the value changes', async () => {
+  it('calls the onInputChange prop when the value changes', () => {
     const { getByTestId } = render(wrap(<TextInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: 'new value' } });
 
-    await waitFor(() =>
-      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-        type: 'string',
-        unsavedValue: 'new value',
-      })
-    );
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+      type: 'string',
+      unsavedValue: 'new value',
+    });
   });
 
   it('calls the onInputChange prop with an error when the value fails validation', async () => {
@@ -83,6 +86,54 @@ describe('TextInput', () => {
         error: 'Invalid value',
       })
     );
+  });
+
+  it('ignores an out-of-order validation response for a stale value', async () => {
+    jest.useFakeTimers();
+
+    const resolvers: Array<(value: ValueValidation) => void> = [];
+    const services = createFieldInputServicesMock();
+    services.validateChange = jest
+      .fn()
+      .mockImplementation(() => new Promise<ValueValidation>((resolve) => resolvers.push(resolve)));
+
+    const { getByTestId } = render(wrap(<TextInput {...defaultProps} />, services));
+    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
+
+    // First edit: its validation is requested but will resolve last (out of order).
+    fireEvent.change(input, { target: { value: 'first' } });
+    act(() => jest.advanceTimersByTime(500));
+
+    // Second edit: its validation is requested next and will resolve first.
+    fireEvent.change(input, { target: { value: 'second' } });
+    act(() => jest.advanceTimersByTime(500));
+
+    expect(services.validateChange).toHaveBeenNthCalledWith(1, id, 'first');
+    expect(services.validateChange).toHaveBeenNthCalledWith(2, id, 'second');
+
+    onInputChange.mockClear();
+
+    // Resolve the latest value's validation, then the stale one.
+    await act(async () => {
+      resolvers[1]({ successfulValidation: true, valid: false, errorMessage: 'second invalid' });
+    });
+    await act(async () => {
+      resolvers[0]({ successfulValidation: true, valid: false, errorMessage: 'first invalid' });
+    });
+
+    // Only the latest value's result is applied; the stale response is discarded.
+    expect(onInputChange).toHaveBeenCalledWith({
+      type: 'string',
+      unsavedValue: 'second',
+      isInvalid: true,
+      error: 'second invalid',
+    });
+    expect(onInputChange).not.toHaveBeenCalledWith({
+      type: 'string',
+      unsavedValue: 'first',
+      isInvalid: true,
+      error: 'first invalid',
+    });
   });
 
   it('disables the input when isDisabled prop is true', () => {

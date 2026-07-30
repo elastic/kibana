@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 
@@ -37,37 +37,44 @@ export const TextInput = ({
   const [value, setValue] = useState(inputValue);
   const { validateChange } = useServices();
   const onUpdate = useUpdate({ onInputChange, field });
+  const latestValue = useRef(inputValue);
 
-  const updateValue = useCallback(
+  const validateValue = useCallback(
     async (newValue: string, onUpdateFn: OnInputChangeFn<'string'>) => {
       const validationResponse = await validateChange(field.id, newValue);
+      // Ignore the response if the value has changed since this validation was requested.
+      if (latestValue.current !== newValue) {
+        return;
+      }
+
       if (validationResponse.successfulValidation && !validationResponse.valid) {
         onUpdateFn({
           type: field.type,
           unsavedValue: newValue,
-          isInvalid: !validationResponse.valid,
+          isInvalid: true,
           error: validationResponse.errorMessage,
         });
-      } else {
-        onUpdateFn({ type: field.type, unsavedValue: newValue });
       }
     },
     [validateChange, field.id, field.type]
   );
 
-  const debouncedUpdateValue = useMemo(() => {
-    // Trigger update 500 ms after the user stopped typing to reduce validation requests to the server
-    return debounce(updateValue, 500);
-  }, [updateValue]);
+  const debouncedValidate = useMemo(() => {
+    // Trigger validation 500 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(validateValue, 500);
+  }, [validateValue]);
 
-  const onChange: EuiFieldTextProps['onChange'] = async (event) => {
+  const onChange: EuiFieldTextProps['onChange'] = (event) => {
     const newValue = event.target.value;
+    latestValue.current = newValue;
     setValue(newValue);
-    await debouncedUpdateValue(newValue, onUpdate);
+    onUpdate({ type: field.type, unsavedValue: newValue });
+    debouncedValidate(newValue, onUpdate);
   };
 
   useEffect(() => {
     setValue(inputValue);
+    latestValue.current = inputValue;
   }, [inputValue]);
 
   const { id, name, ariaAttributes } = field;

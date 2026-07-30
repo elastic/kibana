@@ -148,6 +148,39 @@ describe('Form', () => {
     });
   });
 
+  it('does not let a slow validation clobber a change made to another field', async () => {
+    jest.useFakeTimers();
+    const services: FormServices = createFormServicesMock();
+    services.validateChange = jest.fn().mockResolvedValue({
+      successfulValidation: true,
+      valid: false,
+      errorMessage: 'Invalid value',
+    });
+    const { getByTestId } = render(wrap(<Form {...defaultFormParams} />, services));
+
+    // Edit the (debounced, async-validated) string field first: its pending validation
+    // captures the current unsaved-changes snapshot.
+    fireEvent.change(getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-string`), {
+      target: { value: 'new string' },
+    });
+    // Then toggle the boolean field, adding a second unsaved change in the meantime.
+    const booleanSwitch = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-boolean`);
+    expect(booleanSwitch).toBeChecked();
+    fireEvent.click(booleanSwitch);
+    expect(booleanSwitch).not.toBeChecked();
+
+    // Let the string field's debounced validation resolve and report its (invalid) result.
+    await act(async () => {
+      jest.advanceTimersByTime(500);
+    });
+
+    // The string validation result must not overwrite the concurrent boolean change: the
+    // boolean switch still reflects its toggled (unsaved) value rather than reverting.
+    expect(booleanSwitch).not.toBeChecked();
+
+    jest.useRealTimers();
+  });
+
   it('fires showReloadPagePrompt when changing a reloadPageRequired setting', async () => {
     const services: FormServices = createFormServicesMock();
     // Make all settings require a page reload
