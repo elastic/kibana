@@ -13,7 +13,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
 
-import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
+import type {
+  RelationshipIntegrationConfig,
+  RelationshipMaintainerName,
+  CompositeAfterKey,
+  CompositeBucket,
+} from './types';
 import {
   buildActorDiscoveryQuery,
   buildActorPageFilter,
@@ -399,6 +404,7 @@ export const runRelationshipMaintainer = async ({
   crudClient,
   entityMetadataClient,
   integrations,
+  maintainerName,
   signal,
   requestTimeoutMs,
   telemetryCollector,
@@ -410,6 +416,8 @@ export const runRelationshipMaintainer = async ({
   crudClient: EntityUpdateClient;
   entityMetadataClient: EntityMetadataClient;
   integrations: RelationshipIntegrationConfig[];
+  /** Identifies which maintainer is running — embedded in per-integration completion logs for unambiguous attribution. */
+  maintainerName: RelationshipMaintainerName;
   signal?: AbortSignal;
   /** Per-request timeout in milliseconds for ES client calls (search + esql.query). Defaults to DEFAULT_ESQL_TIMEOUT_MS (60s). */
   requestTimeoutMs?: number;
@@ -479,6 +487,7 @@ export const runRelationshipMaintainer = async ({
       break;
     }
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
+    const integrationStartMs = Date.now();
     const {
       buckets,
       recordsCount,
@@ -497,6 +506,14 @@ export const runRelationshipMaintainer = async ({
       signal,
       metadataContext,
       requestTimeoutMs
+    );
+
+    const durationMs = Date.now() - integrationStartMs;
+    logger.info(
+      `[${config.id}][${maintainerName}] Integration complete: ` +
+        `outcome=${outcome} slices=${iterations} records=${recordsCount} ` +
+        `written=${write.updated} notFound=${write.notFound} errors=${write.errors} ` +
+        `truncated=${integrationTruncated} durationMs=${durationMs}`
     );
 
     totalIterations += iterations;
