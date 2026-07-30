@@ -135,7 +135,11 @@ export class DualWriteStore implements PndStore {
     void Promise.resolve().then(async () => {
       try {
         const method = this.shadow[methodName] as (...a: unknown[]) => Promise<unknown>;
-        await method(...(args as unknown[]));
+        // Call bound to `this.shadow` — extracting the method reference above
+        // detaches it from its instance, so an unbound call would run with
+        // `this === undefined` inside the shadow store and throw on any
+        // `this.<field>` access.
+        await method.apply(this.shadow, args as unknown[]);
       } catch (error) {
         this.logger.warn(
           `DualWriteStore: shadow ${String(methodName)} failed: ${

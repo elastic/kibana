@@ -11,7 +11,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import type { ConversationsStart } from '@kbn/agent-builder-server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 
 export type PndPluginSetup = Record<string, never>;
 export type PndPluginStart = Record<string, never>;
@@ -25,7 +25,7 @@ export interface PndSetupDependencies {
 export interface PndStartDependencies {
   spaces?: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-  agentBuilder?: ConversationsStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export type PndRouter = IRouter;

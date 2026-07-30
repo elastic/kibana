@@ -10,6 +10,7 @@ server.restrictInternalApis: false
 xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters_long_for_test"
 xpack.pnd.enabled: true
 xpack.pnd.ui.useMockData: false
+xpack.pnd.conversationShadowWrite: true
 xpack.agentBuilder.enabled: true
 xpack.security.authc.providers:
   basic.basic1:

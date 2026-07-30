@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { PND_INVESTIGATIONS_URL } from '@kbn/pnd-common';
 import type { IRouter, Logger, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
+import type { PndConfig } from '../../config';
 import { registerListApprovedProposalsRoute } from './list_approved_proposals';
 
 function createCapturingRouter() {
@@ -39,6 +40,23 @@ const createLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
     trace: jest.fn(),
   } as any);
+
+const BASE_CONFIG: PndConfig = {
+  enabled: true,
+  ui: { useMockData: true },
+  conversationShadowWrite: false,
+};
+
+// RouteDependencies requires config/getSpaceId/getWatchProjection/
+// getWorkflowsManagement even though this route only exercises
+// getInvestigationStore — these are unused no-ops for this suite.
+const BASE_DEPS = {
+  config: BASE_CONFIG,
+  getSpaceId: () => 'default',
+  getWatchProjection: () => undefined,
+  getWorkflowsManagement: () => undefined,
+};
+
 const EMPTY_CONTEXT = {} as unknown as RequestHandlerContext;
 const PATH = PND_INVESTIGATIONS_URL + '/proposals/approved';
 
@@ -46,6 +64,7 @@ describe('GET approved proposals route', () => {
   it('returns seed data when store is null', async () => {
     const router = createCapturingRouter();
     registerListApprovedProposalsRoute({
+      ...BASE_DEPS,
       router,
       logger: createLogger(),
       getInvestigationStore: () => undefined,
@@ -62,6 +81,7 @@ describe('GET approved proposals route', () => {
   it('limits results to 20', async () => {
     const router = createCapturingRouter();
     registerListApprovedProposalsRoute({
+      ...BASE_DEPS,
       router,
       logger: createLogger(),
       getInvestigationStore: () => undefined,
@@ -77,6 +97,7 @@ describe('GET approved proposals route', () => {
     const router = createCapturingRouter();
     const mockStore = { listApprovedProposals: jest.fn().mockRejectedValue(new Error('ES down')) };
     registerListApprovedProposalsRoute({
+      ...BASE_DEPS,
       router,
       logger: createLogger(),
       getInvestigationStore: () => mockStore as any,

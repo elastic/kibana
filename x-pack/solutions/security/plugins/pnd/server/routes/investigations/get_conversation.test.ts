@@ -8,6 +8,8 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { PND_INVESTIGATION_URL_TEMPLATE } from '@kbn/pnd-common';
 import type { IRouter, Logger, RequestHandler, RequestHandlerContext } from '@kbn/core/server';
+import type { ReadOnlyConversationClient } from '@kbn/agent-builder-server';
+import type { PndConfig } from '../../config';
 import { registerGetConversationRoute } from './get_conversation';
 
 function createCapturingRouter() {
@@ -39,6 +41,24 @@ const createLogger = (): jest.Mocked<Logger> =>
     debug: jest.fn(),
     trace: jest.fn(),
   } as any);
+
+const BASE_CONFIG: PndConfig = {
+  enabled: true,
+  ui: { useMockData: true },
+  conversationShadowWrite: false,
+};
+
+// RouteDependencies requires config/getSpaceId/getWatchProjection/
+// getWorkflowsManagement/getInvestigationStore even though this route only
+// exercises getConversationClient — these are unused no-ops for this suite.
+const BASE_DEPS = {
+  config: BASE_CONFIG,
+  getSpaceId: () => 'default',
+  getWatchProjection: () => undefined,
+  getWorkflowsManagement: () => undefined,
+  getInvestigationStore: () => undefined,
+};
+
 const EMPTY_CONTEXT = {} as unknown as RequestHandlerContext;
 const PATH = PND_INVESTIGATION_URL_TEMPLATE + '/conversation';
 
@@ -46,6 +66,7 @@ describe('GET conversation route', () => {
   it('returns 404 when client is undefined', async () => {
     const router = createCapturingRouter();
     registerGetConversationRoute({
+      ...BASE_DEPS,
       router,
       logger: createLogger(),
       getConversationClient: undefined,
@@ -63,9 +84,10 @@ describe('GET conversation route', () => {
   it('returns 404 when client resolves to undefined', async () => {
     const router = createCapturingRouter();
     registerGetConversationRoute({
+      ...BASE_DEPS,
       router,
       logger: createLogger(),
-      getConversationClient: () => Promise.resolve(undefined),
+      getConversationClient: (): Promise<ReadOnlyConversationClient> | undefined => undefined,
     });
     const response = httpServerMock.createResponseFactory();
     const request = httpServerMock.createKibanaRequest({
@@ -86,6 +108,7 @@ describe('GET conversation route', () => {
       get: jest.fn(),
     };
     registerGetConversationRoute({
+      ...BASE_DEPS,
       router,
       logger: createLogger(),
       getConversationClient: () => Promise.resolve(mockClient as any),
@@ -117,6 +140,7 @@ describe('GET conversation route', () => {
       get: jest.fn().mockResolvedValue(conv),
     };
     registerGetConversationRoute({
+      ...BASE_DEPS,
       router,
       logger: createLogger(),
       getConversationClient: () => Promise.resolve(mockClient as any),
@@ -138,6 +162,7 @@ describe('GET conversation route', () => {
     const router = createCapturingRouter();
     const logger = createLogger();
     registerGetConversationRoute({
+      ...BASE_DEPS,
       router,
       logger,
       getConversationClient: () => Promise.reject(new Error('down')),
