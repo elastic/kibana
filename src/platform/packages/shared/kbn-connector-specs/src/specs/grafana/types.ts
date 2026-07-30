@@ -59,6 +59,7 @@ export const GrafanaCreateSilenceInputSchema = z.object({
   matchers: z
     .array(GrafanaMatcherSchema)
     .min(1)
+    .max(100)
     .describe('Label matchers identifying which alerts this silence mutes.'),
   startsAt: z
     .string()
