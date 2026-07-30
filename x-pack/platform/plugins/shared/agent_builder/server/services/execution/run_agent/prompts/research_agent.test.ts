@@ -147,7 +147,7 @@ describe('getResearchAgentPrompt', () => {
     );
     expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
   });
-  
+
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
     const params = {
       conversationTimestamp: now,
