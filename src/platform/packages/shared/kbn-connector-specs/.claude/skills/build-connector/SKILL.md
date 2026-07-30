@@ -32,7 +32,8 @@ Use `TaskCreate` to create all of the following tasks up front so the user can s
 9. **Iterate on quality** — "Fix code issues and re-test until quality bar is met"
 10. **Final code review** — "Final review of all generated files and documentation"
 11. **Final chat test** — "Final end-to-end conversation to confirm everything works"
-12. **Report completion** — "Tell the user the connector is ready for manual inspection"
+12. **Compile the PR validation table** — "Build the `## Validated` action-by-action table for the PR description"
+13. **Report completion** — "Tell the user the connector is ready for manual inspection"
 
 Set up dependencies: task 2 is blocked by 1, task 3 by 2, task 4 by 3, and so on sequentially.
 
@@ -48,7 +49,10 @@ they only show up when the spec is actually loaded and exercised in a running Ki
 explicitly asks to defer live testing for a batch, still run the self-review checklist from
 `create-connector`'s Step 4 ("Self-review before handing off") on every connector before considering it
 code-complete, and flag to the user that the deferred connectors have not been runtime-verified and are
-likely to need a fix-up pass once Tasks 4-11 finally run.
+likely to need a fix-up pass once Tasks 4-11 finally run. Still produce the `## Validated` table for each
+connector's PR (Task 12) — every row will read `⚠️ Not validated — needs manual verification` until live
+testing happens, but the table itself is not optional; see
+`create-connector/reference/pr-validation-table.md`.
 
 ---
 
@@ -265,9 +269,35 @@ Mark task 11 as `completed`.
 
 ---
 
-## Task 12: Report Completion
+## Task 12: Compile the PR Validation Table
+
+Mark task 12 as `in_progress`.
+
+Read `create-connector/reference/pr-validation-table.md` for the full format and rules, and build the
+`## Validated` markdown section now, while the results from Tasks 5-11 are fresh:
+
+- One row per action defined in the connector spec's `actions` map, plus the connectivity `test` handler
+  if one exists — no action may be omitted.
+- For actions actually exercised (Task 7/11 chat tests, direct calls during Task 5 activation, or manual
+  testing along the way), describe the concrete scenario tested and mark `✅ Pass` (noting any bug that
+  was found and fixed as part of getting it to pass).
+- For actions not exercised — deliberately skipped (e.g. destructive/admin-only), blocked by missing
+  test data/credentials, or because live testing (Tasks 4-11) was deferred entirely for this connector —
+  mark `⚠️ Not validated — needs manual verification` rather than leaving the row out.
+- For any action that failed and remains unresolved, mark `❌ Fail` with a short description.
+
+Keep this table's markdown handy (in the task output or scratch notes) — it must be included verbatim
+under a `## Validated` heading in the PR description when this connector's PR is opened, whether that
+happens later in this same session or by a human afterward. If a PR already exists for this connector,
+add or update the `## Validated` section in its description now rather than waiting.
 
 Mark task 12 as `completed`.
+
+---
+
+## Task 13: Report Completion
+
+Mark task 13 as `completed`.
 
 Tell the user something like the below template, listing the actual file paths that were created or modified during the process:
 
@@ -286,6 +316,8 @@ Tell the user something like the below template, listing the actual file paths t
 > 1. Open Kibana and navigate to the Agent Builder to inspect the agent
 > 2. Try chatting with the agent in the Kibana UI
 > 3. Review the generated code and adjust as needed
-> 4. When satisfied, commit the code changes
+> 4. When satisfied, commit the code changes and open a PR — include the `## Validated` table from Task 12
+>    in the PR description
 
-List the actual file paths that were created or modified during the process.
+List the actual file paths that were created or modified during the process, and include the `## Validated`
+table compiled in Task 12 in your response so the user has it even if they open the PR themselves.

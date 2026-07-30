@@ -13,6 +13,7 @@ We're going to create a new connector spec for **$0**. The connector will enable
 ## Reference Materials
 
 - **[reference/connector-patterns.md](reference/connector-patterns.md)** — Directory structure, file templates, and registration patterns
+- **[reference/pr-validation-table.md](reference/pr-validation-table.md)** — Format for the `## Validated` action-by-action table required in every connector PR description
 
 ## Step 1: Determine the Connector Strategy
 
@@ -173,6 +174,15 @@ This step requires documentation skills from https://github.com/elastic/elastic-
    a better-fitting category like "Threat intelligence" or "Identity management" first).
 
 Once you are done developing the connector spec, tests, and documentation, let the user review your work before next steps.
+
+### If this connector's PR hasn't been opened yet
+
+Whenever this connector's PR is opened — whether by `build-connector`'s Task 12, a later session, or a
+human — its description must include a `## Validated` section: a table listing every action the spec
+exposes and whether it's been observed working. If you ran this skill standalone (not via
+`build-connector`) and no live testing happened yet, still note this requirement to the user so the table
+doesn't get skipped when the PR is written. See
+[reference/pr-validation-table.md](reference/pr-validation-table.md) for the exact format.
 
 ## Important Notes
 

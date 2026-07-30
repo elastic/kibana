@@ -127,6 +127,17 @@ unavailable, tell the user to install them (`curl -sSL https://raw.githubusercon
 
 Report documentation issues alongside code issues.
 
+### PR Description
+
+- **`## Validated` table**: The PR description must include a `## Validated` section with a table
+  listing every action the spec exposes (plus the connectivity `test` handler, if present) and whether
+  it's been observed working — see
+  `create-connector/reference/pr-validation-table.md` for the required format. Flag a PR that's missing
+  this section entirely, is missing rows for some of the connector's actions, or marks an action
+  `✅ Pass` with no concrete scenario described. If live testing hasn't happened yet, every row should
+  still be present, marked `⚠️ Not validated — needs manual verification` — that's acceptable, an
+  entirely missing table is not.
+
 ### Naming and Conventions
 
 - Directory and file names follow repo conventions (snake_case for dirs/files; camelCase for TS exports)
