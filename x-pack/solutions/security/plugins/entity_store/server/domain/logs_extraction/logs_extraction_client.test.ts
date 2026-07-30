@@ -133,7 +133,6 @@ function createMockGlobalStateClient(
   logExtractionOverrides?: Partial<{
     lookbackPeriod: string;
     delay: string;
-    frequency: string;
     maxTimeWindowSize: string;
     maxLogsPerWindow: number;
     excludedIndexPatterns: string[];
@@ -146,7 +145,6 @@ function createMockGlobalStateClient(
     excludedIndexPatterns: logExtractionOverrides?.excludedIndexPatterns ?? [],
     lookbackPeriod: logExtractionOverrides?.lookbackPeriod ?? '3h',
     delay: logExtractionOverrides?.delay ?? '1m',
-    frequency: logExtractionOverrides?.frequency,
     // Default to a very large cap so existing tests run as a single sub-window. The dedicated
     // sub-window cap describe block overrides this to exercise capping behavior.
     maxTimeWindowSize: logExtractionOverrides?.maxTimeWindowSize ?? '999d',
@@ -1746,59 +1744,6 @@ describe('LogsExtractionClient', () => {
         'No global state found for this namespace'
       );
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('getNewTaskSchedule', () => {
-    const createTaskInstance = (interval?: string) =>
-      ({
-        id: 'entity_store:v2:extract_entity_task:host:default',
-        taskType: 'entity_store:v2:extract_entity_task:host',
-        schedule: interval ? { interval } : undefined,
-      } as Parameters<LogsExtractionClient['getNewTaskSchedule']>[0]);
-
-    const mockConfigFrequency = (frequency: string) => {
-      mockGlobalStateClient.findOrThrow.mockResolvedValue({
-        logsExtraction: LogExtractionConfig.parse({
-          docsLimit: 10000,
-          lookbackPeriod: '3h',
-          delay: '1m',
-          frequency,
-          maxTimeWindowSize: '999d',
-          maxLogsPerWindow: 0,
-        }),
-      } as EntityStoreGlobalState);
-    };
-
-    it('returns a schedule when frequency differs from the current interval', async () => {
-      mockConfigFrequency('22m');
-
-      await expect(client.getNewTaskSchedule(createTaskInstance('1m'))).resolves.toEqual({
-        schedule: { interval: '22m' },
-      });
-      expect(mockLogger.debug).toHaveBeenCalledWith('Updating task schedule from 1m to 22m');
-    });
-
-    it('returns undefined when frequency matches the current interval', async () => {
-      mockConfigFrequency('1m');
-
-      await expect(client.getNewTaskSchedule(createTaskInstance('1m'))).resolves.toBeUndefined();
-    });
-
-    it('returns undefined when the task has no interval', async () => {
-      mockConfigFrequency('1m');
-
-      await expect(client.getNewTaskSchedule(createTaskInstance())).resolves.toBeUndefined();
-      expect(mockGlobalStateClient.findOrThrow).not.toHaveBeenCalled();
-    });
-
-    it('returns undefined and logs a warning when reading global state fails', async () => {
-      mockGlobalStateClient.findOrThrow.mockRejectedValue(new Error('not found'));
-
-      await expect(client.getNewTaskSchedule(createTaskInstance('1m'))).resolves.toBeUndefined();
-      expect(mockLogger.warn).toHaveBeenCalledWith(
-        'Error getting new schedule, received: not found'
-      );
     });
   });
 });

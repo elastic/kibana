@@ -10,7 +10,6 @@ import moment from 'moment';
 import { SavedObjectsErrorHelpers, type ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isNonLocalIndexName } from '@kbn/es-query';
-import type { ConcreteTaskInstance, IntervalSchedule } from '@kbn/task-manager-plugin/server/task';
 import { entityStoreMetrics } from '../../monitor/metrics';
 import type {
   EntityType,
@@ -222,24 +221,6 @@ export class LogsExtractionClient {
     });
     await this.globalStateClient.update({ logsExtraction: mergedConfig });
     return mergedConfig;
-  }
-
-  public async getNewTaskSchedule(
-    taskInstance: ConcreteTaskInstance
-  ): Promise<{ schedule: IntervalSchedule } | undefined> {
-    const taskInterval = taskInstance.schedule?.interval;
-    if (!taskInterval) return;
-
-    try {
-      const config = await this.globalStateClient.findOrThrow();
-      const configFrequency = config.logsExtraction.frequency;
-      if (taskInterval !== configFrequency) {
-        this.logger.debug(`Updating task schedule from ${taskInterval} to ${configFrequency}`);
-        return { schedule: { interval: configFrequency } };
-      }
-    } catch (e) {
-      this.logger.warn(`Error getting new schedule, received: ${e.message}`);
-    }
   }
 
   private async runQueryAndIngestDocs({
