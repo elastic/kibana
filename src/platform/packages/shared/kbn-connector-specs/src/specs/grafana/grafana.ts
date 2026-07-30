@@ -356,6 +356,9 @@ export const Grafana: ConnectorSpec = {
         try {
           const response = await ctx.client.get(`${buildBaseUrl(ctx)}/api/search`, {
             params,
+            // Grafana's /api/search expects the repeated `?tag=a&tag=b` form; axios's
+            // default array serialization (`tag[]=a`) is not parsed by Grafana.
+            paramsSerializer: { indexes: null },
             headers: buildHeaders(ctx),
           });
           return { results: response.data };
