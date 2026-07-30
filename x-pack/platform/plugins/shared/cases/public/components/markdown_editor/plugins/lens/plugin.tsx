@@ -20,7 +20,7 @@ import {
   EuiBetaBadge,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useCallback, useContext, useMemo, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLocation } from 'react-router-dom';
@@ -33,6 +33,7 @@ import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
+import { useMarkdownEditorPluginClickedEBT } from '../../../../analytics/use_markdown_editor_ebt';
 import { DRAFT_COMMENT_STORAGE_ID, ID } from './constants';
 import { CommentEditorContext } from '../../context';
 import { useLensDraftComment } from './use_lens_draft_comment';
@@ -81,6 +82,18 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
   const markdownContext = useContext(EuiMarkdownContext);
   const isMainApplication = useIsMainApplication();
   const { euiTheme } = useEuiTheme();
+  const trackMarkdownEditorPluginClicked = useMarkdownEditorPluginClickedEBT();
+  const hasReportedRef = useRef(false);
+
+  // Reports when the Lens plugin is opened via the markdown toolbar (new insert),
+  // not when editing an existing Lens block (`node` is defined).
+  useEffect(() => {
+    if (!node && !hasReportedRef.current) {
+      hasReportedRef.current = true;
+      trackMarkdownEditorPluginClicked('lens');
+    }
+  }, [node, trackMarkdownEditorPluginClicked]);
+
   const handleClose = useCallback(() => {
     if (currentAppId) {
       embeddable?.getStateTransfer().getIncomingEmbeddablePackage(currentAppId, true);
