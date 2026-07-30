@@ -280,5 +280,62 @@ apiTest.describe(
         expect(scanForDiff('saved_object_create', excludedId)).toBeUndefined();
       }
     );
+
+    apiTest('redacts encrypted (ESO) attributes in the diff', async ({ apiClient, samlAuth }) => {
+      const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
+      const id = `so-diff-eso-${Date.now()}`;
+      const boundary = 'scoutSavedObjectDiffEsoBoundary';
+
+      // `action` (connector) is a hidden, ESO-encrypted type — not creatable via the public
+      // create API — but it IS importable, and the import path runs through the SO security +
+      // encryption extensions, so `secrets` is stored as ciphertext and a diff is emitted.
+      // (The connector API, by contrast, excludes the security extension, so it emits no diff.)
+      const ndjson =
+        JSON.stringify({
+          type: 'action',
+          id,
+          attributes: {
+            name: 'eso-redaction-test',
+            actionTypeId: '.index',
+            config: { index: 'eso-redaction-test' },
+            secrets: { apiKey: 'super-secret-value' },
+            isMissingSecrets: false,
+          },
+          references: [],
+        }) + '\n';
+
+      // Scout's apiClient has no multipart helper, so hand-build the form body and set the
+      // boundary content-type ourselves (the client preserves a caller-set content-type).
+      const body = Buffer.from(
+        `--${boundary}\r\n` +
+          `Content-Disposition: form-data; name="file"; filename="import.ndjson"\r\n` +
+          `Content-Type: application/ndjson\r\n\r\n` +
+          `${ndjson}\r\n` +
+          `--${boundary}--\r\n`,
+        'utf8'
+      );
+
+      const res = await apiClient.post('api/saved_objects/_import?overwrite=true', {
+        headers: {
+          ...cookieHeader,
+          ...KBN_HEADERS,
+          'content-type': `multipart/form-data; boundary=${boundary}`,
+        },
+        body,
+        responseType: 'json',
+      });
+      expect(res).toHaveStatusCode(200);
+      expect(res.body.success).toBe(true);
+
+      const diff = await waitForDiffEvent('saved_object_create', id);
+      // The encrypted `secrets` attribute is masked (ESO attrs are ciphertext + redacted)...
+      expect(opAt(diff, '/secrets')).toStrictEqual({
+        op: 'add',
+        path: '/secrets',
+        value: '[redacted]',
+      });
+      // ...while non-encrypted attributes are shown verbatim.
+      expect(opAt(diff, '/name')).toMatchObject({ op: 'add', value: 'eso-redaction-test' });
+    });
   }
 );
