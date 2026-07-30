@@ -8,6 +8,8 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { isValidTraceId } from '@opentelemetry/api';
 import {
+  createQuantitativeCorrectnessEvaluators,
+  createQuantitativeGroundednessEvaluator,
   createTrajectoryEvaluator,
   getToolCallSteps,
   withEvaluatorSpan,
@@ -21,21 +23,60 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   PersonaMatrixExample,
   PersonaMatrixExampleInput,
-  PersonaMatrixExampleOutput,
 } from './datasets/persona_matrix_prompts';
 import type { PersonaMatrixChatClient } from './chat_client';
+
+/**
+ * Dataset-level expected output the framework evaluators read via `expected`.
+ * `reference` is the ground-truth answer for qualitative scoring; `expected`
+ * is the field `correctness/index.ts` reads (`expected?.expected`) — we
+ * persist both so a single dataset row drives correctness/groundedness
+ * scoring. `tool_sequence` is copied from `metadata.expectedTools` so the
+ * trajectory evaluator's `goldenPathExtractor` — which only receives
+ * `expected`, not `metadata` — can see the golden path. Mirrors
+ * `AlertsRagDatasetExpected` in `kbn-evals-suite-alerts-rag/src/evaluate_dataset.ts`.
+ */
+export interface PersonaMatrixDatasetExpected {
+  reference: string;
+  expected: string;
+  tool_sequence?: string[];
+}
+
+export type PersonaMatrixDatasetExample = PersonaMatrixExample & {
+  output: PersonaMatrixDatasetExpected;
+};
+
+/**
+ * Maps a raw persona-matrix example into the shape the framework evaluators
+ * expect: mirrors `output.reference` into `output.expected`, and copies
+ * `metadata.expectedTools` into `output.tool_sequence` so
+ * `goldenPathExtractor` can resolve the golden path from `expected` without
+ * `@kbn/evals`'s `createTrajectoryEvaluator` needing access to `metadata`.
+ * One mapping function instead of per-example duplication — cannot drift.
+ */
+export const toDatasetExample = (ex: PersonaMatrixExample): PersonaMatrixDatasetExample => {
+  const expectedTools = ex.metadata?.expectedTools;
+  return {
+    ...ex,
+    output: {
+      reference: ex.output.reference,
+      expected: ex.output.reference,
+      ...(expectedTools?.length ? { tool_sequence: expectedTools } : {}),
+    },
+  };
+};
 
 /**
  * ExpectedToolCalled — verifies the primary expected tool was invoked.
  * Reads `expectedTools` from example metadata (first entry) or `tool_sequence`
  * from the expected output.
  */
-const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
+export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
   name: 'ExpectedToolCalled',
   kind: 'CODE',
   evaluate: async ({ output, expected, metadata }) => {
     // Try tool_sequence from expected output first, then expectedTools from metadata
-    const toolSequence = (expected as PersonaMatrixExampleOutput | undefined)?.tool_sequence;
+    const toolSequence = (expected as PersonaMatrixDatasetExpected | undefined)?.tool_sequence;
     const meta = metadata as { expectedTools?: string[] } | undefined;
     const expectedTools = meta?.expectedTools ?? toolSequence;
 
@@ -60,6 +101,46 @@ const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
 });
 
 /**
+ * Trajectory evaluator wrapper. Returns N/A when an example has no
+ * `tool_sequence` annotation so partial-coverage datasets don't get
+ * penalised. Mirrors `createAlertsRagTrajectoryEvaluator` in
+ * `kbn-evals-suite-alerts-rag/src/evaluate_dataset.ts`. `filestore.read`
+ * (SKILL.md activation) is stripped from the actual sequence since it's
+ * already covered by the SkillInvoked evaluator and would otherwise show
+ * up as a noisy "extra tool".
+ */
+const FILESTORE_READ_TOOL_ID = 'filestore.read';
+
+export const createPersonaMatrixTrajectoryEvaluator = (): Evaluator => {
+  const inner = createTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output as TaskOutput)
+        .map((step) => step.tool_id)
+        .filter((id): id is string => Boolean(id) && id !== FILESTORE_READ_TOOL_ID),
+    goldenPathExtractor: (expected) => {
+      const exp = expected as PersonaMatrixDatasetExpected | undefined;
+      return exp?.tool_sequence ?? [];
+    },
+  });
+
+  return {
+    ...inner,
+    name: 'Trajectory',
+    evaluate: async (args) => {
+      const exp = args.expected as PersonaMatrixDatasetExpected | undefined;
+      if (!exp?.tool_sequence || exp.tool_sequence.length === 0) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No tool_sequence annotation — skipping trajectory evaluation.',
+        };
+      }
+      return inner.evaluate(args);
+    },
+  };
+};
+
+/**
  * SkillInvoked — verifies the agent loaded an acceptable skill for THIS example.
  *
  * Scored per-example from the example's own metadata, not fanned out across the
@@ -71,7 +152,7 @@ const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => ({
  */
 const VALID_SKILL_NAME = /^[a-zA-Z0-9_-]+$/;
 
-const createPersonaMatrixSkillInvokedEvaluator = ({
+export const createPersonaMatrixSkillInvokedEvaluator = ({
   traceEsClient,
   log,
 }: {
@@ -186,37 +267,27 @@ export function createEvaluatePersonaMatrixDataset({
   }: {
     dataset: EvaluationDataset<PersonaMatrixExample>;
   }): Promise<void> {
+    const wrappedExamples = dataset.examples.map(toDatasetExample);
+
     const skillInvokedEvaluator = createPersonaMatrixSkillInvokedEvaluator({
       traceEsClient,
       log,
     });
 
-    const trajectoryEvaluator = createTrajectoryEvaluator({
-      extractToolCalls: (output) => {
-        const steps = (output as { steps?: Array<{ tool_id?: string }> })?.steps;
-        if (!Array.isArray(steps)) return [];
-        return steps.map((s) => s.tool_id).filter((t): t is string => typeof t === 'string');
-      },
-      goldenPathExtractor: (expected) => {
-        const meta = expected as { tool_sequence?: string[] };
-        return meta?.tool_sequence ?? [];
-      },
-    });
-
-    const correctnessEvaluators = [
-      evaluators.correctnessAnalysis(),
-      evaluators.groundednessAnalysis(),
-    ];
-
+    const trajectoryEvaluator = createPersonaMatrixTrajectoryEvaluator();
     const expectedToolCalledEvaluator = createPersonaMatrixExpectedToolCalledEvaluator();
 
     const { inputTokens, outputTokens, toolCalls, latency } = evaluators.traceBasedEvaluators;
 
+    // Quantitative correctness/groundedness evaluators are pure functions of
+    // the precomputed analyses attached to task output below — no LLM calls
+    // at evaluate time. Mirrors `buildAlertsRagEvaluators`.
     const allEvaluators: Evaluator[] = [
       skillInvokedEvaluator,
       trajectoryEvaluator,
       expectedToolCalledEvaluator,
-      ...correctnessEvaluators,
+      ...createQuantitativeCorrectnessEvaluators(),
+      createQuantitativeGroundednessEvaluator(),
       evaluators.criteria([
         'Relevance: The response directly addresses the user security question.',
         'Clarity: The response is well-structured and easy to follow.',
@@ -231,7 +302,13 @@ export function createEvaluatePersonaMatrixDataset({
 
     await executorClient.runExperiment(
       {
-        datasets: [dataset],
+        datasets: [
+          {
+            name: dataset.name,
+            description: dataset.description,
+            examples: wrappedExamples,
+          },
+        ],
         metadata: { suite: 'security-persona-matrix', source: 'persona-matrix-eval' },
         task: async (example) => {
           const input = example.input as PersonaMatrixExampleInput;
@@ -240,31 +317,42 @@ export function createEvaluatePersonaMatrixDataset({
           const response = await chatClient.query(question, input?.attachment);
 
           const taskOutput: TaskOutput = {
-            response,
-            traceId: response.traceId ?? null,
+            messages: response.messages,
             steps: response.steps,
-            skillId: response.traceId ?? 'unknown',
-            tags: example.metadata?.tags ?? [],
-          } as TaskOutput;
+            errors: response.errors,
+            traceId: response.traceId ?? null,
+          };
 
-          // Run correctnessAnalysis (structured LLM judge) and attach metadata
-          try {
-            const correctnessResult = await withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+          // Precompute the qualitative analyses inside the task once, so the
+          // deterministic Factuality/Relevance/Sequence Accuracy/Groundedness
+          // evaluators registered above are pure functions of the precomputed
+          // result and correctnessAnalysis() is invoked exactly once per
+          // example (was: once here + once again as a registered evaluator).
+          const expected = example.output as PersonaMatrixDatasetExpected;
+          const [correctnessResult, groundednessResult] = await Promise.all([
+            withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
               evaluators.correctnessAnalysis().evaluate({
                 input,
-                expected: example.output,
+                expected,
                 output: taskOutput,
                 metadata: example.metadata,
               })
-            );
-            return {
-              ...(taskOutput as object),
-              correctnessAnalysis: correctnessResult?.metadata,
-            } as TaskOutput;
-          } catch {
-            // Judge model may fail; continue without correctnessAnalysis
-            return taskOutput;
-          }
+            ),
+            withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+              evaluators.groundednessAnalysis().evaluate({
+                input,
+                expected,
+                output: taskOutput,
+                metadata: example.metadata,
+              })
+            ),
+          ]);
+
+          return {
+            ...(taskOutput as object),
+            correctnessAnalysis: correctnessResult?.metadata,
+            groundednessAnalysis: groundednessResult?.metadata,
+          } as TaskOutput;
         },
       },
       allEvaluators

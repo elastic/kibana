@@ -23,9 +23,17 @@ interface ConverseStep {
   [k: string]: unknown;
 }
 
+/**
+ * Standard task-output shape consumed by the shared `@kbn/evals` evaluators
+ * (`correctness`, `groundedness`): `messages[last].message` is the real
+ * converse answer, and `errors` is always present (even if empty) so the
+ * eval report has a stable column to read. Mirrors `ConverseResponse` in
+ * `kbn-evals-suite-alerts-rag/src/chat_client.ts`.
+ */
 export interface ConverseResponse {
-  message: string;
+  messages: Array<{ message: string }>;
   steps: ConverseStep[];
+  errors: Array<{ error: { message: string; stack?: string }; type: 'error' }>;
   conversationId?: string;
   traceId?: string | null;
 }
@@ -66,9 +74,12 @@ export class PersonaMatrixChatClient {
         body: JSON.stringify(body),
       });
 
+      const message = resp.response?.message ?? '';
+
       const result: ConverseResponse = {
-        message: resp.response?.message ?? '',
+        messages: [{ message }],
         steps: resp.steps ?? [],
+        errors: [],
         conversationId: resp.conversation_id,
         traceId: resp.trace_id ?? null,
       };
@@ -82,7 +93,7 @@ export class PersonaMatrixChatClient {
             `${JSON.stringify({
               connector_id: this.connectorId,
               input,
-              response_message: result.message,
+              response_message: message,
               steps: result.steps,
               trace_id: result.traceId,
               conversation_id: result.conversationId,
