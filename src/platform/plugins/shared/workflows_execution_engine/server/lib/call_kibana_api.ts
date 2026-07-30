@@ -229,15 +229,18 @@ export async function callKibanaApi<T = unknown>(
 
   // Internal UIAM (essu_) keys need the shared secret attached once this loopback request re-enters
   // Kibana. We must never hold the secret here, so instead we present a non-reversible attestation
-  // of it, fetched right before the call and never stored, to authorize Kibana to attach the secret
-  // on our behalf. Spread last, so a step author cannot override it.
+  // of it, bound to this very credential, fetched right before the call and never stored, to
+  // authorize Kibana to attach the secret on our behalf. Spread last, so a step author cannot
+  // override it.
   // Stamping for any essu_ credential is safe because the workflow identity is always an internal
   // granted key. If the engine ever proxies an *external* UIAM key over a loopback, gate this on an
   // explicit internal flag: Elasticsearch rejects an external key presented with the shared secret.
   if (isUiamCredential(authorizationHeader)) {
     Object.assign(
       outboundHeaders,
-      coreStart.security.authc.apiKeys.uiam?.getInternalCallerAttestationHeaders()
+      coreStart.security.authc.apiKeys.uiam?.getInternalCallerAttestationHeaders(
+        authorizationHeader
+      )
     );
   }
 

@@ -8,6 +8,7 @@
  */
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import {
   callKibanaApi,
   CallKibanaApiResponseTooLargeError,
@@ -90,7 +91,13 @@ function createFakeRequest({
  */
 const UIAM_ATTESTATION_HEADER = 'x-some-internal-caller-attestation';
 
+const mockGetAttestationHeaders = jest.fn();
+
 function createCoreStart({ uiamAttestation }: { uiamAttestation?: string } = {}): CoreStart {
+  if (uiamAttestation) {
+    mockGetAttestationHeaders.mockReturnValue({ [UIAM_ATTESTATION_HEADER]: uiamAttestation });
+  }
+
   return {
     http: {
       selfClient: { asScoped: mockAsScoped },
@@ -99,11 +106,7 @@ function createCoreStart({ uiamAttestation }: { uiamAttestation?: string } = {})
       authc: {
         apiKeys: {
           uiam: uiamAttestation
-            ? {
-                getInternalCallerAttestationHeaders: () => ({
-                  [UIAM_ATTESTATION_HEADER]: uiamAttestation,
-                }),
-              }
+            ? { getInternalCallerAttestationHeaders: mockGetAttestationHeaders }
             : null,
         },
       },
@@ -118,6 +121,7 @@ const lastFetchHeaders = () => lastFetchOptions().headers as Record<string, stri
 describe('callKibanaApi', () => {
   beforeEach(() => {
     mockSelfFetch.mockReset();
+    mockGetAttestationHeaders.mockReset();
     mockAsScoped.mockClear();
     mockAsScoped.mockImplementation(() => ({ fetch: mockSelfFetch }));
   });
@@ -235,6 +239,23 @@ describe('callKibanaApi', () => {
     );
 
     expect(lastFetchHeaders()[UIAM_ATTESTATION_HEADER]).toBe('valid-attestation');
+  });
+
+  it('asks for an attestation bound to the credential the request carries', async () => {
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
+
+    await callKibanaApi(
+      {
+        fakeRequest: createFakeRequest({ headers: { authorization: 'ApiKey essu_internal_key' } }),
+        coreStart: createCoreStart({ uiamAttestation: 'valid-attestation' }),
+      },
+      { method: 'GET', path: '/api/status' }
+    );
+
+    expect(mockGetAttestationHeaders).toHaveBeenCalledTimes(1);
+    expect(mockGetAttestationHeaders).toHaveBeenCalledWith(
+      new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key')
+    );
   });
 
   it('does not stamp the attestation for a non-UIAM credential', async () => {

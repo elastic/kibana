@@ -256,6 +256,10 @@ export class ClusterClient implements ICustomClusterClient {
     }
 
     // If the credential is an internal UIAM credential, it might require client authentication.
+    // Use `internal` regardless of the request shape: unlike `getScopedHeaders`, this never reads a
+    // credential off the wire. For a real request it takes the auth provider's post-authentication
+    // headers (Kibana already vouched for that credential), and for a fake one the credential was
+    // minted by Kibana itself, so neither needs an attestation to be trusted.
     const clientAuthentication = this.security?.uiam?.getElasticsearchClientAuthentication({
       credentialSource: 'internal',
       credential: authorizationHeader,

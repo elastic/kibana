@@ -321,9 +321,25 @@ describe('UiamService', () => {
 
   describe('#getInternalCallerAttestationHeaders', () => {
     it('carries the attestation derived from the shared secret, and never the secret itself', () => {
-      expect(uiamService.getInternalCallerAttestationHeaders()).toEqual({
-        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation('secret'),
+      const credential = new HTTPAuthorizationHeader('Bearer', 'essu_one');
+      expect(uiamService.getInternalCallerAttestationHeaders(credential)).toEqual({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          'secret',
+          credential
+        ),
       });
+    });
+
+    it('binds the attestation to the credential', () => {
+      expect(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_one')
+        )
+      ).not.toEqual(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_two')
+        )
+      );
     });
   });
 

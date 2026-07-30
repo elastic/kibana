@@ -16,8 +16,8 @@ import {
 import { createCoreUiamService } from './uiam';
 
 const SHARED_SECRET = 'shared-secret';
-const VALID_ATTESTATION = deriveInternalCallerAttestation(SHARED_SECRET);
 const UIAM_CREDENTIAL = new HTTPAuthorizationHeader('ApiKey', 'essu_internal_key');
+const VALID_ATTESTATION = deriveInternalCallerAttestation(SHARED_SECRET, UIAM_CREDENTIAL);
 
 describe('createCoreUiamService', () => {
   let uiam: ReturnType<typeof createCoreUiamService>;
@@ -76,8 +76,25 @@ describe('createCoreUiamService', () => {
           credentialSource: 'inbound',
           credential: UIAM_CREDENTIAL,
           requestHeaders: {
-            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]:
-              deriveInternalCallerAttestation('a-different-secret'),
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+              'a-different-secret',
+              UIAM_CREDENTIAL
+            ),
+          },
+        })
+      ).toBeUndefined();
+    });
+
+    it('returns undefined for an attestation minted for a different credential', () => {
+      expect(
+        uiam.getElasticsearchClientAuthentication({
+          credentialSource: 'inbound',
+          credential: UIAM_CREDENTIAL,
+          requestHeaders: {
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+              SHARED_SECRET,
+              new HTTPAuthorizationHeader('ApiKey', 'essu_another_internal_key')
+            ),
           },
         })
       ).toBeUndefined();

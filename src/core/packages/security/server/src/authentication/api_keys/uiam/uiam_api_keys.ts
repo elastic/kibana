@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 import type { GrantAPIKeyResult, InvalidateAPIKeyResult } from '../api_keys';
+import type { HTTPAuthorizationHeader } from '../../http_authentication';
 
 /**
  * Interface for managing UIAM-specific API key operations.
@@ -55,8 +56,11 @@ export interface UiamAPIKeysType {
    *
    * Spread the result into the outbound headers (last, so a caller-supplied value cannot win). Read
    * it right before the loopback call, do not persist it.
+   *
+   * @param credential The credential the request will carry. The result only authorizes that one
+   * credential, so it cannot be reused for another and is worthless once the credential expires.
    */
-  getInternalCallerAttestationHeaders(): Record<string, string>;
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
 }
 
 /**

@@ -159,9 +159,10 @@ export interface UiamServicePublic {
   /**
    * Returns the header(s) a trusted loopback caller stamps on a real HTTP request that carries an
    * internal UIAM (`essu_`) credential, so the ES cluster client re-attaches the shared secret on
-   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself).
+   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself), bound
+   * to `credential` so it authorizes that credential only.
    */
-  getInternalCallerAttestationHeaders(): Record<string, string>;
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
 
   /**
    * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
@@ -331,7 +332,6 @@ export class UiamService implements UiamServicePublic {
   readonly #kibanaServerResourceURL: string;
   readonly #elasticsearchUrl?: string;
   readonly #userAgentHeader: string;
-  readonly #internalCallerAttestation: string;
 
   constructor(logger: Logger, config: UiamConfigType, options: UiamServiceOptions) {
     this.#logger = logger;
@@ -355,9 +355,6 @@ export class UiamService implements UiamServicePublic {
 
     this.#config = { enabled, url, sharedSecret, ssl };
     this.#dispatcher = this.#createFetchDispatcher();
-
-    // Calculate attestation once per Kibana run, rotating the shared secret restarts Kibana.
-    this.#internalCallerAttestation = deriveInternalCallerAttestation(sharedSecret);
   }
 
   /**
@@ -373,8 +370,13 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getInternalCallerAttestationHeaders}.
    */
-  getInternalCallerAttestationHeaders(): Record<string, string> {
-    return { [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: this.#internalCallerAttestation };
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string> {
+    return {
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+        this.#config.sharedSecret,
+        credential
+      ),
+    };
   }
 
   /**

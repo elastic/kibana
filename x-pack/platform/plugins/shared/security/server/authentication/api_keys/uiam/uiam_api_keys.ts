@@ -180,8 +180,8 @@ export class UiamAPIKeys implements UiamAPIKeysType {
    * Returns the header(s) trusted loopback callers stamp on real requests carrying an internal
    * UIAM (`essu_`) credential (see {@link UiamAPIKeysType.getInternalCallerAttestationHeaders}).
    */
-  getInternalCallerAttestationHeaders() {
-    return this.uiam.getInternalCallerAttestationHeaders();
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader) {
+    return this.uiam.getInternalCallerAttestationHeaders(credential);
   }
 
   /**

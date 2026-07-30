@@ -75,13 +75,9 @@ function constantTimeEqual(a: string, b: string): boolean {
 }
 
 /**
- * Builds the core {@link CoreUiamService}. The derived attestation is memoized once per Kibana run
- * (rotating the shared secret restarts Kibana, so it never changes at run time).
+ * Builds the core {@link CoreUiamService}.
  */
 export function createCoreUiamService(sharedSecret: string): CoreUiamService {
-  let attestation: string | undefined;
-  const getAttestation = () => (attestation ??= deriveInternalCallerAttestation(sharedSecret));
-
   return Object.freeze({
     getElasticsearchClientAuthentication(params: UiamClientAuthenticationParams) {
       if (!isUiamCredential(params.credential)) {
@@ -89,8 +85,11 @@ export function createCoreUiamService(sharedSecret: string): CoreUiamService {
       }
 
       if (params.credentialSource === 'inbound') {
+        // The attestation is bound to the credential it rides with, so one captured from another
+        // request (or another credential) does not validate here.
+        const expected = deriveInternalCallerAttestation(sharedSecret, params.credential);
         const presented = params.requestHeaders[UIAM_INTERNAL_CALLER_ATTESTATION_HEADER];
-        if (typeof presented !== 'string' || !constantTimeEqual(presented, getAttestation())) {
+        if (typeof presented !== 'string' || !constantTimeEqual(presented, expected)) {
           return;
         }
       }

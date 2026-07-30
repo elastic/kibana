@@ -34,6 +34,7 @@ import { AgentManager } from './agent_manager';
 import { duration } from 'moment';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import {
+  HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   deriveInternalCallerAttestation,
 } from '@kbn/core-security-server';
@@ -941,8 +942,12 @@ describe('ClusterClient', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: {
           [AUTHORIZATION_HEADER]: 'Bearer override',
-          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]:
-            deriveInternalCallerAttestation('some-shared-secret'),
+          // The attestation is bound to the effective (post-authentication) credential, not to the
+          // one that came in on the wire.
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            new HTTPAuthorizationHeader('Bearer', 'essu_dev_yes')
+          ),
         },
       });
 
@@ -964,6 +969,42 @@ describe('ClusterClient', () => {
       // The attestation itself must never be forwarded to Elasticsearch.
       const forwardedHeaders = scopedClient.child.mock.calls[0][0].headers;
       expect(forwardedHeaders).not.toHaveProperty(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER);
+    });
+
+    it('does not specify client authentication for UIAM credentials in real requests with an attestation bound to another credential', () => {
+      const config = createConfig({ requestHeadersWhitelist: ['authorization'] });
+      authHeaders.get.mockReturnValue({ [AUTHORIZATION_HEADER]: 'Bearer essu_dev_yes' });
+
+      const clusterClient = new ClusterClient({
+        config,
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        security: securityServiceMock.createInternalSetup(),
+        agentFactoryProvider,
+        kibanaVersion,
+        onRequestHandlerFactory: mockOnRequestHandlerFactory,
+      });
+      const request = httpServerMock.createKibanaRequest({
+        headers: {
+          [AUTHORIZATION_HEADER]: 'Bearer override',
+          // Genuinely minted with the shared secret, but for a different credential, so replaying it
+          // here must not authorize the shared secret.
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            new HTTPAuthorizationHeader('Bearer', 'essu_dev_other')
+          ),
+        },
+      });
+
+      const scopedClusterClient = clusterClient.asScoped(request);
+      // trigger client instantiation via getter
+      client = scopedClusterClient.asCurrentUser;
+
+      expect(scopedClient.child).toHaveBeenCalledTimes(1);
+      expect(scopedClient.child.mock.calls[0][0].headers).not.toHaveProperty(
+        ES_CLIENT_AUTHENTICATION_HEADER
+      );
     });
 
     it('does not specify client authentication for UIAM credentials in real requests with an invalid attestation', () => {
@@ -1014,8 +1055,10 @@ describe('ClusterClient', () => {
       const request = httpServerMock.createKibanaRequest({
         headers: {
           [AUTHORIZATION_HEADER]: 'Bearer override',
-          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]:
-            deriveInternalCallerAttestation('some-shared-secret'),
+          [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+            'some-shared-secret',
+            new HTTPAuthorizationHeader('Bearer', 'not-uiam')
+          ),
         },
       });
 

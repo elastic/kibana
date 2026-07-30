@@ -10,6 +10,7 @@ import { Agent } from 'undici';
 
 import {
   deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import {
@@ -209,12 +210,17 @@ apiTest.describe(
 
         // 2. A real request carrying the internal key AND a valid attestation succeeds: the ES
         // cluster client re-attaches the shared secret on the request's behalf.
+        const credential = new HTTPAuthorizationHeader(
+          'ApiKey',
+          (await internalUiamApiKeyResponse.json()).key
+        );
         const response = await apiClient.get('internal/security/me', {
           headers: {
             ...COMMON_HEADERS,
-            Authorization: `ApiKey ${(await internalUiamApiKeyResponse.json()).key}`,
+            Authorization: credential.toString(),
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-              MOCK_IDP_UIAM_SHARED_SECRET
+              MOCK_IDP_UIAM_SHARED_SECRET,
+              credential
             ),
           },
           responseType: 'json',
@@ -251,12 +257,50 @@ apiTest.describe(
         const internalUiamApiKeyResponse = await grantUiamApiKey(accessToken);
         expect(internalUiamApiKeyResponse.status).toBe(200);
 
+        const credential = new HTTPAuthorizationHeader(
+          'ApiKey',
+          (await internalUiamApiKeyResponse.json()).key
+        );
+        const response = await apiClient.get('internal/security/me', {
+          headers: {
+            ...COMMON_HEADERS,
+            Authorization: credential.toString(),
+            [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+              'a-different-shared-secret',
+              credential
+            ),
+          },
+          responseType: 'json',
+        });
+        expect(response).toHaveStatusCode(401);
+      }
+    );
+
+    apiTest(
+      'should reject an internal UIAM API key on a real request with an attestation bound to another key',
+      async ({ apiClient }) => {
+        const [_, { accessToken }] = await userSessionCookieFactory();
+        const [internalUiamApiKeyResponse, otherInternalUiamApiKeyResponse] = await Promise.all([
+          grantUiamApiKey(accessToken),
+          grantUiamApiKey(accessToken),
+        ]);
+        expect(internalUiamApiKeyResponse.status).toBe(200);
+        expect(otherInternalUiamApiKeyResponse.status).toBe(200);
+
+        // The attestation is genuine, but minted for a different credential, so it must not
+        // authorize this one.
         const response = await apiClient.get('internal/security/me', {
           headers: {
             ...COMMON_HEADERS,
             Authorization: `ApiKey ${(await internalUiamApiKeyResponse.json()).key}`,
             [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
-              'a-different-shared-secret'
+              MOCK_IDP_UIAM_SHARED_SECRET,
+              new HTTPAuthorizationHeader(
+                'ApiKey',
+                (
+                  await otherInternalUiamApiKeyResponse.json()
+                ).key
+              )
             ),
           },
           responseType: 'json',
