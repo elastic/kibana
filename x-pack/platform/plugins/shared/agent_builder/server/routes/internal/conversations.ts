@@ -68,7 +68,7 @@ export function registerInternalConversationRoutes({
           conversation_id: schema.string({ maxLength: 256 }),
         }),
         body: schema.object({
-          template_id: schema.string(),
+          template_id: schema.string({ maxLength: 256 }),
         }),
       },
       options: { access: 'internal' },
