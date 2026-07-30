@@ -12,6 +12,5 @@ import {
 } from '@kbn/alerting-v2-schemas';
 
 export const createRuleDataFromTemplate = (template: RuleTemplateData): CreateRuleData => {
-  const { engine: _engine, ...ruleFields } = template;
-  return createRuleDataSchema.parse(ruleFields);
+  return createRuleDataSchema.parse(template.rule);
 };

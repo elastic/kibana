@@ -12,9 +12,16 @@ const engineField = z
   .literal('v2')
   .describe('The alerting engine this template targets. Always "v2" for v2 templates.');
 
-export const ruleTemplateDataSchema = createRuleDataBaseSchema
-  .extend({
+/**
+ * Alerting v2 rule template attributes.
+ *
+ * Create-rule fields are nested under `rule` so template storage can evolve
+ * independently of top-level SO metadata (`engine`).
+ */
+export const ruleTemplateDataSchema = z
+  .object({
     engine: engineField,
+    rule: createRuleDataBaseSchema,
   })
   .strict()
   .describe('Alerting v2 rule template attributes.');
