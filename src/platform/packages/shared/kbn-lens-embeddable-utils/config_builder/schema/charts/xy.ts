@@ -426,7 +426,7 @@ const xyLegendOutsideHorizontalSchema = sharedLegendSchema
   .extend({
     placement: z.literal('outside').optional(),
     layout: z.union([gridLayout, listLayout]).optional(),
-    position: z.union([z.literal('top'), z.literal('bottom')]).optional(),
+    position: z.enum(['top', 'bottom']).optional(),
   })
   .meta({
     id: 'xyLegendOutsideHorizontal',
@@ -438,7 +438,7 @@ const xyLegendOutsideVerticalSchema = sharedLegendSchema
   .extend({
     placement: z.literal('outside').optional(),
     layout: gridLayout.optional(),
-    position: z.union([z.literal('left'), z.literal('right')]).optional(),
+    position: z.enum(['left', 'right']).optional(),
     size: legendSizeSchema,
   })
   .meta({

@@ -14,7 +14,7 @@ export const asCodeQuerySchema = z
     expression: z.string().meta({
       description: 'A query expression in KQL or Lucene syntax.',
     }),
-    language: z.union([z.literal('kql'), z.literal('lucene')]).meta({
+    language: z.enum(['kql', 'lucene']).meta({
       description:
         'Query language. Use `kql` for Kibana Query Language (KQL) or `lucene` for Lucene query syntax.',
     }),

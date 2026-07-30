@@ -23,7 +23,7 @@ export function registerTrackUserActivityRoute(router: IRouter<RequestHandlerCon
       validate: {
         params: z
           .object({
-            type: z.union([z.literal('view'), z.literal('refresh')]),
+            type: z.enum(['view', 'refresh']),
             id: z.string().max(100),
           })
           .strict(),

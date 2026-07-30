@@ -33,7 +33,7 @@ const bulletShapeSchema = z
 
 const circularShapeSchema = z
   .object({
-    type: z.union([z.literal('circle'), z.literal('semi_circle'), z.literal('arc')]),
+    type: z.enum(['circle', 'semi_circle', 'arc']),
   })
   .strict()
   .meta({

@@ -129,7 +129,7 @@ const colorByValueBaseSchema = z
     /**
      * Determines whether the range is interpreted as absolute or as a percentage of the data.
      */
-    range: z.union([z.literal('absolute'), z.literal('percentage')]).meta({
+    range: z.enum(['absolute', 'percentage']).meta({
       description:
         'Determines whether the range is interpreted as absolute or as a percentage of the data.',
     }),
@@ -417,7 +417,7 @@ export const DEFAULT_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType =
 /**
  * Schema for where to apply the color (to value or background).
  */
-export const applyColorToSchema = z.union([z.literal('value'), z.literal('background')]).meta({
+export const applyColorToSchema = z.enum(['value', 'background']).meta({
   description:
     'Color target: `value` colors the metric text, `background` colors the cell or panel background.',
 });

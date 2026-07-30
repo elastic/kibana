@@ -52,11 +52,11 @@ export const optionsListSearchTechniqueSchema = z
 
 export const optionsListSortSchema = z
   .object({
-    by: z.union([z.literal('_count'), z.literal('_key')]).meta({
+    by: z.enum(['_count', '_key']).meta({
       description:
         'The field used to sort the available options list. `_count` sorts by document count and `_key` sorts alphabetically by option value.',
     }),
-    direction: z.union([z.literal('asc'), z.literal('desc')]).meta({
+    direction: z.enum(['asc', 'desc']).meta({
       description: 'The sort direction. `asc` sorts ascending and `desc` sorts descending.',
     }),
   })

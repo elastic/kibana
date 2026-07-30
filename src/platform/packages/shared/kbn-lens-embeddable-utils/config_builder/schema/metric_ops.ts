@@ -162,13 +162,7 @@ export const uniqueCountMetricOperationSchema = fieldBasedOperationSharedSchema
 
 export const metricOperationSchema = fieldBasedOperationSharedSchema
   .extend({
-    operation: z.union([
-      z.literal('min'),
-      z.literal('max'),
-      z.literal('average'),
-      z.literal('median'),
-      z.literal('standard_deviation'),
-    ]),
+    operation: z.enum(['min', 'max', 'average', 'median', 'standard_deviation']),
   })
   .meta({ id: 'minMaxAvgMedianStdDevMetricOperation', title: METRIC_OP_TITLES.stats });
 

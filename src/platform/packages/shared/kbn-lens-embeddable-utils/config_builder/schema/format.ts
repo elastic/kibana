@@ -13,7 +13,7 @@ import { durationFormatSchema, legacyDurationFormatSchema } from './duration_uni
 
 const numericFormatSchema = z
   .object({
-    type: z.union([z.literal('number'), z.literal('percent')]).meta({
+    type: z.enum(['number', 'percent']).meta({
       description: 'Value format type: `number` for plain numbers, `percent` for percentages.',
     }),
     /**

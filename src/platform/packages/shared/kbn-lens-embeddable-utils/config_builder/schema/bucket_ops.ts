@@ -94,15 +94,15 @@ const bucketTermsRankByCustomSharedSchema = z
 
 const bucketTermsRankByCustomOperationSchema = bucketTermsRankByCustomSharedSchema
   .extend({
-    operation: z.union([
-      z.literal('min'),
-      z.literal('max'),
-      z.literal('average'),
-      z.literal('median'),
-      z.literal('standard_deviation'),
-      z.literal('unique_count'),
-      z.literal('sum'),
-      z.literal('last_value'),
+    operation: z.enum([
+      'min',
+      'max',
+      'average',
+      'median',
+      'standard_deviation',
+      'unique_count',
+      'sum',
+      'last_value',
     ]),
   })
   .meta({

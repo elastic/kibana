@@ -9,21 +9,17 @@
 
 import { z } from '@kbn/zod';
 
-export const orientationSchema = z
-  .union([z.literal('horizontal'), z.literal('vertical'), z.literal('angled')])
-  .meta({
-    id: 'vis_api_orientation',
-    description: 'Orientation',
-  });
+export const orientationSchema = z.enum(['horizontal', 'vertical', 'angled']).meta({
+  id: 'vis_api_orientation',
+  description: 'Orientation',
+});
 
-export const simpleOrientationSchema = z
-  .union([z.literal('horizontal'), z.literal('vertical')])
-  .meta({
-    id: 'vis_api_simple_orientation',
-    description: 'Orientation',
-  });
+export const simpleOrientationSchema = z.enum(['horizontal', 'vertical']).meta({
+  id: 'vis_api_simple_orientation',
+  description: 'Orientation',
+});
 
-export const directionSchema = z.union([z.literal('asc'), z.literal('desc')]).meta({
+export const directionSchema = z.enum(['asc', 'desc']).meta({
   id: 'vis_api_direction',
   description: 'Direction',
 });

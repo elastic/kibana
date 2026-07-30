@@ -36,7 +36,7 @@ const sortSchema = z
     name: z.string().meta({
       description: 'The name of the field to sort by.',
     }),
-    direction: z.union([z.literal('asc'), z.literal('desc')]).meta({
+    direction: z.enum(['asc', 'desc']).meta({
       description:
         'The direction to sort the field by: Use "asc" for ascending or "desc" for descending.',
     }),

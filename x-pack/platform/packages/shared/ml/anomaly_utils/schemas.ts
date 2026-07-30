@@ -8,16 +8,9 @@
 import { z } from '@kbn/zod';
 import { ML_ENTITY_FIELD_OPERATIONS, ML_ENTITY_FIELD_TYPE } from './anomaly_utils';
 
-const mlEntityFieldTypeSchema = z.union([
-  z.literal(ML_ENTITY_FIELD_TYPE.BY),
-  z.literal(ML_ENTITY_FIELD_TYPE.OVER),
-  z.literal(ML_ENTITY_FIELD_TYPE.PARTITION),
-]);
+const mlEntityFieldTypeSchema = z.enum(ML_ENTITY_FIELD_TYPE);
 
-const mlEntityFieldOperationSchema = z.union([
-  z.literal(ML_ENTITY_FIELD_OPERATIONS.ADD),
-  z.literal(ML_ENTITY_FIELD_OPERATIONS.REMOVE),
-]);
+const mlEntityFieldOperationSchema = z.enum(ML_ENTITY_FIELD_OPERATIONS);
 
 export const influencerSchema = z
   .object({

@@ -52,15 +52,9 @@ export const objectTypeToGetResultSchema = <T extends ZodObjectType>(soSchema: T
       item: soSchema,
       meta: z
         .object({
-          outcome: z.union([
-            z.literal('exactMatch'),
-            z.literal('aliasMatch'),
-            z.literal('conflict'),
-          ]),
+          outcome: z.enum(['exactMatch', 'aliasMatch', 'conflict']),
           aliasTargetId: z.string().optional(),
-          aliasPurpose: z
-            .union([z.literal('savedObjectConversion'), z.literal('savedObjectImport')])
-            .optional(),
+          aliasPurpose: z.enum(['savedObjectConversion', 'savedObjectImport']).optional(),
         })
         .strict(),
     })
@@ -76,13 +70,13 @@ export const createOptionsSchema = z.object({
   managed: z.boolean().optional(),
 });
 
-export const schemaAndOr = z.union([z.literal('AND'), z.literal('OR')]);
+export const schemaAndOr = z.enum(['AND', 'OR']);
 
 export const searchOptionsSchema = z.object({
   page: z.number().optional(),
   perPage: z.number().optional(),
   sortField: z.string().optional(),
-  sortOrder: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
   fields: z.array(z.string()).optional(),
   search: z.string().optional(),
   searchFields: z.union([z.string(), z.array(z.string())]).optional(),

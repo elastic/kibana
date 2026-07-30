@@ -9,34 +9,21 @@
 
 import { z } from '@kbn/zod';
 
-export const horizontalAlignmentSchema = z.union([
-  z.literal('left'),
-  z.literal('center'),
-  z.literal('right'),
+export const horizontalAlignmentSchema = z.enum(['left', 'center', 'right']);
+
+export const verticalAlignmentSchema = z.enum(['top', 'bottom']);
+
+export const metricValuePositionSchema = z.enum(['top', 'middle', 'bottom']);
+
+export const leftRightAlignmentSchema = z.enum(['left', 'right']);
+
+export const positionSchema = z.enum(['top', 'bottom', 'left', 'right']);
+
+export const cornerPositionSchema = z.enum([
+  'top_left',
+  'top_right',
+  'bottom_left',
+  'bottom_right',
 ]);
 
-export const verticalAlignmentSchema = z.union([z.literal('top'), z.literal('bottom')]);
-
-export const metricValuePositionSchema = z.union([
-  z.literal('top'),
-  z.literal('middle'),
-  z.literal('bottom'),
-]);
-
-export const leftRightAlignmentSchema = z.union([z.literal('left'), z.literal('right')]);
-
-export const positionSchema = z.union([
-  z.literal('top'),
-  z.literal('bottom'),
-  z.literal('left'),
-  z.literal('right'),
-]);
-
-export const cornerPositionSchema = z.union([
-  z.literal('top_left'),
-  z.literal('top_right'),
-  z.literal('bottom_left'),
-  z.literal('bottom_right'),
-]);
-
-export const placementSchema = z.union([z.literal('before'), z.literal('after')]);
+export const placementSchema = z.enum(['before', 'after']);
