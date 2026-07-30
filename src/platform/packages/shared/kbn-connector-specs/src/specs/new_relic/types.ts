@@ -323,6 +323,7 @@ export const NewRelicCreateNrqlConditionInputSchema = lazySchema(() =>
       .int()
       .min(60)
       .max(7200)
+      .multipleOf(60)
       .describe(
         'Number of seconds the threshold must be violated before triggering. Must be a multiple of 60.'
       ),
