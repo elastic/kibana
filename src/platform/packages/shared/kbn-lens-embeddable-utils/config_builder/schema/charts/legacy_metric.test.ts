@@ -127,7 +127,7 @@ describe('Legacy Metric Schema', () => {
 
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Invalid input
+        "✖ Invalid option: expected one of \\"top\\"|\\"bottom\\"
           → at metric.labels.alignment"
       `);
     });
@@ -170,7 +170,7 @@ describe('Legacy Metric Schema', () => {
 
       const result = legacyMetricConfigSchema.safeParse(input);
       expectPrettyError(result).toMatchInlineSnapshot(`
-        "✖ Invalid input
+        "✖ Invalid option: expected one of \\"value\\"|\\"background\\"
           → at metric.apply_color_to"
       `);
     });
