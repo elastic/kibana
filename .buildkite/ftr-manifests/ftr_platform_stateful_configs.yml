@@ -55,6 +55,7 @@ disabled:
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/functional_gen_ai/inference/generate_artifacts.config.ts
+  - x-pack/platform/test/functional_gen_ai/inference/generate_security_labs_artifacts.config.ts
 
 defaultQueue: 'n2-4-spot'
 enabled:
@@ -240,7 +241,6 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group5/config.ts
   - x-pack/platform/test/functional/apps/lens/group6/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
-  - x-pack/platform/test/functional/apps/lens/group9/config.ts
   - x-pack/platform/test/functional/apps/lens/group10/config.ts
   - x-pack/platform/test/functional/apps/lens/group11/config.ts
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
@@ -348,7 +348,6 @@ enabled:
   - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/platform/test/spaces_api_integration/access_control_objects/config.ts
   - x-pack/platform/test/spaces_api_integration/access_control_objects/feature_disabled.config.ts
-  - x-pack/platform/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/platform/test/ui_capabilities/security_and_spaces/config.ts
   - x-pack/platform/test/ui_capabilities/spaces_only/config.ts
   - x-pack/platform/test/reindex_service/config.ts
@@ -419,3 +418,4 @@ enabled:
   - x-pack/platform/test/api_integration/apis/streams/streams_without_security.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.streams_definitions.feature_flag.stateful.config.ts
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.significant_events.feature_flag.stateful.config.ts
+  - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.evals.feature_flag.stateful.config.ts
