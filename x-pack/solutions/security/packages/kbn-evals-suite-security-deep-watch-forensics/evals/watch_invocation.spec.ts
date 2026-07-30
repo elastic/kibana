@@ -8,9 +8,26 @@
 /**
  * Watch Invocation Glue Spec — Deep Watch Forensics
  *
- * Verifies that a message with the same shape as the Deep Watch `ai.agent` step
- * (hydrated with realistic escalation context) routes through the Agent Builder
- * to the `deep-watch-forensics` skill and invokes `package_evidence`.
+ * Verifies that the real Deep Watch Worker `ai.agent` step
+ * (`watch_deep_worker.yaml`) invokes the `deep-watch-forensics` skill and
+ * calls `package_evidence`.
+ *
+ * IMPORTANT: `watch_deep_worker.yaml` does NOT rely on natural-language
+ * routing. Per CWL Option 2 (Slack C0BHGGA6PHC/p1784742716537469,
+ * elastic/kibana#280617), the step sets
+ * `configuration_overrides.skill_ids: [deep-watch-forensics]` — a runtime
+ * straight-replace of the agent's skill list — and the hydrated message
+ * explicitly references `[/deep-watch-forensics](skill://deep-watch-forensics)`.
+ * An earlier version of this spec sent a bare JSON escalation-context blob
+ * through unconstrained natural routing (no configuration_overrides), which
+ * doesn't reflect any real invocation path: `watch_deep.yaml` (the
+ * orchestrator-facing file this spec's original docstring cited) is an
+ * unimplemented skeleton, and the real worker never routes without an
+ * explicit skill override. Live-verified 2026-07-30: that unconstrained
+ * shape actually routes to `endpoint-forensic-analysis`, not
+ * `deep-watch-forensics` — a real router ambiguity, but not the bug this
+ * spec is meant to catch (which is: does the Watch's actual invocation path
+ * work).
  *
  * YAML structure assertions live in the PND plugin Jest tests
  * (`managed_workflows.test.ts`) to avoid duplicating file I/O in Playwright.
@@ -28,9 +45,11 @@ import {
 
 evaluate.describe('Deep Watch Forensics — Watch Invocation', { tag: tags.stateful.classic }, () => {
   /**
-   * Replicates the hydrated message template from `watch_deep.yaml` without
-   * reading the file. The goal is to prove that a realistic escalation context
-   * hitting the router resolves to the deep-watch-forensics skill.
+   * Replicates the hydrated message template + configuration_overrides from
+   * `watch_deep_worker.yaml`'s `forensic_investigation` ai.agent step. The
+   * `{{ inputs.escalation | json }}` Liquid interpolation is inlined here
+   * with realistic escalation context rather than read from the file, per
+   * this suite's existing convention (see `composite_pipeline.spec.ts`).
    */
   evaluate(
     'should route hydrated watch message to deep-watch-forensics skill',
@@ -51,17 +70,22 @@ evaluate.describe('Deep Watch Forensics — Watch Invocation', { tag: tags.state
         mitre_technique: ['T1021.002', 'T1543.003'],
       };
 
-      const message = `Forensic investigation requested for escalation.\n\n${JSON.stringify(
-        escalationContext,
-        null,
-        2
-      )}`;
+      const message =
+        'Use the [/deep-watch-forensics](skill://deep-watch-forensics) skill to ' +
+        'perform a forensic investigation of the escalated threat context below. ' +
+        'You already have the endpoint telemetry and IoC context you need for ' +
+        'historical reconstruction; reason from the evidence and return a single ' +
+        'structured draft report. Do NOT ask questions. Do NOT execute response actions.\n\n' +
+        `Escalation context:\n${JSON.stringify(escalationContext, null, 2)}`;
 
       log.info(`Watch invocation message length: ${message.length}`);
 
       const result = await agentBuilderClient.converse({
         agentId: agentBuilderDefaultAgentId,
         input: message,
+        // Matches watch_deep_worker.yaml's runtime override — the real Watch
+        // invocation path never relies on unconstrained natural routing.
+        configurationOverrides: { skillIds: [DEEP_WATCH_FORENSICS_SKILL_ID] },
       });
 
       const toolCallSteps = getToolCallSteps(result);

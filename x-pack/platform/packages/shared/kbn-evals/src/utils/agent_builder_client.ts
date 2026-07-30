@@ -28,6 +28,19 @@ export interface AgentBuilderConverseParams {
   input: string;
   /** Continue an existing conversation. */
   conversationId?: string;
+  /**
+   * Runtime configuration overrides for this execution only, matching the
+   * `configuration_overrides` field on `POST /api/agent_builder/converse`.
+   * Used to replicate managed-workflow `ai.agent` steps that constrain
+   * `skill_ids` at runtime (e.g. PND Watch workers via CWL Option 2 —
+   * `watch_deep_worker.yaml`'s `configuration_overrides.skill_ids`) rather
+   * than relying on natural-language routing, which is a materially
+   * different code path from the unconstrained default-agent router.
+   */
+  configurationOverrides?: {
+    instructions?: string;
+    skillIds?: string[];
+  };
 }
 
 export interface AgentBuilderClientResponse {
@@ -68,6 +81,7 @@ export function createAgentBuilderClient({
     agentId,
     input,
     conversationId,
+    configurationOverrides,
   }: AgentBuilderConverseParams): Promise<AgentBuilderClientResponse> => {
     const call = async (): Promise<AgentBuilderClientResponse> => {
       const response = await fetch<AgentBuilderConverseApiResponse>('/api/agent_builder/converse', {
@@ -84,6 +98,18 @@ export function createAgentBuilderClient({
           // against the default cluster with no `TRACING_ES_URL` (matching the inferenceClient path).
           _execution_mode: 'local',
           ...(conversationId ? { conversation_id: conversationId } : {}),
+          ...(configurationOverrides
+            ? {
+                configuration_overrides: {
+                  ...(configurationOverrides.instructions
+                    ? { instructions: configurationOverrides.instructions }
+                    : {}),
+                  ...(configurationOverrides.skillIds
+                    ? { skill_ids: configurationOverrides.skillIds }
+                    : {}),
+                },
+              }
+            : {}),
         }),
       });
 
