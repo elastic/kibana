@@ -114,7 +114,7 @@ export const monitoringTypes = Object.values(dataTypes);
 /** Dedicated indices Universal Profiling reads from and the Elasticsearch exporter writes to. */
 export const UNIVERSAL_PROFILING_INDEX_PATTERNS = ['profiling-*', 'profiles-*'] as const;
 
-/** Concrete symbolization queue indices used by delete-by-query. */
+/** Index pattern matching concrete symbolization queue indices used by delete-by-query. */
 export const UNIVERSAL_PROFILING_QUEUE_INDEX_PATTERNS = ['.profiling-sq-*'] as const;
 
 /**
