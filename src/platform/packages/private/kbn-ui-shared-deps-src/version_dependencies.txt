@@ -83,7 +83,7 @@ js-cookie@3.0.8
 json-parse-even-better-errors@2.3.1
 json-schema-traverse@0.4.1
 json-schema-traverse@1.0.0
-jsonc-parser@3.2.0
+jsonc-parser@3.3.1
 loader-runner@4.3.0
 locate-path@7.2.0
 mdn-data@2.0.14

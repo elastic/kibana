@@ -39,8 +39,8 @@ describe('Kibana keystore', () => {
     const sandbox = sinon.createSandbox();
 
     beforeEach(() => {
-      sandbox.stub(prompt, 'confirm');
-      sandbox.stub(prompt, 'question');
+      sandbox.stub(prompt, 'confirm').value(sinon.stub());
+      sandbox.stub(prompt, 'question').value(sinon.stub());
 
       sandbox.stub(Logger.prototype, 'log');
       sandbox.stub(Logger.prototype, 'error');

@@ -302,7 +302,8 @@
         "@emotion/css",
         "@emotion/react",
         "@emotion/serialize",
-        "@emotion/styled"
+        "@emotion/styled",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -1973,10 +1974,10 @@
         "@jest/reporters",
         "@jest/transform",
         "@jest/types",
+        "@swc/jest",
         "@types/jest",
         "babel-jest",
         "expect",
-        "jest",
         "jest-canvas-mock",
         "jest-config",
         "jest-diff",
@@ -1985,7 +1986,8 @@
         "jest-mock",
         "jest-runtime",
         "jest-snapshot",
-        "jest-styled-components"
+        "jest-styled-components",
+        "jest"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
