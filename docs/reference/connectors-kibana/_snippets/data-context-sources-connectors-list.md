@@ -5,6 +5,7 @@
 * [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
 * [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 * [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
+* [Dynatrace](/reference/connectors-kibana/dynatrace-action-type.md): Triage Davis problems, ingest events, query metrics and entities, and manage maintenance windows.
 * [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 * [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 * [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
