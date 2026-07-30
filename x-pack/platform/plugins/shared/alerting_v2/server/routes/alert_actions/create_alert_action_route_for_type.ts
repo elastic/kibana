@@ -67,7 +67,8 @@ export const createAlertActionRouteForType = <
     static routeOptions = {
       summary,
       description: 'Create an action for a specific alert group.',
-    };
+      oasOperationObject,
+    } as const;
     static schemas = {
       request: {
         params: createAlertActionParamsSchema,
