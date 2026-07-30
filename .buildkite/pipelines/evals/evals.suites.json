@@ -31,6 +31,20 @@
       ]
     },
     {
+      "id": "alerting-v2",
+      "name": "Alerting V2",
+      "slackChannel": "#rna-program-notify",
+      "configPath": "x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2/playwright.config.ts",
+      "serverConfigSet": "evals_alerting_v2",
+      "tags": [
+        "platform",
+        "alerting-v2"
+      ],
+      "ciLabels": [
+        "evals:alerting-v2"
+      ]
+    },
+    {
       "id": "esql-generation",
       "name": "ES|QL Generation Evaluations",
       "slackChannel": "#agent-builder-alerts",
