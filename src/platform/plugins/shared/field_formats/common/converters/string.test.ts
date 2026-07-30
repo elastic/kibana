@@ -13,6 +13,7 @@ import {
   expectReactElementWithNull,
   expectReactElementWithBlank,
   expectReactElementAsArray,
+  renderReactNode,
 } from '../test_utils';
 
 describe('String Format', () => {
@@ -128,13 +129,9 @@ describe('String Format', () => {
         highlight: { foo: ['@kibana-highlighted-field@<img />@/kibana-highlighted-field@'] },
       },
     };
-    expect(string.convertToReact('<img />', options)).toMatchInlineSnapshot(`
-      <mark
-        css="unknown styles"
-      >
-        &lt;img /&gt;
-      </mark>
-    `);
+    expect(renderReactNode(string.convertToReact('<img />', options))).toMatchInlineSnapshot(
+      `"<mark>&lt;img /&gt;</mark>"`
+    );
   });
 
   test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {

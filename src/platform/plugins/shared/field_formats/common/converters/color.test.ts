@@ -9,7 +9,11 @@
 
 import type { ReactElement } from 'react';
 import { ColorFormat } from './color';
-import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
+import {
+  expectReactElementWithNull,
+  expectReactElementWithBlank,
+  renderReactNode,
+} from '../test_utils';
 
 const expectColoredReactElement = (
   element: React.ReactNode,
@@ -193,52 +197,9 @@ describe('Color Format', () => {
     );
 
     expect(colorer.convertToText([100, 200])).toBe('["100","200"]');
-    expect(colorer.convertToReact([100, 200])).toMatchInlineSnapshot(`
-      <React.Fragment>
-        <span
-          css="unknown styles"
-        >
-          [
-        </span>
-        <span
-          style={
-            Object {
-              "backgroundColor": "yellow",
-              "borderRadius": "3px",
-              "color": "blue",
-              "display": "inline-block",
-              "padding": "0 8px",
-            }
-          }
-        >
-          100
-        </span>
-        <span
-          css="unknown styles"
-        >
-          ,
-        </span>
-         
-        <span
-          style={
-            Object {
-              "backgroundColor": "yellow",
-              "borderRadius": "3px",
-              "color": "blue",
-              "display": "inline-block",
-              "padding": "0 8px",
-            }
-          }
-        >
-          200
-        </span>
-        <span
-          css="unknown styles"
-        >
-          ]
-        </span>
-      </React.Fragment>
-    `);
+    expect(renderReactNode(colorer.convertToReact([100, 200]))).toMatchInlineSnapshot(
+      `"<span>[</span><span style=\\"color:blue;background-color:yellow;display:inline-block;padding:0 8px;border-radius:3px\\">100</span><span>,</span> <span style=\\"color:blue;background-color:yellow;display:inline-block;padding:0 8px;border-radius:3px\\">200</span><span>]</span>"`
+    );
   });
 
   test('returns the single element without brackets for a one-element array', () => {

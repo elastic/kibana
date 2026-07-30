@@ -8,7 +8,11 @@
  */
 
 import { UrlFormat } from './url';
-import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
+import {
+  expectReactElementWithNull,
+  expectReactElementWithBlank,
+  renderReactNode,
+} from '../test_utils';
 
 describe('UrlFormat', () => {
   test('outputs a simple <a> tag by default', () => {
@@ -637,27 +641,19 @@ describe('UrlFormat', () => {
   test('wraps highlighted link text in <mark>', () => {
     const url = new UrlFormat({});
     expect(
-      url.convertToReact('http://elastic.co', {
-        field: { name: 'link' },
-        hit: {
-          highlight: {
-            link: ['@kibana-highlighted-field@http://elastic.co@/kibana-highlighted-field@'],
+      renderReactNode(
+        url.convertToReact('http://elastic.co', {
+          field: { name: 'link' },
+          hit: {
+            highlight: {
+              link: ['@kibana-highlighted-field@http://elastic.co@/kibana-highlighted-field@'],
+            },
           },
-        },
-      })
-    ).toMatchInlineSnapshot(`
-      <a
-        href="http://elastic.co"
-        rel="noopener noreferrer"
-        target="_blank"
-      >
-        <mark
-          css="unknown styles"
-        >
-          http://elastic.co
-        </mark>
-      </a>
-    `);
+        })
+      )
+    ).toMatchInlineSnapshot(
+      `"<a href=\\"http://elastic.co\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\"><mark>http://elastic.co</mark></a>"`
+    );
   });
 
   test('renders a numeric value as text when no URL template is set', () => {
@@ -688,40 +684,11 @@ describe('UrlFormat', () => {
     expect(url.convertToText(['http://elastic.co', 'http://kibana.io'])).toBe(
       '["http://elastic.co","http://kibana.io"]'
     );
-    expect(url.convertToReact(['http://elastic.co', 'http://kibana.io'])).toMatchInlineSnapshot(`
-      <React.Fragment>
-        <span
-          css="unknown styles"
-        >
-          [
-        </span>
-        <a
-          href="http://elastic.co"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          http://elastic.co
-        </a>
-        <span
-          css="unknown styles"
-        >
-          ,
-        </span>
-         
-        <a
-          href="http://kibana.io"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          http://kibana.io
-        </a>
-        <span
-          css="unknown styles"
-        >
-          ]
-        </span>
-      </React.Fragment>
-    `);
+    expect(
+      renderReactNode(url.convertToReact(['http://elastic.co', 'http://kibana.io']))
+    ).toMatchInlineSnapshot(
+      `"<span>[</span><a href=\\"http://elastic.co\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">http://elastic.co</a><span>,</span> <a href=\\"http://kibana.io\\" target=\\"_blank\\" rel=\\"noopener noreferrer\\">http://kibana.io</a><span>]</span>"`
+    );
   });
 
   test('returns the single element without brackets for a one-element array', () => {
