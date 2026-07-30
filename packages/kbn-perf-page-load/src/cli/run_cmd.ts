@@ -40,7 +40,6 @@ export const runCmd: Command<{}> = {
     const dist = flagsReader.boolean('dist');
     const throttle = flagsReader.string('throttle') ?? 'provided';
     const output = flagsReader.string('output');
-    const useRspack = process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
 
     // Guard: devtools throttle requires dist
     if (throttle === 'devtools' && !dist) {
@@ -53,21 +52,11 @@ export const runCmd: Command<{}> = {
 
     // Build dist bundles if requested
     if (dist) {
-      if (useRspack) {
-        log.info('Building rspack dist bundles...');
-        execSync('node scripts/build_rspack_bundles.js --dist', {
-          cwd: REPO_ROOT,
-          stdio: 'inherit',
-          env: { ...process.env, KBN_USE_RSPACK: 'true' },
-        });
-      } else {
-        // [rspack-transition] Legacy build path — delete when legacy optimizer is removed
-        log.info('Building legacy dist bundles...');
-        execSync('node scripts/build_kibana_platform_plugins.js --dist', {
-          cwd: REPO_ROOT,
-          stdio: 'inherit',
-        });
-      }
+      log.info('Building dist bundles...');
+      execSync('node scripts/build_rspack_bundles.js --dist', {
+        cwd: REPO_ROOT,
+        stdio: 'inherit',
+      });
 
       // Validate bundles exist
       const bundlesDir = resolve(REPO_ROOT, 'target/public/bundles');
@@ -95,9 +84,7 @@ export const runCmd: Command<{}> = {
     }
 
     // Spawn Scout to run the spec
-    log.info(
-      `Running Lighthouse benchmark (throttle=${throttle}, dist=${dist}, rspack=${useRspack})...`
-    );
+    log.info(`Running Lighthouse benchmark (throttle=${throttle}, dist=${dist})...`);
 
     try {
       execFileSync(

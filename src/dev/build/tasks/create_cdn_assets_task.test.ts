@@ -40,78 +40,24 @@ const globby = jest.requireMock('globby') as { sync: jest.Mock };
 globby.sync = jest.fn().mockReturnValue([]);
 
 const mockedCopyAll = copyAll as jest.MockedFunction<typeof copyAll>;
-
 const config = getMockConfig();
 const log = new ToolingLog();
 const buildSource = '/mock/build/root';
 const mockedBuild = new Build(config);
 (mockedBuild.resolvePath as jest.Mock).mockReturnValue(buildSource);
 
-let originalKbnUseRspack: string | undefined;
-
-describe('CreateCdnAssets KBN_USE_RSPACK gate', () => {
-  beforeAll(() => {
-    originalKbnUseRspack = process.env.KBN_USE_RSPACK;
-  });
-
+describe('CreateCdnAssets', () => {
   beforeEach(() => {
     mockedCopyAll.mockClear();
     mockedCopyAll.mockResolvedValue(undefined);
   });
 
-  afterEach(() => {
-    if (originalKbnUseRspack === undefined) {
-      delete process.env.KBN_USE_RSPACK;
-    } else {
-      process.env.KBN_USE_RSPACK = originalKbnUseRspack;
-    }
-  });
-
-  it('copies unified rspack bundles from target/public/bundles when KBN_USE_RSPACK is "true"', async () => {
-    process.env.KBN_USE_RSPACK = 'true';
-
+  it('copies unified bundles from target/public/bundles', async () => {
     await CreateCdnAssets.run(config, log, mockedBuild);
 
-    const expectedRspackSource = resolve(buildSource, 'target/public/bundles');
     expect(mockedCopyAll).toHaveBeenCalledWith(
-      expectedRspackSource,
-      expect.stringMatching(/[/\\]bundles$/)
-    );
-    expect(mockedCopyAll).not.toHaveBeenCalledWith(
-      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-      expect.anything()
-    );
-  });
-
-  it('copies legacy core bundles from node_modules/@kbn/core/target/public when KBN_USE_RSPACK is not set', async () => {
-    delete process.env.KBN_USE_RSPACK;
-
-    await CreateCdnAssets.run(config, log, mockedBuild);
-
-    const buildSha = config.getBuildShaShort();
-    const expectedLegacySource = resolve(buildSource, 'node_modules/@kbn/core/target/public');
-    const expectedLegacyDest = resolve(
-      config.resolveFromRepo('build', 'cdn-assets'),
-      buildSha,
-      'bundles',
-      'core'
-    );
-
-    expect(mockedCopyAll).toHaveBeenCalledWith(expectedLegacySource, expectedLegacyDest);
-    expect(mockedCopyAll).not.toHaveBeenCalledWith(
       resolve(buildSource, 'target/public/bundles'),
-      expect.anything()
-    );
-  });
-
-  it('uses legacy core bundle path when KBN_USE_RSPACK is not exactly "true"', async () => {
-    process.env.KBN_USE_RSPACK = 'false';
-
-    await CreateCdnAssets.run(config, log, mockedBuild);
-
-    expect(mockedCopyAll).toHaveBeenCalledWith(
-      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-      expect.stringMatching(/[/\\]core$/)
+      expect.stringMatching(/[/\\]bundles$/)
     );
   });
 });

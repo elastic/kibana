@@ -11,7 +11,6 @@ export * from './build_webpack_packages';
 export * from './brotli_compress_bundles';
 export * from './clean';
 export * from './create_archive';
-export * from './optimize';
 export * from './optimize_rspack';
 export * from './write_public_assets';
 export * from './write_server_files';

@@ -39,7 +39,7 @@ const exactFilePathMatcher = (relativePath) =>
  * does not interact with other allowlists (e.g. AXIOS_LEGACY_CONSUMERS in .eslintrc.js).
  */
 const JS_YAML_LEGACY_CONSUMERS = [
-  'packages/kbn-rspack-optimizer/src/limits.ts',
+  'packages/kbn-optimizer/src/limits.ts',
   'src/platform/kbn-ui/_tooling/affected_packages.ts',
   'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
   'src/platform/packages/shared/kbn-connector-cli/src/create_connectors/manifest_loader.ts',

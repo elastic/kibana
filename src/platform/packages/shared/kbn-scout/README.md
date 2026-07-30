@@ -692,7 +692,7 @@ Ensure you have the latest local copy of the Kibana repository.
 Install dependencies by running the following commands:
 
 - `yarn kbn bootstrap` to install dependencies.
-- `node scripts/build_kibana_platform_plugins.js` to build plugins.
+- `node scripts/build_rspack_bundles.js` to build plugins.
 
 Move to the `src/platform/packages/shared/kbn-scout` directory to begin development.
 

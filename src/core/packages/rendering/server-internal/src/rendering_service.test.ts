@@ -16,7 +16,6 @@ import {
   getBrowserLoggingConfigMock,
   getApmConfigMock,
   getIsThemeBundledMock,
-  isRspackModeEnabledMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -973,22 +972,11 @@ describe('RenderingService', () => {
     });
   });
 
-  describe('rspack mode metadata', () => {
-    let rspackService: RenderingService;
-
-    beforeEach(() => {
-      rspackService = new RenderingService(mockRenderingServiceParams);
-    });
-
-    afterEach(() => {
-      isRspackModeEnabledMock.mockReturnValue(false);
-    });
-
-    it('includes font preload links and font-display:swap when rspack mode is enabled', async () => {
-      isRspackModeEnabledMock.mockReturnValue(true);
-
-      const { render } = await rspackService.setup(mockRenderingSetupDeps);
-      rspackService.start(mockRenderingStartDeps);
+  describe('font metadata', () => {
+    it('includes font preload links and font-display:swap', async () => {
+      const renderingService = new RenderingService(mockRenderingServiceParams);
+      const { render } = await renderingService.setup(mockRenderingSetupDeps);
+      renderingService.start(mockRenderingStartDeps);
 
       const uiSettings = {
         client: uiSettingsServiceMock.createClient(),
@@ -1008,27 +996,6 @@ describe('RenderingService', () => {
       });
 
       expect(content).toContain('font-display: swap');
-    });
-
-    it('does not include font preload links when rspack mode is disabled', async () => {
-      isRspackModeEnabledMock.mockReturnValue(false);
-
-      const { render } = await rspackService.setup(mockRenderingSetupDeps);
-      rspackService.start(mockRenderingStartDeps);
-
-      const uiSettings = {
-        client: uiSettingsServiceMock.createClient(),
-        globalClient: uiSettingsServiceMock.createClient(),
-      };
-      uiSettings.client.getRegistered.mockReturnValue({});
-
-      const { body: content } = await render(createKibanaRequest(), uiSettings);
-      const dom = load(content);
-
-      const preloadLinks = dom('link[rel="preload"][as="font"]');
-      expect(preloadLinks.length).toBe(0);
-
-      expect(content).not.toContain('font-display: swap');
     });
   });
 });

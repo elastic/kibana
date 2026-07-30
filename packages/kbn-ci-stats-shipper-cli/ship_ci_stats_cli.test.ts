@@ -84,35 +84,19 @@ describe('ship_ci_stats_cli', () => {
     });
   };
 
-  it('when limitConfigPath includes kbn-rspack-optimizer, update command uses build_rspack_bundles --update-limits', async () => {
+  it('uses build_rspack_bundles --update-limits for overages', async () => {
     const metrics: CiStatsMetric[] = [
       {
         group: 'g',
         id: 'somePlugin',
         value: 200,
         limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
     ];
 
     await expect(runWithMetrics(metrics, { validate: true })).rejects.toThrow(
       /build_rspack_bundles --update-limits/
-    );
-  });
-
-  it('when limitConfigPath does not include kbn-rspack-optimizer, update command uses build_kibana_platform_plugins --focus with plugin id', async () => {
-    const metrics: CiStatsMetric[] = [
-      {
-        group: 'g',
-        id: 'myPlugin',
-        value: 200,
-        limit: 100,
-        limitConfigPath: 'src/dev/build/limits.json',
-      },
-    ];
-
-    await expect(runWithMetrics(metrics, { validate: true })).rejects.toThrow(
-      /build_kibana_platform_plugins --focus myPlugin --update-limits/
     );
   });
 
@@ -123,7 +107,7 @@ describe('ship_ci_stats_cli', () => {
         id: 'discover',
         value: 999,
         limit: 1,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/foo',
+        limitConfigPath: 'packages/kbn-optimizer/foo',
       },
     ];
 
@@ -143,7 +127,7 @@ describe('ship_ci_stats_cli', () => {
         id: 'p',
         value: 50,
         limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
     ];
 
@@ -157,14 +141,14 @@ describe('ship_ci_stats_cli', () => {
         id: 'pluginA',
         value: 200,
         limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
       {
         group: 'page load bundle size',
         id: 'pluginB',
         value: 200,
         limit: 100,
-        limitConfigPath: 'packages/kbn-rspack-optimizer/limits.yml',
+        limitConfigPath: 'packages/kbn-optimizer/limits.yml',
       },
     ];
 

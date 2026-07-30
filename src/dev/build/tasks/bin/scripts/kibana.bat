@@ -7,10 +7,6 @@ for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\default\node.exe
 set NODE_ENV=production
-{{#rspack}}
-set KBN_USE_RSPACK=true
-{{/rspack}}
-
 If Not Exist "%NODE%" (
   Echo unable to find usable node.js executable.
   Exit /B 1

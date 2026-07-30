@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/dev-utils'
   - '@kbn/optimizer'
-  - '@kbn/rspack-optimizer'
   - '@kbn/tooling-log'
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'

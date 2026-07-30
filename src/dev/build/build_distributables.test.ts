@@ -25,8 +25,7 @@ jest.mock('./lib/version_info', () => ({
 jest.mock('./tasks', () => {
   const actual = jest.requireActual('./tasks') as Record<string, unknown>;
   const noopTaskRun = jest.fn().mockResolvedValue(undefined);
-  const mockRspackBundleTaskRun = jest.fn().mockResolvedValue(undefined);
-  const mockLegacyBundleTaskRun = jest.fn().mockResolvedValue(undefined);
+  const mockBundleTaskRun = jest.fn().mockResolvedValue(undefined);
 
   const result: Record<string, unknown> = {};
 
@@ -38,10 +37,8 @@ jest.mock('./tasks', () => {
       'run' in value &&
       typeof (value as { run: unknown }).run === 'function'
     ) {
-      if (key === 'BuildRspackBundles') {
-        result[key] = { ...(value as object), run: mockRspackBundleTaskRun };
-      } else if (key === 'BuildKibanaPlatformPlugins') {
-        result[key] = { ...(value as object), run: mockLegacyBundleTaskRun };
+      if (key === 'BuildBundles') {
+        result[key] = { ...(value as object), run: mockBundleTaskRun };
       } else {
         result[key] = { ...(value as object), run: noopTaskRun };
       }
@@ -53,11 +50,8 @@ jest.mock('./tasks', () => {
   return result;
 });
 
-const mockRspackBundleTaskRun = Tasks.BuildRspackBundles.run as jest.MockedFunction<
-  typeof Tasks.BuildRspackBundles.run
->;
-const mockLegacyBundleTaskRun = Tasks.BuildKibanaPlatformPlugins.run as jest.MockedFunction<
-  typeof Tasks.BuildKibanaPlatformPlugins.run
+const mockBundleTaskRun = Tasks.BuildBundles.run as jest.MockedFunction<
+  typeof Tasks.BuildBundles.run
 >;
 
 const log = new ToolingLog();
@@ -96,52 +90,15 @@ const minimalGenericFoldersOptions: BuildOptions = {
   eprRegistry: 'snapshot',
 };
 
-let originalKbnUseRspack: string | undefined;
-
-describe('buildDistributables KBN_USE_RSPACK gate', () => {
-  beforeAll(() => {
-    originalKbnUseRspack = process.env.KBN_USE_RSPACK;
-  });
-
+describe('buildDistributables', () => {
   beforeEach(() => {
-    mockRspackBundleTaskRun.mockClear();
-    mockLegacyBundleTaskRun.mockClear();
+    mockBundleTaskRun.mockClear();
   });
 
-  afterEach(() => {
-    if (originalKbnUseRspack === undefined) {
-      delete process.env.KBN_USE_RSPACK;
-    } else {
-      process.env.KBN_USE_RSPACK = originalKbnUseRspack;
-    }
-  });
-
-  it('runs BuildRspackBundles when KBN_USE_RSPACK is "true"', async () => {
-    process.env.KBN_USE_RSPACK = 'true';
-
+  it('builds bundles', async () => {
     await buildDistributables(log, minimalGenericFoldersOptions);
 
-    expect(mockRspackBundleTaskRun).toHaveBeenCalledTimes(1);
-    expect(mockLegacyBundleTaskRun).not.toHaveBeenCalled();
-    expect(Tasks.BuildRspackBundles.run).toHaveBeenCalledTimes(1);
-  });
-
-  it('runs BuildKibanaPlatformPlugins when KBN_USE_RSPACK is not set', async () => {
-    delete process.env.KBN_USE_RSPACK;
-
-    await buildDistributables(log, minimalGenericFoldersOptions);
-
-    expect(mockLegacyBundleTaskRun).toHaveBeenCalledTimes(1);
-    expect(mockRspackBundleTaskRun).not.toHaveBeenCalled();
-    expect(Tasks.BuildKibanaPlatformPlugins.run).toHaveBeenCalledTimes(1);
-  });
-
-  it('runs BuildRspackBundles when KBN_USE_RSPACK is "1"', async () => {
-    process.env.KBN_USE_RSPACK = '1';
-
-    await buildDistributables(log, minimalGenericFoldersOptions);
-
-    expect(mockRspackBundleTaskRun).toHaveBeenCalledTimes(1);
-    expect(mockLegacyBundleTaskRun).not.toHaveBeenCalled();
+    expect(mockBundleTaskRun).toHaveBeenCalledTimes(1);
+    expect(Tasks.BuildBundles.run).toHaveBeenCalledTimes(1);
   });
 });

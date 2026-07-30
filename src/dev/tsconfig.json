@@ -50,7 +50,6 @@
     "@kbn/yarn-lock-validator",
     "@kbn/sort-package-json",
     "@kbn/babel-register",
-    "@kbn/rspack-optimizer",
     "@kbn/dev-validation-runner"
   ]
 }

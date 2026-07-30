@@ -27,7 +27,6 @@
     "@kbn/repo-packages",
     "@kbn/dev-utils",
     "@kbn/es",
-    "@kbn/rspack-optimizer",
   ],
   "exclude": [
     "target/**/*",

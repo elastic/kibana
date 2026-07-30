@@ -8813,10 +8813,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/rspack-optimizer@link:packages/kbn-rspack-optimizer":
-  version "0.0.0"
-  uid ""
-
 "@kbn/rule-data-utils@link:src/platform/packages/shared/kbn-rule-data-utils":
   version "0.0.0"
   uid ""

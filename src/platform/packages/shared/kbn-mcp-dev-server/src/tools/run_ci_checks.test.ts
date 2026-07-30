@@ -231,14 +231,11 @@ describe('runCiChecksTool', () => {
         parallel: false,
       });
 
-      expect(mockedExeca.command).toHaveBeenCalledWith(
-        'node scripts/build_kibana_platform_plugins',
-        {
-          cwd: '/repo/root',
-          stdio: 'pipe',
-          timeout: 900000,
-        }
-      );
+      expect(mockedExeca.command).toHaveBeenCalledWith('node scripts/build_rspack_bundles', {
+        cwd: '/repo/root',
+        stdio: 'pipe',
+        timeout: 900000,
+      });
     });
   });
 });

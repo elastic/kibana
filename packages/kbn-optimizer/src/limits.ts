@@ -11,12 +11,17 @@ import Fs from 'fs';
 import Path from 'path';
 
 import dedent from 'dedent';
-import { parse, stringify } from 'yaml';
+import Yaml from 'js-yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import { getSharedChunkNames } from './config/split_chunks';
 
-import type { OptimizerConfig, Limits } from './optimizer';
+export interface Limits {
+  pageLoadAssetSize?: Record<string, number | undefined>;
+}
+
+export const DEFAULT_LIMITS_PATH = Path.resolve(__dirname, '../limits.yml');
 
 const DEFAULT_BUDGET_FRACTION = 0.1;
 
@@ -26,25 +31,25 @@ export function readLimits(path: string): Limits {
   let yaml;
   try {
     yaml = Fs.readFileSync(path, 'utf8');
-  } catch (error) {
+  } catch (error: any) {
     if (error.code !== 'ENOENT') {
       throw error;
     }
   }
 
-  return yaml ? parse(yaml) ?? {} : {};
+  return yaml ? (Yaml.load(yaml) as Limits) : {};
 }
 
 export function validateLimitsForAllBundles(
   log: ToolingLog,
-  config: OptimizerConfig,
+  pluginIds: string[],
   limitsPath: string
 ) {
   const limitBundleIds = Object.keys(readLimits(limitsPath).pageLoadAssetSize || {});
-  const configBundleIds = config.bundles.map((b) => b.id);
 
-  const missingBundleIds = diff(configBundleIds, limitBundleIds);
-  const extraBundleIds = diff(limitBundleIds, configBundleIds);
+  const sharedChunkNames = getSharedChunkNames();
+  const missingBundleIds = diff(pluginIds, limitBundleIds);
+  const extraBundleIds = diff(limitBundleIds, pluginIds).filter((id) => !sharedChunkNames.has(id));
 
   const issues = [];
   if (missingBundleIds.length) {
@@ -63,11 +68,11 @@ export function validateLimitsForAllBundles(
 
         To automatically update the limits file locally run:
 
-          node scripts/build_kibana_platform_plugins.js --update-limits
+          node scripts/build_rspack_bundles --update-limits
 
         To validate your changes locally run:
 
-          node scripts/build_kibana_platform_plugins.js --validate-limits
+          node scripts/build_rspack_bundles --validate-limits
       ` + '\n'
     );
   }
@@ -80,16 +85,16 @@ export function validateLimitsForAllBundles(
     throw createFailError(
       dedent`
         The limits defined in packages/kbn-optimizer/limits.yml are not sorted correctly. To make
-        sure the file is automatically updatedable without dozens of extra changes, the keys in this
+        sure the file is automatically updatable without dozens of extra changes, the keys in this
         file must be sorted.
 
         Please sort the keys alphabetically or, to automatically update the limits file locally run:
 
-          node scripts/build_kibana_platform_plugins.js --update-limits
+          node scripts/build_rspack_bundles --update-limits
 
         To validate your changes locally run:
 
-          node scripts/build_kibana_platform_plugins.js --validate-limits
+          node scripts/build_rspack_bundles --validate-limits
       ` + '\n'
     );
   }
@@ -97,48 +102,42 @@ export function validateLimitsForAllBundles(
   log.success('limits.yml file valid');
 }
 
-interface UpdateBundleLimitsOptions {
-  log: ToolingLog;
-  config: OptimizerConfig;
-  dropMissing: boolean;
-  limitsPath: string;
-}
+/**
+ * Read metrics.json from the build output, compute limits (110% of measured size),
+ * and write a sorted limits.yml file.
+ *
+ * Unlike legacy's `dropMissing` parameter, this always starts from an empty
+ * object because `--update-limits` always runs a full dist build with all
+ * plugins included. Stale entries for removed plugins are cleaned out
+ * automatically since only plugins present in metrics.json get entries.
+ */
+export function updateBundleLimits(log: ToolingLog, metricsPath: string, limitsPath: string) {
+  const existingLimits = readLimits(limitsPath);
+  const metrics: CiStatsMetric[] = JSON.parse(Fs.readFileSync(metricsPath, 'utf-8'));
 
-export function updateBundleLimits({
-  log,
-  config,
-  dropMissing,
-  limitsPath,
-}: UpdateBundleLimitsOptions) {
-  const limits = readLimits(limitsPath);
-  const metrics: CiStatsMetric[] = config.filteredBundles
-    .map((bundle) =>
-      JSON.parse(Fs.readFileSync(Path.resolve(bundle.outputDir, 'metrics.json'), 'utf-8'))
-    )
-    .flat()
-    .sort((a, b) => a.id.localeCompare(b.id));
-
-  const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = dropMissing
-    ? {}
-    : limits.pageLoadAssetSize ?? {};
+  const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = {};
 
   for (const metric of metrics) {
     if (metric.group !== 'page load bundle size') continue;
 
-    const existingLimit = limits.pageLoadAssetSize?.[metric.id];
-    const newLimit = Math.floor(metric.value * (1 + DEFAULT_BUDGET_FRACTION)); // 110% of value
+    const existingLimit = existingLimits.pageLoadAssetSize?.[metric.id];
+    const newLimit = Math.floor(metric.value * (1 + DEFAULT_BUDGET_FRACTION));
 
-    // Update the limit if the value exeeds the limit or if the limit is way too high (more than 110% of value)
     const shouldKeepExisting =
       existingLimit != null && existingLimit >= metric.value && existingLimit < newLimit;
 
     pageLoadAssetSize[metric.id] = shouldKeepExisting ? existingLimit : newLimit;
   }
 
+  const sortedPageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = {};
+  for (const key of Object.keys(pageLoadAssetSize).sort((a, b) => a.localeCompare(b))) {
+    sortedPageLoadAssetSize[key] = pageLoadAssetSize[key];
+  }
+
   const newLimits: Limits = {
-    pageLoadAssetSize,
+    pageLoadAssetSize: sortedPageLoadAssetSize,
   };
 
-  Fs.writeFileSync(limitsPath, stringify(newLimits));
+  Fs.writeFileSync(limitsPath, Yaml.dump(newLimits));
   log.success(`wrote updated limits to ${limitsPath}`);
 }

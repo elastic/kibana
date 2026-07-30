@@ -10,22 +10,14 @@
 import Chalk from 'chalk';
 import moment from 'moment';
 import type { Writable } from 'stream';
-import { tap } from 'rxjs';
+import * as Rx from 'rxjs';
+import { RspackOptimizer, type OptimizerPhase } from '@kbn/optimizer';
 import {
   ToolingLog,
   pickLevelFromFlags,
   ToolingLogTextWriter,
   parseLogLevel,
 } from '@kbn/tooling-log';
-import * as Rx from 'rxjs';
-import { ignoreElements } from 'rxjs';
-import type { OptimizerUpdate } from '@kbn/optimizer';
-import {
-  runOptimizer,
-  OptimizerConfig,
-  logOptimizerState,
-  logOptimizerProgress,
-} from '@kbn/optimizer';
 
 export interface Options {
   enabled: boolean;
@@ -43,15 +35,7 @@ export interface Options {
   basePath?: string;
 }
 
-/**
- * Check if RSPack optimizer should be used instead of Webpack optimizer
- */
-function isRspackOptimizerEnabled(): boolean {
-  const v = process.env.KBN_USE_RSPACK;
-  return v === 'true' || v === '1';
-}
-
-export type OptimizerPhase = OptimizerUpdate['state']['phase'] | 'running' | 'idle' | 'error';
+export type { OptimizerPhase };
 
 export class Optimizer {
   public readonly run$: Rx.Observable<void>;
@@ -66,130 +50,52 @@ export class Optimizer {
       return;
     }
 
-    // Check if we should use RSPack optimizer
-    if (isRspackOptimizerEnabled()) {
-      this.run$ = this.createRspackRun$(options);
-    } else {
-      this.run$ = this.createWebpackRun$(options);
-    }
+    this.run$ = this.createRun$(options);
   }
 
-  /**
-   * Create run$ observable using the legacy Webpack optimizer
-   */
-  private createWebpackRun$(options: Options): Rx.Observable<void> {
-    const config = OptimizerConfig.create({
-      repoRoot: options.repoRoot,
-      watch: options.watch,
-      includeCoreBundle: true,
-      cache: options.cache,
-      dist: options.dist,
-      examples: options.runExamples,
-      pluginPaths: options.pluginPaths,
-      pluginScanDirs: options.pluginScanDirs,
-    });
-
-    const log = this.createLog(options, '@kbn/optimizer');
+  private createRun$(options: Options): Rx.Observable<void> {
+    const log = this.createLog(options);
 
     return new Rx.Observable<void>((subscriber) => {
+      const optimizer = new RspackOptimizer({
+        repoRoot: options.repoRoot,
+        watch: options.watch,
+        cache: options.cache,
+        dist: options.dist,
+        examples: options.runExamples,
+        basePath: options.basePath,
+        log,
+      });
+
       subscriber.add(
-        runOptimizer(config)
-          .pipe(
-            logOptimizerProgress(log),
-            logOptimizerState(log, config),
-            tap(({ state }) => {
-              this.phase$.next(state.phase);
-              this.ready$.next(state.phase === 'success' || state.phase === 'issue');
-            }),
-            ignoreElements()
-          )
-          .subscribe(subscriber)
+        optimizer.getPhase$().subscribe({
+          next: (phase) => {
+            this.phase$.next(phase);
+            this.ready$.next(phase === 'success' || phase === 'issue');
+          },
+        })
       );
 
-      // complete state subjects when run$ completes
+      optimizer.run().then(
+        () => {
+          if (!options.watch) {
+            subscriber.complete();
+          }
+        },
+        (error) => subscriber.error(error)
+      );
+
       subscriber.add(() => {
+        optimizer.stop().catch(() => {});
         this.phase$.complete();
         this.ready$.complete();
       });
     });
   }
 
-  /**
-   * Create run$ observable using the new RSPack optimizer
-   */
-  private createRspackRun$(options: Options): Rx.Observable<void> {
-    const log = this.createLog(options, '@kbn/rspack-optimizer');
-
-    return new Rx.Observable<void>((subscriber) => {
-      let rspackOptimizerInstance: { stop: () => Promise<void> } | undefined;
-
-      // Dynamically import rspack optimizer to avoid loading it when not needed
-      import('@kbn/rspack-optimizer')
-        .then(async ({ RspackOptimizer }) => {
-          if (subscriber.closed) {
-            return;
-          }
-
-          const rspackOptimizer = new RspackOptimizer({
-            repoRoot: options.repoRoot,
-            watch: options.watch,
-            cache: options.cache,
-            dist: options.dist,
-            examples: options.runExamples,
-            basePath: options.basePath,
-            log,
-          });
-
-          // Store reference for cleanup
-          rspackOptimizerInstance = rspackOptimizer;
-
-          // Subscribe to phase updates
-          const phaseSub = rspackOptimizer.getPhase$().subscribe({
-            next: (phase) => {
-              this.phase$.next(phase);
-              this.ready$.next(phase === 'success' || phase === 'issue');
-            },
-          });
-
-          subscriber.add(phaseSub);
-
-          // Run the optimizer
-          try {
-            await rspackOptimizer.run();
-            if (!options.watch) {
-              subscriber.complete();
-            }
-          } catch (error) {
-            subscriber.error(error);
-          }
-        })
-        .catch((error) => {
-          log.error(`Failed to load @kbn/rspack-optimizer: ${error.message}`);
-          log.warning('Falling back to @kbn/optimizer...');
-
-          // Fallback to webpack optimizer
-          this.createWebpackRun$(options).subscribe(subscriber);
-        });
-
-      // Cleanup when run$ completes or is unsubscribed (e.g., on SIGINT)
-      subscriber.add(() => {
-        // Stop the RSPack optimizer if it's running
-        // This kills the worker process immediately (SIGKILL)
-        if (rspackOptimizerInstance) {
-          rspackOptimizerInstance.stop().catch(() => {});
-        }
-        this.phase$.complete();
-        this.ready$.complete();
-      });
-    });
-  }
-
-  /**
-   * Create a ToolingLog instance with custom formatting
-   */
-  private createLog(options: Options, optimizerName: string): ToolingLog {
+  private createLog(options: Options): ToolingLog {
     const dim = Chalk.dim('np bld');
-    const name = Chalk.magentaBright(optimizerName);
+    const name = Chalk.magentaBright('@kbn/optimizer');
     const time = () => moment().format('HH:mm:ss.SSS');
     const level = (msgType: string) => {
       switch (msgType) {
@@ -215,7 +121,8 @@ export class Optimizer {
     );
 
     const log = new ToolingLog();
-    const has = <T extends object>(obj: T, x: any): x is keyof T => Object.hasOwn(obj, x);
+    const has = <T extends object>(obj: T, key: PropertyKey): key is keyof T =>
+      Object.hasOwn(obj, key);
 
     log.setWriters([
       {
@@ -237,11 +144,11 @@ export class Optimizer {
     return log;
   }
 
-  getPhase$() {
+  getPhase$(): Rx.Observable<OptimizerPhase> {
     return this.phase$.asObservable();
   }
 
-  isReady$() {
+  isReady$(): Rx.Observable<boolean> {
     return this.ready$.asObservable();
   }
 }

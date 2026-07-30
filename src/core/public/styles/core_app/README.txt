@@ -1,1 +1,1 @@
-These files are only used by the sass loader, located here: `packages/kbn-optimizer/src/worker/webpack.config.ts`
+These files are only used by the Sass loader in `packages/kbn-optimizer/src/config/shared_config.ts`.

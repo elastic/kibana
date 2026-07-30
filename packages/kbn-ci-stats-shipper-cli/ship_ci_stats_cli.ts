@@ -36,8 +36,6 @@ run(
     }
 
     const overLimit: string[] = [];
-    let hasRspackOverage = false;
-
     const updateLimitPrompt = 'To update the limit, run the following command locally:';
     const rspackUpdateCommand = `node scripts/build_rspack_bundles --update-limits`;
 
@@ -56,22 +54,12 @@ run(
         if (metric.limit !== undefined && metric.limit < metric.value) {
           const description = `${metric.group} for ${metric.id} plugin is greater than the limit of ${metric.limit}. The current value is ${metric.value}.`;
 
-          // [rspack-transition] TODO: Once the legacy optimizer is removed,
-          // delete the conditional and keep only the rspack command.
-          if (metric.limitConfigPath?.includes('kbn-rspack-optimizer')) {
-            // Rspack uses one shared update command; append prompt + command once after all overages.
-            overLimit.push(description);
-            hasRspackOverage = true;
-          } else {
-            const updateCommand = `node scripts/build_kibana_platform_plugins --focus ${metric.id} --update-limits`;
-
-            overLimit.push(description, updateLimitPrompt, updateCommand);
-          }
+          overLimit.push(description);
         }
       }
     }
 
-    if (hasRspackOverage) {
+    if (overLimit.length) {
       overLimit.push('', updateLimitPrompt, rspackUpdateCommand);
     }
 
