@@ -41096,7 +41096,6 @@
     "xpack.securitySolution.detectionEngine.rules.stepScheduleTitle": "スケジュール",
     "xpack.securitySolution.detectionEngine.rules.update.successfullySavedRuleTitle": "{ruleName}が保存されました",
     "xpack.securitySolution.detectionEngine.rules.updateButtonTitle": "更新",
-    "xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle": "一部のElasticルールの更新が利用可能です。最適な検出エクスペリエンスを保証するために、更新してください。{link}で確認して更新してください。",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.eqlQueryLabel": "EQL クエリ",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.esqlQueryLabel": "EQLクエリ",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.kqlQueryLabel": "KQLクエリ",

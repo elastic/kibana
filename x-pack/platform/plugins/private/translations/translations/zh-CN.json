@@ -41100,7 +41100,6 @@
     "xpack.securitySolution.detectionEngine.rules.stepScheduleTitle": "计划",
     "xpack.securitySolution.detectionEngine.rules.update.successfullySavedRuleTitle": "{ruleName} 已保存",
     "xpack.securitySolution.detectionEngine.rules.updateButtonTitle": "更新",
-    "xpack.securitySolution.detectionEngine.rules.updatePrebuiltRulesCalloutTitle": "某些 Elastic 规则有更新可用。请更新这些规则以确保获得最佳检测体验。在 {link} 中复查并更新。",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.eqlQueryLabel": "EQL 查询",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.esqlQueryLabel": "ESQL 查询",
     "xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.kqlQueryLabel": "KQL 查询",
