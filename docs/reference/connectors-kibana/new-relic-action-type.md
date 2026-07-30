@@ -3,7 +3,7 @@ navigation_title: "New Relic"
 type: reference
 description: "Use the New Relic connector to acknowledge and resolve AI issues, read issues and incidents, manage muting rules, and run NRQL queries over NerdGraph."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
