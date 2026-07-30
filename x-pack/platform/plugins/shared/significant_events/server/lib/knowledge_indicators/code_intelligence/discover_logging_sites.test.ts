@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { LOGGER_IDIOM_PATTERNS } from './constants';
+import { anchoredPhrasePatterns, LOGGER_IDIOM_PATTERNS, LOGGER_PHRASE_LEXICON } from './constants';
 import { codeGrep, discoverLoggingSites, splitRepository } from './discover_logging_sites';
 
 const COLUMNS = [
@@ -18,6 +18,19 @@ const COLUMNS = [
   { name: 'line.number', type: 'long' },
   { name: 'line.content', type: 'keyword' },
 ];
+
+const WINDOW_COLUMNS = [
+  { name: 'line.number', type: 'long' },
+  { name: 'line.content', type: 'keyword' },
+];
+
+// grep calls issued when there are zero hits (no window fetch): one per idiom
+// pattern + two (double- and single-quote anchored) per phrase-lexicon entry.
+const GREP_CALLS = LOGGER_IDIOM_PATTERNS.length + LOGGER_PHRASE_LEXICON.length * 2;
+
+// The window fetch is the only query that filters on an exact file.path (==) and
+// a line.number range; grep patterns use RLIKE. Distinguish by the range clause.
+const isWindowQuery = (query: string): boolean => query.includes('line.number >= ?lo');
 
 const row = (path: string, line: number, content: string) => [
   'open-telemetry',
@@ -98,7 +111,7 @@ describe('codeGrep', () => {
 });
 
 describe('discoverLoggingSites', () => {
-  it('runs one grep per idiom pattern, scoped to <serviceRoot>/**', async () => {
+  it('greps every idiom + anchored-phrase pattern, scoped to <serviceRoot>/**', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
 
@@ -111,22 +124,38 @@ describe('discoverLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    expect(esClient.esql.query.mock.calls).toHaveLength(LOGGER_IDIOM_PATTERNS.length);
+    // No hits -> no window fetch, so exactly one grep per pattern.
+    expect(esClient.esql.query.mock.calls).toHaveLength(GREP_CALLS);
     for (const [{ params }] of esClient.esql.query.mock.calls) {
       expect(params).toContainEqual({ file_path: 'src/ad/**' });
       expect(params).toContainEqual({ git_commit: 'abc123' });
     }
+    // an anchored double-quote phrase pattern is present.
+    const [dq] = anchoredPhrasePatterns('[sS]tarted');
+    const regexes = esClient.esql.query.mock.calls.flatMap(([{ params }]) =>
+      (params as Array<Record<string, unknown>>).filter((p) => 'regex' in p).map((p) => p.regex)
+    );
+    expect(regexes).toContain(dq);
   });
 
-  it('deduplicates matches by path:line across patterns and carries the language', async () => {
+  it('returns windowed candidates tagged by provenance, deduped by path:line', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    // Every pattern returns the same line — must collapse to a single chunk.
-    esClient.esql.query.mockResolvedValue({
-      columns: COLUMNS,
-      values: [row('src/ad/Main.java', 42, 'logger.info("hi");')],
-    });
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return {
+          columns: WINDOW_COLUMNS,
+          values: [
+            [41, 'logger.info('],
+            [42, '"hi");'],
+            [43, 'next();'],
+          ],
+        };
+      }
+      // every grep pattern returns the same idiom hit -> single deduped candidate.
+      return { columns: COLUMNS, values: [row('src/ad/Main.java', 42, 'logger.info(')] };
+    }) as unknown as typeof esClient.esql.query);
 
-    const chunks = await discoverLoggingSites({
+    const candidates = await discoverLoggingSites({
       esClient,
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
@@ -135,19 +164,31 @@ describe('discoverLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    expect(chunks).toEqual([
-      { content: 'logger.info("hi");', language: 'Java', location: 'src/ad/Main.java:42' },
+    expect(candidates).toEqual([
+      {
+        location: 'src/ad/Main.java:42',
+        content: 'logger.info(\n"hi");\nnext();',
+        via: 'idiom',
+        language: 'Java',
+      },
     ]);
   });
 
-  it('never throws: a failing pattern is skipped and the rest still run', async () => {
+  it('never throws: a failing grep pattern is skipped and the rest still run', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.esql.query.mockRejectedValueOnce(new Error('bad regex')).mockResolvedValue({
-      columns: COLUMNS,
-      values: [row('src/ad/Main.java', 7, 'console.error("boom");')],
-    });
+    let firstGrep = true;
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[7, 'console.error("boom");']] };
+      }
+      if (firstGrep) {
+        firstGrep = false;
+        throw new Error('bad regex');
+      }
+      return { columns: COLUMNS, values: [row('src/ad/Main.java', 7, 'console.error("boom");')] };
+    }) as unknown as typeof esClient.esql.query);
 
-    const chunks = await discoverLoggingSites({
+    const candidates = await discoverLoggingSites({
       esClient,
       repository: 'open-telemetry/opentelemetry-demo',
       gitSha: 'abc123',
@@ -155,8 +196,13 @@ describe('discoverLoggingSites', () => {
       logger: loggerMock.create(),
     });
 
-    expect(chunks).toEqual([
-      { content: 'console.error("boom");', language: undefined, location: 'src/ad/Main.java:7' },
+    expect(candidates).toEqual([
+      {
+        location: 'src/ad/Main.java:7',
+        content: 'console.error("boom");',
+        via: 'idiom',
+        language: undefined,
+      },
     ]);
   });
 

@@ -70,4 +70,29 @@ describe('extractLogSignatures', () => {
   it('ignores non-logging text', () => {
     expect(extractLogSignatures({ content: 'const x = compute(1, 2);' })).toHaveLength(0);
   });
+
+  it('synthesizes a signature from a Stage-3 classified (level, message)', () => {
+    // A phrase-only line the idiom regex cannot parse; the classifier supplied
+    // the level + static message.
+    const signatures = extractLogSignatures({
+      content: 'return nil, fmt.Errorf("failed to charge card: %+v", err)',
+      location: 'main.go:355',
+      classified: { level: 'error', message: 'failed to charge card' },
+    });
+    expect(signatures).toEqual([
+      {
+        level: 'error',
+        severity: 70,
+        message: 'failed to charge card',
+        staticPrefix: 'failed to charge card',
+        location: 'main.go:355',
+      },
+    ]);
+  });
+
+  it('drops a classified signature whose static prefix is too short', () => {
+    expect(
+      extractLogSignatures({ content: 'x', classified: { level: 'info', message: '{}' } })
+    ).toHaveLength(0);
+  });
 });

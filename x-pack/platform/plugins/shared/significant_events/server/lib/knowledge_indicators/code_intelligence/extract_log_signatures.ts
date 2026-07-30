@@ -42,10 +42,33 @@ export function staticPrefixOf(message: string): string {
 
 /**
  * Extracts log signatures (level + message + static prefix) from a logging
- * chunk's source. Deterministic regex over the code — no LLM. De-duplicates by
- * `(level, message)` within a chunk.
+ * chunk's source. Deterministic regex over the code — no LLM.
+ *
+ * When the chunk carries a Stage-3 `classified` `(level, message)` (a phrase-only
+ * match the idiom regex cannot parse — e.g. `fmt.Errorf("...")`), that is used to
+ * synthesise the signature directly, so the recall lift still produces a query.
+ * Otherwise the regex parses `(level, message)` from `content` as before.
+ * De-duplicates by `(level, message)` within a chunk.
  */
 export function extractLogSignatures(chunk: LoggingChunk): LogSignature[] {
+  if (chunk.classified) {
+    const level = normalizeLevel(chunk.classified.level);
+    const message = chunk.classified.message;
+    const staticPrefix = staticPrefixOf(message);
+    if (staticPrefix.length < 3) {
+      return [];
+    }
+    return [
+      {
+        level,
+        severity: severityForLevel(level),
+        message,
+        staticPrefix,
+        location: chunk.location,
+      },
+    ];
+  }
+
   const signatures: LogSignature[] = [];
   const seen = new Set<string>();
 

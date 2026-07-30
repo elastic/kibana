@@ -44,13 +44,39 @@ export interface CodeEvidenceCitation {
 }
 
 /**
- * A log-emitting source excerpt verified by the GitHub code research agent.
+ * A log-emitting source excerpt. `content` is a small source window (the matched
+ * line +/- 1 neighbor) so multi-line logger calls keep their `logger.x(` context.
  */
 export interface LoggingChunk {
   content: string;
   language?: string;
   /** Best-effort repository-relative file and line location. */
   location?: string;
+  /**
+   * Stage-3 pre-classified signature. When the deterministic regex in
+   * {@link extractLogSignatures} cannot parse a `(level, message)` from `content`
+   * (a phrase-only match with no logger idiom, e.g. `fmt.Errorf("...")`), the
+   * classifier supplies the level + static message so the recall still yields a
+   * signature. Idiom chunks leave this unset and are parsed by regex as before.
+   */
+  classified?: { level: string; message: string };
+}
+
+/** How a candidate logging line was surfaced by grep. */
+export type LoggingCandidateVia = 'idiom' | 'phrase';
+
+/**
+ * A candidate logging line found by deterministic grep, before the classifier
+ * decides keep/drop + level. `content` is the +/-1 line window.
+ */
+export interface LoggingCandidate {
+  /** Repository-relative `path:line`. */
+  location: string;
+  /** The +/-1 line source window. */
+  content: string;
+  /** Whether a logger idiom matched (high confidence) or only a phrase (needs judging). */
+  via: LoggingCandidateVia;
+  language?: string;
 }
 
 /**

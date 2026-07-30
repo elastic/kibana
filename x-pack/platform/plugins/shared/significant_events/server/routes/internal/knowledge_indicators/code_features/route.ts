@@ -29,6 +29,7 @@ import {
   reconcileCodeAndLogQueries,
   linkServiceEntities,
   discoverLoggingSites,
+  classifyLoggingSites,
   isCodeIntelligenceAgentAvailable,
   CODE_INTELLIGENCE_AGENT_ID,
   type ServiceCodeMetadata,
@@ -529,7 +530,7 @@ const identifyServiceRoute = createServerRoute({
     queriesGenerated: number;
   }> => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, licensing } = scopedClients;
+    const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -547,14 +548,30 @@ const identifyServiceRoute = createServerRoute({
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
     const esClient = scopedClusterClient.asCurrentUser;
 
-    // Deterministically discover this service's production logging call sites by
-    // grepping the indexed source (replaces the agent's logging-sites pass).
-    const loggingChunks = await discoverLoggingSites({
+    // Stage 3: deterministically grep candidate logging call sites (idiom union
+    // string-anchored phrase lexicon, each with a +/-1 line window), then judge
+    // them with a single batched classifier call (keep/drop + level + message).
+    // The classifier connector is the KI-extraction inference feature's mapping.
+    const candidates = await discoverLoggingSites({
       esClient,
       repository,
       gitSha,
       serviceRoot: service.serviceRoot,
       language: service.language,
+      logger: routeLogger,
+    });
+
+    const classifierConnectorId = await resolveConnectorForFeature({
+      searchInferenceEndpoints: server.searchInferenceEndpoints,
+      featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+      featureName: 'logging-site classification',
+      request,
+    });
+
+    const loggingChunks = await classifyLoggingSites({
+      inferenceClient,
+      connectorId: classifierConnectorId,
+      candidates,
       logger: routeLogger,
     });
 

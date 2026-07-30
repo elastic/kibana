@@ -37,12 +37,14 @@ export {
 export { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
 export {
   discoverLoggingSites,
+  fetchLineWindows,
   codeGrep,
   splitRepository,
   type GrepLine,
   type CodeGrepOptions,
   type DiscoverLoggingSitesOptions,
 } from './discover_logging_sites';
+export { classifyLoggingSites, type ClassifyLoggingSitesOptions } from './classify_logging_sites';
 export {
   generatePredictiveQueries,
   buildPredictiveEsql,
@@ -70,5 +72,7 @@ export type {
   RepoType,
   LanguageCount,
   LoggingChunk,
+  LoggingCandidate,
+  LoggingCandidateVia,
   LogSignature,
 } from './types';

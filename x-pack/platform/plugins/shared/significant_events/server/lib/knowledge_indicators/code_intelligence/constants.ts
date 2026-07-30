@@ -119,3 +119,57 @@ export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   // logrus.Info(...) — go logrus.
   '.*logrus[.](Info|Warn|Error|Debug|Fatal).*',
 ] as const;
+
+/**
+ * Log-message phrase lexicon (Stage 3 recall lift). Matched ONLY inside a string
+ * literal, so it catches production log/diagnostic messages emitted through
+ * idioms the Tier-1 set misses — Go `fmt.Errorf("...")`, `eprintln!`, `.expect`,
+ * `Console.WriteLine`, PHP `echo`, structured event tables — language-agnostic.
+ *
+ * Precision is intentionally traded for recall here: a downstream classifier
+ * (see `classify_logging_sites.ts`) decides keep/drop + level, so this layer only
+ * needs to surface candidates. Bare (unanchored) phrase matching is ~7%
+ * precision; string-literal anchoring is the load-bearing constraint.
+ *
+ * Lucene RLIKE gotcha: `"` is a special (literal-quoting) char in Lucene regexp,
+ * so a literal double-quote must be escaped as `\\"` and `[^\\"]` used for
+ * "not a double-quote"; single quotes are ordinary. See `anchoredPhrasePatterns`.
+ */
+export const LOGGER_PHRASE_LEXICON: readonly string[] = [
+  '[sS]tarting',
+  '[sS]tarted',
+  '[sS]hutting [dD]own',
+  '[sS]hutdown',
+  '[lL]istening on',
+  '[cC]onnecting to',
+  '[cC]onnected to',
+  '[cC]onnection refused',
+  '[cC]onnection reset',
+  '[tT]imed out',
+  '[tT]imeout',
+  '[rR]etry',
+  '[rR]etrying',
+  '[fF]ailed to',
+  '[uU]nable to',
+  '[cC]ould not',
+  '[iI]nitializ',
+  '[iI]nitialis',
+  '[hH]ealth check',
+  '[dD]eprecat',
+  '[rR]eceived',
+  '[pP]rocessing',
+  '[pP]rocessed',
+  '[sS]ending',
+  '[eE]rror',
+  '[wW]arning',
+  '[eE]xception',
+] as const;
+
+/**
+ * Builds the string-literal-anchored RLIKE patterns for one phrase body: one for
+ * double-quoted literals (double-quote escaped as `\\"`), one for single-quoted.
+ */
+export const anchoredPhrasePatterns = (phrase: string): string[] => [
+  `.*\\"[^\\"]*${phrase}[^\\"]*\\".*`,
+  `.*'[^']*${phrase}[^']*'.*`,
+];

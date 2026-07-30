@@ -8,8 +8,13 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import { LOGGER_IDIOM_PATTERNS, SOURCERER_LINES_INDEX } from './constants';
-import type { LoggingChunk } from './types';
+import {
+  anchoredPhrasePatterns,
+  LOGGER_IDIOM_PATTERNS,
+  LOGGER_PHRASE_LEXICON,
+  SOURCERER_LINES_INDEX,
+} from './constants';
+import type { LoggingCandidate, LoggingCandidateVia } from './types';
 
 /** One matched source line returned by {@link codeGrep}. */
 export interface GrepLine {
@@ -108,6 +113,84 @@ export function splitRepository(repository: string): { org: string; repo: string
   return { org: repository.slice(0, slash), repo: repository.slice(slash + 1) };
 }
 
+/**
+ * Fetches, per file, the content of every line number in `[min-1, max+1]` so a
+ * matched line can be presented with its +/-1 neighbours. Batched one query per
+ * file over the requested numeric span; never throws (a failed file is skipped).
+ */
+export async function fetchLineWindows({
+  esClient,
+  gitOrg,
+  gitRepo,
+  gitCommit,
+  hitsByFile,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  gitOrg: string;
+  gitRepo: string;
+  gitCommit: string;
+  /** file path -> set of matched line numbers. */
+  hitsByFile: Map<string, Set<number>>;
+  logger: Logger;
+}): Promise<Map<string, Map<number, string>>> {
+  const out = new Map<string, Map<number, string>>();
+
+  for (const [path, lineNumbers] of hitsByFile) {
+    const wanted = new Set<number>();
+    for (const n of lineNumbers) {
+      wanted.add(n - 1);
+      wanted.add(n);
+      wanted.add(n + 1);
+    }
+    const lo = Math.min(...wanted);
+    const hi = Math.max(...wanted);
+
+    try {
+      const response = (await esClient.esql.query({
+        query: `
+          FROM ${SOURCERER_LINES_INDEX}
+          | WHERE MATCH(git.org, ?git_org)
+              AND git.repo LIKE ?git_repo
+              AND git.commit LIKE ?git_commit
+              AND file.path == ?file_path
+              AND line.number >= ?lo AND line.number <= ?hi
+          | KEEP line.number, line.content
+          | SORT line.number
+          | LIMIT 10000`,
+        params: [
+          { git_org: gitOrg },
+          { git_repo: gitRepo },
+          { git_commit: gitCommit },
+          { file_path: path },
+          { lo },
+          { hi },
+        ],
+        drop_null_columns: false,
+      })) as ESQLSearchResponse;
+
+      const lineCol = response.columns.findIndex((c) => c.name === 'line.number');
+      const contentCol = response.columns.findIndex((c) => c.name === 'line.content');
+      if (lineCol === -1 || contentCol === -1) {
+        continue;
+      }
+      const fileLines = new Map<number, string>();
+      for (const row of response.values) {
+        fileLines.set(Number(row[lineCol] ?? 0), String(row[contentCol] ?? ''));
+      }
+      out.set(path, fileLines);
+    } catch (error) {
+      logger.debug(
+        `logging_sites: window fetch failed for "${path}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
+  return out;
+}
+
 export interface DiscoverLoggingSitesOptions {
   esClient: ElasticsearchClient;
   /** Repository as `"org/repo"`. */
@@ -116,20 +199,22 @@ export interface DiscoverLoggingSitesOptions {
   gitSha: string;
   /** Repository-relative service root; grep is confined to `<root>/**`. */
   serviceRoot: string;
-  /** Primary language, carried onto each chunk for downstream context. */
+  /** Primary language, carried onto each candidate for downstream context. */
   language?: string;
   logger: Logger;
-  /** Max lines per idiom pattern (defaults to 500). */
+  /** Max lines per grep pattern (defaults to 500). */
   perPatternLimit?: number;
 }
 
 /**
- * Deterministically discovers production logging call sites for one service by
- * grepping the indexed source with a fixed set of logger idioms — the file-
- * finding pass that previously ran through the LLM agent. Returns one
- * {@link LoggingChunk} per matched line (deduplicated by `path:line`), which
- * {@link extractLogSignatures} then parses into log signatures exactly as
- * before, so the downstream Stage-2 pipeline is unchanged.
+ * Deterministically discovers candidate logging call sites for one service by
+ * grepping the indexed source with the union of (a) high-confidence logger
+ * idioms and (b) the string-anchored phrase lexicon (Stage-3 recall lift). Each
+ * candidate carries a +/-1 line window (so multi-line logger calls keep their
+ * `logger.x(` context) and a `via` tag (`idiom` = high confidence, `phrase` =
+ * needs the classifier to judge). Deduplicated by `path:line`; idiom wins the tag
+ * when both match. The classifier ({@link classifyLoggingSites}) then decides
+ * keep/drop + level, and kept candidates become {@link LoggingChunk}s.
  */
 export async function discoverLoggingSites({
   esClient,
@@ -139,26 +224,35 @@ export async function discoverLoggingSites({
   language,
   logger,
   perPatternLimit = 500,
-}: DiscoverLoggingSitesOptions): Promise<LoggingChunk[]> {
+}: DiscoverLoggingSitesOptions): Promise<LoggingCandidate[]> {
   const { org, repo } = splitRepository(repository);
+  const gitCommit = gitSha || '*';
   const root = serviceRoot.replace(/\/+$/, '');
   const filePath = root ? `${root}/**` : '**';
 
-  const byLocation = new Map<string, LoggingChunk>();
+  // Grep the union; record provenance. Idiom patterns are high-confidence log
+  // sites; phrase patterns are recall candidates the classifier will judge.
+  const via = new Map<string, LoggingCandidateVia>();
   let patternErrors = 0;
 
-  for (const regex of LOGGER_IDIOM_PATTERNS) {
-    let lines: GrepLine[];
+  const runGrep = async (regex: string, tag: LoggingCandidateVia) => {
     try {
-      lines = await codeGrep({
+      const lines = await codeGrep({
         esClient,
         gitOrg: org,
         gitRepo: repo,
-        gitCommit: gitSha || '*',
+        gitCommit,
         filePath,
         regex,
         limit: perPatternLimit,
       });
+      for (const { filePath: path, lineNumber } of lines) {
+        const location = `${path}:${lineNumber}`;
+        // idiom wins the tag; don't downgrade an idiom hit to phrase.
+        if (tag === 'idiom' || !via.has(location)) {
+          via.set(location, tag);
+        }
+      }
     } catch (error) {
       patternErrors += 1;
       logger.debug(
@@ -166,23 +260,60 @@ export async function discoverLoggingSites({
           regex
         )}: ${error instanceof Error ? error.message : String(error)}`
       );
-      continue;
     }
+  };
 
-    for (const { filePath: path, lineNumber, content } of lines) {
-      const location = `${path}:${lineNumber}`;
-      if (byLocation.has(location)) {
-        continue;
-      }
-      byLocation.set(location, { content, language, location });
+  for (const regex of LOGGER_IDIOM_PATTERNS) {
+    await runGrep(regex, 'idiom');
+  }
+  for (const phrase of LOGGER_PHRASE_LEXICON) {
+    for (const regex of anchoredPhrasePatterns(phrase)) {
+      await runGrep(regex, 'phrase');
     }
   }
 
-  const chunks = [...byLocation.values()];
+  // Fetch +/-1 windows for all hits (batched per file).
+  const hitsByFile = new Map<string, Set<number>>();
+  for (const location of via.keys()) {
+    const idx = location.lastIndexOf(':');
+    const path = location.slice(0, idx);
+    const lineNumber = Number(location.slice(idx + 1));
+    const set = hitsByFile.get(path) ?? new Set<number>();
+    set.add(lineNumber);
+    hitsByFile.set(path, set);
+  }
+  const windows = await fetchLineWindows({
+    esClient,
+    gitOrg: org,
+    gitRepo: repo,
+    gitCommit,
+    hitsByFile,
+    logger,
+  });
+
+  const candidates: LoggingCandidate[] = [];
+  for (const [location, tag] of via) {
+    const idx = location.lastIndexOf(':');
+    const path = location.slice(0, idx);
+    const lineNumber = Number(location.slice(idx + 1));
+    const fileLines = windows.get(path);
+    const window = [lineNumber - 1, lineNumber, lineNumber + 1]
+      .map((n) => fileLines?.get(n)?.trim())
+      .filter((line): line is string => Boolean(line))
+      .join('\n');
+    candidates.push({
+      location,
+      content: (window || '').slice(0, 400),
+      via: tag,
+      language,
+    });
+  }
+
+  const idiomCount = candidates.filter((c) => c.via === 'idiom').length;
   logger.debug(
-    `logging_sites: discovered ${chunks.length} logging line(s) for "${repository}" @ "${root}" ` +
-      `across ${LOGGER_IDIOM_PATTERNS.length} idiom pattern(s)` +
+    `logging_sites: discovered ${candidates.length} candidate line(s) for "${repository}" @ "${root}" ` +
+      `(idiom=${idiomCount} phrase=${candidates.length - idiomCount})` +
       (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '')
   );
-  return chunks;
+  return candidates;
 }
