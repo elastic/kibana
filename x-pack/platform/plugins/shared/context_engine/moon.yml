@@ -37,6 +37,8 @@ dependsOn:
   - '@kbn/esql'
   - '@kbn/es-query'
   - '@kbn/share-plugin'
+  - '@kbn/triggers-actions-ui-plugin'
+  - '@kbn/connector-specs'
   - '@kbn/console-plugin'
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
