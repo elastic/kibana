@@ -29,7 +29,7 @@ import type { InstallFormField, TemplateBody } from '@kbn/workflows-library';
 import { InstallForm } from './install_form';
 import { useWorkflowsCapabilities } from '../../../hooks/use_workflows_capabilities';
 import type { WorkflowsCreateRouteState } from '../../../navigation';
-import { useInstallTemplate, type InstallSource } from '../../hooks/use_install_template';
+import { type InstallSource, useInstallTemplate } from '../../hooks/use_install_template';
 
 export interface TemplateInstallSectionProps {
   template: TemplateBody;
@@ -139,31 +139,28 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       [installMode, template.raw, template.metadata.slug]
     );
 
-    const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(
-      installSource,
-      {
-        onSuccess: ({ workflowId }) => {
-          notifications.toasts.addSuccess(
-            i18n.translate('workflows.library.install.successToast', {
-              defaultMessage: 'Workflow created from "{name}"',
-              values: { name: template.metadata.name },
-            })
+    const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(installSource, {
+      onSuccess: ({ workflowId }) => {
+        notifications.toasts.addSuccess(
+          i18n.translate('workflows.library.install.successToast', {
+            defaultMessage: 'Workflow created from "{name}"',
+            values: { name: template.metadata.name },
+          })
+        );
+        void application.navigateToApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
+      },
+      onError: (error) => {
+        const attributes = error.body?.attributes as
+          | { errors?: Array<{ field: string; reason: string }> }
+          | undefined;
+        if (attributes?.errors?.length) {
+          setServerErrors(
+            Object.fromEntries(attributes.errors.map(({ field, reason }) => [field, reason]))
           );
-          void application.navigateToApp(WORKFLOWS_APP_ID, { path: `/${workflowId}` });
-        },
-        onError: (error) => {
-          const attributes = error.body?.attributes as
-            | { errors?: Array<{ field: string; reason: string }> }
-            | undefined;
-          if (attributes?.errors?.length) {
-            setServerErrors(
-              Object.fromEntries(attributes.errors.map(({ field, reason }) => [field, reason]))
-            );
-          }
-          setInstallError(error.body?.message ?? error.message);
-        },
-      }
-    );
+        }
+        setInstallError(error.body?.message ?? error.message);
+      },
+    });
 
     const handleInstall = useCallback(() => {
       setInstallError(undefined);
