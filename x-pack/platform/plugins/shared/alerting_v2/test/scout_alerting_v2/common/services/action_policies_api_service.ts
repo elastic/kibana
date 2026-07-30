@@ -169,7 +169,7 @@ export const getActionPoliciesApiService = ({
 
     cleanUp: () =>
       measurePerformanceAsync(log, 'actionPolicies.cleanUp', async () => {
-        const { items } = await list({ perPage: 100 });
+        const { items } = await list({ per_page: 100 });
         if (items.length === 0) return;
 
         await postBulk('bulk_delete', { ids: items.map((item) => item.id) });

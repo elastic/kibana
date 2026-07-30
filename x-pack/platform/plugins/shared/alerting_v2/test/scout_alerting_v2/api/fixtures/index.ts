@@ -112,6 +112,7 @@ export {
 } from '../../common/roles';
 export {
   buildAlertEvent,
+  buildExternalAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
   getSnoozeDate,
@@ -127,6 +128,7 @@ export {
   getActivateAlertActionUrl,
   getDeactivateAlertActionUrl,
   getRuleUrl,
+  getRunRuleUrl,
   getEnableRuleUrl,
   getDisableRuleUrl,
   getBulkRulesUrl,
