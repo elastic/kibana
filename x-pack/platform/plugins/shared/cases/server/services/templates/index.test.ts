@@ -18,6 +18,7 @@ import {
   CASE_TEMPLATE_SAVED_OBJECT,
   MAX_EXTENDED_FIELD_VALUE_BYTES,
   MAX_FIELDS_PER_TEMPLATE,
+  MAX_TEMPLATE_DEFINITION_LENGTH,
   MAX_TEMPLATES_PER_OWNER,
 } from '../../../common/constants';
 import { TemplatesService } from '.';
@@ -1724,17 +1725,21 @@ describe('TemplatesService', () => {
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
 
-    it('allows create when a template default is exactly the maximum byte size', async () => {
+    it('allows create when a multibyte template default is exactly the maximum byte size', async () => {
       const service = createService();
+      const cjkCharacter = '界';
+      const defaultValue = cjkCharacter.repeat(
+        MAX_EXTENDED_FIELD_VALUE_BYTES / new TextEncoder().encode(cjkCharacter).byteLength
+      );
+      const definition = buildDefinitionWithDefault('Boundary Default', defaultValue);
+
+      expect(definition.length).toBeLessThanOrEqual(MAX_TEMPLATE_DEFINITION_LENGTH);
 
       await service.createTemplate(
         {
           name: 'Boundary Default',
           owner: 'securitySolution',
-          definition: buildDefinitionWithDefault(
-            'Boundary Default',
-            'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES)
-          ),
+          definition,
         },
         'alice',
         'generated-id'
