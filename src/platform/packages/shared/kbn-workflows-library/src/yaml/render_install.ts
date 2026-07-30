@@ -8,6 +8,8 @@
  */
 
 import { parse, parseDocument, visit } from 'yaml';
+import { i18n } from '@kbn/i18n';
+import { assertNever } from '@kbn/std';
 import type { InstallFormField } from '../types/install_form';
 import { InstallFormValidationError } from './install_form_validation_error';
 import type { InstallFormFieldError } from './install_form_validation_error';
@@ -17,6 +19,42 @@ import { stripMetadataBlock } from './render_template';
 
 const INSTALL_PLACEHOLDER = /__install__\.([a-zA-Z0-9_-]+)/g;
 const EXACT_INSTALL_PLACEHOLDER = /^__install__\.([a-zA-Z0-9_-]+)$/;
+
+const REQUIRED_VALUE_ERROR = i18n.translate(
+  'workflows.library.installForm.validation.requiredValue',
+  { defaultMessage: 'A value is required.' }
+);
+
+const EXPECTED_STRING_ERROR = i18n.translate(
+  'workflows.library.installForm.validation.expectedString',
+  { defaultMessage: 'Expected a string.' }
+);
+
+/**
+ * User-facing validation messages keyed by `install.form` field `inputType`.
+ * Parameterized messages are functions; the rest are plain translated strings.
+ */
+const INPUT_VALIDATION_ERRORS = {
+  text: EXPECTED_STRING_ERROR,
+  textarea: EXPECTED_STRING_ERROR,
+  number: i18n.translate('workflows.library.installForm.validation.expectedNumber', {
+    defaultMessage: 'Expected a finite number.',
+  }),
+  boolean: i18n.translate('workflows.library.installForm.validation.expectedBoolean', {
+    defaultMessage: 'Expected a boolean.',
+  }),
+  select: (allowed: string[]) =>
+    i18n.translate('workflows.library.installForm.validation.expectedOption', {
+      defaultMessage: 'Must be one of: {allowed}.',
+      values: { allowed: allowed.join(', ') },
+    }),
+  connector: i18n.translate('workflows.library.installForm.validation.expectedConnector', {
+    defaultMessage: 'Expected a connector ID.',
+  }),
+  esIndex: i18n.translate('workflows.library.installForm.validation.expectedIndex', {
+    defaultMessage: 'Expected an index name.',
+  }),
+} as const;
 
 /**
  * Validate resolved install-form values against the declared form.
@@ -36,7 +74,7 @@ export function validateInstallFormValues(
 
     if (value === undefined || value === '') {
       if (field.required) {
-        errors.push({ field: field.name, reason: 'A value is required.' });
+        errors.push({ field: field.name, reason: REQUIRED_VALUE_ERROR });
       }
       continue;
     }
@@ -54,29 +92,33 @@ function validateFieldValue(field: InstallFormField, value: unknown): string | u
   switch (field.inputType) {
     case 'text':
     case 'textarea':
-      return typeof value === 'string' ? undefined : 'Expected a string.';
+      return typeof value === 'string' ? undefined : INPUT_VALIDATION_ERRORS[field.inputType];
     case 'number':
       return typeof value === 'number' && Number.isFinite(value)
         ? undefined
-        : 'Expected a finite number.';
+        : INPUT_VALIDATION_ERRORS.number;
     case 'boolean':
-      return typeof value === 'boolean' ? undefined : 'Expected a boolean.';
+      return typeof value === 'boolean' ? undefined : INPUT_VALIDATION_ERRORS.boolean;
     case 'select': {
       if (typeof value !== 'string') {
-        return 'Expected a string.';
+        return EXPECTED_STRING_ERROR;
       }
       return field.options.some((option) => option.value === value)
         ? undefined
-        : `Must be one of: ${field.options.map((option) => option.value).join(', ')}.`;
+        : INPUT_VALIDATION_ERRORS.select(field.options.map((option) => option.value));
     }
     case 'connector':
       return typeof value === 'string' && value.trim().length > 0
         ? undefined
-        : 'Expected a connector ID.';
+        : INPUT_VALIDATION_ERRORS.connector;
     case 'esIndex':
       return typeof value === 'string' && value.trim().length > 0
         ? undefined
-        : 'Expected an index name.';
+        : INPUT_VALIDATION_ERRORS.esIndex;
+    // A new `inputType` must get an explicit branch above; TS fails here
+    // otherwise, so values never silently pass this server-side validation.
+    default:
+      return assertNever(field);
   }
 }
 
