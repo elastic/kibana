@@ -19,9 +19,15 @@ interface UseVisorNlToEsqlParams {
   editorRef: MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
   editorModel: MutableRefObject<monaco.editor.ITextModel | undefined>;
   onSubmit: (query: string) => void;
+  onAfterInsert?: () => void;
 }
 
-export const useVisorNlToEsql = ({ editorRef, editorModel, onSubmit }: UseVisorNlToEsqlParams) => {
+export const useVisorNlToEsql = ({
+  editorRef,
+  editorModel,
+  onSubmit,
+  onAfterInsert,
+}: UseVisorNlToEsqlParams) => {
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
 
@@ -95,6 +101,8 @@ export const useVisorNlToEsql = ({ editorRef, editorModel, onSubmit }: UseVisorN
         ]);
       }
 
+      onAfterInsert?.();
+
       showReview({
         firstChangedOriginalLine,
         lastChangedOriginalLine,
@@ -102,7 +110,7 @@ export const useVisorNlToEsql = ({ editorRef, editorModel, onSubmit }: UseVisorN
         generatedLineEnd: lastChangedOriginalLine + genChangedLines.length,
       });
     },
-    [editorRef, editorModel, cleanup, showReview]
+    [editorRef, editorModel, cleanup, showReview, onAfterInsert]
   );
 
   return { showVisorReview };

@@ -669,6 +669,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorRef,
     editorModel,
     onSubmit: visorNlOnSubmit,
+    onAfterInsert: expandToFitContent,
   });
 
   useEffect(() => {
