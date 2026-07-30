@@ -58,11 +58,7 @@ export const toStableUserId = ({
  * the API key owner's username does not match the originating user.
  *
  * For un-enriched fake requests (e.g. tasks scheduled before enrichment was available), we fall
- * back to the ES `_security/_authenticate` API, which works with API keys and returns the
- * username and authentication realm of the API key owner.
- *
- * The returned `id` is a stable principal: profile_uid when available, otherwise a
- * realm-qualified synthetic id. Username alone is never treated as a unique principal.
+ * back to the ES `_security/_authenticate` API for the username only.
  */
 export const getUserFromRequest = async ({
   request,
@@ -89,11 +85,7 @@ export const getUserFromRequest = async ({
   // task scheduled before enrichment): call ES _security/_authenticate
   const authResponse = await esClient.security.authenticate();
   return {
-    id: toStableUserId({
-      profileUid: authUser?.profile_uid,
-      username: authResponse.username,
-      authenticationRealm: authResponse.authentication_realm,
-    }),
+    id: authUser?.profile_uid,
     username: authResponse.username,
   };
 };

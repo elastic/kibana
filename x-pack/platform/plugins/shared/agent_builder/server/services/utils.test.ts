@@ -100,7 +100,7 @@ describe('getUserFromRequest', () => {
     });
   });
 
-  it('falls back to ES authenticate API when getCurrentUser returns null for a real request', async () => {
+  it('falls back to ES authenticate for username without synthesizing a realm id', async () => {
     const request = httpServerMock.createKibanaRequest();
 
     security.authc.getCurrentUser.mockReturnValue(null);
@@ -111,8 +111,9 @@ describe('getUserFromRequest', () => {
 
     const result = await getUserFromRequest({ request, security, esClient });
 
+    // Leaving id undefined preserves username ownership fallback for un-enriched paths;
+    // a realm id from authenticate would mismatch profile_uid-backed agents.
     expect(result).toEqual({
-      id: 'realm:["native","native1","api-key-user"]',
       username: 'api-key-user',
     });
     expect(security.authc.getCurrentUser).toHaveBeenCalledWith(request);
