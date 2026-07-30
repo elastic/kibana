@@ -33,7 +33,6 @@ export async function getEntitiesByFuzzySearch({
     index: castArray(index).join(','),
     track_total_hits: false,
     size: 0,
-    timeout: '2500ms',
     query: {
       bool: {
         filter: [
