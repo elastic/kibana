@@ -35,8 +35,10 @@ import {
   useUpgradePackagePolicyDryRunQuery,
   useUpgradeAgentlessPoliciesDryRunQuery,
   useUpdatePackageMutation,
+  useNamespacePreflightCheckMutation,
   useAuthz,
 } from '../../../../../hooks';
+import type { NamespaceConflictWarning } from '../../../../../../../../common/types/rest_spec/epm';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   KEEP_POLICIES_UP_TO_DATE_PACKAGES,
@@ -61,6 +63,7 @@ import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
+import { NamespaceConflictModal } from './namespace_conflict_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
 import { BreakingChangesFlyout } from './breaking_changes_flyout';
 import { RollbackButton } from './rollback_button';
@@ -226,6 +229,7 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const updatePackageMutation = useUpdatePackageMutation();
     const updateNamespaceCustomizationMutation = useUpdatePackageMutation();
+    const namespacePreflight = useNamespacePreflightCheckMutation();
 
     const { notifications } = useStartServices();
     const { allowedNamespacePrefixes } = useSpaceSettingsContext();
@@ -240,7 +244,13 @@ export const SettingsPage: React.FC<Props> = memo(
 
     const namespaceCustomizationSettings = installationInfo?.namespace_customization_settings;
 
-    const handleNamespaceCustomizationChange = useCallback(
+    // State for the pre-flight conflict confirmation modal.
+    const [pendingNamespaces, setPendingNamespaces] = useState<string[] | null>(null);
+    const [preflightConflicts, setPreflightConflicts] = useState<NamespaceConflictWarning[] | null>(
+      null
+    );
+
+    const saveNamespaceCustomization = useCallback(
       (next: string[]) => {
         updateNamespaceCustomizationMutation.mutate(
           {
@@ -290,6 +300,47 @@ export const SettingsPage: React.FC<Props> = memo(
         updateNamespaceCustomizationMutation,
       ]
     );
+
+    const handleNamespaceCustomizationChange = useCallback(
+      async (next: string[]) => {
+        const addedNamespaces = next.filter((ns) => !namespaceCustomizationEnabledFor.includes(ns));
+        if (addedNamespaces.length > 0) {
+          try {
+            const result = await namespacePreflight.mutateAsync({
+              pkgName: packageInfo.name,
+              namespaces: addedNamespaces,
+            });
+            if (result.warnings.length > 0) {
+              setPendingNamespaces(next);
+              setPreflightConflicts(result.warnings);
+              return;
+            }
+          } catch {
+            // Fail open: if the check itself errors, proceed with the save.
+          }
+        }
+        saveNamespaceCustomization(next);
+      },
+      [
+        namespaceCustomizationEnabledFor,
+        namespacePreflight,
+        packageInfo.name,
+        saveNamespaceCustomization,
+      ]
+    );
+
+    const handleConflictConfirm = useCallback(() => {
+      if (pendingNamespaces !== null) {
+        saveNamespaceCustomization(pendingNamespaces);
+      }
+      setPendingNamespaces(null);
+      setPreflightConflicts(null);
+    }, [pendingNamespaces, saveNamespaceCustomization]);
+
+    const handleConflictCancel = useCallback(() => {
+      setPendingNamespaces(null);
+      setPreflightConflicts(null);
+    }, []);
 
     const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
       return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
@@ -457,7 +508,10 @@ export const SettingsPage: React.FC<Props> = memo(
                         allowedNamespacePrefixes={allowedNamespacePrefixes}
                         namespaceCustomizationSettings={namespaceCustomizationSettings}
                         disabled={!authz.integrations.writePackageSettings}
-                        isSubmitting={updateNamespaceCustomizationMutation.isLoading}
+                        isSubmitting={
+                          updateNamespaceCustomizationMutation.isLoading ||
+                          namespacePreflight.isLoading
+                        }
                         onSave={handleNamespaceCustomizationChange}
                       />
                       <EuiSpacer size="l" />
@@ -749,6 +803,13 @@ export const SettingsPage: React.FC<Props> = memo(
           <BreakingChangesFlyout
             breakingChanges={breakingChanges}
             onClose={() => setIsBreakingChangesFlyoutOpen(false)}
+          />
+        )}
+        {preflightConflicts && preflightConflicts.length > 0 && (
+          <NamespaceConflictModal
+            conflicts={preflightConflicts}
+            onConfirm={handleConflictConfirm}
+            onCancel={handleConflictCancel}
           />
         )}
       </>

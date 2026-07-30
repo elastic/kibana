@@ -111,8 +111,34 @@ export interface UpdatePackageRequest {
   };
 }
 
+/**
+ * How a conflicting index template interacts with Fleet's namespace template (priority 250):
+ * - `overrides_fleet`: higher priority than Fleet's namespace index template
+ * - `blocked_by_same_priority`: same priority, Fleet cannot create namespace index template
+ * - `overridden_by_fleet`: lower priority than Fleet's namespace index template (but still higher than the base)
+ */
+export type ConflictType = 'overrides_fleet' | 'blocked_by_same_priority' | 'overridden_by_fleet';
+
+export interface ConflictingTemplate {
+  name: string;
+  priority: number;
+  conflictType: ConflictType;
+}
+
+export interface NamespaceConflictWarning {
+  /** Concrete data stream name used for the simulate check, e.g. `logs-nginx.access-production`. */
+  dataStreamName: string;
+  namespace: string;
+  /** Fleet-managed base template that is being overridden. */
+  baseTemplateName: string;
+  /** Templates conflicting with Fleet's namespace template, with their priority and conflict type. */
+  conflictingTemplates: ConflictingTemplate[];
+}
+
 export interface UpdatePackageResponse {
   item: PackageInfo;
+  /** Present when added namespaces have pre-existing index template conflicts. */
+  warnings?: NamespaceConflictWarning[];
 }
 
 export interface GetIlmPoliciesResponse {

@@ -21,6 +21,7 @@ import type {
   GetOneBulkOperationPackagesRequestSchema,
 } from '../../types';
 import { updatePackage } from '../../services/epm/packages/update';
+import { runNamespacePreflightCheck } from '../../services/epm/packages/namespace_datastream_templates';
 import { scheduleSyncNamespaceTemplatesTask } from '../../tasks/sync_namespace_templates_task';
 import {
   getAllowedNamespacePrefixesForSpace,
@@ -263,6 +264,40 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
         });
         persistedList = newList;
 
+        let warnings;
+        if (namespaceCustomizationDiff.addedNamespaces.length > 0) {
+          try {
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            const detected = await runNamespacePreflightCheck({
+              esClient,
+              soClient: savedObjectsClient,
+              packageName,
+              namespaces: namespaceCustomizationDiff.addedNamespaces,
+            });
+            if (detected.length > 0) {
+              warnings = detected;
+              const logger = appContextService.getLogger();
+              for (const w of detected) {
+                logger.warn(
+                  `[postBulkNamespaceCustomizationHandler] Pre-existing index template conflict ` +
+                    `for data stream "${w.dataStreamName}" (namespace "${w.namespace}"): base ` +
+                    `template "${w.baseTemplateName}" is overridden. Conflicting templates: ` +
+                    `[${w.conflictingTemplates
+                      .map((t) => `${t.name} (priority ${t.priority}, ${t.conflictType})`)
+                      .join(', ')}].`
+                );
+              }
+            }
+          } catch (err) {
+            appContextService
+              .getLogger()
+              .debug(
+                `[postBulkNamespaceCustomizationHandler] Pre-flight check failed for ` +
+                  `${packageName}: ${(err as Error).message}`
+              );
+          }
+        }
+
         if (
           namespaceCustomizationDiff.addedNamespaces.length > 0 ||
           namespaceCustomizationDiff.removedNamespaces.length > 0
@@ -279,6 +314,7 @@ export const postBulkNamespaceCustomizationHandler: FleetRequestHandler<
           name: packageName,
           success: true,
           namespace_customization_enabled_for: newList,
+          ...(warnings && { warnings }),
         };
       } catch (err) {
         return {

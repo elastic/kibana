@@ -9,7 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 
 import { appContextService } from '../../app_context';
 
-import { warnIfPreexistingCustomization } from './namespace_template_utils';
+import { checkNamespaceConflict } from './namespace_template_utils';
 
 jest.mock('../../app_context');
 jest.mock('../elasticsearch/retry', () => ({
@@ -39,42 +39,66 @@ const DEFAULT_ARGS = {
   logContext: 'test',
 };
 
-/** Simulate: NS template does not exist in ES (404). */
+const MOCK_CLONE_TEMPLATE = {
+  name: 'logs-nginx.access-clone',
+  index_template: {
+    index_patterns: ['logs-nginx.access-production'],
+    priority: 300,
+    template: {},
+  },
+};
+
+/**
+ * Simulate: NS template does not exist in ES (404 on the named call).
+ * The unnamed call (all-templates lookup) returns `allTemplates`.
+ */
 function mockNsTemplateNotFound(
-  esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>
+  esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>,
+  allTemplates: Array<{ name: string; index_template: object }> = [MOCK_CLONE_TEMPLATE]
 ) {
-  esClient.indices.getIndexTemplate.mockRejectedValue({ meta: { statusCode: 404 } });
+  esClient.indices.getIndexTemplate.mockImplementation(async (params?: { name?: string }) => {
+    if (params?.name) {
+      throw Object.assign(new Error('Not found'), { meta: { statusCode: 404 } });
+    }
+    return { index_templates: allTemplates } as any;
+  });
 }
 
-/** Simulate: NS template already exists in ES (returned by getIndexTemplate). */
+/** Simulate: NS template already exists in ES (returned by the named call). */
 function mockNsTemplateExists(
   esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>
 ) {
-  esClient.indices.getIndexTemplate.mockResolvedValue({
-    index_templates: [
-      {
-        name: DEFAULT_ARGS.nsTemplateName,
-        index_template: {
-          composed_of: [
-            'logs-nginx.access@package',
-            'production@custom',
-            'logs-nginx.access@custom',
-          ],
-          index_patterns: ['logs-nginx.access-production'],
-          priority: 250,
-          template: { settings: {}, mappings: {} },
-          data_stream: {},
-        },
-      },
-    ],
-  } as any);
+  esClient.indices.getIndexTemplate.mockImplementation(async (params?: { name?: string }) => {
+    if (params?.name === DEFAULT_ARGS.nsTemplateName) {
+      return {
+        index_templates: [
+          {
+            name: DEFAULT_ARGS.nsTemplateName,
+            index_template: {
+              composed_of: [
+                'logs-nginx.access@package',
+                'production@custom',
+                'logs-nginx.access@custom',
+              ],
+              index_patterns: ['logs-nginx.access-production'],
+              priority: 250,
+              template: { settings: {}, mappings: {} },
+              data_stream: {},
+            },
+          },
+        ],
+      } as any;
+    }
+    // all-templates lookup — NS template exists so no conflict, but return it anyway
+    return { index_templates: [] };
+  });
 }
 
 // ---------------------------------------------------------------------------
-// warnIfPreexistingCustomization
+// checkNamespaceConflict
 // ---------------------------------------------------------------------------
 
-describe('warnIfPreexistingCustomization', () => {
+describe('checkNamespaceConflict', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
@@ -88,51 +112,103 @@ describe('warnIfPreexistingCustomization', () => {
     } as any);
   });
 
-  it('logs a warning when the base template appears in overlapping and the Fleet NS template does not yet exist', async () => {
+  it('returns a conflict when the base template appears in overlapping and the Fleet NS template does not yet exist', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.simulateIndexTemplate.mockResolvedValue({
       overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
       template: { mappings: {}, settings: {}, aliases: {} },
     } as any);
-    // NS template doesn't exist → user clone is the winner → warn.
+    // NS template doesn't exist → user clone is the winner → conflict.
     mockNsTemplateNotFound(esClient);
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS });
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('"logs-nginx.access-production"')
-    );
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"logs-nginx.access"'));
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('logs-nginx.access@namespace.production')
-    );
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('opt the namespace out and back in to retry')
-    );
+    expect(result).not.toBeNull();
+    expect(result!.dataStreamName).toBe(DEFAULT_ARGS.indexName);
+    expect(result!.namespace).toBe(DEFAULT_ARGS.namespace);
+    expect(result!.baseTemplateName).toBe(DEFAULT_ARGS.baseTemplateName);
+    // conflictingTemplates contains the WINNER (user clone), not the ES overlapping losers.
+    expect(result!.conflictingTemplates).toEqual([
+      { name: 'logs-nginx.access-clone', priority: 300, conflictType: 'overrides_fleet' },
+    ]);
   });
 
-  it('includes all overlapping template names in the warning message', async () => {
+  it('includes all winning conflicting template names in the returned conflict', async () => {
+    // Two user clones both win over Fleet's templates for this index.
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.simulateIndexTemplate.mockResolvedValue({
-      overlapping: [
-        { name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] },
-        { name: 'logs-nginx.access-clone', index_patterns: ['logs-nginx.access-production*'] },
-      ],
+      overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
       template: { mappings: {}, settings: {}, aliases: {} },
     } as any);
-    mockNsTemplateNotFound(esClient);
+    mockNsTemplateNotFound(esClient, [
+      {
+        name: 'logs-nginx.access-clone-a',
+        index_template: { index_patterns: ['logs-nginx.access-production'], priority: 400 },
+      },
+      {
+        name: 'logs-nginx.access-clone-b',
+        index_template: { index_patterns: ['logs-nginx.access-*'], priority: 300 },
+      },
+    ]);
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS });
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('logs-nginx.access, logs-nginx.access-clone')
-    );
+    expect(result).not.toBeNull();
+    expect(result!.conflictingTemplates).toEqual([
+      { name: 'logs-nginx.access-clone-a', priority: 400, conflictType: 'overrides_fleet' },
+      { name: 'logs-nginx.access-clone-b', priority: 300, conflictType: 'overrides_fleet' },
+    ]);
   });
 
-  it('does not warn when the base template is not in overlapping (base wins)', async () => {
+  it('classifies a conflicting template at the same priority as blocked_by_same_priority', async () => {
+    // Priority 250 == Fleet NS template priority → ES will reject Fleet's PUT.
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
+      template: { mappings: {}, settings: {}, aliases: {} },
+    } as any);
+    mockNsTemplateNotFound(esClient, [
+      {
+        name: 'logs-nginx.access-clone',
+        index_template: { index_patterns: ['logs-nginx.access-production'], priority: 250 },
+      },
+    ]);
+    const logger = makeLogger();
+
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
+
+    expect(result).not.toBeNull();
+    expect(result!.conflictingTemplates).toEqual([
+      { name: 'logs-nginx.access-clone', priority: 250, conflictType: 'blocked_by_same_priority' },
+    ]);
+  });
+
+  it('classifies a conflicting template at lower-than-NS priority as overridden_by_fleet', async () => {
+    // Priority 220: higher than base (200) so it wins today, but Fleet NS (250) will override it.
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
+      template: { mappings: {}, settings: {}, aliases: {} },
+    } as any);
+    mockNsTemplateNotFound(esClient, [
+      {
+        name: 'logs-nginx.access-clone',
+        index_template: { index_patterns: ['logs-nginx.access-production'], priority: 220 },
+      },
+    ]);
+    const logger = makeLogger();
+
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
+
+    expect(result).not.toBeNull();
+    expect(result!.conflictingTemplates).toEqual([
+      { name: 'logs-nginx.access-clone', priority: 220, conflictType: 'overridden_by_fleet' },
+    ]);
+  });
+
+  it('returns null when the base template is not in overlapping (base wins)', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.simulateIndexTemplate.mockResolvedValue({
       overlapping: [],
@@ -140,28 +216,28 @@ describe('warnIfPreexistingCustomization', () => {
     } as any);
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS });
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(result).toBeNull();
     expect(esClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
     // Early return — no need to fetch the NS template.
     expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('does not warn when overlapping is absent (base wins)', async () => {
+  it('returns null when overlapping is absent (base wins)', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.simulateIndexTemplate.mockResolvedValue({
       template: { mappings: {}, settings: {}, aliases: {} },
     } as any);
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS });
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(result).toBeNull();
     expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
   });
 
-  it('does not warn when the Fleet namespace template already exists and is winning (false positive prevention)', async () => {
+  it('returns null when the Fleet namespace template already exists and is winning (false positive prevention)', async () => {
     // Scenario: the Fleet NS template was created in a previous sync and is winning over
     // the base template. On a retry or reinstall the simulate result looks like a conflict
     // but it is actually expected behavior.
@@ -174,16 +250,16 @@ describe('warnIfPreexistingCustomization', () => {
     mockNsTemplateExists(esClient);
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS });
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(result).toBeNull();
     expect(esClient.indices.getIndexTemplate).toHaveBeenCalledWith(
       { name: DEFAULT_ARGS.nsTemplateName },
       expect.anything()
     );
   });
 
-  it('warns when the Fleet namespace template is itself in overlapping (user clone at priority > 250)', async () => {
+  it('returns a conflict when the Fleet namespace template is itself in overlapping (user clone at priority > 250)', async () => {
     // Scenario: a user clone at priority > 250 beats Fleet's NS template (250), which in
     // turn beats the base (200). Both Fleet NS and base appear in overlapping.
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -197,20 +273,32 @@ describe('warnIfPreexistingCustomization', () => {
       ],
       template: { mappings: {}, settings: {}, aliases: {} },
     } as any);
+    // NS template is in overlapping → fetchIndexTemplate is skipped.
+    // The all-templates lookup returns the high-priority user clone.
+    esClient.indices.getIndexTemplate.mockResolvedValue({
+      index_templates: [MOCK_CLONE_TEMPLATE],
+    } as any);
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS });
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    // No need to fetch the NS template — it's already in overlapping.
-    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+    expect(result).not.toBeNull();
+    expect(result!.conflictingTemplates).toEqual([
+      { name: 'logs-nginx.access-clone', priority: 300, conflictType: 'overrides_fleet' },
+    ]);
+    // fetchIndexTemplate (named call) was skipped — only the all-templates lookup ran.
+    expect(esClient.indices.getIndexTemplate).toHaveBeenCalledWith({}, expect.anything());
+    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalledWith(
+      { name: DEFAULT_ARGS.nsTemplateName },
+      expect.anything()
+    );
   });
 
-  it('skips the simulate call and debug-logs for dataset_is_prefix data streams', async () => {
+  it('returns null and debug-logs for dataset_is_prefix data streams', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({
+    const result = await checkNamespaceConflict({
       esClient,
       logger,
       dataStream: PREFIX_DATA_STREAM,
@@ -221,43 +309,41 @@ describe('warnIfPreexistingCustomization', () => {
       logContext: 'test',
     });
 
+    expect(result).toBeNull();
     expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('dataset_is_prefix'));
   });
 
-  it('skips the simulate call and debug-logs when indexName contains a wildcard', async () => {
+  it('returns null and debug-logs when indexName contains a wildcard', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const logger = makeLogger();
 
-    await warnIfPreexistingCustomization({
+    const result = await checkNamespaceConflict({
       esClient,
       logger,
       ...DEFAULT_ARGS,
       indexName: 'logs-nginx.access-*',
     });
 
+    expect(result).toBeNull();
     expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('dataset_is_prefix'));
   });
 
-  it('does not throw and debug-logs when simulateIndexTemplate fails', async () => {
+  it('returns null and debug-logs when simulateIndexTemplate fails', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.simulateIndexTemplate.mockRejectedValue(new Error('ES unavailable'));
     const logger = makeLogger();
 
-    await expect(
-      warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS })
-    ).resolves.toBeUndefined();
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(result).toBeNull();
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('pre-existing customization check failed')
     );
   });
 
-  it('does not throw and debug-logs when the NS template existence check fails', async () => {
+  it('returns null and debug-logs when the NS template existence check fails', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.indices.simulateIndexTemplate.mockResolvedValue({
       overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
@@ -267,11 +353,9 @@ describe('warnIfPreexistingCustomization', () => {
     esClient.indices.getIndexTemplate.mockRejectedValue(new Error('ES unavailable'));
     const logger = makeLogger();
 
-    await expect(
-      warnIfPreexistingCustomization({ esClient, logger, ...DEFAULT_ARGS })
-    ).resolves.toBeUndefined();
+    const result = await checkNamespaceConflict({ esClient, logger, ...DEFAULT_ARGS });
 
-    expect(logger.warn).not.toHaveBeenCalled();
+    expect(result).toBeNull();
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining('pre-existing customization check failed')
     );
@@ -286,7 +370,7 @@ describe('warnIfPreexistingCustomization', () => {
     const logger = makeLogger();
     const signal = new AbortController().signal;
 
-    await warnIfPreexistingCustomization({
+    await checkNamespaceConflict({
       esClient,
       logger,
       signal,

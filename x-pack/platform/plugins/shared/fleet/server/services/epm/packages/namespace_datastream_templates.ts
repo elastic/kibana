@@ -8,6 +8,7 @@
 import pMap from 'p-map';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { isResponseError } from '@kbn/es-errors';
 
 import type { IndexTemplate, IndexTemplateEntry, RegistryDataStream } from '../../../types';
 import { ElasticsearchAssetType } from '../../../../common/types';
@@ -31,7 +32,8 @@ import { handleIlmSettingsRestoreAfterPackageInstall } from './namespace_ilm_set
 import {
   isOtelDataStream,
   fetchIndexTemplate,
-  warnIfPreexistingCustomization,
+  checkNamespaceConflict,
+  type NamespaceConflictWarning,
 } from './namespace_template_utils';
 
 /**
@@ -195,20 +197,26 @@ async function createNamespaceTemplatesForPackage({
           isOtelInputType,
         });
 
-        await warnIfPreexistingCustomization({
-          esClient,
-          dataStream,
-          indexName: nsTemplate.index_patterns[0],
-          baseTemplateName: templateName,
-          nsTemplateName: nsName,
-          namespace,
-          logger,
-          logContext,
-          signal,
-        });
-
-        await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate }, { signal });
-        updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
+        try {
+          await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate }, { signal });
+          updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
+        } catch (err) {
+          if (
+            isResponseError(err) &&
+            err.statusCode === 400 &&
+            err.body?.error?.type === 'illegal_argument_exception'
+          ) {
+            // A pre-existing template at the same priority blocks creation (blocked_by_same_priority
+            // case from the pre-flight check). Log and continue so other templates are not affected.
+            logger.warn(
+              `[${logContext}] Skipping namespace template "${nsName}": ${
+                (err.body?.error?.reason as string | undefined) ?? 'illegal_argument_exception'
+              }. Check the pre-flight conflict warning for this namespace.`
+            );
+          } else {
+            throw err;
+          }
+        }
       }
     },
     { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
@@ -488,4 +496,98 @@ export async function syncNamespaceTemplates({
   }
 
   return summary;
+}
+
+// ---------------------------------------------------------------------------
+// runNamespacePreflightCheck — synchronous pre-flight conflict detection
+// ---------------------------------------------------------------------------
+
+export type { NamespaceConflictWarning };
+
+/**
+ * Checks all data streams of a package against the given namespaces for pre-existing
+ * index template conflicts. Returns one `NamespaceConflictWarning` per conflicting
+ * (dataStream, namespace) pair. Non-fatal: any error during an individual check is
+ * debug-logged and that pair is skipped. Returns an empty array if the package is not
+ * installed or has no data streams.
+ *
+ * Called synchronously in the opt-in API handler before the sync task is enqueued, so
+ * conflicts can be returned in the API response and logged as warnings at request time.
+ */
+export async function runNamespacePreflightCheck({
+  esClient,
+  soClient,
+  packageName,
+  namespaces,
+}: {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  packageName: string;
+  namespaces: string[];
+}): Promise<NamespaceConflictWarning[]> {
+  if (namespaces.length === 0) return [];
+
+  const installedPkg = await getInstalledPackageWithAssets({
+    savedObjectsClient: soClient,
+    pkgName: packageName,
+  });
+  if (!installedPkg) return [];
+
+  const { packageInfo } = installedPkg;
+  const dataStreams = packageInfo.data_streams ?? [];
+  if (dataStreams.length === 0) return [];
+
+  const logger = appContextService.getLogger();
+
+  // Fetch the full index template list once so each (dataStream × namespace) pair
+  // can filter it locally instead of issuing a separate GET /_index_template per pair.
+  let allTemplates: Awaited<
+    ReturnType<typeof esClient.indices.getIndexTemplate>
+  >['index_templates'] = [];
+  try {
+    const { index_templates } = await esClient.indices.getIndexTemplate({});
+    allTemplates = index_templates;
+  } catch {
+    logger.debug(
+      '[runNamespacePreflightCheck] could not fetch index template list for conflict check'
+    );
+  }
+
+  const conflicts: NamespaceConflictWarning[] = [];
+
+  await pMap(
+    dataStreams,
+    async (dataStream) => {
+      const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
+      const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
+
+      for (const namespace of namespaces) {
+        const nsTemplateName = generateNamespaceTemplateName(templateName, namespace);
+        const indexName = generateNamespaceTemplateIndexPattern(
+          dataStream,
+          namespace,
+          isOtelInputType
+        );
+
+        const conflict = await checkNamespaceConflict({
+          esClient,
+          dataStream,
+          indexName,
+          baseTemplateName: templateName,
+          nsTemplateName,
+          namespace,
+          logger,
+          logContext: 'runNamespacePreflightCheck',
+          allTemplates,
+        });
+
+        if (conflict) {
+          conflicts.push(conflict);
+        }
+      }
+    },
+    { concurrency: MAX_CONCURRENT_COMPONENT_TEMPLATES }
+  );
+
+  return conflicts;
 }

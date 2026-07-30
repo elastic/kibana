@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -545,7 +546,60 @@ describe('syncNamespaceTemplates', () => {
     );
   });
 
-  it('logs a warning when a pre-existing template overrides the Fleet base template but still creates the namespace template', async () => {
+  it('continues creating remaining templates when one putIndexTemplate fails with illegal_argument_exception', async () => {
+    // Scenario: two data streams; the first namespace template gets a same-priority conflict
+    // error (400 illegal_argument_exception) — the second data stream's template must still
+    // be created and no unrecoverable error should be thrown.
+    mockInstalledPackage([
+      { dataset: 'nginx.access', type: 'logs' },
+      { dataset: 'nginx.error', type: 'logs' },
+    ]);
+    const esClient = makeEsClientWithTemplate();
+    const conflictError = new errors.ResponseError({
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'index template [logs-nginx.access@namespace.production] has same priority',
+        },
+      },
+      statusCode: 400,
+      headers: {},
+      warnings: [],
+      meta: {} as any,
+    });
+    esClient.indices.putIndexTemplate.mockImplementation(async (params: any) => {
+      if ((params?.name as string) === 'logs-nginx.access@namespace.production') {
+        throw conflictError;
+      }
+      return { acknowledged: true };
+    });
+    const logger = mockedAppContextService.getLogger();
+
+    const summary = await syncNamespaceTemplates({
+      soClient,
+      esClient,
+      packageName: 'nginx',
+      addedNamespaces: ['production'],
+      removedNamespaces: [],
+    });
+
+    // The failed template is skipped with a warning.
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('logs-nginx.access@namespace.production')
+    );
+    // The other data stream's template was still created.
+    expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-nginx.error@namespace.production' }),
+      expect.any(Object)
+    );
+    // Summary reflects the namespace as created (some templates were created).
+    expect(summary.created).toEqual(['production']);
+  });
+
+  it('creates the namespace template without running a pre-existing customization check (check runs at handler level)', async () => {
+    // The conflict check (warnIfPreexistingCustomization) has been removed from the task
+    // path — it now runs synchronously in the API handler before the task is enqueued.
+    // Verify that the template is created regardless of the ES template landscape.
     mockInstalledPackage();
     const esClient = makeEsClientWithTemplate();
     esClient.indices.simulateIndexTemplate.mockResolvedValue({
@@ -568,8 +622,10 @@ describe('syncNamespaceTemplates', () => {
       removedNamespaces: [],
     });
 
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('"logs-nginx.access"'));
+    // No warning logged at task level — the check is now at handler level.
+    expect(logger.warn).not.toHaveBeenCalled();
+    // _simulate_index is no longer called from within the task.
+    expect(esClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
 
     expect(esClient.indices.putIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'logs-nginx.access@namespace.production' }),

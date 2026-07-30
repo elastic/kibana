@@ -12,7 +12,15 @@ import type { IndexTemplate, RegistryDataStream } from '../../../types';
 import { appContextService } from '../../app_context';
 import { dataStreamUsesOtelInput } from '../../../../common/services';
 import type { PackageInfo } from '../../../../common/types';
+import type {
+  ConflictingTemplate,
+  ConflictType,
+  NamespaceConflictWarning,
+} from '../../../../common/types/rest_spec/epm';
 import { retryTransientEsErrors } from '../elasticsearch/retry';
+import { getNamespaceTemplatePriority } from '../elasticsearch/template/template';
+
+export type { NamespaceConflictWarning };
 
 /**
  * Returns true if any of the data stream's streams effectively use the OTel collector input
@@ -73,8 +81,72 @@ export async function fetchIndexTemplate(
 }
 
 /**
- * Runs a pre-flight check for pre-existing index template customization before Fleet
- * creates a namespace-scoped index template for a given data stream and namespace.
+ * Returns true when `indexName` matches the ES wildcard `pattern` (supports `*` and `?`).
+ */
+function matchesIndexPattern(pattern: string, indexName: string): boolean {
+  const regexStr =
+    '^' +
+    pattern
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*/g, '.*')
+      .replace(/\?/g, '.') +
+    '$';
+  return new RegExp(regexStr).test(indexName);
+}
+
+function classifyConflict(templatePriority: number, nsPriority: number): ConflictType {
+  if (templatePriority > nsPriority) return 'overrides_fleet';
+  if (templatePriority === nsPriority) return 'blocked_by_same_priority';
+  return 'overridden_by_fleet';
+}
+
+/** Minimal shape of one item from GET /_index_template. */
+type IndexTemplateEntry = {
+  name: string;
+  index_template: { index_patterns?: string | string[]; priority?: number };
+};
+
+/**
+ * Filters a pre-fetched list of index templates down to those whose index_patterns
+ * match `indexName`, excluding known ES losers (`overlappingNames`) and Fleet-managed
+ * templates (`excludeNames`). Returns one `ConflictingTemplate` per match.
+ *
+ * Blind-spot: if multiple user clones all beat Fleet's NS template priority (e.g. at 400
+ * and 300), the simulate winner is the 400-clone; the 300-clone lands in `overlapping`
+ * (it lost to the 400-clone) and is excluded here — even though it would still block
+ * Fleet's NS template (250). As a result, only the top-priority conflict is reported.
+ */
+function findConflictingTemplates({
+  allTemplates,
+  indexName,
+  overlappingNames,
+  excludeNames,
+  nsPriority,
+}: {
+  allTemplates: IndexTemplateEntry[];
+  indexName: string;
+  overlappingNames: Set<string>;
+  excludeNames: Set<string>;
+  nsPriority: number;
+}): ConflictingTemplate[] {
+  return allTemplates
+    .filter(
+      ({ name, index_template: tpl }) =>
+        !overlappingNames.has(name) &&
+        !excludeNames.has(name) &&
+        ([] as string[])
+          .concat(tpl.index_patterns ?? [])
+          .some((p) => matchesIndexPattern(p, indexName))
+    )
+    .map(({ name, index_template: tpl }) => ({
+      name,
+      priority: tpl.priority ?? 0,
+      conflictType: classifyConflict(tpl.priority ?? 0, nsPriority),
+    }));
+}
+
+/**
+ * Checks a single (dataStream, namespace) pair for pre-existing index template conflicts.
  *
  * Uses `POST /_index_template/_simulate_index/<indexName>` to discover which template
  * currently wins for the concrete data stream index. The ES response lists losing
@@ -91,13 +163,15 @@ export async function fetchIndexTemplate(
  * simulate response and no warning is emitted. Those inline edits are silently overridden
  * the next time Fleet reinstalls the package and rewrites the base template.
  *
- * This check is deliberately non-fatal: any error during the simulate call is
- * caught and `debug`-logged so the creation path is never blocked by the check.
+ * Returns a `NamespaceConflictWarning` when a conflict is detected, `null` otherwise.
+ * Non-fatal: errors during the simulate call return `null` and are `debug`-logged so the
+ * caller is never blocked.
  *
- * `dataset_is_prefix` data streams are skipped because their namespace index pattern
- * contains a wildcard and is not a valid concrete index name for `_simulate_index`.
+ * `dataset_is_prefix` data streams are skipped (return `null`) because their namespace
+ * index pattern contains a wildcard, which is not a valid concrete index name for
+ * `_simulate_index`.
  */
-export async function warnIfPreexistingCustomization({
+export async function checkNamespaceConflict({
   esClient,
   dataStream,
   indexName,
@@ -107,6 +181,7 @@ export async function warnIfPreexistingCustomization({
   logger,
   logContext,
   signal,
+  allTemplates,
 }: {
   esClient: ElasticsearchClient;
   dataStream: RegistryDataStream;
@@ -117,13 +192,15 @@ export async function warnIfPreexistingCustomization({
   logger: Logger;
   logContext: string;
   signal?: AbortSignal;
-}): Promise<void> {
+  /** Pre-fetched index template list. When provided the per-check GET /_index_template is skipped. */
+  allTemplates?: IndexTemplateEntry[];
+}): Promise<NamespaceConflictWarning | null> {
   // _simulate_index requires a concrete (non-wildcard) index name.
   if (dataStream.dataset_is_prefix || indexName.includes('*')) {
     logger.debug(
       `[${logContext}] skipping pre-existing customization check for ${nsTemplateName} (dataset_is_prefix)`
     );
-    return;
+    return null;
   }
 
   try {
@@ -134,15 +211,15 @@ export async function warnIfPreexistingCustomization({
 
     const overlapping = res.overlapping ?? [];
     if (!overlapping.some((t) => t.name === baseTemplateName)) {
-      // Base template wins — nothing to warn about.
-      return;
+      // Base template wins — no conflict.
+      return null;
     }
 
     // The base template is being overridden. Determine whether the winning template is
     // Fleet's own namespace template (expected on retries/reinstalls) or a user-created one.
     //
     // If the Fleet namespace template is itself in overlapping, something beats even it
-    // (a user clone at priority > 250) — warn without further checks.
+    // (a user clone at priority > 250) — conflict without further checks.
     //
     // If the Fleet namespace template is not in overlapping, it is either the winner
     // (from a previous successful sync) or does not exist yet (user clone is winning).
@@ -157,25 +234,52 @@ export async function warnIfPreexistingCustomization({
       if (existingNsTemplate) {
         // Fleet's own namespace template already exists and is winning over the base.
         // This is expected during retries or reinstalls — not a user customization.
-        return;
+        return null;
       }
     }
 
-    logger.warn(
-      `[${logContext}] Pre-existing index template customization detected for data stream ` +
-        `"${indexName}" (namespace "${namespace}"): the Fleet-managed base template ` +
-        `"${baseTemplateName}" is overridden by a higher-priority template, so namespace ` +
-        `customization "${nsTemplateName}" may not apply as expected or may fail to be ` +
-        `created. Overlapping templates: [${overlapping.map((t) => t.name).join(', ')}]. ` +
-        `To resolve this, remove or adjust the priority of the conflicting template, then ` +
-        `opt the namespace out and back in to retry.`
-    );
+    const nsPriority = getNamespaceTemplatePriority(dataStream);
+
+    // Use the pre-fetched list when the caller supplies one (e.g. runNamespacePreflightCheck
+    // fetches once for all (dataStream × namespace) pairs). Fall back to a per-check fetch
+    // for standalone / test invocations.
+    let templateList: IndexTemplateEntry[];
+    if (allTemplates) {
+      templateList = allTemplates;
+    } else {
+      try {
+        const { index_templates } = await retryTransientEsErrors(
+          () => esClient.indices.getIndexTemplate({}, { signal }),
+          { logger }
+        );
+        templateList = index_templates as IndexTemplateEntry[];
+      } catch {
+        logger.debug(`[${logContext}] could not list index templates to identify conflicting ones`);
+        templateList = [];
+      }
+    }
+
+    const conflictingTemplates = findConflictingTemplates({
+      allTemplates: templateList,
+      indexName,
+      overlappingNames: new Set(overlapping.map((t) => t.name)),
+      excludeNames: new Set([baseTemplateName, nsTemplateName]),
+      nsPriority,
+    });
+
+    return {
+      dataStreamName: indexName,
+      namespace,
+      baseTemplateName,
+      conflictingTemplates,
+    };
   } catch (err) {
-    // Non-fatal: a failed pre-flight check must never block template creation.
+    // Non-fatal: a failed check must never block the caller.
     logger.debug(
       `[${logContext}] pre-existing customization check failed for ${nsTemplateName}: ${
         (err as Error).message
       }`
     );
+    return null;
   }
 }
