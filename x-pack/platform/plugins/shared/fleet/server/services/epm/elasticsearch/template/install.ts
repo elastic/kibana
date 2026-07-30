@@ -638,9 +638,13 @@ export function prepareTemplate({
   const isOtelInputType =
     experimentalFeature.enableOtelIntegrations &&
     dataStreamUsesOtelInput(packageInstallContext.packageInfo, dataStream);
+  // OTel metrics default to TSDS (parity with ES native metrics-*.otel-* templates and
+  // input-package applyTimeSeriesIndexMode). Integration packages never go through that
+  // input-package path, so the default must be applied here during template install.
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
-    !!experimentalDataStreamFeature?.features.tsdb;
+    !!experimentalDataStreamFeature?.features.tsdb ||
+    (isOtelInputType && dataStream.type === 'metrics');
 
   const validFields = processFields(fields);
 
