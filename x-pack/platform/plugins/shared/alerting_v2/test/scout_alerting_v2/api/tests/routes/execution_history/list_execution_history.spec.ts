@@ -71,9 +71,12 @@ apiTest.describe(
     apiTest('validation: rejects page * perPage above the result window', async ({ apiClient }) => {
       const perPage = EXECUTION_HISTORY_MAX_PER_PAGE;
       const page = Math.floor(EXECUTION_HISTORY_MAX_RESULT_WINDOW / perPage) + 1;
-      const response = await apiClient.get(getListExecutionHistoryUrl({ page, per_page: perPage }), {
-        headers: readerHeaders,
-      });
+      const response = await apiClient.get(
+        getListExecutionHistoryUrl({ page, per_page: perPage }),
+        {
+          headers: readerHeaders,
+        }
+      );
       expect(response).toHaveStatusCode(400);
     });
 
