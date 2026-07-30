@@ -17,6 +17,7 @@ project:
   owner: '@elastic/context-eng'
   sourceRoot: x-pack/platform/plugins/shared/context_engine
 dependsOn:
+  - '@kbn/actions-plugin'
   - '@kbn/core'
   - '@kbn/core-http-browser'
   - '@kbn/react-query'
@@ -39,6 +40,7 @@ dependsOn:
   - '@kbn/console-plugin'
   - '@kbn/workflows-ui'
   - '@kbn/deeplinks-workflows'
+  - '@kbn/deeplinks-management'
 tags:
   - plugin
   - prod

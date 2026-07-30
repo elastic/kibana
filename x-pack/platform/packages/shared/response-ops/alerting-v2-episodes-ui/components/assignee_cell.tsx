@@ -49,7 +49,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (isError) {
     return (
       <EuiToolTip content={assigneeUid}>
-        <EuiText color="danger" size="s">
+        <EuiText tabIndex={0} color="danger" size="s">
           {i18n.ASSIGNEE_CELL_PROFILE_LOAD_ERROR}
         </EuiText>
       </EuiToolTip>
@@ -61,7 +61,7 @@ export const AlertEpisodeAssigneeCell = ({
   if (!profile) {
     return (
       <EuiToolTip content={assigneeUid}>
-        <EuiText color="subdued" size="s">
+        <EuiText tabIndex={0} color="subdued" size="s">
           {i18n.ASSIGNEE_CELL_UNKNOWN_USER}
         </EuiText>
       </EuiToolTip>

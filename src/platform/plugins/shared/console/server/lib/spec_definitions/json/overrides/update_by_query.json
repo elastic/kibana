@@ -1,10 +1,6 @@
 {
   "update_by_query": {
     "data_autocomplete_rules": {
-      "conflicts": "",
-      "query": {
-        "__scope_link": "GLOBAL.query"
-      },
       "script": {
         "__template": {
           "source": "",
