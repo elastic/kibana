@@ -7,22 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** @type {import('./types').Transform} */
-const yamlTransform = (path, source, cache) => {
-  const key = cache.getKey(path, source);
+import Path from 'path';
 
-  const cached = cache.getCode(key);
-  if (cached) {
-    return cached;
-  }
+import { determineCachePrefix } from '.';
 
-  const code = `module.exports = ${JSON.stringify(source)};\n`;
+const ORIGINAL_CWD = process.cwd();
 
-  cache.update(key, {
-    code,
-  });
+afterEach(() => {
+  process.chdir(ORIGINAL_CWD);
+});
 
-  return code;
-};
+it('determines a cache prefix that is stable across working directories', () => {
+  const rootPrefix = determineCachePrefix();
 
-module.exports = { yamlTransform };
+  process.chdir(Path.resolve(ORIGINAL_CWD, 'src'));
+
+  expect(determineCachePrefix()).toBe(rootPrefix);
+});
