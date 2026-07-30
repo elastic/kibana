@@ -258,10 +258,14 @@ export class EventClient {
 
   /**
    * Returns the latest version per event_id for all active events (status IN pending/open)
-   * within the given time range. The status filter is applied after grouping so a
-   * closed/dismissed event whose earlier version was pending is correctly excluded.
+   * within the given time range, optionally narrowed to candidate stream/rule identities so the
+   * scan stays proportional to the write batch instead of the whole space. The status and
+   * candidate filters are applied after grouping so a closed/dismissed event whose earlier
+   * version was pending is correctly excluded.
    */
-  async findLatestActive(options: CommonSearchOptions): Promise<{ hits: SignificantEvent[] }> {
+  async findLatestActive(
+    options: CommonSearchOptions & { streamNames?: string[]; ruleUuids?: string[] }
+  ): Promise<{ hits: SignificantEvent[] }> {
     const query = applyTimeRange({
       query: fromIndexForSpace({
         index: EVENTS_DATA_STREAM,
@@ -277,6 +281,14 @@ export class EventClient {
     query.where`${esql.col('status')} IN (${SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS.map((s) =>
       esql.str(s)
     )})`;
+
+    const candidateWhere = continuationCandidateFilter({
+      streamNames: options.streamNames,
+      ruleUuids: options.ruleUuids,
+    });
+    if (candidateWhere) {
+      query.where`${candidateWhere}`;
+    }
 
     const hits = await executeEsqlQuery<SignificantEvent>({
       esClient: this.clients.esClient,

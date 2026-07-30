@@ -99,6 +99,8 @@ interface DedupCandidate {
   eventId: string;
   eventUuid: string;
   fingerprint: string;
+  /** Retained separately from the fingerprint so the dedup scan can narrow by rule identity. */
+  ruleUuids: string[];
   /** ISO string resolved from dedup_window — events older than this are ignored. */
   windowFrom: string;
 }
@@ -310,6 +312,7 @@ export async function eventsWriteBulkHandler({
         eventId: generateDiscoveryEventId(input.stream_names, ruleUuids),
         eventUuid: uuidv4(),
         fingerprint: makeFingerprint(input.stream_names, ruleUuids),
+        ruleUuids,
         windowFrom: resolveTimeBound(input.dedup_window),
       };
     }
@@ -364,6 +367,8 @@ export async function eventsWriteBulkHandler({
             from: dedupCandidates.reduce((earliest, c) =>
               c.windowFrom < earliest.windowFrom ? c : earliest
             ).windowFrom,
+            streamNames: [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))],
+            ruleUuids: [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))],
           })
         ).hits;
 
