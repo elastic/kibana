@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
@@ -3195,7 +3195,6 @@ module.exports.overrides.push({
     'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
