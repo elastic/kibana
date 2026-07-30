@@ -33,6 +33,9 @@ import { accessSummaryManageButton } from '../access/access_i18n';
 
 const { agentOverview: overviewLabels } = labels;
 
+const resolveOwnerLabel = (username?: string) =>
+  username === SYSTEM_USER_ID ? overviewLabels.createdByElastic : username;
+
 export interface AgentHeaderProps {
   agent: AgentDefinition;
   docsUrl?: string;
@@ -56,14 +59,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
     color: ${euiTheme.colors.textSubdued};
   `;
 
-  const resolveOwnerLabel = (username?: string) =>
-    username === SYSTEM_USER_ID ? overviewLabels.createdByElastic : username;
-
-  const createdByResolved = resolveOwnerLabel(agent.created_by?.username);
-  const byAuthorLabel = createdByResolved && overviewLabels.byAuthor(createdByResolved);
-
-  const updatedByResolved = resolveOwnerLabel(agent.updated_by?.username);
-  const lastUpdatedByLabel = updatedByResolved && overviewLabels.lastUpdatedBy(updatedByResolved);
+  const byAuthorLabel = resolveOwnerLabel(agent.created_by?.username);
+  const lastUpdatedByLabel = resolveOwnerLabel(agent.updated_by?.username);
 
   return (
     <>
@@ -81,14 +78,14 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                 {byAuthorLabel && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
-                      {byAuthorLabel}
+                      {overviewLabels.byAuthor(byAuthorLabel)}
                     </EuiText>
                   </EuiFlexItem>
                 )}
                 {lastUpdatedByLabel && (
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
-                      {lastUpdatedByLabel}
+                      {overviewLabels.lastUpdatedBy(lastUpdatedByLabel)}
                     </EuiText>
                   </EuiFlexItem>
                 )}

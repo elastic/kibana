@@ -24,9 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { countBy } from 'lodash';
 import React, { useMemo } from 'react';
 import type { AgentDefinitionWithPermissions } from '../../../../../common/http_api/agents';
+import { labels } from '../../../utils/i18n';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -41,12 +43,32 @@ import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
+const resolveOwnerLabel = (username?: string) =>
+  username === SYSTEM_USER_ID ? labels.agentOverview.createdByElastic : username;
+
+const renderOwnerCell = (username?: string) => {
+  const label = resolveOwnerLabel(username);
+  return (
+    label ?? (
+      <EuiText size="s" color="subdued">
+        —
+      </EuiText>
+    )
+  );
+};
+
 const columnNames = {
   name: i18n.translate('xpack.agentBuilder.agents.nameColumn', { defaultMessage: 'Name' }),
   accessControlMode: i18n.translate('xpack.agentBuilder.agents.accessControlModeColumn', {
     defaultMessage: 'Access',
   }),
   labels: i18n.translate('xpack.agentBuilder.agents.labelsColumn', { defaultMessage: 'Labels' }),
+  createdBy: i18n.translate('xpack.agentBuilder.agents.createdByColumn', {
+    defaultMessage: 'Created by',
+  }),
+  lastUpdatedBy: i18n.translate('xpack.agentBuilder.agents.lastUpdatedByColumn', {
+    defaultMessage: 'Last updated by',
+  }),
 };
 
 const actionLabels = {
@@ -156,6 +178,24 @@ export const AgentsList: React.FC = () => {
       'data-test-subj': 'agentBuilderAgentsListAccessControlMode',
     };
 
+    const agentCreatedBy: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
+      width: '15%',
+      field: 'created_by',
+      name: columnNames.createdBy,
+      render: (createdBy: AgentDefinitionWithPermissions['created_by']) =>
+        renderOwnerCell(createdBy?.username),
+      'data-test-subj': 'agentBuilderAgentsListCreatedBy',
+    };
+
+    const agentLastUpdatedBy: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
+      width: '15%',
+      field: 'updated_by',
+      name: columnNames.lastUpdatedBy,
+      render: (updatedBy: AgentDefinitionWithPermissions['updated_by']) =>
+        renderOwnerCell(updatedBy?.username),
+      'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
+    };
+
     const agentActions: EuiTableActionsColumnType<AgentDefinitionWithPermissions> = {
       width: '120px',
       actions: [
@@ -238,6 +278,8 @@ export const AgentsList: React.FC = () => {
       agentNameAndDescription,
       agentAccessControlMode,
       agentLabels,
+      agentCreatedBy,
+      agentLastUpdatedBy,
       agentActions,
     ];
   }, [createAgentBuilderUrl, deleteAgent, manageAgents, canManageAgentAccess]);
