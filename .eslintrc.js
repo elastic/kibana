@@ -3184,7 +3184,6 @@ module.exports.overrides.push({
     'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
