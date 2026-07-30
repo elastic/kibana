@@ -2353,36 +2353,36 @@
   resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.15.0.tgz#5977edd04cd1508c85f9c35662778fa858307778"
   integrity sha512-fwg30m9U+6/JnlLGCIHJ7ETqi3vijy6SYIxfCpyqgsSwKk2NfvXXqfg0+OZkMOc5tsBHwzZb7UhI1CZi48xA/g==
 
-"@elastic/esql-grammar@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.14.0.tgz#c31dd66f1b04f6fca161ada5bd812fd8bbc869d1"
-  integrity sha512-Aa7ynnfNEYIZSRpk8qyddwTXpwLjPpeUSYFX6YhPHNEE2i6kp+UGCdCTs97Grq7KpxmfUuPcB3F/9xP+zzSLyA==
+"@elastic/esql-grammar@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.16.0.tgz#7bd49f7c19e8ac82ea0556382f334b72d552c311"
+  integrity sha512-956yR/7xZJ8fuW4yirq4MA1ITvzJ5t4vXw1Hk/lEsdB3lilRcYqwkIRDDKRO+sxg5VCD84B08qKutsfjlWFvIQ==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-promql-grammar@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.14.0.tgz#39970c11d07600575552edff4d575411dbb651e7"
-  integrity sha512-6LA2F/4HyvjQARcF9gKAzpoPmgEk6o/1dcjVmyWS2wPLOY2SCunErBuiTcmRgQ6TYP5KIceJ6MevjyLILeq/PQ==
+"@elastic/esql-promql-grammar@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.16.0.tgz#822cac2f821dfef5f1ef42f408765467c6552044"
+  integrity sha512-WjtQtg2ezbxa/Zgp4GUWlpwUhAzS+1tpe03a4l961goslLVmGs9xa+me6DWDkglxwmU0EGR6DXjT6rm2MHcRDw==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-types@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.14.0.tgz#1f141c6d105bf821d96fa8a4ccda0509ed816163"
-  integrity sha512-8BftYi9RpJfJusbpDHheslYCtsvKVucl98PmGyyuWFG6+492Wmdvw/r2Ml8gwhLbVv4fhnb0aXCTpEDmor18cQ==
+"@elastic/esql-types@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.16.0.tgz#d8e97f1719903c58dc30ea81319f1f50c7494888"
+  integrity sha512-/5kqJ2Skb2lTmK98eY+JQwBxH0PCIdeeVuNRX3DSnulEqd1VPR0zB76oscXEowQecKIU9OPA/CBxx2XBXHhYpg==
 
-"@elastic/esql@4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.14.0.tgz#151f1aa9b5590678939d93b276c925a8164a6ec7"
-  integrity sha512-ID777IARt/TnMncPXRNUG7+nRO/eRwac/18NJ/qweoG9aytIVgzxMo+W/Vz3bbIk55cAR8vUZoTCRtjiaRvjbA==
+"@elastic/esql@4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.16.0.tgz#144878b2196e460a4a6df01bb688c0020269077a"
+  integrity sha512-Swen9EAefzT93y1mBTOhs3ecKG1DkJtlHuWOrvXACIe89imKXx1bPIJ9fhtHKhTKsR26wdi5bIrX6fqhMvUAXw==
   dependencies:
-    "@elastic/esql-grammar" "^4.14.0"
-    "@elastic/esql-promql-grammar" "^4.14.0"
-    "@elastic/esql-types" "^4.14.0"
-    "@elastic/pretty-printer" "^4.14.0"
+    "@elastic/esql-grammar" "^4.16.0"
+    "@elastic/esql-promql-grammar" "^4.16.0"
+    "@elastic/esql-types" "^4.16.0"
+    "@elastic/pretty-printer" "^4.16.0"
     antlr4 "4.13.2"
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -2572,10 +2572,10 @@
     import-in-the-middle "^3.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/pretty-printer@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.14.0.tgz#20259cac062f7965c3e9ee1c3d12ab653192bb58"
-  integrity sha512-qtevMN1Cp8X4eTgKn5adc/5Y2GODhb85UO9mg7pACwBMpszriARbxaB8w22Lm1K/RRqTiFG7EDxS0jQlK69T2w==
+"@elastic/pretty-printer@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.16.0.tgz#732b55f94e73c236490c43ec5482f7ade66b4e23"
+  integrity sha512-jgr8EGn3/lbYss8E2Wn6YKZdLrRYBe+UEnhv+fxJgb/RIKtEE3fOuOyhDv6mYZZ80WzUCfWia3nO/Rvr/e17ug==
   dependencies:
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -4622,6 +4622,10 @@
   uid ""
 
 "@kbn/agent-builder-server@link:x-pack/platform/packages/shared/agent-builder/agent-builder-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/agent-builder-skill-loader@link:x-pack/platform/packages/shared/agent-builder/agent-builder-skill-loader":
   version "0.0.0"
   uid ""
 
@@ -7133,6 +7137,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-alerting-v2@link:x-pack/platform/packages/shared/kbn-evals-suite-alerting-v2":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-alerts-rag@link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag":
   version "0.0.0"
   uid ""
@@ -7298,6 +7306,10 @@
   uid ""
 
 "@kbn/failure-store-modal@link:x-pack/platform/packages/shared/kbn-failure-store-modal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/favorite-button@link:src/platform/packages/shared/content-management/favorites/favorite-button":
   version "0.0.0"
   uid ""
 
@@ -8830,10 +8842,6 @@
   uid ""
 
 "@kbn/sample-log-parser@link:x-pack/platform/packages/shared/kbn-sample-parser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/sample-task-plugin-update-by-query@link:x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget":
   version "0.0.0"
   uid ""
 
@@ -15926,11 +15934,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/textarea-caret@3.0.4":
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/@types/textarea-caret/-/textarea-caret-3.0.4.tgz#eaa7a83ec23121147f33cb37f71450e42606f86b"
-  integrity sha512-epJGYB37/sNrTDbhfyRjHkXsQSAcO6zby0JBDS0QMt6HQ1f1W2E4YpSc7TQkNmWaWmYXv92zOIfN5PHA8CmThg==
-
 "@types/through@*":
   version "0.0.30"
   resolved "https://registry.yarnpkg.com/@types/through/-/through-0.0.30.tgz#e0e42ce77e897bd6aead6f6ea62aeb135b8a3895"
@@ -17844,9 +17847,9 @@ brace-expansion@^2.0.1, brace-expansion@^2.0.2:
     balanced-match "^1.0.0"
 
 brace-expansion@^5.0.2, brace-expansion@^5.0.5:
-  version "5.0.7"
-  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.7.tgz#1b0e46965b479dad65af737b4a02790a05498337"
-  integrity sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==
+  version "5.0.8"
+  resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-5.0.8.tgz#135ad0d8d808eb18eb5e0ec9a21f3a0b92ef18cf"
+  integrity sha512-JZyDyq3D4AUifKTPOB7DELf6XsB3WdPuNxCtob1vFXPsSXhdAiHBWJ/tJ8HAc9aH84BK+5JFZLNkJKx3G9kzQg==
   dependencies:
     balanced-match "^4.0.2"
 
@@ -18187,11 +18190,6 @@ call-me-maybe@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/call-me-maybe/-/call-me-maybe-1.0.2.tgz#03f964f19522ba643b1b0693acb9152fe2074baa"
   integrity sha512-HpX65o1Hnr9HH25ojC1YGs7HCQLq0GCOibSaWER0eNpgJ/Z1MZv2mTc7+xh6WOPxbRVcmgbv4hGU+uSQ/2xFZQ==
-
-callsites@4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/callsites/-/callsites-4.2.0.tgz#98761d5be3ce092e4b9c92f7fb8c8eb9b83cadc8"
-  integrity sha512-kfzR4zzQtAE9PC7CzZsjl3aBNbXWuXiSeOCdLcPpBfGW8YuCqQHcRPFDbr/BPVmd3EEPVpuFzLyuT/cUhPr4OQ==
 
 callsites@^3.0.0:
   version "3.1.0"
@@ -30915,11 +30913,6 @@ redux-devtools-extension@2.13.8:
   resolved "https://registry.yarnpkg.com/redux-devtools-extension/-/redux-devtools-extension-2.13.8.tgz#37b982688626e5e4993ff87220c9bbb7cd2d96e1"
   integrity sha512-8qlpooP2QqPtZHQZRhx3x3OP5skEV1py/zUdMY28WNAocbafxdG2tRD1MWE7sp8obGMNYuLWanhhQ7EQvT1FBg==
 
-redux-saga-testing@2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/redux-saga-testing/-/redux-saga-testing-2.0.2.tgz#a542b771a6b6584397198f35d47d07bae8dbfc9c"
-  integrity sha512-8IVPTaEw0Typ9TGCAsktFrrU+I5ACbmwPmzW0DQjUgZvja0k1jP2ILnUn+fZDF1gT8c0L/Ubj//bsej5X3OkaQ==
-
 redux-saga@1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/redux-saga/-/redux-saga-1.3.0.tgz#a59ada7c28010189355356b99738c9fcb7ade30e"
@@ -33622,11 +33615,6 @@ text-table@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/text-table/-/text-table-0.2.0.tgz#7f5ee823ae805207c00af2df4a84ec3fcfa570b4"
   integrity sha1-f17oI66AUgfACvLfSoTsP8+lcLQ=
-
-textarea-caret@3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/textarea-caret/-/textarea-caret-3.1.0.tgz#5d5a35bb035fd06b2ff0e25d5359e97f2655087f"
-  integrity sha512-cXAvzO9pP5CGa6NKx0WYHl+8CHKZs8byMkt3PCJBCmq2a34YA9pO1NrQET5pzeqnBjBdToF5No4rrmkDUgQC2Q==
 
 thingies@^2.5.0:
   version "2.5.0"
