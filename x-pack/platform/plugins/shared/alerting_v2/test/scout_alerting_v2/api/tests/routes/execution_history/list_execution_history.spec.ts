@@ -40,6 +40,7 @@ apiTest.describe(
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: accepts perPage=0 (count-only read)', async ({ apiClient }) => {
@@ -66,15 +67,20 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects page * perPage above the result window', async ({ apiClient }) => {
       const perPage = EXECUTION_HISTORY_MAX_PER_PAGE;
       const page = Math.floor(EXECUTION_HISTORY_MAX_RESULT_WINDOW / perPage) + 1;
-      const response = await apiClient.get(getListExecutionHistoryUrl({ page, per_page: perPage }), {
-        headers: readerHeaders,
-      });
+      const response = await apiClient.get(
+        getListExecutionHistoryUrl({ page, per_page: perPage }),
+        {
+          headers: readerHeaders,
+        }
+      );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: accepts a start_date lower bound', async ({ apiClient }) => {
@@ -99,6 +105,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects non-numeric perPage', async ({ apiClient }) => {
@@ -107,6 +114,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects non-numeric page', async ({ apiClient }) => {
@@ -115,6 +123,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest(

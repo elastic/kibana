@@ -109,6 +109,7 @@ export const RelatedAlertsByAncestry: React.FC<RelatedAlertsByAncestryProps> = (
       <EuiSpacer size="m" />
       {error ? (
         <EuiCallOut
+          announceOnMount
           color="danger"
           iconType="warning"
           data-test-subj={CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_ERROR_TEST_ID}
