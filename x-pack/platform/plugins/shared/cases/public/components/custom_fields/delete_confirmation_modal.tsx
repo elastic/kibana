@@ -37,7 +37,7 @@ const DeleteConfirmationModalComponent: React.FC<ConfirmDeleteCaseModalProps> = 
       confirmButtonText={i18n.DELETE}
       aria-labelledby={titleId}
     >
-      {i18n.DELETE_FIELD_DESCRIPTION}
+      {i18n.DELETE_FIELD_DESCRIPTION(label)}
     </EuiConfirmModal>
   );
 };

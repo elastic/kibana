@@ -42,6 +42,8 @@ export const module = new ContainerModule((options) => {
 
 export type { PluginConfig as AlertingV2Config } from './config';
 export type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from './types';
+export type { FindRulesArgs } from './lib/rules_client';
+export type { FindActionPoliciesArgs } from './lib/action_policy_client';
 
 /**
  * Public catalog of machine-readable error codes emitted by alerting v2 HTTP
