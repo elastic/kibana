@@ -17,18 +17,21 @@ import {
   NODE_HEIGHT,
   ENTITY_NODE_WIDTH,
   ENTITY_NODE_TOTAL_HEIGHT,
+  ENTITY_NODE_SIMPLIFIED_SIZE,
   NODE_LABEL_TOTAL_HEIGHT,
   NODE_WIDTH,
   NODE_LABEL_WIDTH,
   NODE_LABEL_HEIGHT,
   NODE_LABEL_DETAILS,
 } from '../constants';
+import type { DetailLevel } from '../detail_level';
 
 const GRID_SIZE_OFFSET = GRID_SIZE * 2;
 
 export const layoutGraph = (
   nodes: Array<Node<NodeViewModel>>,
-  edges: Array<Edge<EdgeViewModel>>
+  edges: Array<Edge<EdgeViewModel>>,
+  detailLevel: DetailLevel = 'detailed'
 ): { nodes: Array<Node<NodeViewModel>> } => {
   const nodesById: { [key: string]: Node<NodeViewModel> } = {};
   const graphOpts = {
@@ -83,7 +86,10 @@ export const layoutGraph = (
         nodesById[child.data.id] = child;
       });
     } else if (isEntityNode(node.data)) {
-      size = { width: ENTITY_NODE_WIDTH, height: ENTITY_NODE_TOTAL_HEIGHT };
+      size =
+        detailLevel === 'simplified'
+          ? { width: ENTITY_NODE_SIMPLIFIED_SIZE, height: ENTITY_NODE_SIMPLIFIED_SIZE }
+          : { width: ENTITY_NODE_WIDTH, height: ENTITY_NODE_TOTAL_HEIGHT };
     }
 
     if (!nodesById[node.id]) {
@@ -138,8 +144,10 @@ export const layoutGraph = (
     }
 
     if (isEntityNode(node.data)) {
+      const entityHeight =
+        detailLevel === 'simplified' ? ENTITY_NODE_SIMPLIFIED_SIZE : ENTITY_NODE_TOTAL_HEIGHT;
       const x = snapped(Math.round(dagreNode.x - (dagreNode.width ?? 0) / 2));
-      const y = Math.round(dagreNode.y - ENTITY_NODE_TOTAL_HEIGHT / 2);
+      const y = Math.round(dagreNode.y - entityHeight / 2);
 
       return {
         ...node,

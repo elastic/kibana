@@ -23,7 +23,7 @@ import {
   GRAPH_MINIMAP_RELATIONSHIP_NODE_ID,
   GRAPH_MINIMAP_UNKNOWN_NODE_ID,
 } from '../test_ids';
-import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
+import { NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH, ENTITY_NODE_SIMPLIFIED_SIZE } from '../node/styles';
 import type { NodeViewModel } from '../types';
 import { graphSample } from '../mock/graph_sample';
 
@@ -294,12 +294,13 @@ describe('Minimap integrated with Graph', () => {
       const minimapLabelNodes = screen.getAllByTestId(GRAPH_MINIMAP_LABEL_NODE_ID);
       const minimapRelationshipNodes = screen.getAllByTestId(GRAPH_MINIMAP_RELATIONSHIP_NODE_ID);
 
-      // Verify Minimap entity nodes have the correct dimensions (but scaled down)
+      // Verify Minimap entity nodes have the correct dimensions matching simplified layout
+      // (Graph defaults to simplified; would be ENTITY_NODE_WIDTH × ENTITY_NODE_TOTAL_HEIGHT in detailed)
       expect(
         minimapEntityNodes.every(
           (node) =>
-            node.getAttribute('width') === NODE_WIDTH.toString() &&
-            node.getAttribute('height') === NODE_HEIGHT.toString()
+            node.getAttribute('width') === ENTITY_NODE_SIMPLIFIED_SIZE.toString() &&
+            node.getAttribute('height') === ENTITY_NODE_SIMPLIFIED_SIZE.toString()
         )
       ).toBe(true);
 

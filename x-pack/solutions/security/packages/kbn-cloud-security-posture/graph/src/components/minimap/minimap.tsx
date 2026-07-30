@@ -17,19 +17,28 @@ import {
 } from '../test_ids';
 import type { NodeViewModel } from '../types';
 import { isEntityNode, isLabelNode, isRelationshipNode, isStackNode } from '../utils';
-import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
+import {
+  NODE_LABEL_HEIGHT,
+  NODE_LABEL_WIDTH,
+  ENTITY_NODE_SIMPLIFIED_SIZE,
+  ENTITY_NODE_WIDTH,
+  ENTITY_NODE_TOTAL_HEIGHT,
+} from '../node/styles';
+import type { DetailLevel } from '../detail_level';
 
 interface MiniMapNodeRenderedProps extends MiniMapNodeProps {
   data?: NodeViewModel;
+  detailLevel?: DetailLevel;
 }
 
 const MiniMapNode = ({
   x,
   y,
-  width = NODE_WIDTH,
-  height = NODE_HEIGHT,
+  width,
+  height,
   data,
   id,
+  detailLevel = 'simplified',
 }: MiniMapNodeRenderedProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -44,16 +53,19 @@ const MiniMapNode = ({
   // If we don't have node data, we can't render anything useful
   if (!data) return null;
 
-  // For entity nodes, render a square
+  // For entity nodes, use the layout-time dimensions matching the current detail level
   if (isEntityNode(data)) {
+    const entityW = detailLevel === 'simplified' ? ENTITY_NODE_SIMPLIFIED_SIZE : ENTITY_NODE_WIDTH;
+    const entityH =
+      detailLevel === 'simplified' ? ENTITY_NODE_SIMPLIFIED_SIZE : ENTITY_NODE_TOTAL_HEIGHT;
     return (
       <rect
         data-id={data.id}
         data-test-subj={GRAPH_MINIMAP_ENTITY_NODE_ID}
         x={x}
         y={y}
-        height={NODE_HEIGHT}
-        width={NODE_WIDTH}
+        height={entityH}
+        width={entityW}
         fill={getEuiColor(data.color ?? 'primary')}
       />
     );
@@ -130,6 +142,10 @@ export interface MinimapProps {
    * Nodes state from ReactFlow
    */
   nodesState?: Node<NodeViewModel>[];
+  /**
+   * Current detail level — controls which entity node dimensions are used in the minimap
+   */
+  detailLevel?: DetailLevel;
 }
 
 /**
@@ -146,6 +162,7 @@ export const Minimap = ({
   zoomStep = 2,
   style,
   nodesState,
+  detailLevel = 'simplified',
 }: MinimapProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -172,11 +189,9 @@ export const Minimap = ({
     (props: MiniMapNodeProps) => {
       const nodeId = props.id;
       const nodeData = nodeId ? getNodeById(nodeId) : undefined;
-
-      // Return the original MiniMapNode with the correct node data
-      return <MiniMapNode {...props} data={nodeData} />;
+      return <MiniMapNode {...props} data={nodeData} detailLevel={detailLevel} />;
     },
-    [getNodeById]
+    [getNodeById, detailLevel]
   );
 
   const defaultStyle: React.CSSProperties = {

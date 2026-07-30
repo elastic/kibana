@@ -37,11 +37,18 @@ export const ENTITY_NODE_WIDTH = 300;
 /**
  * The total height reserved for an entity node in the layout, in pixels. Sized to
  * the tallest (grouped, full-metadata) detailed card so cards never overlap
- * vertically. The simplified (zoomed-out) tile is smaller and simply sits within
- * this reserved footprint. Required to calculate total node's height in
- * layout_graph.ts. Must be a multiple of `GRID_SIZE * 2`.
+ * vertically. Required to calculate total node's height in layout_graph.ts.
+ * Must be a multiple of `GRID_SIZE * 2`.
  */
 export const ENTITY_NODE_TOTAL_HEIGHT = 320;
+
+/**
+ * The size (width and height) of the entity node in simplified (zoomed-out) mode.
+ * When the graph switches to simplified, Dagre re-runs with this footprint so
+ * edges connect directly to the tile edge with no gap.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_SIMPLIFIED_SIZE = 40;
 
 /**
  * The width of a node in the graph, in pixels.
@@ -192,24 +199,33 @@ export const NodeContainer = styled.div`
   width: ${NODE_WIDTH}px;
 `;
 
+interface EntityNodeContainerProps {
+  isSimplified?: boolean;
+}
+
 /**
- * Root container for the redesigned EntityNode. Always occupies the fixed footprint
- * the layout reserves for an entity node (`ENTITY_NODE_WIDTH` × `ENTITY_NODE_TOTAL_HEIGHT`)
- * and centers its content (detailed card or simplified tile) within it — in both detail
- * levels. Centering keeps the rendered content's visual center on the Dagre node
- * centerline, so connector (relationship/label) nodes line up with the entity both
- * horizontally and vertically regardless of zoom.
+ * Root container for the redesigned EntityNode. Its dimensions match the Dagre
+ * layout footprint for the current detail level:
+ *   - detailed: `ENTITY_NODE_WIDTH` × `ENTITY_NODE_TOTAL_HEIGHT` (300×320)
+ *   - simplified: `ENTITY_NODE_SIMPLIFIED_SIZE` × `ENTITY_NODE_SIMPLIFIED_SIZE` (40×40)
+ *
+ * Centering keeps the rendered content's visual center on the Dagre centerline so
+ * connector nodes line up horizontally and vertically in both detail levels.
  *
  * Referenced by NodeExpandButtonContainer's hover selectors so the expand button
  * reveals on hover.
  */
-export const EntityNodeContainer = styled.div`
+export const EntityNodeContainer = styled('div', {
+  shouldForwardProp: (propName) => propName !== 'isSimplified',
+})<EntityNodeContainerProps>`
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: ${ENTITY_NODE_WIDTH}px;
-  height: ${ENTITY_NODE_TOTAL_HEIGHT}px;
+  width: ${({ isSimplified }) =>
+    isSimplified ? `${ENTITY_NODE_SIMPLIFIED_SIZE}px` : `${ENTITY_NODE_WIDTH}px`};
+  height: ${({ isSimplified }) =>
+    isSimplified ? `${ENTITY_NODE_SIMPLIFIED_SIZE}px` : `${ENTITY_NODE_TOTAL_HEIGHT}px`};
 `;
 
 /**

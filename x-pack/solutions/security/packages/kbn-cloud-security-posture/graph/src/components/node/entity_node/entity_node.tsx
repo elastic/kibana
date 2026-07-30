@@ -25,10 +25,11 @@ export const EntityNode = memo<NodeProps>((props: NodeProps) => {
   const data = props.data as EntityNodeViewModel;
   const { color, interactive, expandButtonClick, nodeClick } = data;
   const level = useDetailLevel();
-  const isSimplified = level === 'simplified';
+  // Non-interactive previews always render simplified; interactive graphs follow zoom level
+  const isSimplified = !interactive || level === 'simplified';
 
   return (
-    <EntityNodeContainer data-test-subj={GRAPH_ENTITY_NODE_ID}>
+    <EntityNodeContainer isSimplified={isSimplified} data-test-subj={GRAPH_ENTITY_NODE_ID}>
       <EntityNodeContent>
         {isSimplified ? <EntityNodeSimplified data={data} /> : <EntityNodeDetailed data={data} />}
         {interactive ? (

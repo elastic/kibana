@@ -15,7 +15,14 @@ import {
   useEdgesState,
   useNodesState,
 } from '@xyflow/react';
-import type { Edge, FitViewOptions, Node, ReactFlowInstance, FitView } from '@xyflow/react';
+import type {
+  Edge,
+  FitViewOptions,
+  Node,
+  NodeChange,
+  ReactFlowInstance,
+  FitView,
+} from '@xyflow/react';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { CommonProps } from '@elastic/eui';
 import { SvgDefsMarker } from '../edge/markers';
@@ -26,6 +33,7 @@ import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { isConnectorShape, isEntityNode, enrichEntityNodeData } from '../utils';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
+import { getDetailLevel, DETAIL_LEVEL_ZOOM_THRESHOLD, type DetailLevel } from '../detail_level';
 
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
@@ -87,8 +95,14 @@ const edgeTypes = {
   default: DefaultEdge,
 };
 
+// Cap fitView zoom just below the simplified→detailed threshold so the fit-view
+// button always zooms out to a simplified layout view. The user can then scroll
+// in past the threshold to switch to the detailed layout.
+const FIT_VIEW_MAX_ZOOM = DETAIL_LEVEL_ZOOM_THRESHOLD - 0.01;
+
 const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
   duration: 200,
+  maxZoom: FIT_VIEW_MAX_ZOOM,
 };
 
 const nonInteractiveFitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
@@ -122,14 +136,117 @@ export const Graph = memo<GraphProps>(
     ...rest
   }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
+    const containerRef = useRef<HTMLDivElement | null>(null);
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
     const currEdgesRef = useRef<EdgeViewModel[]>([]);
     const isInitialRenderRef = useRef(true);
+    // Set to true while a programmatic fitView is animating to suppress onMove
+    // layout switches mid-animation.
+    const isProgrammaticFitRef = useRef(false);
+    // Callback to fire once ReactFlow has measured nodes after a layout update
+    const pendingFitViewRef = useRef<(() => void) | null>(null);
+    // Callback to execute inside onInitCallback after the next ReactFlow remount.
+    // Used when setReactFlowKey forces a remount and we need the new instance's
+    // fitView before we can proceed (e.g. interactive prop change).
+    const pendingOnInitRef = useRef<(() => void) | null>(null);
     const [isGraphInteractive, setIsGraphInteractive] = useState(interactive);
-    const [nodesState, setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>([]);
+    const [nodesState, setNodes, onNodesChangeInternal] = useNodesState<Node<NodeViewModel>>([]);
+
+    const onNodesChange = useCallback(
+      (changes: NodeChange<Node<NodeViewModel>>[]) => {
+        onNodesChangeInternal(changes);
+        // Fire the pending fitView once ReactFlow reports node dimensions (nodes measured by DOM)
+        if (
+          pendingFitViewRef.current &&
+          changes.some((c) => c.type === 'dimensions' && c.resizing === false)
+        ) {
+          const cb = pendingFitViewRef.current;
+          pendingFitViewRef.current = null;
+          cb();
+        }
+      },
+      [onNodesChangeInternal]
+    );
+
+    // Fallback: fire pendingFitViewRef if ReactFlow never delivers a dimensions change
+    // (e.g. in test environments where there is no real DOM layout engine).
+    const scheduleFitViewFallback = useCallback((cb: () => void) => {
+      pendingFitViewRef.current = cb;
+      setTimeout(() => {
+        if (pendingFitViewRef.current === cb) {
+          pendingFitViewRef.current = null;
+          cb();
+        }
+      }, 100);
+    }, []);
     const [edgesState, setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>([]);
     const [reactFlowKey, setReactFlowKey] = useState(0);
+    // Always start in simplified layout so the initial fitView zooms out to show
+    // everything. onMove re-layouts to detailed once the user zooms in past 0.7.
+    const detailLevelRef = useRef<DetailLevel>('simplified');
+    const [detailLevelState, setDetailLevelState] = useState<DetailLevel>('simplified');
+    const setDetailLevel = useCallback((level: DetailLevel) => {
+      detailLevelRef.current = level;
+      setDetailLevelState(level);
+    }, []);
+
+    // Wrapper used by controls and data effects. When called with fitViewOptions
+    // (which caps maxZoom below the simplified/detailed threshold), it first
+    // re-layouts in simplified so positions match the simplified node sizes.
+    // Sets isProgrammaticFitRef to suppress onMove layout switches mid-animation.
+    const fitView = useCallback(
+      (opts?: FitViewOptions<Node<NodeViewModel>>) => {
+        const duration = opts?.duration ?? 0;
+        isProgrammaticFitRef.current = true;
+        setTimeout(() => {
+          isProgrammaticFitRef.current = false;
+        }, duration + 300);
+
+        const capsBelowThreshold =
+          opts?.maxZoom !== undefined && opts.maxZoom < DETAIL_LEVEL_ZOOM_THRESHOLD;
+        if (capsBelowThreshold && detailLevelRef.current !== 'simplified') {
+          // Switch layout back to simplified so positions match the simplified
+          // node sizes that will be shown below the threshold zoom.
+          setDetailLevel('simplified');
+          const { initialNodes, initialEdges } = processGraph(
+            currNodesRef.current,
+            currEdgesRef.current,
+            isGraphInteractive
+          );
+          const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges, 'simplified');
+          setNodes(layoutedNodes);
+          setEdges(initialEdges);
+          // Wait for nodes to be re-measured before fitting
+          scheduleFitViewFallback(() => fitViewRef.current?.(opts));
+          return;
+        }
+        fitViewRef.current?.(opts);
+      },
+      [isGraphInteractive, setDetailLevel, setNodes, setEdges, scheduleFitViewFallback]
+    );
+
+    const onMove = useCallback(
+      (
+        _event: MouseEvent | TouchEvent | null,
+        { zoom }: { x: number; y: number; zoom: number }
+      ) => {
+        if (!interactive || isProgrammaticFitRef.current) return;
+        const level = getDetailLevel(zoom);
+        if (level === detailLevelRef.current || currNodesRef.current.length === 0) return;
+        setDetailLevel(level);
+
+        const { initialNodes, initialEdges } = processGraph(
+          currNodesRef.current,
+          currEdgesRef.current,
+          isGraphInteractive
+        );
+        const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges, level);
+        setNodes(layoutedNodes);
+        setEdges(initialEdges);
+      },
+      [interactive, isGraphInteractive, setNodes, setEdges, setDetailLevel]
+    );
 
     // Sync isGraphInteractive with interactive prop and re-process nodes when it changes
     useEffect(() => {
@@ -142,17 +259,20 @@ export const Graph = memo<GraphProps>(
           currEdgesRef.current,
           interactive
         );
-        const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
-        // Force ReactFlow to remount to apply new className
-        setReactFlowKey((prev) => prev + 1);
-
-        setTimeout(() => {
+        // Force ReactFlow to remount to apply new className. Queue the layout
+        // update and fitView to run inside onInitCallback so it uses the new
+        // ReactFlow instance's fitView (not the stale one from before remount).
+        pendingOnInitRef.current = () => {
+          setDetailLevel('simplified');
+          const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges, 'simplified');
           setNodes(layoutedNodes);
           setEdges(initialEdges);
-        }, 0);
+          scheduleFitViewFallback(() => fitView(fitViewOptions));
+        };
+        setReactFlowKey((prev) => prev + 1);
       }
-    }, [interactive, setNodes, setEdges]);
+    }, [interactive, setNodes, setEdges, fitView, setDetailLevel, scheduleFitViewFallback]);
 
     // Filter the ids of those nodes that are origin events
     const originNodeIds = useMemo(
@@ -173,112 +293,135 @@ export const Graph = memo<GraphProps>(
         const newNodes = nodes.filter((node) => !previousNodeIds.has(node.id));
 
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
-        const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
-        // Force ReactFlow to remount by changing the key first
-        setReactFlowKey((prev) => prev + 1);
-
-        // Then set nodes and edges after a microtask to ensure ReactFlow has remounted
-        setTimeout(() => {
-          setNodes(layoutedNodes);
-          setEdges(initialEdges);
-        }, 0);
 
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
 
-        const fitIntoView = () => {
-          fitViewRef.current?.(fitViewOptions);
-        };
+        if (!interactive) {
+          // Non-interactive preview: just update nodes/edges directly.
+          // ReactFlow's fitView prop handles centering automatically.
+          // Always use simplified layout for preview.
+          setDetailLevel('simplified');
+          const { nodes: simplifiedNodes } = layoutGraph(initialNodes, initialEdges, 'simplified');
+          setNodes(simplifiedNodes);
+          setEdges(initialEdges);
+          return;
+        }
 
-        const centerGraphOn = async (nodeIds: string[]) => {
-          await fitViewRef.current?.({
-            ...fitViewOptions,
-            nodes: nodeIds.map((nodeId) => ({ id: nodeId })),
-          });
-        };
+        // Interactive graph: remount ReactFlow to clear internal hover/selection state,
+        // then set nodes after remount so the layout is applied to a clean instance.
+        setReactFlowKey((prev) => prev + 1);
+
+        const isInitial = isInitialRenderRef.current;
+        if (isInitial) {
+          isInitialRenderRef.current = false;
+        }
 
         const filterExistingNodeIds = (nodeIds: string[]) => {
           const existingNodeIds = new Set(nodes.map((node) => node.id));
           return nodeIds.filter((nodeId) => existingNodeIds.has(nodeId));
         };
 
+        // Set nodes/edges after ReactFlow remounts. Always simplified; onMove switches to detailed.
+        // scheduleFitViewFallback fires once ReactFlow measures nodes (or after 100ms fallback).
         setTimeout(() => {
-          if (isInitialRenderRef.current) {
-            isInitialRenderRef.current = false;
-            return;
-          }
+          setDetailLevel('simplified');
+          const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges, 'simplified');
+          setNodes(layoutedNodes);
+          setEdges(initialEdges);
 
-          // If nodes haven't changed, do nothing
-          if (newNodes.length === 0) {
-            return;
-          }
+          scheduleFitViewFallback(() => {
+            if (isInitial) {
+              fitView(fitViewOptions);
+              return;
+            }
 
-          // If nodes have changed but callback is undefined, default to center on new nodes
-          if (!onCenterGraphAfterRefresh) {
-            centerGraphOn(newNodes.map((node) => node.id));
-            return;
-          }
+            if (newNodes.length === 0) {
+              return;
+            }
 
-          // Get node IDs given by consumer to center the graph on
-          const callbackRetValue = onCenterGraphAfterRefresh(newNodes);
+            const centerGraphOn = (nodeIds: string[]) => {
+              fitView({
+                ...fitViewOptions,
+                nodes: nodeIds.map((nodeId) => ({ id: nodeId })),
+              });
+            };
 
-          // If callback returns undefined, default to center on new nodes
-          if (callbackRetValue === undefined) {
-            centerGraphOn(newNodes.map((node) => node.id));
-            return;
-          }
+            if (!onCenterGraphAfterRefresh) {
+              centerGraphOn(newNodes.map((node) => node.id));
+              return;
+            }
 
-          if (callbackRetValue === 'fit-view') {
-            fitIntoView();
-            return;
-          }
+            const callbackRetValue = onCenterGraphAfterRefresh(newNodes);
 
-          if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
-            // With empty array or non-array return value, do nothing
-            return;
-          }
+            if (callbackRetValue === undefined) {
+              centerGraphOn(newNodes.map((node) => node.id));
+              return;
+            }
 
-          const nodeIdsToCenterOn = filterExistingNodeIds(callbackRetValue);
+            if (callbackRetValue === 'fit-view') {
+              fitView(fitViewOptions);
+              return;
+            }
 
-          // if client specified only node ids that do not exist, do nothing
-          // Otherwise, center graph on given nodes
-          if (nodeIdsToCenterOn.length > 0) {
-            // Center graph on specified nodes by client
-            centerGraphOn(nodeIdsToCenterOn);
-          }
-        }, 30);
+            if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
+              return;
+            }
+
+            const nodeIdsToCenterOn = filterExistingNodeIds(callbackRetValue);
+
+            if (nodeIdsToCenterOn.length > 0) {
+              centerGraphOn(nodeIdsToCenterOn);
+            }
+          });
+        }, 0);
       }
-    }, [nodes, edges, setNodes, setEdges, isGraphInteractive, onCenterGraphAfterRefresh]);
+    }, [
+      nodes,
+      edges,
+      setNodes,
+      setEdges,
+      isGraphInteractive,
+      interactive,
+      fitView,
+      onCenterGraphAfterRefresh,
+      setDetailLevel,
+      scheduleFitViewFallback,
+    ]);
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
-        if (interactive) {
-          xyflow.fitView();
-        } else {
-          xyflow.fitView(nonInteractiveFitViewOptions);
-        }
         fitViewRef.current = xyflow.fitView;
 
-        // When the graph is not initialized as interactive, we need to fit the view on resize
+        // Fire any work that was queued to run after the next remount (e.g. when
+        // interactive changes and setReactFlowKey forces a new ReactFlow instance).
+        if (pendingOnInitRef.current) {
+          const cb = pendingOnInitRef.current;
+          pendingOnInitRef.current = null;
+          cb();
+        }
+
+        // For non-interactive previews, re-fit on container resize so the graph
+        // scales correctly when the flyout panel expands or is resized.
         if (!interactive) {
-          const resizeObserver = new ResizeObserver(() => {
-            xyflow.fitView(nonInteractiveFitViewOptions);
-          });
-          resizeObserver.observe(document.querySelector('.react-flow') as Element);
-          return () => resizeObserver.disconnect();
+          const target = containerRef.current;
+          if (target) {
+            const resizeObserver = new ResizeObserver(() => {
+              xyflow.fitView(nonInteractiveFitViewOptions);
+            });
+            resizeObserver.observe(target);
+          }
         }
       },
       [interactive]
     );
 
     return (
-      <div {...rest}>
+      <div ref={containerRef} {...rest}>
         <SvgDefsMarker />
         <ReactFlow
-          key={reactFlowKey}
+          key={interactive ? reactFlowKey : undefined}
           data-test-subj={GRAPH_ID}
-          fitView={true}
-          fitViewOptions={interactive ? undefined : nonInteractiveFitViewOptions}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
@@ -292,8 +435,8 @@ export const Graph = memo<GraphProps>(
           nodesFocusable={interactive}
           elementsSelectable={interactive}
           onlyRenderVisibleElements={ONLY_RENDER_VISIBLE_ELEMENTS}
-          snapToGrid={true} // Snap to grid is enabled to avoid sub-pixel positioning
-          snapGrid={[GRID_SIZE, GRID_SIZE]} // Snap nodes to a 10px grid
+          snapToGrid={true}
+          snapGrid={[GRID_SIZE, GRID_SIZE]}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           proOptions={{ hideAttribution: true }}
@@ -303,18 +446,32 @@ export const Graph = memo<GraphProps>(
           zoomOnDoubleClick={isGraphInteractive && !isLocked}
           preventScrolling={interactive}
           nodesDraggable={interactive && isGraphInteractive && !isLocked}
-          maxZoom={1.3}
+          maxZoom={interactive ? 1.3 : nonInteractiveFitViewOptions.maxZoom}
           minZoom={0.1}
+          onMove={onMove}
+          {...(!interactive && {
+            fitView: true,
+            fitViewOptions: nonInteractiveFitViewOptions,
+          })}
         >
           {interactive && (
             <Panel position="bottom-right">
-              <Controls fitViewOptions={fitViewOptions} nodeIdsToCenterOn={originNodeIds} />
+              <Controls
+                fitViewOptions={fitViewOptions}
+                nodeIdsToCenterOn={originNodeIds}
+                fitViewFn={fitView as (opts?: FitViewOptions) => void}
+              />
             </Panel>
           )}
           {children}
           <Background id={backgroundId} />
           {interactive && showMinimap && (
-            <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+            <Minimap
+              zoomable={!isLocked}
+              pannable={!isLocked}
+              nodesState={nodesState}
+              detailLevel={detailLevelState}
+            />
           )}
         </ReactFlow>
         <GlobalGraphStyles />
