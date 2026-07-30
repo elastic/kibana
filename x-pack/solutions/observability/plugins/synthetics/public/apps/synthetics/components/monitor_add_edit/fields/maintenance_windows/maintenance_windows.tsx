@@ -25,7 +25,7 @@ export const MaintenanceWindowsField = ({
 }: MaintenanceWindowsFieldProps) => {
   const { data } = useMaintenanceWindows();
   const options: Array<EuiComboBoxOptionOption<string>> =
-    data?.data?.map((option) => ({
+    data?.maintenanceWindows?.map((option) => ({
       value: option.id,
       label: option.title,
     })) ?? [];
