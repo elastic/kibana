@@ -8,6 +8,26 @@ Write once at the top of each `findings-flow-<N>.md` file, before the first find
 <!-- flow: <flow name> | started: <ISO> | ended: <ISO> | duration: <Xm Ys> -->
 ```
 
+`scripts/parse-findings.py` reads this comment to populate the Timing & Cost
+table deterministically (see `phases/3-report.md` Step 3a) — keep the field
+order and delimiters exactly as shown.
+
+**Optional status-override marker.** A flow whose status is not simply
+"completed" for a reason the renderer cannot infer from timing data alone —
+`blocked` (an unresolvable prerequisite), or a mid-flow `session lost` — may
+record that judgment call once, anywhere in the file:
+
+```markdown
+<!-- status: blocked | reason: <short reason> -->
+```
+
+`render-report.py` also has an `--overrides` flow for the same two cases
+(and for `not started` flows that never got a findings file at all) when the
+orchestrator determines the status only after the flow file was written, or
+never wrote one. Either mechanism is fine; don't set both for the same flow.
+Do not use this marker for "timed out" — see the note on that status in
+`phases/3-report.md` Step 3a.
+
 ## Level 1 / 2 finding
 
 ```markdown
