@@ -866,7 +866,7 @@ groups:
         datatype: string
         default: '""'
         applies_to:
-          stack: ga
+          stack: ga 9.6
           ech: ga
           ece: ga
           eck: ga
