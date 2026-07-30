@@ -9,13 +9,47 @@
 
 import type { ScoutPage } from '../scout_page';
 
+interface CountMatchingRequestsOptions {
+  method?: string;
+  exactPathname?: boolean;
+}
+
+interface NetworkRequest {
+  url: () => string;
+  method: () => string;
+}
+
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
-  async countMatchingRequests(endpoint: string, action: () => Promise<void>): Promise<number> {
+  private matchesEndpoint(
+    request: NetworkRequest,
+    endpoint: string,
+    options: CountMatchingRequestsOptions
+  ) {
+    if (options.method && request.method() !== options.method) {
+      return false;
+    }
+
+    if (!options.exactPathname) {
+      return request.url().includes(endpoint);
+    }
+
+    try {
+      return new URL(request.url()).pathname.endsWith(endpoint);
+    } catch {
+      return false;
+    }
+  }
+
+  async countMatchingRequests(
+    endpoint: string,
+    action: () => Promise<void>,
+    options: CountMatchingRequestsOptions = {}
+  ): Promise<number> {
     let count = 0;
-    const listener = (request: { url: () => string }) => {
-      if (request.url().includes(endpoint)) {
+    const listener = (request: NetworkRequest) => {
+      if (this.matchesEndpoint(request, endpoint, options)) {
         count++;
       }
     };
