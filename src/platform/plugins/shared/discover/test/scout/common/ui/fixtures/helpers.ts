@@ -8,6 +8,7 @@
  */
 
 import type { ScoutPage, ScoutTestFixtures } from '@kbn/scout';
+import { expect } from '@kbn/scout/ui';
 import { DISCOVER_QUERY_MODE_KEY } from '../../../../../common/constants';
 import * as testData from './constants';
 

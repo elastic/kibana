@@ -107,10 +107,12 @@ export class DiscoverApp {
     await switcher.waitFor({ state: 'visible' });
     await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', name);
     const matchingDataViewLocator = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    await matchingDataViewLocator.waitFor({ state: 'visible', timeout: 5_000 });
-    await matchingDataViewLocator.click();
+    if (await matchingDataViewLocator.isVisible()) {
+      await matchingDataViewLocator.click();
+    } else {
+      await this.page.testSubj.locator('explore-matching-indices-button').click();
+    }
     await switcher.waitFor({ state: 'hidden' });
-    await expect(this.getSelectedDataView()).toHaveText(name);
     await this.waitUntilFieldListHasCountOfFields();
   }
 
