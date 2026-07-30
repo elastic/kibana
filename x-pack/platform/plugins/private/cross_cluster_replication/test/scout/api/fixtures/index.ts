@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { registerHelpers } from './elasticsearch';
+export { apiTest } from '@kbn/scout';
+export * as testData from './constants';
+export { registerSelfReferentialRemote, removeRemote } from './remote_cluster';
