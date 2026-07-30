@@ -103,6 +103,47 @@ describe('PndPlugin feature-flag gating', () => {
       expect(registerRoutes).toHaveBeenCalled();
     });
 
+    it('registers the pnd-watch-orchestrator agent with Agent Builder during setup', () => {
+      const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
+      const coreSetup = coreMock.createSetup();
+      const features = { registerKibanaFeature: jest.fn() };
+      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+      const register = jest.fn();
+
+      plugin.setup(
+        coreSetup as never,
+        {
+          features,
+          workflowsExtensions,
+          workflowsManagement: { management: {} },
+          agentBuilder: { agents: { register } },
+        } as never
+      );
+
+      expect(register).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'security.pnd_watch_orchestrator' })
+      );
+    });
+
+    it('does not throw when agentBuilder is unavailable during setup', () => {
+      const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
+      const coreSetup = coreMock.createSetup();
+      const features = { registerKibanaFeature: jest.fn() };
+      const workflowsExtensions = { registerManagedWorkflowOwner: jest.fn() };
+
+      expect(() =>
+        plugin.setup(
+          coreSetup as never,
+          {
+            features,
+            workflowsExtensions,
+            workflowsManagement: { management: {} },
+            agentBuilder: undefined,
+          } as never
+        )
+      ).not.toThrow();
+    });
+
     it('installs managed watch workflows during start', () => {
       const plugin = new PndPlugin(createContext(createConfig({ enabled: true })));
       const coreStart = coreMock.createStart();

@@ -129,6 +129,11 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
+  // Backing agent for PND (Proactive Network Defense) Watch-created Conversations
+  // (investigations, proposals, incidents) — see
+  // x-pack/solutions/security/plugins/pnd/server/services/investigations/template_mapping.ts.
+  // Not directly conversable by end users.
+  `${internalNamespaces.security}.pnd_watch_orchestrator`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];

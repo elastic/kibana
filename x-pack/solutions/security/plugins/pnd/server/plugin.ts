@@ -33,6 +33,7 @@ import { InvestigationStore } from './services/investigations/investigation_stor
 import { PndConversationStore } from './services/investigations/pnd_conversation_store';
 import { DualWriteStore } from './services/investigations/dual_write_store';
 import type { PndStore } from './services/investigations/pnd_store';
+import { PND_WATCH_ORCHESTRATOR_AGENT_ID } from './services/investigations/template_mapping';
 
 export class PndPlugin
   implements Plugin<PndPluginSetup, PndPluginStart, PndSetupDependencies, PndStartDependencies>
@@ -52,7 +53,7 @@ export class PndPlugin
 
   setup(
     coreSetup: CoreSetup<PndStartDependencies, PndPluginStart>,
-    { features, workflowsExtensions, workflowsManagement }: PndSetupDependencies
+    { features, workflowsExtensions, workflowsManagement, agentBuilder }: PndSetupDependencies
   ): PndPluginSetup {
     if (!this.config.enabled) {
       this.logger.info('PND plugin is disabled');
@@ -64,6 +65,29 @@ export class PndPlugin
     this.workflowsManagementApi = workflowsManagement?.management;
 
     registerOwner({ workflowsExtensions });
+
+    // Backing agent for every Conversation a Watch creates (investigation,
+    // proposal, incident — see template_mapping.ts). Not directly conversable;
+    // its sole purpose is being a resolvable `agent_id` so
+    // `agentRegistry.get(conversation.agent_id, {access: 'use'})` (client.ts)
+    // succeeds instead of silently failing on every PND-created conversation.
+    // Optional because Agent Builder itself can be disabled.
+    agentBuilder?.agents.register({
+      id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
+      name: 'PND Watch Orchestrator',
+      description:
+        'Backing agent for PND (Proactive Network Defense) Watch investigations, proposals, ' +
+        'and incidents. Not directly conversable by end users — anchors the agent_id of ' +
+        'Conversations created by Watch workers.',
+      avatar_icon: 'securityAnalyticsApp',
+      configuration: {
+        instructions:
+          'You back autonomous Watch investigations. You do not converse directly; your ' +
+          'agent_id anchors Conversations created by Watch workers for investigations, ' +
+          'proposals, and incidents.',
+        tools: [],
+      },
+    });
 
     features.registerKibanaFeature({
       id: PND_FEATURE_ID,

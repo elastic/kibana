@@ -13,6 +13,17 @@ import type { ConversationWriterCreateRequest } from '@kbn/agent-builder-server'
 import type { Proposal as CanonicalProposal } from '../../common/schemas';
 
 /**
+ * Backing agent id for every Conversation a PND Watch creates (investigation,
+ * proposal, incident). Registered in `plugin.ts#setup()` and allow-listed in
+ * `AGENT_BUILDER_BUILTIN_AGENTS` — see that registration's doc comment.
+ * Extracted to a single constant rather than repeated as a literal in the 3
+ * functions below: the previous 3-way copy of `'pnd-watch-orchestrator'` (an
+ * id that was never actually registered anywhere) is exactly how that gap
+ * went unnoticed.
+ */
+export const PND_WATCH_ORCHESTRATOR_AGENT_ID = 'security.pnd_watch_orchestrator';
+
+/**
  * Maps a PND `template_id` literal to the platform
  * {@link ConversationTemplateReference} shape.
  *
@@ -40,7 +51,7 @@ export function investigationToConversationCreate(
   inv: Investigation
 ): ConversationWriterCreateRequest {
   return {
-    agent_id: 'pnd-watch-orchestrator',
+    agent_id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
     title: inv.title,
     template: pndTemplateIdToConversationTemplate('investigation'),
     extended_fields: {
@@ -69,7 +80,7 @@ export function investigationToConversationCreate(
  */
 export function proposalToConversationCreate(proposal: Proposal): ConversationWriterCreateRequest {
   return {
-    agent_id: 'pnd-watch-orchestrator',
+    agent_id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
     title: proposal.summary || `Proposal: ${proposal.type}`,
     template: pndTemplateIdToConversationTemplate('proposal'),
     extended_fields: {
@@ -97,7 +108,7 @@ export function proposalToConversationCreate(proposal: Proposal): ConversationWr
  */
 export function incidentToConversationCreate(incident: Incident): ConversationWriterCreateRequest {
   return {
-    agent_id: 'pnd-watch-orchestrator',
+    agent_id: PND_WATCH_ORCHESTRATOR_AGENT_ID,
     title: `Incident forked from ${incident.forkedFromInvestigationId}`,
     template: pndTemplateIdToConversationTemplate('incident'),
     extended_fields: {
