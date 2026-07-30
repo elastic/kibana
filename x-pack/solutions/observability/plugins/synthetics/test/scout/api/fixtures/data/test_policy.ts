@@ -588,4 +588,8 @@ export const ignoreTestFields = [
   'policy_ids',
   'version',
   'revision',
+  // Package policies now carry a `condition` (null unless the monitor runs on a
+  // condition-sharded scalable private location). These project-monitor fixtures
+  // don't assert on it, so ignore it during comparison.
+  'condition',
 ];
