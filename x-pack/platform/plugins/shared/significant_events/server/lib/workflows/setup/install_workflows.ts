@@ -46,11 +46,12 @@ const BASE_WORKFLOWS_TO_INSTALL: WorkflowInstall[] = [
 ];
 
 // Code Intelligence (Stage 1) extraction. Installed globally like the other core
-// KI workflows, but only when the code-intelligence agent (Sourcerer) is present:
-// the workflow's `ai.agent` steps target that agent, so with the agent absent the
-// workflow cannot run. The reconciler prunes owner workflows not in the installed
-// set, so excluding it here also removes a previously-installed copy. The `_run`
-// route additionally guards at request time (see the agent-presence gate).
+// KI workflows whenever the code-KI extraction feature flag is on. The workflow's
+// `ai.agent` steps target the persisted code-intelligence agent (Sourcerer), whose
+// presence can only be checked with a request-scoped registry; that guard lives in
+// the `_run` route (request time), not here. The reconciler prunes owner workflows
+// not in the installed set, so excluding it when the flag is off also removes a
+// previously-installed copy.
 const CODE_EXTRACTION_WORKFLOW: WorkflowInstall = {
   workflowId: SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
   spaceId: GLOBAL_WORKFLOW_SPACE_ID,

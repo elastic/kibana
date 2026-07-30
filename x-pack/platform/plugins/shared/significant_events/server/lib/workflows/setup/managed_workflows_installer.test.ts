@@ -20,7 +20,7 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
 // When available, the installer writes: 9 always-on base workflows + the code-extraction workflow
-// (only when the code-intelligence agent is present) + 4 memory workflows (all via `installWorkflows`)
+// (only when code KI extraction is enabled) + 4 memory workflows (all via `installWorkflows`)
 // + 1 investigation workflow.
 const ALWAYS_ON_BASE_WORKFLOW_COUNT = 9;
 const CODE_EXTRACTION_WORKFLOW_COUNT = 1;
@@ -30,7 +30,7 @@ const INVESTIGATION_WORKFLOW_COUNT = 1;
 const BASE_WORKFLOW_COUNT = ALWAYS_ON_BASE_WORKFLOW_COUNT + CODE_EXTRACTION_WORKFLOW_COUNT;
 const TOTAL_WORKFLOW_COUNT =
   BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT + INVESTIGATION_WORKFLOW_COUNT;
-// With the code-intelligence agent absent, the code-extraction workflow is excluded.
+// With code KI extraction disabled, the code-extraction workflow is excluded.
 const TOTAL_WORKFLOW_COUNT_WITHOUT_CODE_EXTRACTION =
   TOTAL_WORKFLOW_COUNT - CODE_EXTRACTION_WORKFLOW_COUNT;
 
@@ -141,7 +141,7 @@ describe('createManagedWorkflowsInstaller', () => {
     expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID);
   });
 
-  it('installs the code-extraction workflow when the code-intelligence agent is present', async () => {
+  it('installs the code-extraction workflow when code KI extraction is enabled', async () => {
     const { client, installer } = createInstaller();
 
     await installer.install();
@@ -150,7 +150,7 @@ describe('createManagedWorkflowsInstaller', () => {
     expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
   });
 
-  it('excludes the code-extraction workflow when the code-intelligence agent is absent', async () => {
+  it('excludes the code-extraction workflow when code KI extraction is disabled', async () => {
     const { client, installer } = createInstaller({
       isCodeExtractionAvailable: jest.fn().mockResolvedValue(false),
     });
