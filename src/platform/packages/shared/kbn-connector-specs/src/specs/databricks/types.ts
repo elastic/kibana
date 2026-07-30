@@ -77,6 +77,7 @@ export const CallToolInputSchema = lazySchema(() =>
       ),
     arguments: z
       .record(z.string().max(200), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 50, { message: 'Too many arguments (max 50)' })
       .optional()
       .describe('Arguments to pass to the tool (tool-specific key-value map)'),
   })
@@ -136,6 +137,9 @@ export const RunJobNowInputSchema = lazySchema(() =>
     jobId: z.number().describe('The job ID to trigger. Example: 11223344'),
     jobParameters: z
       .record(z.string().max(200), z.string().max(1000))
+      .refine((obj) => Object.keys(obj).length <= 50, {
+        message: 'Too many job parameters (max 50)',
+      })
       .optional()
       .describe(
         'Job parameters to pass as key-value pairs. Overrides defaults defined in the job. ' +
@@ -158,8 +162,8 @@ export const RepairRunInputSchema = lazySchema(() =>
       runId: z.number().describe('The run ID to repair. Example: 455644833'),
       rerunTasks: z
         .array(z.string().max(200))
-        .max(50)
         .min(1)
+        .max(50)
         .optional()
         .describe('Task keys to re-run. Mutually exclusive with rerunAllFailedTasks.'),
       rerunAllFailedTasks: z
