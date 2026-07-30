@@ -665,6 +665,26 @@ describe('ai indices routes', () => {
           })
         );
       });
+
+      it('logs outcome:failure when connector validation fails', async () => {
+        actionsClient.getBulk.mockResolvedValue([buildConnector('slack-1', '.slack')]);
+
+        await callRoute('POST', aiIndexPath, {
+          ...postRequest,
+          body: { ...postRequest.body, sources: [{ type: 'connector', value: 'slack-1' }] },
+        });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'ai_index_create',
+              outcome: 'failure',
+            }),
+            kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
+          })
+        );
+      });
     });
 
     describe('PUT /api/context_engine/ai_index/{aiIndexId}', () => {
@@ -716,6 +736,26 @@ describe('ai indices routes', () => {
               action: 'ai_index_create_or_update',
               outcome: 'failure',
             }),
+          })
+        );
+      });
+
+      it('logs outcome:failure when connector validation fails', async () => {
+        actionsClient.getBulk.mockResolvedValue([buildConnector('slack-1', '.slack')]);
+
+        await callRoute('PUT', aiIndexByIdPath, {
+          ...putRequest,
+          body: { ...putRequest.body, sources: [{ type: 'connector', value: 'slack-1' }] },
+        });
+
+        expect(auditLogger.log).toHaveBeenCalledTimes(1);
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({
+              action: 'ai_index_create_or_update',
+              outcome: 'failure',
+            }),
+            kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
           })
         );
       });
