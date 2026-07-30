@@ -89,9 +89,13 @@ const IntegrationsNavHeader = ({ coreStart }: { coreStart: CoreStart }) => {
 
   // The two "existing experience" touchpoints live here (rather than as nav
   // sections) so the search box can sit directly above the "Starred
-  // integrations" section, matching the design. They deep-link into the real
-  // Metrics app. Rendered just beneath the panel title via the `sidePanelHeader`
-  // slot.
+  // integrations" section, matching the design. Rendered just beneath the panel
+  // title via the `sidePanelHeader` slot.
+  //
+  // They are intentionally illustrative-only (non-interactive): they show where
+  // these surfaces fit in the current experience without navigating away. Real
+  // navigation would swap the open side panel to the Metrics app's own
+  // (identically titled) "Infrastructure" panel and hide the integrations hub.
   //
   // The panel wraps its content in a roving-tabindex keydown handler that
   // hijacks Arrow/Home/End to move between nav links; stop propagation here so
@@ -104,9 +108,6 @@ const IntegrationsNavHeader = ({ coreStart }: { coreStart: CoreStart }) => {
           label={i18n.translate('xpack.streams.entityCentricLab.integrations.infraInventory', {
             defaultMessage: 'Infrastructure inventory',
           })}
-          onClick={() =>
-            coreStart.application.navigateToApp('metrics', { deepLinkId: 'inventory' })
-          }
           data-test-subj="entityCentricLabNavInfraInventory"
         />
         <EuiListGroupItem
@@ -114,7 +115,6 @@ const IntegrationsNavHeader = ({ coreStart }: { coreStart: CoreStart }) => {
           label={i18n.translate('xpack.streams.entityCentricLab.integrations.infraHosts', {
             defaultMessage: 'Hosts (24)',
           })}
-          onClick={() => coreStart.application.navigateToApp('metrics', { deepLinkId: 'hosts' })}
           data-test-subj="entityCentricLabNavInfraHosts"
         />
       </EuiListGroup>
