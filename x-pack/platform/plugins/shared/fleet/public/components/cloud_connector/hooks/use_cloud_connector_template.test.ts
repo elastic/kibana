@@ -45,12 +45,16 @@ const HOOK_PARAMS = {
 describe('useCloudConnectorTemplate', () => {
   let reportEvent: jest.Mock;
   let windowOpenSpy: jest.SpyInstance;
+  // The tab the hook opens synchronously on click and navigates after the
+  // render settles (popup blockers drop window.open calls made after an await).
+  let cloudFormationTab: { closed: boolean; close: jest.Mock; location: { href: string } };
 
   beforeEach(() => {
     jest.clearAllMocks();
     reportEvent = jest.fn();
     mockedUseStartServices.mockReturnValue({ analytics: { reportEvent } } as any);
-    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => null);
+    cloudFormationTab = { closed: false, close: jest.fn(), location: { href: '' } };
+    windowOpenSpy = jest.spyOn(window, 'open').mockImplementation(() => cloudFormationTab as any);
   });
 
   afterEach(() => {
@@ -134,7 +138,9 @@ describe('useCloudConnectorTemplate', () => {
           { name: 'cloud_asset_inventory', policyTemplates: ['asset_inventory'] },
         ],
       });
-      const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
+      // The tab opens blank within the click gesture, then gets navigated.
+      expect(windowOpenSpy).toHaveBeenCalledWith('', '_blank');
+      const openedUrl = cloudFormationTab.location.href;
       expect(openedUrl).toContain(
         `templateURL=${encodeURIComponent('https://s3.example/rendered?sig=SECRET')}`
       );
@@ -219,7 +225,7 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.templateGenerationError).toBeDefined();
     });
 
-    it('falls back to the static URL and reports telemetry when the render fails', async () => {
+    it('navigates the pre-opened tab to the static URL and reports telemetry when the render fails', async () => {
       mockedSendRenderIacTemplate.mockResolvedValue({
         data: null,
         error: { message: 'unrenderable', statusCode: 422 },
@@ -228,8 +234,7 @@ describe('useCloudConnectorTemplate', () => {
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
       await launch(result);
 
-      const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
-      expect(openedUrl).toContain('static.example');
+      expect(cloudFormationTab.location.href).toContain('static.example');
       expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
         flow: 'cloud_connector',
         reason: 'render_failed',
@@ -237,19 +242,67 @@ describe('useCloudConnectorTemplate', () => {
       expect(result.current.templateGenerationError).toBeUndefined();
     });
 
-    it('surfaces an error when the render fails and no static fallback exists', async () => {
-      mockedSendRenderIacTemplate.mockResolvedValue({
-        data: null,
-        error: { message: 'unrenderable', statusCode: 422 },
-      } as any);
-
+    it('does not attempt a render when no static scaffold exists', async () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })
       );
       await launch(result);
 
+      // Without the quick-create scaffold there is nothing to swap the
+      // rendered artifact into, so the render is skipped entirely.
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
       expect(windowOpenSpy).not.toHaveBeenCalled();
       expect(result.current.templateGenerationError).toBeDefined();
+    });
+
+    it('opens the static URL without rendering when it has no templateURL param to swap', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          // A bare template URL, as some package manifests ship: usable as a
+          // plain link but not as a quick-create scaffold.
+          iacTemplateUrl: 'https://static.example/template.yml',
+        })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
+        flow: 'cloud_connector',
+        reason: 'missing_render_context',
+      });
+      expect(windowOpenSpy).toHaveBeenCalledTimes(1);
+      expect(windowOpenSpy.mock.calls[0][0]).toContain('static.example');
+    });
+
+    it('closes the pre-opened tab and surfaces an error when the render request throws', async () => {
+      mockedSendRenderIacTemplate.mockRejectedValue(new Error('network down'));
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      await launch(result);
+
+      expect(cloudFormationTab.close).toHaveBeenCalled();
+      expect(cloudFormationTab.location.href).toBe('');
+      expect(result.current.templateGenerationError).toBeDefined();
+    });
+
+    it('falls back to a direct window.open when the pre-opened tab was blocked', async () => {
+      windowOpenSpy.mockReturnValueOnce(null);
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: {
+          artifactUrl: 'https://s3.example/rendered?sig=SECRET',
+          expiresAt: '2026-07-28T12:00:00Z',
+        },
+        error: null,
+      } as any);
+
+      const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
+      await launch(result);
+
+      expect(windowOpenSpy).toHaveBeenCalledTimes(2);
+      expect(windowOpenSpy.mock.calls[1][0]).toContain(
+        `templateURL=${encodeURIComponent('https://s3.example/rendered?sig=SECRET')}`
+      );
     });
   });
 });

@@ -22,16 +22,13 @@ export const RenderIacTemplateRequestSchema = {
           maxLength: 255,
           meta: { description: 'EPR package name.' },
         }),
-        policyTemplates: schema.arrayOf(
-          schema.string({ minLength: 1, maxLength: 255 }),
-          {
-            minSize: 1,
-            meta: {
-              description:
-                'Policy template names whose inputs to include. Multiple values merge same-package entries.',
-            },
-          }
-        ),
+        policyTemplates: schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
+          minSize: 1,
+          meta: {
+            description:
+              'Policy template names whose inputs to include. Multiple values merge same-package entries.',
+          },
+        }),
       }),
       {
         minSize: 1,

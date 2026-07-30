@@ -40,21 +40,34 @@ export const renderIacTemplateHandler: FleetRequestHandler<
     });
   }
 
+  // The render request must not repeat a package name, so entries sharing a
+  // package are merged into one with the union of their policy templates.
+  const templatesByPackage = new Map<string, Set<string>>();
+  for (const { name, policyTemplates } of requestedIntegrations) {
+    const templates = templatesByPackage.get(name) ?? new Set<string>();
+    for (const template of policyTemplates) {
+      templates.add(template);
+    }
+    templatesByPackage.set(name, templates);
+  }
+
   const startTime = Date.now();
   try {
     const integrations: IacProviderRenderIntegration[] = await Promise.all(
-      requestedIntegrations.map(async ({ name: pkgName, policyTemplates }) => {
+      Array.from(templatesByPackage, async ([pkgName, policyTemplates]) => {
         // Empty pkgVersion resolves to the installed version, falling back to
         // the latest available: at connector-creation time the package may not
-        // be installed yet.
+        // be installed yet. skipArchive: registry info covers everything read
+        // here; without it each request downloads and unpacks the archive.
         const packageInfo = await getPackageInfo({
           savedObjectsClient: internalSoClient,
           pkgName,
           pkgVersion: '',
+          skipArchive: true,
         });
 
         const inputs = (packageInfo.policy_templates ?? [])
-          .filter(({ name }) => policyTemplates.includes(name))
+          .filter(({ name }) => policyTemplates.has(name))
           .flatMap((template) => ('inputs' in template ? template.inputs ?? [] : []));
         // MVP heuristic pending confirmation with the provisioner team
         // (OQ-A in security-team#18632): only provider-relevant input types
@@ -73,6 +86,17 @@ export const renderIacTemplateHandler: FleetRequestHandler<
         };
       })
     );
+
+    // An integration with no provider-relevant inputs cannot contribute to
+    // the template; sending it would only produce confusing provider errors.
+    const emptyIntegration = integrations.find(({ enabledInputs }) => !enabledInputs.length);
+    if (emptyIntegration) {
+      return response.badRequest({
+        body: {
+          message: `${emptyIntegration.name} has no ${provider} inputs under the requested policy templates`,
+        },
+      });
+    }
 
     reportIacProviderRenderRequested({
       flow,
@@ -100,10 +124,12 @@ export const renderIacTemplateHandler: FleetRequestHandler<
         errorCodes: error.errorCodes,
         latencyMs,
       });
-      // 4xx from the provider passes through so the client can decide whether
-      // the static-template fallback applies (422 = package not renderable).
+      // 422 (package not renderable) passes through for the client's fallback
+      // decision. Any other provider 4xx means the broker built a bad request
+      // — surfaced as 502 so e.g. a provider 401/403 can't reach the browser
+      // and trip Kibana's session-expiry handling.
       return response.customError({
-        statusCode: error.statusCode,
+        statusCode: error.statusCode === 422 ? 422 : 502,
         body: { message: error.message, attributes: { errorCodes: error.errorCodes } },
       });
     }

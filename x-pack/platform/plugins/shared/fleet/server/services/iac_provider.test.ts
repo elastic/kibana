@@ -220,6 +220,41 @@ describe('IacProviderService', () => {
       IacProviderUnavailableError
     );
   });
+
+  it('maps a body that fails to read to IacProviderUnavailableError', async () => {
+    mockConfig();
+    mockLogger();
+    // Headers arrived (200) but the body stalls until the timeout aborts it —
+    // the abort must cover the body read, not just the initial response.
+    mockedFetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw new DOMException('The operation was aborted.', 'AbortError');
+      },
+    } as any);
+
+    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProviderUnavailableError
+    );
+  });
+
+  it('throws IacProviderConfigError when only one of certificate/key is configured', async () => {
+    // A half-configured pair must not silently downgrade to an
+    // unauthenticated connection.
+    mockConfig({
+      api: {
+        url: 'https://iac-provider.example',
+        tls: { certificate: '/path/tls.crt', ca: '/path/ca.crt' },
+      },
+    });
+    mockLogger();
+
+    await expect(iacProviderService.renderTemplate(RENDER_REQUEST)).rejects.toThrow(
+      IacProviderConfigError
+    );
+    expect(mockedFetch).not.toHaveBeenCalled();
+  });
 });
 
 describe('parseIacProviderErrors', () => {

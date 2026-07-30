@@ -103,10 +103,12 @@ class IacProviderServiceImpl implements IacProviderService {
 
     const startTime = Date.now();
     const abortController = new AbortController();
+    // The timeout must cover reading the body too, not just the response
+    // headers — a provider that stalls mid-body would otherwise hang the
+    // request handler indefinitely.
     const timeout = setTimeout(() => abortController.abort(), RENDER_TIMEOUT_MS);
-    let response;
     try {
-      response = await undiciFetch(`${iacProviderConfig.api.url}${RENDER_ENDPOINT}`, {
+      const response = await undiciFetch(`${iacProviderConfig.api.url}${RENDER_ENDPOINT}`, {
         method: 'POST',
         headers: {
           'Content-type': 'application/json',
@@ -117,9 +119,24 @@ class IacProviderServiceImpl implements IacProviderService {
         signal: abortController.signal,
         dispatcher,
       });
+
+      const latencyMs = Date.now() - startTime;
+      if (!response.ok) {
+        throw await this.responseToError(response, logger, latencyMs, traceId);
+      }
+
+      const rendered = (await response.json()) as IacProviderRenderResponse;
+      logger.info(
+        `[IaC Provider] Render succeeded for provider ${request.provider} in ${latencyMs}ms`
+      );
+      return rendered;
     } catch (error) {
-      // No response arrived — timeout or network failure. Logged distinctly
-      // from HTTP errors: availability signal, not contract.
+      if (error instanceof IacProviderRenderError || error instanceof IacProviderUnavailableError) {
+        throw error;
+      }
+      // No usable response arrived — timeout, network failure, or a body that
+      // stalled or wasn't JSON. Logged distinctly from HTTP errors:
+      // availability signal, not contract.
       const latencyMs = Date.now() - startTime;
       logger.error(
         `[IaC Provider] No response from provider after ${latencyMs}ms (${error.message}) [Request Id: ${traceId}]`
@@ -128,16 +145,6 @@ class IacProviderServiceImpl implements IacProviderService {
     } finally {
       clearTimeout(timeout);
     }
-
-    const latencyMs = Date.now() - startTime;
-    if (!response.ok) {
-      throw await this.responseToError(response, logger, latencyMs, traceId);
-    }
-
-    logger.info(
-      `[IaC Provider] Render succeeded for provider ${request.provider} in ${latencyMs}ms`
-    );
-    return (await response.json()) as IacProviderRenderResponse;
   }
 
   private async responseToError(
@@ -165,6 +172,16 @@ class IacProviderServiceImpl implements IacProviderService {
 
   private createDispatcher(iacProviderConfig: IacProviderConfig | undefined) {
     const tls = iacProviderConfig?.api?.tls;
+    // A half-configured pair must fail loudly: with only one of the two set,
+    // `enabled` below would be false, sslSchema's certificate+key requirement
+    // would never fire, and the client would silently connect without a
+    // client certificate — unauthenticated against a provider that doesn't
+    // verify clients.
+    if (Boolean(tls?.certificate) !== Boolean(tls?.key)) {
+      throw new Error(
+        'both xpack.fleet.iacProvider.api.tls.certificate and .key must be set for mTLS client authentication'
+      );
+    }
     // `enabled` only gates sslSchema's certificate+key requirement — the
     // certificate authorities are read either way. This keeps CA-only setups
     // working (e.g. local dev against a provider that doesn't verify clients)

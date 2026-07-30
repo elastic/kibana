@@ -106,20 +106,28 @@ export const useCloudConnectorTemplate = ({
   const launchTemplate = useCallback(async () => {
     setTemplateGenerationError(undefined);
 
-    const openFallback = (reason: string) => {
-      if (staticTemplateUrl) {
-        analytics.reportEvent(IAC_PROVIDER_RENDER_FALLBACK_EVENT.eventType, {
-          flow: 'cloud_connector',
-          reason,
-        });
-        window.open(staticTemplateUrl, '_blank');
-        return true;
-      }
-      return false;
+    const reportFallback = (reason: string) => {
+      analytics.reportEvent(IAC_PROVIDER_RENDER_FALLBACK_EVENT.eventType, {
+        flow: 'cloud_connector',
+        reason,
+      });
     };
 
-    if (!packageName || !policyTemplate || !staticTemplateUrl) {
-      if (!openFallback('missing_render_context')) {
+    // All render preconditions are checked synchronously, while the click's
+    // user activation is still live and window.open is allowed. The static
+    // URL must contain a templateURL param: it is the quick-create scaffold
+    // the rendered artifact gets swapped into, and String.replace on a
+    // non-matching URL would silently discard the render.
+    if (
+      !packageName ||
+      !policyTemplate ||
+      !staticTemplateUrl ||
+      !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
+    ) {
+      if (staticTemplateUrl) {
+        reportFallback('missing_render_context');
+        window.open(staticTemplateUrl, '_blank');
+      } else {
         setTemplateGenerationError(
           i18n.translate('xpack.fleet.cloudConnector.iacProvider.missingContextError', {
             defaultMessage: 'CloudFormation template is not available for this integration.',
@@ -128,6 +136,21 @@ export const useCloudConnectorTemplate = ({
       }
       return;
     }
+
+    // The tab must open synchronously within the user gesture — popup
+    // blockers (Safari always, Firefox by default) drop window.open calls
+    // made after an await. The tab is opened blank now and navigated (or
+    // closed) once the render settles.
+    const cloudFormationTab = window.open('', '_blank');
+    const navigateTo = (url: string) => {
+      if (cloudFormationTab && !cloudFormationTab.closed) {
+        cloudFormationTab.location.href = url;
+      } else {
+        // The blank tab was blocked or closed mid-render; a direct open is
+        // the only remaining option, even if the blocker eats it too.
+        window.open(url, '_blank');
+      }
+    };
 
     setIsGeneratingTemplate(true);
     try {
@@ -138,26 +161,27 @@ export const useCloudConnectorTemplate = ({
       });
 
       if (error || !data) {
-        if (!openFallback('render_failed')) {
-          setTemplateGenerationError(
-            i18n.translate('xpack.fleet.cloudConnector.iacProvider.templateGenerationError', {
-              defaultMessage:
-                'Failed to generate the CloudFormation template. Try again, or contact your administrator if the problem persists.',
-            })
-          );
-        }
+        reportFallback('render_failed');
+        navigateTo(staticTemplateUrl);
         return;
       }
 
       // Only the template source changes: swap the templateURL query param on
       // the existing quick-create URL. artifactUrl embeds signing credentials
       // — never cache it and never write it anywhere other than the URL.
-      window.open(
+      navigateTo(
         staticTemplateUrl.replace(
           TEMPLATE_URL_PARAM_REGEX,
           `templateURL=${encodeURIComponent(data.artifactUrl)}`
-        ),
-        '_blank'
+        )
+      );
+    } catch (e) {
+      cloudFormationTab?.close();
+      setTemplateGenerationError(
+        i18n.translate('xpack.fleet.cloudConnector.iacProvider.templateGenerationError', {
+          defaultMessage:
+            'Failed to generate the CloudFormation template. Try again, or contact your administrator if the problem persists.',
+        })
       );
     } finally {
       setIsGeneratingTemplate(false);

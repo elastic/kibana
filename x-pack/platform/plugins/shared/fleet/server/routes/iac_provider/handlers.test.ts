@@ -139,12 +139,85 @@ describe('renderIacTemplateHandler', () => {
     expect(response.ok).toHaveBeenCalledWith({
       body: { artifactUrl: 'https://s3.example/rendered', expiresAt: '2026-07-28T12:00:00Z' },
     });
+    // Registry info covers everything the handler reads; without skipArchive
+    // each request would download and unpack the full package archive.
+    expect(mockedGetPackageInfo).toHaveBeenCalledWith(
+      expect.objectContaining({ skipArchive: true })
+    );
     expect(reportIacProviderRenderRequested).toHaveBeenCalledWith(
       expect.objectContaining({ flow: 'cloud_connector', integrationCount: 2 })
     );
     expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
       expect.objectContaining({ success: true, httpStatus: 200 })
     );
+  });
+
+  it('merges duplicate package entries in the request into one integration', async () => {
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'aws',
+      version: '7.1.0',
+      policy_templates: [
+        { name: 'guardduty', inputs: [{ type: 'aws-s3' }, { type: 'aws-cloudwatch' }] },
+        { name: 's3', inputs: [{ type: 'aws-s3' }] },
+      ],
+    } as any);
+    mockedRenderTemplate.mockResolvedValue({
+      artifactUrl: 'https://s3.example/rendered',
+      expiresAt: '2026-07-28T12:00:00Z',
+    });
+
+    // The provider contract forbids repeating a package name; the broker must
+    // enforce that regardless of how the client shapes the request.
+    await renderIacTemplateHandler(
+      buildContext(),
+      buildRequest({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [
+          { name: 'aws', policyTemplates: ['guardduty'] },
+          { name: 'aws', policyTemplates: ['s3'] },
+        ],
+      }),
+      response
+    );
+
+    expect(mockedGetPackageInfo).toHaveBeenCalledTimes(1);
+    expect(mockedRenderTemplate).toHaveBeenCalledWith({
+      provider: 'aws',
+      integrations: [
+        { name: 'aws', version: '7.1.0', enabledInputs: ['aws-s3', 'aws-cloudwatch'] },
+      ],
+    });
+  });
+
+  it('returns 400 when an integration has no provider-relevant inputs', async () => {
+    // CSPM's policy template has a GCP input only — nothing matches `aws`.
+    mockedGetPackageInfo.mockResolvedValue({
+      name: 'cloud_security_posture',
+      version: '3.5.0',
+      policy_templates: [
+        { name: 'cspm', inputs: [{ type: 'cloudbeat/cis_gcp', title: '', description: '' }] },
+      ],
+    } as any);
+
+    await renderIacTemplateHandler(
+      buildContext(),
+      buildRequest({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+      }),
+      response
+    );
+
+    expect(response.badRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          message: expect.stringContaining('no aws inputs'),
+        }),
+      })
+    );
+    expect(mockedRenderTemplate).not.toHaveBeenCalled();
   });
 
   it('merges multiple policyTemplates for the same package into one integration', async () => {
@@ -216,6 +289,29 @@ describe('renderIacTemplateHandler', () => {
         httpStatus: 422,
         errorCodes: ['render.blueprint_not_found'],
       })
+    );
+  });
+
+  it('maps non-422 provider 4xx to 502 so auth-like statuses never reach the browser', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedRenderTemplate.mockRejectedValue(new IacProviderRenderError('mTLS rejected', 401, []));
+
+    await renderIacTemplateHandler(
+      buildContext(),
+      buildRequest({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+      }),
+      response
+    );
+
+    // A provider 401/403 surfacing verbatim from an internal Kibana route
+    // could trip the browser's session-expiry handling.
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 502 }));
+    // Telemetry keeps the provider's real status.
+    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, httpStatus: 401 })
     );
   });
 
