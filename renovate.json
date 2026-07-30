@@ -48,11 +48,7 @@
         "webpack-bundle-analyzer",
         "webpack-cli",
         "webpack-dev-server",
-        "webpack-merge",
-        "webpack-sources",
-        "@statoscope/webpack-plugin",
-        "@types/webpack-bundle-analyzer",
-        "@types/webpack-sources"
+        "webpack-merge"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -1321,15 +1317,6 @@
     {
       "groupName": "vinyl",
       "matchDepNames": ["vinyl", "vinyl-fs", "@types/vinyl", "@types/vinyl-fs"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "watchpack",
-      "matchDepNames": ["watchpack", "@types/watchpack"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
