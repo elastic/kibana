@@ -26,11 +26,12 @@ const createFailingContext = (): ActionContext => {
     // Provide minimal placeholder values so connectors that derive their URL from
     // config/secrets can reach the HTTP call rather than throwing on missing config.
     // Keys: baseUrl (Sublime Security), tokenUrl (Salesforce), accountUrl (Azure Blob),
-    //       siteUrl (SharePoint Server).
+    //       siteUrl (SharePoint Server), serverUrl (MCP-based: Box, Dropbox, GitHub, Monday).
     config: {
       baseUrl: 'https://placeholder.example.com',
       accountUrl: 'https://placeholder.example.com',
       siteUrl: 'https://placeholder.example.com',
+      serverUrl: 'https://placeholder.example.com',
     },
     secrets: { tokenUrl: 'https://placeholder.example.com' },
     log: { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn() },
