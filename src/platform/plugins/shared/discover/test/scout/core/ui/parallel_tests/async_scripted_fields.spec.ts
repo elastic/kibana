@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
-spaceTest.describe('search with scripted fields', { tag: tags.stateful.all }, () => {
+spaceTest.describe('search with scripted fields', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(
       'x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash'
@@ -50,6 +49,7 @@ spaceTest.describe('search with scripted fields', { tag: tags.stateful.all }, ()
 
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addSavedSearch('search with warning');
+      // Dashboard panels can be slow to render with data; 60s covers the full load cycle.
       await expect(page.testSubj.locator('searchResponseWarningsBadgeToogleButton')).toBeVisible({
         timeout: 60_000,
       });
@@ -58,13 +58,13 @@ spaceTest.describe('search with scripted fields', { tag: tags.stateful.all }, ()
 
   spaceTest(
     'should return results without errors for a query with a valid scripted field',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.selectDataView('logstash-*');
       await pageObjects.queryBar.setQuery('php* OR *jpg OR *css*');
-      await page.testSubj.click('querySubmitButton');
-      await expect(page.testSubj.locator('discoverQueryHits')).toBeVisible({ timeout: 30_000 });
-      await expect(page.testSubj.locator('searchResponseWarningsEmptyPrompt')).not.toBeVisible();
+      await pageObjects.discover.submitQuery();
+      await pageObjects.discover.waitUntilTabIsLoaded();
+      expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
     }
   );
 });

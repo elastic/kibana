@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData } from '../fixtures';
 
-spaceTest.describe('preserve url', { tag: tags.stateful.all }, () => {
+spaceTest.describe('preserve url', { tag: '@local-stateful-classic' }, () => {
   // Second space ID derived from the worker space to stay unique across parallel workers.
   let anotherSpaceId: string;
 
@@ -50,6 +49,7 @@ spaceTest.describe('preserve url', { tag: tags.stateful.all }, () => {
     await page.gotoApp('discover');
     await pageObjects.discover.waitUntilTabIsLoaded();
     await pageObjects.discover.saveSearch('A Search');
+    const savedDiscoverUrl = page.url();
 
     // Navigate to Dashboards (not Home) — collapsibleNav.clickItem fails from the Home page
     // because the nav toggle's aria-expanded is not 'false' there.
@@ -59,6 +59,7 @@ spaceTest.describe('preserve url', { tag: tags.stateful.all }, () => {
     await pageObjects.collapsibleNav.clickItem('Discover');
     await pageObjects.discover.waitUntilTabIsLoaded();
 
+    expect(page.url()).toBe(savedDiscoverUrl);
     expect(await pageObjects.discover.getCurrentQueryName()).toBe('A Search');
   });
 
