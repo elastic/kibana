@@ -61,8 +61,8 @@ spaceTest.describe('search with scripted fields', { tag: '@local-stateful-classi
       await pageObjects.discover.selectDataView('logstash-*');
       await pageObjects.queryBar.setQuery('php* OR *jpg OR *css*');
       await pageObjects.discover.submitQuery();
-      await expect(page.testSubj.locator('searchResponseWarningsEmptyPrompt')).toBeHidden();
       await expect.poll(() => pageObjects.discover.getHitCountInt()).toBeGreaterThan(13000);
+      await expect(page.testSubj.locator('searchResponseWarningsEmptyPrompt')).toBeHidden();
     }
   );
 });
