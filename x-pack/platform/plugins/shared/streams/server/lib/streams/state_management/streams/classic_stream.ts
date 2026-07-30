@@ -21,7 +21,7 @@ import {
   Streams,
   validateStreamName,
 } from '@kbn/streams-schema';
-import { validateStreamlang } from '@kbn/streamlang';
+import { validateStreamlang } from '@kbn/streamlang/server';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import {
   isDisabledLifecycleFailureStore,

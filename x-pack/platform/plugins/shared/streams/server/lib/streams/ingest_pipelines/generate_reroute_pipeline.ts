@@ -6,7 +6,7 @@
  */
 
 import type { Streams } from '@kbn/streams-schema';
-import { conditionToPainless } from '@kbn/streamlang';
+import { conditionToPainless } from '@kbn/streamlang/server';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getReroutePipelineName } from './name';
 

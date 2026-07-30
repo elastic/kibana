@@ -47,7 +47,7 @@ import {
   FIELD_DEFINITION_TYPES,
   type StreamsMappingProperties,
 } from '@kbn/streams-schema/src/fields';
-import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang';
+import { validateStreamlang, type StreamlangDSL } from '@kbn/streamlang/server';
 import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 import { mapValues, uniq, uniqBy, omit, isEmpty } from 'lodash';
 import {

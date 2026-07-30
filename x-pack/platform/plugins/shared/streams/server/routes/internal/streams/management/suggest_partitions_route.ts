@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { partitionStream } from '@kbn/streams-ai';
 import { Streams } from '@kbn/streams-schema';
-import { conditionSchema } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang/server';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';

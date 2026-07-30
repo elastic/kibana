@@ -27,7 +27,11 @@ import {
   getStreamTypeFromDefinition,
   isOtelStream,
 } from '@kbn/streams-schema';
-import { type StreamlangDSL, type GrokProcessor, type DissectProcessor } from '@kbn/streamlang';
+import {
+  type StreamlangDSL,
+  type GrokProcessor,
+  type DissectProcessor,
+} from '@kbn/streamlang/server';
 import { type InferenceClient, isInferenceError } from '@kbn/inference-common';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';

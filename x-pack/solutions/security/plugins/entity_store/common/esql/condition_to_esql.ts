@@ -14,7 +14,7 @@ import {
   isNeverCondition,
   type Condition,
   type FilterCondition,
-} from '@kbn/streamlang';
+} from '@kbn/streamlang/server';
 import { castField } from './cast';
 import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from './strings';
 

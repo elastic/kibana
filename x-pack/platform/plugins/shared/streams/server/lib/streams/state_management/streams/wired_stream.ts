@@ -37,7 +37,7 @@ import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { validateStreamlang } from '@kbn/streamlang';
+import { validateStreamlang } from '@kbn/streamlang/server';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';

@@ -10,8 +10,8 @@ import { Streams } from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
 import { isRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { set } from '@kbn/safer-lodash-set';
-import type { Condition } from '@kbn/streamlang';
-import { isNeverCondition } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang/server';
+import { isNeverCondition } from '@kbn/streamlang/server';
 import {
   migrateRoutingIfConditionToStreamlang,
   migrateOldProcessingArrayToStreamlang,

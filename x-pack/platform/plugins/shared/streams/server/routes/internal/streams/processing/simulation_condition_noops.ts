@@ -6,14 +6,18 @@
  */
 
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { Condition, StreamlangDSL, StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type {
+  Condition,
+  StreamlangDSL,
+  StreamlangProcessorDefinition,
+} from '@kbn/streamlang/server';
 import {
   combineConditionsAsAnd,
   combineConditionsForElseBranch,
   conditionToPainless,
   isConditionBlock,
   transpileIngestPipeline,
-} from '@kbn/streamlang';
+} from '@kbn/streamlang/server';
 import type { StreamlangResolverOptions } from '@kbn/streamlang/types/resolvers';
 
 type StreamlangStep = StreamlangDSL['steps'][number];

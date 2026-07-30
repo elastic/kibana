@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { conditionToQueryDsl } from '@kbn/streamlang';
+import { conditionToQueryDsl } from '@kbn/streamlang/server';
 import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';

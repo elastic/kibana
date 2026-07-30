@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { isComputedFeature } from '@kbn/significant-events-schema';
-import { isConditionComplete } from '@kbn/streamlang';
+import { isConditionComplete } from '@kbn/streamlang/server';
 import {
   isStoredFeatureKnowledgeIndicator,
   isStoredQueryKnowledgeIndicator,

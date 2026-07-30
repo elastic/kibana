@@ -11,7 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { FeatureWithFilter } from '@kbn/significant-events-schema';
 import { getDiverseSampleDocuments, getSampleDocumentsEsql } from '@kbn/ai-tools';
-import { conditionToESQLAst } from '@kbn/streamlang';
+import { conditionToESQLAst } from '@kbn/streamlang/server';
 import { withSpan } from '@kbn/apm-utils';
 import { getEntityFilters } from './get_entity_filters';
 import { parseError } from '../../streams/parse_error';

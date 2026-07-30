@@ -8,14 +8,14 @@
 import { Streams, isInheritFailureStore } from '@kbn/streams-schema';
 import { isInheritLifecycle } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import type { Condition } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang/server';
 import {
   isAndCondition,
   isFilterCondition,
   isNotCondition,
   isOrCondition,
   isConditionComplete,
-} from '@kbn/streamlang';
+} from '@kbn/streamlang/server';
 import { MalformedStreamError } from '../errors/malformed_stream_error';
 import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 

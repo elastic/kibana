@@ -12,7 +12,7 @@ import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import type { StreamlangStep, StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import { streamlangDSLSchema, isConditionBlock } from '@kbn/streamlang/types/streamlang';
-import { ACTION_METADATA_MAP, validateStreamlang } from '@kbn/streamlang';
+import { ACTION_METADATA_MAP, validateStreamlang } from '@kbn/streamlang/server';
 import { getFlattenedObject } from '@kbn/std';
 import { omit } from 'lodash';
 import type { StreamsClient } from '../../../lib/streams/client';

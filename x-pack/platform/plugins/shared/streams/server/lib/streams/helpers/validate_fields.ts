@@ -7,7 +7,7 @@
 
 import type { IngestSimulateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpileIngestPipeline } from '@kbn/streamlang/server';
 import type { FieldDefinition, Streams } from '@kbn/streams-schema';
 import {
   getRoot,

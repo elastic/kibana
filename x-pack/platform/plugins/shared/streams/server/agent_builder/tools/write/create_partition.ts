@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { isNeverCondition } from '@kbn/streamlang';
+import { isNeverCondition } from '@kbn/streamlang/server';
 import dedent from 'dedent';
 import type { GetScopedClients } from '../../../routes/types';
 import { STREAMS_CREATE_PARTITION_TOOL_ID } from '../tool_ids';

@@ -6,8 +6,12 @@
  */
 
 import { isObject } from 'lodash';
-import type { Condition, ManualIngestPipelineProcessor, StreamlangDSL } from '@kbn/streamlang';
-import { ALWAYS_CONDITION, conditionToPainless } from '@kbn/streamlang';
+import type {
+  Condition,
+  ManualIngestPipelineProcessor,
+  StreamlangDSL,
+} from '@kbn/streamlang/server';
+import { ALWAYS_CONDITION, conditionToPainless } from '@kbn/streamlang/server';
 import type { ConditionWithSteps, StreamlangStep } from '@kbn/streamlang/types/streamlang';
 
 export const migrateRoutingIfConditionToStreamlang = (definition: Record<string, unknown>) => {

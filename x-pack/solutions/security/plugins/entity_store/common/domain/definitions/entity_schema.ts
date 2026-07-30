@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
+import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang/server';
 import { z } from '@kbn/zod/v4';
 
 export type EntityType = z.infer<typeof EntityType>;

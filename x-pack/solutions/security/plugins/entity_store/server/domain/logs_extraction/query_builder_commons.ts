@@ -14,7 +14,7 @@ import {
   isNotCondition,
   isOrCondition,
   type Condition,
-} from '@kbn/streamlang';
+} from '@kbn/streamlang/server';
 import { entityStoreConditionToESQL as conditionToESQL } from '../../../common/esql/condition_to_esql';
 import { castEntityField, castField } from '../../../common/esql/cast';
 import { recentData } from '../../../common/domain/definitions/esql';

@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { conditionSchema, isNeverCondition } from '@kbn/streamlang';
+import { conditionSchema, isNeverCondition } from '@kbn/streamlang/server';
 import { routingStatus } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { ResyncStreamsResponse } from '../../../lib/streams/client';

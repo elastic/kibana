@@ -19,7 +19,7 @@ import type {
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { transpileIngestPipeline } from '@kbn/streamlang';
+import { transpileIngestPipeline } from '@kbn/streamlang/server';
 import { createStreamlangResolverOptions } from '../resolvers';
 import { ASSET_VERSION } from '../../../../common/constants';
 import {

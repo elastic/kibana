@@ -35,7 +35,7 @@ import {
   setProcessorSchema,
   type StreamlangDSL,
   type Condition,
-} from '@kbn/streamlang';
+} from '@kbn/streamlang/server';
 
 const processorSchemasByAction: Record<string, z.ZodType<unknown>> = {
   grok: grokProcessorSchema,

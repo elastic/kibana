@@ -6,7 +6,7 @@
  */
 
 import { escapeQuotes } from '@kbn/es-query';
-import type { FilterCondition, RangeCondition, Condition } from '@kbn/streamlang';
+import type { FilterCondition, RangeCondition, Condition } from '@kbn/streamlang/server';
 import {
   getFilterOperator,
   getFilterValue,
@@ -15,7 +15,7 @@ import {
   isOrCondition,
   isNotCondition,
   isAlwaysCondition,
-} from '@kbn/streamlang';
+} from '@kbn/streamlang/server';
 import type { EntityType, FieldEvaluation } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
 import { getEntityDefinitionWithoutId } from '../definitions/registry';
