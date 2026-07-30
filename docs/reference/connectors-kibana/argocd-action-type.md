@@ -45,6 +45,8 @@ Verification mode
 
 You can test connectors when you create or edit the connector in {{kib}}. The test requests userinfo (`GET /api/v1/session/userinfo`) to verify connectivity and authentication.
 
+## Connector actions [argocd-connector-actions]
+
 The Argo CD connector has the following actions:
 
 `request`
