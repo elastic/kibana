@@ -49,13 +49,7 @@ test.describe(
   () => {
     test.beforeAll(async ({ esArchiver, mlTestResources, kbnClient }) => {
       await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.FAREQUOTE);
-      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.MODULE_SAMPLE_LOGS);
       await mlTestResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
-      await mlTestResources.createDataViewIfNeeded('ft_module_sample_logs', '@timestamp');
-      await mlTestResources.createSavedSearchFarequoteKueryIfNeeded();
-      await mlTestResources.createSavedSearchFarequoteLuceneIfNeeded();
-      await mlTestResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
-      await mlTestResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
       await kbnClient.uiSettings.update({
         [testData.SHOW_FIELD_STATISTICS]: false,
       });
@@ -67,7 +61,6 @@ test.describe(
 
     test.afterAll(async ({ mlTestResources, kbnClient }) => {
       await kbnClient.uiSettings.unset(testData.SHOW_FIELD_STATISTICS);
-      await mlTestResources.deleteSavedSearches();
       await mlTestResources.deleteDataViewByTitle('ft_farequote');
     });
 

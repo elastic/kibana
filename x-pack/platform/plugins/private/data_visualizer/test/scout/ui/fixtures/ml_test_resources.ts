@@ -7,11 +7,17 @@
 
 import type { ApiServicesFixture, KbnClient, ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
-import { savedSearches } from './saved_objects_data';
+import {
+  FAREQUOTE_SAVED_SEARCHES,
+  FAREQUOTE_SAVED_SEARCH_SETS,
+  buildDiscoverSessionAttributes,
+  injectDataViewId,
+  toDiscoverSessionCreateAttributes,
+  type FarequoteSavedSearchKey,
+  type FarequoteSavedSearchSpec,
+} from '@kbn/ml-plugin/test/scout/ui/fixtures/farequote_saved_searches';
 
 const SEARCH_TYPE = 'search';
-
-type SavedSearchDefinition = (typeof savedSearches)[keyof typeof savedSearches];
 
 export interface MlTestResources {
   createDataViewIfNeeded: (
@@ -71,36 +77,14 @@ const getSavedObjectIdByTitle = async ({
   );
 };
 
-const DATA_VIEW_ID_PLACEHOLDER = 'INDEX_PATTERN_ID_PLACEHOLDER';
-
-/**
- * Injects the real data view id into references and into searchSourceJSON strings.
- * A JSON.parse reviver alone does not replace placeholders inside stringified JSON.
- */
-const injectDataViewId = <T>(value: T, dataViewId: string): T =>
-  JSON.parse(JSON.stringify(value).split(DATA_VIEW_ID_PLACEHOLDER).join(dataViewId)) as T;
-
-/**
- * Discover model version 13 create schema only allows title/description/tabs.
- * Fixtures still carry legacy top-level columns/sort/kibanaSavedObjectMeta for
- * readability; strip them before POST so create validation succeeds.
- */
-const toDiscoverSessionCreateAttributes = (
-  attributes: SavedSearchDefinition['requestBody']['attributes']
-) => ({
-  title: attributes.title,
-  description: attributes.description ?? '',
-  tabs: attributes.tabs,
-});
-
-const updateSavedSearchRequestBody = async ({
+const buildSavedSearchCreateBody = async ({
   apiServices,
-  body,
+  spec,
   dataViewTitle,
   space,
 }: {
   apiServices: ApiServicesFixture;
-  body: SavedSearchDefinition['requestBody'];
+  spec: FarequoteSavedSearchSpec;
   dataViewTitle: string;
   space?: string;
 }) => {
@@ -111,10 +95,16 @@ const updateSavedSearchRequestBody = async ({
     throw new Error(`Data view '${dataViewTitle}' must exist before creating saved searches.`);
   }
 
-  const withIds = injectDataViewId(body, dataViewId);
+  const attributes = injectDataViewId(buildDiscoverSessionAttributes(spec), dataViewId);
   return {
-    attributes: toDiscoverSessionCreateAttributes(withIds.attributes),
-    references: withIds.references,
+    attributes: toDiscoverSessionCreateAttributes(attributes),
+    references: [
+      {
+        id: dataViewId,
+        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+        type: 'index-pattern',
+      },
+    ],
   };
 };
 
@@ -163,15 +153,15 @@ export const getMlTestResources = ({
   };
 
   const createSavedSearchIfNeeded = async (
-    savedSearch: SavedSearchDefinition,
+    key: FarequoteSavedSearchKey,
     dataViewTitle: string,
     space?: string
   ) => {
-    const title = savedSearch.requestBody.attributes.title;
+    const spec = FAREQUOTE_SAVED_SEARCHES[key];
     const existingId = await getSavedObjectIdByTitle({
       kbnClient,
       log,
-      title,
+      title: spec.title,
       objectType: SEARCH_TYPE,
       space,
     });
@@ -180,26 +170,30 @@ export const getMlTestResources = ({
       return;
     }
 
-    const body = await updateSavedSearchRequestBody({
+    const body = await buildSavedSearchCreateBody({
       apiServices,
-      body: savedSearch.requestBody,
+      spec,
       dataViewTitle,
       space,
     });
 
-    await measurePerformanceAsync(log, `mlTestResources.createSavedSearch(${title})`, async () => {
-      // Use the public saved objects API: kbnClient.savedObjects.create always adds an
-      // `overwrite` query param that querystring serializes as a string and the FTR SO
-      // route rejects.
-      await kbnClient.request({
-        method: 'POST',
-        path: withSpace(`/api/saved_objects/${SEARCH_TYPE}`, space),
-        body: {
-          attributes: body.attributes,
-          references: body.references,
-        },
-      });
-    });
+    await measurePerformanceAsync(
+      log,
+      `mlTestResources.createSavedSearch(${spec.title})`,
+      async () => {
+        // Use the public saved objects API: kbnClient.savedObjects.create always adds an
+        // `overwrite` query param that querystring serializes as a string and the FTR SO
+        // route rejects.
+        await kbnClient.request({
+          method: 'POST',
+          path: withSpace(`/api/saved_objects/${SEARCH_TYPE}`, space),
+          body: {
+            attributes: body.attributes,
+            references: body.references,
+          },
+        });
+      }
+    );
   };
 
   return {
@@ -209,30 +203,30 @@ export const getMlTestResources = ({
       dataViewTitle = 'ft_farequote',
       space?: string
     ) => {
-      await createSavedSearchIfNeeded(savedSearches.farequoteKuery, dataViewTitle, space);
+      await createSavedSearchIfNeeded('farequoteKuery', dataViewTitle, space);
     },
     createSavedSearchFarequoteLuceneIfNeeded: async (
       dataViewTitle = 'ft_farequote',
       space?: string
     ) => {
-      await createSavedSearchIfNeeded(savedSearches.farequoteLucene, dataViewTitle, space);
+      await createSavedSearchIfNeeded('farequoteLucene', dataViewTitle, space);
     },
     createSavedSearchFarequoteFilterAndLuceneIfNeeded: async (
       dataViewTitle = 'ft_farequote',
       space?: string
     ) => {
-      await createSavedSearchIfNeeded(savedSearches.farequoteFilterAndLucene, dataViewTitle, space);
+      await createSavedSearchIfNeeded('farequoteFilterAndLucene', dataViewTitle, space);
     },
     createSavedSearchFarequoteFilterAndKueryIfNeeded: async (
       dataViewTitle = 'ft_farequote',
       space?: string
     ) => {
-      await createSavedSearchIfNeeded(savedSearches.farequoteFilterAndKuery, dataViewTitle, space);
+      await createSavedSearchIfNeeded('farequoteFilterAndKuery', dataViewTitle, space);
     },
     deleteSavedSearches: async (space?: string) => {
       await measurePerformanceAsync(log, 'mlTestResources.deleteSavedSearches', async () => {
-        for (const savedSearch of Object.values(savedSearches)) {
-          const title = savedSearch.requestBody.attributes.title;
+        for (const key of FAREQUOTE_SAVED_SEARCH_SETS.dataVisualizerPlugin) {
+          const { title } = FAREQUOTE_SAVED_SEARCHES[key];
           const id = await getSavedObjectIdByTitle({
             kbnClient,
             log,

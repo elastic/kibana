@@ -59,10 +59,21 @@ export const FAREQUOTE_SAVED_SEARCHES = {
     title: 'ft_farequote_kuery',
     query: { query: 'airline: A* and responsetime > 5', language: 'kuery' },
   },
+  /** Used by index_data_visualizer farequote lucene saved search specs */
+  farequoteLucene: {
+    title: 'ft_farequote_lucene',
+    query: { query: 'airline:A*', language: 'lucene' },
+  },
   /** Used by data drift (FTR + DV Scout) with ft_farequote */
   farequoteFilterAndKuery: {
     title: 'ft_farequote_filter_and_kuery',
     query: { query: 'responsetime > 49', language: 'kuery' },
+    filters: [airlineAsaFilter],
+  },
+  /** Used by index_data_visualizer filters / dashboard field stats specs */
+  farequoteFilterAndLucene: {
+    title: 'ft_farequote_filter_and_lucene',
+    query: { query: 'responsetime:>50', language: 'lucene' },
     filters: [airlineAsaFilter],
   },
 } as const satisfies Record<string, FarequoteSavedSearchSpec>;
@@ -79,6 +90,13 @@ export const FAREQUOTE_SAVED_SEARCH_SETS = {
   dataVisualizer: [
     'farequoteKuery',
     'farequoteFilterAndKuery',
+  ] as const satisfies readonly FarequoteSavedSearchKey[],
+  /** Full set used by data_visualizer plugin Scout helpers */
+  dataVisualizerPlugin: [
+    'farequoteKuery',
+    'farequoteLucene',
+    'farequoteFilterAndKuery',
+    'farequoteFilterAndLucene',
   ] as const satisfies readonly FarequoteSavedSearchKey[],
 };
 
@@ -114,7 +132,7 @@ const buildSearchSourceJSON = (spec: FarequoteSavedSearchSpec): string =>
     indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
   });
 
-const buildDiscoverSessionAttributes = (spec: FarequoteSavedSearchSpec) => {
+export const buildDiscoverSessionAttributes = (spec: FarequoteSavedSearchSpec) => {
   const searchSourceJSON = buildSearchSourceJSON(spec);
   return {
     title: spec.title,

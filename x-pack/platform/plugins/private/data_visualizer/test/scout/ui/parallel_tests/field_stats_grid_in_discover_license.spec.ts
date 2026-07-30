@@ -50,21 +50,6 @@ spaceTest.describe(
   () => {
     spaceTest.beforeAll(async ({ mlTestResources, scoutSpace }) => {
       await mlTestResources.createDataViewIfNeeded('ft_farequote', '@timestamp', scoutSpace.id);
-      await mlTestResources.createDataViewIfNeeded(
-        'ft_module_sample_logs',
-        '@timestamp',
-        scoutSpace.id
-      );
-      await mlTestResources.createSavedSearchFarequoteKueryIfNeeded('ft_farequote', scoutSpace.id);
-      await mlTestResources.createSavedSearchFarequoteLuceneIfNeeded('ft_farequote', scoutSpace.id);
-      await mlTestResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded(
-        'ft_farequote',
-        scoutSpace.id
-      );
-      await mlTestResources.createSavedSearchFarequoteFilterAndKueryIfNeeded(
-        'ft_farequote',
-        scoutSpace.id
-      );
       await scoutSpace.uiSettings.set({
         [testData.SHOW_FIELD_STATISTICS]: false,
       });
@@ -77,7 +62,6 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
       await scoutSpace.uiSettings.unset(testData.SHOW_FIELD_STATISTICS);
-      await mlTestResources.deleteSavedSearches(scoutSpace.id);
       await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
     });
 

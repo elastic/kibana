@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const DEFAULT_START_TIME = '2020-01-01T00:00:00.000Z';
-export const DEFAULT_END_TIME = '2020-01-02T00:00:00.000Z';
-
 export const ES_ARCHIVES = {
   FAREQUOTE: 'x-pack/platform/test/fixtures/es_archives/ml/farequote',
   MODULE_SAMPLE_LOGS: 'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs',

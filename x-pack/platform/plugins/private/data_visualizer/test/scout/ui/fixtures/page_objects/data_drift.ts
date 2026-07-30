@@ -69,14 +69,9 @@ export class DataDrift {
 
   async waitForDataViewTitle(expectedTitle: string) {
     await this.dataSourceSelectorButton.waitFor({ state: 'visible' });
-    await this.page.waitForFunction(
-      ({ expected }) => {
-        const element = document.querySelector('[data-test-subj="mlDataSourceSelectorButton"]');
-        return element?.getAttribute('title') === expected;
-      },
-      { expected: expectedTitle },
-      { timeout: 5000 }
-    );
+    await expect(this.dataSourceSelectorButton).toHaveAttribute('title', expectedTitle, {
+      timeout: 5000,
+    });
   }
 
   async waitForDataViewTitleIfNeeded(dataViewName?: string) {
@@ -96,12 +91,8 @@ export class DataDrift {
     expectedFormattedTotalDocCount: string,
     timeout = 30_000
   ) {
-    await this.page.waitForFunction(
-      ({ testSubj, expected }) => {
-        const element = document.querySelector(`[data-test-subj="${testSubj}"]`);
-        return element?.textContent?.trim() === expected;
-      },
-      { testSubj: `dataVisualizerTotalDocCount-${id}`, expected: expectedFormattedTotalDocCount },
+    await expect(this.page.testSubj.locator(`dataVisualizerTotalDocCount-${id}`)).toHaveText(
+      expectedFormattedTotalDocCount,
       { timeout }
     );
   }
@@ -143,14 +134,8 @@ export class DataDrift {
         .waitFor({ state: 'visible' });
 
       if (expectedProbability !== undefined) {
-        await this.page.waitForFunction(
-          ({ expected }) => {
-            const element = document.querySelector(
-              '[data-test-subj="dvRandomSamplerProbabilityRange"]'
-            );
-            return element?.getAttribute('value') === `${expected}`;
-          },
-          { expected: expectedProbability },
+        await expect(this.page.testSubj.locator('dvRandomSamplerProbabilityRange')).toHaveValue(
+          `${expectedProbability}`,
           { timeout }
         );
       }
@@ -162,14 +147,8 @@ export class DataDrift {
         .waitFor({ state: 'visible' });
 
       if (expectedProbability !== undefined) {
-        await this.page.waitForFunction(
-          ({ expected }) => {
-            const element = document.querySelector(
-              '[data-test-subj="dvRandomSamplerProbabilityUsedMsg"]'
-            );
-            return element?.textContent?.includes(`${expected}`) ?? false;
-          },
-          { expected: expectedProbability },
+        await expect(this.page.testSubj.locator('dvRandomSamplerProbabilityUsedMsg')).toContainText(
+          `${expectedProbability}`,
           { timeout }
         );
       }
@@ -242,56 +221,19 @@ export class DataDrift {
 
     // FTR WebDriver Actions used canvas-center as origin, so [0, 0] meant center.
     // Playwright positions are top-left relative — treat [0, 0] as "use center".
-    const resolvedCoordinates: [number, number] =
+    const [x, y]: [number, number] =
       chartClickCoordinates[0] === 0 && chartClickCoordinates[1] === 0
         ? [Math.max(Math.floor(box.width / 2), 1), Math.max(Math.floor(box.height / 2), 1)]
         : chartClickCoordinates;
 
-    const clickPositions: Array<[number, number]> = [
-      resolvedCoordinates,
-      [Math.max(Math.floor(box.width / 2), 1), Math.max(Math.floor(box.height / 2), 1)],
-      [Math.max(Math.floor(box.width / 3), 1), Math.max(Math.floor(box.height / 2), 1)],
-      [10, 10],
-    ];
+    await canvas.click({
+      position: { x, y },
+      timeout: 10_000,
+    });
 
-    for (const [x, y] of clickPositions) {
-      await canvas.click({
-        position: { x, y },
-        timeout: 10_000,
-      });
-
-      if ((await this.page.testSubj.locator(`dataDriftBrush-${id}`).count()) > 0) {
-        return;
-      }
-
-      await this.page.evaluate(
-        ({ testSubj, clickX, clickY }) => {
-          const chartElement = document.querySelector(`[data-test-subj="${testSubj}"] canvas`);
-          if (!chartElement) {
-            return;
-          }
-          const rect = chartElement.getBoundingClientRect();
-          chartElement.dispatchEvent(
-            new MouseEvent('click', {
-              bubbles: true,
-              clientX: rect.left + clickX,
-              clientY: rect.top + clickY,
-            })
-          );
-        },
-        { testSubj: `dataDriftDocCountChart-${id}`, clickX: x, clickY: y }
-      );
-
-      if ((await this.page.testSubj.locator(`dataDriftBrush-${id}`).count()) > 0) {
-        return;
-      }
-    }
-
-    await expect
-      .poll(async () => (await this.page.testSubj.locator(`dataDriftBrush-${id}`).count()) > 0, {
-        timeout: 10_000,
-      })
-      .toBe(true);
+    await this.page.testSubj
+      .locator(`dataDriftBrush-${id}`)
+      .waitFor({ state: 'attached', timeout: 10_000 });
   }
 
   async waitForDataDriftTable() {
@@ -327,14 +269,7 @@ export class DataDrift {
   }
 
   async waitForIndexPatternInput(id: SubjectId, expectedText: string) {
-    await this.page.waitForFunction(
-      ({ testSubj, expected }) => {
-        const element = document.querySelector(`[data-test-subj="${testSubj}"]`);
-        return (element as HTMLInputElement | null)?.value === expected;
-      },
-      { testSubj: `mlDataDriftIndexPatternTitleInput-${id}`, expected: expectedText },
-      { timeout: 5000 }
-    );
+    await expect(this.indexPatternInput(id)).toHaveValue(expectedText, { timeout: 5000 });
   }
 
   async setIndexPatternInput(id: SubjectId, pattern: string) {

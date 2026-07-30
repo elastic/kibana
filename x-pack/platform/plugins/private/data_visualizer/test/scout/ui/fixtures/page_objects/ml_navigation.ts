@@ -25,11 +25,13 @@ export class MlNavigation {
   }
 
   async navigateToDataDrift() {
+    await this.navigateToDataVisualizer();
     await this.page.testSubj.click('mlDataVisualizerSelectDataDriftButton');
     await this.page.testSubj.locator('mlPageDataDrift').waitFor({ state: 'visible' });
   }
 
   async navigateToDataESQLDataVisualizer() {
+    await this.navigateToDataVisualizer();
     await this.page.testSubj.click('mlDataVisualizerSelectESQLButton');
     await this.page.testSubj.locator('dataVisualizerIndexPage').waitFor({ state: 'visible' });
   }

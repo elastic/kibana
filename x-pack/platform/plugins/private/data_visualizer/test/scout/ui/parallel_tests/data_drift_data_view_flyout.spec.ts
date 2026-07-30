@@ -20,9 +20,8 @@ spaceTest.describe('data drift data view flows', { tag: tags.stateful.classic },
     await mlTestResources.setKibanaTimeZoneToUTC(scoutSpace.id);
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+  spaceTest.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
-    await pageObjects.mlNavigation.navigateToMl();
   });
 
   spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {

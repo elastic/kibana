@@ -26,9 +26,8 @@ spaceTest.describe(
       await mlTestResources.setKibanaTimeZoneToUTC(scoutSpace.id);
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
-      await pageObjects.mlNavigation.navigateToMl();
     });
 
     spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
