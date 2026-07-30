@@ -32,9 +32,15 @@ interface AutomationsPanelProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
+  isManaged: boolean;
 }
 
-export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPanelProps) => {
+export const AutomationsPanel = ({
+  isLoading,
+  aiIndex,
+  onSaved,
+  isManaged,
+}: AutomationsPanelProps) => {
   const {
     services: { application },
   } = useKibana();
@@ -106,8 +112,8 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : (
-            <EuiButton
+          ) : !isManaged && !isLoading ? (
+            <EuiButtonEmpty
               size="s"
               iconType="pencil"
               onClick={startEditing}
@@ -117,8 +123,8 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
               {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.editButton', {
                 defaultMessage: 'Edit',
               })}
-            </EuiButton>
-          )}
+            </EuiButtonEmpty>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
@@ -178,9 +184,14 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
               }
               body={
                 <p>
-                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
-                    defaultMessage: 'Create an automation to get started.',
-                  })}
+                  {isManaged
+                    ? i18n.translate(
+                        'xpack.contextEngine.aiIndexDetail.automations.emptyBodyManaged',
+                        { defaultMessage: 'No automations are configured for this AI index.' }
+                      )
+                    : i18n.translate('xpack.contextEngine.aiIndexDetail.automations.emptyBody', {
+                        defaultMessage: 'Create an automation to get started.',
+                      })}
                 </p>
               }
             />
@@ -188,7 +199,7 @@ export const AutomationsPanel = ({ isLoading, aiIndex, onSaved }: AutomationsPan
             automations.map((automation, index) => {
               const summary = summaries.get(automation.value);
               return (
-                <React.Fragment key={`${automation.type}-${automation.value}-${index}`}>
+                <React.Fragment key={automation.value}>
                   <AutomationRow
                     automation={automation}
                     name={summary?.name}
