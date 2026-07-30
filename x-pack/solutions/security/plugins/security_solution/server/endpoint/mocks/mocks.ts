@@ -160,6 +160,7 @@ export const createMockEndpointAppContextService = (
       disabledFeatures: [],
     })),
     getSpaceId: jest.fn().mockReturnValue('default'),
+    getActiveSpaceId: jest.fn().mockReturnValue('default'),
     getReferenceDataClient: jest.fn().mockReturnValue(referenceDataMocks.createClient()),
     getServerConfigValue: jest.fn(),
     getScriptsLibraryClient: jest.fn().mockReturnValue(scriptsClient),
