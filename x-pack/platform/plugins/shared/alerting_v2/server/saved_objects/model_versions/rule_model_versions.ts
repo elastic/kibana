@@ -6,7 +6,11 @@
  */
 
 import type { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { ruleSavedObjectAttributesSchemaV1 } from '../schemas/rule_saved_object_attributes';
+import {
+  ruleSavedObjectAttributesSchemaV1,
+  ruleSavedObjectAttributesSchemaV2,
+} from '../schemas/rule_saved_object_attributes';
+import { migrateRuleArtifactsToData } from './migrate_rule_artifacts_to_data';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '1': {
@@ -34,6 +38,22 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: ruleSavedObjectAttributesSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: ruleSavedObjectAttributesSchemaV1,
+    },
+  },
+  '3': {
+    // Replace `artifacts[].value: string` with a structured `artifacts[].data`
+    // record, removing `value` from the document. This is knowingly not
+    // rollback-safe: model version 2's schema requires `value`, so a rolled-back
+    // node cannot read a rule that has artifacts.
+    changes: [
+      {
+        type: 'unsafe_transform',
+        transformFn: (typeSafeGuard) => typeSafeGuard(migrateRuleArtifactsToData),
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV2,
     },
   },
 };

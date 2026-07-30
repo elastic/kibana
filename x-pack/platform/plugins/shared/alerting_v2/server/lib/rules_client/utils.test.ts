@@ -6,6 +6,7 @@
  */
 
 import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleSoAttributes } from '../test_utils';
 import {
   transformCreateRuleBodyToRuleSoAttributes,
@@ -30,6 +31,14 @@ const baseCreateData: CreateRuleData = {
   schedule: { every: '5m' },
   query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
 };
+
+const createRuleSoAttributesWithArtifacts = () =>
+  createRuleSoAttributes({
+    artifacts: [
+      { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+      { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+    ],
+  });
 
 describe('utils', () => {
   describe('transformCreateRuleBodyToRuleSoAttributes', () => {
@@ -226,9 +235,39 @@ describe('utils', () => {
 
       expect(result.metadata.builder_type).toBe('threshold');
     });
+
+    it('preserves stored artifacts when the update does not touch them', () => {
+      const existing = createRuleSoAttributesWithArtifacts();
+
+      const result = buildUpdateRuleAttributes(
+        existing,
+        {},
+        {
+          updatedBy: 'user-2',
+          updatedAt: '2025-01-02T00:00:00.000Z',
+        }
+      );
+
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      ]);
+    });
   });
 
   describe('transformRuleSoAttributesToRuleApiResponse', () => {
+    it('returns artifacts that satisfy the strict response schema', () => {
+      const attrs = createRuleSoAttributesWithArtifacts();
+
+      const result = transformRuleSoAttributesToRuleApiResponse('rule-id-1', attrs);
+
+      expect(result.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'steps' } },
+        { id: 'dashboard-1', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+      ]);
+      expect(() => ruleResponseSchema.parse(result)).not.toThrow();
+    });
+
     it('includes description in the API response', () => {
       const attrs = createRuleSoAttributes({
         metadata: { name: 'rule-1', description: 'A test description' },

@@ -1,0 +1,174 @@
+{
+  "10.2.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test rule with artifacts",
+        "description": "a test alerting v2 rule",
+        "tags": ["test"]
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | LIMIT 10"
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0
+      },
+      "grouping": {
+        "fields": ["host.name"]
+      },
+      "artifacts": [
+        {
+          "id": "runbook-1",
+          "type": "runbook",
+          "value": "## Runbook\n\n1. Check the service health"
+        },
+        {
+          "id": "dashboard-1",
+          "type": "dashboard",
+          "value": "dashboard-id-1"
+        },
+        {
+          "id": "host-1",
+          "type": "host",
+          "value": "host-a"
+        }
+      ],
+      "enabled": true,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test rule without artifacts",
+        "description": "a test alerting v2 rule",
+        "tags": ["test"]
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | LIMIT 10"
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0
+      },
+      "grouping": {
+        "fields": ["host.name"]
+      },
+      "enabled": true,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "10.3.0": [
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test rule with artifacts",
+        "description": "a test alerting v2 rule",
+        "tags": ["test"]
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | LIMIT 10"
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0
+      },
+      "grouping": {
+        "fields": ["host.name"]
+      },
+      "artifacts": [
+        {
+          "id": "runbook-1",
+          "type": "runbook",
+          "data": {
+            "content": "## Runbook\n\n1. Check the service health"
+          }
+        },
+        {
+          "id": "dashboard-1",
+          "type": "dashboard",
+          "data": {
+            "dashboardId": "dashboard-id-1"
+          }
+        },
+        {
+          "id": "host-1",
+          "type": "host",
+          "data": {
+            "value": "host-a"
+          }
+        }
+      ],
+      "enabled": true,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    },
+    {
+      "kind": "alert",
+      "metadata": {
+        "name": "test rule without artifacts",
+        "description": "a test alerting v2 rule",
+        "tags": ["test"]
+      },
+      "time_field": "@timestamp",
+      "schedule": {
+        "every": "1m",
+        "lookback": "5m"
+      },
+      "recovery_strategy": "no_breach",
+      "query": {
+        "format": "standalone",
+        "breach": {
+          "query": "FROM logs-* | LIMIT 10"
+        }
+      },
+      "state_transition": {
+        "pending_count": 0,
+        "recovering_count": 0
+      },
+      "grouping": {
+        "fields": ["host.name"]
+      },
+      "enabled": true,
+      "createdBy": "elastic",
+      "updatedBy": "elastic",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "updatedAt": "2025-01-01T00:00:00.000Z"
+    }
+  ]
+}

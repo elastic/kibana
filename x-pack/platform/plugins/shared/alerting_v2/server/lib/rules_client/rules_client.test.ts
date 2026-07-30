@@ -456,7 +456,7 @@ describe('RulesClient', () => {
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
-        artifacts: [{ id: 'runbook-id', type: 'runbook', value: 'Persisted runbook' }],
+        artifacts: [{ id: 'runbook-id', type: 'runbook', data: { content: 'Persisted runbook' } }],
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({

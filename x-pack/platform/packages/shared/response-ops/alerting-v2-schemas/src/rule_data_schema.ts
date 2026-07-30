@@ -7,9 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  DEFAULT_ARTIFACT_VALUE_LIMIT,
-  ARTIFACT_VALUE_LIMITS,
-  MAX_ARTIFACT_VALUE_LIMIT,
+  DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
+  ARTIFACT_DATA_FIELD_LIMITS,
   DEFAULT_TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
@@ -345,18 +344,26 @@ const artifactSchema = z
   .object({
     id: z.string().min(1).max(256).describe('Artifact identifier.'),
     type: z.string().min(1).max(128).describe('Artifact type.'),
-    value: z.string().min(1).max(MAX_ARTIFACT_VALUE_LIMIT).describe('Artifact value.'),
+    data: z.record(z.string(), z.unknown()).describe('Structured artifact data.'),
   })
   .strict()
   .check((ctx) => {
-    const limit = ARTIFACT_VALUE_LIMITS[ctx.value.type] ?? DEFAULT_ARTIFACT_VALUE_LIMIT;
-    if (ctx.value.value.length > limit) {
-      ctx.issues.push({
-        code: 'custom',
-        path: ['value'],
-        message: `Artifact value must be at most ${limit} characters for type "${ctx.value.type}".`,
-        input: ctx.value.value,
-      });
+    const fieldLimits = ARTIFACT_DATA_FIELD_LIMITS[ctx.value.type];
+
+    for (const [field, value] of Object.entries(ctx.value.data)) {
+      if (typeof value !== 'string') {
+        continue;
+      }
+
+      const limit = fieldLimits?.[field] ?? DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
+      if (value.length > limit) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['data', field],
+          message: `Artifact data field "${field}" must be at most ${limit} characters for type "${ctx.value.type}".`,
+          input: value,
+        });
+      }
     }
   });
 

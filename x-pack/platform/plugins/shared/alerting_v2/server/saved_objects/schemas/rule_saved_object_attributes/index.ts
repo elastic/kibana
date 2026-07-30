@@ -6,8 +6,13 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { ruleSavedObjectAttributesSchema } from './v1';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV1 } from './v1';
+import { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV2 } from './v2';
 
-export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchema>;
+/** Attributes as stored by model versions 1 and 2 (artifacts carried `value: string`). */
+export type RuleSavedObjectAttributesV1 = TypeOf<typeof ruleSavedObjectAttributesSchemaV1>;
 
-export { ruleSavedObjectAttributesSchema as ruleSavedObjectAttributesSchemaV1 };
+/** Latest attributes shape, introduced by model version 3. */
+export type RuleSavedObjectAttributes = TypeOf<typeof ruleSavedObjectAttributesSchemaV2>;
+
+export { ruleSavedObjectAttributesSchemaV1, ruleSavedObjectAttributesSchemaV2 };
