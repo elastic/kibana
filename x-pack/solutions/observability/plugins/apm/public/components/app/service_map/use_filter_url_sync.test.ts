@@ -12,6 +12,7 @@ import {
   parseViewFiltersFromAppState,
   useFilterUrlSync,
 } from './use_filter_url_sync';
+import type { ConnectionFilter } from './apply_service_map_visibility';
 
 const mockGet = jest.fn();
 const mockSet = jest.fn();
@@ -169,7 +170,7 @@ describe('parseViewFiltersFromAppState', () => {
     expect(
       parseViewFiltersFromAppState({
         viewFilters: {
-          connectionFilter: ['orphaned', 'not-a-real-filter'] as unknown as string[],
+          connectionFilter: ['orphaned', 'not-a-real-filter' as ConnectionFilter],
           alertStatusFilter: ['active'],
         },
       })
@@ -184,7 +185,7 @@ describe('parseViewFiltersFromAppState', () => {
   it('returns undefined when all filter arrays are empty after validation', () => {
     expect(
       parseViewFiltersFromAppState({
-        viewFilters: { connectionFilter: ['bogus'] as unknown as string[] },
+        viewFilters: { connectionFilter: ['bogus'] as unknown as ConnectionFilter[] },
       })
     ).toBeUndefined();
   });
