@@ -4569,7 +4569,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/access-control-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin":
+"@kbn/access-control-test-plugin@link:x-pack/platform/test/spaces_access_control/plugins/access_control_test_plugin":
   version "0.0.0"
   uid ""
 
@@ -9602,10 +9602,6 @@
   uid ""
 
 "@kbn/spaces-plugin@link:x-pack/platform/plugins/shared/spaces":
-  version "0.0.0"
-  uid ""
-
-"@kbn/spaces-test-plugin@link:x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin":
   version "0.0.0"
   uid ""
 

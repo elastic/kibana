@@ -1,0 +1,341 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "047057a0ca558ca-2959065e4e09292",
+      "title": "spaces access control - feature disabled rejects creating a write-restricted object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 58,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-a93b85a60e3e56b",
+      "title": "spaces access control - feature disabled allows creating an object without access control metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 69,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-01bd8f7cf4db9bd",
+      "title": "spaces access control - feature disabled allows creating an object when there is no active user profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 77,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-3fe87b77411d099",
+      "title": "spaces access control - feature disabled allows overwriting an object by the creating user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 89,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-6a5241ebe52404e",
+      "title": "spaces access control - feature disabled allows overwriting an object by a different user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 122,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-9894f98cf7deada",
+      "title": "spaces access control - feature disabled returns error status when attempting to create write-restricted objects",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 158,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-970df48cca56856",
+      "title": "spaces access control - feature disabled allows creating objects without access control metadata",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 180,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-ae5177b7bce0b6b",
+      "title": "spaces access control - feature disabled allows creating objects when there is no active user profile",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 199,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-def567d3d24e09f",
+      "title": "spaces access control - feature disabled allows overwriting objects by the creating user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 214,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-e11c55931eefaf8",
+      "title": "spaces access control - feature disabled allows overwriting objects by a different user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 247,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-931f2460aafa006",
+      "title": "spaces access control - feature disabled allows update of an object by the creating user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 288,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-8135cd99151d83a",
+      "title": "spaces access control - feature disabled allows update of an object by a different user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 315,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-7019f950792a505",
+      "title": "spaces access control - feature disabled rejects update of an object by a user without RBAC permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 342,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-2def36e6ec58940",
+      "title": "spaces access control - feature disabled allows bulk update of objects by the creating user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 372,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-95ecdba2cc90f50",
+      "title": "spaces access control - feature disabled allows bulk update of objects by a different user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 396,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-bcb6362b0283f73",
+      "title": "spaces access control - feature disabled rejects bulk update of objects by a user without RBAC permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 426,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-a887e7c9b246851",
+      "title": "spaces access control - feature disabled allows the creating user to delete an object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 458,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-573f079c7895bde",
+      "title": "spaces access control - feature disabled allows a non-creating user with permissions to delete an object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 482,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-3cd46999d937263",
+      "title": "spaces access control - feature disabled rejects deletion of an object by a user without RBAC permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 515,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-22e3bcb390f3bcb",
+      "title": "spaces access control - feature disabled allows bulk delete of objects by the creating user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 545,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-965e62377fd5a6f",
+      "title": "spaces access control - feature disabled allows bulk delete of objects by a different user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 569,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-a0047e6ffbbca4e",
+      "title": "spaces access control - feature disabled rejects bulk delete of objects by a user without RBAC permissions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 599,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-f115339583bf9c2",
+      "title": "spaces access control - feature disabled throws when trying to update ownership of an ownable type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 631,
+        "column": 10
+      }
+    },
+    {
+      "id": "047057a0ca558ca-a1f91bb2c0510a4",
+      "title": "spaces access control - feature disabled throws when trying to update access mode of an ownable type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/spaces/test/scout_spaces_access_control_disabled/api/tests/feature_disabled.spec.ts",
+        "line": 662,
+        "column": 10
+      }
+    }
+  ]
+}

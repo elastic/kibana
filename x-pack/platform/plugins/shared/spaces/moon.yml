@@ -85,6 +85,9 @@ dependsOn:
   - '@kbn/deeplinks-workplace-ai'
   - '@kbn/core-user-profile-server'
   - '@kbn/ui-callout'
+  - '@kbn/repo-info'
+  - '@kbn/es'
+  - '@kbn/test-es-server'
 tags:
   - plugin
   - prod
@@ -98,6 +101,8 @@ fileGroups:
     - server/**/*
     - test/scout/**/*
     - test/scout_cps_local/**/*
+    - test/scout_spaces_access_control/**/*
+    - test/scout_spaces_access_control_disabled/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

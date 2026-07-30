@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+/**
+ * Repo-relative path (directory) of the shared spaces ES archive used by the
+ * `disable_legacy_url_aliases`, `get_shareable_references` and
+ * `update_objects_spaces` suites. The archive contains raw saved object documents
+ * (multi-namespace shares, `originId`s, `legacy-url-alias` docs) that cannot be
+ * produced through the saved objects HTTP APIs, so it is seeded into the existing
+ * `.kibana*` indices by the plugin-local `common/es_archive` helper.
+ */
+export const SPACES_ES_ARCHIVE =
+  'x-pack/platform/plugins/shared/spaces/test/scout/api/fixtures/es_archiver/saved_objects/spaces';
+
 export const SPACES = {
   DEFAULT: {
     spaceId: 'default',
