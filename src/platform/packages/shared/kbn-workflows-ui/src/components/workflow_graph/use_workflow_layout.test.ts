@@ -286,17 +286,17 @@ describe('useWorkflowLayout', () => {
       const { edges } = result.current;
 
       const caseEdge = edges.find(
-        (e) =>
-          e.source === 'sw' && (e.data as Record<string, unknown> | undefined)?.label === 'a'
+        (e) => e.source === 'sw' && (e.data as Record<string, unknown> | undefined)?.label === 'a'
       );
       const defaultEdge = edges.find(
         (e) =>
-          e.source === 'sw' &&
-          (e.data as Record<string, unknown> | undefined)?.label === 'default'
+          e.source === 'sw' && (e.data as Record<string, unknown> | undefined)?.label === 'default'
       );
       expect(traversedOf(caseEdge)).toBe(true);
       expect(traversedOf(defaultEdge)).toBe(false);
-      expect(traversedOf(edges.find((e) => e.source === 'on-a' && e.target === 'after'))).toBe(true);
+      expect(traversedOf(edges.find((e) => e.source === 'on-a' && e.target === 'after'))).toBe(
+        true
+      );
       const bypassId = defaultEdge!.target;
       expect(traversedOf(edges.find((e) => e.source === bypassId && e.target === 'after'))).toBe(
         false
@@ -329,8 +329,7 @@ describe('useWorkflowLayout', () => {
       );
       const defaultEdge = edges.find(
         (e) =>
-          e.source === 'sw' &&
-          (e.data as Record<string, unknown> | undefined)?.label === 'default'
+          e.source === 'sw' && (e.data as Record<string, unknown> | undefined)?.label === 'default'
       );
       expect(traversedOf(defaultEdge)).toBe(true);
       expect(traversedOf(caseEdge)).toBe(false);
