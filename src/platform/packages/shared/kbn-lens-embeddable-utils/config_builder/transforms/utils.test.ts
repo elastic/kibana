@@ -12,6 +12,8 @@ import {
   buildReferences,
   getDataSourceIndex,
   getAdHocDataViewSpec,
+  generateAdHocDataViewId,
+  getAdhocDataviews,
   addLayerColumn,
   operationFromColumn,
   buildDataSourceState,
@@ -30,6 +32,7 @@ import type {
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
+import type { APIAdHocDataView } from './columns/types';
 import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
@@ -953,5 +956,84 @@ describe('filtersAndQueryToApiFormat', () => {
     const result = filtersAndQueryToApiFormat(lensState);
 
     expect(result).toEqual({});
+  });
+});
+
+describe('generateAdHocDataViewId', () => {
+  test('form-based views differing only in name get distinct ids', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs A',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs B',
+    });
+
+    expect(idA).not.toBe(idB);
+    // Both keep the readable `index-timeField` base
+    expect(idA.startsWith('logs-*-@timestamp-')).toBe(true);
+    expect(idB.startsWith('logs-*-@timestamp-')).toBe(true);
+  });
+
+  test('identical form-based views share the same base-<hash> id', () => {
+    const idA = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+    const idB = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'Logs',
+    });
+
+    expect(idA).toBe(idB);
+  });
+
+  test('form-based views over the same index+timeField but different field settings get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutRuntimeField = generateAdHocDataViewId(base);
+    const withRuntimeField = generateAdHocDataViewId({
+      ...base,
+      fieldSettings: {
+        my_runtime_field: { type: 'keyword', script: "emit('x')" },
+      },
+    });
+
+    expect(withoutRuntimeField).not.toBe(withRuntimeField);
+  });
+
+  test('form-based views over the same index+timeField but different allowHidden get distinct ids', () => {
+    const base = {
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    };
+    const withoutAllowHidden = generateAdHocDataViewId(base);
+    const withAllowHidden = generateAdHocDataViewId({
+      ...base,
+      allowHidden: true,
+    });
+
+    expect(withoutAllowHidden).not.toBe(withAllowHidden);
+  });
+
+  test('form-based views with name undefined === name === index, get the same id', () => {
+    const noName = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+    });
+    const nameEqualsIndex = generateAdHocDataViewId({
+      index: 'logs-*',
+      timeFieldName: '@timestamp',
+      name: 'logs-*',
+    });
+
+    expect(noName).toBe(nameEqualsIndex);
   });
 });
