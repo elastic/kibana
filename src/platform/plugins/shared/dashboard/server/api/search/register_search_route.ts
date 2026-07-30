@@ -77,7 +77,7 @@ export function registerSearchRoute(
       },
     },
     async (ctx, req, res) =>
-      telemetryHandler(req, usageCounter, async () => {
+      telemetryHandler(req, { usageCounter, trackAgentic: true }, async () => {
         try {
           const {
             core: { featureFlags },

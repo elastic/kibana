@@ -20,7 +20,6 @@ import { useAgentBuilderAvailability } from '../../../agent_builder/hooks/use_ag
 import { ActionsCell } from '../../../detections/components/alert_summary/table/actions_cell';
 import { CellValue } from '../../../detections/components/alert_summary/table/render_cell';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
-import { PageScope } from '../../../data_view_manager/constants';
 import type { AdditionalTableContext } from '../../../detections/components/alert_summary/table/table';
 import {
   ACTION_COLUMN_WIDTH,
@@ -104,7 +103,7 @@ export const Table = memo(({ dataView, id, onLoaded, packages, query }: TablePro
     ]
   );
 
-  const browserFields = useBrowserFields(PageScope.alerts);
+  const browserFields = useBrowserFields(dataView);
 
   const { isAgentBuilderEnabled } = useAgentBuilderAvailability();
   const bulkAddToChatConfig = useBulkAddToChatConfig('bulk_alerts_cases');

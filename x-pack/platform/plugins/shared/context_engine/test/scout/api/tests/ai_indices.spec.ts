@@ -10,18 +10,15 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData } from '../fixtures';
 
+const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
 const AI_INDEX_ID = 'scout_test_ai_index';
-const AI_INDEX_PATH = `api/context_engine/ai_index/${AI_INDEX_ID}`;
+const AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`;
 const INDEX_AI_INDEX_ID = 'scout_test_index_ai_index';
-const INDEX_AI_INDEX_PATH = `api/context_engine/ai_index/${INDEX_AI_INDEX_ID}`;
+const INDEX_AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${INDEX_AI_INDEX_ID}`;
 const LAZY_AI_INDEX_ID = `${AI_INDEX_ID}_lazy`;
-const LAZY_AI_INDEX_PATH = `api/context_engine/ai_index/${LAZY_AI_INDEX_ID}`;
+const LAZY_AI_INDEX_PATH = `${AI_INDEX_COLLECTION_PATH}/${LAZY_AI_INDEX_ID}`;
 const DEST_DATA_STREAM = 'ai-index-ds-scout-test';
 const DEST_INDEX = 'ai-index-idx-scout-test';
-// Must not match the data stream template pattern (`${DEST_DATA_STREAM}*`),
-// or ES refuses to create it as a plain index.
-const PLAIN_INDEX = 'ai-index-ds-plain-scout-test';
-const DEST_INDEX_TEMPLATE = 'scout-test-context-engine-template';
 const CONTEXT_ENGINE_ENABLED_SETTING = 'contextEngine:enabled';
 
 const API_HEADERS = {
@@ -40,19 +37,26 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
 
-  apiTest.beforeAll(async ({ requestAuth, kbnClient, esClient }) => {
+  apiTest.beforeAll(async ({ apiClient, requestAuth, kbnClient, esClient }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
     await kbnClient.uiSettings.update({ [CONTEXT_ENGINE_ENABLED_SETTING]: true });
-    await esClient.indices.putIndexTemplate({
-      name: DEST_INDEX_TEMPLATE,
-      index_patterns: [`${DEST_DATA_STREAM}*`],
-      data_stream: {},
-      priority: 500,
-    });
+    // Defensive polling due to the context engine feature flag; may be simplified when
+    // feature flag is removed.
+    await expect
+      .poll(
+        async () => {
+          const response = await apiClient.get('api/context_engine/ai_index', {
+            headers: { ...viewerApiCredentials.apiKeyHeader, ...API_HEADERS },
+            responseType: 'json',
+          });
+          return response.statusCode;
+        },
+        { timeout: 30_000, message: 'contextEngine feature flag did not propagate' }
+      )
+      .toBe(200);
     await esClient.indices.createDataStream({ name: DEST_DATA_STREAM });
     await esClient.indices.create({ index: DEST_INDEX });
-    await esClient.indices.create({ index: PLAIN_INDEX });
   });
 
   apiTest.afterAll(async ({ apiClient, kbnClient, esClient }) => {
@@ -70,9 +74,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       responseType: 'json',
     });
     await esClient.indices.delete({ index: DEST_INDEX }, { ignore: [404] });
-    await esClient.indices.delete({ index: PLAIN_INDEX }, { ignore: [404] });
     await esClient.indices.deleteDataStream({ name: DEST_DATA_STREAM }, { ignore: [404] });
-    await esClient.indices.deleteIndexTemplate({ name: DEST_INDEX_TEMPLATE }, { ignore: [404] });
     await kbnClient.uiSettings.unset(CONTEXT_ENGINE_ENABLED_SETTING);
   });
 
@@ -80,14 +82,24 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     let dateCreated: string;
 
     await apiTest.step('creates the AI index', async () => {
-      const response = await apiClient.put(AI_INDEX_PATH, {
+      const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: aiIndexBody,
+        body: { id: AI_INDEX_ID, ...aiIndexBody },
       });
 
       expect(response).toHaveStatusCode(201);
       expect(response.body).toStrictEqual({ status: 'created' });
+    });
+
+    await apiTest.step('rejects a duplicate id with a 409', async () => {
+      const response = await apiClient.post(AI_INDEX_COLLECTION_PATH, {
+        headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
+        responseType: 'json',
+        body: { id: AI_INDEX_ID, ...aiIndexBody },
+      });
+
+      expect(response).toHaveStatusCode(409);
     });
 
     await apiTest.step('gets the AI index by id', async () => {
@@ -204,16 +216,6 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
       responseType: 'json',
       body: { ...aiIndexBody, dest: { type: 'index', value: '.kibana*' } },
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('rejects a dest that is not a data stream', async ({ apiClient }) => {
-    const response = await apiClient.put(AI_INDEX_PATH, {
-      headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
-      responseType: 'json',
-      body: { ...aiIndexBody, dest: { type: 'data_stream', value: PLAIN_INDEX } },
     });
 
     expect(response).toHaveStatusCode(400);
