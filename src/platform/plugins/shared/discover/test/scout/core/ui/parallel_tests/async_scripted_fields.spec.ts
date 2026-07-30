@@ -49,22 +49,23 @@ spaceTest.describe('search with scripted fields', { tag: '@local-stateful-classi
 
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addSavedSearch('search with warning');
-      // Dashboard panels can be slow to render with data; 60s covers the full load cycle.
-      await expect(page.testSubj.locator('searchResponseWarningsBadgeToogleButton')).toBeVisible({
-        timeout: 60_000,
-      });
+      await expect
+        .poll(() => page.testSubj.locator('searchResponseWarningsBadgeToogleButton').isVisible())
+        .toBe(true);
     }
   );
 
   spaceTest(
     'should return results without errors for a query with a valid scripted field',
-    async ({ pageObjects }) => {
+    async ({ page, pageObjects }) => {
       await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.discover.selectDataView('logstash-*');
       await pageObjects.queryBar.setQuery('php* OR *jpg OR *css*');
       await pageObjects.discover.submitQuery();
       await pageObjects.discover.waitUntilTabIsLoaded();
-      expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+      await expect(page.testSubj.locator('searchResponseWarningsEmptyPrompt')).toBeHidden();
+      await expect.poll(() => pageObjects.discover.getHitCountInt()).toBeGreaterThan(13000);
     }
   );
 });
