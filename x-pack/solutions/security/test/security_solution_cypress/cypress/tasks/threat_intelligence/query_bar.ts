@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { clickAction, openBarchartPopoverMenu } from './common';
 import {
   QUERY_BAR,
@@ -22,7 +23,10 @@ import {
   FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON,
   FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON,
   FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON,
-  FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
+  FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
+  FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE,
+  FLYOUT_TABLE,
+  CELL_ACTIONS_RENDER_CONTENT,
 } from '../../screens/threat_intelligence/indicators';
 
 /**
@@ -64,23 +68,39 @@ export const clearKQLBar = () => {
 };
 
 /**
- * Filter in value from indicators flyout block item
+ * Hover a Security cell-actions wrapper so the hover-intent popover mounts, then click
+ * the given action. Prefer the cellActions root over inner value nodes — mouseenter on
+ * HoverActionsPopover does not bubble from children reliably under Cypress realHover.
+ */
+const clickFlyoutCellAction = (cellActionsSelector: string, actionSelector: string) => {
+  recurse(
+    () => {
+      cy.get(cellActionsSelector).filter(':visible').first().should('be.visible').realHover();
+      // Short timeout so recurse can re-hover if the hover-intent popover did not mount
+      return cy.get(actionSelector, { timeout: 2000 }).filter(':visible').first();
+    },
+    ($el) => $el.is(':visible')
+  );
+
+  cy.get(actionSelector).filter(':visible').first().click();
+};
+
+/**
+ * Filter in value from indicators flyout header high-level block
  */
 export const filterInFromFlyoutBlockItem = () => {
-  clickAction(
-    FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
-    0,
+  clickFlyoutCellAction(
+    `${FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS} ${CELL_ACTIONS_RENDER_CONTENT}`,
     FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON
   );
 };
 
 /**
- * Filter out value from indicators flyout block item
+ * Filter out value from indicators flyout header high-level block
  */
 export const filterOutFromFlyoutBlockItem = () => {
-  clickAction(
-    FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM,
-    0,
+  clickFlyoutCellAction(
+    `${FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS} ${CELL_ACTIONS_RENDER_CONTENT}`,
     FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_OUT_BUTTON
   );
 };
@@ -89,36 +109,38 @@ export const filterOutFromFlyoutBlockItem = () => {
  * Filter in value from indicators flyout overview tab table
  */
 export const filterInFromFlyoutOverviewTable = () => {
-  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().realHover();
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON).click();
-};
-
-/**
- * Filter out value from indicators flyout overview tab table
- */
-export const filterOutFromFlyoutOverviewTable = () => {
-  cy.get(`[data-test-subj^="cellActions-renderContent-"]`).first().realHover();
-  cy.get(FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON).click();
-};
-
-/**
- * Filter in value from indicators flyout overview tab table
- */
-export const filterInFromFlyoutTableTab = () => {
-  clickAction(
-    '[data-test-subj^="cellActions-renderContent-"]',
-    0,
-    FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON
+  clickFlyoutCellAction(
+    `${FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE} ${CELL_ACTIONS_RENDER_CONTENT}`,
+    FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON
   );
 };
 
 /**
  * Filter out value from indicators flyout overview tab table
  */
+export const filterOutFromFlyoutOverviewTable = () => {
+  clickFlyoutCellAction(
+    `${FLYOUT_OVERVIEW_HIGHLIGHTED_FIELDS_TABLE} ${CELL_ACTIONS_RENDER_CONTENT}`,
+    FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON
+  );
+};
+
+/**
+ * Filter in value from indicators flyout table tab action column
+ */
+export const filterInFromFlyoutTableTab = () => {
+  clickFlyoutCellAction(
+    `${FLYOUT_TABLE} ${CELL_ACTIONS_RENDER_CONTENT}`,
+    FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON
+  );
+};
+
+/**
+ * Filter out value from indicators flyout table tab action column
+ */
 export const filterOutFromFlyoutTableTab = () => {
-  clickAction(
-    '[data-test-subj^="cellActions-renderContent-"]',
-    0,
+  clickFlyoutCellAction(
+    `${FLYOUT_TABLE} ${CELL_ACTIONS_RENDER_CONTENT}`,
     FLYOUT_TABLE_TAB_ROW_FILTER_OUT_BUTTON
   );
 };

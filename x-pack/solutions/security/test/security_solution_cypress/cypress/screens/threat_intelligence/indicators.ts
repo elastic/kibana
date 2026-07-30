@@ -69,6 +69,10 @@ export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjec
 );
 export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM =
   getDataTestSubjectSelector('iocHeaderBlockItem');
+export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = getDataTestSubjectSelector(
+  'tiFlyoutOverviewHighLevelBlocks'
+);
+export const CELL_ACTIONS_RENDER_CONTENT = '[data-test-subj^="cellActions-renderContent-"]';
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterIn'
 );
