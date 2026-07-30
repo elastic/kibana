@@ -6,12 +6,12 @@ description: "Best practices and guidelines for designing consistent, user-frien
 # Guidelines for HTTP API design in Kibana
 
 :::{warning} Work in progress
-This guidance is under review. If you have a question or intend to apply it to your use-case please reach out to the Kibana Core team first.
+This guidance is under review and may still change. If you have a question about applying it to your use case, [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana repository.
 :::
 
 Kibana's public HTTP APIs are the focus of this document. See the section about [Internal vs Public APIs](#internal-vs-public-apis) for more details.
 
-[Click here](#structure-and-conventions) to skip to the structure and conventions guides.
+[Skip to the structure and conventions guides](#structure-and-conventions).
 
 ## Design principles
 
@@ -566,7 +566,7 @@ And either returns a task ID for tracking long running executions or a response 
 :::{warning} Bulk operations against Elasticsearch are not atomic
 Bulk operations are not atomic. If an operation fails, the previous operations will not be rolled back automatically.
 
-  Bulk operations add complexity, ensure that your use case merits the added complexity. Reach out to the Kibana Core team for more guidance.
+  Bulk operations add complexity, ensure that your use case merits the added complexity.
 :::
 
 If you are considering offering this API consider impacts on [IaC use cases](./guidelines-for-terraform-friendly-http-apis.md).
@@ -585,11 +585,9 @@ Carefully choose the log level of any logs you emit. `info` level logs can gener
 ```
 :::
 
-For questions about APM and telemetry please reach out to the Core team.
-
 #### Telemetry
-###LG TODO check in on https://github.com/elastic/kibana/issues/112291#issuecomment-4238886978
-Every team should be collecting telemetry metrics on it's public API usage. This will be important for knowing when it's safe to make breaking changes. The Core team will be looking into ways to make this easier and an automatic part of registration (see [#112291](https://github.com/elastic/kibana/issues/112291)).
+
+Every team should be collecting telemetry metrics on it's public API usage. This will be important for knowing when it's safe to make breaking changes. There is ongoing work to make this easier and an automatic part of registration (see [#112291](https://github.com/elastic/kibana/issues/112291)).
 
 #### APM
 
@@ -608,8 +606,6 @@ Carefully consider the information you return from or log in your API handler, w
 :::
 
 Assigning specific privilege requirements to your API will surface them in the code-generated OpenAPI spec. See the [documentation section](#documentation).
-
-_**If you have any hesitation or questions please reach out to the Kibana security team!**_
 
 ### Performance
 
@@ -635,25 +631,25 @@ Alternatively, use 2 numbers in milliseconds or [ISO 8601](https://en.wikipedia.
 
 **Public HTTP APIs must have reference documentation**
 
-See our current reference documentation [here](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
+See our current reference documentation for [Kibana](https://www.elastic.co/docs/api/doc/kibana/). This is compiled from our OpenAPI spec.
 
 See [this tutorial](../../tutorials/generating-oas-for-http-apis.md) about the code-first approach to generating OpenAPI spec available in Kibana.
 
-Every public API should be documented inside the [docs/api](https://github.com/elastic/kibana/tree/main/docs/api) folder in asciidoc (this content will eventually be migrated to mdx to support the new docs system). If a public REST API is undocumented, you should either document it, or make it internal.
+If a public REST API is undocumented, you should either document it, or make it internal.
 
 ### Release tags
 
-Every public API should have a release tag specified at the top of its documentation page. Release tags are not applicable to internal APIs, as we make no guarantees on those.
+Every public API should declare its lifecycle stage. Release tags are not applicable to internal APIs, as we make no guarantees on those.
 
-| Type | Description | Documentation | Asciidoc Tag |
-| -----| ------------| ------------- | ------------ |
-| Undocumented | Every public API should be documented, but if it isn't, we make no guarantees about it. These need to be eliminated and should become internal or documented. | | |
-| Experimental | A public API that may break or be removed at any time. | experimental[] | |
-| Technical Preview | A public API that we make a best effort not to break or remove. However, there are no guarantees. | tech_preview[] | |
-| Stable | No breaking changes outside of a Major | stable[] | |
-| Deprecated | Do not use, will be removed. | deprecated[] | |
+| Type | Description | Route declaration |
+| -----| ------------| ----------------- |
+| Undocumented | Every public API should be documented, but if it isn't, we make no guarantees about it. These need to be eliminated and should become internal or documented. | |
+| Experimental | A public API that may break or be removed at any time. | `availability: { stability: 'experimental' }` |
+| Technical Preview | A public API that we make a best effort not to break or remove. However, there are no guarantees. | `availability: { stability: 'tech_preview' }` |
+| Stable | No breaking changes outside of a Major | `availability: { stability: 'stable' }` |
+| Deprecated | Do not use, will be removed. | `deprecated: true` |
 
-Every public API should have a release tag specified using the appropriate documentation release tag above. If you do this, the docs system will provide a pop up explaining the conditions. If an API is not marked, it should be considered experimental.
+Declare the stage in your route's options, together with the version it was introduced in, for example `availability: { since: '9.0.0', stability: 'tech_preview' }`. It is surfaced in the generated OpenAPI spec, and the docs system uses it to explain the conditions that apply to the endpoint. If an API is not marked, it should be considered experimental.
 
 ## Versioning
 
@@ -666,7 +662,7 @@ curl -v -uelastic:changeme 'http://localhost:5601/api/synthetics/monitors' \
 Kibana's public HTTP APIs in our Serverless offering are versioned with the entire Elastic organization using date-based versioning. The date indicates the last breaking change. For example: version `2023-10-31` is saying "the last breaking change was at the end of October 2023".
 
 :::{warning} New public date versions will be very sparse
-Do not build your public HTTP APIs with the idea you will be able to change them quickly using versions! Due to the MASSIVE surface area, new date string versions are not introduced lightly and must go through rigorous review and justification.
+Do not build your public HTTP APIs with the idea you will be able to change them quickly using versions! Due to the size of the surface area, new date string versions are not introduced lightly and must go through rigorous review and justification.
 :::
 
 :::{note} What about Kibana public APIs that are not explicitly versioned?
@@ -715,4 +711,4 @@ And validation should be super lax `schema.object({}, { unknowns: 'allow' })`.
 
 Between refreshing state and applying changes, there’s a gap where someone could modify your API. Generally it's ok to take the approach of last-write-wins.
 
-If you have to consider concurrency control, support mechanisms like ETags and checksums, and the \`version\` property on saved objects.
+If you have to consider concurrency control, support mechanisms like ETags and checksums, and the `version` property on saved objects.

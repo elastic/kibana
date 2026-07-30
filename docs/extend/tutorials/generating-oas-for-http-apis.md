@@ -12,7 +12,7 @@ If your route declares `access: 'public'` you **must** provide up-to-date OpenAP
 :::{warning} Designing good code-first APIs
 Code-first API schemas must be designed carefully to produce clear OpenAPI 3.0 output. Prefer simple `@kbn/config-schema` types and keep request/response shapes narrow and explicit. For more information on how to design your API for OAS, see [HTTP API Design](../contributing/api-design/guidelines-for-http-api-design-in-kibana.md).
 
-  Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See <a href="#oas-compatibility-kbn-config-schema-types">types and patterns that do not map cleanly to OAS 3.0</a>.
+  Complex runtime-centric schemas can validate correctly but still generate confusing, lossy, or incomplete OAS. See [types and patterns that do not map cleanly to OAS 3.0](#oas-compatibility-kbn-config-schema-types).
 
   Always make sure to preview the OAS you generated before merging it to `main`, run `make help` in `/oas_docs` for preview commands.
 :::
@@ -50,8 +50,7 @@ Other useful query parameters for filtering are:
  * `pluginId` - get the OAS for a specific plugin, for example: `@kbn/data-views-plugin`
  * `access` - filter for specific access levels: `public` or `internal` are supported
 
-### Some good practices to consider
-<a id="oas-compatibility-kbn-config-schema-types"></a>
+### Some good practices to consider [oas-compatibility-kbn-config-schema-types]
 
 Use this section as a practical checklist when authoring public APIs.
 
@@ -302,7 +301,7 @@ x-codeSamples:
 
 #### 3. Generating OAS
 
-See <a href="#how-do-i-see-my-http-apis-oas">this section</a> about viewing your HTTP APIs OAS.
+See [How do I see my HTTP API's OAS?](#how-do-i-see-my-http-apis-oas) for how to view the OAS generated for your route.
 
 #### 4. Iterating on OAS
 
@@ -359,7 +358,7 @@ OAS for public routes are written to the Kibana repo as a snapshot that will ult
 :::{warning} Under construction
 At the time of writing we only capture OAS for a subset of Kibana's HTTP APIs to give teams time to check and improve the quality of generated OAS.
 
-  If you would like OAS for your endpoints to be included in the snapshot, **please reach out to the Kibana Core team** or follow the instructions below.
+  If you would like OAS for your endpoints to be included in the snapshot, follow the instructions below.
 :::
 
 To publish OAS to our docs site create a pull request updating [this command](https://github.com/elastic/kibana/blob/970e9fe4a3c29df81ccff6761d4986d316338398/.buildkite/scripts/steps/checks/capture_oas_snapshot.sh#L11) to include your HTTP API path.
@@ -378,7 +377,7 @@ If you would like to preview your docs before merging, you can do the following:
 #### What about runtime validation libary X?
 Teams have adopted different runtime validation libraries for their HTTP APIs. Kibana core does not intend to support all runtime validation libraries.
 
-Reach out to **the Kibana Core Team** with questions, concerns or issues you may be facing with `@kbn/config-schema` and we will help you find a solution.
+If you run into problems with `@kbn/config-schema`, [open an issue](https://github.com/elastic/kibana/issues/new/choose) in the Kibana repository so it can be addressed.
 
 #### What about internal HTTP APIs?
 It's possible to generate OpenAPI specification for `access: 'internal'` routes but it is not required. The benefit will largely be for your team's internal reference and for other teams to discover your APIs. If you follow the practices outlined in this tutorial it should be simple to generate OAS for internal routes as well.
