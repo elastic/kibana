@@ -26,10 +26,9 @@ export class EntityStorePreferencesClient {
     private readonly logger: Logger
   ) {}
 
-  async get(): Promise<EntityStorePreferences & { isExplicitlySet: boolean }> {
+  async get(): Promise<EntityStorePreferences> {
     const response = await this.findSO();
-    const preferences = EntityStorePreferences.parse(response.saved_objects[0]?.attributes ?? {});
-    return { ...preferences, isExplicitlySet: response.total > 0 };
+    return EntityStorePreferences.parse(response.saved_objects[0]?.attributes ?? {});
   }
 
   async update(preferences: Partial<EntityStorePreferences>): Promise<void> {

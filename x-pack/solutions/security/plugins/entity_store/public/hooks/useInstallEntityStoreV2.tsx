@@ -43,23 +43,23 @@ const initEntityMaintainersRequest: HttpFetchOptionsWithPath = {
   query: { apiVersion: '2' },
 };
 
-const getPreferencesRequest: HttpFetchOptionsWithPath = {
-  path: ENTITY_STORE_ROUTES.internal.PREFERENCES,
-  query: { apiVersion: '2' },
-};
-
 const getPrivilegesRequest: HttpFetchOptionsWithPath = {
   path: ENTITY_STORE_ROUTES.internal.CHECK_PRIVILEGES,
   query: { apiVersion: '2' },
 };
 
-// Detects whether the legacy v1 Entity Store was installed in this space by
-// looking up the legacy `entity-engine-status` saved object. Used to decide
-// whether to auto-install v2 in non-default spaces (only for users who had v1).
+// Detects whether the legacy v1 Entity Store was installed and running in this
+// space by looking up the legacy `entity-engine-status` saved object. Excludes
+// engines with status `stopped` — a user who explicitly stopped v1 should not
+// be treated as a migration candidate for v2 auto-install.
 export const isEntityStoreV1Installed = async (http: HttpSetup): Promise<boolean> => {
   const response = await http.fetch<{ total: number }>(SAVED_OBJECTS_FIND_PATH, {
     method: 'GET',
-    query: { type: LEGACY_ENTITY_ENGINE_SO_TYPE, per_page: 0 },
+    query: {
+      type: LEGACY_ENTITY_ENGINE_SO_TYPE,
+      per_page: 0,
+      filter: `NOT ${LEGACY_ENTITY_ENGINE_SO_TYPE}.attributes.status:stopped`,
+    },
   });
   return response.total > 0;
 };
@@ -97,15 +97,8 @@ export const useInstallEntityStoreV2 = (services: Services) => {
 
         if (!(await hasEntityStoreInstallPrivileges(services.http))) return;
 
-        const { autoInstall, isExplicitlySet } = await services.http.get<{
-          autoInstall: boolean;
-          isExplicitlySet: boolean;
-        }>(getPreferencesRequest);
-
-        // Block install when:
-        // - No v1 history: require explicit opt-in (autoInstall defaults to false for new users)
-        // - V1 history exists but user explicitly opted out (stop/uninstall written autoInstall: false)
-        if (!autoInstall && (!hadV1 || isExplicitlySet)) return;
+        // Only auto-install for users migrating from v1. Fresh users must opt in explicitly.
+        if (!hadV1) return;
 
         // Entity store not installed → install entity store (init entity maintainers is already done by the install API).
         await services.http.post(installAllEntitiesRequest);
