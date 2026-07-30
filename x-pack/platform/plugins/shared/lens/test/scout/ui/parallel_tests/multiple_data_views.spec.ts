@@ -6,7 +6,7 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { addDataLayer, enableElasticChartDebug, openEmptyLensEditor, testData } from '../fixtures';
 
@@ -16,7 +16,7 @@ function getNonEmptyLineSeriesCount(state: DebugState): number {
   return state.lines?.filter((series) => series.points.length > 0).length ?? 0;
 }
 
-spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-classic' }, () => {
   // Prefer API-created DVs over the kbn archive: the archive uses saved-object id
   // `long-window-logstash-*`, and the unencoded `*` in data-view URLs 404s under CI load.
   let longWindowDataViewId: string | undefined;

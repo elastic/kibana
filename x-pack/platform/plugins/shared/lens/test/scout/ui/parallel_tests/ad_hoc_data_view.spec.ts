@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   completeLensCsvExport,
@@ -30,7 +30,7 @@ function getDiscoverDataViewIdFromUrl(url: string): string {
   return matches[0] ?? '';
 }
 
-spaceTest.describe('Lens ad hoc data view', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens ad hoc data view', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.uiSettings.set({
       defaultIndex: testData.DATA_VIEW_ID.LOGSTASH,
