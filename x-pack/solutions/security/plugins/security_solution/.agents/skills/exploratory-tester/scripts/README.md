@@ -11,6 +11,12 @@ behind a `window.__et` bridge, so a flow can inject it once (and again after
 each `browser_navigate`) instead of pasting all three scripts at every
 checklist step. See `__tests__/` below for how it's generated and verified.
 
+`action-scoped-collector.mjs` is an experimental, **shadow-only** alternative
+network/console classifier (`collector_mode: shadow`, default `legacy` —
+never drives findings). See `action-scoped-collector.md` for the design and
+`action-scoped-collector-spike.md` for the one-time manual capability check
+required before enabling it in any real session.
+
 ## Running the Python tests
 
 ```bash
@@ -81,9 +87,92 @@ inside a normal `yarn kbn bootstrap`'d checkout.
     generated file wasn't regenerated to match.
   - **Lifecycle** — the bridge-missing/fallback condition, reinjection
     after a simulated navigation, and idempotency of redundant reinjection,
-    matching the contract `../phases/2-explore.md` depends on.
+    matching the contract `../phases/2-flow-core.md` depends on.
 - `fixtures/` — DOM/console/network fixtures shared by all of the above.
 
 This suite is also not part of Kibana CI (same reasoning as the Python
 suite above). Run it locally before sending a change that touches any
 detector script or `inject-detectors.js`.
+
+## `action-scoped-collector.mjs` and its test suite
+
+```bash
+cd x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts
+node __tests__/action-scoped-collector.test.mjs
+```
+
+Pure reducer, no browser dependency — `reduceAction(events, priorState)`
+classifies pre-collected `{network, console, dom}` events (see the module's
+own header comment for the exact shape) into the same
+`{level1, level2, level3, suppressed}` convention the other detectors use,
+plus a `state` object to carry cumulative history (e.g. a pending request
+that's still pending several checklist steps later) between calls in the
+same flow. Also runnable as a CLI (`node action-scoped-collector.mjs
+<events.json> [<prior-state.json>]`) — `phases/2-flow-core.md` invokes it
+this way in shadow mode.
+
+The actual event collection happens elsewhere: Playwright-side, inside a
+`browser_run_code_unsafe` call, because that sandbox has no `require`/`import`
+and can't execute this module directly. See `action-scoped-collector.md` for
+that bridge script, and `action-scoped-collector-spike.md` for the manual,
+one-time verification that the bridge's core assumption (listeners installed
+in one tool call are still there in a later, separate one) actually holds
+against your MCP setup — required reading before ever setting
+`collector_mode: shadow`.
+
+`action-scoped-collector.test.mjs` covers: silent 5xx with no matching
+console error (and that an *abandoned* 5xx — headers arrived, then torn down
+by navigation — is never double-reported as both `request_abandoned_by_navigation`
+and `silent_server_error`), pending-vs-stuck-vs-abandoned-by-navigation
+classification (including settle-then-repend and same-drain settle+repend,
+both disambiguated by the bridge-assigned `id` — see the reducer's own
+header comment), a request whose headers arrived but whose body is still
+streaming (must read as pending, not settled), a same-URL retry right after
+an abandoned (never-truly-settled) attempt not being misread as a
+duplicate/retry/repeat, meaningfully different query strings never being
+grouped as duplicates, concurrent duplicate calls vs. an intentional
+retry-after-failure vs. the same call repeated far apart, known-noise
+(polling) suppression that still lets a genuinely failing polling endpoint
+through, deterministic spinner-timing escalation, URL redaction (including a
+parity check against the bridge doc's own inline copy of the same logic, a
+malformed-encoding fixture, a hash-fragment case, the full credential-shaped
+param-name list, and the per-value hashed placeholder that keeps different
+secret values from collapsing into one signature), a duplicate-window check
+against total span rather than only adjacent gaps, and a CLI-vs-module
+classification round trip.
+
+```bash
+node __tests__/action-scoped-collector-bridge.test.mjs
+```
+
+The bridge snippets in `action-scoped-collector.md` (Install/Drain) only ever
+run inside a live `browser_run_code_unsafe` VM sandbox — no prior test here
+executed that code at all, only the reducer it feeds. Three separate reviews
+of this feature each found a real bug living exclusively in that
+never-executed bridge logic. `action-scoped-collector-bridge.test.mjs`
+extracts the actual Install/Drain/Uninstall snippets straight out of the doc
+(never a hand-copied duplicate) and runs them against a fake, `EventEmitter`-
+based Playwright `page`/`Request`/`Response`/console-message stand-in,
+covering: idempotent listener attachment vs. non-idempotent per-flow state
+reset, `response` (headers) vs. `requestfinished` (true completion) — a
+stalled body must still read as pending after headers arrive —
+navigation-abandonment scoped to the specific frame that navigated (an
+unrelated iframe's request is untouched by a main-frame nav, and a child
+frame's own navigation abandons only its own requests), a same-document
+(`history.pushState()`) navigation — which Playwright reports via
+`framenavigated` exactly like a real one — never abandoning a still-running
+request (only a navigation preceded by an actual `isNavigationRequest()`
+request does), a cancelled/superseded navigation request never poisoning a
+*later* same-document navigation on the same frame — within one flow or
+across a flow boundary — into wrongly abandoning something, the navigating
+request itself (and its redirect hops) never being abandoned by the very
+navigation it drives even when its own body is still streaming past commit,
+`request.frame()` throwing (Service Worker requests, and navigation
+requests issued before their frame exists — both documented Playwright
+behavior) never aborting that request's own buffering or wrongly scoping it
+to any frame's navigation, console-text redaction including per-value
+differentiation, Uninstall removing exactly the collector's own six
+listeners (never an unrelated listener sharing the same event) and clearing
+state so a later install() re-attaches cleanly, and a second flow's
+install() call not inheriting a previous flow's leftover open request or
+console text.
