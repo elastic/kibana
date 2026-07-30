@@ -43,18 +43,6 @@ const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/data-context-sources-conn
 const TOC_FILE = Path.resolve(REPO_ROOT, 'docs/reference/toc.yml');
 const TOC_SECTION_FILE = 'connectors-kibana/data-context-sources-connectors.md';
 
-const ULTIMATE_PRIORITY_RULES_COMMENT = `
-####
-## These rules are always last so they take ultimate priority over everything else
-####
-`;
-const GENERATED_END = `
-####
-## Everything below this line overrides the default assignments for each package.
-## Items lower in the file have higher precedence:
-##  https://help.github.com/articles/about-codeowners/
-####
-`;
 
 export const ConnectorCommand: GenerateCommand = {
   name: 'connector',
