@@ -372,7 +372,7 @@ describe('initializeESQLControlManager', () => {
       const callArgs = mock.mock.calls[0][0];
       expect(callArgs.signal.aborted).toBe(false);
 
-      manager.cancelRequests();
+      manager.api.cancelRequests();
 
       expect(callArgs.signal.aborted).toBe(true);
     });
