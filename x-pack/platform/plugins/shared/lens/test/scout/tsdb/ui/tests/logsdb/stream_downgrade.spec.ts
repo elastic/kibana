@@ -140,86 +140,56 @@ const runScenario = async (
       return chartBars;
     });
 
-  const annotationVisible =
-    await test.step('visualize an annotation layer from a LogsDB stream', async () => {
-      await pageObjects.lens.workspace.openFullEditor();
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: 'utc_time',
-      });
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'min',
-        field: 'bytes_counter',
-      });
-      await pageObjects.lens.layers.createLayer('annotations');
-
-      const layerCount = await pageObjects.lens.layers.getLayerCount();
-      expect(layerCount).toBe(2);
-
-      await pageObjects.lens.layers.ensureLayerTabIsActive(1);
-      const triggerText = await pageObjects.lens.dimensions.getDimensionTriggerText(
-        'lnsXY_xAnnotationsPanel'
-      );
-      expect(triggerText).toBe('Event');
-
-      await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
-      await page.testSubj.click('lnsXY_annotation_query');
-      await pageObjects.lens.style.configureQueryAnnotation({
-        queryString: 'request: *',
-        timeField: '@timestamp',
-        textDecoration: { type: 'name' },
-        extraFields: ['request', 'utc_time'],
-      });
-      await pageObjects.lens.closeDimensionEditor();
-
-      // Multiple annotation icons may render on the chart; check that at least one exists.
-      const annotationCountTs = await page.testSubj.locator('xyVisGroupedAnnotationIcon').count();
-
-      await pageObjects.lens.layers.removeLayer(1);
-      return annotationCountTs > 0;
+  const checkAnnotationLayer = async (
+    timeField: string,
+    extraFields: string[]
+  ): Promise<boolean> => {
+    await pageObjects.lens.workspace.openFullEditor();
+    await pageObjects.lens.configureDimension({
+      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+      operation: 'date_histogram',
+      field: 'utc_time',
     });
+    await pageObjects.lens.configureDimension({
+      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+      operation: 'min',
+      field: 'bytes_counter',
+    });
+    await pageObjects.lens.layers.createLayer('annotations');
+
+    const layerCount = await pageObjects.lens.layers.getLayerCount();
+    expect(layerCount).toBe(2);
+
+    await pageObjects.lens.layers.ensureLayerTabIsActive(1);
+    const triggerText = await pageObjects.lens.dimensions.getDimensionTriggerText(
+      'lnsXY_xAnnotationsPanel'
+    );
+    expect(triggerText).toBe('Event');
+
+    await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
+    await page.testSubj.click('lnsXY_annotation_query');
+    await pageObjects.lens.style.configureQueryAnnotation({
+      queryString: 'request: *',
+      timeField,
+      textDecoration: { type: 'name' },
+      extraFields,
+    });
+    await pageObjects.lens.closeDimensionEditor();
+
+    // Multiple annotation icons may render on the chart; check that at least one exists.
+    const annotationCount = await page.testSubj.locator('xyVisGroupedAnnotationIcon').count();
+
+    await pageObjects.lens.layers.removeLayer(1);
+    return annotationCount > 0;
+  };
+
+  const annotationVisible =
+    await test.step('visualize an annotation layer from a LogsDB stream', async () =>
+      checkAnnotationLayer('@timestamp', ['request', 'utc_time']));
 
   const annotationAltTimeFieldVisible =
-    await test.step('visualize an annotation layer using another time field', async () => {
-      await pageObjects.lens.workspace.openFullEditor();
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-        operation: 'date_histogram',
-        field: 'utc_time',
-      });
-      await pageObjects.lens.configureDimension({
-        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-        operation: 'min',
-        field: 'bytes_counter',
-      });
-      await pageObjects.lens.layers.createLayer('annotations');
-
-      const layerCount = await pageObjects.lens.layers.getLayerCount();
-      expect(layerCount).toBe(2);
-
-      await pageObjects.lens.layers.ensureLayerTabIsActive(1);
-      const triggerText = await pageObjects.lens.dimensions.getDimensionTriggerText(
-        'lnsXY_xAnnotationsPanel'
-      );
-      expect(triggerText).toBe('Event');
-
-      await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
-      await page.testSubj.click('lnsXY_annotation_query');
-      await pageObjects.lens.style.configureQueryAnnotation({
-        queryString: 'request: *',
-        timeField: 'utc_time',
-        textDecoration: { type: 'name' },
-        extraFields: ['request', '@timestamp'],
-      });
-      await pageObjects.lens.closeDimensionEditor();
-
-      const annotationCountUtc = await page.testSubj.locator('xyVisGroupedAnnotationIcon').count();
-
-      await pageObjects.lens.layers.removeLayer(1);
-      return annotationCountUtc > 0;
-    });
+    await test.step('visualize an annotation layer using another time field', async () =>
+      checkAnnotationLayer('utc_time', ['request', '@timestamp']));
 
   await test.step('visualize ES|QL queries based on a LogsDB stream', async () => {
     await page.gotoApp('discover');
