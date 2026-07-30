@@ -189,7 +189,7 @@ describe('Datadog', () => {
   });
 
   describe('muteMonitor / unmuteMonitor actions', () => {
-    it('should POST mute with scope and end in the request body', async () => {
+    it('should POST mute with scope and end as query params', async () => {
       mockClient.post.mockResolvedValue({ data: { id: 7, overall_state: 'Alert' } });
 
       await Datadog.actions.muteMonitor.handler(mockContext, {
@@ -200,11 +200,12 @@ describe('Datadog', () => {
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://api.datadoghq.com/api/v1/monitor/7/mute',
-        { scope: 'host:web-01', end: 1700000000 }
+        undefined,
+        { params: { scope: 'host:web-01', end: 1700000000 } }
       );
     });
 
-    it('should POST unmute with scope and all_scopes in the request body', async () => {
+    it('should POST unmute with scope and all_scopes query params', async () => {
       mockClient.post.mockResolvedValue({ data: { id: 7 } });
 
       await Datadog.actions.unmuteMonitor.handler(mockContext, {
@@ -214,7 +215,8 @@ describe('Datadog', () => {
 
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://api.datadoghq.com/api/v1/monitor/7/unmute',
-        { scope: undefined, all_scopes: true }
+        undefined,
+        { params: { scope: undefined, all_scopes: true } }
       );
     });
   });
