@@ -832,7 +832,7 @@ describe('runRelationshipMaintainer', () => {
   });
 
   describe('transport options', () => {
-    it('does not pass an AbortSignal to the ES client when no signal is provided', async () => {
+    it('passes the default requestTimeout (DEFAULT_ESQL_TIMEOUT_MS) to both search and esql.query when no signal is provided', async () => {
       const { esClient, search, esql } = makeEsClient();
       const { crudClient, entityMetadataClient } = makeClients();
       search.mockResolvedValueOnce(
@@ -847,8 +847,10 @@ describe('runRelationshipMaintainer', () => {
         entityMetadataClient,
         integrations: [baseConfig],
       });
-      expect(search.mock.calls[0][1]).toBeUndefined();
-      expect(esql.mock.calls[0][1]).toBeUndefined();
+      expect((search.mock.calls[0][1] as { requestTimeout: number }).requestTimeout).toBe(60_000);
+      expect((esql.mock.calls[0][1] as { requestTimeout: number }).requestTimeout).toBe(60_000);
+      expect((search.mock.calls[0][1] as { signal?: AbortSignal }).signal).toBeUndefined();
+      expect((esql.mock.calls[0][1] as { signal?: AbortSignal }).signal).toBeUndefined();
     });
 
     it('passes the AbortSignal to both search and esql.query when signal is provided', async () => {
@@ -870,6 +872,57 @@ describe('runRelationshipMaintainer', () => {
       });
       expect((search.mock.calls[0][1] as { signal: AbortSignal }).signal).toBe(ac.signal);
       expect((esql.mock.calls[0][1] as { signal: AbortSignal }).signal).toBe(ac.signal);
+    });
+  });
+
+  describe('requestTimeoutMs', () => {
+    it('passes requestTimeout to esClient.search when requestTimeoutMs is set', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      search.mockResolvedValueOnce({ aggregations: { users: { buckets: [] } } });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+        requestTimeoutMs: 90_000,
+      });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ requestTimeout: 90_000 })
+      );
+    });
+
+    it('passes requestTimeout to esClient.esql.query when requestTimeoutMs is set', async () => {
+      const { esClient, search, esql } = makeEsClient();
+      const { crudClient, entityMetadataClient } = makeClients();
+      search.mockResolvedValueOnce({
+        aggregations: {
+          users: {
+            buckets: [{ key: { 'user.name': 'alice' }, doc_count: 1 }],
+          },
+        },
+      });
+      esql.mockResolvedValueOnce({ columns: [], values: [] });
+
+      await runRelationshipMaintainer({
+        esClient,
+        logger: loggerMock.create(),
+        namespace: 'default',
+        crudClient,
+        entityMetadataClient,
+        integrations: [baseConfig],
+        requestTimeoutMs: 90_000,
+      });
+
+      expect(esql).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ requestTimeout: 90_000 })
+      );
     });
   });
 

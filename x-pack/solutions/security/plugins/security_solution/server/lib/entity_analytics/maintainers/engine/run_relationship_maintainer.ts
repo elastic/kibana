@@ -31,7 +31,7 @@ import {
   writeRelationshipMetadatas,
   type WriteRelationshipMetadatasResult,
 } from './write_relationship_metadatas';
-import { LOOKBACK_WINDOW, MAX_ITERATIONS } from './constants';
+import { LOOKBACK_WINDOW, MAX_ITERATIONS, DEFAULT_ESQL_TIMEOUT_MS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 import type {
   RelationshipMaintainerSourceResult,
@@ -79,7 +79,7 @@ async function fetchActorPage(
   logger: Logger,
   namespace: string,
   afterKey: CompositeAfterKey | undefined,
-  transportOpts: { signal: AbortSignal } | undefined,
+  transportOpts: { signal?: AbortSignal; requestTimeout?: number } | undefined,
   signal: AbortSignal | undefined
 ): Promise<{ buckets: CompositeBucket[]; newAfterKey: CompositeAfterKey | undefined } | null> {
   try {
@@ -113,7 +113,7 @@ async function fetchTargetsForActors(
   logger: Logger,
   namespace: string,
   buckets: CompositeBucket[],
-  transportOpts: { signal: AbortSignal } | undefined,
+  transportOpts: { signal?: AbortSignal; requestTimeout?: number } | undefined,
   signal: AbortSignal | undefined
 ): Promise<EsqlQueryResult | null> {
   const esqlFilter = {
@@ -173,7 +173,8 @@ async function runIntegration(
   crudClient: EntityUpdateClient,
   entityMetadataClient: EntityMetadataClient,
   signal: AbortSignal | undefined,
-  metadataContext: { scanId: string; observedAt: string }
+  metadataContext: { scanId: string; observedAt: string },
+  requestTimeoutMs?: number
 ): Promise<{
   buckets: number;
   recordsCount: number;
@@ -188,7 +189,11 @@ async function runIntegration(
   let truncated = false;
   let totalBuckets = 0;
   const records: EntityRelationshipRecord[] = [];
-  const transportOpts = signal ? { signal } : undefined;
+  const timeoutMs = requestTimeoutMs ?? DEFAULT_ESQL_TIMEOUT_MS;
+  const transportOpts: { signal?: AbortSignal; requestTimeout?: number } = {
+    requestTimeout: timeoutMs,
+  };
+  if (signal) transportOpts.signal = signal;
   let outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error' = 'producing';
 
   try {
@@ -355,6 +360,7 @@ export const runRelationshipMaintainer = async ({
   entityMetadataClient,
   integrations,
   signal,
+  requestTimeoutMs,
   telemetryCollector,
 }: {
   esClient: ElasticsearchClient;
@@ -365,6 +371,8 @@ export const runRelationshipMaintainer = async ({
   entityMetadataClient: EntityMetadataClient;
   integrations: RelationshipIntegrationConfig[];
   signal?: AbortSignal;
+  /** Per-request timeout in milliseconds for ES client calls (search + esql.query). Defaults to DEFAULT_ESQL_TIMEOUT_MS (60s). */
+  requestTimeoutMs?: number;
   /**
    * Optional. Engine populates one entry per integration into `sources` and
    * accumulates per-rel-type applied counts in `relationshipTypeApplied` for callers
@@ -447,7 +455,8 @@ export const runRelationshipMaintainer = async ({
       crudClient,
       entityMetadataClient,
       signal,
-      metadataContext
+      metadataContext,
+      requestTimeoutMs
     );
 
     totalIterations += iterations;
