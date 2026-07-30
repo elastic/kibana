@@ -131,7 +131,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a `data_stream.type` variable to the simplified package policy API so input-only packages can route data to a different index prefix (for example, `logs-*` instead of `metrics-*`) [#269895]({{kib-pull}}269895).
 
 **Data management**:
-* Add **ES|QL Data Federation** in {{stack-manage-app}} as a technical preview, so you can create and manage external data sources and datasets for {{esql}} queries [#265681]({{kib-pull}}265681).
+* Add [**ES|QL Data Federation**](elasticsearch://reference/query-languages/esql/esql-data-federation.md) management UI in {{stack-manage-app}}. This feature enables you to create and manage external data sources (Amazon S3 initially) and query datasets using {{esql}} [#265681]({{kib-pull}}265681).
+  * This is an experimental feature and is not enabled by default. To try it out, set `esql.federation.enabled: true` in your Elasticsearch configuration and `xpack.dataFederation.enabled: true` in your Kibana configuration.
 * Add hot, frozen, and delete phases to **Data lifecycle** in the index and component template wizards, and add a unified editor for successful and failed data lifecycles in data stream details [#273960]({{kib-pull}}273960) [#273965]({{kib-pull}}273965) [#275740]({{kib-pull}}275740).
 * Add `min_age`, `min_docs`, `min_size`, `min_primary_shard_docs`, and `min_primary_shard_size` rollover conditions to **Index Lifecycle Management** hot-phase actions [#270398]({{kib-pull}}270398).
 * Add **Force merge index** and **Force merge on clone** settings for searchable snapshots in the **Index Lifecycle Management** policy editor for hot, cold, and frozen phases [#264698]({{kib-pull}}264698).
