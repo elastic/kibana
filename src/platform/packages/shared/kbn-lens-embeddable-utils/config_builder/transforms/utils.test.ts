@@ -13,7 +13,6 @@ import {
   getDataSourceIndex,
   getAdHocDataViewSpec,
   generateAdHocDataViewId,
-  getAdhocDataviews,
   addLayerColumn,
   operationFromColumn,
   buildDataSourceState,
@@ -32,7 +31,6 @@ import type {
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { APIAdHocDataView } from './columns/types';
 import type { LensApiConfig, MetricConfig } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
