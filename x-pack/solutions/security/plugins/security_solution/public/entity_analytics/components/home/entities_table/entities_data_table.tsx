@@ -392,7 +392,7 @@ export const EntitiesDataTable = ({
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
-      filterManager && dataView
+      config.supportsFieldFiltering !== false && filterManager && dataView
         ? (clickedField, values, operation) => {
             const newFilters = generateFilters(
               filterManager,
@@ -406,7 +406,7 @@ export const EntitiesDataTable = ({
             });
           }
         : undefined,
-    [dataView, filterManager, filters, setUrlQuery]
+    [config.supportsFieldFiltering, dataView, filterManager, filters, setUrlQuery]
   );
 
   const onResize = (colSettings: { columnId: string; width: number | undefined }) => {
@@ -644,7 +644,9 @@ export const EntitiesDataTable = ({
             columns={currentColumns}
             dataView={dataView}
             loadingState={loadingState}
-            onFilter={onAddFilter as DocViewFilterFn}
+            onFilter={
+              config.supportsFieldFiltering !== false ? (onAddFilter as DocViewFilterFn) : undefined
+            }
             onResize={onResize}
             onSetColumns={onSetColumns}
             onSort={onSort}

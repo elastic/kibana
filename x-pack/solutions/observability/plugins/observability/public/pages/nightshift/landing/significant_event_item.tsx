@@ -7,13 +7,26 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { InvestigationStatusBadge } from '../investigation/investigation_status_badge';
 import { getStatusColor } from '../event/significant_event_status';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
 
 export interface SignificantEventItemProps {
@@ -21,6 +34,8 @@ export interface SignificantEventItemProps {
   isSelected?: boolean;
   onClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
+  onCloseClick?: (event: SignificantEvent) => void;
+  isClosing?: boolean;
 }
 
 export function SignificantEventItem({
@@ -28,13 +43,21 @@ export function SignificantEventItem({
   isSelected = false,
   onClick,
   onChatClick,
+  onCloseClick,
+  isClosing = false,
 }: SignificantEventItemProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
   const statusColor = getStatusColor(event.status);
   const statusDotColor =
     statusColor === 'success' ? euiTheme.colors.success : euiTheme.colors.danger;
 
-  const handleClick = () => {
+  const handleClick = (clickEvent: React.MouseEvent<HTMLDivElement>) => {
+    if (
+      clickEvent.target instanceof Element &&
+      clickEvent.target.closest('[data-prevent-row-click]')
+    ) {
+      return;
+    }
     // Releasing the mouse after selecting row text also fires a click.
     if (window.getSelection()?.toString()) {
       return;
@@ -49,7 +72,7 @@ export function SignificantEventItem({
     }
     if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
       keyboardEvent.preventDefault();
-      onClick?.(event);
+      keyboardEvent.currentTarget.click();
     }
   };
 
@@ -57,6 +80,13 @@ export function SignificantEventItem({
     // Not a native <button> because the row nests the interactive chat button.
     <div
       data-test-subj="nightshiftSignificantEventItem"
+      {...(onClick
+        ? getEbtProps({
+            action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SIGNIFICANT_EVENT,
+            element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
+            detail: event.status,
+          })
+        : {})}
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
       aria-pressed={onClick ? isSelected : undefined}
@@ -118,12 +148,15 @@ export function SignificantEventItem({
                           values: { eventTitle: event.title },
                         }
                       )}
+                      data-prevent-row-click
                       data-test-subj="nightshiftOpenEventInChatButton"
+                      {...getEbtProps({
+                        action: NIGHTSHIFT_EBT_ACTIONS.OPEN_IN_CHAT,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
+                        detail: NIGHTSHIFT_EBT_DETAILS.NEW_CONVERSATION,
+                      })}
                       iconType="productAgent"
-                      onClick={(clickEvent: React.MouseEvent<HTMLButtonElement>) => {
-                        clickEvent.stopPropagation();
-                        onChatClick(event);
-                      }}
+                      onClick={() => onChatClick(event)}
                       size="s"
                       variant="empty"
                       css={css`
@@ -141,6 +174,42 @@ export function SignificantEventItem({
                           fill: currentColor !important;
                         }
                       `}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+              {onCloseClick && event.status === 'open' && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.observability.nightshift.event.closeEventTooltip',
+                      {
+                        defaultMessage: 'Close significant event',
+                      }
+                    )}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.observability.nightshift.event.closeEventButtonAriaLabel',
+                        {
+                          defaultMessage: 'Close {eventTitle}',
+                          values: { eventTitle: event.title },
+                        }
+                      )}
+                      color="text"
+                      data-prevent-row-click
+                      data-test-subj="nightshiftCloseSignificantEventButton"
+                      {...getEbtProps({
+                        action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_SIGNIFICANT_EVENT,
+                        element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
+                        detail: NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION,
+                      })}
+                      iconType="cross"
+                      isDisabled={isClosing}
+                      isLoading={isClosing}
+                      onClick={() => onCloseClick(event)}
+                      size="s"
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
