@@ -65,13 +65,13 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     setSignalFilter,
     searchQuery,
     setSearchQuery,
-    filteredServices,
     categories,
     activeCategory,
     setSelectedCategory,
     servicesInCategory,
     duplicateNamesInCategory,
     selectedSet,
+    categoryStats,
     isReady,
     handleToggle,
     allInCategorySelected,
@@ -129,15 +129,14 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false} style={{ width: 240 }}>
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false} style={{ maxWidth: 350 }}>
           {categories.map((cat) => {
             const isActive = cat === activeCategory;
-            const catServices = filteredServices.filter((s) => s.category === cat);
-            const catSelectedCount = catServices.filter((s) => selectedSet.has(s.id)).length;
-            const uniqueNames = [...new Set(catServices.map((s) => s.name))];
-            const preview =
-              uniqueNames.slice(0, 2).join(', ') + (uniqueNames.length > 2 ? ', ...' : '');
+            const stats = categoryStats.get(cat);
+            const selected = stats?.selected ?? 0;
+            const total = stats?.total ?? 0;
+            const preview = stats?.preview ?? '';
 
             return (
               <EuiPanel
@@ -150,7 +149,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                 style={{ cursor: 'pointer' }}
                 data-test-subj={`servicesStep-category-${cat}`}
               >
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem>
                     <EuiHealth color={categoryColor(cat)} textSize="s">
                       {cat}
@@ -159,11 +158,20 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                       {preview}
                     </EuiText>
                   </EuiFlexItem>
-                  {catSelectedCount > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">{catSelectedCount}</EuiBadge>
-                    </EuiFlexItem>
-                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color="default"
+                      aria-label={i18n.translate(
+                        'xpack.ingestHub.servicesStep.categoryBadgeAriaLabel',
+                        {
+                          defaultMessage: '{selected} of {total} services selected',
+                          values: { selected, total },
+                        }
+                      )}
+                    >
+                      {selected}/{total}
+                    </EuiBadge>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
             );
@@ -207,7 +215,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size="s" />
-                <EuiFlexGrid columns={2} gutterSize="s">
+                <EuiFlexGrid columns={2} gutterSize="m">
                   {servicesInCategory.map((service) => (
                     <EuiFlexItem key={service.id}>
                       <ServiceRow

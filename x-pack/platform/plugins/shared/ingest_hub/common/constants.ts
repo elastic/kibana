@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ELASTIC_PACKAGE_REGISTRY_URL = 'https://epr.elastic.co';
+
 export const INGEST_HUB_ENABLED_FLAG = 'ingestHub.enabled';
 export const INGEST_HUB_ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 

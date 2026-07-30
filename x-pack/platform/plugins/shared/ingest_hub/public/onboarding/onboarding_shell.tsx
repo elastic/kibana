@@ -17,7 +17,6 @@ import {
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
@@ -60,7 +59,6 @@ export function OnboardingShell() {
   const { integrationId } = useParams<{ integrationId: string }>();
   const history = useHistory();
   const location = useLocation();
-  const { euiTheme } = useEuiTheme();
   const meta = INTEGRATION_META[integrationId];
 
   useEffect(() => {
@@ -162,24 +160,27 @@ export function OnboardingShell() {
 
   return (
     <EuiPageTemplate data-test-subj="onboardingShell">
-      <EuiPageTemplate.Section
-        grow={false}
-        paddingSize="l"
-        restrictWidth
-        css={css`
-          border-bottom: ${euiTheme.border.thin};
-        `}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="l">
+      <EuiPageTemplate.Section grow={false} paddingSize="l" restrictWidth>
+        <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={meta.icon} size="xxl" aria-hidden={true} />
+            <EuiIcon type={meta.icon} size="xl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="l">
+            <EuiTitle
+              size="m"
+              css={css`
+                text-align: center;
+              `}
+            >
               <h1>{meta.title}</h1>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="m" color="subdued">
+            <EuiText
+              size="s"
+              color="subdued"
+              css={css`
+                text-align: center;
+              `}
+            >
               <p>{meta.description}</p>
             </EuiText>
           </EuiFlexItem>
