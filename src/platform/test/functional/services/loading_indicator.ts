@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-
 import { FtrService } from '../ftr_provider_context';
 
 const LOADING_INDICATOR_IDLE_TIME_MS = 1000;
@@ -41,12 +39,26 @@ export class LoadingIndicatorService extends FtrService {
   }
 
   public async awaitGlobalLoadingIndicatorHidden(): Promise<void> {
-    await this.retry.tryForTime(this.defaultFindTimeout * 10, async () => {
-      await this.assertLoadingIndicatorHidden();
-      // The hidden marker can be present before a delayed loading pulse starts.
-      await setTimeoutAsync(LOADING_INDICATOR_IDLE_TIME_MS);
-      await this.assertLoadingIndicatorHidden();
-    });
+    let hiddenSince: number | undefined;
+
+    await this.retry.tryForTime(
+      this.defaultFindTimeout * 10,
+      async () => {
+        try {
+          await this.assertLoadingIndicatorHidden();
+        } catch (exception) {
+          hiddenSince = undefined;
+          throw exception;
+        }
+
+        hiddenSince ??= Date.now();
+        if (Date.now() - hiddenSince < LOADING_INDICATOR_IDLE_TIME_MS) {
+          throw new Error('global loading indicator has not remained hidden long enough');
+        }
+      },
+      undefined,
+      LOADING_INDICATOR_VISIBILITY_CHECK_MS
+    );
   }
 
   private async assertLoadingIndicatorHidden(): Promise<void> {
