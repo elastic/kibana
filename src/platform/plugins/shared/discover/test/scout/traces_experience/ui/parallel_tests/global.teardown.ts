@@ -10,6 +10,10 @@
 import { globalTeardownHook } from '@kbn/scout';
 
 globalTeardownHook('Teardown traces experience tests data', async ({ esClient, log }) => {
-  await esClient.indices.delete({ index: 'traces-test.otel-default', ignore_unavailable: true });
-  log.debug('[teardown:traces] Deleted traces-test.otel-default index');
+  await esClient.indices
+    .deleteDataStream({ name: 'traces-test.otel-default' })
+    .then(() => log.debug('[teardown:traces] Deleted traces-test.otel-default data stream'))
+    .catch((err) =>
+      log.warning(`[teardown:traces] Failed to delete traces-test.otel-default: ${err.message}`)
+    );
 });

@@ -21,9 +21,15 @@ export async function indexUnprocessedOtelTrace(
     .filter((doc) => !!doc.kind);
 
   const operations = docs.flatMap((doc) => [
-    { index: { _index: 'traces-test.otel-default' } },
+    { create: { _index: 'traces-test.otel-default' } },
     { ...doc, 'service.name': OTEL_SERVICE.SERVICE_NAME },
   ]);
 
-  await esClient.bulk({ operations, refresh: true });
+  const result = await esClient.bulk({ operations, refresh: true });
+  if (result.errors) {
+    const failures = result.items.flatMap((item) =>
+      item.create?.error ? [item.create.error] : []
+    );
+    throw new Error(`Bulk indexing failed: ${JSON.stringify(failures)}`);
+  }
 }
