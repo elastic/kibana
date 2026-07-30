@@ -245,9 +245,11 @@ export const NewRelicCreateDeploymentMarkerInputSchema = lazySchema(() =>
       .optional()
       .describe('Name or identifier of who/what triggered the deployment.'),
     deploymentType: z
-      .enum(['BASIC', 'BLUE_GREEN', 'CANARY', 'OTHER', 'ROLLING', 'SHADOW'])
+      .enum(['Basic', 'Blue Green', 'Canary', 'Rolling', 'Shadow'])
       .optional()
-      .describe('Type of deployment. Defaults to BASIC.'),
+      .describe(
+        'Standard New Relic deployment type for the "Deployment" category. Defaults to "Basic".'
+      ),
     groupId: z
       .string()
       .max(200)

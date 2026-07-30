@@ -103,7 +103,7 @@ describe('NewRelic', () => {
           data: {
             aiIssuesAckIssue: {
               error: null,
-              result: { action: 'ACK', accountId: 123, issueId: 'i1', routingKey: 'rk' },
+              result: { action: 'ACK', accountId: 123, issueId: 'i1' },
             },
           },
         },
@@ -119,7 +119,7 @@ describe('NewRelic', () => {
         expect.objectContaining({ variables: { accountId: 123, issueId: 'i1' } }),
         { headers: AI_ISSUES_HEADERS }
       );
-      expect(result).toEqual({ action: 'ACK', accountId: 123, issueId: 'i1', routingKey: 'rk' });
+      expect(result).toEqual({ action: 'ACK', accountId: 123, issueId: 'i1' });
     });
 
     it('should throw when the mutation returns a GraphQL-level error field', async () => {
@@ -435,15 +435,50 @@ describe('NewRelic', () => {
           variables: expect.objectContaining({
             event: expect.objectContaining({
               entitySearch: { query: "id = 'guid1'" },
-              categoryAndTypeData: expect.objectContaining({
-                kind: { category: 'deployment', type: 'basic' },
-              }),
+              categoryAndTypeData: {
+                kind: { category: 'deployment', type: 'Basic' },
+                categoryFields: { deployment: { version: '1.4.2' } },
+              },
             }),
           }),
         }),
         expect.any(Object)
       );
       expect(result).toEqual({ changeTrackingEvent: { changeTrackingId: 'ct1' }, messages: [] });
+    });
+
+    it('should forward a provided deploymentType as the kind.type and omit it from categoryFields', async () => {
+      mockClient.post.mockResolvedValue({
+        data: {
+          data: {
+            changeTrackingCreateEvent: {
+              changeTrackingEvent: { changeTrackingId: 'ct2' },
+              messages: [],
+            },
+          },
+        },
+      });
+
+      await NewRelic.actions.createDeploymentMarker.handler(mockContext, {
+        entityGuid: 'guid1',
+        version: '2.0.0',
+        deploymentType: 'Canary',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        US_ENDPOINT,
+        expect.objectContaining({
+          variables: expect.objectContaining({
+            event: expect.objectContaining({
+              categoryAndTypeData: {
+                kind: { category: 'deployment', type: 'Canary' },
+                categoryFields: { deployment: { version: '2.0.0' } },
+              },
+            }),
+          }),
+        }),
+        expect.any(Object)
+      );
     });
 
     it('should reject an entityGuid containing a quote (query injection attempt)', () => {

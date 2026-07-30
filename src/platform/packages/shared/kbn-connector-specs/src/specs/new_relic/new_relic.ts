@@ -110,7 +110,7 @@ const toEpochMs = (value?: string): number | undefined => {
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
-// AiIssuesTimeWindowInput requires both startTime and endTime, so a since-only
+// TimeWindowInput requires both startTime and endTime, so a since-only
 // or until-only value must be completed with a default bound rather than sent
 // partially (which NerdGraph would reject as a required-field error).
 const buildTimeWindow = (
@@ -195,7 +195,7 @@ export const NewRelic: ConnectorSpec = {
           `mutation($accountId: Int!, $issueId: ID!) {
             aiIssuesAckIssue(accountId: $accountId, issueId: $issueId) {
               error
-              result { action accountId issueId routingKey }
+              result { action accountId issueId }
             }
           }`,
           { accountId: input.accountId, issueId: input.issueId },
@@ -222,7 +222,7 @@ export const NewRelic: ConnectorSpec = {
           `mutation($accountId: Int!, $issueId: ID!) {
             aiIssuesUnackIssue(accountId: $accountId, issueId: $issueId) {
               error
-              result { action accountId issueId routingKey }
+              result { action accountId issueId }
             }
           }`,
           { accountId: input.accountId, issueId: input.issueId },
@@ -249,7 +249,7 @@ export const NewRelic: ConnectorSpec = {
           `mutation($accountId: Int!, $issueId: ID!) {
             aiIssuesResolveIssue(accountId: $accountId, issueId: $issueId) {
               error
-              result { action accountId issueId routingKey }
+              result { action accountId issueId }
             }
           }`,
           { accountId: input.accountId, issueId: input.issueId },
@@ -280,7 +280,6 @@ export const NewRelic: ConnectorSpec = {
                 issues: {
                   issues: Array<Record<string, unknown>>;
                   nextCursor: string | null;
-                  totalCount?: number;
                 };
               };
             };
@@ -288,7 +287,7 @@ export const NewRelic: ConnectorSpec = {
         }>(
           ctx,
           'listIssues',
-          `query($accountId: Int!, $filter: AiIssuesFilterIssuesInput, $timeWindow: AiIssuesTimeWindowInput, $cursor: String) {
+          `query($accountId: Int!, $filter: AiIssuesFilterIssues, $timeWindow: TimeWindowInput, $cursor: String) {
             actor {
               account(id: $accountId) {
                 aiIssues {
@@ -313,7 +312,6 @@ export const NewRelic: ConnectorSpec = {
                       conditionName
                     }
                     nextCursor
-                    totalCount
                   }
                 }
               }
@@ -356,7 +354,7 @@ export const NewRelic: ConnectorSpec = {
         }>(
           ctx,
           'listIncidents',
-          `query($accountId: Int!, $filter: AiIssuesFilterIncidentsInput, $timeWindow: AiIssuesTimeWindowInput, $cursor: String) {
+          `query($accountId: Int!, $filter: AiIssuesFilterIncidents, $timeWindow: TimeWindowInput, $cursor: String) {
             actor {
               account(id: $accountId) {
                 aiIssues {
@@ -557,11 +555,10 @@ export const NewRelic: ConnectorSpec = {
           {
             event: {
               categoryAndTypeData: {
-                kind: { category: 'deployment', type: 'basic' },
+                kind: { category: 'deployment', type: input.deploymentType ?? 'Basic' },
                 categoryFields: {
                   deployment: {
                     version: input.version,
-                    deploymentType: input.deploymentType ?? 'BASIC',
                   },
                 },
               },
