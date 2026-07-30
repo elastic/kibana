@@ -74,7 +74,7 @@ export class VisualizeApp {
       timeout: 30_000,
     });
   }
-  
+
   async clickSavedVisualization(title: string) {
     await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
   }
