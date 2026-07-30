@@ -54,11 +54,13 @@ FROM ai-index-* METADATA _id, _index, _score
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
 | FUSE
 | SORT _score DESC, _id ASC
-| LIMIT 10
+| LIMIT <n>
 ```
 
 Set a generous per-branch `LIMIT` (20) so FUSE has enough candidates to merge results from.
-The post-FUSE `LIMIT 10` controls the final result count.
+The post-FUSE `LIMIT <n>` controls the final result count — start with 5 and adjust based on
+how much context the KIs carry. Some use cases may need only 1–2; others may warrant more if
+individual KIs are sparse.
 
 Only deviate from this template if you have a hard constraint that FORK+FUSE cannot satisfy
 (e.g. you need purely exact-match results with no semantic fallback). In that case,
@@ -68,7 +70,7 @@ keyword-only is a valid alternative:
 FROM ai-index-* METADATA _id, _index, _score
 | WHERE content:"<query>" OR title:"<query>" OR description:"<query>"
 | SORT _score DESC, _id ASC
-| LIMIT 10
+| LIMIT <n>
 ```
 
 In all other cases, prefer the FORK+FUSE template above.
@@ -83,7 +85,7 @@ FROM ai-index-* METADATA _id, _index, _score
     ( WHERE content.semantic:"<query>" OR title.semantic:"<query>" OR description.semantic:"<query>" | SORT _score DESC | LIMIT 20 )
 | FUSE
 | SORT _score DESC, _id ASC
-| LIMIT 10
+| LIMIT <n>
 ```
 
 Replace `type == "index_metadata"` with any combination of `type` or `tags` filters.
