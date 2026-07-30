@@ -74,9 +74,13 @@ export class VisualizeApp {
       timeout: 30_000,
     });
   }
+  
+  async clickSavedVisualization(title: string) {
+    await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
+  }
 
   async openSavedVisualization(title: string, options?: { waitFor?: 'agg' | 'lens' }) {
-    await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
+    await this.clickSavedVisualization(title);
     if (options?.waitFor === 'lens') {
       await this.page.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
     } else {
