@@ -2221,7 +2221,6 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/test/common/ftr_provider_context.ts @elastic/appex-qa
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ @elastic/appex-qa # temporarily
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
-/x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/platform/test/functional/fixtures/kbn_archives/packaging.json @elastic/appex-qa # No usages found
 /x-pack/platform/test/fixtures/es_archives/filebeat @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/logstash_functional @elastic/appex-qa
