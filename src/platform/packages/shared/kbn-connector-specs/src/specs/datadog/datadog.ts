@@ -81,9 +81,14 @@ export const DatadogConnector: ConnectorSpec = {
       defaultMessage:
         'Manage Datadog monitors and webhooks; extensible for downtimes, events, hosts, metrics, and incidents',
     }),
+    // gold matches classic stack action peers (.pagerduty, .webhook) and
+    // threat-intel-ish specs (e.g. .virustotal); not a final packaging call.
     minimumLicense: 'gold',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder', 'alerting'],
+    // Same surface as other kbn-connector-specs peers. Do not add 'alerting'
+    // until there is a real v1 rule-action params UI / default subAction —
+    // specs are Workflows / Agent Builder tools today, not rule actions.
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {
