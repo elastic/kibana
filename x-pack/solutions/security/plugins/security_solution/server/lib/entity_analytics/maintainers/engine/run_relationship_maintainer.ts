@@ -161,17 +161,13 @@ async function fetchTargetsForActors(
 }
 
 /**
- * Runs Step 1 + Step 2 + write for one integration end-to-end. Writes the
- * integration's records to the entity store before returning, so the engine
- * never holds more than one integration's records in memory.
+ * Runs Step 1 + Step 2 + write for one integration end-to-end. Writes each
+ * page's records to the entity store immediately after parsing, so the engine
+ * never holds more than one page of records in memory at a time.
  *
- * Memory bound: previously the engine accumulated `allRecords` across all
- * integrations × all pages before a single write, with theoretical max
- * ≈ COMPOSITE_PAGE_SIZE × MAX_ITERATIONS × #integrations ≈ 14M records.
- * Streaming per-integration drops that to one integration's records.
+ * Memory bound: one page's records at a time (≤ COMPOSITE_PAGE_SIZE per page).
  *
- * Abort semantics: returns the count of records actually written for this
- * integration. If the abort fires mid-pagination, the partial records
+ * Abort semantics: if the abort fires mid-pagination, the partial records
  * collected so far are still written before returning (best-effort
  * persistence — the records are derived from the run, not authoritative,
  * and partial writes are no worse than a re-run).
@@ -328,10 +324,7 @@ async function runIntegration(
             totalWriteResult.relationshipTypeApplied,
             pageWrite.relationshipTypeApplied
           ),
-          succeededEntityIds: new Set([
-            ...totalWriteResult.succeededEntityIds,
-            ...pageWrite.succeededEntityIds,
-          ]),
+          succeededEntityIds: pageWrite.succeededEntityIds,
           validTargetIds: pageWrite.validTargetIds,
         };
         totalMetadataResult = {

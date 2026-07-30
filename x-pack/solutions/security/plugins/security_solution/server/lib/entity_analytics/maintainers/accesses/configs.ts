@@ -96,6 +96,13 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     targetEntityType: 'host',
     bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
+    // Windows logon events typically carry `user.name`; `user.email` may also
+    // be present. Both fields are listed to stay in sync with the extraction
+    // pipeline's document filter (which admits docs with either field). The
+    // fast-path EUID builder always sorts user.name first in its COALESCE so
+    // the produced EUID is `user:<user.name>@<host.id>@local` regardless of
+    // field order here.
+    customActor: { fields: ['user.email', 'user.name'] },
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
