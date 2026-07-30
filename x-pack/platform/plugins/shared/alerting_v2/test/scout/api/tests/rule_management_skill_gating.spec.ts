@@ -19,16 +19,18 @@ const ALERTING_V2_SKILL_IDS = [RULE_MANAGEMENT_SKILL_ID, ACTION_POLICY_MANAGEMEN
 
 const getSkillIds = (results: Array<{ id: string }>) => results.map((skill) => skill.id);
 
-// Alerting V2 Agent Builder skills (`rule-management` and
-// `action-policy-management`) are gated behind BOTH the agent builder
-// experimental-features advanced setting AND the `alerting:v2:enabled`
-// advanced setting. Both must be enabled for the skills to be listed, so this
-// suite exercises each gate independently as well as the combined case.
-//
-// This is the canonical gating suite because the generic Scout config leaves
-// `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
-// The dedicated `scout_alerting_v2` config forces the feature on and therefore
-// cannot cover the disabled cases.
+/*
+ * Alerting V2 Agent Builder skills (`rule-management` and
+ * `action-policy-management`) are gated behind BOTH the agent builder
+ * experimental-features advanced setting AND the `alerting:v2:enabled`
+ * advanced setting. Both must be enabled for the skills to be listed, so this
+ * suite exercises each gate independently as well as the combined case.
+ *
+ * This is the canonical gating suite because the generic Scout config leaves
+ * `alerting:v2:enabled` unpinned, so it can be flipped on and off at runtime.
+ * The dedicated `scout_alerting_v2` config forces the feature on and therefore
+ * cannot cover the disabled cases.
+ */
 apiTest.describe('Agent Builder — alerting V2 rule-management skill gating', () => {
   // Reset both gates after every test. `.unset()` / DELETE are safe no-ops when
   // no user value is set, so we can reset unconditionally — this also guards
