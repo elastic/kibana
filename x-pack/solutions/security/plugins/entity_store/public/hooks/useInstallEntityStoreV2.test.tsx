@@ -229,7 +229,10 @@ describe('useInstallEntityStoreV2', () => {
     const mockServices = createMockServices();
 
     mockServices.spaces.getActiveSpace.mockResolvedValue({ id: 'default' });
-    mockHttpGet(mockServices, { status: EntityStoreStatusEnum.enum.not_installed, hasInstallPermissions: false });
+    mockHttpGet(mockServices, {
+      status: EntityStoreStatusEnum.enum.not_installed,
+      hasInstallPermissions: false,
+    });
     mockServices.http.fetch.mockResolvedValueOnce({ total: 0 });
 
     renderHook(() => useInstallEntityStoreV2(asServices(mockServices)));
