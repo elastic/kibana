@@ -6,20 +6,15 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ConversationRightActions } from './conversation_actions_right';
 import { ConversationTitle } from './conversation_title';
-import { TemplateSelector } from './template_selector';
+import { ConversationTypeButton } from './conversation_type_button';
+import { SetTypeControl } from './set_type_control';
 
-const headerGridStyles = css`
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  width: 100%;
-`;
-
-const rightActionsStyles = css`
-  justify-self: end;
+const titleSlotStyles = css`
+  min-width: 0;
 `;
 
 interface ConversationHeaderProps {
@@ -31,19 +26,29 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   ariaLabelledBy,
 }) => {
   return (
-    <div css={headerGridStyles}>
-      {/* Left column — template selector */}
-      <div>
-        <TemplateSelector />
-      </div>
+    <EuiFlexGroup
+      alignItems="center"
+      justifyContent="spaceBetween"
+      gutterSize="s"
+      responsive={false}
+    >
+      {/* Left slot — conversation title */}
+      <EuiFlexItem grow={true} css={titleSlotStyles}>
+        <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
+      </EuiFlexItem>
 
-      {/* Center column — always exactly centered */}
-      <ConversationTitle ariaLabelledBy={ariaLabelledBy} />
-
-      {/* Right column — right-aligned within its 1fr column */}
-      <div css={rightActionsStyles}>
-        <ConversationRightActions onClose={onClose} />
-      </div>
-    </div>
+      {/* Right slot — chat type control, then the existing actions menu */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <SetTypeControl />
+            <ConversationTypeButton />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <ConversationRightActions onClose={onClose} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
