@@ -90,13 +90,24 @@ describe('ConversationClient', () => {
   });
 
   describe('list', () => {
-    it('requests access_control and preserves it in listed conversations', async () => {
+    it('requests access_control and origin, and preserves them in listed conversations', async () => {
+      const origin = {
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      };
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
-            createConversationDocument({
-              accessMode: ConversationAccessControlMode.Public,
-            }),
+            {
+              ...createConversationDocument({
+                accessMode: ConversationAccessControlMode.Public,
+              }),
+              _source: {
+                ...createConversationDocument({
+                  accessMode: ConversationAccessControlMode.Public,
+                })._source!,
+                origin,
+              },
+            },
           ],
         },
       });
@@ -105,7 +116,7 @@ describe('ConversationClient', () => {
 
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          _source: expect.arrayContaining(['access_control']),
+          _source: expect.arrayContaining(['access_control', 'origin']),
         })
       );
       expect(result[0]).toEqual(
@@ -113,6 +124,7 @@ describe('ConversationClient', () => {
           access_control: {
             access_mode: ConversationAccessControlMode.Public,
           },
+          origin,
         })
       );
     });
@@ -291,17 +303,37 @@ describe('ConversationClient', () => {
   });
 
   describe('exists', () => {
-    it('returns false when conversation access passes but agent use access fails', async () => {
-      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
+    it('returns true when the document exists, even when owned by another user and private', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
             createConversationDocument({
               userId: 'other-user-id',
               username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
+              accessMode: ConversationAccessControlMode.Private,
             }),
           ],
+        },
+      });
+
+      await expect(client.exists('conversation-1')).resolves.toBe(true);
+    });
+
+    it('returns true when the document exists but agent use access fails', async () => {
+      agentRegistry.get.mockRejectedValue(createAgentNotFoundError({ agentId: 'agent-1' }));
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [createConversationDocument()],
+        },
+      });
+
+      await expect(client.exists('conversation-1')).resolves.toBe(true);
+    });
+
+    it('returns false when no document exists', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [],
         },
       });
 
@@ -314,23 +346,103 @@ describe('ConversationClient', () => {
 
       await expect(client.exists('conversation-1')).rejects.toBe(error);
     });
+  });
 
-    it('propagates agent registry failures that are not access denials', async () => {
-      const error = new Error('agent registry unavailable');
-      agentRegistry.get.mockRejectedValue(error);
+  describe('create', () => {
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ result: 'created' });
       mockEsClient.search.mockResolvedValue({
         hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
+          hits: [createConversationDocument()],
         },
       });
+    });
 
-      await expect(client.exists('conversation-1')).rejects.toBe(error);
+    it('indexes with op_type create so existing conversations are never overwritten', async () => {
+      await client.create({
+        id: 'conversation-1',
+        title: 'Conversation 1',
+        agent_id: 'agent-1',
+        rounds: [],
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conversation-1',
+          op_type: 'create',
+        })
+      );
+    });
+
+    it('throws a not found error when the id already exists', async () => {
+      const conflictError = Object.assign(new Error('version conflict'), { statusCode: 409 });
+      mockEsClient.index.mockRejectedValueOnce(conflictError);
+
+      await expect(
+        client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        })
+      ).rejects.toMatchObject({
+        message: 'Conversation conversation-1 not found',
+      });
+    });
+
+    it('propagates non-conflict index failures', async () => {
+      const error = new Error('index unavailable');
+      mockEsClient.index.mockRejectedValueOnce(error);
+
+      await expect(
+        client.create({
+          id: 'conversation-1',
+          title: 'Conversation 1',
+          agent_id: 'agent-1',
+          rounds: [],
+        })
+      ).rejects.toBe(error);
+    });
+  });
+
+  describe('getByOrigin', () => {
+    it('finds a conversation by first-class origin in the current space', async () => {
+      const document = createConversationDocument();
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [document],
+          },
+        });
+
+      const result = await client.getByOrigin({
+        external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
+      });
+
+      expect(result?.id).toBe('conversation-1');
+      expect(mockEsClient.search).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          query: {
+            bool: {
+              filter: [
+                expect.any(Object),
+                {
+                  term: {
+                    'origin.external_conversation_id':
+                      'team:T123/channel:C123/thread:1712345678.000100',
+                  },
+                },
+              ],
+            },
+          },
+        })
+      );
     });
   });
 

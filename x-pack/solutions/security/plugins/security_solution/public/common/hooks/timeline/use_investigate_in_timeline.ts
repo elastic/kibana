@@ -6,9 +6,10 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import type { Filter, Query } from '@kbn/es-query';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useSelectDataView } from '../../../data_view_manager/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
@@ -62,7 +63,8 @@ export const useInvestigateInTimeline = () => {
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
-  const timelineSelectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const { dataView } = useDataView(PageScope.timeline);
+  const timelineSelectedPatterns = useSelectedPatterns(dataView);
 
   const clearTimelineTemplate = useCreateTimeline({
     timelineId: TimelineId.active,

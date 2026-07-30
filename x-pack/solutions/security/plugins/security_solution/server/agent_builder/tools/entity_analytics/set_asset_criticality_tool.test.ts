@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { coreMock } from '@kbn/core/server/mocks';
 import { ToolResultType, type ErrorResult, type OtherResult } from '@kbn/agent-builder-common';
 import { ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
@@ -14,7 +15,11 @@ import {
   createToolTestMocks,
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
-import { setAssetCriticalityTool } from './set_asset_criticality_tool';
+import { ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT } from '../../../lib/telemetry/event_based/events';
+import {
+  setAssetCriticalityTool,
+  SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+} from './set_asset_criticality_tool';
 
 jest.mock('../../../lib/entity_analytics/risk_score/recalculate_entity_risk_score', () => ({
   recalculateEntityRiskScore: jest.fn().mockResolvedValue(undefined),
@@ -33,19 +38,35 @@ describe('setAssetCriticalityTool', () => {
 
   let mockBulkUpdateEntity: jest.Mock;
   let mockCreateCRUDClient: jest.Mock;
+  let mockCoreStart: ReturnType<typeof coreMock.createStart>;
 
   const handlerContext = () => createToolHandlerContext(mockRequest, mockEsClient, mockLogger);
 
   const mockCheckPrivileges = jest.fn().mockResolvedValue({
+    hasAllRequested: true,
     privileges: {
       elasticsearch: {
-        index: new Proxy({}, { get: () => [{ privilege: 'write', authorized: true }] }),
+        cluster: [],
+        index: new Proxy(
+          {},
+          {
+            get: () => [
+              { privilege: 'read', authorized: true },
+              { privilege: 'write', authorized: true },
+            ],
+          }
+        ),
       },
+      kibana: [
+        { privilege: 'api:securitySolution', authorized: true },
+        { privilege: 'api:securitySolution-entity-analytics', authorized: true },
+      ],
     },
   });
   const mockSecurity = {
     authz: {
       checkPrivilegesDynamicallyWithRequest: jest.fn().mockReturnValue(mockCheckPrivileges),
+      actions: { api: { get: (privilege: string) => `api:${privilege}` } },
     },
   };
 
@@ -56,7 +77,7 @@ describe('setAssetCriticalityTool', () => {
       bulkUpdateEntity: mockBulkUpdateEntity,
     });
 
-    const mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
+    mockCoreStart = setupMockCoreStartServices(mockCore, mockEsClient);
     mockCore.getStartServices.mockResolvedValue([
       mockCoreStart,
       {
@@ -138,6 +159,46 @@ describe('setAssetCriticalityTool', () => {
           criticality: CRITICALITY,
         }).success
       ).toBe(false);
+    });
+  });
+
+  describe('handler — permissions', () => {
+    it('returns a permission error and does not update the entity when the caller lacks the Kibana feature privilege', async () => {
+      mockCheckPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        privileges: {
+          elasticsearch: {
+            cluster: [],
+            index: new Proxy(
+              {},
+              {
+                get: () => [
+                  { privilege: 'read', authorized: true },
+                  { privilege: 'write', authorized: true },
+                ],
+              }
+            ),
+          },
+          kibana: [
+            { privilege: 'api:securitySolution', authorized: false },
+            { privilege: 'api:securitySolution-entity-analytics', authorized: false },
+          ],
+        },
+      });
+
+      const ctx = handlerContext();
+      const result = (await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results).toHaveLength(1);
+      const errResult = result.results[0] as ErrorResult;
+      expect(errResult.type).toBe(ToolResultType.error);
+      expect((errResult.data as { message: string }).message).toContain(
+        'You do not have permission to update asset criticality in this space.'
+      );
+      expect(mockBulkUpdateEntity).not.toHaveBeenCalled();
     });
   });
 
@@ -377,6 +438,170 @@ describe('setAssetCriticalityTool', () => {
       const errResult = result.results[0] as ErrorResult;
       expect(errResult.type).toBe(ToolResultType.error);
       expect((errResult.data as { message: string }).message).toContain('ES unavailable');
+    });
+  });
+
+  describe('handler — telemetry', () => {
+    it('does not report telemetry while only asking for confirmation', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.unprompted,
+      });
+      (ctx.prompts.askForConfirmation as jest.Mock).mockReturnValue({ type: 'confirmation' });
+
+      await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      );
+
+      expect(mockCoreStart.analytics.reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports userConfirmationOutcome=rejected and success=true when the user declines the prompt', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.rejected,
+      });
+
+      await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      );
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: true,
+          errorMessage: undefined,
+          userConfirmationOutcome: ConfirmationStatus.rejected,
+        }
+      );
+    });
+
+    it('reports userConfirmationOutcome=accepted and success=true after a successful update', async () => {
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      );
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: true,
+          errorMessage: undefined,
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
+    });
+
+    it('reports success=false when the caller lacks write privilege', async () => {
+      mockCheckPrivileges.mockResolvedValueOnce({
+        hasAllRequested: false,
+        privileges: {
+          elasticsearch: {
+            cluster: [],
+            index: new Proxy(
+              {},
+              {
+                get: () => [
+                  { privilege: 'read', authorized: true },
+                  { privilege: 'write', authorized: false },
+                ],
+              }
+            ),
+          },
+          kibana: [
+            { privilege: 'api:securitySolution', authorized: true },
+            { privilege: 'api:securitySolution-entity-analytics', authorized: true },
+          ],
+        },
+      });
+      const ctx = handlerContext();
+
+      await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      );
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: 'You do not have permission to update asset criticality in this space.',
+          userConfirmationOutcome: undefined,
+        }
+      );
+    });
+
+    it('reports success=false and errorMessage when bulkUpdateEntity returns errors', async () => {
+      mockBulkUpdateEntity.mockResolvedValueOnce([
+        {
+          _id: 'abc',
+          status: 400,
+          type: 'illegal_argument_exception',
+          reason: 'Engine not running',
+        },
+      ]);
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      );
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: 'Engine not running',
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
+    });
+
+    it('reports success=false and errorMessage when bulkUpdateEntity throws', async () => {
+      mockBulkUpdateEntity.mockRejectedValueOnce(new Error('ES unavailable'));
+      const ctx = handlerContext();
+      (ctx.prompts.checkConfirmationStatus as jest.Mock).mockReturnValue({
+        status: ConfirmationStatus.accepted,
+      });
+
+      await tool.handler(
+        { entityId: ENTITY_ID, entityType: ENTITY_TYPE, criticality: CRITICALITY },
+        ctx
+      );
+
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalledWith(
+        ENTITY_ANALYTICS_AI_TOOL_USAGE_EVENT.eventType,
+        {
+          toolId: SECURITY_SET_ASSET_CRITICALITY_TOOL_ID,
+          actionType: 'mutation',
+          spaceId: 'default',
+          success: false,
+          errorMessage: 'ES unavailable',
+          userConfirmationOutcome: ConfirmationStatus.accepted,
+        }
+      );
     });
   });
 });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 
@@ -24,6 +26,7 @@ const DEFAULT_PER_PAGE = 20;
 
 export interface GetWorkflowChangeHistoryDeps {
   changeHistoryService: IWorkflowChangeHistoryService;
+  userProfileService: UserProfileServiceStart;
   getWorkflowSource: (id: string, spaceId: string) => Promise<{ spaceId: string } | null>;
 }
 
@@ -77,10 +80,27 @@ export const getHistoryForWorkflow = async (
     size: perPage,
   });
 
+  const userProfilesById = await resolveUserProfiles(deps.userProfileService, result.items);
+
   return {
     page,
     perPage,
     total: result.total,
-    items: result.items.map(mapWorkflowHistoryItem),
+    items: result.items.map((item) => mapWorkflowHistoryItem(item, userProfilesById)),
   };
+};
+
+const resolveUserProfiles = async (
+  userProfileService: UserProfileServiceStart,
+  items: Array<{ user?: { id?: string } }>
+): Promise<Map<string, UserProfile>> => {
+  const uids = new Set(items.flatMap((item) => (item.user?.id ? [item.user.id] : [])));
+
+  if (uids.size === 0) {
+    return new Map();
+  }
+
+  const profiles = await userProfileService.bulkGet({ uids });
+
+  return new Map(profiles.map((profile) => [profile.uid, profile]));
 };

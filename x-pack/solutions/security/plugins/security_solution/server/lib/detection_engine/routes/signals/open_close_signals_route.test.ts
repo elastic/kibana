@@ -19,6 +19,8 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
+import { RuntimeFieldTypeEnum } from '../../../../../common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
+import { MAX_RUNTIME_FIELDS_PER_REQUEST } from './bulk_close_runtime_mappings';
 import { setSignalsStatusRoute } from './open_close_signals_route';
 import type { SecuritySolutionRequestHandlerContextMock } from '../__mocks__/request_context';
 
@@ -113,6 +115,54 @@ describe('set signal status', () => {
           query: { bool: { filter: { terms: { _id: ['somefakeid1', 'somefakeid2'] } } } },
         })
       );
+    });
+
+    test('returns 400 when runtime_fields exceeds the per-request entry limit', async () => {
+      const runtimeFields = Object.fromEntries(
+        Array.from({ length: MAX_RUNTIME_FIELDS_PER_REQUEST + 1 }, (_, i) => [
+          `custom.field_${i}`,
+          RuntimeFieldTypeEnum.keyword,
+        ])
+      );
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByQueryPayload(),
+            runtime_fields: runtimeFields,
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(400);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    test('returns 200 when runtime_fields is at the per-request entry limit', async () => {
+      const runtimeFields = Object.fromEntries(
+        Array.from({ length: MAX_RUNTIME_FIELDS_PER_REQUEST }, (_, i) => [
+          `custom.field_${i}`,
+          RuntimeFieldTypeEnum.keyword,
+        ])
+      );
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'post',
+          path: DETECTION_ENGINE_SIGNALS_STATUS_URL,
+          body: {
+            ...typicalSetStatusSignalByQueryPayload(),
+            runtime_fields: runtimeFields,
+          },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(200);
+      expect(context.core.elasticsearch.client.asCurrentUser.updateByQuery).toHaveBeenCalled();
     });
 
     test('returns 400 when closing reason is invalid', async () => {

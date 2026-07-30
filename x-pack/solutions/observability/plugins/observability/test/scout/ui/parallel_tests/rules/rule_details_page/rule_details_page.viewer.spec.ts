@@ -90,13 +90,16 @@ test.describe(
       expect(url).toContain('selected_options:!()');
     });
 
-    test('should not show actions button for viewer user', async ({ pageObjects }) => {
+    test('should not show edit or delete actions for viewer user', async ({ pageObjects }) => {
       // Navigate to rule details
       await pageObjects.ruleDetailsPage.gotoById(ruleId);
       await pageObjects.ruleDetailsPage.expectRuleDetailsPageLoaded();
 
-      // Verify actions button is NOT visible for viewer
-      await expect(pageObjects.ruleDetailsPage.actionsButton).toBeHidden();
+      // The actions menu only exposes read-only entries (e.g. View in Discover) for a viewer,
+      // so open it and verify the mutating edit/delete actions are not available.
+      await pageObjects.ruleDetailsPage.actionsButton.click();
+      await expect(pageObjects.ruleDetailsPage.editRuleButton).toBeHidden();
+      await expect(pageObjects.ruleDetailsPage.deleteRuleButton).toBeHidden();
     });
   }
 );

@@ -148,6 +148,7 @@ const restoreSequenceFieldsSchema: RootSchema<{
   restoredFromSequence?: number;
   currentSequence?: number;
   rollbackDistance?: number;
+  hadUnsavedLocalEdits?: boolean;
 }> = {
   restoredFromSequence: {
     type: 'integer',
@@ -167,6 +168,14 @@ const restoreSequenceFieldsSchema: RootSchema<{
     type: 'integer',
     _meta: {
       description: 'currentSequence - restoredFromSequence when both present',
+      optional: true,
+    },
+  },
+  hadUnsavedLocalEdits: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'True when the host had unsaved in-editor changes at restore confirm time (restore over draft)',
       optional: true,
     },
   },

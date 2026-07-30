@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SmlSearchFilters,
-  SmlSearchConstraints,
-} from '@kbn/agent-context-layer-plugin/public';
+import type { SmlSearchFilters, SmlSearchConstraints } from '@kbn/agent-builder-sml-plugin/public';
 
 /**
  * Query keys for react-query
@@ -74,6 +71,10 @@ export const queryKeys = {
   },
   connectors: {
     all: ['connectors'] as const,
+  },
+  workspaceFiles: {
+    byPath: (conversationId: string, path: string) =>
+      ['workspaceFiles', conversationId, path] as const,
   },
   oauthClients: {
     all: ['oauthClients', 'list'] as const,

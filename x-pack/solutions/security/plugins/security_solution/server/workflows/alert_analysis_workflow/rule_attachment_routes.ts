@@ -17,12 +17,12 @@ import {
   ALERT_ANALYSIS_WORKFLOW_RULE_UPDATE_ROUTE,
   ALERT_ANALYSIS_WORKFLOW_RULES_ROUTE,
   AlertAnalysisWorkflowRuleAttachmentListRequestQuery,
-  AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody,
-  AlertAnalysisWorkflowRuleAttachmentStatsRequestBody,
+  AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery,
+  AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery,
   AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody,
   type AlertAnalysisWorkflowRuleAttachmentListRequestQuery as AlertAnalysisWorkflowRuleAttachmentListRequestQueryType,
-  type AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType,
-  type AlertAnalysisWorkflowRuleAttachmentStatsRequestBody as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType,
+  type AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery as AlertAnalysisWorkflowRuleAttachmentSelectionRequestQueryType,
+  type AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery as AlertAnalysisWorkflowRuleAttachmentStatsRequestQueryType,
   type AlertAnalysisWorkflowRuleAttachmentUpdateRequestBody as AlertAnalysisWorkflowRuleAttachmentUpdateRequestBodyType,
 } from '../../../common/workflows/alert_analysis_workflow';
 import type {
@@ -115,11 +115,17 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
 
           const {
             search,
+            attachment_filter: attachmentFilter,
             page,
             per_page: perPage,
           } = request.query as AlertAnalysisWorkflowRuleAttachmentListRequestQueryType;
           const service = await createReadService(context);
-          const body = await service.getRuleAttachments({ search, page, perPage });
+          const body = await service.getRuleAttachments({
+            search,
+            attachmentFilter,
+            page,
+            perPage,
+          });
 
           return response.ok({ body });
         } catch (err) {
@@ -133,7 +139,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
     );
 
   router.versioned
-    .post({
+    .get({
       path: ALERT_ANALYSIS_WORKFLOW_RULE_STATS_ROUTE,
       access: 'internal',
       security: {
@@ -147,7 +153,9 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(AlertAnalysisWorkflowRuleAttachmentStatsRequestBody),
+            query: buildRouteValidationWithZod(
+              AlertAnalysisWorkflowRuleAttachmentStatsRequestQuery
+            ),
           },
         },
       },
@@ -159,10 +167,10 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
             return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
           }
 
-          const { search } =
-            request.body as AlertAnalysisWorkflowRuleAttachmentStatsRequestBodyType;
+          const { search, attachment_filter: attachmentFilter } =
+            request.query as AlertAnalysisWorkflowRuleAttachmentStatsRequestQueryType;
           const service = await createReadService(context);
-          const body = await service.getRuleAttachmentStats({ search });
+          const body = await service.getRuleAttachmentStats({ search, attachmentFilter });
 
           return response.ok({ body });
         } catch (err) {
@@ -176,7 +184,7 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
     );
 
   router.versioned
-    .post({
+    .get({
       path: ALERT_ANALYSIS_WORKFLOW_RULE_SELECTION_ROUTE,
       access: 'internal',
       security: {
@@ -190,8 +198,8 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
         version: ALERT_ANALYSIS_WORKFLOW_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(
-              AlertAnalysisWorkflowRuleAttachmentSelectionRequestBody
+            query: buildRouteValidationWithZod(
+              AlertAnalysisWorkflowRuleAttachmentSelectionRequestQuery
             ),
           },
         },
@@ -204,10 +212,10 @@ export const registerAlertAnalysisWorkflowRuleAttachmentRoutes = (
             return response.forbidden({ body: LICENSE_ERROR_MESSAGE });
           }
 
-          const { search } =
-            request.body as AlertAnalysisWorkflowRuleAttachmentSelectionRequestBodyType;
+          const { search, attachment_filter: attachmentFilter } =
+            request.query as AlertAnalysisWorkflowRuleAttachmentSelectionRequestQueryType;
           const service = await createReadService(context);
-          const body = await service.getRuleAttachmentSelection({ search });
+          const body = await service.getRuleAttachmentSelection({ search, attachmentFilter });
 
           return response.ok({ body });
         } catch (err) {

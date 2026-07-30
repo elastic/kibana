@@ -22,9 +22,8 @@ export class TelemetryService {
     this.analytics = analytics;
     workflowsTelemetryEvents.forEach((eventConfig) => analytics.registerEventType(eventConfig));
 
-    // Lazy-load change-history telemetry registration to avoid pulling the full
-    // @kbn/change-history-ui package into the plugin page-load bundle.
-    void import('@kbn/change-history-ui/src/telemetry/register_change_history_telemetry_events')
+    // Lazy-load via @kbn/change-history-ui/telemetry to avoid pulling React UI into page-load bundle.
+    void import('@kbn/change-history-ui/telemetry')
       .then(({ registerChangeHistoryTelemetryEvents }) => {
         registerChangeHistoryTelemetryEvents(analytics);
       })

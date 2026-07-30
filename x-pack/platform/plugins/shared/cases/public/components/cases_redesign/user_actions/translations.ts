@@ -17,3 +17,17 @@ export const SHOW_MORE_ACTIVITIES_ARIA = i18n.translate(
   'xpack.cases.caseView.redesign.userActions.showMoreActivitiesAria',
   { defaultMessage: 'Show more activities' }
 );
+
+export const NO_SEARCH_RESULTS_TITLE = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.noSearchResults.title',
+  {
+    defaultMessage: 'No results match your search criteria',
+  }
+);
+
+export const NO_SEARCH_RESULTS_BODY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.noSearchResults.body',
+  {
+    defaultMessage: 'Try modifying your search or filters.',
+  }
+);

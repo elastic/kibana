@@ -12,7 +12,7 @@ import type {
   QueryWithOccurrences,
   StreamQuery,
 } from '@kbn/significant-events-schema';
-import type { QueryStatus } from '@kbn/streams-plugin/common';
+import type { QueryStatus } from '@kbn/significant-events-plugin/common';
 import moment from 'moment';
 import { useKibana } from '../use_kibana';
 import { useTimefilter } from '../use_timefilter';
@@ -105,7 +105,14 @@ export const useFetchDiscoveryQueries = (
       perPage: response.perPage,
       total: response.total,
       queries: response.queries.map((series: QueryWithOccurrences) => {
-        const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
+        const {
+          occurrences,
+          change_points,
+          rule_uuid: _ruleUuid,
+          stream_name,
+          rule_backed,
+          ...rest
+        } = series;
         return {
           query: rest,
           stream_name,

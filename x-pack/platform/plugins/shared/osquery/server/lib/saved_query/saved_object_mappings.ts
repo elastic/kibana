@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { produce } from 'immer';
+import { produce } from 'immer-v9';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
@@ -13,6 +13,7 @@ import {
   packSavedObjectModelVersion1,
   packSavedObjectModelVersion2,
   packSavedObjectModelVersion3,
+  packSavedObjectModelVersion4,
   savedQueryModelVersion1,
   savedQueryModelVersion2,
 } from './saved_object_model_versions';
@@ -214,6 +215,7 @@ export const packType: SavedObjectsType = {
     1: packSavedObjectModelVersion1,
     2: packSavedObjectModelVersion2,
     3: packSavedObjectModelVersion3,
+    4: packSavedObjectModelVersion4,
   },
   management: {
     defaultSearchField: 'name',
@@ -221,7 +223,10 @@ export const packType: SavedObjectsType = {
     getTitle: (savedObject) => `Pack: ${savedObject.attributes.name}`,
     getEditUrl: (savedObject) => `/packs/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
-      path: `/app/osquery/packs/${savedObject.id}`,
+      // The read-only Pack details page was removed; link straight to the Edit
+      // page (read-only for readPacks-only users) instead of relying on the
+      // legacy `/packs/:id` -> `/packs/:id/edit` client-side redirect.
+      path: `/app/osquery/packs/${savedObject.id}/edit`,
       uiCapabilitiesPath: 'osquery.read',
     }),
     onExport: (context, objects) =>

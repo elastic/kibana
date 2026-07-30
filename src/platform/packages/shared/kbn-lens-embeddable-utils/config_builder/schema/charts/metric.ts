@@ -16,6 +16,7 @@ import {
   DEFAULT_PRIMARY_VALUE_ALIGNMENT,
   DEFAULT_PRIMARY_VALUE_SIZING,
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
+  DEFAULT_DENSITY,
   DEFAULT_SECONDARY_LABEL_VISIBLE,
   DEFAULT_SECONDARY_LABEL_PLACEMENT,
   DEFAULT_SECONDARY_VALUE_ALIGNMENT,
@@ -129,15 +130,28 @@ export const complementaryVizSchemaNoESQL = schema.oneOf(
   }
 );
 
-// Note: 'trend' type is not supported for ES|QL yet
-export const complementaryVizSchemaESQL = barBackgroundChartSchema.extends(
+export const complementaryVizSchemaESQL = schema.oneOf(
+  [
+    barBackgroundChartSchema.extends(
+      {
+        /**
+         * Max value
+         */
+        max_value: esqlColumnSchema,
+      },
+      { meta: { id: 'metricComplementaryBar', title: 'Complementary Bar' } }
+    ),
+    schema.object({
+      type: schema.literal('trend'),
+    }),
+  ],
   {
-    /**
-     * Max value
-     */
-    max_value: esqlColumnSchema,
-  },
-  { meta: { id: 'metricComplementaryBar', title: 'Complementary Bar' } }
+    meta: {
+      id: 'metricComplementaryVizESQL',
+      title: 'Complementary Visualization',
+      description: 'Bar chart or trendline shown behind the primary metric value.',
+    },
+  }
 );
 
 const metricConfigBackgroundChartSchemaNoESQL = {
@@ -156,6 +170,21 @@ const metricConfigBackgroundChartSchemaESQL = {
 
 const metricStylingSchema = schema.object(
   {
+    /**
+     * Density preset for metric elements.
+     * Possible values:
+     * - 'compact': Compact density (original implementation)
+     * - 'default': Default density with increased spacing, paddings, and sizing
+     */
+    density: schema.maybe(
+      schema.oneOf([schema.literal('compact'), schema.literal('default')], {
+        meta: {
+          description:
+            'Density preset for the metric chart layout. Use `compact` for a compact layout, or `default` for increased padding, element spacing, and font size.',
+        },
+        defaultValue: DEFAULT_DENSITY,
+      })
+    ),
     /**
      * Icon configuration
      */

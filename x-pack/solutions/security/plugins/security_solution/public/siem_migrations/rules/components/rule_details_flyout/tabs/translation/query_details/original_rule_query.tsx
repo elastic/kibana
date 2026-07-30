@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import xmlFormatter from 'xml-formatter';
 import type { RuleMigrationRule } from '../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import { useRuleMigrationVendorCopy } from '../../../../../hooks/use_rule_migration_vendor_copy';
 import { QueryHeader } from './header';
 import { QueryViewer } from './query_viewer';
-import * as i18n from './translations';
 
 interface OriginalRuleQueryProps {
   migrationRule: RuleMigrationRule;
@@ -19,23 +19,11 @@ interface OriginalRuleQueryProps {
 
 export const OriginalRuleQuery: React.FC<OriginalRuleQueryProps> = React.memo(
   ({ migrationRule }) => {
-    const { title, tooltip } = useMemo(
-      () => ({
-        title:
-          migrationRule.original_rule.vendor === 'splunk'
-            ? i18n.SPLUNK_QUERY_TITLE
-            : i18n.QRADAR_RULE_TITLE,
-        tooltip:
-          migrationRule.original_rule.vendor === 'splunk'
-            ? i18n.SPLUNK_QUERY_TOOLTIP
-            : i18n.QRADAR_RULE_TITLE_TOOLTIP,
-      }),
-      [migrationRule.original_rule.vendor]
-    );
+    const { originalRule } = useRuleMigrationVendorCopy(migrationRule.original_rule.vendor);
 
     return (
       <>
-        <QueryHeader title={title} tooltip={tooltip} />
+        <QueryHeader title={originalRule.title} tooltip={originalRule.tooltip} />
         <EuiHorizontalRule data-test-subj="queryHorizontalRule" margin="xs" />
         <QueryViewer
           ruleName={migrationRule.original_rule.title}

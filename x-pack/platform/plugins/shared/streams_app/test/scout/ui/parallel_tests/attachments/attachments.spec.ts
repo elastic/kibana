@@ -155,8 +155,10 @@ test.describe(
       await pageObjects.streams.clickAddAttachmentsButton();
       await pageObjects.streams.expectAddAttachmentFlyoutVisible();
 
-      // Select all attachments
-      await pageObjects.streams.selectAllAttachmentsInFlyout();
+      // Select specific test attachments (avoid selecting managed dashboards)
+      await pageObjects.streams.selectAttachmentInFlyout(TEST_DASHBOARD_TITLE);
+      await pageObjects.streams.selectAttachmentInFlyout(TEST_RULE_NAME);
+      await pageObjects.streams.selectAttachmentInFlyout(TEST_SLO_NAME);
 
       // Click add to stream
       await pageObjects.streams.clickAddToStreamButton();
@@ -192,11 +194,13 @@ test.describe(
     test('opens attachment details flyout and verifies information for each type', async ({
       pageObjects,
     }) => {
-      // First, link all attachments
+      // Link specific test attachments (avoid selecting managed dashboards)
       await pageObjects.streams.gotoAttachmentsTab(TEST_STREAM_NAME);
       await pageObjects.streams.clickAddAttachmentsButton();
       await pageObjects.streams.expectAddAttachmentFlyoutVisible();
-      await pageObjects.streams.selectAllAttachmentsInFlyout();
+      await pageObjects.streams.selectAttachmentInFlyout(TEST_DASHBOARD_TITLE);
+      await pageObjects.streams.selectAttachmentInFlyout(TEST_RULE_NAME);
+      await pageObjects.streams.selectAttachmentInFlyout(TEST_SLO_NAME);
       await pageObjects.streams.clickAddToStreamButton();
       await pageObjects.streams.expectAttachmentsTableVisible();
 

@@ -89,12 +89,11 @@ export interface KIFeatureDeduplicationScenario {
   snapshot_source?: SnapshotSourceOverride;
 }
 
-export interface DiscoveryInvestigatorScenario {
+export interface DiscoveryScenario {
   input: {
     scenario_id: string;
     stream_name: string;
     detections: Array<Partial<Detection>>;
-    continuation_candidates?: Array<Discovery>;
   };
   /** Ordered ground-truth continuation chains by `rule_name`, keyed by continuation path label. */
   continuationChains?: Record<string, string[]>;
@@ -104,9 +103,9 @@ export interface DiscoveryInvestigatorScenario {
     /** Human-readable summary of expected output for quick orientation (e.g. `discoveries=[cascade, benign-auth]`). */
     expected_ground_truth?: string;
     /**
-     * The discoveries the investigator is expected to produce — same shape as the judge's
-     * `input.discoveries` (detections + evidences + cause_kis). This is the canonical ground
-     * truth: the grouping check derives its expected groups from these `detections[].rule_name`s,
+     * The discoveries the agent is expected to generate — same shape as the judge's
+     * `input.discoveries` (signals + causal_features + blast_radius). This is the canonical ground
+     * truth: the grouping check derives its expected groups from these `signals[].metadata.rule_uuid`s,
      * and the same discoveries feed the judge scenario's input so the two stages stay consistent.
      */
     expected_discoveries: Array<Partial<Discovery>>;
@@ -123,8 +122,10 @@ export interface DiscoveryJudgeScenario {
   };
   output: {
     criteria: SamplingCriterion[];
-    /** Human-readable summary of expected outcome for each discovery, e.g. `slug=promoted (reason); slug=demoted (reason)`. Used by the status-correctness evaluator. */
+    /** Human-readable summary of the expected status for each event ID, e.g. `event_id=open (reason); event_id=dismissed (reason)`. */
     expected_ground_truth: string;
+    /** Expected judge-confirmed rule UUIDs keyed by event ID. */
+    expected_confirmed_rule_uuids?: Record<string, string[]>;
     expect_assessment_note?: boolean;
   };
   metadata: Record<string, unknown> & ScenarioMetadata;
@@ -139,6 +140,6 @@ export interface DatasetConfig {
   kiFeatureExtraction: KIFeatureExtractionScenario[];
   kiFeatureExclusion: KIFeatureExclusionScenario[];
   kiFeatureDeduplication: KIFeatureDeduplicationScenario[];
-  discoveryInvestigator: DiscoveryInvestigatorScenario[];
+  discovery: DiscoveryScenario[];
   discoveryJudge: DiscoveryJudgeScenario[];
 }

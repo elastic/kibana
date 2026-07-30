@@ -745,7 +745,6 @@ describe('Mappings editor', () => {
               ...updatedMappings.properties,
               [newField.name]: {
                 inference_id: defaultInferenceEndpoints.ELSER,
-                reference_field: '',
                 type: 'semantic_text',
               },
             },
@@ -780,9 +779,12 @@ describe('Mappings editor', () => {
             ...updatedMappings,
             properties: {
               ...updatedMappings.properties,
+              title: {
+                type: 'text',
+                copy_to: ['someNewField'],
+              },
               [newField.name]: {
                 inference_id: defaultInferenceEndpoints.ELSER,
-                reference_field: 'title',
                 type: 'semantic_text',
               },
             },

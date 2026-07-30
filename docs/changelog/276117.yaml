@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276117
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Alerting and reporting
+title: "Add cases attachments analytics index"
+description: "Cases analytics now includes a `.cases-attachments` index that stores comment and attachment data so you can join attachments to cases in Cases Analytics."

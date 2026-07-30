@@ -12,7 +12,7 @@
     "requiredPlugins": [
       "actions",
       "agentBuilder",
-      "agentContextLayer",
+      "agentBuilderSml",
       "share",
       "triggersActionsUi"
     ],

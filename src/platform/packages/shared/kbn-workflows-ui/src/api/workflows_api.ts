@@ -34,6 +34,8 @@ import type { z } from '@kbn/zod/v4';
 import type {
   BulkCreateWorkflowsParams,
   BulkCreateWorkflowsResponse,
+  CheckWorkflowIdConflictsParams,
+  CheckWorkflowIdConflictsResponse,
   ExportWorkflowsParams,
   ExportWorkflowsResponse,
   GetAggsParams,
@@ -132,6 +134,25 @@ export class WorkflowApi {
   async mgetWorkflows({ ids, source }: MgetWorkflowsParams): Promise<WorkflowMgetResponseDto> {
     return this.http.post(`${BASE}/mget`, {
       body: JSON.stringify({ ids, source }),
+      version: API_VERSION,
+    });
+  }
+
+  /**
+   * Returns the subset of the given candidate workflow IDs that already exist
+   * in the index, including soft-deleted tombstones and cross-space documents.
+   * Used by the import preflight to detect conflicts before the user commits.
+   *
+   * Implemented as `dryRun=true` on the bulk-create endpoint so no new route
+   * is needed — the same import path is reused for both the preflight check and
+   * the actual import.
+   */
+  async checkWorkflowIdConflicts({
+    workflows,
+  }: CheckWorkflowIdConflictsParams): Promise<CheckWorkflowIdConflictsResponse> {
+    return this.http.post(BASE, {
+      query: { dryRun: true },
+      body: JSON.stringify({ workflows }),
       version: API_VERSION,
     });
   }

@@ -26,41 +26,27 @@ describe('buildIlmPreviewPhases', () => {
     },
   };
 
-  it('should use stream stats for hot and 0.0 B for other non-delete phases', () => {
-    const phases = buildIlmPreviewPhases({
-      policy,
-      ilmPhases,
-      stats: { size: '249.0 B', sizeBytes: 249, totalDocs: 0 },
-    });
+  it('never includes per-phase size or document counts', () => {
+    const phases = buildIlmPreviewPhases({ policy, ilmPhases });
 
     expect(phases).toHaveLength(4);
-    expect(phases[0]).toMatchObject({
-      label: 'hot',
-      size: '249.0 B',
-      sizeInBytes: 249,
-      docsCount: 0,
-    });
-    expect(phases[1]).toMatchObject({
-      label: 'warm',
-      size: '0.0 B',
-      sizeInBytes: 0,
-      docsCount: undefined,
-    });
-    expect(phases[2]).toMatchObject({
-      label: 'cold',
-      size: '0.0 B',
-      sizeInBytes: 0,
-      docsCount: undefined,
-    });
-    expect(phases[3]).toMatchObject({
-      label: 'delete',
-      isDelete: true,
-      size: undefined,
-      sizeInBytes: undefined,
-    });
+    for (const phase of phases) {
+      expect(phase.size).toBeUndefined();
+      expect(phase.sizeInBytes).toBeUndefined();
+      expect(phase.docsCount).toBeUndefined();
+    }
   });
 
-  it('should default hot to 0.0 B when stats are missing', () => {
+  it('still resolves min_age, grow and labels per phase', () => {
+    const phases = buildIlmPreviewPhases({ policy, ilmPhases });
+
+    expect(phases[0]).toMatchObject({ label: 'hot', min_age: '0ms' });
+    expect(phases[1]).toMatchObject({ label: 'warm', min_age: '2d' });
+    expect(phases[2]).toMatchObject({ label: 'cold', min_age: '30d' });
+    expect(phases[3]).toMatchObject({ label: 'delete', isDelete: true, min_age: '90d' });
+  });
+
+  it('defaults hot min_age to 0d when missing', () => {
     const phases = buildIlmPreviewPhases({
       policy: {
         name: 'test-policy',
@@ -69,7 +55,7 @@ describe('buildIlmPreviewPhases', () => {
       ilmPhases,
     });
 
-    expect(phases[0]).toMatchObject({ label: 'hot', size: '0.0 B', sizeInBytes: 0 });
-    expect(phases[1]).toMatchObject({ label: 'warm', size: '0.0 B', sizeInBytes: 0 });
+    expect(phases[0]).toMatchObject({ label: 'hot', min_age: '0d' });
+    expect(phases[1]).toMatchObject({ label: 'warm', min_age: '2d' });
   });
 });

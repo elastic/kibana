@@ -54,7 +54,7 @@ export const markdownClient = {
         throw new Error(message);
       });
   },
-  search: async (searchQuery: Partial<MarkdownSearchRequestQuery>) => {
+  search: async (searchQuery: MarkdownSearchRequestQuery) => {
     const { query, ...params } = searchQuery;
     return await coreServices.http.get<MarkdownSearchResponseBody>(MARKDOWN_API_PATH, {
       version: MARKDOWN_API_VERSION,

@@ -1,5 +1,9 @@
 {
-  "sha1": "32c50285e1c777a93b96d8a9c5bedac75f68c7fd",
+  "sha1": "473d9dd8c898f0ae87c2c752ecb379291145ef31",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "d18f81a84aa5c84-01def2558f31c21",
@@ -360,6 +364,70 @@
       }
     },
     {
+      "id": "bff1cb9c45e581b-4bb89a6c4b0e36a",
+      "title": "Agent Builder — agents API agent responses expose the raw configuration and default the type to chat",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 233,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-41b3134f0941bb5",
+      "title": "Agent Builder — agents API GET-modify-PUT round-trips keep the stored configuration stable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 256,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-e39c5a13fda894e",
+      "title": "Agent Builder — agents API POST rejects a type field (typed agents are created in code, not via the API)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 284,
+        "column": 12
+      }
+    },
+    {
+      "id": "bff1cb9c45e581b-3fad42af990346c",
+      "title": "Agent Builder — agents API PUT rejects changing the agent type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
+        "line": 295,
+        "column": 12
+      }
+    },
+    {
       "id": "bff1cb9c45e581b-6ee79680b9f3db0",
       "title": "Agent Builder — agents API DELETE /api/agent_builder/agents/:id deletes agent",
       "expectedStatus": "passed",
@@ -371,7 +439,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 233,
+        "line": 311,
         "column": 12
       }
     },
@@ -387,7 +455,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/agents_api.spec.ts",
-        "line": 252,
+        "line": 330,
         "column": 12
       }
     },
@@ -452,6 +520,48 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/attachments_api.spec.ts",
         "line": 146,
+        "column": 12
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-15831800091ed82",
+      "title": "Agent Builder — conversations access-control API public conversations require conversation access and agent use access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 407,
+        "column": 12
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-984590e296dee6c",
+      "title": "Agent Builder — conversations access-control API auto-create cannot overwrite or take over another user conversation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 743,
+        "column": 12
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-38ea603d84caa81",
+      "title": "Agent Builder — conversations access-control API route-level privilege remains distinct from resource access",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 793,
         "column": 12
       }
     },
@@ -723,7 +833,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 111,
+        "line": 116,
         "column": 14
       }
     },
@@ -739,7 +849,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 127,
+        "line": 132,
         "column": 14
       }
     },
@@ -755,7 +865,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 143,
+        "line": 148,
         "column": 14
       }
     },
@@ -771,7 +881,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 179,
+        "line": 191,
         "column": 14
       }
     },
@@ -835,7 +945,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 111,
+        "line": 116,
         "column": 14
       }
     },
@@ -851,7 +961,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 127,
+        "line": 132,
         "column": 14
       }
     },
@@ -867,7 +977,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 143,
+        "line": 148,
         "column": 14
       }
     },
@@ -883,8 +993,152 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_attachments_api.spec.ts",
-        "line": 179,
+        "line": 191,
         "column": 14
+      }
+    },
+    {
+      "id": "23808d62419391b-3869981e6c97b56",
+      "title": "Agent Builder - converse callback API delivers completed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 94,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-92f5e782bc9e4c1",
+      "title": "Agent Builder - converse callback API stores callback origin authorship on list and get conversation responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 144,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-edfb8df4e3d1793",
+      "title": "Agent Builder - converse callback API delivers failed response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 241,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-0dffc761e12b7ef",
+      "title": "Agent Builder - converse callback API delivers aborted response to callback URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 283,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-82a75a6c138a614",
+      "title": "Agent Builder - converse callback API returns the existing execution for a replayed idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 339,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-e3a4852c5eeefc2",
+      "title": "Agent Builder - converse callback API schedules a single execution for concurrent duplicate deliveries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 418,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-be5f9d8b14fa9ea",
+      "title": "Agent Builder - converse callback API schedules separate executions for the same key on different origins",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 480,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-a98d347436e2dcf",
+      "title": "Agent Builder - converse callback API prefers a caller-provided execution id over the idempotency key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 531,
+        "column": 12
+      }
+    },
+    {
+      "id": "23808d62419391b-8077e4c805574b4",
+      "title": "Agent Builder - converse callback API continues conversation for repeated Slack origin",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_callback_api.spec.ts",
+        "line": 576,
+        "column": 12
       }
     },
     {
@@ -1176,6 +1430,22 @@
       }
     },
     {
+      "id": "e4d863c37e81c3f-1121048c07532a3",
+      "title": "Agent Builder — tracing snapshot trace documents match snapshot after conversation with tool call",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
+        "line": 198,
+        "column": 12
+      }
+    },
+    {
       "id": "238a406144a8aa4-72848fc3099b974",
       "title": "Agent Builder — plugin installation API install from remote zip URL lifecycle",
       "expectedStatus": "passed",
@@ -1430,8 +1700,8 @@
       }
     },
     {
-      "id": "1b65711126013c6-7ec29fa26d8296c",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search autocomplete",
+      "id": "1b65711126013c6-4680cb5f8075c8c",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search autocomplete",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1439,13 +1709,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 90,
+        "line": 87,
         "column": 10
       }
     },
     {
-      "id": "1b65711126013c6-db0d1ab812dd7f2",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search wildcard returns item fields",
+      "id": "1b65711126013c6-7588b6188fdff3b",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search wildcard returns item fields",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1453,13 +1723,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 105,
+        "line": 102,
         "column": 10
       }
     },
     {
-      "id": "1b65711126013c6-ff0990d6a368fe5",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_search rejects empty query",
+      "id": "1b65711126013c6-7d12781749f488c",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder_sml/sml/_search rejects empty query",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -1467,7 +1737,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/sml_api.spec.ts",
-        "line": 125,
+        "line": 122,
         "column": 10
       }
     },
@@ -1486,8 +1756,8 @@
       }
     },
     {
-      "id": "1b65711126013c6-cf6d7f8e78a8ae4",
-      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches chunk and persists attachment refs",
+      "id": "1b65711126013c6-af2271c43253dbd",
+      "title": "Agent Builder — SML internal API POST /internal/agent_builder/sml/_attach attaches entry and persists attachment refs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

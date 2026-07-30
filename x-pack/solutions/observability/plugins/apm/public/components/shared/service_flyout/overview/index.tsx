@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -14,15 +13,15 @@ import {
   EuiSkeletonTitle,
   EuiSpacer,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceNodeData } from '../../../../../common/service_map';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
@@ -48,20 +47,6 @@ const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
   }
 );
 
-interface ServiceFlyoutOverviewProps {
-  service: ServiceNodeData;
-  environment: Environment;
-  kuery: string;
-  rangeFrom: string;
-  rangeTo: string;
-  transactionType: string;
-  refreshToken: number;
-  onEnvironmentChange: (environment: Environment) => void;
-  onRangeChange: (range: { rangeFrom: string; rangeTo: string }) => void;
-  onRefresh: () => void;
-  onTransactionTypeChange: (transactionType: string) => void;
-}
-
 interface FlyoutLensChartDefinition {
   id: string;
   title: string;
@@ -74,7 +59,6 @@ function ServiceFlyoutChartsSection({
   title,
   description,
   charts,
-  columns = 2,
   rangeFrom,
   rangeTo,
   refreshToken,
@@ -83,11 +67,12 @@ function ServiceFlyoutChartsSection({
   title: string;
   description?: string;
   charts: FlyoutLensChartDefinition[];
-  columns?: 2 | 3;
   rangeFrom: string;
   rangeTo: string;
   refreshToken: number;
 }) {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <>
       <EuiFlexGroup
@@ -108,45 +93,42 @@ function ServiceFlyoutChartsSection({
         ) : null}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiFlexGrid columns={columns} responsive={false} gutterSize="m">
+      <div
+        css={css`
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: ${euiTheme.size.m};
+        `}
+      >
         {charts.map((chart) => (
-          <EuiFlexItem key={chart.id}>
-            <ServiceFlyoutLensChart
-              id={chart.id}
-              title={chart.title}
-              titleAction={chart.titleAction}
-              config={chart.config}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              refreshToken={refreshToken}
-            />
-          </EuiFlexItem>
+          <ServiceFlyoutLensChart
+            key={chart.id}
+            id={chart.id}
+            title={chart.title}
+            titleAction={chart.titleAction}
+            config={chart.config}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            refreshToken={refreshToken}
+          />
         ))}
-      </EuiFlexGrid>
+      </div>
     </>
   );
 }
 
-export function ServiceFlyoutOverview({
-  service,
-  environment,
-  kuery,
-  rangeFrom,
-  rangeTo,
-  transactionType,
-  refreshToken,
-  onEnvironmentChange,
-  onRangeChange,
-  onRefresh,
-  onTransactionTypeChange,
-}: ServiceFlyoutOverviewProps) {
+export function ServiceFlyoutOverview() {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
-  const { core, share } = useApmPluginContext();
+  const {
+    deps: { core, share },
+    service,
+    filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
+  } = useServiceFlyoutContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
-    serviceName: service.id,
+    serviceName: service.name,
     environment,
     rangeFrom,
     rangeTo,
@@ -156,10 +138,9 @@ export function ServiceFlyoutOverview({
     () =>
       getChartDefinitions({
         indexes,
-        serviceName: service.id,
+        serviceName: service.name,
         environment,
-        kuery,
-        transactionType,
+        transactionType: transactionType ?? '',
         latencyAggregationType,
         latencyTitleAction: (
           <LatencyAggregationTypeSelect
@@ -168,24 +149,12 @@ export function ServiceFlyoutOverview({
           />
         ),
       }),
-    [environment, indexes, kuery, latencyAggregationType, service.id, transactionType]
+    [environment, indexes, latencyAggregationType, service.name, transactionType]
   );
 
   return (
     <div data-test-subj="serviceFlyoutOverview">
-      <ServiceFlyoutQueryControls
-        agentName={service.agentName}
-        environment={environment}
-        kuery={kuery}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-        serviceName={service.id}
-        transactionType={transactionType}
-        onEnvironmentChange={onEnvironmentChange}
-        onRangeChange={onRangeChange}
-        onRefresh={onRefresh}
-        onTransactionTypeChange={onTransactionTypeChange}
-      />
+      <ServiceFlyoutQueryControls />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
@@ -193,7 +162,6 @@ export function ServiceFlyoutOverview({
             id="keyMetrics"
             title={KEY_METRICS_SECTION_TITLE}
             charts={keyMetrics}
-            columns={3}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             refreshToken={refreshToken}
@@ -223,11 +191,11 @@ export function ServiceFlyoutOverview({
             http={core.http}
             notifications={core.notifications}
             locators={share.url.locators}
-            serviceName={service.id}
+            serviceName={service.name}
             environment={environment}
             start={start}
             end={end}
-            transactionType={transactionType}
+            transactionType={transactionType ?? ''}
             latencyAggregationType={latencyAggregationType}
             refreshToken={refreshToken}
           />

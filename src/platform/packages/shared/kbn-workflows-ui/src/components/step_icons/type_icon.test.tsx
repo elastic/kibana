@@ -14,6 +14,7 @@ import type {
   PublicStepDefinition,
   PublicTriggerDefinition,
 } from '@kbn/workflows-extensions/public';
+import { HardcodedIcons } from './hardcoded_icons';
 import { TypeIcon } from './type_icon';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 import { useWorkflowsUiServices } from '../../context/workflows_ui_services';
@@ -32,15 +33,20 @@ beforeEach(() => {
 const iconType = (container: HTMLElement) =>
   container.querySelector('[data-euiicon-type]')?.getAttribute('data-euiicon-type');
 
+const dataUrlIcon = (container: HTMLElement) =>
+  container.querySelector('[data-test-subj="workflowTypeIconDataUrl"]');
+
 describe('TypeIcon', () => {
   describe('kind="trigger"', () => {
     it.each([
-      ['manual', 'play'],
-      ['alert', 'warning'],
-      ['scheduled', 'clock'],
+      ['manual', HardcodedIcons.manual],
+      ['alert', HardcodedIcons.alert],
+      ['scheduled', HardcodedIcons.scheduled],
     ])('renders the built-in icon for "%s"', (triggerType, expectedIcon) => {
       const { container } = render(<TypeIcon type={triggerType} kind="trigger" />);
-      expect(iconType(container)).toBe(expectedIcon);
+      expect(iconType(container) ?? dataUrlIcon(container)?.getAttribute('data-test-subj')).toBe(
+        expectedIcon.startsWith('data:') ? 'workflowTypeIconDataUrl' : expectedIcon
+      );
     });
 
     it('resolves a custom trigger icon from the workflows extensions registry', () => {
@@ -56,7 +62,11 @@ describe('TypeIcon', () => {
 
     it('falls back to "bolt" for an unknown trigger with no registered definition', () => {
       const { container } = render(<TypeIcon type="custom-trigger" kind="trigger" />);
-      expect(iconType(container)).toBe('bolt');
+      expect(iconType(container) ?? dataUrlIcon(container)?.getAttribute('data-test-subj')).toBe(
+        HardcodedIcons.trigger.startsWith('data:')
+          ? 'workflowTypeIconDataUrl'
+          : HardcodedIcons.trigger
+      );
     });
   });
 

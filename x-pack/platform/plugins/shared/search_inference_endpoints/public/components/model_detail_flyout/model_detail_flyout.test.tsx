@@ -7,15 +7,24 @@
 
 import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
-import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { ModelDetailFlyout } from './model_detail_flyout';
+import { useKibana } from '../../hooks/use_kibana';
+import { INFERENCE_PREFERENCES_FEATURE_FLAG_ID } from '../../../common/constants';
+
+jest.mock('../../hooks/use_kibana');
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useUiSetting: jest.fn((key: string, defaultValue?: unknown) => defaultValue),
+}));
+
+const mockUseUiSetting = useUiSetting as jest.Mock;
+const mockUseKibana = useKibana as jest.Mock;
 
 const MODEL_ID = 'test-model';
 
-const createEndpoint = (
-  overrides: Partial<InferenceAPIConfigResponse> = {}
-): InferenceAPIConfigResponse => ({
+const createEndpoint = (overrides: Partial<EisInferenceEndpoint> = {}): EisInferenceEndpoint => ({
   inference_id: 'my-endpoint',
   task_type: 'text_embedding',
   service: 'elastic',
@@ -29,11 +38,18 @@ describe('ModelDetailFlyout', () => {
   const onDeleteEndpoint = jest.fn();
   const onCopyEndpointId = jest.fn();
 
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+      if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return false;
+      return defaultValue;
+    });
+    mockUseKibana.mockReturnValue({ services: {} });
+  });
 
   const renderFlyout = (
     modelId = MODEL_ID,
-    allEndpoints: InferenceAPIConfigResponse[] = [createEndpoint()]
+    allEndpoints: EisInferenceEndpoint[] = [createEndpoint()]
   ) =>
     render(
       <ModelDetailFlyout
@@ -55,7 +71,7 @@ describe('ModelDetailFlyout', () => {
     const endpoint = {
       ...createEndpoint(),
       metadata: { display: { name: 'Anthropic Claude Opus 4.5', model_creator: 'Anthropic' } },
-    } as unknown as InferenceAPIConfigResponse;
+    } as unknown as EisInferenceEndpoint;
     renderFlyout(MODEL_ID, [endpoint]);
 
     expect(screen.getByText('Anthropic Claude Opus 4.5')).toBeInTheDocument();
@@ -121,7 +137,7 @@ describe('ModelDetailFlyout', () => {
         metadata: {
           heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' },
         },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       const badges = screen.getByTestId('flyoutTaskBadges');
@@ -134,7 +150,7 @@ describe('ModelDetailFlyout', () => {
         metadata: {
           heuristics: { status: 'deprecated' },
         },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       const badges = screen.getByTestId('flyoutTaskBadges');
@@ -145,7 +161,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { status: 'preview' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       const badges = screen.getByTestId('flyoutTaskBadges');
@@ -158,6 +174,32 @@ describe('ModelDetailFlyout', () => {
       expect(screen.queryByTestId(`modelPreviewBadge-${MODEL_ID}`)).not.toBeInTheDocument();
       expect(screen.queryByTestId(`modelDeprecatedBadge-${MODEL_ID}`)).not.toBeInTheDocument();
       expect(screen.queryByTestId(`modelEolBadge-${MODEL_ID}`)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('region badges', () => {
+    const endpointWithRegions = {
+      ...createEndpoint(),
+      metadata: {
+        regions: [{ csp: 'aws', region: 'us-east-1', geo: 'us' }],
+      },
+    } as unknown as EisInferenceEndpoint;
+
+    it('renders region badges when FF is enabled and endpoint has region metadata', () => {
+      mockUseUiSetting.mockImplementation((key: string, defaultValue?: unknown) => {
+        if (key === INFERENCE_PREFERENCES_FEATURE_FLAG_ID) return true;
+        return defaultValue;
+      });
+      renderFlyout(MODEL_ID, [endpointWithRegions]);
+
+      expect(screen.getByTestId('flyoutRegionBadges')).toBeInTheDocument();
+      expect(screen.getByTestId('flyoutRegionBadge-us')).toBeInTheDocument();
+    });
+
+    it('does not render region badges when FF is disabled', () => {
+      renderFlyout(MODEL_ID, [endpointWithRegions]);
+
+      expect(screen.queryByTestId('flyoutRegionBadges')).not.toBeInTheDocument();
     });
   });
 
@@ -179,7 +221,7 @@ describe('ModelDetailFlyout', () => {
             end_of_life_date: '2026-04-15',
           },
         },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
@@ -197,7 +239,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { status: 'ga' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).toHaveTextContent('--');
@@ -208,7 +250,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { release_date: '2025-01-10' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).not.toHaveTextContent('--');
@@ -219,7 +261,7 @@ describe('ModelDetailFlyout', () => {
       const endpoint = {
         ...createEndpoint(),
         metadata: { heuristics: { end_of_life_date: '2026-04-15' } },
-      } as unknown as InferenceAPIConfigResponse;
+      } as unknown as EisInferenceEndpoint;
       renderFlyout(MODEL_ID, [endpoint]);
 
       expect(valueForLabel(releaseLabel)).toHaveTextContent('--');

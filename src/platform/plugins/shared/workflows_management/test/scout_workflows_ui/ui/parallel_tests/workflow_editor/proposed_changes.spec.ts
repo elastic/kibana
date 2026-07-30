@@ -14,6 +14,7 @@ import { cleanupWorkflowsAndRules } from '../../fixtures/cleanup';
 
 /** Matches ProposalManager: always Ctrl in scout tests */
 const CHORD_MODIFIER = 'Control';
+const LLM_CONNECTOR_NAME = 'scout-workflows-gen-ai';
 
 const INITIAL_YAML = `name: Proposed Changes Test
 description: A test workflow for proposed changes
@@ -82,10 +83,26 @@ const ALL_STEPS_MODIFIED = INITIAL_YAML.replace(
   .replace('message: "Hello from step three"', 'message: "Modified three"');
 
 test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ scoutSpace }) => {
+  let llmConnectorId: string | undefined;
+
+  test.beforeAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.set({
       'agentBuilder:experimentalFeatures': true,
     });
+    const connector = await apiServices.alerting.connectors.create(
+      {
+        name: LLM_CONNECTOR_NAME,
+        connectorTypeId: '.gen-ai',
+        config: {
+          apiProvider: 'OpenAI',
+          apiUrl: 'http://localhost:9999',
+          defaultModel: 'gpt-4',
+        },
+        secrets: { apiKey: 'scout-test-key' },
+      },
+      scoutSpace.id
+    );
+    llmConnectorId = connector.id;
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -97,6 +114,9 @@ test.describe('Proposed changes accept and reject', { tag: [...tags.stateful.cla
 
   test.afterAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.unset('agentBuilder:experimentalFeatures');
+    if (llmConnectorId) {
+      await apiServices.alerting.connectors.delete(llmConnectorId, scoutSpace.id);
+    }
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 

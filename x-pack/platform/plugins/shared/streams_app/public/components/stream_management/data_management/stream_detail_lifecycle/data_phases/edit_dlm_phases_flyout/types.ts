@@ -17,6 +17,8 @@ export interface EditDlmPhasesFlyoutProps extends DataPhasesFlyoutCommonProps {
   onRefreshDefaultRepository?: () => void;
   isRefreshingDefaultRepository?: boolean;
   manageRepositoriesHref?: string;
+  createDefaultRepositoryHref?: string;
+  hasExistingRepositories?: boolean;
   defaultRepositoryName?: string;
   canCreateRepository?: boolean;
 

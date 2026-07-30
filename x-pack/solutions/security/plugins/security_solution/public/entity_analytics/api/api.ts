@@ -12,10 +12,15 @@ import {
   type EntityMaintainerResponseItem,
   ENTITY_STORE_ROUTES,
   type GetEntityMaintainersResponse,
+  type SaveEntityAiSummaryParams,
+  type GetPersistedAiSummaryResponse,
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
-import { ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
+import {
+  ENTITY_DETAILS_HIGHLIGHT_INTERNAL_URL,
+  ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL,
+} from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AnomalyOverviewRequestBody,
   AnomalyOverviewResponse,
@@ -207,7 +212,6 @@ export const useEntityAnalyticsRoutes = () => {
           from: params.from,
           to: params.to,
           score_type: params.scoreType,
-          page_size: params.pageSize,
           include_contributions: params.includeContributions,
         },
         signal,
@@ -756,6 +760,31 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
+    const saveEntityAiSummary = (
+      params: SaveEntityAiSummaryParams
+    ): Promise<{ created: boolean }> =>
+      http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+
+    /**
+     * Reads the persisted AI summary for an entity from the metadata datastream.
+     * `canRead: false` in the response means the user lacks metadata read access
+     * and the caller should fall back to on-demand generation.
+     */
+    const fetchPersistedAiSummary = (
+      params: { entityType: string; entityIdentifier: string },
+      signal?: AbortSignal
+    ): Promise<GetPersistedAiSummaryResponse> =>
+      http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+        query: { entityId: params.entityIdentifier, entityType: params.entityType },
+        signal,
+      });
+
     /**
      * List all watchlists
      */
@@ -1054,6 +1083,8 @@ export const useEntityAnalyticsRoutes = () => {
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
       fetchEntityDetailsHighlights,
+      saveEntityAiSummary,
+      fetchPersistedAiSummary,
       fetchWatchlists,
       fetchLeads,
       fetchLeadGenerationStatus,
@@ -1090,6 +1121,5 @@ export interface FetchRiskScoreHistoryParams {
   from?: string;
   to?: string;
   scoreType?: RiskScoreHistoryEntry['score_type'];
-  pageSize?: number;
   includeContributions?: boolean;
 }

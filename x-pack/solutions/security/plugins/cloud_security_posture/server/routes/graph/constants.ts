@@ -21,3 +21,10 @@ export const GRAPH_TARGET_EUID_SOURCE_FIELDS = getGraphTargetEuidSourceFields(eu
  * Anything not starting with one of these is treated as a generic entity.
  */
 export const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
+
+/**
+ * ES|QL FORK supports a maximum of 8 branches. buildRelationshipsEsqlQuery emits one FORK
+ * branch per relationship field, so ENTITY_RELATIONSHIP_FIELDS is batched into groups of at
+ * most this size, each issued as its own ES|QL query, once it exceeds the limit.
+ */
+export const RELATIONSHIP_FIELDS_FORK_BATCH_SIZE = 8;

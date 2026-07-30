@@ -59,7 +59,11 @@ describe('Lens API - Visualizations Search Route', () => {
     const routeHandler = addVersionArgs[1];
 
     // Setup request and response mocks using core testing utilities
-    const mockCtx = {} as unknown as RequestHandlerContext;
+    const mockCtx = {
+      resolve: jest.fn().mockResolvedValue({
+        core: { featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(true) } },
+      }),
+    } as unknown as RequestHandlerContext;
     const mockReq = httpServerMock.createKibanaRequest({
       query: {
         query: 'search query',

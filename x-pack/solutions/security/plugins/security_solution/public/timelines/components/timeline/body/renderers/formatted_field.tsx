@@ -45,6 +45,7 @@ import {
   SIGNAL_STATUS_FIELD_NAME,
 } from './constants';
 import { renderEventModule, RenderRuleName, renderUrl } from './formatted_field_helpers';
+import type { FlyoutOrigin } from '../../../../../common/lib/telemetry';
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
@@ -79,6 +80,11 @@ const FormattedFieldValueComponent: React.FC<{
   value: string | number | undefined | null;
   linkValue?: string | null | undefined;
   data?: TimelineNonEcsData[];
+  /**
+   * Which UI surface this is rendered in, for telemetry on fields that open a flyout (e.g. rule
+   * name). Forwarded to `RenderRuleName`; defaults to `table_field_link` there.
+   */
+  origin?: FlyoutOrigin;
 }> = ({
   asPlainText,
   Component,
@@ -99,6 +105,7 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
   data,
+  origin,
 }) => {
   const euidApi = useEntityStoreEuidApi();
 
@@ -192,6 +199,7 @@ const FormattedFieldValueComponent: React.FC<{
         title={title}
         truncate={truncate}
         value={value}
+        origin={origin}
       />
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {

@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
-  DOCUMENT_TYPE_ENTITY,
   DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
 } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { Skeleton } from './parts/skeleton';
 import { Panel } from './parts/panel';
@@ -24,6 +24,12 @@ export type GroupedItemProps =
       isLoading: true;
       item?: EntityOrEventItem;
       scopeId?: string;
+      onShowDocument?: (docId: string, indexName?: string, isEvent?: boolean) => void;
+      onShowEntity?: (params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      }) => void;
     }
   | {
       isLoading?: false;
@@ -32,42 +38,57 @@ export type GroupedItemProps =
        * Unique identifier for the graph instance, used to scope filter state.
        */
       scopeId: string;
+      /** Invoked to open the event/alert details preview for the clicked item. */
+      onShowDocument: (docId: string, indexName?: string, isEvent?: boolean) => void;
+      /** Invoked to open the entity details preview for the clicked item. */
+      onShowEntity: (params: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      }) => void;
     };
 
-export const GroupedItem = memo(({ item, isLoading, scopeId }: GroupedItemProps) => {
-  if (isLoading) {
+export const GroupedItem = memo(
+  ({ item, isLoading, scopeId, onShowDocument, onShowEntity }: GroupedItemProps) => {
+    if (isLoading) {
+      return (
+        <Panel grow={false}>
+          <Skeleton />
+        </Panel>
+      );
+    }
+
     return (
-      <Panel grow={false}>
-        <Skeleton />
+      <Panel isAlert={item.itemType === DOCUMENT_TYPE_ALERT}>
+        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <HeaderRow
+              item={item}
+              scopeId={scopeId}
+              onShowDocument={onShowDocument}
+              onShowEntity={onShowEntity}
+            />
+          </EuiFlexItem>
+
+          {item.timestamp && (
+            <EuiFlexItem>
+              <TimestampRow timestamp={item.timestamp} />
+            </EuiFlexItem>
+          )}
+
+          {item.itemType !== DOCUMENT_TYPE_ENTITY && item.actor && item.target && (
+            <EuiFlexItem>
+              <ActorsRow actor={item.actor} target={item.target} />
+            </EuiFlexItem>
+          )}
+
+          <EuiFlexItem>
+            <MetadataRow item={item} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Panel>
     );
   }
-
-  return (
-    <Panel isAlert={item.itemType === DOCUMENT_TYPE_ALERT}>
-      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <HeaderRow item={item} scopeId={scopeId} />
-        </EuiFlexItem>
-
-        {item.timestamp && (
-          <EuiFlexItem>
-            <TimestampRow timestamp={item.timestamp} />
-          </EuiFlexItem>
-        )}
-
-        {item.itemType !== DOCUMENT_TYPE_ENTITY && item.actor && item.target && (
-          <EuiFlexItem>
-            <ActorsRow actor={item.actor} target={item.target} />
-          </EuiFlexItem>
-        )}
-
-        <EuiFlexItem>
-          <MetadataRow item={item} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Panel>
-  );
-});
+);
 
 GroupedItem.displayName = 'GroupedItem';

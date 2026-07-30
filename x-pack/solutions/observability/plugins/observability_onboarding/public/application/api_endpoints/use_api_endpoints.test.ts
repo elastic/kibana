@@ -84,6 +84,84 @@ describe('useApiEndpoints', () => {
     expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
   });
 
+  it('builds the managed Elasticsearch-compatible URL from the managed OTLP URL', () => {
+    const { result } = setup({
+      isServerless: false,
+      elasticsearchUrl: 'https://es.example.com',
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://otlp.example.com:443/_es');
+  });
+
+  it('reports the OpenTelemetry endpoint as a managed input when the managed service is available', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'opentelemetry')?.usesManagedInput).toBe(true);
+  });
+
+  it('reports the Elasticsearch endpoint as direct when the managed OTLP URL is blank', () => {
+    const { result } = setup({
+      managedOtlpServiceUrl: '   ',
+    });
+
+    expect(findEndpoint(result, 'elasticsearch')?.usesManagedInput).toBe(false);
+  });
+
+  it('reports the Prometheus endpoint as direct when managed PRW is disabled', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpPrwEndpointEnabled: false,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'prometheus')?.usesManagedInput).toBe(false);
+  });
+
+  it('labels the managed Elasticsearch-compatible endpoint as Elasticsearch when the managed OTLP URL is configured', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: false,
+      elasticsearchUrl: 'https://es.example.com',
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'elasticsearch')?.label).toBe('Elasticsearch');
+  });
+
+  it('builds the managed Elasticsearch-compatible URL from the managed OTLP URL when the managed service is available', () => {
+    const { result } = setup({
+      isServerless: false,
+      isManagedOtlpServiceAvailable: true,
+      elasticsearchUrl: 'https://es.example.com',
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://otlp.example.com:443/_es');
+  });
+
+  it('labels the managed Elasticsearch-compatible endpoint as Elasticsearch', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      elasticsearchUrl: 'https://es.example.com',
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'elasticsearch')?.label).toBe('Elasticsearch');
+  });
+
+  it('falls back to the Elasticsearch URL when the managed OTLP URL is blank on Serverless', () => {
+    const { result } = setup({
+      isServerless: true,
+      elasticsearchUrl: 'https://es.example.com',
+      managedOtlpServiceUrl: '   ',
+    });
+
+    expect(findEndpoint(result, 'elasticsearch')?.url).toBe('https://es.example.com');
+  });
+
   it('uses the on-prem Elasticsearch URL resolved server-side for Prometheus', () => {
     const { result } = setup({
       isServerless: false,
@@ -155,5 +233,42 @@ describe('useApiEndpoints', () => {
     const { result } = setup({ status: FETCH_STATUS.LOADING });
 
     expect(result.current.isLoading).toBe(true);
+  });
+
+  it('resolves Supabase and Vercel endpoints for OpenTelemetry when the managed service is available', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([
+      expect.objectContaining({
+        id: 'supabase',
+        url: 'https://otlp.example.com:443/supabase/v1/logs',
+      }),
+      expect.objectContaining({
+        id: 'vercel',
+        url: 'https://otlp.example.com:443/vercel',
+      }),
+    ]);
+  });
+
+  it('resolves no additional endpoints for OpenTelemetry when the managed service is unavailable', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: false,
+      elasticsearchUrl: 'https://es.example.com',
+    });
+
+    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([]);
+  });
+
+  it('resolves no additional endpoints for Prometheus and Elasticsearch', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'prometheus')?.additionalEndpoints).toEqual([]);
+    expect(findEndpoint(result, 'elasticsearch')?.additionalEndpoints).toEqual([]);
   });
 });

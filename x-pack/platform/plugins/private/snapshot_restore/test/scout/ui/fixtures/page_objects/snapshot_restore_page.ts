@@ -12,10 +12,25 @@ export class SnapshotRestorePage {
 
   async waitForSnapshotsTab({
     state = 'noRepos',
-  }: { state?: 'noRepos' | 'noSnapshots' | 'hasSnapshots' } = {}) {
-    // noRepos    → RepositoryEmptyPrompt renders registerRepositoryButton
+  }: { state?: 'noRepos' | 'noSnapshots' | 'hasSnapshots' | 'loaded' } = {}) {
+    // noRepos     → RepositoryEmptyPrompt renders registerRepositoryButton
     // noSnapshots → SnapshotEmptyPrompt renders emptyPrompt (repos exist, no snapshots yet)
     // hasSnapshots → snapshotList table
+    // loaded      → either emptyPrompt or snapshotList — a repository exists but the snapshot count
+    //               is irrelevant. Use this when the test only needs a repository present: the
+    //               empty-snapshots count is global across all repositories, and on ECH the managed
+    //               `found-snapshots` repository continuously accrues SLM snapshots, so `noSnapshots`
+    //               never resolves there.
+    if (state === 'loaded') {
+      // `emptyPrompt` and `snapshotList` are mutually exclusive in the DOM (snapshot_list.tsx
+      // renders one or the other), so the combined locator resolves to a single element.
+      await this.page.testSubj
+        .locator('emptyPrompt')
+        .or(this.page.testSubj.locator('snapshotList'))
+        .waitFor({ state: 'visible' });
+      return;
+    }
+
     const selectorMap = {
       noRepos: 'registerRepositoryButton',
       noSnapshots: 'emptyPrompt',

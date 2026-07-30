@@ -120,7 +120,6 @@ export const editPanelsOperation = defineOperation({
             nlQuery: panelInput.query,
             chartType: panelInput.chartType,
             esql: panelInput.esql,
-            renderer: panelInput.renderer,
             existingPanel,
           })
         )
@@ -174,6 +173,12 @@ export const editPanelsOperation = defineOperation({
       }
 
       nextDashboardData = updateResult.dashboardData;
+      if (attempt.authoringNote) {
+        context.panelAuthoringNotes.push({
+          panelId: panelInput.panelId,
+          authoringNote: attempt.authoringNote,
+        });
+      }
     }
 
     return nextDashboardData;

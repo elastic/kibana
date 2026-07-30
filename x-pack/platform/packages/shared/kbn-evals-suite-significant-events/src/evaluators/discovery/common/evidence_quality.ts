@@ -11,35 +11,54 @@ import {
   type CreateScenarioCriteriaLlmEvaluatorOptions,
 } from '../../scenario_criteria/evaluators';
 
-const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
-  {
-    id: 'evidence_description_is_hypothesis_test',
-    text: 'Every evidences[] entry where the judge stamped confirmed: true (evidence the judge re-verified via execute_esql in this cycle) must document a hypothesis test using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Entries without a confirmed stamp (carried forward from input without re-verification in this cycle) are exempt and may retain whatever description they arrived with.',
-    score: 1,
-  },
+const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_informational_exempt',
-    text: 'Informational entries are exempt and should be treated as acceptable: quiet-rule entries (esql_query is null, trusting the detection-pipeline kind:quiet signal) and "no confirming query available" dispositions do not need the four-part structure. Do not penalize them.',
+    text: 'Informational entries are exempt and should be treated as acceptable: quiet-rule signals (evidence is null, trusting the detection-pipeline kind:quiet signal) and "no confirming query available" dispositions do not need a structured verification account. Do not penalize them.',
     score: 1,
   },
   {
     id: 'evidence_description_no_payload',
-    text: 'Evidence descriptions contain no raw payload values, PII, tokens, UUIDs, or raw log lines — only service names, error types/codes, field paths, and counts.',
+    text: 'Signal descriptions contain no raw IDs, UUIDs, metric values, PII, PCI, CVV, SSNs, credentials, secrets, or tokens. Concise non-sensitive log signatures are acceptable when they identify decisive evidence; do not penalize literal non-sensitive error text.',
     score: 1,
   },
 ];
 
-/** LLM evaluator: grades whether each evidence `description` follows the 4-part hypothesis-test structure. */
+const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
+  {
+    id: 'evidence_description_is_hypothesis_test',
+    text: 'Every signal where the agent set `confirmed` to true or false must document its verification using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Signals without a confirmed value were not verified and are exempt.',
+    score: 1,
+  },
+  ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
+];
+
+/**
+ * Judge-authored descriptions follow the plain-sentence contract from the judge instructions
+ * (`<communication>`); carried entries keep whatever format they arrived with, including the
+ * legacy four-part template still written by the discovery agent.
+ */
+export const JUDGE_EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
+  {
+    id: 'evidence_description_is_grounded_check',
+    text: 'Every signal the judge verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must describe the check in one to three plain sentences covering what was checked, what the data showed, and what that means for the event. The four-part template ("Testing: … Expected if true: … Found: … Verdict: …") is not acceptable for these judge-authored entries. Entries carried forward unchanged from the input (older `collected_at`) are acceptable in any format, including the four-part template. Signals without a confirmed value were not verified and are exempt.',
+    score: 1,
+  },
+  ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
+];
+
+/** LLM evaluator: grades whether each signal's `description` follows the expected verification account structure. */
 export const createEvidenceDescriptionEvaluator = <
   TExample extends Example,
   TOutput extends TaskOutput
 >({
   criteriaFn,
   transformOutput,
+  criteria = EVIDENCE_DESCRIPTION_CRITERIA,
 }: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TOutput>): Evaluator<TExample, TOutput> =>
   createScenarioCriteriaLlmEvaluator<TExample, TOutput>({
     name: 'evidence_description_quality',
     criteriaFn,
-    criteria: EVIDENCE_DESCRIPTION_CRITERIA,
+    criteria,
     transformOutput,
   });

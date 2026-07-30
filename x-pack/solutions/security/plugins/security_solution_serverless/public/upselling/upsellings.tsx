@@ -30,6 +30,7 @@ import {
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   AttackDiscoveryUpsellingPageLazy,
+  AttacksUpsellingPageLazy,
   EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
@@ -79,6 +80,11 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.attackDiscovery,
     pli: ProductFeatureKey.attackDiscovery,
     component: () => <AttackDiscoveryUpsellingPageLazy />,
+  },
+  {
+    pageName: SecurityPageName.attacks,
+    pli: ProductFeatureKey.attackDiscovery,
+    component: () => <AttacksUpsellingPageLazy />,
   },
   {
     pageName: SecurityPageName.siemMigrationsRules,

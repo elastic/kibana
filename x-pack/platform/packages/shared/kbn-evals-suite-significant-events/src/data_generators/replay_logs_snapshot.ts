@@ -14,6 +14,7 @@ import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 
 const LOGS_STREAM_NAME = 'logs';
+const SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM = '.significant_events-events';
 
 const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) {
@@ -110,4 +111,12 @@ export async function cleanSignificantEventsDataStreams(
   }
 
   await deleteLogsIndexTemplate(esClient, log);
+
+  await esClient
+    .deleteByQuery({
+      index: SIGNIFICANT_EVENTS_EVENTS_DATA_STREAM,
+      query: { match_all: {} },
+      refresh: true,
+    })
+    .catch(() => {});
 }

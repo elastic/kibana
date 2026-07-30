@@ -98,7 +98,8 @@ export default function ({ getService }: FtrProviderContext) {
         'manage_tools',
         'manage_skills',
       ],
-      agentContextLayer: ['all', 'read', 'minimal_all', 'minimal_read'],
+      agentBuilderSml: ['all', 'read', 'minimal_all', 'minimal_read'],
+      contextEngine: ['all', 'read', 'minimal_all', 'minimal_read'],
       automatic_import: ['all', 'read', 'minimal_all', 'minimal_read'],
       slo: ['all', 'read', 'minimal_all', 'minimal_read'],
       searchPlayground: ['all', 'read', 'minimal_all', 'minimal_read'],
@@ -138,6 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
       actions: ['all', 'read', 'minimal_all', 'minimal_read', 'endpoint_security_execute'],
       anonymization: ['all', 'read', 'minimal_all', 'minimal_read'],
       stackAlerts: ['all', 'read', 'minimal_all', 'minimal_read'],
+      stackAlertsOnly: ['all', 'read', 'minimal_all', 'minimal_read'],
       ml: ['all', 'read', 'minimal_all', 'minimal_read'],
       siem: [
         'all',

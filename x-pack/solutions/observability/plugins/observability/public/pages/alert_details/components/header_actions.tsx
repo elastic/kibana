@@ -29,8 +29,10 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { RuleQueryInspector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { AlertSnoozePanelInline, useAlertSnooze } from '@kbn/response-ops-alert-snooze';
 import type { AlertSnoozePayload } from '@kbn/response-ops-alert-snooze';
+import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names';
 
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
@@ -55,6 +57,34 @@ export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps 
   onUntrackAlert: () => void;
 }
 
+/**
+ * Inline snooze form with its `field_change` dropdown wired to the alert index
+ * fields for the alert's rule type. Kept as a small component so the fields are
+ * only fetched when the snooze form is actually opened. The `alert-snooze`
+ * package stays data-agnostic; this consumer owns the fetching.
+ */
+function AlertSnoozeForm({
+  http,
+  ruleTypeIds,
+  onApply,
+  onBack,
+}: {
+  http: HttpStart;
+  ruleTypeIds: string[];
+  onApply: (payload: AlertSnoozePayload) => void;
+  onBack: () => void;
+}) {
+  const { fieldNames, isLoading } = useAlertFieldNames({ http, ruleTypeIds });
+  return (
+    <AlertSnoozePanelInline
+      onApply={onApply}
+      onBack={onBack}
+      fieldOptions={fieldNames}
+      isLoadingFields={isLoading}
+    />
+  );
+}
+
 export function HeaderActions({
   alert,
   alertIndex,
@@ -72,15 +102,11 @@ export function HeaderActions({
     notifications,
   } = services;
 
-  const authorizedToReadRuleType = useAuthorizedToReadRuleType();
+  const { authorizedToReadRuleType } = useAuthorizedToReadRuleType();
 
-  // Rule read is authorized per rule type (and consumer), so gate the "Go to rule
-  // details" action on the specific rule behind this alert rather than a coarse
-  // "any rules" flag.
-  const alertRuleTypeId = alert?.fields[ALERT_RULE_TYPE_ID];
-  const alertConsumer = alert?.fields[ALERT_RULE_CONSUMER];
-  const canReadAlertRule = Boolean(
-    alertRuleTypeId && authorizedToReadRuleType(alertRuleTypeId, alertConsumer)
+  const canReadAlertRule = authorizedToReadRuleType(
+    alert?.fields[ALERT_RULE_TYPE_ID],
+    alert?.fields[ALERT_RULE_CONSUMER]
   );
 
   // Attaching an alert to a case requires both reading cases and adding comments
@@ -135,14 +161,14 @@ export function HeaderActions({
   const { discoverUrl } = useDiscoverUrl({ alert, rule });
 
   const handleUntrackAlert = useCallback(async () => {
-    if (alert) {
+    if (alert && alertIndex) {
       await untrackAlerts({
-        indices: ['.internal.alerts-observability.*'],
+        indices: [alertIndex],
         alertUuids: [alert.fields[ALERT_UUID]],
       });
       onUntrackAlert();
     }
-  }, [alert, untrackAlerts, onUntrackAlert]);
+  }, [alert, alertIndex, untrackAlerts, onUntrackAlert]);
 
   const [alertDetailsRuleFormFlyoutOpen, setAlertDetailsRuleFormFlyoutOpen] = useState(false);
 
@@ -239,7 +265,11 @@ export function HeaderActions({
           >
             {isAlertSnoozeFormOpen ? (
               <EuiContextMenuPanel>
-                <AlertSnoozePanelInline
+                <AlertSnoozeForm
+                  http={http}
+                  ruleTypeIds={
+                    alert?.fields[ALERT_RULE_TYPE_ID] ? [alert.fields[ALERT_RULE_TYPE_ID]] : []
+                  }
                   onApply={handleSnoozeAlertApply}
                   onBack={() => setIsAlertSnoozeFormOpen(false)}
                 />

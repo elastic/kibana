@@ -27,16 +27,18 @@ import {
   EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
-import type { ToastsStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useController, useForm } from 'react-hook-form';
 
 import type { DataSource, DataSourceWithSecrets } from '../../common/datasource_types';
-import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
-import { ALL_DATA_SOURCE_TYPES, DATA_SOURCE_TYPES_TO_ICONS } from '../../common';
+import {
+  ALL_DATA_SOURCE_TYPES,
+  DATA_SOURCE_TYPES_TO_ICONS,
+  validateIndexNameRules,
+} from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
 import { getFlyoutSaveErrorMessage } from '../get_flyout_save_error_message';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
-import type { DataSourcesClient } from '../data_sources_client';
 import {
   applyAuthenticationModeToDataSource,
   getDefaultAuthenticationMode,
@@ -45,28 +47,22 @@ import {
 import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
 import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
+import { CreateDataSourceFlyoutTypeSettingsS3Region } from './create_data_source_flyout_type_settings_s3';
 import {
   authenticationModeFromDataSource,
   dataSourceToFlyoutFormValues,
   emptyDataSourceFlyoutFormValues,
 } from './data_source_flyout_initial_values';
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
-import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormValues } from './types';
+import type { DataFederationKibanaServices } from '../types';
 
 export interface CreateDataSourceFlyoutProps {
   /** When set, the flyout opens in edit mode for this data source. */
   initialDataSource?: DataSource;
   /** Existing names to prevent duplicates (create mode only). */
   existingDataSourceNames?: readonly string[];
-  cloudInfo?: FederatedIdentityClusterInfo;
-  featureFlags?: {
-    enableFederatedIdentityAuth?: boolean;
-    enableGoogleCloudStorageDataSourceType?: boolean;
-    enableAzureDataSourceType?: boolean;
-  };
-  dataSourcesClient: DataSourcesClient;
-  toasts: ToastsStart;
-  onClose: () => void;
+  onClose: (result?: { savedChanges?: boolean }) => void;
   /**
    * Persist a data source (create or update). Resolve `null` on success, or an error message to show in the flyout.
    */
@@ -76,13 +72,13 @@ export interface CreateDataSourceFlyoutProps {
 export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutProps> = ({
   initialDataSource,
   existingDataSourceNames = [],
-  cloudInfo,
-  featureFlags,
-  dataSourcesClient,
-  toasts,
   onClose,
   onSave,
 }) => {
+  const {
+    services: { cloudInfo, featureFlags },
+  } = useKibana<DataFederationKibanaServices>();
+
   const enableFederatedIdentityAuth = featureFlags?.enableFederatedIdentityAuth;
   const enableGoogleCloudStorageDataSourceType =
     featureFlags?.enableGoogleCloudStorageDataSourceType;
@@ -126,6 +122,11 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
 
         if (isEditMode) {
           return true;
+        }
+
+        const nameValidation = validateIndexNameRules(trimmed);
+        if (nameValidation) {
+          return nameValidation.message;
         }
 
         const normalized = trimmed.toLowerCase();
@@ -233,7 +234,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   return (
     <EuiFlyout
       ownFocus
-      onClose={onClose}
+      onClose={() => onClose()}
       aria-labelledby="createDataSourceFlyoutTitle"
       size="m"
       data-test-subj={isEditMode ? 'editDataSourceFlyout' : 'createDataSourceFlyout'}
@@ -301,6 +302,13 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
               inputRef={descriptionField.ref}
             />
           </EuiFormRow>
+          {dataSourceType === 's3' && (
+            <CreateDataSourceFlyoutTypeSettingsS3Region
+              control={control}
+              unregister={unregister}
+              isRequired={!isEditMode}
+            />
+          )}
           <CreateDataSourceFlyoutTypeSettingsBlock
             control={control}
             dataSourceType={dataSourceType}
@@ -330,7 +338,7 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={onClose}>
+            <EuiButtonEmpty data-test-subj="createDataSourceFlyoutCancel" onClick={() => onClose()}>
               {createDataSourceFlyoutStrings.cancelButton()}
             </EuiButtonEmpty>
           </EuiFlexItem>

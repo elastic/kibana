@@ -21,7 +21,8 @@
       "encryptedSavedObjects"
     ],
     "extraPublicDirs": [
-      "common"
+      "common",
+      "common/entity_summary"
     ]
   }
 }

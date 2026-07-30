@@ -58,7 +58,7 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
   services.capabilities.management = {
     ...services.capabilities.management,
     insightsAndAlerting: {
-      triggersActions: true,
+      triggersActionsRules: true,
     },
   };
   services.uiSettings.get = <T,>(key: string) => {
@@ -389,7 +389,7 @@ describe('useTopNavLinks', () => {
           management: {
             ...baseMock.capabilities.management,
             insightsAndAlerting: {
-              triggersActions: true,
+              triggersActionsRules: true,
             },
           },
         },
@@ -553,7 +553,7 @@ describe('useTopNavLinks', () => {
             save: true,
             storeSearchSession: true,
           },
-          // No v1 management.insightsAndAlerting.triggersActions capability.
+          // No v1 management.insightsAndAlerting.triggersActionsRules capability.
           management: {
             ...baseMock.capabilities.management,
             insightsAndAlerting: {},

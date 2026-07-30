@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import pRetry, { AbortError } from 'p-retry';
 import type {
   ElasticsearchServiceStart,
   KibanaRequest,
@@ -14,6 +15,7 @@ import type {
 import { validateAgentId } from '@kbn/agent-builder-common/agents';
 import {
   agentBuilderDefaultAgentId,
+  chatAgentTypeId,
   createAgentNotFoundError,
   createBadRequestError,
   isAgentNotFoundError,
@@ -32,6 +34,7 @@ import type {
 } from '../../../../../common/agents';
 import type { ToolsServiceStart } from '../../../tools';
 import { createSpaceDslFilter } from '../../../../utils/spaces';
+import { isVersionConflictError } from '../../../../utils/is_version_conflict_error';
 import type {
   AgentsUsingSkillsResult,
   AgentsUsingToolsResult,
@@ -74,6 +77,29 @@ export interface GetAgentAccessControlResult {
   };
 }
 
+const workflowIdsEqual = (a: string[], b: string[]): boolean =>
+  a.length === b.length && a.every((id, index) => id === b[index]);
+
+/**
+ * Guards changes to an agent's pre-execution workflow IDs.
+ */
+const assertCanConfigureWorkflows = ({
+  nextWorkflowIds,
+  currentWorkflowIds,
+  isAdmin,
+}: {
+  nextWorkflowIds: string[] | undefined;
+  currentWorkflowIds: string[] | undefined;
+  isAdmin: boolean;
+}): void => {
+  if (isAdmin || nextWorkflowIds === undefined) {
+    return;
+  }
+  if (!workflowIdsEqual(nextWorkflowIds, currentWorkflowIds ?? [])) {
+    throw createBadRequestError('Only administrators can configure pre-execution workflows.');
+  }
+};
+
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<PersistedAgentDefinitionWithPermissions>;
@@ -103,6 +129,96 @@ export interface AgentClient {
   getAgentsUsingSkills(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
   removeSkillRefsFromAgents(params: { skillIds: string[] }): Promise<AgentsUsingSkillsResult>;
 }
+
+export interface SystemAgentClient {
+  ensureAgent(profile: AgentCreateRequest): Promise<void>;
+}
+
+const getAgentDocument = async ({
+  storage,
+  space,
+  agentId,
+}: {
+  storage: AgentProfileStorage;
+  space: string;
+  agentId: string;
+}): Promise<Document | undefined> => {
+  const response = await storage.getClient().search({
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: [
+          createSpaceDslFilter(space),
+          {
+            bool: {
+              // BWC compatibility with M1 - agentId was stored as the _id
+              should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  return response.hits.hits.length > 0 ? (response.hits.hits[0] as Document) : undefined;
+};
+
+/**
+ * Ensures a system agent exists, treating a concurrent create as success. Guarantees
+ * existence, not searchability: the document may not be visible to searches yet when
+ * this resolves.
+ */
+const ensureSystemAgent = async ({
+  storage,
+  space,
+  profile,
+}: {
+  storage: AgentProfileStorage;
+  space: string;
+  profile: AgentCreateRequest;
+}): Promise<void> => {
+  // System-installed agents may use protected platform namespaces even though they are
+  // persisted (and therefore editable) rather than registered as built-in agents.
+  const validationError = validateAgentId({ agentId: profile.id, builtIn: true });
+  if (validationError) {
+    throw createBadRequestError(`Invalid agent id: "${profile.id}": ${validationError}`);
+  }
+
+  const expectedType = profile.type ?? chatAgentTypeId;
+  const existingAgent = await getAgentDocument({ storage, space, agentId: profile.id });
+  if (existingAgent) {
+    const existingType = fromEs(existingAgent).type;
+    if (existingType !== expectedType) {
+      throw createBadRequestError(
+        `Cannot ensure agent "${profile.id}": the id is already used by an agent of type "${existingType}"`
+      );
+    }
+    return;
+  }
+
+  const creationDate = new Date();
+  const document = createRequestToEs({
+    profile,
+    space,
+    creationDate,
+    user: { username: SYSTEM_USER_ID },
+  });
+
+  try {
+    await storage.getClient().index({
+      id: `${space}_${profile.id}`,
+      op_type: 'create',
+      document,
+    });
+  } catch (error) {
+    if (!isVersionConflictError(error)) {
+      throw error;
+    }
+  }
+};
 
 export const createClient = async ({
   space,
@@ -140,6 +256,22 @@ export const createClient = async ({
     toolsService,
     logger,
   });
+};
+
+export const createSystemClient = ({
+  space,
+  elasticsearch,
+  logger,
+}: {
+  space: string;
+  elasticsearch: ElasticsearchServiceStart;
+  logger: Logger;
+}): SystemAgentClient => {
+  const storage = createStorage({ logger, esClient: elasticsearch.client.asInternalUser });
+
+  return {
+    ensureAgent: (profile) => ensureSystemAgent({ storage, space, profile }),
+  };
 };
 
 class AgentClientImpl implements AgentClient {
@@ -325,6 +457,12 @@ class AgentClientImpl implements AgentClient {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
     }
 
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profile.configuration.workflow_ids,
+      currentWorkflowIds: [],
+      isAdmin: this.isAdmin,
+    });
+
     await this.validateAgentToolSelection(profile.configuration.tools);
 
     const attributes = createRequestToEs({
@@ -341,32 +479,28 @@ class AgentClientImpl implements AgentClient {
     return this.get(profile.id);
   }
 
+  /**
+   * A concurrently created agent may not be searchable right away,
+   * so the read is retried until it becomes visible.
+   */
   async ensureDefaultAgent(
     profile: AgentCreateRequest
   ): Promise<PersistedAgentDefinitionWithPermissions> {
-    // Intentionally skipping access checks when ensuring an agent exists
-    const defaultAgent = await this._get(profile.id);
-    if (defaultAgent) {
-      return this.get(profile.id);
-    }
+    await ensureSystemAgent({ storage: this.storage, space: this.space, profile });
 
-    const now = new Date();
-    const documentId = `${this.space}_${profile.id}`;
-    const attributes = createRequestToEs({
-      profile,
-      space: this.space,
-      creationDate: now,
-      user: {
-        username: SYSTEM_USER_ID,
+    return pRetry(
+      async () => {
+        try {
+          return await this.get(profile.id);
+        } catch (error) {
+          if (isAgentNotFoundError(error)) {
+            throw error;
+          }
+          throw new AbortError(error);
+        }
       },
-    });
-
-    await this.storage.getClient().index({
-      id: documentId,
-      document: attributes,
-    });
-
-    return this.get(profile.id);
+      { retries: 9, factor: 1, minTimeout: 300 }
+    );
   }
 
   async update(
@@ -386,6 +520,14 @@ class AgentClientImpl implements AgentClient {
     ) {
       throw createAgentNotFoundError({ agentId });
     }
+
+    // Only admins may change pre-execution workflows
+    const currentConfig = source.config ?? source.configuration;
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profileUpdate.configuration?.workflow_ids,
+      currentWorkflowIds: currentConfig?.workflow_ids,
+      isAdmin: this.isAdmin,
+    });
 
     if (profileUpdate.configuration?.tools) {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
@@ -555,29 +697,6 @@ class AgentClientImpl implements AgentClient {
    * It doesn't check for access. Please use {@link getDocumentWithAccess} instead.
    */
   private async _get(agentId: string): Promise<Document | undefined> {
-    const response = await this.storage.getClient().search({
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: [
-            createSpaceDslFilter(this.space),
-            {
-              bool: {
-                // BWC compatibility with M1 - agentId was stored as the _id
-                should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
-                minimum_should_match: 1,
-              },
-            },
-          ],
-        },
-      },
-    });
-    if (response.hits.hits.length === 0) {
-      return undefined;
-    } else {
-      return response.hits.hits[0] as Document;
-    }
+    return getAgentDocument({ storage: this.storage, space: this.space, agentId });
   }
 }

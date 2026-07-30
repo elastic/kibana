@@ -253,6 +253,8 @@ export function registerAnomalyDetectionAlertType({
     executor: async ({
       services,
       params,
+      previousStartedAt,
+      startedAt,
       spaceId,
       rule,
     }: ExecutorOptions<MlAnomalyDetectionAlertParams>) => {
@@ -270,7 +272,9 @@ export function registerAnomalyDetectionAlertType({
       const executionResult = await alertingService.execute(
         params,
         spaceId,
-        fieldFormatCache.get(rule.id)
+        fieldFormatCache.get(rule.id),
+        previousStartedAt,
+        startedAt
       );
 
       if (!executionResult) return { state: {} };

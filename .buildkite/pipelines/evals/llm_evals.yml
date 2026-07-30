@@ -39,7 +39,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-highcpu-8
-      diskSizeGb: 95
+      diskSizeGb: 130
 
   - label: '🧑‍🏭 Build Kibana Distribution'
     command: .buildkite/scripts/steps/build_kibana.sh
@@ -65,6 +65,7 @@ steps:
           EVAL_SUITE_ID: 'agent-builder'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_SERVER_CONFIG_SET: 'evals_agent_builder'
           # Weekly pipeline model allowlist (per-suite):
           # - Core tier: default for most suites (one flagship per provider).
           # - Extended tier: includes additional model sizes for suites that benefit from them.
@@ -96,6 +97,29 @@ steps:
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Alerting V2'
+        key: kbn-evals-weekly-alerting-v2
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'alerting-v2'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+          EVAL_SERVER_CONFIG_SET: 'evals_alerting_v2'
         timeout_in_minutes: 60
         agents:
           image: family/kibana-ubuntu-2404
@@ -406,6 +430,28 @@ steps:
           KBN_EVALS: '1'
           FTR_EIS_CCM: '1'
           EVAL_SUITE_ID: 'security-alert-triage'
+          EVAL_FANOUT: '1'
+          EVAL_INCLUDE_EIS_MODELS: '1'
+          EVAL_MODEL_GROUPS: *weekly_eis_core_models
+        timeout_in_minutes: 60
+        agents:
+          image: family/kibana-ubuntu-2404
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-8
+          preemptible: true
+        retry:
+          automatic:
+            - exit_status: '-1'
+              limit: 3
+
+      - label: 'Evals: Alert Analysis Workflow'
+        key: kbn-evals-weekly-security-alert-analysis-workflow
+        command: bash .buildkite/scripts/steps/evals/run_suite.sh
+        env:
+          KBN_EVALS: '1'
+          FTR_EIS_CCM: '1'
+          EVAL_SUITE_ID: 'security-alert-analysis-workflow'
           EVAL_FANOUT: '1'
           EVAL_INCLUDE_EIS_MODELS: '1'
           EVAL_MODEL_GROUPS: *weekly_eis_core_models

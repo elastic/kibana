@@ -49,11 +49,26 @@ export interface TableEntityRow {
   entity: Record<string, unknown>;
 }
 
+/** Ellipsis truncation for text-bearing cell content (`EuiText` / `EuiLink`). */
 export const truncatedCellCss = css`
-  max-width: 150px;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+`;
+
+/** Sizes a container to the cell width so a truncated child can ellipsize (tooltip anchor, flex group). */
+export const truncatedContainerCss = css`
+  width: 100%;
+  min-width: 0;
+`;
+
+/** Allows an `EuiFlexItem` to shrink below its content width so a child can ellipsize. */
+export const truncatedFlexItemCss = css`
+  min-width: 0;
 `;
 
 export const getEntityLastSeen = (entity: Record<string, unknown>): string | undefined => {

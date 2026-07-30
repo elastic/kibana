@@ -11,8 +11,8 @@ import { type EuiBasicTableColumn, EuiText } from '@elastic/eui';
 
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
-import { TableFieldNameCell } from '../../../../flyout/document_details/right/components/table_field_name_cell';
-import { getFieldFromBrowserField } from '../../../../flyout/document_details/right/tabs/table_tab';
+import { TableFieldNameCell } from '../../../shared/components/table_field_name_cell';
+import { getFieldFromBrowserField } from '../../../document/main/tabs/table_tab';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { TableFieldValueCell } from '../components/table_field_value_cell';
 

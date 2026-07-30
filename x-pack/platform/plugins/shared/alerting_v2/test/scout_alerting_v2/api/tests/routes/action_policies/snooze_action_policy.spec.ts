@@ -117,6 +117,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('ACTION_POLICY_NOT_FOUND');
   });
 
   apiTest('validation: rejects an invalid date string', async ({ apiClient, apiServices }) => {
@@ -182,6 +183,22 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
     expect(response).toHaveStatusCode(400);
   });
+
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.actionPolicies.create(
+        buildCreateActionPolicyData({ name: 'test-snooze-strict' })
+      );
+
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: { snoozedUntil: getSnoozeDate(), unknownField: 'x' },
+      });
+
+      expect(response).toHaveStatusCode(400);
+    }
+  );
 
   apiTest(
     'authorization: 200 with full alerting_v2 privileges (write)',

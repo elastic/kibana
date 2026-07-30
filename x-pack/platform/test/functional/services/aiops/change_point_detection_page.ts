@@ -27,6 +27,7 @@ export function ChangePointDetectionPageProvider(
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const cases = getService('cases');
 
   return {
@@ -242,12 +243,7 @@ export function ChangePointDetectionPageProvider(
         }
 
         await testSubjects.click('confirmSaveSavedObjectButton');
-        await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-          testSubjects
-            .missingOrFail('confirmSaveSavedObjectButton')
-            .then(() => true)
-            .catch(() => false)
-        );
+        await common.waitForSaveModalToClose();
 
         // make sure the dashboard page actually loaded
         const dashboardItemCount = await dashboardPage.getSharedItemsCount();

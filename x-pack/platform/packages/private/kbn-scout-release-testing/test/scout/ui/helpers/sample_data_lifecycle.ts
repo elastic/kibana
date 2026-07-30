@@ -6,8 +6,7 @@
  */
 
 import fs from 'fs';
-import type { KbnClient } from '@kbn/test';
-import type { ApiServicesFixture } from '@kbn/scout';
+import type { ApiServicesFixture, KbnClient } from '@kbn/scout';
 
 interface Artifact {
   type: string;

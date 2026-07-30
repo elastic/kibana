@@ -38,6 +38,13 @@ export type { Simplify, MakeOverridesSerializable, ChartSizeSpec, ChartSizeEvent
 export { isChartSizeEvent } from './types';
 export type { ExpressionValueVisDimension } from './expression_value_dimension';
 export type { XYLegendValue } from './legend';
+export {
+  ChartPosition,
+  ChartHorizontalAlignment,
+  ChartVerticalAlignment,
+  ChartLayoutDirection,
+  ChartLegendValue,
+} from './constants';
 export type {
   HistogramParams,
   DateHistogramParams,

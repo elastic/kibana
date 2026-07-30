@@ -10,12 +10,15 @@ import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
-import { DocumentFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID } from '.';
+import { DocumentFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from '.';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('./tabs/table_tab', () => ({
+  TableTab: () => <div data-test-subj="mock-table-tab" />,
+}));
 jest.mock('./tabs/json_tab', () => ({
   JsonTab: () => <div data-test-subj="mock-json-tab" />,
 }));
@@ -130,9 +133,16 @@ describe('<DocumentFlyout />', () => {
     // overview is selected by default
     expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
 
+    // switching to the Table tab renders the table content
+    fireEvent.click(getByTestId(TABLE_TAB_TEST_ID));
+    expect(getByTestId('mock-table-tab')).toBeInTheDocument();
+    expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
+    expect(queryByTestId('mock-json-tab')).not.toBeInTheDocument();
+
     // switching to the JSON tab renders the json content
     fireEvent.click(getByTestId(JSON_TAB_TEST_ID));
     expect(getByTestId('mock-json-tab')).toBeInTheDocument();
+    expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
     expect(queryByTestId('mock-table-tab')).not.toBeInTheDocument();
   });
 
