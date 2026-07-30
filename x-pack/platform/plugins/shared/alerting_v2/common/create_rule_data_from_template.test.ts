@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createRuleDataSchema, parseRuleTemplateData } from '@kbn/alerting-v2-schemas';
+import { createRuleDataSchema, ruleTemplateDataSchema } from '@kbn/alerting-v2-schemas';
 import { createRuleDataFromTemplate } from './create_rule_data_from_template';
 
 /**
@@ -50,7 +50,7 @@ const exampleTemplateAttributes = {
 
 describe('createRuleDataFromTemplate', () => {
   it('strips engine and passes createRuleDataSchema', () => {
-    const template = parseRuleTemplateData(exampleTemplateAttributes);
+    const template = ruleTemplateDataSchema.parse(exampleTemplateAttributes);
     const createData = createRuleDataFromTemplate(template);
 
     expect(createData).not.toHaveProperty('engine');

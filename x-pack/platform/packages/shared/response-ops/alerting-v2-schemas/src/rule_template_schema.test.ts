@@ -7,11 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { createRuleDataBaseSchema } from './rule_data_schema';
-import {
-  RULE_TEMPLATE_ONLY_FIELDS,
-  parseRuleTemplateData,
-  ruleTemplateDataSchema,
-} from './rule_template_schema';
+import { ruleTemplateDataSchema } from './rule_template_schema';
 
 const exampleTemplateAttributes = {
   kind: 'alert' as const,
@@ -51,14 +47,42 @@ const exampleTemplateAttributes = {
 };
 
 
-describe('parseRuleTemplateData', () => {
+describe('ruleTemplateDataSchema', () => {
   it('parses valid template attributes', () => {
-    const result = parseRuleTemplateData(exampleTemplateAttributes);
+    const result = ruleTemplateDataSchema.parse(exampleTemplateAttributes);
     expect(result.engine).toBe('v2');
   });
 
-  it('rejects invalid input', () => {
-    expect(() => parseRuleTemplateData(null)).toThrow();
+  it('rejects a v1 rule template', () => {
+    const v1RuleTemplate = {
+      name: 'Sample alerting rule template',
+      tags: ['Testing'],
+      description: 'This is a sample alerting rule template description',
+      artifacts: {
+        dashboards: [{ id: 'dash-1' }],
+        investigation_guide: { blob: 'text' },
+      },
+      ruleTypeId: '.index-threshold',
+      schedule: {
+        interval: '1m',
+      },
+      params: {
+        aggType: 'count',
+        termSize: 5,
+        thresholdComparator: '>',
+        timeWindowSize: 5,
+        timeWindowUnit: 'm',
+        groupBy: 'all',
+        threshold: [1000],
+        index: ['logs-test-default'],
+        timeField: '@timestamp',
+      },
+      alertDelay: {
+        active: 1,
+      },
+    };
+
+    expect(() => ruleTemplateDataSchema.parse(v1RuleTemplate)).toThrow();
   });
 });
 
@@ -75,12 +99,11 @@ describe('rule template create-rule schema coupling', () => {
     return rest;
   };
 
-  it('template keys match create-rule keys plus template-only fields', () => {
+  it('template keys match create-rule keys plus engine', () => {
     const createRuleKeys = new Set(Object.keys(createRuleDataBaseSchema.shape));
     const templateKeys = Object.keys(ruleTemplateDataSchema.shape);
-    const templateOnly = new Set<string>(RULE_TEMPLATE_ONLY_FIELDS);
 
-    const templateRuleKeys = templateKeys.filter((key) => !templateOnly.has(key)).sort();
+    const templateRuleKeys = templateKeys.filter((key) => key !== 'engine').sort();
     const createKeysSorted = [...createRuleKeys].sort();
 
     expect({
@@ -93,10 +116,8 @@ describe('rule template create-rule schema coupling', () => {
       createKeysSorted,
     });
 
-    for (const field of RULE_TEMPLATE_ONLY_FIELDS) {
-      if (!templateKeys.includes(field)) {
-        throw new Error(`Rule template schema is missing required template-only field "${field}".`);
-      }
+    if (!templateKeys.includes('engine')) {
+      throw new Error('Rule template schema is missing required field "engine".');
     }
   });
 
