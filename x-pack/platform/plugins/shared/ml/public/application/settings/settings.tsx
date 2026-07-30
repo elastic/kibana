@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AnomalyDetectionSettings } from './anomaly_detection_settings';
 import { HelpMenu } from '../components/help_menu';
@@ -22,7 +21,6 @@ export const Settings: FC = () => {
   const anomalyDetectionJobsBack = useAnomalyDetectionJobsBack();
   return (
     <Fragment>
-      <EuiSpacer size="m" />
       <div data-test-subj="mlPageSettings">
         <MlAppHeader
           title={i18n.translate('xpack.ml.anomalyDetectionSettings.title', {
