@@ -594,18 +594,18 @@ export const BriefPage: React.FC = () => {
             <div key={group.id} css={{ marginBottom: euiTheme.size.l }}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiBadge
-                    color={
-                      BUCKET_COLORS[group.id] as
-                        | 'danger'
-                        | 'warning'
-                        | 'primary'
-                        | 'accent'
-                        | 'success'
-                    }
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    css={css`
+                      text-transform: uppercase;
+                      font-weight: 600;
+                      letter-spacing: 0.55px;
+                      color: ${euiTheme.colors.textSubdued};
+                    `}
                   >
                     {group.label}
-                  </EuiBadge>
+                  </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s" color="subdued">
