@@ -28,47 +28,46 @@ const baseParams = {
   end,
 };
 
-function makeEsClient(aggCounts: { ecs?: number; otel?: number } = {}): ElasticsearchClient {
-  return {
-    search: jest.fn().mockResolvedValue({
-      hits: { total: { value: 0 } },
-      aggregations: {
-        ecs: { doc_count: aggCounts.ecs ?? 0 },
-        otel: { doc_count: aggCounts.otel ?? 0 },
-      },
-    }),
-  } as unknown as ElasticsearchClient;
+function makeHitsResponse(totalValue: number) {
+  return { hits: { total: { value: totalValue } } };
 }
 
-function getSearchCall(esClient: ElasticsearchClient) {
-  return (esClient.search as jest.Mock).mock.calls[0][0];
+function makeEsClient(counts: { ecs?: number; otel?: number } = {}): ElasticsearchClient {
+  const mock = jest.fn();
+  mock.mockResolvedValueOnce(makeHitsResponse(counts.ecs ?? 0));
+  mock.mockResolvedValueOnce(makeHitsResponse(counts.otel ?? 0));
+  return { search: mock } as unknown as ElasticsearchClient;
 }
 
-function getFilterClauses(esClient: ElasticsearchClient) {
-  return getSearchCall(esClient)?.query?.bool?.filter ?? [];
+function getSearchCall(esClient: ElasticsearchClient, callIndex: number) {
+  return (esClient.search as jest.Mock).mock.calls[callIndex]?.[0];
+}
+
+function getFilterClauses(esClient: ElasticsearchClient, callIndex: number) {
+  return getSearchCall(esClient, callIndex)?.query?.bool?.filter ?? [];
 }
 
 describe('getServiceSchemaType', () => {
   describe('schema type resolution', () => {
-    it('returns ecs when ecs agg has matches', async () => {
+    it('returns ecs when ecs query has matches', async () => {
       const esClient = makeEsClient({ ecs: 1 });
       const result = await getServiceSchemaType({ esClient, ...baseParams });
       expect(result).toEqual({ schema: 'ecs' });
     });
 
-    it('returns ecs when both ecs and otel aggs have matches', async () => {
+    it('returns ecs when both queries have matches', async () => {
       const esClient = makeEsClient({ ecs: 1, otel: 1 });
       const result = await getServiceSchemaType({ esClient, ...baseParams });
       expect(result).toEqual({ schema: 'ecs' });
     });
 
-    it('returns otel when only otel agg has matches', async () => {
-      const esClient = makeEsClient({ otel: 1 });
+    it('returns otel when only otel query has matches', async () => {
+      const esClient = makeEsClient({ ecs: 0, otel: 1 });
       const result = await getServiceSchemaType({ esClient, ...baseParams });
       expect(result).toEqual({ schema: 'otel' });
     });
 
-    it('returns unknown when both aggs have no matches', async () => {
+    it('returns unknown when both queries have no matches', async () => {
       const esClient = makeEsClient({ ecs: 0, otel: 0 });
       const result = await getServiceSchemaType({ esClient, ...baseParams });
       expect(result).toEqual({ schema: 'unknown' });
@@ -81,21 +80,20 @@ describe('getServiceSchemaType', () => {
       expect(result).toEqual({ schema: 'unknown' });
       expect(esClient.search).not.toHaveBeenCalled();
     });
-
-    it('returns unknown when aggregations are absent', async () => {
-      const esClient = {
-        search: jest.fn().mockResolvedValue({ hits: { total: { value: 0 } } }),
-      } as unknown as ElasticsearchClient;
-      const result = await getServiceSchemaType({ esClient, ...baseParams });
-      expect(result).toEqual({ schema: 'unknown' });
-    });
   });
 
   describe('query structure', () => {
-    it('searches against the combined transaction and span indices', async () => {
+    it('runs two parallel queries', async () => {
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams });
-      expect(getSearchCall(esClient).index).toBe('traces-apm*,apm-*,traces-*.otel-*');
+      expect((esClient.search as jest.Mock).mock.calls).toHaveLength(2);
+    });
+
+    it('searches against the combined transaction and span indices for both queries', async () => {
+      const esClient = makeEsClient();
+      await getServiceSchemaType({ esClient, ...baseParams });
+      expect(getSearchCall(esClient, 0).index).toBe('traces-apm*,apm-*,traces-*.otel-*');
+      expect(getSearchCall(esClient, 1).index).toBe('traces-apm*,apm-*,traces-*.otel-*');
     });
 
     it('deduplicates when transaction and span indices are identical', async () => {
@@ -105,36 +103,40 @@ describe('getServiceSchemaType', () => {
       } as unknown as APMIndices;
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams, indices: sameIndices });
-      expect(getSearchCall(esClient).index).toBe('traces-apm*,apm-*');
+      expect(getSearchCall(esClient, 0).index).toBe('traces-apm*,apm-*');
+      expect(getSearchCall(esClient, 1).index).toBe('traces-apm*,apm-*');
     });
 
-    it('uses size: 0', async () => {
+    it('uses size: 0 and terminate_after: 1 for both queries', async () => {
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams });
-      expect(getSearchCall(esClient).size).toBe(0);
+      expect(getSearchCall(esClient, 0).size).toBe(0);
+      expect(getSearchCall(esClient, 0).terminate_after).toBe(1);
+      expect(getSearchCall(esClient, 1).size).toBe(0);
+      expect(getSearchCall(esClient, 1).terminate_after).toBe(1);
     });
 
-    it('filters by service name', async () => {
+    it('filters by service name in both queries', async () => {
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams });
-      const filters = getFilterClauses(esClient);
-      expect(filters).toContainEqual({ term: { [SERVICE_NAME]: 'my-service' } });
-    });
-
-    it('includes ecs agg probing for processor.event', async () => {
-      const esClient = makeEsClient();
-      await getServiceSchemaType({ esClient, ...baseParams });
-      expect(getSearchCall(esClient).aggs?.ecs).toEqual({
-        filter: { exists: { field: PROCESSOR_EVENT } },
+      expect(getFilterClauses(esClient, 0)).toContainEqual({
+        term: { [SERVICE_NAME]: 'my-service' },
+      });
+      expect(getFilterClauses(esClient, 1)).toContainEqual({
+        term: { [SERVICE_NAME]: 'my-service' },
       });
     });
 
-    it('includes otel agg probing for kind', async () => {
+    it('ecs query filters by existence of processor.event', async () => {
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams });
-      expect(getSearchCall(esClient).aggs?.otel).toEqual({
-        filter: { exists: { field: KIND } },
-      });
+      expect(getFilterClauses(esClient, 0)).toContainEqual({ exists: { field: PROCESSOR_EVENT } });
+    });
+
+    it('otel query filters by existence of kind', async () => {
+      const esClient = makeEsClient();
+      await getServiceSchemaType({ esClient, ...baseParams });
+      expect(getFilterClauses(esClient, 1)).toContainEqual({ exists: { field: KIND } });
     });
   });
 
@@ -146,7 +148,7 @@ describe('getServiceSchemaType', () => {
         ...baseParams,
         environment: ENVIRONMENT_ALL_VALUE,
       });
-      const filters = getFilterClauses(esClient);
+      const filters = getFilterClauses(esClient, 0);
       const hasEnvFilter = filters.some(
         (f: Record<string, unknown>) => 'term' in f && 'service.environment' in (f.term as object)
       );
@@ -156,8 +158,9 @@ describe('getServiceSchemaType', () => {
     it('adds a term filter for a specific environment', async () => {
       const esClient = makeEsClient();
       await getServiceSchemaType({ esClient, ...baseParams, environment: 'production' });
-      const filters = getFilterClauses(esClient);
-      expect(filters).toContainEqual({ term: { 'service.environment': 'production' } });
+      expect(getFilterClauses(esClient, 0)).toContainEqual({
+        term: { 'service.environment': 'production' },
+      });
     });
   });
 });

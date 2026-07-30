@@ -35,31 +35,31 @@ export async function getServiceSchemaType({
     .join(',');
   if (!index) return { schema: 'unknown' };
 
-  const response = await esClient.search({
-    index,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          { term: { [SERVICE_NAME]: serviceName } },
-          ...rangeQuery(start, end),
-          ...environmentQuery(environment),
-        ],
-      },
-    },
-    aggs: {
-      ecs: { filter: { exists: { field: PROCESSOR_EVENT } } },
-      otel: { filter: { exists: { field: KIND } } },
-    },
-  });
+  const baseFilter = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    ...rangeQuery(start, end),
+    ...environmentQuery(environment),
+  ];
 
-  const aggs = response.aggregations as
-    | { ecs?: { doc_count: number }; otel?: { doc_count: number } }
-    | undefined;
-  const ecsCount = aggs?.ecs?.doc_count ?? 0;
-  const otelCount = aggs?.otel?.doc_count ?? 0;
+  const [ecsResponse, otelResponse] = await Promise.all([
+    esClient.search({
+      index,
+      size: 0,
+      terminate_after: 1,
+      query: { bool: { filter: [...baseFilter, { exists: { field: PROCESSOR_EVENT } }] } },
+    }),
+    esClient.search({
+      index,
+      size: 0,
+      terminate_after: 1,
+      query: { bool: { filter: [...baseFilter, { exists: { field: KIND } }] } },
+    }),
+  ]);
 
-  if (ecsCount > 0) return { schema: 'ecs' };
-  if (otelCount > 0) return { schema: 'otel' };
+  const hasEcs = (ecsResponse.hits.total as { value: number }).value > 0;
+  const hasOtel = (otelResponse.hits.total as { value: number }).value > 0;
+
+  if (hasEcs) return { schema: 'ecs' };
+  if (hasOtel) return { schema: 'otel' };
   return { schema: 'unknown' };
 }
