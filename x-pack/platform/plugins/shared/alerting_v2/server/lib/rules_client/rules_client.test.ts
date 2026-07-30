@@ -88,8 +88,6 @@ describe('RulesClient', () => {
     ensureRuleExecutorTaskScheduledMock.mockResolvedValue({ id: 'task-123' });
     getRuleExecutorTaskIdMock.mockReturnValue('task:fallback');
 
-    // `bulkRemove` resolves with a per-task status array; default to an
-    // all-succeeded response so the drift inspection has a shape to read.
     taskManager.bulkRemove.mockResolvedValue({ statuses: [] });
   });
 
@@ -1425,8 +1423,6 @@ describe('RulesClient', () => {
       const res = await client.bulkDeleteRules({ ids: ['rule-1', 'rule-2'] });
 
       // The saved objects are gone (affected), but the orphan tasks are flagged.
-      // We assert only on the machine-readable `error.code`; the human-readable
-      // message is intentionally not pinned so wording changes don't break tests.
       expect(res.affected_count).toBe(2);
       expect(res.errors).toEqual([
         { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },

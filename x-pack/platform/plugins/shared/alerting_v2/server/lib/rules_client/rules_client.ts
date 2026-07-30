@@ -676,14 +676,6 @@ export class RulesClient {
    * `TASK_MANAGER_DRIFT` code and, when an `errors` sink is provided, appends a
    * per-rule `TASK_MANAGER_DRIFT` entry so the drift surfaces in the bulk
    * response.
-   *
-   * `taskManager.bulkRemove` resolves with a per-task `statuses` array instead
-   * of throwing on individual failures, so a `try/catch` alone would silently
-   * miss partial failures. We therefore inspect the statuses: a missing task
-   * (404) is the desired end state and is ignored (mirroring the single-rule
-   * `removeIfExists`), while any other failed status means the task lingers and
-   * is reported as drift. A thrown error (e.g. a transport failure) is treated
-   * as a whole-batch failure and its message is appended to the drift.
    */
   private async removeExecutorTasks({
     ruleIds,
