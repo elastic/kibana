@@ -214,24 +214,10 @@ describe('generateSampleFromJsonSchema', () => {
       expect(generateSampleFromJsonSchema({ type: ['null'] })).toBeUndefined();
     });
 
-    it('["null"] with properties hits implicit-object branch unlike string "null"', () => {
-      // type: 'null' → effectiveType='null' → default: case → undefined (properties ignored)
-      expect(
-        generateSampleFromJsonSchema({
-          type: 'null',
-          properties: { name: { type: 'string' } },
-          required: ['name'],
-        })
-      ).toBeUndefined();
-
-      // type: ['null'] → effectiveType=undefined → case undefined: (implicit object) → generates sample
-      expect(
-        generateSampleFromJsonSchema({
-          type: ['null'],
-          properties: { name: { type: 'string' } },
-          required: ['name'],
-        })
-      ).toEqual({ name: INPUT_STRING_PLACEHOLDER });
+    it('returns undefined for ["null"] with properties, consistent with string "null"', () => {
+      const schema = { properties: { name: { type: 'string' } }, required: ['name'] } as const;
+      expect(generateSampleFromJsonSchema({ type: 'null', ...schema })).toBeUndefined();
+      expect(generateSampleFromJsonSchema({ type: ['null'], ...schema })).toBeUndefined();
     });
   });
 

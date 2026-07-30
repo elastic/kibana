@@ -47,9 +47,10 @@ export function generateSampleFromJsonSchema(
     return schema.default;
   }
 
-  // Normalize nullable union types like ['string', 'null'] to the first non-null type
+  // Normalize nullable union types like ['string', 'null'] to the first non-null type.
+  // All-null arrays (e.g. ['null']) coerce to 'null' so they behave like type: 'null'.
   const effectiveType = Array.isArray(schema.type)
-    ? schema.type.find((t) => t !== 'null')
+    ? schema.type.find((t) => t !== 'null') ?? 'null'
     : schema.type;
 
   switch (effectiveType) {
