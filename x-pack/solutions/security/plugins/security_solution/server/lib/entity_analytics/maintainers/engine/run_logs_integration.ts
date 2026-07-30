@@ -57,22 +57,6 @@ interface EsqlResponse {
 }
 
 /**
- * Returns actor IDs to pass to the extract query, or undefined if the probe
- * used a probeActorKey (raw field value) rather than the full EUID. When
- * probeActorKey is set, the probe collects raw values like "backup_svc" while
- * the extract produces full EUIDs like "user:backup_svc@local" — the formats
- * differ, so the IN filter would never match and must be skipped.
- */
-const extractActorIdsFilter = (
-  config: RelationshipIntegrationConfig,
-  actorIds: string[]
-): string[] | undefined => {
-  if (config.kind === 'override') return undefined;
-  if (config.customActor?.probeActorKey != null) return undefined;
-  return actorIds;
-};
-
-/**
  * Runs the probe query with SAMPLE first (cheap on large datasets). If SAMPLE
  * returns no actors — which happens on sparse indices where sampling misses all
  * docs — retries without SAMPLE to confirm there are genuinely no actors before
@@ -196,7 +180,7 @@ export const runLogsIntegration = async (
         );
         const boundaryResponse = (await esClient.esql.query(
           { query: boundaryQuery },
-          transportOpts
+          { ...transportOpts, requestTimeout: EXTRACT_QUERY_TIMEOUT_MS }
         )) as {
           columns: Array<{ name: string; type: string }>;
           values: unknown[][];
@@ -209,14 +193,13 @@ export const runLogsIntegration = async (
       }
 
       // Step 3: Extract — collect actor→target relationships within the slice
-      // window. The actorIds filter is skipped when the probe used a probeActorKey
-      // (raw field values) because they don't match the extract's EUID format.
-      const extractQuery = buildTargetsPerActorQuery(
-        config,
-        namespace,
-        { fromDate: sliceStart, toDate },
-        extractActorIdsFilter(config, probeResult.actorIds)
-      );
+      // window. No actorIds filter is passed: the probe samples only ~10% of
+      // actors, so filtering by that subset would silently drop the rest. The
+      // slice time window (fromDate/toDate) already bounds the extract.
+      const extractQuery = buildTargetsPerActorQuery(config, namespace, {
+        fromDate: sliceStart,
+        toDate,
+      });
       const extractResponse = (await esClient.esql.query(
         { query: extractQuery },
         { ...transportOpts, requestTimeout: EXTRACT_QUERY_TIMEOUT_MS }
