@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
+import styled from '@emotion/styled';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ProcessResult } from './process_result';
 import type { ProcessTreeNode } from '../utils/build_process_tree';
@@ -15,14 +15,16 @@ import { buildProcessTree } from '../utils/build_process_tree';
 import type { KilledProcessDescendant } from '../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
-const nodeConnectorStyles = css`
+const TreeNodeConnector = styled.div`
   .top,
   .bottom {
     width: 1em;
   }
+
   .top {
     height: 0.7em;
   }
+
   .bottom {
     height: 1em;
   }
@@ -30,17 +32,21 @@ const nodeConnectorStyles = css`
   &.childNode {
     .top,
     .bottom {
-      border-left: 1px solid;
+      border-left: ${({ theme }) => theme.euiTheme.border.width.thin} solid
+        ${({ theme }) => theme.euiTheme.colors.borderBasePlain};
     }
     .top {
-      border-bottom: 1px solid;
+      border-bottom: ${({ theme }) => theme.euiTheme.border.width.thin} solid
+        ${({ theme }) => theme.euiTheme.colors.borderBasePlain};
     }
   }
 
   &.lastChildNode {
     .top {
-      border-left: 1px solid;
-      border-bottom: 1px solid;
+      border-left: ${({ theme }) => theme.euiTheme.border.width.thin} solid
+        ${({ theme }) => theme.euiTheme.colors.borderBasePlain};
+      border-bottom: ${({ theme }) => theme.euiTheme.border.width.thin} solid
+        ${({ theme }) => theme.euiTheme.colors.borderBasePlain};
     }
   }
 `;
@@ -102,25 +108,13 @@ interface TreeNodeProps {
 const TreeNode = memo<TreeNodeProps>(({ process, children, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
 
-  const nodeConnectorClassName = useMemo(() => {
-    let classNameList = nodeConnectorStyles;
-
-    if (children) {
-      classNameList += ' childNode';
-    } else {
-      classNameList += ' lastChildNode';
-    }
-
-    return classNameList;
-  }, [children]);
-
   return (
     <EuiFlexGroup data-test-subj={getTestId()} responsive={false} gutterSize="xs" wrap={false}>
       <EuiFlexItem grow={false}>
-        <div className={nodeConnectorClassName}>
+        <TreeNodeConnector className={children ? 'childNode' : 'lastChildNode'}>
           <div className="top" />
           <div className="bottom" />
-        </div>
+        </TreeNodeConnector>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xs" wrap={false}>
