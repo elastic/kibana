@@ -264,4 +264,32 @@ describe('renderIacTemplateHandler', () => {
       expect.objectContaining({ success: false })
     );
   });
+
+  it('maps unexpected errors to 500 with an error log', async () => {
+    mockedGetPackageInfo.mockResolvedValue(CSPM_PACKAGE_INFO as any);
+    mockedRenderTemplate.mockRejectedValue(new Error('unexpected boom'));
+
+    await renderIacTemplateHandler(
+      buildContext(),
+      buildRequest({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'cloud_security_posture', policyTemplates: ['cspm'] }],
+      }),
+      response
+    );
+
+    expect(response.customError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        statusCode: 500,
+        body: expect.objectContaining({ message: expect.stringContaining('unexpected boom') }),
+      })
+    );
+    expect(appContextService.getLogger().get().error).toHaveBeenCalledWith(
+      expect.stringContaining('unexpected boom')
+    );
+    expect(reportIacProviderRenderCompleted).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false, httpStatus: 500 })
+    );
+  });
 });

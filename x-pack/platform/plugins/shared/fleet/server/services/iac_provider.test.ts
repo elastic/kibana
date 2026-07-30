@@ -24,8 +24,11 @@ jest.mock('./app_context');
 
 jest.mock('@kbn/server-http-tools', () => ({
   ...jest.requireActual('@kbn/server-http-tools'),
+  // rejectUnauthorized: false mirrors the real SslConfig default (it carries
+  // server-side client-auth semantics) — the service must NOT propagate it to
+  // the outbound Agent, so the Agent assertion below would catch it if it did.
   SslConfig: jest.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
     certificate,
     key,
     certificateAuthorities,
@@ -128,6 +131,33 @@ describe('IacProviderService', () => {
         cert: '/path/tls.crt',
         key: '/path/tls.key',
         ca: '/path/ca.crt',
+        // Server certs must always be verified, regardless of what SslConfig
+        // says — its rejectUnauthorized is a server-side client-auth setting.
+        rejectUnauthorized: true,
+      }),
+    });
+  });
+
+  it('supports CA-only TLS config, still verifying the server certificate', async () => {
+    // Local dev: the provider doesn't verify clients, so no cert/key pair —
+    // this must not throw IacProviderConfigError.
+    mockConfig({
+      api: { url: 'https://iac-provider.example', tls: { ca: '/path/ca.crt' } },
+    });
+    mockLogger();
+    mockedFetch.mockResolvedValueOnce(
+      jsonResponse(200, { artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' })
+    );
+
+    const result = await iacProviderService.renderTemplate(RENDER_REQUEST);
+
+    expect(result).toEqual({ artifactUrl: ARTIFACT_URL, expiresAt: '2026-07-28T12:00:00Z' });
+    expect(mockedAgent).toHaveBeenCalledWith({
+      connect: expect.objectContaining({
+        cert: undefined,
+        key: undefined,
+        ca: '/path/ca.crt',
+        rejectUnauthorized: true,
       }),
     });
   });

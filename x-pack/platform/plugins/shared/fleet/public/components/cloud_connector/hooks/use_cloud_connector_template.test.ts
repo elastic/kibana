@@ -75,10 +75,17 @@ describe('useCloudConnectorTemplate', () => {
     it('returns href button props with the static template URL', () => {
       const { result } = renderHook(() => useCloudConnectorTemplate(HOOK_PARAMS));
 
-      expect(result.current.launchButtonProps).toEqual({
-        href: expect.stringContaining('param_ElasticResourceId=kibana-component-id'),
-        target: '_blank',
-      });
+      const { launchButtonProps } = result.current;
+      if (!('href' in launchButtonProps)) {
+        throw new Error('expected href launch button props');
+      }
+      // The templateURL param is what distinguishes the static template from
+      // an IaC-rendered artifact; both carry the same ElasticResourceId.
+      expect(launchButtonProps.href).toContain(
+        `templateURL=${encodeURIComponent('https://static.example/template.yml')}`
+      );
+      expect(launchButtonProps.href).toContain('param_ElasticResourceId=kibana-component-id');
+      expect(launchButtonProps.target).toBe('_blank');
       expect(result.current.isDisabled).toBe(false);
       expect(result.current.isGeneratingTemplate).toBe(false);
     });
@@ -133,6 +140,83 @@ describe('useCloudConnectorTemplate', () => {
       );
       expect(openedUrl).not.toContain('static.example');
       expect(openedUrl).toContain('param_ElasticResourceId=kibana-component-id');
+    });
+
+    it('merges same-package policy group entries into one integration', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: { artifactUrl: 'https://s3.example/rendered', expiresAt: '2026-07-28T12:00:00Z' },
+        error: null,
+      } as any);
+
+      // aws/guardduty is in aws_global_policy_group together with aws/s3 —
+      // one EPR package, so one integration carrying both policy templates.
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          packageName: 'aws',
+          policyTemplate: 'guardduty',
+        })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'aws', policyTemplates: ['guardduty', 's3'] }],
+      });
+    });
+
+    it('sends a single integration when the package is not in any policy group', async () => {
+      mockedSendRenderIacTemplate.mockResolvedValue({
+        data: { artifactUrl: 'https://s3.example/rendered', expiresAt: '2026-07-28T12:00:00Z' },
+        error: null,
+      } as any);
+
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          packageName: 'some_package',
+          policyTemplate: 'some_template',
+        })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).toHaveBeenCalledWith({
+        provider: 'aws',
+        flow: 'cloud_connector',
+        integrations: [{ name: 'some_package', policyTemplates: ['some_template'] }],
+      });
+    });
+
+    it('falls back to the static URL without rendering when the package name is missing', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({ ...HOOK_PARAMS, packageName: undefined })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      const openedUrl = windowOpenSpy.mock.calls[0][0] as string;
+      expect(openedUrl).toContain('static.example');
+      expect(reportEvent).toHaveBeenCalledWith('iac_provider_render_fallback', {
+        flow: 'cloud_connector',
+        reason: 'missing_render_context',
+      });
+      expect(result.current.templateGenerationError).toBeUndefined();
+    });
+
+    it('surfaces an error when the package name is missing and no static fallback exists', async () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          packageName: undefined,
+          iacTemplateUrl: undefined,
+        })
+      );
+      await launch(result);
+
+      expect(mockedSendRenderIacTemplate).not.toHaveBeenCalled();
+      expect(windowOpenSpy).not.toHaveBeenCalled();
+      expect(result.current.templateGenerationError).toBeDefined();
     });
 
     it('falls back to the static URL and reports telemetry when the render fails', async () => {
