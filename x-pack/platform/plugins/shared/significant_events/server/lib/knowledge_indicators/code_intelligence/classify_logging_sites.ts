@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { InferenceClient } from '@kbn/inference-common';
 import {
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import type { LoggingCandidate, LoggingChunk } from './types';
@@ -111,7 +111,7 @@ export async function classifyLoggingSites({
       abortSignal,
       metadata: {
         connectorTelemetry: {
-          pluginId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+          pluginId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
           aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
         },
       },

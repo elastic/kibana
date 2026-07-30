@@ -12,6 +12,7 @@ import {
   deriveKnowledgeIndicatorSource,
   SignificantEventsWorkflowStatus,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
   type Feature,
   type QueryLink,
   type SignificantEventsWorkflowStatusResult,
@@ -569,7 +570,7 @@ const identifyServiceRoute = createServerRoute({
 
     const classifierConnectorId = await resolveConnectorForFeature({
       searchInferenceEndpoints: server.searchInferenceEndpoints,
-      featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+      featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
       featureName: 'logging-site classification',
       request,
     });
@@ -721,7 +722,7 @@ const discoverServicesRoute = createServerRoute({
 
     const connectorId = await resolveConnectorForFeature({
       searchInferenceEndpoints: server.searchInferenceEndpoints,
-      featureId: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+      featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
       featureName: 'service discovery classification',
       request,
     });

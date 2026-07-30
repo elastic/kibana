@@ -16,6 +16,18 @@ export const SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID =
 export const SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID =
   'significant_events_ki_query_generation' as const;
 
+/**
+ * Code Intelligence classification (Stage 3 logging-site + Stage 4 service
+ * discovery). Bounded, tool-less, temperature-0 classification over
+ * grep-discovered candidates — a deliberately low-stakes task, so this has its
+ * OWN feature (separate from KI extraction) and defaults to a cheap, fast model.
+ * Keeping it distinct means the code-intelligence classifier can run on a
+ * sub-cent model without forcing the (reasoning-heavy) KI extraction / query
+ * generation onto the same tier.
+ */
+export const SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID =
+  'significant_events_code_intelligence' as const;
+
 /** Discovery and significant event generation. */
 export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
   'significant_events_discovery' as const;
