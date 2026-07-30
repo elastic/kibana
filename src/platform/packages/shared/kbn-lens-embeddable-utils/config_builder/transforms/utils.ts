@@ -39,7 +39,12 @@ import { toApiFieldSettings, fromApiFieldSettings } from './columns/field_settin
 import { getMetricApiColumnFromLensState } from './columns/metric';
 import type { AnyLensStateColumn, APIAdHocDataView, APIDataView } from './columns/types';
 import { isLensStateBucketColumnType } from './columns/utils';
-import { LENS_LAYER_SUFFIX, LENS_DEFAULT_TIME_FIELD, INDEX_PATTERN_ID } from './constants';
+import {
+  LENS_LAYER_SUFFIX,
+  LENS_XY_ANNOTATION_LAYER_SUFFIX,
+  LENS_DEFAULT_TIME_FIELD,
+  INDEX_PATTERN_ID,
+} from './constants';
 import {
   LENS_SAMPLING_DEFAULT_VALUE,
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -179,7 +184,10 @@ export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   };
 }
 
-export const getAdhocDataviews = (dataviews: Record<string, APIDataView | APIAdHocDataView>) => {
+export const getAdhocDataviews = (
+  dataviews: Record<string, APIDataView | APIAdHocDataView>,
+  annotationLayerIds: ReadonlySet<string> = new Set()
+) => {
   // filter out ad hoc dataViews only
   const adHocDataViewsFiltered = Object.entries(dataviews).filter(
     ([_layerId, dataViewEntry]) => dataViewEntry.type === 'adHocDataView'
@@ -204,7 +212,14 @@ export const getAdhocDataviews = (dataviews: Record<string, APIDataView | APIAdH
   for (const [baseSpec, { layerIds, id }] of Array.from(internalReferencesMap.entries())) {
     adHocDataViews[id] = getAdHocDataViewSpec(baseSpec);
     for (const layerId of layerIds) {
-      internalReferences.push(createDataViewReference(id, layerId));
+      // XY annotation layers reference their data view (ad hoc included) under the
+      // `xy-visualization-layer-` name, matching Lens's own persistence logic, so
+      // the runtime can resolve it. Other layers use the default datasource name.
+      internalReferences.push(
+        annotationLayerIds.has(layerId)
+          ? createAnnotationLayerDataViewReference(id, layerId)
+          : createDataViewReference(id, layerId)
+      );
     }
   }
 
@@ -330,15 +345,27 @@ export function buildDataSourceState(
   return buildDataSourceStateNoESQL(layer, layerId, adHocDataViews, references, adhocReferences);
 }
 
-// builds Lens State references from list of dataviews
-export function buildReferences(dataviews: Record<string, string>): SavedObjectReference[] {
-  const references: SavedObjectReference[][] = [];
-  for (const layerid in dataviews) {
-    if (dataviews[layerid]) {
-      references.push(getDefaultReferences(dataviews[layerid], layerid));
-    }
-  }
-  return references.flat(2);
+/**
+ * Builds Lens State data view references from a `{ layerId => dataViewId }` map.
+ *
+ * Most layers persist their data view under the `indexpattern-datasource-layer-`
+ * reference name. By-value XY annotation layers are the exception: their data
+ * view must be persisted under the `xy-visualization-layer-` name so the XY
+ * runtime can resolve it (otherwise it falls back to the first index-pattern
+ * reference and the panel fails to render). Pass those layer ids via
+ * `annotationLayerIds` so they get the correct prefix.
+ * See x-pack/.../lens/public/visualizations/xy/persistence.ts and
+ * https://github.com/elastic/kibana/issues/268821.
+ */
+export function buildReferences(
+  dataviews: Record<string, string>,
+  annotationLayerIds: ReadonlySet<string> = new Set()
+): SavedObjectReference[] {
+  return Object.entries(dataviews).map(([layerId, dataViewId]) =>
+    annotationLayerIds.has(layerId)
+      ? createAnnotationLayerDataViewReference(dataViewId, layerId)
+      : createDataViewReference(dataViewId, layerId)
+  );
 }
 
 export function isSingleLayer(
@@ -466,6 +493,22 @@ export const buildDatasourceStates = (
     if (!dataSource) {
       if ('type' in layer && layer.type === 'annotation_group' && 'group_id' in layer) {
         // by-ref annotation layers don't require a data_source
+        continue;
+      }
+      if ('type' in layer && layer.type === 'annotations') {
+        // Query annotations actually query an index, so they require a data
+        // source. Manual point/range annotations are positioned purely by
+        // timestamp and may omit their data_source: they share the data view of
+        // the chart's data layers, which the Lens XY runtime resolves at load
+        // time. Either way an annotation layer produces no datasource state, so
+        // there's nothing to build here.
+        const hasQueryEvent =
+          'events' in layer &&
+          Array.isArray(layer.events) &&
+          layer.events.some((event) => event?.type === 'query');
+        if (hasQueryEvent) {
+          throw Error('A data source is required for annotation layers with query events');
+        }
         continue;
       }
       throw Error('DataSource must be defined');
