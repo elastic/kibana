@@ -28,11 +28,13 @@ import type {
 } from '../../../common/types/api';
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
 import { validateCustomFields } from './validators';
-import { normalizeCreateCaseRequest } from './utils';
+import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
+import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
 import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import { validateExtendedFieldValueSizes } from '../../../common/types/domain/template/validate_extended_fields';
 
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
@@ -94,6 +96,22 @@ export const bulkCreate = async (
           templatesEnabled: clientArgs.config.templates.enabled,
         })
       );
+    }
+
+    // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      const allUids = new Set(
+        bulkCreateRequest.flatMap((theCase) => theCase.assignees?.map(({ uid }) => uid) ?? [])
+      );
+      const profiles = await getUserProfilesSafe(clientArgs.securityStartPlugin, allUids, logger);
+
+      if (profiles) {
+        for (const theCase of bulkCreateRequest) {
+          if (theCase.assignees && theCase.assignees.length > 0) {
+            theCase.assignees = applyProfilesToAssignees(theCase.assignees, profiles);
+          }
+        }
+      }
     }
 
     const bulkCreateResponse = await caseService.bulkCreateCases({
@@ -202,6 +220,14 @@ const validateRequest = ({
 
   validateCustomFields(customFieldsValidationParams);
   validateAssigneesUsage({ assignees: theCase.assignees, hasPlatinumLicenseOrGreater });
+
+  // bulkCreate has no HTTP route — its callers (the cases connector) resolve templates
+  // themselves and always pin a version. Server-side template expansion (which resolves an
+  // omitted version to latest) is deliberately limited to `create`: running it here would
+  // silently change connector behavior (e.g. template assignees under the rule's request
+  // context). Reject an unpinned reference instead of storing one that close-time
+  // `required_on_close` validation cannot resolve.
+  ensureTemplateVersionIsPinned(theCase.template);
 };
 
 const validateAssigneesUsage = ({
@@ -261,6 +287,13 @@ const createBulkCreateCaseRequest = ({
       ) ?? undefined;
   }
 
+  const extendedFieldValueErrors = validateExtendedFieldValueSizes(
+    normalizedCase.extended_fields ?? {}
+  );
+  if (extendedFieldValueErrors.length > 0) {
+    throw Boom.badRequest(`Invalid extended_fields: ${extendedFieldValueErrors.join('; ')}`);
+  }
+
   return {
     id,
     ...transformNewCase({
@@ -285,7 +318,8 @@ const createBulkCreateUserActionsRequest = ({
     owner: theCase.attributes.owner,
     description: theCase.attributes.description,
     severity: theCase.attributes.severity ?? CaseSeverity.LOW,
-    assignees: theCase.attributes.assignees ?? [],
+    // Keep the user action uid-only
+    assignees: theCase.attributes.assignees?.map(({ uid }) => ({ uid })) ?? [],
     category: theCase.attributes.category ?? null,
     customFields: theCase.attributes.customFields ?? [],
   };

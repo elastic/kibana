@@ -332,6 +332,12 @@ tags:
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery
+  - description: |
+      Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space.
+
+      A single request can run one or more initialization flows. Each flow provisions a specific set of assets (for example, list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, or detection rule monitoring assets). The response reports a per-flow result so you can tell which flows completed and which returned an error.
+    name: Security Solution Initialization API
+    x-displayName: Security solution initialization
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
@@ -2812,14 +2818,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental; added in 9.4.0
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -2830,6 +2837,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview; added in 9.5.0
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2840,7 +2848,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -2873,6 +2881,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview; added in 9.3.0
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -2957,7 +2966,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -2980,6 +2989,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -3267,14 +3277,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental; added in 9.4.0
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -3285,6 +3296,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview; added in 9.5.0
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -3295,7 +3307,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -3328,6 +3340,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview; added in 9.3.0
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -3412,7 +3425,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -3435,6 +3448,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -12609,6 +12623,62 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/cases/{caseId}/fields:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/fields</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the fields you can write to the case's `extended_fields`. The case determines the owner and any applied template. The response includes the owner's global fields (library-wide) and, if the case has a template, that template's fields. Requires the Cases feature to be enabled in the space.
+      operationId: getCaseApplicableFieldsDefaultSpace
+      parameters:
+        - $ref: '#/components/parameters/Cases_case_id'
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseApplicableFieldsResponse:
+                  $ref: '#/components/examples/Cases_get_case_applicable_fields_response'
+              schema:
+                $ref: '#/components/schemas/Cases_applicable_fields_response'
+          description: Indicates a successful call.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have access to the case.
+        '404':
+          content:
+            application/json:
+              examples:
+                response404:
+                  $ref: '#/components/examples/Cases_response_404'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The case was not found.
+      summary: Get the fields applicable to an existing case
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/cases/{caseId}/files:
     post:
       description: |
@@ -13414,6 +13484,76 @@ paths:
                 $ref: '#/components/schemas/Cases_response_4xx'
           description: Authorization information is missing or invalid.
       summary: Get case connectors
+      tags:
+        - cases
+      x-metaTags:
+        - content: Kibana
+          name: product_name
+  /api/cases/fields:
+    get:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/fields</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Returns the fields you can write to a case's `extended_fields` when creating a case for the given owner. Includes the owner's global (library-wide) fields and, when `templateId` is supplied, that template's fields. Migrated legacy custom fields appear as `global` fields. Requires the Cases feature to be enabled in the space.
+      operationId: getApplicableFieldsDefaultSpace
+      parameters:
+        - description: The application that owns the cases (for example `cases`, `observability`, or `securitySolution`).
+          example: cases
+          in: query
+          name: owner
+          required: true
+          schema:
+            maxLength: 30
+            type: string
+        - description: The identifier of a template to include the template's fields in the response.
+          in: query
+          name: templateId
+          required: false
+          schema:
+            maxLength: 36
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                getCaseApplicableFieldsResponse:
+                  $ref: '#/components/examples/Cases_get_case_applicable_fields_response'
+              schema:
+                $ref: '#/components/schemas/Cases_applicable_fields_response'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              examples:
+                response400:
+                  $ref: '#/components/examples/Cases_response_400_invalid_template'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The request is invalid, for example when the `templateId` does not exist for the owner or its definition is invalid.
+        '401':
+          content:
+            application/json:
+              examples:
+                response401:
+                  $ref: '#/components/examples/Cases_response_401'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: Authorization information is missing or invalid.
+        '403':
+          content:
+            application/json:
+              examples:
+                response403:
+                  $ref: '#/components/examples/Cases_response_403'
+              schema:
+                $ref: '#/components/schemas/Cases_response_4xx'
+          description: The user does not have access to the requested owner.
+      summary: Get the fields applicable to a case
       tags:
         - cases
       x-metaTags:
@@ -30491,6 +30631,8 @@ paths:
                         pipeline_config:
                           maxLength: 10000
                           type: string
+                        policy_base_id:
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -31155,6 +31297,8 @@ paths:
                       pipeline_config:
                         maxLength: 10000
                         type: string
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -31635,6 +31779,8 @@ paths:
                         type: array
                       pipeline_config:
                         maxLength: 10000
+                        type: string
+                      policy_base_id:
                         type: string
                       policy_id:
                         type: string
@@ -56147,6 +56293,83 @@ paths:
       x-metaTags:
         - content: Kibana
           name: product_name
+  /api/security_solution/initialize:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Run one or more Security Solution initialization flows for the current space.
+        Each flow provisions a specific set of assets, for example list indices,
+        security data views, prebuilt detection rules, endpoint protection, AI prompts,
+        or detection rule monitoring assets. Only the requested flows are run, and the
+        response reports a result for each one.
+      operationId: InitializeSecuritySolution
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  flows:
+                    - init-prebuilt-rules
+                    - init-endpoint-protection
+                    - init-ai-prompts
+            schema:
+              type: object
+              properties:
+                flows:
+                  items:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowId'
+                  minItems: 1
+                  type: array
+              required:
+                - flows
+        description: The initialization flows to run.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    flows:
+                      init-ai-prompts:
+                        payload:
+                          install_status: installed
+                          name: security_ai_prompts
+                          version: 8.17.1
+                        status: ready
+                      init-endpoint-protection:
+                        payload:
+                          install_status: already_installed
+                          name: endpoint
+                          version: 8.17.1
+                        status: ready
+                      init-prebuilt-rules:
+                        payload:
+                          install_status: installed
+                          name: security_detection_engine
+                          version: 8.17.1
+                        status: ready
+              schema:
+                type: object
+                properties:
+                  flows:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowsResult'
+                required:
+                  - flows
+          description: Indicates a successful call. Returns a result for each requested flow.
+      summary: Initialize security solution flows
+      tags:
+        - Security Solution Initialization API
+      x-metaTags:
+        - content: Kibana
+          name: product_name
   /api/security/entity_store:
     put:
       description: |-
@@ -69481,6 +69704,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 2048
             type: string
         - description: The page of results to return.
           in: query
@@ -69690,6 +69914,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '204':
@@ -69721,6 +69947,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -69790,6 +70018,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -76145,6 +76375,45 @@ components:
         - attached_at: '2022-07-25T20:09:40.963Z'
           id: f6a7d0c3-d52d-432c-b2e6-447cd7fce04d
           index: .alerts-observability.logs.alerts-default
+    Cases_get_case_applicable_fields_response:
+      summary: Fields applicable to a case
+      value:
+        fields:
+          - control: SELECT_BASIC
+            defaultValue: medium
+            displayOnly: false
+            isGlobal: true
+            key: priority_as_keyword
+            label: Priority
+            name: priority
+            options:
+              - low
+              - medium
+              - high
+            type: keyword
+            required: true
+            requiredOnClose: false
+            source: global
+          - control: TEXTAREA
+            displayOnly: false
+            isGlobal: false
+            key: rollout_notes_as_keyword
+            label: Rollout notes
+            name: rollout_notes
+            type: keyword
+            required: false
+            requiredOnClose: true
+            source: template
+          - control: MARKDOWN
+            displayOnly: true
+            isGlobal: false
+            key: instructions_as_keyword
+            label: Instructions
+            name: instructions
+            type: keyword
+            required: false
+            requiredOnClose: false
+            source: template
     Cases_get_case_configuration_response:
       summary: Get the case configuration.
       value:
@@ -76418,12 +76687,24 @@ components:
           profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
           username: elastic
         version: WzE3NjgsM10=
+    Cases_response_400_invalid_template:
+      summary: The request is invalid.
+      value:
+        error: Bad Request
+        message: Template [invalid-template-id] not found for owner [cases]
+        statusCode: 400
     Cases_response_401:
       summary: Authorization information is missing or invalid.
       value:
         error: Unauthorized
         message: Unable to authenticate with the provided credentials.
         statusCode: 401
+    Cases_response_403:
+      summary: The user does not have access to the requested resource.
+      value:
+        error: Forbidden
+        message: Unauthorized to access cases
+        statusCode: 403
     Cases_response_404:
       summary: The requested resource was not found.
       value:
@@ -81715,6 +81996,79 @@ components:
         index:
           description: The alert index.
           type: string
+    Cases_applicable_fields_response:
+      description: |
+        The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
+      type: object
+      properties:
+        fields:
+          items:
+            type: object
+            properties:
+              control:
+                description: |
+                  The UI control for the field, such as `INPUT_TEXT`, `INPUT_NUMBER`, `SELECT_BASIC`, `TOGGLE`, or `MARKDOWN`.
+                example: SELECT_BASIC
+                type: string
+              defaultValue:
+                description: The default value, as a string, when the field definition declares one.
+                type: string
+              displayOnly:
+                description: |
+                  When `true` the field is display-only (for example a `MARKDOWN` block): it is returned so the full form shape is visible, but it holds no value and its `key` cannot be written to `extended_fields`.
+                type: boolean
+              isGlobal:
+                description: Whether the field is a global (library-wide) definition.
+                type: boolean
+              key:
+                description: |
+                  The storage key to write in the case `extended_fields` map. Follows the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`).
+                example: priority_as_keyword
+                type: string
+              label:
+                description: The human-readable label. Falls back to `name` when no label is authored.
+                example: Priority
+                type: string
+              name:
+                description: The field name as authored in the field definition.
+                example: priority
+                type: string
+              options:
+                description: The allowed values for `SELECT_BASIC`, `RADIO_GROUP`, and `CHECKBOX_GROUP` fields.
+                items:
+                  type: string
+                type: array
+              type:
+                description: 'The storage type: `keyword`, `integer`, `long`, `boolean`, or `date`.'
+                example: keyword
+                type: string
+              required:
+                description: Whether a value must be supplied at write time.
+                type: boolean
+              requiredOnClose:
+                description: Whether the field must be filled before the case can be closed.
+                type: boolean
+              source:
+                description: |
+                  Where the field comes from: `global` for a library-wide (`isGlobal`) definition writable on any case, or `template` for a field contributed by the applied template.
+                enum:
+                  - global
+                  - template
+                type: string
+            required:
+              - key
+              - name
+              - label
+              - type
+              - control
+              - required
+              - requiredOnClose
+              - displayOnly
+              - source
+              - isGlobal
+          type: array
+      required:
+        - fields
     Cases_assignees:
       description: An array containing users that are assigned to the case.
       items:
@@ -82628,6 +82982,23 @@ components:
           $ref: '#/components/schemas/Cases_case_severity'
         tags:
           $ref: '#/components/schemas/Cases_case_tags'
+        template:
+          description: |
+            A case template to create the case from. Requires the `xpack.cases.templates.enabled` setting. The server applies the template's case defaults (severity, category, tags, assignees, settings, connector) and its field defaults into `extended_fields`; any value explicitly provided in the request wins over the template default. When `version` is omitted, the latest version of the template is resolved and pinned on the case. To discover a template's fields before creating a case, use the get case fields API (`GET /api/cases/fields`).
+          nullable: true
+          type: object
+          properties:
+            id:
+              description: The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+              type: string
+            version:
+              description: |
+                The template version to apply. Omit to use (and pin) the latest version.
+              minimum: 1
+              type: integer
+          required:
+            - id
+          x-state: Technical preview
         title:
           $ref: '#/components/schemas/Cases_case_title'
       required:
@@ -90237,6 +90608,9 @@ components:
           description: The ID of the API key in the Security API.
           type: string
         created_at:
+          type: string
+        expire_at:
+          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
           type: string
         hidden:
           type: boolean
@@ -97916,6 +98290,10 @@ components:
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
+        allow_hidden_indices:
+          description: When `true`, allows the data view to match hidden indices.
+          title: Allow hidden and system indices
+          type: boolean
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
@@ -97924,6 +98302,12 @@ components:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
           minLength: 1
           title: Index pattern
+          type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
           type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
@@ -98093,12 +98477,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -98110,12 +98499,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -106139,6 +106533,8 @@ components:
       additionalProperties: false
       properties:
         expiration:
+          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
+          maxLength: 20
           type: string
         name:
           type: string
@@ -134892,35 +135288,41 @@ components:
       properties:
         has_all_required:
           type: boolean
+        has_install_permissions:
+          type: boolean
         has_read_permissions:
           type: boolean
         has_write_permissions:
           type: boolean
+        install_privileges:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  additionalProperties:
-                    type: boolean
-                  type: object
-                index:
-                  additionalProperties:
-                    additionalProperties:
-                      type: boolean
-                    type: object
-                  type: object
-            kibana:
-              additionalProperties:
-                type: boolean
-              type: object
-          required:
-            - elasticsearch
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              additionalProperties:
+                type: boolean
+              type: object
+            index:
+              additionalProperties:
+                additionalProperties:
+                  type: boolean
+                type: object
+              type: object
+        kibana:
+          additionalProperties:
+            type: boolean
+          type: object
+      required:
+        - elasticsearch
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -135501,6 +135903,9 @@ components:
           items:
             type: string
           type: array
+        hasManualEntities:
+          description: Indicates whether the watchlist contains manually assigned entities
+          type: boolean
         id:
           description: The unique ID of the watchlist
           type: string
@@ -139514,6 +139919,144 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
+    Security_Solution_Initialization_API_CreateListIndicesReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_DataViewPayload:
+      type: object
+      properties:
+        id:
+          type: string
+        patternList:
+          items:
+            type: string
+          type: array
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - patternList
+    Security_Solution_Initialization_API_InitializationFlowErrorResult:
+      type: object
+      properties:
+        error:
+          nullable: true
+          type: string
+        status:
+          enum:
+            - error
+          type: string
+      required:
+        - status
+        - error
+    Security_Solution_Initialization_API_InitializationFlowId:
+      description: Identifier for an initialization flow.
+      enum:
+        - create-list-indices
+        - security-data-views
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-rule-monitoring
+      type: string
+    Security_Solution_Initialization_API_InitializationFlowsResult:
+      description: Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
+      type: object
+      properties:
+        create-list-indices:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_CreateListIndicesReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-ai-prompts:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-detection-rule-monitoring:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-endpoint-protection:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-prebuilt-rules:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        security-data-views:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_SecurityDataViewsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+    Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_PackageInstallReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            install_status:
+              description: Fleet package installation status (e.g., installed, already_installed).
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+          required:
+            - name
+            - version
+            - install_status
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
+    Security_Solution_Initialization_API_SecurityDataViewsReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            alertDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            attackDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            defaultDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            kibanaDataViews:
+              items:
+                $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+              type: array
+            signalIndexName:
+              type: string
+          required:
+            - defaultDataView
+            - alertDataView
+            - kibanaDataViews
+            - signalIndexName
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
     Security_Timeline_API_AssociatedFilterType:
       description: |
         How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).

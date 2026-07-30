@@ -274,7 +274,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables entity ML anomaly details API
    */
-  entityAnalyticsAnomalyDetails: false,
+  entityAnalyticsAnomalyDetails: true,
 
   /**
    * Enables the deprecated prebuilt rules UI
@@ -302,7 +302,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the risk score history API endpoint for Entity Analytics.
    */
-  riskScoreHistoryEnabled: false,
+  riskScoreHistoryEnabled: true,
 
   /**
    * Enables UI treatments surfacing rules whose MITRE ATT&CK mappings drift
