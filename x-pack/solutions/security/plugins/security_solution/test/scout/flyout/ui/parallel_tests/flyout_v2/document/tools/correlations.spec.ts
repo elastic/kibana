@@ -25,6 +25,7 @@ spaceTest.describe(
         name: ruleName,
         index: [sourceIndex],
       });
+      // Verify that a read-only Security Solution analyst can access correlations.
       await browserAuth.loginAsT1Analyst();
     });
 
@@ -44,6 +45,7 @@ spaceTest.describe(
         await pageObjects.correlationsTool.titleLink.waitFor({ state: 'visible' });
         await pageObjects.correlationsTool.titleLink.click();
 
+        // The correlations overlay can be slow to mount under parallel load.
         await expect(pageObjects.correlationsTool.toolsFlyoutHeader).toBeVisible({
           timeout: 20_000,
         });
@@ -60,8 +62,6 @@ spaceTest.describe(
         await pageObjects.correlationsTool.sessionAlertsSectionFirstPreviewButton.click();
         await pageObjects.documentFlyout.waitForChildDocumentFlyout();
         await expect(pageObjects.documentFlyout.childDocumentAlertTitle).toContainText(ruleName);
-
-        // TODO: Related Attacks
       }
     );
   }
