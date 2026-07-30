@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { WorkflowYaml } from '../spec/schema';
 
 interface StepNameValidationError {
   stepName: string;
