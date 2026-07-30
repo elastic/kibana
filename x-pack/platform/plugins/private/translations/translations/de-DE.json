@@ -10911,8 +10911,6 @@
     "xpack.agentBuilder.conversation.staleAttachments.dismissButton": "Verwerfen",
     "xpack.agentBuilder.conversation.staleAttachments.stageButton": "Aktualisierte Versionen verwenden",
     "xpack.agentBuilder.conversation.staleAttachments.title": "Einige Anhänge sind veraltet",
-    "xpack.agentBuilder.conversation.toolResponseFlyout.text": "Überprüfen Sie in diesem Schritt die Reaktion auf den Tool-Aufruf",
-    "xpack.agentBuilder.conversation.toolResponseFlyout.title": "Tool-Reaktion überprüfen",
     "xpack.agentBuilder.conversationActions.actions": "Mehr",
     "xpack.agentBuilder.conversationActions.actionsAriaLabel": "Mehr",
     "xpack.agentBuilder.conversationActions.agentDetails": "Agentendetails",
