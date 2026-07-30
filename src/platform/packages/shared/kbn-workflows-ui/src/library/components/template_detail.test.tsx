@@ -259,4 +259,21 @@ describe('TemplateDetail', () => {
     renderDetail();
     expect(screen.getByTestId('workflowLibraryTemplateDetail-error')).toBeInTheDocument();
   });
+
+  it('should render an in-memory template without fetching by slug', () => {
+    // No slug and no fetch result — the query must not be consulted.
+    mockUseTemplate.mockReturnValue({ data: undefined, isLoading: true, isError: true });
+
+    render(
+      <WorkflowsUiServicesProvider services={createMockWorkflowsUiServices()}>
+        <TemplateDetail template={TEMPLATE_BODY} installMode="custom" />
+      </WorkflowsUiServicesProvider>
+    );
+
+    expect(mockUseTemplate).toHaveBeenCalledWith(undefined);
+    expect(screen.getByRole('heading', { name: 'My Template' })).toBeInTheDocument();
+    expect(screen.getByTestId('workflowLibraryTemplateDetail-preview')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-loading')).toBeNull();
+    expect(screen.queryByTestId('workflowLibraryTemplateDetail-error')).toBeNull();
+  });
 });

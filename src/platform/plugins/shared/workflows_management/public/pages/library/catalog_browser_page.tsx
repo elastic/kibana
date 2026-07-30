@@ -14,6 +14,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderBadge, AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { Template } from '@kbn/workflows-library';
+import type { WorkflowsImportRouteState } from '@kbn/workflows-ui';
 import { CatalogBrowser, useLibraryEnabled } from '@kbn/workflows-ui';
 import { PLUGIN_ID } from '../../../common';
 import { WorkflowsPageName } from '../../deep_links';
@@ -87,6 +88,20 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
     [application]
   );
 
+  // Navigate to the import page with the uploaded YAML carried on history state
+  // (never in the URL). A reload there loses the state and falls back to the
+  // catalog. The file is processed entirely client-side (see `CatalogBrowser`).
+  const handleFileUploaded = useCallback(
+    (customTemplateYaml: string) => {
+      application.navigateToApp(PLUGIN_ID, {
+        deepLinkId: WorkflowsPageName.library,
+        path: 'import',
+        state: { customTemplateYaml } satisfies WorkflowsImportRouteState,
+      });
+    },
+    [application]
+  );
+
   // The library is a tech preview gated behind a global uiSetting
   // This will be removed once the library is fully released
   const isLibraryEnabled = useLibraryEnabled();
@@ -102,7 +117,7 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
     >
       <AppHeader title={libraryPageTitle} badges={headerBadges} menu={headerMenu} />
       <EuiPageTemplate.Section paddingSize="m" grow>
-        <CatalogBrowser onSelect={handleSelect} />
+        <CatalogBrowser onSelect={handleSelect} onFileUploaded={handleFileUploaded} />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

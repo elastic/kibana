@@ -152,4 +152,24 @@ describe('CatalogBrowser', () => {
 
     expect(screen.getByTestId('workflowLibraryCategoryFacet-enrichment')).toHaveTextContent('1');
   });
+
+  it('hides the "Install template from file" button when no upload handler is provided', () => {
+    const template = buildTemplate();
+    mockCatalogState({ templates: [template], allTemplates: [template] });
+
+    renderBrowser();
+
+    expect(screen.queryByTestId('workflowLibraryUploadTemplateButton')).not.toBeInTheDocument();
+  });
+
+  it('opens the upload modal when the "Install template from file" button is clicked', () => {
+    const template = buildTemplate();
+    mockCatalogState({ templates: [template], allTemplates: [template] });
+
+    render(<CatalogBrowser onSelect={jest.fn()} onFileUploaded={jest.fn()} />);
+
+    expect(screen.queryByTestId('workflowLibraryUploadModal')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('workflowLibraryUploadTemplateButton'));
+    expect(screen.getByTestId('workflowLibraryUploadModal')).toBeInTheDocument();
+  });
 });

@@ -29,7 +29,7 @@ import type { InstallFormField, TemplateBody } from '@kbn/workflows-library';
 import { InstallForm } from './install_form';
 import { useWorkflowsCapabilities } from '../../../hooks/use_workflows_capabilities';
 import type { WorkflowsCreateRouteState } from '../../../navigation';
-import { useInstallTemplate } from '../../hooks/use_install_template';
+import { useInstallTemplate, type InstallSource } from '../../hooks/use_install_template';
 
 export interface TemplateInstallSectionProps {
   template: TemplateBody;
@@ -44,6 +44,12 @@ export interface TemplateInstallSectionProps {
    * editor, so what the user sees is what they remix.
    */
   previewYaml: string;
+  /**
+   * Where the template came from. `'catalog'` (default) installs by slug (the
+   * server re-fetches the trusted template); `'custom'` installs the template's
+   * own raw YAML (e.g. an uploaded file with no catalog slug).
+   */
+  installMode?: 'catalog' | 'custom';
 }
 
 const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =>
@@ -64,7 +70,12 @@ const defaultsFromForm = (fields: InstallFormField[]): Record<string, unknown> =
  * a toast and navigates to the created workflow's editor page.
  */
 export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
-  function TemplateInstallSection({ template, onPreviewValuesChange, previewYaml }) {
+  function TemplateInstallSection({
+    template,
+    onPreviewValuesChange,
+    previewYaml,
+    installMode = 'catalog',
+  }) {
     const { euiTheme } = useEuiTheme();
     const { application, notifications } = useKibana<{
       application: ApplicationStart;
@@ -120,8 +131,16 @@ export const TemplateInstallSection = React.memo<TemplateInstallSectionProps>(
       [onPreviewValuesChange, values]
     );
 
+    const installSource = useMemo<InstallSource>(
+      () =>
+        installMode === 'custom'
+          ? { type: 'custom', yaml: template.raw }
+          : { type: 'catalog', slug: template.metadata.slug },
+      [installMode, template.raw, template.metadata.slug]
+    );
+
     const { mutate: installTemplate, isLoading: isInstalling } = useInstallTemplate(
-      template.metadata.slug,
+      installSource,
       {
         onSuccess: ({ workflowId }) => {
           notifications.toasts.addSuccess(

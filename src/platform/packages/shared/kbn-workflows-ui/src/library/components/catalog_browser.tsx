@@ -9,6 +9,7 @@
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFieldSearch,
   EuiFlexGroup,
@@ -24,12 +25,21 @@ import type { Template } from '@kbn/workflows-library';
 import { CategoryFacets } from './category_facets';
 import { SolutionFilter } from './solution_filter';
 import { TemplateCard } from './template_card';
+import { UploadTemplateModal } from './upload_template_modal';
 import { filterCatalog } from '../hooks/filter_catalog';
 import { useActiveSolution } from '../hooks/use_active_solution';
 import { useCatalog } from '../hooks/use_catalog';
 
 export interface CatalogBrowserProps {
   onSelect: (template: Template) => void;
+  /**
+   * Enables the "Install template from file" flow. When provided, a link under
+   * the categories opens an upload modal; the raw YAML of a valid file is handed
+   * back here so the host can navigate to the setup/install page. Navigation
+   * (and URL/history state) stays with the host, so the button is hidden when
+   * this callback is absent.
+   */
+  onFileUploaded?: (rawYaml: string) => void;
 }
 
 interface CenteredMessageProps {
@@ -52,8 +62,19 @@ CenteredMessage.displayName = 'CenteredMessage';
  * is active), and a card grid. Renders in any plugin — only depends on core
  * services (http via `useWorkflowsApi`, chrome via `useActiveSolution`).
  */
-export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => {
+export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect, onFileUploaded }) => {
   const { euiTheme } = useEuiTheme();
+
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const openUpload = useCallback(() => setIsUploadOpen(true), []);
+  const closeUpload = useCallback(() => setIsUploadOpen(false), []);
+  const handleUploaded = useCallback(
+    (rawYaml: string) => {
+      setIsUploadOpen(false);
+      onFileUploaded?.(rawYaml);
+    },
+    [onFileUploaded]
+  );
 
   // Fluid card grid: tracks are at least 260px wide and grow to fill the full
   // row, but each track becomes at least one sixth of the row on wide screens so
@@ -188,10 +209,27 @@ export const CatalogBrowser = React.memo<CatalogBrowserProps>(({ onSelect }) => 
               selectedCategories={selectedCategories}
               onChange={setSelectedCategories}
             />
+            {onFileUploaded ? (
+              <EuiButtonEmpty
+                iconType="importAction"
+                flush="left"
+                size="s"
+                onClick={openUpload}
+                css={{ marginTop: euiTheme.size.m, alignSelf: 'flex-start' }}
+                data-test-subj="workflowLibraryUploadTemplateButton"
+              >
+                {i18n.translate('workflows.library.upload.trigger', {
+                  defaultMessage: 'Install template from file',
+                })}
+              </EuiButtonEmpty>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={1}>{content}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
+      {isUploadOpen ? (
+        <UploadTemplateModal onClose={closeUpload} onUploaded={handleUploaded} />
+      ) : null}
     </EuiFlexGroup>
   );
 });
