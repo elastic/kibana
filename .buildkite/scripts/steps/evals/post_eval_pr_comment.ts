@@ -10,8 +10,10 @@
 import { upsertComment } from '#pipeline-utils';
 
 // Scope the comment to the suite so each suite gets its own PR comment slot.
-// Falls back to the generic context for local runs where EVAL_SUITE_ID is not set.
-const suiteId = process.env.EVAL_SUITE_ID;
+// Prefers EVAL_SUITE_IDS (the canonical step env var) and falls back to EVAL_SUITE_ID.
+// When multiple suites are comma-joined, uses the first to derive the context key.
+const suiteIdsRaw = process.env.EVAL_SUITE_IDS ?? process.env.EVAL_SUITE_ID;
+const suiteId = suiteIdsRaw?.split(',')[0].trim() || undefined;
 const COMMENT_CONTEXT = suiteId ? `kbn-evals-comparison-${suiteId}` : 'kbn-evals-comparison';
 
 async function main(): Promise<void> {
