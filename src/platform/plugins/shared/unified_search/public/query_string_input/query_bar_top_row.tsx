@@ -1389,7 +1389,7 @@ export const QueryBarTopRow = React.memo(
                     padding-top: 0;
                   `}
                 >
-                  <EuiFlexItem grow={false}>
+                  <EuiFlexItem>
                     {props.esqlVariablesConfig?.controlsWrapper}
                   </EuiFlexItem>
                 </EuiFlexGroup>
