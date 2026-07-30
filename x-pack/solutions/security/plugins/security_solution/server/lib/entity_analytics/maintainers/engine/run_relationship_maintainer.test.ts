@@ -1631,7 +1631,7 @@ describe('runRelationshipMaintainer', () => {
 
       const infoCalls = logger.info.mock.calls.map((c) => c[0] as string);
       const completionLog = infoCalls.find((msg) =>
-        msg.includes('[elastic_defend][communicates_with] Integration complete:')
+        msg.includes('[communicates_with][elastic_defend] Integration complete:')
       );
       expect(completionLog).toBeDefined();
       expect(completionLog).toContain('outcome=');

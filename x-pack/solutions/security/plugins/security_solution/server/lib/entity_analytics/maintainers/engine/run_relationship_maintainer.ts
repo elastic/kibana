@@ -91,7 +91,8 @@ async function fetchActorPage(
   namespace: string,
   afterKey: CompositeAfterKey | undefined,
   transportOpts: { signal?: AbortSignal; requestTimeout?: number } | undefined,
-  signal: AbortSignal | undefined
+  signal: AbortSignal | undefined,
+  logPrefix: string
 ): Promise<{ buckets: CompositeBucket[]; newAfterKey: CompositeAfterKey | undefined } | null> {
   try {
     const result = await esClient.search(
@@ -105,14 +106,14 @@ async function fetchActorPage(
     };
   } catch (err) {
     if (isIndexNotFound(err)) {
-      logger.info(`[${config.id}] Index "${config.indexPattern(namespace)}" not found, skipping`);
+      logger.info(`${logPrefix} Index "${config.indexPattern(namespace)}" not found, skipping`);
       return null;
     }
     if (signal?.aborted) {
-      logger.info(`[${config.id}] Aborted during composite aggregation`);
+      logger.info(`${logPrefix} Aborted during composite aggregation`);
       return null;
     }
-    logger.error(`[${config.id}] Composite aggregation failed: ${errMsg(err)}`);
+    logger.error(`${logPrefix} Composite aggregation failed: ${errMsg(err)}`);
     throw err;
   }
 }
@@ -125,7 +126,8 @@ async function fetchTargetsForActors(
   namespace: string,
   buckets: CompositeBucket[],
   transportOpts: { signal?: AbortSignal; requestTimeout?: number } | undefined,
-  signal: AbortSignal | undefined
+  signal: AbortSignal | undefined,
+  logPrefix: string
 ): Promise<EsqlQueryResult | null> {
   const esqlFilter = {
     bool: {
@@ -144,7 +146,7 @@ async function fetchTargetsForActors(
     const typed = result as unknown as Partial<EsqlQueryResult>;
     if (!Array.isArray(typed.columns) || !Array.isArray(typed.values)) {
       logger.warn(
-        `[${config.id}] ES|QL returned unexpected response shape (columns or values not arrays); skipping page`
+        `${logPrefix} ES|QL returned unexpected response shape (columns or values not arrays); skipping page`
       );
       return null;
     }
@@ -152,10 +154,10 @@ async function fetchTargetsForActors(
     return { columns: typed.columns, values: typed.values };
   } catch (err) {
     if (signal?.aborted) {
-      logger.info(`[${config.id}] Aborted during ES|QL query`);
+      logger.info(`${logPrefix} Aborted during ES|QL query`);
       return null;
     }
-    logger.error(`[${config.id}] ES|QL query failed: ${errMsg(err)}`);
+    logger.error(`${logPrefix} ES|QL query failed: ${errMsg(err)}`);
     throw err;
   }
 }
@@ -181,7 +183,8 @@ async function runIntegration(
   entityMetadataClient: EntityMetadataClient,
   signal: AbortSignal | undefined,
   metadataContext: { scanId: string; observedAt: string },
-  requestTimeoutMs?: number
+  requestTimeoutMs: number | undefined,
+  logPrefix: string
 ): Promise<{
   buckets: number;
   recordsCount: number;
@@ -217,13 +220,13 @@ async function runIntegration(
   try {
     do {
       if (signal?.aborted) {
-        logger.info(`[${config.id}] Aborted during pagination`);
+        logger.info(`${logPrefix} Aborted during pagination`);
         outcome = totalBuckets === 0 ? 'empty' : 'partial';
         break;
       }
       iterations++;
       if (iterations > MAX_ITERATIONS) {
-        logger.warn(`[${config.id}] Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+        logger.warn(`${logPrefix} Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
         outcome = 'partial';
         truncated = true;
         break;
@@ -236,7 +239,8 @@ async function runIntegration(
         namespace,
         afterKey,
         transportOpts,
-        signal
+        signal,
+        logPrefix
       );
       if (actorPage === null) {
         outcome = signal?.aborted ? (totalBuckets === 0 ? 'empty' : 'partial') : 'index_missing';
@@ -244,7 +248,7 @@ async function runIntegration(
       }
 
       const { buckets, newAfterKey } = actorPage;
-      logger.info(`[${config.id}] Found ${buckets.length} user buckets`);
+      logger.info(`${logPrefix} Found ${buckets.length} user buckets`);
       totalBuckets += buckets.length;
       if (buckets.length === 0) {
         if (iterations === 1) outcome = 'empty';
@@ -258,7 +262,8 @@ async function runIntegration(
         namespace,
         buckets,
         transportOpts,
-        signal
+        signal,
+        logPrefix
       );
       if (esqlResult === null) {
         outcome = 'partial';
@@ -267,7 +272,7 @@ async function runIntegration(
 
       const { columns, values } = esqlResult;
       const pageRecords = parseTargetsPerActorRows(columns, values, config, logger);
-      logger.debug(`[${config.id}] Produced ${pageRecords.length} records`);
+      logger.debug(`${logPrefix} Produced ${pageRecords.length} records`);
       totalRecordsCount += pageRecords.length;
 
       // Stream per-page: write entity IDs immediately after parsing each page.
@@ -354,7 +359,7 @@ async function runIntegration(
       truncated,
     };
   } catch (err) {
-    logger.error(`[${config.id}] Integration failed: ${errMsg(err)}`);
+    logger.error(`${logPrefix} Integration failed: ${errMsg(err)}`);
     return {
       buckets: totalBuckets,
       recordsCount: totalRecordsCount,
@@ -479,7 +484,8 @@ export const runRelationshipMaintainer = async ({
       logger.info('Relationship maintainer aborted, skipping remaining integrations');
       break;
     }
-    logger.info(`[${config.id}] Processing integration: ${config.name}`);
+    const logPrefix = `[${maintainerName}][${config.id}]`;
+    logger.info(`${logPrefix} Processing integration: ${config.name}`);
     const integrationStartMs = Date.now();
     const {
       buckets,
@@ -498,12 +504,13 @@ export const runRelationshipMaintainer = async ({
       entityMetadataClient,
       signal,
       metadataContext,
-      requestTimeoutMs
+      requestTimeoutMs,
+      logPrefix
     );
 
     const durationMs = Date.now() - integrationStartMs;
     logger.info(
-      `[${config.id}][${maintainerName}] Integration complete: ` +
+      `${logPrefix} Integration complete: ` +
         `outcome=${outcome} slices=${iterations} records=${recordsCount} ` +
         `written=${write.updated} notFound=${write.notFound} errors=${write.errors} ` +
         `truncated=${integrationTruncated} durationMs=${durationMs}`
@@ -513,7 +520,7 @@ export const runRelationshipMaintainer = async ({
     if (integrationTruncated) truncated = true;
 
     if (outcome === 'error') {
-      logger.warn(`[${config.id}] Integration failed; skipping totals accumulation for this run`);
+      logger.warn(`${logPrefix} Integration failed; skipping totals accumulation for this run`);
     } else {
       totalBuckets += buckets;
       totalRecords += recordsCount;
