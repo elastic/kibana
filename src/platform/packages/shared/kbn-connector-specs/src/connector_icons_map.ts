@@ -248,6 +248,10 @@ export const ConnectorIconsMap: Map<
   ],
 
   [
+    '.rootly',
+    lazy(() => import(/* webpackChunkName: "connectorIconRootly" */ './specs/rootly/icon')),
+  ],
+  [
     '.sentry',
     lazy(() => import(/* webpackChunkName: "connectorIconSentry" */ './specs/sentry/icon')),
   ],

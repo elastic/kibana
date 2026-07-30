@@ -51,4 +51,5 @@ export * from './specs/one_drive/one_drive';
 export * from './specs/ansible_controller/ansible_controller';
 export * from './specs/sublime_security/sublime_security';
 export * from './specs/kubernetes/kubernetes';
+export * from './specs/rootly/rootly';
 export * from './specs/sentry/sentry';
