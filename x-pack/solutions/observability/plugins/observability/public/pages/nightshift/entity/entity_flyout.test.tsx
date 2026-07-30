@@ -113,7 +113,10 @@ describe('EntityFlyout', () => {
   it('opens a new chat with the entity attached when Open in chat is clicked', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByTestId('nightshiftEntityFlyoutChatButton'));
+    const chatButton = screen.getByTestId('nightshiftEntityFlyoutChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'newConversation');
+    fireEvent.click(chatButton);
 
     expect(mockOpenChat).toHaveBeenCalledWith({
       newConversation: true,
