@@ -15,7 +15,7 @@ import {
   toDiscoverSessionCreateAttributes,
   type FarequoteSavedSearchKey,
   type FarequoteSavedSearchSpec,
-} from '@kbn/ml-plugin/test/scout/ui/fixtures/farequote_saved_searches';
+} from './farequote_saved_searches';
 
 const SEARCH_TYPE = 'search';
 
