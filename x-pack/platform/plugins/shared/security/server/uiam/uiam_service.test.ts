@@ -9,7 +9,11 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -312,6 +316,30 @@ describe('UiamService', () => {
         scheme: 'SharedSecret',
         value: 'secret',
       });
+    });
+  });
+
+  describe('#getInternalCallerAttestationHeaders', () => {
+    it('carries the attestation derived from the shared secret, and never the secret itself', () => {
+      const credential = new HTTPAuthorizationHeader('Bearer', 'essu_one');
+      expect(uiamService.getInternalCallerAttestationHeaders(credential)).toEqual({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          'secret',
+          credential
+        ),
+      });
+    });
+
+    it('binds the attestation to the credential', () => {
+      expect(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_one')
+        )
+      ).not.toEqual(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_two')
+        )
+      );
     });
   });
 
@@ -1287,11 +1315,34 @@ describe('UiamService', () => {
         json: async () => ({ connections: [] }),
       });
 
-      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id');
+      await uiamService.listOAuthConnections('access-token', 'cid', 'conn-id', 'my-project-id');
 
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
-        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id',
+        'https://uiam.service/uiam/api/v1/oauth/connections?client_id=cid&connection_id=conn-id&project_id=my-project-id',
+        {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('includes project_id query parameter when provided', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => ({ connections: [] }),
+      });
+
+      await uiamService.listOAuthConnections('access-token', undefined, undefined, 'my-project-id');
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/connections?project_id=my-project-id',
         {
           method: 'GET',
           headers: {
