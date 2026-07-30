@@ -332,9 +332,9 @@ export class DiscoverApp {
       .locator(`[data-test-subj="field-${fieldName}"]`);
     await field.waitFor({ state: 'visible' });
     await field.click();
-    const fieldPopover = this.page.getByRole('dialog');
+    const fieldPopover = this.page.testSubj.locator('fieldPopover');
     await fieldPopover.waitFor({ state: 'visible' });
-    const deleteButton = fieldPopover.getByRole('button', { name: 'Delete data view field' });
+    const deleteButton = this.page.testSubj.locator(`fieldPopoverHeader_deleteField-${fieldName}`);
     await deleteButton.waitFor({ state: 'visible' });
     await deleteButton.click();
     await this.page.testSubj.fill('deleteModalConfirmText', 'REMOVE');
