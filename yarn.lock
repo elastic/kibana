@@ -2353,36 +2353,36 @@
   resolved "https://registry.yarnpkg.com/@elastic/esql-definitions/-/esql-definitions-4.15.0.tgz#5977edd04cd1508c85f9c35662778fa858307778"
   integrity sha512-fwg30m9U+6/JnlLGCIHJ7ETqi3vijy6SYIxfCpyqgsSwKk2NfvXXqfg0+OZkMOc5tsBHwzZb7UhI1CZi48xA/g==
 
-"@elastic/esql-grammar@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.14.0.tgz#c31dd66f1b04f6fca161ada5bd812fd8bbc869d1"
-  integrity sha512-Aa7ynnfNEYIZSRpk8qyddwTXpwLjPpeUSYFX6YhPHNEE2i6kp+UGCdCTs97Grq7KpxmfUuPcB3F/9xP+zzSLyA==
+"@elastic/esql-grammar@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-grammar/-/esql-grammar-4.16.0.tgz#7bd49f7c19e8ac82ea0556382f334b72d552c311"
+  integrity sha512-956yR/7xZJ8fuW4yirq4MA1ITvzJ5t4vXw1Hk/lEsdB3lilRcYqwkIRDDKRO+sxg5VCD84B08qKutsfjlWFvIQ==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-promql-grammar@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.14.0.tgz#39970c11d07600575552edff4d575411dbb651e7"
-  integrity sha512-6LA2F/4HyvjQARcF9gKAzpoPmgEk6o/1dcjVmyWS2wPLOY2SCunErBuiTcmRgQ6TYP5KIceJ6MevjyLILeq/PQ==
+"@elastic/esql-promql-grammar@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-promql-grammar/-/esql-promql-grammar-4.16.0.tgz#822cac2f821dfef5f1ef42f408765467c6552044"
+  integrity sha512-WjtQtg2ezbxa/Zgp4GUWlpwUhAzS+1tpe03a4l961goslLVmGs9xa+me6DWDkglxwmU0EGR6DXjT6rm2MHcRDw==
   dependencies:
     antlr4 "4.13.2"
     tslib "2.8.1"
 
-"@elastic/esql-types@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.14.0.tgz#1f141c6d105bf821d96fa8a4ccda0509ed816163"
-  integrity sha512-8BftYi9RpJfJusbpDHheslYCtsvKVucl98PmGyyuWFG6+492Wmdvw/r2Ml8gwhLbVv4fhnb0aXCTpEDmor18cQ==
+"@elastic/esql-types@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql-types/-/esql-types-4.16.0.tgz#d8e97f1719903c58dc30ea81319f1f50c7494888"
+  integrity sha512-/5kqJ2Skb2lTmK98eY+JQwBxH0PCIdeeVuNRX3DSnulEqd1VPR0zB76oscXEowQecKIU9OPA/CBxx2XBXHhYpg==
 
-"@elastic/esql@4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.14.0.tgz#151f1aa9b5590678939d93b276c925a8164a6ec7"
-  integrity sha512-ID777IARt/TnMncPXRNUG7+nRO/eRwac/18NJ/qweoG9aytIVgzxMo+W/Vz3bbIk55cAR8vUZoTCRtjiaRvjbA==
+"@elastic/esql@4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/esql/-/esql-4.16.0.tgz#144878b2196e460a4a6df01bb688c0020269077a"
+  integrity sha512-Swen9EAefzT93y1mBTOhs3ecKG1DkJtlHuWOrvXACIe89imKXx1bPIJ9fhtHKhTKsR26wdi5bIrX6fqhMvUAXw==
   dependencies:
-    "@elastic/esql-grammar" "^4.14.0"
-    "@elastic/esql-promql-grammar" "^4.14.0"
-    "@elastic/esql-types" "^4.14.0"
-    "@elastic/pretty-printer" "^4.14.0"
+    "@elastic/esql-grammar" "^4.16.0"
+    "@elastic/esql-promql-grammar" "^4.16.0"
+    "@elastic/esql-types" "^4.16.0"
+    "@elastic/pretty-printer" "^4.16.0"
     antlr4 "4.13.2"
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -2572,10 +2572,10 @@
     import-in-the-middle "^3.0.0"
     safe-stable-stringify "^2.4.3"
 
-"@elastic/pretty-printer@^4.14.0":
-  version "4.14.0"
-  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.14.0.tgz#20259cac062f7965c3e9ee1c3d12ab653192bb58"
-  integrity sha512-qtevMN1Cp8X4eTgKn5adc/5Y2GODhb85UO9mg7pACwBMpszriARbxaB8w22Lm1K/RRqTiFG7EDxS0jQlK69T2w==
+"@elastic/pretty-printer@^4.16.0":
+  version "4.16.0"
+  resolved "https://registry.yarnpkg.com/@elastic/pretty-printer/-/pretty-printer-4.16.0.tgz#732b55f94e73c236490c43ec5482f7ade66b4e23"
+  integrity sha512-jgr8EGn3/lbYss8E2Wn6YKZdLrRYBe+UEnhv+fxJgb/RIKtEE3fOuOyhDv6mYZZ80WzUCfWia3nO/Rvr/e17ug==
   dependencies:
     tree-dump "1.1.0"
     tslib "2.8.1"
@@ -8842,10 +8842,6 @@
   uid ""
 
 "@kbn/sample-log-parser@link:x-pack/platform/packages/shared/kbn-sample-parser":
-  version "0.0.0"
-  uid ""
-
-"@kbn/sample-task-plugin-update-by-query@link:x-pack/platform/test/task_manager_claimer_update_by_query/plugins/sample_task_plugin_mget":
   version "0.0.0"
   uid ""
 
