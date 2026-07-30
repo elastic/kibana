@@ -41,13 +41,6 @@ jest.mock('@kbn/embeddable-plugin/public', () => {
         </div>
       );
     },
-    ReactEmbeddableRenderer: (props: DashboardGridItemProps) => {
-      return (
-        <div className="embedPanel" id={`mockEmbedPanel_${props.id}`}>
-          mockEmbeddablePanel
-        </div>
-      );
-    },
   };
 });
 

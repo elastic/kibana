@@ -321,15 +321,15 @@ export function initializeESQLControlManager(
       availableOptionsSearchSubscription.unsubscribe();
       publishQuerySubscription.unsubscribe();
     },
-    cancelRequests: () => {
-      fetchAbortController.abort();
-      fetchAbortController = new AbortController();
-    },
     api: {
       hasSelections$: hasSelections$ as PublishingSubject<boolean | undefined>,
       esqlVariable$: esqlVariable$ as PublishingSubject<ESQLControlVariable>,
       singleSelect$: singleSelect$ as PublishingSubject<boolean>,
       query$,
+      cancelRequests: () => {
+        fetchAbortController.abort();
+        fetchAbortController = new AbortController();
+      },
     },
     anyStateChange$: merge(
       selectedOptions$.pipe(

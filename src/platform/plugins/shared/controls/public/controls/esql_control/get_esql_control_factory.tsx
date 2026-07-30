@@ -114,7 +114,6 @@ export const getESQLControlFactory = <
       });
 
       const api = finalizeApi({
-        cancelRequests: selections.cancelRequests,
         ...stateApi,
         ...selections.api,
         ...labelManager.api,
