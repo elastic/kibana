@@ -212,6 +212,10 @@ export function createChromeApi({
         get$: () => state.contextSwitcher.$,
         set: state.contextSwitcher.set,
       },
+      projectPicker: {
+        get$: () => state.projectPicker.$,
+        set: state.projectPicker.set,
+      },
       inlineAppHeader: {
         get$: () => state.inlineAppHeader.$,
         set: state.inlineAppHeader.set,
