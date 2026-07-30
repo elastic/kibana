@@ -16,6 +16,7 @@ import { z } from '@kbn/zod/v4';
 export const SearchWorkersInputSchema = z.object({
   search: z
     .string()
+    .max(100)
     .optional()
     .describe(
       'Filter workers by name. Passed as the search parameter (case-insensitive, min 3 chars). ' +
@@ -44,6 +45,7 @@ export type WhoAmIInput = z.infer<typeof WhoAmIInputSchema>;
 export const GetWorkerInputSchema = z.object({
   workerId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       'Workday worker ID (the WID), returned in the id field of searchWorkers results. ' +
@@ -56,6 +58,7 @@ export type GetWorkerInput = z.infer<typeof GetWorkerInputSchema>;
 export const GetDirectReportsInputSchema = z.object({
   workerId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       'Workday worker ID (WID) of the manager whose direct reports to retrieve. ' +
@@ -105,6 +108,7 @@ export type ListOrganizationsInput = z.infer<typeof ListOrganizationsInputSchema
 export const GetOrganizationInputSchema = z.object({
   organizationId: z
     .string()
+    .max(256)
     .describe(
       'Workday organization ID (WID), returned in the id field of listOrganizations results.'
     ),
@@ -133,6 +137,7 @@ export type ListJobPostingsInput = z.infer<typeof ListJobPostingsInputSchema>;
 export const GetJobPostingInputSchema = z.object({
   jobPostingId: z
     .string()
+    .max(256)
     .describe('Workday job posting ID (WID), returned in the id field of listJobPostings results.'),
 });
 export type GetJobPostingInput = z.infer<typeof GetJobPostingInputSchema>;
@@ -140,6 +145,7 @@ export type GetJobPostingInput = z.infer<typeof GetJobPostingInputSchema>;
 export const GetTimeOffBalanceInputSchema = z.object({
   workerId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       'WID of the worker whose balances to retrieve. ' +
@@ -148,6 +154,7 @@ export const GetTimeOffBalanceInputSchema = z.object({
     ),
   effective: z
     .string()
+    .max(10)
     .optional()
     .describe(
       'Return balances as of this date (ISO 8601 format, e.g. "2025-06-01"). Omit for current balances.'
@@ -166,6 +173,7 @@ export type GetTimeOffBalanceInput = z.infer<typeof GetTimeOffBalanceInputSchema
 export const ListTimeOffEntriesInputSchema = z.object({
   workerId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       'WID of the worker whose time off entries to retrieve. ' +
@@ -173,12 +181,14 @@ export const ListTimeOffEntriesInputSchema = z.object({
     ),
   fromDate: z
     .string()
+    .max(10)
     .optional()
     .describe(
       'Start of the date range (ISO 8601 date, e.g. "2025-01-01"). Omit for no lower bound.'
     ),
   toDate: z
     .string()
+    .max(10)
     .optional()
     .describe('End of the date range (ISO 8601 date, e.g. "2025-12-31"). Omit for no upper bound.'),
   limit: z
@@ -195,6 +205,7 @@ export type ListTimeOffEntriesInput = z.infer<typeof ListTimeOffEntriesInputSche
 export const ListAbsenceTypesInputSchema = z.object({
   workerId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       'WID of the worker whose eligible absence types to retrieve. ' +
@@ -214,6 +225,7 @@ export type ListAbsenceTypesInput = z.infer<typeof ListAbsenceTypesInputSchema>;
 export const ListInboxTasksInputSchema = z.object({
   workerId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       'WID of the worker whose inbox tasks to retrieve. ' +
@@ -245,6 +257,7 @@ export type ListInboxTasksInput = z.infer<typeof ListInboxTasksInputSchema>;
 export const ListCandidatesInputSchema = z.object({
   jobRequisitionId: z
     .string()
+    .max(256)
     .optional()
     .describe(
       'Filter candidates by job requisition WID. ' +
@@ -280,14 +293,17 @@ export type ListCandidatesInput = z.infer<typeof ListCandidatesInputSchema>;
 
 export const ListHolidaysInputSchema = z.object({
   workerIds: z
-    .array(z.string())
+    .array(z.string().max(256))
     .min(1)
     .describe(
       'One or more worker WIDs to retrieve holidays for. Required — omitting returns empty results. ' +
         'Obtain WIDs from whoAmI (current user) or searchWorkers.'
     ),
-  fromDate: z.string().describe('Start of the date range (ISO 8601 date, e.g. "2025-01-01").'),
-  toDate: z.string().describe('End of the date range (ISO 8601 date, e.g. "2025-12-31").'),
+  fromDate: z
+    .string()
+    .max(10)
+    .describe('Start of the date range (ISO 8601 date, e.g. "2025-01-01").'),
+  toDate: z.string().max(10).describe('End of the date range (ISO 8601 date, e.g. "2025-12-31").'),
   limit: z
     .number()
     .int()

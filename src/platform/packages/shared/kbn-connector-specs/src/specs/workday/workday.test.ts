@@ -626,14 +626,14 @@ describe('Workday', () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it('should cap limit at 100', async () => {
+    it('should pass limit through to the API', async () => {
       mockClient.get.mockResolvedValue({ data: { data: [], total: 0 } });
 
-      await Workday.actions.listInboxTasks.handler(mockContext, { limit: 200 });
+      await Workday.actions.listInboxTasks.handler(mockContext, { limit: 75 });
 
       expect(mockClient.get).toHaveBeenCalledWith(
         'https://mycompany.workday.com/ccx/api/common/v1/mycompany/workers/me/inboxTasks',
-        { params: { limit: 100 } }
+        { params: { limit: 75 } }
       );
     });
 

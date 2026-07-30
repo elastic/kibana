@@ -37,8 +37,8 @@ You can create a Workday connector in **{{stack-manage-app}} > {{connectors-ui}}
 **Authentication**
 :   OAuth 2.0 — either Authorization Code (per-user) or Client Credentials (machine-to-machine). Both require a **Client ID**, **Client Secret**, and **Token URL** from a registered Workday API client. Authorization Code also requires an **Authorization URL**.
     The authorization and token URLs follow the pattern:
-    - `https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/authorize`
-    - `https://wd2-impl-services1.workday.com/ccx/oauth2/<tenantName>/token`
+    - `https://<tenant>.workday.com/ccx/oauth2/<tenant>/authorize`
+    - `https://<tenant>.workday.com/ccx/oauth2/<tenant>/token`
 
 ## Available actions [workday-available-actions]
 

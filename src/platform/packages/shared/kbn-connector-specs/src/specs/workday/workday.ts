@@ -27,7 +27,7 @@ const HOLIDAY_API_VERSION = 'v1';
 
 import { i18n } from '@kbn/i18n';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../../connector_spec';
+import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import { UISchemas } from '../../connector_spec_ui';
 import {
   SearchWorkersInputSchema,
@@ -160,11 +160,7 @@ export const Workday: ConnectorSpec = {
         "Use this to get the current user's WID before calling other worker-scoped actions.",
       input: WhoAmIInputSchema,
       handler: async (ctx) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers/me`;
         const response = await ctx.client.get(url, {});
         return response.data;
@@ -180,11 +176,7 @@ export const Workday: ConnectorSpec = {
         'Use the returned id (WID) with getWorker to retrieve the full worker profile.',
       input: SearchWorkersInputSchema,
       handler: async (ctx, input: SearchWorkersInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers`;
 
         const response = await ctx.client.get(url, {
@@ -209,11 +201,7 @@ export const Workday: ConnectorSpec = {
         'Use the WID returned by the searchWorkers action.',
       input: GetWorkerInputSchema,
       handler: async (ctx, input: GetWorkerInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const workerSegment = resolvedWorkerId(input.workerId);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers/${workerSegment}`;
 
@@ -231,11 +219,7 @@ export const Workday: ConnectorSpec = {
         'Use the WID returned by searchWorkers or getWorker to look up a manager.',
       input: GetDirectReportsInputSchema,
       handler: async (ctx, input: GetDirectReportsInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const workerSegment = resolvedWorkerId(input.workerId);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers/${workerSegment}/directReports`;
 
@@ -259,11 +243,7 @@ export const Workday: ConnectorSpec = {
         'Use the returned id (WID) with getOrganization for full details, or to look up members.',
       input: ListOrganizationsInputSchema,
       handler: async (ctx, input: ListOrganizationsInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/organizations`;
 
         const response = await ctx.client.get(url, {
@@ -286,11 +266,7 @@ export const Workday: ConnectorSpec = {
         'Use the WID returned by the listOrganizations action.',
       input: GetOrganizationInputSchema,
       handler: async (ctx, input: GetOrganizationInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/organizations/${encodeURIComponent(
           input.organizationId
         )}`;
@@ -309,11 +285,7 @@ export const Workday: ConnectorSpec = {
         'Use the returned id (WID) with getJobPosting for the full job description.',
       input: ListJobPostingsInputSchema,
       handler: async (ctx, input: ListJobPostingsInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/recruiting/${RECRUITING_API_VERSION}/${tenantName}/jobPostings`;
 
         const response = await ctx.client.get(url, {
@@ -336,11 +308,7 @@ export const Workday: ConnectorSpec = {
         'Use the WID returned by the listJobPostings action.',
       input: GetJobPostingInputSchema,
       handler: async (ctx, input: GetJobPostingInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/recruiting/${RECRUITING_API_VERSION}/${tenantName}/jobPostings/${encodeURIComponent(
           input.jobPostingId
         )}`;
@@ -359,11 +327,7 @@ export const Workday: ConnectorSpec = {
         'Use effective to get balances as of a past or future date.',
       input: GetTimeOffBalanceInputSchema,
       handler: async (ctx, input: GetTimeOffBalanceInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/absenceManagement/${ABSENCE_API_VERSION}/${tenantName}/balances`;
 
         const response = await ctx.client.get(url, {
@@ -388,11 +352,7 @@ export const Workday: ConnectorSpec = {
         'Use fromDate/toDate to scope to a date range.',
       input: ListTimeOffEntriesInputSchema,
       handler: async (ctx, input: ListTimeOffEntriesInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const workerSegment = resolvedWorkerId(input.workerId);
         const url = `${base}/ccx/api/absenceManagement/${ABSENCE_API_VERSION}/${tenantName}/workers/${workerSegment}/timeOffDetails`;
 
@@ -418,11 +378,7 @@ export const Workday: ConnectorSpec = {
         'Use this to understand what absence plans are available before calling getTimeOffBalance.',
       input: ListAbsenceTypesInputSchema,
       handler: async (ctx, input: ListAbsenceTypesInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const workerSegment = resolvedWorkerId(input.workerId);
         const url = `${base}/ccx/api/absenceManagement/${ABSENCE_API_VERSION}/${tenantName}/workers/${workerSegment}/eligibleAbsenceTypes`;
 
@@ -445,17 +401,13 @@ export const Workday: ConnectorSpec = {
         'Omit workerId to retrieve tasks for the current authenticated user.',
       input: ListInboxTasksInputSchema,
       handler: async (ctx, input: ListInboxTasksInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const workerSegment = resolvedWorkerId(input.workerId);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers/${workerSegment}/inboxTasks`;
 
         const response = await ctx.client.get(url, {
           params: {
-            limit: Math.min(input.limit ?? 100, 100),
+            limit: input.limit,
             ...(input.offset !== undefined && { offset: input.offset }),
           },
         });
@@ -477,11 +429,7 @@ export const Workday: ConnectorSpec = {
         'Pass a jobRequisitionId WID to scope results to a specific role.',
       input: ListCandidatesInputSchema,
       handler: async (ctx, input: ListCandidatesInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/recruiting/${RECRUITING_API_VERSION}/${tenantName}/candidates`;
 
         const response = await ctx.client.get(url, {
@@ -512,11 +460,7 @@ export const Workday: ConnectorSpec = {
         'Always call whoAmI first to obtain a WID for the current user.',
       input: ListHolidaysInputSchema,
       handler: async (ctx, input: ListHolidaysInput) => {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = tenantUrl.replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/holiday/${HOLIDAY_API_VERSION}/${tenantName}/holidayEvents`;
 
         // worker is collectionFormat:multi — build with URLSearchParams to get ?worker=a&worker=b
@@ -553,16 +497,13 @@ export const Workday: ConnectorSpec = {
   ].join('\n'),
 
   test: {
+    enabled: true,
     description: i18n.translate('core.kibanaConnectorSpecs.workday.test.description', {
       defaultMessage: 'Verifies Workday connection by listing up to one worker',
     }),
     handler: async (ctx) => {
       try {
-        const { tenantUrl, tenantName } = ctx.config as {
-          tenantUrl: string;
-          tenantName: string;
-        };
-        const base = (tenantUrl as string).replace(/\/+$/, '');
+        const { base, tenantName } = getBaseUrl(ctx);
         const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers`;
 
         await ctx.client.get(url, { params: { limit: 1 } });
@@ -578,6 +519,14 @@ export const Workday: ConnectorSpec = {
     },
   },
 };
+
+function getBaseUrl(ctx: ActionContext): { base: string; tenantName: string } {
+  const { tenantUrl, tenantName } = ctx.config as { tenantUrl: string; tenantName: string };
+  return {
+    base: tenantUrl.replace(/\/+$/, ''),
+    tenantName: encodeURIComponent(tenantName),
+  };
+}
 
 function resolvedWorkerId(workerId: string | undefined) {
   return workerId ? encodeURIComponent(workerId) : 'me';
