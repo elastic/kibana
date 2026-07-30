@@ -130,7 +130,7 @@ describe('String Format', () => {
     };
     expect(string.convertToReact('<img />', options)).toMatchInlineSnapshot(`
       <mark
-        className="ffSearch__highlight"
+        css="unknown styles"
       >
         &lt;img /&gt;
       </mark>

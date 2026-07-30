@@ -235,18 +235,10 @@ export abstract class FieldFormat {
 
   protected checkForMissingValueReact(val: unknown): ReactNode | void {
     if (val === '') {
-      return (
-        <span className="ffString__emptyValue" css={emptyValueStyles}>
-          {EMPTY_LABEL}
-        </span>
-      );
+      return <span css={emptyValueStyles}>{EMPTY_LABEL}</span>;
     }
     if (val == null || val === MISSING_TOKEN) {
-      return (
-        <span className="ffString__emptyValue" css={emptyValueStyles}>
-          {NULL_LABEL}
-        </span>
-      );
+      return <span css={emptyValueStyles}>{NULL_LABEL}</span>;
     }
   }
 }

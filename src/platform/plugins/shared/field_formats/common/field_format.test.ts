@@ -143,11 +143,11 @@ describe('FieldFormat class', () => {
       test('uses newline separator and indentation when values contain newlines', () => {
         const f = getTestFormat(undefined, (v) => String(v));
         expect(renderReact(f.convertToReact(['{\n  "x": 1\n}', '{\n  "y": 2\n}']))).toBe(
-          '<span class="ffArray__highlight">[</span>\n' +
+          '<span>[</span>\n' +
             '  {\n    "x": 1\n  }' +
-            '<span class="ffArray__highlight">,</span>\n' +
+            '<span>,</span>\n' +
             '  {\n    "y": 2\n  }\n' +
-            '<span class="ffArray__highlight">]</span>'
+            '<span>]</span>'
         );
       });
 
@@ -164,7 +164,7 @@ describe('FieldFormat class', () => {
         React.createElement(EuiProvider, null, f.convertToReact(undefined))
       );
 
-      expect(container.querySelector('.ffString__emptyValue')).toHaveStyleRule(
+      expect(container.querySelector('span')).toHaveStyleRule(
         'color',
         result.current.euiTheme.colors.darkShade
       );
@@ -184,7 +184,7 @@ describe('FieldFormat class', () => {
             makeOptions('myField', [`lorem ${hl('ipsum')} dolor`])
           )
         );
-        expect(result).toBe('lorem <mark class="ffSearch__highlight">ipsum</mark> dolor');
+        expect(result).toBe('lorem <mark>ipsum</mark> dolor');
       });
 
       test('returns plain text from convertToReact when no highlights are present', () => {
@@ -216,7 +216,7 @@ describe('FieldFormat class', () => {
           const result = renderReact(
             f.convertToReact('ipsum', makeOptions('myField', [`${hl('formatted:ipsum')}`]))
           );
-          expect(result).toBe('<mark class="ffSearch__highlight">formatted:ipsum</mark>');
+          expect(result).toBe('<mark>formatted:ipsum</mark>');
         });
 
         test('returns plain text when no highlights present', () => {
@@ -232,7 +232,7 @@ describe('FieldFormat class', () => {
         const result = renderReact(
           f.convertToReact('<em>lorem</em>', makeOptions('myField', [`${hl('<em>lorem</em>')}`]))
         );
-        expect(result).toBe('<mark class="ffSearch__highlight">&lt;em&gt;lorem&lt;/em&gt;</mark>');
+        expect(result).toBe('<mark>&lt;em&gt;lorem&lt;/em&gt;</mark>');
         expect(result).not.toContain('<em>');
       });
 

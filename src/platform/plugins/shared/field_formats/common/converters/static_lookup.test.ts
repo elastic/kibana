@@ -106,7 +106,7 @@ describe('StaticLookupFormat', () => {
       expect(formatter.convertToReact('test', options)).toMatchInlineSnapshot(`
         <React.Fragment>
           <mark
-            className="ffSearch__highlight"
+            css="unknown styles"
           >
             Test
           </mark>

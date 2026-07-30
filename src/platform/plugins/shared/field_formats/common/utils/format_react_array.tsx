@@ -54,7 +54,7 @@ export function formatReactArray(
 }
 
 const withArrayStyles = (text: string, key?: string) => (
-  <span key={key ?? text} className="ffArray__highlight" css={arrayHighlightStyles}>
+  <span key={key ?? text} css={arrayHighlightStyles}>
     {text}
   </span>
 );

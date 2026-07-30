@@ -375,7 +375,7 @@ describe('datatable cell renderer', () => {
               convertToText: () => '(null)',
               convertToReact: (x: unknown) => {
                 if (x == null) {
-                  return <span className="ffString__emptyValue">(null)</span>;
+                  return <span>(null)</span>;
                 }
                 return `formatted ${x}`;
               },
@@ -390,7 +390,7 @@ describe('datatable cell renderer', () => {
           context: { table: makeTable([{ a: null }]) },
         });
 
-        expect(screen.getByText('(null)')).toHaveClass('ffString__emptyValue');
+        expect(screen.getByText('(null)')).toBeInTheDocument();
         expect(setCellProps).not.toHaveBeenCalled();
         expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
       }
@@ -480,7 +480,7 @@ describe('datatable cell renderer', () => {
             },
             convertToReact: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
-                return <span className="ffString__emptyValue">(null)</span>;
+                return <span>(null)</span>;
               }
               return `formatted ${x}`;
             },

@@ -652,7 +652,7 @@ describe('UrlFormat', () => {
         target="_blank"
       >
         <mark
-          className="ffSearch__highlight"
+          css="unknown styles"
         >
           http://elastic.co
         </mark>
@@ -691,7 +691,7 @@ describe('UrlFormat', () => {
     expect(url.convertToReact(['http://elastic.co', 'http://kibana.io'])).toMatchInlineSnapshot(`
       <React.Fragment>
         <span
-          className="ffArray__highlight"
+          css="unknown styles"
         >
           [
         </span>
@@ -703,7 +703,7 @@ describe('UrlFormat', () => {
           http://elastic.co
         </a>
         <span
-          className="ffArray__highlight"
+          css="unknown styles"
         >
           ,
         </span>
@@ -716,7 +716,7 @@ describe('UrlFormat', () => {
           http://kibana.io
         </a>
         <span
-          className="ffArray__highlight"
+          css="unknown styles"
         >
           ]
         </span>

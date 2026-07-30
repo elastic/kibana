@@ -196,7 +196,7 @@ describe('Color Format', () => {
     expect(colorer.convertToReact([100, 200])).toMatchInlineSnapshot(`
       <React.Fragment>
         <span
-          className="ffArray__highlight"
+          css="unknown styles"
         >
           [
         </span>
@@ -214,7 +214,7 @@ describe('Color Format', () => {
           100
         </span>
         <span
-          className="ffArray__highlight"
+          css="unknown styles"
         >
           ,
         </span>
@@ -233,7 +233,7 @@ describe('Color Format', () => {
           200
         </span>
         <span
-          className="ffArray__highlight"
+          css="unknown styles"
         >
           ]
         </span>

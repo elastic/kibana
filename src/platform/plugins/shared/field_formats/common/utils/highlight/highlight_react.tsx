@@ -110,7 +110,7 @@ function highlightWithSubstrings(
     const [highlighted, after] = part.split(highlightTags.post);
     if (highlighted)
       nodes.push(
-        <mark className="ffSearch__highlight" css={searchHighlightStyles} key={i}>
+        <mark css={searchHighlightStyles} key={i}>
           {highlighted}
         </mark>
       );
@@ -165,7 +165,7 @@ function highlightWithInlineTags(
     }
 
     nodes.push(
-      <mark className="ffSearch__highlight" css={searchHighlightStyles} key={key++}>
+      <mark css={searchHighlightStyles} key={key++}>
         {remaining.slice(contentStart, closeIndex)}
       </mark>
     );

@@ -79,11 +79,7 @@ export abstract class NumeralFormat extends FieldFormat {
 
   reactConvert: ReactConvertFunction = (val) => {
     if (val == null || val === MISSING_TOKEN) {
-      return (
-        <span className="ffString__emptyValue" css={emptyValueStyles}>
-          {NULL_LABEL}
-        </span>
-      );
+      return <span css={emptyValueStyles}>{NULL_LABEL}</span>;
     }
     if (typeof val === 'object' && !Array.isArray(val)) {
       return asPrettyString(val);

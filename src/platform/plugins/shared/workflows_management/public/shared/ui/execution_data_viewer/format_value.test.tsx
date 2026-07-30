@@ -72,7 +72,7 @@ describe('formatValueAsElement', () => {
     it('renders an array with bracket highlights and comma separators', () => {
       const { container } = renderValue(['a', 'b', 'c']);
 
-      const highlights = container.querySelectorAll('.ffArray__highlight');
+      const highlights = container.querySelectorAll('span');
       // Opening bracket, two commas, closing bracket = 4 highlighted spans
       expect(highlights).toHaveLength(4);
       expect(highlights[0].textContent).toBe('[');
@@ -87,7 +87,7 @@ describe('formatValueAsElement', () => {
       const { result } = renderHook(() => useEuiTheme(), { wrapper: EuiProvider });
       const { container } = renderValue(['a', 'b']);
 
-      expect(container.querySelector('.ffArray__highlight')).toHaveStyleRule(
+      expect(container.querySelector('span')).toHaveStyleRule(
         'color',
         result.current.euiTheme.colors.mediumShade
       );
@@ -96,7 +96,7 @@ describe('formatValueAsElement', () => {
     it('renders an empty array with only brackets', () => {
       const { container } = renderValue([]);
 
-      const highlights = container.querySelectorAll('.ffArray__highlight');
+      const highlights = container.querySelectorAll('span');
       expect(highlights).toHaveLength(2);
       expect(highlights[0].textContent).toBe('[');
       expect(highlights[1].textContent).toBe(']');
@@ -106,7 +106,7 @@ describe('formatValueAsElement', () => {
     it('renders a single-element array without commas', () => {
       const { container } = renderValue([42]);
 
-      const highlights = container.querySelectorAll('.ffArray__highlight');
+      const highlights = container.querySelectorAll('span');
       // Opening bracket and closing bracket only
       expect(highlights).toHaveLength(2);
       expect(container.textContent).toBe('[42]');

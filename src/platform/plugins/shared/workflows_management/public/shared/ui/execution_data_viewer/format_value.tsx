@@ -27,22 +27,14 @@ export function formatValueAsElement(value: unknown): React.ReactElement | strin
   if (Array.isArray(value)) {
     return (
       <>
-        <span className="ffArray__highlight" css={arrayHighlightStyles}>
-          {'['}
-        </span>
+        <span css={arrayHighlightStyles}>{'['}</span>
         {value.map((item, index) => (
           <React.Fragment key={index}>
-            {index > 0 && (
-              <span className="ffArray__highlight" css={arrayHighlightStyles}>
-                {', '}
-              </span>
-            )}
+            {index > 0 && <span css={arrayHighlightStyles}>{', '}</span>}
             {formatValueAsElement(item)}
           </React.Fragment>
         ))}
-        <span className="ffArray__highlight" css={arrayHighlightStyles}>
-          {']'}
-        </span>
+        <span css={arrayHighlightStyles}>{']'}</span>
       </>
     );
   }

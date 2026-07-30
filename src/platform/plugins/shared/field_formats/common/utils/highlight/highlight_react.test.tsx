@@ -25,7 +25,7 @@ function render(node: React.ReactNode): string {
 }
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
-const mark = (word: string) => `<mark class="ffSearch__highlight">${word}</mark>`;
+const mark = (word: string) => `<mark>${word}</mark>`;
 
 describe('getHighlightReact', () => {
   it('returns plain string unchanged when no field name is provided', () => {
@@ -66,7 +66,7 @@ describe('getHighlightReact', () => {
         </EuiProvider>
       );
 
-      expect(container.querySelector('.ffSearch__highlight')).toHaveStyleRule(
+      expect(container.querySelector('mark')).toHaveStyleRule(
         'text-decoration',
         'dotted underline'
       );

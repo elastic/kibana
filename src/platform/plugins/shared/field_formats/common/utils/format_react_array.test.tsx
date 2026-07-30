@@ -18,9 +18,9 @@ function render(node: React.ReactNode): string {
   return renderReactNode(node);
 }
 
-const open = '<span class="ffArray__highlight">[</span>';
-const close = '<span class="ffArray__highlight">]</span>';
-const comma = '<span class="ffArray__highlight">,</span>';
+const open = '<span>[</span>';
+const close = '<span>]</span>';
+const comma = '<span>,</span>';
 
 describe('formatReactArray', () => {
   describe('empty and single-element arrays', () => {
@@ -44,7 +44,7 @@ describe('formatReactArray', () => {
         <EuiProvider>{formatReactArray(['a', 'b'], String)}</EuiProvider>
       );
 
-      expect(container.querySelector('.ffArray__highlight')).toHaveStyleRule(
+      expect(container.querySelector('span')).toHaveStyleRule(
         'color',
         result.current.euiTheme.colors.mediumShade
       );

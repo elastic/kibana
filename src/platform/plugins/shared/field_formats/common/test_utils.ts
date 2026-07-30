@@ -8,53 +8,41 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { createElement, isValidElement, type ReactElement, type ReactNode } from 'react';
+import { createElement, isValidElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { NULL_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
 
-const EMPTY_VALUE_CLASS = 'ffString__emptyValue';
-const ARRAY_HIGHLIGHT_CLASS = 'ffArray__highlight';
-
 export const renderReactNode = (node: ReactNode) =>
   renderToStaticMarkup(createElement(EuiProvider, null, node))
+    .replace(/ class="css-[^"]+"/g, '')
     .replace(/ css-[^"]+/g, '')
     .replace(/&quot;/g, '"');
 
 /**
  * Asserts that a React element represents a null value display.
- * Expects a span with className "ffString__emptyValue" and text "(null)".
  */
 export const expectReactElementWithNull = (element: React.ReactNode) => {
   expect(isValidElement(element)).toBe(true);
-  const el = element as ReactElement;
-  expect(el.type).toBe('span');
-  expect(el.props.className).toBe(EMPTY_VALUE_CLASS);
-  expect(el.props.children).toBe(NULL_LABEL);
+  expect(renderReactNode(element)).toBe(`<span>${NULL_LABEL}</span>`);
 };
 
 /**
  * Asserts that a React element represents a blank value display.
- * Expects a span with className "ffString__emptyValue" and text "(blank)".
  */
 export const expectReactElementWithBlank = (element: React.ReactNode) => {
   expect(isValidElement(element)).toBe(true);
-  const el = element as ReactElement;
-  expect(el.type).toBe('span');
-  expect(el.props.className).toBe(EMPTY_VALUE_CLASS);
-  expect(el.props.children).toBe(EMPTY_LABEL);
+  expect(renderReactNode(element)).toBe(`<span>${EMPTY_LABEL}</span>`);
 };
 
 /**
  * Asserts that a React element represents an array with bracket notation.
- * Expects a structure like: [value1, value2, ...] where brackets and commas
- * are wrapped in spans with className "ffArray__highlight".
  */
 export const expectReactElementAsArray = (element: React.ReactNode, expectedValues: string[]) => {
   expect(isValidElement(element)).toBe(true);
 
   const html = renderReactNode(element);
 
-  const bracket = (char: string) => `<span class="${ARRAY_HIGHLIGHT_CLASS}">${char}</span>`;
+  const bracket = (char: string) => `<span>${char}</span>`;
   const expectedHtml = bracket('[') + expectedValues.join(`${bracket(',')} `) + bracket(']');
 
   expect(html).toBe(expectedHtml);
