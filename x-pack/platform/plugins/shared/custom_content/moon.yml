@@ -44,6 +44,7 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/code-editor-mock'
   - '@kbn/core-http-server'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
