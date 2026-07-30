@@ -21,6 +21,10 @@ export const EVENT_SEARCH_FULL_MAX_PER_PAGE = 10;
 // via `total_signals`/`signals_truncated` so callers know to re-query with view: 'full' and
 // event_ids: [event_id] for the complete list.
 export const MAX_COMPACT_EVENT_SIGNALS = 10;
+// A single signal's `description` can be as long as MAX_TEXT_LENGTH (10,000 chars), so capping
+// signal *count* alone doesn't bound payload size — a handful of long descriptions can still
+// blow up the prompt. Compact view truncates each description to this length.
+export const MAX_COMPACT_SIGNAL_DESCRIPTION_LENGTH = 500;
 
 export type EventSearchView = 'compact' | 'full';
 
@@ -94,6 +98,11 @@ const byRecencyThenConfirmed = (a: Signal, b: Signal): number => {
   return a.confirmed === b.confirmed ? 0 : a.confirmed ? -1 : 1;
 };
 
+const truncateCompactDescription = (description: string | undefined): string | undefined =>
+  description !== undefined && description.length > MAX_COMPACT_SIGNAL_DESCRIPTION_LENGTH
+    ? `${description.slice(0, MAX_COMPACT_SIGNAL_DESCRIPTION_LENGTH)}… [truncated]`
+    : description;
+
 // A signal matching the caller's own `rule_uuids`/`stream_names` filter is what the caller
 // explicitly asked for, so its whole group is kept ahead of the rest and can never be truncated
 // away in its favor; each group is independently sorted by recency.
@@ -145,7 +154,7 @@ const toCompactEvent = (
       rule_uuid: signal.metadata.rule_uuid,
       rule_name: signal.metadata.rule_name,
       confirmed: signal.confirmed,
-      description: signal.description,
+      description: truncateCompactDescription(signal.description),
       collected_at: signal.collected_at,
       esql_query: signal.evidence?.esql_query,
     })),
