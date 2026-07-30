@@ -47,6 +47,10 @@ export interface Options {
  * Check if RSPack optimizer should be used instead of Webpack optimizer
  */
 function isRspackOptimizerEnabled(): boolean {
+  if (process.env.KBN_USE_RSPACK === undefined) {
+    process.env.KBN_USE_RSPACK = 'true';
+  }
+
   const v = process.env.KBN_USE_RSPACK;
   return v === 'true' || v === '1';
 }

@@ -118,7 +118,7 @@ describe('webpack optimizer path', () => {
 
   beforeEach(() => {
     previousKbnUseRspack = process.env.KBN_USE_RSPACK;
-    delete process.env.KBN_USE_RSPACK;
+    process.env.KBN_USE_RSPACK = 'false';
   });
 
   afterEach(() => {
