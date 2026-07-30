@@ -22,4 +22,3 @@ export const transformGetResponse = (ruleTemplate: RuleTemplate): RuleTemplateRe
   ...(ruleTemplate.description ? { description: ruleTemplate.description } : {}),
   ...(ruleTemplate.engine ? { engine: ruleTemplate.engine } : {}),
 });
-

@@ -19,9 +19,7 @@ export interface TransformRawRuleTemplateToRuleTemplateParams {
 
 const isAlertingV2Template = (
   attributes: RawRuleTemplate
-): attributes is AlertingV2RawRuleTemplate =>
-  attributes.engine === 'v2' && 'rule' in attributes;
-
+): attributes is AlertingV2RawRuleTemplate => attributes.engine === 'v2' && 'rule' in attributes;
 
 /**
  * Maps Fleet-shaped template SOs to the v1 application RuleTemplate.
