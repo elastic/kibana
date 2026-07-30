@@ -24,7 +24,7 @@ import { expectReactElementAsArray } from './test_utils';
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
 const renderReact = (node: React.ReactNode) =>
-  ReactDOM.renderToStaticMarkup(React.createElement(EuiProvider, null, node)).replace(
+  ReactDOM.renderToStaticMarkup(React.createElement(React.Fragment, null, node)).replace(
     /&quot;/g,
     '"'
   );
@@ -148,11 +148,11 @@ describe('FieldFormat class', () => {
       test('uses newline separator and indentation when values contain newlines', () => {
         const f = getTestFormat(undefined, (v) => String(v));
         expect(renderReact(f.convertToReact(['{\n  "x": 1\n}', '{\n  "y": 2\n}']))).toBe(
-          '<span class="css-edplx8-arrayHighlightStyles">[</span>\n' +
+          '<span class="css-1msmqia-arrayHighlightStyles">[</span>\n' +
             '  {\n    "x": 1\n  }' +
-            '<span class="css-edplx8-arrayHighlightStyles">,</span>\n' +
+            '<span class="css-1msmqia-arrayHighlightStyles">,</span>\n' +
             '  {\n    "y": 2\n  }\n' +
-            '<span class="css-edplx8-arrayHighlightStyles">]</span>'
+            '<span class="css-1msmqia-arrayHighlightStyles">]</span>'
         );
       });
 

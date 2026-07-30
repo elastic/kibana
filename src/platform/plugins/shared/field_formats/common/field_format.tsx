@@ -26,7 +26,7 @@ import type {
   ReactConvertFunction,
   TextContextTypeConvert,
 } from './types';
-import { emptyValueStyles } from './field_format_styles';
+import { MissingValue } from './field_format_styles';
 
 export abstract class FieldFormat {
   /**
@@ -235,10 +235,10 @@ export abstract class FieldFormat {
 
   protected checkForMissingValueReact(val: unknown): ReactNode | void {
     if (val === '') {
-      return <span css={emptyValueStyles}>{EMPTY_LABEL}</span>;
+      return <MissingValue>{EMPTY_LABEL}</MissingValue>;
     }
     if (val == null || val === MISSING_TOKEN) {
-      return <span css={emptyValueStyles}>{NULL_LABEL}</span>;
+      return <MissingValue>{NULL_LABEL}</MissingValue>;
     }
   }
 }

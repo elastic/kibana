@@ -7,19 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 
-export const arrayHighlightStyles = ({ euiTheme }: UseEuiTheme) =>
+const arrayHighlightStyles = ({ euiTheme }: ReturnType<typeof useEuiTheme>) =>
   css({
     color: euiTheme.colors.mediumShade,
   });
+
+export const ArrayHighlight = ({ children }: PropsWithChildren) => {
+  const euiTheme = useEuiTheme();
+
+  return <span css={arrayHighlightStyles(euiTheme)}>{children}</span>;
+};
 
 export const searchHighlightStyles = css({
   textDecoration: 'dotted underline',
 });
 
-export const emptyValueStyles = ({ euiTheme }: UseEuiTheme) =>
+const emptyValueStyles = ({ euiTheme }: ReturnType<typeof useEuiTheme>) =>
   css({
     color: euiTheme.colors.darkShade,
   });
+
+export const MissingValue = ({ children }: PropsWithChildren) => {
+  const euiTheme = useEuiTheme();
+
+  return <span css={emptyValueStyles(euiTheme)}>{children}</span>;
+};

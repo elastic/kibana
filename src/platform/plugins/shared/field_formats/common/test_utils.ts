@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiProvider } from '@elastic/eui';
 import { render } from '@testing-library/react';
-import { createElement, isValidElement, type ReactNode } from 'react';
+import { isValidElement, type ReactNode } from 'react';
 import { NULL_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
 
-export const renderReactNode = (node: ReactNode) =>
-  render(createElement(EuiProvider, null, node)).container;
+export const renderReactNode = (node: ReactNode) => render(node).container;
 
 /**
  * Asserts that a React element represents a null value display.
