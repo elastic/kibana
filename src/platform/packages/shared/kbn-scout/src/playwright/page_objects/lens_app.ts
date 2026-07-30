@@ -538,8 +538,15 @@ export class LensApp {
     await this.chartSwitchList.waitFor({ state: 'visible' });
   }
 
+  /**
+   * Drags a field from the field list onto the workspace drop zone.
+   *
+   * `'records'` is accepted as an alias for Lens's "Records" pseudo-field, whose internal id
+   * (`RECORDS_FIELD_ID`) differs from its display label — see `selectField` above.
+   */
   async dragFieldToWorkspace(field: string) {
-    const fieldLocator = this.page.testSubj.locator(`lnsFieldListPanelField-${field}`);
+    const fieldId = field === 'records' ? RECORDS_FIELD_ID : field;
+    const fieldLocator = this.page.testSubj.locator(`lnsFieldListPanelField-${fieldId}`);
     const dropTarget = this.page.testSubj.locator('workspace-drag-drop-prompt');
     await fieldLocator.dragTo(dropTarget);
     await this.page.locator('.echCanvasRenderer').waitFor({ state: 'visible' });
