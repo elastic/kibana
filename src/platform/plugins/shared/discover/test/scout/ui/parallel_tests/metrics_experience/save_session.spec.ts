@@ -21,9 +21,11 @@ import {
   testData,
   DEFAULT_TIME_RANGE,
   DEFAULT_CONFIG,
+  SORTED_FIRST_CARD_IDS,
 } from '../../fixtures/metrics_experience';
 
 const SAVED_SEARCH_NAME = 'Metrics Tier 3 Save Test';
+const SORT_SAVED_SEARCH_NAME = 'Metrics Sort Save Test';
 const FIRST_DIMENSION = DEFAULT_CONFIG.dimensions[0].name;
 
 spaceTest.describe(
@@ -98,6 +100,46 @@ spaceTest.describe(
       await spaceTest.step('ES|QL query should be preserved', async () => {
         const queryAfter = await discover.getEsqlQueryValue();
         expect(queryAfter).toStrictEqual(queryBefore);
+      });
+    });
+
+    // The sort selector is gated behind `discover.metricsExperienceSortEnabled`,
+    // enabled for the whole parallel suite in `parallel_tests/global.setup.ts`.
+    spaceTest('should restore a non-default sort from a saved session', async ({ pageObjects }) => {
+      const { metricsExperience, discover } = pageObjects;
+
+      await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      await expect(metricsExperience.grid).toBeVisible();
+
+      await spaceTest.step('change the sort to descending', async () => {
+        await metricsExperience.setSortDirection('desc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
+          'id',
+          SORTED_FIRST_CARD_IDS.DESC
+        );
+      });
+
+      await spaceTest.step('save the session with the descending sort', async () => {
+        await discover.saveSearch(SORT_SAVED_SEARCH_NAME);
+      });
+
+      await spaceTest.step('a new session falls back to the default ascending sort', async () => {
+        await discover.clickNewSearch();
+        await discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
+          'id',
+          SORTED_FIRST_CARD_IDS.ASC
+        );
+      });
+
+      await spaceTest.step('loading the saved session restores the descending sort', async () => {
+        await discover.loadSavedSearch(SORT_SAVED_SEARCH_NAME);
+        await expect(metricsExperience.grid).toBeVisible();
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute(
+          'id',
+          SORTED_FIRST_CARD_IDS.DESC
+        );
       });
     });
   }
