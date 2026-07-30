@@ -29,6 +29,7 @@ import { AddConnectorModal } from '@kbn/elastic-assistant/impl/connectorland/add
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLoadConnectors } from '@kbn/inference-connectors';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import type { EntitySummaryStalenessReason } from '@kbn/entity-store/common';
 import {
   buildEntitySummaryStaleness,
@@ -451,25 +452,12 @@ export const EntityHighlightsAccordion: React.FC<{
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem grow={4}>
                 <EuiText size="xs" textAlign="left">
-                  {!connectorId ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
-                      defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
-                    />
-                  ) : missingInferencePrivilege ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.missingInferencePrivilege"
-                      defaultMessage="The selected connector requires the Elasticsearch cluster privilege {privilege}. Ask an administrator to grant it, or switch to a different AI connector."
-                      values={{
-                        privilege: <strong>{INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE}</strong>,
-                      }}
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
-                      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
-                    />
-                  )}
+                  {getEntitySummaryEmptyStateDescription({
+                    connectorId,
+                    connectorName,
+                    connectors: aiConnectors,
+                    missingInferencePrivilege,
+                  })}
                 </EuiText>
               </EuiFlexItem>
               {(aiConnectors?.length ?? 0) > 0 ? (
@@ -517,5 +505,63 @@ export const EntityHighlightsAccordion: React.FC<{
       </EuiAccordion>
       <EuiHorizontalRule />
     </>
+  );
+};
+
+const getEntitySummaryEmptyStateDescription = ({
+  connectorId,
+  connectorName,
+  connectors,
+  missingInferencePrivilege,
+}: {
+  connectorId: string;
+  connectorName: string;
+  connectors?: Array<{ actionTypeId?: string }>;
+  missingInferencePrivilege: boolean;
+}): React.ReactElement => {
+  if (!connectorId) {
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.noConnector"
+        defaultMessage="No AI connector is configured. Please configure an AI connector to generate a summary."
+      />
+    );
+  }
+
+  if (missingInferencePrivilege) {
+    const hasAlternativeNonInferenceConnector = (connectors ?? []).some(
+      (connector) => connector.actionTypeId !== InferenceConnectorType.Inference
+    );
+
+    if (hasAlternativeNonInferenceConnector) {
+      return (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.missingInferencePrivilegeWithAlternative"
+          defaultMessage="The selected connector {connectorName} requires the Elasticsearch cluster privilege {privilege}. Ask an administrator to grant it, or switch to a different AI connector."
+          values={{
+            connectorName: <strong>{connectorName}</strong>,
+            privilege: <strong>{INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE}</strong>,
+          }}
+        />
+      );
+    }
+
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.missingInferencePrivilege"
+        defaultMessage="The selected connector {connectorName} requires the Elasticsearch cluster privilege {privilege}. Ask an administrator to grant it."
+        values={{
+          connectorName: <strong>{connectorName}</strong>,
+          privilege: <strong>{INFERENCE_CONNECTOR_CLUSTER_PRIVILEGE}</strong>,
+        }}
+      />
+    );
+  }
+
+  return (
+    <FormattedMessage
+      id="xpack.securitySolution.flyout.entityDetails.highlights.cardDescription.default"
+      defaultMessage="Create AI summary of the entity to better understand its key characteristics and see recommended actions."
+    />
   );
 };

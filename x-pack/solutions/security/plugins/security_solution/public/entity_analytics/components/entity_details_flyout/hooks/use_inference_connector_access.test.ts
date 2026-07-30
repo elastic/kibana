@@ -6,6 +6,7 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { TestProviders } from '../../../../common/mock';
 import { useInferenceConnectorAccess } from './use_inference_connector_access';
 
@@ -25,12 +26,12 @@ describe('useInferenceConnectorAccess', () => {
   const genAiConnector = {
     id: 'connector-1',
     name: 'OpenAI',
-    actionTypeId: '.gen-ai',
+    actionTypeId: InferenceConnectorType.OpenAI,
   };
   const inferenceConnector = {
     id: 'connector-2',
     name: 'Elastic Managed LLM',
-    actionTypeId: '.inference',
+    actionTypeId: InferenceConnectorType.Inference,
   };
 
   beforeEach(() => {

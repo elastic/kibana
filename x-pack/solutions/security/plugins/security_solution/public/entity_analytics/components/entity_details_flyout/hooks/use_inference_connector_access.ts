@@ -8,6 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useQuery } from '@kbn/react-query';
+import { InferenceConnectorType } from '@kbn/inference-common';
 import { INFERENCE_CONNECTOR_PRIVILEGES_INTERNAL_URL } from '../../../../../common/inference_connector/constants';
 import { API_VERSIONS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -25,7 +26,7 @@ interface InferenceConnectorAccessConnector {
 }
 
 const isInferenceApiConnector = (connector?: InferenceConnectorAccessConnector): boolean =>
-  connector?.actionTypeId === '.inference';
+  connector?.actionTypeId === InferenceConnectorType.Inference;
 
 /**
  * Resolves whether the current user can use the selected connector.
