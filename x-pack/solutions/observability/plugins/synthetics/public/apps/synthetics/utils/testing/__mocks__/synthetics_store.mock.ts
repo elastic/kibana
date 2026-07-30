@@ -143,6 +143,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
     status: null,
     error: null,
+    settled: false,
     isInitialLoad: true,
   },
   globalParams: {

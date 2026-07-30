@@ -1746,6 +1746,17 @@ module.exports = {
         },
       },
       rules: {
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        'playwright/expect-expect': [
+          'warn',
+          {
+            assertFunctionNames: ['expect', 'expect.soft', 'assert*'],
+          },
+        ],
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
         'playwright/no-conditional-in-test': 'warn',

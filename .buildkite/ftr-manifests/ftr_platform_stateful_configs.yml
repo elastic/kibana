@@ -241,7 +241,6 @@ enabled:
   - x-pack/platform/test/functional/apps/lens/group6/config.ts
   - x-pack/platform/test/functional/apps/lens/group8/config.ts
   - x-pack/platform/test/functional/apps/lens/group10/config.ts
-  - x-pack/platform/test/functional/apps/lens/group11/config.ts
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
   - x-pack/platform/test/functional/apps/lens/group13/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts

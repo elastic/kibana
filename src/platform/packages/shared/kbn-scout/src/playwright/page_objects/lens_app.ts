@@ -349,6 +349,15 @@ export class LensApp {
   async closeDimensionEditorPanel() {
     await this.closeDimensionEditor();
   }
+  
+  /** Enables empty rows for the current date histogram dimension. */
+  async enableIncludeEmptyRows() {
+    const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
+    await includeEmptyRows.click();
+    await includeEmptyRows
+      .and(this.page.locator('[aria-checked="true"]'))
+      .waitFor({ state: 'visible' });
+  }
 
   /**
    * Closes the open dimension editor flyout.
