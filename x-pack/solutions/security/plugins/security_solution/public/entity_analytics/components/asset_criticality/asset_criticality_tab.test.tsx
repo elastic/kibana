@@ -8,6 +8,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import {
+  ENTITY_LATEST,
+  getEntitiesAlias,
+  getEntityMetadataAlias,
+  getLatestEntityIndexPattern,
+} from '@kbn/entity-store/common';
 
 import { AssetCriticalityTab } from './asset_criticality_tab';
 
@@ -18,6 +24,26 @@ import {
   ASSET_CRITICALITY_INFO_PANEL_TEST_ID,
   ASSET_CRITICALITY_DOC_LINK_TEST_ID,
 } from '../../test_ids';
+
+const SPACE_ID = 'default';
+const ENTITIES_ALIAS = getEntitiesAlias(ENTITY_LATEST, SPACE_ID);
+const LATEST_INDEX_PATTERN = getLatestEntityIndexPattern(SPACE_ID);
+const METADATA_ALIAS = getEntityMetadataAlias(SPACE_ID);
+
+const privilegesMissingWrite = {
+  has_write_permissions: false,
+  has_read_permissions: false,
+  has_all_required: false,
+  privileges: {
+    elasticsearch: {
+      index: {
+        [ENTITIES_ALIAS]: { read: false, write: false },
+        [LATEST_INDEX_PATTERN]: { read: false, write: false },
+        [METADATA_ALIAS]: { read: false },
+      },
+    },
+  },
+};
 
 const mockUseAssetCriticalityPrivileges = jest.fn();
 jest.mock('./use_asset_criticality', () => ({
@@ -59,7 +85,10 @@ describe('AssetCriticalityTab', () => {
     mockUseHasSecurityCapability.mockReturnValue(true);
     mockUseAssetCriticalityPrivileges.mockReturnValue({
       isLoading: false,
-      data: { has_write_permissions: true },
+      data: {
+        has_write_permissions: true,
+        privileges: { elasticsearch: { index: {} } },
+      },
       error: null,
     });
   });
@@ -98,10 +127,10 @@ describe('AssetCriticalityTab', () => {
     expect(screen.getByText('Forbidden by server')).toBeInTheDocument();
   });
 
-  it('shows insufficient privileges callout when write permissions are missing', () => {
+  it('shows insufficient privileges callout listing indices missing write', () => {
     mockUseAssetCriticalityPrivileges.mockReturnValue({
       isLoading: false,
-      data: { has_write_permissions: false },
+      data: privilegesMissingWrite,
       error: null,
     });
     render(<AssetCriticalityTab />, { wrapper: Wrapper });
@@ -109,6 +138,10 @@ describe('AssetCriticalityTab', () => {
     expect(
       screen.getByTestId(ASSET_CRITICALITY_INSUFFICIENT_PRIVILEGES_TEST_ID)
     ).toBeInTheDocument();
+    expect(screen.getByText(ENTITIES_ALIAS)).toBeInTheDocument();
+    expect(screen.getByText(LATEST_INDEX_PATTERN)).toBeInTheDocument();
+    expect(screen.queryByText(METADATA_ALIAS)).not.toBeInTheDocument();
+    expect(screen.queryByText('.asset-criticality.asset-criticality-*')).not.toBeInTheDocument();
     expect(screen.queryByTestId('asset-criticality-file-uploader')).not.toBeInTheDocument();
   });
 

@@ -23,7 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 
-import { ASSET_CRITICALITY_INDEX_PATTERN } from '../../../../common/entity_analytics/asset_criticality';
+import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityFileUploader } from '../asset_criticality_file_uploader/asset_criticality_file_uploader';
 import { useAssetCriticalityPrivileges } from './use_asset_criticality';
 import { useHasSecurityCapability } from '../../../helper_hooks';
@@ -43,14 +43,13 @@ export const AssetCriticalityTab = () => {
     error: assetCriticalityPrivilegesError,
     isLoading: assetCriticalityIsLoading,
   } = useAssetCriticalityPrivileges('AssetCriticalityUploadPage');
-  const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
 
   return (
     <EuiFlexGroup gutterSize="xl">
       <FileUploadSection
+        assetCriticalityPrivileges={assetCriticalityPrivileges}
         assetCriticalityPrivilegesError={assetCriticalityPrivilegesError}
         hasEntityAnalyticsCapability={hasEntityAnalyticsCapability}
-        hasAssetCriticalityWritePermissions={hasAssetCriticalityWritePermissions}
         isLoading={assetCriticalityIsLoading}
       />
       <EuiFlexItem grow={2}>
@@ -61,27 +60,34 @@ export const AssetCriticalityTab = () => {
 };
 
 const FileUploadSection: React.FC<{
+  assetCriticalityPrivileges?: EntityAnalyticsPrivileges;
   assetCriticalityPrivilegesError: SecurityAppError | null;
   hasEntityAnalyticsCapability: boolean;
-  hasAssetCriticalityWritePermissions?: boolean;
   isLoading: boolean;
 }> = ({
+  assetCriticalityPrivileges,
   assetCriticalityPrivilegesError,
   hasEntityAnalyticsCapability,
-  hasAssetCriticalityWritePermissions,
   isLoading,
 }) => {
   if (isLoading) {
     return null;
   }
 
+  const hasAssetCriticalityWritePermissions = assetCriticalityPrivileges?.has_write_permissions;
+  const indicesMissingWrite = assetCriticalityPrivileges
+    ? getIndicesMissingWrite(assetCriticalityPrivileges)
+    : [];
+
   let content: ReactNode;
   if (!hasEntityAnalyticsCapability || assetCriticalityPrivilegesError?.body.status_code === 403) {
     content = (
       <AssetCriticalityIssueCallout errorMessage={assetCriticalityPrivilegesError?.body.message} />
     );
-  } else if (!hasAssetCriticalityWritePermissions) {
-    content = <InsufficientAssetCriticalityPrivilegesCallout />;
+  } else if (!hasAssetCriticalityWritePermissions && indicesMissingWrite.length > 0) {
+    content = (
+      <InsufficientAssetCriticalityPrivilegesCallout indicesMissingWrite={indicesMissingWrite} />
+    );
   } else {
     content = (
       <>
@@ -166,7 +172,9 @@ const WhatIsAssetCriticalityPanel: React.FC = () => {
   );
 };
 
-const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
+const InsufficientAssetCriticalityPrivilegesCallout: React.FC<{
+  indicesMissingWrite: string[];
+}> = ({ indicesMissingWrite }) => {
   return (
     <EuiCallOut
       title={
@@ -181,12 +189,16 @@ const InsufficientAssetCriticalityPrivilegesCallout: React.FC = () => {
     >
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.missingPermissionsDescription"
-          defaultMessage="Write permission is required for the {index} index pattern in order to access this functionality. Contact your administrator for further assistance."
-          values={{
-            index: <EuiCode>{ASSET_CRITICALITY_INDEX_PATTERN}</EuiCode>,
-          }}
+          id="xpack.securitySolution.entityAnalytics.entityAnalyticsManagementPage.assetCriticality.missingWriteIndexPermissionsDescription"
+          defaultMessage="Write permission is required for the following indices in order to access this functionality. Contact your administrator for further assistance."
         />
+        <ul>
+          {indicesMissingWrite.map((indexName) => (
+            <li key={indexName}>
+              <EuiCode>{indexName}</EuiCode>
+            </li>
+          ))}
+        </ul>
       </EuiText>
     </EuiCallOut>
   );
@@ -218,3 +230,8 @@ const AssetCriticalityIssueCallout: React.FC<{ errorMessage?: string | ReactNode
     </EuiCallOut>
   );
 };
+
+const getIndicesMissingWrite = (privileges: EntityAnalyticsPrivileges): string[] =>
+  Object.entries(privileges.privileges.elasticsearch.index ?? {})
+    .filter(([, indexPrivileges]) => indexPrivileges.write === false)
+    .map(([indexName]) => indexName);
