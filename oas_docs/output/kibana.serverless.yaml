@@ -77535,6 +77535,9 @@ components:
           type: string
         created_at:
           type: string
+        expire_at:
+          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
+          type: string
         hidden:
           type: boolean
         id:
@@ -93456,6 +93459,8 @@ components:
       additionalProperties: false
       properties:
         expiration:
+          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
+          maxLength: 20
           type: string
         name:
           type: string
