@@ -411,7 +411,7 @@ export const Databricks: ConnectorSpec = {
       input: WarehouseIdInputSchema,
       handler: async (ctx, input: WarehouseIdInput) => {
         const { data } = await ctx.client.post(
-          `${workspaceOrigin(ctx)}/api/2.0/sql/warehouses/${input.warehouseId}/start`
+          `${workspaceOrigin(ctx)}/api/2.0/sql/warehouses/${encodeURIComponent(input.warehouseId)}/start`
         );
         return data;
       },
