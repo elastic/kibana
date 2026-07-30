@@ -10,7 +10,11 @@ import type {
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,
 } from '@kbn/features-plugin/common';
-import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from './saved_object_types';
+import {
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_SAVED_OBJECT_TYPE,
+  RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+} from './saved_object_types';
 import {
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
@@ -144,7 +148,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.all, ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           all: [RULE_SAVED_OBJECT_TYPE],
-          read: [],
+          read: [RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
       read: {
@@ -152,7 +156,7 @@ export const ALERTING_V2_FEATURES = {
         ui: [ALERTING_V2_UI_CAPABILITIES.rules.read],
         savedObject: {
           all: [],
-          read: [RULE_SAVED_OBJECT_TYPE],
+          read: [RULE_SAVED_OBJECT_TYPE, RULE_TEMPLATE_SAVED_OBJECT_TYPE],
         },
       },
     },

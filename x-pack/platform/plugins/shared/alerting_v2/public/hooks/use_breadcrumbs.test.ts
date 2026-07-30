@@ -81,6 +81,16 @@ describe('useBreadcrumbs', () => {
     expect(rulesListBreadcrumb.href).toBe('/');
   });
 
+  it('should set breadcrumbs for rule_library with root and rules list link', () => {
+    renderHook(() => useBreadcrumbs('rule_library'));
+
+    const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
+    expect(breadcrumbs).toHaveLength(3);
+    expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
+    expect(breadcrumbs[1]).toMatchObject({ text: 'Rules', href: '/' });
+    expect(breadcrumbs[2]).toMatchObject({ text: 'Rule library' });
+  });
+
   it('should not include href on rules list breadcrumb when on the list page itself', () => {
     renderHook(() => useBreadcrumbs('rules_list'));
 

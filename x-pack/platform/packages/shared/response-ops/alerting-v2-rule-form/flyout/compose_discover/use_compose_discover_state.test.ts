@@ -88,6 +88,26 @@ describe('createInitialState', () => {
     expect(state.queryCommitted).toBe(false);
   });
 
+  it('opens on the requested initialStepId', () => {
+    const state = createInitialState({
+      mode: 'edit',
+      initialKind: 'alert',
+      initialStepId: 'notifications',
+    });
+    // alertCondition, recoveryCondition, details, notifications
+    expect(state.step).toBe(3);
+    expect(state.childOpen).toBe(false);
+  });
+
+  it('falls back to step 0 when initialStepId is not in the step list', () => {
+    const state = createInitialState({
+      mode: 'edit',
+      initialKind: 'signal',
+      initialStepId: 'notifications',
+    });
+    expect(state.step).toBe(0);
+  });
+
   it('sets queryCommitted true in create mode when isQueryPrePopulated is true', () => {
     const state = createInitialState({ mode: 'create', isQueryPrePopulated: true });
 

@@ -128,7 +128,10 @@ export const mapYamlFormValuesToComposeFormValues = (parsed: FormValues): FormVa
   ...splitArtifactsByType(parsed.artifacts),
 });
 
-export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
+const mapApiRuleFieldsToComposeFormValues = (
+  rule: CreateRuleData,
+  enabled: boolean
+): FormValues => {
   const stateTransition: FormValues['stateTransition'] = rule.state_transition
     ? {
         pendingCount: rule.state_transition.pending_count ?? null,
@@ -143,7 +146,7 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
     metadata: {
       name: rule.metadata.name,
       description: rule.metadata.description,
-      enabled: rule.enabled,
+      enabled,
       owner: rule.metadata.owner,
       tags: rule.metadata.tags,
     },
@@ -162,3 +165,10 @@ export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues => {
     ...splitArtifactsByType(rule.artifacts),
   };
 };
+
+/** Maps create-rule payload (e.g. from a template) into compose form values. */
+export const mapCreateRuleDataToComposeFormValues = (data: CreateRuleData): FormValues =>
+  mapApiRuleFieldsToComposeFormValues(data, true);
+
+export const mapRuleToComposeFormValues = (rule: RuleResponse): FormValues =>
+  mapApiRuleFieldsToComposeFormValues(rule, rule.enabled);

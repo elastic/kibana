@@ -31,7 +31,12 @@ import {
   getRuleManagementABSkillRequirements,
 } from './hooks/use_is_rule_management_ab_skill_available';
 import { RulesApi } from './services/rules_api';
-import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from './constants';
+import {
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  AGENT_BUILDER_NEW_CONVERSATION_PATH,
+  MANAGEMENT_APP_ID,
+  ALERTING_V2_RULES_MANAGEMENT_PATH,
+} from './constants';
 
 export interface CreateRuleOptionsFlyoutLegacyItem {
   id: string;
@@ -181,6 +186,14 @@ const CreateRuleOptionsFlyoutInner = ({
     onClose();
   }, [value, onClose]);
 
+  const navigateToRuleLibrary = useCallback(() => {
+    if (!value?.services) return;
+    value.services.application.navigateToApp(MANAGEMENT_APP_ID, {
+      path: `${ALERTING_V2_RULES_MANAGEMENT_PATH}/library`,
+    });
+    onClose();
+  }, [value, onClose]);
+
   const historyKey = useMemo(() => Symbol('discoverCreateAlert'), []);
 
   const rulesApi = useMemo(
@@ -303,6 +316,7 @@ const CreateRuleOptionsFlyoutInner = ({
       onCreateWithAgent={navigateToAgentBuilder}
       createWithAgentDisabled={createWithAgentDisabled}
       createWithAgentTooltipText={createWithAgentTooltipText}
+      onCreateFromLibrary={navigateToRuleLibrary}
       onCreateThresholdRule={() => setStep({ type: 'threshold' })}
       legacyRuleTypes={legacyPanelItems}
     />

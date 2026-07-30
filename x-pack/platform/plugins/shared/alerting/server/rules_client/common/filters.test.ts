@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { nodeBuilder } from '@kbn/es-query';
+import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import {
   buildConsumersFilter,
   buildFilter,
+  buildRuleTemplateV1EngineFilter,
   buildRuleTypeIdsFilter,
   combineFilterWithAuthorizationFilter,
   combineFilters,
@@ -16,6 +17,14 @@ import {
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 describe('filters', () => {
+  describe('buildRuleTemplateV1EngineFilter', () => {
+    it('matches engine v1 or missing engine field', () => {
+      expect(toKqlExpression(buildRuleTemplateV1EngineFilter())).toBe(
+        '(alerting_rule_template.attributes.engine: "v1" OR NOT alerting_rule_template.attributes.engine: *)'
+      );
+    });
+  });
+
   describe('combineFilterWithAuthorizationFilter', () => {
     it('returns undefined if neither a filter or authorizationFilter are passed', () => {
       expect(combineFilterWithAuthorizationFilter()).toBeUndefined();

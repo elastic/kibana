@@ -1,0 +1,46 @@
+{
+  "id": "kubernetes_otel-pod-crashloopbackoff-v2",
+  "type": "alerting_rule_template",
+  "managed": true,
+  "attributes": {
+    "kind": "alert",
+    "metadata": {
+      "name": "[Kubernetes OTel] Pod CrashLoopBackOff",
+      "description": "Alerts when containers have a high restart count, indicating CrashLoopBackOff. Rapidly increasing restarts mean a container is repeatedly crashing and being restarted by the kubelet.",
+      "tags": [
+        "Kubernetes"
+      ]
+    },
+    "schedule": {
+      "every": "1m",
+      "lookback": "15m"
+    },
+    "state_transition": {
+      "pending_count": 3
+    },
+    "recovery_strategy": "no_breach",
+    "artifacts": [
+      {
+        "id": "kubernetes_otel-pod-crashloopbackoff-v2-runbook",
+        "type": "runbook",
+        "value": "## Pod CrashLoopBackOff\n\n### Triage Steps\n1. Identify the affected pod(s) and container(s) from the alert results.\n2. Check container logs: `kubectl logs <pod> -c <container> -n <namespace> --previous` (use `--previous` to see logs from the crashed instance).\n3. Open the Pod & Container Detail dashboard filtered to the affected namespace/pod.\n4. Check the container's `last_terminated_reason` for clues (OOMKilled, Error, etc.).\n5. Verify the container image is correct and pullable.\n6. Check if ConfigMaps, Secrets, or environment variables are missing.\n\n### Common Causes\n- Application bugs causing immediate crashes\n- Missing or incorrect configuration (ConfigMaps, Secrets, env vars)\n- Missing dependencies (database not reachable, required service unavailable)\n- OOM kills (check for OOMKilled terminated reason)\n- Liveness probe misconfiguration causing healthy containers to be killed\n\n### Tuning\n- The rule alerts on any container with `restarts > 0` within the 15-minute window. The `k8s.container.restarts` gauge resets to 0 when kubelet prunes dead containers, so > 0 reliably means the container is restarting in the recent past.\n- Combined with `alertDelay` of 3 consecutive evaluations, this catches sustained crash loops while filtering out one-off restarts.\n- To reduce noise for workloads that legitimately restart, add a namespace or pod name filter.\n\n### Escalation\nCrashLooping pods consume cluster resources without providing service. If the root cause isn't immediately clear from logs, escalate to the application team."
+      }
+    ],
+    "engine": "v2",
+    "query": {
+      "format": "composed",
+      "base": "TS metrics-k8sclusterreceiver.otel-*\n| STATS restarts = MAX(k8s.container.restarts)\n    BY k8s.pod.name, k8s.container.name, k8s.namespace.name",
+      "breach": {
+        "segment": "WHERE restarts > 0\n| SORT restarts DESC\n| KEEP k8s.namespace.name, k8s.pod.name, k8s.container.name, restarts\n| LIMIT 50"
+      }
+    },
+    "grouping": {
+      "fields": [
+        "k8s.pod.name",
+        "k8s.container.name",
+        "k8s.namespace.name"
+      ]
+    },
+    "time_field": "@timestamp"
+  }
+}

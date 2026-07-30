@@ -16,6 +16,7 @@ import { findRuleTemplatesParamsSchema } from './schema';
 import { transformRawRuleTemplateToRuleTemplate } from '../../transforms/transform_raw_rule_template_to_rule_template';
 import type { RuleTemplate } from '../../types';
 import {
+  buildRuleTemplateV1EngineFilter,
   buildRuleTypeIdsFilter,
   buildTagsFilter,
   combineFilters,
@@ -64,7 +65,9 @@ export async function findRuleTemplates(
     ? buildRuleTypeIdsFilter([ruleTypeId], RULE_TEMPLATE_SAVED_OBJECT_TYPE)
     : undefined;
   const tagsFilter = tags ? buildTagsFilter(tags, RULE_TEMPLATE_SAVED_OBJECT_TYPE) : undefined;
-  const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter], 'and');
+  // Hide engine:v2 templates from create-from-template listings until v2 UI is ready.
+  const engineFilter = buildRuleTemplateV1EngineFilter();
+  const combinedFilters = combineFilters([ruleTypeFilter, tagsFilter, engineFilter], 'and');
 
   const finalFilter = authorizationFilter
     ? combineFilterWithAuthorizationFilter(combinedFilters, authorizationFilter as KueryNode)
@@ -92,7 +95,16 @@ export async function findRuleTemplates(
   });
 
   const authorizedData = data.map((so) => {
+    const templateName =
+      'metadata' in so.attributes
+        ? so.attributes.metadata.name
+        : so.attributes.name;
     try {
+      if (!('ruleTypeId' in so.attributes)) {
+        throw new Error(
+          `Rule template "${so.id}" is missing ruleTypeId (alerting v2 templates are not listed here)`
+        );
+      }
       ensureRuleTypeIsAuthorized(so.attributes.ruleTypeId, AlertingAuthorizationEntity.Rule);
     } catch (error) {
       context.auditLogger?.log(
@@ -101,7 +113,7 @@ export async function findRuleTemplates(
           savedObject: {
             type: RULE_TEMPLATE_SAVED_OBJECT_TYPE,
             id: so.id,
-            name: so.attributes.name,
+            name: templateName,
           },
           error,
         })

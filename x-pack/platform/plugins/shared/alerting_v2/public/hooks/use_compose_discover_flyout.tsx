@@ -9,8 +9,10 @@ import type {
   BuilderState,
   ComposeDiscoverMode,
   RuleFormServices,
+  StepId,
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
+import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
@@ -63,6 +65,8 @@ export const useComposeDiscoverFlyout = ({
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [flyoutMode, setFlyoutMode] = useState<ComposeDiscoverMode>('create');
   const [targetRule, setTargetRule] = useState<RuleApiResponse | null>(null);
+  const [initialCreateData, setInitialCreateData] = useState<CreateRuleData | undefined>();
+  const [initialStepId, setInitialStepId] = useState<StepId | undefined>();
   const [builderType, setBuilderType] = useState<string | null>(null);
   const [initialBuilderState, setInitialBuilderState] = useState<BuilderState>(undefined);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
@@ -87,12 +91,16 @@ export const useComposeDiscoverFlyout = ({
   const closeFlyout = useCallback(() => {
     setFlyoutOpen(false);
     setTargetRule(null);
+    setInitialCreateData(undefined);
+    setInitialStepId(undefined);
     setBuilderType(null);
     setInitialBuilderState(undefined);
   }, []);
 
   const closeAndRedirect = useCallback(() => {
     setFlyoutOpen(false);
+    setInitialCreateData(undefined);
+    setInitialStepId(undefined);
     if (createSuccessRedirectPath) {
       application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));
     }
@@ -100,8 +108,20 @@ export const useComposeDiscoverFlyout = ({
 
   const openCreateFlyout = useCallback(() => {
     setTargetRule(null);
+    setInitialCreateData(undefined);
+    setInitialStepId(undefined);
     setFlyoutMode('create');
     setBuilderType(null);
+    setFlyoutOpen(true);
+  }, []);
+
+  const openCreateFromTemplate = useCallback((createData: CreateRuleData) => {
+    setTargetRule(null);
+    setInitialCreateData(createData);
+    setInitialStepId(undefined);
+    setFlyoutMode('create');
+    setBuilderType(null);
+    setInitialBuilderState(undefined);
     setFlyoutOpen(true);
   }, []);
 
@@ -118,12 +138,16 @@ export const useComposeDiscoverFlyout = ({
           }),
         });
         setTargetRule(null);
+        setInitialCreateData(undefined);
+        setInitialStepId(undefined);
         setFlyoutMode('create');
         setBuilderType(null);
         setFlyoutOpen(true);
         return;
       }
       setTargetRule(null);
+      setInitialCreateData(undefined);
+      setInitialStepId(undefined);
       setFlyoutMode('create');
       setBuilderType(type);
       setInitialBuilderState(undefined);
@@ -133,8 +157,14 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const openRuleFlyout = useCallback(
-    (rule: RuleApiResponse, mode: ComposeDiscoverMode) => {
+    (
+      rule: RuleApiResponse,
+      mode: ComposeDiscoverMode,
+      options?: { initialStepId?: StepId }
+    ) => {
       setTargetRule(rule);
+      setInitialCreateData(undefined);
+      setInitialStepId(options?.initialStepId);
       setFlyoutMode(mode);
 
       if (rule.metadata.builder_type) {
@@ -171,7 +201,8 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const openEditFlyout = useCallback(
-    (rule: RuleApiResponse) => openRuleFlyout(rule, 'edit'),
+    (rule: RuleApiResponse, options?: { initialStepId?: StepId }) =>
+      openRuleFlyout(rule, 'edit', options),
     [openRuleFlyout]
   );
 
@@ -185,6 +216,8 @@ export const useComposeDiscoverFlyout = ({
       historyKey={historyKey}
       mode={flyoutMode}
       rule={targetRule ?? undefined}
+      initialCreateData={initialCreateData}
+      initialStepId={initialStepId}
       ruleId={flyoutMode === 'edit' ? targetRule?.id : undefined}
       onClose={closeFlyout}
       services={ruleFormServices}
@@ -232,6 +265,7 @@ export const useComposeDiscoverFlyout = ({
   return {
     flyout,
     openCreateFlyout,
+    openCreateFromTemplate,
     openCreateBuilderFlyout,
     openEditFlyout,
     openCloneFlyout,

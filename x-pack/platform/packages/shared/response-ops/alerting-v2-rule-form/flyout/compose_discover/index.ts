@@ -14,4 +14,4 @@ export type { QuerySandboxFlyoutProps } from './query_sandbox_flyout';
 export { QuerySandbox } from './query_sandbox';
 export type { QuerySandboxProps } from './query_sandbox';
 
-export type { QueryTab } from './types';
+export type { QueryTab, StepId } from './types';

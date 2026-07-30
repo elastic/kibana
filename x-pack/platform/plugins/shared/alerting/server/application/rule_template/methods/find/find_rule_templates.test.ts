@@ -16,6 +16,11 @@ import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import {
+  buildRuleTemplateV1EngineFilter,
+  combineFilters,
+  combineFilterWithAuthorizationFilter,
+} from '../../../../rules_client/common/filters';
 
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const authorization = alertingAuthorizationMock.create();
@@ -38,6 +43,22 @@ const buildRuleTypeFilter = (...ruleTypeIds: string[]) =>
       nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`, id)
     )
   );
+
+const defaultAuthFilter = () => buildRuleTypeFilter('test.rule.type', 'another.rule.type');
+
+const expectFindFilter = (
+  additionalFilters: Array<ReturnType<typeof nodeBuilder.is> | ReturnType<typeof nodeBuilder.or>> = [],
+  authorizationFilter = defaultAuthFilter()
+) => {
+  const combined = combineFilters(
+    [...additionalFilters, buildRuleTemplateV1EngineFilter()],
+    'and'
+  );
+  const expected = combineFilterWithAuthorizationFilter(combined, authorizationFilter);
+  expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
+    toKqlExpression(expected!)
+  );
+};
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -86,6 +107,25 @@ describe('findRuleTemplates', () => {
     score: 1,
     references: [],
   };
+
+  test('always filters to engine v1 or missing engine', async () => {
+    unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
+      total: 0,
+      per_page: 10,
+      page: 1,
+      saved_objects: [],
+    });
+
+    await findRuleTemplates(rulesClientContext, { perPage: 10, page: 1 });
+
+    expectFindFilter();
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toContain(
+      'alerting_rule_template.attributes.engine: "v1"'
+    );
+    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toContain(
+      'NOT alerting_rule_template.attributes.engine: *'
+    );
+  });
 
   test('finds rule templates with proper parameters', async () => {
     unsecuredSavedObjectsClient.find.mockResolvedValueOnce({
@@ -147,10 +187,7 @@ describe('findRuleTemplates', () => {
       filter: expect.any(Object),
     });
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type)'
-    );
+    expectFindFilter();
 
     expect(authorization.getByRuleTypeAuthorizationFilter).toHaveBeenCalledWith({
       authorizationEntity: 'rule',
@@ -181,11 +218,9 @@ describe('findRuleTemplates', () => {
     expect(result.total).toBe(1);
     expect(result.data).toHaveLength(1);
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expectFindFilter([
+      nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`, 'custom.rule.type'),
+    ]);
   });
 
   test('filters by tags', async () => {
@@ -206,11 +241,9 @@ describe('findRuleTemplates', () => {
     expect(result.data).toHaveLength(1);
     expect(result.data[0].tags).toContain('tag1');
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '(alerting_rule_template.attributes.tags: tag1 AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expectFindFilter([
+      nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.tags`, 'tag1'),
+    ]);
   });
 
   test('filters by multiple tags', async () => {
@@ -227,12 +260,12 @@ describe('findRuleTemplates', () => {
       tags: ['tag1', 'tag2'],
     });
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '((alerting_rule_template.attributes.tags: tag1 OR ' +
-        'alerting_rule_template.attributes.tags: tag2) AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expectFindFilter([
+      nodeBuilder.or([
+        nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.tags`, 'tag1'),
+        nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.tags`, 'tag2'),
+      ]),
+    ]);
   });
 
   test('combines ruleTypeId and tags filters', async () => {
@@ -250,12 +283,10 @@ describe('findRuleTemplates', () => {
       tags: ['tag1'],
     });
 
-    expect(toKqlExpression(unsecuredSavedObjectsClient.find.mock.calls[0][0].filter)).toBe(
-      '((alerting_rule_template.attributes.ruleTypeId: custom.rule.type AND ' +
-        'alerting_rule_template.attributes.tags: tag1) AND ' +
-        '(alerting_rule_template.attributes.ruleTypeId: test.rule.type OR ' +
-        'alerting_rule_template.attributes.ruleTypeId: another.rule.type))'
-    );
+    expectFindFilter([
+      nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.ruleTypeId`, 'custom.rule.type'),
+      nodeBuilder.is(`${RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.tags`, 'tag1'),
+    ]);
   });
 
   test('applies search and sort parameters', async () => {

@@ -14,6 +14,7 @@ import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
+const onCreateFromLibrary = jest.fn();
 const onCreateThresholdRule = jest.fn();
 
 const renderFlyout = () =>
@@ -23,6 +24,7 @@ const renderFlyout = () =>
         onClose={onClose}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
+        onCreateFromLibrary={onCreateFromLibrary}
         onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
@@ -40,6 +42,7 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
     expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
     expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('Create from library')).toBeInTheDocument();
     expect(screen.getByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
   });
@@ -66,6 +69,14 @@ describe('RuleCreateOptionsFlyout', () => {
     fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onCreateFromLibrary when the Create from library option is selected', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByTestId('createFromLibraryCard'));
+
+    expect(onCreateFromLibrary).toHaveBeenCalledTimes(1);
   });
 
   it('renders the builder divider before the Threshold rule option', () => {

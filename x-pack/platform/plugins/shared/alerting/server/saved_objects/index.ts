@@ -264,7 +264,11 @@ export function setupSavedObjects(
     management: {
       importableAndExportable: true,
       getTitle(ruleTemplateSavedObject: SavedObject<RawRuleTemplate>) {
-        return `${ruleTemplateSavedObject.attributes.name}`;
+        const attrs = ruleTemplateSavedObject.attributes as {
+          name?: string;
+          metadata?: { name?: string };
+        };
+        return `${attrs.metadata?.name ?? attrs.name ?? ruleTemplateSavedObject.id}`;
       },
       getInAppUrl: (savedObject: SavedObject<RawRuleTemplate>) => {
         return {

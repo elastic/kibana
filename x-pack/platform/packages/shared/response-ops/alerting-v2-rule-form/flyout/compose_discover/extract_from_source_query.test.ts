@@ -40,4 +40,18 @@ describe('extractFromSourceQuery', () => {
       'FROM logs-*, metrics-*'
     );
   });
+
+  it('extracts TS from a timeseries query', () => {
+    expect(
+      extractFromSourceQuery(
+        'TS metrics-kubeletstatsreceiver.otel-*\n| WHERE k8s.container.cpu_limit_utilization IS NOT NULL\n| STATS avg_util = AVG(k8s.container.cpu_limit_utilization) BY k8s.pod.name'
+      )
+    ).toBe('TS metrics-kubeletstatsreceiver.otel-*');
+  });
+
+  it('extracts TS with a dotted index pattern', () => {
+    expect(extractFromSourceQuery('TS metrics-k8sclusterreceiver.otel-* | LIMIT 10')).toBe(
+      'TS metrics-k8sclusterreceiver.otel-*'
+    );
+  });
 });

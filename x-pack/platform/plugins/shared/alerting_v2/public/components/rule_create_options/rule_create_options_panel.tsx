@@ -50,6 +50,7 @@ interface RuleCreateOptionsPanelProps {
    * prerequisite). Shown on hover/focus regardless of whether the option is disabled.
    */
   createWithAgentTooltipText?: string;
+  onCreateFromLibrary?: () => void;
   onCreateThresholdRule?: () => void;
   legacyRuleTypes?: LegacyRuleTypeItem[];
 }
@@ -130,6 +131,14 @@ const AI_AGENT_TITLE = i18n.translate(
 const AI_AGENT_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
   { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
+);
+const CREATE_FROM_LIBRARY_TITLE = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.createFromLibraryTitle',
+  { defaultMessage: 'Create from library' }
+);
+const CREATE_FROM_LIBRARY_DESCRIPTION = i18n.translate(
+  'xpack.alertingV2.ruleCreateOptionsPanel.createFromLibraryDescription',
+  { defaultMessage: 'Start from a prebuilt rule template.' }
 );
 const CREATE_WITH_AGENT_MISSING_PRIVILEGE_TOOLTIP = i18n.translate(
   'xpack.alertingV2.ruleCreateOptions.createWithAgentMissingPrivilegeTooltip',
@@ -261,6 +270,7 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
   onCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
+  onCreateFromLibrary,
   onCreateThresholdRule,
 }) => {
   const styles = useMemoCss(listEmptyStateStyles);
@@ -285,8 +295,22 @@ const RuleCreateOptionsListEmptyState: React.FC<RuleCreateOptionsPanelProps> = (
         tooltipText: createWithAgentTooltipText,
         'data-test-subj': 'createWithAgentCard',
       },
+      {
+        id: 'create-from-library',
+        iconType: 'list',
+        title: CREATE_FROM_LIBRARY_TITLE,
+        description: CREATE_FROM_LIBRARY_DESCRIPTION,
+        onClick: onCreateFromLibrary ?? noop,
+        'data-test-subj': 'createFromLibraryCard',
+      },
     ],
-    [onCreateEsqlRule, onCreateWithAgent, createWithAgentDisabled, createWithAgentTooltipText]
+    [
+      onCreateEsqlRule,
+      onCreateWithAgent,
+      createWithAgentDisabled,
+      createWithAgentTooltipText,
+      onCreateFromLibrary,
+    ]
   );
 
   const thresholdCreateOption = useMemo<RuleCreateOptionItem>(
@@ -396,6 +420,7 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateWithAgent,
   createWithAgentDisabled,
   createWithAgentTooltipText,
+  onCreateFromLibrary,
   onCreateThresholdRule,
   legacyRuleTypes,
 }) => {
@@ -448,6 +473,20 @@ const RuleCreateOptionsFlyoutPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           ) : (
             agentCard
           )}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            display="plain"
+            titleElement="h3"
+            titleSize="xs"
+            hasBorder={true}
+            title={CREATE_FROM_LIBRARY_TITLE}
+            description={CREATE_FROM_LIBRARY_DESCRIPTION}
+            onClick={onCreateFromLibrary ?? noop}
+            icon={<EuiIcon type="list" color="text" size="l" aria-hidden={true} />}
+            data-test-subj="createFromLibraryCard"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <RuleBuilderSectionDivider />

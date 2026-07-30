@@ -279,6 +279,22 @@ export async function createInactivityMonitoringTemplate(
   });
 }
 
+/**
+ * CREATE_ALERTING_ASSETS install step (also used by the "Reinstall alerting assets" API).
+ *
+ * Runs after Kibana assets are installed. Archive `alerting_rule_template` SOs are imported by
+ * the earlier kibana-assets step; this step is the alerting follow-up:
+ *
+ * 1. Inactivity monitoring template — for integration packages with data streams (when
+ *    `enableIntegrationInactivityAlerting` is on), create/update a Fleet-owned
+ *    `alerting_rule_template` (`fleet-{pkg}-inactivity-monitoring`) that is not part of the
+ *    package archive. On primary-space reinstall, also recreate it for every secondary space
+ *    whose assets were wiped by archive reinstall.
+ *
+ * 2. Instantiate rules from templates — elastic_agent only: walk archive
+ *    `kibana/alerting_rule_template/*`, look up each installed template, and create a disabled
+ *    `alert` SO. Failures are recorded as deferred refs instead of failing the install.
+ */
 export async function stepCreateAlertingAssets(
   context: Pick<
     InstallContext,
@@ -310,7 +326,7 @@ export async function stepCreateAlertingAssets(
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
-  // Create or re-create inactivity monitoring template for integration packages
+  // (1) Create or re-create inactivity monitoring template for integration packages
   await createInactivityMonitoringTemplate(
     { logger, savedObjectsClient },
     { packageInfo, spaceId, installAsAdditionalSpace }
@@ -336,7 +352,7 @@ export async function stepCreateAlertingAssets(
     }
   }
 
-  // Create alerting rules templates from archive assets
+  // (2) Instantiate disabled rules from archive templates — elastic_agent package only
   if (pkgName !== FLEET_ELASTIC_AGENT_PACKAGE) {
     return;
   }

@@ -89,3 +89,18 @@ export const userProfileKeys = {
   all: ['userProfile'] as const,
   bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
 };
+
+export const ruleTemplateKeys = {
+  all: ['ruleTemplate'] as const,
+  lists: () => [...ruleTemplateKeys.all, 'list'] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    tags?: string[];
+    sortField?: string;
+    sortOrder?: 'asc' | 'desc';
+  }) => [...ruleTemplateKeys.lists(), filters] as const,
+  allTags: () => [...ruleTemplateKeys.all, 'tags'] as const,
+  tags: () => [...ruleTemplateKeys.allTags()] as const,
+};
