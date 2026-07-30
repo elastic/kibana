@@ -21,7 +21,7 @@
 | Overview panel — Behavioral anomalies accordion | specified | 2026-07-06T09:05:00Z | 12m 38s | 6m | ⚠️ over | completed |
 | Anomalies tab — filters and controls | specified | 2026-07-06T09:20:00Z | 3m 0s | 6m | ✓ | completed |
 | MITRE attack chain — tactic filtering | specified | - | - | 5m | - | not started |
-| ML permissions and API authorization | specified | - | - | 6m | - | blocked |
+| ML permissions and API authorization | specified | - | - | 6m | - | blocked — ML jobs failed to provision |
 | **Total session** | - | 2026-07-06T09:00:00Z | **2h 30m** | 90m cap | ⚠️ over cap | - |
 
 **Token usage:** not available
@@ -34,7 +34,7 @@
 - Level 3 (observations): 1
 - Known / suppressed: 1
 - **Flows completed:** 2 of 4
-- **Flows not fully completed:** 2 - MITRE attack chain — tactic filtering (not started); ML permissions and API authorization (blocked)
+- **Flows not fully completed:** 2 - MITRE attack chain — tactic filtering (not started); ML permissions and API authorization (blocked — ML jobs failed to provision)
 
 ## Level 1 - Confirmed Bugs
 
