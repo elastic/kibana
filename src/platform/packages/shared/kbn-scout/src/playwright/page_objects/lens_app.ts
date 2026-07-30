@@ -224,7 +224,9 @@ export class LensApp {
   async enableIncludeEmptyRows() {
     const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
     await includeEmptyRows.click();
-    await expect(includeEmptyRows).toHaveAttribute('aria-checked', 'true');
+    await includeEmptyRows
+      .and(this.page.locator('[aria-checked="true"]'))
+      .waitFor({ state: 'visible' });
   }
 
   /** Closes the open dimension editor flyout. */
@@ -367,7 +369,9 @@ export class LensApp {
     await operationButton.waitFor({ state: 'visible' });
     await operationButton.scrollIntoViewIfNeeded();
     await operationButton.click();
-    await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
+    await operationButton
+      .and(this.page.locator('[aria-pressed="true"]'))
+      .waitFor({ state: 'visible' });
   }
 
   private async selectField(field: string) {
