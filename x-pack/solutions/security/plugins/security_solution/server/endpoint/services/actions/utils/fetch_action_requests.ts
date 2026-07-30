@@ -14,6 +14,8 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { KibanaRequest } from '@kbn/core/server';
+import { buildOriginSpaceIdFilter } from './build_origin_space_id_filter';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
 import { REF_DATA_KEYS } from '../../../lib/reference_data';
@@ -35,6 +37,8 @@ import { MICROSOFT_DEFENDER_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../..
 export interface FetchActionRequestsOptions {
   spaceId: string;
   endpointService: EndpointAppContextService;
+  /** Required for the read to fan out under CPS; without it the read is origin-only */
+  request?: KibanaRequest;
   from?: number;
   size?: number;
   startDate?: string;
@@ -72,6 +76,7 @@ interface FetchActionRequestsResponse {
 export const fetchActionRequests = async ({
   endpointService,
   spaceId,
+  request,
   from = 0,
   size = 10,
   agentTypes,
@@ -83,7 +88,10 @@ export const fetchActionRequests = async ({
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
-  const esClient = endpointService.getInternalEsClient();
+  const cpsEnabled = endpointService.isCpsEnabled();
+  const esClient = cpsEnabled
+    ? endpointService.getReadEsClient(request)
+    : endpointService.getInternalEsClient();
   const logger = endpointService.createLogger('FetchActionRequests');
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const additionalFilters = [];
@@ -111,15 +119,23 @@ export const fetchActionRequests = async ({
 
   const must: QueryDslQueryContainer[] = [];
 
-  // if space awareness is enabled, then add filter for integration policy ids
+  // The policy ids below come from local Fleet saved objects, which do not fan out, so under CPS they
+  // would filter out every linked project's action. `originSpaceId` replaces the clause one for one.
+  const matchSpace: QueryDslQueryContainer = cpsEnabled
+    ? buildOriginSpaceIdFilter(spaceId, { matchMissingOriginSpaceId: false })
+    : {
+        terms: {
+          'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices),
+        },
+      };
+
   logger.debug(
     () =>
-      `Space awareness is enabled - adding filter to narrow results to only response actions visible in space [${spaceId}]`
+      `Narrowing results to only response actions visible in space [${spaceId}] using ${
+        cpsEnabled ? 'the originSpaceId carried by the document' : 'local integration policy ids'
+      }`
   );
 
-  const matchIntegrationPolicyIds: QueryDslQueryContainer = {
-    terms: { 'agent.policy.integrationPolicyId': await fetchIntegrationPolicyIds(fleetServices) },
-  };
   const matchOrphanActions: QueryDslQueryContainer | undefined =
     orphanActionsSpaceId && orphanActionsSpaceId === spaceId
       ? { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } }
@@ -130,14 +146,14 @@ export const fetchActionRequests = async ({
       bool: {
         filter: {
           bool: {
-            should: [matchIntegrationPolicyIds, matchOrphanActions],
+            should: [matchSpace, matchOrphanActions],
             minimum_should_match: 1,
           },
         },
       },
     });
   } else {
-    must.push({ bool: { filter: matchIntegrationPolicyIds } });
+    must.push({ bool: { filter: matchSpace } });
   }
 
   // Add the date filters

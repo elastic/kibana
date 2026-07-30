@@ -208,6 +208,9 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   private isServerless: boolean;
 
+  /** Derived in `setup()`, where `cps` is available as a dependency, and consumed in `start()` */
+  private defendCpsEnabled = false;
+
   constructor(context: PluginInitializerContext) {
     const serverConfig = createConfig(context);
 
@@ -320,6 +323,9 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { appClientFactory, productFeaturesService, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
+
+    this.defendCpsEnabled =
+      (plugins.cps?.getCpsEnabled() ?? false) && experimentalFeatures.defendCrossProjectSearch;
 
     initSavedObjects(core.savedObjects, experimentalFeatures, this.logger.get('initSavedObjects'));
     initEncryptedSavedObjects({
@@ -925,6 +931,9 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       esClient: core.elasticsearch.client.asInternalUser,
+      clusterClient: core.elasticsearch.client,
+      dataStart: plugins.data,
+      cpsEnabled: this.defendCpsEnabled,
       productFeaturesService,
       savedObjectsServiceStart: core.savedObjects,
       connectorActions: plugins.actions,

@@ -70,7 +70,8 @@ export const getActionDetailsRequestHandler = (
           data: await getActionDetailsById(
             endpointContext.service,
             activeSpaceId,
-            req.params.action_id
+            req.params.action_id,
+            { request: req }
           ),
         },
       });

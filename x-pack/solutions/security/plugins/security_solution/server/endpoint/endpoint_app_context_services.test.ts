@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { EndpointAppContextService } from './endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
@@ -83,6 +84,69 @@ describe('test endpoint app context services', () => {
       // next call retries instead of serving the stale false, and sees the recovered remote
       expect(await service.isCcsEnabled()).toBe(true);
       expect(remoteInfoMock()).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('CPS scoped read accessors', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    const request = httpServerMock.createKibanaRequest();
+
+    const startService = (cpsEnabled: boolean) => {
+      startContract = { ...createMockEndpointAppContextServiceStartContract(), cpsEnabled };
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it('reports CPS as disabled when the deployment and flag check resolved to false', () => {
+      startService(false);
+
+      expect(service.isCpsEnabled()).toBe(false);
+    });
+
+    it('returns the internal ES client when CPS is disabled', () => {
+      startService(false);
+
+      expect(service.getReadEsClient(request)).toBe(startContract.esClient);
+      expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
+    });
+
+    it('returns a current-user client with space project routing when CPS is enabled', () => {
+      startService(true);
+
+      const client = service.getReadEsClient(request);
+
+      expect(startContract.clusterClient.asScoped).toHaveBeenCalledWith(request, {
+        projectRouting: 'space',
+      });
+      expect(client).toBe(startContract.clusterClient.asScoped.mock.results[0].value.asCurrentUser);
+      expect(client).not.toBe(startContract.esClient);
+    });
+
+    it('scopes the search client without project routing when CPS is disabled', () => {
+      startService(false);
+
+      service.getScopedSearchClient(request);
+
+      expect(startContract.dataStart.search.asScoped).toHaveBeenCalledWith(request);
+    });
+
+    it('scopes the search client with space project routing when CPS is enabled', () => {
+      startService(true);
+
+      service.getScopedSearchClient(request);
+
+      expect(startContract.dataStart.search.asScoped).toHaveBeenCalledWith(request, {
+        projectRouting: 'space',
+      });
     });
   });
 });

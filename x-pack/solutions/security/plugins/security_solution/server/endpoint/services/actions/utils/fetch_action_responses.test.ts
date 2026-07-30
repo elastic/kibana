@@ -7,6 +7,7 @@
 
 import { applyActionListEsSearchMock } from '../mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { fetchActionResponses } from './fetch_action_responses';
 import { createMockEndpointAppContextService } from '../../../mocks';
@@ -227,5 +228,71 @@ describe('fetchActionResponses()', () => {
       }),
       { ignore: [404] }
     );
+  });
+
+  describe('and CPS is enabled', () => {
+    let readEsClientMock: ElasticsearchClientMock;
+    const request = httpServerMock.createKibanaRequest();
+
+    beforeEach(() => {
+      readEsClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      applyActionListEsSearchMock(readEsClientMock);
+
+      endpointServiceMock.isCpsEnabled.mockReturnValue(true);
+      endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
+    });
+
+    afterEach(() => {
+      endpointServiceMock.isCpsEnabled.mockReturnValue(false);
+    });
+
+    it('should read the Endpoint response index as the request user so it can fan out', async () => {
+      await fetchActionResponses({
+        esClient: esClientMock,
+        endpointService: endpointServiceMock,
+        request,
+        actionIds: ['a'],
+      });
+
+      expect(endpointServiceMock.getReadEsClient).toHaveBeenCalledWith(request);
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN }),
+        { ignore: [404] }
+      );
+    });
+
+    it('should keep the Fleet response index on the internal client, since CPS excludes it', async () => {
+      await fetchActionResponses({
+        esClient: esClientMock,
+        endpointService: endpointServiceMock,
+        request,
+        actionIds: ['a'],
+      });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: AGENT_ACTIONS_RESULTS_INDEX }),
+        { ignore: [404] }
+      );
+      expect(readEsClientMock.search).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: AGENT_ACTIONS_RESULTS_INDEX }),
+        expect.anything()
+      );
+    });
+
+    it('should add no space filter of its own, because the read is bounded by action ids', async () => {
+      await fetchActionResponses({
+        esClient: esClientMock,
+        endpointService: endpointServiceMock,
+        request,
+        actionIds: ['a'],
+      });
+
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: { bool: { filter: [{ terms: { action_id: ['a'] } }] } },
+        }),
+        { ignore: [404] }
+      );
+    });
   });
 });

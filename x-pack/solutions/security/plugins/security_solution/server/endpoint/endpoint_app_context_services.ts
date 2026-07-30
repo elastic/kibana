@@ -8,12 +8,14 @@
 import type {
   AnalyticsServiceSetup,
   ElasticsearchClient,
+  IClusterClient,
   KibanaRequest,
   LoggerFactory,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { IScopedSearchClient, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type {
   ExceptionListClient,
   ListPluginSetup,
@@ -110,6 +112,12 @@ export interface EndpointAppContextServiceStartContract {
   experimentalFeatures: ExperimentalFeatures;
   /** An internal ES client */
   esClient: ElasticsearchClient;
+  /** Used to build the request-scoped, project-routed client that CPS reads fan out on */
+  clusterClient: IClusterClient;
+  /** Used to build the project-routed search client that CPS search strategies fan out on */
+  dataStart: DataPluginStart;
+  /** CPS enabled on the deployment AND the `defendCrossProjectSearch` flag on */
+  cpsEnabled: boolean;
   productFeaturesService: ProductFeaturesService;
   savedObjectsServiceStart: SavedObjectsServiceStart;
   connectorActions: ActionsPluginStartContract;
@@ -318,6 +326,58 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.esClient;
+  }
+
+  /** `true` when Defend reads should fan out across linked projects via Cross-Project Search */
+  public isCpsEnabled(): boolean {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.cpsEnabled;
+  }
+
+  /**
+   * The client for reads against Defend-owned indices. Fleet-owned ones keep `getInternalEsClient()`.
+   *
+   * Background callers with no request identity fall back to the internal client, with a breadcrumb
+   * since origin-only data looks the same as a missing index grant.
+   */
+  public getReadEsClient(request?: KibanaRequest): ElasticsearchClient {
+    if (!this.startDependencies?.clusterClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    if (!this.isCpsEnabled()) {
+      return this.getInternalEsClient();
+    }
+
+    if (!request) {
+      this.createLogger('getReadEsClient').debug(
+        'CPS is enabled but this read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
+      );
+
+      return this.getInternalEsClient();
+    }
+
+    return this.startDependencies.clusterClient.asScoped(request, { projectRouting: 'space' })
+      .asCurrentUser;
+  }
+
+  /**
+   * The search client the Defend search strategies dispatch through. Carries the same routing as
+   * `getReadEsClient()` when CPS is on, so callers do not branch on the flag themselves.
+   */
+  public getScopedSearchClient(request: KibanaRequest): IScopedSearchClient {
+    if (!this.startDependencies?.dataStart) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    const { dataStart } = this.startDependencies;
+
+    return this.isCpsEnabled()
+      ? dataStart.search.asScoped(request, { projectRouting: 'space' })
+      : dataStart.search.asScoped(request);
   }
 
   public getAgentBuilder(): AgentBuilderPluginStart {

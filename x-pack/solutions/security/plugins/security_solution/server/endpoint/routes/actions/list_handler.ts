@@ -91,6 +91,7 @@ export const actionListHandler = (
 
         spaceId: activeSpaceId,
         endpointService: endpointContext.service,
+        request: req,
       };
       // wrapper method to branch logic for
       // normal paged search via page, size

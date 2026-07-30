@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
@@ -40,6 +41,8 @@ const buildSearchQuery = (
 interface FetchActionResponsesOptions {
   esClient: ElasticsearchClient;
   endpointService: EndpointAppContextService;
+  /** Required for the Endpoint index read to fan out under CPS. The Fleet index read never fans out */
+  request?: KibanaRequest;
   /** List of specific action ids to filter for */
   actionIds?: string[];
   /** List of specific agent ids to filter for */
@@ -75,6 +78,10 @@ export const fetchActionResponses = async <
 
 /**
  * Fetch Response Action response documents from the Endpoint index
+ *
+ * Safe to fan out with no space filter: the read is always bounded by ids the caller could only have
+ * obtained from an already space-checked document. These documents carry no space field anyway.
+ *
  * @param esClient
  * @param actionIds
  * @param agentIds
@@ -85,13 +92,17 @@ export const fetchEndpointActionResponses = async <
 >({
   esClient,
   endpointService,
+  request,
   actionIds,
   agentIds,
 }: FetchActionResponsesOptions): Promise<
   Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
 > => {
   const ccsEnabled = await endpointService.isCcsEnabled();
-  const searchResponse = await esClient
+  const readEsClient = endpointService.isCpsEnabled()
+    ? endpointService.getReadEsClient(request)
+    : esClient;
+  const searchResponse = await readEsClient
     .search<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>(
       {
         index: prefixIndexPatternsWithCcs(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN, ccsEnabled),
@@ -110,6 +121,10 @@ export const fetchEndpointActionResponses = async <
 
 /**
  * Fetch Response Action response documents from the Fleet index
+ *
+ * Stays on the internal client under CPS: `.fleet-*` is excluded from project routing, so third party
+ * agent responses, which land here rather than in the Endpoint index, cannot be read across projects.
+ *
  * @param esClient
  * @param actionIds
  * @param agentIds

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import { stringify } from '../../../utils/stringify';
 import { NotFoundError } from '../../../errors';
@@ -37,17 +38,23 @@ export const fetchActionRequestById = async <
   actionId: string,
   {
     bypassSpaceValidation = false,
+    request,
   }: Partial<{
     /**
      * if `true`, then no space validations will be done on the action retrieved. Default is `false`.
      * USE IT CAREFULLY!
      */
     bypassSpaceValidation: boolean;
+    /** Required for the read to fan out under CPS; without it the read is origin-only */
+    request: KibanaRequest;
   }> = {}
 ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> => {
   const logger = endpointService.createLogger('fetchActionRequestById');
-  const searchResponse = await endpointService
-    .getInternalEsClient()
+  const cpsEnabled = endpointService.isCpsEnabled();
+  const esClient = cpsEnabled
+    ? endpointService.getReadEsClient(request)
+    : endpointService.getInternalEsClient();
+  const searchResponse = await esClient
     .search<LogsEndpointAction<TParameters, TOutputContent, TMeta>>(
       {
         index: ENDPOINT_ACTIONS_INDEX,
@@ -62,6 +69,30 @@ export const fetchActionRequestById = async <
 
   if (!actionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
+  } else if (!bypassSpaceValidation && cpsEnabled) {
+    // The Fleet lookup below throws for an agent not enrolled locally, which would 404 every
+    // cross-project action, so visibility comes off the document. Strict: a missing `originSpaceId`
+    // cannot be told apart from a linked project's document here.
+    const actionTags = Array.isArray(actionRequest.tags)
+      ? actionRequest.tags
+      : actionRequest.tags
+      ? [actionRequest.tags]
+      : [];
+    const isOrphanAction = actionTags.includes(
+      ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted
+    );
+    const isVisibleInSpace =
+      actionRequest.originSpaceId === spaceId ||
+      (isOrphanAction && (await fetchOrphanActionsSpaceId(endpointService)) === spaceId);
+
+    if (!isVisibleInSpace) {
+      logger.debug(
+        () =>
+          `Action [${actionId}] with originSpaceId [${actionRequest.originSpaceId}] is not visible in space [${spaceId}]`
+      );
+
+      throw new NotFoundError(`Action [${actionId}] not found`);
+    }
   } else if (!bypassSpaceValidation) {
     if (!actionRequest.agent.policy || actionRequest.agent.policy.length === 0) {
       const message = `Response action [${actionId}] missing 'agent.policy' information - unable to determine if response action is accessible for space [${spaceId}]`;
@@ -134,3 +165,16 @@ export const fetchActionRequestById = async <
 
   return actionRequest;
 };
+
+/**
+ * The space that actions whose integration policy has been deleted are displayed in
+ * @internal
+ */
+const fetchOrphanActionsSpaceId = async (
+  endpointService: EndpointAppContextService
+): Promise<string | undefined> =>
+  (
+    await endpointService
+      .getReferenceDataClient()
+      .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
+  ).metadata.spaceId;

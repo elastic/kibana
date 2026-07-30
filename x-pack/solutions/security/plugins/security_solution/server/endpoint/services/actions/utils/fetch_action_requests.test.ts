@@ -16,7 +16,9 @@ import { REF_DATA_KEY_INITIAL_VALUE, REF_DATA_KEYS } from '../../../lib/referenc
 import { set } from '@kbn/safer-lodash-set';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { ExperimentalFeatures } from '../../../../../common';
+import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 
 describe('fetchActionRequests()', () => {
   let esClientMock: ElasticsearchClientMock;
@@ -471,6 +473,88 @@ describe('fetchActionRequests()', () => {
                     },
                   },
                 },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+  });
+
+  describe('and CPS is enabled', () => {
+    let readEsClientMock: ElasticsearchClientMock;
+
+    beforeEach(() => {
+      readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      applyActionListEsSearchMock(readEsClientMock);
+
+      const endpointService =
+        fetchOptions.endpointService as jest.Mocked<EndpointAppContextService>;
+      endpointService.isCpsEnabled.mockReturnValue(true);
+      endpointService.getReadEsClient.mockReturnValue(readEsClientMock);
+
+      fetchOptions.request = httpServerMock.createKibanaRequest();
+    });
+
+    it('should read as the request user so the search can fan out to linked projects', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(fetchOptions.endpointService.getReadEsClient).toHaveBeenCalledWith(
+        fetchOptions.request
+      );
+      expect(readEsClientMock.search).toHaveBeenCalled();
+      expect(esClientMock.search).not.toHaveBeenCalled();
+    });
+
+    it('should scope the search by originSpaceId instead of local integration policy ids', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { bool: { filter: { term: { originSpaceId: 'default' } } } },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('should not resolve integration policy ids from Fleet, which cannot fan out', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      expect(
+        fetchOptions.endpointService.getInternalFleetServices().packagePolicy.fetchAllItemIds
+      ).not.toHaveBeenCalled();
+    });
+
+    it('should exclude documents with no originSpaceId, which may belong to a named space on a linked project', async () => {
+      await fetchActionRequests(fetchOptions);
+
+      const [[{ query }]] = readEsClientMock.search.mock.calls as unknown as Array<
+        [{ query: { bool: { must: unknown[] } } }]
+      >;
+
+      expect(JSON.stringify(query.bool.must)).not.toContain('must_not');
+    });
+
+    it('should still scope a named space by originSpaceId', async () => {
+      fetchOptions.spaceId = 'foo';
+
+      await fetchActionRequests(fetchOptions);
+
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                { bool: { filter: { term: { originSpaceId: 'foo' } } } },
                 { bool: { filter: [] } },
               ],
             },

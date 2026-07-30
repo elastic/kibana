@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fetchActionRequests } from './utils/fetch_action_requests';
 import type { FetchActionResponsesResult } from './utils/fetch_action_responses';
@@ -28,6 +29,11 @@ import {
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 interface OptionalFilterParams {
+  /**
+   * Required for these reads to fan out under CPS. Optional because the pending-actions summary
+   * reaches this from a path with no request.
+   */
+  request?: KibanaRequest;
   agentTypes?: ResponseActionAgentType[];
   commands?: string[];
   elasticAgentIds?: string[];
@@ -52,6 +58,7 @@ interface OptionalFilterParams {
 export const getActionListByStatus = async ({
   endpointService,
   spaceId,
+  request,
   agentTypes,
   commands,
   elasticAgentIds,
@@ -75,6 +82,7 @@ export const getActionListByStatus = async ({
   const { actionDetails: allActionDetails } = await getActionDetailsList({
     endpointService,
     spaceId,
+    request,
     agentTypes,
     commands,
     elasticAgentIds,
@@ -115,6 +123,7 @@ export const getActionListByStatus = async ({
 export const getActionList = async ({
   endpointService,
   spaceId,
+  request,
   agentTypes,
   commands,
   elasticAgentIds,
@@ -138,6 +147,7 @@ export const getActionList = async ({
   const { actionDetails, totalRecords } = await getActionDetailsList({
     spaceId,
     endpointService,
+    request,
     agentTypes,
     commands,
     elasticAgentIds,
@@ -173,6 +183,7 @@ export type GetActionDetailsListParam = OptionalFilterParams & {
 const getActionDetailsList = async ({
   endpointService,
   spaceId,
+  request,
   agentTypes,
   commands,
   elasticAgentIds,
@@ -199,6 +210,7 @@ const getActionDetailsList = async ({
     const { data, total } = await fetchActionRequests({
       spaceId,
       endpointService,
+      request,
       agentTypes,
       commands: commands as ResponseActionsApiCommandNames[],
       elasticAgentIds,
@@ -247,6 +259,7 @@ const getActionDetailsList = async ({
       fetchActionResponses({
         esClient: endpointService.getInternalEsClient(),
         endpointService,
+        request,
         actionIds: actionReqIds,
       }),
 
