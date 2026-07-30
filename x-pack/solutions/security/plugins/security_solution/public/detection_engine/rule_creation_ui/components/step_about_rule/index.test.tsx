@@ -336,13 +336,13 @@ describe('StepAboutRuleComponent', () => {
 
     const { user } = setup(<TestComp onSubmit={handleSubmit} />);
 
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleName')).getByRole('textbox'),
-      'Test name text'
+      { target: { value: 'Test name text' } }
     );
-    await user.type(
+    fireEvent.change(
       within(screen.getByTestId('detectionEngineStepAboutRuleDescription')).getByRole('textbox'),
-      'Test description text'
+      { target: { value: 'Test description text' } }
     );
 
     await submitForm();
