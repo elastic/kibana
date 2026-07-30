@@ -161,8 +161,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
             !endpointMeta.Endpoint.capabilities?.includes('memdump_kernel')) ||
           (memDumpType === 'process' &&
             !endpointMeta.Endpoint.capabilities?.includes('memdump_process')) ||
-          (memDumpType === 'raw' &&
-            !endpointMeta.Endpoint.capabilities?.includes('memdump_physical'))
+          (memDumpType === 'raw' && !endpointMeta.Endpoint.capabilities?.includes('memdump_raw'))
         ) {
           unsupportedAgents.push(
             `${endpointMeta.agent.id} (agent v.${endpointMeta.agent.version})`

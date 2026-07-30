@@ -826,7 +826,7 @@ describe('EndpointActionsClient', () => {
         index: metadataCurrentIndexPattern,
         response: generator.toEsSearchResponse([
           generator.toEsSearchHit(
-            generator.generate({ Endpoint: { capabilities: ['memdump_physical'] } })
+            generator.generate({ Endpoint: { capabilities: ['memdump_raw'] } })
           ),
         ]),
       });
