@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
@@ -17,6 +18,8 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../common/api/detection_engine/rule_exceptions';
+import { DETECTION_ENGINE_RULES_URL } from '../../../common/constants';
+import { RuleExceptionList } from '../../../common/api/detection_engine/model/rule_schema';
 import { assertUnreachable } from '../../../common/utility_types';
 import type {
   ExceptionEntryInput,
@@ -185,8 +188,50 @@ export const toExceptionItemOutput = (
 });
 
 /**
- * Looks up an exception item by its human-readable `item_id` (unique per
- * namespace, across lists). Returns `undefined` when no item exists.
+ * Minimal validation of a rule read response: just enough to find its
+ * `rule_default` exception list, tolerating the rest of the (large) rule
+ * shape.
+ */
+const ruleWithExceptionsListSchema = z.object({
+  exceptions_list: z.array(RuleExceptionList).optional(),
+});
+
+/**
+ * Finds the `list_id` of the rule's own default exception list (the list
+ * `createExceptionItemForRule` creates/appends to), or `undefined` when the
+ * rule has none yet. A rule has at most one `rule_default` list (enforced by
+ * `checkDefaultRuleExceptionListReferences` on the create-rule-exceptions
+ * route). Does not catch 404s: a missing rule is a real failure, not a
+ * "no default list" case.
+ */
+export const findRuleDefaultExceptionListId = async (
+  contextManager: StepHandlerContext['contextManager'],
+  action: ExceptionItemStepAction,
+  ruleId: string
+): Promise<string | undefined> => {
+  const { body } = await contextManager.callKibanaApi<unknown>({
+    method: 'GET',
+    path: `${DETECTION_ENGINE_RULES_URL}?id=${encodeURIComponent(ruleId)}`,
+  });
+  const parsed = ruleWithExceptionsListSchema.safeParse(body);
+  if (!parsed.success) {
+    throw new ExecutionError({
+      type: 'ApiError',
+      message: `Failed to ${action}: unexpected rule response shape`,
+      details: { issues: stringifyZodError(parsed.error) },
+    });
+  }
+  return parsed.data.exceptions_list?.find((list) => list.type === 'rule_default')?.list_id;
+};
+
+/**
+ * Looks up an exception item by its human-readable `item_id` within a
+ * namespace. `item_id` is not scoped to a particular list: an item matching
+ * `itemId` can belong to any list in the namespace, not necessarily the one
+ * a caller has in mind, so callers that care which list it's on must check
+ * the returned item's `list_id` themselves (see `findRuleDefaultExceptionListId`
+ * for why `createRuleExceptionStepDefinition` does). Returns `undefined` when
+ * no item exists.
  */
 export const findExceptionItemByItemId = async (
   contextManager: StepHandlerContext['contextManager'],

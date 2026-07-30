@@ -6,12 +6,14 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { ExceptionListItem } from '@kbn/securitysolution-exceptions-common/api';
 import { createRuleExceptionStepCommonDefinition } from '../../../../common/workflows/step_types/create_rule_exception_step/create_rule_exception_step_common';
 import {
   createExceptionItemForRule,
   ExceptionItemStepAction,
   findExceptionItemByItemId,
+  findRuleDefaultExceptionListId,
   toExceptionItemOutput,
   updateExceptionItemByItemId,
 } from '../../utils/exception_item';
@@ -32,12 +34,41 @@ export const createRuleExceptionStepDefinition = createServerStepDefinition({
     try {
       let existingItem: ExceptionListItem | undefined;
       if (itemId !== undefined) {
-        existingItem = await findExceptionItemByItemId(
+        // `item_id` is not scoped to a particular list, so an item with this
+        // `item_id` could belong to an unrelated (possibly shared) list.
+        // Skipping or overwriting that item would violate the step's "only
+        // affects that rule" guarantee; creating a new item alongside it
+        // would silently duplicate the item_id, since the rule-exceptions
+        // creation endpoint has no uniqueness check of its own (and every
+        // later run would hit the same foreign item and duplicate again).
+        // So a mismatch is a hard failure, not a fall-through to create.
+        const candidate = await findExceptionItemByItemId(
           context.contextManager,
           ACTION,
           itemId,
           RULE_DEFAULT_LIST_NAMESPACE
         );
+        if (candidate !== undefined) {
+          const ruleDefaultListId = await findRuleDefaultExceptionListId(
+            context.contextManager,
+            ACTION,
+            ruleId
+          );
+          if (candidate.list_id === ruleDefaultListId) {
+            existingItem = candidate;
+          } else {
+            throw new ExecutionError({
+              type: 'ConflictError',
+              message:
+                `Failed to ${ACTION}: item_id "${itemId}" already exists on a different ` +
+                `exception list (list_id: "${candidate.list_id}"), not this rule's own ${
+                  ruleDefaultListId !== undefined
+                    ? `default list (list_id: "${ruleDefaultListId}").`
+                    : `default list (the rule has none yet).`
+                } Choose a different item_id, or manage that item directly.`,
+            });
+          }
+        }
       }
 
       if (existingItem && !overwrite) {
