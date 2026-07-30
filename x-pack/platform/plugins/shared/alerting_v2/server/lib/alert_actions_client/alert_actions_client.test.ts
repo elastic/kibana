@@ -137,6 +137,40 @@ describe('AlertActionsClient', () => {
       const docs = operations.filter((_, index) => index % 2 === 1);
       expect(docs[0]).toMatchObject({ actor: null });
     });
+
+    it('persists source from the resolved alert event', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ source: 'pagerduty' }])
+      );
+
+      await client.createAction({
+        groupHash: 'test-group-hash',
+        action: actionData,
+      });
+
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(docs[0]).toMatchObject({ source: 'pagerduty' });
+    });
+
+    it('accepts a null rule_id and writes it as null for external episodes', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(
+        getAlertEventESQLResponse([{ rule_id: null, source: 'pagerduty' }])
+      );
+
+      await client.createAction({
+        groupHash: 'test-group-hash',
+        action: actionData,
+      });
+
+      expect(storageServiceEsClient.bulk).toHaveBeenCalledTimes(1);
+      const callArgs = storageServiceEsClient.bulk.mock.calls[0][0];
+      const operations = callArgs.operations ?? [];
+      const docs = operations.filter((_, index) => index % 2 === 1);
+      expect(docs[0]).toMatchObject({ rule_id: null, source: 'pagerduty' });
+    });
   });
 
   describe('createAction deactivate', () => {
