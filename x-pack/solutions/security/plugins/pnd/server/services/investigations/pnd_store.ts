@@ -15,7 +15,7 @@ import type {
 import type { EvidencePackage, WorkerEvaluationRecord } from '../../common/schemas';
 import type { DetectionChangeSignal } from '../../common/schemas/detection_change';
 import type { Proposal as CanonicalProposal } from '../../common/schemas';
-import type { DismissalReason, ProposalStatusUpdate } from './investigation_store';
+import type { DismissalReason, ProposalStatusUpdate } from './proposal_decision_store';
 
 type Investigation = ListInvestigationsResponse['investigations'][number];
 

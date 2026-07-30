@@ -9,7 +9,7 @@ import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/serve
 import type { ConversationWriterClient } from '@kbn/agent-builder-server';
 import type { PndStore } from './pnd_store';
 import { proposalToConversationCreate } from './template_mapping';
-import type { ProposalStatusUpdate } from './investigation_store';
+import type { ProposalStatusUpdate } from './proposal_decision_store';
 
 /**
  * Resolver that obtains a {@link ConversationWriterClient}. The plugin wires
