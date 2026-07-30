@@ -1739,7 +1739,7 @@ describe('RulesClient', () => {
   });
 
   describe('bulkDisableRules', () => {
-    it('disables enabled rules and removes the executor task on task manager', async () => {
+    it('disables enabled rules and removes their executor tasks', async () => {
       const client = createClient();
 
       const enabledAttrs = createRuleSoAttributes({
@@ -1768,7 +1768,10 @@ describe('RulesClient', () => {
         }),
       ]);
 
+      // Executor tasks are removed (not flagged disabled) to match single disable
+      // and keep re-enable's `bulkSchedule` from conflicting on an existing task id.
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1']);
+      expect(taskManager.bulkDisable).not.toHaveBeenCalled();
 
       expect(res).toEqual({ affected_count: 1, errors: [] });
     });

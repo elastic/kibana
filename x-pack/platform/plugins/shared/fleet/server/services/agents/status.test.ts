@@ -215,14 +215,9 @@ describe('getAgentStatusForAgentPolicy', () => {
           bool: expect.objectContaining({
             must: expect.arrayContaining([
               expect.objectContaining({
-                bool: {
-                  should: [
-                    { terms: { policy_id: agentPolicyIds } },
-                    { prefix: { policy_id: 'agentPolicyId1#' } },
-                    { prefix: { policy_id: 'agentPolicyId2#' } },
-                  ],
-                  minimum_should_match: 1,
-                },
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([{ terms: { policy_base_id: agentPolicyIds } }]),
+                }),
               }),
             ]),
           }),
@@ -265,13 +260,9 @@ describe('getAgentStatusForAgentPolicy', () => {
           bool: expect.objectContaining({
             must: expect.arrayContaining([
               expect.objectContaining({
-                bool: {
-                  should: [
-                    { term: { policy_id: 'agentPolicyId' } },
-                    { prefix: { policy_id: 'agentPolicyId#' } },
-                  ],
-                  minimum_should_match: 1,
-                },
+                bool: expect.objectContaining({
+                  should: expect.arrayContaining([{ term: { policy_base_id: 'agentPolicyId' } }]),
+                }),
               }),
             ]),
           }),

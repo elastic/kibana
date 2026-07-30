@@ -27,7 +27,7 @@ const sharedFilterFields = {
     .describe(
       'Free-text search. Matches policy name, rule name, policy/rule ID (case-insensitive).'
     ),
-  ruleIds: z
+  rule_ids: z
     .preprocess(
       (v) => (v === undefined || Array.isArray(v) ? v : [v]),
       z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
@@ -43,15 +43,15 @@ const sharedFilterFields = {
     ),
 };
 
-export const listPolicyExecutionHistoryQuerySchema = z.object({
+export const listPolicyExecutionHistoryRequestSchema = z.object({
   page: z.coerce.number().min(1).optional().describe('Page number (1-indexed). Defaults to 1.'),
-  perPage: z.coerce
+  per_page: z.coerce
     .number()
     .min(1)
     .max(POLICY_EXECUTION_HISTORY_MAX_PER_PAGE)
     .optional()
     .describe('Number of events per page. Defaults to 100.'),
-  episodeIds: z
+  episode_ids: z
     .preprocess(
       (v) => (v === undefined || Array.isArray(v) ? v : [v]),
       z.array(z.string().trim().min(1).max(ID_MAX_LENGTH)).max(50)
@@ -60,18 +60,28 @@ export const listPolicyExecutionHistoryQuerySchema = z.object({
     .describe(
       'Episode filter. Narrows events to those referencing at least one of the provided episode ids. Max 50 ids.'
     ),
+  start_date: z
+    .string()
+    .trim()
+    .max(64)
+    .optional()
+    .describe(
+      'Inclusive ISO timestamp lower bound applied to @timestamp; overrides the default 24-hour window. Independent of episodeIds \u2014 e.g. set it to an episode\u2019s start time to scope results to that episode\u2019s lifetime.'
+    ),
   ...sharedFilterFields,
 });
-export type ListPolicyExecutionHistoryParams = z.infer<
-  typeof listPolicyExecutionHistoryQuerySchema
+export type ListPolicyExecutionHistoryRequest = z.infer<
+  typeof listPolicyExecutionHistoryRequestSchema
 >;
 
-export const countPolicyExecutionEventsQuerySchema = z.object({
-  since: z.string().describe('ISO timestamp; count events with @timestamp greater than this.'),
+export const countPolicyExecutionEventsRequestSchema = z.object({
+  since: z.iso
+    .datetime()
+    .describe('ISO timestamp; count events with @timestamp greater than this.'),
   ...sharedFilterFields,
 });
-export type CountPolicyExecutionEventsParams = z.infer<
-  typeof countPolicyExecutionEventsQuerySchema
+export type CountPolicyExecutionEventsRequest = z.infer<
+  typeof countPolicyExecutionEventsRequestSchema
 >;
 
 const namedRefSchema = z.object({
