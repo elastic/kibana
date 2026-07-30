@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { getRunbookContent } from '@kbn/alerting-v2-rule-form';
 import { useFetchEpisodeQuery } from '../../hooks/use_fetch_episode_query';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { isRuleError, isRuleLoaded, isRuleLoading } from '../../types/rule_state';
@@ -52,7 +53,8 @@ export const AlertEpisodeRunbookSection = ({
     return null;
   }
 
-  const runbookContent = ruleState.rule.artifacts?.find((a) => a.type === 'runbook')?.value;
+  const runbookArtifact = ruleState.rule.artifacts?.find((a) => a.type === 'runbook');
+  const runbookContent = runbookArtifact ? getRunbookContent(runbookArtifact) : undefined;
 
   return <AlertEpisodeRunbook content={runbookContent} />;
 };

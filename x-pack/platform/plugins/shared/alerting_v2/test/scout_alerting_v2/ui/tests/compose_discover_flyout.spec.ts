@@ -176,7 +176,7 @@ test.describe(
               });
               return items[0]?.artifacts?.some(
                 (artifact) =>
-                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.value === RUNBOOK_TEXT
+                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
               );
             },
             { timeout: 30_000 }
@@ -206,7 +206,7 @@ test.describe(
               {
                 id: 'runbook-id',
                 type: RUNBOOK_ARTIFACT_TYPE,
-                value: RUNBOOK_TEXT,
+                data: { content: RUNBOOK_TEXT },
               },
             ],
           })

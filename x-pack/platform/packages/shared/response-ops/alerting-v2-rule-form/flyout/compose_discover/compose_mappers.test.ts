@@ -207,58 +207,78 @@ describe('composeFormToCreateRequest', () => {
     );
   });
 
-  it('trims runbook and dashboard artifacts', () => {
+  it('passes runbook and dashboard artifacts through with data unchanged', () => {
     const values: FormValues = {
       ...baseFormValues,
       runbookArtifacts: [
-        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '  Runbook steps  ' },
+        {
+          id: 'runbook-id',
+          type: RUNBOOK_ARTIFACT_TYPE,
+          data: { content: '  Runbook steps  ' },
+        },
       ],
       dashboardArtifacts: [
-        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '  dashboard-123  ' },
+        {
+          id: 'dashboard-id',
+          type: DASHBOARD_ARTIFACT_TYPE,
+          data: { dashboardId: '  dashboard-123  ' },
+        },
       ],
     };
 
     const result = composeFormToCreateRequest(values);
 
     expect(result.artifacts).toEqual([
-      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' },
-      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' },
+      {
+        id: 'runbook-id',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: '  Runbook steps  ' },
+      },
+      {
+        id: 'dashboard-id',
+        type: DASHBOARD_ARTIFACT_TYPE,
+        data: { dashboardId: '  dashboard-123  ' },
+      },
     ]);
   });
 
-  it('removes empty runbook and dashboard artifacts while preserving other artifacts', () => {
+  it('passes empty-looking runbook and dashboard artifacts through without filtering', () => {
     const values: FormValues = {
       ...baseFormValues,
-      runbookArtifacts: [{ id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, value: '   ' }],
-      dashboardArtifacts: [{ id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, value: '' }],
-      artifacts: [{ id: 'other-id', type: 'other', value: 'kept' }],
-    };
-
-    const result = composeFormToCreateRequest(values);
-
-    expect(result.artifacts).toEqual([{ id: 'other-id', type: 'other', value: 'kept' }]);
-  });
-
-  it('generates missing IDs for runbook and dashboard artifacts', () => {
-    const values: FormValues = {
-      ...baseFormValues,
-      runbookArtifacts: [{ id: '', type: RUNBOOK_ARTIFACT_TYPE, value: 'Runbook steps' }],
-      dashboardArtifacts: [{ id: '', type: DASHBOARD_ARTIFACT_TYPE, value: 'dashboard-123' }],
+      runbookArtifacts: [
+        { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      ],
+      dashboardArtifacts: [
+        { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+      ],
+      artifacts: [{ id: 'other-id', type: 'other', data: { value: 'kept' } }],
     };
 
     const result = composeFormToCreateRequest(values);
 
     expect(result.artifacts).toEqual([
-      expect.objectContaining({
-        id: expect.stringMatching(/^runbook-/),
-        type: RUNBOOK_ARTIFACT_TYPE,
-        value: 'Runbook steps',
-      }),
-      expect.objectContaining({
-        id: expect.stringMatching(/^dashboard-/),
-        type: DASHBOARD_ARTIFACT_TYPE,
-        value: 'dashboard-123',
-      }),
+      { id: 'other-id', type: 'other', data: { value: 'kept' } },
+      { id: 'runbook-id', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '   ' } },
+      { id: 'dashboard-id', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: '' } },
+    ]);
+  });
+
+  it('passes empty artifact ids through without generating replacements', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      runbookArtifacts: [
+        { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
+      ],
+      dashboardArtifacts: [
+        { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
+      ],
+    };
+
+    const result = composeFormToCreateRequest(values);
+
+    expect(result.artifacts).toEqual([
+      { id: '', type: RUNBOOK_ARTIFACT_TYPE, data: { content: 'Runbook steps' } },
+      { id: '', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'dashboard-123' } },
     ]);
   });
 });
@@ -487,18 +507,18 @@ describe('mapRuleToComposeFormValues', () => {
     const rule = {
       ...baseRuleResponse,
       artifacts: [
-        { id: 'host-id', type: 'host', value: 'host-a' },
-        { id: 'runbook-id', type: 'runbook', value: 'steps here' },
-        { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+        { id: 'host-id', type: 'host', data: { value: 'host-a' } },
+        { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
+        { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
       ],
     } as RuleResponse;
     const result = mapRuleToComposeFormValues(rule);
-    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', value: 'host-a' }]);
+    expect(result.artifacts).toEqual([{ id: 'host-id', type: 'host', data: { value: 'host-a' } }]);
     expect(result.runbookArtifacts).toEqual([
-      { id: 'runbook-id', type: 'runbook', value: 'steps here' },
+      { id: 'runbook-id', type: 'runbook', data: { content: 'steps here' } },
     ]);
     expect(result.dashboardArtifacts).toEqual([
-      { id: 'dashboard-id', type: 'dashboard', value: 'dashboard-123' },
+      { id: 'dashboard-id', type: 'dashboard', data: { dashboardId: 'dashboard-123' } },
     ]);
   });
 

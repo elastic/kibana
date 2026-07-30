@@ -6,8 +6,8 @@
  */
 
 import {
-  DEFAULT_ARTIFACT_VALUE_LIMIT,
-  ARTIFACT_VALUE_LIMITS,
+  DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
+  ARTIFACT_DATA_FIELD_LIMITS,
   RUNBOOK_ARTIFACT_TYPE,
 } from '@kbn/alerting-v2-constants';
 import {
@@ -61,7 +61,7 @@ describe('createRuleDataSchema', () => {
           recovering_count: 5,
           recovering_timeframe: '15m',
         },
-        artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+        artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
       });
 
       expect(result).toEqual(
@@ -78,7 +78,7 @@ describe('createRuleDataSchema', () => {
             recovering_count: 5,
             recovering_timeframe: '15m',
           },
-          artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+          artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
         })
       );
     });
@@ -824,81 +824,112 @@ describe('createRuleDataSchema', () => {
     });
   });
 
-  describe('artifacts value length', () => {
-    it('accepts a runbook artifact at the maximum allowed length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
-          },
-        ],
+  describe('artifacts data size', () => {
+    const runbookLimit = ARTIFACT_DATA_FIELD_LIMITS[RUNBOOK_ARTIFACT_TYPE].content;
+
+    const parseWithArtifact = (artifact: Record<string, unknown>) =>
+      createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });
+
+    it('accepts a runbook whose content is exactly at the limit', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(runbookLimit) },
       });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
-          },
-        ],
+    it('rejects a runbook whose content exceeds the limit', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(runbookLimit + 1) },
       });
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+              path: ['artifacts', 0, 'data', 'content'],
+              message: `Artifact data field "content" must be at most ${runbookLimit} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
             }),
           ])
         );
       }
     });
 
-    it('accepts a non-runbook artifact at the default maximum length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
-          },
-        ],
+    it('measures content itself, so JSON escaping does not eat into the budget', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        // Every newline and quote would double in size when serialized.
+        data: { content: '"\n'.repeat(runbookLimit / 2) },
       });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
-      const result = createRuleDataSchema.safeParse({
-        ...validCreateData,
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
-          },
-        ],
+    it('applies the default limit to a runbook field that has no configured limit', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: {
+          content: 'ok',
+          note: 'a'.repeat(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT + 1),
+        },
       });
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: expect.stringContaining(
-                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
-              ),
+              message: `Artifact data field "note" must be at most ${DEFAULT_ARTIFACT_DATA_FIELD_LIMIT} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
             }),
           ])
         );
       }
+    });
+
+    it('accepts an unknown artifact type at the default limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT) },
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects an unknown artifact type exceeding the default limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT + 1) },
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              message: `Artifact data field "value" must be at most ${DEFAULT_ARTIFACT_DATA_FIELD_LIMIT} characters for type "host".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('only length-checks string fields', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { count: 12, enabled: true, nested: { a: 'b' }, list: [1, 2, 3] },
+      });
+
+      expect(result.success).toBe(true);
     });
   });
 
@@ -934,10 +965,10 @@ describe('updateRuleDataSchema', () => {
 
   it('accepts artifacts in update payload and supports null removal', () => {
     const withArtifacts = updateRuleDataSchema.parse({
-      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+      artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
     });
     expect(withArtifacts).toMatchObject({
-      artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }],
+      artifacts: [{ id: 'artifact-1', type: 'host', data: { value: 'host-a' } }],
     });
 
     const nullArtifacts = updateRuleDataSchema.parse({ artifacts: null });
@@ -1069,73 +1100,65 @@ describe('updateRuleDataSchema', () => {
     });
   });
 
-  describe('artifacts value length', () => {
-    it('accepts a runbook artifact at the maximum allowed length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]),
-          },
-        ],
+  describe('artifacts data size', () => {
+    const runbookLimit = ARTIFACT_DATA_FIELD_LIMITS[RUNBOOK_ARTIFACT_TYPE].content;
+
+    const parseWithArtifact = (artifact: Record<string, unknown>) =>
+      updateRuleDataSchema.safeParse({ artifacts: [artifact] });
+
+    it('accepts a runbook whose content is exactly at the limit', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(runbookLimit) },
       });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a runbook artifact exceeding the maximum allowed length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'runbook-1',
-            type: RUNBOOK_ARTIFACT_TYPE,
-            value: 'a'.repeat(ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE] + 1),
-          },
-        ],
+    it('rejects a runbook whose content exceeds the limit', () => {
+      const result = parseWithArtifact({
+        id: 'runbook-1',
+        type: RUNBOOK_ARTIFACT_TYPE,
+        data: { content: 'a'.repeat(runbookLimit + 1) },
       });
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: `Artifact value must be at most ${ARTIFACT_VALUE_LIMITS[RUNBOOK_ARTIFACT_TYPE]} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+              path: ['artifacts', 0, 'data', 'content'],
+              message: `Artifact data field "content" must be at most ${runbookLimit} characters for type "${RUNBOOK_ARTIFACT_TYPE}".`,
             }),
           ])
         );
       }
     });
 
-    it('accepts a non-runbook artifact at the default maximum length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT),
-          },
-        ],
+    it('accepts an unknown artifact type at the default limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT) },
       });
+
       expect(result.success).toBe(true);
     });
 
-    it('rejects a non-runbook artifact exceeding the default maximum length', () => {
-      const result = updateRuleDataSchema.safeParse({
-        artifacts: [
-          {
-            id: 'artifact-1',
-            type: 'host',
-            value: 'a'.repeat(DEFAULT_ARTIFACT_VALUE_LIMIT + 1),
-          },
-        ],
+    it('rejects an unknown artifact type exceeding the default limit', () => {
+      const result = parseWithArtifact({
+        id: 'artifact-1',
+        type: 'host',
+        data: { value: 'a'.repeat(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT + 1) },
       });
+
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues).toEqual(
           expect.arrayContaining([
             expect.objectContaining({
-              message: expect.stringContaining(
-                `Artifact value must be at most ${DEFAULT_ARTIFACT_VALUE_LIMIT} characters`
-              ),
+              message: `Artifact data field "value" must be at most ${DEFAULT_ARTIFACT_DATA_FIELD_LIMIT} characters for type "host".`,
             }),
           ])
         );

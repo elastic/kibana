@@ -48,7 +48,7 @@ describe('RuleSidebarRunbookTab', () => {
   it('renders empty prompt when artifacts exist but none are runbooks', () => {
     renderRunbookTab({
       ...baseRule,
-      artifacts: [{ id: 'other-1', type: 'other', value: 'not a runbook' }],
+      artifacts: [{ id: 'other-1', type: 'other', data: { value: 'not a runbook' } }],
     });
     expect(screen.getByTestId('sidebarRunbookEmpty')).toBeInTheDocument();
   });
@@ -57,7 +57,11 @@ describe('RuleSidebarRunbookTab', () => {
     renderRunbookTab({
       ...baseRule,
       artifacts: [
-        { id: 'runbook-1', type: 'runbook', value: '# Alert Response\n\n- Step one\n- Step two' },
+        {
+          id: 'runbook-1',
+          type: 'runbook',
+          data: { content: '# Alert Response\n\n- Step one\n- Step two' },
+        },
       ],
     });
     expect(screen.getByTestId('sidebarRunbookContent')).toBeInTheDocument();
@@ -69,9 +73,9 @@ describe('RuleSidebarRunbookTab', () => {
     renderRunbookTab({
       ...baseRule,
       artifacts: [
-        { id: 'other-1', type: 'dashboard', value: 'some-dashboard-id' },
-        { id: 'runbook-1', type: 'runbook', value: '# First Runbook' },
-        { id: 'runbook-2', type: 'runbook', value: '# Second Runbook' },
+        { id: 'other-1', type: 'dashboard', data: { dashboardId: 'some-dashboard-id' } },
+        { id: 'runbook-1', type: 'runbook', data: { content: '# First Runbook' } },
+        { id: 'runbook-2', type: 'runbook', data: { content: '# Second Runbook' } },
       ],
     });
     expect(screen.getByText('First Runbook')).toBeInTheDocument();

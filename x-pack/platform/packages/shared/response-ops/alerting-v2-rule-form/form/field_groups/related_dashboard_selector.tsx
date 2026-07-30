@@ -29,6 +29,7 @@ import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
 import type { FormValues } from '../types';
+import { getDashboardId } from '../utils/artifact_data';
 import {
   resolveDashboardsByIds,
   searchRelatedDashboard,
@@ -36,6 +37,9 @@ import {
 } from './search_related_dashboards';
 
 const SEARCH_DEBOUNCE_MS = 300;
+
+const createDashboardArtifactId = () =>
+  `dashboard-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 const haveSameDashboardIds = (left: string[], right: string[]) => {
   if (left.length !== right.length) {
@@ -270,7 +274,11 @@ export const RelatedDashboardSelector: React.FC = () => {
   });
 
   const dashboardsFormData = useMemo(
-    () => dashboardArtifacts.map((artifact) => ({ id: artifact.value })),
+    () =>
+      dashboardArtifacts.flatMap((artifact) => {
+        const dashboardId = getDashboardId(artifact);
+        return dashboardId ? [{ id: dashboardId }] : [];
+      }),
     [dashboardArtifacts]
   );
 
@@ -279,25 +287,26 @@ export const RelatedDashboardSelector: React.FC = () => {
       const missingIds = new Set(missingDashboards.map((entry) => entry.id));
       // Preserve unresolved (missing) artifacts — they are not represented in the
       // combo box, so rebuilding solely from the selection would silently drop them.
-      const preservedMissingArtifacts = dashboardArtifacts.filter((artifact) =>
-        missingIds.has(artifact.value)
-      );
+      const preservedMissingArtifacts = dashboardArtifacts.filter((artifact) => {
+        const dashboardId = getDashboardId(artifact);
+        return dashboardId != null && missingIds.has(dashboardId);
+      });
 
       const selectedArtifacts = selectedOptions.flatMap((selectedOption) => {
-        const dashboardId = selectedOption.value;
+        const dashboardId = selectedOption.value?.trim();
         if (!dashboardId) {
           return [];
         }
 
         const existingArtifact = dashboardArtifacts.find(
-          (artifact) => artifact.value === dashboardId
+          (artifact) => getDashboardId(artifact) === dashboardId
         );
 
         return [
           {
-            id: existingArtifact?.id ?? '',
+            id: existingArtifact?.id?.trim() ? existingArtifact.id : createDashboardArtifactId(),
             type: DASHBOARD_ARTIFACT_TYPE,
-            value: dashboardId,
+            data: { dashboardId },
           },
         ];
       });
@@ -309,7 +318,7 @@ export const RelatedDashboardSelector: React.FC = () => {
 
   const removeMissingArtifact = useCallback(
     (dashboardId: string) => {
-      onChange(dashboardArtifacts.filter((artifact) => artifact.value !== dashboardId));
+      onChange(dashboardArtifacts.filter((artifact) => getDashboardId(artifact) !== dashboardId));
     },
     [dashboardArtifacts, onChange]
   );
