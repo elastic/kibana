@@ -86,70 +86,98 @@ export interface NewLogstashOutput extends BeatsBaseOutput {
 }
 
 export type OtlpOutputProtocol = ValueOf<typeof otlpProtocol>;
-
-// gRPC supports the full set; HTTP only supports gzip/none (enforced by service validation)
 export type OtlpGrpcCompression = ValueOf<typeof otlpCompressionType>;
 export type OtlpHttpCompression = 'gzip' | 'none';
+export type OtlpTlsCurvePreference = 'X25519' | 'P521' | 'P256' | 'P384';
 
-export interface OtlpExporterConfig {
-  endpoint: string;
-  protocol: OtlpOutputProtocol;
-  api_key?: string;
-  headers?: Record<string, string>;
-  compression?: OtlpGrpcCompression;
-  timeout?: string;
-  tls?: {
-    insecure?: boolean;
-    insecure_skip_verify?: boolean;
-    ca_pem?: string;
-    cert_pem?: string;
-    key_pem?: string;
-    include_system_ca_certs_pool?: boolean;
-    min_version?: string;
-    max_version?: string;
-    reload_interval?: string;
-  };
-  sending_queue?: {
-    enabled?: boolean;
-    num_consumers?: number;
-    queue_size?: number;
-    sizer?: 'requests' | 'items' | 'bytes';
-    wait_for_result?: boolean;
-    block_on_overflow?: boolean;
-  };
-  retry_on_failure?: {
-    enabled?: boolean;
-    initial_interval?: string;
-    max_interval?: string;
-    max_elapsed_time?: string;
-    multiplier?: number;
-  };
-  // http contains fields that are only valid when protocol is 'http/protobuf' (enforced by schema validation)
-  http?: {
-    encoding?: 'proto' | 'json';
-    traces_endpoint?: string;
-    metrics_endpoint?: string;
-    logs_endpoint?: string;
-    profiles_endpoint?: string;
-    read_buffer_size?: number;
-    write_buffer_size?: number;
+interface OtlpExporterTlsConfig {
+  insecure?: boolean;
+  insecure_skip_verify?: boolean;
+  ca_pem?: string;
+  cert_pem?: string;
+  key_pem?: string;
+  include_system_ca_certs_pool?: boolean;
+  min_version?: string;
+  max_version?: string;
+  reload_interval?: string;
+  server_name_override?: string;
+  cipher_suites?: string[];
+  curve_preferences?: OtlpTlsCurvePreference[];
+}
+
+interface OtlpExporterSendingQueueConfig {
+  enabled?: boolean;
+  num_consumers?: number;
+  queue_size?: number;
+  sizer?: 'requests' | 'items' | 'bytes';
+  wait_for_result?: boolean;
+  block_on_overflow?: boolean;
+  batch?: {
+    flush_timeout?: string;
+    min_size?: number;
+    max_size?: number;
+    sizer?: 'items' | 'bytes';
+    partition?: {
+      metadata_keys?: string[];
+    };
   };
 }
 
-// Fields omitted from v1 — candidates for follow-up investigation:
-// tls.server_name_override (SNI override), tls.cipher_suites, tls.curve_preferences,
-// sending_queue.storage (persistent queue), sending_queue.batch.*,
-// grpc.balancer_name, grpc.keepalive.*
+interface OtlpExporterRetryConfig {
+  enabled?: boolean;
+  initial_interval?: string;
+  max_interval?: string;
+  max_elapsed_time?: string;
+  multiplier?: number;
+}
+
+interface OtlpExporterBaseConfig {
+  endpoint: string;
+  api_key?: string;
+  headers?: Record<string, string>;
+  timeout?: string;
+  tls?: OtlpExporterTlsConfig;
+  sending_queue?: OtlpExporterSendingQueueConfig;
+  retry_on_failure?: OtlpExporterRetryConfig;
+}
+
+export interface OtlpGrpcExporterConfig extends OtlpExporterBaseConfig {
+  protocol: typeof otlpProtocol.Grpc;
+  compression?: OtlpGrpcCompression;
+  balancer_name?: string;
+  keepalive?: {
+    time?: string;
+    timeout?: string;
+    permit_without_stream?: boolean;
+  };
+  read_buffer_size?: number;
+  write_buffer_size?: number;
+}
+
+export interface OtlpHttpExporterConfig extends OtlpExporterBaseConfig {
+  protocol: typeof otlpProtocol.HttpProtobuf;
+  compression?: OtlpHttpCompression;
+  encoding?: 'proto' | 'json';
+  traces_endpoint?: string;
+  metrics_endpoint?: string;
+  logs_endpoint?: string;
+  profiles_endpoint?: string;
+  read_buffer_size?: number;
+  write_buffer_size?: number;
+}
+
+export type OtlpExporterConfig = OtlpGrpcExporterConfig | OtlpHttpExporterConfig;
 
 export interface NewOtlpOutput extends NewBaseOutput {
   type: OutputType['Otlp'];
+  api_key?: string | null;
   otlp_exporter: OtlpExporterConfig;
   secrets?: OtlpOutputSecrets;
 }
 
 interface OtlpOutputSecrets {
+  api_key?: SOSecret;
   otlp_exporter?: {
-    api_key?: SOSecret;
     tls?: {
       key_pem?: SOSecret;
     };

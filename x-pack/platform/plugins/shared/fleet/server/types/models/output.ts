@@ -355,14 +355,76 @@ const KafkaUpdateSchema = {
  * OTLP schemas
  */
 
-const OtlpExporterSchema = schema.object({
+const OtlpExporterTlsSchema = schema.object({
+  insecure: schema.maybe(schema.boolean()),
+  insecure_skip_verify: schema.maybe(schema.boolean()),
+  ca_pem: schema.maybe(schema.string()),
+  cert_pem: schema.maybe(schema.string()),
+  key_pem: schema.maybe(schema.string()),
+  include_system_ca_certs_pool: schema.maybe(schema.boolean()),
+  min_version: schema.maybe(schema.string()),
+  max_version: schema.maybe(schema.string()),
+  reload_interval: schema.maybe(schema.string()),
+  server_name_override: schema.maybe(schema.string()),
+  cipher_suites: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  curve_preferences: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal('X25519'),
+        schema.literal('P521'),
+        schema.literal('P256'),
+        schema.literal('P384'),
+      ]),
+      { maxSize: 4 }
+    )
+  ),
+});
+
+const OtlpExporterSendingQueueSchema = schema.object({
+  enabled: schema.maybe(schema.boolean()),
+  num_consumers: schema.maybe(schema.number()),
+  queue_size: schema.maybe(schema.number()),
+  sizer: schema.maybe(
+    schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')])
+  ),
+  wait_for_result: schema.maybe(schema.boolean()),
+  block_on_overflow: schema.maybe(schema.boolean()),
+  batch: schema.maybe(
+    schema.object({
+      flush_timeout: schema.maybe(schema.string()),
+      min_size: schema.maybe(schema.number()),
+      max_size: schema.maybe(schema.number()),
+      sizer: schema.maybe(schema.oneOf([schema.literal('items'), schema.literal('bytes')])),
+      partition: schema.maybe(
+        schema.object({
+          metadata_keys: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+        })
+      ),
+    })
+  ),
+});
+
+const OtlpExporterRetrySchema = schema.object({
+  enabled: schema.maybe(schema.boolean()),
+  initial_interval: schema.maybe(schema.string()),
+  max_interval: schema.maybe(schema.string()),
+  max_elapsed_time: schema.maybe(schema.string()),
+  multiplier: schema.maybe(schema.number()),
+});
+
+const OtlpExporterBaseSchema = {
   endpoint: schema.string(),
-  protocol: schema.oneOf([
-    schema.literal(otlpProtocol.Grpc),
-    schema.literal(otlpProtocol.HttpProtobuf),
-  ]),
   api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   headers: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  timeout: schema.maybe(schema.string()),
+  tls: schema.maybe(OtlpExporterTlsSchema),
+  sending_queue: schema.maybe(OtlpExporterSendingQueueSchema),
+  retry_on_failure: schema.maybe(OtlpExporterRetrySchema),
+};
+
+const OtlpGrpcExporterSchema = schema.object({
+  ...OtlpExporterBaseSchema,
+  protocol: schema.literal(otlpProtocol.Grpc),
   compression: schema.maybe(
     schema.oneOf([
       schema.literal(otlpCompressionType.Gzip),
@@ -371,59 +433,46 @@ const OtlpExporterSchema = schema.object({
       schema.literal(otlpCompressionType.None),
     ])
   ),
-  timeout: schema.maybe(schema.string()),
-  tls: schema.maybe(
+  balancer_name: schema.maybe(schema.string()),
+  keepalive: schema.maybe(
     schema.object({
-      insecure: schema.maybe(schema.boolean()),
-      insecure_skip_verify: schema.maybe(schema.boolean()),
-      ca_pem: schema.maybe(schema.string()),
-      cert_pem: schema.maybe(schema.string()),
-      key_pem: schema.maybe(schema.string()),
-      include_system_ca_certs_pool: schema.maybe(schema.boolean()),
-      min_version: schema.maybe(schema.string()),
-      max_version: schema.maybe(schema.string()),
-      reload_interval: schema.maybe(schema.string()),
+      time: schema.maybe(schema.string()),
+      timeout: schema.maybe(schema.string()),
+      permit_without_stream: schema.maybe(schema.boolean()),
     })
   ),
-  sending_queue: schema.maybe(
-    schema.object({
-      enabled: schema.maybe(schema.boolean()),
-      num_consumers: schema.maybe(schema.number()),
-      queue_size: schema.maybe(schema.number()),
-      sizer: schema.maybe(
-        schema.oneOf([schema.literal('requests'), schema.literal('items'), schema.literal('bytes')])
-      ),
-      wait_for_result: schema.maybe(schema.boolean()),
-      block_on_overflow: schema.maybe(schema.boolean()),
-    })
-  ),
-  retry_on_failure: schema.maybe(
-    schema.object({
-      enabled: schema.maybe(schema.boolean()),
-      initial_interval: schema.maybe(schema.string()),
-      max_interval: schema.maybe(schema.string()),
-      max_elapsed_time: schema.maybe(schema.string()),
-      multiplier: schema.maybe(schema.number()),
-    })
-  ),
-  http: schema.maybe(
-    schema.object({
-      encoding: schema.maybe(schema.oneOf([schema.literal('proto'), schema.literal('json')])),
-      traces_endpoint: schema.maybe(schema.string()),
-      metrics_endpoint: schema.maybe(schema.string()),
-      logs_endpoint: schema.maybe(schema.string()),
-      profiles_endpoint: schema.maybe(schema.string()),
-      read_buffer_size: schema.maybe(schema.number()),
-      write_buffer_size: schema.maybe(schema.number()),
-    })
-  ),
+  read_buffer_size: schema.maybe(schema.number()),
+  write_buffer_size: schema.maybe(schema.number()),
 });
+
+const OtlpHttpExporterSchema = schema.object({
+  ...OtlpExporterBaseSchema,
+  protocol: schema.literal(otlpProtocol.HttpProtobuf),
+  compression: schema.maybe(
+    schema.oneOf([
+      schema.literal(otlpCompressionType.Gzip),
+      schema.literal(otlpCompressionType.None),
+    ])
+  ),
+  encoding: schema.maybe(schema.oneOf([schema.literal('proto'), schema.literal('json')])),
+  traces_endpoint: schema.maybe(schema.string()),
+  metrics_endpoint: schema.maybe(schema.string()),
+  logs_endpoint: schema.maybe(schema.string()),
+  profiles_endpoint: schema.maybe(schema.string()),
+  read_buffer_size: schema.maybe(schema.number()),
+  write_buffer_size: schema.maybe(schema.number()),
+});
+
+const OtlpExporterSchema = schema.discriminatedUnion('protocol', [
+  OtlpGrpcExporterSchema,
+  OtlpHttpExporterSchema,
+]);
 
 const OtlpSecretsSchema = schema.maybe(
   schema.object({
+    api_key: schema.maybe(secretRefSchema),
     otlp_exporter: schema.maybe(
       schema.object({
-        api_key: schema.maybe(secretRefSchema),
         tls: schema.maybe(
           schema.object({
             key_pem: schema.maybe(secretRefSchema),
@@ -437,6 +486,7 @@ const OtlpSecretsSchema = schema.maybe(
 export const OtlpSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Otlp),
+  api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otlp_exporter: OtlpExporterSchema,
   secrets: OtlpSecretsSchema,
 };
@@ -444,6 +494,7 @@ export const OtlpSchema = {
 export const OtlpUpdateSchema = {
   ...UpdateSchema,
   type: schema.maybe(schema.literal(outputType.Otlp)),
+  api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   otlp_exporter: schema.maybe(OtlpExporterSchema),
   secrets: OtlpSecretsSchema,
 };
