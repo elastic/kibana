@@ -37,11 +37,19 @@ export const migrateRuleArtifactsToData: SavedObjectModelUnsafeTransformFn<
   const attributes: RuleSavedObjectAttributes = artifacts
     ? {
         ...rest,
-        artifacts: artifacts.map(({ id, type, value }) => ({
-          id,
-          type,
-          data: { [DATA_KEY_BY_ARTIFACT_TYPE[type] ?? 'value']: value },
-        })),
+        artifacts: artifacts.flatMap(({ id, type, value }) => {
+          const dataKey = DATA_KEY_BY_ARTIFACT_TYPE[type];
+
+          // The legacy saved object schema allowed a blank `value`, but the API
+          // now requires these fields to be populated, so migrating one would
+          // produce a rule the API refuses to serve. Unknown types have no
+          // required fields, so they migrate whatever they carry.
+          if (dataKey && !value.trim()) {
+            return [];
+          }
+
+          return [{ id, type, data: { [dataKey ?? 'value']: value } }];
+        }),
       }
     : rest;
 

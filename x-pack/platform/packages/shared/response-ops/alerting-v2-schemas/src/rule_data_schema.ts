@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import {
   DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
   ARTIFACT_DATA_FIELD_LIMITS,
+  ARTIFACT_REQUIRED_DATA_FIELDS,
   DEFAULT_TIME_FIELD,
 } from '@kbn/alerting-v2-constants';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
@@ -365,7 +366,26 @@ const artifactSchema = z
         });
       }
     }
+
+    for (const field of ARTIFACT_REQUIRED_DATA_FIELDS[ctx.value.type] ?? []) {
+      const value = ctx.value.data[field];
+      if (typeof value !== 'string' || value.trim().length === 0) {
+        ctx.issues.push({
+          code: 'custom',
+          path: ['data', field],
+          message: `Artifact data field "${field}" is required and must be a non-empty string for type "${ctx.value.type}".`,
+          input: value,
+        });
+      }
+    }
   });
+
+const artifactsSchema = z
+  .array(artifactSchema)
+  .max(100)
+  .describe(
+    'Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`.'
+  );
 
 /** Create rule API schema */
 
@@ -398,7 +418,7 @@ export const createRuleDataBaseSchema = z
       ),
     state_transition: stateTransitionSchema,
     grouping: groupingSchema.optional(),
-    artifacts: z.array(artifactSchema).max(100).optional(),
+    artifacts: artifactsSchema.optional(),
   })
   .strict();
 
@@ -547,7 +567,7 @@ export const updateRuleDataSchema = z
     no_data_strategy: noDataStrategySchema.optional().nullable(),
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
-    artifacts: z.array(artifactSchema).max(100).optional().nullable(),
+    artifacts: artifactsSchema.optional().nullable(),
   })
   .strict()
   .check((ctx) => {

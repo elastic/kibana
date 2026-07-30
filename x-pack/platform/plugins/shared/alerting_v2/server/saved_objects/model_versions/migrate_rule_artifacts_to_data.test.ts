@@ -77,6 +77,27 @@ describe('migrateRuleArtifactsToData', () => {
     expect(artifacts).toEqual([{ id: 'host-1', type: 'host', data: { value: 'host-a' } }]);
   });
 
+  it.each([
+    [RUNBOOK_ARTIFACT_TYPE, ''],
+    [RUNBOOK_ARTIFACT_TYPE, '   '],
+    [DASHBOARD_ARTIFACT_TYPE, ' '],
+  ])('drops a %s artifact whose legacy value is %j', (type, value) => {
+    const { artifacts } = migrate([
+      { id: 'blank-1', type, value },
+      { id: 'kept-1', type: RUNBOOK_ARTIFACT_TYPE, value: '# Kept' },
+    ]);
+
+    expect(artifacts).toEqual([
+      { id: 'kept-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '# Kept' } },
+    ]);
+  });
+
+  it('keeps a blank value for an unknown type, which has no required fields', () => {
+    const { artifacts } = migrate([{ id: 'host-1', type: 'host', value: '' }]);
+
+    expect(artifacts).toEqual([{ id: 'host-1', type: 'host', data: { value: '' } }]);
+  });
+
   it('removes the legacy value from the document', () => {
     const { artifacts } = migrate([
       { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, value: 'steps' },

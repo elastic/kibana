@@ -8,6 +8,7 @@
 import {
   DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
   ARTIFACT_DATA_FIELD_LIMITS,
+  DASHBOARD_ARTIFACT_TYPE,
   RUNBOOK_ARTIFACT_TYPE,
 } from '@kbn/alerting-v2-constants';
 import {
@@ -933,6 +934,69 @@ describe('createRuleDataSchema', () => {
     });
   });
 
+  describe('artifacts required data fields', () => {
+    const parseWithArtifact = (artifact: Record<string, unknown>) =>
+      createRuleDataSchema.safeParse({ ...validCreateData, artifacts: [artifact] });
+
+    it('accepts registered types that carry their required field', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        artifacts: [
+          { id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '# Steps' } },
+          { id: 'dashboard-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboardId: 'abc' } },
+        ],
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it.each<[string, Record<string, unknown>]>([
+      ['absent', {}],
+      ['blank', { content: '   \n' }],
+      ['not a string', { content: 42 }],
+    ])('rejects a runbook whose content is %s', (_, data) => {
+      const result = parseWithArtifact({ id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: ['artifacts', 0, 'data', 'content'],
+              message: `Artifact data field "content" is required and must be a non-empty string for type "${RUNBOOK_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('rejects a dashboard that carries no dashboardId', () => {
+      const result = parseWithArtifact({
+        id: 'dashboard-1',
+        type: DASHBOARD_ARTIFACT_TYPE,
+        data: { title: 'Some dashboard' },
+      });
+
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              path: ['artifacts', 0, 'data', 'dashboardId'],
+              message: `Artifact data field "dashboardId" is required and must be a non-empty string for type "${DASHBOARD_ARTIFACT_TYPE}".`,
+            }),
+          ])
+        );
+      }
+    });
+
+    it('leaves unregistered artifact types free to carry any data', () => {
+      const result = parseWithArtifact({ id: 'artifact-1', type: 'host', data: {} });
+
+      expect(result.success).toBe(true);
+    });
+  });
+
   describe('required fields', () => {
     it.each(['kind', 'metadata', 'schedule', 'query'] as const)(
       'rejects when required field "%s" is missing',
@@ -1163,6 +1227,22 @@ describe('updateRuleDataSchema', () => {
           ])
         );
       }
+    });
+  });
+
+  describe('artifacts required data fields', () => {
+    it('rejects a runbook sent with empty content', () => {
+      const result = updateRuleDataSchema.safeParse({
+        artifacts: [{ id: 'runbook-1', type: RUNBOOK_ARTIFACT_TYPE, data: { content: '' } }],
+      });
+
+      expect(result.success).toBe(false);
+    });
+
+    it('clears artifacts with an explicit null rather than an emptied artifact', () => {
+      const result = updateRuleDataSchema.safeParse({ artifacts: null });
+
+      expect(result.success).toBe(true);
     });
   });
 

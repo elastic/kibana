@@ -27,3 +27,13 @@ export const ARTIFACT_DATA_FIELD_LIMITS: Readonly<
 > = {
   [RUNBOOK_ARTIFACT_TYPE]: { content: 50_000 },
 };
+
+/**
+ * Type-specific `data` fields that must be present and hold a non-empty string.
+ *
+ * Enforcement is opt-in per type.
+ */
+export const ARTIFACT_REQUIRED_DATA_FIELDS: Readonly<Record<string, readonly string[]>> = {
+  [RUNBOOK_ARTIFACT_TYPE]: ['content'],
+  [DASHBOARD_ARTIFACT_TYPE]: ['dashboardId'],
+};
