@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { setLogstashUiSettings, unsetLogstashUiSettings, testData } from '../fixtures';
 
@@ -16,7 +16,7 @@ const RANGE_TWEAKED_COLOR = 'rgb(36, 194, 146)';
 const REVERSED_COLOR = 'rgb(246, 114, 106)';
 const TEMPERATURE_COLOR = 'rgb(235, 239, 245)';
 
-spaceTest.describe('Lens legacy metric', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await setLogstashUiSettings({ scoutSpace });
     await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.LENS_BASIC);

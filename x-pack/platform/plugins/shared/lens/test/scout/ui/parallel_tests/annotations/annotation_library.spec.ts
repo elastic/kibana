@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
@@ -19,7 +19,7 @@ const FIRST_VIS_TITLE = 'first visualization';
 const SECOND_VIS_TITLE = 'second visualization';
 const DASHBOARD_TITLE = 'annotation sync test dashboard';
 
-spaceTest.describe('Lens annotation library', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }, () => {
   let storedDataViewId: string | undefined;
 
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {

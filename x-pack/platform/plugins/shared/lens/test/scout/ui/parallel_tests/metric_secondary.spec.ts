@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   buildMetricVisualization,
@@ -25,7 +25,7 @@ const CUSTOM_STATIC_COLOR_RGB = 'rgb(238, 114, 166)';
 const TREND_VALUE_WITH_ARROW = /^[+-]?[\d,]+(\.\d+)?\n[↑↓]$/;
 const TREND_VALUE_ONLY = /^[+-]?[\d,]+(\.\d+)?$/;
 
-spaceTest.describe('Lens metric secondary', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, () => {
   let storedDataViewId: string | undefined;
 
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {

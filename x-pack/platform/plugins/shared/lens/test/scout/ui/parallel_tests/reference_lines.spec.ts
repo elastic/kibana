@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { cleanupLogstashDataView, setupLogstashDataView } from '../fixtures';
 
 const REFERENCE_LINE_LEFT = 'lnsXY_yReferenceLineLeftPanel';
 const REFERENCE_LINE_RIGHT = 'lnsXY_yReferenceLineRightPanel';
 
-spaceTest.describe('Lens reference lines', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, () => {
   let storedDataViewId: string | undefined;
 
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
