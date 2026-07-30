@@ -302,6 +302,7 @@ tags:
     name: Security Timeline API
     x-displayName: Security timeline
   - name: significant_events
+    x-displayName: Significant events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
