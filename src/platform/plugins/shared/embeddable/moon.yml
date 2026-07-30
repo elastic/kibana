@@ -47,9 +47,9 @@ dependsOn:
   - '@kbn/unified-search-plugin'
   - '@kbn/kibana-react-plugin'
   - '@kbn/core-http-server'
-  - '@kbn/zod'
-  - '@kbn/config-schema'
   - '@kbn/ui-callout'
+  - '@kbn/config-schema'
+  - '@kbn/zod'
 tags:
   - plugin
   - prod
