@@ -35,6 +35,7 @@ export class LensApp {
   private readonly saveModal;
   private readonly savedObjectTitleInput;
   private readonly confirmSaveButton;
+  private readonly closeDimensionEditorButton;
   public readonly chartTitle;
   /** XY legend items (elastic-charts does not expose a `data-test-subj` for these). */
   public readonly xyLegendItems;
