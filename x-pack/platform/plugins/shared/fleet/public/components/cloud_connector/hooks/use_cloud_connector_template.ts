@@ -10,11 +10,17 @@ import { i18n } from '@kbn/i18n';
 
 import { useIacProvider, useStartServices } from '../../../hooks';
 import { sendRenderIacTemplate } from '../../../hooks/use_request/iac_provider';
-import { IAC_PROVIDER_RENDER_FALLBACK_EVENT } from '../../../../common/telemetry/iac_provider_events';
+import {
+  CLOUD_CONNECTOR_RENDER_FLOW,
+  IAC_PROVIDER_FALLBACK_REASON_MISSING_CONTEXT,
+  IAC_PROVIDER_FALLBACK_REASON_RENDER_FAILED,
+  IAC_PROVIDER_RENDER_FALLBACK_EVENT,
+} from '../../../../common/telemetry/iac_provider_events';
 import {
   CLOUD_CONNECTOR_PERMISSION_ALLOWLIST,
   getPolicyGroupForIntegration,
 } from '../../../../common/constants/cloud_connector';
+import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connector';
 import type { RenderIacTemplateIntegration } from '../../../../common/types/rest_spec/iac_provider';
 import type { AccountType } from '../../../types';
 import type { CloudSetupForCloudConnector } from '../types';
@@ -41,7 +47,9 @@ const getIntegrationsToRender = (
 ): RenderIacTemplateIntegration[] => {
   const policyGroup = getPolicyGroupForIntegration(packageName, policyTemplate);
   const groupEntries = policyGroup
-    ? CLOUD_CONNECTOR_PERMISSION_ALLOWLIST[policyGroup].filter((e) => e.provider === 'aws')
+    ? CLOUD_CONNECTOR_PERMISSION_ALLOWLIST[policyGroup].filter(
+        (e) => e.provider === AWS_CLOUD_PROVIDER
+      )
     : [{ package: packageName, policyTemplate }];
 
   const templatesByPackage = new Map<string, string[]>();
@@ -108,7 +116,7 @@ export const useCloudConnectorTemplate = ({
 
     const reportFallback = (reason: string) => {
       analytics.reportEvent(IAC_PROVIDER_RENDER_FALLBACK_EVENT.eventType, {
-        flow: 'cloud_connector',
+        flow: CLOUD_CONNECTOR_RENDER_FLOW,
         reason,
       });
     };
@@ -125,7 +133,7 @@ export const useCloudConnectorTemplate = ({
       !TEMPLATE_URL_PARAM_REGEX.test(staticTemplateUrl)
     ) {
       if (staticTemplateUrl) {
-        reportFallback('missing_render_context');
+        reportFallback(IAC_PROVIDER_FALLBACK_REASON_MISSING_CONTEXT);
         window.open(staticTemplateUrl, '_blank');
       } else {
         setTemplateGenerationError(
@@ -155,13 +163,13 @@ export const useCloudConnectorTemplate = ({
     setIsGeneratingTemplate(true);
     try {
       const { data, error } = await sendRenderIacTemplate({
-        provider: 'aws',
-        flow: 'cloud_connector',
+        provider: AWS_CLOUD_PROVIDER,
+        flow: CLOUD_CONNECTOR_RENDER_FLOW,
         integrations: getIntegrationsToRender(packageName, policyTemplate),
       });
 
       if (error || !data) {
-        reportFallback('render_failed');
+        reportFallback(IAC_PROVIDER_FALLBACK_REASON_RENDER_FAILED);
         navigateTo(staticTemplateUrl);
         return;
       }

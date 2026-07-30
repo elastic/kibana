@@ -16,7 +16,16 @@ import type { EventTypeOpts } from '@elastic/ebt/client';
  * agent-based integration flow will report its own value once it lands.
  */
 
-export type IacProviderRenderFlow = 'cloud_connector';
+export const CLOUD_CONNECTOR_RENDER_FLOW = 'cloud_connector' as const;
+
+export type IacProviderRenderFlow = typeof CLOUD_CONNECTOR_RENDER_FLOW;
+
+/**
+ * `reason` values for IAC_PROVIDER_RENDER_FALLBACK_EVENT — telemetry
+ * vocabulary, queried by exact string; change only with a migration plan.
+ */
+export const IAC_PROVIDER_FALLBACK_REASON_MISSING_CONTEXT = 'missing_render_context' as const;
+export const IAC_PROVIDER_FALLBACK_REASON_RENDER_FAILED = 'render_failed' as const;
 
 export interface IacProviderRenderRequestedFields {
   flow: IacProviderRenderFlow;

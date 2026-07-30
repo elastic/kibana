@@ -7,12 +7,15 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { AWS_CLOUD_PROVIDER } from '../../../common/types/models/cloud_connector';
+import { CLOUD_CONNECTOR_RENDER_FLOW } from '../../../common/telemetry/iac_provider_events';
+
 export const RenderIacTemplateRequestSchema = {
   body: schema.object({
-    provider: schema.oneOf([schema.literal('aws')], {
+    provider: schema.oneOf([schema.literal(AWS_CLOUD_PROVIDER)], {
       meta: { description: 'The cloud provider the template targets. Only AWS is supported.' },
     }),
-    flow: schema.oneOf([schema.literal('cloud_connector')], {
+    flow: schema.oneOf([schema.literal(CLOUD_CONNECTOR_RENDER_FLOW)], {
       meta: { description: 'The Kibana flow requesting the render; reported in telemetry.' },
     }),
     integrations: schema.arrayOf(

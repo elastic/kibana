@@ -6,6 +6,7 @@
  */
 
 import type { IacProviderRenderFlow } from '../../telemetry/iac_provider_events';
+import type { AWS_CLOUD_PROVIDER } from '../models/cloud_connector';
 
 export interface RenderIacTemplateIntegration {
   /** EPR package name. */
@@ -20,7 +21,7 @@ export interface RenderIacTemplateIntegration {
 }
 
 export interface RenderIacTemplateRequest {
-  provider: 'aws';
+  provider: typeof AWS_CLOUD_PROVIDER;
   /** The Kibana flow requesting the render; reported in telemetry. */
   flow: IacProviderRenderFlow;
   integrations: RenderIacTemplateIntegration[];
