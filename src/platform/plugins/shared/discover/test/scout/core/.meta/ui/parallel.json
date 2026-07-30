@@ -1,5 +1,5 @@
 {
-  "sha1": "c1aaf3404ac9eb0b4f2ea30f786ff5683c457aef",
+  "sha1": "304d98e4eec1d08a2455440b827339c3645953e4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -119,52 +119,28 @@
       }
     },
     {
-      "id": "a7d4e615652abeb-341038fc04818b4",
-      "title": "Discover default columns - switching data views should render only available default columns after switching data views",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns_switch_back.spec.ts",
-        "line": 54,
-        "column": 14
-      }
-    },
-    {
       "id": "478c3baf483d35a-f5bf8287919c203",
       "title": "Discover default columns should render default columns",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
-        "line": 42,
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "478c3baf483d35a-ec1d070ad629b2a",
+      "title": "Discover default columns should render only available default columns after switching data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
+        "line": 45,
         "column": 12
       }
     },
@@ -173,24 +149,11 @@
       "title": "Discover default columns should combine selected columns and default columns after switching data views",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
-        "line": 53,
+        "line": 96,
         "column": 12
       }
     },
@@ -199,24 +162,11 @@
       "title": "Discover default columns should not change columns if discover:modifyColumnsOnSwitch is off",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
-        "line": 101,
+        "line": 144,
         "column": 12
       }
     },
@@ -385,7 +335,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 50,
+        "line": 49,
         "column": 12
       }
     },
@@ -398,7 +348,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 59,
+        "line": 58,
         "column": 12
       }
     },
@@ -411,7 +361,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 68,
+        "line": 67,
         "column": 12
       }
     },
@@ -424,7 +374,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 104,
+        "line": 103,
         "column": 12
       }
     },
@@ -645,7 +595,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 37,
+        "line": 51,
         "column": 14
       }
     },
@@ -671,7 +621,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 46,
+        "line": 74,
         "column": 14
       }
     },
@@ -697,7 +647,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 56,
+        "line": 89,
         "column": 14
       }
     },
@@ -723,7 +673,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 73,
+        "line": 105,
         "column": 14
       }
     },
@@ -749,7 +699,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 86,
+        "line": 123,
         "column": 14
       }
     },
@@ -775,7 +725,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 103,
+        "line": 138,
         "column": 14
       }
     },
@@ -801,7 +751,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 120,
+        "line": 160,
         "column": 14
       }
     },
@@ -827,7 +777,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 161,
+        "line": 216,
         "column": 14
       }
     },
@@ -853,7 +803,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 175,
+        "line": 235,
         "column": 14
       }
     },
@@ -879,7 +829,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 195,
+        "line": 254,
         "column": 14
       }
     },
@@ -905,7 +855,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 205,
+        "line": 269,
         "column": 14
       }
     },
@@ -931,7 +881,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 215,
+        "line": 284,
         "column": 14
       }
     },
@@ -957,7 +907,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 225,
+        "line": 299,
         "column": 14
       }
     },
@@ -966,25 +916,12 @@
       "title": "Discover request counts - ES|QL mode ES|QL mode request counts",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-stateful-search",
-        "@cloud-stateful-search",
-        "@local-stateful-observability_complete",
-        "@cloud-stateful-observability_complete",
-        "@local-stateful-security_complete",
-        "@cloud-stateful-security_complete",
-        "@local-serverless-search",
-        "@cloud-serverless-search",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 33,
-        "column": 12
+        "line": 40,
+        "column": 14
       }
     },
     {
