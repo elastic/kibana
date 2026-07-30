@@ -150,5 +150,4 @@ describe('NewEnrollmentTokenModal', () => {
       );
     });
   });
-
 });
