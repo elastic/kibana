@@ -14,6 +14,16 @@ import {
 } from '../common/constants/incremental_id';
 
 export const ConfigSchema = schema.object({
+  /**
+   * Gates server-side population of assignee identity fields (`username`,
+   * `full_name`, `email`) on the cases saved object at write time.
+   */
+  assigneeIdentity: schema.object({
+    enabled: offeringBasedSchema({
+      serverless: schema.boolean({ defaultValue: false }),
+      traditional: schema.boolean({ defaultValue: true }),
+    }),
+  }),
   analytics: schema.object({
     index: schema.object({
       enabled: offeringBasedSchema({
