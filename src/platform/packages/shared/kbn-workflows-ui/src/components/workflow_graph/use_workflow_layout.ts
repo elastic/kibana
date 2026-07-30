@@ -116,6 +116,29 @@ export function useWorkflowLayout({
     }, {});
   }, [stepExecutions]);
 
+  // Which branch scopes each gate (`if`/`switch`) actually entered, keyed by the
+  // gate's step name. A taken branch's child steps carry a `scopeStack` frame
+  // `{ stepId: <gateName>, nestedScopes: [{ scopeId: 'true' | 'false' |
+  // 'case_<match>' | 'default' }] }`. The gate's own `conditionResult` /
+  // `matchedIndex` lives in `output`, which is stripped from the execution-detail
+  // fetch, so branch detection relies on these child scopes (unions naturally
+  // across loop iterations).
+  const scopeIdsByStepId = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    if (!stepExecutions) return map;
+    for (const exec of stepExecutions) {
+      for (const frame of exec.scopeStack ?? []) {
+        for (const scope of frame.nestedScopes ?? []) {
+          if (!scope.scopeId) continue;
+          const set = map.get(frame.stepId);
+          if (set) set.add(scope.scopeId);
+          else map.set(frame.stepId, new Set([scope.scopeId]));
+        }
+      }
+    }
+    return map;
+  }, [stepExecutions]);
+
   const syntheticTriggerExecution = useMemo<WorkflowStepExecutionDto | null>(() => {
     if (!stepExecutions || stepExecutions.length === 0) return null;
     return { status: ExecutionStatus.COMPLETED } as WorkflowStepExecutionDto;
@@ -176,6 +199,94 @@ export function useWorkflowLayout({
     transformed.nodes,
     transformed.edges,
   ]);
+
+  // Branch-aware execution highlighting. Computes which fork edges (and which
+  // bypass lanes) belong to the branch that actually executed, so only the
+  // taken path is drawn as traversed. Recomputed on status polls (cheap) but
+  // not on structural changes.
+  const branchTraversal = useMemo(() => {
+    const { allBypassLaneIds, nodeById, allEdges } = topologyMeta;
+
+    const getStatus = (nodeId: string): ExecutionStatus | undefined => {
+      const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
+      const label = typeof nodeData?.label === 'string' ? nodeData.label : undefined;
+      const exec = (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
+      return exec?.status;
+    };
+
+    // Fork edges (those carrying a `branchType`) grouped by their gate (source).
+    type ForkEdge = (typeof allEdges)[number];
+    const forkEdgesByGate = new Map<string, ForkEdge[]>();
+    for (const e of allEdges) {
+      if (!e.branchType) continue;
+      const arr = forkEdgesByGate.get(e.source);
+      if (arr) arr.push(e);
+      else forkEdgesByGate.set(e.source, [e]);
+    }
+
+    const traversedForkEdgeIds = new Set<string>();
+    const traversedBypassIds = new Set<string>();
+
+    const markTraversed = (edge: ForkEdge) => {
+      traversedForkEdgeIds.add(edge.id);
+      if (allBypassLaneIds.has(edge.target)) traversedBypassIds.add(edge.target);
+    };
+
+    for (const [gateId, forkEdges] of forkEdgesByGate) {
+      // Only completed gates highlight a branch; running/unfinished gates stay
+      // neutral until they resolve.
+      if (getStatus(gateId) !== ExecutionStatus.COMPLETED) continue;
+
+      const nodeData = nodeById.get(gateId)?.data as Record<string, unknown> | undefined;
+      const gateLabel = typeof nodeData?.label === 'string' ? nodeData.label : gateId;
+      const scopeIds = scopeIdsByStepId.get(gateLabel) ?? scopeIdsByStepId.get(gateId);
+
+      if (forkEdges.some((e) => e.branchType === 'switch')) {
+        // Switch: a case edge (`label` = match value) maps to scope
+        // `case_<match>`; the default edge maps to scope `default`.
+        let anyMatched = false;
+        for (const e of forkEdges) {
+          const scope = e.label === 'default' ? 'default' : `case_${e.label}`;
+          if (scopeIds?.has(scope)) {
+            markTraversed(e);
+            anyMatched = true;
+          }
+        }
+        // No case matched and no default body ran → the completed switch fell
+        // through its default lane (the transform always emits one default edge,
+        // whether a real branch or a synthesized bypass).
+        if (!anyMatched) {
+          const defaultEdge = forkEdges.find((e) => e.label === 'default');
+          if (defaultEdge) markTraversed(defaultEdge);
+        }
+        continue;
+      }
+
+      // `if`: 'true' → then branch, 'false' → else branch.
+      let thenTaken = scopeIds?.has('true') ?? false;
+      let elseTaken = scopeIds?.has('false') ?? false;
+
+      // Empty taken branch (no child steps → no scope). Resolve by elimination:
+      // if exactly one branch is a bypass lane, the completed gate must have
+      // taken that empty branch. (A both-empty `if` produces no bypass lanes.)
+      if (!thenTaken && !elseTaken) {
+        const thenEdge = forkEdges.find((e) => e.branchType === 'then');
+        const elseEdge = forkEdges.find((e) => e.branchType === 'else');
+        const thenEmpty = thenEdge ? allBypassLaneIds.has(thenEdge.target) : false;
+        const elseEmpty = elseEdge ? allBypassLaneIds.has(elseEdge.target) : false;
+        if (thenEmpty && !elseEmpty) thenTaken = true;
+        else if (elseEmpty && !thenEmpty) elseTaken = true;
+      }
+
+      for (const e of forkEdges) {
+        if (e.branchType === 'then' ? thenTaken : e.branchType === 'else' ? elseTaken : false) {
+          markTraversed(e);
+        }
+      }
+    }
+
+    return { traversedForkEdgeIds, traversedBypassIds };
+  }, [stepExecutionMap, scopeIdsByStepId, topologyMeta]);
 
   const derivedNodes = useMemo<Node[]>(() => {
     const { allBypassLaneIds, innerNodeToGroupId, allDomainNodes } = topologyMeta;
@@ -262,16 +373,24 @@ export function useWorkflowLayout({
         },
         targetPosition,
         sourcePosition,
-        data: {},
+        data: { traversed: branchTraversal.traversedBypassIds.has(id) },
       };
     });
 
     return [...domainNodes, ...bypassLaneReactNodes];
-  }, [layoutSnapshot.nodes, stepExecutionMap, syntheticTriggerExecution, topologyMeta, direction]);
+  }, [
+    layoutSnapshot.nodes,
+    stepExecutionMap,
+    syntheticTriggerExecution,
+    topologyMeta,
+    direction,
+    branchTraversal,
+  ]);
 
   const derivedEdges = useMemo<Edge[]>(() => {
     const { allBypassLaneIds, nodeById, allEdges, mergeNodeIds } = topologyMeta;
     const layoutEdgeById = new Map(layoutSnapshot.edges.map((e) => [e.id, e]));
+    const { traversedForkEdgeIds, traversedBypassIds } = branchTraversal;
 
     const getExec = (nodeId: string): WorkflowStepExecutionDto | undefined => {
       const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
@@ -279,10 +398,27 @@ export function useWorkflowLayout({
       return (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
     };
 
-    return allEdges.map((e) => {
+    const mapped = allEdges.map((e) => {
       const laid = layoutEdgeById.get(e.id);
-      const sourceExec = getExec(e.source);
-      const traversed = sourceExec?.status === ExecutionStatus.COMPLETED;
+      // Fork edges (if/switch branches) highlight only for the branch that ran;
+      // edges leaving an empty (bypass) lane inherit that lane's traversal;
+      // everything else falls back to source-step completion.
+      let traversed: boolean;
+      if (e.branchType) {
+        traversed = traversedForkEdgeIds.has(e.id);
+      } else if (allBypassLaneIds.has(e.source)) {
+        traversed = traversedBypassIds.has(e.source);
+      } else {
+        // Trigger nodes have no persisted step execution; mirror the node's
+        // synthetic "completed" status so the trigger's outgoing edge highlights
+        // alongside it once the run has started.
+        const sourceExec =
+          getExec(e.source) ??
+          (nodeById.get(e.source)?.type === 'trigger'
+            ? syntheticTriggerExecution ?? undefined
+            : undefined);
+        traversed = sourceExec?.status === ExecutionStatus.COMPLETED;
+      }
       return {
         id: e.id,
         source: e.source,
@@ -298,7 +434,22 @@ export function useWorkflowLayout({
         },
       };
     });
-  }, [layoutSnapshot.edges, stepExecutionMap, topologyMeta]);
+
+    // Fork/merge edges deliberately overlap into one shared trunk + bus (see
+    // compute_edge_path). On those shared pixels the last-painted edge wins, so
+    // render traversed edges last to ensure the green (taken) path is never
+    // hidden under a grey sibling's trunk/bus. Stable sort preserves the
+    // original order within each group.
+    return mapped.sort(
+      (a, b) => Number(Boolean(a.data.traversed)) - Number(Boolean(b.data.traversed))
+    );
+  }, [
+    layoutSnapshot.edges,
+    stepExecutionMap,
+    topologyMeta,
+    branchTraversal,
+    syntheticTriggerExecution,
+  ]);
 
   return { nodes: derivedNodes, edges: derivedEdges };
 }
