@@ -16,6 +16,7 @@ import type {
 import type { Template } from '../../../common/types/domain/template/v1';
 import {
   CASE_TEMPLATE_SAVED_OBJECT,
+  MAX_EXTENDED_FIELD_VALUE_BYTES,
   MAX_FIELDS_PER_TEMPLATE,
   MAX_TEMPLATES_PER_OWNER,
 } from '../../../common/constants';
@@ -1539,6 +1540,30 @@ describe('TemplatesService', () => {
         })),
       });
 
+    const buildDefinitionWithDefault = (name: string, defaultValue: string) =>
+      yamlStringify({
+        name,
+        fields: [
+          {
+            control: 'INPUT_TEXT',
+            name: 'field_one',
+            type: 'keyword',
+            metadata: { default: defaultValue },
+          },
+        ],
+      });
+
+    const buildDefinitionWithRefDefault = (name: string, defaultValue: string) =>
+      yamlStringify({
+        name,
+        fields: [
+          {
+            $ref: 'library_field',
+            metadata: { default: defaultValue },
+          },
+        ],
+      });
+
     it('rejects create when the owner is at the template limit', async () => {
       const service = createService();
       unsecuredSavedObjectsClient.find.mockResolvedValue(
@@ -1642,6 +1667,71 @@ describe('TemplatesService', () => {
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
     });
 
+    it('rejects create when an ASCII template default exceeds the maximum byte size', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Large Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithDefault(
+              'Large Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(
+        `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('allows create when a template default is exactly the maximum byte size', async () => {
+      const service = createService();
+
+      await service.createTemplate(
+        {
+          name: 'Boundary Default',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithDefault(
+            'Boundary Default',
+            'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES)
+          ),
+        },
+        'alice',
+        'generated-id'
+      );
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalled();
+    });
+
+    it('rejects create when a $ref default override exceeds the maximum byte size', async () => {
+      const service = createService();
+
+      await expect(
+        service.createTemplate(
+          {
+            name: 'Large Ref Default',
+            owner: 'securitySolution',
+            definition: buildDefinitionWithRefDefault(
+              'Large Ref Default',
+              'a'.repeat(MAX_EXTENDED_FIELD_VALUE_BYTES + 1)
+            ),
+          },
+          'alice',
+          'generated-id'
+        )
+      ).rejects.toThrow(
+        `Template field "library_field" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
     it('rejects update when a definition declares too many fields', async () => {
       const service = createService();
       jest
@@ -1663,6 +1753,36 @@ describe('TemplatesService', () => {
           definition: buildDefinitionWithFields('Existing', MAX_FIELDS_PER_TEMPLATE + 1),
         })
       ).rejects.toThrow(`A template cannot define more than ${MAX_FIELDS_PER_TEMPLATE} fields.`);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects update when a non-ASCII template default exceeds the maximum byte size', async () => {
+      const service = createService();
+      jest
+        .spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        )
+        .mockResolvedValue(
+          createTemplateSO('template-so-id', {
+            templateId: 'template-id',
+            name: 'Existing',
+          })
+        );
+
+      await expect(
+        service.updateTemplate('template-id', {
+          name: 'Existing',
+          owner: 'securitySolution',
+          definition: buildDefinitionWithDefault(
+            'Existing',
+            '界'.repeat(Math.floor(MAX_EXTENDED_FIELD_VALUE_BYTES / 3) + 1)
+          ),
+        })
+      ).rejects.toThrow(
+        `Template field "field_one" default exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
 
       expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });

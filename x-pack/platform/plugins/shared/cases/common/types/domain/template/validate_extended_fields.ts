@@ -15,6 +15,22 @@ import { MAX_EXTENDED_FIELD_VALUE_BYTES } from '../../../constants';
 // counts UTF-16 code units and can undercount non-ASCII input.
 const textEncoder = new TextEncoder();
 
+export const validateExtendedFieldValueSizes = (
+  extendedFields: Record<string, string>
+): string[] => {
+  const errors: string[] = [];
+
+  for (const [key, value] of Object.entries(extendedFields)) {
+    if (textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES) {
+      errors.push(
+        `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
+      );
+    }
+  }
+
+  return errors;
+};
+
 const validatePattern = (
   label: string,
   value: string,
@@ -147,17 +163,8 @@ export const validateExtendedFields = (
     if (!validKeys.has(key)) {
       errors.push(`Unknown extended field key: "${key}"`);
     }
-
-    const value = extendedFields[key];
-    if (
-      typeof value === 'string' &&
-      textEncoder.encode(value).byteLength > MAX_EXTENDED_FIELD_VALUE_BYTES
-    ) {
-      errors.push(
-        `Extended field "${key}" exceeds the maximum size of ${MAX_EXTENDED_FIELD_VALUE_BYTES} bytes`
-      );
-    }
   }
+  errors.push(...validateExtendedFieldValueSizes(extendedFields));
 
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};
