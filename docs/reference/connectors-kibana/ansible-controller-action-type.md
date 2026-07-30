@@ -46,6 +46,8 @@ Verification mode
 
 You can test connectors when you create or edit the connector in {{kib}}. The test requests the authenticated user (`GET …/me/`) to verify connectivity and authentication.
 
+## Connection actions [ansible-controller-connector-actions]
+
 The connector has the following actions:
 
 `request`
