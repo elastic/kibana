@@ -112,6 +112,7 @@ export const registerEntityAttachment = ({
   experimentalFeatures,
   resolveSecurityCanvasContext,
   searchSession,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
@@ -120,6 +121,7 @@ export const registerEntityAttachment = ({
   experimentalFeatures: ExperimentalFeatures;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
   searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_attachment_rich" */
@@ -134,6 +136,7 @@ export const registerEntityAttachment = ({
         chrome,
         resolveSecurityCanvasContext,
         searchSession,
+        uiSettings,
       })
     );
   });
@@ -215,19 +218,31 @@ export const registerEntityAnalyticsDashboardAttachment = ({
   application,
   agentBuilder,
   chrome,
+  experimentalFeatures,
   searchSession,
+  uiSettings,
 }: {
   attachments: AttachmentServiceStartContract;
   application: ApplicationStart;
   agentBuilder?: AgentBuilderPluginStart;
   chrome?: SecurityAgentBuilderChrome;
+  experimentalFeatures: ExperimentalFeatures;
   searchSession?: ISessionService;
+  uiSettings: IUiSettingsClient;
 }): void => {
   void import(
     /* webpackChunkName: "security_entity_analytics_dashboard_attachment" */
     './entity_analytics_dashboard_attachment'
   ).then(({ registerEntityAnalyticsDashboardAttachment: register }) => {
-    register({ attachments, application, agentBuilder, chrome, searchSession });
+    register({
+      attachments,
+      application,
+      agentBuilder,
+      chrome,
+      experimentalFeatures,
+      searchSession,
+      uiSettings,
+    });
   });
 };
 

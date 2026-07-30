@@ -8,7 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
 import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { generateMockIndicator } from '../../../../../common/threat_intelligence/types/indicator';
@@ -93,11 +93,13 @@ describe('<FilterOutButtonIcon /> <FilterOutButtonEmpty /> <FilterOutContextMenu
 
   it('should render one Component (for EuiDataGrid use)', () => {
     const mockComponent: FunctionComponent = () => (
-      <EuiButtonIcon
-        aria-label={'test'}
-        iconType="plusCircle"
-        data-test-subj={CHILD_COMPONENT_TEST_ID}
-      />
+      <EuiToolTip content="test" disableScreenReaderOutput>
+        <EuiButtonIcon
+          aria-label={'test'}
+          iconType="plusCircle"
+          data-test-subj={CHILD_COMPONENT_TEST_ID}
+        />
+      </EuiToolTip>
     );
 
     const { getByTestId } = render(
