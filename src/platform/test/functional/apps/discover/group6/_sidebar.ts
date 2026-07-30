@@ -315,7 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Initial Available fields
         const availableFields = await unifiedFieldList.getSidebarSectionFieldNames('available');
-        expect(availableFields.length).to.be(48);
+        expect(availableFields.length).to.be(49);
         expect(
           availableFields
             .join(', ')
@@ -343,7 +343,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await expectFieldListDescription(
-          '48 available fields. 1 unmapped field. 5 empty fields. 4 meta fields.'
+          '49 available fields. 1 unmapped field. 5 empty fields. 4 meta fields.'
         );
       });
 

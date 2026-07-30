@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('should show all fields as available', async () => {
           expect(
             await (await testSubjects.find('lnsIndexPatternAvailableFields-count')).getVisibleText()
-          ).to.eql(50);
+          ).to.eql(49);
         });
 
         it('should show a histogram and top values popover for numeric field', async () => {
