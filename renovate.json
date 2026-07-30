@@ -1515,7 +1515,7 @@
     },
     {
       "groupName": "kibana-presentation misc canvas dependencies",
-      "matchDepNames": ["object-path-immutable", "safe-squel"],
+      "matchDepNames": ["safe-squel"],
       "reviewers": ["team:kibana-presentation"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Presentation"],
