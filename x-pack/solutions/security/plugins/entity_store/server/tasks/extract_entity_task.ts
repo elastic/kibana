@@ -129,7 +129,7 @@ async function runTask({
     let schedule: { schedule: IntervalSchedule } | undefined;
     try {
       const config = await logsExtractionClient.globalStateClient.findOrThrow();
-      schedule = await getNewSchedule(config.logsExtraction.frequency, taskInstance);
+      schedule = getNewSchedule(config.logsExtraction.frequency, taskInstance);
     } catch (e) {
       logger.warn(`Error getting new schedule, received ${e.message}`);
     }
