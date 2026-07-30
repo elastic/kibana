@@ -32,12 +32,15 @@ evaluate.describe(
   'C3:L4 | Deep Watch Forensics — Durable Outcome',
   { tag: tags.stateful.classic },
   () => {
-    // See leaf_quality.spec.ts for the full rationale: without seeded
-    // `logs-endpoint.events.*` telemetry for DESKTOP-APT29, execute_esql
-    // always returns zero rows and the agent correctly refuses to draft a
-    // report rather than fabricate one — which is the right guardrail
-    // behavior, but means this L4 test can never exercise the durable-write
-    // path it's meant to score. Root-caused and verified live 2026-07-30.
+    // Seeds `logs-endpoint.events.*` telemetry for DESKTOP-APT29 so execute_esql
+    // returns real rows and the agent can draft a report from actual evidence
+    // instead of refusing for insufficient evidence (the correct no-fabrication
+    // guardrail, but not what this L4 durable-write test is scoring).
+    // Live-verified 2026-07-30 against a real Kibana + ES stack: produceDraft=true,
+    // persisted=true, Evaluation Record shape valid=true — the durable-write path
+    // is real and this test exercises it. (An earlier version of this comment
+    // claimed the test could never reach the durable-write path; that was
+    // incorrect once the seeder in ../src/data_generators/forensic_data.ts landed.)
     evaluate.beforeAll(async ({ esClient, log }) => {
       await cleanupSeededData({ esClient });
       await seedForensicTimeline({ esClient }, log);
