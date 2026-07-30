@@ -1952,6 +1952,7 @@
     "@kbn/whereis-pkg-cli": "link:packages/kbn-whereis-pkg-cli",
     "@kbn/workflow-graph-screenshot-cli": "link:src/platform/packages/private/kbn-workflow-graph-screenshot-cli",
     "@kbn/workflow-step-schema-cli": "link:src/platform/packages/private/kbn-workflow-step-schema-cli",
+    "@kbn/workflow-yaml-validate-cli": "link:src/platform/packages/private/kbn-workflow-yaml-validate-cli",
     "@kbn/workspaces": "link:src/platform/packages/shared/kbn-workspaces",
     "@kbn/yarn-install-scripts": "link:packages/kbn-yarn-install-scripts",
     "@kbn/yarn-lock-validator": "link:packages/kbn-yarn-lock-validator",
