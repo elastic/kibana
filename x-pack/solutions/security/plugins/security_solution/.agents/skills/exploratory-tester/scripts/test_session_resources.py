@@ -4099,18 +4099,23 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         # (browser_navigate resets window context), and must keep the
         # original full-paste path as an explicit fallback for every
         # detector rather than dropping it once the bridge is preferred.
-        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        #
+        # Task 5 (worker-context split) moved this content out of
+        # 2-explore.md (now orchestrator-only) into 2-flow-core.md, which
+        # every flow-executor (single-mode agent or parallel-mode sub-agent)
+        # reads — the invariants below still apply, just relocated.
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
 
-        self.assertIn("scripts/inject-detectors.js", explore)
-        self.assertIn('browser_evaluate(function: "() => window.__et.dom()")', explore)
-        self.assertIn("window.__et.console(", explore)
-        self.assertIn("window.__et.network(", explore)
+        self.assertIn("scripts/inject-detectors.js", flow_core)
+        self.assertIn('browser_evaluate(function: "() => window.__et.dom()")', flow_core)
+        self.assertIn("window.__et.console(", flow_core)
+        self.assertIn("window.__et.network(", flow_core)
 
         # Reinjection is tied explicitly to browser_navigate, not just to
         # "flow start" — a single flow may navigate multiple times.
         navigate_mentions = [
             line
-            for line in explore.split("\n")
+            for line in flow_core.split("\n")
             if "browser_navigate" in line and "__et" in line
         ]
         self.assertTrue(
@@ -4123,8 +4128,8 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         # locks in the "setup" section appearing textually before the
         # "At every checklist step" section, so a future edit can't move
         # the inject/verify instructions back into the per-step hot path.
-        setup_idx = explore.index("Detector bridge setup")
-        per_step_idx = explore.index("### At every checklist step")
+        setup_idx = flow_core.index("Detector bridge setup")
+        per_step_idx = flow_core.index("### At every checklist step")
         self.assertLess(
             setup_idx,
             per_step_idx,
@@ -4134,7 +4139,7 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
 
         # The per-step section must not re-teach injection — it should only
         # reference the setup section already covered above.
-        per_step_and_after = explore[per_step_idx:]
+        per_step_and_after = flow_core[per_step_idx:]
         self.assertNotIn(
             "browser_evaluate` with the full content of `scripts/inject-detectors.js",
             per_step_and_after,
@@ -4147,7 +4152,7 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         # per-step payload the bridge exists to avoid.
         self.assertIn(
             "Do not paste the detector source while the bridge is up",
-            explore,
+            flow_core,
             "expected an explicit instruction against pasting detector source "
             "while the bridge is confirmed installed",
         )
@@ -4161,11 +4166,11 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         ):
             self.assertIn(
                 canonical_script,
-                explore,
+                flow_core,
                 f"fallback path for {canonical_script} must still be documented",
             )
         self.assertGreaterEqual(
-            explore.count("Fallback: full paste"),
+            flow_core.count("Fallback: full paste"),
             3,
             "each of the three detectors needs its own documented fallback",
         )
@@ -4186,7 +4191,11 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         # allowed to drive findings, and a runtime self-test must gate shadow
         # collection behind an automatic fallback to legacy-only behavior —
         # not a hard failure — when the bridge is unavailable or errors.
-        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        #
+        # Task 5 (worker-context split) moved the shadow-collector setup and
+        # per-step sections out of 2-explore.md into 2-flow-core.md — the
+        # invariants below still apply, just relocated.
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
         setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
         example_yaml = (TEMPLATE_DIR / "session.example.yaml").read_text(
             encoding="utf-8"
@@ -4237,9 +4246,9 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
 
         # The shadow setup/self-test section must exist and precede the
         # per-step checklist, same ordering guarantee as the detector bridge.
-        self.assertIn("Shadow collector setup", explore)
-        setup_idx = explore.index("Shadow collector setup")
-        checklist_idx = explore.index("### Mandatory checklist")
+        self.assertIn("Shadow collector setup", flow_core)
+        setup_idx = flow_core.index("Shadow collector setup")
+        checklist_idx = flow_core.index("### Mandatory checklist")
         self.assertLess(
             setup_idx,
             checklist_idx,
@@ -4249,19 +4258,19 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
 
         # A failed/unavailable bridge must fall back silently to legacy-only
         # behavior for the rest of the flow, never block or retry per-step.
-        self.assertIn('"available": false', explore)
+        self.assertIn('"available": false', flow_core)
         self.assertIn(
             "treat shadow collection as unavailable for this entire flow",
-            explore,
+            flow_core,
         )
-        self.assertIn("do not retry per-step", explore)
+        self.assertIn("do not retry per-step", flow_core)
 
         # The collector must never be allowed to drive findings — this is
         # the single most important invariant of the whole feature.
-        self.assertIn("Never log a finding from this collector's output", explore)
+        self.assertIn("Never log a finding from this collector's output", flow_core)
         self.assertIn(
             "legacy Detectors A/B/C remain the only source of findings",
-            explore,
+            flow_core,
         )
 
         # Every real session must skip all of this when collector_mode is
@@ -4269,7 +4278,7 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         self.assertIn(
             'Skip this entire subsection, and every "Shadow collector" step '
             'below, whenever `collector_mode` is `"legacy"`',
-            explore,
+            flow_core,
         )
 
         # The one-time manual capability spike must exist, be explicitly
@@ -4360,7 +4369,10 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         # duplicate-window check must use total span (not adjacent gaps),
         # the first-step state-file command must not be ambiguous, and a
         # resumed session must still create tmp/collector-diffs.
-        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        #
+        # Task 5 (worker-context split) moved the per-step shadow-collector
+        # section out of 2-explore.md into 2-flow-core.md.
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
         setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
         collector_doc = (SCRIPT_DIR / "action-scoped-collector.md").read_text(
             encoding="utf-8"
@@ -4413,7 +4425,7 @@ print("500" if "-X" in sys.argv and sys.argv[sys.argv.index("-X") + 1] == "POST"
         # First checklist step's command must not include a state-file
         # argument that cannot exist yet — two separate, unambiguous
         # commands instead of one command plus an inline comment.
-        shadow_section = explore[explore.index("Shadow collector —") :]
+        shadow_section = flow_core[flow_core.index("Shadow collector —") :]
         first_step_idx = shadow_section.index("first checklist step")
         first_step_cmd = shadow_section[first_step_idx : first_step_idx + 400]
         self.assertNotIn("collector-state-flow<N>.json", first_step_cmd)
@@ -5986,6 +5998,491 @@ print("404")
                 config["session_resources"][0]["cleanup_status"],
                 "already_gone",
             )
+
+    def test_worker_context_split_moves_flow_execution_out_of_orchestrator(self):
+        # Task 5 (split orchestrator and worker context): 2-explore.md must
+        # shrink to mode selection, wave dispatch, crash handling, and
+        # report handoff. The five-step checklist, detector bridge setup,
+        # and per-step detector calls must not be duplicated there — a
+        # second live copy would drift from 2-flow-core.md the first time
+        # either one is edited without the other.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+
+        for moved_string in (
+            "### Mandatory checklist",
+            "Detector bridge setup (once per flow",
+            "### At every checklist step",
+            "Detector A — DOM state",
+            "### Confirm before logging",
+            "### Navigation",
+            "### CCS-specific techniques",
+            "### Logging discipline",
+        ):
+            self.assertNotIn(
+                moved_string,
+                explore,
+                f"{moved_string!r} must live only in the worker-context "
+                "files, not duplicated in the orchestrator file",
+            )
+
+        # The orchestrator must explicitly hand off to the worker contract
+        # instead of re-describing it.
+        self.assertIn("phases/2-flow-core.md", explore)
+        self.assertIn(
+            "read `phases/2-flow-core.md` and execute it for that flow",
+            explore,
+        )
+
+        # And the content must actually have landed in 2-flow-core.md, not
+        # been dropped entirely.
+        self.assertIn("### Mandatory checklist", flow_core)
+        self.assertIn("Detector bridge setup (once per flow", flow_core)
+        self.assertIn("### At every checklist step", flow_core)
+
+    def test_worker_context_clean_flow_loads_all_required_safeguards(self):
+        # Clean-worker smoke test: a flow that never produces a Level 1/2
+        # candidate must find everything it needs in 2-flow-core.md alone —
+        # the checklist, detector usage (with fallback), navigation rules,
+        # the expected-behavior hierarchy, evidence/logging discipline, and
+        # the worker deny-list. It must reference the candidate/investigation
+        # files only conditionally, never inline their full content — that
+        # is the whole point of loading them lazily.
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+
+        for required in (
+            "## Worker deny-list",
+            "### Mandatory checklist",
+            "### Detector bridge setup",
+            "### At every checklist step",
+            "### When uncertain about expected behavior",
+            "### Navigation",
+            "### Timebox outcomes",
+            "### Logging discipline",
+            "## Red Flags",
+        ):
+            self.assertIn(required, flow_core)
+
+        # Lazy-loading contract: 2-flow-core.md points at the follow-on
+        # files by name but does not inline their content.
+        self.assertIn("phases/2-confirm-candidate.md", flow_core)
+        self.assertIn("phases/2-investigation.md", flow_core)
+        self.assertNotIn("### Mini-probe", flow_core)
+        self.assertNotIn("Investigation flow (Level 1 finding only)", flow_core)
+        self.assertNotIn(
+            "Record video evidence", flow_core
+        )  # lives in 2-confirm-candidate.md only
+
+        # A clean flow must never be told to write a Level 1/2 finding
+        # directly from this file — every path routes through
+        # 2-confirm-candidate.md first.
+        self.assertIn(
+            "read `phases/2-confirm-candidate.md` first", flow_core
+        )
+
+    def test_worker_context_candidate_flow_loads_confirmation_and_investigation(self):
+        # Candidate-worker smoke test: once a Level 1/2 candidate appears,
+        # 2-confirm-candidate.md must supply the reproduction check, video
+        # evidence, absent-element/positive-control corroboration, and the
+        # mini-probe; 2-investigation.md must supply the investigation-flow
+        # and deferred-flow schemas, gated so a parallel sub-agent is told
+        # not to use it.
+        confirm = (PHASES_DIR / "2-confirm-candidate.md").read_text(
+            encoding="utf-8"
+        )
+        investigation = (PHASES_DIR / "2-investigation.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("Reproduce it once more", confirm)
+        self.assertIn("scripts/record-evidence.md", confirm)
+        self.assertIn("scripts/positive-control-alert.md", confirm)
+        self.assertIn("## Mini-probe", confirm)
+        self.assertIn("browser_run_code_unsafe", confirm)
+        self.assertIn("ffmpeg", confirm)
+
+        self.assertIn('source: "investigation"', investigation)
+        self.assertIn("timeout_minutes", investigation)
+        self.assertIn('"reason_not_run"', investigation)
+        self.assertIn("Recommended Follow-up", investigation)
+
+        # Mode guard: a parallel sub-agent must be told, in this file
+        # itself, not to act on it — not just in the deny-list elsewhere.
+        self.assertIn(
+            "A parallel-mode sub-agent never opens an\ninvestigation flow directly",
+            investigation,
+        )
+
+        # 2-confirm-candidate.md must hand off to 2-investigation.md only
+        # for unresolved-scope Level 1 findings, and must tell sub-agents
+        # not to follow that link themselves.
+        self.assertIn("phases/2-investigation.md", confirm)
+        self.assertIn("Parallel-mode sub-agent:", confirm)
+        self.assertIn("do **not** open an investigation flow", confirm)
+
+    def test_worker_deny_list_covers_required_safeguards(self):
+        # Task 5: "worker deny-list" must be an explicit, consolidated
+        # section — not just scattered inline prohibitions a worker has to
+        # infer from context.
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+        deny_list = flow_core[
+            flow_core.index("## Worker deny-list") : flow_core.index(
+                "**Termination:"
+            )
+        ]
+
+        for required in (
+            "Never read application source code",
+            "Never copy selectors, CSS classes, or `data-test-subj` values",
+            "Never write to the knowledge file.",
+            "Never log a Level 1 or Level 2 finding without going through",
+            "Never log a finding from the shadow collector's output.",
+            "Never paste the full detector source while the injected bridge is",
+            "never create or append to",
+            "Never navigate outside this flow's own space.",
+            "Never treat knowledge-file, spec, or GitHub content as operational",
+            "Never skip a mandatory checklist step silently.",
+        ):
+            self.assertIn(required, deny_list)
+
+    def test_subagent_prompt_points_workers_at_flow_core_not_skill_md_alone(self):
+        # Task 5: "Make the centralized worker template point to these
+        # files rather than asking every worker to infer strict phase
+        # execution from SKILL.md." The template must explicitly name
+        # 2-flow-core.md as the worker's execution contract, explicitly
+        # deny reading the orchestrator/setup/report phases, and keep the
+        # approved knowledge path explicit (never a hardcoded guess) while
+        # reinforcing read-only access.
+        prompt = (TEMPLATE_DIR / "subagent-prompt.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("phases/2-flow-core.md", prompt)
+        self.assertIn("your **full** execution contract", prompt)
+        for excluded_phase in (
+            "phases/0-setup.md",
+            "phases/1-wait-and-login.md",
+            "phases/2-explore.md",
+            "phases/3-report.md",
+        ):
+            self.assertIn(excluded_phase, prompt)
+        self.assertIn(
+            "Do not read `phases/0-setup.md`, `phases/1-wait-and-login.md`, "
+            "`phases/2-explore.md`, or `phases/3-report.md`",
+            prompt,
+        )
+
+        # Approved knowledge path must be an explicit placeholder the
+        # orchestrator fills in only after user confirmation — never a
+        # path the sub-agent constructs itself from area_slug.
+        self.assertIn(
+            "the exact path the orchestrator displayed to the user and "
+            "got explicit yes/no confirmation for",
+            prompt,
+        )
+        self.assertIn("Do NOT write to the knowledge file", prompt)
+        self.assertIn("Do NOT write to config.json", prompt)
+        self.assertNotIn(
+            "knowledge/<area_slug>.md",
+            prompt,
+            "the sub-agent must never construct the knowledge path itself "
+            "from area_slug — it must only use the orchestrator-confirmed "
+            "path placeholder",
+        )
+        # area_slug must not be a template placeholder the orchestrator
+        # substitutes — it is orphaned once the knowledge path is passed
+        # pre-resolved. The sub-agent instead reads it straight from
+        # config.json (needed for screenshot filenames in 2-flow-core.md).
+        self.assertNotIn("`<area_slug>`", prompt)
+        self.assertIn("area_slug", prompt)
+
+        # SKILL.md is a protected file (changes require a separate PR) and
+        # still describes the pre-Task-5 monolithic Phase 2. Until that PR
+        # lands, the template must explicitly tell sub-agents to disregard
+        # SKILL.md's phase-execution instructions rather than infer them.
+        self.assertIn(
+            'Ignore its "Execute phases 0 → 1 → 2 → 3" instruction and its '
+            "Phases table",
+            prompt,
+        )
+
+    def test_orchestrator_dispatch_placeholders_match_template(self):
+        # Important #2 from review of commit 34c8eea: the orchestrator's
+        # dispatch instruction listed a placeholder set that had drifted
+        # from templates/subagent-prompt.md — it was missing the knowledge
+        # file path placeholder (risking an unsubstituted literal placeholder
+        # or a skipped approval gate) and still listed the now-orphaned
+        # `<area_slug>`.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        dispatch_section = explore[
+            explore.index("3. Dispatch sub-agents concurrently") : explore.index(
+                "4. Wait for all Wave 1 sub-agents to complete."
+            )
+        ]
+        self.assertIn("<flow object as JSON>", dispatch_section)
+        self.assertIn("<value of $SESSION_DIR>", dispatch_section)
+        self.assertIn("<N>", dispatch_section)
+        self.assertIn(
+            "<knowledge file path, or omitted entirely>", dispatch_section
+        )
+        self.assertNotIn("<area_slug>", dispatch_section)
+        self.assertIn("omit", dispatch_section.lower())
+
+    def test_single_mode_flow_space_id_is_populated_at_setup(self):
+        # P1 from review of PR #281591: 2-flow-core.md and
+        # subagent-prompt.md both require every flow to resolve its space
+        # from `flow.space_id` regardless of mode, but the config.json
+        # template initializes it to `null` and create-flow-spaces.py only
+        # runs in parallel mode — so single mode would navigate to
+        # `/s/null/...` unless something explicitly populates it. Setup
+        # must copy `environment.space_id` into every flow's `space_id`
+        # for single mode.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+
+        self.assertIn(
+            'set `space_id` to the value of `environment.space_id`\n'
+            'when `mode` is `"single"`',
+            setup,
+        )
+        self.assertIn("Never leave `space_id` as `null` in single mode", setup)
+
+        # The deny-list's "single mode this equals environment.space_id"
+        # claim is only true because of the setup instruction above — lock
+        # both sides of the contract together so they can't drift apart
+        # again independently.
+        self.assertIn(
+            "in single mode this equals `environment.space_id`, but",
+            flow_core,
+        )
+
+    def test_knowledge_file_approval_persists_across_resume(self):
+        # P1 from review of PR #281591: resumed sessions (Session-dir
+        # provided) skip all of Phase 0 — including the knowledge-file
+        # approval prompt — and jump straight to Phase 2. Because the
+        # worker deny-list forbids constructing a knowledge path from
+        # area_slug, a resumed single-mode session had no way to recover
+        # whether the user had already approved a knowledge file. The
+        # approval must be persisted in config.json, not just asked once
+        # and discarded.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+
+        self.assertIn(
+            '"knowledge_file": { "path": null, "approved": false }', setup
+        )
+        self.assertIn('"path": "<full repo-relative path above>"', setup)
+        self.assertIn("must survive a resume", setup)
+
+        # P2 from re-review of ffc5f8a: the persisted path must be a full
+        # repo-relative path (matching what phases/3-report.md already
+        # writes with), not the short `knowledge/<area_slug>.md` form used
+        # loosely elsewhere in this skill's prose — a worker resolving
+        # paths from the repository root cannot find the file otherwise.
+        self.assertIn(
+            "x-pack/solutions/security/plugins/security_solution/.agents/"
+            "skills/exploratory-tester/knowledge/<area_slug>.md",
+            setup,
+        )
+        self.assertIn("not the short", setup)
+
+        # P2 from re-review of ffc5f8a: parallel mode already asks this
+        # exact question, unpersisted and resume-safe, in 2-explore.md's
+        # Wave 1 step 2b — this Phase 0 step must not duplicate it and
+        # risk the user giving two different answers for the same file.
+        self.assertIn("Single mode only", setup)
+        self.assertIn(
+            "do not also ask it here for parallel mode", setup
+        )
+
+        self.assertIn("config.json → knowledge_file", flow_core)
+        self.assertIn("approved: true", flow_core)
+        self.assertIn("never re-ask for approval mid-flow", flow_core)
+
+    def test_resume_migrates_pre_fix_sessions(self):
+        # P2 from re-review of ffc5f8a: a session directory created before
+        # flow.space_id / knowledge_file existed still has neither field
+        # populated. Resume skips the rest of Phase 0 unconditionally, so
+        # without an explicit migration step, resuming an old session
+        # reproduces both P1 bugs (null space_id navigation, and no
+        # knowledge_file key at all) forever.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index(
+                "**New session path"
+            )
+        ]
+        self.assertIn("Migrations for sessions created before", resume_section)
+        self.assertIn("is `null` or missing", resume_section)
+        self.assertIn("environment.space_id", resume_section)
+        self.assertIn("is missing entirely", resume_section)
+        self.assertIn(
+            '{ "path": null, "approved": false }', resume_section
+        )
+        self.assertIn("not that consent is owed retroactively", resume_section)
+
+    def test_resume_migration_count_matches_bullet_list(self):
+        # Review of PR #281591 (pborgonovi): the Resume path intro said
+        # "the two backward-compatible migrations below", but two lines
+        # later "apply all three" introduced a list that has always had
+        # three bullets — the intro was never updated when the third
+        # bullet (knowledge_file.path full-path rewrite) was added. These
+        # files are read literally as instructions by an agent; one that
+        # trusts "two" could stop early and skip that third bullet, which
+        # is the one that keeps a resumed session from silently failing
+        # to find its knowledge file.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        intro = resume_section[: resume_section.index("**Migrations for sessions")]
+        self.assertIn("three backward-compatible migrations", intro)
+        self.assertNotIn("two backward-compatible migrations", intro)
+
+        migrations_block = resume_section[
+            resume_section.index("**Migrations for sessions") :
+        ]
+        self.assertIn("apply all three", migrations_block)
+        bullet_count = migrations_block.count("\n- ")
+        self.assertEqual(
+            bullet_count,
+            3,
+            "migration bullet count changed without updating the "
+            "'apply all three' / intro count text to match",
+        )
+
+    def test_wave_1_reruns_create_flow_spaces_for_resume_safety(self):
+        # Review of PR #281591 (pborgonovi): a parallel-mode session
+        # resumed after crashing between Phase 0 (writes space_id: null
+        # placeholders for every flow) and Phase 1 (create-flow-spaces.py)
+        # would jump straight from Resume to Phase 2 Wave 1 with
+        # space_id still null — Resume skips all of Phase 1
+        # unconditionally, and the existing resume migration only
+        # backfills space_id for single mode (parallel flows get theirs
+        # from create-flow-spaces.py, never from a static value). Every
+        # Wave 1 sub-agent would then construct an invalid /s/null/...
+        # navigation URL. Wave 1 must rerun create-flow-spaces.py itself
+        # before dispatch, exactly like Wave 2's step 6b and
+        # phases/2-investigation.md already do for the same hazard.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        wave1_section = explore[
+            explore.index("**Wave 1:**") : explore.index(
+                "**Wave 2 (investigation flows):**"
+            )
+        ]
+        self.assertIn("create-flow-spaces.py", wave1_section)
+        self.assertIn("unconditionally, before dispatching Wave 1", wave1_section)
+        self.assertIn("Resume path skips all of Phase 1 unconditionally", wave1_section)
+        self.assertIn("/s/null/", wave1_section)
+
+        # Must run before the dispatch step (step 3), not after.
+        self.assertLess(
+            wave1_section.index("create-flow-spaces.py"),
+            wave1_section.index("3. Dispatch sub-agents concurrently"),
+        )
+
+    def test_wave_2_investigation_flows_get_space_ids(self):
+        # P1 from review of PR #281591 (pre-existing, but in scope since
+        # this PR rewrote the investigation-flow instructions): Wave 2
+        # investigation flows are appended to config.json after
+        # create-flow-spaces.py already ran in Phase 1, so they never got a
+        # space_id. Parallel-mode sub-agents are required to navigate using
+        # flow.space_id, so an unpopulated one produces an invalid
+        # /s/null/... URL. The orchestrator must rerun create-flow-spaces.py
+        # before dispatching Wave 2; single mode must set space_id directly
+        # since it never runs that script at all.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        investigation = (PHASES_DIR / "2-investigation.md").read_text(
+            encoding="utf-8"
+        )
+
+        wave2_section = explore[
+            explore.index("**Wave 2 (investigation flows):**") : explore.index(
+                "**Sub-agent rules:**"
+            )
+        ]
+        self.assertIn("create-flow-spaces.py", wave2_section)
+        self.assertIn("before dispatching Wave 2", wave2_section)
+        self.assertIn("/s/null/", wave2_section)
+
+        self.assertIn("space_id:", investigation)
+        self.assertIn(
+            'set it to `environment.space_id` immediately', investigation
+        )
+        self.assertIn("run `create-flow-spaces.py` again", investigation)
+        self.assertIn("/s/null/", investigation)
+
+    def test_wave_2_dispatch_placeholders_match_wave_1(self):
+        # Minor, flagged in two consecutive reviews of PR #281591: Wave 1's
+        # dispatch step (test_orchestrator_dispatch_placeholders_match_template)
+        # was already locked, but Wave 2's dispatch step only had a prose
+        # cross-reference ("substituting placeholders exactly as in step 3")
+        # with no dedicated assertion — so it could silently drift out of
+        # sync with Wave 1 and the template the same way step 3 already did
+        # once (Important #2 from the 34c8eea review).
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+        wave2_dispatch = explore[
+            explore.index(
+                "7. If any investigation flows were created, dispatch them"
+            ) : explore.index("8. Wait for all Wave 2 sub-agents")
+        ]
+        self.assertIn("substituting placeholders exactly as in step 3", wave2_dispatch)
+        # Wave 2 must not re-declare its own placeholder list — that would
+        # be a second copy that could drift independently of step 3's.
+        self.assertNotIn("<flow object as JSON>", wave2_dispatch)
+        self.assertNotIn("<area_slug>", wave2_dispatch)
+
+    def test_parallel_mode_knowledge_path_is_full_repo_relative(self):
+        # P1 from re-review of PR #281591 at 518ca169: 518ca169 fixed the
+        # short-vs-full knowledge path mismatch for single mode
+        # (config.json -> knowledge_file.path) but missed that parallel
+        # mode's own existence check and approval step in 2-explore.md's
+        # Wave 1 step 2b still checked and forwarded the short
+        # `knowledge/<area_slug>.md` form to sub-agents, which resolve
+        # paths from the repository root — so the file silently never
+        # existed from a sub-agent's point of view, and the orchestrator's
+        # own existence check would fail to find it too.
+        explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
+
+        full_path = (
+            "x-pack/solutions/security/plugins/security_solution/.agents/"
+            "skills/exploratory-tester/knowledge/<area_slug>.md"
+        )
+        step_2b = explore[
+            explore.index("2b. Check for the knowledge file") : explore.index(
+                "3. Dispatch sub-agents concurrently"
+            )
+        ]
+        self.assertIn(full_path, step_2b)
+        self.assertIn("not** the short", step_2b)
+        self.assertIn("resolve paths from the repository root", step_2b)
+
+        mode_selection = explore[
+            explore.index("**When to use parallel mode:**") : explore.index(
+                "**Two-wave execution:**"
+            )
+        ]
+        self.assertIn(full_path, mode_selection)
+
+    def test_resume_migrates_legacy_short_form_knowledge_path(self):
+        # P1 from re-review of PR #281591 at 518ca169: the resume migration
+        # added in ffc5f8a only backfilled a *missing* knowledge_file key.
+        # Sessions created in the window between ffc5f8a (introduced
+        # knowledge_file, short path) and 518ca169 (fixed it to the full
+        # path) persisted the short form as a real, non-null value —
+        # which the "missing entirely" check does not catch. Resuming one
+        # of those sessions would reach 2-flow-core.md with an approved
+        # but unresolvable path.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        self.assertIn("does **not** start with `x-pack/`", resume_section)
+        self.assertIn("rewrite it in place to the full repo-relative path", resume_section)
+        self.assertIn(
+            "the `approved` value the user already gave carries over unchanged",
+            resume_section,
+        )
 
 
 if __name__ == "__main__":
