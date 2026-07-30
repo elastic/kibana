@@ -160,22 +160,22 @@ export function OnboardingShell() {
 
   return (
     <EuiPageTemplate data-test-subj="onboardingShell">
-      <EuiPageTemplate.Section grow={false} paddingSize="l" restrictWidth>
+      <EuiPageTemplate.Section grow={false} paddingSize="m" restrictWidth>
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" alignItems="flexEnd" gutterSize="m">
             <EuiIcon type={meta.icon} size="xl" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem>
             <EuiTitle
-              size="m"
+              size="l"
               css={css`
                 text-align: center;
               `}
             >
               <h1>{meta.title}</h1>
             </EuiTitle>
+          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
             <EuiText
-              size="s"
+              size="m"
               color="subdued"
               css={css`
                 text-align: center;
@@ -185,8 +185,7 @@ export function OnboardingShell() {
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
+        <EuiSpacer size="xs" />
         <EuiStepsHorizontal steps={horizontalStepsConfig} />
         <EuiSpacer size="xl" />
         {CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />}

@@ -82,7 +82,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiTitle size="l">
+      <EuiTitle size="m">
         <h2>
           <FormattedMessage
             id="xpack.ingestHub.servicesStep.title"
