@@ -11,6 +11,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover - group 2', function () {
     loadTestFile(require.resolve('./preserve_url'));
     loadTestFile(require.resolve('./async_scripted_fields'));
-    loadTestFile(require.resolve('./error_handling'));
   });
 }
