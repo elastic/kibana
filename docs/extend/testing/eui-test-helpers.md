@@ -38,6 +38,10 @@ const comboBox = page.components.comboBox('dataViewSelector', someFlyout);
 - **In scope**: enabling consumer end-to-end tests to set up and tear down component state reliably, so the test can focus on its actual assertion instead of navigating EUI's DOM.
 - **Out of scope**: testing EUI component behavior. EUI already has RTL unit tests, Cypress E2E tests, and Loki VRT tests for that. A method added only to exercise an EUI feature (e.g. "click the clear button to verify `onChange` fires") belongs in EUI's own suite. The package's validation tests prove **the helper itself works**; they don't substitute for EUI's tests.
 
+::::::{note}
+Each Component Object targets one EUI component: `page.components.comboBox` drives an `EuiComboBox` only. Pointing it at a different component that happens to share the same `data-test-subj` (e.g. an `EuiSelectable`) fails on purpose, since the helper validates the component type internally. Unlike some FTR helpers, it won't silently operate on the wrong component, something to watch for when migrating.
+::::::
+
 ## Contribute a helper [scout-eui-test-helpers-contribute]
 
 The full contributor journey is: prototype in Scout, validate against Kibana, port to EUI, then publish. Prototyping in Kibana first means you exercise the helper against the real DOM it must support, not a curated Storybook story.
