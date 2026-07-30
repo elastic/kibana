@@ -364,7 +364,7 @@ const eventsUpdateRoute = createServerRoute({
     }),
     body: z.object({
       severity: severitySchema.optional(),
-      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
+      summary: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
       status: significantEventStatusSchema.optional(),
     }),
   }),
