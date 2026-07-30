@@ -638,7 +638,7 @@ describe('EvalsClient', () => {
       expect(result).toBeUndefined();
     });
 
-    it('forwards suite_id query param', async () => {
+    it('forwards suite_id and build_id query params, stripping the bk- prefix', async () => {
       const kbnClient = createMockKbnClient();
       const log = createLog();
       kbnClient.request.mockResolvedValue(
@@ -655,9 +655,26 @@ describe('EvalsClient', () => {
         expect.objectContaining({
           path: EVALS_EXPERIMENTS_URL,
           method: 'GET',
-          query: expect.objectContaining({ suite_id: 'obs' }),
+          query: expect.objectContaining({ suite_id: 'obs', build_id: '123' }),
         })
       );
+    });
+
+    it('passes baseExecutionId as-is to build_id when it has no bk- prefix', async () => {
+      const kbnClient = createMockKbnClient();
+      const log = createLog();
+      kbnClient.request.mockResolvedValue(
+        asKbnResponse({ experiments: [makeExperiment('rawid::obs::haiku')], total: 1 })
+      );
+      const client = new EvalsClient(kbnClient, log);
+
+      await client.findLatestExperimentForBuild({
+        suiteId: 'obs',
+        baseExecutionId: 'rawid',
+      });
+
+      const call = kbnClient.request.mock.calls[0][0] as { query: Record<string, unknown> };
+      expect(call.query).toMatchObject({ build_id: 'rawid' });
     });
 
     it('returns undefined and logs error on request failure', async () => {

@@ -301,14 +301,20 @@ export class EvalsClient {
     baseExecutionId: string;
   }): Promise<BaselineExperiment | undefined> {
     try {
+      // metadata.ci.build_id stores the raw BUILDKITE_BUILD_ID without the "bk-" prefix.
+      const rawBuildId = baseExecutionId.startsWith('bk-')
+        ? baseExecutionId.slice(3)
+        : baseExecutionId;
+
       const response = await this.kbnClient.request({
         path: EVALS_EXPERIMENTS_URL,
         method: 'GET',
         query: {
           suite_id: suiteId,
+          build_id: rawBuildId,
           ...(branch != null && { branch }),
           page: 1,
-          per_page: 10,
+          per_page: 20,
         },
         headers: VERSIONED_HEADERS,
       });
