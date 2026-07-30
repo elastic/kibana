@@ -7,12 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isValidElement, type ReactElement } from 'react';
+import { EuiProvider } from '@elastic/eui';
+import { createElement, isValidElement, type ReactElement, type ReactNode } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { NULL_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
 
 const EMPTY_VALUE_CLASS = 'ffString__emptyValue';
 const ARRAY_HIGHLIGHT_CLASS = 'ffArray__highlight';
+
+export const renderReactNode = (node: ReactNode) =>
+  renderToStaticMarkup(createElement(EuiProvider, null, node))
+    .replace(/ css-[^"]+/g, '')
+    .replace(/&quot;/g, '"');
 
 /**
  * Asserts that a React element represents a null value display.
@@ -46,7 +52,7 @@ export const expectReactElementWithBlank = (element: React.ReactNode) => {
 export const expectReactElementAsArray = (element: React.ReactNode, expectedValues: string[]) => {
   expect(isValidElement(element)).toBe(true);
 
-  const html = renderToStaticMarkup(element as ReactElement);
+  const html = renderReactNode(element);
 
   const bracket = (char: string) => `<span class="${ARRAY_HIGHLIGHT_CLASS}">${char}</span>`;
   const expectedHtml = bracket('[') + expectedValues.join(`${bracket(',')} `) + bracket(']');

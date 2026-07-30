@@ -18,6 +18,7 @@ import { FieldFormat } from '../field_format';
 import type { ReactConvertFunction, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';
+import { emptyValueStyles } from '../field_format_styles';
 
 const numeralInst = numeral();
 
@@ -78,7 +79,11 @@ export abstract class NumeralFormat extends FieldFormat {
 
   reactConvert: ReactConvertFunction = (val) => {
     if (val == null || val === MISSING_TOKEN) {
-      return <span className="ffString__emptyValue">{NULL_LABEL}</span>;
+      return (
+        <span className="ffString__emptyValue" css={emptyValueStyles}>
+          {NULL_LABEL}
+        </span>
+      );
     }
     if (typeof val === 'object' && !Array.isArray(val)) {
       return asPrettyString(val);

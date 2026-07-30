@@ -7,18 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@emotion/jest';
+import { EuiProvider } from '@elastic/eui';
+import { render as renderComponent } from '@testing-library/react';
 import React from 'react';
-import ReactDOM from 'react-dom/server';
 import { highlightTags } from './highlight_tags';
 import { getHighlightReact } from './highlight_react';
 import type { FieldFormatHighlightTags } from '../../types';
+import { renderReactNode } from '../../test_utils';
 
 /** Render the ReactNode to a plain HTML string for easy assertion.
  * &quot; is decoded back to " since both are valid HTML and the difference is
  * an implementation detail of renderToStaticMarkup, not semantically meaningful.
  */
 function render(node: React.ReactNode): string {
-  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
+  return renderReactNode(node);
 }
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
@@ -52,6 +55,21 @@ describe('getHighlightReact', () => {
 
     test('highlights a single word at the start', () => {
       check('lorem ipsum dolor', [`${hl('lorem')} ipsum dolor`], `${mark('lorem')} ipsum dolor`);
+    });
+
+    test('underlines highlighted text', () => {
+      const { container } = renderComponent(
+        <EuiProvider>
+          {getHighlightReact('lorem ipsum', 'myField', {
+            highlight: { myField: [`${hl('lorem')} ipsum`] },
+          })}
+        </EuiProvider>
+      );
+
+      expect(container.querySelector('.ffSearch__highlight')).toHaveStyleRule(
+        'text-decoration',
+        'dotted underline'
+      );
     });
 
     test('highlights a single word in the middle', () => {

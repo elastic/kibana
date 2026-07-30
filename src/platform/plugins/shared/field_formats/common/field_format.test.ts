@@ -9,22 +9,20 @@
 
 /* eslint-disable max-classes-per-file -- needs TestFormat (generic test double) + ConvertOverrideFormat (tests textConvert override path, as used by AggsTermsFieldFormat) */
 
+import '@emotion/jest';
+import { EuiProvider, useEuiTheme } from '@elastic/eui';
+import { render, renderHook } from '@testing-library/react';
 import React from 'react';
-import ReactDOM from 'react-dom/server';
 import { constant } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 import { highlightTags } from './utils/highlight/highlight_tags';
 import type { FieldFormatParams, ReactContextTypeOptions, TextContextTypeOptions } from './types';
 import { NULL_LABEL } from '@kbn/field-formats-common';
-import { expectReactElementAsArray } from './test_utils';
+import { expectReactElementAsArray, renderReactNode } from './test_utils';
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
-const renderReact = (node: React.ReactNode) =>
-  ReactDOM.renderToStaticMarkup(React.createElement(React.Fragment, null, node)).replace(
-    /&quot;/g,
-    '"'
-  );
+const renderReact = (node: React.ReactNode) => renderReactNode(node);
 
 const getTestFormat = (
   _params?: FieldFormatParams,
@@ -157,6 +155,19 @@ describe('FieldFormat class', () => {
         const f = getTestFormat(undefined, (v) => String(v));
         expectReactElementAsArray(f.convertToReact(['<a>', '<b>']), ['&lt;a&gt;', '&lt;b&gt;']);
       });
+    });
+
+    test('styles missing values with the EUI theme', () => {
+      const f = getTestFormat();
+      const { result } = renderHook(() => useEuiTheme(), { wrapper: EuiProvider });
+      const { container } = render(
+        React.createElement(EuiProvider, null, f.convertToReact(undefined))
+      );
+
+      expect(container.querySelector('.ffString__emptyValue')).toHaveStyleRule(
+        'color',
+        result.current.euiTheme.colors.darkShade
+      );
     });
 
     describe('default convertToReact highlight support', () => {

@@ -7,12 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@emotion/jest';
+import { EuiProvider, useEuiTheme } from '@elastic/eui';
+import { render as renderComponent, renderHook } from '@testing-library/react';
 import React from 'react';
-import ReactDOM from 'react-dom/server';
 import { formatReactArray } from './format_react_array';
+import { renderReactNode } from '../test_utils';
 
 function render(node: React.ReactNode): string {
-  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
+  return renderReactNode(node);
 }
 
 const open = '<span class="ffArray__highlight">[</span>';
@@ -35,6 +38,18 @@ describe('formatReactArray', () => {
   });
 
   describe('multi-element arrays — single-line values', () => {
+    test('styles array punctuation with the EUI theme', () => {
+      const { result } = renderHook(() => useEuiTheme(), { wrapper: EuiProvider });
+      const { container } = renderComponent(
+        <EuiProvider>{formatReactArray(['a', 'b'], String)}</EuiProvider>
+      );
+
+      expect(container.querySelector('.ffArray__highlight')).toHaveStyleRule(
+        'color',
+        result.current.euiTheme.colors.mediumShade
+      );
+    });
+
     test('wraps two elements with one comma', () => {
       expect(render(formatReactArray(['a', 'b'], String))).toBe(`${open}a${comma} b${close}`);
     });
