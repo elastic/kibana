@@ -2792,7 +2792,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /src/platform/test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 /src/platform/test/functional/page_objects/management/indexpattern_field_editor_page.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/page_objects/management/saved_objects_page.ts @elastic/kibana-core
-/src/platform/test/functional/page_objects/embedded_console.ts @elastic/kibana-management
+/src/platform/test/functional/page_objects/embedded_console.ts @elastic/search-kibana
 /src/platform/test/functional/page_objects/console_page.ts @elastic/kibana-management
 /src/platform/test/functional/firefox/console.config.ts @elastic/kibana-management
 /src/platform/test/functional/apps/console/*.ts @elastic/kibana-management
