@@ -12,6 +12,9 @@ export const <%= connector.className %>: ConnectorSpec = {
   schema: z.object({}),
   actions: {},
   test: {
+    // enabled must be explicitly set to true, otherwise the "Test connector"
+    // button stays disabled in the UI even though a handler is defined.
+    enabled: true,
     handler: async () => ({ ok: true }),
   },
 };
