@@ -62,6 +62,17 @@ action you plan to implement, find the vendor's official API reference and confi
 - **Accepted value formats for "assign to" / "who" style fields**: don't assume convenience shorthands
   (like `"me"`) are valid API values just because they're common search-filter syntax — verify against
   the docs for the specific write endpoint you're calling.
+- **Structured field shapes (labels, tags, custom fields, metadata)**: don't default a field like `labels`
+  or `customFields` to `z.string()` (e.g. a comma-separated list) just because that's a common convention
+  elsewhere — check the vendor's actual example request body. Many APIs expect a JSON object/map (e.g.
+  `{"team": "backend", "priority": "high"}`) or an array of objects, not a delimited string, and will 500
+  or silently misparse a string sent where an object is expected.
+- **Compound-document / sideloading conventions**: if the vendor's response envelope follows JSON:API
+  (`data`/`attributes`/`relationships`/`included`) or a similar sparse-fieldset pattern, check whether
+  related objects are populated by default or require an explicit param (e.g. `?include=services,groups`,
+  GraphQL field selection). If required and omitted, relationship fields the output schema promises will
+  come back `null`/empty even though the API call itself succeeds with a 200 — this is easy to miss because
+  nothing errors, the data is just quietly missing.
 
 Cross-reference this research against the fields you're about to add `.describe()` text for — the
 description should state the *verified* format/constraint, not an assumed one.

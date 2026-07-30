@@ -91,6 +91,16 @@ actual documented behavior — flag them even without live access to the API, ba
   corrupt the request path. Check every `${...}` inside a URL template literal, including config values
   like an organization slug. This is easy to miss in review because the code "looks like" normal template
   interpolation, and easy to miss in tests that only exercise plain alphanumeric IDs.
+- **Structured field types (objects vs. delimited strings)**: Flag any `z.string()` input for a field
+  vendors commonly model as a key-value map or array — `labels`, `tags`, `customFields`, `metadata`.
+  Check the vendor's actual example request body rather than assuming a comma-separated-string convention;
+  sending a string where the API expects a JSON object typically produces a 500 or a silently-ignored field.
+- **JSON:API / compound-document relationships**: If the vendor's response envelope uses a JSON:API-style
+  `data`/`attributes`/`relationships`/`included` shape (or a similar sparse-fieldset/GraphQL selection
+  convention), check that handlers request the param needed to sideload any relationship the output schema
+  promises (e.g. `?include=services,groups`). Without it, those fields come back `null`/empty on a
+  successful 200 response — flag any handler returning a "flattened" relationship field with no
+  corresponding `include`/field-selection param in the request.
 
 ### LLM Descriptions and Skill Content
 

@@ -206,6 +206,13 @@ If tools failed (tool results contain `"status":"failed"`):
    - `Unexpected parameter` — the tool call passes a parameter the sub-action doesn't accept. Fix the action's Zod schema.
    - `Input should be 'X'` — a parameter value is invalid. Fix the action's input constraints.
    - Auth/credential errors — note this but don't count as code failure. Ask user to re-provide credentials.
+   - `404`/`Not found or unauthorized` on an action that **assigns, mentions, or otherwise targets a
+     specific user** (e.g. `assignIncidentUser`, add-watcher, notify) — before concluding the endpoint or
+     payload is wrong, check whether the target user ID belongs to the API key's own bound/service
+     account. Some vendors (e.g. Rootly) reject certain user-targeting operations for that synthetic
+     identity even though the ID format, payload shape, and endpoint are all otherwise correct. Retry with
+     a different, real human user's ID from the same org before treating this as a connector bug — if that
+     succeeds, the code is fine and this is just a property of the test data/account, not something to fix.
 3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 
