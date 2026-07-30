@@ -11,12 +11,9 @@ export const bootstrapRendererMock = jest.fn();
 export const registerBootstrapRouteMock = jest.fn();
 export const bootstrapRendererFactoryMock = jest.fn(() => bootstrapRendererMock);
 
-export const isRspackModeEnabledMock = jest.fn(() => false);
-
 jest.doMock('./bootstrap', () => ({
   registerBootstrapRoute: registerBootstrapRouteMock,
   bootstrapRendererFactory: bootstrapRendererFactoryMock,
-  isRspackModeEnabled: isRspackModeEnabledMock,
 }));
 
 export const getSettingValueMock = jest.fn();

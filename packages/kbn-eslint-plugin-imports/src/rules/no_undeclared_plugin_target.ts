@@ -98,7 +98,7 @@ const isTypeOnlyImport = (importer: Importer) => {
  *   NOT `common/other`). Bare plugin imports (empty target) never match.
  *
  * @see packages/kbn-optimizer/src/worker/bundle_remotes_plugin.ts (legacy equivalent)
- * @see packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts (build-time equivalent)
+ * @see packages/kbn-optimizer/src/config/create_external_plugin_config.ts (build-time equivalent)
  */
 export const NoUndeclaredPluginTargetRule: Rule.RuleModule = {
   meta: {

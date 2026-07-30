@@ -159,6 +159,6 @@ Keep `pageLoadAssetSize.pnd` lean — prefer a thin plugin entry over raising th
 Measure with:
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --filter pnd --dist --no-cache --no-examples
+node scripts/build_rspack_bundles.js --dist --no-cache
 # inspect …/pnd/target/public/metrics.json → "page load bundle size"
 ```

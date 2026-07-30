@@ -44,7 +44,7 @@ module.exports = (_, argv) => {
          * babel runtime helpers referenced from entry chunks
          * determined by running:
          *
-         *  node scripts/build_kibana_platform_plugins --dist --profile
+         *  node scripts/build_rspack_bundles --dist --profile
          *  node scripts/find_babel_runtime_helpers_in_use.js
          */
         '@babel/runtime/helpers/assertThisInitialized',

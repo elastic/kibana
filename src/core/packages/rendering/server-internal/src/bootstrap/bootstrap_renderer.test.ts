@@ -10,7 +10,6 @@
 import {
   renderTemplateMock,
   getPluginsBundlePathsMock,
-  getJsDependencyPathsMock,
   getRspackDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
@@ -62,12 +61,8 @@ describe('bootstrapRenderer', () => {
   let packageInfo: PackageInfo;
   let userSettingsService: ReturnType<typeof userSettingsServiceMock.createSetupContract>;
   let themeName$: BehaviorSubject<ThemeName>;
-  let kbnUseRspackBeforeEach: string | undefined;
 
   beforeEach(() => {
-    kbnUseRspackBeforeEach = process.env.KBN_USE_RSPACK;
-    delete process.env.KBN_USE_RSPACK;
-
     themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
     auth = httpServiceMock.createAuth();
     uiSettingsClient = uiSettingsServiceMock.createClient();
@@ -77,7 +72,6 @@ describe('bootstrapRenderer', () => {
 
     getPluginsBundlePathsMock.mockReturnValue(new Map());
     renderTemplateMock.mockReturnValue('__rendered__');
-    getJsDependencyPathsMock.mockReturnValue([]);
     getRspackDependencyPathsMock.mockReturnValue([]);
     uiSettingsClient.get.mockImplementation(getClientGetMockImplementation());
 
@@ -91,15 +85,8 @@ describe('bootstrapRenderer', () => {
   });
 
   afterEach(() => {
-    if (kbnUseRspackBeforeEach === undefined) {
-      delete process.env.KBN_USE_RSPACK;
-    } else {
-      process.env.KBN_USE_RSPACK = kbnUseRspackBeforeEach;
-    }
-
     getPluginsBundlePathsMock.mockReset();
     renderTemplateMock.mockReset();
-    getJsDependencyPathsMock.mockReset();
     getRspackDependencyPathsMock.mockReset();
     themeName$.complete();
   });
@@ -440,81 +427,18 @@ describe('bootstrapRenderer', () => {
     });
   });
 
-  it('calls getJsDependencyPaths with the correct parameters', async () => {
-    const pluginsBundlePaths = new Map<string, unknown>();
-
-    getPluginsBundlePathsMock.mockReturnValue(pluginsBundlePaths);
+  it('calls getRspackDependencyPaths and renders with the resulting dependencies', async () => {
+    getRspackDependencyPathsMock.mockReturnValue(['rspack-dep-a', 'rspack-dep-b']);
     const request = httpServerMock.createKibanaRequest();
 
-    await renderer({
-      request,
-      uiSettingsClient,
-    });
+    await renderer({ request, uiSettingsClient });
 
-    expect(getJsDependencyPathsMock).toHaveBeenCalledTimes(1);
-    expect(getJsDependencyPathsMock).toHaveBeenCalledWith(
-      '/base-path/buildShaShort/bundles',
-      pluginsBundlePaths
+    expect(getRspackDependencyPathsMock).toHaveBeenCalled();
+    expect(renderTemplateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        useRspack: true,
+        jsDependencyPaths: ['rspack-dep-a', 'rspack-dep-b'],
+      })
     );
-  });
-
-  it('calls renderTemplate with the correct parameters', async () => {
-    getJsDependencyPathsMock.mockReturnValue(['path-1', 'path-2']);
-
-    const request = httpServerMock.createKibanaRequest();
-
-    await renderer({
-      request,
-      uiSettingsClient,
-    });
-
-    expect(renderTemplateMock).toHaveBeenCalledTimes(1);
-    expect(renderTemplateMock).toHaveBeenCalledWith({
-      themeTagName: 'borealis',
-      colorMode: 'light',
-      jsDependencyPaths: ['path-1', 'path-2'],
-      publicPathMap: expect.any(String),
-    });
-  });
-
-  describe('when KBN_USE_RSPACK is enabled', () => {
-    beforeEach(() => {
-      process.env.KBN_USE_RSPACK = 'true';
-      getRspackDependencyPathsMock.mockReturnValue(['rspack-dep-a', 'rspack-dep-b']);
-      auth.get.mockReturnValue({
-        status: 'unauthenticated' as AuthStatus,
-        state: {},
-      });
-
-      renderer = bootstrapRendererFactory({
-        auth,
-        packageInfo,
-        uiPlugins,
-        baseHref: `/base-path/${packageInfo.buildShaShort}`,
-        themeName$,
-      });
-    });
-
-    afterEach(() => {
-      delete process.env.KBN_USE_RSPACK;
-    });
-
-    it('calls getRspackDependencyPaths and renderTemplate with useRspack', async () => {
-      const request = httpServerMock.createKibanaRequest();
-
-      await renderer({
-        request,
-        uiSettingsClient,
-      });
-
-      expect(getRspackDependencyPathsMock).toHaveBeenCalled();
-      expect(getJsDependencyPathsMock).not.toHaveBeenCalled();
-      expect(renderTemplateMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          useRspack: true,
-          jsDependencyPaths: ['rspack-dep-a', 'rspack-dep-b'],
-        })
-      );
-    });
   });
 });

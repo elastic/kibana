@@ -100,31 +100,6 @@ node scripts/perf_page_load.js compare-refs HEAD main --dist --throttle devtools
 
 ---
 
-### `compare-optimizers` — Legacy vs Rspack *(rspack-transition)*
-
-Run back-to-back benchmarks on the current working tree — first with the legacy Webpack optimizer, then with Rspack — and output a side-by-side comparison.
-
-```bash
-node scripts/perf_page_load.js compare-optimizers [--dist] [--throttle devtools] [--threshold 5]
-```
-
-| Flag | Description |
-|---|---|
-| `--dist` | Build dist bundles for each optimizer. |
-| `--throttle` | `provided` (default) or `devtools`. `devtools` requires `--dist`. |
-| `--threshold` | Regression threshold percentage (default: 5). |
-
-**Example:**
-
-```bash
-node scripts/perf_page_load.js compare-optimizers --dist --throttle devtools
-```
-
-> **Note:** This command is tagged `[rspack-transition]` and will be removed when the legacy
-> optimizer is fully deprecated. Legacy runs first to avoid stale shared-deps artifacts.
-
----
-
 ## Use cases
 
 ### Compare performance across two commits
@@ -174,7 +149,6 @@ node scripts/perf_page_load.js compare before.json after.json --threshold 3
 | Goal | Command |
 |---|---|
 | Single benchmark | `node scripts/perf_page_load.js run` |
-| Legacy vs Rspack | `node scripts/perf_page_load.js compare-optimizers` |
 | Commit A vs Commit B | `node scripts/perf_page_load.js compare-refs <A> <B>` |
 | HEAD vs a commit | `node scripts/perf_page_load.js compare-refs HEAD <commit>` |
 | HEAD vs base branch (PR) | `node scripts/perf_page_load.js compare-refs HEAD $(git merge-base HEAD origin/main)` |
@@ -203,12 +177,6 @@ Add `--dist` to any command to benchmark production bundles, and `--throttle dev
 Kibana emits `performance.mark('kbnLoad', { detail: 'phase_name' })` at key lifecycle points. The Lighthouse user-timings audit strips the `detail` property when building its table, so we bypass the audit and read directly from `artifacts.Trace.traceEvents` where Chrome serializes the full mark data including `args.data.detail`.
 
 ---
-
-## Environment variables
-
-| Variable | Description |
-|---|---|
-| `KBN_USE_RSPACK` | Set to `true` to use the Rspack optimizer. When unset, the legacy Webpack optimizer is used. Affects `run`, `compare-refs`, and which path `compare-optimizers` builds. |
 
 ## Pages benchmarked
 

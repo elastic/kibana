@@ -11,12 +11,8 @@
  * Maps a bundle URL basename (e.g. `discover.entry.js`, `plugin-discover.abc.js`)
  * to a stable logical label for Scout perf aggregation.
  *
- * Legacy webpack per-plugin bundles use `<id>.entry.js` / `<id>.chunk.*.js`.
- * Unified RSPack uses `plugin-<pluginId>.<hash>.js`, shared split chunks
+ * Rspack uses `plugin-<pluginId>.<hash>.js`, shared split chunks
  * (`shared-plugins.<hash>.js`), and `kibana.bundle.js`.
- *
- * [rspack-transition] When the legacy optimizer is removed, simplify branches
- * that only exist for legacy filenames (tracked in LEGACY_REMOVAL_CHECKLIST.md).
  */
 export function getLogicalBundlePluginLabel(fileName: string): string {
   const base = fileName.replace(/\.js$/i, '');
@@ -25,18 +21,6 @@ export function getLogicalBundlePluginLabel(fileName: string): string {
   const rspackPluginChunk = /^plugin-(.+)\.[a-f0-9]{8,}$/i.exec(base);
   if (rspackPluginChunk) {
     return rspackPluginChunk[1];
-  }
-
-  // Legacy per-plugin entry bundle
-  const legacyEntry = /^(.+)\.entry$/i.exec(base);
-  if (legacyEntry) {
-    return legacyEntry[1];
-  }
-
-  // Legacy async chunk: <pluginId>.chunk.<id>.js
-  const legacyChunk = /^(.+)\.chunk\./i.exec(base);
-  if (legacyChunk) {
-    return legacyChunk[1];
   }
 
   // RSPack entry shell (and any *.bundle.js one-segment name)

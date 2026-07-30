@@ -29,7 +29,7 @@ This case study outlines one way to identify the source of a large plugin bundle
 When loading Kibana, I saw the `cases` plugin bundle in the client was one of the largest.  I ran the build script with the `--profile` flag to [generate a webpack stats file](../client-performance.md):
 
 ```bash
-node scripts/build_kibana_platform_plugins.js --dist --profile --focus=console
+node scripts/build_rspack_bundles.js --dist --profile --profile-focus=console
 ```
 
 Then, I loaded the `stats.json` file in the [Webpack Bundle Analyzer](https://chrisbateman.github.io/webpack-visualizer/):

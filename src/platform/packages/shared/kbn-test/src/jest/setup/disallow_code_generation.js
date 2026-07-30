@@ -62,7 +62,7 @@ const ALLOWED_CALLERS = [
   /kbn-handlebars.*test/,
   // hmr_client.test uses new Function() to load a browser bundle with injected globals;
   // the bundle itself does not use code generation in production.
-  /kbn-rspack-optimizer.*hmr_client\.test/,
+  /kbn-optimizer.*hmr_client\.test/,
 ];
 
 // @kbn/handlebars probes for CSP unsafe-eval support by calling

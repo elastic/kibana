@@ -60,7 +60,7 @@ interface CiChecksResult {
 const CI_CHECKS = {
   build: {
     name: 'Build Kibana Distribution',
-    command: 'node scripts/build_kibana_platform_plugins',
+    command: 'node scripts/build_rspack_bundles',
     description: 'Build Kibana platform plugins',
   },
   quick_checks: {

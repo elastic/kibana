@@ -14,8 +14,8 @@ Use this workflow to keep limits stable by moving non-critical code out of the e
 2. Build dist metrics for the target plugin and record current `page load bundle size`.
 
 ```bash
-node scripts/build_kibana_platform_plugins --focus <pluginId> --dist --workers 4
-cat <pluginDir>/target/public/metrics.json
+node scripts/build_rspack_bundles --dist
+cat target/public/bundles/metrics.json
 ```
 
 3. If this is a regression investigation, compare plugin limits on branch vs upstream.
@@ -30,20 +30,20 @@ rg '^\\s{2}<pluginId>:' packages/kbn-optimizer/limits.yml
 1. Generate a profile build.
 
 ```bash
-node scripts/build_kibana_platform_plugins --focus <pluginId> --dist --profile --no-cache --workers 4
+node scripts/build_rspack_bundles --dist --profile --profile-focus <pluginId> --no-cache
 ```
 
 2. Find the entry chunk id and top modules in that chunk.
 
 ```bash
-entry_id=$(jq -r '.chunks[] | select((.names|index("<pluginId>")) != null) | .id' <pluginDir>/target/public/stats.json)
-jq -r --argjson cid "$entry_id" '.modules[] | select((.chunks|index($cid)) != null) | [.size, (.name // .identifier)] | @tsv' <pluginDir>/target/public/stats.json | sort -nr | head -40
+entry_id=$(jq -r '.chunks[] | select((.names|index("plugin-<pluginId>")) != null) | .id' target/public/bundles/stats.json)
+jq -r --argjson cid "$entry_id" '.modules[] | select((.chunks|index($cid)) != null) | [.size, (.name // .identifier)] | @tsv' target/public/bundles/stats.json | sort -nr | head -40
 ```
 
 3. Compare with upstream when the delta is unclear.
 
 ```bash
-jq -r .modules[].id <pluginDir>/target/public/stats.json | sort - > moduleids.txt
+jq -r .modules[].id target/public/bundles/stats.json | sort - > moduleids.txt
 # generate moduleids.txt on both branches and diff them
 ```
 
@@ -64,7 +64,7 @@ jq -r .modules[].id <pluginDir>/target/public/stats.json | sort - > moduleids.tx
 4. If a limit increase is required, use `--update-limits` (sets current size +15kb) and include findings in PR notes.
 
 ```bash
-node scripts/build_kibana_platform_plugins --focus <pluginId> --update-limits
+node scripts/build_rspack_bundles --update-limits
 ```
 
 ## 5) Validate changes
@@ -75,6 +75,6 @@ node scripts/build_kibana_platform_plugins --focus <pluginId> --update-limits
 4. If `check_changes.ts` fails due unrelated pre-existing files, call that out explicitly in PR notes.
 
 ```bash
-node scripts/build_kibana_platform_plugins --validate-limits --focus <pluginId>
-node scripts/build_kibana_platform_plugins --dist --watch --focus <pluginId>
+node scripts/build_rspack_bundles --validate-limits
+node scripts/build_rspack_bundles --dist --watch
 ```

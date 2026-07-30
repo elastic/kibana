@@ -14,7 +14,7 @@ user_activity:
 2. Start Kibana with examples:
 
 ```bash
-node scripts/build_kibana_platform_plugins --examples --test-plugins
+node scripts/build_rspack_bundles --examples --test-plugins
 yarn start --run-examples
 ```
 

@@ -5,49 +5,34 @@
  * 2.0.
  */
 
-/**
- * Validates Discover Scout perf bundle plugin labels for legacy webpack vs unified RSPack.
- * [rspack-transition] Collapse to RSPack-only when the legacy optimizer is removed.
- */
+const UNIFIED_BUNDLE_LABELS = [
+  'core',
+  'kibana',
+  'one_discover_shared_deps',
+  'rspack-chunk',
+  'shared-core',
+  'shared-misc',
+  'shared-packages',
+  'shared-plugins',
+  'shared-root-packages',
+  'shared-solution-packages',
+  'vendors',
+  'vendors-heavy',
+] as const;
+
 export function evaluateDiscoverBundlePluginAssertion(
-  loadedPluginNamesSorted: string[],
-  expectedPlugins: string[],
-  rspackOnlyBundleLabels: readonly string[]
+  loadedPluginNames: string[],
+  expectedPlugins: string[]
 ): { ok: true } | { ok: false; detail: string } {
-  const usesRspackBundles =
-    process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1';
-  const sortedExpected = [...expectedPlugins].sort((a, b) => a.localeCompare(b));
+  const allowed = new Set([...expectedPlugins, ...UNIFIED_BUNDLE_LABELS]);
+  const unexpected = loadedPluginNames.filter(
+    (name) => !allowed.has(name) && !name.startsWith('lazy')
+  );
 
-  if (usesRspackBundles) {
-    // In RSPack dist mode, only on-demand split chunks are captured during SPA
-    // navigation. Named plugin entry chunks (plugin-discover, etc.) are preloaded
-    // during bootstrap and not re-fetched. On-demand chunks get the aggregated
-    // 'rspack-chunk' label. Validate that every loaded label is either in the
-    // expected set, the RSPack-only allowlist, or a lazy-loaded named split chunk
-    // (e.g. lazy_application_dependencies, lazySiemMigrationsService).
-    const rspackAllowed = new Set([...expectedPlugins, ...rspackOnlyBundleLabels]);
-    const subsetOk = loadedPluginNamesSorted.every(
-      (name) => rspackAllowed.has(name) || name.startsWith('lazy')
-    );
-    if (subsetOk) {
-      return { ok: true };
-    }
-    return {
-      ok: false,
-      detail: `RSPack: unexpected labels found. Loaded=${JSON.stringify(
-        loadedPluginNamesSorted
-      )}, allowed=${JSON.stringify([...rspackAllowed])}`,
-    };
-  }
-
-  const legacyOk = loadedPluginNamesSorted.join('\0') === sortedExpected.join('\0');
-  if (legacyOk) {
-    return { ok: true };
-  }
-  return {
-    ok: false,
-    detail: `Legacy: expected ${JSON.stringify(sortedExpected)} got ${JSON.stringify(
-      loadedPluginNamesSorted
-    )}`,
-  };
+  return unexpected.length === 0
+    ? { ok: true }
+    : {
+        ok: false,
+        detail: `Unexpected labels found: ${JSON.stringify(unexpected)}`,
+      };
 }

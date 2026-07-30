@@ -36,9 +36,10 @@
     "mocha-multi-reporters",
     "mochawesome",
     "mochawesome-merge",
-    // nyc is invoked from shell scripts (.buildkite/scripts/steps/code_coverage/)
-    // and osquery's package.json scripts; knip can't trace shell usage.
+    // nyc and webpack-bundle-analyzer are invoked from Buildkite shell scripts,
+    // which knip cannot trace.
     "nyc",
+    "webpack-bundle-analyzer",
     // oxlint is invoked as a binary via procRunner in @kbn/lint-cli;
     // knip can't trace dynamic cmd invocations.
     "oxlint"

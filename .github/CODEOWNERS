@@ -98,7 +98,6 @@ packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-rspack-optimizer @elastic/kibana-operations
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
@@ -1452,7 +1451,6 @@ x-pack/solutions/workplaceai/test @elastic/workchat-eng
 # ops team isn't auto-requested as reviewer on every bump. A GitHub Actions
 # workflow (bundle-size-limits-comment.yml) flags increases ≥15% instead.
 packages/kbn-optimizer/limits.yml
-packages/kbn-rspack-optimizer/limits.yml
 
 # The #CC# prefix delineates Code Coverage,
 # used for the 'team' designator within Kibana Stats

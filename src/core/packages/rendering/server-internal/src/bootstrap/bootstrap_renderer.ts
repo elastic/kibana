@@ -23,7 +23,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-server-internal';
 import { getPluginsBundlePaths } from './get_plugin_bundle_paths';
-import { getJsDependencyPaths, getRspackDependencyPaths } from './get_js_dependency_paths';
+import { getRspackDependencyPaths } from './get_js_dependency_paths';
 import { renderTemplate } from './render_template';
 import { getBundlesHref } from '../render_utils';
 
@@ -51,14 +51,6 @@ interface RendererResult {
   etag: string;
 }
 
-/**
- * Check if RSPack mode is enabled via environment variable
- */
-export function isRspackModeEnabled(): boolean {
-  const v = process.env.KBN_USE_RSPACK;
-  return v === 'true' || v === '1';
-}
-
 export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   packageInfo,
   baseHref,
@@ -73,7 +65,6 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
     return authStatus !== 'unauthenticated';
   };
 
-  const useRspack = isRspackModeEnabled();
   const useHMR = !packageInfo.dist && process.env.KBN_HMR !== 'false';
   const isDist = packageInfo.dist;
 
@@ -105,16 +96,14 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
   // compiled into kibana.bundle.js and their directories may contain leftover
   // webpack bundles that must not be loaded separately.
   const externalPluginIds = new Set<string>();
-  if (useRspack) {
-    const externalPluginsDir = fromRoot('plugins') + Path.sep;
-    for (const [pluginId, { publicTargetDir }] of uiPlugins.internal.entries()) {
-      if (!publicTargetDir.startsWith(externalPluginsDir)) {
-        continue;
-      }
-      const standaloneBundle = Path.join(publicTargetDir, `${pluginId}.plugin.js`);
-      if (Fs.existsSync(standaloneBundle)) {
-        externalPluginIds.add(pluginId);
-      }
+  const externalPluginsDir = fromRoot('plugins') + Path.sep;
+  for (const [pluginId, { publicTargetDir }] of uiPlugins.internal.entries()) {
+    if (!publicTargetDir.startsWith(externalPluginsDir)) {
+      continue;
+    }
+    const standaloneBundle = Path.join(publicTargetDir, `${pluginId}.plugin.js`);
+    if (Fs.existsSync(standaloneBundle)) {
+      externalPluginIds.add(pluginId);
     }
   }
 
@@ -148,76 +137,47 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       isAnonymousPage,
     });
 
-    let body: string;
+    // Build script paths for external plugins using the same route scheme as bundle routes
+    const externalPluginScriptPaths = [...externalPluginIds].map((pluginId) => {
+      const { version } = uiPlugins.internal.get(pluginId)!;
+      return `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`;
+    });
 
-    if (useRspack) {
-      // Build script paths for external plugins using the same route scheme as bundle routes
-      const externalPluginScriptPaths = [...externalPluginIds].map((pluginId) => {
-        const { version } = uiPlugins.internal.get(pluginId)!;
-        return `${bundlesHref}/plugin/${pluginId}/${version}/${pluginId}.plugin.js`;
-      });
+    const chunkPaths = getAllChunkFilenames().map((f) => `${bundlesHref}/${f}`);
+    const rspackPaths = getRspackDependencyPaths(
+      bundlesHref,
+      bundlePaths,
+      externalPluginScriptPaths,
+      chunkPaths
+    );
 
-      const chunkPaths = getAllChunkFilenames().map((f) => `${bundlesHref}/${f}`);
+    const bundlesDir = `${bundlesHref}/`;
+    const publicPathMap = JSON.stringify({
+      core: bundlesDir,
+      'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
+      'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
+      'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
+      ...Object.fromEntries(
+        [...bundlePaths.entries()]
+          .filter(([pluginId]) => !externalPluginIds.has(pluginId))
+          .map(([pluginId]) => [pluginId, bundlesDir])
+      ),
+      ...Object.fromEntries(
+        [...externalPluginIds].map((pluginId) => {
+          const { version } = uiPlugins.internal.get(pluginId)!;
+          return [pluginId, `${bundlesHref}/plugin/${pluginId}/${version}/`];
+        })
+      ),
+    });
 
-      const rspackPaths = getRspackDependencyPaths(
-        bundlesHref,
-        bundlePaths,
-        externalPluginScriptPaths,
-        chunkPaths
-      );
-
-      const bundlesDir = `${bundlesHref}/`;
-      const publicPathMap = JSON.stringify({
-        core: bundlesDir,
-        'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
-        'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
-        'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
-        // Internal plugins use the unified bundles directory
-        ...Object.fromEntries(
-          [...bundlePaths.entries()]
-            .filter(([pluginId]) => !externalPluginIds.has(pluginId))
-            .map(([pluginId]) => [pluginId, bundlesDir])
-        ),
-        // External plugins use their own versioned bundle route
-        ...Object.fromEntries(
-          [...externalPluginIds].map((pluginId) => {
-            const { version } = uiPlugins.internal.get(pluginId)!;
-            return [pluginId, `${bundlesHref}/plugin/${pluginId}/${version}/`];
-          })
-        ),
-      });
-
-      body = renderTemplate({
-        colorMode,
-        themeTagName,
-        jsDependencyPaths: rspackPaths,
-        publicPathMap,
-        useHMR,
-        useRspack: true,
-      });
-    } else {
-      // Legacy mode - use __kbnBundles__ with DLLs
-      const jsDependencyPaths = getJsDependencyPaths(bundlesHref, bundlePaths);
-
-      // These paths should align with the bundle routes configured in
-      // src/optimize/bundles_route/bundles_route.ts
-      const publicPathMap = JSON.stringify({
-        core: `${bundlesHref}/core/`,
-        'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
-        'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
-        'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
-        ...Object.fromEntries(
-          [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
-        ),
-      });
-
-      body = renderTemplate({
-        colorMode,
-        themeTagName,
-        jsDependencyPaths,
-        publicPathMap,
-      });
-    }
+    const body = renderTemplate({
+      colorMode,
+      themeTagName,
+      jsDependencyPaths: rspackPaths,
+      publicPathMap,
+      useHMR,
+      useRspack: true,
+    });
 
     const hash = createHash('sha256');
     hash.update(body);
