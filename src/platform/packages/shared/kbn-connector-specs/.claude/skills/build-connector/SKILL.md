@@ -317,7 +317,13 @@ Tell the user something like the below template, listing the actual file paths t
 > 2. Try chatting with the agent in the Kibana UI
 > 3. Review the generated code and adjust as needed
 > 4. When satisfied, commit the code changes and open a PR — include the `## Validated` table from Task 12
->    in the PR description
+>    in the PR description, and add the `release_note:feature` and `Feature:Actions/ConnectorTypes` labels
 
 List the actual file paths that were created or modified during the process, and include the `## Validated`
 table compiled in Task 12 in your response so the user has it even if they open the PR themselves.
+
+If you open the PR yourself (via `gh pr create`), apply both labels as part of that same command or
+immediately after with `gh pr edit <number> --add-label "release_note:feature" --add-label "Feature:Actions/ConnectorTypes"`.
+`release_note:feature` surfaces the new connector in the condensed release notes; `Feature:Actions/ConnectorTypes`
+routes the PR to the right reviewers and keeps it discoverable alongside other connector-type work. Use these
+exact label names/casing — check `gh label list --repo elastic/kibana --search <name>` if unsure they still exist.

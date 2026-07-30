@@ -144,6 +144,8 @@ Report documentation issues alongside code issues.
   `✅ Pass` with no concrete scenario described. If live testing hasn't happened yet, every row should
   still be present, marked `⚠️ Not validated — needs manual verification` — that's acceptable, an
   entirely missing table is not.
+- **Labels**: The PR must have both `release_note:feature` and `Feature:Actions/ConnectorTypes` applied
+  (check with `gh pr view <number> --json labels`). Flag if either is missing.
 
 ### Naming and Conventions
 

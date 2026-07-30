@@ -187,6 +187,10 @@ exposes and whether it's been observed working. If you ran this skill standalone
 doesn't get skipped when the PR is written. See
 [reference/pr-validation-table.md](reference/pr-validation-table.md) for the exact format.
 
+The PR must also carry the `release_note:feature` and `Feature:Actions/ConnectorTypes` labels. If you open
+the PR yourself, add them with `gh pr create --label "release_note:feature" --label "Feature:Actions/ConnectorTypes" ...`
+(or `gh pr edit <number> --add-label ...` afterward). If a human opens the PR, remind them to add both.
+
 ## Important Notes
 
 - **Stop if architectural gaps emerge** — This skill is for adding connectors to the catalog, not for enhancing platform features
