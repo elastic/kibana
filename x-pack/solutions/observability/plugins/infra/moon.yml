@@ -138,6 +138,7 @@ dependsOn:
   - '@kbn/presentation-publishing'
   - '@kbn/inspector-plugin'
   - '@kbn/es-query-constants'
+  - '@kbn/scout-oblt'
 tags:
   - plugin
   - prod
@@ -150,6 +151,7 @@ fileGroups:
     - public/**/*
     - server/**/*
     - types/**/*
+    - test/scout/api/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
