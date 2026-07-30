@@ -158,7 +158,6 @@
     {
       "groupName": "@elastic/appex-qa dependencies",
       "matchDepNames": [
-        "callsites",
         "chance",
         "cheerio",
         "@types/chance",
@@ -1959,7 +1958,6 @@
         "@testing-library/dom",
         "@testing-library/jest-dom",
         "@testing-library/react",
-        "@testing-library/react-hooks",
         "@testing-library/user-event"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -2035,15 +2033,6 @@
     {
       "groupName": "react-window-infinite-loader",
       "matchDepNames": ["react-window-infinite-loader", "@types/react-window-infinite-loader"],
-      "reviewers": ["team:actionable-obs-team"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "redux-saga-testing",
-      "matchDepNames": ["redux-saga-testing"],
       "reviewers": ["team:actionable-obs-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["ci:all-cypress-suites", "Team:obs-ux-management"],
@@ -2150,7 +2139,8 @@
         "@aws-sdk/client-bedrock-agent-runtime",
         "@aws-sdk/client-bedrock-runtime",
         "@aws-sdk/client-kendra",
-        "@aws-sdk/credential-provider-node"
+        "@aws-sdk/credential-provider-node",
+        "google-auth-library"
       ],
       "reviewers": ["team:security-generative-ai"],
       "matchBaseBranches": ["main"],
@@ -2339,7 +2329,6 @@
       "matchDepNames": [
         "@types/http-proxy",
         "get-port",
-        "google-auth-library",
         "http-proxy",
         "http-proxy-agent",
         "https-proxy-agent",
@@ -2354,11 +2343,9 @@
       "groupName": "Response Ops misc dependencies",
       "matchDepNames": [
         "@types/stats-lite",
-        "@types/textarea-caret",
         "email-addresses",
         "murmurhash",
-        "stats-lite",
-        "textarea-caret"
+        "stats-lite"
       ],
       "reviewers": ["team:response-ops"],
       "matchBaseBranches": ["main"],
@@ -2400,14 +2387,8 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "Serve swagger docs",
-      "matchDepNames": [
-        "@types/express",
-        "express",
-        "swagger-jsdoc",
-        "swagger-ui-express",
-        "zod-to-json-schema"
-      ],
+      "groupName": "express",
+      "matchDepNames": ["@types/express", "express", "zod-to-json-schema"],
       "reviewers": ["team:obs-entities"],
       "matchBaseBranches": ["main"],
       "addLabels": ["team:obs-entities"],

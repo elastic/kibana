@@ -374,7 +374,7 @@ export const TopThreatHuntingLeads: React.FC<TopThreatHuntingLeadsProps> = ({
                     <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
                       <EuiSkeletonTitle size="xs" />
                       <EuiSpacer size="s" />
-                      <EuiSkeletonText lines={3} size="s" />
+                      <EuiSkeletonText lines={4} size="s" />
                     </EuiPanel>
                   </EuiFlexItem>
                 ))}

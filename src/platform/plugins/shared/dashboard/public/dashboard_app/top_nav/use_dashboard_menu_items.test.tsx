@@ -11,12 +11,18 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 import type { AppMenuPopoverItem } from '@kbn/core-chrome-app-menu-components';
 import type { ShareActionIntents } from '@kbn/share-plugin/public/types';
+import { openLazyFlyout } from '@kbn/presentation-util';
 
 import { dashboardContextWrapper } from '../../mocks';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { useDashboardMenuItems } from './use_dashboard_menu_items';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
+
+jest.mock('@kbn/presentation-util', () => ({
+  ...jest.requireActual('@kbn/presentation-util'),
+  openLazyFlyout: jest.fn(),
+}));
 
 describe('useDashboardMenuItems', () => {
   beforeEach(() => {
@@ -25,6 +31,35 @@ describe('useDashboardMenuItems', () => {
     jest
       .mocked(shareService!.availableIntegrations)
       .mockImplementation(() => [] as ShareActionIntents[]);
+  });
+
+  describe('Add panel', () => {
+    test('returns focus to the Add button when the flyout closes', () => {
+      const returnFocus = jest.fn();
+      const { result } = renderHook(
+        () =>
+          useDashboardMenuItems({
+            isLabsShown: false,
+            setIsLabsShown: jest.fn(),
+            maybeRedirect: jest.fn(),
+          }),
+        {
+          wrapper: dashboardContextWrapper({}),
+        }
+      );
+
+      result.current.editModeTopNavConfig.items
+        ?.find(({ id }) => id === 'add')
+        ?.run?.({
+          triggerElement: document.createElement('button'),
+          returnFocus,
+        });
+
+      const [{ returnFocus: restoreFocus }] = jest.mocked(openLazyFlyout).mock.calls[0];
+      restoreFocus?.();
+
+      expect(returnFocus).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Export', () => {

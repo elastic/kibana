@@ -28,7 +28,7 @@ export const getHistorySnapshotTaskId = (namespace: string): string =>
 
 interface RunHistorySnapshotTaskParams {
   taskInstance: { state: Record<string, unknown>; id: string };
-  abortController: AbortController;
+  signal: AbortSignal;
   fakeRequest: KibanaRequest | null | undefined;
   core: EntityStoreCoreSetup;
   logger: Logger;
@@ -36,7 +36,7 @@ interface RunHistorySnapshotTaskParams {
 
 async function runHistorySnapshotTask({
   taskInstance,
-  abortController,
+  signal,
   fakeRequest,
   core,
   logger,
@@ -65,7 +65,7 @@ async function runHistorySnapshotTask({
   });
 
   await historySnapshotClient.runHistorySnapshot({
-    abortSignal: abortController.signal,
+    abortSignal: signal,
   });
 
   return { state: taskInstance.state };
@@ -96,7 +96,7 @@ export function registerHistorySnapshotTask({
           }),
         },
       },
-      createTaskRunner: ({ taskInstance, abortController, fakeRequest }) => ({
+      createTaskRunner: ({ taskInstance, signal, fakeRequest }) => ({
         run: () =>
           wrapTaskRun({
             spanName: 'entityStore.task.history_snapshot.run',
@@ -108,7 +108,7 @@ export function registerHistorySnapshotTask({
             run: () =>
               runHistorySnapshotTask({
                 taskInstance,
-                abortController,
+                signal,
                 fakeRequest,
                 core,
                 logger,

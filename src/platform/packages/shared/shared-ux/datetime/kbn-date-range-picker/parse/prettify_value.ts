@@ -20,15 +20,14 @@ import { textToTimeRange } from './parse_text';
  * Simplifies a dateMath value string into a compact shorthand suitable for
  * display in the input field.
  *
- * - `now-7d/d to now`          → `-7d`
+ * - `now-7d/d to now`          → `-7d/d`
  * - `now to now+1d`            → `+1d`
- * - `now-30d/d to now-7d/d`    → `-30d to -7d/d`
+ * - `now-30d/d to now-7d/d`    → `-30d/d to -7d/d`
  * - `now/w to now`             → `now/w to now` (now + rounding only → unchanged)
  * - Natural language ("last 3 weeks") and absolute dates pass through unchanged.
  *
- * Rounding is only stripped from the **start** bound (the end bound keeps its
- * rounding intact) because start-bound rounding is controlled by the
- * `roundRelativeTime` setting.
+ * Rounding suffixes are always preserved: rounding policy belongs to the
+ * parser (the `roundRelativeTime` setting), not to this display layer.
  */
 
 // Matches a dateMath relative expression with an offset: optional "now", sign, digits, unit, optional rounding.
@@ -68,24 +67,12 @@ const prettifyAbsoluteDate = (bound: string, precision: TimePrecision = 'ms'): s
 };
 
 /**
- * Strips the `now` prefix and rounding suffix from a dateMath offset bound.
- * Returns `null` if the bound is not a relative offset expression
- * (bare `now`, `now/w`, absolute dates, natural language all return null).
+ * Strips the `now` prefix from a dateMath offset bound, preserving any
+ * rounding suffix. Returns `null` if the bound is not a relative offset
+ * expression (bare `now`, `now/w`, absolute dates, natural language all
+ * return null).
  */
-const prettifyStartBound = (bound: string): string | null => {
-  const match = bound.match(DATEMATH_OFFSET_RE);
-  if (!match) return null;
-
-  // first two values omitted on purpose
-  const [, , sign, count, unit] = match;
-  return `${sign}${count}${unit}`;
-};
-
-/**
- * Strips only the `now` prefix from a dateMath offset bound, keeping rounding.
- * Returns `null` if the bound is not a relative offset expression.
- */
-const prettifyEndBound = (bound: string): string | null => {
+const prettifyRelativeBound = (bound: string): string | null => {
   const match = bound.match(DATEMATH_OFFSET_RE);
   if (!match) return null;
 
@@ -154,8 +141,8 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
         if (presetLabel) return presetLabel;
       }
 
-      const prettyStart = prettifyStartBound(start);
-      const prettyEnd = prettifyEndBound(end);
+      const prettyStart = prettifyRelativeBound(start);
+      const prettyEnd = prettifyRelativeBound(end);
 
       // Both bounds are "now" (with or without rounding) — format any absolute dates
       if (!prettyStart && !prettyEnd) {
@@ -182,9 +169,9 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
     }
   }
 
-  // No delimiter found — try prettifying as a single dateMath expression (start-bound rules)
+  // No delimiter found — try prettifying as a single dateMath expression
   if (trimmed === 'now') return trimmed;
-  const prettySingle = prettifyStartBound(trimmed);
+  const prettySingle = prettifyRelativeBound(trimmed);
   if (prettySingle) return prettySingle;
 
   // Try formatting as an absolute ISO date
