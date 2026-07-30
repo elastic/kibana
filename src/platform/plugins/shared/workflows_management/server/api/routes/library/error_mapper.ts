@@ -8,25 +8,54 @@
  */
 
 import type { KibanaResponseFactory } from '@kbn/core/server';
+import { InstallFormValidationError, MissingInstallFormFieldError } from '@kbn/workflows-library';
 
 import {
   LibraryDisabledError,
   LibraryFetchError,
   LibraryNotFoundError,
 } from '../../../library/errors';
+import { handleRouteError } from '../utils/route_error_handlers';
 
 /**
  * Maps library-layer errors to HTTP responses. Kept separate from the
  * existing `handleRouteError` in `api/routes/utils/route_error_handlers.ts`
  * because library errors are a distinct family (no overlap in classes) and
  * the mapping decisions are local (e.g. `LibraryFetchError(reason='unavailable')`
- * → 503 with a tech-preview-friendly message).
+ * → 503 with a tech-preview-friendly message). Errors outside the family
+ * fall through to `handleRouteError` (the install route funnels rendered YAML
+ * into the shared create-workflow path, whose errors keep their usual mapping).
  */
 export function mapLibraryError(response: KibanaResponseFactory, error: unknown) {
   if (error instanceof LibraryDisabledError) {
     return response.customError({
       statusCode: error.statusCode,
       body: { message: error.message },
+    });
+  }
+
+  if (error instanceof InstallFormValidationError) {
+    // Field-level details travel under `attributes` (the standard error body
+    // strips other top-level fields) so the install UI can highlight rows.
+    return response.badRequest({
+      body: {
+        message: error.message,
+        attributes: { errors: error.errors },
+      },
+    });
+  }
+
+  if (error instanceof MissingInstallFormFieldError) {
+    return response.badRequest({
+      body: {
+        message: error.message,
+        attributes: {
+          errors: error.fields.map((field) => ({
+            field,
+            reason: 'Referenced by the template body but not declared in `install.form`.',
+          })),
+        },
+      },
     });
   }
 
@@ -46,10 +75,14 @@ export function mapLibraryError(response: KibanaResponseFactory, error: unknown)
     });
   }
 
+  if (error instanceof Error) {
+    return handleRouteError(response, error);
+  }
+
   return response.customError({
     statusCode: 500,
     body: {
-      message: `Internal server error: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Internal server error: ${String(error)}`,
     },
   });
 }
