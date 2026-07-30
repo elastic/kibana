@@ -330,7 +330,7 @@ export const KubernetesConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder'],
   },
 
   auth: {

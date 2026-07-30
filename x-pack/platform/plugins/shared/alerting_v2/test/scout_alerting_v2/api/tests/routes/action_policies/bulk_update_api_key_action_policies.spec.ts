@@ -94,6 +94,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest(
@@ -105,6 +106,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(400);
+        expect(response.body.code).toBe('BAD_REQUEST');
       }
     );
 
@@ -115,6 +117,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects an id over the maximum length', async ({ apiClient }) => {
@@ -124,6 +127,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects more than the maximum number of ids', async ({ apiClient }) => {
@@ -135,6 +139,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest(
