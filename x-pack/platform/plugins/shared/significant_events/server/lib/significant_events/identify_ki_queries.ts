@@ -9,8 +9,6 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ChatCompletionTokenCount, InferenceClient } from '@kbn/inference-common';
 import type { Streams } from '@kbn/streams-schema';
 import type { GeneratedSignificantEventQuery } from '@kbn/significant-events-schema';
-import { ensureMetadata } from '@kbn/streams-schema';
-import { QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import {
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
@@ -144,9 +142,7 @@ export async function identifyKIQueries(
       type: query.type,
       title: query.title,
       description: query.description,
-      esql: {
-        query: query.type === QUERY_TYPE_STATS ? query.esql : ensureMetadata(query.esql),
-      },
+      esql: { query: query.esql },
       severity_score: query.severity_score,
       evidence: query.evidence,
       replaces: query.replaces,
