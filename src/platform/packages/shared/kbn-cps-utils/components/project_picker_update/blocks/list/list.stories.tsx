@@ -19,11 +19,19 @@ export default {
 } satisfies Meta<typeof ProjectPickerList>;
 
 export const ProjectPickerListItemStory: StoryObj<
-  Pick<ProjectPickerStateProviderProps, 'availableProjects'> &
+  Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'> &
     ComponentProps<typeof ProjectPickerList>
 > = {
   name: 'ProjectPickerListItem',
+  argTypes: {
+    isReadOnly: {
+      control: {
+        type: 'boolean',
+      },
+    },
+  },
   args: {
+    isReadOnly: false,
     availableProjects: Array.from({ length: 10 }, () => ({
       _id: faker.string.uuid(),
       _type: faker.helpers.arrayElement(['security', 'observability', 'elasticsearch']),
@@ -33,8 +41,8 @@ export const ProjectPickerListItemStory: StoryObj<
       _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
     })),
   },
-  render: ({ availableProjects, ...props }) => (
-    <ProjectPickerStateProvider availableProjects={availableProjects}>
+  render: ({ availableProjects, isReadOnly, ...props }) => (
+    <ProjectPickerStateProvider availableProjects={availableProjects} isReadOnly={isReadOnly}>
       <ProjectPickerList {...props} />
     </ProjectPickerStateProvider>
   ),
