@@ -479,6 +479,13 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
   objects like alert-rule conditions or config maps) has the same unbounded-input DoS risk as a bare
   `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
   This also applies to string keys inside `z.array(z.record(...))`.
+- **Bound the collection size too, not just the string lengths inside it** — a `z.array()` needs `.max(N)`
+  on the array itself (e.g. `z.array(z.string().max(64)).max(50)` for a list of IDs), and a `z.record()`
+  needs an entry-count cap via `.refine()` since Zod has no built-in one:
+  `z.record(z.string().max(100), z.string().max(200)).refine((v) => Object.keys(v).length <= 50, { message: '...' })`.
+  Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
+  vector, and if the array is later joined into a query string, an oversized array also risks an oversized
+  upstream request.
 - **Require "at least one of" for optional-only update inputs** — if an action updates a resource and
   every field is `.optional()`, an empty/no-op call is a silent bug. Add `.refine((v) => v.fieldA !== undefined || v.fieldB !== undefined, { message: '...' })`
   to the schema.

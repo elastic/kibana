@@ -184,6 +184,16 @@ Report documentation issues alongside code issues.
   constraint to prevent DoS from oversized inputs. This is flagged by CodeQL. Common limits: 2000 for
   freeform queries, 1024 for paths/URLs, 200 for IDs/names, 50 for short tokens or enum-like strings.
   Also applies to strings inside `z.array(z.string())` and `z.record(z.string(), ...)` key types.
+- **Unbounded collection *sizes* in Zod schemas — a distinct bound from string length**: Bounding the
+  strings inside a `z.array()`/`z.record()` is not enough; the collection itself also needs a cap on how
+  many elements/entries it can hold. Flag any `z.array(...)` used as connector-execute input with no
+  `.max(N)` on the array (a sensible default is `.max(50)` for ID/name lists — tighten or loosen based on
+  what the vendor's own API accepts), and any `z.record(...)` with no cap on entry count (Zod has no
+  built-in entry-count bound — use `.refine((obj) => Object.keys(obj).length <= N, { message: ... })`).
+  This is easy to miss because the string-length bound on the *elements* looks like sufficient hardening
+  at a glance, but an array of 100,000 short, individually-valid strings is still an unbounded-input DoS
+  vector — especially if the array is later joined into a URL query string, since that also risks an
+  oversized upstream request.
 - **SSRF**: Any URL field in connector config or workflow action input (e.g. `base_url`, `endpoint`, `webhook_url`)
   must be validated. URLs should be allowlisted, restricted to HTTPS, or otherwise prevented from being user-controlled
   in a way that could trigger requests to internal/private hosts. Flag any case where a user-supplied URL flows
