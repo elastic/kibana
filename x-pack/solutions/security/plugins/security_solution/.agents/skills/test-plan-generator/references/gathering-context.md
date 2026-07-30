@@ -63,7 +63,7 @@ For each **Figma link**: use the Figma MCP. Extract component names and states, 
 The flow below is **metadata-first**:
 
 - `get_metadata` gives every structural fact a test plan needs — component names, hierarchy, node types — for typically 1–2 calls total per link.
-- `get_screenshot` gives visual verification when a scenario asserts on layout, section names, or CTAs. The default response is a short-lived URL plus a `curl` instruction (~300 bytes inline), so calls are effectively free in context terms. Fetch the PNG only when actual visual inspection is needed.
+- `get_screenshot` gives visual verification when a scenario asserts on layout, section names, or CTAs. The default response is a short-lived URL plus a `curl` instruction (~300 bytes inline), so a `get_screenshot` **call** itself is effectively free in context terms. **Actually opening the returned PNG** — required whenever a scenario leans on visual layout or on a node's *name* (see Step 3 and *Name-vs-content mismatch* below) — consumes real vision tokens. The Step 5 cap below counts **opened PNGs**, not URL-only calls.
 - `get_design_context` is reserved for the rare case where a test asserts on pixel-precise layout or exact CSS identifiers that neither the screenshot nor the metadata can supply. Prefer the other two tools by default.
 
 ### Step 1 — Parse the URL
@@ -85,27 +85,37 @@ For design-file URLs with a `nodeId`, call `get_metadata` **exactly once**. The 
 
 From that XML, extract three lists and hold them as the "Figma inventory" for the link:
 
-1. **Fetchable elements** — direct or nested children whose type is `frame`, `instance`, or `section`. These are the ones that map to real UI components (flyouts, panels, forms, etc.).
+1. **Fetchable elements** — direct or nested children whose type is `frame`, `instance`, `section`, `component`, or `component_set`. These are the ones that map to real UI components (flyouts, panels, forms, etc.). Include `component` and `component_set` because a Figma link may target a component definition directly rather than a frame instance of it — the metadata inventory would come back empty without them.
 2. **Leaf-shape elements** — `text`, `vector`, `rectangle` / `rounded-rectangle` / `ellipse` / `line` / `star` / `regular-polygon`. These are decorative or per-label; ignore them when writing scenarios, but count them if you need to explain to the user what a container holds.
 3. **Nested containers** — `section` or `canvas` nodes below the root. Note them but do **not** recurse into their children via more `get_metadata` calls unless a scenario explicitly requires it.
 
 The inventory alone is usually enough to write scenarios that assert on which flyouts / panels / states exist. Do **not** fan out to `get_design_context` at this step.
 
-**Special case — canvas root.** A `canvas` URL points at a whole Figma page and typically bundles dozens of unrelated frames. If the root is `canvas`, list the direct-child frames and **stop and ask** the user which are in scope before continuing. Do not build an inventory of the entire canvas.
+**Special case — canvas root, or oversized section root.** A `canvas` URL points at a whole Figma page and typically bundles dozens of unrelated frames; a large `section` root can do the same when a designer groups every state and variant of a screen under one section. Apply the same stop-and-ask in either case:
+
+- Root is `canvas` (regardless of child count), **or**
+- Root is `section` with **more than 20 fetchable children** (counted using the fetchable-element filter above — `frame` / `instance` / `section` / `component` / `component_set` — not raw XML children).
+
+In either case, list the direct-child fetchable elements and **stop and ask** the user which are in scope before continuing. Do not build an inventory of the entire canvas or oversized section — that is exactly the fan-out this flow is meant to avoid. Whichever children the user excludes must be surfaced per Step 6 (Sources Summary partial-catalogue status + Known Limitations entry).
 
 ### Step 3 — Add visual verification with `get_screenshot` only where needed
 
-Once scenarios are being drafted (Step 3 of the main workflow), some assertions need visual anchoring — for example *"the Overview tab is selected by default"*, *"the flyout body renders these sections in this order"*, or *"the footer shows an 'Add to chat' and a 'Take action' CTA"*.
+Once scenarios are being drafted (Step 3 of the main workflow), some assertions need visual anchoring. Fetch a screenshot in either of these two cases:
+
+- **Layout / order / CTA assertions** — e.g. *"the Overview tab is selected by default"*, *"the flyout body renders these sections in this order"*, *"the footer shows an 'Add to chat' and a 'Take action' CTA"*.
+- **Name-anchored assertions** — whenever a scenario cites a node's *name* to establish what it is (e.g. *"the Analyzer flyout shows…"*). Figma metadata reports the layer name a designer typed, not what the layer depicts, and a stale or repurposed name is invisible from metadata alone; opening the PNG is the only way to catch the mismatch. See *Name-vs-content mismatch* below.
 
 For each such assertion:
 
 1. Pick the smallest node in the inventory that contains the visual detail (typically a single flyout frame or a specific state instance).
-2. Call `get_screenshot` on that node. Default parameters are fine — the response is a URL, not an inline PNG.
-3. If the visual detail cannot be verified from the URL metadata alone (dimensions, aspect ratio), download the PNG via the `curl` instruction the tool returns and read it. Otherwise leave the URL in place — the URL is what will be linked from the Sources Summary.
+2. Call `get_screenshot` on that node. Default parameters are fine — the response is a URL plus a `curl` instruction, not an inline PNG. The call itself is effectively free in context terms.
+3. Download the PNG via the `curl` instruction and read it. This step **consumes vision tokens** and counts against the Step 5 `get_screenshot` cap — the cap is on **opened PNGs**, not URL-only calls. Leave the URL in the Sources Summary as the reader-facing preview (the URL is short-lived — see Step 6).
+
+The only case where step 3 above can be skipped is a strict geometry check that can be answered from the URL alone (dimensions, aspect ratio in headers). Do not skip it for anything that depends on what the image actually depicts — including any assertion that cites the node name.
 
 Do **not** call `get_screenshot` speculatively on every child in a container. Only call it where a scenario would otherwise be unverifiable.
 
-**Name-vs-content mismatch.** Figma metadata reports the layer name a designer typed, not what the layer actually depicts — designers sometimes rename or repurpose components without updating the label. If the downloaded PNG visibly does not match the node name (e.g. a frame called `Analyzer` renders as a Notes flyout), treat the mismatch as first-class signal:
+**Name-vs-content mismatch.** Figma metadata reports the layer name a designer typed, not what the layer actually depicts — designers sometimes rename or repurpose components without updating the label. This mismatch is invisible from metadata alone; catching it is precisely why step 3 above requires opening the PNG for name-anchored assertions. If the downloaded PNG visibly does not match the node name (e.g. a frame called `Analyzer` renders as a Notes flyout), treat the mismatch as first-class signal:
 
 1. Trust the screenshot, not the name. Write scenarios only from what the image shows.
 2. Do **not** write assertions grounded in the misleading name. In the `Analyzer` example, do not add analyzer-specific scenarios anchored on that node; either find a differently-named node that genuinely renders the analyzer or defer the scenario to Known Limitations.
@@ -130,7 +140,7 @@ To keep the agent's context healthy across the rest of Step 1 (parent issue, sub
 | Tool | Default per-session cap | Rationale |
 |---|---|---|
 | `get_metadata` | 3 | 1 per Figma link on the target + 1 for the parent's link + 1 spare. Nested-container recursion is not counted here — it should not happen. |
-| `get_screenshot` | 8 | Enough for the P0 flyout + a handful of P1 states + 1–2 error/empty states. |
+| `get_screenshot` | 8 opened PNGs | Enough for the P0 flyout + a handful of P1 states + 1–2 error/empty states. The cap is on **opened PNGs** (the vision-token cost), not on `get_screenshot` calls that only returned a URL. |
 | `get_design_context` | 2 | The escape hatch above. If a plan needs more than 2, the plan is probably asserting on the wrong things. |
 | `get_figjam` | 1 per FigJam link | FigJam is background context. |
 
@@ -184,7 +194,7 @@ Check the "Relationships" or "Parent issue" section in the sidebar. If a parent 
 
 1. Fetch using `gh issue view <number> --repo <owner>/<repo> --json number,title,body,labels,comments`. Fall back to GitHub MCP if unavailable.
 2. For each **image URL** found: fetch and analyze.
-3. For each **Figma link** found: apply the full [Figma](#figma) flow above (URL parsing → root node detection → tiered behaviour → Sources Summary/Known Limitations propagation). Parent epics often contain the most complete designs — treat as high-value context.
+3. For each **Figma link** found: apply the full [Figma](#figma) flow above (URL parsing → metadata inventory → targeted screenshots → Sources Summary / Known Limitations propagation). Parent epics often contain the most complete designs — treat as high-value context.
 4. Check comments for an existing test plan (body starts with `<!-- test-plan-generated -->`). If found, store as **parent test plan** — use it in Step 2 to understand what is already covered at the epic level.
 
 Constraints:

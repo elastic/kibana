@@ -300,7 +300,7 @@ The status cell should also include the (short-lived) screenshot URLs the Figma 
 
 Again, no Known Limitations entry is required — the intent was structural coverage and it was met.
 
-**Narrowed case — canvas or oversized section.** When the linked node is a `canvas` or a large `section`, Step 2 stops and asks the user which children are in scope. The un-selected children are then out of coverage and must be surfaced. Two entries appear together:
+**Narrowed case — canvas root, or oversized section root (>20 fetchable children).** When the linked node is a `canvas` (regardless of size) or a `section` root with more than 20 fetchable children, Step 2 stops and asks the user which children are in scope (see [`gathering-context.md`](gathering-context.md#figma)). The un-selected children are then out of coverage and must be surfaced. Two entries appear together:
 
 Sources Summary row:
 

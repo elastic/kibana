@@ -51,40 +51,56 @@ This step is critical. Without it, all GitHub API calls to `elastic` repositorie
 
 ---
 
-## Step 2 — Generate Your Figma Personal Access Token
+## Step 2 — Ensure Figma access
 
-1. Open [figma.com](https://figma.com) and log in with your `@elastic.co` account
-2. Click your profile avatar (top-left) → **Settings**
-3. Scroll down to **"Personal access tokens"**
-4. Click **"Generate new token"**, give it a name like `cursor-mcp`, and click **Generate**
-5. **Copy the token** — it will only be shown once
+Make sure you can sign in to [figma.com](https://figma.com) with your `@elastic.co` account and open the Kibana / Security Solution designs. If your workspace access is set up correctly, no personal access token is needed — the Figma MCP options in Step 3 both use your account session (OAuth or the local Figma Desktop session), not a manually generated token.
+
+> **If you had a `cursor-mcp` (or similarly named) personal access token from an earlier setup**, you can revoke it at [figma.com](https://figma.com) → profile avatar → **Settings** → **Personal access tokens**. It is no longer used by the flows below.
 
 ---
 
-## Step 3 — Configure the Figma MCP Server in Cursor
+## Step 3 — Enable the Figma MCP
 
-Cursor reads MCP configuration from a file called `mcp.json`. The Figma MCP allows the agent to fetch design context from linked Figma files.
+The Figma MCP allows the agent to fetch design context from linked Figma files. The test-plan-generator skill uses the **official Figma MCP tools** (`get_metadata`, `get_screenshot`, `get_design_context`, `get_figjam`), not the older Framelink `figma-developer-mcp` package — see the migration note at the bottom of this step if you had that configured.
+
+Pick one of the two options below.
 
 > **Note on the GitHub MCP:** The GitHub MCP is optional. In practice, the agent works more reliably using the `gh` CLI for all GitHub interactions (reading issues, posting comments, navigating sub-issues). When the GitHub MCP is enabled alongside the agent doing complex multi-step work, it can interfere with parallel tool calls and cause Cursor to hang. The recommended setup is to use `gh` CLI as the primary GitHub tool and leave the GitHub MCP disabled unless you have a specific reason to enable it.
 
-### Locate or create the file
+### Option A — Cursor Integrations (recommended)
 
-- **macOS / Linux:** `~/.cursor/mcp.json`
-- **Windows:** `%APPDATA%\Cursor\mcp.json`
+Cursor ships built-in support for the official Figma MCP. This is the easiest path — no config file editing, no local server to run.
 
-Open the file (create it if it doesn't exist) and paste the following, replacing the placeholder value with your actual Figma token:
-```json
-{
-  "mcpServers": {
-    "figma": {
-      "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR_FIGMA_TOKEN_HERE", "--stdio"]
-    }
-  }
-}
-```
+1. Open **Cursor Settings** (`⌘ ,` on macOS)
+2. Go to the **Integrations** section
+3. Find **Figma** and click **Connect**
+4. Sign in with your `@elastic.co` Figma account and authorize Cursor
+5. Verify: still in Cursor Settings, open the **MCP** tab and confirm Figma appears with a green status indicator. Hovering over it should show `get_metadata`, `get_screenshot`, `get_design_context`, and `get_figjam` among the available tools.
 
-If you do want to enable the GitHub MCP as well, add it alongside Figma:
+The integration is managed by Cursor — no `mcp.json` entry is required.
+
+### Option B — Figma Desktop local dev-mode MCP server (manual)
+
+Use this option if you prefer running Figma's own local MCP server (e.g. because you already keep Figma Desktop open, or your Cursor version does not expose the Integrations tab).
+
+1. **In Figma Desktop**: open **Preferences** and enable **"Enable local MCP Server"**. Figma exposes it at `http://127.0.0.1:3845/mcp`.
+2. Open (or create) Cursor's `mcp.json`:
+   - **macOS / Linux:** `~/.cursor/mcp.json`
+   - **Windows:** `%APPDATA%\Cursor\mcp.json`
+3. Add the Figma entry:
+   ```json
+   {
+     "mcpServers": {
+       "figma": {
+         "url": "http://127.0.0.1:3845/mcp"
+       }
+     }
+   }
+   ```
+4. Fully quit and reopen Cursor.
+5. Verify: Cursor Settings → **MCP** should list `figma` with a green status and expose the same official tools listed in Option A.
+
+If you also want to enable the GitHub MCP (optional — see the note above), add it alongside Figma:
 ```json
 {
   "mcpServers": {
@@ -96,30 +112,26 @@ If you do want to enable the GitHub MCP as well, add it alongside Figma:
       }
     },
     "figma": {
-      "command": "npx",
-      "args": ["-y", "figma-developer-mcp", "--figma-api-key=YOUR_FIGMA_TOKEN_HERE", "--stdio"]
+      "url": "http://127.0.0.1:3845/mcp"
     }
   }
 }
 ```
 
-> **Why this approach?**
->
-> - **Figma** uses the `figma-developer-mcp` package, which is the officially recommended package for Cursor (optimised for code generation from designs). The token is passed as a CLI argument — not as an environment variable — because that is how this package expects it. The older `@figma/mcp-server` package does not exist, and `@modelcontextprotocol/server-figma` has been deprecated.
->
-> - **GitHub MCP** uses a remote HTTP server hosted by GitHub — no local installation needed. The older `@modelcontextprotocol/server-github` npm package was deprecated in April 2025. This MCP is optional — see the note above.
+### Migrating from the older Framelink setup
 
-### Save the file and restart Cursor
+Earlier versions of this guide asked you to install the Framelink `figma-developer-mcp` npm package via `npx`. That package exposes different tools (`get_figma_data`, `download_figma_images`), which the test-plan-generator skill no longer calls — the metadata-first Figma flow in [`references/gathering-context.md`](../../../.agents/skills/test-plan-generator/references/gathering-context.md#figma) relies on the official tools listed above. If your `mcp.json` still contains an entry like:
 
-After saving, fully quit and reopen Cursor. The MCP servers start automatically on launch.
+```json
+"figma": {
+  "command": "npx",
+  "args": ["-y", "figma-developer-mcp", "--figma-api-key=…", "--stdio"]
+}
+```
 
-### Verify the MCPs are connected
+remove that entry before enabling Option A (or replace it with the Option B entry above). Otherwise Cursor will connect to Framelink's server, the skill's Figma calls will fail with "tool not found", and the setup will silently fall back to metadata-less scenarios.
 
-1. Open Cursor Settings → **MCP** tab
-2. You should see `figma` listed with a green status indicator
-3. Hover over the `figma` entry — you should see 2 available tools listed
-
-> If a server shows as disconnected, double-check the token values and that the JSON has no syntax errors. Use [jsonlint.com](https://jsonlint.com) to validate if needed.
+> If a server shows as disconnected in Cursor Settings → MCP, double-check the token/URL values and that the JSON in `mcp.json` has no syntax errors. Use [jsonlint.com](https://jsonlint.com) to validate if needed.
 
 ---
 
@@ -171,22 +183,24 @@ The skill and its reference files were added to the repository by the Engineerin
 The files live at:
 ```
 x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/
-├── SKILL.md                              # Agent instructions
+├── SKILL.md                                        # Agent instructions
 ├── references/
-│   ├── common-mistakes.md                # 8 common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
-│   ├── document-structure.md             # Test plan template, required sections, the Pending work pattern, and the Issue Clarity Assessment block
-│   ├── draft-coherence-review.md         # Holistic end-to-end draft review (D1–D9 document coherence + S1–S8 source fidelity); run on the assembled draft before saving
-│   ├── example-test-plan.md              # Fully-worked end-to-end example for a UI feature with a linked PR
-│   ├── example-test-plan-backend.md      # Sibling example for a backend / parser feature without UI and without a linked PR (synthetic issue numbers)
-│   ├── gathering-context.md              # Step 1 in detail: gh CLI commands, URL handling, images, Figma, sub-issues, PRs, test catalog, AC origin tagging, orphan-PR handling
-│   ├── issue-clarity-assessment.md       # Rubric, 5 dimensions, grading anchors, per-issue + combined readability scoring, Coverage Ratio (with the no-PR boundary case), stop-and-ask gate, two worked examples
-│   ├── mode-generate.md                  # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
-│   ├── mode-update.md                    # Incremental update flow with PR re-read, Issue Clarity Assessment re-evaluation, and full-document coherence review
-│   ├── optional-scenarios.md             # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities
-│   ├── output-formats.md                 # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout
-│   └── security-test-directories.md      # Map of existing test locations in the repo
+│   ├── common-mistakes.md                          # 8 common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
+│   ├── critical-workflows.md                       # File-lookup convention that routes the skill to the team-owned map below when generating scenarios that touch a Security Solution area
+│   ├── critical-workflows-security-solution.md     # Security Solution team's list of critical workflows and impact-based priority rules (P0 / P1) used to raise scenario priorities beyond the default P2
+│   ├── document-structure.md                       # Test plan template, required sections, the Pending work pattern, and the Issue Clarity Assessment block
+│   ├── draft-coherence-review.md                   # Holistic end-to-end draft review (D1–D9 document coherence + S1–S8 source fidelity); run on the assembled draft before saving
+│   ├── example-test-plan.md                        # Fully-worked end-to-end example for a UI feature with a linked PR, including the Figma metadata-first variants
+│   ├── example-test-plan-backend.md                # Sibling example for a backend / parser feature without UI and without a linked PR (synthetic issue numbers)
+│   ├── gathering-context.md                        # Step 1 in detail: gh CLI commands, URL handling, images, Figma (metadata-first flow + session budget), sub-issues, PRs, test catalog, AC origin tagging, orphan-PR handling
+│   ├── issue-clarity-assessment.md                 # Rubric, 5 dimensions, grading anchors, per-issue + combined readability scoring, Coverage Ratio (with the no-PR boundary case), stop-and-ask gate, two worked examples
+│   ├── mode-generate.md                            # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
+│   ├── mode-update.md                              # Incremental update flow with PR re-read, Issue Clarity Assessment re-evaluation, and full-document coherence review
+│   ├── optional-scenarios.md                       # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities, critical-workflows pointer
+│   ├── output-formats.md                           # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout, per-scenario Execution status block, token usage marker
+│   └── security-test-directories.md                # Map of existing test locations in the repo
 └── scripts/
-    └── publish_test_plan.sh              # Deterministic publish step (invoked in Step 4)
+    └── publish_test_plan.sh                        # Deterministic publish step (invoked in Step 4)
 ```
 
 > **Why a skill and not a Cursor rule?** Skills are the current standard for extending AI agents in Kibana, agreed by Kibana tech leads and the AI guild. They are more efficient than rules (loaded on demand, not on every agent session), portable across agents, and version-controlled like any other code.
@@ -268,13 +282,17 @@ Your GitHub token is not authorized for the Elastic organization. Go to [github.
 
 The GitHub MCP is optional — the agent uses `gh` CLI as the primary method for all GitHub interactions. If you have enabled the GitHub MCP and it shows as disconnected, check that the `mcp.json` entry uses `"type": "http"` and the URL `https://api.githubcopilot.com/mcp/`. Ensure your GitHub token is correctly placed in the `Authorization` header value (after `Bearer `). Fully quit and reopen Cursor after any changes to `mcp.json`. If you continue to have issues, simply disable the GitHub MCP and rely on `gh` CLI — the agent works more reliably that way.
 
-### Figma MCP not connecting or "package not found"
+### Figma MCP not connecting
 
-Make sure you are using `figma-developer-mcp` as the package name — not `@figma/mcp-server` or `@modelcontextprotocol/server-figma` (both are incorrect or deprecated). The token must be passed as a CLI argument in the `args` array (e.g., `--figma-api-key=YOUR_TOKEN`), not as an environment variable. See Step 3 for the exact configuration.
+Both Step 3 options (Cursor Integrations, or Figma Desktop's local dev-mode MCP server) result in a connection Cursor shows in **Cursor Settings → MCP**. If that entry is red / disconnected:
+
+- **Option A (Cursor Integrations):** open Cursor Settings → **Integrations** → **Figma** and re-run **Connect**. Make sure you are signed in with your `@elastic.co` Figma account. Fully quit and reopen Cursor after connecting.
+- **Option B (manual `mcp.json`):** confirm Figma Desktop is running with **"Enable local MCP Server"** turned on in Preferences, and that `mcp.json` points at `http://127.0.0.1:3845/mcp` with no trailing typos. Validate the JSON via [jsonlint.com](https://jsonlint.com). Fully quit and reopen Cursor after edits.
+- **If you followed an older version of this guide** and installed Framelink's `figma-developer-mcp` npm package via `npx`, remove that entry from `mcp.json` — the skill no longer calls Framelink's tools and Cursor will surface a "tool not found" style error when the skill runs. See the migration note at the bottom of Step 3.
 
 ### "Cannot read Figma file"
 
-Make sure the Figma file is shared with your `@elastic.co` account. The token can only access files your account can view.
+Make sure the Figma file is shared with your `@elastic.co` account and that whichever Figma MCP option you chose in Step 3 is using that account. The MCP can only access files your account can view — Option A via the OAuth session you connected in Cursor Settings, Option B via the account currently signed in to Figma Desktop.
 
 ### The agent says it cannot connect to GitHub and falls back to `gh` CLI
 
