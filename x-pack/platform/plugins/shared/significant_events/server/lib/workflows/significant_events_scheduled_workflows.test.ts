@@ -54,9 +54,22 @@ const getParsedWorkflowYaml = (id: string, values: Record<string, unknown>): Par
   return parse(definition.yamlTemplate(values)) as ParsedWorkflow;
 };
 
+/**
+ * Workflows carrying the daily run-quota gate are templated on their limits, so
+ * they are rendered with representative values rather than read as static YAML.
+ */
+const RUN_QUOTA_VALUES = {
+  runQuotaEnabled: true,
+  runDailyLimit: 20,
+  runQuotaTimeZone: 'UTC',
+};
+
 const getParsedStaticWorkflowYaml = (id: string): ParsedWorkflow => {
   const definition = getManagedWorkflowDefinition(id);
-  if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
+  if (definition && typeof definition.yamlTemplate === 'function') {
+    return parse(definition.yamlTemplate(RUN_QUOTA_VALUES)) as ParsedWorkflow;
+  }
+  if (!definition || typeof definition.yaml !== 'string') {
     throw new Error(`Managed workflow definition ${id} is missing yaml`);
   }
   return parse(definition.yaml) as ParsedWorkflow;
@@ -177,7 +190,9 @@ describe('scheduled Significant Events managed workflows', () => {
     const discover = findStep(drainLoop?.steps ?? [], 'discover');
     expect(discover?.with).toEqual({
       'workflow-id': SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
-      inputs: { detectionBatchMax: 7 },
+      // The root origin is forwarded so the child's run-quota gate can tell an
+      // automated pass from one a person started.
+      inputs: { detectionBatchMax: 7, runOrigin: '{{ execution.triggeredBy }}' },
     });
   });
 

@@ -66,7 +66,11 @@ describe('significant events fair batch selection', () => {
     expect(backlog?.if).toBeUndefined();
     expect(JSON.stringify(backlog?.with?.filter)).toContain('written_rule_uuids');
     expect(discovery.steps.some(({ name }) => name === 'get_rule_backlog')).toBe(false);
-    expect(discovery.steps.some(({ if: stepIf }) => Boolean(stepIf))).toBe(false);
+    // Step-level `if` is stripped on elasticsearch.* schemas, so those steps must
+    // never rely on it. Other step types (the run-quota gate's workflow.output) may.
+    expect(
+      discovery.steps.some(({ type, if: stepIf }) => type.startsWith('elasticsearch.') && stepIf)
+    ).toBe(false);
   });
 
   it('reports hasWork from the batch size so the drain loop can continue without a queue count', () => {

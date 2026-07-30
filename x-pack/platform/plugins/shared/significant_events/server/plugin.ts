@@ -27,6 +27,12 @@ import {
 } from './lib/maintenance/maintenance_service';
 import { createMaintenanceSystemRequest } from './lib/maintenance/system_request';
 import {
+  createRunQuotaService,
+  getRunQuotaSettingsSavedObjectType,
+  initializeRunLedgerTemplate,
+  type RunQuotaService,
+} from './lib/run_quotas';
+import {
   createManagedWorkflowsInstaller,
   type ManagedWorkflowsInstaller,
 } from './lib/workflows/setup/managed_workflows_installer';
@@ -103,6 +109,7 @@ export class SignificantEventsPlugin
   private streamsKIsOnboardingClient?: SignificantEventsKIsOnboardingClient;
   private managedWorkflowsInstaller?: ManagedWorkflowsInstaller;
   private maintenanceService?: SignificantEventsMaintenanceService;
+  private runQuotaService?: RunQuotaService;
 
   constructor(context: PluginInitializerContext) {
     this.isDev = context.env.mode.dev;
@@ -124,6 +131,7 @@ export class SignificantEventsPlugin
 
     core.savedObjects.registerType(getRelayAppConnectionSavedObjectType());
     core.savedObjects.registerType(getSignificantEventsMaintenanceStateSavedObjectType());
+    core.savedObjects.registerType(getRunQuotaSettingsSavedObjectType());
 
     this.ebtTelemetryService.setup(core.analytics);
 
@@ -337,6 +345,16 @@ export class SignificantEventsPlugin
       getScopedClients: this.getScopedClients,
     });
 
+    // Daily run limits are baked into the gated workflow definitions at install
+    // time, so a limit change has to reinstall them to take effect.
+    this.runQuotaService = createRunQuotaService({
+      logger: this.logger,
+      server: this.server,
+      onSettingsChanged: async () => {
+        await this.managedWorkflowsInstaller?.install();
+      },
+    });
+
     registerRoutes({
       repository: significantEventsRouteRepository,
       dependencies: {
@@ -348,6 +366,7 @@ export class SignificantEventsPlugin
         significantEventsScheduledWorkflowsService,
         workflowClients,
         maintenanceService: this.maintenanceService,
+        runQuotaService: this.runQuotaService,
         getSpaceId: async (request: KibanaRequest) => {
           const [, pluginsStart] = await core.getStartServices();
           return pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -402,12 +421,14 @@ export class SignificantEventsPlugin
     // so a runtime flag flip can never close the reconciliation window with a partial set (which
     // would prune the owner's other workflows). Created here so the availability path below reuses
     // the same instance.
-    if (plugins.workflowsExtensions) {
+    if (plugins.workflowsExtensions && this.runQuotaService) {
       const { workflowsExtensions } = plugins;
+      const { runQuotaService } = this;
       this.managedWorkflowsInstaller = createManagedWorkflowsInstaller({
         getClient: () =>
           workflowsExtensions.initManagedWorkflowsClient(SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER),
         isAvailable,
+        getRunQuotaSettings: () => runQuotaService.getSettings(),
         logger: this.logger,
       });
     }
@@ -547,6 +568,13 @@ export class SignificantEventsPlugin
       {
         name: 'knowledge indicators template',
         run: initializeKnowledgeIndicatorsTemplate({ esClient, logger: this.logger }),
+      },
+      {
+        // Must exist before the first gated workflow run: the gate writes its
+        // ledger entry with the workflow caller's credentials, which cannot
+        // create an index template.
+        name: 'run ledger template',
+        run: initializeRunLedgerTemplate({ esClient, logger: this.logger }),
       },
     ];
 

@@ -70,10 +70,16 @@ describe('StreamsKIsOnboardingClient', () => {
   describe('concurrency key sync with onboarding YAML', () => {
     it('buildConcurrencyKey produces keys that match the YAML concurrency template', () => {
       const definition = getManagedWorkflowDefinition(SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID);
-      expect(definition).toBeDefined();
-      expect(definition!.yaml).toBeDefined();
+      // Templated on its daily run limit, so the YAML only exists rendered.
+      expect(typeof definition?.yamlTemplate).toBe('function');
 
-      const parsed = parse(definition!.yaml!) as {
+      const parsed = parse(
+        definition!.yamlTemplate!({
+          runQuotaEnabled: true,
+          runDailyLimit: 5,
+          runQuotaTimeZone: 'UTC',
+        })
+      ) as {
         settings: { concurrency: { key: string } };
       };
       const yamlTemplate = parsed.settings.concurrency.key;

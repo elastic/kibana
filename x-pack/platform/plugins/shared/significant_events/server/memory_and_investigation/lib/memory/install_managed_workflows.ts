@@ -7,15 +7,24 @@
 
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
+import type { RunQuotaSettings } from '../../../../common';
+import { runQuotaValuesFor } from '../../../lib/run_quotas/budget_groups';
 import { MEMORY_WORKFLOW_IDS } from '../../../lib/maintenance/managed_workflow_targets';
 
 export const installMemoryWorkflows = async ({
   client,
+  runQuotaSettings,
 }: {
   client: PluginScopedManagedWorkflowsApi;
+  runQuotaSettings: RunQuotaSettings;
 }): Promise<void> => {
   const results = await Promise.allSettled(
-    MEMORY_WORKFLOW_IDS.map((id) => client.install(id, { spaceId: GLOBAL_WORKFLOW_SPACE_ID }))
+    MEMORY_WORKFLOW_IDS.map((id) =>
+      client.install(id, {
+        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        values: runQuotaValuesFor(runQuotaSettings, id),
+      })
+    )
   );
 
   const failures = results.flatMap((result, index) =>

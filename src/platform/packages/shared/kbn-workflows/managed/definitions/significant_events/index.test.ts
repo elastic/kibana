@@ -36,7 +36,14 @@ const requireStep = (workflow: ParsedWorkflow, name: string): WorkflowStep => {
   return step;
 };
 
-const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWorkflow;
+// Discovery carries the daily run-quota gate, so its YAML only exists rendered.
+const discovery = parse(
+  SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yamlTemplate({
+    runQuotaEnabled: true,
+    runDailyLimit: 20,
+    runQuotaTimeZone: 'UTC',
+  })
+) as ParsedWorkflow;
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {

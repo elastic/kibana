@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderRunQuotaGate, type SignificantEventsRunQuotaTemplateValues } from './run_quota_gate';
 import DETECTION_YAML from './significant_events/detection.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
@@ -40,14 +41,17 @@ export const SIGNIFICANT_EVENTS_DETECTION_WORKFLOW = {
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;
 
+// Templated because it carries the daily run-quota gate: the limit has to be
+// baked in at install time, so the significant_events plugin reinstalls this
+// workflow whenever the detection budget changes.
 export const SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW_ID,
   pluginId: 'significantEvents',
   version: 14,
   billable: false,
-  yaml: DISCOVERY_YAML,
+  yamlTemplate: (values) => renderRunQuotaGate(DISCOVERY_YAML, values),
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
+} as const satisfies ManagedWorkflowDefinition<SignificantEventsRunQuotaTemplateValues>;
 
 export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW = {
   id: SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID,

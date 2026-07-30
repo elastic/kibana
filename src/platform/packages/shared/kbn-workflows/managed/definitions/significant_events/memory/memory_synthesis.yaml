@@ -21,7 +21,90 @@ tags:
 triggers:
   - type: manual
 
+consts:
+  RUN_LEDGER_INDEX: ".significant_events-runs"
+  RUN_BUDGET_GROUP: "memory"
+  RUN_ENGINE: "context"
+  RUN_QUOTA_ENABLED: __RUN_QUOTA_ENABLED__
+  RUN_DAILY_LIMIT: __RUN_DAILY_LIMIT__
+  RUN_QUOTA_TIME_ZONE: "__RUN_QUOTA_TIME_ZONE__"
+
 steps:
+  # -----------------------------------------------------------------------
+  # Daily run-quota gate. The four memory workflows share one counter: they are
+  # siblings (none invokes another), so one budget covers all memory upkeep.
+  # Scheduled runs stop here once it is used up for the day; synthesis started
+  # from the UI always runs. See `server/lib/run_quotas` in the significant_events
+  # plugin.
+  # -----------------------------------------------------------------------
+  - name: quota_resolve_origin
+    type: data.set
+    with:
+      # No workflow invokes this one, so its own trigger is the root origin.
+      runOrigin: "{{ execution.triggeredBy }}"
+
+  - name: quota_count_runs
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.RUN_LEDGER_INDEX }}/_count"
+      body:
+        query:
+          bool:
+            filter:
+              - term:
+                  budget_group: "{{ consts.RUN_BUDGET_GROUP }}"
+              - term:
+                  outcome: "admitted"
+              - range:
+                  "@timestamp":
+                    gte: "now/d"
+                    time_zone: "{{ consts.RUN_QUOTA_TIME_ZONE }}"
+    on-failure:
+      continue: true
+
+  - name: quota_evaluate
+    type: data.set
+    with:
+      # Fail open on an unreadable ledger: a missing count must not stall the pipeline.
+      quotaUsed: "${{ steps.quota_count_runs.output.count | default: 0 }}"
+      # Fail closed on an unknown origin: only these three mean a person asked for
+      # the run. Keep in sync with HUMAN_RUN_ORIGINS in the significant_events plugin.
+      quotaAutomated: '${{ variables.runOrigin != "manual" and variables.runOrigin != "sigevents-investigation-ui" and variables.runOrigin != "significant-events-memory-ui" }}'
+
+  - name: quota_decide
+    type: data.set
+    with:
+      quotaRefused: "${{ consts.RUN_QUOTA_ENABLED and steps.quota_evaluate.output.quotaAutomated and steps.quota_evaluate.output.quotaUsed >= consts.RUN_DAILY_LIMIT }}"
+
+  # Recorded before any work starts, so a run that later fails still consumed
+  # budget. Refused runs are recorded too — as `refused`, which the counter
+  # excludes — so a day spent at the cap does not inflate its own usage.
+  # `refresh=wait_for` makes an admitted run visible to the next gate's count.
+  - name: quota_record_run
+    type: elasticsearch.request
+    with:
+      method: POST
+      path: "/{{ consts.RUN_LEDGER_INDEX }}/_doc?refresh=wait_for"
+      body:
+        "@timestamp": '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
+        budget_group: "{{ consts.RUN_BUDGET_GROUP }}"
+        engine: "{{ consts.RUN_ENGINE }}"
+        outcome: "{% if steps.quota_decide.output.quotaRefused %}refused{% else %}admitted{% endif %}"
+        workflow_id: "{{ workflow.id }}"
+        execution_id: "{{ execution.id }}"
+        triggered_by: "{{ variables.runOrigin }}"
+        kibana:
+          space_ids:
+            - "{{ workflow.spaceId }}"
+    on-failure:
+      continue: true
+
+  - name: quota_stop_if_exhausted
+    type: workflow.output
+    if: "${{ steps.quota_decide.output.quotaRefused }}"
+    with: {}
+
   - name: synthesize_memory
     type: ai.agent
     # connector-id-by-feature: shared memory connector (SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID).

@@ -84,3 +84,27 @@ export {
   stateBlocksNewActivity,
 } from './maintenance/state_machine';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
+
+export {
+  DEFAULT_RUN_LIMITS,
+  DEFAULT_RUN_QUOTA_SETTINGS,
+  DEFAULT_RUN_QUOTA_TIME_ZONE,
+  HUMAN_RUN_ORIGINS,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  RUN_BUDGET_GROUPS_BY_ENGINE,
+  RUN_BUDGET_GROUP_ENGINE,
+  RUN_BUDGET_GROUP_IDS,
+  RUN_QUOTA_ENGINE_IDS,
+  isHumanRunOrigin,
+} from './run_quotas/types';
+export type {
+  HumanRunOrigin,
+  RunBudgetGroupId,
+  RunBudgetGroupUsage,
+  RunLimit,
+  RunQuotaEngineId,
+  RunQuotaSettings,
+  RunQuotaWindow,
+  RunQuotasResponse,
+} from './run_quotas/types';
