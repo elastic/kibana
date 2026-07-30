@@ -1523,7 +1523,6 @@
     "nodemailer": "8.0.7",
     "normalize-path": "3.0.0",
     "object-hash": "3.0.0",
-    "object-path-immutable": "4.1.2",
     "oniguruma-to-es": "4.3.4",
     "openai": "4.104.0",
     "openpgp": "5.11.3",
