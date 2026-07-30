@@ -197,7 +197,7 @@ export const NewRelic: ConnectorSpec = {
           placeholder: '1234567',
           helpText: i18n.translate('core.kibanaConnectorSpecs.newRelic.config.accountId.helpText', {
             defaultMessage:
-              'The numeric New Relic account ID this connector operates against. Found in the New Relic UI under your account name, or in account-scoped URLs as one.newrelic.com/accounts/<accountId>. To manage another account, create a separate connector instance.',
+              'The numeric New Relic account ID this connector operates against. Found in the New Relic UI under your account name, or in account-scoped URLs as one.newrelic.com/accounts/ACCOUNT_ID. To manage another account, create a separate connector instance.',
           }),
         }),
       region: z
