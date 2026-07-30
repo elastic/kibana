@@ -22,7 +22,8 @@ export { getInvestigationProgressStatusLabel };
  *
  * The `STATUS_GROUP` map below is the single source of truth for this grouping so
  * the summary cards and event lists cannot drift apart. Because it is a
- * `Record<SignificantEventStatus, StatusGroup>`, adding a status to the schema
+ * `Record<SignificantEventStatusOptions, StatusGroup>`, adding a status to the
+ * schema (other than `pending`, which is excluded and treated as needs-action)
  * without classifying it here is a compile-time error.
  *
  * The "Investigating" / "Investigated" badge is derived separately from
@@ -30,22 +31,30 @@ export { getInvestigationProgressStatusLabel };
  */
 type StatusGroup = 'needsAction' | 'resolved';
 
-const STATUS_GROUP: Record<SignificantEventStatus, StatusGroup> = {
+type SignificantEventStatusOptions = Exclude<SignificantEventStatus, 'pending'>;
+
+const STATUS_GROUP: Record<SignificantEventStatusOptions, StatusGroup> = {
   open: 'needsAction',
   closed: 'resolved',
   dismissed: 'resolved',
 };
 
+const isReviewedSignificantEventStatus = (
+  status: SignificantEventStatus
+): status is SignificantEventStatusOptions => status !== 'pending';
+
 export const NEEDS_ACTION_STATUSES: SignificantEventStatus[] =
-  SIGNIFICANT_EVENT_STATUS_OPTIONS.filter((status) => STATUS_GROUP[status] === 'needsAction');
+  SIGNIFICANT_EVENT_STATUS_OPTIONS.filter(
+    (status) => isReviewedSignificantEventStatus(status) && STATUS_GROUP[status] === 'needsAction'
+  );
 export const RESOLVED_STATUSES: SignificantEventStatus[] = SIGNIFICANT_EVENT_STATUS_OPTIONS.filter(
-  (status) => STATUS_GROUP[status] === 'resolved'
+  (status) => isReviewedSignificantEventStatus(status) && STATUS_GROUP[status] === 'resolved'
 );
 
 export type StatusColor = 'danger' | 'success';
 
 const getStatusGroup = (status: SignificantEventStatus): StatusGroup =>
-  STATUS_GROUP[status] ?? 'needsAction';
+  isReviewedSignificantEventStatus(status) ? STATUS_GROUP[status] : 'needsAction';
 
 export const isNeedsActionStatus = (status: SignificantEventStatus): boolean =>
   getStatusGroup(status) === 'needsAction';
