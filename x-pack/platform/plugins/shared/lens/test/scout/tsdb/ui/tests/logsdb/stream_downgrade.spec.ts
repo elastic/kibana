@@ -11,7 +11,6 @@ import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
-  getChartDebugData,
   offsetPickerTime,
   sumFirstNValues,
   test,
@@ -38,6 +37,12 @@ interface ScenarioResult {
   hasDataBeforeDowngrade: boolean;
   /** Whether the after-downgrade time window contains any data. */
   hasDataAfterDowngrade: boolean;
+  /** Bar chart data using the utc_time date field instead of @timestamp. */
+  altDateFieldBars: Array<{ y: number }>;
+  /** Whether the annotation layer rendered with @timestamp time field. */
+  annotationVisible: boolean;
+  /** Whether the annotation layer rendered with utc_time time field. */
+  annotationAltTimeFieldVisible: boolean;
   expectedDocumentCountBeforeRollover: number;
 }
 
@@ -48,20 +53,16 @@ const runScenario = async (
   const scenario = await tsdbScenario.setup(BASE_STREAM, indexes, TIME_RANGE);
 
   const bars = await test.step('visualize date histogram chart', async () => {
-    await pageObjects.lens.openFullEditor();
+    await pageObjects.lens.workspace.openFullEditor();
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
       operation: 'date_histogram',
       field: '@timestamp',
       keepOpen: true,
     });
-
-    // Bar charts disable empty rows by default. Keep empty buckets so the first and last bars
-    // cover the complete range before and after the stream rollover.
-    await pageObjects.lens.enableIncludeEmptyRows();
+    await pageObjects.lens.dimensions.enableIncludeEmptyRows();
     await pageObjects.lens.closeDimensionEditor();
 
-    // check that a basic agg on a field works
     await pageObjects.lens.configureDimension({
       dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
       operation: 'min',
@@ -69,7 +70,7 @@ const runScenario = async (
     });
 
     await pageObjects.lens.waitForVisualization('xyVisChart');
-    const chartData = await getChartDebugData(page, 'xyVisChart');
+    const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
     const chartBars = chartData.bars?.[0]?.bars ?? [];
     expect(chartBars.length).toBeGreaterThan(0);
     return chartBars;
@@ -77,8 +78,7 @@ const runScenario = async (
 
   const { hasDataBeforeDowngrade, hasDataAfterDowngrade } =
     await test.step('visualize data on both sides of the downgrade boundary', async () => {
-      // Reload Lens for a clean editor before narrowing the time window.
-      await pageObjects.lens.openFullEditor();
+      await pageObjects.lens.workspace.openFullEditor();
       await pageObjects.datePicker.setAbsoluteRange({
         from: offsetPickerTime(TIME_RANGE.beforeRollover, -ONE_HOUR),
         to: offsetPickerTime(TIME_RANGE.beforeRollover, ONE_HOUR),
@@ -96,7 +96,8 @@ const runScenario = async (
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsBeforeDowngrade =
-        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
+        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
+          ?.bars ?? [];
 
       await pageObjects.datePicker.setAbsoluteRange({
         from: offsetPickerTime(TIME_RANGE.afterRollover, ONE_SECOND),
@@ -104,7 +105,8 @@ const runScenario = async (
       });
       await pageObjects.lens.waitForVisualization('xyVisChart');
       const barsAfterDowngrade =
-        (await getChartDebugData(page, 'xyVisChart')).bars?.[0]?.bars ?? [];
+        (await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart')).bars?.[0]
+          ?.bars ?? [];
 
       return {
         hasDataBeforeDowngrade: barsBeforeDowngrade.some(({ y }) => y > 0),
@@ -112,15 +114,153 @@ const runScenario = async (
       };
     });
 
+  const altDateFieldBars =
+    await test.step('visualize date histogram chart using a different date field', async () => {
+      await pageObjects.lens.workspace.openFullEditor();
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: 'utc_time',
+        keepOpen: true,
+      });
+      await pageObjects.lens.dimensions.enableIncludeEmptyRows();
+      await pageObjects.lens.closeDimensionEditor();
+
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+        field: 'bytes_counter',
+      });
+
+      await pageObjects.lens.waitForVisualization('xyVisChart');
+      const chartData = await pageObjects.lens.workspace.getCurrentChartDebugState('xyVisChart');
+      const chartBars = chartData.bars?.[0]?.bars ?? [];
+      expect(chartBars.length).toBeGreaterThan(0);
+      return chartBars;
+    });
+
+  const annotationVisible =
+    await test.step('visualize an annotation layer from a LogsDB stream', async () => {
+      await pageObjects.lens.workspace.openFullEditor();
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: 'utc_time',
+      });
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+        field: 'bytes_counter',
+      });
+      await pageObjects.lens.layers.createLayer('annotations');
+
+      const layerCount = await pageObjects.lens.layers.getLayerCount();
+      expect(layerCount).toBe(2);
+
+      await pageObjects.lens.layers.ensureLayerTabIsActive(1);
+      const triggerText = await pageObjects.lens.dimensions.getDimensionTriggerText(
+        'lnsXY_xAnnotationsPanel'
+      );
+      expect(triggerText).toBe('Event');
+
+      await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
+      await page.testSubj.click('lnsXY_annotation_query');
+      await pageObjects.lens.style.configureQueryAnnotation({
+        queryString: 'request: *',
+        timeField: '@timestamp',
+        textDecoration: { type: 'name' },
+        extraFields: ['request', 'utc_time'],
+      });
+      await pageObjects.lens.closeDimensionEditor();
+
+      const annotationIcon = page.testSubj.locator('xyVisGroupedAnnotationIcon');
+      const isVisible = await annotationIcon.isVisible();
+
+      await pageObjects.lens.layers.removeLayer(1);
+      return isVisible;
+    });
+
+  const annotationAltTimeFieldVisible =
+    await test.step('visualize an annotation layer using another time field', async () => {
+      await pageObjects.lens.workspace.openFullEditor();
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: 'utc_time',
+      });
+      await pageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'min',
+        field: 'bytes_counter',
+      });
+      await pageObjects.lens.layers.createLayer('annotations');
+
+      const layerCount = await pageObjects.lens.layers.getLayerCount();
+      expect(layerCount).toBe(2);
+
+      await pageObjects.lens.layers.ensureLayerTabIsActive(1);
+      const triggerText = await pageObjects.lens.dimensions.getDimensionTriggerText(
+        'lnsXY_xAnnotationsPanel'
+      );
+      expect(triggerText).toBe('Event');
+
+      await pageObjects.lens.dimensions.openDimensionEditor('lns-dimensionTrigger', 1);
+      await page.testSubj.click('lnsXY_annotation_query');
+      await pageObjects.lens.style.configureQueryAnnotation({
+        queryString: 'request: *',
+        timeField: 'utc_time',
+        textDecoration: { type: 'name' },
+        extraFields: ['request', '@timestamp'],
+      });
+      await pageObjects.lens.closeDimensionEditor();
+
+      const annotationIcon = page.testSubj.locator('xyVisGroupedAnnotationIcon');
+      const isVisible = await annotationIcon.isVisible();
+
+      await pageObjects.lens.layers.removeLayer(1);
+      return isVisible;
+    });
+
+  await test.step('visualize ES|QL queries based on a LogsDB stream', async () => {
+    await page.gotoApp('discover');
+
+    const esqlQuery = `from ${indexes
+      .map(({ index }) => index)
+      .join(', ')} | stats averageB = avg(bytes_counter) by request`;
+    await pageObjects.discover.writeAndSubmitEsqlQuery(esqlQuery);
+    await pageObjects.discover.waitUntilSearchingHasFinished();
+
+    await page.testSubj.click('unifiedHistogramEditFlyoutVisualization');
+
+    await expect
+      .poll(
+        async () => {
+          const dimensions = await page.testSubj.locator('lns-dimensionTrigger-textBased').all();
+          if (dimensions.length !== 2) return false;
+          const text = await dimensions[1].innerText();
+          return text === 'averageB';
+        },
+        { timeout: 10_000 }
+      )
+      .toBe(true);
+
+    // Navigate back to Lens for the next scenario
+    await page.gotoApp('lens');
+  });
+
   return {
     bars,
     hasDataBeforeDowngrade,
     hasDataAfterDowngrade,
+    altDateFieldBars,
+    annotationVisible,
+    annotationAltTimeFieldVisible,
     expectedDocumentCountBeforeRollover: scenario.expectedDocumentCountBeforeRollover,
   };
 };
 
 const assertDowngradeResult = (result: ScenarioResult) => {
+  // Date histogram with @timestamp
   expect.soft(result.hasDataBeforeDowngrade).toBe(true);
   expect.soft(result.hasDataAfterDowngrade).toBe(true);
   const columnsToCheck = Math.floor(result.bars.length / 2);
@@ -130,6 +270,17 @@ const assertDowngradeResult = (result: ScenarioResult) => {
   expect
     .soft(sumFirstNValues(columnsToCheck, [...result.bars].reverse()))
     .toBeGreaterThan(TSDB_SCENARIO_DOCUMENT_COUNT - 1);
+
+  // Date histogram with utc_time
+  const altColumnsToCheck = Math.floor(result.altDateFieldBars.length / 2);
+  expect.soft(sumFirstNValues(altColumnsToCheck, result.altDateFieldBars)).toBeGreaterThan(0);
+  expect
+    .soft(sumFirstNValues(altColumnsToCheck, [...result.altDateFieldBars].reverse()))
+    .toBeGreaterThan(0);
+
+  // Annotation layers
+  expect.soft(result.annotationVisible).toBe(true);
+  expect.soft(result.annotationAltTimeFieldVisible).toBe(true);
 };
 
 test.describe('Lens LogsDB stream downgrade scenarios', { tag: tags.deploymentAgnostic }, () => {

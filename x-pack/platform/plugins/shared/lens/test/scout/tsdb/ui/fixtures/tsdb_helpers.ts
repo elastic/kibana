@@ -86,6 +86,10 @@ export interface TsdbHelper {
     stream: string,
     timeRange: TsdbScenarioTimeRange
   ) => Promise<CleanupHandle>;
+  createDowngradedLogsDBStream: (
+    stream: string,
+    timeRange: TsdbScenarioTimeRange
+  ) => Promise<CleanupHandle>;
   setupScenario: (
     initialIndex: string,
     indexes: TsdbScenarioIndex[],
@@ -174,6 +178,7 @@ const getTsdbMapping = ({
   includeTimeSeriesMetadata?: boolean;
 } = {}): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
+  utc_time: { type: 'date' },
   request: {
     type: 'keyword',
     ...(includeTimeSeriesMetadata ? { time_series_dimension: true } : {}),
@@ -219,7 +224,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
 
       const putDataStreamTemplate = async (
         stream: string,
-        mode: 'tsdb' | undefined,
+        mode: 'tsdb' | 'logsdb' | undefined,
         { includeTimeSeriesMetadata = true }: { includeTimeSeriesMetadata?: boolean } = {}
       ): Promise<void> => {
         await esClient.cluster.putComponentTemplate({
@@ -230,6 +235,13 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
                   settings: {
                     mode: 'time_series',
                     routing_path: ['request'],
+                  },
+                }
+              : {}),
+            ...(mode === 'logsdb'
+              ? {
+                  settings: {
+                    mode: 'logsdb',
                   },
                 }
               : {}),
@@ -249,7 +261,10 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         });
       };
 
-      const createDataStream = async (stream: string, mode: 'tsdb' | undefined): Promise<void> => {
+      const createDataStream = async (
+        stream: string,
+        mode: 'tsdb' | 'logsdb' | undefined
+      ): Promise<void> => {
         await putDataStreamTemplate(stream, mode);
         await esClient.indices.createDataStream({ name: stream });
       };
@@ -264,6 +279,9 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
           { length: TSDB_SCENARIO_DOCUMENT_COUNT },
           (_, indexOffset) => ({
             '@timestamp': new Date(
+              startTimeMs + (TSDB_SCENARIO_DOCUMENT_COUNT + indexOffset) * 1000
+            ).toISOString(),
+            utc_time: new Date(
               startTimeMs + (TSDB_SCENARIO_DOCUMENT_COUNT + indexOffset) * 1000
             ).toISOString(),
             request: `/lens-tsdb-test/${indexOffset % 5}`,
@@ -370,6 +388,28 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         }
       };
 
+      const createDowngradedLogsDBStream: TsdbHelper['createDowngradedLogsDBStream'] = async (
+        stream,
+        timeRange
+      ) => {
+        const cleanup = async () => deleteDataStream(stream);
+        try {
+          log.info(`Creating LogsDB data stream "${stream}"`);
+          await createDataStream(stream, 'logsdb');
+          await createDocs(stream, timeRange.beforeRollover, { isStream: true });
+
+          log.info(`Downgrading LogsDB data stream "${stream}" to a regular data stream`);
+          await putDataStreamTemplate(stream, undefined);
+          await esClient.indices.rollover({ alias: stream });
+          await createDocs(stream, timeRange.afterRollover, { isStream: true });
+
+          return { cleanup };
+        } catch (error) {
+          await cleanup();
+          throw error;
+        }
+      };
+
       const setupScenario: TsdbHelper['setupScenario'] = async (
         initialIndex,
         indexes,
@@ -437,6 +477,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
         downsampleTSDBIndex,
         createUpgradedStream,
         createDowngradedStream,
+        createDowngradedLogsDBStream,
         setupScenario,
       });
     },
