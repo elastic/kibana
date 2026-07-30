@@ -7,6 +7,7 @@
 
 import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
+import type { TimeRange } from '@kbn/es-query';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { LocatorDefinition } from '@kbn/share-plugin/common';
 import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
@@ -31,6 +32,13 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
       getIsEsqlDefault(): Promise<boolean>;
     }
   ) {}
+
+  public readonly getTimeRange = (params: LogsLocatorParams) => params.timeRange;
+
+  public readonly setTimeRange = (params: LogsLocatorParams, timeRange?: TimeRange) => ({
+    ...params,
+    timeRange,
+  });
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const discoverAppLocator =

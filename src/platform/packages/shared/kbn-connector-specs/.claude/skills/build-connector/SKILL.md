@@ -32,17 +32,40 @@ Use `TaskCreate` to create all of the following tasks up front so the user can s
 9. **Iterate on quality** — "Fix code issues and re-test until quality bar is met"
 10. **Final code review** — "Final review of all generated files and documentation"
 11. **Final chat test** — "Final end-to-end conversation to confirm everything works"
-12. **Report completion** — "Tell the user the connector is ready for manual inspection"
+12. **Compile the PR validation table** — "Build the `## Validated` action-by-action table for the PR description"
+13. **Report completion** — "Tell the user the connector is ready for manual inspection"
 
 Set up dependencies: task 2 is blocked by 1, task 3 by 2, task 4 by 3, and so on sequentially.
 
 Then begin working through the tasks in order.
+
+### If building several connectors as a batch, don't defer Tasks 4-11 for all of them
+
+It's tempting, when asked to build many connectors, to build the code for all of them first (Task 1-3)
+and defer activation/live-testing (Tasks 4-11) until later. In practice this is where most real bugs
+surface — disabled test buttons, ICU parse errors, endpoints that reject partial updates, query params
+the vendor rejects, wrong auth scopes — none of which unit tests or a code-only review catch, because
+they only show up when the spec is actually loaded and exercised in a running Kibana. If the user
+explicitly asks to defer live testing for a batch, still run the self-review checklist from
+`create-connector`'s Step 4 ("Self-review before handing off") on every connector before considering it
+code-complete, and flag to the user that the deferred connectors have not been runtime-verified and are
+likely to need a fix-up pass once Tasks 4-11 finally run. Still produce the `## Validated` table for each
+connector's PR (Task 12) — every row will read `⚠️ Not validated — needs manual verification` until live
+testing happens, but the table itself is not optional; see
+`create-connector/reference/pr-validation-table.md`.
 
 ---
 
 ## Task 1: Create the Connector Code
 
 Mark task 1 as `in_progress`.
+
+Before generating code, research the vendor's real API docs for the actions you plan to implement —
+specifically update semantics (partial vs. full-replace), array query-param encoding, per-action auth
+scopes, and regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code"
+in `create-connector/reference/custom-connector-setup.md`. Bugs that trace back to skipping this (wrong
+auth scope, 400s on partial updates, 404s on regional domains) are far cheaper to avoid up front than to
+find during Task 7's live chat test or after the PR is open.
 
 Invoke the `create-connector` skill with `$ARGUMENTS` as the argument:
 
@@ -183,6 +206,13 @@ If tools failed (tool results contain `"status":"failed"`):
    - `Unexpected parameter` — the tool call passes a parameter the sub-action doesn't accept. Fix the action's Zod schema.
    - `Input should be 'X'` — a parameter value is invalid. Fix the action's input constraints.
    - Auth/credential errors — note this but don't count as code failure. Ask user to re-provide credentials.
+   - `404`/`Not found or unauthorized` on an action that **assigns, mentions, or otherwise targets a
+     specific user** (e.g. `assignIncidentUser`, add-watcher, notify) — before concluding the endpoint or
+     payload is wrong, check whether the target user ID belongs to the API key's own bound/service
+     account. Some vendors (e.g. Rootly) reject certain user-targeting operations for that synthetic
+     identity even though the ID format, payload shape, and endpoint are all otherwise correct. Retry with
+     a different, real human user's ID from the same org before treating this as a connector bug — if that
+     succeeds, the code is fine and this is just a property of the test data/account, not something to fix.
 3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 
@@ -246,9 +276,35 @@ Mark task 11 as `completed`.
 
 ---
 
-## Task 12: Report Completion
+## Task 12: Compile the PR Validation Table
+
+Mark task 12 as `in_progress`.
+
+Read `create-connector/reference/pr-validation-table.md` for the full format and rules, and build the
+`## Validated` markdown section now, while the results from Tasks 5-11 are fresh:
+
+- One row per action defined in the connector spec's `actions` map, plus the connectivity `test` handler
+  if one exists — no action may be omitted.
+- For actions actually exercised (Task 7/11 chat tests, direct calls during Task 5 activation, or manual
+  testing along the way), describe the concrete scenario tested and mark `✅ Pass` (noting any bug that
+  was found and fixed as part of getting it to pass).
+- For actions not exercised — deliberately skipped (e.g. destructive/admin-only), blocked by missing
+  test data/credentials, or because live testing (Tasks 4-11) was deferred entirely for this connector —
+  mark `⚠️ Not validated — needs manual verification` rather than leaving the row out.
+- For any action that failed and remains unresolved, mark `❌ Fail` with a short description.
+
+Keep this table's markdown handy (in the task output or scratch notes) — it must be included verbatim
+under a `## Validated` heading in the PR description when this connector's PR is opened, whether that
+happens later in this same session or by a human afterward. If a PR already exists for this connector,
+add or update the `## Validated` section in its description now rather than waiting.
 
 Mark task 12 as `completed`.
+
+---
+
+## Task 13: Report Completion
+
+Mark task 13 as `completed`.
 
 Tell the user something like the below template, listing the actual file paths that were created or modified during the process:
 
@@ -267,6 +323,14 @@ Tell the user something like the below template, listing the actual file paths t
 > 1. Open Kibana and navigate to the Agent Builder to inspect the agent
 > 2. Try chatting with the agent in the Kibana UI
 > 3. Review the generated code and adjust as needed
-> 4. When satisfied, commit the code changes
+> 4. When satisfied, commit the code changes and open a PR — include the `## Validated` table from Task 12
+>    in the PR description, and add the `release_note:feature` and `Feature:Actions/ConnectorTypes` labels
 
-List the actual file paths that were created or modified during the process.
+List the actual file paths that were created or modified during the process, and include the `## Validated`
+table compiled in Task 12 in your response so the user has it even if they open the PR themselves.
+
+If you open the PR yourself (via `gh pr create`), apply both labels as part of that same command or
+immediately after with `gh pr edit <number> --add-label "release_note:feature" --add-label "Feature:Actions/ConnectorTypes"`.
+`release_note:feature` surfaces the new connector in the condensed release notes; `Feature:Actions/ConnectorTypes`
+routes the PR to the right reviewers and keeps it discoverable alongside other connector-type work. Use these
+exact label names/casing — check `gh label list --repo elastic/kibana --search <name>` if unsure they still exist.
