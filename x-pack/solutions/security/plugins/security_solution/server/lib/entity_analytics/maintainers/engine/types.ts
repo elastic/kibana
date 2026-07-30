@@ -330,3 +330,15 @@ export interface EntityRelationshipRecord {
    */
   relationships: Record<string, string[]>;
 }
+
+/**
+ * Union of all known relationship maintainer identifiers. Passed into
+ * `runRelationshipMaintainer` as a required `maintainerName` field so that
+ * per-integration completion logs carry an unambiguous maintainer label.
+ */
+export type RelationshipMaintainerName =
+  | 'communicates_with'
+  | 'accesses_frequently_and_infrequently'
+  | 'administers'
+  | 'supervises'
+  | 'owns';
