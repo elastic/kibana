@@ -135,6 +135,7 @@ import {
   useUpgradeAgentlessPoliciesDryRunQuery,
   useUpdatePackageMutation,
   useNamespacePreflightCheckMutation,
+  useStartServices,
 } from '../../../../../hooks';
 import { isAgentlessPoliciesUIEnabled } from '../../../../../services';
 
@@ -528,6 +529,7 @@ describe('SettingsPage', () => {
     describe('preflight → modal → confirm flow', () => {
       const mockMutateAsync = jest.fn();
       const mockMutate = jest.fn();
+      const mockAddWarning = jest.fn();
       const conflictWarning = {
         dataStreamName: 'logs-nginx.access-staging',
         namespace: 'staging',
@@ -544,6 +546,7 @@ describe('SettingsPage', () => {
       beforeEach(() => {
         mockMutateAsync.mockReset();
         mockMutate.mockReset();
+        mockAddWarning.mockReset();
         (useNamespacePreflightCheckMutation as jest.Mock).mockReturnValue({
           mutateAsync: mockMutateAsync,
           isLoading: false,
@@ -552,6 +555,12 @@ describe('SettingsPage', () => {
           mutate: mockMutate,
           isLoading: false,
           isPending: false,
+        });
+        (useStartServices as jest.Mock).mockReturnValue({
+          notifications: {
+            toasts: { addError: jest.fn(), addSuccess: jest.fn(), addWarning: mockAddWarning },
+          },
+          docLinks: { links: { fleet: { datastreams: '' } } },
         });
       });
 
@@ -616,6 +625,7 @@ describe('SettingsPage', () => {
             expect.anything()
           );
         });
+        expect(mockAddWarning).toHaveBeenCalled();
         expect(result.queryByTestId('epmSettings.namespaceConflictModal')).not.toBeInTheDocument();
       });
 

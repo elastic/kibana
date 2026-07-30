@@ -21,6 +21,7 @@ import {
   handleNamespaceTemplateRestoreAfterPackageInstall,
   insertNamespaceCustomTemplate,
   isNamespaceCustomizationEnabledForPackage,
+  runNamespacePreflightCheck,
   syncNamespaceTemplates,
 } from './namespace_datastream_templates';
 
@@ -632,5 +633,133 @@ describe('syncNamespaceTemplates', () => {
       expect.any(Object)
     );
     expect(summary.created).toEqual(['production']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// runNamespacePreflightCheck — orchestration tests
+// ---------------------------------------------------------------------------
+
+describe('runNamespacePreflightCheck', () => {
+  const soClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedAppContextService.getLogger.mockReturnValue({
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as any);
+  });
+
+  it('returns empty array without calling ES when namespaces is empty', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const result = await runNamespacePreflightCheck({
+      esClient,
+      soClient,
+      packageName: 'nginx',
+      namespaces: [],
+    });
+    expect(result).toEqual([]);
+    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('returns empty array when the package is not installed', async () => {
+    mockedGetInstalledPackageWithAssets.mockResolvedValue(undefined);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const result = await runNamespacePreflightCheck({
+      esClient,
+      soClient,
+      packageName: 'nginx',
+      namespaces: ['production'],
+    });
+    expect(result).toEqual([]);
+    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('returns empty array without calling ES when the package has no data streams', async () => {
+    mockedGetInstalledPackageWithAssets.mockResolvedValue({
+      packageInfo: { name: 'nginx', data_streams: [] },
+      installation: { installed_es: [] },
+    } as any);
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const result = await runNamespacePreflightCheck({
+      esClient,
+      soClient,
+      packageName: 'nginx',
+      namespaces: ['production'],
+    });
+    expect(result).toEqual([]);
+    expect(esClient.indices.getIndexTemplate).not.toHaveBeenCalled();
+  });
+
+  it('proceeds with empty allTemplates when getIndexTemplate throws, suppressing conflicts that cannot be identified', async () => {
+    mockInstalledPackage();
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getIndexTemplate.mockImplementation((params: any) => {
+      if (params?.name) {
+        // NS template check: does not exist yet
+        return Promise.reject(
+          Object.assign(new Error('Not found'), { meta: { statusCode: 404 } })
+        );
+      }
+      // All-templates fetch fails
+      return Promise.reject(new Error('network error'));
+    });
+    // Simulate reports a conflict (base template in overlapping), but allTemplates is empty
+    // so findConflictingTemplates returns [] and the guard suppresses the empty warning.
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
+      template: { mappings: {}, settings: {}, aliases: {} },
+    } as any);
+
+    const result = await runNamespacePreflightCheck({
+      esClient,
+      soClient,
+      packageName: 'nginx',
+      namespaces: ['production'],
+    });
+
+    expect(result).toEqual([]);
+  });
+
+  it('fans out across (data stream × namespace) pairs and collects all conflicts', async () => {
+    mockInstalledPackage();
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.indices.getIndexTemplate.mockImplementation((params: any) => {
+      if (params?.name) {
+        // NS template check: does not exist yet
+        return Promise.reject(
+          Object.assign(new Error('Not found'), { meta: { statusCode: 404 } })
+        );
+      }
+      // All-templates fetch: return a conflicting clone template
+      return Promise.resolve({
+        index_templates: [
+          {
+            name: 'logs-nginx.access-clone',
+            index_template: { index_patterns: ['logs-nginx.access-*'], priority: 300 },
+          },
+        ],
+      });
+    });
+    // Base template is in overlapping (losing) → conflict indicated for every simulated index
+    esClient.indices.simulateIndexTemplate.mockResolvedValue({
+      overlapping: [{ name: 'logs-nginx.access', index_patterns: ['logs-nginx.access-*'] }],
+      template: { mappings: {}, settings: {}, aliases: {} },
+    } as any);
+
+    const result = await runNamespacePreflightCheck({
+      esClient,
+      soClient,
+      packageName: 'nginx',
+      namespaces: ['production', 'staging'],
+    });
+
+    expect(result).toHaveLength(2);
+    expect(result.map((w) => w.namespace).sort()).toEqual(['production', 'staging']);
+    expect(result[0].conflictingTemplates[0].name).toBe('logs-nginx.access-clone');
+    expect(result[0].conflictingTemplates[0].conflictType).toBe('overrides_fleet');
   });
 });
