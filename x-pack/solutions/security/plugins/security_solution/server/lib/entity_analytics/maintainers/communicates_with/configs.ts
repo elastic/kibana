@@ -62,6 +62,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
       { term: { 'event.action': 'ssh_login' } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    localNamespaceFastPath: true,
   },
   {
     kind: 'standard',
@@ -80,6 +81,7 @@ export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipInt
       { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    localNamespaceFastPath: true,
   },
   {
     kind: 'standard',

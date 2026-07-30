@@ -165,6 +165,19 @@ interface RelationshipIntegrationBase {
    * log-based maintainer behavior.
    */
   disableLookbackWindow?: boolean;
+  /**
+   * When true, the ES|QL builder emits a minimized local-namespace query:
+   * hardcodes `@local` as the namespace suffix in the actor EUID, reads only
+   * the three identity fields (`user.email`, `user.name`, `host.id`), and skips
+   * the namespace/EUID EVAL chain. Measured to be ~26× faster than the full
+   * builder on large indices (e.g. logs-system.auth, ~700M docs, 30d lookback).
+   *
+   * Only valid for integrations whose data exclusively uses the `@local`
+   * namespace — all current `system_auth` and `system_security` configs qualify.
+   * Setting this on a multi-namespace integration will silently produce wrong
+   * EUIDs for non-local entities.
+   */
+  localNamespaceFastPath?: true;
 }
 
 /**

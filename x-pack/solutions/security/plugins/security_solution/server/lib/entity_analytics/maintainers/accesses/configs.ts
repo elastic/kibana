@@ -86,6 +86,7 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
       { term: { 'event.action': 'ssh_login' } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    localNamespaceFastPath: true,
   },
   {
     kind: 'bucketed',
@@ -104,5 +105,6 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
       { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    localNamespaceFastPath: true,
   },
 ];

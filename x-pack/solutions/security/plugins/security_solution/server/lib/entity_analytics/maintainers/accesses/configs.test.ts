@@ -129,4 +129,23 @@ describe('ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
       }
     );
   });
+
+  describe('localNamespaceFastPath flag', () => {
+    it('system_auth has localNamespaceFastPath: true', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'system_auth');
+      expect(cfg?.localNamespaceFastPath).toBe(true);
+    });
+
+    it('system_security has localNamespaceFastPath: true', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find(
+        (c) => c.id === 'system_security'
+      );
+      expect(cfg?.localNamespaceFastPath).toBe(true);
+    });
+
+    it('elastic_defend does NOT have localNamespaceFastPath', () => {
+      const cfg = ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS.find((c) => c.id === 'elastic_defend');
+      expect(cfg?.localNamespaceFastPath).toBeUndefined();
+    });
+  });
 });
