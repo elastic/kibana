@@ -12,6 +12,7 @@ type AlertingPageId = 'alerts';
 type ApmPageId = 'services' | 'traces' | 'dependencies';
 type DatasetQualityPageId = 'dataset_quality';
 type InfraPageId = 'hosts';
+type NightshiftPageId = 'nightshift';
 type OnboardingPageId = 'onboarding';
 type RuleDetailsPageId = 'rule_details';
 type RulesListPageId = 'rules_list';
@@ -33,6 +34,7 @@ export type Key =
   | `${ApmPageId}`
   | `${DatasetQualityPageId}`
   | `${InfraPageId}`
+  | `${NightshiftPageId}`
   | `${OnboardingPageId}`
   | `${RuleDetailsPageId}`
   | `${RulesListPageId}`

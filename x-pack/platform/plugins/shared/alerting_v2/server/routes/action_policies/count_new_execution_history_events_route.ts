@@ -10,17 +10,36 @@ import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import { injectable, inject } from 'inversify';
 import {
-  countPolicyExecutionEventsQuerySchema,
+  countPolicyExecutionEventsRequestSchema,
   countPolicyExecutionEventsResponseSchema,
   errorResponseSchema,
+  type CountPolicyExecutionEventsRequest,
 } from '@kbn/alerting-v2-schemas';
 import { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
+import type { CountNewEventsSinceArgs } from '../../lib/action_policy_execution_history_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { countActionPolicyExecutionHistoryOasExamples } from './count_new_execution_history_events_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH } from '../constants';
 import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { assertAllFieldsMapped, type Complete } from '../mapper_types';
+
+export const toCountNewEventsSinceArgs = ({
+  since,
+  search,
+  rule_ids: ruleIds,
+  outcome,
+  ...rest
+}: CountPolicyExecutionEventsRequest): Complete<Omit<CountNewEventsSinceArgs, 'request'>> => {
+  assertAllFieldsMapped(rest);
+  return {
+    since,
+    search,
+    ruleIds,
+    outcome,
+  };
+};
 
 @injectable()
 export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
@@ -39,7 +58,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   } as const;
   static schemas = {
     request: {
-      query: countPolicyExecutionEventsQuerySchema,
+      query: countPolicyExecutionEventsRequestSchema,
     },
     response: {
       200: {
@@ -60,7 +79,7 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
     @inject(Request)
     private readonly request: KibanaRequest<
       unknown,
-      z.infer<typeof countPolicyExecutionEventsQuerySchema>,
+      z.infer<typeof countPolicyExecutionEventsRequestSchema>,
       unknown
     >,
     @inject(ActionPolicyExecutionHistoryClient)
@@ -70,14 +89,9 @@ export class CountNewExecutionHistoryEventsRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const { since, search, ruleIds, outcome } = this.request.query;
-
     const result = await this.executionHistoryClient.countNewEventsSince({
       request: this.request,
-      since,
-      search,
-      ruleIds,
-      outcome,
+      ...toCountNewEventsSinceArgs(this.request.query),
     });
 
     return this.ctx.response.ok({ body: result });
