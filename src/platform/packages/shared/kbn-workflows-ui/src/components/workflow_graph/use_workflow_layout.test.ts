@@ -41,7 +41,7 @@ const stepExec = (
           },
         ]
       : [],
-  } as unknown as WorkflowStepExecutionDto);
+  } satisfies Partial<WorkflowStepExecutionDto> as WorkflowStepExecutionDto);
 
 const traversedOf = (edge: { data?: unknown } | undefined): boolean | undefined =>
   (edge?.data as Record<string, unknown> | undefined)?.traversed as boolean | undefined;
@@ -263,6 +263,35 @@ describe('useWorkflowLayout', () => {
       expect(traversedOf(findForkEdge(edges, 'gate', 'else'))).toBe(false);
       expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'after'))).toBe(true);
       expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'after'))).toBe(false);
+    });
+
+    it('highlights the else branch when the false path is taken (both populated)', () => {
+      const workflow = minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [{ name: 'yes', type: 'http' }],
+            else: [{ name: 'no', type: 'http' }],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      });
+      const stepExecutions = [
+        stepExec('gate', ExecutionStatus.COMPLETED),
+        stepExec('no', ExecutionStatus.COMPLETED, { gate: 'gate', scopeId: 'false' }),
+        stepExec('after', ExecutionStatus.COMPLETED),
+      ];
+      const { result } = renderHook(() => useWorkflowLayout({ workflow, stepExecutions }));
+      const { edges } = result.current;
+
+      expect(traversedOf(findForkEdge(edges, 'gate', 'else'))).toBe(true);
+      expect(traversedOf(findForkEdge(edges, 'gate', 'then'))).toBe(false);
+      expect(traversedOf(edges.find((e) => e.source === 'no' && e.target === 'after'))).toBe(true);
+      expect(traversedOf(edges.find((e) => e.source === 'yes' && e.target === 'after'))).toBe(
+        false
+      );
     });
 
     it('highlights the matched switch case and greys the default bypass lane', () => {

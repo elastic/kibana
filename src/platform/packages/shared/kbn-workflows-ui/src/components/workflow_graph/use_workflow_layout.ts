@@ -129,10 +129,11 @@ export function useWorkflowLayout({
     for (const exec of stepExecutions) {
       for (const frame of exec.scopeStack ?? []) {
         for (const scope of frame.nestedScopes ?? []) {
-          if (!scope.scopeId) continue;
-          const set = map.get(frame.stepId);
-          if (set) set.add(scope.scopeId);
-          else map.set(frame.stepId, new Set([scope.scopeId]));
+          if (scope.scopeId) {
+            const set = map.get(frame.stepId);
+            if (set) set.add(scope.scopeId);
+            else map.set(frame.stepId, new Set([scope.scopeId]));
+          }
         }
       }
     }
@@ -206,6 +207,7 @@ export function useWorkflowLayout({
   // not on structural changes.
   const branchTraversal = useMemo(() => {
     const { allBypassLaneIds, nodeById, allEdges } = topologyMeta;
+    type ForkEdge = (typeof allEdges)[number];
 
     const getStatus = (nodeId: string): ExecutionStatus | undefined => {
       const nodeData = nodeById.get(nodeId)?.data as Record<string, unknown> | undefined;
@@ -214,55 +216,34 @@ export function useWorkflowLayout({
       return exec?.status;
     };
 
-    // Fork edges (those carrying a `branchType`) grouped by their gate (source).
-    type ForkEdge = (typeof allEdges)[number];
-    const forkEdgesByGate = new Map<string, ForkEdge[]>();
-    for (const e of allEdges) {
-      if (!e.branchType) continue;
-      const arr = forkEdgesByGate.get(e.source);
-      if (arr) arr.push(e);
-      else forkEdgesByGate.set(e.source, [e]);
-    }
-
-    const traversedForkEdgeIds = new Set<string>();
-    const traversedBypassIds = new Set<string>();
-
-    const markTraversed = (edge: ForkEdge) => {
-      traversedForkEdgeIds.add(edge.id);
-      if (allBypassLaneIds.has(edge.target)) traversedBypassIds.add(edge.target);
+    // Switch: a case edge (`label` = match value) maps to scope `case_<match>`;
+    // the default edge maps to scope `default`.
+    //
+    // Limitation: the edge `label` is the raw YAML `match` literal, whereas the
+    // runtime scope is `case_<renderedValue>`. For a templated match (e.g.
+    // `'{{ variables.status }}'`) the two never line up, so a matched templated
+    // case is not highlighted and this falls through to greening the default
+    // lane instead. Static matches (`'a'`, `42`, `true`) align exactly.
+    const resolveSwitchTakenEdges = (
+      forkEdges: ForkEdge[],
+      scopeIds: Set<string> | undefined
+    ): ForkEdge[] => {
+      const matched = forkEdges.filter((e) =>
+        scopeIds?.has(e.label === 'default' ? 'default' : `case_${e.label}`)
+      );
+      if (matched.length > 0) return matched;
+      // No case matched and no default body ran → the completed switch fell
+      // through its default lane (the transform always emits one default edge,
+      // whether a real branch or a synthesized bypass).
+      const defaultEdge = forkEdges.find((e) => e.label === 'default');
+      return defaultEdge ? [defaultEdge] : [];
     };
 
-    for (const [gateId, forkEdges] of forkEdgesByGate) {
-      // Only completed gates highlight a branch; running/unfinished gates stay
-      // neutral until they resolve.
-      if (getStatus(gateId) !== ExecutionStatus.COMPLETED) continue;
-
-      const nodeData = nodeById.get(gateId)?.data as Record<string, unknown> | undefined;
-      const gateLabel = typeof nodeData?.label === 'string' ? nodeData.label : gateId;
-      const scopeIds = scopeIdsByStepId.get(gateLabel) ?? scopeIdsByStepId.get(gateId);
-
-      if (forkEdges.some((e) => e.branchType === 'switch')) {
-        // Switch: a case edge (`label` = match value) maps to scope
-        // `case_<match>`; the default edge maps to scope `default`.
-        let anyMatched = false;
-        for (const e of forkEdges) {
-          const scope = e.label === 'default' ? 'default' : `case_${e.label}`;
-          if (scopeIds?.has(scope)) {
-            markTraversed(e);
-            anyMatched = true;
-          }
-        }
-        // No case matched and no default body ran → the completed switch fell
-        // through its default lane (the transform always emits one default edge,
-        // whether a real branch or a synthesized bypass).
-        if (!anyMatched) {
-          const defaultEdge = forkEdges.find((e) => e.label === 'default');
-          if (defaultEdge) markTraversed(defaultEdge);
-        }
-        continue;
-      }
-
-      // `if`: 'true' → then branch, 'false' → else branch.
+    // `if`: 'true' → then branch, 'false' → else branch.
+    const resolveIfTakenEdges = (
+      forkEdges: ForkEdge[],
+      scopeIds: Set<string> | undefined
+    ): ForkEdge[] => {
       let thenTaken = scopeIds?.has('true') ?? false;
       let elseTaken = scopeIds?.has('false') ?? false;
 
@@ -278,12 +259,41 @@ export function useWorkflowLayout({
         else if (elseEmpty && !thenEmpty) elseTaken = true;
       }
 
-      for (const e of forkEdges) {
-        if (e.branchType === 'then' ? thenTaken : e.branchType === 'else' ? elseTaken : false) {
-          markTraversed(e);
-        }
-      }
+      return forkEdges.filter((e) =>
+        e.branchType === 'then' ? thenTaken : e.branchType === 'else' ? elseTaken : false
+      );
+    };
+
+    // Fork edges (those carrying a `branchType`) grouped by their gate (source).
+    const forkEdgesByGate = new Map<string, ForkEdge[]>();
+    for (const e of allEdges.filter((edge) => edge.branchType)) {
+      const arr = forkEdgesByGate.get(e.source);
+      if (arr) arr.push(e);
+      else forkEdgesByGate.set(e.source, [e]);
     }
+
+    const traversedForkEdgeIds = new Set<string>();
+    const traversedBypassIds = new Set<string>();
+
+    forkEdgesByGate.forEach((forkEdges, gateId) => {
+      // Only completed gates highlight a branch; running/unfinished gates stay
+      // neutral until they resolve.
+      if (getStatus(gateId) !== ExecutionStatus.COMPLETED) return;
+
+      const nodeData = nodeById.get(gateId)?.data as Record<string, unknown> | undefined;
+      const gateLabel = typeof nodeData?.label === 'string' ? nodeData.label : gateId;
+      const scopeIds = scopeIdsByStepId.get(gateLabel) ?? scopeIdsByStepId.get(gateId);
+
+      const isSwitch = forkEdges.some((e) => e.branchType === 'switch');
+      const takenEdges = isSwitch
+        ? resolveSwitchTakenEdges(forkEdges, scopeIds)
+        : resolveIfTakenEdges(forkEdges, scopeIds);
+
+      for (const edge of takenEdges) {
+        traversedForkEdgeIds.add(edge.id);
+        if (allBypassLaneIds.has(edge.target)) traversedBypassIds.add(edge.target);
+      }
+    });
 
     return { traversedForkEdgeIds, traversedBypassIds };
   }, [stepExecutionMap, scopeIdsByStepId, topologyMeta]);
