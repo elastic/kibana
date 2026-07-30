@@ -182,6 +182,7 @@ const getTsdbMapping = ({
 } = {}): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
   utc_time: { type: 'date' },
+  bytes: { type: 'long' },
   request: {
     type: 'keyword',
     ...(includeTimeSeriesMetadata ? { time_series_dimension: true } : {}),
@@ -304,6 +305,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
               startTimeMs + (TSDB_SCENARIO_DOCUMENT_COUNT + indexOffset) * 1000
             ).toISOString(),
             request: `/lens-tsdb-test/${indexOffset % 5}`,
+            bytes: Math.floor(Math.random() * 10000),
             ...(removeTSDBFields ? {} : { bytes_counter: 5000 }),
           })
         );
@@ -460,7 +462,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
               });
               await createDocs(index, beforeRollover, {
                 isStream: true,
-                removeTSDBFields: mode === 'logsdb' ? true : removeTSDBFields,
+                removeTSDBFields,
               });
             } else {
               cleanupActions.push(async () => {
