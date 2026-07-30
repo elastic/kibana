@@ -515,6 +515,25 @@ describe('NewRelic', () => {
       });
       expect(result.success).toBe(false);
     });
+
+    it('should reject a missing version (required by New Relic deployment markers)', () => {
+      const result = NewRelicCreateDeploymentMarkerInputSchema.safeParse({
+        entityGuid: 'guid1',
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('inaccessible accountId', () => {
+    it('should throw a clear error when NerdGraph returns a null account', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { data: { actor: { account: null } } },
+      });
+
+      await expect(NewRelic.actions.listIssues.handler(mockContext, {})).rejects.toThrow(
+        'New Relic listIssues failed: account 123 not found or not accessible'
+      );
+    });
   });
 
   describe('listAlertPolicies action', () => {

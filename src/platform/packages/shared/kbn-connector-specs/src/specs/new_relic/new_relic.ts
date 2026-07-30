@@ -77,6 +77,16 @@ const getAccountId = (ctx: ActionContext): number => {
   return accountId;
 };
 
+// NerdGraph returns `account: null` (with no top-level errors) when the API key
+// cannot access the configured accountId. Guard before dereferencing so callers
+// get a clear misconfiguration error instead of a TypeError.
+const requireAccount = <T>(account: T | null | undefined, action: string, accountId: number): T => {
+  if (account == null) {
+    throw new Error(`New Relic ${action} failed: account ${accountId} not found or not accessible`);
+  }
+  return account;
+};
+
 async function graphqlRequest<T>(
   ctx: ActionContext,
   action: string,
@@ -238,7 +248,7 @@ export const NewRelic: ConnectorSpec = {
     unacknowledgeIssue: {
       isTool: true,
       description:
-        'Reverse the acknowledgement on a New Relic AI issue via aiIssuesUnackIssue, re-opening it for handoff or when remediation failed.',
+        'Reverse the acknowledgment on a New Relic AI issue via aiIssuesUnackIssue, re-opening it for handoff or when remediation failed.',
       input: NewRelicUnacknowledgeIssueInputSchema,
       handler: async (ctx, input: NewRelicUnacknowledgeIssueInput) => {
         const data = await graphqlRequest<{
@@ -295,6 +305,7 @@ export const NewRelic: ConnectorSpec = {
         'List New Relic AI issues (deduplicated, correlated groups of incidents) for an account, filterable by state, priority, entity GUIDs, and time window. Defaults to the last 24 hours if no window is given. Drives triage and enrichment branching in a workflow. Returns nextCursor for pagination.',
       input: NewRelicListIssuesInputSchema,
       handler: async (ctx, input: NewRelicListIssuesInput) => {
+        const accountId = getAccountId(ctx);
         const filter: Record<string, unknown> = {};
         if (input.states) filter.states = input.states;
         if (input.priority) filter.priority = input.priority;
@@ -309,7 +320,7 @@ export const NewRelic: ConnectorSpec = {
                   nextCursor: string | null;
                 };
               };
-            };
+            } | null;
           };
         }>(
           ctx,
@@ -345,14 +356,14 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: getAccountId(ctx),
+            accountId,
             filter: Object.keys(filter).length ? filter : undefined,
             timeWindow,
             cursor: input.cursor,
           },
           AI_ISSUES_HEADERS
         );
-        return data.actor.account.aiIssues.issues;
+        return requireAccount(data.actor.account, 'listIssues', accountId).aiIssues.issues;
       },
     },
 
@@ -362,6 +373,7 @@ export const NewRelic: ConnectorSpec = {
         'List the individual New Relic incidents (condition violations) grouped under AI issues for an account, filterable by state, priority, entity GUIDs, and time window. Use for granular per-signal handling. Returns nextCursor for pagination.',
       input: NewRelicListIncidentsInputSchema,
       handler: async (ctx, input: NewRelicListIncidentsInput) => {
+        const accountId = getAccountId(ctx);
         const filter: Record<string, unknown> = {};
         if (input.states) filter.states = input.states;
         if (input.priority) filter.priority = input.priority;
@@ -376,7 +388,7 @@ export const NewRelic: ConnectorSpec = {
                   nextCursor: string | null;
                 };
               };
-            };
+            } | null;
           };
         }>(
           ctx,
@@ -405,14 +417,14 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: getAccountId(ctx),
+            accountId,
             filter: Object.keys(filter).length ? filter : undefined,
             timeWindow,
             cursor: input.cursor,
           },
           AI_ISSUES_HEADERS
         );
-        return data.actor.account.aiIssues.incidents;
+        return requireAccount(data.actor.account, 'listIncidents', accountId).aiIssues.incidents;
       },
     },
 
@@ -502,9 +514,10 @@ export const NewRelic: ConnectorSpec = {
         'List existing New Relic muting rules for an account, so a workflow can check for an existing rule before creating or deleting one (idempotency).',
       input: NewRelicListMutingRulesInputSchema,
       handler: async (ctx) => {
+        const accountId = getAccountId(ctx);
         const data = await graphqlRequest<{
           actor: {
-            account: { alerts: { mutingRules: Array<Record<string, unknown>> } };
+            account: { alerts: { mutingRules: Array<Record<string, unknown>> } } | null;
           };
         }>(
           ctx,
@@ -524,9 +537,12 @@ export const NewRelic: ConnectorSpec = {
               }
             }
           }`,
-          { accountId: getAccountId(ctx) }
+          { accountId }
         );
-        return { mutingRules: data.actor.account.alerts.mutingRules };
+        return {
+          mutingRules: requireAccount(data.actor.account, 'listMutingRules', accountId).alerts
+            .mutingRules,
+        };
       },
     },
 
@@ -536,9 +552,12 @@ export const NewRelic: ConnectorSpec = {
         'Run an NRQL query against a New Relic account and return the results. The primary read path for metric, event-count, and health-check enrichment inside a workflow, e.g. "SELECT count(*) FROM Transaction SINCE 1 HOUR AGO".',
       input: NewRelicRunNrqlQueryInputSchema,
       handler: async (ctx, input: NewRelicRunNrqlQueryInput) => {
+        const accountId = getAccountId(ctx);
         const data = await graphqlRequest<{
           actor: {
-            account: { nrql: { results: Array<Record<string, unknown>>; metadata?: unknown } };
+            account: {
+              nrql: { results: Array<Record<string, unknown>>; metadata?: unknown };
+            } | null;
           };
         }>(
           ctx,
@@ -553,9 +572,9 @@ export const NewRelic: ConnectorSpec = {
               }
             }
           }`,
-          { accountId: getAccountId(ctx), nrql: input.nrql, timeout: input.timeoutSeconds ?? 70 }
+          { accountId, nrql: input.nrql, timeout: input.timeoutSeconds ?? 70 }
         );
-        return data.actor.account.nrql;
+        return requireAccount(data.actor.account, 'runNrqlQuery', accountId).nrql;
       },
     },
 
@@ -607,6 +626,7 @@ export const NewRelic: ConnectorSpec = {
         'List New Relic alert policies for an account, optionally filtered by a name substring, to resolve policy context or target a muting rule or condition action.',
       input: NewRelicListAlertPoliciesInputSchema,
       handler: async (ctx, input: NewRelicListAlertPoliciesInput) => {
+        const accountId = getAccountId(ctx);
         const data = await graphqlRequest<{
           actor: {
             account: {
@@ -616,7 +636,7 @@ export const NewRelic: ConnectorSpec = {
                   nextCursor: string | null;
                 };
               };
-            };
+            } | null;
           };
         }>(
           ctx,
@@ -634,12 +654,13 @@ export const NewRelic: ConnectorSpec = {
             }
           }`,
           {
-            accountId: getAccountId(ctx),
+            accountId,
             searchCriteria: input.nameFilter ? { nameLike: input.nameFilter } : undefined,
             cursor: input.cursor,
           }
         );
-        return data.actor.account.alerts.policiesSearch;
+        return requireAccount(data.actor.account, 'listAlertPolicies', accountId).alerts
+          .policiesSearch;
       },
     },
 
@@ -649,11 +670,14 @@ export const NewRelic: ConnectorSpec = {
         'List the NRQL alert conditions under a New Relic alert policy, to audit existing conditions or pick one to reference.',
       input: NewRelicListNrqlConditionsInputSchema,
       handler: async (ctx, input: NewRelicListNrqlConditionsInput) => {
+        const accountId = getAccountId(ctx);
         const data = await graphqlRequest<{
           actor: {
             account: {
-              alerts: { nrqlConditionsSearch: { nrqlConditions: Array<Record<string, unknown>> } };
-            };
+              alerts: {
+                nrqlConditionsSearch: { nrqlConditions: Array<Record<string, unknown>> };
+              };
+            } | null;
           };
         }>(
           ctx,
@@ -676,9 +700,12 @@ export const NewRelic: ConnectorSpec = {
               }
             }
           }`,
-          { accountId: getAccountId(ctx), searchCriteria: { policyId: input.policyId } }
+          { accountId, searchCriteria: { policyId: input.policyId } }
         );
-        return { nrqlConditions: data.actor.account.alerts.nrqlConditionsSearch.nrqlConditions };
+        return {
+          nrqlConditions: requireAccount(data.actor.account, 'listNrqlConditions', accountId).alerts
+            .nrqlConditionsSearch.nrqlConditions,
+        };
       },
     },
 

@@ -22,7 +22,7 @@ You can create a New Relic connector in **{{stack-manage-app}} > {{connectors-ui
 ### Connector configuration [new-relic-connector-configuration]
 
 User API Key
-:   A New Relic User API key (prefixed `NRAK-`). Create one under your user profile > API keys.
+:   A New Relic User API key (prefixed `NRAK-`). Create one under your user profile → API keys.
 
 Account ID
 :   The numeric New Relic account ID this connector operates against. Found in the New Relic UI under your account name, or in account-scoped URLs as `one.newrelic.com/accounts/<accountId>`. To manage another account, create a separate connector instance.
@@ -37,7 +37,7 @@ All actions below operate on the account ID configured on the connector.
 | Action | Description |
 |--------|-------------|
 | `acknowledgeIssue` | Acknowledge an AI issue via `aiIssuesAckIssue`. Parameters: `issueId` (required). |
-| `unacknowledgeIssue` | Reverse an acknowledgement via `aiIssuesUnackIssue`. Parameters: `issueId` (required). |
+| `unacknowledgeIssue` | Reverse an acknowledgment via `aiIssuesUnackIssue`. Parameters: `issueId` (required). |
 | `resolveIssue` | Resolve/close an AI issue via `aiIssuesResolveIssue`. Parameters: `issueId` (required). |
 | `listIssues` | List AI issues with optional `states`, `priority`, `entityGuids`, `since`/`until`, and `cursor` filters. |
 | `listIncidents` | List the individual incidents grouped under issues, with the same filter shape as `listIssues`. |
@@ -46,7 +46,7 @@ All actions below operate on the account ID configured on the connector.
 | `deleteMutingRule` | Delete a muting rule via `alertsMutingRuleDelete`. Parameters: `mutingRuleId` (required). |
 | `listMutingRules` | List existing muting rules for the account. |
 | `runNrqlQuery` | Run an NRQL query and return the results. Parameters: `nrql` (required), `timeoutSeconds`. |
-| `createDeploymentMarker` | Record a change event via `changeTrackingCreateEvent`. Parameters: `entityGuid` (required), `version`, `description`, `user`, `deploymentType`, `groupId`, `timestamp`. |
+| `createDeploymentMarker` | Record a change event via `changeTrackingCreateEvent`. Parameters: `entityGuid`, `version` (both required), `description`, `user`, `deploymentType`, `groupId`, `timestamp`. |
 | `listAlertPolicies` | List alert policies, optionally filtered by name. Parameters: `nameFilter`, `cursor`. |
 | `listNrqlConditions` | List the NRQL conditions under a policy. Parameters: `policyId` (required). |
 | `createAlertPolicy` | Provision a new alert policy via `alertsPolicyCreate`. Parameters: `name` (required), `incidentPreference`. |
