@@ -15,13 +15,15 @@ import type { Cert } from '../../../../../common/runtime_types';
 configure({ testIdAttribute: 'data-test-subj' });
 
 describe('FingerprintCol', () => {
+  const sha1 = 'ca06f56b258b7a0d4f2b05470939478651151984'.toUpperCase();
+  const sha256 = '3111500c4a66012cdae333ec3fca1c9dde45c954440e7ee413716bff3663c074'.toUpperCase();
   const cert = {
     monitors: [{ name: '', id: 'github', url: 'https://github.com/' }],
     not_after: '2020-05-08T00:00:00.000Z',
     not_before: '2018-05-08T00:00:00.000Z',
     issuer: 'DigiCert SHA2 Extended Validation Server CA',
-    sha1: 'ca06f56b258b7a0d4f2b05470939478651151984'.toUpperCase(),
-    sha256: '3111500c4a66012cdae333ec3fca1c9dde45c954440e7ee413716bff3663c074'.toUpperCase(),
+    sha1,
+    sha256,
     common_name: 'github.com',
     configId: '123',
   } as Cert;
@@ -37,7 +39,7 @@ describe('FingerprintCol', () => {
     expect(await findByText('SHA 1')).toBeInTheDocument();
     expect(await findByText('SHA 256')).toBeInTheDocument();
 
-    expect(await findByTestId(cert.sha1)).toBeInTheDocument();
-    expect(await findByTestId(cert.sha256)).toBeInTheDocument();
+    expect(await findByTestId(sha1)).toBeInTheDocument();
+    expect(await findByTestId(sha256)).toBeInTheDocument();
   });
 });
