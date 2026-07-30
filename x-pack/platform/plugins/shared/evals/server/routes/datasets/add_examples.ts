@@ -122,7 +122,7 @@ export const registerAddExamplesRoute = ({
           logger.error(`Failed to add evaluation dataset examples: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to add evaluation dataset examples: ${errorMessage}` },
+            body: { message: 'Failed to add evaluation dataset examples' },
           });
         }
       }
