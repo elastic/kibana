@@ -10,7 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Rootly } from './rootly';
-import { RootlyCreateIncidentInputSchema } from './types';
+import { RootlyCreateIncidentInputSchema, RootlyAddIncidentSubscribersInputSchema } from './types';
 
 describe('Rootly', () => {
   const mockClient = {
@@ -133,6 +133,24 @@ describe('Rootly', () => {
         labels: 'platform:osx,version:1.29',
       });
       expect(result.success).toBe(false);
+    });
+
+    it('should reject more than 50 label entries', () => {
+      const labels = Object.fromEntries(
+        Array.from({ length: 51 }, (_, i) => [`key${i}`, `value${i}`])
+      );
+      const result = RootlyCreateIncidentInputSchema.safeParse({ title: 'DB down', labels });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject more than 50 serviceIds/groupIds', () => {
+      const ids = Array.from({ length: 51 }, (_, i) => `id${i}`);
+      expect(
+        RootlyCreateIncidentInputSchema.safeParse({ title: 'DB down', serviceIds: ids }).success
+      ).toBe(false);
+      expect(
+        RootlyCreateIncidentInputSchema.safeParse({ title: 'DB down', groupIds: ids }).success
+      ).toBe(false);
     });
   });
 
@@ -337,6 +355,15 @@ describe('Rootly', () => {
         { data: { type: 'incidents', attributes: { user_ids: ['u1', 'u2'] } } },
         INCLUDE_SERVICES_GROUPS
       );
+    });
+
+    it('should reject more than 50 userIds', () => {
+      const userIds = Array.from({ length: 51 }, (_, i) => `u${i}`);
+      const result = RootlyAddIncidentSubscribersInputSchema.safeParse({
+        incidentId: 'inc1',
+        userIds,
+      });
+      expect(result.success).toBe(false);
     });
   });
 

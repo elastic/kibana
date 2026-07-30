@@ -12,6 +12,14 @@ import { z } from '@kbn/zod/v4';
 const MAX_ID_LENGTH = 64;
 const MAX_TITLE_LENGTH = 500;
 const MAX_TEXT_LENGTH = 10000;
+const MAX_ARRAY_LENGTH = 50;
+const MAX_LABEL_ENTRIES = 50;
+
+const labelsSchema = z
+  .record(z.string().max(100), z.string().max(200))
+  .refine((labels) => Object.keys(labels).length <= MAX_LABEL_ENTRIES, {
+    message: `Labels object must not contain more than ${MAX_LABEL_ENTRIES} entries.`,
+  });
 
 export interface JsonApiRelationshipRef {
   id: string;
@@ -57,10 +65,12 @@ export const RootlyCreateIncidentInputSchema = z.object({
     .describe('Severity resource ID. Use listSeverities to resolve a real ID.'),
   serviceIds: z
     .array(z.string().max(MAX_ID_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Affected service resource IDs.'),
   groupIds: z
     .array(z.string().max(MAX_ID_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Owning team (group) resource IDs.'),
   status: z
@@ -70,8 +80,7 @@ export const RootlyCreateIncidentInputSchema = z.object({
       "Initial incident status. Defaults to Rootly's standard initial status when omitted."
     ),
   private: z.boolean().optional().describe('Whether the incident is private.'),
-  labels: z
-    .record(z.string().max(100), z.string().max(200))
+  labels: labelsSchema
     .optional()
     .describe(
       'Labels to attach to the incident, as a key-value map (e.g. {"platform": "osx", "version": "1.29"}).'
@@ -93,10 +102,12 @@ export const RootlyListIncidentsInputSchema = z.object({
   severityId: z.string().max(MAX_ID_LENGTH).optional().describe('Filter by severity resource ID.'),
   serviceIds: z
     .array(z.string().max(MAX_ID_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Filter by affected service resource IDs.'),
   teamIds: z
     .array(z.string().max(MAX_ID_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Filter by owning team (group) resource IDs.'),
   search: z
@@ -132,14 +143,15 @@ export const RootlyUpdateIncidentInputSchema = z.object({
   severityId: z.string().max(MAX_ID_LENGTH).optional().describe('New severity resource ID.'),
   serviceIds: z
     .array(z.string().max(MAX_ID_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Replacement set of affected service resource IDs.'),
   groupIds: z
     .array(z.string().max(MAX_ID_LENGTH))
+    .max(MAX_ARRAY_LENGTH)
     .optional()
     .describe('Replacement set of owning team (group) resource IDs.'),
-  labels: z
-    .record(z.string().max(100), z.string().max(200))
+  labels: labelsSchema
     .optional()
     .describe('Replacement key-value map of labels (e.g. {"platform": "osx", "version": "1.29"}).'),
 });
@@ -248,6 +260,7 @@ export const RootlyAddIncidentSubscribersInputSchema = z.object({
   userIds: z
     .array(z.string().max(MAX_ID_LENGTH))
     .min(1)
+    .max(MAX_ARRAY_LENGTH)
     .describe('User IDs to subscribe to incident updates.'),
 });
 export type RootlyAddIncidentSubscribersInput = z.infer<
