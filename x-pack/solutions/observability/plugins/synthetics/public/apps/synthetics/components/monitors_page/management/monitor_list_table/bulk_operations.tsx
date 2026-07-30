@@ -170,6 +170,9 @@ export const BulkOperations = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.synthetics.bulkOperations.popoverAriaLabel', {
+        defaultMessage: 'Bulk actions for the selected monitors',
+      })}
       button={
         <EuiButton
           data-test-subj="syntheticsBulkActionsButton"

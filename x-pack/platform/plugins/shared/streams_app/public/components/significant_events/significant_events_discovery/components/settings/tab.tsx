@@ -27,6 +27,7 @@ import {
   EuiTextArea,
   EuiTextColor,
   EuiToolTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -173,6 +174,7 @@ export function SettingsTab() {
 
   const [isSaving, setIsSaving] = useState(false);
   const [isConfirmingZeroMatch, setIsConfirmingZeroMatch] = useState(false);
+  const zeroMatchConfirmModalTitleId = useGeneratedHtmlId({ prefix: 'zeroMatchConfirmModalTitle' });
 
   const hasTuningConfigChanges = draftConfigYaml !== savedConfigYamlState;
   const hasChanges =
@@ -884,11 +886,13 @@ export function SettingsTab() {
 
       {isConfirmingZeroMatch && (
         <EuiConfirmModal
+          aria-labelledby={zeroMatchConfirmModalTitleId}
           data-test-subj="streams-settings-zero-match-confirm"
           title={i18n.translate(
             'xpack.streams.significantEventsDiscovery.settings.zeroMatchConfirmTitle',
             { defaultMessage: 'No streams match these patterns' }
           )}
+          titleProps={{ id: zeroMatchConfirmModalTitleId }}
           onCancel={() => setIsConfirmingZeroMatch(false)}
           onConfirm={handleConfirmZeroMatch}
           cancelButtonText={i18n.translate(
