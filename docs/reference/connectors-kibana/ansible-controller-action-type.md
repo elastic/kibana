@@ -55,7 +55,7 @@ The connector has the following actions:
 :   Discover templates and launch-time prompts (`ask_*`, survey defaults).
 
 `launchJobTemplate`
-:   Launch a job (`extra_vars`, `limit`, `inventory`, credentials, tags, etc.). Mutates infrastructure.
+:   Launch a job (`extra_vars`, `limit`, `inventory`, credentials, tags, and so on). Mutates infrastructure.
 
 `listJobs` / `getJob` / `getJobStdout` / `listJobEvents` / `cancelJob`
 :   Monitor and diagnose job runs. Stdout is capped for agent-safe context size.
