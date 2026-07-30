@@ -64,8 +64,19 @@ export class TimePickerPageObject extends FtrService {
     // Wait for the page to settle before detecting, otherwise a stale picker
     // from a previous app may briefly appear during navigation.
     await this.header.awaitGlobalLoadingIndicatorHidden();
+    // Wait until a picker has actually rendered before classifying. A slow mount
+    // of the new picker (e.g. delayed ES|QL time-field resolution after a cold
+    // navigation) must not be read as "legacy", which would take a code path that
+    // clicks legacy-only subjects and burns the outer retry until it times out.
+    await this.retry.waitForWithTimeout('a date picker to render', 30_000, async () => {
+      const [newRendered, legacyRendered] = await Promise.all([
+        this.testSubjects.exists('dateRangePickerControlButton', { timeout: 1000 }),
+        this.testSubjects.exists('superDatePickerToggleQuickMenuButton', { timeout: 1000 }),
+      ]);
+      return newRendered || legacyRendered;
+    });
     const isNew = await this.testSubjects.exists('dateRangePickerControlButton', {
-      timeout: 5000,
+      timeout: 1000,
     });
     this.log.debug(
       `Detected date picker variant: ${isNew ? 'DateRangePicker' : 'EuiSuperDatePicker'}`
