@@ -10,13 +10,15 @@ import type { ChangeHistoryClient } from '@kbn/change-history';
 import { RULE_CHANGES_HISTORY_OBJECT_TYPE } from './constants';
 import { RuleChangesHistoryService } from './rule_changes_history_service';
 import type { LogRuleChangesParams } from './types';
+import { createRuleResponse } from '../test_utils';
 
 const createMockClient = () => ({
   initialize: jest.fn().mockResolvedValue(undefined),
   logBulk: jest.fn().mockResolvedValue(undefined),
 });
 
-const snapshot: Record<string, unknown> = { id: 'rule-1', metadata: { name: 'my rule' } };
+const rule = createRuleResponse({ id: 'rule-1', metadata: { name: 'my rule' } });
+const { version: _occVersion, ...snapshot } = rule;
 
 describe('RuleChangesHistoryService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -88,13 +90,14 @@ describe('RuleChangesHistoryService', () => {
 
     it('maps each entry to an ObjectChange using the service objectType and a normalized ISO timestamp', async () => {
       const timestamp = new Date('2024-01-01T00:00:00.000Z');
-      const secondSnapshot: Record<string, unknown> = { id: 'rule-2' };
+      const secondRule = createRuleResponse({ id: 'rule-2' });
+      const { version: _secondOccVersion, ...secondSnapshot } = secondRule;
 
       await service.logRuleChanges({
         ...baseParams,
         entries: [
           { id: 'rule-1', snapshot, sequence: 3 },
-          { id: 'rule-2', snapshot: secondSnapshot },
+          { id: 'rule-2', snapshot: secondSnapshot, sequence: 4 },
         ],
         timestamp,
       });
@@ -112,7 +115,7 @@ describe('RuleChangesHistoryService', () => {
           objectType: RULE_CHANGES_HISTORY_OBJECT_TYPE,
           objectId: 'rule-2',
           timestamp: timestamp.toISOString(),
-          sequence: undefined,
+          sequence: 4,
           snapshot: secondSnapshot,
         },
       ]);

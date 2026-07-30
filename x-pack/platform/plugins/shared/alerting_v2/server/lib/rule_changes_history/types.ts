@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+
+/** Domain rule snapshot persisted as `object.snapshot` (API response minus SO OCC token). */
+export type RuleChangesHistorySnapshot = Omit<RuleResponse, 'version'>;
+
 /** Scope (module + dataset + object type) used for all rule changes history writes. */
 export interface RuleChangesHistoryScope {
   module: string;
@@ -21,14 +26,10 @@ export interface RuleChangesHistoryAuthor {
 /** A single rule change to log. */
 export interface RuleChangesHistoryEntry {
   id: string;
-  /**
-   * Post-change object state persisted as `object.snapshot`. Callers pass the
-   * domain rule (API response shape); kept generic so change history stays
-   * agnostic of the rule schema.
-   */
-  snapshot: Record<string, unknown>;
+  /** Domain rule (API response), not SO attributes. */
+  snapshot: RuleChangesHistorySnapshot;
   /** Monotonic rule sequence; persisted as `object.sequence`. */
-  sequence?: number;
+  sequence: number;
 }
 
 /** ECS `event.type` categorization for a rule change. */

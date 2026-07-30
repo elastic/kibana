@@ -21,37 +21,39 @@ import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import { isUndefined, omitBy } from 'lodash';
 import { RuleChangesHistoryAction } from '../../../../server/lib/rule_changes_history/audit_actions';
+import type { RuleChangesHistorySnapshot } from '../../../../server/lib/rule_changes_history/types';
 import { apiTest, buildCreateRuleData } from '../fixtures';
 
 const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleResponse): void => {
-  const snapshot = doc.object.snapshot as Partial<RuleResponse>;
+  const snapshot = doc.object.snapshot as RuleChangesHistorySnapshot;
+  const { version: _occVersion, ...expectedSnapshot } = expectedRule;
 
   expect(snapshot).toMatchObject(
     omitBy(
       {
-        id: expectedRule.id,
-        kind: expectedRule.kind,
-        enabled: expectedRule.enabled,
-        time_field: expectedRule.time_field,
-        metadata: expectedRule.metadata,
-        schedule: expectedRule.schedule,
-        query: expectedRule.query,
-        recovery_strategy: expectedRule.recovery_strategy,
-        no_data_strategy: expectedRule.no_data_strategy,
-        state_transition: expectedRule.state_transition,
-        grouping: expectedRule.grouping,
-        artifacts: expectedRule.artifacts,
-        createdBy: expectedRule.createdBy,
-        createdAt: expectedRule.createdAt,
-        updatedBy: expectedRule.updatedBy,
-        updatedAt: expectedRule.updatedAt,
+        id: expectedSnapshot.id,
+        kind: expectedSnapshot.kind,
+        enabled: expectedSnapshot.enabled,
+        time_field: expectedSnapshot.time_field,
+        metadata: expectedSnapshot.metadata,
+        schedule: expectedSnapshot.schedule,
+        query: expectedSnapshot.query,
+        recovery_strategy: expectedSnapshot.recovery_strategy,
+        no_data_strategy: expectedSnapshot.no_data_strategy,
+        state_transition: expectedSnapshot.state_transition,
+        grouping: expectedSnapshot.grouping,
+        artifacts: expectedSnapshot.artifacts,
+        createdBy: expectedSnapshot.createdBy,
+        createdAt: expectedSnapshot.createdAt,
+        updatedBy: expectedSnapshot.updatedBy,
+        updatedAt: expectedSnapshot.updatedAt,
       },
       isUndefined
     )
   );
 
   // Cover the full payload shape so significant schema drift fails loudly.
-  expect(snapshot).toMatchObject(expectedRule);
+  expect(snapshot).toMatchObject(expectedSnapshot);
 };
 
 const expectSequences = (entries: ChangeHistoryDocument[], expected: number[]): void => {
@@ -325,9 +327,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expect(disableEntries[0].object.sequence).toBe(disabled.metadata.version);
-      // Bulk enable/disable emit without the SO OCC `version` token.
-      const { version: _occVersion, ...disabledSnapshot } = disabled;
-      expectSnapshotShape(disableEntries[0], disabledSnapshot);
+      expectSnapshotShape(disableEntries[0], disabled);
       expect(disableEntries[0].object.snapshot).toMatchObject({ enabled: false });
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({
@@ -395,9 +395,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         },
       });
       expect(enableEntries[0].object.sequence).toBe(enabled.metadata.version);
-      // Bulk enable/disable emit without the SO OCC `version` token.
-      const { version: _occVersion, ...enabledSnapshot } = enabled;
-      expectSnapshotShape(enableEntries[0], enabledSnapshot);
+      expectSnapshotShape(enableEntries[0], enabled);
       expect(enableEntries[0].object.snapshot).toMatchObject({ enabled: true });
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({
@@ -453,11 +451,9 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
       });
 
       // Snapshot is the pre-delete rule with the bumped configuration version.
-      // OCC `version` is not stamped on the delete emission.
-      const { version: _occVersion, metadata, ...beforeDeleteSnapshot } = beforeDelete;
       expectSnapshotShape(deleteEntries[0], {
-        ...beforeDeleteSnapshot,
-        metadata: { ...metadata, version: expectedDeleteSequence },
+        ...beforeDelete,
+        metadata: { ...beforeDelete.metadata, version: expectedDeleteSequence },
       });
 
       const allEntries = await apiServices.alertingV2.ruleChangesHistory.find({

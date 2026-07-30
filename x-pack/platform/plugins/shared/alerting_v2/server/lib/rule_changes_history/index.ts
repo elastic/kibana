@@ -22,6 +22,7 @@ export type {
   RuleChangesHistoryEntry,
   RuleChangesHistoryEventType,
   RuleChangesHistoryScope,
+  RuleChangesHistorySnapshot,
 } from './types';
 export type { RuleChangesHistoryServiceContract } from './rule_changes_history_service';
 export { RuleChangesHistoryService } from './rule_changes_history_service';
