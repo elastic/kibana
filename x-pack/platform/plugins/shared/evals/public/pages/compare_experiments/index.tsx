@@ -146,6 +146,12 @@ const ExperimentHeader: React.FC<{
   const timestamp = experimentData?.timestamp;
   const taskModel = experimentData?.task_model?.id;
   const evaluatorModel = experimentData?.evaluator_model?.id;
+  const displayName = experimentData?.experiment_name || experimentId;
+  const detailLocation = {
+    pathname: `/experiments/${encodeURIComponent(experimentId)}`,
+    search: executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '',
+  };
+  const detailHref = history.createHref(detailLocation);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">
@@ -170,15 +176,26 @@ const ExperimentHeader: React.FC<{
       <EuiSpacer size="xs" />
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={i18n.VIEW_EXPERIMENT_DETAIL}>
+          <EuiToolTip
+            content={
+              <>
+                {i18n.VIEW_EXPERIMENT_DETAIL}
+                <br />
+                {experimentId}
+              </>
+            }
+          >
             <EuiLink
-              onClick={() => {
-                const path = `/experiments/${encodeURIComponent(experimentId)}`;
-                const query = executionId ? `?execution_id=${encodeURIComponent(executionId)}` : '';
-                history.push(`${path}${query}`);
+              href={detailHref}
+              onClick={(event) => {
+                if (event.metaKey || event.ctrlKey || event.shiftKey || event.button === 1) {
+                  return;
+                }
+                event.preventDefault();
+                history.push(detailLocation);
               }}
             >
-              {experimentId}
+              {displayName}
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
