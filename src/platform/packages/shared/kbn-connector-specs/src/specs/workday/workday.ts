@@ -134,6 +134,7 @@ export const Workday: ConnectorSpec = {
       )
       .meta({
         label: 'Tenant URL',
+        validate: { allowedHosts: true },
         placeholder: 'https://mycompany.workday.com',
         helpText: 'Your Workday tenant base URL. Find it in the URL when you log in to Workday.',
       }),
