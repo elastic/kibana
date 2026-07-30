@@ -2355,6 +2355,7 @@
         "@types/stats-lite",
         "@types/textarea-caret",
         "email-addresses",
+        "graphql",
         "murmurhash",
         "stats-lite",
         "textarea-caret"
