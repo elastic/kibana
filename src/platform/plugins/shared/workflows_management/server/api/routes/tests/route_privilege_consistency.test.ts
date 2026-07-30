@@ -173,9 +173,9 @@ const INTERNAL_WRITE_EXCEPTIONS: Record<string, string[]> = {
 };
 
 /**
- * Routes with conditional privilege behaviour. These routes use `anyRequired`
- * to make `readExecution` optional: when the user holds it, extra execution
- * data is included; when not, the response omits it. Both modes must pass
+ * Routes with conditional privilege behaviour. These routes use
+ * `extendedPrivileges` so optional privileges (e.g. `readExecution`) are
+ * surfaced in `authzResult` without gating access. Both modes must pass
  * the privilege check.
  */
 const CONDITIONAL_PRIVILEGE_TESTS: Array<{
@@ -189,7 +189,9 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read only (no execution history)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: false,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [WorkflowsManagementApiActions.read],
   },
@@ -198,7 +200,9 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution (with execution history)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [
       WorkflowsManagementApiActions.read,
@@ -206,11 +210,28 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     ],
   },
   {
+    routeKey: 'GET:/api/workflows',
+    label: 'read + readExecution + readManagedExecution (with managed execution history)',
+    authzResult: {
+      [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
+      [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: true,
+    },
+    effectivePrivileges: [
+      WorkflowsManagementApiActions.read,
+      WorkflowsManagementApiActions.readExecution,
+      WorkflowsManagementApiActions.readManagedExecution,
+    ],
+  },
+  {
     routeKey: 'GET:/api/workflows/stats',
     label: 'read only (no execution stats)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: false,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [WorkflowsManagementApiActions.read],
   },
@@ -219,11 +240,28 @@ const CONDITIONAL_PRIVILEGE_TESTS: Array<{
     label: 'read + readExecution (with execution stats)',
     authzResult: {
       [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
       [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: false,
     },
     effectivePrivileges: [
       WorkflowsManagementApiActions.read,
       WorkflowsManagementApiActions.readExecution,
+    ],
+  },
+  {
+    routeKey: 'GET:/api/workflows/stats',
+    label: 'read + readExecution + readManagedExecution (with managed execution stats)',
+    authzResult: {
+      [WorkflowsManagementApiActions.read]: true,
+      [WorkflowsManagementApiActions.readManaged]: false,
+      [WorkflowsManagementApiActions.readExecution]: true,
+      [WorkflowsManagementApiActions.readManagedExecution]: true,
+    },
+    effectivePrivileges: [
+      WorkflowsManagementApiActions.read,
+      WorkflowsManagementApiActions.readExecution,
+      WorkflowsManagementApiActions.readManagedExecution,
     ],
   },
 ];
@@ -704,8 +742,9 @@ describe('Route privilege/ES-operation consistency', () => {
           path: route.path,
         });
 
-        // For routes with anyRequired, simulate the platform populating
-        // authzResult with all privileges granted (maximal access).
+        // Populate authzResult with declared required privileges (maximal
+        // required-privilege access). Optional extendedPrivileges are covered by
+        // the conditional privilege mode tests below.
         const authzResult: Record<string, boolean> = {};
         for (const p of privileges) {
           authzResult[p] = true;

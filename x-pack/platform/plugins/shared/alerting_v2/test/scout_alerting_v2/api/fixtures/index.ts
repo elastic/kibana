@@ -116,6 +116,7 @@ export {
 } from '../../common/roles';
 export {
   buildAlertEvent,
+  buildExternalAlertEvent,
   buildCreateRuleData,
   buildCreateActionPolicyData,
   buildWorkflowYaml,
