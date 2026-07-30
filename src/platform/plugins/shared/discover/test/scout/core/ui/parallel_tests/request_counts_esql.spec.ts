@@ -10,7 +10,8 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
-import { measureSearchRequests } from '../fixtures';
+
+const ESQL_ENDPOINT = '/internal/search/esql_async';
 
 spaceTest.describe('Discover request counts - ES|QL mode', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
@@ -30,52 +31,63 @@ spaceTest.describe('Discover request counts - ES|QL mode', { tag: tags.deploymen
     await discoverScoutSpace.teardownDiscoverDefaults();
   });
 
-  spaceTest('ES|QL mode request counts', async ({ page, pageObjects }) => {
+  spaceTest('ES|QL mode request counts', async ({ page, pageObjects, network }) => {
     // This test collapses the 7 scenarios of the original FTR suite (which shared one browser
     // session) into a single test, so it needs more than the default 60s budget — CI serverless
     // runs exceed it on esql_async searches alone.
     spaceTest.setTimeout(120_000);
+
+    // In ES|QL mode the chart (Lens) fires its esql_async request as a React effect that runs
+    // after the docs response is processed — i.e. after waitUntilSearchingHasFinished() returns.
+    // Awaiting a waitForResponse for the chart endpoint after the docs wait keeps the
+    // network.countMatchingRequests listener alive long enough to capture both requests.
+    const waitForChartRequest = () =>
+      page
+        .waitForResponse((r) => r.url().includes(ESQL_ENDPOINT), { timeout: 10_000 })
+        .catch(() => {});
+
     // setCodeEditorValue fires onDidChangeContent which Discover auto-submits after a debounce.
-    // Waiting for the search to finish ensures that debounced request completes and is visible
-    // in the resource timing buffer BEFORE measureSearchRequests clears it.
+    // Waiting for the search to finish ensures that debounced request completes and is not
+    // captured by the next network.countMatchingRequests listener.
     const resetQuery = async () => {
       await pageObjects.discover.codeEditor.setCodeEditorValue(
         'from logstash-* | where bytes > 1000 '
       );
       await pageObjects.discover.waitUntilSearchingHasFinished();
+      await waitForChartRequest();
     };
 
     await spaceTest.step('should send 2 requests (documents + chart) on submit', async () => {
       await resetQuery();
-      const count = await measureSearchRequests(page, pageObjects.discover, 'esql', 2, () =>
-        pageObjects.discover.submitQuery()
-      );
+      const count = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+        await pageObjects.discover.submitQuery();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await waitForChartRequest();
+      });
       expect(count).toBe(2);
     });
 
     await spaceTest.step('should send 2 requests (documents + chart) when refreshing', async () => {
       // No resetQuery here — tests that re-submitting an already-set query fires new requests
-      const count = await measureSearchRequests(page, pageObjects.discover, 'esql', 2, () =>
-        pageObjects.discover.submitQuery()
-      );
+      const count = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+        await pageObjects.discover.submitQuery();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await waitForChartRequest();
+      });
       expect(count).toBe(2);
     });
 
     await spaceTest.step(
       'should send 2 requests (documents + chart) when changing the query',
       async () => {
-        const count = await measureSearchRequests(
-          page,
-          pageObjects.discover,
-          'esql',
-          2,
-          async () => {
-            await pageObjects.discover.codeEditor.setCodeEditorValue(
-              'from logstash-* | where bytes > 1000 '
-            );
-            await pageObjects.discover.submitQuery();
-          }
-        );
+        const count = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+          await pageObjects.discover.codeEditor.setCodeEditorValue(
+            'from logstash-* | where bytes > 1000 '
+          );
+          await pageObjects.discover.submitQuery();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await waitForChartRequest();
+        });
         expect(count).toBe(2);
       }
     );
@@ -84,19 +96,21 @@ spaceTest.describe('Discover request counts - ES|QL mode', { tag: tags.deploymen
       'should send 2 requests (documents + chart) when changing the time range',
       async () => {
         await resetQuery();
-        const count = await measureSearchRequests(page, pageObjects.discover, 'esql', 2, () =>
-          pageObjects.datePicker.setAbsoluteRange({
+        const count = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+          await pageObjects.datePicker.setAbsoluteRange({
             from: 'Sep 21, 2015 @ 06:31:44.000',
             to: 'Sep 23, 2015 @ 00:00:00.000',
-          })
-        );
+          });
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+          await waitForChartRequest();
+        });
         expect(count).toBe(2);
       }
     );
 
     await spaceTest.step('should send no requests when toggling the chart visibility', async () => {
       await resetQuery();
-      const count = await measureSearchRequests(page, pageObjects.discover, 'esql', 0, async () => {
+      const count = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
         await pageObjects.discover.hideChart();
         await pageObjects.discover.showChart();
       });
@@ -113,61 +127,60 @@ spaceTest.describe('Discover request counts - ES|QL mode', { tag: tags.deploymen
         });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const count = await measureSearchRequests(page, pageObjects.discover, 'esql', 1, () =>
-          pageObjects.discover.showChart()
-        );
+        const count = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+          await pageObjects.discover.showChart();
+          await waitForChartRequest();
+        });
         expect(count).toBe(1);
       }
     );
 
     await spaceTest.step('should send expected requests for saved search changes', async () => {
-      // Setup between measurements also goes through measureSearchRequests (count not asserted)
-      // so it waits for both triggered requests and none can leak into the next measured count
-      await measureSearchRequests(page, pageObjects.discover, 'esql', 2, async () => {
-        await pageObjects.discover.codeEditor.setCodeEditorValue(
-          'from logstash-* | where bytes > 1000 '
-        );
-        await pageObjects.discover.submitQuery();
+      await pageObjects.discover.codeEditor.setCodeEditorValue(
+        'from logstash-* | where bytes > 1000 '
+      );
+      await pageObjects.discover.submitQuery();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await waitForChartRequest();
+      await pageObjects.datePicker.setAbsoluteRange({
+        from: 'Sep 21, 2015 @ 06:31:44.000',
+        to: 'Sep 23, 2015 @ 00:00:00.000',
       });
-      await measureSearchRequests(page, pageObjects.discover, 'esql', 2, () =>
-        pageObjects.datePicker.setAbsoluteRange({
-          from: 'Sep 21, 2015 @ 06:31:44.000',
-          to: 'Sep 23, 2015 @ 00:00:00.000',
-        })
-      );
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await waitForChartRequest();
 
-      const saveCount = await measureSearchRequests(page, pageObjects.discover, 'esql', 0, () =>
-        pageObjects.discover.saveSearch('esql test')
-      );
+      const saveCount = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+        await pageObjects.discover.saveSearch('esql test');
+      });
       expect(saveCount).toBe(0);
 
-      await measureSearchRequests(page, pageObjects.discover, 'esql', 2, async () => {
-        await pageObjects.discover.codeEditor.setCodeEditorValue(
-          'from logstash-* | where bytes < 2000 '
-        );
-        await pageObjects.discover.submitQuery();
-      });
-
-      const revertCount = await measureSearchRequests(page, pageObjects.discover, 'esql', 2, () =>
-        pageObjects.discover.revertUnsavedChanges()
+      await pageObjects.discover.codeEditor.setCodeEditorValue(
+        'from logstash-* | where bytes < 2000 '
       );
+      await pageObjects.discover.submitQuery();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await waitForChartRequest();
+
+      const revertCount = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+        await pageObjects.discover.revertUnsavedChanges();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await waitForChartRequest();
+      });
       expect(revertCount).toBe(2);
 
-      const newSearchCount = await measureSearchRequests(
-        page,
-        pageObjects.discover,
-        'esql',
-        2,
-        async () => {
-          await pageObjects.discover.clickNewSearch();
-          await pageObjects.discover.submitQuery();
-        }
-      );
+      const newSearchCount = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+        await pageObjects.discover.clickNewSearch();
+        await pageObjects.discover.submitQuery();
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await waitForChartRequest();
+      });
       expect(newSearchCount).toBe(2);
 
-      const loadCount = await measureSearchRequests(page, pageObjects.discover, 'esql', 2, () =>
-        pageObjects.discover.loadSavedSearch('esql test')
-      );
+      const loadCount = await network.countMatchingRequests(ESQL_ENDPOINT, async () => {
+        await pageObjects.discover.loadSavedSearch('esql test');
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+        await waitForChartRequest();
+      });
       expect(loadCount).toBe(2);
     });
   });

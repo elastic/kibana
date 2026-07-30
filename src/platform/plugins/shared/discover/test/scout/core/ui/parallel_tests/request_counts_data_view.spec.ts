@@ -10,10 +10,11 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
-import { measureSearchRequests } from '../fixtures';
 
 const LONG_WINDOW_LOGSTASH_KBN_ARCHIVE =
   'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern';
+
+const ESE_ENDPOINT = '/internal/search/ese';
 
 spaceTest.describe(
   'Discover request counts - data view mode',
@@ -36,73 +37,66 @@ spaceTest.describe(
 
     spaceTest(
       'should send 2 search requests (documents + chart) on page load',
-      async ({ page, pageObjects }) => {
-        await page.reload();
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 2);
+      async ({ page, pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await page.reload();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
 
     spaceTest(
       'should send 2 requests (documents + chart) when refreshing',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 2, () =>
-          pageObjects.discover.submitQuery()
-        );
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.submitQuery();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
 
     spaceTest(
       'should send 2 requests (documents + chart) when changing the query',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(
-          page,
-          pageObjects.discover,
-          'ese',
-          2,
-          async () => {
-            await pageObjects.queryBar.setQuery('bytes > 1000');
-            await pageObjects.discover.submitQuery();
-          }
-        );
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.queryBar.setQuery('bytes > 1000');
+          await pageObjects.discover.submitQuery();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
 
     spaceTest(
       'should send 2 requests (documents + chart) when changing the time range',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 2, () =>
-          pageObjects.datePicker.setAbsoluteRange({
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.datePicker.setAbsoluteRange({
             from: 'Sep 21, 2015 @ 06:31:44.000',
             to: 'Sep 23, 2015 @ 00:00:00.000',
-          })
-        );
+          });
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
 
     spaceTest(
       'should send no requests when toggling the chart visibility',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(
-          page,
-          pageObjects.discover,
-          'ese',
-          0,
-          async () => {
-            await pageObjects.discover.hideChart();
-            await pageObjects.discover.showChart();
-          }
-        );
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.hideChart();
+          await pageObjects.discover.showChart();
+        });
         expect(count).toBe(0);
       }
     );
 
     spaceTest(
       'should send a request for chart data when showing the chart after a time range change',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects, network }) => {
         await pageObjects.discover.hideChart();
         await pageObjects.datePicker.setAbsoluteRange({
           from: 'Sep 21, 2015 @ 06:31:44.000',
@@ -110,16 +104,17 @@ spaceTest.describe(
         });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 1, () =>
-          pageObjects.discover.showChart()
-        );
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.showChart();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(1);
       }
     );
 
     spaceTest(
       'should send expected requests for saved search changes',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects, network }) => {
         await pageObjects.queryBar.setQuery('bytes > 1000');
         await pageObjects.discover.submitQuery();
         await pageObjects.datePicker.setAbsoluteRange({
@@ -128,106 +123,105 @@ spaceTest.describe(
         });
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const saveCount = await measureSearchRequests(page, pageObjects.discover, 'ese', 0, () =>
-          pageObjects.discover.saveSearch('data view test')
-        );
+        const saveCount = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.saveSearch('data view test');
+        });
         expect(saveCount).toBe(0);
 
         await pageObjects.queryBar.setQuery('bytes < 2000');
         await pageObjects.discover.submitQuery();
         await pageObjects.discover.waitUntilSearchingHasFinished();
 
-        const revertCount = await measureSearchRequests(page, pageObjects.discover, 'ese', 2, () =>
-          pageObjects.discover.revertUnsavedChanges()
-        );
+        const revertCount = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.revertUnsavedChanges();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(revertCount).toBe(2);
 
-        const newSearchCount = await measureSearchRequests(
-          page,
-          pageObjects.discover,
-          'ese',
-          2,
-          () => pageObjects.discover.clickNewSearch()
-        );
+        const newSearchCount = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.clickNewSearch();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(newSearchCount).toBe(2);
 
-        const loadCount = await measureSearchRequests(page, pageObjects.discover, 'ese', 2, () =>
-          pageObjects.discover.loadSavedSearch('data view test')
-        );
+        const loadCount = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.loadSavedSearch('data view test');
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(loadCount).toBe(2);
       }
     );
 
     spaceTest(
       'should send 2 requests (documents + chart) when adding a filter',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 2, () =>
-          pageObjects.filterBar.addFilter({
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.filterBar.addFilter({
             field: 'extension',
             operator: 'is',
             value: 'jpg',
-          })
-        );
+          });
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
 
     spaceTest(
       'should send 2 requests (documents + chart) when sorting',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(
-          page,
-          pageObjects.discover,
-          'ese',
-          2,
-          async () => {
-            await pageObjects.dataGrid.openColumnMenuByField('@timestamp');
-            await page.testSubj
-              .locator('dataGridHeaderCellActionGroup-@timestamp')
-              .getByRole('button', { name: 'Sort Old-New' })
-              .click();
-          }
-        );
+      async ({ page, pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.dataGrid.openColumnMenuByField('@timestamp');
+          await page.testSubj
+            .locator('dataGridHeaderCellActionGroup-@timestamp')
+            .getByRole('button', { name: 'Sort Old-New' })
+            .click();
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
 
     spaceTest(
       'should send 1 request (chart) when changing to a breakdown field without an other bucket',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 1, () =>
-          pageObjects.discover.chooseBreakdownField('type')
-        );
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.chooseBreakdownField('type');
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(1);
       }
     );
 
     spaceTest(
       'should send 2 requests (chart + other bucket) when changing to a breakdown field with an other bucket',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 2, () =>
-          pageObjects.discover.chooseBreakdownField('geo.src')
-        );
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.chooseBreakdownField('geo.src');
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
 
     spaceTest(
       'should send 1 request (chart) when changing the chart interval',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 1, () =>
-          pageObjects.discover.setChartInterval('Day')
-        );
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.setChartInterval('Day');
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(1);
       }
     );
 
     spaceTest(
       'should send 2 requests (documents + chart) when changing the data view',
-      async ({ page, pageObjects }) => {
-        const count = await measureSearchRequests(page, pageObjects.discover, 'ese', 2, () =>
-          pageObjects.discover.selectDataView('long-window-logstash-*')
-        );
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(ESE_ENDPOINT, async () => {
+          await pageObjects.discover.selectDataView('long-window-logstash-*');
+          await pageObjects.discover.waitUntilSearchingHasFinished();
+        });
         expect(count).toBe(2);
       }
     );
