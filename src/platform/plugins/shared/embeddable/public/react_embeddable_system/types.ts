@@ -11,6 +11,7 @@ import type {
   CanLockHoverActions,
   HasSerializableState,
   HasType,
+  PublishesInteractions,
   PublishesPhaseEvents,
 } from '@kbn/presentation-publishing';
 import type React from 'react';
@@ -28,6 +29,7 @@ import type { PlacementStrategy } from './constants';
 export interface DefaultEmbeddableApi<SerializedState extends object = object>
   extends DefaultPresentationPanelApi,
     HasType,
+    PublishesInteractions,
     PublishesPhaseEvents,
     HasSerializableState<SerializedState> {}
 

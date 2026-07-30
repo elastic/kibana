@@ -203,6 +203,7 @@ export {
 export { SAVED_OBJECT_REF_NAME } from './constants';
 export { convertCamelCasedKeysToSnakeCase } from './utils/snake_case';
 export type { PublishesSearchSession } from './interfaces/fetch/publishes_search_session';
+export type { PublishesInteractions } from './interfaces/publishes_interactions';
 
 // =============================================
 // Container interfaces (merged from removed @kbn/presentation-containers package, to avoid circular dependencies between packages)
