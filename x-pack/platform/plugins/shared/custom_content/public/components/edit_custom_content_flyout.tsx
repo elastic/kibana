@@ -83,14 +83,13 @@ export const EditCustomContentFlyout = ({
 
   const handleGenerateWithChat = useCallback(() => {
     if (!agentBuilder) return;
-    agentBuilder.setChatConfig({
+    agentBuilder.openChat({
       attachments: [
         buildCustomContentContextAttachment(draftTemplate, draftEsqlQuery || undefined, panelTitle),
       ],
       browserApiTools: [updateTool],
       sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${embeddableId}`,
     });
-    agentBuilder.openChat();
     onClose();
   }, [agentBuilder, draftTemplate, draftEsqlQuery, updateTool, embeddableId, panelTitle, onClose]);
 

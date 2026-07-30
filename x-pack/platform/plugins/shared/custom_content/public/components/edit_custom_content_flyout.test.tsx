@@ -144,14 +144,13 @@ describe('EditCustomContentFlyout', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
 
-      expect(setChatConfig).toHaveBeenCalledWith(
+      expect(openChat).toHaveBeenCalledWith(
         expect.objectContaining({
           sessionTag: 'custom_content-panel-1',
           attachments: [expect.objectContaining({ type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE })],
           browserApiTools: [expect.objectContaining({ id: 'custom_content_update_panel' })],
         })
       );
-      expect(openChat).toHaveBeenCalled();
     });
 
     it('closes the flyout when clicked', async () => {
