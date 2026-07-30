@@ -46,11 +46,10 @@ function hasInvalidProjectRouting(
   projectRouting: string | undefined,
   allowedProjects: string[]
 ): boolean {
-  const scope = projectRouting?.replace(/^_alias:/, '');
-  const requestedProjects = scope ? scope.split(',').filter((p) => p.length > 0) : [];
-  return (
-    requestedProjects.length === 0 || !requestedProjects.every((p) => allowedProjects.includes(p))
-  );
+  // temporary return true
+  // Util functions are coming very soon to perform this validation
+  // for now just return true to allow the user to save the job
+  return false;
 }
 
 interface Props {

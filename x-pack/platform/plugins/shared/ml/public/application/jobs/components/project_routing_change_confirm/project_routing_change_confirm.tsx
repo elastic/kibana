@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -30,7 +30,9 @@ import type { OverlayStart } from '@kbn/core/public';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
-import type { ICPSManager } from '@kbn/cps-utils/types';
+import type { ProjectRouting } from '@kbn/es-query';
+import { useFetchProjects } from '@kbn/cps-utils';
+import type { CPSProject, ICPSManager, ProjectsData } from '@kbn/cps-utils';
 
 interface Props {
   onConfirm: () => void;
@@ -43,21 +45,22 @@ interface Props {
   };
 }
 
-function getProjectsFromRouting(
-  projectRouting: string | undefined,
-  allProjects: string[]
+function getProjectAliasesFromProjects(
+  originProject: CPSProject | null,
+  linkedProjects: CPSProject[]
 ): string[] {
-  if (!projectRouting) {
+  const aliases = linkedProjects.map((project) => project._alias);
+  if (originProject) {
+    aliases.push('_origin');
+  }
+  return aliases;
+}
+
+function getProjectAliasesFromProjectsData(projectsData: ProjectsData | null): string[] {
+  if (!projectsData) {
     return [];
   }
-  const scope = projectRouting.split(':')[1];
-  if (scope === undefined) {
-    return [];
-  }
-  if (scope === '*') {
-    return allProjects;
-  }
-  return scope.split(',').filter((project) => project.length > 0);
+  return getProjectAliasesFromProjects(projectsData.origin, projectsData.linkedProjects);
 }
 
 function getScopeChangeCounts(
@@ -97,31 +100,55 @@ export const ProjectRoutingChangeConfirmModal: FC<Props> = ({
     Map<string, { added: number; removed: number }>
   >(new Map());
 
+  const cpsManager = countsDependencies?.cpsManager;
+  const selectedProjectRouting = countsDependencies?.selectedProjectRouting;
+
+  const fetchProjects = useCallback(
+    (routing?: ProjectRouting) => {
+      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
+    },
+    [cpsManager]
+  );
+
+  const {
+    originProject,
+    linkedProjects,
+    isLoading: isSelectedProjectsLoading,
+  } = useFetchProjects(fetchProjects, selectedProjectRouting as ProjectRouting | undefined);
+
+  const selectedProjects = useMemo(
+    () => getProjectAliasesFromProjects(originProject, linkedProjects),
+    [originProject, linkedProjects]
+  );
+
   useEffect(() => {
     async function fetchData() {
-      if (!countsDependencies) {
+      if (!countsDependencies || isSelectedProjectsLoading) {
         return;
       }
-      const { jobIds, selectedProjectRouting, getJobs, cpsManager } = countsDependencies;
-      const [projects, jobs] = await Promise.all([cpsManager.fetchProjects(), getJobs(jobIds)]);
-      const allProjects = projects?.linkedProjects.map((project) => project._alias) ?? [];
-      allProjects.push('_origin');
-      const selectedProjects = getProjectsFromRouting(selectedProjectRouting, allProjects);
+      const { jobIds, getJobs } = countsDependencies;
+      const jobs = await getJobs(jobIds);
 
-      const jobScopes = jobs.reduce((acc, job) => {
-        acc[job.job_id] = getProjectsFromRouting(job.datafeed_config.project_routing, allProjects);
-        return acc;
-      }, {} as Record<string, string[]>);
+      const jobScopesEntries = await Promise.all(
+        jobs.map(async (job): Promise<[string, string[]]> => {
+          const projectRouting = job.datafeed_config.project_routing;
+          if (!projectRouting) {
+            return [job.job_id, []];
+          }
+          const projectsData = await fetchProjects(projectRouting as ProjectRouting);
+          return [job.job_id, getProjectAliasesFromProjectsData(projectsData)];
+        })
+      );
 
       const changeCounts = new Map<string, { added: number; removed: number }>();
-      for (const [jobId, currentScope] of Object.entries(jobScopes)) {
+      for (const [jobId, currentScope] of jobScopesEntries) {
         changeCounts.set(jobId, getScopeChangeCounts(currentScope, selectedProjects));
       }
       setJobScopeChangeCounts(changeCounts);
     }
 
     fetchData();
-  }, [countsDependencies]);
+  }, [countsDependencies, fetchProjects, isSelectedProjectsLoading, selectedProjects]);
 
   const modalTitle = useMemo(() => {
     if (!countsDependencies) {

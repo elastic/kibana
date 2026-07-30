@@ -5,29 +5,17 @@
  * 2.0.
  */
 
-import React, { useId, useState } from 'react';
+import React, { useCallback, useId, useState } from 'react';
 import type { FC } from 'react';
 import { EuiButtonEmpty, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ProjectRouting } from '@kbn/es-query';
+import { useFetchProjects } from '@kbn/cps-utils';
 import { DEFAULT_ML_PROJECT_ROUTING } from '../../../../../../common/constants/cps';
 import { useMlKibana } from '../../../../contexts/kibana';
 
 interface Props {
   projectRouting: string | null;
-}
-
-function getProjectCountFromRouting(
-  projectRouting: string | null,
-  totalProjectCount: number
-): number {
-  if (projectRouting == null) {
-    return 1;
-  }
-  const projectsPart = projectRouting.split(':')[1];
-  if (projectsPart === undefined || projectsPart === '*') {
-    return totalProjectCount;
-  }
-  return projectsPart.split(',').filter((project) => project.length > 0).length;
 }
 
 export const ProjectScope: FC<Props> = ({ projectRouting }) => {
@@ -38,21 +26,34 @@ export const ProjectScope: FC<Props> = ({ projectRouting }) => {
   } = useMlKibana();
   const cpsManager = cps?.cpsManager;
 
+  const fetchProjects = useCallback(
+    (routing?: ProjectRouting) => {
+      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
+    },
+    [cpsManager]
+  );
+
+  const displayedProjectRouting = projectRouting ?? DEFAULT_ML_PROJECT_ROUTING;
+  const { originProject, linkedProjects, isLoading } = useFetchProjects(
+    fetchProjects,
+    displayedProjectRouting as ProjectRouting
+  );
+
   if (!cpsManager) {
     return null;
   }
 
   const totalProjectCount = cpsManager.getTotalProjectCount();
-  const projectCount = getProjectCountFromRouting(projectRouting, totalProjectCount);
-  const displayedProjectRouting = projectRouting ?? DEFAULT_ML_PROJECT_ROUTING;
+  const projectCount = isLoading ? null : (originProject ? 1 : 0) + linkedProjects.length;
 
   const button = (
     <EuiButtonEmpty
       size="s"
       data-test-subj="mlJobListProjectScopeButton"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+      isLoading={isLoading}
     >
-      {`${projectCount}/${totalProjectCount}`}
+      {projectCount === null ? `–/${totalProjectCount}` : `${projectCount}/${totalProjectCount}`}
     </EuiButtonEmpty>
   );
 
