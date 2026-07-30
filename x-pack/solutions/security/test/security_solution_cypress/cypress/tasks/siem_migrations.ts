@@ -10,10 +10,11 @@ import {
   TRANSLATED_RULES_PAGE,
   LAUNCHPAD_PANEL_BTN,
   LAUNCHPAD_TRANSLATED_RULES_PAGE,
+  openNavigationPanel as openEssNavigationPanel,
 } from '../screens/security_header';
 import {
   FOOTER_LAUNCHPAD,
-  openNavigationPanel,
+  openNavigationPanel as openServerlessNavigationPanel,
   RULES_PANEL_BTN as RULES_PANEL_BTN_SERVERLESS,
   TRANSLATED_RULES_PAGE as TRANSLATED_RULES_PAGE_SERVERLESS,
 } from '../screens/serverless_security_header';
@@ -22,16 +23,16 @@ import { bedrockConnectorAPIPayload } from './api_calls/connectors';
 
 export const navigateToTranslatedRulesPage = (isClassicNavUpdateEnabled: boolean) => {
   if (Cypress.env('IS_SERVERLESS')) {
-    openNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
+    openServerlessNavigationPanel(RULES_PANEL_BTN_SERVERLESS);
     cy.get(FOOTER_LAUNCHPAD).click();
     cy.get(TRANSLATED_RULES_PAGE_SERVERLESS).click();
   } else if (isClassicNavUpdateEnabled) {
     // ESS with classic nav: navigate through Launchpad group to reach Migrations
-    openNavigationPanel(LAUNCHPAD_PANEL_BTN);
+    openEssNavigationPanel(LAUNCHPAD_PANEL_BTN);
     cy.get(LAUNCHPAD_TRANSLATED_RULES_PAGE).click();
   } else {
     // ESS without classic nav: navigate directly to Migrations in the side nav
-    openNavigationPanel(MIGRATIONS_PANEL_BTN);
+    openEssNavigationPanel(MIGRATIONS_PANEL_BTN);
     cy.get(TRANSLATED_RULES_PAGE).click();
   }
 };

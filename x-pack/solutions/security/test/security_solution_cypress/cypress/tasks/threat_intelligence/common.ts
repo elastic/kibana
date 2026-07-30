@@ -108,12 +108,13 @@ export const openBarchartPopoverMenu = () => {
  * Performs click on element that require a mouse hover first.
  * Uses realHover so EUI data-grid cell actions (CSS :hover) actually mount — synthetic
  * mouseover events often never reveal the buttons (see alerts.ts clickAction).
+ *
+ * Do not send Escape here: several callers run with an open flyout, and Escape closes it
+ * before `iocHeaderBlockItem` (or other flyout targets) can be hovered.
  */
 export const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   recurse(
     () => {
-      // Clear focus so hover state is not stolen by a focused element
-      cy.get('body').type('{esc}');
       cy.get(propertySelector).filter(':visible').eq(rowIndex).should('be.visible');
       cy.get(propertySelector).filter(':visible').eq(rowIndex).realHover();
       return cy.get(actionSelector).first();
