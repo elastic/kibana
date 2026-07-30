@@ -10,9 +10,9 @@ import { EuiCard, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityOnboardingAppServices } from '../../..';
-import { LogoIcon, type SupportedLogo } from '../../shared/logo_icon';
-import { addPathParamToUrl } from '../../package_list_search_form/use_card_url_rewrite';
+import type { ObservabilityOnboardingAppServices } from '../..';
+import { LogoIcon, type SupportedLogo } from '../shared/logo_icon';
+import { addPathParamToUrl } from '../package_list_search_form/use_card_url_rewrite';
 
 const LOGO_STACK_OVERLAP = '-8px';
 

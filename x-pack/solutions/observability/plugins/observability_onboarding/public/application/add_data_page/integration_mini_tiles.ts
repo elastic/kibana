@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SupportedLogo } from '../../shared/logo_icon';
+import type { SupportedLogo } from '../shared/logo_icon';
 
 export interface IntegrationMiniTileData {
   id: string;

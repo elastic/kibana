@@ -14,7 +14,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const IntegrationsCategory = ({ id, label, children }: Props) => {
+export const CuratedCategorySection = ({ id, label, children }: Props) => {
   const labelId = useGeneratedHtmlId({ prefix: 'integrationsCategory', suffix: id });
 
   return (
