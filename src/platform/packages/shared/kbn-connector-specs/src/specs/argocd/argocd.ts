@@ -176,7 +176,13 @@ const assertPathAllowed = (path: string): void => {
 
 const assertRequestAllowed = (method: HttpMethod, path: string): void => {
   assertPathAllowed(path);
-  const pathOnly = (path.split(/[?#]/, 1)[0] ?? path).toLowerCase();
+  const rawPathOnly = path.split(/[?#]/, 1)[0] ?? path;
+  let pathOnly = rawPathOnly.toLowerCase();
+  try {
+    pathOnly = decodeURIComponent(rawPathOnly).toLowerCase();
+  } catch {
+    throw new Error('Argo CD API path contains invalid percent-encoding');
+  }
 
   if (method !== 'GET') {
     if (
