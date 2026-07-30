@@ -11,10 +11,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
-  EuiCallOut,
   EuiCode,
   EuiCodeBlock,
-  EuiLink,
   EuiPageTemplate,
   EuiProvider,
   EuiSpacer,
@@ -22,6 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
 import * as example1 from './examples/1_using_existing_format';
 import * as example2 from './examples/2_creating_custom_formatter';
 // @ts-ignore
@@ -124,19 +123,22 @@ const CreatingCustomFieldFormat: React.FC<{ deps: Deps }> = (props) => {
       />
       <EuiSpacer size={'s'} />
 
-      <EuiCallOut
+      <KbnSuccessCallout
         title="Seamless integration with data views!"
-        color="success"
-        iconType="indexManagementApp"
-      >
-        <p>
-          Currency formatter that we&apos;ve just created is already integrated with data views. It
-          can be applied to any <EuiCode>numeric</EuiCode> field of any data view.{' '}
-          <EuiLink onClick={() => props.deps.openDateViewNumberFieldEditor()}>
-            Open data view field editor to give it a try.
-          </EuiLink>
-        </p>
-      </EuiCallOut>
+        text={
+          <p>
+            Currency formatter that we&apos;ve just created is already integrated with data views.
+            It can be applied to any <EuiCode>numeric</EuiCode> field of any data view. Open data
+            view field editor to give it a try.
+          </p>
+        }
+        actionProps={{
+          primary: {
+            children: 'Open data view field editor',
+            onClick: () => props.deps.openDateViewNumberFieldEditor(),
+          },
+        }}
+      />
     </>
   );
 };
@@ -156,19 +158,22 @@ const CreatingCustomFieldFormatEditor: React.FC<{ deps: Deps }> = (props) => {
       <EuiCodeBlock language="jsx">{example3SampleCode}</EuiCodeBlock>
       <EuiSpacer size={'s'} />
 
-      <EuiCallOut
+      <KbnInfoCallout
         title="Check the result in the data view field editor!"
-        color="primary"
-        iconType="indexManagementApp"
-      >
-        <p>
-          Currency formatter and its custom editor are integrated with data views. It can be applied
-          to any <EuiCode>numeric</EuiCode> field of any data view.{' '}
-          <EuiLink onClick={() => props.deps.openDateViewNumberFieldEditor()}>
-            Open date view field editor to give it a try.
-          </EuiLink>
-        </p>
-      </EuiCallOut>
+        text={
+          <p>
+            Currency formatter and its custom editor are integrated with data views. It can be
+            applied to any <EuiCode>numeric</EuiCode> field of any data view. Open date view field
+            editor to give it a try.
+          </p>
+        }
+        actionProps={{
+          primary: {
+            children: 'Open data view field editor',
+            onClick: () => props.deps.openDateViewNumberFieldEditor(),
+          },
+        }}
+      />
     </>
   );
 };

@@ -23,8 +23,8 @@ import type { OpenFlyoutLinkProps } from '../shared/components/open_flyout_link'
 import { OpenFlyoutLink } from '../shared/components/open_flyout_link';
 import { getColumns } from './tools/prevalence/utils/get_columns';
 import {
-  defaultToolsFlyoutProperties,
   useDefaultDocumentFlyoutProperties,
+  useDefaultToolsFlyoutProperties,
 } from '../shared/hooks/use_default_flyout_properties';
 import { useOpenFlyout } from '../shared/hooks/use_open_flyout';
 import { buildFlyoutNavTitle } from '../shared/utils/build_flyout_nav_title';
@@ -264,6 +264,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
   const history = useHistory();
   const { session: sessionMode, historyKey } = useFlyoutSessionContext();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
   const open = useOpenFlyout();
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
   const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
@@ -454,7 +455,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openSessionView = useCallback(
@@ -503,7 +504,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentEntities = useCallback(
@@ -538,7 +539,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentCorrelations = useCallback(
@@ -587,7 +588,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentResponse = useCallback(
@@ -617,7 +618,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentThreatIntelligence = useCallback(
@@ -651,7 +652,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentPrevalence = useCallback(
@@ -707,7 +708,15 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose, isInSecurityApp, renderFlyoutLink]
+    [
+      open,
+      defaultToolsFlyoutProperties,
+      historyKey,
+      writeOnOpen,
+      buildOnClose,
+      isInSecurityApp,
+      renderFlyoutLink,
+    ]
   );
 
   const openDocumentInvestigationGuide = useCallback(
@@ -741,7 +750,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   const openDocumentGraph = useCallback(
@@ -780,7 +789,7 @@ export const useDocumentFlyoutApi = (): DocumentFlyoutApi => {
         FLYOUT_SESSION_KIND.INHERIT
       );
     },
-    [open, historyKey, writeOnOpen, buildOnClose]
+    [open, defaultToolsFlyoutProperties, historyKey, writeOnOpen, buildOnClose]
   );
 
   return useMemo(
