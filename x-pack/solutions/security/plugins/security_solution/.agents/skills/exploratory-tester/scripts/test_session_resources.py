@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import fcntl
+import hashlib
 import json
 import os
 import subprocess
@@ -31,6 +32,8 @@ CAPTURE_CCS_SCRIPT = SCRIPT_DIR / "capture-remote-cluster.py"
 RESTORE_CCS_SCRIPT = SCRIPT_DIR / "restore-remote-cluster.py"
 RECONCILE_SCRIPT = SCRIPT_DIR / "reconcile-session-resource.py"
 RESTORE_CLEANUP_SCRIPT = SCRIPT_DIR / "restore-and-cleanup-session.py"
+KNOWLEDGE_HASH_SCRIPT = SCRIPT_DIR / "knowledge-hash.py"
+KNOWLEDGE_DIR = SCRIPT_DIR.parent / "knowledge"
 FIXTURES_DIR = SCRIPT_DIR / "__tests__" / "fixtures"
 OWNED_REUSED_FIXTURE = FIXTURES_DIR / "session-resources-owned-reused.json"
 EARLY_EXIT_FIXTURE = FIXTURES_DIR / "session-resources-early-exit.json"
@@ -6176,12 +6179,20 @@ print("404")
         # orchestrator fills in only after user confirmation — never a
         # path the sub-agent constructs itself from area_slug.
         self.assertIn(
-            "the exact path the orchestrator displayed to the user and "
-            "got explicit yes/no confirmation for",
+            "the orchestrator displayed to the user and got explicit "
+            "yes/no confirmation for in Phase 0 Step 0g",
             prompt,
         )
         self.assertIn("Do NOT write to the knowledge file", prompt)
         self.assertIn("Do NOT write to config.json", prompt)
+
+        # Task 6: the sha256 placeholder must travel with the path
+        # placeholder, and the sub-agent must verify it before reading —
+        # never trust a stale approval just because a path was given.
+        self.assertIn("<knowledge file sha256, or omitted entirely>", prompt)
+        self.assertIn("knowledge_file.sha256", prompt)
+        self.assertIn("knowledge-hash.py", prompt)
+        self.assertIn("do not read the file", prompt.lower())
         self.assertNotIn(
             "knowledge/<area_slug>.md",
             prompt,
@@ -6269,7 +6280,14 @@ print("404")
         flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
 
         self.assertIn(
-            '"knowledge_file": { "path": null, "approved": false }', setup
+            '"knowledge_file": {\n'
+            '    "path": null,\n'
+            '    "approved": false,\n'
+            '    "sha256": null,\n'
+            '    "approved_at": null,\n'
+            '    "approved_sections": []\n'
+            "  },",
+            setup,
         )
         self.assertIn('"path": "<full repo-relative path above>"', setup)
         self.assertIn("must survive a resume", setup)
@@ -6286,14 +6304,17 @@ print("404")
         )
         self.assertIn("not the short", setup)
 
-        # P2 from re-review of ffc5f8a: parallel mode already asks this
-        # exact question, unpersisted and resume-safe, in 2-explore.md's
-        # Wave 1 step 2b — this Phase 0 step must not duplicate it and
-        # risk the user giving two different answers for the same file.
-        self.assertIn("Single mode only", setup)
+        # Task 6: eliminates the *duplicate* prompt (a P2/Important flagged
+        # across multiple PR #281591 reviews) by making this the ONLY place
+        # a fresh session ever asks — 2-explore.md's Wave 1 step 2b now
+        # just reads the persisted result instead of asking again.
+        self.assertIn("Runs once per session, for both", setup)
         self.assertIn(
-            "do not also ask it here for parallel mode", setup
+            "duplicated the prompt (risking two different answers for the "
+            "same file)",
+            setup,
         )
+        self.assertNotIn("Single mode only", setup)
 
         self.assertIn("config.json → knowledge_file", flow_core)
         self.assertIn("approved: true", flow_core)
@@ -6317,38 +6338,23 @@ print("404")
         self.assertIn("environment.space_id", resume_section)
         self.assertIn("is missing entirely", resume_section)
         self.assertIn(
-            '{ "path": null, "approved": false }', resume_section
+            '{ "path": null, "approved": false, "sha256": null, '
+            '"approved_at": null, "approved_sections": [] }',
+            resume_section,
         )
         self.assertIn("not that consent is owed retroactively", resume_section)
 
-    def test_resume_migration_count_matches_bullet_list(self):
-        # Review of PR #281591 (pborgonovi): the Resume path intro said
-        # "the two backward-compatible migrations below", but two lines
-        # later "apply all three" introduced a list that has always had
-        # three bullets — the intro was never updated when the third
-        # bullet (knowledge_file.path full-path rewrite) was added. These
-        # files are read literally as instructions by an agent; one that
-        # trusts "two" could stop early and skip that third bullet, which
-        # is the one that keeps a resumed session from silently failing
-        # to find its knowledge file.
-        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
-        resume_section = setup[
-            setup.index("**Resume path") : setup.index("**New session path")
-        ]
-        intro = resume_section[: resume_section.index("**Migrations for sessions")]
-        self.assertIn("three backward-compatible migrations", intro)
-        self.assertNotIn("two backward-compatible migrations", intro)
-
-        migrations_block = resume_section[
-            resume_section.index("**Migrations for sessions") :
-        ]
-        self.assertIn("apply all three", migrations_block)
-        bullet_count = migrations_block.count("\n- ")
-        self.assertEqual(
-            bullet_count,
-            3,
-            "migration bullet count changed without updating the "
-            "'apply all three' / intro count text to match",
+        # Task 6: hash-gate re-verification must run on every resume too —
+        # otherwise a resumed session could keep reusing an approval for a
+        # knowledge file another session already rewrote via 3-report.md
+        # Step 3d.
+        self.assertIn("Hash-gate re-verification", resume_section)
+        self.assertIn("knowledge-hash.py", resume_section)
+        self.assertIn("does *not* match", resume_section)
+        self.assertIn(
+            "display the file's current full contents and ask the same "
+            "yes/no question as Step 0g",
+            resume_section,
         )
 
     def test_wave_1_reruns_create_flow_spaces_for_resume_safety(self):
@@ -6433,15 +6439,14 @@ print("404")
         self.assertNotIn("<area_slug>", wave2_dispatch)
 
     def test_parallel_mode_knowledge_path_is_full_repo_relative(self):
-        # P1 from re-review of PR #281591 at 518ca169: 518ca169 fixed the
-        # short-vs-full knowledge path mismatch for single mode
-        # (config.json -> knowledge_file.path) but missed that parallel
-        # mode's own existence check and approval step in 2-explore.md's
-        # Wave 1 step 2b still checked and forwarded the short
-        # `knowledge/<area_slug>.md` form to sub-agents, which resolve
-        # paths from the repository root — so the file silently never
-        # existed from a sub-agent's point of view, and the orchestrator's
-        # own existence check would fail to find it too.
+        # Original P1 (re-review of PR #281591 at 518ca169) was that Wave 1
+        # step 2b constructed/checked the short `knowledge/<area_slug>.md`
+        # form itself. Task 6 removes step 2b's own existence check and
+        # prompt entirely — approval now happens exactly once, in
+        # `phases/0-setup.md` Step 0g, for both modes — so this invariant
+        # is now: step 2b must source path/hash only from
+        # `config.json -> knowledge_file`, never re-derive or re-check a
+        # path itself, and never prompt the user a second time.
         explore = (PHASES_DIR / "2-explore.md").read_text(encoding="utf-8")
 
         full_path = (
@@ -6449,13 +6454,17 @@ print("404")
             "skills/exploratory-tester/knowledge/<area_slug>.md"
         )
         step_2b = explore[
-            explore.index("2b. Check for the knowledge file") : explore.index(
+            explore.index("2b. Knowledge approval already happened") : explore.index(
                 "3. Dispatch sub-agents concurrently"
             )
         ]
-        self.assertIn(full_path, step_2b)
-        self.assertIn("not** the short", step_2b)
-        self.assertIn("resolve paths from the repository root", step_2b)
+        self.assertIn("Phase 0 Step 0g", step_2b)
+        self.assertIn("for this mode too", step_2b)
+        self.assertIn("never prompts the user again", step_2b)
+        self.assertIn("config.json → knowledge_file", step_2b)
+        self.assertIn("sha256", step_2b)
+        self.assertNotIn(full_path, step_2b)
+        self.assertIn("Never re-derive `path` from `area_slug`", step_2b)
 
         mode_selection = explore[
             explore.index("**When to use parallel mode:**") : explore.index(
@@ -6483,6 +6492,563 @@ print("404")
             "the `approved` value the user already gave carries over unchanged",
             resume_section,
         )
+
+    # --- Task 6: hash-gated, compact knowledge loading ---------------------
+
+    def test_knowledge_hash_script_computes_sha256_and_sections(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            knowledge_path = Path(tmp) / "area.md"
+            text = (
+                "# Knowledge: Area\n\n"
+                "## Known non-bugs\n"
+                "- some entry\n\n"
+                "## Navigation patterns\n"
+                "- some pattern\n"
+            )
+            knowledge_path.write_text(text, encoding="utf-8")
+            expected_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+            result = subprocess.run(
+                [sys.executable, str(KNOWLEDGE_HASH_SCRIPT), "--file", str(knowledge_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertTrue(payload["exists"])
+            self.assertEqual(payload["sha256"], expected_sha256)
+            self.assertEqual(
+                payload["sections"], ["Known non-bugs", "Navigation patterns"]
+            )
+
+    def test_knowledge_hash_script_reports_missing_file_without_erroring(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            missing_path = Path(tmp) / "does-not-exist.md"
+            result = subprocess.run(
+                [sys.executable, str(KNOWLEDGE_HASH_SCRIPT), "--file", str(missing_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            # A missing file is reported in the JSON payload, not via a
+            # non-zero exit — callers branch on `exists`, not on exit code,
+            # for the plain (non `--verify`) form.
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertEqual(
+                payload, {"exists": False, "sha256": None, "sections": []}
+            )
+
+    def test_knowledge_hash_script_verify_exit_codes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            knowledge_path = Path(tmp) / "area.md"
+            text = "# Knowledge\n\n## Known non-bugs\n- entry\n"
+            knowledge_path.write_text(text, encoding="utf-8")
+            correct_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+            match = subprocess.run(
+                [
+                    sys.executable,
+                    str(KNOWLEDGE_HASH_SCRIPT),
+                    "--file",
+                    str(knowledge_path),
+                    "--verify",
+                    correct_hash,
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(match.returncode, 0, match.stderr)
+
+            mismatch = subprocess.run(
+                [
+                    sys.executable,
+                    str(KNOWLEDGE_HASH_SCRIPT),
+                    "--file",
+                    str(knowledge_path),
+                    "--verify",
+                    "0" * 64,
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(mismatch.returncode, 1)
+
+            missing = subprocess.run(
+                [
+                    sys.executable,
+                    str(KNOWLEDGE_HASH_SCRIPT),
+                    "--file",
+                    str(Path(tmp) / "nope.md"),
+                    "--verify",
+                    correct_hash,
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(missing.returncode, 1)
+
+            # Editing the file (even by one byte) must change the hash and
+            # therefore fail --verify against the old value — this is the
+            # exact mechanism phases/0-setup.md's Step 0g/Resume-path and
+            # phases/2-flow-core.md's Navigation rely on.
+            knowledge_path.write_text(text + "- one more entry\n", encoding="utf-8")
+            after_edit = subprocess.run(
+                [
+                    sys.executable,
+                    str(KNOWLEDGE_HASH_SCRIPT),
+                    "--file",
+                    str(knowledge_path),
+                    "--verify",
+                    correct_hash,
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(after_edit.returncode, 1)
+
+    def test_knowledge_hash_script_only_lists_h2_headings(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            knowledge_path = Path(tmp) / "area.md"
+            knowledge_path.write_text(
+                "# Title\n\n"
+                "## Known non-bugs\n"
+                "### A subsection that is not itself a section\n"
+                "- entry\n\n"
+                "## Navigation patterns\n",
+                encoding="utf-8",
+            )
+            result = subprocess.run(
+                [sys.executable, str(KNOWLEDGE_HASH_SCRIPT), "--file", str(knowledge_path)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            payload = json.loads(result.stdout)
+            self.assertEqual(
+                payload["sections"], ["Known non-bugs", "Navigation patterns"]
+            )
+
+    def test_setup_step_0g_is_hash_gated_for_both_modes(self):
+        # Task 6 checklist: "Record approved path, SHA-256, timestamp, and
+        # approved sections in config" + "Reuse approval only when the
+        # exact file hash matches; otherwise re-display and re-approve" +
+        # "Eliminate the duplicate Phase 0/parallel approval prompt
+        # without weakening the first-load or changed-file gate."
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        self.assertIn("## Step 0g — Knowledge file approval (hash-gated)", setup)
+        step_0g = setup[setup.index("## Step 0g") :]
+
+        self.assertIn("knowledge-hash.py", step_0g)
+        self.assertIn('"sha256": "<hex from above>"', step_0g)
+        self.assertIn('"approved_at": "<current UTC ISO-8601 timestamp>"', step_0g)
+        self.assertIn(
+            '"approved_sections": <sections array from above>', step_0g
+        )
+        # sha256/approved_sections must be recorded on decline too, not
+        # only on approval — they describe the reviewed file, not the
+        # answer, and a later resume needs them to detect drift either way.
+        self.assertIn(
+            "recorded either way", step_0g
+        )
+
+    def test_resume_hash_gate_handles_all_four_cases(self):
+        # Task 6: "Reuse approval only when the exact file hash matches;
+        # otherwise re-display and re-approve" must also apply on resume —
+        # not just at first approval — since a resumed session skips the
+        # rest of Phase 0 and would otherwise trust a stale flag forever.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        self.assertIn("Hash-gate re-verification", resume_section)
+        # Case 1: file disappeared.
+        self.assertIn('"exists": false', resume_section)
+        self.assertIn("there is nothing left to gate", resume_section)
+        # Case 2: legacy session predating hash-gating (sha256 is null) —
+        # backfill without re-prompting, never invent a forced re-approval
+        # just because the field is new.
+        self.assertIn("predates hash-gating entirely", resume_section)
+        self.assertIn("do not re-prompt", resume_section)
+        # Case 3: hash matches — no-op, the common case.
+        self.assertIn("matches the command's `sha256`", resume_section)
+        # Case 4: hash differs — must re-display and re-approve, not
+        # silently keep the stale `approved` value.
+        self.assertIn("does *not* match", resume_section)
+        self.assertIn("must not be reused silently", resume_section)
+        self.assertIn(
+            "the one exception to \"resume skips the rest of Phase 0\"",
+            resume_section,
+        )
+
+    def test_subagent_and_flow_core_verify_hash_before_reading_knowledge(self):
+        # Task 6: "Have workers verify the approved hash before reading
+        # the file; preserve the untrusted-content treatment." This must
+        # hold for both a parallel sub-agent (via the template) and a
+        # single-mode worker (via 2-flow-core.md directly) — approval
+        # persisted in config.json is not itself proof the file is still
+        # what was approved.
+        prompt = (TEMPLATE_DIR / "subagent-prompt.md").read_text(encoding="utf-8")
+        flow_core = (PHASES_DIR / "2-flow-core.md").read_text(encoding="utf-8")
+
+        for doc in (prompt, flow_core):
+            self.assertIn("knowledge-hash.py", doc)
+            self.assertIn("--verify", doc)
+
+        self.assertIn(
+            "before reading it, verify its hash still matches the sha256 given above",
+            prompt,
+        )
+        self.assertIn(
+            "Before reading the file, verify its hash still matches",
+            flow_core,
+        )
+        # Untrusted-content treatment must survive this change unchanged.
+        self.assertIn("<<UNTRUSTED-CONTENT>>", prompt)
+        self.assertIn("<<UNTRUSTED-CONTENT>>", flow_core)
+
+        # Deny-list must also carry the rule, not just the Navigation
+        # section prose, matching this file's existing pattern for other
+        # hard invariants.
+        deny_list = flow_core[
+            flow_core.index("## Worker deny-list") : flow_core.index("## Red Flags")
+        ]
+        self.assertIn("Never read the knowledge file without verifying its hash", deny_list)
+
+    def test_report_suppression_scoped_to_known_non_bugs_section_only(self):
+        # Task 6 checklist: "Allow automatic suppression only from
+        # explicitly marked `Known non-bugs`; show known tracked bugs as
+        # reproduced/known rather than silently treating them as noise."
+        report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
+        step_3b = report[
+            report.index("## Step 3b") : report.index("## Step 3c")
+        ]
+        self.assertIn(
+            "Suppression matching reads only the `## Known non-bugs` "
+            "section of each file",
+            step_3b,
+        )
+        self.assertIn("## Known non-bugs` heading?", step_3b)
+        self.assertIn(
+            "cite the issue number** — this still surfaces the finding as "
+            "a tracked, reproduced bug",
+            step_3b,
+        )
+        self.assertIn(
+            "is **not** suppressed", step_3b
+        )
+
+    def test_report_step_3b_explains_why_it_skips_hash_verify(self):
+        # Review of PR #281618 at 25c2a08 (judgment-call suggestion, not a
+        # bug): unlike templates/subagent-prompt.md and phases/2-flow-core.md,
+        # Step 3b's own knowledge-file read has no --verify call before it.
+        # That asymmetry is intentional (this read is same-process,
+        # same-session, right after the approval that covers it — never a
+        # dispatched sub-agent or a resumed session reading a stale
+        # approval) but easy for a future reviewer to flag as an
+        # inconsistency without an explanation on the record.
+        report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
+        step_3b = report[report.index("## Step 3b") : report.index("## Step 3c")]
+        self.assertIn("does **not** need a `knowledge-hash.py --verify`", step_3b)
+        self.assertIn("same orchestrator process", step_3b)
+
+    def test_report_step_3d_forbids_narrative_sections_in_active_knowledge_file(self):
+        # Task 6 checklist: "Remove historical finding narratives from
+        # active worker knowledge; retain them in archives for explicit
+        # lookup."
+        report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
+        step_3d = report[
+            report.index("## Step 3d") : report.index("## Step 3e")
+        ]
+        self.assertIn(
+            "Never add any other top-level (`##`) section to the active "
+            "knowledge file",
+            step_3d,
+        )
+        self.assertIn("## Session findings", step_3d)
+        self.assertIn("only `## Known non-bugs` and `## Navigation patterns` entries", step_3d)
+        self.assertIn("invalidates any other session's already-persisted approval", step_3d)
+
+    def test_active_knowledge_files_are_compact_known_non_bugs_and_navigation_only(self):
+        # Task 6 checklist: entity-analytics.md must no longer carry
+        # per-session bug narratives (moved to the archive file); the
+        # shared security-solution.md must expose a canonical
+        # `## Known non-bugs` section so the new Step 3b scoping in
+        # 3-report.md doesn't silently stop suppressing its genuine noise
+        # entries.
+        forbidden_prefixes = ("Session findings", "Confirmed bugs", "Checklist coverage")
+
+        for filename in ("entity-analytics.md", "security-solution.md"):
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(KNOWLEDGE_HASH_SCRIPT),
+                    "--file",
+                    str(KNOWLEDGE_DIR / filename),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertTrue(payload["exists"], filename)
+            self.assertIn("Known non-bugs", payload["sections"], filename)
+            for section in payload["sections"]:
+                for forbidden in forbidden_prefixes:
+                    self.assertFalse(
+                        section.startswith(forbidden),
+                        f"{filename} still has a narrative section: {section!r}",
+                    )
+
+        # entity-analytics.md specifically must be compact — only the two
+        # canonical sections, no third.
+        entity_analytics = (KNOWLEDGE_DIR / "entity-analytics.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Compact by design", entity_analytics)
+
+        # security-solution.md must not duplicate its canonical
+        # `## Known non-bugs` entries into a second "detail" section
+        # (real regression fixed after review of PR #281618 at 25c2a08):
+        # an earlier revision added the canonical section but *kept* the
+        # pre-existing sections around under "— detail" names, duplicating
+        # 5 of 6 entries verbatim with zero new information, and creating
+        # a heading-name collision risk (`## Known non-bugs` vs `## Known
+        # non-bugs — detail`) for the exact prose instruction in Step 3b
+        # that says "reads only the `## Known non-bugs` section" — a
+        # prefix-based reading of that instruction could plausibly pull
+        # in the "detail" section too. There must be exactly one section
+        # whose name is (or starts with) "Known non-bugs".
+        security_solution = (KNOWLEDGE_DIR / "security-solution.md").read_text(
+            encoding="utf-8"
+        )
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(KNOWLEDGE_HASH_SCRIPT),
+                "--file",
+                str(KNOWLEDGE_DIR / "security-solution.md"),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        sections = json.loads(result.stdout)["sections"]
+        known_non_bug_sections = [s for s in sections if s.startswith("Known non-bugs")]
+        self.assertEqual(
+            known_non_bug_sections,
+            ["Known non-bugs"],
+            "security-solution.md must have exactly one section named "
+            "'Known non-bugs', with no '— detail' duplicate",
+        )
+        self.assertNotIn("— detail", security_solution)
+        self.assertNotIn("Same entries as", security_solution)
+
+    def test_stale_step_0f_references_are_updated_to_0g(self):
+        # Review of PR #281618 at 25c2a08 (all three review agents): Step
+        # 0f (knowledge-file approval) was renamed to Step 0g earlier in
+        # this same PR, but three prose cross-references to it were
+        # missed. These files are read literally as instructions or
+        # documentation by an agent; a stale step number sends a reader
+        # to the wrong section (Step 0f is now "Review Specs content",
+        # unrelated to knowledge approval).
+        report = (PHASES_DIR / "3-report.md").read_text(encoding="utf-8")
+        hash_script = KNOWLEDGE_HASH_SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("Step 0f", report)
+        self.assertNotIn("Step 0f", hash_script)
+        self.assertIn("Step 0g", report)
+        self.assertIn("Step 0g", hash_script)
+
+    def test_subagent_prompt_hash_verify_command_is_directly_executable(self):
+        # Review of PR #281618 at 25c2a08 (Review B): the inline prose in
+        # subagent-prompt.md told a sub-agent to run bare
+        # `knowledge-hash.py --file ... --verify ...`, which is not on
+        # $PATH and has no interpreter prefix — a literal follower gets
+        # "command not found". phases/2-flow-core.md already has the
+        # correct form (python3 + full repo-relative path); the template
+        # must match it exactly, not just parenthetically mention where
+        # the script "lives".
+        prompt = (TEMPLATE_DIR / "subagent-prompt.md").read_text(encoding="utf-8")
+        self.assertIn(
+            "python3 x-pack/solutions/security/plugins/security_solution/"
+            ".agents/skills/exploratory-tester/scripts/knowledge-hash.py",
+            prompt,
+        )
+        self.assertNotIn("run `knowledge-hash.py", prompt)
+
+    def test_knowledge_hash_script_handles_non_utf8_without_crashing(self):
+        # Review of PR #281618 at 25c2a08 (all three review agents):
+        # path.read_text(encoding="utf-8") raised an uncaught
+        # UnicodeDecodeError on invalid UTF-8 instead of the script's own
+        # documented JSON-or-exit-1 contract, so a caller following the
+        # module docstring's usage instructions would see a raw Python
+        # traceback instead of a parseable result.
+        with tempfile.TemporaryDirectory() as tmp:
+            bad_file = Path(tmp) / "bad.md"
+            bad_file.write_bytes(b"# Heading\n\xff\xfe not valid utf-8\n")
+
+            result = subprocess.run(
+                [sys.executable, str(KNOWLEDGE_HASH_SCRIPT), "--file", str(bad_file)],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(result.stdout)
+            self.assertFalse(payload["exists"])
+            self.assertIsNone(payload["sha256"])
+
+            verify_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(KNOWLEDGE_HASH_SCRIPT),
+                    "--file",
+                    str(bad_file),
+                    "--verify",
+                    "anyhash",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(verify_result.returncode, 1)
+
+    def test_readme_documents_knowledge_hash_script(self):
+        # Review of PR #281618 at 25c2a08 (Review A): every other CLI
+        # entry point in this directory is described in README.md;
+        # knowledge-hash.py was added by this PR without a matching entry.
+        readme = (SCRIPT_DIR / "README.md").read_text(encoding="utf-8")
+        self.assertIn("knowledge-hash.py", readme)
+        self.assertIn("--verify", readme)
+        self.assertIn("Step 0g", readme)
+
+    def test_resume_sha256_null_with_prior_approval_requires_reapproval(self):
+        # Review of PR #281618 at 25c2a08 (Review A + Review B, both
+        # flagged this): the original migration backfilled a missing
+        # sha256 from *today's* file content while leaving a pre-existing
+        # `approved: true` untouched and never re-prompting. That binds a
+        # stale yes/no to unseen bytes -- exactly the failure hash-gating
+        # exists to prevent -- for the one population of sessions
+        # transitioning into the hash-gated world. Only an `approved:
+        # false` (nothing was ever actually approved) may still be
+        # silently backfilled without re-prompting.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        hash_gate = resume_section[resume_section.index("**Hash-gate re-verification") :]
+
+        self.assertIn(
+            "`knowledge_file.sha256` is `null` and `approved` is `false`",
+            hash_gate,
+        )
+        self.assertIn(
+            "`knowledge_file.sha256` is `null` and `approved` is `true`",
+            hash_gate,
+        )
+        null_true_case = hash_gate[
+            hash_gate.index("`approved` is `true`**") :
+            hash_gate.index("`knowledge_file.sha256` is non-null and matches")
+        ]
+        self.assertIn("do **not** silently backfill", null_true_case)
+        self.assertIn(
+            "display the file's current full contents and ask the same "
+            "yes/no question as Step 0g",
+            null_true_case,
+        )
+
+    def test_resume_migration_intro_count_matches_bullet_list(self):
+        # Same class of bug as pborgonovi's review of PR #281591 (the
+        # intro sentence disagreeing with the actual bullet count below
+        # it) reintroduced here: Task 6 added a fourth migration bullet
+        # (hash-gate re-verification) and updated "apply all three" to
+        # "apply all four", but never updated this file's own separate
+        # Resume-path intro sentence to match.
+        setup = (PHASES_DIR / "0-setup.md").read_text(encoding="utf-8")
+        resume_section = setup[
+            setup.index("**Resume path") : setup.index("**New session path")
+        ]
+        intro = resume_section[: resume_section.index("**Migrations for sessions")]
+        self.assertIn("four backward-compatible migrations", intro)
+        self.assertNotIn("two backward-compatible migrations", intro)
+        self.assertNotIn("three backward-compatible migrations", intro)
+
+        migrations_block = resume_section[
+            resume_section.index("**Migrations for sessions") :
+        ]
+        self.assertIn("apply all four", migrations_block)
+        # Top-level bullets only — the hash-gate sub-cases are nested
+        # "\n  - " (two-space indent), not "\n- ", so they don't inflate
+        # this count.
+        bullet_count = migrations_block.count("\n- ")
+        self.assertEqual(
+            bullet_count,
+            4,
+            "migration bullet count changed without updating the "
+            "'apply all four' / intro count text to match",
+        )
+
+    def test_entity_analytics_does_not_mislabel_a_confirmed_bug_as_non_bug(self):
+        # Review of PR #281618 at 25c2a08 (Review B): entity-analytics.md
+        # had a `totalComment: 0` entry sitting inside `## Known
+        # non-bugs` whose own text said "this is a confirmed product bug
+        # ... Do not suppress." Step 3b's new heading-only suppression
+        # rule (this same PR) mechanically suppresses anything under that
+        # heading with no exception for an entry's own inline caveat, so
+        # this made an existing miscategorization far more dangerous. A
+        # confirmed bug must never appear inside `## Known non-bugs`.
+        entity_analytics = (KNOWLEDGE_DIR / "entity-analytics.md").read_text(
+            encoding="utf-8"
+        )
+        known_non_bugs = entity_analytics[
+            entity_analytics.index("## Known non-bugs") :
+            entity_analytics.index("## Navigation patterns")
+        ]
+        self.assertNotIn("confirmed product bug", known_non_bugs)
+        self.assertNotIn("totalComment", known_non_bugs)
+
+    def test_archive_checklist_table_is_not_split_by_later_content(self):
+        # Review of PR #281618 at 25c2a08 (Review B): archiving two
+        # "Session findings" sections into
+        # entity-analytics-archive-2026-07-15.md inserted ~50 lines
+        # between the checklist-coverage table's row F and its final row
+        # G, leaving G as an orphaned line at end-of-file, disconnected
+        # from the table it belongs to.
+        archive = (KNOWLEDGE_DIR / "entity-analytics-archive-2026-07-15.md").read_text(
+            encoding="utf-8"
+        )
+        table_start = archive.index("## Checklist coverage per journey")
+        # The next blank-line-preceded "---" after the table header is
+        # the section's own closing rule; everything between the header
+        # and that rule must be the table itself, ending in row G with no
+        # other content in between.
+        table_end = archive.index("\n---\n", table_start)
+        table_block = archive[table_start:table_end]
+        rows = [line for line in table_block.splitlines() if line.startswith("| ")]
+        self.assertEqual(len(rows), 8, table_block)  # header separator row A-G (8 total incl. header)
+        self.assertTrue(rows[-1].startswith("| G —"), rows[-1])
+        self.assertNotIn("| G —", archive[table_end:])
+
+    def test_archive_does_not_contain_plaintext_credentials(self):
+        # Review of PR #281618 at 25c2a08 (Review B, P1): the archive
+        # file carried literal test-account passwords
+        # (`cases-read-tester / ReadOnly123!`, `cases-all-tester /
+        # AllCases123!`) copied verbatim from entity-analytics.md. Even
+        # though these describe a since-torn-down ephemeral test
+        # environment, plaintext credentials should never be committed.
+        archive = (KNOWLEDGE_DIR / "entity-analytics-archive-2026-07-15.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("ReadOnly123", archive)
+        self.assertNotIn("AllCases123", archive)
+        # The usernames (non-secret) may still be referenced for context.
+        self.assertIn("cases-read-tester", archive)
 
 
 if __name__ == "__main__":
