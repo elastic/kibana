@@ -20,7 +20,7 @@ import type {
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
-import { FILTERS, getFilterField } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 import { FilterConversionError } from './errors';
 import type { StoredFilter } from './types';
 import {
@@ -293,16 +293,9 @@ function convertFromDSLFilter(
 ): StoredFilter {
   const query = asCodeFilter.dsl.query;
 
-  // Build a filter to test with type guard functions
-  const dslFilter: StoredFilter = {
-    ...baseStored,
-    query,
-  };
-
-  // Extract field name using utility function (returns undefined for filters without a field)
-  const detectedField = getFilterField(dslFilter);
-  // Use detected field or fall back to asCodeFilter.field
-  const field = detectedField ?? asCodeFilter.field;
+  // Custom/DSL filters carry a `field` only when is set explicitly (e.g. scripted
+  // filters, whose genuine `meta.field` is preserved by `from_stored_filter`).
+  const field = asCodeFilter.field;
 
   return {
     ...baseStored,
