@@ -118,6 +118,8 @@ jest.mock('../common/no_monitors_found', () => ({
 }));
 
 import { OverviewPage } from './overview_page';
+import { setOverviewPageStateAction } from '../../../state';
+import type { MonitorOverviewPageState } from '../../../state';
 
 const buildStore = () => {
   const sagaMiddleware = createSagaMiddleware();
@@ -126,8 +128,11 @@ const buildStore = () => {
   return store;
 };
 
-const renderPage = (initialEntry = '/overview') => {
+const renderPage = (initialEntry = '/overview', pageState?: Partial<MonitorOverviewPageState>) => {
   const store = buildStore();
+  if (pageState) {
+    store.dispatch(setOverviewPageStateAction(pageState));
+  }
   const history = createMemoryHistory({ initialEntries: [initialEntry] });
 
   render(
@@ -183,10 +188,11 @@ describe('OverviewPage wiring', () => {
     expect(history.location.pathname).toBe('/monitors/getting-started');
   });
 
-  it('redirects to Getting Started on an empty deployment even when the URL carries a query string', () => {
-    // `absoluteTotal` is filter-independent, so an empty deployment must still be
-    // onboarded when unrelated params (date range, tab state) are in the URL —
-    // the redirect must not be blocked just because a query string is present.
+  it('redirects to Getting Started on an empty deployment when only a date range is set (not a monitor filter)', () => {
+    // The date range scopes each monitor's status, not which monitors exist, so it must
+    // not block onboarding a genuinely empty deployment. (Regression: the old `!search`
+    // gate wrongly kept the user on the overview whenever the date picker put params in
+    // the URL.)
     mockUseMonitorList.mockReturnValue({
       loading: false,
       loaded: true,
@@ -203,9 +209,39 @@ describe('OverviewPage wiring', () => {
       allConfigs: [],
     });
 
-    const history = renderPage('/overview?dateRangeStart=now-1h&dateRangeEnd=now');
+    const history = renderPage('/overview', {
+      dateRangeStart: 'now-1h',
+      dateRangeEnd: 'now',
+    });
 
     expect(history.location.pathname).toBe('/monitors/getting-started');
+  });
+
+  it('does not redirect when a monitor filter is active, even if the filtered overview is empty', () => {
+    // `allConfigs` is filtered (the active filter is forwarded to the overview-status
+    // request), so an empty result under a filter does NOT prove the deployment is empty
+    // — a ping-only deployment could simply have its Heartbeat monitors excluded by the
+    // filter. Redirecting to Getting Started here would wrongly onboard away from a
+    // filtered view of a deployment that does have (read-only) monitors.
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage('/overview', { monitorTypes: ['http'] });
+
+    expect(history.location.pathname).toBe('/overview');
   });
 
   it('does not redirect when only ping-only overview monitors exist (no saved objects)', () => {

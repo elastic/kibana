@@ -13,7 +13,11 @@ import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
 import { useEnablement } from '../../../hooks';
-import { selectOverviewView, selectServiceLocationsState } from '../../../state';
+import {
+  selectOverviewPageState,
+  selectOverviewView,
+  selectServiceLocationsState,
+} from '../../../state';
 import { getServiceLocations } from '../../../state/service_locations';
 import { isExternalOverviewMonitor } from '../../../state/overview_status';
 import { GETTING_STARTED_ROUTE, MONITORS_ROUTE } from '../../../../../../common/constants';
@@ -67,12 +71,29 @@ export const OverviewPage: React.FC = () => {
     scopeStatusByLocation: true,
   });
 
+  const pageState = useSelector(selectOverviewPageState);
+
   const {
     loading: monitorsLoading,
     loaded: monitorsLoaded,
     handleFilterChange,
     absoluteTotal,
   } = useMonitorList();
+
+  // An overview monitor filter is active. Unlike `absoluteTotal` (which the server
+  // counts filter-independently), the overview-status `allConfigs` IS filtered — the
+  // active filters are forwarded to the request (see `toStatusOverviewQueryArgs`), so a
+  // filter that excludes every monitor makes `allConfigs` empty even when monitors exist.
+  // The date range is intentionally excluded: it scopes each monitor's status, not which
+  // monitors exist, so it must not suppress the Getting Started redirect.
+  const hasActiveOverviewFilter = Boolean(
+    pageState.query ||
+      pageState.tags?.length ||
+      pageState.locations?.length ||
+      pageState.monitorTypes?.length ||
+      pageState.projects?.length ||
+      pageState.schedules?.length
+  );
 
   // Ping-only Heartbeat / Elastic Agent (and CCS remote) monitors have no saved object,
   // so they are absent from `absoluteTotal` but present in the overview status
@@ -86,17 +107,19 @@ export const OverviewPage: React.FC = () => {
   // on those alone would strand a truly empty deployment on an empty overview whenever the
   // status request fails.
   //
-  // Note we do NOT gate on the absence of a URL query string: `absoluteTotal` is already
-  // filter-independent (the server counts all saved-object monitors regardless of the
-  // active search/filter), so `absoluteTotal === 0` means "genuinely no monitors". Gating
-  // on the raw query string would also block the redirect whenever unrelated params (the
-  // date range, tab state) are present, stranding an empty deployment on the search
-  // empty-state instead of onboarding it. `/monitors` already redirects without that gate.
+  // We suppress the redirect while a monitor filter is active: because `allConfigs` is
+  // filtered, an empty result there doesn't prove the deployment has no monitors — a
+  // filter could simply be excluding the ping-only ones. Onboarding away from a filtered
+  // view of a ping-only deployment would be wrong, so we keep the user on the overview
+  // (showing `NoMonitorsFound`) instead. This gate is scoped to real monitor filters, not
+  // the raw URL query string, so unrelated params (the date range) still allow the
+  // redirect on a genuinely empty deployment.
   const hasNoMonitors =
     !enablementLoading &&
     monitorsLoaded &&
     absoluteTotal === 0 &&
     overviewSettled &&
+    !hasActiveOverviewFilter &&
     !allConfigs.some(isExternalOverviewMonitor);
 
   if (hasNoMonitors && !monitorsLoading && isEnabled) {
