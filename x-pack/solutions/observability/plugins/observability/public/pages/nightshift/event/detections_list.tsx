@@ -21,6 +21,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { UseQueryResult } from '@kbn/react-query';
 import type {
@@ -32,10 +33,15 @@ import type {
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { useFetchStreamFeaturesByStream } from '../hooks/use_fetch_stream_features';
 import { useFormatTimestamp } from '../common/format_timestamp';
-import { getChangePointLabel } from '../detection/change_point';
+import {
+  filterOccurrencesForDetection,
+  getChangePointLabel,
+  type OccurrencePoint,
+} from '../detection/change_point';
 import { ChangePointSparkline } from '../detection/change_point_visualization';
 import { getDetectionEntities } from './get_detection_entities';
 import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
 const SPARKLINE_SKELETON_WIDTH = 64;
 const SPARKLINE_SKELETON_HEIGHT = 32;
@@ -46,6 +52,8 @@ const MAX_VISIBLE_ENTITY_PILLS = 2;
 export interface DetectionsListProps {
   event: SignificantEvent;
   eventUuid: string;
+  occurrencesByRuleUuid?: ReadonlyMap<string, OccurrencePoint[]>;
+  isLoadingOccurrences?: boolean;
   selectedDetectionId?: string;
   onDetectionClick?: (detection: LifecycleDetection) => void;
   lifecycleQuery?: Pick<
@@ -66,13 +74,17 @@ const parseTimestamp = (timestamp: string): number => {
 function DetectionCard({
   detection,
   event,
+  occurrences,
   streamFeatures,
+  isLoadingOccurrences,
   isSelected = false,
   onClick,
 }: {
   detection: LifecycleDetection;
   event: SignificantEvent;
+  occurrences: OccurrencePoint[];
   streamFeatures: Feature[];
+  isLoadingOccurrences: boolean;
   isSelected?: boolean;
   onClick?: (detection: LifecycleDetection) => void;
 }) {
@@ -101,7 +113,7 @@ function DetectionCard({
       return;
     }
     keyboardEvent.preventDefault();
-    onClick?.(detection);
+    keyboardEvent.currentTarget.click();
   };
 
   return (
@@ -110,6 +122,15 @@ function DetectionCard({
       tabIndex={onClick ? 0 : undefined}
       aria-pressed={onClick ? isSelected : undefined}
       data-test-subj="nightshiftDetectionCard"
+      {...(onClick
+        ? getEbtProps({
+            action: isSelected
+              ? NIGHTSHIFT_EBT_ACTIONS.CLOSE_FLYOUT
+              : NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION,
+            element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_DETECTIONS,
+            detail: detection.change_point_type,
+          })
+        : {})}
       onClick={onClick ? handleClick : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       css={css`
@@ -150,11 +171,34 @@ function DetectionCard({
             flex: 1 1 ${TEXT_CONTENT_MIN_WIDTH};
           `}
         >
-          <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="none"
+            responsive={false}
+            css={css`
+              row-gap: ${euiTheme.size.s};
+            `}
+          >
             <EuiFlexItem grow={false}>
-              <EuiText size="s" textAlign="left">
-                <strong>{detection.rule_name}</strong>
-              </EuiText>
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+                css={css`
+                  row-gap: ${euiTheme.size.xxs};
+                `}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" textAlign="left">
+                    <strong>{detection.rule_name}</strong>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued" textAlign="left">
+                    {formatTimestamp(detection['@timestamp'])}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup
@@ -166,11 +210,6 @@ function DetectionCard({
                   row-gap: ${euiTheme.size.xs};
                 `}
               >
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued" textAlign="left">
-                    {formatTimestamp(detection['@timestamp'])}
-                  </EuiText>
-                </EuiFlexItem>
                 {detection.change_point_type && (
                   <EuiFlexItem grow={false}>
                     <EuiBadge color="default">{changePointLabel}</EuiBadge>
@@ -199,10 +238,20 @@ function DetectionCard({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <ChangePointSparkline
-            changePointType={detection.change_point_type}
-            timestamp={detection['@timestamp']}
-          />
+          {isLoadingOccurrences ? (
+            <EuiSkeletonRectangle
+              data-test-subj="nightshiftDetectionSparklineSkeleton"
+              width={SPARKLINE_SKELETON_WIDTH}
+              height={SPARKLINE_SKELETON_HEIGHT}
+              borderRadius="m"
+            />
+          ) : (
+            <ChangePointSparkline
+              changePointType={detection.change_point_type}
+              data={occurrences}
+              timestamp={detection['@timestamp']}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -306,6 +355,8 @@ function DetectionListPanel({ items }: { items: React.ReactElement[] }): React.R
 export function DetectionsList({
   event,
   eventUuid,
+  occurrencesByRuleUuid,
+  isLoadingOccurrences = false,
   selectedDetectionId,
   onDetectionClick,
   lifecycleQuery: lifecycleQueryFromParent,
@@ -401,7 +452,12 @@ export function DetectionsList({
               key={detection.detection_id}
               detection={detection}
               event={event}
+              occurrences={filterOccurrencesForDetection(
+                detection.rule_uuid ? occurrencesByRuleUuid?.get(detection.rule_uuid) ?? [] : [],
+                detection['@timestamp']
+              )}
               streamFeatures={streamFeaturesByStream.get(detection.stream_name ?? '') ?? []}
+              isLoadingOccurrences={isLoadingOccurrences && Boolean(detection.rule_uuid)}
               isSelected={detection.detection_id === selectedDetectionId}
               onClick={onDetectionClick}
             />

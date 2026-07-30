@@ -69722,6 +69722,7 @@ paths:
                           - count: 7
                             date: '2025-01-15T12:00:00.000Z'
                         rule_backed: false
+                        rule_uuid: 9fdfcf5a-4e1d-5ee3-b05d-7bc2b014e81c
                         severity_score: 75
                         stream_name: logs.nginx
                         title: Error count by host
