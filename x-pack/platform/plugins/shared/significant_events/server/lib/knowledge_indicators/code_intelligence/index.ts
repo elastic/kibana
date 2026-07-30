@@ -36,6 +36,14 @@ export {
 } from './link_ingesting_streams';
 export { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
 export {
+  discoverLoggingSites,
+  codeGrep,
+  splitRepository,
+  type GrepLine,
+  type CodeGrepOptions,
+  type DiscoverLoggingSitesOptions,
+} from './discover_logging_sites';
+export {
   generatePredictiveQueries,
   buildPredictiveEsql,
   isValidEsqlSyntax,

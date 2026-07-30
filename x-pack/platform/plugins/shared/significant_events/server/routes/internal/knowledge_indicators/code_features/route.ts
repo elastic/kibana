@@ -28,6 +28,7 @@ import {
   identifyCodeQueries,
   reconcileCodeAndLogQueries,
   linkServiceEntities,
+  discoverLoggingSites,
   isCodeIntelligenceAgentAvailable,
   CODE_INTELLIGENCE_AGENT_ID,
   type ServiceCodeMetadata,
@@ -398,11 +399,12 @@ const resetCodeFeaturesRoute = createServerRoute({
 // Identify code intelligence for a single agent-resolved service (Stage 1 +
 // Stage 2 + reconcile), code-first — no logs required.
 //
-// Called by the "Continuous Code KI Extraction" managed workflow: its
-// `ai.agent` steps (the code-intelligence agent) enumerate deployable services and
-// their production logging sites, and the workflow fans out one call per
-// `{ repository, service }` here. Service enumeration is owned by the agent
-// (it reasons over the repo layout) rather than by directory-name parsing.
+// Called by the "Continuous Code KI Extraction" managed workflow: a single
+// `ai.agent` step (the code-intelligence agent) enumerates deployable services
+// by reasoning over the repo layout, and the workflow fans out one call per
+// `{ repository, service }` here. Logging call sites are discovered
+// deterministically server-side (grep over the indexed source) rather than by
+// the agent, so file-finding is exact and LLM-free.
 // ---------------------------------------------------------------------------
 
 const trimToUndefined = (value: string | null | undefined): string | undefined => {
@@ -489,15 +491,6 @@ const identifyServiceRoute = createServerRoute({
           })
         )
         .nullish(),
-      loggingChunks: z
-        .array(
-          z.object({
-            content: z.string(),
-            language: z.string().optional(),
-            location: z.string().optional(),
-          })
-        )
-        .nullish(),
       service: z.object({
         name: z.string(),
         serviceRoot: z.string(),
@@ -545,7 +538,6 @@ const identifyServiceRoute = createServerRoute({
       gitSha,
       repositoryLanguages,
       iacSignals,
-      loggingChunks,
       service,
       runId = uuidv4(),
     } = params.body;
@@ -553,6 +545,18 @@ const identifyServiceRoute = createServerRoute({
     const metadata = buildServiceCodeMetadata(service, { gitSha, iacSignals });
 
     const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const esClient = scopedClusterClient.asCurrentUser;
+
+    // Deterministically discover this service's production logging call sites by
+    // grepping the indexed source (replaces the agent's logging-sites pass).
+    const loggingChunks = await discoverLoggingSites({
+      esClient,
+      repository,
+      gitSha,
+      serviceRoot: service.serviceRoot,
+      language: service.language,
+      logger: routeLogger,
+    });
 
     // Stage 1: derive code Feature KIs (repo type, language, predicted service name).
     const featureResult = await identifyCodeFeaturesForService({
@@ -568,7 +572,6 @@ const identifyServiceRoute = createServerRoute({
       runId,
     });
 
-    const esClient = scopedClusterClient.asCurrentUser;
     const streams = await listStreamSamplingSources(scopedClients.streamsClient);
 
     // Stage 2: generate predictive Query KIs from the service's logger call
@@ -580,7 +583,7 @@ const identifyServiceRoute = createServerRoute({
       streams,
       metadata,
       kiClient,
-      loggingChunks: loggingChunks ?? [],
+      loggingChunks,
       esClient,
       logger: routeLogger,
     });

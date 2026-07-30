@@ -1,9 +1,10 @@
 # Sourcerer-driven KI (Knowledge Indicator) extraction proof of concept.
 #
-# A first agent pass discovers deployable services across the repositories
-# indexed in Sourcerer. A second, service-scoped pass finds production logging
-# call sites. The workflow then sends the verified source analysis to the
-# Significant Events KI endpoint.
+# A single agent pass discovers deployable services across the repositories
+# indexed in Sourcerer. The workflow then fans out one request per service to
+# the Significant Events KI endpoint, which deterministically greps the indexed
+# source for that service's production logging call sites (no second agent pass)
+# and sends the verified source analysis to the KI pipeline.
 #
 # The `sourcerer` agent is installed independently by `sourcerer setup` (its
 # read-only code tools + skills pre-exist), so this workflow only drives it; if
@@ -152,8 +153,8 @@ steps:
     type: if
     condition: '${{ steps.identify_services.error == null and steps.identify_services.output.structured_output.services != null }}'
     steps:
-      # Intentionally serial for the POC so observed search_code timestamps expose
-      # the natural workload without concurrency-induced bursts.
+      # Intentionally serial for the POC so the per-service workload is observable
+      # without concurrency-induced bursts.
       - name: process_services
         type: foreach
         foreach: '${{ steps.identify_services.output.structured_output.services }}'
@@ -161,59 +162,6 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          - name: identify_logging_sites
-            type: ai.agent
-            agent-id: sourcerer
-            connector-id: '${{ inputs.agentConnectorId }}'
-            plugin-id: 'significant_events'
-            aggregate-by: 'significant_events'
-            with:
-              message: |
-                Task: LOGGING_SITES
-
-                Find production logging call sites for this deployable service:
-                - repository (org/repo): {{ foreach.item.repository }}
-                - immutable commit (git.commit): {{ foreach.item.gitSha }}
-                - service name: {{ foreach.item.name }}
-                - service root: {{ foreach.item.serviceRoot }}
-                - language: {{ foreach.item.language }}
-
-                Scope every call to this exact git_org/git_repo/git_commit and stay inside the service root.
-                Derive git_org and git_repo by splitting the repository on "/". Use sourcerer.code.grep with a
-                file_path glob rooted at the service (e.g. "{{ foreach.item.serviceRoot }}/**") and a regex
-                matching this language's logger idioms (logger method calls such as logger.info/Error/Warn,
-                console.* for JS/TS, level macros like info!(...) for Rust, Logger.* for JVM/Elixir). Note
-                sourcerer regex is Lucene: use [.] for a literal dot, wrap patterns in .*, and it is
-                case-sensitive, so enumerate case in alternations. Prefer one grep per idiom over one complex
-                alternation. Confirm surrounding context with sourcerer.files.cat / sourcerer.files.head when
-                a match needs it. Exclude tests, examples, and generated code.
-
-                Return bounded source excerpts containing actual logger calls and their static message
-                templates, each with its repository-relative location (path and line). Prefer completeness for
-                production call sites but deduplicate repeated messages.
-              schema:
-                type: object
-                properties:
-                  loggingChunks:
-                    type: array
-                    maxItems: 200
-                    items:
-                      type: object
-                      properties:
-                        content:
-                          type: string
-                          description: 'Concise source excerpt containing one or more logger calls.'
-                        language:
-                          type: string
-                        location:
-                          type: string
-                          description: 'Repository-relative path and optional line number.'
-                      required: [content, location]
-                required: [loggingChunks]
-            timeout: 600s
-            on-failure:
-              continue: false
-
           - name: identify_service
             type: kibana.request
             with:
@@ -226,7 +174,6 @@ steps:
                 gitSha: '{{ foreach.item.gitSha }}'
                 repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
                 iacSignals: '${{ foreach.item.iacSignals }}'
-                loggingChunks: '${{ steps.identify_logging_sites.output.structured_output.loggingChunks }}'
                 service:
                   name: '{{ foreach.item.name }}'
                   serviceRoot: '{{ foreach.item.serviceRoot }}'

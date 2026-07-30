@@ -73,3 +73,49 @@ export const LOG_LEVEL_SEVERITY: Record<string, number> = {
 
 /** Default severity for a recognized log call whose level is not in the map. */
 export const DEFAULT_LOG_SEVERITY = 40;
+
+/**
+ * Elasticsearch index pattern written by Sourcerer's line indexer — one
+ * document per source line (`git.org`, `git.repo`, `git.commit`, `file.path`,
+ * `line.number`, `line.content`). The deterministic logging-site discovery greps
+ * over this pattern with the same ES|QL contract as the `sourcerer.code.grep`
+ * tool. This is the substrate seam: when the Agent Builder code sandbox arrives
+ * with ripgrep, only the grep driver changes, not the pattern set.
+ */
+export const SOURCERER_LINES_INDEX = 'sourcerer-v1-lines*' as const;
+
+/**
+ * Lucene RLIKE patterns matching production logger idioms, one idiom per pattern
+ * (per the grep tool's own guidance — several small greps beat one mega-
+ * alternation and avoid automaton determinization blowup). Verified against the
+ * OpenTelemetry demo. Lucene RLIKE gotchas baked in:
+ * - anchored to the whole value, so every pattern is wrapped in `.*`;
+ * - case-sensitive, so case is enumerated in the alternations;
+ * - a literal dot is written `[.]` (a bare `\.` is rejected by the ES|QL string
+ *   literal parser).
+ *
+ * Recall boundary (Tier-1): convention-named loggers only. Misses custom-named
+ * wrapper instances (`audit = createLogger(); audit.write(...)`) and
+ * non-severity SDK emit methods. Closing that tail (per-language tree-sitter, as
+ * in elastic/semantic-code-search#168) is a later refinement.
+ */
+export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
+  // logger.info(...) / Logger.Error(...) / logging.warning(...) — go/java/py method calls.
+  '.*[lL]og(ger|ging)?[.]([iI]nfo|[eE]rror|[wW]arn|[wW]arning|[dD]ebug|[tT]race|[pP]rint|[fF]atal|[pP]rintln|[pP]rintf|[eE]xception|[cC]ritical).*',
+  // this.logger.x(...) / self.logger.x(...) — member-field loggers.
+  '.*(this|self)[.][lL]og(ger)?[.](info|warn|warning|error|debug|trace|fatal).*',
+  // console.log/error/warn(...) — JS/TS.
+  '.*console[.](log|error|warn|info|debug|trace).*',
+  // info!(...) / error!(...) — Rust level macros.
+  '.*(info|warn|error|debug|trace)![(].*',
+  // $logger->info(...) — PHP arrow calls.
+  '.*logger->(info|error|warning|debug|critical|notice).*',
+  // Logger.info(...) — Elixir/py module-level Logger.
+  '.*Logger[.](info|warn|warning|error|debug|critical|notice).*',
+  // LoggerFactory.getLogger(...) — java slf4j declaration site.
+  '.*LoggerFactory.*',
+  // slog.Info(...) — go structured logging.
+  '.*slog[.](Info|Warn|Error|Debug).*',
+  // logrus.Info(...) — go logrus.
+  '.*logrus[.](Info|Warn|Error|Debug|Fatal).*',
+] as const;
