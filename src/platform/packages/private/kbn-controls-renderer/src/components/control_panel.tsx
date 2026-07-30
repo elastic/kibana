@@ -28,6 +28,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { EmbeddableRenderer, type DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
+  apiCanCancelRequests,
   apiPublishesRelatedPanels,
   useBatchedPublishingSubjects,
   type PublishingSubject,
@@ -74,6 +75,15 @@ export const ControlPanel = ({
   const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
+  const apiRef = useRef<DefaultEmbeddableApi | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (apiRef.current && apiCanCancelRequests(apiRef.current)) {
+        apiRef.current.cancelRequests();
+      }
+    };
+  }, []);
 
   const selectedPanel = useMemo(
     () =>
@@ -139,6 +149,7 @@ export const ControlPanel = ({
 
   const onApiAvailable = useCallback(
     (controlApi: DefaultEmbeddableApi) => {
+      apiRef.current = controlApi;
       setApi(controlApi);
       parentApi.registerChildApi(controlApi);
     },
