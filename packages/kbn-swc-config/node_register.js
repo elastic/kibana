@@ -7,35 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** @typedef {import('./types').Cache} CacheInterface */
-
-/**
- * @implements {CacheInterface}
- */
-class NoCacheCache {
-  getKey() {
-    return '';
-  }
-
-  getCode() {
-    return undefined;
-  }
-
-  getMtime() {
-    return undefined;
-  }
-
-  getSourceMap() {
-    return undefined;
-  }
-
-  async update() {
-    return undefined;
-  }
-
-  close() {}
-}
-
-module.exports = {
-  NoCacheCache,
-};
+module.exports = require('./src/node_register');

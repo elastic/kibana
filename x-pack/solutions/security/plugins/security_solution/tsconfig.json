@@ -282,7 +282,7 @@
     "@kbn/ai-assistant-common",
     "@kbn/product-doc-common",
     "@kbn/kql",
-    "@kbn/babel-register",
+    "@kbn/swc-register",
     "@kbn/core-security-common",
     "@kbn/entity-store",
     "@kbn/as-code-filters-transforms",

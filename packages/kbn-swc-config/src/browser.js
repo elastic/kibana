@@ -7,51 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getSharedConfig } from '@kbn/transpiler-config';
-
-/**
- * Options for browser SWC configuration
- */
-export interface BrowserSwcOptions {
-  /** Whether this is a production build */
-  production?: boolean;
-}
-
-/**
- * SWC loader options for RSPack/Webpack
- * This type is compatible with swc-loader
- */
-export interface SwcLoaderOptions {
-  jsc: {
-    parser: {
-      syntax: 'typescript';
-      tsx: boolean;
-      decorators: boolean;
-    };
-    transform: {
-      legacyDecorator: boolean;
-      decoratorMetadata: boolean;
-      react?: {
-        runtime: 'automatic' | 'classic';
-        development?: boolean;
-        importSource?: string;
-      };
-    };
-    target: string;
-    keepClassNames: boolean;
-    externalHelpers: boolean;
-    experimental?: {
-      plugins: Array<[string, Record<string, unknown>]>;
-    };
-  };
-  sourceMaps?: boolean | 'inline';
-  inlineSourcesContent?: boolean;
-  module?: {
-    type: 'es6' | 'commonjs';
-    ignoreDynamic?: boolean;
-  };
-  minify?: boolean;
-}
+const { getSharedConfig } = require('@kbn/transpiler-config');
 
 /**
  * Get SWC configuration for browser builds.
@@ -69,10 +25,9 @@ export interface SwcLoaderOptions {
  * won't have build-time optimizations. This is acceptable as Kibana is
  * migrating to Emotion.
  *
- * @param options - Configuration options
- * @returns SWC loader options compatible with swc-loader
+ * @param {{ production?: boolean }} options
  */
-export function getBrowserSwcConfig(options: BrowserSwcOptions = {}): SwcLoaderOptions {
+function getBrowserSwcConfig(options = {}) {
   const { production = false } = options;
   const sharedConfig = getSharedConfig();
 
@@ -128,3 +83,5 @@ export function getBrowserSwcConfig(options: BrowserSwcOptions = {}): SwcLoaderO
     minify: production,
   };
 }
+
+module.exports = { getBrowserSwcConfig };

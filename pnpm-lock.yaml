@@ -4956,9 +4956,6 @@ importers:
       '@kbn/babel-preset':
         specifier: workspace:*
         version: link:packages/kbn-babel-preset
-      '@kbn/babel-register':
-        specifier: workspace:*
-        version: link:src/platform/packages/shared/kbn-babel-register
       '@kbn/babel-transform':
         specifier: workspace:*
         version: link:src/platform/packages/private/kbn-babel-transform
@@ -5658,6 +5655,9 @@ importers:
       '@kbn/swc-config':
         specifier: workspace:*
         version: link:packages/kbn-swc-config
+      '@kbn/swc-register':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-swc-register
       '@kbn/synthetics-forge':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-synthetics-forge
@@ -7715,8 +7715,6 @@ importers:
 
   src/platform/packages/shared/kbn-axe-config: {}
 
-  src/platform/packages/shared/kbn-babel-register: {}
-
   src/platform/packages/shared/kbn-background-search: {}
 
   src/platform/packages/shared/kbn-bench: {}
@@ -8062,6 +8060,8 @@ importers:
   src/platform/packages/shared/kbn-storage-adapter: {}
 
   src/platform/packages/shared/kbn-storybook: {}
+
+  src/platform/packages/shared/kbn-swc-register: {}
 
   src/platform/packages/shared/kbn-synthtrace: {}
 
@@ -9507,13 +9507,13 @@ importers:
 
   x-pack/solutions/security/test: {}
 
-  x-pack/solutions/security/test_plugins/resolver_test: {}
-
   x-pack/solutions/security/test/security_solution_api_integration: {}
 
   x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response: {}
 
   x-pack/solutions/security/test/security_solution_endpoint: {}
+
+  x-pack/solutions/security/test_plugins/resolver_test: {}
 
   x-pack/solutions/vectordb/packages/kbn-vectordb-onboarding: {}
 
