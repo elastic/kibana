@@ -7,7 +7,7 @@
 
 import { Builder } from '@elastic/esql';
 import type { ESQLAstCommand } from '@elastic/esql/types';
-import { isAlwaysCondition } from '../../../..';
+import { isAlwaysCondition } from '../../../../types/conditions';
 import type { ConvertType } from '../../../../types/formats';
 import type { ConvertProcessor } from '../../../../types/processors';
 import { conditionToESQLAst } from '../condition_to_esql';
