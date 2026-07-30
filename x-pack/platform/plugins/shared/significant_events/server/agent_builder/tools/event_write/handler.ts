@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 import {
   type BlastRadiusEntry,
   type CausalFeature,
@@ -257,52 +258,22 @@ export const mergeEpisodeContext = (
   };
 };
 
-/**
- * Versions a batch of significant events in one request while preserving input order in the
- * returned results.
- *
- * Dedup-mode items (`dedup_window` present, no `event_id`):
- *  - Check for an active (status IN pending/open) event with the same fingerprint in-window and
- *    skip the write if found, returning the existing event_id.
- *  - Force status = "pending" — an unvalidated candidate hidden from the default read path.
- *
- * Snapshot-mode items (`event_id` present, no `dedup_window`):
- *  - Write a new version of the identified event, persisting the caller-supplied status.
- *    (Discovery-stage callers are expected to pass "pending"; judge/status workflows may
- *    promote to open/closed/dismissed.)
- *  - Merge signals and topology with prior versions when history is found.
- *
- * Anonymous items (neither `event_id` nor `dedup_window`):
- *  - Generate a synthetic event_id and write as-is.
- */
-export async function eventsWriteBulkHandler({
-  eventClient,
-  inputs,
-}: {
-  eventClient: EventClient;
-  inputs: EventsWriteInput[];
-}): Promise<EventsWriteBulkResult[]> {
-  const now = new Date();
-  const timestamp = now.toISOString();
+type BulkResults = Array<EventsWriteBulkResult | undefined>;
 
-  assertValidBulkWriteSize(inputs);
-
-  // Defensive guard: the tool schema's `.refine()` already blocks this combination for normal
-  // callers, but the handler must not silently discard `event_id` in favor of a generated one if
-  // some other path (bypassing the schema) sends both fields.
-  const mutuallyExclusiveViolations = inputs.flatMap((input, index) =>
-    input.event_id !== undefined && input.dedup_window !== undefined ? [index] : []
-  );
-  if (mutuallyExclusiveViolations.length > 0) {
-    throw createBulkWriteValidationError(
-      `event_id and dedup_window are mutually exclusive at items[${mutuallyExclusiveViolations.join(
-        ', '
-      )}]`
-    );
+/** Fills in every still-`undefined` slot or throws — every candidate must resolve to exactly one result. */
+const alignResults = (results: BulkResults, message: string): EventsWriteBulkResult[] => {
+  const aligned: EventsWriteBulkResult[] = [];
+  for (const result of results) {
+    if (result === undefined) {
+      throw createBulkWriteOutcomeUnknownError(message);
+    }
+    aligned.push(result);
   }
+  return aligned;
+};
 
-  // Build typed write candidates.
-  const candidates: WriteCandidate[] = inputs.map((input, index) => {
+const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
+  inputs.map((input, index) => {
     if (input.dedup_window !== undefined) {
       const ruleUuids = extractRuleUuids(input.signals);
       return {
@@ -325,8 +296,14 @@ export async function eventsWriteBulkHandler({
     };
   });
 
-  // Mark duplicate event_ids and fingerprints as per-item errors (keep first occurrence).
-  const results: Array<EventsWriteBulkResult | undefined> = new Array(inputs.length);
+/**
+ * Flags candidates that share a fingerprint (dedup mode) or event_id (snapshot/anonymous mode)
+ * as `duplicate_key` errors in `results`, keeping the first occurrence. Returns the remainder.
+ */
+const markDuplicateKeys = (
+  candidates: WriteCandidate[],
+  results: BulkResults
+): WriteCandidate[] => {
   const seenEventIds = new Map<string, number>();
   const seenFingerprints = new Map<string, number>();
 
@@ -354,36 +331,46 @@ export async function eventsWriteBulkHandler({
     }
   }
 
-  // Only process candidates that have not been flagged as duplicates.
-  const validCandidates = candidates.filter((c) => results[c.index] === undefined);
+  return candidates.filter((c) => results[c.index] === undefined);
+};
 
-  // Single scan for dedup candidates: fetch all events from the earliest window start.
-  const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
+/** Single scan for dedup candidates: fetch all active events from the earliest window start. */
+const fetchActiveEventsForDedup = async (
+  eventClient: EventClient,
+  dedupCandidates: DedupCandidate[]
+): Promise<SignificantEvent[]> => {
+  if (dedupCandidates.length === 0) return [];
+
   // Narrow by stream/rule only when every candidate carries one, otherwise an AND'd filter
   // could exclude a candidate's genuine duplicate that has no value for that field.
   const allCandidatesHaveStreamNames = dedupCandidates.every(
     (c) => c.input.stream_names.length > 0
   );
   const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.ruleUuids.length > 0);
-  const activeEvents: SignificantEvent[] =
-    dedupCandidates.length === 0
-      ? []
-      : (
-          await eventClient.findLatestActive({
-            from: dedupCandidates.reduce((earliest, c) =>
-              c.windowFrom < earliest.windowFrom ? c : earliest
-            ).windowFrom,
-            streamNames: allCandidatesHaveStreamNames
-              ? [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))]
-              : undefined,
-            ruleUuids: allCandidatesHaveRuleUuids
-              ? [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))]
-              : undefined,
-          })
-        ).hits;
+  const { hits } = await eventClient.findLatestActive({
+    from: dedupCandidates.reduce((earliest, c) =>
+      c.windowFrom < earliest.windowFrom ? c : earliest
+    ).windowFrom,
+    streamNames: allCandidatesHaveStreamNames
+      ? [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))]
+      : undefined,
+    ruleUuids: allCandidatesHaveRuleUuids
+      ? [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))]
+      : undefined,
+  });
+  return hits;
+};
 
+/**
+ * Marks dedup candidates whose fingerprint matches an in-window active event as
+ * `duplicate_within_window` in `results`. Returns the candidates that still need to be written.
+ */
+const resolveDedupSkips = (
+  validCandidates: WriteCandidate[],
+  activeEvents: SignificantEvent[],
+  results: BulkResults
+): WriteCandidate[] => {
   const activeStatuses = SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS as readonly string[];
-
   const toWrite: WriteCandidate[] = [];
 
   for (const candidate of validCandidates) {
@@ -413,6 +400,17 @@ export async function eventsWriteBulkHandler({
     toWrite.push(candidate);
   }
 
+  return toWrite;
+};
+
+/** Fetches prior versions needed for lineage (`previous_event_uuid`) and episode merge. */
+const fetchLineageContext = async (
+  eventClient: EventClient,
+  toWrite: WriteCandidate[]
+): Promise<{
+  latestByEventId: Map<string, SignificantEvent>;
+  priorDocsByEventId: Map<string, SignificantEvent[]>;
+}> => {
   // For snapshot writes with an explicit event_id, fetch prior versions for lineage + episode merge.
   const explicitIds = toWrite.flatMap((c) => (c.input.event_id !== undefined ? [c.eventId] : []));
   const latestByEventId =
@@ -431,73 +429,61 @@ export async function eventsWriteBulkHandler({
       })
   );
 
-  const pendingWrites = toWrite.map((candidate) => {
-    const { dedup_window: _dedup, event_id: _explicitId, ...rest } = candidate.input;
-    const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
-    const latestEvent = latestByEventId.get(candidate.eventId);
-    const isContinuation = candidate.input.event_id !== undefined;
+  return { latestByEventId, priorDocsByEventId };
+};
 
-    const signals = isContinuation
-      ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
-      : candidate.input.signals ?? [];
+const buildPendingWrite = (
+  candidate: WriteCandidate,
+  timestamp: string,
+  latestByEventId: Map<string, SignificantEvent>,
+  priorDocsByEventId: Map<string, SignificantEvent[]>
+) => {
+  const { dedup_window: _dedup, event_id: _explicitId, ...rest } = candidate.input;
+  const priorDocs = priorDocsByEventId.get(candidate.eventId) ?? [];
+  const latestEvent = latestByEventId.get(candidate.eventId);
+  const isContinuation = candidate.input.event_id !== undefined;
 
-    const episodeContext = isContinuation
-      ? mergeEpisodeContext(priorDocs, rest, timestamp)
-      : {
-          streamNames: rest.stream_names,
-          causalFeatures: rest.causal_features ?? [],
-          blastRadius: rest.blast_radius ?? [],
-        };
+  const signals = isContinuation
+    ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
+    : candidate.input.signals ?? [];
 
-    // Dedup writes land as "pending" candidates; snapshot writes persist caller-supplied status.
-    const status = candidate.mode === 'dedup' ? ('pending' as const) : candidate.input.status;
+  const episodeContext = isContinuation
+    ? mergeEpisodeContext(priorDocs, rest, timestamp)
+    : {
+        streamNames: rest.stream_names,
+        causalFeatures: rest.causal_features ?? [],
+        blastRadius: rest.blast_radius ?? [],
+      };
 
-    return {
-      candidate,
+  // Dedup writes land as "pending" candidates; snapshot writes persist caller-supplied status.
+  const status = candidate.mode === 'dedup' ? ('pending' as const) : candidate.input.status;
+
+  return {
+    candidate,
+    status,
+    document: {
+      ...rest,
+      '@timestamp': timestamp,
+      event_uuid: candidate.eventUuid,
+      event_id: candidate.eventId,
+      previous_event_uuid: latestEvent?.event_uuid,
+      investigations: latestEvent?.investigations,
+      signals,
+      stream_names: episodeContext.streamNames,
+      causal_features: episodeContext.causalFeatures,
+      blast_radius: episodeContext.blastRadius,
+      severity: candidate.input.severity,
       status,
-      document: {
-        ...rest,
-        '@timestamp': timestamp,
-        event_uuid: candidate.eventUuid,
-        event_id: candidate.eventId,
-        previous_event_uuid: latestEvent?.event_uuid,
-        investigations: latestEvent?.investigations,
-        signals,
-        stream_names: episodeContext.streamNames,
-        causal_features: episodeContext.causalFeatures,
-        blast_radius: episodeContext.blastRadius,
-        severity: candidate.input.severity,
-        status,
-      },
-    };
-  });
+    },
+  };
+};
 
-  if (pendingWrites.length === 0) {
-    const aligned: EventsWriteBulkResult[] = [];
-    for (const result of results) {
-      if (result === undefined) {
-        throw createBulkWriteOutcomeUnknownError('Event bulk results were not aligned');
-      }
-      aligned.push(result);
-    }
-    return aligned;
-  }
-
-  let response;
-  try {
-    response = await eventClient.bulkCreate(
-      pendingWrites.map(({ document }) => document),
-      // `wait_for` lets the immediate triage `_count` see the newly written event version.
-      { throwOnFail: false, refresh: 'wait_for' }
-    );
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown Elasticsearch transport error';
-    throw createBulkWriteOutcomeUnknownError(`Event bulk write outcome is unknown: ${message}`);
-  }
-
-  const createResults = extractCreateResults(response, pendingWrites.length, 'Event');
-
+/** Writes `detail.error ? bulk_error : written` into `results` for each pending write, by index. */
+const applyBulkResults = (
+  pendingWrites: Array<ReturnType<typeof buildPendingWrite>>,
+  createResults: BulkResponseItem[],
+  results: BulkResults
+): void => {
   pendingWrites.forEach(({ candidate, status }, responseIndex) => {
     const detail = createResults[responseIndex];
     results[candidate.index] = detail.error
@@ -517,17 +503,85 @@ export async function eventsWriteBulkHandler({
           written: true,
         };
   });
+};
 
-  const aligned: EventsWriteBulkResult[] = [];
-  for (const result of results) {
-    if (result === undefined) {
-      throw createBulkWriteOutcomeUnknownError(
-        'Event bulk results were not aligned with every input'
-      );
-    }
-    aligned.push(result);
+/**
+ * Versions a batch of significant events in one request while preserving input order in the
+ * returned results.
+ *
+ * Dedup-mode items (`dedup_window` present, no `event_id`):
+ *  - Check for an active (status IN pending/open) event with the same fingerprint in-window and
+ *    skip the write if found, returning the existing event_id.
+ *  - Force status = "pending" — an unvalidated candidate hidden from the default read path.
+ *
+ * Snapshot-mode items (`event_id` present, no `dedup_window`):
+ *  - Write a new version of the identified event, persisting the caller-supplied status.
+ *    (Discovery-stage callers are expected to pass "pending"; judge/status workflows may
+ *    promote to open/closed/dismissed.)
+ *  - Merge signals and topology with prior versions when history is found.
+ *
+ * Anonymous items (neither `event_id` nor `dedup_window`):
+ *  - Generate a synthetic event_id and write as-is.
+ */
+export async function eventsWriteBulkHandler({
+  eventClient,
+  inputs,
+}: {
+  eventClient: EventClient;
+  inputs: EventsWriteInput[];
+}): Promise<EventsWriteBulkResult[]> {
+  const timestamp = new Date().toISOString();
+
+  assertValidBulkWriteSize(inputs);
+
+  // Defensive guard: the tool schema's `.refine()` already blocks this combination for normal
+  // callers, but the handler must not silently discard `event_id` in favor of a generated one if
+  // some other path (bypassing the schema) sends both fields.
+  const mutuallyExclusiveViolations = inputs.flatMap((input, index) =>
+    input.event_id !== undefined && input.dedup_window !== undefined ? [index] : []
+  );
+  if (mutuallyExclusiveViolations.length > 0) {
+    throw createBulkWriteValidationError(
+      `event_id and dedup_window are mutually exclusive at items[${mutuallyExclusiveViolations.join(
+        ', '
+      )}]`
+    );
   }
-  return aligned;
+
+  const candidates = buildWriteCandidates(inputs);
+  const results: BulkResults = new Array(inputs.length);
+  const validCandidates = markDuplicateKeys(candidates, results);
+
+  const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
+  const activeEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
+  const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
+
+  const { latestByEventId, priorDocsByEventId } = await fetchLineageContext(eventClient, toWrite);
+  const pendingWrites = toWrite.map((candidate) =>
+    buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
+  );
+
+  if (pendingWrites.length === 0) {
+    return alignResults(results, 'Event bulk results were not aligned');
+  }
+
+  let response;
+  try {
+    response = await eventClient.bulkCreate(
+      pendingWrites.map(({ document }) => document),
+      // `wait_for` lets the immediate triage `_count` see the newly written event version.
+      { throwOnFail: false, refresh: 'wait_for' }
+    );
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown Elasticsearch transport error';
+    throw createBulkWriteOutcomeUnknownError(`Event bulk write outcome is unknown: ${message}`);
+  }
+
+  const createResults = extractCreateResults(response, pendingWrites.length, 'Event');
+  applyBulkResults(pendingWrites, createResults, results);
+
+  return alignResults(results, 'Event bulk results were not aligned with every input');
 }
 
 /** Single-item adapter retained for callers such as `event_create` that require thrown item errors. */

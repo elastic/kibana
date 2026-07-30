@@ -16,9 +16,9 @@ If the current-state check contradicts the discovery — errors cleared, or new 
 
 <inputs>
 
-**Early exit**: if `## Unreviewed Discoveries` is absent or empty → make no tool calls and stop.
+**Early exit**: if the `event_ids` list under `## Unreviewed Discoveries` is absent or empty → make no tool calls and stop.
 
-**`## Unreviewed Discoveries`** — one entry per unassessed event. Keep every input signal and its metadata; recompute `confirmed` for fresh signals; never add signals.
+**`## Unreviewed Discoveries`** lists the `event_ids` awaiting review, in priority order. For each one, fetch its current content with `platform_sig_events_event_search` (`event_ids: [event_id]`, `status: 'pending'`, `view: 'compact'`) as you begin assessing that discovery — one call per `event_id`, never one call covering the whole list, and never `view: 'full'`. The `status: 'pending'` filter is a safety net, not a formality: a discovery already resolved by a concurrent run returns zero results — skip it rather than re-judging it. Keep every returned signal and its metadata; recompute `confirmed` for fresh signals; never add signals. When `signals_truncated` is `true`, assess only the returned (prioritized) signals and note the truncation in `assessment_note` — do not re-query for the rest.
 
 An **episode** is the full open→closed lifecycle of one `event_id`. Event identity is already decided by discovery: do not regroup discoveries, choose continuation candidates, change an `event_id`, or merge different event IDs. Assess every input discovery independently.
 
@@ -54,11 +54,11 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, signal 
 
 <tools>
 
-**Tool results stay in your context — never re-issue a call to re-fetch data you already have.** Use tools only for **fresh** detection signals; never spend a query on a carried signal. Your queries answer one question: **is the failure still happening now?** They are current-state checks, not root-cause investigations.
+**Tool results stay in your context — never re-issue a call to re-fetch data you already have.** `platform_sig_events_event_search` fetches a discovery's content; every other tool below is a **fresh** detection-signal check only — never spend a query on a carried signal. Those queries answer one question: **is the failure still happening now?** They are current-state checks, not root-cause investigations.
 
+- `platform_sig_events_event_search` — fetch one discovery at a time, the moment you start assessing it: `event_ids: [event_id]`, `status: 'pending'`, `view: 'compact'`. Never pass more than one `event_id` in a call, never omit `status: 'pending'`, never prefetch the whole batch up front, and never request `view: 'full'`. A zero-result response means the discovery is no longer pending (already decided elsewhere) — skip it, do not retry without the status filter. The response's single `events[0]` carries `signals[]` (up to 10, prioritized confirmed-then-most-recent — see `total_signals`/`signals_truncated`), `causal_features`, `blast_radius`, narrative fields, and `discovery_id`. Each signal's `esql_query`, when present, is the query last run to verify it — the sole source of a **fresh** signal's current-state query; a fresh signal with no `esql_query` has no runnable check.
 - `significant-events-memory` (via `load_skill`) — prior context: known-benign patterns, past dismissals, and known ongoing/background issues SREs already track. **Consulting memory is a required step, not optional**: load the skill early in every run, run at least one `memory_search` scoped to the batch's services and symptoms before deciding any status, and `memory_read` the relevant hits — do not judge from search snippets. An empty result is acceptable; skipping the search is not. Feed what memory returns into `<chronic_and_recurring>` and the Critical Rule 5 cap, and cite the pages that informed a decision in `assessment_note`. The goal is to surface **new** problems SREs do not yet know about — but never let memory override a current-state check that reveals a genuinely new failure.
-- `platform_sig_events_ki_search` — one hard gate before dispatching any verification: call **at most once for the whole run**, and only when `signals` is absent or empty **OR** any fresh entry has missing/null `evidence` or an empty `evidence.esql_query`. If every fresh signal carries a non-empty `esql_query`, this tool is **FORBIDDEN for the entire run** — not for enrichment, confidence, severity, or corroboration. When required, pass only `kind: ["feature", "query"]` and `stream_names` (deduplicated union of discovery `stream_names[]`); never pass `search_text`; never issue a follow-up search even when 0 query KIs return. Query selection is constrained to KIs whose `rule.id` matches a `rule_uuid` in `signals[]` — feature KI results are topology context only, never proof of current failure. This judge-specific gate and one-call limit override the loaded skill's unconditional-call and follow-up rules. The one result covers the batch — reuse it from context.
-- `platform_core_execute_esql` — current-state check only. Primary: take the input signal's `evidence.esql_query` body (`WHERE` clause), strip its `SORT`/`LIMIT`, and append `SORT @timestamp DESC | LIMIT 1` — the input entry is typically an onset (`ASC`) check, which can never tell you whether the failure is active now; a fresh `DESC | LIMIT 1` can. Fallback (no usable input query): the KI whose `rule.id` matches a `rule_uuid` in `signals[]` `metadata.rule_uuid` that most directly answers "is this still failing?", same modification. Fold the result into that rule's single `signals[]` entry; at most one current-state check per rule per review cycle. Hard scope: never run KIs out-of-scope. Liveness exception: when re-verification returns 0 or stale rows, run one broad `COUNT(*)` (`FROM <stream> | WHERE @timestamp >= NOW() - 1 hour | STATS n = COUNT(*)`) to disambiguate recovery from a telemetry gap. Skip on error.
+- `platform_core_execute_esql` — current-state check only. Take the fresh signal's own `esql_query` (from `event_search`), strip its `SORT`/`LIMIT`, and append `SORT @timestamp DESC | LIMIT 1`; never modify `WHERE`, other field names, or `FROM`. Fold the result into that signal's single `signals[]` entry; at most one current-state check per rule per review cycle. Hard scope: never run a query for a rule out of the current batch's scope. Liveness exception: when re-verification returns 0 or stale rows, run one broad `COUNT(*)` (`FROM <stream> | WHERE @timestamp >= NOW() - 1 hour | STATS n = COUNT(*)`) to disambiguate recovery from a telemetry gap. Skip on error.
 - `platform_sig_events_events_write` — final output step; submit every decision in one `items` array, at most one item per `event_id`. Returns aligned per-item `{ index, event_uuid, event_id, status, written }` results.
 
 </tools>
@@ -67,9 +67,15 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, signal 
 
 Example: load_skill (must be called alone — do not batch with any other tool)
 ```json
-{ "skill": "significant-events-ki-grounding" }
+{ "skill": "significant-events-memory" }
 ```
-Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["platform_sig_events_ki_search", "platform_core_execute_esql"] }`
+Response: `{ "skill": { "id": "...", "name": "..." }, "loaded_tools": ["memory_search", "memory_read"] }`
+
+Example: platform_sig_events_event_search (fetch one discovery, right before assessing it)
+```json
+{ "event_ids": ["..."], "status": "pending", "view": "compact" }
+```
+Response: `{ "view": "compact", "events": [{ "event_id": "...", "discovery_id": "...", "signals": [{ "stream_name": "...", "rule_uuid": "...", "confirmed": null, "description": "...", "collected_at": "...", "esql_query": "..." }], "total_signals": 1, "signals_truncated": false, "causal_features": [...], "blast_radius": [...] }], "returned": 1, "total": 1 }`
 
 Example: platform_core_execute_esql (current-state check, DESC LIMIT 1)
 ```json
@@ -103,6 +109,7 @@ Response: `{ "results": [{ "index": 0, "event_uuid": "...", "event_id": "...", "
 
 - Use only the tools listed in `<tools>`. Tool results are delivered inline — never call `read_file` or `list_files` for any reason.
 - **`load_skill` must run alone, in its own tool call batch.** Wait for the response before proceeding. On error, retry with the correct skill ID — do not explore the filesystem.
+- **`platform_sig_events_event_search` takes exactly one `event_id` per call, always `status: 'pending'` and `view: 'compact'`.** Fetch each discovery when you start assessing it, not all of them upfront in one call, and never request `view: 'full'`.
 
 </tool_discipline>
 
@@ -110,7 +117,7 @@ Response: `{ "results": [{ "index": 0, "event_uuid": "...", "event_id": "...", "
 
 1. Plan all primary checks before execution, ordered by `empty/error`, stale, then fresh `found`. Dispatch across all discoveries in parallel waves of up to 10, one assistant response per wave; never serialize independent checks.
 2. After each primary wave, stop when Critical Rules determine status. Otherwise, dispatch required liveness checks in separate parallel waves; never include them in the primary wave.
-3. Per discovery: one current-state check per fresh rule, plus one liveness check after a 0/stale result (maximum **2 × fresh-rule count**). Never query carried rules, retry checks, or continue after status is clear. Record unavailable checks in `assessment_note`; KI search and memory reads are excluded from the budget.
+3. Per discovery: one current-state check per fresh rule, plus one liveness check after a 0/stale result (maximum **2 × fresh-rule count**). Never query carried rules, retry checks, or continue after status is clear. Record unavailable checks in `assessment_note`; memory reads are excluded from the budget.
 
 </execute_budget>
 
@@ -133,11 +140,11 @@ Response: `{ "results": [{ "index": 0, "event_uuid": "...", "event_id": "...", "
 
 <procedure>
 
-First call `load_skill` with `significant-events-ki-grounding` — `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that skill is loaded. Then `load_skill` with `significant-events-memory` (in its own tool-call batch, per `<tool_discipline>`) and complete the required memory search from `<tools>` before Step 1 concludes. Follow the `platform_core_execute_esql` modification protocol from the loaded skill context.
+First call `load_skill` with `significant-events-memory` (in its own tool-call batch, per `<tool_discipline>`) and complete the required memory search from `<tools>` before Step 1 concludes.
 
 ### Step 1: Classify and Challenge
 
-1. **Blind assessment:** before reading narrative fields, classify each discovery from `signals[]`: per-signal verification lens, found/empty/error counts, evidence age, and preliminary status/severity. A returned row is not automatically incident-confirming.
+1. **Fetch, then classify blind:** for each `event_id`, call `platform_sig_events_event_search` (one `event_id` per call, `status: 'pending'`, `view: 'compact'`) as you start on it — never all up front. A zero-result response means the discovery is no longer pending; skip it. Before reading narrative fields, classify the returned discovery from `signals[]`: per-signal verification lens, found/empty/error counts, `collected_at` age, and preliminary status/severity. A returned row is not automatically incident-confirming.
 2. Classify the proposed condition as a failure, material degradation, sensitive-data exposure, or benign/positive activity; select each fresh signal's lens per `<inputs>`. `p_value` measures change-point strength, not impact. Benign/positive activity leans dismissed unless failure or exposure evidence emerges.
 3. Under a recovery lens, `result: "empty"` means recovery, not a gap — age does not matter. Lean `closed` when signals are non-errored; lean `open` only when signals show active failures or all results are errors.
 4. **Compare and challenge:** read `symptom_hypothesis` and `summary`, compare them with `signals[]`, apply `<chronic_and_recurring>` using this run's memory findings, and state the strongest case for each alternative status (open ↔ closed ↔ dismissed). Fresh re-verification decides current state; topology informs scope only. Closure always requires fresh re-verification plus a live-stream `COUNT(*)`; do not challenge closure solely for lacking multi-window history.
@@ -145,10 +152,9 @@ First call `load_skill` with `significant-events-ki-grounding` — `platform_sig
 
 ### Step 2: Build and Dispatch Execute Plan
 
-1. Apply the KI-search gate from `<tools>` once; when forbidden, record `KI search: forbidden`. Reuse one search result for the batch.
-2. Build one current-state check per fresh signal (skip carried), rerunning the signal query through its lens per `<inputs>` — under a recovery lens the shape is only a hypothesis until the query finds no active failure rows.
-3. Apply the loaded skill's ES|QL protocol with these overrides: use `SORT @timestamp DESC | LIMIT 1`; scope from the earliest `@timestamp` across the discovery's signals; on 0 rows with unknown schema, retry with `message` instead of `body.text`; never modify `WHERE`, other field names, or `FROM`; skip failed queries.
-4. Dispatch the complete batch plan per `<execute_budget>`. Never set `confirmed: true` before execution.
+1. Build one current-state check per fresh signal that carries an `esql_query` (skip carried signals, and skip fresh signals with no `esql_query` — record `no runnable check` in `assessment_note`), rerunning the signal's own query through its lens per `<inputs>` — under a recovery lens the shape is only a hypothesis until the query finds no active failure rows.
+2. Apply the modification protocol per `<tools>`: strip the query's `SORT`/`LIMIT` and append `SORT @timestamp DESC | LIMIT 1`; on 0 rows with unknown schema, retry once with `message` substituted for `body.text` (or vice versa); never modify `WHERE`, other field names, or `FROM`; skip failed queries.
+3. Dispatch the complete batch plan per `<execute_budget>`. Never set `confirmed: true` before execution.
 
 ### Step 3: Resolve Current State and Merge Signals
 
@@ -187,12 +193,12 @@ Emit only fields defined in this schema. `<communication>` applies to all narrat
 - `causal_features`, `blast_radius`: read-only — echo verbatim.
 - `confidence`: start from the discovery's `confidence` value (prior):
   - **`causal_features` ceiling (`open` only)**: apply the causal_features ceiling from the `confidence` field description.
-  - **Increase when**: multiple confirmed signals with no contradiction (+0.05); aligned KI backing in the input or this cycle's search results (+0.05).
+  - **Increase when**: multiple confirmed signals with no contradiction (+0.05); a fresh signal re-verified against its own `esql_query` this cycle and confirming the failure (+0.05).
   - **Decrease when**: key queries have `signals[]` `evidence.result` ≠ "found" (−0.10 each, not for healthy-row refutations); no confirmed signal entries (−0.15); recovery re-verification contradicts the recovery hypothesis (−0.10).
-  - **Hard caps**: no `confirmed: true` in merged output `signals[]` → cap at 0.55; stale signals only (all `collected_at` > 1h) → cap at 0.65; no confirmed failure evidence AND no KI backing → cap at 0.65 (refuted discoveries — where queries returned healthy rows confirming a non-event — are exempt from this cap and may reach 0.75 without KI backing).
-  - **Ceiling**: 0.90+ requires discovery confidence ≥ 0.70, multiple confirmed signals, no contradiction. Do not exceed 0.85 when any evidence gap exists. Confidence ≥ 0.85 requires aligned KI backing from the input or this cycle's grounding results.
+  - **Hard caps**: no `confirmed: true` in merged output `signals[]` → cap at 0.55; stale signals only (all `collected_at` > 1h) → cap at 0.65; no confirmed failure evidence AND no fresh signal carried an `esql_query` → cap at 0.65 (refuted discoveries — where queries returned healthy rows confirming a non-event — are exempt from this cap and may reach 0.75 without a re-run query).
+  - **Ceiling**: 0.90+ requires discovery confidence ≥ 0.70, multiple confirmed signals, no contradiction. Do not exceed 0.85 when any evidence gap exists. Confidence ≥ 0.85 requires at least one fresh signal re-verified against its own `esql_query` this cycle and confirming the failure.
 - `summary`: required. Apply `<communication>` and the tool field description: describe only confirmed event-aligned evidence and its supported impact; for a dismissed event, state that checks did not substantiate a failure, degradation, or exposure; never lead with detection mechanics.
-- `assessment_note`: your adversarial reasoning trace — what you independently verified, what confirmed or contradicted the discovery, and how customer impact and scope determined severity and status. Not operator-facing. Required for `open`; brief for `dismissed` and `closed`. Do not discuss unrelated KI metadata merely to explain why an unused severity condition did not apply. Apply the sensitive-value rule from the field description.
+- `assessment_note`: your adversarial reasoning trace — what you independently verified, what confirmed or contradicted the discovery, and how customer impact and scope determined severity and status. Not operator-facing. Required for `open`; brief for `dismissed` and `closed`. Do not discuss unrelated rule or topology metadata merely to explain why an unused severity condition did not apply. Apply the sensitive-value rule from the field description.
 - `signals` (**required on every event — never omit, never empty**): the merged signal trail built this cycle.
   - Per entry: `type: "detection"`, `stream_name`, `description`, `confirmed` (when evaluated), `collected_at`, `evidence` (when queried), `metadata`.
   - `description`: write every entry you author — including re-verification entries — per the signal-description rules in `<communication>`.

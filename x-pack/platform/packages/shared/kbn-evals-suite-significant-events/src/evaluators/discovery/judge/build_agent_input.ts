@@ -16,5 +16,6 @@ export interface DiscoveryJudgeInputParams {
 
 /** Build the discovery judge agent's user message. */
 export function buildDiscoveryJudgeInput({ discoveries }: DiscoveryJudgeInputParams): string {
-  return Mustache.render(judgeUserPrompt, { discoveries: JSON.stringify(discoveries) }).trim();
+  const eventIds = discoveries.map((discovery) => discovery.event_id);
+  return Mustache.render(judgeUserPrompt, { event_ids: JSON.stringify(eventIds) }).trim();
 }

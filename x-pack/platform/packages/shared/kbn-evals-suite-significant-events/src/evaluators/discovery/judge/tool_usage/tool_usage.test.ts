@@ -10,7 +10,7 @@ import type { ConverseStep } from '@kbn/evals';
 import type { SignificantEvent, SignalEntry } from '@kbn/significant-events-schema';
 import { scoreJudgeToolUsage } from './tool_usage';
 
-const { searchKnowledgeIndicators: TOOL_ID_KI_SEARCH, eventsWrite: TOOL_ID_EVENTS_WRITE } =
+const { searchEvent: TOOL_ID_EVENT_SEARCH, eventsWrite: TOOL_ID_EVENTS_WRITE } =
   platformSignificantEventsTools;
 const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
 
@@ -48,21 +48,12 @@ const discovery = (withQuery: boolean): Pick<SignificantEvent, 'signals'> => ({
 });
 
 describe('scoreJudgeToolUsage', () => {
-  it('uses ES|QL and events_write without KI search when evidence has a query', () => {
+  it('uses event_search and execute_esql when evidence has a query', () => {
     expect(
       scoreJudgeToolUsage({
         discoveries: [discovery(true)],
-        steps: [toolCall(TOOL_ID_EXECUTE_ESQL), toolCall(TOOL_ID_EVENTS_WRITE)],
-      })
-    ).toMatchObject({ score: 1, label: 'correct' });
-  });
-
-  it('requires KI search when evidence has no query', () => {
-    expect(
-      scoreJudgeToolUsage({
-        discoveries: [discovery(false)],
         steps: [
-          toolCall(TOOL_ID_KI_SEARCH),
+          toolCall(TOOL_ID_EVENT_SEARCH),
           toolCall(TOOL_ID_EXECUTE_ESQL),
           toolCall(TOOL_ID_EVENTS_WRITE),
         ],
@@ -70,11 +61,38 @@ describe('scoreJudgeToolUsage', () => {
     ).toMatchObject({ score: 1, label: 'correct' });
   });
 
+  it('does not require execute_esql when no discovery has a runnable query', () => {
+    expect(
+      scoreJudgeToolUsage({
+        discoveries: [discovery(false)],
+        steps: [toolCall(TOOL_ID_EVENT_SEARCH), toolCall(TOOL_ID_EVENTS_WRITE)],
+      })
+    ).toMatchObject({ score: 1, label: 'correct' });
+  });
+
+  it('fails when event_search is missing', () => {
+    expect(
+      scoreJudgeToolUsage({
+        discoveries: [discovery(true)],
+        steps: [toolCall(TOOL_ID_EXECUTE_ESQL), toolCall(TOOL_ID_EVENTS_WRITE)],
+      })
+    ).toMatchObject({ score: 0, label: `missing-${TOOL_ID_EVENT_SEARCH}` });
+  });
+
+  it('fails when execute_esql is missing but a runnable query exists', () => {
+    expect(
+      scoreJudgeToolUsage({
+        discoveries: [discovery(true)],
+        steps: [toolCall(TOOL_ID_EVENT_SEARCH), toolCall(TOOL_ID_EVENTS_WRITE)],
+      })
+    ).toMatchObject({ score: 0, label: `missing-${TOOL_ID_EXECUTE_ESQL}` });
+  });
+
   it('fails when events_write is missing', () => {
     expect(
       scoreJudgeToolUsage({
         discoveries: [discovery(true)],
-        steps: [toolCall(TOOL_ID_EXECUTE_ESQL)],
+        steps: [toolCall(TOOL_ID_EVENT_SEARCH), toolCall(TOOL_ID_EXECUTE_ESQL)],
       })
     ).toMatchObject({ score: 0, label: 'missing-output-write' });
   });
@@ -84,6 +102,7 @@ describe('scoreJudgeToolUsage', () => {
       scoreJudgeToolUsage({
         discoveries: [discovery(true)],
         steps: [
+          toolCall(TOOL_ID_EVENT_SEARCH),
           toolCall(TOOL_ID_EXECUTE_ESQL),
           toolCall(TOOL_ID_EVENTS_WRITE),
           toolCall(TOOL_ID_EVENTS_WRITE),
@@ -97,6 +116,7 @@ describe('scoreJudgeToolUsage', () => {
       scoreJudgeToolUsage({
         discoveries: [discovery(true)],
         steps: [
+          toolCall(TOOL_ID_EVENT_SEARCH),
           toolCall(TOOL_ID_EXECUTE_ESQL),
           retryableEventsWriteCall(),
           retryCall(TOOL_ID_EVENTS_WRITE),

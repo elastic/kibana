@@ -178,6 +178,11 @@ export function createSearchEventsTool({
         defaultMessage:
           'Use compact for broad searches and continuation matching. Use full only when complete evidence and assessment details are required. Follow next_page while has_more is true. Omit status to return all states.',
       })}
+
+      ${i18n.translate('xpack.significantEvents.agentBuilder.tools.eventSearch.description.line3', {
+        defaultMessage:
+          'A compact event caps its signals list and sets signals_truncated to true when a long-running event has more signals than shown; total_signals holds the real count. To read every signal for such an event, call again with view: full and event_ids: [event_id].',
+      })}
     `,
     schema: searchEventsSchema,
     tags: ['streams', 'significant_events'],

@@ -119,11 +119,12 @@ steps:
     create-conversation: true
     public-conversation: true
     with:
+      # Rows are [event_id, _source, score]; only the ids go to the judge — it fetches each
+      # discovery itself via platform_sig_events_event_search, per judge.md.text.
       message: |
         ## Unreviewed Discoveries
 
-        Columns: {{ steps.get_unassessed_discoveries.output.columns | map: 'name' | json }}
-        Rows: {{ steps.get_unassessed_discoveries.output.values | json }}
+        event_ids: {{ steps.get_unassessed_discoveries.output.values | map: '0' | json }}
       schema:
         type: object
         properties:
