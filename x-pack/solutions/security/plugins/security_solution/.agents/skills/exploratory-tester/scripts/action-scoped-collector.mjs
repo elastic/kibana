@@ -26,7 +26,7 @@
  * pasted as literal source into browser_evaluate and never `import`ed, so
  * Node never needs to determine their module type. This file IS `import`ed
  * (by action-scoped-collector.test.mjs and, in shadow mode, by
- * phases/2-explore.md's CLI invocation) and uses real ESM `import`/`export`,
+ * phases/2-flow-core.md's CLI invocation) and uses real ESM `import`/`export`,
  * so `.mjs` avoids a module-type-sniffing warning on every run rather than
  * requiring a change to the shared plugin package.json's "type" field.
  *
@@ -388,7 +388,7 @@ export function reduceAction(action, priorState) {
 
   // ── Delayed elements: deterministic spinner-timing escalation ────────────
   // Replaces the agent-judgment-based "has it been visible >10s?" rule in
-  // phases/2-explore.md with a computed one, given an explicit action clock.
+  // phases/2-flow-core.md with a computed one, given an explicit action clock.
   if (typeof dom.spinnerVisibleForMs === 'number') {
     if (dom.spinnerVisibleForMs > 10000) {
       level2.push({
