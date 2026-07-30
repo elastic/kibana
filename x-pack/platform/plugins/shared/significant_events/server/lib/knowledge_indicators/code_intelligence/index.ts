@@ -9,7 +9,9 @@ export {
   CODE_FEATURE_SUBTYPE_LANGUAGE,
   CODE_FEATURE_SUBTYPE_REPO_TYPE,
   CODE_FEATURE_SUBTYPE_SERVICE_NAME,
+  CODE_INTELLIGENCE_AGENT_ID,
 } from './constants';
+export { isCodeIntelligenceAgentAvailable } from './is_agent_available';
 export { classifyRepository } from './classify_repository';
 export { reconcileCodeFeatures } from './reconcile_code_features';
 export {

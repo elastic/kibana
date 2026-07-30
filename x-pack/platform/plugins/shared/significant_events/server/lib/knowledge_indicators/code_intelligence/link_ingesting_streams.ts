@@ -152,7 +152,7 @@ export const SERVICE_ENTITY_CONFIDENCE_GROUNDED = 100;
 export const SERVICE_ENTITY_CONFIDENCE_INFERRED = 70;
 
 /**
- * Additional code-derived facts about a service that the `github.code_researcher`
+ * Additional code-derived facts about a service that the code-intelligence agent
  * agent reports alongside its identity. Stored on the service entity KI's
  * properties so they travel with the service (and merge onto any log-derived
  * entity during reconciliation).
@@ -287,7 +287,7 @@ export async function linkServiceEntities({
 
   const ref = fingerprint ? `${repository}@${fingerprint}` : repository;
   const evidence = formatCitations(citations, ref) ?? [
-    `code: ${ref} service identified by github.code_researcher agent`,
+    `code: ${ref} service identified by the code-intelligence agent`,
   ];
   const metadataProperties = serviceMetadataToProperties(metadata);
 

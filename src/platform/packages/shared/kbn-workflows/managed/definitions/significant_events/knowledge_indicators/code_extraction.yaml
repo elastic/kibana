@@ -1,12 +1,20 @@
-# GitHub-driven KI (Knowledge Indicator) extraction proof of concept.
+# Sourcerer-driven KI (Knowledge Indicator) extraction proof of concept.
 #
-# A first agent pass discovers deployable services in the repositories returned
-# by `github.list_repos`. A second, service-scoped pass finds production logging
+# A first agent pass discovers deployable services across the repositories
+# indexed in Sourcerer. A second, service-scoped pass finds production logging
 # call sites. The workflow then sends the verified source analysis to the
-# Significant Events KI endpoint. It stays in Kibana because the
-# `github.code_researcher` agent, GitHub tools and skills, and the endpoint it
-# drives are plugin-owned; no SCS coupling remains. It runs manually and on a
-# schedule, while the fingerprint noop guard keeps unchanged runs cheap.
+# Significant Events KI endpoint.
+#
+# The `sourcerer` agent is installed independently by `sourcerer setup` (its
+# read-only code tools + skills pre-exist), so this workflow only drives it; if
+# the agent is absent the plugin does not install/enable this workflow (see the
+# code-intelligence agent-presence gate). `agent-id` must stay in sync with
+# `CODE_INTELLIGENCE_AGENT_ID` in the plugin (YAML cannot import the constant).
+#
+# It runs manually and on a schedule; the fingerprint noop guard keeps unchanged
+# runs cheap. This is the substrate swap point: when the Agent Builder code
+# sandbox arrives, repoint `agent-id` and rewrite the tool guidance in the two
+# agent messages below.
 
 version: '1'
 name: 'Code KI Extraction'
@@ -34,34 +42,37 @@ triggers:
         type: string
         default: '.openai-gpt-5.2-chat_completion'
         required: false
-        description: 'Connector ID for the GitHub Code Researcher agent.'
+        description: 'Connector ID for the code-intelligence (Sourcerer) agent.'
 steps:
   - name: identify_services
     type: ai.agent
-    agent-id: github.code_researcher
+    agent-id: sourcerer
     connector-id: '${{ inputs.agentConnectorId }}'
     plugin-id: 'significant_events'
     aggregate-by: 'significant_events'
     with:
       message: |
-        Load the github-ki-discovery skill before doing any work.
         Task: SERVICE_DISCOVERY
 
-        Discover every independently deployable service in every repository returned by github.list_repos.
+        Discover every independently deployable service in every repository indexed in Sourcerer.
 
-        Resolve each configured ref with github.get_commit first. Pass the ref exactly as returned by
-        github.list_repos in the sha argument; never prepend refs/tags/ or refs/heads/. Use the resulting
-        full commit SHA for every tree and file read. Prefer github.get_repository_tree and targeted file reads. Use
-        github.search_code only when the repository tree cannot locate the relevant configuration; pass
-        phase="service-discovery" and always scope the query with repo:owner/repo.
+        First call sourcerer.refs.list (git_org="*", git_repo="*") to enumerate the indexed repositories and
+        their refs. For each repository pick the ref to analyze and record its full git.commit from the
+        refs.list result; use that exact commit in every subsequent sourcerer.files.* and sourcerer.code.*
+        call (scope every call with git_org, git_repo, git_commit). Never guess a commit.
+
+        Explore structure with sourcerer.files.ls and read specific files with sourcerer.files.cat /
+        sourcerer.files.head. Use sourcerer.code.grep (regex, file/line order) for exact identifiers,
+        config keys, or deployment-manifest markers, and sourcerer.code.search (BM25) when you know the
+        concept but not the location. Prefer one grep per keyword over complex alternations.
 
         A service has its own entrypoint, build target, deployment manifest, or container. Exclude libraries,
         shared packages, tests, examples, generated code, and config-only directories.
 
-        For every service return the repository and immutable gitSha, its repository-relative serviceRoot,
-        emitted service.name, primary language, deployment evidence, and any version or telemetry metadata
-        verified in source. Also report repository language weights and IaC file signals. Repeat repository
-        metadata for each service so every item is self-contained. Never guess.
+        For every service return the repository (as "org/repo") and immutable gitSha (the full git.commit),
+        its repository-relative serviceRoot, emitted service.name, primary language, deployment evidence, and
+        any version or telemetry metadata verified in source. Also report repository language weights and IaC
+        file signals. Repeat repository metadata for each service so every item is self-contained. Never guess.
       schema:
         type: object
         properties:
@@ -152,30 +163,34 @@ steps:
         steps:
           - name: identify_logging_sites
             type: ai.agent
-            agent-id: github.code_researcher
+            agent-id: sourcerer
             connector-id: '${{ inputs.agentConnectorId }}'
             plugin-id: 'significant_events'
             aggregate-by: 'significant_events'
             with:
               message: |
-                Load the github-ki-discovery skill before doing any work.
                 Task: LOGGING_SITES
 
                 Find production logging call sites for this deployable service:
-                - repository: {{ foreach.item.repository }}
-                - immutable commit SHA: {{ foreach.item.gitSha }}
+                - repository (org/repo): {{ foreach.item.repository }}
+                - immutable commit (git.commit): {{ foreach.item.gitSha }}
                 - service name: {{ foreach.item.name }}
                 - service root: {{ foreach.item.serviceRoot }}
                 - language: {{ foreach.item.language }}
 
-                Stay inside the service root. Use github.get_repository_tree and pinned file reads first.
-                Use github.search_code only when needed; every search must include
-                repo:{{ foreach.item.repository }} path:{{ foreach.item.serviceRoot }}, phase="logging-sites",
-                and serviceName="{{ foreach.item.name }}". Verify every candidate with
-                github.get_file_contents at the supplied SHA. Exclude tests, examples, and generated code.
+                Scope every call to this exact git_org/git_repo/git_commit and stay inside the service root.
+                Derive git_org and git_repo by splitting the repository on "/". Use sourcerer.code.grep with a
+                file_path glob rooted at the service (e.g. "{{ foreach.item.serviceRoot }}/**") and a regex
+                matching this language's logger idioms (logger method calls such as logger.info/Error/Warn,
+                console.* for JS/TS, level macros like info!(...) for Rust, Logger.* for JVM/Elixir). Note
+                sourcerer regex is Lucene: use [.] for a literal dot, wrap patterns in .*, and it is
+                case-sensitive, so enumerate case in alternations. Prefer one grep per idiom over one complex
+                alternation. Confirm surrounding context with sourcerer.files.cat / sourcerer.files.head when
+                a match needs it. Exclude tests, examples, and generated code.
 
                 Return bounded source excerpts containing actual logger calls and their static message
-                templates. Prefer completeness for production call sites but deduplicate repeated messages.
+                templates, each with its repository-relative location (path and line). Prefer completeness for
+                production call sites but deduplicate repeated messages.
               schema:
                 type: object
                 properties:

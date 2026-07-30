@@ -14,7 +14,7 @@ import { type SignificantEventsWorkflowStatusResult } from '@kbn/significant-eve
 import { WorkflowExecutionService } from './workflow_execution_service';
 
 interface CodeExtractionWorkflowInputPayload {
-  /** Connector for the `github.code_researcher` agent steps. Omitted -> YAML default. */
+  /** Connector for the code-intelligence agent steps. Omitted -> YAML default. */
   agentConnectorId?: string;
 }
 
@@ -27,8 +27,8 @@ export interface CodeExtractionRunParams {
 
 /**
  * Triggers the managed "Continuous Code KI Extraction" workflow. The workflow
- * uses `ai.agent` steps (`github.code_researcher`) to enumerate deployable
- * services and their logging sites across configured GitHub repositories, then fans out to the per-service
+ * uses `ai.agent` steps (the code-intelligence agent) to enumerate deployable
+ * services and their logging sites across the indexed repositories, then fans out to the per-service
  * `_identify_service` endpoint. Runs are singleton per space: a non-terminal
  * execution is reused rather than starting a duplicate.
  */

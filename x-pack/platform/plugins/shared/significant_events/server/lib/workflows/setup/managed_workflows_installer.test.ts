@@ -13,19 +13,26 @@ import {
   SIGNIFICANT_EVENTS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_GAP_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_MEMORY_SYNTHESIS_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import { createManagedWorkflowsInstaller } from './managed_workflows_installer';
 
-// Significant events is gated solely by the availability flag now, so the installer always writes
-// the full set: 9 base workflows + 4 memory workflows (both via `installWorkflows`) + 1 investigation
-// workflow.
-const BASE_WORKFLOW_COUNT = 9;
+// When available, the installer writes: 9 always-on base workflows + the code-extraction workflow
+// (only when the code-intelligence agent is present) + 4 memory workflows (all via `installWorkflows`)
+// + 1 investigation workflow.
+const ALWAYS_ON_BASE_WORKFLOW_COUNT = 9;
+const CODE_EXTRACTION_WORKFLOW_COUNT = 1;
 const MEMORY_WORKFLOW_COUNT = 4;
 const INVESTIGATION_WORKFLOW_COUNT = 1;
+// Default test setup enables code extraction, so the full set includes it.
+const BASE_WORKFLOW_COUNT = ALWAYS_ON_BASE_WORKFLOW_COUNT + CODE_EXTRACTION_WORKFLOW_COUNT;
 const TOTAL_WORKFLOW_COUNT =
   BASE_WORKFLOW_COUNT + MEMORY_WORKFLOW_COUNT + INVESTIGATION_WORKFLOW_COUNT;
+// With the code-intelligence agent absent, the code-extraction workflow is excluded.
+const TOTAL_WORKFLOW_COUNT_WITHOUT_CODE_EXTRACTION =
+  TOTAL_WORKFLOW_COUNT - CODE_EXTRACTION_WORKFLOW_COUNT;
 
 const createClientMock = () => {
   const client = {
@@ -48,6 +55,7 @@ const createInstaller = (
   const installer = createManagedWorkflowsInstaller({
     getClient: jest.fn().mockResolvedValue(client),
     isAvailable: jest.fn().mockResolvedValue(true),
+    isCodeExtractionAvailable: jest.fn().mockResolvedValue(true),
     logger: loggerMock.create(),
     ...overrides,
   });
@@ -131,6 +139,29 @@ describe('createManagedWorkflowsInstaller', () => {
     await installer.install();
 
     expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID);
+  });
+
+  it('installs the code-extraction workflow when the code-intelligence agent is present', async () => {
+    const { client, installer } = createInstaller();
+
+    await installer.install();
+
+    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID);
+    expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT);
+  });
+
+  it('excludes the code-extraction workflow when the code-intelligence agent is absent', async () => {
+    const { client, installer } = createInstaller({
+      isCodeExtractionAvailable: jest.fn().mockResolvedValue(false),
+    });
+
+    await installer.install();
+
+    expect(installedIds(client)).not.toContain(SIGNIFICANT_EVENTS_KI_CODE_EXTRACTION_WORKFLOW_ID);
+    expect(client.install).toHaveBeenCalledTimes(TOTAL_WORKFLOW_COUNT_WITHOUT_CODE_EXTRACTION);
+    // The rest of the set still installs and reconciliation still closes.
+    expect(installedIds(client)).toContain(SIGNIFICANT_EVENTS_DETECTION_WORKFLOW_ID);
+    expect(client.ready).toHaveBeenCalledTimes(1);
   });
 
   it('re-installs on later calls but reconciles (ready) only once', async () => {

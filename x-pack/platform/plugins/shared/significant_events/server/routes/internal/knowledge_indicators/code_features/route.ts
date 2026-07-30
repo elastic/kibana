@@ -23,16 +23,13 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { FeatureNotEnabledError } from '../../../../lib/errors/feature_not_enabled_error';
-import { ensureGithubMcpConnector } from '../../../../agent_builder/tools/github/ensure_connector';
-import {
-  getGithubSearchRateReport,
-  resetGithubSearchRateReport,
-} from '../../../../agent_builder/tools/github/search_rate_tracker';
 import {
   identifyCodeFeaturesForService,
   identifyCodeQueries,
   reconcileCodeAndLogQueries,
   linkServiceEntities,
+  isCodeIntelligenceAgentAvailable,
+  CODE_INTELLIGENCE_AGENT_ID,
   type ServiceCodeMetadata,
   type StreamSamplingSource,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
@@ -126,16 +123,16 @@ const reconcileCodeQueriesRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// Code Intelligence availability. GitHub source access is ready once the
-// editable MCP connector exists; credentials are added by the user in Connector
-// settings and validated when extraction runs.
+// Code Intelligence availability. Ready once the code-intelligence agent (today
+// the externally-installed Sourcerer agent) is registered in Agent Builder; the
+// user installs Sourcerer and indexes repositories out of band.
 // ---------------------------------------------------------------------------
 
 const codeIntelligenceAvailabilityRoute = createServerRoute({
   endpoint: 'GET /internal/streams/code_intelligence/_availability',
   options: {
     access: 'internal',
-    summary: 'Check whether the GitHub MCP connector exists',
+    summary: 'Check whether the code-intelligence agent is installed',
   },
   security: {
     authz: {
@@ -143,13 +140,24 @@ const codeIntelligenceAvailabilityRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients, server }): Promise<{ available: boolean }> => {
+  handler: async ({
+    request,
+    getScopedClients,
+    server,
+    logger,
+  }): Promise<{ available: boolean }> => {
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
-    // Connector creation is intentionally deferred to the manage-privileged
-    // `_run` request. Read-only availability must not block the setup action.
-    return { available: server.agentBuilder !== undefined };
+    if (!server.agentBuilder) {
+      return { available: false };
+    }
+    const available = await isCodeIntelligenceAgentAvailable({
+      agentBuilder: server.agentBuilder,
+      request,
+      logger: logger.get('code_intelligence', 'agent_availability'),
+    });
+    return { available };
   },
 });
 
@@ -391,7 +399,7 @@ const resetCodeFeaturesRoute = createServerRoute({
 // Stage 2 + reconcile), code-first — no logs required.
 //
 // Called by the "Continuous Code KI Extraction" managed workflow: its
-// `ai.agent` steps (`github.code_researcher`) enumerate deployable services and
+// `ai.agent` steps (the code-intelligence agent) enumerate deployable services and
 // their production logging sites, and the workflow fans out one call per
 // `{ repository, service }` here. Service enumeration is owned by the agent
 // (it reasons over the repo layout) rather than by directory-name parsing.
@@ -618,7 +626,7 @@ const identifyServiceRoute = createServerRoute({
 });
 
 // ---------------------------------------------------------------------------
-// Run code intelligence across all configured GitHub repositories on demand.
+// Run code intelligence across all indexed repositories on demand.
 //
 // Triggers the managed "Continuous Code KI Extraction" workflow for the current
 // space (singleton per space — reuses a running execution). The workflow's
@@ -632,7 +640,7 @@ const runCodeIntelligenceRoute = createServerRoute({
   endpoint: 'POST /internal/streams/code_intelligence/_run',
   options: {
     access: 'internal',
-    summary: 'Trigger code intelligence extraction across configured GitHub repositories',
+    summary: 'Trigger code intelligence extraction across indexed repositories',
   },
   security: {
     authz: {
@@ -658,16 +666,23 @@ const runCodeIntelligenceRoute = createServerRoute({
     const { licensing } = await getScopedClients({ request });
     await assertSignificantEventsAccess({ server, licensing });
 
-    const connectorStatus = await ensureGithubMcpConnector({
-      server,
-      request,
-      logger: logger.get('github_mcp_connector'),
-    });
-    if (connectorStatus.needsConfigurationUpdate) {
-      throw new Error(
-        'The GitHub MCP connector tool allow-list is outdated. Update its X-MCP-Tools header in Connector settings before starting Code Intelligence.'
+    if (!server.agentBuilder) {
+      throw new FeatureNotEnabledError(
+        'Code intelligence extraction requires the Agent Builder feature to be enabled'
       );
     }
+    const agentAvailable = await isCodeIntelligenceAgentAvailable({
+      agentBuilder: server.agentBuilder,
+      request,
+      logger: logger.get('code_intelligence', 'agent_availability'),
+    });
+    if (!agentAvailable) {
+      throw new FeatureNotEnabledError(
+        `Code intelligence is unavailable: the "${CODE_INTELLIGENCE_AGENT_ID}" agent is not installed. ` +
+          'Install Sourcerer (run its setup to register the code agent, tools, and skills) and index the repositories to analyze.'
+      );
+    }
+
     const spaceId = await getSpaceId(request);
     const agentConnectorId = await resolveConnectorForFeature({
       searchInferenceEndpoints: server.searchInferenceEndpoints,
@@ -680,7 +695,6 @@ const runCodeIntelligenceRoute = createServerRoute({
       request,
       spaceId,
       inputs: { agentConnectorId },
-      onBeforeStart: () => resetGithubSearchRateReport(spaceId),
     });
   },
 });
@@ -763,26 +777,6 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
 // Powers the discovery tab's live progress + auto-refresh while a run proceeds.
 // ---------------------------------------------------------------------------
 
-const githubSearchRateReportRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/code_intelligence/_github_search_rate',
-  options: {
-    access: 'internal',
-    summary: 'Get GitHub search_code request-rate measurements for the current POC run',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({}),
-  handler: async ({ request, getScopedClients, getSpaceId, server }) => {
-    const { licensing } = await getScopedClients({ request });
-    await assertSignificantEventsAccess({ server, licensing });
-    const spaceId = await getSpaceId(request);
-    return getGithubSearchRateReport(spaceId);
-  },
-});
-
 const codeIntelligenceRunStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/code_intelligence/_run_status',
   options: {
@@ -822,7 +816,6 @@ export const internalKICodeFeaturesRoutes = {
   ...serviceDistributionRoute,
   ...identifyServiceRoute,
   ...runCodeIntelligenceRoute,
-  ...githubSearchRateReportRoute,
   ...codeIntelligenceRunStatusRoute,
   ...reconcileKnowledgeIndicatorsRoute,
   ...resetCodeFeaturesRoute,

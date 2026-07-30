@@ -14,7 +14,6 @@ import { MemoryServiceImpl } from '../memory_and_investigation/lib/memory';
 import type { MemoryToolsOptions } from '../memory_and_investigation/tools/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
 import { registerAgentBuilderAttachments } from './attachments/register_attachments';
-import { registerGithubCodeResearcherAgent } from './agents/github_code_researcher';
 
 export const createMemoryToolsOptions = ({
   getScopedClients,
@@ -51,6 +50,11 @@ export const createMemoryToolsOptions = ({
  * Discovery and judge agents are registered as agent types from plugin setup (see
  * `registerSignificantEventsDiscoveryAgentTypes`) and installed as editable profiles via
  * `installDiscoveryAgents`.
+ *
+ * Code Intelligence KI extraction is driven by the externally-installed Sourcerer
+ * agent (`sourcerer setup`), so this plugin registers no code-research agent/tools/
+ * skills of its own; the extraction workflow targets that agent and gates on its
+ * presence.
  */
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -67,7 +71,4 @@ export const registerStreamsAgentBuilder = async ({
 }): Promise<void> => {
   registerAgentBuilderAttachments({ agentBuilder, getScopedClients, logger });
   registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
-  // GitHub code-researcher: a read-only built-in agent driving Code Intelligence
-  // KI extraction. Registered as a built-in agent (see AGENT_BUILDER_BUILTIN_AGENTS).
-  registerGithubCodeResearcherAgent(agentBuilder);
 };

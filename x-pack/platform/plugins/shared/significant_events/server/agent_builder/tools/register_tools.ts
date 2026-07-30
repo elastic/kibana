@@ -19,7 +19,6 @@ import { createEventStatusUpdateTool } from './event_status_update/tool';
 import { createEventInvestigationAttachTool } from '../../memory_and_investigation/tools/event_investigation_attach/tool';
 import { createDiscoveryWriteTool } from './discovery_write/tool';
 import { createEventsWriteTool } from './event_write/tool';
-import { createGithubCodeResearchTools } from './github/tools';
 import {
   createInvestigationProgressReportTool,
   SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
@@ -110,11 +109,6 @@ export function registerAgentBuilderTools({
     createInvestigationProgressReportTool({
       server,
       logger: logger.get('investigation_progress_report_tool'),
-    }),
-    // GitHub code-research tools backing the Code Intelligence agent.
-    ...createGithubCodeResearchTools({
-      server,
-      logger: logger.get('github_code_research_tool'),
     }),
   ];
 

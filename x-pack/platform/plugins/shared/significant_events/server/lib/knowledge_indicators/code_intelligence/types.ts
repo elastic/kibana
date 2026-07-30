@@ -34,7 +34,7 @@ export interface RepoClassification {
 }
 
 /**
- * A source-code citation the `github.code_researcher` agent used to identify a
+ * A source-code citation the code-intelligence agent used to identify a
  * service — the file (and optionally line/snippet) that supports the decision.
  */
 export interface CodeEvidenceCitation {

@@ -6,6 +6,19 @@
  */
 
 /**
+ * Agent Builder agent that drives Code Intelligence KI extraction. The workflow
+ * reads source through this agent's read-only tools (repo discovery, file reads,
+ * regex grep). Today this is the externally-installed **Sourcerer** agent
+ * (`sourcerer setup`), whose tools/skills pre-exist independently of this plugin.
+ *
+ * This is the one swap point for the substrate: when the Agent Builder code
+ * sandbox arrives, point this at the sandbox agent id (and retarget the workflow
+ * message to its tools). The `code_extraction.yaml` `agent-id` literal must be
+ * kept in sync with this value (YAML cannot import a TS constant).
+ */
+export const CODE_INTELLIGENCE_AGENT_ID = 'sourcerer' as const;
+
+/**
  * Code-derived Feature KIs are stored as `code_analysis` features (reusing the
  * existing computed feature type so no schema enum / UI filter changes are
  * needed) and discriminated by `subtype`.

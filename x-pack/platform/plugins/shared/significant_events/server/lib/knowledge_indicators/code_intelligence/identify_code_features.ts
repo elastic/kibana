@@ -46,7 +46,7 @@ export interface IdentifyCodeForServiceOptions {
 
 /**
  * Derives repository and service language Feature KIs from the structured,
- * pinned source analysis returned by `github.code_researcher`.
+ * pinned source analysis returned by the code-intelligence agent.
  */
 export async function identifyCodeFeaturesForService({
   repository,
