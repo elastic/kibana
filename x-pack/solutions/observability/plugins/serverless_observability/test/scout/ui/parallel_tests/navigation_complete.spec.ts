@@ -23,12 +23,7 @@ test.describe(
       const nav = pageObjects.observabilityNavigation;
 
       await test.step('primary body items are visible and linked', async () => {
-        const primaryDeepLinks = [
-          'discover',
-          'dashboards',
-          'workflows',
-          'observability-overview:alerts',
-        ];
+        const primaryDeepLinks = ['discover', 'dashboards', 'workflows'];
         for (const deepLinkId of primaryDeepLinks) {
           const item = nav.navItemInPrimaryByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
@@ -41,7 +36,11 @@ test.describe(
       });
 
       await test.step('More linked items are visible and linked', async () => {
-        const moreDeepLinks = ['observability-overview:cases', 'slo'];
+        const moreDeepLinks = [
+          'observability-overview:alerts',
+          'observability-overview:cases',
+          'slo',
+        ];
         for (const deepLinkId of moreDeepLinks) {
           const item = nav.navItemInMoreByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
@@ -105,12 +104,10 @@ test.describe(
         });
       });
 
-      await test.step('Alerts', async () => {
-        await nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts').click();
+      await test.step('Alerts (via More menu)', async () => {
+        await nav.openMoreMenu();
+        await nav.navItemInMoreByDeepLinkId('observability-overview:alerts').click();
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
-        await expect(nav.activeNavItemByDeepLinkId('observability-overview:alerts')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
