@@ -10,6 +10,7 @@ import { EuiCallOut, EuiLoadingSpinner, EuiPanel, useEuiTheme } from '@elastic/e
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import { SERVICE_NAME } from '@kbn/apm-types';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { useKibanaQuerySettings } from '@kbn/observability-shared-plugin/public';
@@ -54,6 +55,11 @@ export interface ServiceMapEmbeddableProps {
   environment?: Environment;
   kuery?: string;
   serviceName?: string;
+  /**
+   * Multi-service context highlight from panel state (`highlighted_service_names`).
+   * When unset, falls back to highlighting `serviceName` alone.
+   */
+  highlightedServiceNames?: string[];
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
@@ -151,6 +157,7 @@ export function ServiceMapEmbeddable({
   environment = ENVIRONMENT_ALL.value,
   kuery = '',
   serviceName,
+  highlightedServiceNames: highlightedServiceNamesProp,
   serviceGroupId,
   core,
   onBlockingError,
@@ -335,6 +342,13 @@ export function ServiceMapEmbeddable({
     [flyoutOptions]
   );
 
+  const highlightedServiceNames = useMemo(() => {
+    if (highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0) {
+      return highlightedServiceNamesProp;
+    }
+    return serviceName ? [serviceName] : undefined;
+  }, [highlightedServiceNamesProp, serviceName]);
+
   const badgeDependentFiltersActive =
     (viewFilters?.alertStatusFilter?.length ?? 0) > 0 ||
     (viewFilters?.sloStatusFilter?.length ?? 0) > 0 ||
@@ -426,9 +440,16 @@ export function ServiceMapEmbeddable({
     rangeFrom,
     rangeTo,
     environment,
+    kuery,
     serviceName,
     serviceGroupId,
     filterPills,
+    viewFilters,
+    mapOrientation,
+    controlSelections:
+      highlightedServiceNamesProp && highlightedServiceNamesProp.length > 0
+        ? { [SERVICE_NAME]: highlightedServiceNamesProp }
+        : undefined,
   });
 
   const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
@@ -474,7 +495,7 @@ export function ServiceMapEmbeddable({
             onCollapse={onCollapse}
             onBaseMaxHopsChange={setBaseMaxHops}
             onMaxVisibleNodesChange={setMaxVisibleNodes}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
@@ -492,7 +513,7 @@ export function ServiceMapEmbeddable({
             nodes={isLoading ? [] : nodesForGraph}
             edges={isLoading ? [] : data.edges}
             serviceName={serviceName}
-            highlightedServiceName={serviceName}
+            highlightedServiceNames={highlightedServiceNames}
             environment={environment}
             kuery={kuery}
             start={start}
