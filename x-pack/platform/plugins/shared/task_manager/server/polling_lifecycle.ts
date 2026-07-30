@@ -18,10 +18,7 @@ import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { TaskManagerConfig } from './config';
-import {
-  CLAIM_STRATEGY_UPDATE_BY_QUERY,
-  WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
-} from './config';
+import { WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS } from './config';
 
 import type {
   TaskMarkRunning,
@@ -51,7 +48,6 @@ import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';
 import type { TaskTypeDictionary } from './task_type_dictionary';
-import { delayOnClaimConflicts } from './polling';
 import { TaskClaiming } from './queries/task_claiming';
 import type { ClaimOwnershipResult } from './task_claimers';
 import type { TaskPartitioner } from './lib/task_partitioner';
@@ -211,22 +207,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    let pollIntervalDelay$: Observable<number> | undefined;
-    if (claimStrategy === CLAIM_STRATEGY_UPDATE_BY_QUERY) {
-      pollIntervalDelay$ = delayOnClaimConflicts(
-        this.capacityConfiguration$,
-        this.pollIntervalConfiguration$,
-        this.events$,
-        config.version_conflict_threshold,
-        config.monitored_stats_running_average_window
-      ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
-    }
-
     this.poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,
       initialPollInterval: pollInterval,
       pollInterval$: this.pollIntervalConfiguration$,
-      pollIntervalDelay$,
       getCapacity: () => {
         const capacity = this.pool.availableCapacity();
         if (!capacity) {
@@ -302,14 +286,12 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       store: this.bufferedStore,
       definitions: this.definitions,
       beforeRun: this.middleware.beforeRun,
-      beforeMarkRunning: this.middleware.beforeMarkRunning,
       onTaskEvent: this.emitEvent,
       defaultMaxAttempts: this.taskClaiming.maxAttempts,
       executionContext: this.executionContext,
       usageCounter: this.usageCounter,
       config: this.config,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
-      strategy: this.config.claim_strategy,
       getPollInterval: () => this.currentPollInterval,
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
