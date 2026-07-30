@@ -320,7 +320,7 @@ describe('Grafana', () => {
         tag: ['prod'],
       });
 
-      expect(mockClient.get).toHaveBeenCalledWith('(acme.grafana.net/redacted), {
+      expect(mockClient.get).toHaveBeenCalledWith('(acme.grafana.net/redacted)', {
         params: { query: 'prod', tag: ['prod'] },
         paramsSerializer: { indexes: null },
         headers: {},
