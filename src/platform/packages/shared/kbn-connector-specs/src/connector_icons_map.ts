@@ -237,10 +237,13 @@ export const ConnectorIconsMap: Map<
     '.kubernetes',
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
   ],
-
   [
     '.new_relic',
     lazy(() => import(/* webpackChunkName: "connectorIconNewRelic" */ './specs/new_relic/icon')),
+  ],
+  [  
+    '.rootly',
+    lazy(() => import(/* webpackChunkName: "connectorIconRootly" */ './specs/rootly/icon')),
   ],
   [
     '.sentry',

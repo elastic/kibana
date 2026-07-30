@@ -13195,7 +13195,6 @@
     "xpack.apm.serviceMap.traceInformation.traceIdLabel": "跟踪 ID",
     "xpack.apm.serviceMap.traceInformation.traceIdPlaceholder": "选择或输入跟踪 ID",
     "xpack.apm.serviceMap.typePopoverStat": "类型",
-    "xpack.apm.serviceMap.viewFullServiceMapButton": "查看完整的服务地图",
     "xpack.apm.serviceMetrics.loading": "正在加载指标",
     "xpack.apm.serviceNamesSelectCustomOptionText": "将 '{searchValue}' 添加为新服务名称",
     "xpack.apm.serviceNamesSelectPlaceholder": "选择服务名称",
