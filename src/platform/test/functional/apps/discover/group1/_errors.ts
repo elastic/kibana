@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await header.awaitKibanaChrome();
 
-        const invalidLink = await testSubjects.find('invalidRouteMessage');
+        const invalidLink = await testSubjects.find('invalidRouteBanner__message');
         expect(await invalidLink.getVisibleText()).to.be(
           `Discover application doesn't recognize this route: /invalid-route`
         );

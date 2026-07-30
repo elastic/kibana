@@ -16,7 +16,13 @@ import {
   euiShadowHover,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 import { nightshiftStatusCardTransition } from '../common/nightshift_transition';
 
 type SignificantEventStatusGroup = 'needsAction' | 'resolved';
@@ -40,6 +46,15 @@ function SignificantEventStatusCard({
   const { euiTheme } = euiThemeContext;
   const isNeedsAction = status === 'needsAction';
   const isInteractive = count > 0;
+  const ebtProps = isInteractive
+    ? getEbtProps({
+        action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SIGNIFICANT_EVENTS,
+        element: NIGHTSHIFT_EBT_ELEMENTS.STATUS_SUMMARY,
+        detail: isNeedsAction
+          ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
+          : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
+      })
+    : {};
 
   return (
     <EuiPanel
@@ -79,17 +94,18 @@ function SignificantEventStatusCard({
           : ''}
       `}
       data-test-subj={testSubj}
+      {...ebtProps}
       hasBorder={false}
       hasShadow={false}
       onClick={isInteractive ? onClick : undefined}
       onKeyDown={
         isInteractive
-          ? (keyboardEvent: React.KeyboardEvent) => {
+          ? (keyboardEvent: React.KeyboardEvent<HTMLDivElement>) => {
               if (keyboardEvent.key !== 'Enter' && keyboardEvent.key !== ' ') {
                 return;
               }
               keyboardEvent.preventDefault();
-              onClick();
+              keyboardEvent.currentTarget.click();
             }
           : undefined
       }
