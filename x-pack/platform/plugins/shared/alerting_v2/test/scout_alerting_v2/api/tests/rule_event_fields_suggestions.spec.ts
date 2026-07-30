@@ -158,7 +158,7 @@ apiTest.describe('Rule event fields suggestions API', { tag: '@local-stateful-cl
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -170,7 +170,7 @@ apiTest.describe('Rule event fields suggestions API', { tag: '@local-stateful-cl
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
