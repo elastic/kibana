@@ -177,7 +177,7 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: tags.deploymentAg
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [
       { index: BASE_STREAM },
-      { index: ADDITIONAL_LOGSDB_STREAM, create: true, mode: 'tsdb' },
+      { index: ADDITIONAL_LOGSDB_STREAM, create: true, mode: 'logsdb' },
     ]);
     assertDowngradeResult(result);
   });

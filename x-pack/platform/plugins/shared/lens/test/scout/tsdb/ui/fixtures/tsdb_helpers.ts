@@ -52,7 +52,7 @@ export interface TsdbScenarioIndex {
   create?: boolean;
   downsample?: boolean;
   removeTSDBFields?: boolean;
-  mode?: 'tsdb';
+  mode?: 'tsdb' | 'logsdb';
 }
 
 export interface TsdbScenarioTimeRange {
@@ -386,10 +386,13 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
             if (!create) {
               continue;
             }
-            if (mode === 'tsdb') {
+            if (mode === 'tsdb' || mode === 'logsdb') {
               cleanupActions.push(async () => deleteDataStream(index));
-              await createDataStream(index, 'tsdb');
-              await createDocs(index, beforeRollover, { isStream: true, removeTSDBFields });
+              await createDataStream(index, mode);
+              await createDocs(index, beforeRollover, {
+                isStream: true,
+                removeTSDBFields: mode === 'logsdb' ? true : removeTSDBFields,
+              });
             } else {
               cleanupActions.push(async () => {
                 await esClient.indices.delete({ index }, { ignore: [404] });
