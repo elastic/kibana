@@ -1,5 +1,5 @@
 {
-  "sha1": "f1603c58e15d7fe0e543379c8efaf7c15c55e32f",
+  "sha1": "16088b659b1e1d0deb83a40b21cad1ee273bf7a1",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -684,8 +684,8 @@
       }
     },
     {
-      "id": "b997ef31f0ad15f-e93e7fc15d6406a",
-      "title": "Nightshift navigation from Significant Events Discovery navigates to Nightshift page from Streams discovery",
+      "id": "b997ef31f0ad15f-5f0c7e85e95a610",
+      "title": "Nightshift navigation from Significant Events Discovery navigates between Streams discovery, Nightshift, and settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -695,7 +695,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 38,
+        "line": 55,
         "column": 9
       }
     }

@@ -17,6 +17,18 @@ never drives findings). See `action-scoped-collector.md` for the design and
 `action-scoped-collector-spike.md` for the one-time manual capability check
 required before enabling it in any real session.
 
+`knowledge-hash.py` computes a knowledge markdown file's SHA-256 and its
+ordered list of top-level (`##`) section headings, and supports a
+`--verify <sha256>` mode that exits non-zero on a mismatch or missing file
+for a simple bash conditional. It backs the hash-gated knowledge-file
+approval described in `../phases/0-setup.md` Step 0g: an approval is
+recorded against exact file content, not just a path, so an edit to the
+file after approval (most commonly `../phases/3-report.md` Step 3d's own
+end-of-session write) is always detected and re-confirmed rather than
+silently reused. Both `../templates/subagent-prompt.md` and
+`../phases/2-flow-core.md` call it with `--verify` immediately before a
+worker reads the file.
+
 ## Running the Python tests
 
 ```bash
@@ -87,7 +99,7 @@ inside a normal `yarn kbn bootstrap`'d checkout.
     generated file wasn't regenerated to match.
   - **Lifecycle** — the bridge-missing/fallback condition, reinjection
     after a simulated navigation, and idempotency of redundant reinjection,
-    matching the contract `../phases/2-explore.md` depends on.
+    matching the contract `../phases/2-flow-core.md` depends on.
 - `fixtures/` — DOM/console/network fixtures shared by all of the above.
 
 This suite is also not part of Kibana CI (same reasoning as the Python
@@ -108,8 +120,8 @@ own header comment for the exact shape) into the same
 plus a `state` object to carry cumulative history (e.g. a pending request
 that's still pending several checklist steps later) between calls in the
 same flow. Also runnable as a CLI (`node action-scoped-collector.mjs
-<events.json> [<prior-state.json>]`) — `phases/2-explore.md` invokes it this
-way in shadow mode.
+<events.json> [<prior-state.json>]`) — `phases/2-flow-core.md` invokes it
+this way in shadow mode.
 
 The actual event collection happens elsewhere: Playwright-side, inside a
 `browser_run_code_unsafe` call, because that sandbox has no `require`/`import`

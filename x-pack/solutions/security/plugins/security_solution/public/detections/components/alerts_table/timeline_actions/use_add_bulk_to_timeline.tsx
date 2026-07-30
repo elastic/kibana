@@ -72,7 +72,7 @@ export const useAddBulkToTimelineAction = ({
 
   const { dataView } = useDataView(scopeId);
   const browserFields = useBrowserFields(dataView);
-  const selectedPatterns = useSelectedPatterns(scopeId);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const runtimeMappings = useMemo(
     () => dataView.getRuntimeMappings() as RunTimeMappings,
     [dataView]
