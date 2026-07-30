@@ -49,9 +49,7 @@ spaceTest.describe('search with scripted fields', { tag: '@local-stateful-classi
 
       await pageObjects.dashboard.openNewDashboard();
       await pageObjects.dashboard.addSavedSearch('search with warning');
-      await expect(
-        page.testSubj.locator('searchResponseWarningsBadgeToogleButton')
-      ).toBeVisible();
+      await expect(page.testSubj.locator('searchResponseWarningsBadgeToogleButton')).toBeVisible();
     }
   );
 
