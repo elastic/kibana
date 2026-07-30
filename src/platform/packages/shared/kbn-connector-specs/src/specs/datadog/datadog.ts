@@ -290,6 +290,7 @@ export const DatadogConnector: ConnectorSpec = {
   },
 
   test: {
+    enabled: true,
     description: i18n.translate('connectorSpecs.datadog.test.description', {
       defaultMessage: 'Validates the Datadog access token (PAT or SAT)',
     }),
