@@ -31,6 +31,7 @@ import {
   RootlyAcknowledgeAlertInputSchema,
   RootlyResolveAlertInputSchema,
   type JsonApiListResponse,
+  type JsonApiRelationshipRef,
   type JsonApiResource,
   type JsonApiSingleResponse,
   type RootlyCreateIncidentInput,
@@ -58,15 +59,38 @@ const JSON_API_HEADERS = {
   Accept: 'application/vnd.api+json',
 };
 
-const flattenResource = (resource: JsonApiResource) => ({
-  id: resource.id,
-  ...resource.attributes,
-});
+// Rootly's `services` and `groups` incident fields are JSON:API relationships, not plain
+// attributes: without `?include=services,groups` on the request and this resolution step, they
+// come back as bare relationship refs (or are dropped entirely), even though the write side
+// (service_ids/group_ids) succeeded. Resolve them against the sideloaded `included` array so
+// callers see `{ id, name }` instead of nothing.
+const RELATIONSHIP_SUMMARY_KEYS = ['services', 'groups'] as const;
 
-const flattenSingle = (response: JsonApiSingleResponse) => flattenResource(response.data);
+const resolveRelationshipRef = (ref: JsonApiRelationshipRef, included: JsonApiResource[]) => {
+  const match = included.find((resource) => resource.type === ref.type && resource.id === ref.id);
+  return { id: ref.id, name: match?.attributes?.name };
+};
+
+const flattenResource = (resource: JsonApiResource, included: JsonApiResource[] = []) => {
+  const relationshipSummaries: Record<string, unknown> = {};
+  for (const key of RELATIONSHIP_SUMMARY_KEYS) {
+    const data = resource.relationships?.[key]?.data;
+    if (!data) continue;
+    const refs = Array.isArray(data) ? data : [data];
+    relationshipSummaries[key] = refs.map((ref) => resolveRelationshipRef(ref, included));
+  }
+  return {
+    id: resource.id,
+    ...resource.attributes,
+    ...relationshipSummaries,
+  };
+};
+
+const flattenSingle = (response: JsonApiSingleResponse) =>
+  flattenResource(response.data, response.included);
 
 const flattenList = (response: JsonApiListResponse) => ({
-  items: response.data.map(flattenResource),
+  items: response.data.map((resource) => flattenResource(resource, response.included)),
   meta: response.meta,
 });
 
@@ -139,7 +163,7 @@ export const Rootly: ConnectorSpec = {
           const response = await ctx.client.post<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents`,
             { data: { type: 'incidents', attributes } },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -157,7 +181,7 @@ export const Rootly: ConnectorSpec = {
         try {
           const response = await ctx.client.get<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}`,
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -182,6 +206,8 @@ export const Rootly: ConnectorSpec = {
         if (input.createdAtLte) params['filter[created_at][lte]'] = input.createdAtLte;
         if (input.pageSize) params['page[size]'] = input.pageSize;
         if (input.pageNumber) params['page[number]'] = input.pageNumber;
+
+        params.include = 'services,groups';
 
         try {
           const response = await ctx.client.get<JsonApiListResponse>(
@@ -216,7 +242,7 @@ export const Rootly: ConnectorSpec = {
           const response = await ctx.client.put<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}`,
             { data: { type: 'incidents', attributes } },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -234,7 +260,7 @@ export const Rootly: ConnectorSpec = {
           const response = await ctx.client.put<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/in_triage`,
             { data: { type: 'incidents' } },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -254,7 +280,7 @@ export const Rootly: ConnectorSpec = {
           const response = await ctx.client.put<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/mitigate`,
             { data: { type: 'incidents', attributes } },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -274,7 +300,7 @@ export const Rootly: ConnectorSpec = {
           const response = await ctx.client.put<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/resolve`,
             { data: { type: 'incidents', attributes } },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -293,7 +319,7 @@ export const Rootly: ConnectorSpec = {
           const response = await ctx.client.put<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/cancel`,
             { data: { type: 'incidents', attributes } },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -317,7 +343,7 @@ export const Rootly: ConnectorSpec = {
                 attributes: { user_id: input.userId, incident_role_id: input.incidentRoleId },
               },
             },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {
@@ -336,7 +362,7 @@ export const Rootly: ConnectorSpec = {
           const response = await ctx.client.post<JsonApiSingleResponse>(
             `${ROOTLY_BASE_URL}/incidents/${input.incidentId}/add_subscribers`,
             { data: { type: 'incidents', attributes: { user_ids: input.userIds } } },
-            { headers: JSON_API_HEADERS }
+            { params: { include: 'services,groups' }, headers: JSON_API_HEADERS }
           );
           return flattenSingle(response.data);
         } catch (error) {

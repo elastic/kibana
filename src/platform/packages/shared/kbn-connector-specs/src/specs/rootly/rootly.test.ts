@@ -10,6 +10,7 @@
 import type { ActionContext } from '../../connector_spec';
 import { getConnectorSpec } from '../../..';
 import { Rootly } from './rootly';
+import { RootlyCreateIncidentInputSchema } from './types';
 
 describe('Rootly', () => {
   const mockClient = {
@@ -26,6 +27,13 @@ describe('Rootly', () => {
   const JSON_API_HEADERS = {
     'Content-Type': 'application/vnd.api+json',
     Accept: 'application/vnd.api+json',
+  };
+
+  // All incident-returning endpoints request sideloaded services/groups so the response can be
+  // resolved to friendly { id, name } summaries instead of bare relationship refs.
+  const INCLUDE_SERVICES_GROUPS = {
+    params: { include: 'services,groups' },
+    headers: JSON_API_HEADERS,
   };
 
   beforeEach(() => {
@@ -82,7 +90,7 @@ describe('Rootly', () => {
             attributes: { title: 'DB down', severity_id: 'sev1', service_ids: ['svc1'] },
           },
         },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
       );
       expect(result).toEqual({ id: 'inc1', title: 'DB down', status: 'started' });
     });
@@ -96,6 +104,36 @@ describe('Rootly', () => {
         Rootly.actions.createIncident.handler(mockContext, { title: 'x' })
       ).rejects.toThrow('Rootly createIncident failed (status 422): title is required');
     });
+
+    it('should pass labels through as a key-value object, not a string', async () => {
+      mockClient.post.mockResolvedValue({
+        data: { data: { id: 'inc1', type: 'incidents', attributes: { title: 'DB down' } } },
+      });
+
+      await Rootly.actions.createIncident.handler(mockContext, {
+        title: 'DB down',
+        labels: { platform: 'osx', version: '1.29' },
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://api.rootly.com/v1/incidents',
+        {
+          data: {
+            type: 'incidents',
+            attributes: { title: 'DB down', labels: { platform: 'osx', version: '1.29' } },
+          },
+        },
+        INCLUDE_SERVICES_GROUPS
+      );
+    });
+
+    it('should reject a comma-separated string for labels (Rootly expects an object)', () => {
+      const result = RootlyCreateIncidentInputSchema.safeParse({
+        title: 'DB down',
+        labels: 'platform:osx,version:1.29',
+      });
+      expect(result.success).toBe(false);
+    });
   });
 
   describe('getIncident action', () => {
@@ -106,10 +144,39 @@ describe('Rootly', () => {
 
       const result = await Rootly.actions.getIncident.handler(mockContext, { incidentId: 'inc1' });
 
-      expect(mockClient.get).toHaveBeenCalledWith('https://api.rootly.com/v1/incidents/inc1', {
-        headers: JSON_API_HEADERS,
-      });
+      expect(mockClient.get).toHaveBeenCalledWith(
+        'https://api.rootly.com/v1/incidents/inc1',
+        INCLUDE_SERVICES_GROUPS
+      );
       expect(result).toEqual({ id: 'inc1', title: 'DB down' });
+    });
+
+    it('should resolve services/groups relationships to { id, name } using the included array', async () => {
+      mockClient.get.mockResolvedValue({
+        data: {
+          data: {
+            id: 'inc1',
+            attributes: { title: 'DB down' },
+            relationships: {
+              services: { data: [{ id: 'svc1', type: 'services' }] },
+              groups: { data: [{ id: 'team1', type: 'groups' }] },
+            },
+          },
+          included: [
+            { id: 'svc1', type: 'services', attributes: { name: 'Checkout' } },
+            { id: 'team1', type: 'groups', attributes: { name: 'Payments' } },
+          ],
+        },
+      });
+
+      const result = await Rootly.actions.getIncident.handler(mockContext, { incidentId: 'inc1' });
+
+      expect(result).toEqual({
+        id: 'inc1',
+        title: 'DB down',
+        services: [{ id: 'svc1', name: 'Checkout' }],
+        groups: [{ id: 'team1', name: 'Payments' }],
+      });
     });
   });
 
@@ -126,7 +193,12 @@ describe('Rootly', () => {
       });
 
       expect(mockClient.get).toHaveBeenCalledWith('https://api.rootly.com/v1/incidents', {
-        params: { 'filter[status]': 'started', 'filter[severity_id]': 'sev1', 'page[size]': 20 },
+        params: {
+          'filter[status]': 'started',
+          'filter[severity_id]': 'sev1',
+          'page[size]': 20,
+          include: 'services,groups',
+        },
         headers: JSON_API_HEADERS,
       });
       expect(result).toEqual({ items: [{ id: 'inc1' }], meta: { total_count: 1 } });
@@ -147,7 +219,24 @@ describe('Rootly', () => {
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1',
         { data: { type: 'incidents', attributes: { title: 'Updated' } } },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
+      );
+    });
+
+    it('should pass labels through as a key-value object', async () => {
+      mockClient.put.mockResolvedValue({
+        data: { data: { id: 'inc1', attributes: { title: 'Updated' } } },
+      });
+
+      await Rootly.actions.updateIncident.handler(mockContext, {
+        incidentId: 'inc1',
+        labels: { platform: 'osx' },
+      });
+
+      expect(mockClient.put).toHaveBeenCalledWith(
+        'https://api.rootly.com/v1/incidents/inc1',
+        { data: { type: 'incidents', attributes: { labels: { platform: 'osx' } } } },
+        INCLUDE_SERVICES_GROUPS
       );
     });
   });
@@ -163,7 +252,7 @@ describe('Rootly', () => {
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1/in_triage',
         { data: { type: 'incidents' } },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
       );
     });
 
@@ -180,7 +269,7 @@ describe('Rootly', () => {
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1/mitigate',
         { data: { type: 'incidents', attributes: { mitigation_message: 'Rolled back deploy' } } },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
       );
     });
 
@@ -194,7 +283,7 @@ describe('Rootly', () => {
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1/resolve',
         { data: { type: 'incidents', attributes: {} } },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
       );
     });
 
@@ -211,7 +300,7 @@ describe('Rootly', () => {
       expect(mockClient.put).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1/cancel',
         { data: { type: 'incidents', attributes: { cancellation_message: 'False alarm' } } },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
       );
     });
   });
@@ -229,7 +318,7 @@ describe('Rootly', () => {
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1/assign_role_to_user',
         { data: { type: 'incidents', attributes: { user_id: 'u1', incident_role_id: 'role1' } } },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
       );
     });
   });
@@ -246,7 +335,7 @@ describe('Rootly', () => {
       expect(mockClient.post).toHaveBeenCalledWith(
         'https://api.rootly.com/v1/incidents/inc1/add_subscribers',
         { data: { type: 'incidents', attributes: { user_ids: ['u1', 'u2'] } } },
-        { headers: JSON_API_HEADERS }
+        INCLUDE_SERVICES_GROUPS
       );
     });
   });

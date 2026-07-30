@@ -13,18 +13,29 @@ const MAX_ID_LENGTH = 64;
 const MAX_TITLE_LENGTH = 500;
 const MAX_TEXT_LENGTH = 10000;
 
+export interface JsonApiRelationshipRef {
+  id: string;
+  type: string;
+}
+
 export interface JsonApiResource {
   id: string;
   type?: string;
   attributes?: Record<string, unknown>;
+  relationships?: Record<
+    string,
+    { data?: JsonApiRelationshipRef | JsonApiRelationshipRef[] | null }
+  >;
 }
 
 export interface JsonApiSingleResponse {
   data: JsonApiResource;
+  included?: JsonApiResource[];
 }
 
 export interface JsonApiListResponse {
   data: JsonApiResource[];
+  included?: JsonApiResource[];
   links?: { self?: string; first?: string; prev?: string; next?: string; last?: string };
   meta?: {
     current_page?: number;
@@ -60,10 +71,11 @@ export const RootlyCreateIncidentInputSchema = z.object({
     ),
   private: z.boolean().optional().describe('Whether the incident is private.'),
   labels: z
-    .string()
-    .max(1000)
+    .record(z.string().max(100), z.string().max(200))
     .optional()
-    .describe('Comma-separated labels to attach to the incident.'),
+    .describe(
+      'Labels to attach to the incident, as a key-value map (e.g. {"platform": "osx", "version": "1.29"}).'
+    ),
 });
 export type RootlyCreateIncidentInput = z.infer<typeof RootlyCreateIncidentInputSchema>;
 
@@ -126,7 +138,10 @@ export const RootlyUpdateIncidentInputSchema = z.object({
     .array(z.string().max(MAX_ID_LENGTH))
     .optional()
     .describe('Replacement set of owning team (group) resource IDs.'),
-  labels: z.string().max(1000).optional().describe('Replacement comma-separated labels.'),
+  labels: z
+    .record(z.string().max(100), z.string().max(200))
+    .optional()
+    .describe('Replacement key-value map of labels (e.g. {"platform": "osx", "version": "1.29"}).'),
 });
 export type RootlyUpdateIncidentInput = z.infer<typeof RootlyUpdateIncidentInputSchema>;
 
