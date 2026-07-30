@@ -20,6 +20,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { getEmitterWorkflowExecutionIdFromRequest } from '@kbn/workflows-extensions/server';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEvent } from '../../../lib/significant_events/events/update_event';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
@@ -365,7 +366,6 @@ const eventsUpdateRoute = createServerRoute({
       severity: severitySchema.optional(),
       summary: z.string().max(MAX_TEXT_LENGTH).optional(),
       status: significantEventStatusSchema.optional(),
-      workflow_execution_id: z.string().max(255).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
@@ -374,7 +374,9 @@ const eventsUpdateRoute = createServerRoute({
     await assertSignificantEventsAccess({ server, licensing });
 
     const eventClient = getEventClient();
-    const { severity, summary, status, workflow_execution_id: workflowExecutionId } = params.body;
+    const { severity, summary, status } = params.body;
+
+    const workflowExecutionId = getEmitterWorkflowExecutionIdFromRequest(request);
 
     // `updateSignificantEvent` ignores `undefined` fields (and values equal to the current
     // version), so passing the whole set through is safe even when only some attributes change.

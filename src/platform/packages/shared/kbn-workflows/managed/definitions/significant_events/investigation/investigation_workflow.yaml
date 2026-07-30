@@ -311,7 +311,9 @@ steps:
   # append-only version. Deterministic: the agent only *proposes* via `significant_event_updates` in its
   # structured output; this step performs the write. Reason and evidence intentionally stay in
   # this workflow execution's `investigate` structured output — the event version records only
-  # the changed field values plus this execution's id (workflow_execution_id) as the audit trail.
+  # the changed field values plus this execution's id as the audit trail. The route derives that
+  # id from the `x-kibana-workflow-execution-id` header the engine stamps on outbound
+  # kibana.request calls, so it is never passed (or spoofable) via the body.
   # Proposing the current value is a server-side no-op (the update route ignores identical
   # values), so no field comparison is needed here. Runs after attach_to_significant_event so
   # a failed field write never blocks recording the investigation; both endpoints re-resolve the
@@ -329,7 +331,6 @@ steps:
       # request, so only the changed fields are sent. `reason`/`evidence` stay in the structured
       # output and are intentionally never forwarded to the event document.
       body:
-        workflow_execution_id: "{{ execution.id }}"
         severity: "${{ steps.investigate.output.structured_output.significant_event_updates | where: 'field', 'severity' | map: 'to' | first }}"
         summary: "${{ steps.investigate.output.structured_output.significant_event_updates | where: 'field', 'summary' | map: 'to' | first }}"
         status: "${{ steps.investigate.output.structured_output.significant_event_updates | where: 'field', 'status' | map: 'to' | first }}"

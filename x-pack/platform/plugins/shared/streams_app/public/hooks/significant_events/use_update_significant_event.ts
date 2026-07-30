@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import type { Severity, SignificantEventStatus } from '@kbn/significant-events-schema';
+import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import { useKibana } from '../use_kibana';
 
 interface UpdateSignificantEventArgs {
@@ -20,7 +20,6 @@ interface UpdateSignificantEventResult {
   updated: number;
   ignored: number;
   status?: SignificantEventStatus;
-  severity?: Severity;
 }
 
 const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(
