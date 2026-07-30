@@ -34,6 +34,7 @@ export class LensApp {
   private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
+  public readonly chartTitle;
   /** XY legend items (elastic-charts does not expose a `data-test-subj` for these). */
   public readonly xyLegendItems;
   private readonly goBackToAppButton;
@@ -53,6 +54,7 @@ export class LensApp {
       'lns-indexPattern-dimensionContainerClose'
     );
     this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
+    this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
     this.xyLegendItems = this.page.locator('.echLegendItem');
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');

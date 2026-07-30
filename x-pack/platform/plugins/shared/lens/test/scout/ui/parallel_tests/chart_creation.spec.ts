@@ -59,7 +59,7 @@ spaceTest.describe('Lens chart creation', { tag: tags.stateful.classic }, () => 
         await visualize.goto();
         await visualize.clickSavedVisualization(NEW_CHART_TITLE);
         await lens.waitForVisualization('xyVisChart');
-        await expect.poll(() => lens.getChartTitle()).toBe(NEW_CHART_TITLE);
+        await expect(lens.chartTitle).toHaveText(NEW_CHART_TITLE);
         // Terms uses DEFAULT_SIZE=9, plus "Other" = 10.
         await expect(lens.xyLegendItems).toHaveCount(10);
       });
