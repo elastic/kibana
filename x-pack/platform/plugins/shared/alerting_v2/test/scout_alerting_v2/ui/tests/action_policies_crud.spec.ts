@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   ALERTING_V2_ACTION_POLICY_FORM_ROLE,
@@ -19,12 +20,8 @@ import {
  * between what `form_utils.ts` serializes and what the create/update routes
  * accept fails the test — something the RTL suite cannot catch because it
  * asserts against a mocked client.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
-test.describe('Action Policies - create and edit', { tag: '@local-stateful-classic' }, () => {
+test.describe('Action Policies - create and edit', { tag: [...tags.stateful.classic] }, () => {
   const CREATED_POLICY_NAME = 'scout-action-policy-created';
   const SEEDED_POLICY_NAME = 'scout-action-policy-to-edit';
   const EDITED_POLICY_NAME = 'scout-action-policy-edited';
