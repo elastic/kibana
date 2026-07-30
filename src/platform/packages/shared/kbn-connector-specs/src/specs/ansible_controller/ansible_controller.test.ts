@@ -133,6 +133,41 @@ describe('AnsibleControllerConnector', () => {
       ).rejects.toThrow('not permitted');
     });
 
+    it('rejects slash-less collection creates for credentials, credential types, and users', async () => {
+      // Django APPEND_SLASH may defuse these in practice, but the guard must not rely on that.
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'POST',
+          path: '/api/v2/credentials',
+          body: { name: 'x' },
+        })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'POST',
+          path: '/credentials',
+          body: { name: 'x' },
+        })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'POST',
+          path: '/api/v2/credential_types',
+          body: { name: 'x' },
+        })
+      ).rejects.toThrow('not permitted');
+
+      await expect(
+        AnsibleControllerConnector.actions.request.handler(mockContext, {
+          method: 'POST',
+          path: '/users',
+          body: { username: 'evil', is_superuser: true },
+        })
+      ).rejects.toThrow('not permitted');
+    });
+
     it('rejects password reset / privilege escalation via PATCH on the user object itself', async () => {
       await expect(
         AnsibleControllerConnector.actions.request.handler(mockContext, {

@@ -121,16 +121,20 @@ const assertPathAllowed = (path: string): void => {
 const assertRequestAllowed = (method: HttpMethod, path: string): void => {
   assertPathAllowed(path);
   const pathOnly = (path.split(/[?#]/, 1)[0] ?? path).toLowerCase();
+  // Normalize so slash-less collection creates (`POST /api/v2/users`) match the same
+  // `/users/` substring checks as detail routes (`PATCH /api/v2/users/5`). Without this,
+  // `includes('/users/')` misses the create endpoint and the guard is weaker than intended.
+  const normalizedPath = pathOnly.endsWith('/') ? pathOnly : `${pathOnly}/`;
 
   if (method !== 'GET') {
     if (
-      pathOnly.includes('/credentials/') ||
-      pathOnly.includes('/credential_types/') ||
-      pathOnly.includes('/tokens/') ||
+      normalizedPath.includes('/credentials/') ||
+      normalizedPath.includes('/credential_types/') ||
+      normalizedPath.includes('/tokens/') ||
       // Blocks the whole users collection, not just `/password/` or `/tokens/` sub-paths: AWX/
       // Controller resets a password or escalates `is_superuser` via `PATCH` on the user object
       // itself (e.g. `PATCH /api/v2/users/5/`), and creates users via `POST /api/v2/users/`.
-      pathOnly.includes('/users/')
+      normalizedPath.includes('/users/')
     ) {
       throw new Error(
         `Mutating requests to credential/token/user paths are not permitted via this connector`
