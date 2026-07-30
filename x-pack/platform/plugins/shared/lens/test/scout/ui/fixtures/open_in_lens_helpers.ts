@@ -9,15 +9,11 @@ import type { DebugState } from '@elastic/charts';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 
 import { DATA_TEST_SUBJECTS, LOGSTASH_IN_RANGE_DATES, DATA_VIEW_ID } from './constants';
+import type { ImportedSavedObject } from './saved_object_helpers';
+import { getImportedDashboardId } from './saved_object_helpers';
 
 interface ElasticChartDebugContext {
   addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
-}
-
-export interface ImportedSavedObject {
-  id: string;
-  type: string;
-  title: string;
 }
 
 interface LogstashOpenInLensSetupContext {
@@ -117,26 +113,6 @@ export function createOpenInLensSuiteSetup({
   };
 
   return { getDashboardId, beforeAll, beforeEach, afterAll };
-}
-
-/** Resolves a saved-object id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
-export function getImportedSavedObjectId(
-  imported: ImportedSavedObject[],
-  type: string,
-  title: string
-): string {
-  const so = imported.find(
-    (savedObject) => savedObject.type === type && savedObject.title === title
-  );
-  if (!so?.id) {
-    throw new Error(`${type} "${title}" was not imported`);
-  }
-  return so.id;
-}
-
-/** Resolves a dashboard id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
-function getImportedDashboardId(imported: ImportedSavedObject[], dashboardTitle: string): string {
-  return getImportedSavedObjectId(imported, 'dashboard', dashboardTitle);
 }
 
 /** Clicks the "Open in Lens" panel action for the panel with the given title. */
