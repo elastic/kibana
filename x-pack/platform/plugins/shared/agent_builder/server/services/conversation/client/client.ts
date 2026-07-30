@@ -29,6 +29,7 @@ import type {
   ConversationListOptions,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
+import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { createStorage } from './storage';
 import {
@@ -194,7 +195,7 @@ class ConversationClientImpl implements ConversationClient {
         op_type: 'create',
       });
     } catch (error) {
-      if (error?.statusCode === 409) {
+      if (isVersionConflictError(error)) {
         throw createConversationNotFoundError({ conversationId: id });
       }
 

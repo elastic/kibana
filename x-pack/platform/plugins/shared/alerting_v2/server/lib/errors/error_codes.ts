@@ -51,6 +51,18 @@ export const ALERTING_V2_ERROR_CODES = {
   SCHEDULE_INTERVAL_TOO_SHORT: 'SCHEDULE_INTERVAL_TOO_SHORT',
   /** Scheduling the rule would exceed the configured maximum rule runs per minute. */
   MAX_SCHEDULES_PER_MINUTE_EXCEEDED: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
+  /** A manual "run now" was requested for a disabled rule (it has no executor task to run). */
+  RULE_DISABLED: 'RULE_DISABLED',
+  /** A manual "run now" was requested for a rule whose executor task is already running. */
+  RULE_ALREADY_RUNNING: 'RULE_ALREADY_RUNNING',
+  /** A manual "run now" raced with another writer updating the executor task; retry. */
+  RULE_RUN_CONFLICT: 'RULE_RUN_CONFLICT',
+  /**
+   * A manual "run now" failed for an unexpected reason (e.g. the executor task
+   * is missing despite the rule being enabled). Catch-all for `runSoon` errors
+   * that are not already-running or conflict.
+   */
+  RULE_RUN_ERROR: 'RULE_RUN_ERROR',
 
   // ────────────────────── Action policies ────────────────────
   /** An action policy with the given identifier does not exist. */

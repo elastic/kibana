@@ -43,6 +43,10 @@ export interface RoundInput {
    * References to versioned conversation-level attachments.
    */
   attachment_refs?: AttachmentVersionRef[];
+  /**
+   * Pre-rendered, immutable prompt context for attachments created/updated in this round
+   */
+  attachment_context?: string;
 }
 
 /**
