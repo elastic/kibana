@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Locator } from 'playwright/test';
-import type { ScoutPage } from '..';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 /**
  * The embedded (persistent) console rendered at the bottom of solution and
