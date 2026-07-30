@@ -63,10 +63,12 @@ export const GrafanaCreateSilenceInputSchema = z.object({
   startsAt: z
     .string()
     .min(1)
+    .max(64)
     .describe('RFC3339 timestamp the silence starts at, e.g. "2026-01-01T00:00:00Z".'),
   endsAt: z
     .string()
     .min(1)
+    .max(64)
     .describe('RFC3339 timestamp the silence ends at, e.g. "2026-01-01T02:00:00Z".'),
   comment: z
     .string()
