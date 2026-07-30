@@ -122,4 +122,98 @@ describe('UnifiedDocViewerFlyout', () => {
     );
     expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
   });
+
+  describe('document pinning behavior', () => {
+    it('should update active page when hits reorder and the pinned doc is still present', () => {
+      const pinnedHit = buildHit({ id: 'pinned-hit', message: 'pinned message' });
+      const otherHits = [
+        buildHit({ id: 'hit-1', message: 'hit 1' }),
+        buildHit({ id: 'hit-2', message: 'hit 2' }),
+        buildHit({ id: 'hit-3', message: 'hit 3' }),
+        buildHit({ id: 'hit-4', message: 'hit 4' }),
+      ];
+      const initialHits = [pinnedHit, ...otherHits];
+      const reorderedHits = [...otherHits, pinnedHit];
+
+      const { rerender } = render(
+        <UnifiedDocViewerFlyout {...buildProps({ hit: pinnedHit, hits: initialHits })} />
+      );
+
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
+      expect(screen.getByTestId('docViewerFlyoutNavigationPage-0')).toBeInTheDocument();
+
+      rerender(<UnifiedDocViewerFlyout {...buildProps({ hit: pinnedHit, hits: reorderedHits })} />);
+
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
+      expect(screen.getByTestId('docViewerFlyoutNavigationPage-4')).toBeInTheDocument();
+    });
+
+    it('should hide navigation and show stale doc when hits change to exclude the pinned doc', () => {
+      const pinnedHit = buildHit({ id: 'pinned-hit', message: 'pinned message' });
+      const otherHits = [
+        buildHit({ id: 'hit-1', message: 'hit 1' }),
+        buildHit({ id: 'hit-2', message: 'hit 2' }),
+      ];
+
+      const renderHeader = ({ hit }: { hit: { raw: { _source?: Record<string, unknown> } } }) => (
+        <div data-test-subj="docViewerFlyoutHeaderHit" data-message={hit.raw._source?.message}>
+          Header
+        </div>
+      );
+
+      const { rerender } = render(
+        <UnifiedDocViewerFlyout
+          {...buildProps({
+            hit: pinnedHit,
+            hits: [pinnedHit, ...otherHits],
+            renderCustomHeader: renderHeader,
+          })}
+        />
+      );
+
+      expect(screen.getByTestId('docViewerFlyoutNavigation')).toBeInTheDocument();
+
+      rerender(
+        <UnifiedDocViewerFlyout
+          {...buildProps({ hit: pinnedHit, hits: otherHits, renderCustomHeader: renderHeader })}
+        />
+      );
+
+      expect(screen.getByTestId('docViewerFlyoutHeaderHit')).toHaveAttribute(
+        'data-message',
+        'pinned message'
+      );
+      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+    });
+
+    it('should hide navigation when exactly one result exists', () => {
+      const pinnedHit = buildHit({ id: 'pinned-hit', message: 'pinned message' });
+
+      render(<UnifiedDocViewerFlyout {...buildProps({ hit: pinnedHit, hits: [pinnedHit] })} />);
+
+      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+    });
+
+    it('should hide navigation when the pinned hit has a time-stamped id that cannot match refreshed hits', () => {
+      // Simulates ES|QL without METADATA _id/_index: IDs are time-stamped per-response
+      // and will never match across refreshes, so navigation should always be hidden.
+      const hitWithTimestampedId = buildHit({ id: '1@2026-07-30_10_00_00', message: 'original' });
+      const refreshedHitsWithDifferentTimestamp = [
+        buildHit({ id: '1@2026-07-30_10_01_00', message: 'refreshed 1' }),
+        buildHit({ id: '2@2026-07-30_10_01_00', message: 'refreshed 2' }),
+      ];
+
+      render(
+        <UnifiedDocViewerFlyout
+          {...buildProps({
+            hit: hitWithTimestampedId,
+            hits: refreshedHitsWithDifferentTimestamp,
+            isEsqlQuery: true,
+          })}
+        />
+      );
+
+      expect(screen.queryByTestId('docViewerFlyoutNavigation')).not.toBeInTheDocument();
+    });
+  });
 });
