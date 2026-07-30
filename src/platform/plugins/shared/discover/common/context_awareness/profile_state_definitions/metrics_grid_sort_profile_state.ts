@@ -16,7 +16,7 @@ import { ProfileStateType } from '../profile_state';
  *
  * Both fields are typed `ProfileStateType.Persistent`, which places them in
  * `LOCALLY_PERSISTED_PROFILE_STATE_TYPES` (the host persists the sort to local
- * tab storage and restores it on page reload, #278162) and includes them in the
+ * tab storage and restores it on page reload) and includes them in the
  * persistent profile state written to saved Discover sessions and locator state.
  */
 export const METRICS_GRID_SORT_STATE_DEF: ProfileStateDefinition<MetricsGridSort> = {

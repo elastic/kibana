@@ -79,9 +79,6 @@ export const fromSavedObjectTabToTabState = ({
       : existingTab?.globalState.refreshInterval,
   };
 
-  // Persistent-typed profile state comes from the saved object, while Ui and
-  // Url-typed overrides are not part of saved tab state, so keep the current
-  // values (mirroring how e.g. `hideSidebar` is handled on reset).
   const nonPersistentProfileState = profileStateRegistry.pickStateByType({
     profileStateMap: existingTab?.profileState,
     stateTypes: [ProfileStateType.Ui, ProfileStateType.Url],
@@ -194,8 +191,6 @@ export const fromTabStateToSavedObjectTab = ({
 
   const usesAdHocDataView = isObject(serializedSearchSource.index);
 
-  // Only Persistent-typed profile state fields belong in the saved object,
-  // stripped of default values so all-default state is stored as `undefined`.
   const persistentProfileState = services.profileStateRegistry.pickStateByType({
     profileStateMap: tab.profileState,
     stateTypes: [ProfileStateType.Persistent],

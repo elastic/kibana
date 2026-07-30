@@ -110,8 +110,7 @@ export type SerializableSavedSearch = Omit<SavedSearch, 'searchSource'> & {
 /**
  * Map of profile state blobs keyed by their registered profile state
  * definition key (see Discover's `ProfileStateRegistry`), e.g.
- * `{ metricsGridSort: { field: 'recency' } }`. Only non-default
- * `Persistent`-typed fields are stored.
+ * `{ metricsGridSort: { field: 'recency' } }`.
  */
 export type DiscoverSessionTabProfileState = Record<string, SerializableRecord>;
 

@@ -80,8 +80,7 @@ export function MetricsExperienceStateProvider({
 
   // Sort is controlled when the host provides `onMetricsSortChange` (e.g.
   // Discover's persistent profile state). Without it, fall back to internal
-  // state so standalone hosts still get a working sort control -- `metricsSort`
-  // then acts as the initial value, like a DOM input's `defaultValue`.
+  // state so standalone hosts still get a working sort control.
   const isSortControlled = onMetricsSortChange !== undefined;
   const [uncontrolledSort, setUncontrolledSort] = useState<MetricsSort>(
     metricsSort ?? DEFAULT_METRICS_SORT
@@ -133,8 +132,7 @@ export function MetricsExperienceStateProvider({
         return;
       }
 
-      // Preserve the page-reset-on-sort-change behavior from #277184: compare
-      // against the current sort before forwarding the change.
+      // compare against the current sort before forwarding the change
       const [prevSortBy, prevDirection] = effectiveMetricsSort;
       const [nextSortBy, nextDirection] = nextSort;
       if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {

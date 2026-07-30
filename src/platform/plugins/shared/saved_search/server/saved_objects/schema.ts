@@ -161,11 +161,6 @@ export const SCHEMA_DISCOVER_SESSION_V13 = schema.object({
 });
 
 const SCHEMA_TAB_ATTRIBUTES_V14 = SCHEMA_TAB_ATTRIBUTES_V13.extends({
-  // Context awareness
-  // Map of profile state blobs keyed by their registered profile state
-  // definition key, e.g. `{ metricsGridSort: { field: 'recency' } }`. Only
-  // fields typed `ProfileStateType.Persistent` are written here, stripped of
-  // default values.
   profileState: schema.maybe(
     schema.recordOf(schema.string(), schema.recordOf(schema.string(), schema.any()))
   ),

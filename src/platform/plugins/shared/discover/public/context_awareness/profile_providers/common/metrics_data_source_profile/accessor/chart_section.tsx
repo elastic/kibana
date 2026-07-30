@@ -62,13 +62,11 @@ const MetricsExperienceGridWrapper = (
 
   const sortState = useObservable(sortStateAdapter.getState$(), sortStateAdapter.getState());
 
-  // Map the host's serializable sort record to the viewer's tuple prop.
   const metricsSort = useMemo<MetricsSort>(
     () => [sortState.field, sortState.direction],
     [sortState.field, sortState.direction]
   );
 
-  // Map the viewer's tuple back to the serializable record the host persists.
   const onMetricsSortChange = useCallback(
     (next: MetricsSort) => {
       const [field, direction] = next;

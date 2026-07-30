@@ -11,8 +11,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 
 /**
  * Field the metrics grid is sorted by. Mirrors the viewer's `METRICS_SORT_BY`
- * values (`@kbn/unified-chart-section-viewer`); the drift-guard unit test keeps
- * the two in sync.
+ * values (`@kbn/unified-chart-section-viewer`).
  */
 export type MetricsGridSortField = 'alphabetically' | 'recency';
 
@@ -24,11 +23,7 @@ export type MetricsGridSortDirection = 'asc' | 'desc';
 
 /**
  * Serializable shape of the metrics grid sort selection persisted in Discover's
- * profile state (typed `ProfileStateType.Persistent`, which is locally persisted
- * for page-reload restore and included in saved Discover sessions). Modeled as a
- * named-field record -- rather than the viewer's readonly `MetricsSort` tuple --
- * so it satisfies the `SerializableRecord` constraint required by profile-state
- * definitions.
+ * profile state.
  */
 export interface MetricsGridSort extends SerializableRecord {
   field: MetricsGridSortField;
