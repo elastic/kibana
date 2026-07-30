@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
@@ -264,9 +265,23 @@ const BriefCard: React.FC<{
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         {item.priority != null ? (
           <EuiFlexItem grow={false}>
-            <EuiText size="m">
-              <strong>{item.priority}</strong>
-            </EuiText>
+            <div
+              data-test-subj="pndBriefCardScore"
+              css={css`
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                inline-size: 26px;
+                block-size: 26px;
+                border-radius: 7px;
+                font-size: 12px;
+                font-weight: 700;
+                color: ${accent};
+                background-color: ${transparentize(accent, 0.12)};
+              `}
+            >
+              {item.priority}
+            </div>
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
