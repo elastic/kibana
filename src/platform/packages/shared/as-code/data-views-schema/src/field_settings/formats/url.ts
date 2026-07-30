@@ -27,15 +27,21 @@ export const urlFormatSchema = z
     type: z.literal('url'),
     params: z.discriminatedUnion('type', [
       baseSubtypeOptionsSchema.extend({
-        type: z.literal('a'),
+        type: z.literal('a').meta({
+          title: 'Link',
+          description: 'Displays the field value as a hyperlink.',
+        }),
         open_link_in_current_tab: z.boolean().optional().meta({
-          title: 'Open in new tab',
+          title: 'Open link in current tab',
           description:
-            'Whether to open the URL in a new tab. If not provided, the URL will be opened in a new tab.',
+            'When true, the URL opens in the current tab. When false or not provided, the URL opens in a new tab.',
         }),
       }),
       baseSubtypeOptionsSchema.extend({
-        type: z.literal('img'),
+        type: z.literal('img').meta({
+          title: 'Image',
+          description: 'Displays the field value as an image.',
+        }),
         width: z.number().optional().meta({
           title: 'Width',
           description:
@@ -47,7 +53,12 @@ export const urlFormatSchema = z
             'The height of the image. If not provided, the image will be displayed at the original height.',
         }),
       }),
-      baseSubtypeOptionsSchema.extend({ type: z.literal('audio') }),
+      baseSubtypeOptionsSchema.extend({
+        type: z.literal('audio').meta({
+          title: 'Audio',
+          description: 'Displays the field value as an audio player.',
+        }),
+      }),
     ]),
   })
   .meta({

@@ -34,7 +34,7 @@ export const stringFormatSchema = z
             z.literal('short').meta({
               title: 'Short dots',
               description:
-                'Converts the field value to short dots. For example: "Some Text" -> "S.T.".',
+                'Shortens each dot-separated segment of the field value to its first character, except for the last segment. For example: "dot.notated.string" -> "d.n.string".',
             }),
             z.literal('base64').meta({
               title: 'Base64 decode',

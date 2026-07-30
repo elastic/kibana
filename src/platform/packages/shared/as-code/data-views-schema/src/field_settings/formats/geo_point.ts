@@ -39,7 +39,7 @@ export const geoPointFormatSchema = z
             z.literal('multi').meta({
               title: 'Multi',
               description:
-                'Transforms the geo point to all the previous formats. For Example: "Lat Long: 40.7128,-74.0060, WKT: POINT (123.456 78.901), DMS: 40°42′50.2″N 73°59′45.6″W, MGRS: 18SUJ1234567890".',
+                'Transforms the geo point to all the previous formats. For example: "Lat Long: 40.7128,-74.0060, WKT: POINT (123.456 78.901), DMS: 40°42′50.2″N 73°59′45.6″W, MGRS: 18SUJ1234567890".',
             }),
           ])
           .meta({
