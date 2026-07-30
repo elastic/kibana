@@ -13,16 +13,21 @@ import '@emotion/jest';
 import { EuiProvider, useEuiTheme } from '@elastic/eui';
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
+import ReactDOM from 'react-dom/server';
 import { constant } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
 import { highlightTags } from './utils/highlight/highlight_tags';
 import type { FieldFormatParams, ReactContextTypeOptions, TextContextTypeOptions } from './types';
 import { NULL_LABEL } from '@kbn/field-formats-common';
-import { expectReactElementAsArray, renderReactNode } from './test_utils';
+import { expectReactElementAsArray } from './test_utils';
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
-const renderReact = (node: React.ReactNode) => renderReactNode(node);
+const renderReact = (node: React.ReactNode) =>
+  ReactDOM.renderToStaticMarkup(React.createElement(EuiProvider, null, node)).replace(
+    /&quot;/g,
+    '"'
+  );
 
 const getTestFormat = (
   _params?: FieldFormatParams,
@@ -143,17 +148,19 @@ describe('FieldFormat class', () => {
       test('uses newline separator and indentation when values contain newlines', () => {
         const f = getTestFormat(undefined, (v) => String(v));
         expect(renderReact(f.convertToReact(['{\n  "x": 1\n}', '{\n  "y": 2\n}']))).toBe(
-          '<span>[</span>\n' +
+          '<span class="css-edplx8-arrayHighlightStyles">[</span>\n' +
             '  {\n    "x": 1\n  }' +
-            '<span>,</span>\n' +
+            '<span class="css-edplx8-arrayHighlightStyles">,</span>\n' +
             '  {\n    "y": 2\n  }\n' +
-            '<span>]</span>'
+            '<span class="css-edplx8-arrayHighlightStyles">]</span>'
         );
       });
 
       test('HTML-escapes special characters inside array elements', () => {
         const f = getTestFormat(undefined, (v) => String(v));
-        expectReactElementAsArray(f.convertToReact(['<a>', '<b>']), ['&lt;a&gt;', '&lt;b&gt;']);
+        const result = f.convertToReact(['<a>', '<b>']);
+        expectReactElementAsArray(result, ['<a>', '<b>']);
+        expect(renderReact(result)).toContain('&lt;a&gt;');
       });
     });
 
@@ -184,7 +191,9 @@ describe('FieldFormat class', () => {
             makeOptions('myField', [`lorem ${hl('ipsum')} dolor`])
           )
         );
-        expect(result).toBe('lorem <mark>ipsum</mark> dolor');
+        expect(result).toBe(
+          'lorem <mark class="css-wxea76-searchHighlightStyles">ipsum</mark> dolor'
+        );
       });
 
       test('returns plain text from convertToReact when no highlights are present', () => {
@@ -216,7 +225,9 @@ describe('FieldFormat class', () => {
           const result = renderReact(
             f.convertToReact('ipsum', makeOptions('myField', [`${hl('formatted:ipsum')}`]))
           );
-          expect(result).toBe('<mark>formatted:ipsum</mark>');
+          expect(result).toBe(
+            '<mark class="css-wxea76-searchHighlightStyles">formatted:ipsum</mark>'
+          );
         });
 
         test('returns plain text when no highlights present', () => {
@@ -232,7 +243,9 @@ describe('FieldFormat class', () => {
         const result = renderReact(
           f.convertToReact('<em>lorem</em>', makeOptions('myField', [`${hl('<em>lorem</em>')}`]))
         );
-        expect(result).toBe('<mark>&lt;em&gt;lorem&lt;/em&gt;</mark>');
+        expect(result).toBe(
+          '<mark class="css-wxea76-searchHighlightStyles">&lt;em&gt;lorem&lt;/em&gt;</mark>'
+        );
         expect(result).not.toContain('<em>');
       });
 

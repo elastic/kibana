@@ -8,24 +8,23 @@
  */
 
 import '@emotion/jest';
-import { EuiProvider } from '@elastic/eui';
 import { render as renderComponent } from '@testing-library/react';
 import React from 'react';
+import ReactDOM from 'react-dom/server';
 import { highlightTags } from './highlight_tags';
 import { getHighlightReact } from './highlight_react';
 import type { FieldFormatHighlightTags } from '../../types';
-import { renderReactNode } from '../../test_utils';
 
 /** Render the ReactNode to a plain HTML string for easy assertion.
  * &quot; is decoded back to " since both are valid HTML and the difference is
  * an implementation detail of renderToStaticMarkup, not semantically meaningful.
  */
 function render(node: React.ReactNode): string {
-  return renderReactNode(node);
+  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
 }
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
-const mark = (word: string) => `<mark>${word}</mark>`;
+const mark = (word: string) => `<mark class="css-wxea76-searchHighlightStyles">${word}</mark>`;
 
 describe('getHighlightReact', () => {
   it('returns plain string unchanged when no field name is provided', () => {
@@ -59,11 +58,11 @@ describe('getHighlightReact', () => {
 
     test('underlines highlighted text', () => {
       const { container } = renderComponent(
-        <EuiProvider>
+        <>
           {getHighlightReact('lorem ipsum', 'myField', {
             highlight: { myField: [`${hl('lorem')} ipsum`] },
           })}
-        </EuiProvider>
+        </>
       );
 
       expect(container.querySelector('mark')).toHaveStyleRule(

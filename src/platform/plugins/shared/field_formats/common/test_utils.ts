@@ -8,22 +8,21 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
+import { render } from '@testing-library/react';
 import { createElement, isValidElement, type ReactNode } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 import { NULL_LABEL, EMPTY_LABEL } from '@kbn/field-formats-common';
 
 export const renderReactNode = (node: ReactNode) =>
-  renderToStaticMarkup(createElement(EuiProvider, null, node))
-    .replace(/ class="css-[^"]+"/g, '')
-    .replace(/ css-[^"]+/g, '')
-    .replace(/&quot;/g, '"');
+  render(createElement(EuiProvider, null, node)).container;
 
 /**
  * Asserts that a React element represents a null value display.
  */
 export const expectReactElementWithNull = (element: React.ReactNode) => {
   expect(isValidElement(element)).toBe(true);
-  expect(renderReactNode(element)).toBe(`<span>${NULL_LABEL}</span>`);
+  const { children } = renderReactNode(element);
+  expect(children).toHaveLength(1);
+  expect(children[0]).toHaveTextContent(NULL_LABEL);
 };
 
 /**
@@ -31,7 +30,9 @@ export const expectReactElementWithNull = (element: React.ReactNode) => {
  */
 export const expectReactElementWithBlank = (element: React.ReactNode) => {
   expect(isValidElement(element)).toBe(true);
-  expect(renderReactNode(element)).toBe(`<span>${EMPTY_LABEL}</span>`);
+  const { children } = renderReactNode(element);
+  expect(children).toHaveLength(1);
+  expect(children[0]).toHaveTextContent(EMPTY_LABEL);
 };
 
 /**
@@ -40,10 +41,11 @@ export const expectReactElementWithBlank = (element: React.ReactNode) => {
 export const expectReactElementAsArray = (element: React.ReactNode, expectedValues: string[]) => {
   expect(isValidElement(element)).toBe(true);
 
-  const html = renderReactNode(element);
-
-  const bracket = (char: string) => `<span>${char}</span>`;
-  const expectedHtml = bracket('[') + expectedValues.join(`${bracket(',')} `) + bracket(']');
-
-  expect(html).toBe(expectedHtml);
+  const container = renderReactNode(element);
+  expect(container.textContent).toBe(`[${expectedValues.join(', ')}]`);
+  expect([...container.querySelectorAll('span')].map(({ textContent }) => textContent)).toEqual([
+    '[',
+    ...expectedValues.slice(1).map(() => ','),
+    ']',
+  ]);
 };

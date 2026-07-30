@@ -11,16 +11,16 @@ import '@emotion/jest';
 import { EuiProvider, useEuiTheme } from '@elastic/eui';
 import { render as renderComponent, renderHook } from '@testing-library/react';
 import React from 'react';
+import ReactDOM from 'react-dom/server';
 import { formatReactArray } from './format_react_array';
-import { renderReactNode } from '../test_utils';
 
 function render(node: React.ReactNode): string {
-  return renderReactNode(node);
+  return ReactDOM.renderToStaticMarkup(<EuiProvider>{node}</EuiProvider>).replace(/&quot;/g, '"');
 }
 
-const open = '<span>[</span>';
-const close = '<span>]</span>';
-const comma = '<span>,</span>';
+const open = '<span class="css-edplx8-arrayHighlightStyles">[</span>';
+const close = '<span class="css-edplx8-arrayHighlightStyles">]</span>';
+const comma = '<span class="css-edplx8-arrayHighlightStyles">,</span>';
 
 describe('formatReactArray', () => {
   describe('empty and single-element arrays', () => {

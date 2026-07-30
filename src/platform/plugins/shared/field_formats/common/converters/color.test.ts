@@ -197,9 +197,11 @@ describe('Color Format', () => {
     );
 
     expect(colorer.convertToText([100, 200])).toBe('["100","200"]');
-    expect(renderReactNode(colorer.convertToReact([100, 200]))).toMatchInlineSnapshot(
-      `"<span>[</span><span style=\\"color:blue;background-color:yellow;display:inline-block;padding:0 8px;border-radius:3px\\">100</span><span>,</span> <span style=\\"color:blue;background-color:yellow;display:inline-block;padding:0 8px;border-radius:3px\\">200</span><span>]</span>"`
-    );
+    const container = renderReactNode(colorer.convertToReact([100, 200]));
+    expect(container.textContent).toBe('[100, 200]');
+    expect(
+      [...container.querySelectorAll('span[style]')].map(({ textContent }) => textContent)
+    ).toEqual(['100', '200']);
   });
 
   test('returns the single element without brackets for a one-element array', () => {

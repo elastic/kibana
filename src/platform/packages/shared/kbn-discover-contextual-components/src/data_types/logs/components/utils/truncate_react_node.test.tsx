@@ -72,7 +72,7 @@ describe('truncateReactNode', () => {
     it('preserves element attributes after truncation', () => {
       const text = 'Long text that needs truncation';
       const node = (
-        <mark className="customHighlight" data-test="value">
+        <mark className="ffSearch__highlight" data-test="value">
           {text}
         </mark>
       );
@@ -80,7 +80,7 @@ describe('truncateReactNode', () => {
       const { container } = render(<>{result}</>);
 
       const mark = container.querySelector('mark');
-      expect(mark).toHaveClass('customHighlight');
+      expect(mark).toHaveClass('ffSearch__highlight');
       expect(mark).toHaveAttribute('data-test', 'value');
       expect(mark?.textContent).toBe('Long ...ation');
     });

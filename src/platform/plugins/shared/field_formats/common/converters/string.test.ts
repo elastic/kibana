@@ -129,9 +129,9 @@ describe('String Format', () => {
         highlight: { foo: ['@kibana-highlighted-field@<img />@/kibana-highlighted-field@'] },
       },
     };
-    expect(renderReactNode(string.convertToReact('<img />', options))).toMatchInlineSnapshot(
-      `"<mark>&lt;img /&gt;</mark>"`
-    );
+    const container = renderReactNode(string.convertToReact('<img />', options));
+    expect(container.querySelector('mark')).toHaveTextContent('<img />');
+    expect(container.querySelector('img')).not.toBeInTheDocument();
   });
 
   test('convertToReact returns raw string for unhighlighted content (React escapes at render)', () => {

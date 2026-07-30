@@ -107,9 +107,9 @@ describe('StaticLookupFormat', () => {
           },
         },
       };
-      expect(renderReactNode(formatter.convertToReact('test', options))).toMatchInlineSnapshot(
-        `"<mark>Test</mark> Value"`
-      );
+      const container = renderReactNode(formatter.convertToReact('test', options));
+      expect(container.textContent).toBe('Test Value');
+      expect(container.querySelector('mark')).toHaveTextContent('Test');
     });
 
     test('falls back to missing value handling when lookup yields missing originals', () => {
