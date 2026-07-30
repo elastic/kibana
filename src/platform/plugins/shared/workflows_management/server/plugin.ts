@@ -124,6 +124,7 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.debug('Workflows Management: Start');
+    this.workflowsService?.setStopping(false);
 
     stepSchemas.initialize(plugins.workflowsExtensions);
 
@@ -163,6 +164,7 @@ export class WorkflowsPlugin
   }
 
   public stop() {
+    this.workflowsService?.setStopping(true);
     this.availabilityUpdater?.stop();
   }
 }

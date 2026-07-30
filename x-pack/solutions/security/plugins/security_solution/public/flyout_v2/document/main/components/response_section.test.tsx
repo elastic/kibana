@@ -18,7 +18,6 @@ import { ResponseSectionContent } from './response_section_content';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
@@ -107,9 +106,13 @@ describe('<ResponseSection />', () => {
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        ...defaultToolsFlyoutProperties,
         historyKey: documentFlyoutHistoryKey,
+        minWidth: expect.any(Number),
+        ownFocus: false,
+        paddingSize: 'm',
+        resizable: true,
         session: 'start',
+        size: 'm',
       })
     );
   });
