@@ -23,7 +23,7 @@ export interface CheckExistingScheduledExecutionOptions {
    * (different `taskRunAt`) is still non-terminal.
    * When false (workflows with concurrency `key` + `strategy`), leave in-flight overlap
    * to the concurrency check so strategies like `cancel-in-progress` still apply.
-   * Stale same-`taskRunAt` recovery always runs regardless of this flag.
+   * Stale same-`taskRunAt` recovery and past-tick abandoned `pending` reaping always run.
    */
   createSkippedForInFlightDuplicates?: boolean;
 }
@@ -46,8 +46,10 @@ export interface CheckExistingScheduledExecutionOptions {
  *   → Else mark execution as FAILED (TaskRecoveryError) and proceed with a new execution for this tick
  *   → This stale path always runs when invoked, including for workflows with valid concurrency settings
  *
- * - If execution's `taskRunAt` differs from current task's `runAt`:
- *   → Execution is from a DIFFERENT scheduled run that's still running
+ * - If execution is still `pending` and `taskRunAt` differs from current `runAt`:
+ *   → Never-started orphan from a prior tick; mark FAILED and proceed (one reap per tick)
+ *
+ * - If execution's `taskRunAt` differs from current task's `runAt` (in-flight work):
  *   → When `createSkippedForInFlightDuplicates` is true: skip current run (create SKIPPED)
  *   → When false: return false so the concurrency check governs overlap
  *
@@ -114,6 +116,33 @@ export async function checkAndSkipIfExistingScheduledExecution(
         {
           message: taskRecoveryMessages.scheduledStale,
         }
+      );
+      return false;
+    }
+
+    // Never-started orphan from a prior schedule claim — free the slot and proceed
+    // (one reap per tick). Task Manager only advances `runAt` after that claim
+    // finishes, so `PENDING` + a different `taskRunAt` means the earlier claim
+    // created the doc but never started it and will not retry that `runAt`.
+    const isAbandonedNeverStartedPending =
+      existingExecution.status === ExecutionStatus.PENDING &&
+      executionTaskRunAt != null &&
+      currentTaskRunAt != null &&
+      executionTaskRunAt !== currentTaskRunAt;
+
+    if (isAbandonedNeverStartedPending) {
+      logger.warn(
+        `Found abandoned pending execution ${existingExecution.id} from a prior scheduled run ` +
+          `(taskRunAt: ${executionTaskRunAt}, current taskRunAt: ${currentTaskRunAt}) - marking as failed and proceeding`
+      );
+      await markExecutionFailedTaskRecovery(
+        workflowExecutionRepository,
+        stepExecutionRepository,
+        existingExecution.id,
+        {
+          message: taskRecoveryMessages.scheduledAbandonedPending,
+        },
+        { refresh: 'wait_for' }
       );
       return false;
     }

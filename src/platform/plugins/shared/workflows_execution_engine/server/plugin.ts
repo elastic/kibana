@@ -47,6 +47,7 @@ import { checkLicense } from './lib/check_license';
 import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
+  markScheduledExecutionFailedAfterTaskError,
   resolveExhaustedWorkflowRunTask,
   resolveInterruptedWorkflowResumeTask,
   resolveInterruptedWorkflowRunTask,
@@ -525,32 +526,26 @@ export class WorkflowsExecutionEnginePlugin
               }
               logger.debug(`Running scheduled workflow task for workflow ${workflow.id}`);
 
-              // Overlap handling: concurrency collision strategies only run when both
-              // `key` (group) and `strategy` (drop/cancel/queue) are set. Without that
-              // pair, keep schedule-level SKIPPED for in-flight duplicates.
-              // Stale same-taskRunAt recovery only applies on TM retries (attempts > 1);
-              // skip the ES lookup on first attempt when deferring to concurrency.
+              // Overlap / recovery: always run so past-tick abandoned `pending` orphans are
+              // reaped even on the first attempt of a new schedule interval. Defer in-flight
+              // SKIPPED only when concurrency key+strategy will enforce collisions.
               const concurrency = workflow.definition?.settings?.concurrency;
               const deferInFlightDuplicatesToConcurrency = Boolean(
                 concurrency?.key?.trim() && concurrency?.strategy
               );
-              const shouldCheckExistingScheduledExecution =
-                !deferInFlightDuplicatesToConcurrency || taskInstance.attempts > 1;
-              if (shouldCheckExistingScheduledExecution) {
-                const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
-                  workflow,
-                  spaceId,
-                  workflowExecutionRepository,
-                  stepExecutionRepository,
-                  taskInstance,
-                  logger,
-                  {
-                    createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
-                  }
-                );
-                if (wasSkipped) {
-                  return;
+              const wasSkipped = await checkAndSkipIfExistingScheduledExecution(
+                workflow,
+                spaceId,
+                workflowExecutionRepository,
+                stepExecutionRepository,
+                taskInstance,
+                logger,
+                {
+                  createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
                 }
+              );
+              if (wasSkipped) {
+                return;
               }
 
               // Check for RRule triggers and log details
@@ -629,41 +624,54 @@ export class WorkflowsExecutionEnginePlugin
                 refresh: 'wait_for',
               });
 
-              // Check concurrency limits and apply collision strategy if needed
-              const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
-              if (!canProceed) {
+              try {
+                // Check concurrency limits and apply collision strategy if needed
+                const canProceed = await this.checkConcurrencyIfNeeded(workflowExecution);
+                if (!canProceed) {
+                  if (workflowExecution.id && workflowExecution.spaceId) {
+                    await handleConcurrencyBlockedExecution({
+                      workflowExecutionId: workflowExecution.id,
+                      spaceId: workflowExecution.spaceId,
+                      request: fakeRequest,
+                      workflowExecutionRepository,
+                      workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
+                      internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                      logger,
+                    });
+                  }
+                  return;
+                }
+
+                if (!workflowExecution.id || !workflowExecution.spaceId) {
+                  throw new Error('Workflow execution must have id and spaceId');
+                }
+
+                const [, , workflowsExecutionEngine] = await core.getStartServices();
+
+                await runWorkflow({
+                  workflowRunId: workflowExecution.id,
+                  spaceId: workflowExecution.spaceId,
+                  signal: taskAbortController.signal,
+                  logger,
+                  config,
+                  fakeRequest,
+                  dependencies,
+                  workflowsExecutionEngine,
+                  meteringService: this.meteringService,
+                  internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                });
+              } catch (error) {
                 if (workflowExecution.id && workflowExecution.spaceId) {
-                  await handleConcurrencyBlockedExecution({
-                    workflowExecutionId: workflowExecution.id,
-                    spaceId: workflowExecution.spaceId,
-                    request: fakeRequest,
+                  await markScheduledExecutionFailedAfterTaskError({
                     workflowExecutionRepository,
-                    workflowTaskManager: new WorkflowTaskManager(pluginsStart.taskManager),
-                    internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
+                    stepExecutionRepository,
+                    workflowRunId: workflowExecution.id,
+                    spaceId: workflowExecution.spaceId,
                     logger,
                   });
                 }
-                return;
+                throw error;
               }
-
-              if (!workflowExecution.id || !workflowExecution.spaceId) {
-                throw new Error('Workflow execution must have id and spaceId');
-              }
-
-              const [, , workflowsExecutionEngine] = await core.getStartServices();
-
-              await runWorkflow({
-                workflowRunId: workflowExecution.id,
-                spaceId: workflowExecution.spaceId,
-                signal: taskAbortController.signal,
-                logger,
-                config,
-                fakeRequest,
-                dependencies,
-                workflowsExecutionEngine,
-                meteringService: this.meteringService,
-                internalResumeWorkflowExecution: this.internalResumeWorkflowExecutionHandler,
-              });
 
               const scheduleType = rruleTriggers.length > 0 ? 'RRule' : 'interval/cron';
               logger.debug(
