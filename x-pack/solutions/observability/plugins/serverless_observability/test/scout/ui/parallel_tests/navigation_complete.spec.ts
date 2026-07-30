@@ -35,12 +35,16 @@ test.describe(
         await nav.openMoreMenu();
       });
 
+      await test.step('Alerts is visible and linked (primary or More, depending on overflow)', async () => {
+        // Alerts sits at the primary/More overflow boundary: it renders in the primary
+        // nav when there is room and overflows into the More menu otherwise.
+        const alerts = nav.navItemInBodyByDeepLinkId('observability-overview:alerts');
+        await expect(alerts).toBeVisible();
+        await expect(alerts).toHaveAttribute('href', /.+/);
+      });
+
       await test.step('More linked items are visible and linked', async () => {
-        const moreDeepLinks = [
-          'observability-overview:alerts',
-          'observability-overview:cases',
-          'slo',
-        ];
+        const moreDeepLinks = ['observability-overview:cases', 'slo'];
         for (const deepLinkId of moreDeepLinks) {
           const item = nav.navItemInMoreByDeepLinkId(deepLinkId);
           await expect(item).toBeVisible();
@@ -104,9 +108,16 @@ test.describe(
         });
       });
 
-      await test.step('Alerts (via More menu)', async () => {
-        await nav.openMoreMenu();
-        await nav.navItemInMoreByDeepLinkId('observability-overview:alerts').click();
+      await test.step('Alerts', async () => {
+        // Alerts sits at the primary/More overflow boundary — click it in the primary
+        // nav when it rendered there, otherwise reach it through the More menu.
+        const primaryAlerts = nav.navItemInPrimaryByDeepLinkId('observability-overview:alerts');
+        if (await primaryAlerts.isVisible()) {
+          await primaryAlerts.click();
+        } else {
+          await nav.openMoreMenu();
+          await nav.navItemInMoreByDeepLinkId('observability-overview:alerts').click();
+        }
         await expect(page.testSubj.locator('alertsPageWithData')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
