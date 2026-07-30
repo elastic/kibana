@@ -153,7 +153,13 @@ const assertPathAllowed = (path: string): void => {
   }
 
   const pathOnly = path.split(/[?#]/, 1)[0] ?? path;
-  const normalized = pathOnly.toLowerCase();
+  let decodedPath = pathOnly;
+  try {
+    decodedPath = decodeURIComponent(pathOnly);
+  } catch {
+    throw new Error('Argo CD API path contains invalid percent-encoding');
+  }
+  const normalized = decodedPath.toLowerCase();
 
   for (const prefix of BLOCKED_PATH_PREFIXES) {
     if (normalized.startsWith(prefix)) {
