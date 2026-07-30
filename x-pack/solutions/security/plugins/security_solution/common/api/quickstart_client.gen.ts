@@ -840,6 +840,12 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+Create a new entity source configuration.
+
+    */
   async createEntitySource(props: CreateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
     return this.kbnClient
@@ -853,6 +859,12 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+Create an index for Privileges Monitoring import.
+
+    */
   async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
     return this.kbnClient
@@ -867,8 +879,11 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
-   */
+    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+
+Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
+
+    */
   async createPrivMonUser(props: CreatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivMonUser`);
     return this.kbnClient
@@ -1142,6 +1157,12 @@ Delete the asset criticality record for a specific entity.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+Delete an entity source configuration.
+
+    */
   async deleteEntitySource(props: DeleteEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteEntitySource`);
     return this.kbnClient
@@ -1155,7 +1176,7 @@ Delete the asset criticality record for a specific entity.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+   * **Deprecated in 9.6.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
   async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
@@ -1193,8 +1214,11 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Removes a privileged user from monitoring by their document ID.
-   */
+    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+
+Removes a privileged user from monitoring by their document ID.
+
+    */
   async deletePrivMonUser(props: DeletePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeletePrivMonUser`);
     return this.kbnClient
@@ -1295,7 +1319,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+   * **Deprecated in 9.6.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
   async disableMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
@@ -1948,6 +1972,12 @@ finishes and then call this operation once.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+Get an entity source configuration by ID.
+
+    */
   async getEntitySource(props: GetEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API GetEntitySource`);
     return this.kbnClient
@@ -2373,7 +2403,7 @@ response reports a result for each one.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+   * **Deprecated in 9.6.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
    */
   async initMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
@@ -2517,6 +2547,12 @@ Each row will match up to 10,000 entities.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+List all entity source configurations.
+
+    */
   async listEntitySources(props: ListEntitySourcesProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListEntitySources`);
     return this.kbnClient
@@ -2532,8 +2568,11 @@ Each row will match up to 10,000 entities.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
-   */
+    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+
+Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
+
+    */
   async listPrivMonUsers(props: ListPrivMonUsersProps) {
     this.log.info(`${new Date().toISOString()} Calling API ListPrivMonUsers`);
     return this.kbnClient
@@ -2730,8 +2769,11 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
-   */
+    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+
+Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
+
+    */
   async privmonBulkUploadUsersCsv(props: PrivmonBulkUploadUsersCSVProps) {
     this.log.info(`${new Date().toISOString()} Calling API PrivmonBulkUploadUsersCSV`);
     return this.kbnClient
@@ -2746,7 +2788,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+   * **Deprecated in 9.6.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
    */
   async privMonHealth() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
@@ -2761,8 +2803,11 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Check if the current user has all required permissions for Privilege Monitoring
-   */
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+Check if the current user has all required permissions for Privilege Monitoring.
+
+    */
   async privMonPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
     return this.kbnClient
@@ -3093,7 +3138,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+   * **Deprecated in 9.6.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
    */
   async scheduleMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
@@ -3155,6 +3200,12 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+Search Indices for Privileges Monitoring import.
+
+    */
   async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
@@ -3513,6 +3564,12 @@ remain on the watchlist.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+Update an entity source configuration.
+
+    */
   async updateEntitySource(props: UpdateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
     return this.kbnClient
@@ -3527,8 +3584,11 @@ remain on the watchlist.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Updates the details of an existing monitored privileged user by their document ID.
-   */
+    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+
+Updates the details of an existing monitored privileged user by their document ID.
+
+    */
   async updatePrivMonUser(props: UpdatePrivMonUserProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdatePrivMonUser`);
     return this.kbnClient
