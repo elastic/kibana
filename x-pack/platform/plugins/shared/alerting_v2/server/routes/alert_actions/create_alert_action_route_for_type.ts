@@ -13,7 +13,6 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import { Request, type RouteDefinition } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { inject, injectable } from 'inversify';
 import type { z } from '@kbn/zod/v4';
 import { AlertActionsClient } from '../../lib/alert_actions_client';
@@ -59,10 +58,10 @@ export const createAlertActionRouteForType = <
       summary: `Create an alert ${pathSuffix} action`,
       description: 'Create an action for a specific alert group.',
     };
-    static validate = {
+    static schemas = {
       request: {
-        params: buildRouteValidationWithZod(createAlertActionParamsSchema),
-        body: buildRouteValidationWithZod(bodySchema),
+        params: createAlertActionParamsSchema,
+        body: bodySchema,
       },
       response: {
         204: {
@@ -77,7 +76,7 @@ export const createAlertActionRouteForType = <
           description: 'Indicates the alert event was not found.',
         },
       },
-    } as const;
+    };
 
     protected readonly routeName = `create alert ${pathSuffix} action`;
 
@@ -103,5 +102,10 @@ export const createAlertActionRouteForType = <
     }
   }
 
-  return CreateTypedAlertActionRoute;
+  return CreateTypedAlertActionRoute as RouteDefinition<
+    CreateAlertActionParams,
+    unknown,
+    ActionBody,
+    'post'
+  >;
 };

@@ -27,6 +27,11 @@ describe('createAlertActionRouteForType', () => {
     expect(RouteClass.method).toBe('post');
     expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{group_hash}/${suffix}`);
     expect(RouteClass.validate).toBeDefined();
+    expect(RouteClass.validate).toEqual(
+      expect.objectContaining({
+        onRequestValidationError: expect.any(Function),
+      })
+    );
   });
 
   it('injects inferred action_type into createAction payload', async () => {
