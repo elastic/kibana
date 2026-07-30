@@ -92,7 +92,6 @@ export function ServiceNameLink({
     );
   }
 
-  // Fallback: no flyout feature registered (or no APM access) — render a direct APM link instead.
   const apmLinkToServiceEntityLocator = urlService.locators.get<{
     serviceName: string;
     rangeFrom: string;
