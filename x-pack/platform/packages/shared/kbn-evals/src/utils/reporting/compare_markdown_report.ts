@@ -62,6 +62,9 @@ export function formatMarkdownCompareReport({
   baselineTimestamp,
   baselineCommitSha,
   refreshBaselineUrl,
+  skippedMissingPairs = 0,
+  skippedNullScores = 0,
+  baselineBranch = 'main',
 }: {
   experimentIdA: string;
   experimentIdB: string;
@@ -71,6 +74,9 @@ export function formatMarkdownCompareReport({
   baselineTimestamp?: string;
   baselineCommitSha?: string;
   refreshBaselineUrl?: string;
+  skippedMissingPairs?: number;
+  skippedNullScores?: number;
+  baselineBranch?: string;
 }): string {
   const sortedResults = [...results].sort(
     (a, b) =>
@@ -86,7 +92,7 @@ export function formatMarkdownCompareReport({
 
   const lines: string[] = [];
 
-  lines.push(`**PR run**: ${experimentIdA} | **Baseline (main)**: ${experimentIdB}`);
+  lines.push(`**PR run**: ${experimentIdA} | **Baseline (${baselineBranch})**: ${experimentIdB}`);
 
   if (baselineTimestamp) {
     const diffDays = daysSince(baselineTimestamp);
@@ -97,7 +103,7 @@ export function formatMarkdownCompareReport({
 
     if (diffDays >= STALENESS_WARNING_DAYS) {
       lines.push(
-        `> **Warning**: Baseline is ${diffDays} days old. Results may not reflect current main.`
+        `> **Warning**: Baseline is ${diffDays} days old. Results may not reflect current ${baselineBranch}.`
       );
     }
   }
@@ -116,12 +122,27 @@ export function formatMarkdownCompareReport({
     );
   }
 
+  if (skippedMissingPairs > 0 || skippedNullScores > 0) {
+    const parts: string[] = [];
+    if (skippedMissingPairs > 0) {
+      parts.push(`${skippedMissingPairs} unpaired (ran in only one experiment)`);
+    }
+    if (skippedNullScores > 0) {
+      parts.push(`${skippedNullScores} null scores`);
+    }
+    lines.push(
+      `> **Note**: ${parts.join(
+        ', '
+      )} skipped. Comparison may be incomplete — the baseline could be a partial run.`
+    );
+  }
+
   const actionLinks: string[] = [];
   if (comparePageUrl) {
     actionLinks.push(`[View full comparison in UI](${comparePageUrl})`);
   }
   if (refreshBaselineUrl) {
-    actionLinks.push(`[Refresh baseline against latest main](${refreshBaselineUrl})`);
+    actionLinks.push(`[Refresh baseline against latest ${baselineBranch}](${refreshBaselineUrl})`);
   }
   if (actionLinks.length > 0) {
     lines.push('');
@@ -139,7 +160,9 @@ export function formatMarkdownCompareReport({
 
   const renderTable = (rows: PairedTTestResult[]) => {
     const tableLines: string[] = [];
-    tableLines.push('| Dataset | Evaluator | N | Mean (PR) | Mean (main) | Diff | p-value | Sig |');
+    tableLines.push(
+      `| Dataset | Evaluator | N | Mean (PR) | Mean (${baselineBranch}) | Diff | p-value | Sig |`
+    );
     tableLines.push('| --- | --- | --- | --- | --- | --- | --- | --- |');
     rows.forEach((r) => {
       const delta = r.meanA - r.meanB;

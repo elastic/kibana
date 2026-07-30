@@ -274,6 +274,9 @@ export const compareCmd: Command<void> = {
         baselineTimestamp: baselineMetadata?.timestamp,
         baselineCommitSha: baselineMetadata?.gitCommitSha ?? undefined,
         refreshBaselineUrl: refreshUrl,
+        skippedMissingPairs,
+        skippedNullScores,
+        baselineBranch: baselineBranch ?? undefined,
       });
 
       if (outputPath) {

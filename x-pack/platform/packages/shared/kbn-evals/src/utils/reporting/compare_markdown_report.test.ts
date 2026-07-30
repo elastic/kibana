@@ -29,6 +29,7 @@ describe('formatMarkdownCompareReport', () => {
 
     expect(output).toContain('**PR run**: exp-a');
     expect(output).toContain('**Baseline (main)**: exp-b');
+    expect(output).toContain('Mean (main)');
     expect(output).toContain('Dataset One');
     expect(output).toContain('Criteria');
     expect(output).toContain('0.80');
@@ -90,6 +91,22 @@ describe('formatMarkdownCompareReport', () => {
     );
   });
 
+  it('uses the provided baselineBranch instead of "main"', () => {
+    const output = formatMarkdownCompareReport({
+      experimentIdA: 'exp-a',
+      experimentIdB: 'exp-b',
+      results: [makeResult()],
+      baselineBranch: 'release/9.x',
+      refreshBaselineUrl: 'https://buildkite.com/builds/456#block',
+    });
+
+    expect(output).toContain('**Baseline (release/9.x)**: exp-b');
+    expect(output).toContain('Mean (release/9.x)');
+    expect(output).toContain(
+      '[Refresh baseline against latest release/9.x](https://buildkite.com/builds/456#block)'
+    );
+  });
+
   it('renders both compare and refresh links separated by pipe', () => {
     const output = formatMarkdownCompareReport({
       experimentIdA: 'exp-a',
@@ -99,8 +116,9 @@ describe('formatMarkdownCompareReport', () => {
       refreshBaselineUrl: 'https://buildkite.com/builds/123#kbn-evals-refresh-block',
     });
 
+    expect(output).toContain('[View full comparison in UI](https://kibana.example.com/compare)');
     expect(output).toContain(
-      '[View full comparison in UI](https://kibana.example.com/compare) | [Refresh baseline against latest main](https://buildkite.com/builds/123#kbn-evals-refresh-block)'
+      '[Refresh baseline against latest main](https://buildkite.com/builds/123#kbn-evals-refresh-block)'
     );
   });
 
@@ -112,6 +130,67 @@ describe('formatMarkdownCompareReport', () => {
     });
 
     expect(output).not.toContain('Refresh baseline');
+  });
+
+  describe('skipped pairs', () => {
+    it('shows a note when skippedMissingPairs > 0', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult()],
+        skippedMissingPairs: 5,
+      });
+
+      expect(output).toContain('5 unpaired (ran in only one experiment)');
+      expect(output).toContain('Comparison may be incomplete');
+    });
+
+    it('shows a note when skippedNullScores > 0', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult()],
+        skippedNullScores: 3,
+      });
+
+      expect(output).toContain('3 null scores');
+      expect(output).toContain('Comparison may be incomplete');
+    });
+
+    it('combines both counts in one note', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult()],
+        skippedMissingPairs: 4,
+        skippedNullScores: 2,
+      });
+
+      expect(output).toContain('4 unpaired (ran in only one experiment)');
+      expect(output).toContain('2 null scores');
+    });
+
+    it('omits the note when both counts are zero', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult()],
+        skippedMissingPairs: 0,
+        skippedNullScores: 0,
+      });
+
+      expect(output).not.toContain('Comparison may be incomplete');
+    });
+
+    it('omits the note when neither count is provided', () => {
+      const output = formatMarkdownCompareReport({
+        experimentIdA: 'exp-a',
+        experimentIdB: 'exp-b',
+        results: [makeResult()],
+      });
+
+      expect(output).not.toContain('Comparison may be incomplete');
+    });
   });
 
   it('handles null p-values as n/a', () => {
