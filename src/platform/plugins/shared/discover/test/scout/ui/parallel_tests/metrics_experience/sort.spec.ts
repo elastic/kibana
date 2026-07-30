@@ -91,6 +91,15 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
       });
 
+      await spaceTest.step('wait for the sort to be persisted to local tab storage', async () => {
+        // Tab state is written to local storage on a trailing throttle, so an
+        // immediate reload could race the write. Poll storage until the sort
+        // lands to deterministically test "persisted sort survives a reload".
+        await expect
+          .poll(() => page.evaluate(() => window.localStorage.getItem('discover.tabs') ?? ''))
+          .toContain('metricsGridSort');
+      });
+
       await spaceTest.step('the descending sort survives a full page reload', async () => {
         await page.reload();
         await expect(metricsExperience.grid).toBeVisible();
