@@ -241,7 +241,7 @@ export const ConnectorIconsMap: Map<
     '.new_relic',
     lazy(() => import(/* webpackChunkName: "connectorIconNewRelic" */ './specs/new_relic/icon')),
   ],
-  [    
+  [
     '.grafana',
     lazy(() => import(/* webpackChunkName: "connectorIconGrafana" */ './specs/grafana/icon')),
   ],
