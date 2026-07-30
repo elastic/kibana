@@ -6,13 +6,20 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { createAgentNotFoundError, createAgentUnavailableError } from '@kbn/agent-builder-common';
+import {
+  createAgentNotFoundError,
+  createAgentUnavailableError,
+  isConversationWriteConflictError,
+} from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common/chat/access_control';
 import type { AgentRegistry } from '../../agents/agent_registry';
+import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
 const testSpace = 'default';
+
+const createConflictError = () => Object.assign(new Error('version conflict'), { statusCode: 409 });
 
 interface MockEsClient {
   search: jest.Mock;
@@ -42,27 +49,41 @@ describe('ConversationClient', () => {
     userId = 'user-1',
     username = 'test-user',
     accessMode = ConversationAccessControlMode.Private,
+    seqNo = 1,
+    primaryTerm = 1,
+    title = 'Conversation 1',
+    rounds = [],
+    attachments,
+    workspaceId,
   }: {
     id?: string;
     agentId?: string;
     userId?: string;
     username?: string;
     accessMode?: ConversationAccessControlMode;
+    seqNo?: number;
+    primaryTerm?: number;
+    title?: string;
+    rounds?: unknown[];
+    attachments?: unknown[];
+    workspaceId?: string;
   } = {}): Document =>
     ({
       _id: id,
-      _seq_no: 1,
-      _primary_term: 1,
+      _seq_no: seqNo,
+      _primary_term: primaryTerm,
       _source: {
         agent_id: agentId,
         user_id: userId,
         user_name: username,
         space: testSpace,
-        title: 'Conversation 1',
+        title,
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         read: false,
-        conversation_rounds: [],
+        conversation_rounds: rounds,
+        ...(attachments ? { attachments } : {}),
+        ...(workspaceId ? { workspace_id: workspaceId } : {}),
         access_control: {
           access_mode: accessMode,
         },
@@ -531,6 +552,179 @@ describe('ConversationClient', () => {
 
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
       expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('optimistic concurrency control', () => {
+    it('requests seq_no_primary_term when reading a conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Updated title' });
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({ seq_no_primary_term: true })
+      );
+    });
+
+    it('passes the version read from the document to the write', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ seqNo: 42, primaryTerm: 7 })] },
+      });
+
+      await client.update({ id: 'conversation-1', title: 'Updated title' });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({ if_seq_no: 42, if_primary_term: 7 })
+      );
+    });
+
+    it('surfaces a write conflict as a conversation write conflict error', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      mockEsClient.index.mockRejectedValue(createConflictError());
+
+      const error = await client.update({ id: 'conversation-1', title: 'x' }).catch((e) => e);
+
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      expect(error.meta.statusCode).toBe(409);
+    });
+  });
+
+  describe('persistRound', () => {
+    const round = createRound({ id: 'round-2', input: { message: 'second' } });
+
+    const persistedRounds = (call: number = 0) =>
+      mockEsClient.index.mock.calls[call][0].document.conversation_rounds as Array<{ id: string }>;
+
+    beforeEach(() => {
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+    });
+
+    it('appends the round to the stored conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })] },
+      });
+
+      await client.persistRound({ id: 'conversation-1', round });
+
+      expect(persistedRounds().map(({ id }) => id)).toEqual(['round-1', 'round-2']);
+    });
+
+    it('re-reads and keeps a round written concurrently after a conflict', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [createConversationDocument({ rounds: [createRound({ id: 'round-1' })] })],
+          },
+        })
+        // the winning writer's round is now present in the stored document
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({
+                seqNo: 2,
+                rounds: [createRound({ id: 'round-1' }), createRound({ id: 'round-concurrent' })],
+              }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+
+      await client.persistRound({ id: 'conversation-1', round });
+
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      expect(persistedRounds(1).map(({ id }) => id)).toEqual([
+        'round-1',
+        'round-concurrent',
+        'round-2',
+      ]);
+    });
+
+    it('throws a write conflict error once retries are exhausted', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+      mockEsClient.index.mockRejectedValue(createConflictError());
+
+      const error = await client.persistRound({ id: 'conversation-1', round }).catch((e) => e);
+
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      expect(error.meta.statusCode).toBe(409);
+    });
+
+    it('preserves a title renamed while the round was running', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ title: 'Renamed by user' })] },
+      });
+
+      const result = await client.persistRound({ id: 'conversation-1', round });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ title: 'Renamed by user' }),
+        })
+      );
+      expect(result.title).toBe('Renamed by user');
+    });
+
+    it('merges attachments rather than reverting concurrent changes', async () => {
+      const concurrent = { id: 'attachment-concurrent', versions: [], current_version: 1 };
+      const fromRound = { id: 'attachment-from-round', versions: [], current_version: 1 };
+
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ attachments: [concurrent] })] },
+      });
+
+      await client.persistRound({
+        id: 'conversation-1',
+        round,
+        attachments: [fromRound] as never,
+      });
+
+      const { attachments } = mockEsClient.index.mock.calls[0][0].document;
+      expect(attachments.map(({ id }: { id: string }) => id).sort()).toEqual([
+        'attachment-concurrent',
+        'attachment-from-round',
+      ]);
+    });
+
+    it('does not overwrite a workspace already set on the stored conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ workspaceId: 'workspace-existing' })] },
+      });
+
+      await client.persistRound({
+        id: 'conversation-1',
+        round,
+        workspace_id: 'workspace-new',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ workspace_id: 'workspace-existing' }),
+        })
+      );
+    });
+
+    it('sets the workspace when the stored conversation has none', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await client.persistRound({
+        id: 'conversation-1',
+        round,
+        workspace_id: 'workspace-new',
+      });
+
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ workspace_id: 'workspace-new' }),
+        })
+      );
     });
   });
 

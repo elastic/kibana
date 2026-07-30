@@ -7,10 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import {
-  ATTACHMENT_REF_ACTOR,
-  type VersionedAttachment,
-} from '@kbn/agent-builder-common/attachments';
+import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
@@ -22,23 +19,7 @@ import {
 } from '../../../common/http_api/sml';
 import { AGENT_BUILDER_WRITE_SECURITY } from '../route_security';
 import { applyAttachmentRefsToRounds } from '../../services/conversation/client/migrate_attachments';
-
-const mergeAttachmentsById = (
-  latestAttachments: VersionedAttachment[],
-  stateManagerAttachments: VersionedAttachment[]
-) => {
-  const mergedAttachments = new Map<string, VersionedAttachment>();
-
-  for (const attachment of stateManagerAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  for (const attachment of latestAttachments) {
-    mergedAttachments.set(attachment.id, attachment);
-  }
-
-  return Array.from(mergedAttachments.values());
-};
+import { mergeAttachmentsById } from '../../services/conversation/client/round_writes';
 
 export function registerInternalSmlRoutes({
   router,

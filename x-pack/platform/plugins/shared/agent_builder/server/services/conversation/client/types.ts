@@ -17,6 +17,11 @@ import type {
   ConversationRoundStepType,
   Conversation,
 } from '@kbn/agent-builder-common/chat/conversation';
+import type {
+  ConversationInternalState,
+  ConversationRoundStatus,
+} from '@kbn/agent-builder-common/chat';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import type { AgentNodeState } from '@kbn/agent-builder-common/chat/round_state';
 
@@ -34,6 +39,29 @@ export type ConversationUpdateRequest = Pick<Conversation, 'id'> &
       'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'workspace_id'
     >
   >;
+
+/**
+ * Persists a single completed round.
+ *
+ * Expresses intent ("place this round") rather than desired end state ("here is
+ * the full rounds array"), so the round can be merged into whatever is currently
+ * stored. A caller-supplied array cannot be made concurrency-safe: it is built
+ * from a snapshot read before the agent ran, so writing it would drop any round
+ * that landed in the meantime.
+ */
+export interface PersistRoundRequest {
+  id: string;
+  /** Upserted by `round.id` — appended if new, replaced in place if present (HITL resume). */
+  round: ConversationRound;
+  /** `action: 'regenerate'` only: id of the round this one supersedes. */
+  replaces_round_id?: string;
+  state?: ConversationInternalState;
+  status?: ConversationRoundStatus;
+  /** Merged into the stored list by id; never used to remove attachments. */
+  attachments?: VersionedAttachment[];
+  /** Applied only when the freshly-read conversation has no workspace yet. */
+  workspace_id?: string;
+}
 
 export interface ConversationListOptions {
   agentId?: string;
