@@ -3,7 +3,7 @@ navigation_title: "Sentry"
 type: reference
 description: "Use the Sentry connector to triage issues, provision issue alert rules, and correlate incidents to releases using the Sentry API."
 applies_to:
-  stack: preview 9.4
+  stack: preview 9.6
   serverless: preview
 ---
 
