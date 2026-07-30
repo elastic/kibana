@@ -20,7 +20,9 @@ import {
   MAX_ESQL_QUERY_LENGTH,
   MAX_FIELD_NAME_LENGTH,
   MAX_GROUPING_FIELDS,
+  MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
+  MAX_SEARCH_LENGTH,
   MIN_SCHEDULE_INTERVAL,
   MAX_BULK_ITEMS,
   ID_MAX_LENGTH,
@@ -501,6 +503,7 @@ export const createRuleDataSchema = createRuleDataBaseSchema
   .refine(isNoDataStrategyNotEmit, rejectEmitNoDataStrategy);
 
 export type CreateRuleData = z.infer<typeof createRuleDataSchema>;
+export type CreateRuleDataInput = z.input<typeof createRuleDataSchema>;
 
 /**
  * Top-level fields of the create-rule schema that cannot be changed after the
@@ -538,7 +541,6 @@ export const updateRuleDataSchema = z
     state_transition: stateTransitionSchema.nullable(),
     grouping: groupingSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
-    enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strict()
   .check((ctx) => {
@@ -590,26 +592,27 @@ export const findRulesSortFieldSchema = z.enum(['kind', 'enabled', 'name']);
 export type FindRulesSortField = z.infer<typeof findRulesSortFieldSchema>;
 
 /** Query parameters for the find rules (list) API. */
-export const findRulesParamsSchema = z.object({
+export const findRulesRequestSchema = z.object({
   page: z.coerce.number().min(1).optional().describe('The page number to return. Defaults to 1.'),
-  perPage: z.coerce
+  per_page: z.coerce
     .number()
     .min(1)
     .max(1000)
     .optional()
     .describe('The number of rules to return per page. Defaults to 20.'),
-  filter: z.string().optional().describe('The filter to apply to the rules.'),
-  sortField: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
-  sortOrder: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
+  filter: z.string().max(MAX_KQL_LENGTH).optional().describe('The filter to apply to the rules.'),
+  sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
+  sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
   search: z
     .string()
     .trim()
     .min(1)
+    .max(MAX_SEARCH_LENGTH)
     .optional()
     .describe('A text string to search across rule fields.'),
 });
 
-export type FindRulesParams = z.infer<typeof findRulesParamsSchema>;
+export type FindRulesRequest = z.infer<typeof findRulesRequestSchema>;
 
 /** Paginated list response schema. */
 export const findRulesResponseSchema = z
@@ -640,6 +643,8 @@ export const ruleTagsResponseSchema = z
     tags: z.array(z.string()).describe('The list of unique rule tags.'),
   })
   .describe('All unique tags across rules.');
+
+export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
 export const ruleIdSchema = z
   .string()

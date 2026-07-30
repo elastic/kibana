@@ -25,6 +25,7 @@ import { triggerInvestigationWorkflow } from '../../../lib/significant_events/ev
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
+import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
@@ -182,7 +183,7 @@ const eventsLifecycleRoute = createServerRoute({
     access: 'internal',
     summary: 'Get event lifecycle',
     description:
-      'Get the full lifecycle chain for a significant event: detections, discoveries, and event versions.',
+      'Get the full lifecycle chain for a significant event: detections and event versions.',
   },
   security: {
     authz: {
@@ -200,22 +201,18 @@ const eventsLifecycleRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<EventLifecycleResponse> => {
-    const { getEventClient, getDiscoveryClient, getDetectionClient, licensing } =
-      await getScopedClients({ request });
+    const { getEventClient, getDetectionClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
     const { hits: initialHits } = await getEventClient().findByEventUuid(params.path.id);
     if (initialHits.length === 0) {
-      return { detections: [], discoveries: [], events: [] };
+      return { detections: [], events: [] };
     }
 
     const { event_id: eventId } = initialHits[0];
 
-    const [{ hits: events }, { hits: discoveries }] = await Promise.all([
-      getEventClient().findByEventId(eventId),
-      getDiscoveryClient().findByEventId(eventId),
-    ]);
+    const { hits: events } = await getEventClient().findByEventId(eventId);
 
     const embedded = collectEmbeddedDetections(events);
     const { hits: allDetectionHits } = await getDetectionClient().findByIds(
@@ -250,7 +247,7 @@ const eventsLifecycleRoute = createServerRoute({
       }
     );
 
-    return { detections, discoveries, events };
+    return { detections, events };
   },
 });
 
@@ -315,10 +312,12 @@ const eventsTriggerInvestigationRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
+    maintenanceService,
   }): Promise<{ executionId: string }> => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
+    await assertNotPaused({ maintenanceService, request });
 
     const { hits } = await getEventClient().findByEventUuid(params.path.id);
     if (hits.length === 0) {

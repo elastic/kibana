@@ -123,6 +123,7 @@ const createAppDependencies = (httpSetup: HttpSetup): AppDependencies => {
       enableSemanticText: true,
       enforceAdaptiveAllocations: false,
       enableFailureStoreRetentionDisabling: true,
+      enableIndexMode: true,
       isServerless: false,
     },
     overlays: coreMock.createStart().overlays,

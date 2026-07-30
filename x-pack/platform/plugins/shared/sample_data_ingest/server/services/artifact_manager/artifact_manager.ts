@@ -59,7 +59,7 @@ export class ArtifactManager {
 
   async prepareArtifact(
     sampleType: DatasetSampleType,
-    abortController?: AbortController
+    signal?: AbortSignal
   ): Promise<PreparedArtifact> {
     const productName = mapDatasetSampleTypeToProduct[sampleType];
 
@@ -75,7 +75,7 @@ export class ArtifactManager {
       artifactUrl,
       artifactPathAtVolume,
       'application/zip',
-      abortController
+      signal
     );
 
     this.downloadedFiles.add(artifactPathAtVolume);

@@ -16,11 +16,15 @@
 * [Confluence Cloud](/reference/connectors-kibana/confluence-cloud-action-type.md): Search and retrieve Confluence Cloud pages and spaces using the REST API v2.
 * [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
 * [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
+* [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
 * [Microsoft Teams](/reference/connectors-kibana/microsoft-teams-action-type.md): Search messages and browse teams, channels, and chats in Microsoft Teams.
+* [Monday.com](/reference/connectors-kibana/monday-com-action-type.md): Search boards, read and create items, post updates, and manage workspaces in Monday.com.
 * [Notion](/reference/connectors-kibana/notion-action-type.md): Explore content and databases in Notion.
 * [OneDrive](/reference/connectors-kibana/one-drive-action-type.md): Search files and folders, browse drives, read file content, and list files shared with you in Microsoft OneDrive.
 * [Outlook](/reference/connectors-kibana/outlook-action-type.md): Search emails, list folders, and read messages and attachments in Microsoft Outlook.
+* [Rootly](/reference/connectors-kibana/rootly-action-type.md): Declare and drive incidents through their lifecycle.
 * [Salesforce](/reference/connectors-kibana/salesforce-action-type.md): Query and retrieve data from your Salesforce org using SOQL and the REST API.
+* [Sentry](/reference/connectors-kibana/sentry-action-type.md): Triage Sentry issues and provision issue alert rules.
 * [ServiceNow](/reference/connectors-kibana/servicenow-search-action-type.md): Search and retrieve records from ServiceNow.
 * [PagerDuty (MCP)](/reference/connectors-kibana/pagerduty-mcp-action-type.md): Access incidents, escalation policies, schedules, on-calls, users, and teams in PagerDuty.
 * [SharePoint online](/reference/connectors-kibana/sharepoint-online-action-type.md): Search across SharePoint sites, pages, and content using the Microsoft Graph API.
@@ -33,6 +37,9 @@
 
 **Identity management**
 * [1Password](/reference/connectors-kibana/one-password-action-type.md): Manage users in 1Password Enterprise Password Manager — list, get, suspend, and reactivate users.
+
+**Email security**
+* [Sublime Security](/reference/connectors-kibana/sublime-security-action-type.md): Search flagged email, get verdicts, and quarantine, trash, or restore message groups in Sublime Security.
 
 **Threat intelligence**
 * [AbuseIPDB](/reference/connectors-kibana/abuseipdb-action-type.md): Check IP reputation and report abusive IPs.
