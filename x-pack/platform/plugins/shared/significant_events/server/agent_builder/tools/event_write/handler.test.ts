@@ -677,5 +677,37 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     });
 
     expect(eventClient.findLatestActive).toHaveBeenCalledTimes(1);
+    expect(eventClient.findLatestActive).toHaveBeenCalledWith(
+      expect.objectContaining({
+        streamNames: ['logs.checkout', 'logs.payments'],
+        ruleUuids: ['rule-abc'],
+      })
+    );
   });
+
+  it.each<{ field: 'ruleUuids' | 'streamNames'; override: Partial<EventsWriteInput> }>([
+    { field: 'ruleUuids', override: { stream_names: ['logs.payments'], signals: [] } },
+    { field: 'streamNames', override: { stream_names: [] } },
+  ])(
+    'omits $field from the scan when any candidate in the batch has none',
+    async ({ field, override }) => {
+      const partialInput: EventsWriteInput = { ...dedupInput, ...override };
+
+      const eventClient = {
+        findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+        findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+        findByEventId: noopFindByEventId,
+        bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+      };
+
+      await eventsWriteBulkHandler({
+        eventClient: eventClient as never,
+        inputs: [dedupInput, partialInput],
+      });
+
+      expect(eventClient.findLatestActive).toHaveBeenCalledWith(
+        expect.objectContaining({ [field]: undefined })
+      );
+    }
+  );
 });

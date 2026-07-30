@@ -359,6 +359,12 @@ export async function eventsWriteBulkHandler({
 
   // Single scan for dedup candidates: fetch all events from the earliest window start.
   const dedupCandidates = validCandidates.filter((c): c is DedupCandidate => c.mode === 'dedup');
+  // Narrow by stream/rule only when every candidate carries one, otherwise an AND'd filter
+  // could exclude a candidate's genuine duplicate that has no value for that field.
+  const allCandidatesHaveStreamNames = dedupCandidates.every(
+    (c) => c.input.stream_names.length > 0
+  );
+  const allCandidatesHaveRuleUuids = dedupCandidates.every((c) => c.ruleUuids.length > 0);
   const activeEvents: SignificantEvent[] =
     dedupCandidates.length === 0
       ? []
@@ -367,8 +373,12 @@ export async function eventsWriteBulkHandler({
             from: dedupCandidates.reduce((earliest, c) =>
               c.windowFrom < earliest.windowFrom ? c : earliest
             ).windowFrom,
-            streamNames: [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))],
-            ruleUuids: [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))],
+            streamNames: allCandidatesHaveStreamNames
+              ? [...new Set(dedupCandidates.flatMap((c) => c.input.stream_names))]
+              : undefined,
+            ruleUuids: allCandidatesHaveRuleUuids
+              ? [...new Set(dedupCandidates.flatMap((c) => c.ruleUuids))]
+              : undefined,
           })
         ).hits;
 
