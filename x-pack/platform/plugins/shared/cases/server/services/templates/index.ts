@@ -698,7 +698,9 @@ export class TemplatesService {
 
   /**
    * Counts the latest, non-deleted templates for an owner. This is a best-effort
-   * read-then-write check, so two concurrent creates can overshoot by one.
+   * read-then-write check: every concurrent request that sees a count below the
+   * limit can create, so the limit may be temporarily exceeded. We accept this
+   * trade-off because template writes are infrequent administrative actions.
    */
   private async assertOwnerTemplateCountWithinLimit(owner: string): Promise<void> {
     const escapedOwner = escapeKuery(owner);
