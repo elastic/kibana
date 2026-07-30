@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { Redirect, useLocation } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';
 import { OverviewAlerts } from './overview/overview_alerts';
@@ -44,8 +44,6 @@ export const OverviewPage: React.FC = () => {
   const view = useSelector(selectOverviewView);
 
   const dispatch = useDispatch();
-
-  const { search } = useLocation();
 
   const { loading: locationsLoading, locationsLoaded } = useSelector(selectServiceLocationsState);
 
@@ -87,8 +85,14 @@ export const OverviewPage: React.FC = () => {
   // error (and the `error` flag is cleared by the OverviewStatus toast effect), so gating
   // on those alone would strand a truly empty deployment on an empty overview whenever the
   // status request fails.
+  //
+  // Note we do NOT gate on the absence of a URL query string: `absoluteTotal` is already
+  // filter-independent (the server counts all saved-object monitors regardless of the
+  // active search/filter), so `absoluteTotal === 0` means "genuinely no monitors". Gating
+  // on the raw query string would also block the redirect whenever unrelated params (the
+  // date range, tab state) are present, stranding an empty deployment on the search
+  // empty-state instead of onboarding it. `/monitors` already redirects without that gate.
   const hasNoMonitors =
-    !search &&
     !enablementLoading &&
     monitorsLoaded &&
     absoluteTotal === 0 &&

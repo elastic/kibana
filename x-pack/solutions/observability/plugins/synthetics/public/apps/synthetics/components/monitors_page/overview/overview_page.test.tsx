@@ -126,9 +126,9 @@ const buildStore = () => {
   return store;
 };
 
-const renderPage = () => {
+const renderPage = (initialEntry = '/overview') => {
   const store = buildStore();
-  const history = createMemoryHistory({ initialEntries: ['/overview'] });
+  const history = createMemoryHistory({ initialEntries: [initialEntry] });
 
   render(
     <Provider store={store}>
@@ -179,6 +179,31 @@ describe('OverviewPage wiring', () => {
     });
 
     const history = renderPage();
+
+    expect(history.location.pathname).toBe('/monitors/getting-started');
+  });
+
+  it('redirects to Getting Started on an empty deployment even when the URL carries a query string', () => {
+    // `absoluteTotal` is filter-independent, so an empty deployment must still be
+    // onboarded when unrelated params (date range, tab state) are in the URL —
+    // the redirect must not be blocked just because a query string is present.
+    mockUseMonitorList.mockReturnValue({
+      loading: false,
+      loaded: true,
+      handleFilterChange: jest.fn(),
+      absoluteTotal: 0,
+      syntheticsMonitors: [],
+    });
+    mockUseOverviewStatus.mockReturnValue({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: true,
+      settled: true,
+      allConfigs: [],
+    });
+
+    const history = renderPage('/overview?dateRangeStart=now-1h&dateRangeEnd=now');
 
     expect(history.location.pathname).toBe('/monitors/getting-started');
   });
