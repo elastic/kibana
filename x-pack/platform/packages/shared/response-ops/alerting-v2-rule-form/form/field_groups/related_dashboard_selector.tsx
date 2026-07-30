@@ -30,6 +30,7 @@ import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
 import type { FormValues } from '../types';
 import { getDashboardId } from '../utils/artifact_data';
+import { resolveArtifactId } from '../utils/artifact_mappers';
 import {
   resolveDashboardsByIds,
   searchRelatedDashboard,
@@ -37,9 +38,6 @@ import {
 } from './search_related_dashboards';
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-const createDashboardArtifactId = () =>
-  `dashboard-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 const haveSameDashboardIds = (left: string[], right: string[]) => {
   if (left.length !== right.length) {
@@ -304,7 +302,7 @@ export const RelatedDashboardSelector: React.FC = () => {
 
         return [
           {
-            id: existingArtifact?.id?.trim() ? existingArtifact.id : createDashboardArtifactId(),
+            id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingArtifact?.id),
             type: DASHBOARD_ARTIFACT_TYPE,
             data: { dashboardId },
           },

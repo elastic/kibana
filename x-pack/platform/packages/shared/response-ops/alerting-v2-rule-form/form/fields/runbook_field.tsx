@@ -28,12 +28,11 @@ import {
 } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../types';
 import { getRunbookContent } from '../utils/artifact_data';
+import { resolveArtifactId } from '../utils/artifact_mappers';
 
 const RUNBOOK_ROW_ID = 'ruleV2FormRunbookField';
 const RUNBOOK_MAX_LENGTH =
   ARTIFACT_DATA_FIELD_LIMITS[RUNBOOK_ARTIFACT_TYPE]?.content ?? DEFAULT_ARTIFACT_DATA_FIELD_LIMIT;
-const createRunbookArtifactId = () =>
-  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
 export interface RunbookFieldProps {
   isOpen: boolean;
@@ -70,7 +69,7 @@ export const RunbookField: React.FC<RunbookFieldProps> = ({ isOpen, onClose }) =
     const nextArtifacts = trimmedRunbook
       ? [
           {
-            id: runbookArtifact?.id ?? createRunbookArtifactId(),
+            id: resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, runbookArtifact?.id),
             type: RUNBOOK_ARTIFACT_TYPE,
             data: { content: trimmedRunbook },
           },
