@@ -74,6 +74,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a **Snowflake** connector to run SQL queries, explore databases and tables, and search with Cortex Search in Agent Builder and Workflows [#264827]({{kib-pull}}264827).
 * Add an **Azure Blob Storage** connector to list containers and blobs, read blob content, and search storage in Agent Builder and Workflows [#259439]({{kib-pull}}259439).
 * Add a **HubSpot** connector to search and retrieve contacts, companies, deals, tickets, and engagements in Agent Builder and Workflows [#257675]({{kib-pull}}257675).
+* Add a **Sublime Security** connector to investigate and act on email threats in Agent Builder and Workflows [#279707]({{kib-pull}}279707).
 * Add a **Filter by feature** control to the create-connector flyout, and show the HTTP connector in standard connector lists [#271686]({{kib-pull}}271686).
 * Improve authentication options for Agent Builder connectors by listing recommended methods first with a **Recommended** badge and hiding legacy options when you create new connectors [#273410]({{kib-pull}}273410).
 * Add `secretQueryParams` support to the HTTP connector so encrypted query parameters are stored in connector secrets and injected into request URLs [#258291]({{kib-pull}}258291).
@@ -244,6 +245,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the case file upload modal showing byte-based size limits and unclear unsupported-file errors [#277567]({{kib-pull}}277567).
 * Fix attachment removal activity titles always showing "removed comment" instead of the attachment type [#277037]({{kib-pull}}277037).
 * Fix **Save and return** from **Lens** in the case markdown editor not updating the comment [#275117]({{kib-pull}}275117).
+* Fix filters and queries being dropped when you add a **Lens** visualization to a case [#279532]({{kib-pull}}279532).
 * Fix observable auto-extraction when alerts are added through the case comments API [#274969]({{kib-pull}}274969).
 * Fix pushing a case to an external connector not marking all attachments as pushed [#274451]({{kib-pull}}274451).
 * Fix phrase search in the **All Cases** search bar so quoted phrases match exactly [#266827]({{kib-pull}}266827).
@@ -258,6 +260,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix rule updates leaving a stale API key on the saved rule when the key should be cleared [#263887]({{kib-pull}}263887).
 * Fix **{{rules-ui}}** appearing in global search when you have alerts access but not rules access [#278895]({{kib-pull}}278895).
 * Fix alerts-as-data index template updates failing when system-managed template metadata is present [#262534]({{kib-pull}}262534).
+* Fix the alerts-as-data setup overriding an index's total fields limit that was already set to a higher value [#277402]({{kib-pull}}277402).
 * Fix the public **Find rules** and **Get rule** APIs so documented response fields are returned as specified in the OpenAPI spec [#247279]({{kib-pull}}247279).
 
 **Connectivity**:
@@ -289,6 +292,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix default colored badges missing color when data table columns are created through the Visualizations API [#268425]({{kib-pull}}268425).
 * Fix the Visualizations API rejecting unsupported pipeline operations for **Lens** gauge `min`, `max`, and `goal` metrics [#268168]({{kib-pull}}268168).
 * Fix **Lens** gauge color stops extending beyond configured ranges or losing palette continuity in the Visualizations API, and keep out-of-range values colored for named palettes with user-defined bounds [#272123]({{kib-pull}}272123) [#279918]({{kib-pull}}279918).
+* Fix ad hoc data view resolution for **Lens** XY annotation layers created through the Visualizations API [#281079]({{kib-pull}}281079).
 * Fix dashboard PDF exports using a stale time range after you change the time picker when the dashboard does not save the time range [#278262]({{kib-pull}}278262).
 * Fix **Canvas** tables exceeding the 10,000-row limit from large `createTable` expressions [#276502]({{kib-pull}}276502).
 * Fix **Canvas** autoplay not advancing past the first page [#272619]({{kib-pull}}272619).
@@ -303,10 +307,12 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix **Save and return** for **Maps** visualizations opened from the **Visualize** library [#274002]({{kib-pull}}274002).
 * Fix dashboard filters not being applied after you collapse a section that was expanded on initial load [#272751]({{kib-pull}}272751).
 * Fix **Lens** legacy metric chart colors not updating with live data when using non-custom palettes [#275203]({{kib-pull}}275203).
+* Fix **Lens** metric text color so values outside the color-by-value range stay readable against the background [#280816]({{kib-pull}}280816).
 * Fix **Markdown** panels appearing in the **Add from library** flyout when a tag filter is applied [#269228]({{kib-pull}}269228).
 * Fix the unavailable **Save** tooltip in the **Lens** edit flyout not receiving keyboard focus [#268003]({{kib-pull}}268003).
 * Fix **Save to library** failing silently when a visualization title already exists [#266493]({{kib-pull}}266493).
 * Fix **Lens** XY axis ticks ignoring the **Decimals** number-formatter setting [#265529]({{kib-pull}}265529).
+* Fix missing tick values on percentage Y axes configured with fewer than two decimal places [#279489]({{kib-pull}}279489).
 * Fix related dashboard panels staying blurred while you edit a pinned control [#263737]({{kib-pull}}263737).
 * Fix dashboard state overrides persisting after a full page reload when navigating via a locator [#262695]({{kib-pull}}262695).
 * Fix visualizations saved to the current dashboard from chat not appearing until you refresh the page [#262107]({{kib-pull}}262107).
@@ -316,12 +322,15 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix `POST /internal/fleet/reset_preconfigured_agent_policies/{id}` returning `404` before the reset completes on deployments where space awareness is turned off and agent policies use legacy saved object types [#276742]({{kib-pull}}276742).
 * Fix a cleared SSL/TLS private key secret repopulating with its previous value when you reopen a Fleet Server host on the {{fleet}} **Settings** page after saving [#275693]({{kib-pull}}275693).
 * Fix integration policy updates redeploying agents even when `bumpRevision: false` is set [#275626]({{kib-pull}}275626).
+* Fix preconfigured {{fleet}} proxies being rewritten on every setup, which needlessly bumped every dependent agent policy [#281059]({{kib-pull}}281059).
 * Fix package installs and upgrades failing with an `ambiguous_conflict` error caused by orphaned duplicate saved objects in a space [#275552]({{kib-pull}}275552).
 * Fix integration alerting assets (rule templates, alert rules, inactivity monitoring) not being created or updated correctly when a package is installed or reinstalled in a {{kib}} space other than the original installation space [#274894]({{kib-pull}}274894).
 * Fix broken {{kib}} asset references in the integration **Assets** tab when an integration is reinstalled or upgraded from a different space than the original installation space [#271800]({{kib-pull}}271800).
 * Fix the {{fleet}} UI blocking one-way TLS for {{ls}} outputs by requiring **Client SSL certificate** and **Client SSL certificate key** only when you configure mTLS [#275453]({{kib-pull}}275453).
 * Fix the agentless enrollment flyout for content connector integrations to show a connector configuration link instead of waiting for incoming data that cannot arrive until the connector is set up [#274832]({{kib-pull}}274832).
 * Fix integration rollback leaving agents assigned to stale version-specific policies [#274463]({{kib-pull}}274463).
+* Fix the **Add Fleet Server** onboarding continuing to show after the Fleet Server agent moves to a version-specific policy [#281092]({{kib-pull}}281092).
+* Fix the agent policy filter on the **Agents** list returning no agents for version-specific policies [#281195]({{kib-pull}}281195).
 * Fix slow {{fleet}} setup on deployments with many configured outputs [#273848]({{kib-pull}}273848).
 * Fix slow {{fleet}} setup on deployments with many agent policies [#272604]({{kib-pull}}272604).
 * Fix bulk agent action requests timing out on large deployments [#273679]({{kib-pull}}273679).
@@ -335,9 +344,11 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix per-integration output overrides for OpenTelemetry integrations, and return a validation error when an unsupported output type is assigned instead of failing silently [#270487]({{kib-pull}}270487).
 * Fix missing `.otel` suffix on explicitly named `otelcol` inputs in integration package policies [#269074]({{kib-pull}}269074).
 * Fix incorrect agent index permissions for span events stored in logs data streams for OpenTelemetry trace policies, which prevented ingestion into dynamically routed log datasets [#263415]({{kib-pull}}263415).
+* Fix OpenTelemetry integration metrics not defaulting to the `time_series` index mode [#281295]({{kib-pull}}281295).
 * Fix a crash in the **Integrations** view when a package has no icon [#273191]({{kib-pull}}273191).
 * Fix input packages being hidden from the signal type filter in the **Integrations** list by deriving signal types from policy templates when `data_streams` are absent [#272585]({{kib-pull}}272585).
 * Fix the agent logging level dropdown on the **Settings** tab not updating after **Reset to policy** is applied, so the displayed level stays in sync with {{fleet}}-polled agent metadata [#271964]({{kib-pull}}271964).
+* Fix adding and removing agent tags from the checkbox in the **Agents** list [#279874]({{kib-pull}}279874).
 * Fix generated agent policy YAML becoming invalid when an integration policy value contains a double quote (`"`) [#279391]({{kib-pull}}279391).
 * Fix multiline configuration values, such as CEL programs, being corrupted in generated agent policy YAML [#271922]({{kib-pull}}271922).
 * Fix integration upgrades and reinstalls dropping storage-related package settings [#269080]({{kib-pull}}269080).
@@ -363,6 +374,8 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the **Transforms** details view to list all source indices when a transform uses multiple source indices [#261875]({{kib-pull}}261875).
 * Fix managed {{data-sources}} being deletable from {{stack-manage-app}} and the data view detail page [#270608]({{kib-pull}}270608).
 * Fix the time field remaining selected in the **Create data view** flyout after you switch to an index pattern without a time field [#262001]({{kib-pull}}262001).
+* Fix follower index selections not clearing after you pause, resume, or unfollow an index in **Cross-Cluster Replication** [#273576]({{kib-pull}}273576).
+* Fix the geo point degrees, minutes, seconds field format distorting coordinates very close to zero [#281336]({{kib-pull}}281336).
 
 **Developer tools**:
 * Fix **Dev Tools Console** variable substitution when a variable appears inside a larger string value in a request body [#266418]({{kib-pull}}266418).
@@ -382,6 +395,7 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix Discover blocking when canceling a long-running {{esql}} asynchronous query times out [#277242]({{kib-pull}}277242).
 * Fix Discover {{esql}} document summary hiding fields when null values incorrectly count toward `discover:maxDocFieldsDisplayed` [#273610]({{kib-pull}}273610).
 * Fix computed-field formatting, the time column, and document viewer types for cascaded {{esql}} documents in Discover [#268892]({{kib-pull}}268892).
+* Fix drilldowns from grouped time series (`TS`) {{esql}} query results in Discover [#280580]({{kib-pull}}280580).
 * Fix the expanded document changing after refresh in {{esql}} Discover [#268328]({{kib-pull}}268328).
 * Fix stale **Inspect** requests when switching Discover layouts that drop charts or metric grids [#275901]({{kib-pull}}275901).
 * Fix the **Extend** action icon not remaining visible in dark mode in **Background searches** [#272754]({{kib-pull}}272754).
@@ -423,6 +437,8 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix false validation errors when `null` appears in `CASE()` result values [#269051]({{kib-pull}}269051).
 * Fix multi-line field-conflict errors displaying incorrectly in the {{esql}} editor [#268840]({{kib-pull}}268840).
 * Fix stale column metadata requests after you close the {{esql}} editor [#267237]({{kib-pull}}267237).
+* Fix {{esql}} editor autocomplete suggesting the wrong columns after the `TS_INFO` and `METRICS_INFO` commands [#280524]({{kib-pull}}280524).
+* Fix {{esql}} editor autocomplete suggesting the wrong columns after the `PROMQL` command [#280538]({{kib-pull}}280538).
 * Fix **Command-Enter** and **Control-Enter** running a stale query in the {{esql}} editor [#266242]({{kib-pull}}266242).
 * Fix server-side validation errors not appearing in {{esql}} control flyouts [#263020]({{kib-pull}}263020).
 
@@ -440,9 +456,11 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the JSON logger printing numbered scalar meta keys that inflated field mappings in monitoring clusters [#256233]({{kib-pull}}256233).
 * Fix **Advanced Settings** search adding a browser history entry on every keystroke [#266278]({{kib-pull}}266278).
 * Fix focus feedback and small-viewport layout in the technical-preview date range picker in Discover and Dashboards [#266185]({{kib-pull}}266185).
+* Fix the `roundRelativeTime` advanced setting rounding only the start of a relative time range instead of both bounds [#280105]({{kib-pull}}280105).
 
 **Machine learning and {{infer}}**:
 * Fix **Model Management** disappearing from the menu when you have only the **{{infer-cap}} Endpoints** privilege [#271988]({{kib-pull}}271988).
+* Fix the cursor jumping to the end of the field when you edit an inference endpoint ID [#280894]({{kib-pull}}280894).
 * Fix legacy `.gp-llm-v2*` and `.rainbow-sprinkles*` {{infer}} endpoints appearing in {{kib}} UIs [#267452]({{kib-pull}}267452).
 * Fix space-aware {{infer}} model lists so feature connector pickers match per-space **Feature settings** instead of the default space [#266517]({{kib-pull}}266517).
 * Fix missing save confirmation toasts after saving default model or allow/disallow settings on **Feature settings** [#263768]({{kib-pull}}263768).
@@ -460,6 +478,10 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix file upload creating a data view when you lack index-pattern save privileges [#268167]({{kib-pull}}268167).
 * Fix missing anomaly actions on the single metric chart in **Anomaly Explorer** [#263925]({{kib-pull}}263925).
 * Fix the {{anomaly-job}} wizard so JSON edits on any step update the wizard controls [#263117]({{kib-pull}}263117).
+* Fix the anomaly detection, data frame analytics, and trained model saved object APIs denying access to users who hold only a subset of the required privileges [#276936]({{kib-pull}}276936).
+* Fix the annotation and anomaly results APIs not enforcing job-level space access [#277197]({{kib-pull}}277197).
+* Fix the checkbox for applying an annotation to a single series not resetting when you edit an existing annotation [#279875]({{kib-pull}}279875).
+* Fix the prebuilt authentication anomaly detection jobs failing on non-Windows logs that lack the Windows `LogonType` field [#278500]({{kib-pull}}278500).
 
 **Workflows**:
 * Fix Elastic Workflows version history failing to record changes on newly provisioned clusters when {{es}} is temporarily unavailable [#278387]({{kib-pull}}278387).
