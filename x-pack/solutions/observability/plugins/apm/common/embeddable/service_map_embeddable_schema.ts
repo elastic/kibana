@@ -40,20 +40,29 @@ function literalsOf<T extends string>(values: readonly T[]): Type<T> {
 /** Cap for multi-service highlight lists persisted on dashboard panels. */
 export const HIGHLIGHTED_SERVICE_NAMES_MAX_SIZE = 50;
 
+/** Max length for single string fields on service map panel state (names, env, group id). */
+export const SERVICE_MAP_STRING_MAX_LENGTH = 1024;
+
+/** Max length for panel kuery. */
+export const SERVICE_MAP_KUERY_MAX_LENGTH = 2048;
+
 export const serviceMapCustomStateSchema = schema.object({
-  environment: schema.string({ defaultValue: ENVIRONMENT_ALL.value, maxLength: 1024 }),
-  kuery: schema.maybe(schema.string({ maxLength: 2048 })),
-  service_name: schema.maybe(schema.string({ maxLength: 1024 })),
+  environment: schema.string({
+    defaultValue: ENVIRONMENT_ALL.value,
+    maxLength: SERVICE_MAP_STRING_MAX_LENGTH,
+  }),
+  kuery: schema.maybe(schema.string({ maxLength: SERVICE_MAP_KUERY_MAX_LENGTH })),
+  service_name: schema.maybe(schema.string({ maxLength: SERVICE_MAP_STRING_MAX_LENGTH })),
   /**
    * Multi-service context highlight (aligned with global Service name Controls).
    * When a single service is selected, prefer `service_name` (filter + highlight).
    */
   highlighted_service_names: schema.maybe(
-    schema.arrayOf(schema.string({ maxLength: 1024 }), {
+    schema.arrayOf(schema.string({ maxLength: SERVICE_MAP_STRING_MAX_LENGTH }), {
       maxSize: HIGHLIGHTED_SERVICE_NAMES_MAX_SIZE,
     })
   ),
-  service_group_id: schema.maybe(schema.string({ maxLength: 1024 })),
+  service_group_id: schema.maybe(schema.string({ maxLength: SERVICE_MAP_STRING_MAX_LENGTH })),
   map_orientation: schema.maybe(literalsOf(MAP_ORIENTATION_VALUES)),
   sync_with_dashboard_filters: schema.maybe(schema.boolean()),
   alert_status_filter: schema.maybe(

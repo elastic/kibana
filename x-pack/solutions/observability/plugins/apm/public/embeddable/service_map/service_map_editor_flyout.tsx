@@ -272,7 +272,14 @@ export function ServiceMapEditorFlyout({
   // Debounced KQL applied to the preview so the map doesn't refetch on every keystroke.
   const [previewKuery, setPreviewKuery] = useState(initialState?.kuery ?? '');
   useDebounce(() => setPreviewKuery(kuery), KUERY_PREVIEW_DEBOUNCE_MS, [kuery]);
-  const [serviceName, setServiceName] = useState(initialState?.service_name ?? '');
+  const [serviceName, setServiceName] = useState(() => {
+    // Prefer multi-highlight when both are present (mutually exclusive with service_name).
+    const highlights = initialState?.highlighted_service_names ?? [];
+    if (highlights.length > 0) {
+      return '';
+    }
+    return initialState?.service_name ?? '';
+  });
   const [highlightedServiceNames, setHighlightedServiceNames] = useState<string[]>(
     initialState?.highlighted_service_names ?? []
   );

@@ -416,6 +416,29 @@ describe('<ServiceMapEditorFlyout/>', () => {
         );
       });
     });
+
+    it('clears service_name when loading state that also has highlighted_service_names', async () => {
+      const onSave = jest.fn();
+      await renderFlyout({
+        onSave,
+        initialState: {
+          environment: 'ENVIRONMENT_ALL',
+          service_name: 'stale-single',
+          highlighted_service_names: ['service-a', 'service-b'],
+        },
+      });
+
+      fireEvent.click(screen.getByTestId('apmServiceMapEditorSaveButton'));
+
+      await waitFor(() => {
+        expect(onSave).toHaveBeenCalledWith(
+          expect.objectContaining({
+            service_name: undefined,
+            highlighted_service_names: ['service-a', 'service-b'],
+          })
+        );
+      });
+    });
   });
 
   describe('environment selection', () => {

@@ -41,8 +41,13 @@ export type ControlSelections = Record<string, string[]>;
 interface AppFilterState {
   filters?: Filter[];
   controlSelections?: ControlSelections;
-  viewFilters?: Partial<ServiceMapViewFilters>;
-  mapOrientation?: ServiceMapOrientation;
+  viewFilters?: Partial<{
+    alertStatusFilter: string[];
+    sloStatusFilter: string[];
+    connectionFilter: string[];
+    anomalySeverityFilter: string[];
+  }>;
+  mapOrientation?: string;
 }
 
 function getRestoredAppFilters(initialState: AppFilterState | null): Filter[] {
