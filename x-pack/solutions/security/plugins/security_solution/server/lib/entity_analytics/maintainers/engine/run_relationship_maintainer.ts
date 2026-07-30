@@ -26,7 +26,11 @@ import {
 } from './build_actor_discovery_query';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
-import { writeEntityIds, type WriteEntityIdsResult } from './update_entities';
+import {
+  writeEntityIds,
+  type WriteEntityIdsResult,
+  type WriteEntityIdsPageState,
+} from './update_entities';
 import {
   writeRelationshipMetadatas,
   type WriteRelationshipMetadatasResult,
@@ -213,7 +217,6 @@ async function runIntegration(
     errors: 0,
     droppedTargets: 0,
     relationshipTypeApplied: {},
-    succeededEntityIds: new Set(),
   };
   let totalMetadataResult: WriteRelationshipMetadatasResult = { docsAttempted: 0, docsApplied: 0 };
 
@@ -279,7 +282,7 @@ async function runIntegration(
       // Both writes are inside the loop so any transport failure sets outcome:
       // 'error' and the outer loop continues to other integrations.
       if (pageRecords.length > 0) {
-        const pageWrite = await writeEntityIds(
+        const pageWrite: WriteEntityIdsResult & WriteEntityIdsPageState = await writeEntityIds(
           crudClient,
           logger,
           pageRecords,
@@ -329,8 +332,6 @@ async function runIntegration(
             totalWriteResult.relationshipTypeApplied,
             pageWrite.relationshipTypeApplied
           ),
-          succeededEntityIds: pageWrite.succeededEntityIds,
-          validTargetIds: pageWrite.validTargetIds,
         };
         totalMetadataResult = {
           docsAttempted: totalMetadataResult.docsAttempted + pageMetadata.docsAttempted,
@@ -369,7 +370,6 @@ async function runIntegration(
         errors: 0,
         droppedTargets: 0,
         relationshipTypeApplied: {},
-        succeededEntityIds: new Set(),
       },
       metadata: { docsAttempted: 0, docsApplied: 0 },
       outcome: 'error',
