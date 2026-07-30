@@ -16,7 +16,7 @@ import {
   SOURCES_AUTOCOMPLETE_ROUTE,
 } from '@kbn/esql-types';
 import { getIndexPatternFromESQLQuery } from './get_index_pattern_from_query';
-import { getESQLTimeFieldFromQuery } from './get_esql_time_field_from_query';
+import { getESQLTimeField } from './get_time_field';
 
 // uses browser sha256 method with fallback if unavailable
 async function sha256(str: string) {
@@ -78,7 +78,7 @@ export async function getESQLAdHocDataview({
   // optional http service to use to fetch the time field, if needed
   http?: HttpStart;
 }) {
-  const timeFieldName = await getESQLTimeFieldFromQuery({ query, http });
+  const timeFieldName = await getESQLTimeField({ query, http });
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const prefix = options?.idPrefix ?? 'esql';

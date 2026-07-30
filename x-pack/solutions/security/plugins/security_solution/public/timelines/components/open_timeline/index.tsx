@@ -158,7 +158,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     );
 
     const { dataView } = useDataView(PageScope.timeline);
-    const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+    const selectedPatterns = useSelectedPatterns(dataView);
     const dataViewId = useMemo(() => dataView.id || '', [dataView.id]);
 
     const {

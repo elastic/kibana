@@ -29,6 +29,10 @@ export const anomalyDetectionJobsHealthRuleParamsSchema = schema.object(
             enabled: schema.boolean({ defaultValue: true }),
             docsCount: schema.nullable(schema.number({ min: 1 })),
             timeInterval: schema.nullable(schema.string()),
+            thresholdType: schema.maybe(
+              schema.oneOf([schema.literal('count'), schema.literal('percentage')])
+            ),
+            docsCountPercentage: schema.nullable(schema.number({ min: 1, max: 100 })),
           })
         ),
         behindRealtime: schema.nullable(

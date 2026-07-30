@@ -8,3 +8,7 @@
 export { AiIndexNotFoundError } from './ai_index_not_found_error';
 export { InvalidAiIndexDestError } from './invalid_ai_index_dest_error';
 export { AiIndexConflictError } from './ai_index_conflict_error';
+export { AiIndexManagedError } from './ai_index_managed_error';
+export { AiIndexIdConflictError } from './ai_index_id_conflict_error';
+export { AiIndexAlreadyExistsError } from './ai_index_already_exists_error';
+export { InvalidConnectorSourceError } from './invalid_connector_source_error';
