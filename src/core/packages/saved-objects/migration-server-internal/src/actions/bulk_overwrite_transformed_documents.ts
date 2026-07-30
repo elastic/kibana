@@ -134,13 +134,7 @@ export const bulkOverwriteTransformedDocuments =
       let allocationReason = '';
       if (fetchAllocationExplain) {
         try {
-          // Kibana migration indices always have exactly 1 shard (shard 0).
-          // We ask about the replica (primary: false) because wait_for_active_shards:'all'
-          // fails when the replica can't be assigned, not the primary.
-          const explain = await client.cluster.allocationExplain(
-            { index, shard: 0, primary: false, master_timeout: '30s' },
-            { maxRetries: 0 }
-          );
+          const explain = await explainShardAllocation(client, index);
           allocationReason = formatAllocationExplanation(explain);
         } catch (explainError) {
           logger?.debug(
@@ -160,6 +154,26 @@ export const bulkOverwriteTransformedDocuments =
 
     throw new Error(JSON.stringify(errors));
   };
+
+const explainShardAllocation = async (
+  client: ElasticsearchClient,
+  index: string
+): Promise<estypes.ClusterAllocationExplainResponse> => {
+  try {
+    return await client.cluster.allocationExplain(
+      { index, shard: 0, primary: false, master_timeout: '30s' },
+      { maxRetries: 0 }
+    );
+  } catch (error) {
+    if (error instanceof esErrors.ResponseError && error.statusCode === 400) {
+      return await client.cluster.allocationExplain(
+        { index, shard: 0, primary: true, master_timeout: '30s' },
+        { maxRetries: 0 }
+      );
+    }
+    throw error;
+  }
+};
 
 const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainResponse): string => {
   const parts: string[] = [];
