@@ -34,6 +34,7 @@ import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
 import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
+import { validateExtendedFieldValueSizes } from '../../../common/types/domain/template/validate_extended_fields';
 
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
@@ -284,6 +285,13 @@ const createBulkCreateCaseRequest = ({
         caseWithoutId.customFields,
         normalizedCase.extended_fields
       ) ?? undefined;
+  }
+
+  const extendedFieldValueErrors = validateExtendedFieldValueSizes(
+    normalizedCase.extended_fields ?? {}
+  );
+  if (extendedFieldValueErrors.length > 0) {
+    throw Boom.badRequest(`Invalid extended_fields: ${extendedFieldValueErrors.join('; ')}`);
   }
 
   return {
