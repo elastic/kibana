@@ -36,11 +36,11 @@ export const resolveCpsData = async (
 
   try {
     const resolvedExpression = await internalUserEsClient.transport
-      .request<{ [key: string]: { expression: string } }>({
+      .request<{ expression: string }>({
         method: 'GET',
         path: `/_project_routing/${npreName}`,
       })
-      .then((res) => res[npreName]?.expression ?? PROJECT_ROUTING_ALL)
+      .then((res) => res.expression ?? PROJECT_ROUTING_ALL)
       .catch((error: { statusCode?: number }) => {
         // A missing routing expression (404) is a legitimate "no routing configured" case: fall
         // back to the default "all projects" scope silently.

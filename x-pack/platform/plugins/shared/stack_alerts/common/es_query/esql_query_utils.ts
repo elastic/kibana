@@ -9,7 +9,7 @@ import { entries, findLastIndex, isNil } from 'lodash';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption, ESQLAstCommand } from '@elastic/esql/types';
-import { Parser, isOptionNode, isColumn, isFunctionExpression } from '@elastic/esql';
+import { Parser, isOptionNode, isColumn, isFunctionExpression, isAssignment } from '@elastic/esql';
 import { getArgsFromRenameFunction } from '@kbn/esql-utils';
 import type {
   EsqlEsqlShardFailure,
@@ -232,7 +232,7 @@ export const getAlertIdFields = (query: string, resultColumns: EsqlResultColumn[
     // Check for BY option and get fields
     const byOption = getByOption(statsCommand);
     if (byOption) {
-      let fields = getFields(byOption);
+      let fields = getFields(byOption, query);
 
       // Check if any STATS fields were renamed
       const renameCommands = getRenameCommands(commands.slice(statsCommandIndex));
@@ -274,11 +274,20 @@ const getByOption = (astCommand: ESQLAstCommand): ESQLCommandOption | undefined 
   }
 };
 
-const getFields = (option: ESQLCommandOption): string[] => {
+const getFields = (option: ESQLCommandOption, query: string): string[] => {
   const fields: string[] = [];
   for (const arg of option.args) {
     if (isColumn(arg)) {
       fields.push(arg.name);
+      // Handle columns renamed inline in the BY clause
+    } else if (isAssignment(arg)) {
+      const { renamed } = getArgsFromRenameFunction(arg);
+      if (isColumn(renamed)) {
+        fields.push(renamed.name);
+      }
+      // Handle unnamed grouping expressions in the BY clause
+    } else if (!Array.isArray(arg) && arg.location) {
+      fields.push(query.substring(arg.location.min, arg.location.max + 1));
     }
   }
   return fields;
