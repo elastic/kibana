@@ -167,7 +167,7 @@ For an existing policy, pass the \`actionPolicyAttachmentId\` and only include t
    - For \`all\` / \`per_field\` grouping: \`time_interval\`, \`every_time\`.
    - \`per_status_interval\` and \`time_interval\` require an \`interval\` value (e.g. \`"5m"\`, \`"1h"\`).
 
-Action policies are always space-wide: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`.
+Action policies are always space-scoped: they match alerts from any rule in the space unless the matcher narrows them. To scope a policy to a single rule, set a matcher of \`rule.id: "<ruleId>"\` via \`set_matcher\`.
 
 ### Throttle / Grouping Compatibility
 
