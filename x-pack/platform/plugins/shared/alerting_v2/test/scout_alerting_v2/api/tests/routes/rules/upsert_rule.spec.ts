@@ -309,7 +309,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       });
       expect(response).toHaveStatusCode(403);
       // Verify no rule was created.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).not.toContain(id);
     }
   );
@@ -324,7 +324,7 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ metadata: { name: 'attempted' } }),
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).not.toContain(id);
     }
   );

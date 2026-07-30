@@ -1,5 +1,5 @@
 {
-  "sha1": "6b88f5e1e6e7dd5e0c4420a7dfa84a07a6923d6e",
+  "sha1": "f444fbe2fe4d499e7a4147e50faaeca998ee9aea",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -725,7 +725,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
+        "line": 36,
         "column": 16
       }
     },
@@ -745,7 +745,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 60,
+        "line": 55,
         "column": 16
       }
     },
@@ -765,7 +765,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 77,
+        "line": 72,
         "column": 16
       }
     },
@@ -785,7 +785,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
+        "line": 36,
         "column": 16
       }
     },
@@ -805,7 +805,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 60,
+        "line": 55,
         "column": 16
       }
     },
@@ -825,7 +825,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 77,
+        "line": 72,
         "column": 16
       }
     },
@@ -845,7 +845,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 41,
+        "line": 36,
         "column": 16
       }
     },
@@ -865,7 +865,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 60,
+        "line": 55,
         "column": 16
       }
     },
@@ -885,7 +885,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/traces_experience/ui/parallel_tests/profile_disabled.spec.ts",
-        "line": 77,
+        "line": 72,
         "column": 16
       }
     },

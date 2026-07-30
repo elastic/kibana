@@ -104,7 +104,7 @@ apiTest.describe('Disable rules by query API', { tag: '@local-stateful-classic' 
       expect(response.body.affected_count).toBe(2);
       expect(response.body.errors).toStrictEqual([]);
 
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.every((rule) => rule.enabled === false)).toBe(true);
     }
   );

@@ -58,7 +58,7 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
       expect(response.body.match_count).toBe(2);
       expect(response.body.sample).toStrictEqual(expect.arrayContaining([ruleA.id, ruleB.id]));
 
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.total).toBe(3);
     }
   );
@@ -97,7 +97,7 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ affected_count: 1, errors: [] });
 
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       const remainingIds = remaining.items.map((rule) => rule.id);
       expect(remainingIds).toStrictEqual([devRule.id]);
       expect(remainingIds).not.toContain(prodRule.id);
@@ -122,7 +122,7 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
       expect(response.body.affected_count).toBe(2);
       expect(response.body.errors).toStrictEqual([]);
 
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.total).toBe(0);
     }
   );
@@ -142,7 +142,7 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
       expect(response).toHaveStatusCode(200);
       expect(response.body).toStrictEqual({ affected_count: 0, errors: [] });
 
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.total).toBe(1);
     }
   );
@@ -234,7 +234,7 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
         body: { match_all: true, force: true },
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).toContain(rule.id);
     }
   );
@@ -251,7 +251,7 @@ apiTest.describe('Delete rules by query API', { tag: '@local-stateful-classic' }
         body: { match_all: true, force: true },
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((r) => r.id)).toContain(rule.id);
     }
   );

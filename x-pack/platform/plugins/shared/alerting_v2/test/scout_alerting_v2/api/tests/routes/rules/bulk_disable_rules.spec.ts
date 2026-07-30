@@ -51,7 +51,7 @@ apiTest.describe('Bulk disable rules by IDs API', { tag: '@local-stateful-classi
     expect(response).toHaveStatusCode(200);
     expect(response.body).toStrictEqual({ affected_count: 2, errors: [] });
     // Verify the side effect: both rules are now disabled.
-    const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
     expect(remaining.items.every((rule) => rule.enabled === false)).toBe(true);
   });
 

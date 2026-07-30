@@ -18,14 +18,17 @@ import { createRouteDependencies } from '../test_utils';
 describe('createAlertActionRouteForType', () => {
   it('creates a route class with expected static metadata', () => {
     const suffix = '_tag';
+    const summary = 'Add tags to an alert';
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: suffix,
+      summary,
       bodySchema: createTagAlertActionBodySchema,
     });
 
     expect(RouteClass.method).toBe('post');
     expect(RouteClass.path).toBe(`/api/alerting/v2/alerts/{group_hash}/${suffix}`);
+    expect(RouteClass.options?.summary).toBe(summary);
     expect(RouteClass.validate).toBeDefined();
     expect(RouteClass.validate).toEqual(
       expect.objectContaining({
@@ -38,6 +41,7 @@ describe('createAlertActionRouteForType', () => {
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
+      summary: 'Add tags to an alert',
       bodySchema: createTagAlertActionBodySchema,
     });
     const { ctx } = createRouteDependencies();
@@ -64,6 +68,7 @@ describe('createAlertActionRouteForType', () => {
     const RouteClass = createAlertActionRouteForType({
       actionType: ALERT_EPISODE_ACTION_TYPE.TAG,
       pathSuffix: '_tag',
+      summary: 'Add tags to an alert',
       bodySchema: createTagAlertActionBodySchema,
     });
     const { ctx } = createRouteDependencies();

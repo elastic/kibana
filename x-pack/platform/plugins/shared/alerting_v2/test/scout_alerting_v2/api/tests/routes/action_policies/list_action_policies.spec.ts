@@ -134,7 +134,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'page-policy-3' })
     );
 
-    const firstPage = await apiClient.get(getListActionPoliciesUrl({ page: 1, perPage: 2 }), {
+    const firstPage = await apiClient.get(getListActionPoliciesUrl({ page: 1, per_page: 2 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(firstPage).toHaveStatusCode(200);
@@ -143,7 +143,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(firstPage.body.page).toBe(1);
     expect(firstPage.body.perPage).toBe(2);
 
-    const secondPage = await apiClient.get(getListActionPoliciesUrl({ page: 2, perPage: 2 }), {
+    const secondPage = await apiClient.get(getListActionPoliciesUrl({ page: 2, per_page: 2 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(secondPage).toHaveStatusCode(200);
@@ -285,7 +285,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ sortField: 'name', sortOrder: 'asc' }),
+      getListActionPoliciesUrl({ sort_field: 'name', sort_order: 'asc' }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -299,7 +299,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ sortField: 'name', sortOrder: 'desc' }),
+      getListActionPoliciesUrl({ sort_field: 'name', sort_order: 'desc' }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -313,7 +313,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ sortField: 'createdAt', sortOrder: 'asc' }),
+      getListActionPoliciesUrl({ sort_field: 'createdAt', sort_order: 'asc' }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -328,7 +328,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ sortField: 'createdAt', sortOrder: 'desc' }),
+      getListActionPoliciesUrl({ sort_field: 'createdAt', sort_order: 'desc' }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -343,7 +343,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ search: 'Monitors', sortField: 'name', sortOrder: 'asc' }),
+      getListActionPoliciesUrl({ search: 'Monitors', sort_field: 'name', sort_order: 'asc' }),
       { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
     );
     expect(response).toHaveStatusCode(200);
@@ -356,7 +356,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     await createActionPolicies(apiServices);
 
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ search: 'Policy', perPage: 2, page: 1 }),
+      getListActionPoliciesUrl({ search: 'Policy', per_page: 2, page: 1 }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -377,7 +377,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
-    const response = await apiClient.get(getListActionPoliciesUrl({ perPage: 0 }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ per_page: 0 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
@@ -386,7 +386,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects perPage over the maximum', async ({ apiClient }) => {
     const response = await apiClient.get(
-      getListActionPoliciesUrl({ perPage: ACTION_POLICY_PER_PAGE_MAX + 1 }),
+      getListActionPoliciesUrl({ per_page: ACTION_POLICY_PER_PAGE_MAX + 1 }),
       {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       }
@@ -423,7 +423,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects unknown sortField', async ({ apiClient }) => {
-    const response = await apiClient.get(getListActionPoliciesUrl({ sortField: 'description' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ sort_field: 'description' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
@@ -431,7 +431,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects unknown sortOrder', async ({ apiClient }) => {
-    const response = await apiClient.get(getListActionPoliciesUrl({ sortOrder: 'sideways' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ sort_order: 'sideways' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
