@@ -93,7 +93,12 @@ actual documented behavior — flag them even without live access to the API, ba
   only the vendor's own request example will. This doesn't throw — the vendor accepts the request and
   silently ignores the misplaced param — so it won't show up in a test or live-testing pass unless the
   optional param is actually set to a non-default value; flag it as unverified if the only tests/live runs
-  exercise the required-fields-only path.
+  exercise the required-fields-only path. If the diff's commit history shows this was *already* "fixed"
+  once (moved from query to body or vice versa), don't treat that as settled — re-derive the answer from
+  the vendor's actual docs page yourself. A prior fix based on a client library's internal code or a
+  third-party OpenAPI mirror can be confidently wrong; those aren't a substitute for the vendor's own
+  parameter table (look for an explicit "Query String(s)" vs. "Request Body" heading on the vendor's own
+  endpoint reference page).
 - **"At least one of" update inputs**: If every field on an update-action's input schema is optional, check
   for a `.refine()` (or equivalent) requiring at least one to be set. Without it, a call with no fields set
   silently no-ops instead of erroring.

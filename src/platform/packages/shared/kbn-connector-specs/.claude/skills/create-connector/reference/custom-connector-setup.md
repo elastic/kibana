@@ -56,6 +56,19 @@ action you plan to implement, find the vendor's official API reference and confi
   if both share it. A wrong transport here doesn't error — the vendor accepts the request and silently
   ignores the misplaced param, so the bug only shows up if a test or live-testing pass actually sets that
   optional param to a non-default value.
+  - **Verify against the vendor's own docs page, not a derived source.** A vendor's official client
+    library's internal request-building code, or a third-party/community OpenAPI mirror, is not sufficient
+    evidence on its own for this specific question — both can encode the same wrong assumption the handler
+    does, or be independently wrong, and neither will tell you so. Find the actual parameter table on the
+    vendor's own API reference page for that endpoint (look for an explicit "Query String(s)" vs. "Request
+    Body"/"Body Data" heading) and treat that as authoritative over anything else. If the live docs page is
+    a heavy client-rendered SPA that a scraping/fetch tool can't render properly (parameter tables missing
+    from the extracted text), don't fall back to a lower-confidence secondary source — try an archived
+    static snapshot of the same page (e.g. via the Wayback Machine) or, if still unresolved, live-test the
+    specific optional param against a real account before merging. Getting this backwards is easy to miss
+    because the "fixed" code still looks more correct than the original — it changed something on purpose,
+    based on evidence that seemed reasonable — so a subsequent reviewer has to independently re-derive the
+    right answer rather than just trusting that a change already went through this reasoning correctly.
 - **Per-action auth scopes**: list every scope/permission each action actually requires (not just the
   minimum to authenticate), especially for destructive or admin actions (delete, bulk update) or actions
   that hit a different API sub-resource (e.g. an alert/rule endpoint vs. the main resource). Once you have
