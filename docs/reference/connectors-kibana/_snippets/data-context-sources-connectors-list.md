@@ -1,5 +1,6 @@
 **Third-party search**
 * [Amazon S3](/reference/connectors-kibana/amazon-s3-action-type.md): List and download content from AWS S3 buckets.
+* [Argo CD](/reference/connectors-kibana/argocd-action-type.md): Manage GitOps applications in Argo CD — sync, inspect health and resources.
 * [Azure Blob Storage](/reference/connectors-kibana/azure-blob-action-type.md): List containers and blobs, and retrieve blob content from Azure Blob Storage.
 * [BigQuery](/reference/connectors-kibana/bigquery-action-type.md): Run GoogleSQL queries and retrieve results from Google BigQuery.
 * [Box](/reference/connectors-kibana/box-action-type.md): Search files and folders, read content, and query enterprise content using Box AI.
