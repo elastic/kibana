@@ -491,28 +491,17 @@ export class LensApp {
     }
   }
 
-  async setPalette(paletteId: string, isLegacy: boolean) {
+  private async setPalette(paletteId: string, isLegacy: boolean) {
     await this.openPalettePanelFlyout();
 
     const paletteModeToggle = this.page.testSubj.locator('lns_colorMappingOrLegacyPalette_switch');
     const targetValue = isLegacy ? 'true' : 'false';
-    // Palette flyout remounts make the switch fail Playwright stability checks.
-    // Always drive to the requested mode, then wait for aria-checked (no early return).
     if ((await paletteModeToggle.getAttribute('aria-checked')) !== targetValue) {
-      await paletteModeToggle.dispatchEvent('click');
+      await paletteModeToggle.click();
     }
-    await this.page.waitForFunction(
-      ([subj, expected]) =>
-        document.querySelector(`[data-test-subj="${subj}"]`)?.getAttribute('aria-checked') ===
-        expected,
-      ['lns_colorMappingOrLegacyPalette_switch', targetValue] as const,
-      { timeout: 10_000 }
-    );
 
     if (isLegacy) {
-      const palettePicker = this.page.testSubj.locator('lns-palettePicker');
-      await palettePicker.waitFor({ state: 'visible' });
-      await palettePicker.dispatchEvent('click');
+      await this.page.testSubj.click('lns-palettePicker');
       await this.page.locator(`#${paletteId}`).click();
     } else {
       await this.page.testSubj.click('kbnColoring_ColorMapping_PalettePicker');
@@ -594,32 +583,7 @@ export class LensApp {
   }
 
   private async selectField(field: string) {
-    // Prefer the field's own stable test-subj over the generic combo box's
-    // label-text match: Lens's field icon adds hidden accessibility text (e.g.
-    // "IP address") to every option, and the field search itself matches any
-    // field name containing the typed substring — so filtering for `ip` also
-    // renders (and can ambiguously match) an unrelated `clientip` option.
-    const fieldCombo = this.page.testSubj.locator('indexPattern-dimension-field');
-    await fieldCombo.getByTestId('comboBoxInput').click();
-    const searchInput = fieldCombo.getByTestId('comboBoxSearchInput');
-    await searchInput.fill(field);
-    // A field is either compatible or incompatible with the current operation,
-    // never both, so at most one of these two test-subjs renders for `field`.
-    const option = this.page
-      .getByTestId(`lns-fieldOption-${field}`)
-      .or(this.page.getByTestId(`lns-fieldOptionIncompatible-${field}`));
-    try {
-      await option.waitFor({ state: 'visible', timeout: 2000 });
-      await option.click();
-    } catch {
-      // Some special pseudo-fields (e.g. the "Records" document count) are
-      // addressed by a display label rather than their real field id, so they
-      // never render the test-subj above — fall back to label matching.
-      await searchInput.blur();
-      await this.page.components
-        .comboBox('indexPattern-dimension-field')
-        .setSelectedOptions([field]);
-    }
+    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
   /** Clears the dimension field combo box (removes the currently selected field). */
@@ -1071,8 +1035,10 @@ export class LensApp {
 
   private getFieldListPanelFieldLocator(field: string) {
     // Prefer Available Fields — the same field can also appear under Selected Fields after use.
+    // The document-count field is stored as `___records___`; callers pass its bare id `records`.
+    const attrField = field === 'records' ? '___records___' : field;
     return this.page.locator(
-      `[data-test-subj="lnsIndexPatternAvailableFields"] [data-attr-field="${field}"]`
+      `[data-test-subj="lnsIndexPatternAvailableFields"] [data-attr-field="${attrField}"]`
     );
   }
 

@@ -139,16 +139,20 @@ spaceTest.describe('Lens heatmap palette', { tag: '@local-stateful-classic' }, (
       });
 
       await spaceTest.step('keep legend when switching number to percent', async () => {
+        // FTR asserted the legend was byte-for-byte identical across this switch. Capture the
+        // pre-switch shape (rather than hardcoding fixture-dependent literals, which are
+        // descoped to #280444) so the "unchanged" intent is still enforced.
+        const legendBefore = (await getHeatmapDebug()).legend?.items?.map(({ key, color }) => ({
+          key,
+          color,
+        }));
         await lens.setPaletteRangeType('percent');
-        await expect
-          .poll(async () => {
-            const debugState = await getHeatmapDebug();
-            return debugState.legend?.items?.length ?? 0;
-          })
-          .toBeGreaterThan(0);
-        // Percent mode may restore the same stop labels; assert legend stays populated.
-        const debugState = await getHeatmapDebug();
-        expect(debugState.legend?.items?.[0]?.key).toBeTruthy();
+
+        const legendAfter = (await getHeatmapDebug()).legend?.items?.map(({ key, color }) => ({
+          key,
+          color,
+        }));
+        expect(legendAfter).toStrictEqual(legendBefore);
       });
 
       await spaceTest.step('change x-axis label rotation', async () => {
