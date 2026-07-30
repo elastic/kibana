@@ -518,7 +518,7 @@ export class LensApp {
     await workspace.waitFor({ state: 'visible', timeout: 20_000 });
 
     const container = workspace.getByTestId(chartSubj);
-    await container.waitFor({ state: 'visible', timeout: 20_000 });
+    await container.waitFor({ state: 'visible' });
 
     let prevCount: string | null = null;
     await expect
