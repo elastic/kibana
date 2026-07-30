@@ -9,7 +9,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiAccordion,
   EuiButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -22,6 +21,7 @@ import {
   EuiTableRowCell,
   EuiText,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '@kbn/esql/public';
@@ -155,16 +155,13 @@ export const EsqlPreviewSection = ({
       {previewError && (
         <>
           <EuiSpacer size="s" />
-          <EuiCallOut
-            color="danger"
-            size="s"
+          <KbnDangerCallout
             title={i18n.translate('xpack.customContent.editFlyout.esqlSection.previewError', {
               defaultMessage: 'Preview failed',
             })}
-            announceOnMount
           >
             {previewError}
-          </EuiCallOut>
+          </KbnDangerCallout>
         </>
       )}
 

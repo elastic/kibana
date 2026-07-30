@@ -31,7 +31,8 @@
     "@kbn/esql",
     "@kbn/zod",
     "@kbn/code-editor-mock",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
