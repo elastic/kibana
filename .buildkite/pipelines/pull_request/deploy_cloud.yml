@@ -2,6 +2,10 @@ steps:
   - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
     label: 'Build and Deploy to Cloud'
     key: deploy_cloud
+    env:
+      # TEMPORARY - do not merge. Chromium in the Kibana container needs more
+      # headroom than the 2048MB default for reporting screenshot testing.
+      KIBANA_MEMORY_SIZE: '8192'
     agents:
       machineType: n2-standard-2
       preemptible: true
