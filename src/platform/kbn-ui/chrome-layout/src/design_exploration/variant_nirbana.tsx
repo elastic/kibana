@@ -663,13 +663,14 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
 
     /* Roomier internal padding than Linbana — content never sits flush
        against the panel border. */
-    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer'],
-    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer'] {
+    /* Exclude .euiProgress: its css prop is Emotion-labeled from the same file. */
+    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:not(.euiProgress),
+    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:not(.euiProgress) {
       padding: 0 ${knobVar('panelPadding')} ${knobVar('panelPadding')} !important;
     }
 
-    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:has(.echMetricText),
-    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:has(.echMetricText) {
+    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:not(.euiProgress):has(.echMetricText),
+    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:not(.euiProgress):has(.echMetricText) {
       padding: ${DESIGN_EXPLORATION_GAP + 8}px ${DESIGN_EXPLORATION_GAP + 4}px
         ${DESIGN_EXPLORATION_GAP + 4}px !important;
     }
@@ -679,6 +680,12 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
+    }
+
+    /* Dashboards listing search — restore hairline (general rule strips borders). */
+    ${scope} .euiFormControlLayout:has([data-test-subj='tableListSearchBox']):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)) {
+      border: ${NIRBANA_HAIRLINE} !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
@@ -1095,6 +1102,56 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
       padding-block-start: ${knobVar('padding')} !important;
     }
 
+    /* Discover: session tabs arrive via titleAppend (same primary row as the
+       title). Stack title + tabs so the menu stays on the title row — POC
+       stand-in for a real AppHeader tabsContent slot. */
+    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
+      [class*='css-'][class*='-app_header_shell--primaryRow'] {
+      align-items: flex-start !important;
+    }
+
+    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
+      [class*='css-'][class*='-app_header_shell--titleCluster'] {
+      flex-direction: column !important;
+      align-items: stretch !important;
+    }
+
+    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
+      [class*='css-'][class*='-app_header_shell--titleGroup'],
+    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
+      [class*='css-'][class*='-app_header_shell--titleAppend'] {
+      max-width: none !important;
+      width: 100% !important;
+      flex: 0 0 auto !important;
+    }
+
+    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
+      [class*='css-'][class*='-app_header_shell--titleAppend'] {
+      justify-content: flex-start !important;
+      margin-block-start: 16px !important;
+    }
+
+    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar']) {
+      padding-inline: 24px !important;
+      border-block-end: none !important;
+    }
+
+    ${scope} [data-test-subj='dataView-add-field_btn'] {
+      border-radius: 12px !important;
+    }
+
+    ${scope} [class*='css-'][class*='-tab_with_background--TabWithBackground'] {
+      margin-inline: 0 !important;
+    }
+
+    ${scope} [class*='css-'][class*='-tab--getTabContentCss'] {
+      height: 32px !important;
+    }
+
+    ${scope} [class*='css-'][class*='-tab--getTabContainerCss'] .unifiedTabs__tabActions {
+      top: 4px !important;
+    }
+
     ${scope} [data-test-subj='appHeader'] {
       border-block-end: ${NIRBANA_HAIRLINE} !important;
       background-color: ${knobVar('surface')} !important;
@@ -1174,6 +1231,7 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
       border-end-start-radius: ${knobVar('radiusButton')} !important;
       border-start-end-radius: 0 !important;
       border-end-end-radius: 0 !important;
+      padding-inline-end: 12px !important;
     }
 
     ${scope} [data-test-subj='appHeader'] .euiSplitButtonActionSecondary {

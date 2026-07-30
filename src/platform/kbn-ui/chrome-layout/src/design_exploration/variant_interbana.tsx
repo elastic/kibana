@@ -646,13 +646,14 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     /* Roomier internal padding than Linbana — content never sits flush
        against the panel border. */
-    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer'],
-    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer'] {
+    /* Exclude .euiProgress: its css prop is Emotion-labeled from the same file. */
+    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:not(.euiProgress),
+    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:not(.euiProgress) {
       padding: 0 ${knobVar('panelPadding')} ${knobVar('panelPadding')} !important;
     }
 
-    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:has(.echMetricText),
-    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:has(.echMetricText) {
+    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:not(.euiProgress):has(.echMetricText),
+    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:not(.euiProgress):has(.echMetricText) {
       padding: ${DESIGN_EXPLORATION_GAP + 8}px ${DESIGN_EXPLORATION_GAP + 4}px
         ${DESIGN_EXPLORATION_GAP + 4}px !important;
     }
