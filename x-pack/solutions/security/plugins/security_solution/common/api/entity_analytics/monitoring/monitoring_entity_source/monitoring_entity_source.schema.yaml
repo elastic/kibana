@@ -9,7 +9,12 @@ paths:
     post:
       operationId: CreateEntitySource
       x-codegen-enabled: true
+      deprecated: true
       summary: Create a new entity source configuration
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+        Create a new entity source configuration.
       requestBody:
         required: true
         content:
@@ -35,7 +40,7 @@ paths:
                   items:
                     $ref: '#/components/schemas/Matcher'
                 filter:
-                  $ref: '#/components/schemas/Filter' 
+                  $ref: '#/components/schemas/Filter'
       responses:
         "200":
           description: Entity source created successfully
@@ -48,7 +53,12 @@ paths:
     get:
       operationId: GetEntitySource
       x-codegen-enabled: true
+      deprecated: true
       summary: Get an entity source configuration by ID
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+        Get an entity source configuration by ID.
       parameters:
         - name: id
           in: path
@@ -67,7 +77,12 @@ paths:
     put:
       operationId: UpdateEntitySource
       x-codegen-enabled: true
+      deprecated: true
       summary: Update an entity source configuration
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+        Update an entity source configuration.
       parameters:
         - name: id
           in: path
@@ -92,7 +107,12 @@ paths:
     delete:
       operationId: DeleteEntitySource
       x-codegen-enabled: true
+      deprecated: true
       summary: Delete an entity source configuration
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+        Delete an entity source configuration.
       parameters:
         - name: id
           in: path
@@ -108,7 +128,12 @@ paths:
     get:
       operationId: ListEntitySources
       x-codegen-enabled: true
+      deprecated: true
       summary: List all entity source configurations
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+        List all entity source configurations.
       parameters:
         - name: type
           in: query
@@ -201,7 +226,7 @@ components:
             $ref: '#/components/schemas/Matcher'
         filter:
           $ref: '#/components/schemas/Filter'
-        integrations: 
+        integrations:
           $ref: '#/components/schemas/Integrations'
 
     UpdateEntitySourceNoadditionalProps:
@@ -221,7 +246,7 @@ components:
             type: boolean
           managedVersion:
             type: integer
-          matchersModifiedByUser: 
+          matchersModifiedByUser:
             type: boolean
 
     Matcher:
@@ -284,15 +309,15 @@ components:
           type: string
           maxLength: 1000
           description: Index to read latest sync markers from
-        syncData: 
+        syncData:
           type: object
           description: integrations latest full sync and update syncData
           properties:
-            lastFullSync: 
+            lastFullSync:
               type: string
               format: date-time
               description: Timestamp of the last full sync from integrations
-            lastUpdateProcessed: 
+            lastUpdateProcessed:
               type: string
               format: date-time
               description: Timestamp of the last update processed from integrations

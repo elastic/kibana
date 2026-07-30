@@ -9,8 +9,12 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ListPrivMonUsers
+      deprecated: true
       summary: List all monitored users
-      description: Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+
+        Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
       parameters:
         - name: kql
           in: query

@@ -9,8 +9,12 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: DeletePrivMonUser
+      deprecated: true
       summary: Delete a monitored user
-      description: Removes a privileged user from monitoring by their document ID.
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+
+        Removes a privileged user from monitoring by their document ID.
       parameters:
         - name: id
           in: path

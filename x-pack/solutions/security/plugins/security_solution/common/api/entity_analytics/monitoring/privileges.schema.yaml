@@ -9,8 +9,12 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PrivMonPrivileges
+      deprecated: true
       summary: Run a privileges check on Privilege Monitoring
-      description: Check if the current user has all required permissions for Privilege Monitoring
+      description: |
+        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+
+        Check if the current user has all required permissions for Privilege Monitoring.
       responses:
         '200':
           description: Successful response
