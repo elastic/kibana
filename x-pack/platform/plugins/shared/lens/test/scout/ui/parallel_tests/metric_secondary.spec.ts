@@ -85,7 +85,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
           await page.testSubj.click('lnsMetric_secondary_trend_baseline_primary');
           // Primary and secondary are both "Average of bytes", so the diff is deterministically 0
           // regardless of the underlying data.
-          expect(await lens.getSecondaryMetricBadgeText()).toBe('0');
+          await expect.poll(() => lens.getSecondaryMetricBadgeText()).toBe('0');
         }
       );
 
