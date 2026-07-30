@@ -9,7 +9,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { createRouteDependencies } from '../test_utils';
-import { CountNewExecutionHistoryEventsRoute } from './count_new_execution_history_events_route';
+import {
+  CountNewExecutionHistoryEventsRoute,
+  toCountNewEventsSinceArgs,
+} from './count_new_execution_history_events_route';
 
 const createMocks = () => {
   const deps = createRouteDependencies();
@@ -90,5 +93,23 @@ describe('CountNewExecutionHistoryEventsRoute', () => {
 
     expect(mocks.deps.response.customError).toHaveBeenCalledTimes(1);
     expect(mocks.deps.response.ok).not.toHaveBeenCalled();
+  });
+});
+
+describe('toCountNewEventsSinceArgs', () => {
+  it('maps the snake_case request to camelCase client args (keeps since, no request)', () => {
+    expect(
+      toCountNewEventsSinceArgs({
+        since: '2026-01-01T00:00:00.000Z',
+        search: 'bar',
+        rule_ids: ['rule-1'],
+        outcome: 'throttled',
+      })
+    ).toEqual({
+      since: '2026-01-01T00:00:00.000Z',
+      search: 'bar',
+      ruleIds: ['rule-1'],
+      outcome: 'throttled',
+    });
   });
 });
