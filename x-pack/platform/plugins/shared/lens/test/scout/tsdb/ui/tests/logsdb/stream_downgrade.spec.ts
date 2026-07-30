@@ -25,6 +25,7 @@ const RESOURCE_SUFFIX = `${process.pid}-${Date.now()}`;
 // Serverless Security's editor role grants data access to the sample-data namespace.
 const BASE_STREAM = `kibana_sample_data_lens_logsdb_downgrade_${RESOURCE_SUFFIX}`;
 const REGULAR_INDEX = `kibana_sample_data_lens_logsdb_regular_${RESOURCE_SUFFIX}`;
+const LOGSDB_STREAM_NO_HOST = `kibana_sample_data_lens_logsdb_nohost_${RESOURCE_SUFFIX}`;
 const ADDITIONAL_LOGSDB_STREAM = `kibana_sample_data_lens_logsdb_additional_${RESOURCE_SUFFIX}`;
 const ADDITIONAL_TSDB_STREAM = `kibana_sample_data_lens_logsdb_tsdb_${RESOURCE_SUFFIX}`;
 const ADDITIONAL_TSDB_DOWNSAMPLED = `kibana_sample_data_lens_logsdb_tsdb_ds_${RESOURCE_SUFFIX}`;
@@ -306,6 +307,17 @@ test.describe('Lens LogsDB stream downgrade scenarios', { tag: tags.deploymentAg
     tsdbScenario,
   }) => {
     const result = await runScenario({ page, pageObjects, tsdbScenario }, [{ index: BASE_STREAM }]);
+    assertDowngradeResult(result);
+  });
+
+  test('supports a downgraded LogsDB data stream without host.name field', async ({
+    page,
+    pageObjects,
+    tsdbScenario,
+  }) => {
+    const result = await runScenario({ page, pageObjects, tsdbScenario }, [
+      { index: LOGSDB_STREAM_NO_HOST, create: true, mode: 'logsdb', removeLogsDBFields: true },
+    ]);
     assertDowngradeResult(result);
   });
 

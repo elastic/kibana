@@ -52,6 +52,7 @@ export interface TsdbScenarioIndex {
   create?: boolean;
   downsample?: boolean;
   removeTSDBFields?: boolean;
+  removeLogsDBFields?: boolean;
   mode?: 'tsdb' | 'logsdb';
 }
 
@@ -172,9 +173,11 @@ const runCleanupActions = async (
 
 const getTsdbMapping = ({
   removeTSDBFields = false,
+  removeLogsDBFields = false,
   includeTimeSeriesMetadata = true,
 }: {
   removeTSDBFields?: boolean;
+  removeLogsDBFields?: boolean;
   includeTimeSeriesMetadata?: boolean;
 } = {}): Record<string, MappingProperty> => ({
   '@timestamp': { type: 'date' },
@@ -189,6 +192,15 @@ const getTsdbMapping = ({
         bytes_counter: {
           type: 'long',
           ...(includeTimeSeriesMetadata ? { time_series_metric: 'counter' as const } : {}),
+        },
+      }),
+  ...(removeLogsDBFields
+    ? {}
+    : {
+        host: {
+          properties: {
+            name: { type: 'keyword' },
+          },
         },
       }),
 });
@@ -225,7 +237,10 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
       const putDataStreamTemplate = async (
         stream: string,
         mode: 'tsdb' | 'logsdb' | undefined,
-        { includeTimeSeriesMetadata = true }: { includeTimeSeriesMetadata?: boolean } = {}
+        {
+          includeTimeSeriesMetadata = true,
+          removeLogsDBFields = false,
+        }: { includeTimeSeriesMetadata?: boolean; removeLogsDBFields?: boolean } = {}
       ): Promise<void> => {
         await esClient.cluster.putComponentTemplate({
           name: `${stream}_mapping`,
@@ -246,7 +261,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
                 }
               : {}),
             mappings: {
-              properties: getTsdbMapping({ includeTimeSeriesMetadata }),
+              properties: getTsdbMapping({ includeTimeSeriesMetadata, removeLogsDBFields }),
             },
           },
         });
@@ -263,9 +278,13 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
 
       const createDataStream = async (
         stream: string,
-        mode: 'tsdb' | 'logsdb' | undefined
+        mode: 'tsdb' | 'logsdb' | undefined,
+        mappingOptions?: { includeTimeSeriesMetadata?: boolean; removeLogsDBFields?: boolean }
       ): Promise<void> => {
-        await putDataStreamTemplate(stream, mode);
+        await putDataStreamTemplate(stream, mode, {
+          includeTimeSeriesMetadata: mappingOptions?.includeTimeSeriesMetadata,
+          removeLogsDBFields: mappingOptions?.removeLogsDBFields,
+        });
         await esClient.indices.createDataStream({ name: stream });
       };
 
@@ -422,13 +441,23 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
           runCleanupActions(`TSDB scenario for "${initialIndex}"`, [...cleanupActions].reverse());
 
         try {
-          for (const { index, create, downsample, removeTSDBFields, mode } of indexes) {
+          for (const {
+            index,
+            create,
+            downsample,
+            removeTSDBFields,
+            removeLogsDBFields,
+            mode,
+          } of indexes) {
             if (!create) {
               continue;
             }
             if (mode === 'tsdb' || mode === 'logsdb') {
               cleanupActions.push(async () => deleteDataStream(index));
-              await createDataStream(index, mode);
+              await createDataStream(index, mode, {
+                includeTimeSeriesMetadata: mode === 'tsdb',
+                removeLogsDBFields,
+              });
               await createDocs(index, beforeRollover, {
                 isStream: true,
                 removeTSDBFields: mode === 'logsdb' ? true : removeTSDBFields,
@@ -440,7 +469,7 @@ export const test = lensTest.extend<LensUiTestFixtures, LensUiWorkerFixtures>({
               await esClient.indices.create({
                 index,
                 mappings: {
-                  properties: getTsdbMapping({ removeTSDBFields }),
+                  properties: getTsdbMapping({ removeTSDBFields, removeLogsDBFields }),
                 },
               });
               await createDocs(index, beforeRollover, { isStream: false, removeTSDBFields });
