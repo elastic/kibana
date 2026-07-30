@@ -8,10 +8,12 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { getEbtProps, type EbtClickAttrs } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { nightshiftBackgroundTransition } from '../common/nightshift_transition';
 
 export interface EntityChipProps {
+  ebt?: EbtClickAttrs;
   label: string;
   onClick: () => void;
   testSubj?: string;
@@ -19,6 +21,7 @@ export interface EntityChipProps {
 }
 
 export function EntityChip({
+  ebt,
   label,
   onClick,
   testSubj = 'nightshiftEntityChip',
@@ -31,6 +34,7 @@ export function EntityChip({
     <button
       type="button"
       data-test-subj={testSubj}
+      {...(ebt ? getEbtProps(ebt) : {})}
       aria-label={i18n.translate('xpack.observability.nightshift.entityChip.viewDetailsLabel', {
         defaultMessage: 'View entity details for {label}',
         values: { label },

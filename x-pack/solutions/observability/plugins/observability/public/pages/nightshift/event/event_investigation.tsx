@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationStatus } from '@kbn/investigation-output';
 import type {
@@ -27,6 +28,7 @@ import {
   type InvestigationFlyoutTabId,
 } from '../investigation/investigation_flyout';
 import { InvestigationSummaryCard } from '../investigation/investigation_summary_card';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 
 export interface EventInvestigationProps {
   event: SignificantEvent;
@@ -74,6 +76,11 @@ export function EventInvestigation({
               color="primary"
               data-test-subj="nightshiftInvestigationShowDetailsButton"
               onClick={() => openFlyout()}
+              {...getEbtProps({
+                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_INVESTIGATION,
+                detail: status,
+              })}
             >
               {i18n.translate('xpack.observability.nightshift.flyout.investigationShowDetails', {
                 defaultMessage: 'Show details',

@@ -35,8 +35,13 @@ const ALL_SPECS_FILE = Path.resolve(
 
 const CODEOWNERS_FILE = Path.resolve(REPO_ROOT, '.github/CODEOWNERS');
 const DOCS_DIR = Path.resolve(REPO_ROOT, 'docs/reference/connectors-kibana');
-const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/elastic-connectors-list.md');
+// `elastic-connectors-list.md` / `elastic-connectors.md` are reserved for the small, fixed set of
+// Kibana-native connectors (Cases, Index, ServerLog, Obs AI Assistant). Every connector scaffolded
+// by this generator is a third-party integration, so it belongs in the data-context-sources list/TOC
+// section instead. See the `review-connector` skill for the full placement rule.
+const SNIPPET_FILE = Path.resolve(DOCS_DIR, '_snippets/data-context-sources-connectors-list.md');
 const TOC_FILE = Path.resolve(REPO_ROOT, 'docs/reference/toc.yml');
+const TOC_SECTION_FILE = 'connectors-kibana/data-context-sources-connectors.md';
 
 const ULTIMATE_PRIORITY_RULES_COMMENT = `
 ####
@@ -280,7 +285,7 @@ export const ConnectorCommand: GenerateCommand = {
       }
     }
 
-    // update snippet file (elastic-connectors-list.md)
+    // update snippet file (data-context-sources-connectors-list.md)
     {
       const content = await Fsp.readFile(SNIPPET_FILE, 'utf8');
       const newEntry = `* [${displayName}](/reference/connectors-kibana/${kebabName}-action-type.md): TODO: Add brief description.`;
@@ -288,32 +293,79 @@ export const ConnectorCommand: GenerateCommand = {
       if (content.includes(`${kebabName}-action-type.md`)) {
         log.info('Snippet file already references', kebabName);
       } else {
-        // Insert in alphabetical order
-        const lines = content.split('\n').filter((l) => l.trim());
+        // The file is split into categories with a "**Category**" header line (e.g.
+        // "**Third-party search**", "**Identity management**") separated by blank lines. Insert
+        // alphabetically within the FIRST category only, and never cross into the next category's
+        // header — most scaffolded connectors are generic third-party integrations, and it's safer
+        // to land a new entry at the end of the first section than to risk it being alphabetically
+        // sorted into an unrelated category (e.g. "Threat intelligence"). Re-categorize manually if
+        // needed. Blank lines are preserved verbatim (not filtered out) so category separators and
+        // the file's exact formatting survive every generator run.
+        const hadTrailingNewline = content.endsWith('\n');
+        const rawLines = content.split('\n');
+        if (hadTrailingNewline) {
+          rawLines.pop();
+        }
+        const isCategoryHeader = (l: string) => /^\*\*.+\*\*$/.test(l.trim());
+        const isListItem = (l: string) => l.trim().startsWith('*') && !isCategoryHeader(l);
         let inserted = false;
-        const newLines = [];
+        let pastFirstCategory = false;
+        let sawFirstCategoryItem = false;
+        const newLines: string[] = [];
+        // Blank lines between the first category's last item and the next category's header must
+        // stay attached to that header (as its separator), not get displaced by an entry inserted
+        // after them. Hold them back until we know what follows.
+        let pendingBlankLines: string[] = [];
 
-        for (const line of lines) {
-          if (!inserted && line.startsWith('*')) {
+        for (const line of rawLines) {
+          const isBlank = line.trim() === '';
+
+          if (!inserted && isCategoryHeader(line) && sawFirstCategoryItem) {
+            // Reached the end of the first category without finding an alphabetical spot: the new
+            // entry belongs right after the last item, before the blank separator.
+            newLines.push(newEntry, ...pendingBlankLines, line);
+            pendingBlankLines = [];
+            inserted = true;
+            pastFirstCategory = true;
+            continue;
+          }
+
+          if (!inserted && !pastFirstCategory && isListItem(line)) {
+            newLines.push(...pendingBlankLines);
+            pendingBlankLines = [];
             const match = line.match(/\[([^\]]+)\]/);
             if (match && match[1] > displayName) {
-              newLines.push(newEntry);
+              newLines.push(newEntry, line);
               inserted = true;
+            } else {
+              if (match) {
+                sawFirstCategoryItem = true;
+              }
+              newLines.push(line);
             }
+            continue;
           }
-          newLines.push(line);
+
+          if (!inserted && !pastFirstCategory && isBlank) {
+            pendingBlankLines.push(line);
+            continue;
+          }
+
+          newLines.push(...pendingBlankLines, line);
+          pendingBlankLines = [];
         }
 
         if (!inserted) {
           newLines.push(newEntry);
         }
+        newLines.push(...pendingBlankLines);
 
-        await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + '\n');
+        await Fsp.writeFile(SNIPPET_FILE, newLines.join('\n') + (hadTrailingNewline ? '\n' : ''));
         log.info('Updated', Path.relative(REPO_ROOT, SNIPPET_FILE));
       }
     }
 
-    // update toc.yml (add to elastic-connectors section)
+    // update toc.yml (add to the data-context-sources-connectors section)
     {
       const content = await Fsp.readFile(TOC_FILE, 'utf8');
       const docEntry = `connectors-kibana/${kebabName}-action-type.md`;
@@ -324,9 +376,9 @@ export const ConnectorCommand: GenerateCommand = {
         const lines = content.split('\n');
         let insertAt = -1;
 
-        // Find the elastic-connectors section and its children
+        // Find the data-context-sources-connectors section and its children
         for (let i = 0; i < lines.length; i++) {
-          if (lines[i].includes('file: connectors-kibana/elastic-connectors.md')) {
+          if (lines[i].includes(`file: ${TOC_SECTION_FILE}`)) {
             // Found the section, look for the children block
             let childIndent = '';
             for (let j = i + 1; j < lines.length; j++) {

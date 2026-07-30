@@ -18,8 +18,14 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_DETAILS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../common/ebt_constants';
 import { SignificantEventItem } from './significant_event_item';
 
 export interface SignificantEventListProps {
@@ -31,6 +37,8 @@ export interface SignificantEventListProps {
   onClearFilter?: () => void;
   onEventClick?: (event: SignificantEvent) => void;
   onChatClick?: (event: SignificantEvent) => void;
+  onCloseClick?: (event: SignificantEvent) => void;
+  closingEventUuid?: string;
   sectionRef?: React.Ref<HTMLElement>;
 }
 
@@ -43,6 +51,8 @@ export function SignificantEventList({
   onClearFilter,
   onEventClick,
   onChatClick,
+  onCloseClick,
+  closingEventUuid,
   sectionRef,
 }: SignificantEventListProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -84,9 +94,16 @@ export function SignificantEventList({
           <EuiText textAlign="center" color="subdued" size="s">
             <p>
               {filterActive
-                ? i18n.translate('xpack.observability.nightshift.list.filteredEmptyDescription', {
-                    defaultMessage: 'No events match this filter.',
-                  })
+                ? statusColor === 'success'
+                  ? i18n.translate(
+                      'xpack.observability.nightshift.list.filteredResolvedEmptyDescription',
+                      {
+                        defaultMessage: 'No resolved events match this filter.',
+                      }
+                    )
+                  : i18n.translate('xpack.observability.nightshift.list.filteredEmptyDescription', {
+                      defaultMessage: 'No events match this filter.',
+                    })
                 : i18n.translate('xpack.observability.nightshift.list.emptyDescription', {
                     defaultMessage: 'No significant events found',
                   })}
@@ -102,6 +119,14 @@ export function SignificantEventList({
                     flush="left"
                     onClick={onClearFilter}
                     size="s"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.CLEAR_BLAST_RADIUS_FILTER,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.SIGNIFICANT_EVENTS_LIST,
+                      detail:
+                        statusColor === 'danger'
+                          ? NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION
+                          : NIGHTSHIFT_EBT_DETAILS.RESOLVED,
+                    })}
                   >
                     {i18n.translate('xpack.observability.nightshift.list.clearFilterButton', {
                       defaultMessage: 'Clear filter',
@@ -143,6 +168,8 @@ export function SignificantEventList({
                 isSelected={event.event_uuid === selectedEventUuid}
                 onClick={onEventClick}
                 onChatClick={onChatClick}
+                onCloseClick={onCloseClick}
+                isClosing={event.event_uuid === closingEventUuid}
               />
             </li>
           ))}

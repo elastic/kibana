@@ -103,7 +103,7 @@ const NetworkDetailsComponent: React.FC = () => {
   }, [detailName, dispatch]);
 
   const { dataView, status } = useDataView(PageScope.explore);
-  const selectedPatterns = useSelectedPatterns(PageScope.explore);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const indicesExist = dataView.hasMatchedIndices();
 
   const ip = decodeIpv6(detailName);
