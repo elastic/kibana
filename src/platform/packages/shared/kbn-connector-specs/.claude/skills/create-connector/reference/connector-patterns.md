@@ -242,7 +242,7 @@ Available `.meta()` options: `label`, `widget`, `placeholder`, `helpText`, `hidd
 
 **There is no widget for `z.number()` config fields — use a regex-validated string instead.** The
 form-generator's widget registry only has `text`, `password`, `select`, `formFieldset`, `hidden`, `object`,
-and `fileUpload`; there is no numeric widget. A config field typed `z.number()` (e.g. `z.number().int()`)
+and `fileUpload`; there is no numeric widget. A config field typed `z.number()` (e.g. `z.int()`)
 throws `Error: No widget found for schema type: ZodNumberFormat. Please specify a widget in the schema
 metadata.` when the connector creation form renders it — and since this is a runtime UI error, not a type
 or lint error, it won't be caught by `node scripts/type_check` or unit tests. If a config value is
