@@ -19,7 +19,7 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
-import type { EbtTelemetryClient } from '../lib/telemetry';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
