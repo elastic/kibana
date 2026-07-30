@@ -454,7 +454,7 @@ export const Databricks: ConnectorSpec = {
       input: GetAlertInputSchema,
       handler: async (ctx, input: GetAlertInput) => {
         const { data } = await ctx.client.get(
-          `${workspaceOrigin(ctx)}/api/2.0/sql/alerts/${input.alertId}`
+          `${workspaceOrigin(ctx)}/api/2.0/sql/alerts/${encodeURIComponent(input.alertId)}`
         );
         return data;
       },
