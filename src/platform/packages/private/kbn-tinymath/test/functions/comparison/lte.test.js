@@ -57,4 +57,16 @@ describe('Lte', () => {
       expect(lte([-1, -1], [-2, 2])).toBeFalsy();
     });
   });
+
+  describe('mixed eq and lt values', () => {
+    it('arrays', () => {
+      expect(lte([5, 10], [5, 30])).toBeTruthy();
+      expect(lte([1, 2], [1, 3])).toBeTruthy();
+      expect(lte([1, 2], 2)).toBeTruthy();
+
+      // an element above the bound still fails
+      expect(lte([1, 2, 3], 2)).toBeFalsy();
+      expect(lte([5, 10, 40], [5, 30, 30])).toBeFalsy();
+    });
+  });
 });

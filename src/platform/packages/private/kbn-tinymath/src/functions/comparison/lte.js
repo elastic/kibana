@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { eq } = require('./eq');
-const { lt } = require('./lt');
-
 /**
  * Performs a lower than or equal comparison between two values.
  * @param {number|number[]} a a number or an array of numbers
@@ -24,6 +21,18 @@ const { lt } = require('./lt');
  */
 
 function lte(a, b) {
-  return eq(a, b) || lt(a, b);
+  if (b == null) {
+    throw new Error('Missing b value');
+  }
+  if (Array.isArray(a)) {
+    if (!Array.isArray(b)) {
+      return a.every((v) => v <= b);
+    }
+    if (a.length !== b.length) {
+      throw new Error('Array length mismatch');
+    }
+    return a.every((v, i) => v <= b[i]);
+  }
+  return a <= b;
 }
 module.exports = { lte };
