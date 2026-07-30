@@ -107,6 +107,40 @@ describe('IndicatorReader.getQueryLinks', () => {
     expect(links).toHaveLength(1);
     expect(links[0].expires_at).toBeUndefined();
   });
+
+  it('filters query type and rule ID before returning links', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await reader.getQueryLinks([STREAM], {
+      queryTypes: ['match'],
+      ruleIds: ['rule-1'],
+    });
+
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('query.query_type');
+    expect(query).toContain('"match"');
+    expect(query).toContain('query.rule_id');
+    expect(query).toContain('"rule-1"');
+  });
+});
+
+describe('IndicatorReader.getFeatures', () => {
+  it('filters public feature IDs by feature.slug rather than stored UUID', async () => {
+    const { reader, runEsql } = makeReader();
+    runEsql.mockResolvedValueOnce({ hits: [] });
+
+    await reader.getFeatures(STREAM, {
+      featureIds: ['payment'],
+      type: ['entity'],
+    });
+
+    const query = capturedQueryString(runEsql);
+    expect(query).toContain('feature.slug');
+    expect(query).toContain('"payment"');
+    expect(query).toContain('feature.type');
+    expect(query).toContain('"entity"');
+  });
 });
 
 describe('IndicatorReader.getStreamToQueryLinksMap', () => {

@@ -39,6 +39,10 @@ export function registerDocumentsSampleRoute({
           index: indexName,
           size: DEFAULT_DOCUMENT_PAGE_SIZE,
           track_total_hits: false,
+          _source: {
+            includes: ['*', '_inference_fields'],
+          },
+          fields: ['*'],
           sort: [
             {
               _doc: {
