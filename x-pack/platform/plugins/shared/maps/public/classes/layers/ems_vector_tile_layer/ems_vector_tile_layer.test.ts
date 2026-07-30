@@ -81,10 +81,8 @@ describe('EmsVectorTileLayer', () => {
       });
     };
 
-    const loadedWith = (tileLayerId: string) => ({ dataRequestMeta: { tileLayerId } });
-
     test('_generateMbSourceIdPrefix should use the loaded tileLayerId over the live source value', () => {
-      const layer = createLayer(loadedWith('oldTheme')) as unknown as {
+      const layer = createLayer({ dataRequestMeta: { tileLayerId: 'oldTheme' } }) as unknown as {
         _generateMbSourceIdPrefix: () => string;
       };
       expect(layer._generateMbSourceIdPrefix()).toBe('layerid___oldTheme___');
@@ -92,7 +90,7 @@ describe('EmsVectorTileLayer', () => {
 
     test('_generateMbSourceIdPrefix should ignore the tileLayerId of an in-flight request', () => {
       const layer = createLayer({
-        ...loadedWith('oldTheme'),
+        dataRequestMeta: { tileLayerId: 'oldTheme' },
         dataRequestMetaAtStart: { tileLayerId: 'newTheme' },
         dataRequestToken: Symbol('in-flight request'),
       }) as unknown as { _generateMbSourceIdPrefix: () => string };
@@ -117,7 +115,7 @@ describe('EmsVectorTileLayer', () => {
         .spyOn(TMSService, 'transformColorProperties')
         .mockReturnValue([]);
 
-      const layer = createLayer(loadedWith('oldTheme')) as unknown as {
+      const layer = createLayer({ dataRequestMeta: { tileLayerId: 'oldTheme' } }) as unknown as {
         _setColorFilter: (mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) => void;
       };
       const mbLayer = { id: 'mbLayerId', type: 'symbol' } as unknown as LayerSpecification;
