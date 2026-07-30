@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -51,6 +52,7 @@ describe('clone', () => {
   const getAuthenticationApiKeyMock = jest.fn();
 
   const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+    request: httpServerMock.createKibanaRequest(),
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,
