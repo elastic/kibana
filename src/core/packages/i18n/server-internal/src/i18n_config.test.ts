@@ -42,6 +42,7 @@ describe('i18n config', () => {
       expect(validated).toEqual({
         locales: ['en', 'fr-FR', 'ja-JP', 'zh-CN', 'de-DE'],
         defaultLocale: 'en',
+        allowLocaleCookie: true,
       });
     });
 
@@ -94,6 +95,16 @@ describe('i18n config', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[locales]: array size is [11], but cannot be greater than [10]"`
       );
+    });
+
+    it('defaults allowLocaleCookie to true', () => {
+      const validated = config.schema.validate({});
+      expect(validated.allowLocaleCookie).toBe(true);
+    });
+
+    it('accepts allowLocaleCookie: false', () => {
+      const validated = config.schema.validate({ allowLocaleCookie: false });
+      expect(validated.allowLocaleCookie).toBe(false);
     });
   });
 

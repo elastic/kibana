@@ -8,17 +8,25 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
-import { ruleResponseSchema } from '@kbn/alerting-v2-schemas';
-
-import { updateRuleDataSchema, type UpdateRuleData } from '../../lib/rules_client';
+import {
+  errorResponseSchema,
+  ruleResponseSchema,
+  updateRuleBodySchema,
+  type UpdateRuleBody,
+} from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ruleIdParamsSchema } from './route_schemas';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  RULE_NOT_FOUND_DESCRIPTION,
+  RULE_VERSION_CONFLICT_DESCRIPTION,
+} from './rule_response_descriptions';
+import { updateRuleOasExamples } from './update_rule_oas_example';
 
 @injectable()
 export class UpdateRuleRoute extends BaseAlertingRoute {
@@ -31,22 +39,29 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Update a rule',
+    oasOperationObject: updateRuleOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(updateRuleDataSchema),
-      params: buildRouteValidationWithZod(ruleIdParamsSchema),
+      body: updateRuleBodySchema,
+      params: ruleIdParamsSchema,
     },
     response: {
       200: {
         body: () => ruleResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the updated rule.',
       },
       400: {
-        description: 'Indicates an invalid schema or parameters.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
-        description: 'Indicates a rule with the given ID does not exist.',
+        body: () => errorResponseSchema,
+        description: RULE_NOT_FOUND_DESCRIPTION,
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: RULE_VERSION_CONFLICT_DESCRIPTION,
       },
     },
   };
@@ -59,7 +74,7 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof ruleIdParamsSchema>,
       unknown,
-      UpdateRuleData
+      UpdateRuleBody
     >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
@@ -67,9 +82,12 @@ export class UpdateRuleRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
+    const { version, ...data } = this.request.body;
+
     const updated = await this.rulesClient.updateRule({
       id: this.request.params.id,
-      data: this.request.body,
+      data,
+      options: { version },
     });
 
     return this.ctx.response.ok({ body: updated });

@@ -57,3 +57,89 @@ export const Default: Story = {
     return <Story />;
   },
 };
+
+export const FrozenEnterpriseRequired: Story = {
+  render: () => {
+    const Story = () => {
+      const [selectedPhases, setSelectedPhases] = useState<IlmPhaseSelectOption[]>([
+        'hot',
+        'warm',
+        'cold',
+      ]);
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 140 }}>
+          <EuiFlexItem grow={false}>
+            <IlmPhaseSelect
+              renderButton={(props) => (
+                <EuiButton
+                  {...props}
+                  color="text"
+                  size="s"
+                  iconType="chevronSingleDown"
+                  iconSide="right"
+                >
+                  Add data phase and downsampling
+                </EuiButton>
+              )}
+              selectedPhases={selectedPhases}
+              onSelect={(phase) => {
+                action('onSelect')(phase);
+                setSelectedPhases((prev) => {
+                  const next = [...prev, phase];
+                  action('selectedPhases')(next);
+                  return next;
+                });
+              }}
+              showEnterpriseLicenseRequiredBadge={true}
+              initialIsOpen={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    };
+    return <Story />;
+  },
+};
+
+export const FrozenDefaultRepositoryRequired: Story = {
+  render: () => {
+    const Story = () => {
+      const [selectedPhases, setSelectedPhases] = useState<IlmPhaseSelectOption[]>([
+        'hot',
+        'warm',
+        'cold',
+      ]);
+      return (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 140 }}>
+          <EuiFlexItem grow={false}>
+            <IlmPhaseSelect
+              renderButton={(props) => (
+                <EuiButton
+                  {...props}
+                  color="text"
+                  size="s"
+                  iconType="chevronSingleDown"
+                  iconSide="right"
+                >
+                  Add data phase and downsampling
+                </EuiButton>
+              )}
+              selectedPhases={selectedPhases}
+              onSelect={(phase) => {
+                action('onSelect')(phase);
+                setSelectedPhases((prev) => {
+                  const next = [...prev, phase];
+                  action('selectedPhases')(next);
+                  return next;
+                });
+              }}
+              showDefaultRepositoryRequiredBadge={true}
+              initialIsOpen={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    };
+    return <Story />;
+  },
+};

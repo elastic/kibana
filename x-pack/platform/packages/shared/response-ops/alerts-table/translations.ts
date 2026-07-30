@@ -251,6 +251,10 @@ export const ADD_TO_EXISTING_CASE = i18n.translate(
   }
 );
 
+export const ADD_TO_CHAT = i18n.translate('xpack.responseOpsAlertsTable.actions.addChat', {
+  defaultMessage: 'Add to chat',
+});
+
 export const ADD_TO_NEW_CASE = i18n.translate('xpack.responseOpsAlertsTable.actions.addToNewCase', {
   defaultMessage: 'Add to new case',
 });
@@ -284,8 +288,12 @@ export const MUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.mute', 
   defaultMessage: 'Mute',
 });
 
-export const UNMUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.unmute', {
-  defaultMessage: 'Unmute',
+export const SNOOZE = i18n.translate('xpack.responseOpsAlertsTable.actions.snooze', {
+  defaultMessage: 'Snooze',
+});
+
+export const UNSNOOZE = i18n.translate('xpack.responseOpsAlertsTable.actions.unsnooze', {
+  defaultMessage: 'Unsnooze',
 });
 
 export const MUTE_SELECTED = i18n.translate('xpack.responseOpsAlertsTable.actions.muteSelected', {

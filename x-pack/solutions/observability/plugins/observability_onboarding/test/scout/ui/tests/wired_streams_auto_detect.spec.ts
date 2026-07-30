@@ -29,6 +29,7 @@ test.describe(
       await test.step('navigate to Auto-detect flow', async () => {
         await pageObjects.onboarding.selectHostUseCase();
         await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+        await pageObjects.onboarding.waitForIngestionModeSelector();
       });
 
       await test.step('ingestion selector is visible with both options', async () => {
@@ -49,6 +50,7 @@ test.describe(
     test('can switch to Wired Streams mode', async ({ pageObjects }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await pageObjects.onboarding.selectWiredStreams();
 
@@ -63,6 +65,7 @@ test.describe(
     }) => {
       await pageObjects.onboarding.selectHostUseCase();
       await pageObjects.onboarding.clickIntegrationCard('integration-card:auto-detect-logs');
+      await pageObjects.onboarding.waitForIngestionModeSelector();
 
       await test.step('command does NOT include wired streams flag in Classic mode', async () => {
         const classicCommand = await pageObjects.onboarding.getAutoDetectCommandContent();

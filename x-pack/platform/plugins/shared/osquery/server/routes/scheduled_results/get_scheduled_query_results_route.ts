@@ -11,6 +11,7 @@ import { lastValueFrom } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { isFilters } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { PLUGIN_ID, OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { API_VERSIONS, DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
 import type {
@@ -21,6 +22,7 @@ import { Direction, OsqueryQueries } from '../../../common/search_strategy';
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 
 export const getScheduledQueryResultsRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -79,6 +81,10 @@ export const getScheduledQueryResultsRoute = (
           let integrationNamespaces: Record<string, string[]> = {};
           const logger = osqueryContext.logFactory.get('scheduled_query_results');
 
+          const spaceId = osqueryContext?.service?.getActiveSpace
+            ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
+            : DEFAULT_SPACE_ID;
+
           if (osqueryContext?.service?.getIntegrationNamespaces) {
             const spaceScopedClient = await createInternalSavedObjectsClientForSpaceId(
               osqueryContext,
@@ -121,6 +127,7 @@ export const getScheduledQueryResultsRoute = (
                 kuery: request.query.kuery,
                 esFilters: request.query.esFilters,
                 startDate: request.query.startDate,
+                spaceId,
                 pagination: generateTablePaginationOptions(page, pageSize),
                 sort: [
                   {
@@ -130,7 +137,7 @@ export const getScheduledQueryResultsRoute = (
                 ],
                 integrationNamespaces: namespacesOrUndefined,
               },
-              { abortSignal, strategy: 'osquerySearchStrategy' }
+              { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )
           );
 

@@ -8,15 +8,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { RiskSeverity } from '../../../../common/search_strategy';
-import { EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
+import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 import { ENTITY_RISK_LEVEL_FIELD, RiskLevelBreakdownTable } from './risk_level_breakdown_table';
-import { useCombinedRiskScoreKpi } from './use_combined_risk_score_kpi';
-import { useKibana, useUiSetting } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
 import { useRiskLevelsEsqlQuery } from '../watchlists/components/hooks/use_risk_levels_esql_query';
 import { esqlRecordsToSeverityCount, type EsqlSeverityRecord } from '../../common/utils';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -24,11 +21,6 @@ import { useQueryInspector } from '../../../common/components/page/manage_query'
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 
 const ENTITY_RISK_LEVEL_QUERY_ID = 'entity-risk-level-query';
-
-// Wide "all time" range used to neutralize the global date picker on the
-// Entity Analytics home page, where the picker is intentionally hidden and
-// risk levels must match the counts in the entities table.
-const ALL_TIME_RANGE = { from: 'now-100y', to: 'now' } as const;
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
@@ -45,17 +37,11 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
 }) => {
   const spaceId = useSpaceId();
   const { filterManager } = useKibana().services.data.query;
-  const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
   const { setQuery, deleteQuery } = useGlobalTime();
 
-  const useLegacy = !isEntityStoreV2Enabled;
-
-  const combinedRiskStats = useCombinedRiskScoreKpi(!useLegacy, {
-    timerangeOverride: ALL_TIME_RANGE,
-  });
   const riskLevelsStats = useRiskLevelsEsqlQuery({
     watchlistId: watchlistId ?? '',
-    skip: useLegacy,
+    skip: false,
     spaceId: spaceId ?? '',
     // The Entity Analytics home page intentionally hides the global date
     // picker, so risk levels are shown across the entire entities-latest
@@ -63,38 +49,60 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
     applyGlobalTimeFilter: false,
   });
 
-  const severityCount = useMemo(() => {
-    if (useLegacy) {
-      return combinedRiskStats.severityCount ?? EMPTY_SEVERITY_COUNT;
-    }
-    return esqlRecordsToSeverityCount((riskLevelsStats.records ?? []) as EsqlSeverityRecord[]);
-  }, [useLegacy, combinedRiskStats.severityCount, riskLevelsStats.records]);
+  const severityCount = useMemo(
+    () =>
+      esqlRecordsToSeverityCount((riskLevelsStats.records ?? []) as EsqlSeverityRecord[]) ??
+      EMPTY_SEVERITY_COUNT,
+    [riskLevelsStats.records]
+  );
 
-  const loading = useLegacy ? combinedRiskStats.loading : riskLevelsStats.isLoading;
+  const loading = riskLevelsStats.isLoading;
 
   useQueryInspector({
     queryId: ENTITY_RISK_LEVEL_QUERY_ID,
-    inspect: useLegacy ? combinedRiskStats.inspect : riskLevelsStats.inspect,
+    inspect: riskLevelsStats.inspect,
     loading,
-    refetch: useLegacy ? combinedRiskStats.refetch : riskLevelsStats.refetch,
+    refetch: riskLevelsStats.refetch,
     setQuery,
     deleteQuery,
   });
 
   const handlePartitionClick = useCallback(
     (level: RiskSeverity) => {
-      filterManager.addFilters([
-        {
-          meta: {
-            alias: null,
-            disabled: false,
-            negate: false,
-          },
-          query: { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: level } },
-        },
-      ]);
+      const filter =
+        level === RiskSeverity.Unknown
+          ? {
+              meta: {
+                alias: i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.dynamicRiskLevel.unknownFilterAlias',
+                  { defaultMessage: 'Risk level: Unknown' }
+                ),
+                index: entityDataView?.id,
+                key: ENTITY_RISK_LEVEL_FIELD,
+                disabled: false,
+                negate: false,
+              },
+              query: {
+                bool: {
+                  should: [
+                    { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: level } },
+                    { bool: { must_not: { exists: { field: ENTITY_RISK_LEVEL_FIELD } } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            }
+          : {
+              meta: {
+                alias: null,
+                disabled: false,
+                negate: false,
+              },
+              query: { match_phrase: { [ENTITY_RISK_LEVEL_FIELD]: level } },
+            };
+      filterManager.addFilters([filter]);
     },
-    [filterManager]
+    [filterManager, entityDataView?.id]
   );
 
   const title = i18n.translate(

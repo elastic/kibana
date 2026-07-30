@@ -18,8 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/262351
-  describe.skip('Agentless CIS Integration Page', function () {
+  describe('Agentless CIS Integration Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
     this.tags(['skipMKI', 'cloud_security_posture_cis_integration']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
@@ -54,6 +53,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await cisIntegration.selectSetupTechnology('agentless');
 
+        // When GCP Cloud Connectors are enabled (package >= 3.3.0-preview03), the form defaults
+        // to the cloud_connectors credential type. Switch to credentials-json to show the
+        // Cloud Shell button — same pattern used by the AWS test with selectAwsCredentials('direct').
+        if (await cisIntegration.isGcpCredentialSelectorVisible()) {
+          await cisIntegration.selectGcpCredentials('credentials-json');
+        }
+
         await pageObjects.header.waitUntilLoadingHasFinished();
 
         expect(await cisIntegrationGcp.showLaunchCloudShellAgentlessButton()).to.be(true);
@@ -66,6 +72,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await cisIntegration.clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
         await cisIntegration.selectSetupTechnology('agentless');
+
+        // Same as above — switch away from cloud_connectors when the selector is visible.
+        if (await cisIntegration.isGcpCredentialSelectorVisible()) {
+          await cisIntegration.selectGcpCredentials('credentials-json');
+        }
 
         await pageObjects.header.waitUntilLoadingHasFinished();
 

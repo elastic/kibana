@@ -7,10 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
+
+/**
+ * FTR / Jest / Cypress test-infrastructure modules that Scout tests must never import.
+ * Keeps Scout tests decoupled from FTR core (which is being deprecated) and makes the
+ * selective-testing skip-list safe (see .buildkite/scripts/steps/test/scout/scout_ftr_modules.ts).
+ */
+const SCOUT_RESTRICTED_FTR_MODULES = [
+  '@kbn/test',
+  '@kbn/test-jest-helpers',
+  '@kbn/test-eui-helpers',
+  '@kbn/ftr-common-functional-services',
+  '@kbn/ftr-common-functional-ui-services',
+  '@kbn/ftr-screenshot-filename',
+  '@kbn/ftr-benchmarks',
+  '@kbn/cypress-test-helper',
+  '@kbn/journeys',
+  '@kbn/migrator-test-kit',
+  '@kbn/detections-response-ftr-services',
+];
+
+const scoutRestrictedFtrPaths = SCOUT_RESTRICTED_FTR_MODULES.map((name) => ({
+  name,
+  message: `Scout tests must not import '${name}' (FTR/Cypress/Jest test infrastructure). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.`,
+}));
+
+const scoutRestrictedFtrPatterns = {
+  group: SCOUT_RESTRICTED_FTR_MODULES.map((name) => `${name}/**`),
+  message:
+    "Scout tests must not import FTR/Cypress/Jest test infrastructure. The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
+};
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -190,6 +220,7 @@ const DEV_PATTERNS = [
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
   'src/platform/packages/shared/kbn-esql-language/scripts/**/*',
+  'src/platform/kbn-ui/_tooling/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -274,10 +305,6 @@ const RESTRICTED_IMPORTS = [
     name: 'rxjs/operators',
     message:
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
-  },
-  {
-    name: '@testing-library/react-hooks',
-    message: 'Please use @testing-library/react instead',
   },
   {
     name: '@elastic/ecs',
@@ -458,7 +485,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/observability/plugins/synthetics/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/synthetics_service/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/plugins/synthetics/server/telemetry/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/observability/test/api_integration/profiling/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
@@ -1021,6 +1047,7 @@ module.exports = {
       rules: {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
+        '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
           'warn',
@@ -1719,6 +1746,17 @@ module.exports = {
         },
       },
       rules: {
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        'playwright/expect-expect': [
+          'warn',
+          {
+            assertFunctionNames: ['expect', 'expect.soft', 'assert*'],
+          },
+        ],
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
         'playwright/no-conditional-in-test': 'warn',
@@ -1939,6 +1977,15 @@ module.exports = {
       ],
     },
     /**
+     * Alerting V2 rule form — require compressed prop on EUI form controls
+     */
+    {
+      files: ['x-pack/platform/packages/shared/response-ops/alerting-v2-rule-form/**/*.{ts,tsx}'],
+      rules: {
+        '@kbn/alerting-v2/require_eui_form_compressed': 'error',
+      },
+    },
+    /**
      * Stack Connectors Specs package
      * This package contains common code for public and server side
      */
@@ -2062,6 +2109,53 @@ module.exports = {
     {
       files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
       excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
+      rules: {
+        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
+        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+      },
+    },
+
+    /**
+     * Visualization team overrides
+     */
+
+    {
+      files: [
+        // src/platform/plugins
+        'src/platform/plugins/shared/visualizations',
+        'src/platform/plugins/shared/visualization_listing',
+        'src/platform/plugins/shared/data',
+        'src/platform/plugins/shared/expressions',
+        'src/platform/plugins/shared/charts',
+        'src/platform/plugins/shared/vis_types/timeseries',
+        'src/platform/plugins/shared/chart_expressions',
+        'src/platform/plugins/private/vis_types',
+        'src/platform/plugins/private/event_annotation',
+        'src/platform/plugins/private/event_annotation_listing',
+        'src/platform/plugins/private/vis_default_editor',
+
+        // src/platform/packages
+        'src/platform/packages/shared/kbn-visualization-listing-components',
+        'src/platform/packages/shared/kbn-visualizations-common',
+        'src/platform/packages/shared/kbn-visualization-utils',
+        'src/platform/packages/shared/kbn-visualization-ui-components',
+        'src/platform/packages/shared/kbn-palettes',
+        'src/platform/packages/shared/kbn-event-annotation-components',
+        'src/platform/packages/shared/kbn-dom-drag-drop',
+        'src/platform/packages/shared/kbn-coloring',
+        'src/platform/packages/shared/kbn-chart-icons',
+        'src/platform/packages/shared/chart-test-jest-helpers',
+        'src/platform/packages/private/kbn-test-eui-helpers',
+
+        // x-pack/platform/plugins
+        'x-pack/platform/plugins/shared/lens',
+        'x-pack/platform/plugins/private/graph',
+
+        // x-pack/platform/packages
+        'x-pack/platform/packages/private/kbn-random-sampling',
+      ].map(
+        (path) => `${path}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)`
+      ),
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
@@ -2756,6 +2850,7 @@ module.exports = {
                 name: 'playwright',
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
@@ -2778,6 +2873,7 @@ module.exports = {
                 message:
                   "Platform tests should import from '@kbn/scout' (and '@kbn/scout-synthtrace' if you need synthtrace).",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2805,6 +2901,7 @@ module.exports = {
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
@@ -2812,6 +2909,7 @@ module.exports = {
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2836,12 +2934,14 @@ module.exports = {
                 name: 'playwright',
                 message: "Search solution tests should import from '@kbn/scout-search' instead.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
                 group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
                 message: "Search solution tests should import from '@kbn/scout-search' instead.",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2869,6 +2969,7 @@ module.exports = {
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
@@ -2876,6 +2977,7 @@ module.exports = {
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2896,6 +2998,7 @@ module.exports = {
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_core_settings_in_space_test': 'warn',
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/scout_no_deprecated_tags': 'error',
@@ -2980,7 +3083,8 @@ module.exports = {
      * portable outside Kibana (e.g. Cloud UI). They may only import from the
      * baseline peer deps (`@elastic/eui`, `@emotion/*`, `react`, `react-dom`) plus
      * the `@kbn/*` modules that are stubbed at packaging time. Packaging, tests,
-     * and stories are excluded because they reference Kibana-only tooling.
+     * stories, and Storybook config are excluded because they reference
+     * Kibana-only tooling.
      */
     {
       files: ['src/platform/kbn-ui/**/*.{ts,tsx}'],
@@ -2990,6 +3094,8 @@ module.exports = {
         'src/platform/kbn-ui/**/__stories__/**',
         'src/platform/kbn-ui/**/__tests__/**',
         'src/platform/kbn-ui/**/packaging/**',
+        'src/platform/kbn-ui/storybook-config/**',
+        'src/platform/kbn-ui/_tooling/**',
       ],
       rules: {
         'no-restricted-imports': [
@@ -2999,8 +3105,8 @@ module.exports = {
               '@kbn/*',
               '!@kbn/i18n',
               '!@kbn/i18n-react',
-              '!@kbn/core-chrome-layout-constants',
-              '!@kbn/core-chrome-layout-utils',
+              '!@kbn/ui-chrome-layout-constants',
+              '!@kbn/ui-chrome-layout-utils',
             ],
           },
         ],
@@ -3012,9 +3118,11 @@ module.exports = {
       // as consumers migrate to the native `fetch` API. Placed last so it wins
       // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
       // security_solution and workflows_management blocks). The trade-off: the
-      // 35 allowlisted files that overlap with those blocks lose their
-      // `*legacy*` pattern check; verified that none of them currently import
-      // any path matching `*legacy*`.
+      // allowlisted files that overlap with those blocks lose their `*legacy*`
+      // pattern check; verified that none of them currently import any path
+      // matching `*legacy*`. The js-yaml freeze is handled separately via
+      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
+      // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
         'no-restricted-imports': [
@@ -3023,8 +3131,93 @@ module.exports = {
         ],
       },
     },
+    {
+      // These files are allowed to reference 'npx playwright' — either because they define
+      // the rule itself, test it with invalid-code fixtures, or mention it in an error message
+      // to explain what went wrong.
+      files: [
+        'src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.js',
+        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.test.js',
+      ],
+      rules: {
+        '@kbn/eslint/no_npx_playwright': 'off',
+      },
+    },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/observability/plugins/**/*.test.*',
+        'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/**/*.mock.*',
+        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
+        'x-pack/solutions/observability/packages/**/*.test.*',
+        'x-pack/solutions/observability/packages/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.mock.*',
+        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
+      ],
+      rules: {
+        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
+      },
+    },
   ],
 };
+
+/**
+ * Redux Toolkit v1 enforcement.
+ * These paths still use RTK v1 aliased packages (redux-toolkit-v1, react-redux-v7, etc.).
+ * When a plugin/package migrates to RTK v2, remove its entry here.
+ * See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx
+ */
+module.exports.overrides.push({
+  files: [
+    'src/platform/packages/private/kbn-ambient-common-types/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-coloring/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-test-jest-helpers/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
+    'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
+    'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
+    'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/graph/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/index_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/lens/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/license_management/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/maps/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/searchprofiler/**/*.{js,mjs,ts,tsx}',
+    'x-pack/platform/plugins/shared/streams_app/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/observability/plugins/uptime/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/search/plugins/enterprise_search/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/packages/data-table/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/packages/expandable-flyout/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
+    'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
+  ],
+  rules: {
+    '@kbn/imports/no_redux_toolkit_v2_imports': 'error',
+  },
+});
 
 /**
  * Prettier disables all conflicting rules, listing as last override so it takes precedence

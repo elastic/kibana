@@ -472,6 +472,8 @@ export class AuthenticationService {
               grant: uiamAPIKeys.grant.bind(uiamAPIKeys),
               invalidate: uiamAPIKeys.invalidate.bind(uiamAPIKeys),
               convert: uiamAPIKeys.convert.bind(uiamAPIKeys),
+              getInternalCallerAttestationHeaders:
+                uiamAPIKeys.getInternalCallerAttestationHeaders.bind(uiamAPIKeys),
             }
           : null,
       },
@@ -485,6 +487,7 @@ export class AuthenticationService {
             listConnections: uiamOAuth.listConnections.bind(uiamOAuth),
             updateConnection: uiamOAuth.updateConnection.bind(uiamOAuth),
             revokeConnection: uiamOAuth.revokeConnection.bind(uiamOAuth),
+            resolveUsers: uiamOAuth.resolveUsers.bind(uiamOAuth),
           }
         : null,
 

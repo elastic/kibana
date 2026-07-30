@@ -35,6 +35,13 @@ export const readStreamRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'Stream definition and associated metadata.',
@@ -64,15 +71,12 @@ export const readStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Streams.all.GetResponse> => {
-    const { getQueryClient, attachmentClient, streamsClient, scopedClusterClient } =
-      await getScopedClients({
-        request,
-      });
+    const { attachmentClient, streamsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
 
-    const queryClient = await getQueryClient();
     const body = await readStream({
       name: params.path.name,
-      queryClient,
       attachmentClient,
       scopedClusterClient,
       streamsClient,
@@ -94,6 +98,13 @@ export const listStreamsRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'A list of all streams.',
@@ -175,7 +186,7 @@ export const editStreamRoute = createServerRoute({
     const { streamsClient } = await getScopedClients({ request });
 
     // Replicated data streams are managed by the source cluster via CCR.
-    // Only Kibana-side data (description, dashboards, queries) can be updated.
+    // Only Kibana-side data (description, dashboards, rules) can be updated.
     if (Streams.ClassicStream.UpsertRequest.is(params.body)) {
       const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
       if (dataStream?.replicated && classicIngestHasEsLevelChanges(params.body.stream.ingest)) {
@@ -219,6 +230,13 @@ export const deleteStreamRoute = createServerRoute({
       stability: 'experimental',
     },
     oasOperationObject: () => ({
+      requestBody: {
+        content: {
+          'application/json': {
+            examples: {},
+          },
+        },
+      },
       responses: {
         200: {
           description: 'The stream was deleted successfully.',

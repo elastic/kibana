@@ -74,6 +74,28 @@ export function enrichErrorMessage(
   return result;
 }
 
+// Schema-aware enrichment replaces the issue message with a description of the
+// *type* expected at the path (e.g. "max expects number"). That is helpful when
+// the author supplied the wrong shape, but it destroys precise, author-written
+// messages carried by the zod issue itself:
+//   - constraint violations (`too_big`, etc.) carrying e.g. "Parallel concurrency
+//     \"max\" cannot exceed 20." would be rewritten to the useless "max expects
+//     number".
+//   - `custom` refinements (e.g. the parallel-mode mutual-exclusivity rule)
+//     carry a hand-written, actionable message; because they attach at the step
+//     node the path points at the step-union, so enrichment would otherwise
+//     replace them with the giant "must be one of ...405 more" union dump.
+// For these codes the zod issue message is already specific and authoritative,
+// so skip the type-describing enrichment and keep it verbatim.
+const AUTHORITATIVE_MESSAGE_ERROR_CODES = new Set([
+  'too_big',
+  'too_small',
+  'not_multiple_of',
+  'invalid_value',
+  'invalid_format',
+  'custom',
+]);
+
 function computeEnrichment(
   path: PropertyKey[],
   originalMessage: string,
@@ -88,7 +110,7 @@ function computeEnrichment(
     return { message: domainEnriched, enriched: true };
   }
 
-  if (path.length > 0) {
+  if (path.length > 0 && !AUTHORITATIVE_MESSAGE_ERROR_CODES.has(errorCode)) {
     const schemaEnriched = trySchemaAwareEnrichment(
       path,
       fieldName,
@@ -282,8 +304,20 @@ function getStepTypeAtYamlPath(pathToStep: PropertyKey[], yamlDocument: Document
   }
 }
 
+// Keep enriched marker messages readable: `steps` is a discriminated union of
+// every connector registered in Kibana (~200 options).
+const MAX_UNION_OPTIONS_RENDERED = 10;
+
 function analyzeUnionSchema(unionSchema: z.ZodUnion<any>): string[] {
-  return unionSchema.def.options.map((option: z.ZodType) => analyzeUnionOption(option));
+  const { options } = unionSchema;
+  const rendered = options
+    .slice(0, MAX_UNION_OPTIONS_RENDERED)
+    .map((option: z.ZodType) => analyzeUnionOption(option));
+  const remaining = options.length - MAX_UNION_OPTIONS_RENDERED;
+  if (remaining > 0) {
+    rendered.push(`... and ${remaining} more`);
+  }
+  return rendered;
 }
 
 function analyzeUnionOption(option: z.ZodType): string {
@@ -419,6 +453,10 @@ function unwrapSchema(schema: z.ZodType): z.ZodType {
     } else if (current instanceof z.ZodNullable) {
       current = current.unwrap() as z.ZodType;
     } else if (current instanceof z.ZodDefault) {
+      current = current.unwrap() as z.ZodType;
+    } else if (current instanceof z.ZodLazy) {
+      // So that `z.array(z.lazy(stepUnion))` resolves to the union branch in
+      // `generateArrayErrorMessage` / `generateSchemaErrorMessage`.
       current = current.unwrap() as z.ZodType;
     } else {
       break;

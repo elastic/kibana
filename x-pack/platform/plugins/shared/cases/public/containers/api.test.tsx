@@ -43,7 +43,6 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
-  bulkPostObservables,
 } from './api';
 
 import {
@@ -630,6 +629,85 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(findCaseUserActionsSnake);
       const resp = await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(resp).toEqual(findCaseUserActionsResponse);
+    });
+
+    it('should include the search param in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, search: 'hello world' },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            search: 'hello world',
+          },
+        }
+      );
+    });
+
+    it('should include the authors param in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, authors: ['elastic'] },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            authors: ['elastic'],
+          },
+        }
+      );
+    });
+
+    it('should include multiple authors in the query when provided', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { ...params, authors: ['elastic', 'other'] },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${basicCase.id}/user_actions/_find`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+          query: {
+            types: [],
+            sortOrder: 'asc',
+            page: 1,
+            perPage: 10,
+            authors: ['elastic', 'other'],
+          },
+        }
+      );
+    });
+
+    it('should omit search and authors from the query when not provided', async () => {
+      await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.query).not.toHaveProperty('search');
+      expect(options.query).not.toHaveProperty('authors');
+    });
+
+    it('should omit authors from the query when an empty array is provided', async () => {
+      await findCaseUserActions(basicCase.id, { ...params, authors: [] }, abortCtrl.signal);
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options.query).not.toHaveProperty('authors');
     });
   });
 
@@ -1385,64 +1463,6 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
       expect(resp).toEqual(undefined);
-    });
-  });
-
-  describe('bulkPostObservables', () => {
-    beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(basicCaseSnake);
-    });
-
-    it('should be called with correct check url, method, signal', async () => {
-      await bulkPostObservables(
-        {
-          caseId: mockCase.id,
-          observables: [
-            {
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-            },
-          ],
-        },
-        abortCtrl.signal
-      );
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_bulk_create`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            caseId: mockCase.id,
-            observables: [
-              {
-                typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-                value: 'test value',
-                description: '',
-              },
-            ],
-          }),
-          signal: abortCtrl.signal,
-        }
-      );
-    });
-
-    it('should return correct response', async () => {
-      const resp = await bulkPostObservables(
-        {
-          caseId: mockCase.id,
-          observables: [
-            {
-              typeKey: '18b62f19-8c60-415e-8a08-706d1078c556',
-              value: 'test value',
-              description: '',
-            },
-          ],
-        },
-        abortCtrl.signal
-      );
-      expect(resp).toEqual(basicCase);
     });
   });
 });

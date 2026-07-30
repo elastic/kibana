@@ -32,31 +32,22 @@ const makeDeps = () => ({
 describe('createUnresolveAction', () => {
   beforeEach(() => jest.restoreAllMocks());
 
-  it('compatible when some episode is not activated and not already ACTIVE', () => {
+  it('compatible when at least one episode is INACTIVE', () => {
     expect(
       createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: undefined })],
+        episodes: [makeEpisode({ 'episode.status': ALERT_EPISODE_STATUS.INACTIVE })],
       })
     ).toBe(true);
   });
 
-  it('not compatible when every episode is already activated', () => {
+  it.each([
+    ALERT_EPISODE_STATUS.ACTIVE,
+    ALERT_EPISODE_STATUS.RECOVERING,
+    ALERT_EPISODE_STATUS.PENDING,
+  ] as const)('not compatible when every episode is %s', (status) => {
     expect(
       createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [makeEpisode({ last_deactivate_action: 'activate' })],
-      })
-    ).toBe(false);
-  });
-
-  it('not compatible when every episode has status ACTIVE', () => {
-    expect(
-      createUnresolveAction(makeDeps()).isCompatible({
-        episodes: [
-          makeEpisode({
-            'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-            last_deactivate_action: undefined,
-          }),
-        ],
+        episodes: [makeEpisode({ 'episode.status': status })],
       })
     ).toBe(false);
   });
@@ -67,7 +58,7 @@ describe('createUnresolveAction', () => {
 
   it('execute: POSTs unique-by-group ACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ processed: 1, total: 1 });
+    jest.spyOn(bulk, 'bulkCreateAlertActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = jest.fn();
     await createUnresolveAction(deps).execute({
       episodes: [

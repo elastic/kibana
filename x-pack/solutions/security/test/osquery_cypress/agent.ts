@@ -13,9 +13,17 @@ import {
   waitForHostToEnroll,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 
+import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import chalk from 'chalk';
 import { Manager } from './resource_manager';
 import { generateRandomString, getLatestAvailableAgentVersion } from './utils';
+
+// Pin the stateful (ESS) enrolled agent to a fixed version to work around a
+// regression in the 9.5/9.6 Elastic Agent. Serverless keeps resolving the
+// latest available version. Keep this plain (no `-SNAPSHOT`) so the released
+// docker image tag resolves.
+// TODO: unpin once the 9.5/9.6 agent regression is resolved.
+const PINNED_STATEFUL_AGENT_VERSION = '9.4.3';
 
 export class AgentManager extends Manager {
   private readonly log: ToolingLog;
@@ -40,10 +48,12 @@ export class AgentManager extends Manager {
   public async setup() {
     this.log.info(chalk.bold('Setting up Agent'));
 
-    const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${await getLatestAvailableAgentVersion(
-      this.kbnClient,
-      this.log
-    )}`;
+    const isServerless = await isServerlessKibanaFlavor(this.kbnClient);
+    const agentVersion = isServerless
+      ? await getLatestAvailableAgentVersion(this.kbnClient, this.log)
+      : PINNED_STATEFUL_AGENT_VERSION;
+
+    const artifact = `docker.elastic.co/elastic-agent/elastic-agent:${agentVersion}`;
     this.log.indent(4, () => this.log.info(`Image: ${artifact}`));
     const containerName = generateRandomString(12);
     const fleetServerUrl =

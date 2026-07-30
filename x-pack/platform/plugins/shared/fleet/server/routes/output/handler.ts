@@ -6,13 +6,18 @@
  */
 
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
 
 import { isEqual } from 'lodash';
 
-import { SERVERLESS_DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
+import {
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+  outputType,
+} from '../../../common/constants';
 
 import type {
   DeleteOutputRequestSchema,
@@ -107,11 +112,10 @@ export const putOutputHandler: RequestHandler<
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(request.params.outputId);
-    if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(esClient);
-    } else {
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id);
-    }
+    await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+      isDefault: output.is_default,
+      isDefaultMonitoring: output.is_default_monitoring,
+    });
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -142,9 +146,10 @@ export const postOutputHandler: RequestHandler<
   validateOutputSslPaths(newOutput);
   ensureNoDuplicateSecrets(newOutput);
   const output = await outputService.create(soClient, esClient, newOutput, { id });
-  if (output.is_default || output.is_default_monitoring) {
-    await agentPolicyService.bumpAllAgentPolicies(esClient);
-  }
+  await agentPolicyService.bumpAllAgentPoliciesForOutput(esClient, output.id, {
+    isDefault: output.is_default,
+    isDefaultMonitoring: output.is_default_monitoring,
+  });
 
   const body: GetOneOutputResponse = {
     item: output,
@@ -173,11 +178,29 @@ async function validateOutputServerless(
     originalOutput = await outputService.get(outputId);
   }
   const type = output.type || originalOutput?.type;
-  if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
-    throw Boom.badRequest(
-      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
-    );
+  if (type !== outputType.Elasticsearch) {
+    return;
   }
+
+  if (isEqual(output.hosts, defaultOutput.hosts)) {
+    return;
+  }
+
+  try {
+    const privateOutput = await outputService.get(SERVERLESS_PRIVATE_OUTPUT_ID);
+    if (isEqual(output.hosts, privateOutput.hosts)) {
+      return;
+    }
+  } catch (e) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw e;
+    }
+    appContextService.getLogger().debug(`Private ES output SO not found: ${e?.message ?? e}`);
+  }
+
+  throw Boom.badRequest(
+    `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+  );
 }
 
 export const deleteOutputHandler: RequestHandler<

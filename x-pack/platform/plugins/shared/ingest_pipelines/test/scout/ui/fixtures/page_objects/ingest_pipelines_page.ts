@@ -163,6 +163,7 @@ export class IngestPipelinesPage {
 
   async closePipelineDetailsFlyout() {
     await this.flyoutCloseButton.click();
+    await this.detailsFlyout.waitFor({ state: 'hidden' });
   }
 
   async getDetailsFlyoutTitle() {
@@ -238,6 +239,7 @@ export class IngestPipelinesPage {
     await row.locator('[data-test-subj="deleteGeoipDatabaseButton"]').click();
     await this.geoipDatabaseConfirmation.fill('delete');
     await this.deleteGeoipDatabaseSubmitButton.click();
+    await this.deleteGeoipDatabaseSubmitButton.waitFor({ state: 'detached' });
   }
 
   private async fillDescription(description: string) {

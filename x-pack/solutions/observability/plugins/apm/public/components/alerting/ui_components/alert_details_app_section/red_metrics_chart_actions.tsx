@@ -12,6 +12,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import type { ApmPluginStartDeps } from '../../../../plugin';
 import type {
@@ -20,6 +21,9 @@ import type {
 } from '../../../shared/links/discover_links/get_esql_query';
 import { getESQLQuery } from '../../../shared/links/discover_links/get_esql_query';
 import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
+import type { APM_CHART_EBT_ELEMENTS } from '../../../shared/charts/ebt_constants';
+import { TimeRangeComparisonEnum } from '../../../shared/time_comparison/get_comparison_options';
+import type { AnomalyChartInfo } from './anomaly_severity_badge';
 
 const openLabel = i18n.translate('xpack.apm.alertDetails.chartActions.open', {
   defaultMessage: 'Open',
@@ -43,19 +47,8 @@ const errorsInDiscoverLabel = i18n.translate(
   }
 );
 
-/**
- * Chart names used as the `data-ebt-element` value for click telemetry
- * on the alert details RED metrics and error count charts actions.
- */
-export const RED_METRICS_CHART_ELEMENT = {
-  LATENCY: 'latencyChart',
-  THROUGHPUT: 'throughputChart',
-  FAILED_TRANSACTION_RATE: 'failedTransactionRateChart',
-  ERROR_COUNT: 'errorCountChart',
-} as const;
-
 export type RedMetricsChartElement =
-  (typeof RED_METRICS_CHART_ELEMENT)[keyof typeof RED_METRICS_CHART_ELEMENT];
+  (typeof APM_CHART_EBT_ELEMENTS)[keyof typeof APM_CHART_EBT_ELEMENTS];
 
 interface RedMetricsChartActionsProps {
   queryParams: Pick<
@@ -66,6 +59,11 @@ interface RedMetricsChartActionsProps {
   indexType?: IndexType;
   ruleTypeId?: string;
   element: RedMetricsChartElement;
+  /**
+   * When set, the "In APM" link opens APM with the anomaly severity threshold
+   * pre-selected and expected bounds comparison enabled (used for anomaly alerts).
+   */
+  anomaly?: AnomalyChartInfo;
 }
 
 export function RedMetricsChartActions(props: RedMetricsChartActionsProps) {
@@ -93,6 +91,7 @@ function RedMetricsChartActionsPopover({
   ruleTypeId,
   indexType = 'traces',
   element,
+  anomaly,
   apmLocator,
   apmSourcesAccess,
   share,
@@ -112,6 +111,10 @@ function RedMetricsChartActionsPopover({
 
   const { serviceName, errorGroupId, ...queryForApm } = queryParams;
 
+  const anomalyThreshold =
+    anomaly && anomaly.severity !== ML_ANOMALY_SEVERITY.UNKNOWN ? anomaly.severity : undefined;
+  const includeAnomalies = anomalyThreshold !== undefined;
+
   const apmLink = useMemo(() => {
     let serviceOverviewTab: 'errors' | 'transactions' | undefined;
 
@@ -129,6 +132,13 @@ function RedMetricsChartActionsPopover({
         ...queryForApm,
         rangeFrom: timeRange.from,
         rangeTo: timeRange.to,
+        ...(includeAnomalies
+          ? {
+              anomalyThreshold,
+              comparisonEnabled: true,
+              offset: TimeRangeComparisonEnum.ExpectedBounds,
+            }
+          : {}),
       },
     });
   }, [
@@ -139,6 +149,8 @@ function RedMetricsChartActionsPopover({
     queryForApm,
     timeRange,
     indexType,
+    anomalyThreshold,
+    includeAnomalies,
   ]);
 
   const discoverLink = useMemo(() => {

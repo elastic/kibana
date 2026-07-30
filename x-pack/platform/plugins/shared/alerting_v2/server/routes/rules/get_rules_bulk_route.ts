@@ -8,33 +8,25 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
-import { findRulesResponseSchema, ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
+import {
+  bulkGetRulesParamsSchema,
+  bulkGetRulesResponseSchema,
+  errorResponseSchema,
+} from '@kbn/alerting-v2-schemas';
+import type { BulkGetRulesParams } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-
-const ruleIdSchema = z.string().trim().min(1).max(ID_MAX_LENGTH).describe('A rule identifier.');
-
-const getRulesBulkQuerySchema = z.object({
-  ids: z.union([
-    ruleIdSchema,
-    z
-      .array(ruleIdSchema)
-      .min(1)
-      .max(1000)
-      .optional()
-      .describe('A list of rule identifiers to retrieve.'),
-  ]),
-});
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import { RULES_NOT_FOUND_DESCRIPTION } from './rule_response_descriptions';
+import { bulkGetRulesOasExamples } from './bulk_get_rules_oas_example';
 
 @injectable()
 export class BulkGetRulesRoute extends BaseAlertingRoute {
-  static method = 'get' as const;
-  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk`;
+  static method = 'post' as const;
+  static path = `${ALERTING_V2_RULE_API_PATH}/_bulk_get`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.rules.read],
@@ -42,18 +34,24 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     summary: 'Get rules in bulk',
+    oasOperationObject: bulkGetRulesOasExamples,
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(getRulesBulkQuerySchema),
+      body: bulkGetRulesParamsSchema,
     },
     response: {
       200: {
-        body: () => findRulesResponseSchema,
-        description: 'Indicates a successful call.',
+        body: () => bulkGetRulesResponseSchema,
+        description: 'Returns the requested rules.',
       },
       400: {
-        description: 'Indicates an invalid schema or parameters.',
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+      },
+      404: {
+        body: () => errorResponseSchema,
+        description: RULES_NOT_FOUND_DESCRIPTION,
       },
     },
   };
@@ -63,23 +61,14 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, z.infer<typeof getRulesBulkQuerySchema>>,
+    private readonly request: KibanaRequest<unknown, unknown, BulkGetRulesParams>,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
   }
 
   protected async execute() {
-    const idsParam = this.request.query.ids ?? [];
-    const ids = Array.isArray(idsParam) ? idsParam : [idsParam];
-    const items = await this.rulesClient.getRules(ids);
-    return this.ctx.response.ok({
-      body: {
-        items,
-        total: items.length,
-        page: 1,
-        perPage: items.length,
-      },
-    });
+    const rules = await this.rulesClient.getRules(this.request.body.ids);
+    return this.ctx.response.ok({ body: { rules } });
   }
 }

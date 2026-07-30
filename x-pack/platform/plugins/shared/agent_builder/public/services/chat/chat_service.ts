@@ -27,6 +27,7 @@ interface BaseConverseParams {
   agentId?: string;
   connectorId?: string;
   conversationId: string;
+  executionId: string;
   browserApiTools?: BrowserApiToolMetadata[];
   capabilities?: AgentCapabilities;
 }
@@ -46,7 +47,10 @@ export type RegenerateParams = BaseConverseParams;
  * Wire payload for `converse()` with `conversation_id` narrowed to required. Every
  * Agent Builder UI caller passes a client-generated UUID before chat fires.
  */
-type ConversePayload = ChatRequestBodyPayload & { conversation_id: string };
+type ConversePayload = ChatRequestBodyPayload & {
+  conversation_id: string;
+  execution_id: string;
+};
 
 export class ChatService {
   private readonly http: HttpSetup;
@@ -62,6 +66,7 @@ export class ChatService {
       input: params.input,
       agent_id: params.agentId,
       conversation_id: params.conversationId,
+      execution_id: params.executionId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       attachments: params.attachments,
@@ -76,6 +81,7 @@ export class ChatService {
     return this.converse(params.signal, {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
+      execution_id: params.executionId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       prompts: params.prompts,
@@ -87,6 +93,7 @@ export class ChatService {
     return this.converse(params.signal, {
       agent_id: params.agentId,
       conversation_id: params.conversationId,
+      execution_id: params.executionId,
       connector_id: params.connectorId,
       capabilities: params.capabilities ?? getKibanaDefaultAgentCapabilities(),
       browser_api_tools: params.browserApiTools ?? [],
@@ -106,6 +113,10 @@ export class ChatService {
       httpResponseIntoObservable<ChatEvent>(),
       unwrapAgentBuilderErrors()
     );
+  }
+
+  async abort(executionId: string): Promise<void> {
+    await this.http.post(`${internalApiPath}/executions/${executionId}/abort`);
   }
 
   private converse(signal: AbortSignal | undefined, payload: ConversePayload) {

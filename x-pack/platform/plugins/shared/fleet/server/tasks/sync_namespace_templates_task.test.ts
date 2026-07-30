@@ -107,10 +107,12 @@ describe('syncNamespaceTemplatesTask', () => {
       const registeredDef =
         taskManager.registerTaskDefinitions.mock.calls[0][0]['fleet:sync_namespace_templates'];
       const abortController = new AbortController();
-      const runner = registeredDef.createTaskRunner({
-        taskInstance: { params } as any,
-        abortController,
-      });
+      const runner = registeredDef.createTaskRunner(
+        taskManagerMock.createRunContext({
+          taskInstance: { params } as any,
+          signal: abortController.signal,
+        })
+      );
       return { runner, abortController };
     };
 
@@ -132,7 +134,7 @@ describe('syncNamespaceTemplatesTask', () => {
         packageName: 'nginx',
         addedNamespaces: ['production'],
         removedNamespaces: ['staging'],
-        abortController,
+        signal: abortController.signal,
       });
     });
 
@@ -161,7 +163,7 @@ describe('syncNamespaceTemplatesTask', () => {
       await runner.run();
 
       expect(mockedSyncNamespaceTemplates).toHaveBeenCalledWith(
-        expect.objectContaining({ abortController })
+        expect.objectContaining({ signal: abortController.signal })
       );
       expect(abortController.signal.aborted).toBe(true);
     });

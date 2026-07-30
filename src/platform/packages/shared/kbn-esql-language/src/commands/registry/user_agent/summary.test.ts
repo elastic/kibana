@@ -15,12 +15,12 @@ describe('USER_AGENT > summary', () => {
     const result = summary(synth.cmd`USER_AGENT ua = uaString`);
     expect(result).toEqual({
       newColumns: new Set([
+        'ua.device.name',
         'ua.name',
-        'ua.version',
+        'ua.os.full',
         'ua.os.name',
         'ua.os.version',
-        'ua.os.full',
-        'ua.device.name',
+        'ua.version',
       ]),
     });
   });

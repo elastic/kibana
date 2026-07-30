@@ -65,9 +65,16 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
       background: transparent;
       height: ${euiTheme.size.xl};
     }
-    
+
     .rdp-day_button {
       border: ${euiTheme.border.width.thick} solid transparent;
+      /* rdp's default is 100%, which turns elliptical on our full-width day
+         buttons and distorts the focus ring; match the selection rectangle. */
+      --rdp-day_button-border-radius: ${euiTheme.border.radius.small};
+    }
+
+    .rdp-day:not(.rdp-selected) .rdp-day_button:hover {
+      background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
     }
 
     :not(.rdp-today) .rdp-day_button {
@@ -76,7 +83,7 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
       height: ${euiTheme.size.xl};
       width: 100%;
     }
-  
+
     .rdp-today .rdp-day_button {
       position: relative;
       color: ${euiTheme.colors.textParagraph};
@@ -95,7 +102,7 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
         border-radius: 3px;
       }
     }
-    
+
     .rdp-selected.rdp-range_start .rdp-day_button::after,
     .rdp-selected.rdp-range_end .rdp-day_button::after {
       background-color: ${euiTheme.colors.textInverse};
@@ -107,12 +114,12 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
       color: ${euiTheme.colors.textPrimary};
       font-weight: ${euiTheme.font.weight.semiBold};
     }
-    
+
     .rdp-selected:not(.rdp-range_middle) .rdp-day_button {
       border-radius: ${euiTheme.border.radius.small};
       font-weight: ${euiTheme.font.weight.bold};
     }
-    
+
     .rdp-range_middle .rdp-day_button {
       position: relative;
       background-color: ${euiTheme.colors.backgroundLightPrimary};
@@ -145,11 +152,11 @@ export const calendarViewStyles = ({ euiTheme }: UseEuiTheme) => {
     .rdp-range_start:has(+ .rdp-range_end) .rdp-day_button {
       border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
     }
-    
+
     .rdp-range_start + .rdp-range_end .rdp-day_button {
       border-radius: 0 ${euiTheme.border.radius.small} ${euiTheme.border.radius.small} 0;
     }
-    
+
     .rdp-range_end .rdp-day_button, .rdp-range_start .rdp-day_button {
       background-color: ${euiTheme.colors.backgroundFilledPrimary};
       border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.backgroundFilledPrimary};

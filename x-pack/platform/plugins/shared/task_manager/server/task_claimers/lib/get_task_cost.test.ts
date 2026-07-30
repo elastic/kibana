@@ -76,4 +76,13 @@ describe('getTaskCost', () => {
     });
     expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.ExtraLarge);
   });
+
+  it('ensure unknown task size is supported', () => {
+    const task = mockInstance({
+      taskType: 'taskType1',
+      // simulate unknown cost from a newer Kibana
+      cost: 'HUGE' as InstanceTaskCost,
+    });
+    expect(getTaskCost(task, taskDefinitions)).toBe(TaskCost.Normal);
+  });
 });

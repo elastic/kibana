@@ -9,14 +9,11 @@
 
 import { Document, LineCounter, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
+import type { ForeachVariableLineParseResult, VariableLineParseResult } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { getVariableSuggestions } from './get_variable_suggestions';
 import type { StepPropInfo } from '../../../../../../entities/workflows/store';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
-import type {
-  ForeachVariableLineParseResult,
-  VariableLineParseResult,
-} from '../../context/parse_line_for_completion';
 
 describe('getVariableSuggestions', () => {
   const createMockRange = (): monaco.IRange => ({
@@ -71,8 +68,12 @@ describe('getVariableSuggestions', () => {
     isInStepsContext: false,
     isInTriggersContext: false,
     isInWorkflowInputsContext: false,
+    isInEsqlQueryField: false,
+    esqlRegion: null,
+    esqlOffsetInQuery: null,
     workflowDefinition: null,
     currentWorkflowId: null,
+    isCurrentWorkflowManaged: false,
     ...overrides,
   });
 

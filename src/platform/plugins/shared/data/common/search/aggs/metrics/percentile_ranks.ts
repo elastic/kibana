@@ -45,7 +45,7 @@ const getValueProps = (
 
       return i18n.translate('data.search.aggs.metrics.percentileRanks.valuePropsLabel', {
         defaultMessage: 'Percentile rank {format} of "{label}"',
-        values: { format: format.convert(this.key, 'text'), label },
+        values: { format: format.convertToText(this.key), label },
       });
     },
   };

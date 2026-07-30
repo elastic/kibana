@@ -6,12 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { CoreStart, useService } from '@kbn/core-di-browser';
+import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
-import { paths } from '../../../constants';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { useDeleteRule } from '../../../hooks/use_delete_rule';
 import { useToggleRuleEnabled } from '../../../hooks/use_toggle_rule_enabled';
+import { useRunRule } from '../../../hooks/use_run_rule';
+import { UserCapabilities } from '../../../services/user_capabilities';
 import type { RuleApiResponse } from '../../../services/rules_api';
 import { DeleteConfirmationModal } from '../modals/delete_confirmation_modal';
 import { EntityNotFoundFlyout } from '../../entity_not_found_flyout';
@@ -21,26 +22,21 @@ import { RuleSummaryFlyout } from './rule_summary_flyout';
 interface Props {
   ruleId: string;
   onClose: () => void;
+  onEdit: (rule: RuleApiResponse) => void;
+  onClone: (rule: RuleApiResponse) => void;
 }
 
-export const RuleSummaryFlyoutContainer = ({ ruleId, onClose }: Props) => {
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const { basePath } = useService(CoreStart('http'));
+export const RuleSummaryFlyoutContainer = ({ ruleId, onClose, onEdit, onClone }: Props) => {
   const [ruleToDelete, setRuleToDelete] = useState<RuleApiResponse | null>(null);
+  const canWrite = useService(UserCapabilities).canWrite('rules');
 
   const { data: rule, isLoading, isError } = useFetchRule(ruleId);
   const { mutate: deleteRule, isLoading: isDeleting } = useDeleteRule();
   const { mutate: toggleRuleEnabled } = useToggleRuleEnabled();
+  const { mutate: runRule } = useRunRule();
 
   if (isLoading) {
-    return (
-      <LoadingFlyout
-        title={i18n.translate('xpack.alertingV2.rule.summaryFlyout.loadingTitle', {
-          defaultMessage: 'Rule',
-        })}
-        onClose={onClose}
-      />
-    );
+    return <LoadingFlyout onClose={onClose} />;
   }
 
   if (isError || !rule) {
@@ -61,27 +57,31 @@ export const RuleSummaryFlyoutContainer = ({ ruleId, onClose }: Props) => {
     <>
       <RuleSummaryFlyout
         rule={rule}
+        canWrite={canWrite}
+        hasAnimation={false}
+        ownFocus={false}
+        session="start"
         onClose={onClose}
-        onEdit={(r) => navigateToUrl(basePath.prepend(paths.ruleEdit(r.id)))}
-        onClone={(r) =>
-          navigateToUrl(
-            basePath.prepend(`${paths.ruleCreate}?cloneFrom=${encodeURIComponent(r.id)}`)
-          )
-        }
+        onEdit={onEdit}
+        onClone={onClone}
         onDelete={(r) => setRuleToDelete(r)}
         onToggleEnabled={(r) => toggleRuleEnabled({ id: r.id, enabled: !r.enabled })}
+        onRun={(r) => runRule({ id: r.id })}
       />
       {ruleToDelete && (
         <DeleteConfirmationModal
           ruleName={ruleToDelete.metadata.name}
           onCancel={() => setRuleToDelete(null)}
           onConfirm={() => {
-            deleteRule(ruleToDelete.id, {
-              onSuccess: () => {
-                setRuleToDelete(null);
-                onClose();
-              },
-            });
+            deleteRule(
+              { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+              {
+                onSuccess: () => {
+                  setRuleToDelete(null);
+                  onClose();
+                },
+              }
+            );
           }}
           isLoading={isDeleting}
         />

@@ -8,12 +8,19 @@
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { combineLatest, map } from 'rxjs';
+import type { FullscreenEntryPointSource } from '@kbn/agent-builder-common';
+import type { ConversationAttachment } from '@kbn/agent-builder-common/attachments';
 import { AGENTBUILDER_APP_ID } from '../../../common/features';
+import type { CreateOAuthClientResponse } from '../../../common/http_api/oauth_clients';
 import { useKibana } from './use_kibana';
 
 export interface LocationState {
   shouldStickToBottom?: boolean;
   initialMessage?: string;
+  attachments?: ConversationAttachment[];
+  autoSendInitialMessage?: boolean;
+  mcpClientCreated?: CreateOAuthClientResponse;
+  entryPointSource?: FullscreenEntryPointSource;
 }
 
 export const INFERENCE_MANAGEMENT_APP_ID = 'management';

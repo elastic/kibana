@@ -1,0 +1,196 @@
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+  lifecycle: preview
+  repo: kibana
+  owner: elastic
+release-date: 2026-07-02
+entries:
+- file:
+    name: 275555.yaml
+    checksum: dee9dede91583e1925ac59cf9977bd911a7c5a10
+  type: bug-fix
+  title: Fix incorrect handling of environment in service logs
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  prs:
+  - https://github.com/elastic/kibana/pull/275555
+  issues:
+  - https://github.com/elastic/kibana/issues/274661
+- file:
+    name: 275041.yaml
+    checksum: 917a03faed2995f1b1806119f0a6dfd24a2b90bd
+  type: bug-fix
+  title: Fix Workflows `while` loops failing when referenced step output exceeds 10KB
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  prs:
+  - https://github.com/elastic/kibana/pull/275041
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17768'
+- file:
+    name: 274303.yaml
+    checksum: 4718fbe6a828761aa10f746a10437dbe34878903
+  type: bug-fix
+  title: Fix Agent Builder not finding Google Drive files owned by a shared drive
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  prs:
+  - https://github.com/elastic/kibana/pull/274303
+  issues:
+  - '# PRIVATE: https://github.com/elastic/search-team/issues/14921'
+- file:
+    name: 267539.yaml
+    checksum: c8275baba5785400b318c51eb5436d821b4243b7
+  type: enhancement
+  title: Add workflow step to push cases to external connectors
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/267539
+- file:
+    name: 275553.yaml
+    checksum: d2cd6061dc475ce2307a5bddf660a7bf87c68ebb
+  type: enhancement
+  title: Improve display of long service names in the Traces table
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Long service names in the Originating service column now truncate with an ellipsis; the full name is still available in the tooltip on hover.
+  prs:
+  - https://github.com/elastic/kibana/pull/275553
+  issues:
+  - https://github.com/elastic/kibana/issues/274838
+- file:
+    name: 271586.yaml
+    checksum: c862d6df9c8469cd18092d7c9d62e1f51b2d789a
+  type: bug-fix
+  title: Fix missing manual input dialog for workflow executions in Elastic Security
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Fixes workflow executions that require manual input by showing an input dialog when a workflow run needs user-provided values.
+  prs:
+  - https://github.com/elastic/kibana/pull/271586
+  issues:
+  - '# PRIVATE: https://github.com/elastic/security-team/issues/17274'
+- file:
+    name: 264090.yaml
+    checksum: 280d76aef030ff1951b9856524ce239bc3c0aa09
+  type: feature
+  title: Allow users to snooze and unsnooze individual alert instances
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Users can snooze individual alert instances with optional time-based expiry, field-change, severity-change, or severity-equals conditions, and unsnooze them later. A new `kibana.alert.snoozed` field is written to alert documents.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/264090
+- file:
+    name: 275157.yaml
+    checksum: fbe424d21e38932534feba0e8f223ac77463c385
+  type: bug-fix
+  title: Fix shared API keys invalidated when one referencing task is removed
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Fixes Task Manager invalidating API keys still in use by other tasks when one referencing task is removed, which caused surviving tasks to fail with a `security_exception`.
+  prs:
+  - https://github.com/elastic/kibana/pull/275157
+- file:
+    name: 273410.yaml
+    checksum: 8f6aaa01150bf8635f4419ecb00ca7c1a768df9e
+  type: enhancement
+  title: Improve authentication options for Agent Builder connectors
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Recommended auth methods are listed first and marked with a "Recommended" badge, and legacy options are hidden when creating new connectors while remaining valid for existing ones.
+  prs:
+  - https://github.com/elastic/kibana/pull/273410
+- file:
+    name: 273513.yaml
+    checksum: 1e6139ac2c3a63b10f7cf571d3a2e7376baaefa1
+  type: enhancement
+  title: Improve performance of Synthetics check-group screenshot and step queries
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  prs:
+  - https://github.com/elastic/kibana/pull/273513
+- file:
+    name: 269581.yaml
+    checksum: d3ef63a289d0ea95ab6193844fd585f5ea4484b7
+  type: feature
+  title: Add cases analytics data view for analyzing cases in Discover and Lens
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Adds a managed cases analytics data view that groups case data in one place for analysis in Discover and Lens, with space-aware fields mapped for easier exploration. Requires the `xpack.cases.analyticsV2.enabled` feature flag.
+  areas:
+  - Alerting and reporting
+  prs:
+  - https://github.com/elastic/kibana/pull/269581
+- file:
+    name: 275632.yaml
+    checksum: 692e4c68c84f0c0cf22b864a5ef4186009d183cb
+  type: bug-fix
+  title: Fix broken "Defer loading panels below the fold" dashboard setting
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/275632
+- file:
+    name: 273139.yaml
+    checksum: ba5d4832411ddab4e593319f3d375a151c021696
+  type: feature
+  title: Add anomalies section to entity details flyout and details tab
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  prs:
+  - https://github.com/elastic/kibana/pull/273139
+- file:
+    name: 272694.yaml
+    checksum: d075c8b5171d0cb1e0fc4fd715510888d286078e
+  type: bug-fix
+  title: Fix dashboard API returning 400 status for server-side transform errors
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  areas:
+  - Dashboards and visualizations
+  prs:
+  - https://github.com/elastic/kibana/pull/272694
+- file:
+    name: 274605.yaml
+    checksum: ce3d3955c4fdc891b63ee31f602e29e5df3178e7
+  type: feature
+  title: Add rule restore from changes history in Elastic Security
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Adds an API and UI to restore a detection rule to a previous state from its changes history.
+  prs:
+  - https://github.com/elastic/kibana/pull/274605
+- file:
+    name: 269559.yaml
+    checksum: c82dbcfb8a9ff73cee471d3bd1267956e3023cbe
+  type: feature
+  title: Add rule suggestion skill for Elastic Security
+  products:
+  - product: cloud-serverless
+    target: 2026-07-02
+  description: Adds an Agent Builder skill that recommends prebuilt detection rules based on your environment.
+  prs:
+  - https://github.com/elastic/kibana/pull/269559

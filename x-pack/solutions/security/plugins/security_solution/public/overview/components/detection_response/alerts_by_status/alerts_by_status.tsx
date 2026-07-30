@@ -115,7 +115,7 @@ export const AlertsByStatus = ({
   entityRecord,
 }: AlertsByStatusProps) => {
   const { euiTheme } = useEuiTheme();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
   const euidApi = useEntityStoreEuidApi();
   const entityIdentifiersResolved = useMemo(
     () => resolveEntityIdentifiers(identityFields, entityFilter),

@@ -9,14 +9,14 @@ import { renderHook } from '@testing-library/react';
 import { useAddAlertsOnlyFilter } from './use_add_alerts_only_filter';
 import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_view';
 import { useKibana } from '../../../../../../common/lib/kibana';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 
 jest.mock('../../../../../../data_view_manager/hooks/use_data_view');
 jest.mock('../../../../../../common/lib/kibana');
-jest.mock('react-redux');
+jest.mock('react-redux-v7');
 jest.mock('../../../../../../common/hooks/use_space_id');
 
 const dataView: DataView = createStubDataView({

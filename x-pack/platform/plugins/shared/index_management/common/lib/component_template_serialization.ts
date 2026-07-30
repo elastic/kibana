@@ -92,6 +92,7 @@ export function deserializeComponentTemplateList(
   return componentTemplatesEs.map((componentTemplateEs) => {
     const { name, component_template: componentTemplate } = componentTemplateEs;
     const { template, _meta, deprecated } = componentTemplate;
+    const lifecycle = template.lifecycle;
 
     const componentTemplateListItem: ComponentTemplateListItem = {
       name,
@@ -101,6 +102,9 @@ export function deserializeComponentTemplateList(
       hasSettings: hasEntries(template.settings),
       hasMappings: hasEntries(template.mappings),
       hasAliases: hasEntries(template.aliases),
+      hasFrozenOrDeletePhase: Boolean(
+        lifecycle?.enabled && (lifecycle.data_retention || lifecycle.frozen_after)
+      ),
     };
 
     return componentTemplateListItem;

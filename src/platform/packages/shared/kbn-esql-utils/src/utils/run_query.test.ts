@@ -6,10 +6,37 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { of } from 'rxjs';
+import type { ISearchGeneric, IKibanaSearchResponse } from '@kbn/search-types';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import { getStartEndParams, getNamedParams } from './run_query';
+import {
+  getStartEndParams,
+  getNamedParams,
+  getESQLQueryColumnsRaw,
+  getESQLQueryColumns,
+  getESQLResults,
+  formatESQLColumns,
+} from './run_query';
 
 describe('run query helpers', () => {
+  describe('formatESQLColumns', () => {
+    it('carries the column _meta over as esMeta', () => {
+      const columns = formatESQLColumns([
+        { name: 'COUNT()', type: 'long' },
+        {
+          name: '_approximation_certified(COUNT())',
+          type: 'keyword',
+          _meta: { approximation: { type: 'count', column: 'COUNT()' } },
+        },
+      ]);
+      expect(columns[0].meta.esMeta).toBeUndefined();
+      expect(columns[1].meta.esMeta).toEqual({
+        approximation: { type: 'count', column: 'COUNT()' },
+      });
+    });
+  });
+
   describe('getStartEndParams', () => {
     it('should return an empty array if there are no time params', () => {
       const time = { from: 'now-15m', to: 'now' };
@@ -63,9 +90,9 @@ describe('run query helpers', () => {
       expect(params[1]).toHaveProperty('_tend');
     });
 
-    it('should return the variables if given', () => {
+    it('should return only the variables used in the query', () => {
       const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
-      const query = 'FROM foo | KEEP ??field | WHERE agent.name = ?agent_name';
+      const query = 'FROM foo | KEEP ??field | WHERE agent.name == ?agent_name';
       const variables = [
         {
           key: 'field',
@@ -94,21 +121,15 @@ describe('run query helpers', () => {
           field: 'clientip',
         },
         {
-          interval: '5 minutes',
-        },
-        {
           agent_name: 'go',
-        },
-        {
-          function: 'count',
         },
       ]);
     });
 
-    it('should return the variables and named params if given', () => {
+    it('should return only the variables used in the query, plus time params', () => {
       const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
       const query =
-        'FROM foo | KEEP ??field | WHERE agent.name = ?agent_name AND time < ?_tend amd time > ?_tstart';
+        'FROM foo | KEEP ??field | WHERE agent.name == ?agent_name AND time < ?_tend AND time > ?_tstart';
       const variables = [
         {
           key: 'field',
@@ -132,22 +153,59 @@ describe('run query helpers', () => {
         },
       ];
       const params = getNamedParams(query, time, variables);
-      expect(params).toHaveLength(6);
+      expect(params).toHaveLength(4);
       expect(params[0]).toHaveProperty('_tstart');
       expect(params[1]).toHaveProperty('_tend');
       expect(params[2]).toStrictEqual({
         field: 'clientip',
       });
       expect(params[3]).toStrictEqual({
-        interval: '5 minutes',
-      });
-      expect(params[4]).toStrictEqual({
         agent_name: 'go',
       });
+    });
 
-      expect(params[5]).toStrictEqual({
-        function: 'count',
-      });
+    it('should include variables from PromQL expression bodies', () => {
+      const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
+      const query =
+        'PROMQL histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{app=?variable, kubernetes_namespace="default"}[30s])) by (app,kubernetes_namespace,le))';
+      const variables = [
+        {
+          key: 'variable',
+          value: 'my-app',
+          type: ESQLVariableType.VALUES,
+        },
+      ];
+      const params = getNamedParams(query, time, variables);
+      expect(params).toStrictEqual([{ variable: 'my-app' }]);
+    });
+
+    it('should include ??identifier variables from PromQL grouping clauses', () => {
+      const time = { from: 'Jul 5, 2024 @ 08:03:56.849', to: 'Jul 5, 2024 @ 10:03:56.849' };
+      const query =
+        'PROMQL histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{app=?variable, kubernetes_namespace=?namespace}[30s])) by (??label,le))';
+      const variables = [
+        {
+          key: 'variable',
+          value: 'my-app',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'namespace',
+          value: 'default',
+          type: ESQLVariableType.VALUES,
+        },
+        {
+          key: 'label',
+          value: 'kubernetes_namespace',
+          type: ESQLVariableType.FIELDS,
+        },
+      ];
+      const params = getNamedParams(query, time, variables);
+      expect(params).toStrictEqual([
+        { variable: 'my-app' },
+        { namespace: 'default' },
+        { label: 'kubernetes_namespace' },
+      ]);
     });
   });
 
@@ -159,5 +217,114 @@ describe('run query helpers', () => {
     expect(params[0]).toHaveProperty('_tstart');
     expect(params[1]).toHaveProperty('_tend');
     expect(params[0]._tstart).not.toEqual(params[1]._tend);
+  });
+
+  describe('column metadata request setting', () => {
+    let search: jest.MockedFunction<ISearchGeneric>;
+
+    beforeEach(() => {
+      search = jest.fn();
+    });
+
+    it('getESQLQueryColumnsRaw does not request column_metadata by default', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLQueryColumnsRaw({ esqlQuery: 'FROM foo', search });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.not.objectContaining({
+            settings: expect.anything(),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('getESQLQueryColumnsRaw requests column_metadata when includeColumnMetadata is true', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLQueryColumnsRaw({ esqlQuery: 'FROM foo', search, includeColumnMetadata: true });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            settings: { column_metadata: true },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('getESQLResults does not request column_metadata by default', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLResults({ esqlQuery: 'FROM foo', search });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.not.objectContaining({
+            settings: expect.anything(),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('getESQLResults requests column_metadata when includeColumnMetadata is true', async () => {
+      search.mockReturnValue(
+        of({ isRunning: false, rawResponse: { columns: [], values: [] } } as any)
+      );
+
+      await getESQLResults({ esqlQuery: 'FROM foo', search, includeColumnMetadata: true });
+
+      expect(search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            settings: { column_metadata: true },
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    const mockRawResponseWithMeta = () =>
+      of({
+        isRunning: false,
+        rawResponse: {
+          columns: [{ name: 'foo', type: 'keyword', _meta: { approximation: true } }],
+          values: [],
+        },
+      } as unknown as IKibanaSearchResponse<ESQLSearchResponse>);
+
+    it('getESQLQueryColumnsRaw propagates the _meta returned for each column', async () => {
+      search.mockReturnValue(mockRawResponseWithMeta());
+
+      const columns = await getESQLQueryColumnsRaw({
+        esqlQuery: 'FROM foo',
+        search,
+        includeColumnMetadata: true,
+      });
+
+      expect(columns[0]._meta).toEqual({ approximation: true });
+    });
+
+    it('getESQLQueryColumns maps the propagated _meta to meta.esMeta', async () => {
+      search.mockReturnValue(mockRawResponseWithMeta());
+
+      const columns = await getESQLQueryColumns({
+        esqlQuery: 'FROM foo',
+        search,
+        includeColumnMetadata: true,
+      });
+
+      expect(columns[0].meta.esMeta).toEqual({ approximation: true });
+    });
   });
 });

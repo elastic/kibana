@@ -7,22 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { RequestHandlerContext } from '@kbn/core/server';
-import type { RequestTiming } from '@kbn/core-http-server';
-import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
 import Boom from '@hapi/boom';
+import { asCodeIdSchema } from '@kbn/as-code-shared-schemas';
+import type { RequestTiming } from '@kbn/core-http-server';
 import type { SavedObjectsUpdateResponse } from '@kbn/core-saved-objects-api-server';
-import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
+import type { RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import type { DashboardUpdateResponseBody } from './types';
-import { transformDashboardIn } from '../transforms';
-import { getDashboardCRUResponseBody } from '../get_cru_response_body';
-import { create } from '../create';
+import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import type { DashboardCreateResponseBody } from '../create';
+import { create } from '../create';
 import type { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getDashboardCRUResponseBody } from '../get_cru_response_body';
+import { getUseGASchemas } from '../get_use_ga_schemas';
+import { transformDashboardIn } from '../transforms';
 import type { DashboardState, Operation } from '../types';
+import type { DashboardUpdateResponseBody } from './types';
 
 /**
  * Upserts a dashboard by id — creates it if it doesn't exist, or updates it if it does.
@@ -36,7 +37,7 @@ import type { DashboardState, Operation } from '../types';
  */
 export async function update(
   requestCtx: RequestHandlerContext,
-  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
+  strictValidationSchema: ReturnType<typeof getDashboardStateSchema>,
   id: string,
   updateBody: DashboardState,
   serverTiming?: RequestTiming,
@@ -48,10 +49,12 @@ export async function update(
   const { core } = await requestCtx.resolve(['core']);
 
   const { access_control: accessControl, ...restOfBody } = updateBody;
+  const useGASchemas = await getUseGASchemas(core);
   const { attributes: soAttributes, references: soReferences } = transformDashboardIn(
     restOfBody,
     isDashboardAppRequest,
-    serverTiming
+    serverTiming,
+    useGASchemas
   );
 
   const supportsAccessControl = core.savedObjects.typeRegistry.supportsAccessControl(
@@ -85,7 +88,7 @@ export async function update(
 
     const body = await create(
       requestCtx,
-      dashboardStateSchema,
+      strictValidationSchema,
       updateBody,
       serverTiming,
       isDashboardAppRequest,
@@ -151,9 +154,10 @@ export async function update(
     body: getDashboardCRUResponseBody(
       updated,
       'update',
-      dashboardStateSchema,
+      strictValidationSchema,
       isDashboardAppRequest,
-      serverTiming
+      serverTiming,
+      useGASchemas
     ),
     operation: 'update',
   };

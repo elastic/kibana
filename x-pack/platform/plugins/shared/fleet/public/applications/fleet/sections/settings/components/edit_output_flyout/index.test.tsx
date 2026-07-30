@@ -183,6 +183,9 @@ describe('EditOutputFlyout', () => {
       kafkaSectionsLabels.forEach((label) => {
         expect(utils.queryByText(label)).toBeNull();
       });
+
+      // Show the Client certificate mTLS sub-section heading
+      expect(utils.queryByText('Client certificate (mTLS)')).not.toBeNull();
     });
   });
 
@@ -321,6 +324,146 @@ describe('EditOutputFlyout', () => {
         })
       );
     });
+  });
+
+  it('should save a logstash output with only server CA configured (no client cert or key)', async () => {
+    // Regression test for https://github.com/elastic/kibana/issues/272243
+    // Server-only TLS (one-way) must be saveable without a client certificate or key.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: true,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        certificate: '',
+        certificate_authorities: ['/etc/ssl/ca.pem'],
+      },
+    });
+
+    // Trigger a change to mark the form as modified so the Save button becomes enabled
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await waitFor(() => {
+      expect(mockSendPutOutput).toHaveBeenCalledWith(
+        'outputL',
+        expect.objectContaining({
+          ssl: expect.objectContaining({
+            certificate_authorities: ['/etc/ssl/ca.pem'],
+          }),
+        })
+      );
+    });
+  });
+
+  it('should block saving a logstash output when client cert is set but key is missing', async () => {
+    // Regression guard: cert without key must not save — mTLS requires both fields.
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
+  it('should block saving a logstash output when key is set but client cert is missing', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'logstash',
+      name: 'logstash output',
+      id: 'outputL',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['logstash:5044'],
+      ssl: {
+        key: 'key',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('logstash output'), {
+      target: { value: 'logstash output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
+  });
+
+  it('should block saving an elasticsearch output when client cert is set but key is missing', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({} as any);
+
+    mockedUseFleetStatus.mockReturnValue({
+      isLoading: false,
+      isReady: true,
+      isSecretsStorageEnabled: false,
+    } as any);
+
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'elasticsearch output',
+      id: 'outputES',
+      is_default: false,
+      is_default_monitoring: false,
+      hosts: ['http://localhost:9200'],
+      ssl: {
+        certificate: 'cert',
+        certificate_authorities: [],
+      },
+    });
+
+    fireEvent.change(utils.getByDisplayValue('elasticsearch output'), {
+      target: { value: 'elasticsearch output updated' },
+    });
+
+    fireEvent.click(utils.getByText('Save and apply settings'));
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(mockSendPutOutput).not.toHaveBeenCalled();
   });
 
   it('should show a callout in the flyout if the selected output is logstash and no encrypted key is set', async () => {
@@ -677,7 +820,7 @@ describe('EditOutputFlyout', () => {
       expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
     });
 
-    it('should not show the OTel exporter section for remote ES output', async () => {
+    it('should show the OTel exporter configuration section for remote ES output', async () => {
       jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
       jest
         .spyOn(ExperimentalFeaturesService, 'get')
@@ -691,8 +834,10 @@ describe('EditOutputFlyout', () => {
         is_default_monitoring: false,
       });
 
-      expect(utils.queryByText('OpenTelemetry exporter')).toBeNull();
-      expect(utils.queryByLabelText('Advanced YAML Configuration')).toBeNull();
+      expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+
+      fireEvent.click(utils.getByText('OpenTelemetry exporter'));
+      expect(utils.queryByLabelText('Advanced YAML configuration')).not.toBeNull();
     });
 
     it('should include otel_exporter_config_yaml in the save payload when creating an ES output', async () => {
@@ -759,6 +904,103 @@ describe('EditOutputFlyout', () => {
           'output123',
           expect.objectContaining({
             otel_exporter_config_yaml: null,
+          })
+        );
+      });
+    });
+
+    it.each([
+      {
+        type: 'elasticsearch' as const,
+        outputId: 'outputE',
+        outputName: 'elasticsearch output',
+        extra: { hosts: ['http://localhost:9200'] },
+      },
+      {
+        type: 'remote_elasticsearch' as const,
+        outputId: 'outputR',
+        outputName: 'remote es output',
+        extra: { hosts: ['https://remote-es:9200'], service_token: 'remote-token' },
+      },
+    ])(
+      'should block saving a $type output when otel_exporter_config_yaml is invalid YAML',
+      async ({ type, outputId, outputName, extra }) => {
+        jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+        jest
+          .spyOn(ExperimentalFeaturesService, 'get')
+          .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+        mockedUseFleetStatus.mockReturnValue({
+          isLoading: false,
+          isReady: true,
+          isSecretsStorageEnabled: true,
+        } as any);
+
+        const { utils } = renderFlyout({
+          type,
+          name: outputName,
+          id: outputId,
+          is_default: false,
+          is_default_monitoring: false,
+          // Invalid YAML — unbalanced brackets cause the parser to throw
+          otel_exporter_config_yaml: 'foo: [bar',
+          ...extra,
+        } as Output);
+
+        // The yaml parser used by validators is loaded asynchronously via
+        // useYaml — wait until it has been picked up so that
+        // createValidateYamlConfig is wired to the real parser before save.
+        await waitFor(() => {
+          expect(utils.queryByText('OpenTelemetry exporter')).not.toBeNull();
+        });
+        await new Promise((resolve) => setTimeout(resolve, 50));
+
+        fireEvent.change(utils.getByDisplayValue(outputName), {
+          target: { value: `${outputName} updated` },
+        });
+
+        fireEvent.click(utils.getByText('Save and apply settings'));
+
+        // Submit must NOT be called because invalid OTel exporter YAML must
+        // block save for both ES and remote ES outputs.
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        expect(mockSendPutOutput).not.toHaveBeenCalled();
+      }
+    );
+
+    it('should include otel_exporter_config_yaml in the save payload when editing a remote ES output', async () => {
+      jest.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
+      jest
+        .spyOn(ExperimentalFeaturesService, 'get')
+        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+      mockedUseFleetStatus.mockReturnValue({
+        isLoading: false,
+        isReady: true,
+        isSecretsStorageEnabled: true,
+      } as any);
+
+      const { utils } = renderFlyout({
+        type: 'remote_elasticsearch',
+        name: 'remote es output',
+        id: 'outputR',
+        is_default: false,
+        is_default_monitoring: false,
+        hosts: ['https://remote-es:9200'],
+        service_token: 'remote-token',
+        otel_exporter_config_yaml: 'flush_interval: 10s',
+      });
+
+      // Change a field so the Save button becomes enabled
+      fireEvent.change(utils.getByDisplayValue('remote es output'), {
+        target: { value: 'updated remote output name' },
+      });
+
+      fireEvent.click(utils.getByText('Save and apply settings'));
+
+      await waitFor(() => {
+        expect(mockSendPutOutput).toHaveBeenCalledWith(
+          'outputR',
+          expect.objectContaining({
+            otel_exporter_config_yaml: 'flush_interval: 10s',
           })
         );
       });

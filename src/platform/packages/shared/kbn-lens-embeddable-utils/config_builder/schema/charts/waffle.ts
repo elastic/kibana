@@ -18,6 +18,7 @@ import {
   layerSettingsSchema,
   sharedPanelInfoSchema,
   legendTruncateAfterLinesSchema,
+  legendPositionSchema,
 } from '../shared';
 import { validateMultipleMetricsCriteria, valueDisplaySchema } from './partition_shared';
 import {
@@ -46,6 +47,7 @@ const waffleConfigSharedSchema = {
         truncate_after_lines: legendTruncateAfterLinesSchema,
         visibility: legendVisibilitySchemaWithAuto,
         size: legendSizeSchema,
+        position: legendPositionSchema,
       },
       {
         meta: {

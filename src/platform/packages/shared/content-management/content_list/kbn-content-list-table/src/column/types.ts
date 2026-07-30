@@ -9,6 +9,7 @@
 
 import type { UseEuiTheme } from '@elastic/eui';
 import type {
+  ContentListFeatures,
   ContentListItem,
   ContentListItemConfig,
   ContentListSupports,
@@ -39,6 +40,14 @@ export interface BuilderContext {
   entityName?: string;
   /** Feature support flags from the provider. */
   supports?: ContentListSupports;
+  /**
+   * Resolved feature configuration from the provider.
+   *
+   * Action builders read list-level wiring from this bag — e.g.
+   * `buildContentEditorAction` looks up `features.contentEditor.open` to
+   * decide whether to render the row icon.
+   */
+  features?: ContentListFeatures;
   /** Callbacks for action orchestration. */
   actions?: BuilderContextActions;
   /**

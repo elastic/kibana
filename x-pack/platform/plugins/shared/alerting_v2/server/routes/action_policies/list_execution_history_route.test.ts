@@ -9,7 +9,10 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionPolicyExecutionHistoryClient } from '../../lib/action_policy_execution_history_client';
 import { createRouteDependencies } from '../test_utils';
-import { ListExecutionHistoryRoute } from './list_execution_history_route';
+import {
+  ListExecutionHistoryRoute,
+  toListExecutionHistoryArgs,
+} from './list_execution_history_route';
 
 const createMocks = () => {
   const deps = createRouteDependencies();
@@ -21,6 +24,7 @@ const createMocks = () => {
       page: 1,
       perPage: 100,
       totalEvents: 0,
+      searchMatches: null,
     }),
     countNewEventsSince: jest.fn(),
   };
@@ -35,9 +39,11 @@ const buildRoute = (request: KibanaRequest, mocks: ReturnType<typeof createMocks
   );
 
 describe('ListExecutionHistoryRoute', () => {
-  it('forwards page and perPage from the query to the client', async () => {
+  it('forwards page, perPage, search and outcome from the query to the client', async () => {
     const mocks = createMocks();
-    const request = httpServerMock.createKibanaRequest({ query: { page: 2, perPage: 25 } });
+    const request = httpServerMock.createKibanaRequest({
+      query: { page: 2, per_page: 25, search: 'foo', outcome: 'throttled' },
+    });
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
 
     await route.handle();
@@ -46,10 +52,43 @@ describe('ListExecutionHistoryRoute', () => {
       request,
       page: 2,
       perPage: 25,
+      search: 'foo',
+      ruleIds: undefined,
+      outcome: 'throttled',
+      episodeIds: undefined,
+      startDate: undefined,
     });
   });
 
-  it('passes undefined page/perPage when query is empty (defaults applied by client)', async () => {
+  it('forwards episode_ids from the query to the client as episodeIds', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { episode_ids: ['ep-1', 'ep-2'] },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ episodeIds: ['ep-1', 'ep-2'] })
+    );
+  });
+
+  it('forwards start_date from the query to the client', async () => {
+    const mocks = createMocks();
+    const request = httpServerMock.createKibanaRequest({
+      query: { start_date: '2026-01-01T00:00:00.000Z' },
+    });
+    const route = buildRoute(request as unknown as KibanaRequest, mocks);
+
+    await route.handle();
+
+    expect(mocks.executionHistoryClient.listExecutionHistory).toHaveBeenCalledWith(
+      expect.objectContaining({ startDate: '2026-01-01T00:00:00.000Z' })
+    );
+  });
+
+  it('passes undefined params when query is empty (defaults applied by client)', async () => {
     const mocks = createMocks();
     const request = httpServerMock.createKibanaRequest();
     const route = buildRoute(request as unknown as KibanaRequest, mocks);
@@ -60,6 +99,11 @@ describe('ListExecutionHistoryRoute', () => {
       request,
       page: undefined,
       perPage: undefined,
+      search: undefined,
+      ruleIds: undefined,
+      outcome: undefined,
+      episodeIds: undefined,
+      startDate: undefined,
     });
   });
 
@@ -87,5 +131,29 @@ describe('ListExecutionHistoryRoute', () => {
 
     expect(mocks.deps.response.customError).toHaveBeenCalledTimes(1);
     expect(mocks.deps.response.ok).not.toHaveBeenCalled();
+  });
+});
+
+describe('toListExecutionHistoryArgs', () => {
+  it('maps the snake_case request to camelCase client args (without request)', () => {
+    expect(
+      toListExecutionHistoryArgs({
+        page: 1,
+        per_page: 100,
+        search: 'foo',
+        rule_ids: ['rule-1', 'rule-2'],
+        outcome: 'dispatched',
+        episode_ids: ['ep-1'],
+        start_date: '2026-01-01T00:00:00.000Z',
+      })
+    ).toEqual({
+      page: 1,
+      perPage: 100,
+      search: 'foo',
+      ruleIds: ['rule-1', 'rule-2'],
+      outcome: 'dispatched',
+      episodeIds: ['ep-1'],
+      startDate: '2026-01-01T00:00:00.000Z',
+    });
   });
 });

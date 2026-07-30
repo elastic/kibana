@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, type ReactNode } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import type { ContentListItem } from '@kbn/content-list-provider';
@@ -17,6 +17,7 @@ import {
   ContentListTable,
   ContentListFooter,
   ContentListToolbar,
+  useContentListConfig,
 } from '@kbn/content-list';
 import { KibanaContentListPage } from '@kbn/content-list-page';
 import {
@@ -29,7 +30,7 @@ import {
   createMockStoryFindItems,
   createMockTagFacetProvider,
   createMockUserProfileFacetProvider,
-  useInspectFlyout,
+  useContentEditorFlyout,
 } from './stories_helpers';
 
 const meta: Meta = {
@@ -49,10 +50,10 @@ const labels = {
 } as const;
 
 const useMapsProviderProps = ({
-  onInspect,
+  openContentEditor,
   includeCreatedBy = false,
 }: {
-  onInspect?: (item: ContentListItem) => void;
+  openContentEditor?: (item: ContentListItem) => void;
   includeCreatedBy?: boolean;
 }) => {
   const dataSource = useMemo(
@@ -75,19 +76,24 @@ const useMapsProviderProps = ({
       pagination: { initialPageSize: 20 },
       tags: createMockTagFacetProvider(MOCK_MAPS),
       ...(includeCreatedBy ? { userProfiles: createMockUserProfileFacetProvider(MOCK_MAPS) } : {}),
+      // Mirrors how `ContentListClientProvider` wires `useContentEditorOpen()`.
+      ...(openContentEditor ? { contentEditor: { open: openContentEditor } } : {}),
     }),
-    [includeCreatedBy]
+    [includeCreatedBy, openContentEditor]
   );
 
   const item = useMemo(
     () => ({
       getHref: (content: ContentListItem) => `#/maps/map/${content.id}`,
-      onDelete: async () => {
-        await wait(250);
+      actions: {
+        delete: {
+          onBulkAction: async () => {
+            await wait(250);
+          },
+        },
       },
-      ...(onInspect ? { onInspect } : {}),
     }),
-    [onInspect]
+    []
   );
 
   return { dataSource, features, item };
@@ -143,9 +149,43 @@ const OriginalStory = () => {
   );
 };
 
+/**
+ * Mirrors `x-pack/.../maps/public/components/map_list`:
+ * `<Action.ContentEditor />` is unconditional and self-skips when
+ * `features.contentEditor.open` isn't wired.
+ */
+const MapsProposalListBody = ({ flyout }: { flyout: ReactNode }) => {
+  const { isReadOnly } = useContentListConfig();
+
+  return (
+    <ContentList>
+      <ContentListToolbar>
+        <Filters>
+          <Filters.Tags />
+          <Filters.CreatedBy />
+          <Filters.Sort />
+        </Filters>
+      </ContentListToolbar>
+      <ContentListTable title="Maps">
+        <Column.Name showDescription showTags />
+        <Column.CreatedBy />
+        <Column.UpdatedAt />
+        {!isReadOnly && (
+          <Column.Actions>
+            <Action.ContentEditor />
+            <Action.Delete />
+          </Column.Actions>
+        )}
+      </ContentListTable>
+      <ContentListFooter />
+      {flyout}
+    </ContentList>
+  );
+};
+
 const ProposalStory = () => {
-  const { onInspect, flyout } = useInspectFlyout();
-  const providerProps = useMapsProviderProps({ onInspect, includeCreatedBy: true });
+  const { open: openContentEditor, flyout } = useContentEditorFlyout();
+  const providerProps = useMapsProviderProps({ openContentEditor, includeCreatedBy: true });
 
   const pageElement = useMemo(
     () => (
@@ -159,26 +199,7 @@ const ProposalStory = () => {
           }
         />
         <KibanaContentListPage.Section>
-          <ContentList>
-            <ContentListToolbar>
-              <Filters>
-                <Filters.Tags />
-                <Filters.CreatedBy />
-                <Filters.Sort />
-              </Filters>
-            </ContentListToolbar>
-            <ContentListTable title="Maps">
-              <Column.Name showDescription showTags />
-              <Column.CreatedBy />
-              <Column.UpdatedAt />
-              <Column.Actions>
-                <Action.Inspect />
-                <Action.Delete />
-              </Column.Actions>
-            </ContentListTable>
-            <ContentListFooter />
-            {flyout}
-          </ContentList>
+          <MapsProposalListBody flyout={flyout} />
         </KibanaContentListPage.Section>
       </KibanaContentListPage>
     ),

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import type { ChangeHistoryDocument, GetHistoryResult } from '@kbn/change-history';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { RulesClientContext } from '../types';
-import type { RawRule } from '../../types';
-import {
-  transformRuleAttributesToRuleDomain,
-  transformRuleDomainToRule,
-} from '../../application/rule/transforms';
-import type { Rule, RuleParams } from '../../application/rule/types';
+import { transformRuleDomainToRule } from '../../application/rule/transforms';
+import type { Rule, RuleDomain, RuleParams } from '../../application/rule/types';
+import type { RuleChangeHistorySnapshot } from '../lib/change_tracking';
 import { getRuleSo } from '../../data/rule';
 
 /**
@@ -42,6 +43,8 @@ export interface GetRuleHistoryParams {
   size?: number;
   /** ES sort. When omitted, the underlying change-history client's default applies. */
   sort?: SortCombinations[];
+  /** Extra ES query clauses ANDed into the history search (e.g. a term filter on event.id). */
+  filters?: QueryDslQueryContainer[];
 }
 
 /**
@@ -66,21 +69,59 @@ const DEFAULT_SIZE = 20;
 
 export async function getRuleHistory(
   context: RulesClientContext,
-  { module, ruleId, from = DEFAULT_FROM, size = DEFAULT_SIZE, sort }: GetRuleHistoryParams
+  { module, ruleId, from = DEFAULT_FROM, size = DEFAULT_SIZE, sort, filters }: GetRuleHistoryParams
 ): Promise<GetRuleHistoryResult> {
   if (!context.changeTrackingService) {
     throw new RuleChangeTrackingDisabledError();
   }
 
-  const currentRule = await getRuleSo({
-    savedObjectsClient: context.unsecuredSavedObjectsClient,
-    id: ruleId,
-  });
+  // Resolve auth info from the rule saved object. When the rule is deleted, fall back to
+  // the most recent history snapshot so we can still authorize and serve the history.
+  let ruleTypeId: string | undefined;
+  let consumer: string | undefined;
+  let ruleName: string | undefined;
+
+  try {
+    const currentRule = await getRuleSo({
+      savedObjectsClient: context.unsecuredSavedObjectsClient,
+      id: ruleId,
+    });
+    ruleTypeId = currentRule.attributes.alertTypeId;
+    consumer = currentRule.attributes.consumer;
+    ruleName = currentRule.attributes.name;
+  } catch (error) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      throw error;
+    }
+
+    // Rule was deleted. Extract auth info from the most recent history snapshot.
+    const latestHistory = await context.changeTrackingService.getHistory(
+      module,
+      context.spaceId,
+      ruleId,
+      { from: 0, size: 1, sort: [{ '@timestamp': { order: 'desc' } }] }
+    );
+
+    if (latestHistory.items.length === 0) {
+      return { total: 0, items: [] };
+    }
+
+    const snapshot = latestHistory.items[0].object.snapshot as
+      | RuleChangeHistorySnapshot
+      | undefined;
+    ruleTypeId = snapshot?.alertTypeId;
+    consumer = snapshot?.consumer;
+    ruleName = snapshot?.name;
+  }
+
+  if (!ruleTypeId || !consumer) {
+    return { total: 0, items: [] };
+  }
 
   try {
     await context.authorization.ensureAuthorized({
-      ruleTypeId: currentRule.attributes.alertTypeId,
-      consumer: currentRule.attributes.consumer,
+      ruleTypeId,
+      consumer,
       operation: ReadOperations.GetHistory,
       entity: AlertingAuthorizationEntity.Rule,
     });
@@ -91,7 +132,7 @@ export async function getRuleHistory(
         savedObject: {
           type: RULE_SAVED_OBJECT_TYPE,
           id: ruleId,
-          name: currentRule.attributes.name,
+          name: ruleName,
         },
         error,
       })
@@ -102,7 +143,7 @@ export async function getRuleHistory(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_HISTORY,
-      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: currentRule.attributes.name },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId, name: ruleName },
     })
   );
 
@@ -110,12 +151,13 @@ export async function getRuleHistory(
     from,
     size,
     sort,
+    additionalFilters: filters,
   });
 
   const itemsRule: RuleChangeHistoryDocument[] = [];
 
   for (const item of result.items) {
-    const ruleSnapshot = hydrateRuleSnapshot(item.object, context);
+    const ruleSnapshot = hydrateRuleSnapshot(item.object, context.logger);
 
     if (ruleSnapshot) {
       itemsRule.push({ ...item, rule: ruleSnapshot });
@@ -130,53 +172,61 @@ export async function getRuleHistory(
 
 /**
  * Reconstructs the `SanitizedRule` for a single history entry from its
- * `object.snapshot` (a `RuleSnapshot` of `{ attributes: RawRule, references }`).
- * In particular it leads to transforming date strings to Date.
- *
- * If the snapshot is malformed or the rule type is no longer registered,
- * we fall back to the raw item — the caller may still surface it without a
- * fully-typed rule.
+ * `object.snapshot` (a serialized `RuleChangeHistorySnapshot` with ISO date strings).
  */
 function hydrateRuleSnapshot(
   obj: ChangeHistoryDocument['object'],
-  context: RulesClientContext
+  logger: RulesClientContext['logger']
 ): Rule | undefined {
   const snapshot = obj.snapshot;
-  const rawRule = snapshot?.attributes;
 
-  if (typeof rawRule !== 'object' || rawRule === null) {
-    return;
-  }
-
-  const ruleTypeId =
-    'alertTypeId' in rawRule && typeof rawRule.alertTypeId === 'string'
-      ? rawRule.alertTypeId
-      : undefined;
-
-  if (!ruleTypeId) {
+  if (!isRuleDomainSnapshot(snapshot)) {
     return;
   }
 
   try {
-    const ruleType = context.ruleTypeRegistry.get(ruleTypeId);
-    const ruleDomain = transformRuleAttributesToRuleDomain(
-      rawRule as RawRule,
-      {
-        id: obj.id,
-        logger: context.logger,
-        ruleType,
-        references:
-          snapshot?.references && Array.isArray(snapshot.references) ? snapshot.references : [],
-      },
-      context.isSystemAction
-    );
+    const ruleDomain = {
+      ...snapshot,
+      createdAt: hydrateDateField(snapshot.createdAt),
+      updatedAt: hydrateDateField(snapshot.updatedAt),
+    };
 
-    // `transformRuleDomainToRule` returns a `Rule` shape that omits the
-    // raw `apiKey` field, so the result is effectively a `SanitizedRule`.
-    return transformRuleDomainToRule(ruleDomain);
+    return transformRuleDomainToRule(ruleDomain as RuleDomain);
   } catch (error) {
-    context.logger.warn(`Unable to hydrate rule snapshot for [${obj.id}]: ${error}`);
-
+    logger.warn(`Unable to hydrate rule snapshot for [${obj.id}]: ${error}`);
     return;
   }
+}
+
+function hydrateDateField(value: unknown): Date | null {
+  if (value instanceof Date) {
+    return value;
+  }
+
+  if (typeof value === 'string' || typeof value === 'number') {
+    return new Date(value);
+  }
+
+  return null;
+}
+
+/**
+ * Minimal guard on-read. Full field-level validation is omitted.
+ * This is because snapshots are stored as unmapped JSON and never migrated
+ * (stricter checks would silently invalidate records after schema changes),
+ * and `transformRuleDomainToRule` never throws.
+ * Missing fields produce `undefined` output rather than errors.
+ * We may wish to review the logic here later to cater for more complex cases around corrupt records.
+ * In particular, we want to avoid 2 scenarios:
+ * - Returning 500 for whole response on single corrupt record.
+ * - Silently chomping out valid historical records when schema diverges far enough.
+ */
+function isRuleDomainSnapshot(
+  maybeRuleDomain: unknown
+): maybeRuleDomain is RuleChangeHistorySnapshot {
+  return (
+    typeof maybeRuleDomain === 'object' &&
+    maybeRuleDomain !== null &&
+    typeof (maybeRuleDomain as Record<string, unknown>).id === 'string'
+  );
 }

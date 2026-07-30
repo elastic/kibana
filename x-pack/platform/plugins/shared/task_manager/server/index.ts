@@ -36,6 +36,7 @@ export { TaskStatus, TaskPriority, TaskCost, InstanceTaskCost } from './task';
 export type { TaskRegisterDefinition, TaskDefinitionRegistry } from './task_type_dictionary';
 
 export { asInterval } from './lib/intervals';
+export { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 export {
   isUnrecoverableError,
   throwUnrecoverableError,
@@ -76,6 +77,10 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
       deprecate('claim_strategy', 'a future version', {
         level: 'warning',
         message: `Configuring "xpack.task_manager.claim_strategy" is deprecated and will be removed in a future version. This setting should be removed.`,
+      }),
+      deprecate('request_timeouts', 'a future version', {
+        level: 'warning',
+        message: `Configuring "xpack.task_manager.request_timeouts" is deprecated and will be removed in a future version. This setting should be removed.`,
       }),
       (settings, fromPath, addDeprecation) => {
         const taskManager = get(settings, fromPath);

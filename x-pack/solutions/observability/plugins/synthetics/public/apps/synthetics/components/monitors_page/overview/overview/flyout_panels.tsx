@@ -58,12 +58,14 @@ export const FlyoutLastTestRun = ({
   configId,
   locationId,
   remoteName,
+  spaceId,
 }: {
   latestPing?: Ping;
   loading: boolean;
   configId: string;
   locationId: string;
   remoteName?: string;
+  spaceId?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { basePath } = useSyntheticsSettingsContext();
@@ -123,6 +125,7 @@ export const FlyoutLastTestRun = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
+            announceOnMount
             data-test-subj="flyoutLastTestRunErrorCallout"
             title={latestPing.error.message}
             size="s"
@@ -148,6 +151,7 @@ export const FlyoutLastTestRun = ({
                   basePath,
                   configId,
                   locationId,
+                  spaceId,
                   stateId: latestPing.state.id,
                 })}
               >

@@ -67,15 +67,8 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
     });
 
-    after(async () => {
-      await esArchiver.unload(esArchive);
-      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
-      await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
-      await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
-      await kibanaServer.savedObjects.cleanStandardList();
-    });
-
-    loadTestFile(require.resolve('./metric')); // 4m 7s
+    loadTestFile(require.resolve('./metric_primary_and_breakdown'));
+    loadTestFile(require.resolve('./metric_secondary'));
     loadTestFile(require.resolve('./legacy_metric')); // 29s
     loadTestFile(require.resolve('./disable_auto_apply')); // 1m 6s
     loadTestFile(require.resolve('./reference_lines')); // 1m

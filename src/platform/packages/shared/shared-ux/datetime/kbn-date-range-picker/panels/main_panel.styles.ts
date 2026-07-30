@@ -8,29 +8,41 @@
  */
 
 import { css } from '@emotion/react';
+import { euiOverflowScroll } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 
-export const mainPanelStyles = ({ euiTheme }: UseEuiTheme) => {
+export const mainPanelStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
   const root = null;
+  const presetsArea = css`
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-block-size: 0;
+  `;
   const tabs = css`
     padding-block-start: ${euiTheme.size.s};
     margin-inline: ${euiTheme.size.s};
-    position: sticky;
-    top: 0px;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
+    flex-shrink: 0;
   `;
   const list = css`
     padding-block: ${euiTheme.size.s};
   `;
-  const stickyBottom = css`
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    position: sticky;
-    bottom: 0px;
+  const scroller = css`
+    flex: 1 1 auto;
+    min-block-size: 0;
+    overflow-block: auto;
+    ${euiOverflowScroll(euiThemeContext, { direction: 'y', mask: true })};
+  `;
+  const bottomSection = css`
+    margin-block-start: auto;
+    flex-shrink: 0;
   `;
   const documentationButtonWrapper = css`
     padding-inline: ${euiTheme.size.s};
     margin-block-start: calc(${euiTheme.size.s} * 2);
+    flex-shrink: 0;
   `;
 
-  return { root, tabs, list, stickyBottom, documentationButtonWrapper };
+  return { root, presetsArea, tabs, list, scroller, bottomSection, documentationButtonWrapper };
 };

@@ -24,7 +24,7 @@ apiTest.describe(
     });
 
     apiTest('GET returns 403 with API key auth', async ({ apiClient }) => {
-      const response = await h.get(apiClient);
+      const response = await h.getKey(apiClient, 'test:string_key');
       expect(response).toHaveStatusCode(403);
     });
 

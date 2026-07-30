@@ -25,6 +25,8 @@ import {
   getEntitySource,
   getEntityRiskScore,
   truncatedCellCss,
+  truncatedContainerCss,
+  truncatedFlexItemCss,
   type TableEntityRow,
 } from './helpers';
 import {
@@ -39,6 +41,8 @@ import {
   CANNOT_REMOVE_TARGET_TOOLTIP,
   RESOLUTION_EMPTY_STATE,
   RESOLUTION_FETCH_ERROR,
+  RESOLUTION_GROUP_TABLE_CAPTION,
+  RESOLUTION_GROUP_DETAILS_TABLE_CAPTION,
 } from './translations';
 import {
   RESOLUTION_GROUP_TABLE_TEST_ID,
@@ -92,24 +96,28 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
           const isThisEntityRemoving = removingEntityId === entityId;
 
           const expandButton = (
-            <EuiButtonIcon
-              iconType="expand"
-              color={isCurrentEntity ? 'text' : 'primary'}
-              aria-label={EXPAND_ENTITY_BUTTON}
-              disabled={isCurrentEntity}
-              onClick={() => onEntityNameClick?.(entity)}
-            />
+            <EuiToolTip content={EXPAND_ENTITY_BUTTON} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="expand"
+                color={isCurrentEntity ? 'text' : 'primary'}
+                aria-label={EXPAND_ENTITY_BUTTON}
+                disabled={isCurrentEntity}
+                onClick={() => onEntityNameClick?.(entity)}
+              />
+            </EuiToolTip>
           );
 
           const removeButton = (
-            <EuiButtonIcon
-              iconType="cross"
-              color="primary"
-              aria-label={REMOVE_ENTITY_BUTTON}
-              disabled={isTarget || !!removingEntityId}
-              onClick={() => onRemoveEntity?.(entityId)}
-              isLoading={isThisEntityRemoving}
-            />
+            <EuiToolTip content={REMOVE_ENTITY_BUTTON} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="cross"
+                color="primary"
+                aria-label={REMOVE_ENTITY_BUTTON}
+                disabled={isTarget || !!removingEntityId}
+                onClick={() => onRemoveEntity?.(entityId)}
+                isLoading={isThisEntityRemoving}
+              />
+            </EuiToolTip>
           );
 
           return (
@@ -139,16 +147,20 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
           const nameContent =
             onEntityNameClick && !isCurrentEntity && !showActions ? (
-              <EuiText size="xs" css={truncatedCellCss}>
-                <EuiLink onClick={() => onEntityNameClick(entity)} title={name}>
-                  {name}
-                </EuiLink>
-              </EuiText>
+              <EuiLink css={truncatedCellCss} onClick={() => onEntityNameClick(entity)}>
+                {name}
+              </EuiLink>
             ) : (
               <EuiText size="xs" css={truncatedCellCss}>
                 {name}
               </EuiText>
             );
+
+          const nameWithTooltip = (
+            <EuiToolTip display="block" content={name} anchorProps={{ css: truncatedContainerCss }}>
+              {nameContent}
+            </EuiToolTip>
+          );
 
           if (isTarget) {
             return (
@@ -156,11 +168,9 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
                 gutterSize="xs"
                 alignItems="center"
                 responsive={false}
-                css={truncatedCellCss}
+                css={truncatedContainerCss}
               >
-                <EuiFlexItem grow={false} css={truncatedCellCss}>
-                  {nameContent}
-                </EuiFlexItem>
+                <EuiFlexItem css={truncatedFlexItemCss}>{nameWithTooltip}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiIconTip
                     content={TARGET_ENTITY_TOOLTIP}
@@ -173,7 +183,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
             );
           }
 
-          return nameContent;
+          return nameWithTooltip;
         },
       },
       {
@@ -238,6 +248,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
     return (
       <EuiBasicTable
+        tableCaption={RESOLUTION_GROUP_TABLE_CAPTION}
         data-test-subj={RESOLUTION_EMPTY_STATE_TEST_ID}
         items={[]}
         columns={emptyColumns}
@@ -249,6 +260,7 @@ export const ResolutionGroupTable: React.FC<ResolutionGroupTableProps> = ({
 
   return (
     <EuiBasicTable
+      tableCaption={RESOLUTION_GROUP_DETAILS_TABLE_CAPTION}
       data-test-subj={RESOLUTION_GROUP_TABLE_TEST_ID}
       items={items}
       columns={columns}

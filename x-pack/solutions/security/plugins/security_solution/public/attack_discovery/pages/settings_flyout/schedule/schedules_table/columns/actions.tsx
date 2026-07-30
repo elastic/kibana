@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { AttackDiscoverySchedule } from '@kbn/elastic-assistant-common';
 
 import * as i18n from './translations';
@@ -14,29 +14,31 @@ import type { TableColumn } from './constants';
 import { WithMissingPrivileges } from '../../missing_privileges';
 
 interface ActionProps {
-  deleteSchedule: (scheduleId: string) => Promise<void>;
+  requestDeleteSchedule: (scheduleId: string) => void;
   isDisabled: boolean;
   scheduleId: string;
 }
 
-const Action = ({ isDisabled, deleteSchedule, scheduleId }: ActionProps) => {
-  const onScheduleDeleteChange = useCallback(async () => {
-    deleteSchedule(scheduleId);
-  }, [deleteSchedule, scheduleId]);
+const Action = ({ isDisabled, requestDeleteSchedule, scheduleId }: ActionProps) => {
+  const onScheduleDeleteChange = useCallback(() => {
+    requestDeleteSchedule(scheduleId);
+  }, [requestDeleteSchedule, scheduleId]);
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
         <WithMissingPrivileges>
           {(enabled) => (
-            <EuiButtonIcon
-              data-test-subj="deleteButton"
-              aria-label={i18n.DELETE_ACTIONS_BUTTON_ARIAL_LABEL}
-              color="danger"
-              iconType="trash"
-              onClick={onScheduleDeleteChange}
-              disabled={isDisabled || !enabled}
-            />
+            <EuiToolTip content={i18n.DELETE_ACTIONS_BUTTON_ARIAL_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="deleteButton"
+                aria-label={i18n.DELETE_ACTIONS_BUTTON_ARIAL_LABEL}
+                color="danger"
+                iconType="trash"
+                onClick={onScheduleDeleteChange}
+                disabled={isDisabled || !enabled}
+              />
+            </EuiToolTip>
           )}
         </WithMissingPrivileges>
       </EuiFlexItem>
@@ -46,16 +48,20 @@ const Action = ({ isDisabled, deleteSchedule, scheduleId }: ActionProps) => {
 
 export const createActionsColumn = ({
   isDisabled,
-  deleteSchedule,
+  requestDeleteSchedule,
 }: {
   isDisabled: boolean;
-  deleteSchedule: (scheduleId: string) => Promise<void>;
+  requestDeleteSchedule: (scheduleId: string) => void;
 }): TableColumn => {
   return {
     field: 'delete',
     name: i18n.COLUMN_ACTIONS,
     render: (_, schedule: AttackDiscoverySchedule) => (
-      <Action isDisabled={isDisabled} deleteSchedule={deleteSchedule} scheduleId={schedule.id} />
+      <Action
+        isDisabled={isDisabled}
+        requestDeleteSchedule={requestDeleteSchedule}
+        scheduleId={schedule.id}
+      />
     ),
     width: '65px',
     align: 'center',

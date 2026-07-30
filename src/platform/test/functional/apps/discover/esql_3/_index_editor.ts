@@ -14,8 +14,11 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 const INDEX_NAME_MANUAL = 'test-lookup-index-manual';
 const INDEX_NAME_FILE = 'test-lookup-index-file';
 const INDEX_NAME_EDITION = 'test-lookup-index-edition';
+const INDEX_NAME_CLOSED = 'test-lookup-index-closed';
 const INITIAL_COLUMN_PLACEHOLDERS = 4;
-const NUMBER_OF_CONTROL_COLUMNS = 2;
+// Leading control columns rendered before the data columns: the unsaved-row color indicator,
+// the selection column, and the add-row column.
+const NUMBER_OF_CONTROL_COLUMNS = 3;
 const IMPORT_FILE_PATH = path.join(__dirname, 'imports', 'customers.csv');
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -98,6 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.tryForTime(6000, async () => {
         const gridData = await dataGrid.getDataGridTableData();
         expect(gridData.columns).to.eql([
+          '', // Unsaved-row color indicator control column
           'Select column',
           'Actions columnActions', // Add row control column
           'Keywordcustomer_first_name',
@@ -109,6 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           '', // Add column control column
         ]);
         expect(gridData.rows[0]).to.eql([
+          '', // Unsaved-row color indicator control column
           '', // toggles column
           '', // Add row control column
           'Elyssa',
@@ -179,7 +184,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         colIndex <= INITIAL_COLUMN_PLACEHOLDERS + NUMBER_OF_CONTROL_COLUMNS;
         colIndex++
       ) {
-        await indexEditor.setCellValue(0, colIndex, `value-1-${colIndex - 1}`);
+        await indexEditor.setCellValue(
+          0,
+          colIndex,
+          `value-1-${colIndex - NUMBER_OF_CONTROL_COLUMNS + 1}`
+        );
       }
 
       // Add new row with values
@@ -189,7 +198,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         colIndex <= INITIAL_COLUMN_PLACEHOLDERS + NUMBER_OF_CONTROL_COLUMNS;
         colIndex++
       ) {
-        await indexEditor.setCellValue(1, colIndex, `value-2-${colIndex - 1}`);
+        await indexEditor.setCellValue(
+          1,
+          colIndex,
+          `value-2-${colIndex - NUMBER_OF_CONTROL_COLUMNS + 1}`
+        );
       }
 
       // Edit column name
@@ -285,7 +298,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect((await dataGrid.getDocTableRows()).length).to.be(2);
 
       // Filter rows
-      await indexEditor.search('Elyssa');
+      await indexEditor.search('customer_first_name: Elyssa');
       await retry.tryForTime(6000, async () => {
         expect((await dataGrid.getDocTableRows()).length).to.be(1);
       });
@@ -294,17 +307,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect((await dataGrid.getDocTableRows()).length).to.be(2);
       });
 
-      // Edit cell values
-      await indexEditor.setCellValue(0, 2, 'Jasmin');
-      await indexEditor.setCellValue(0, 3, 'Jasmin Upperwood');
+      // Edit cell values (column indices are relative to the leading control columns)
+      const firstNameColumn = NUMBER_OF_CONTROL_COLUMNS;
+      const fullNameColumn = NUMBER_OF_CONTROL_COLUMNS + 1;
+      // 6 existing data columns precede the newly added "age" column
+      const ageColumn = NUMBER_OF_CONTROL_COLUMNS + 6;
 
-      await indexEditor.setCellValue(1, 2, 'Philip');
-      await indexEditor.setCellValue(1, 3, 'Philip Tompsoon');
+      await indexEditor.setCellValue(0, firstNameColumn, 'Jasmin');
+      await indexEditor.setCellValue(0, fullNameColumn, 'Jasmin Upperwood');
+
+      await indexEditor.setCellValue(1, firstNameColumn, 'Philip');
+      await indexEditor.setCellValue(1, fullNameColumn, 'Philip Tompsoon');
 
       // Add a new row with some values and delete it
       await indexEditor.addRow(0);
-      await indexEditor.setCellValue(1, 2, 'New Name');
-      await indexEditor.setCellValue(1, 3, 'New Name Surname');
+      await indexEditor.setCellValue(1, firstNameColumn, 'New Name');
+      await indexEditor.setCellValue(1, fullNameColumn, 'New Name Surname');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
 
       await indexEditor.deleteRow(1);
@@ -312,15 +330,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Add a new row with some values
       await indexEditor.addRow(0);
-      await indexEditor.setCellValue(1, 2, 'Pedro');
-      await indexEditor.setCellValue(1, 3, 'Pedro Fernandez');
+      await indexEditor.setCellValue(1, firstNameColumn, 'Pedro');
+      await indexEditor.setCellValue(1, fullNameColumn, 'Pedro Fernandez');
       expect((await dataGrid.getDocTableRows()).length).to.be(3);
 
       // Add a new column
       await indexEditor.addColumn('age', 'integer');
-      await indexEditor.setCellValue(0, 8, '30');
-      await indexEditor.setCellValue(1, 8, '40');
-      await indexEditor.setCellValue(2, 8, '25');
+      await indexEditor.setCellValue(0, ageColumn, '30');
+      await indexEditor.setCellValue(1, ageColumn, '40');
+      await indexEditor.setCellValue(2, ageColumn, '25');
 
       // Try to exit without saving changes
       await indexEditor.closeIndexEditor();
@@ -380,7 +398,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Manually set content
       await indexEditor.setColumn(`my_column`, 'text', 0);
-      await indexEditor.setCellValue(0, 2, `value`);
+      await indexEditor.setCellValue(0, NUMBER_OF_CONTROL_COLUMNS, `value`);
 
       // Save changes
       await indexEditor.saveChanges();
@@ -395,10 +413,46 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    it('shows a warning tooltip for a closed lookup index instead of "Create lookup index"', async function () {
+      // Create a lookup index and close it
+      await es.indices.create({
+        index: INDEX_NAME_CLOSED,
+        settings: { mode: 'lookup' },
+      });
+      await es.indices.close({ index: INDEX_NAME_CLOSED });
+
+      await common.navigateToApp('discover');
+      await discover.waitUntilSearchingHasFinished();
+      await discover.selectTextBaseLang();
+      await discover.waitUntilSearchingHasFinished();
+
+      // Type the closed index into a lookup join query
+      await esql.typeEsqlEditorQuery(
+        `from logstash-* | LOOKUP JOIN ${INDEX_NAME_CLOSED} ON customer_id`
+      );
+
+      // Hover the badge and read the tooltip text — it must contain the closed warning
+      const hoverText = await esql.getEsqlBadgeHoverText('lookupIndexClosedBadge');
+      expect(hoverText).to.contain('closed');
+      expect(hoverText).not.to.contain('Create lookup index');
+      expect(hoverText).not.to.contain('Edit lookup index');
+    });
+
     async function cleanLookupJoinIndexes() {
-      for (const name of [INDEX_NAME_EDITION, INDEX_NAME_MANUAL, INDEX_NAME_FILE]) {
+      for (const name of [
+        INDEX_NAME_EDITION,
+        INDEX_NAME_MANUAL,
+        INDEX_NAME_FILE,
+        INDEX_NAME_CLOSED,
+      ]) {
         const indexExists = await es.indices.exists({ index: name });
         if (indexExists) {
+          // Open the index before deletion (closed indices cannot be deleted directly)
+          try {
+            await es.indices.open({ index: name });
+          } catch {
+            // ignore if already open
+          }
           await es.indices.delete({ index: name });
         }
       }

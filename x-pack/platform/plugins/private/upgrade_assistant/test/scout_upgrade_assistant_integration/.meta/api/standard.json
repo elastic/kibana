@@ -1,0 +1,19 @@
+{
+  "sha1": "7c068d3ca823debe4c1e0e1f2ab5d3cd4fc49a8f",
+  "tests": [
+    {
+      "id": "3de9ea17bcf919f-f3cb9bba8772070",
+      "title": "Upgrade Assistant API deprecations tracks deprecated API calls and resolution state",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/upgrade_assistant/test/scout_upgrade_assistant_integration/api/tests/api_deprecations.spec.ts",
+        "line": 29,
+        "column": 12
+      }
+    }
+  ]
+}

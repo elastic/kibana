@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268596
+issues:
+- https://github.com/elastic/security-team/issues/16730
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Add queue concurrency strategy for workflows
+description: "Adds a queue concurrency strategy for workflows. When the maximum number of slot-occupying runs is reached, new executions are queued and processed in order when a slot becomes available."

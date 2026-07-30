@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/275901
+issues:
+- https://github.com/elastic/kibana/issues/273454
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Discover and ES|QL
+title: Fix stale requests in the inspector when switching between layouts with charts

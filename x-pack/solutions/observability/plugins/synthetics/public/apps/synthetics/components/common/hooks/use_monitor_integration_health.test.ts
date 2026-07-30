@@ -6,14 +6,18 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import * as reactRedux from 'react-redux';
+import * as reactRedux from 'react-redux-v7';
 import { PrivateLocationHealthStatusValue } from '../../../../../../common/runtime_types';
 import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
 
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useSelector: jest.fn(),
   useDispatch: jest.fn(),
+}));
+
+jest.mock('../../../contexts', () => ({
+  useSyntheticsRefreshContext: jest.fn().mockReturnValue({ lastRefresh: 0 }),
 }));
 
 jest.mock('../../../state/monitor_management/api', () => ({
@@ -89,6 +93,23 @@ describe('useMonitorIntegrationHealth', () => {
     jest.clearAllMocks();
     dispatchSpy = jest.fn();
     (reactRedux.useDispatch as jest.Mock).mockReturnValue(dispatchSpy);
+  });
+
+  it('does not re-fetch health when configIds is a new array reference with the same ids', () => {
+    setupSelectors({ monitors: [unhealthyMonitor], errors: [] });
+
+    const { rerender } = renderHook(
+      ({ configIds }: { configIds: string[] }) => useMonitorIntegrationHealth({ configIds }),
+      { initialProps: { configIds: ['mon-2'] } }
+    );
+
+    rerender({ configIds: ['mon-2'] });
+    rerender({ configIds: ['mon-2'] });
+
+    const healthDispatches = dispatchSpy.mock.calls.filter(
+      ([action]: [{ type: string }]) => action.type === '[MONITOR HEALTH] GET'
+    );
+    expect(healthDispatches).toHaveLength(1);
   });
 
   describe('status helpers', () => {

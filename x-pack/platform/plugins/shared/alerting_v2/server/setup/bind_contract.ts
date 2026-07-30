@@ -11,8 +11,9 @@ import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { RulesClient } from '../lib/rules_client';
-import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
-import type { AlertingServerStart, RulesClientApi } from '../types';
+import { ActionPolicyClient } from '../lib/action_policy_client';
+import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
+import type { AlertingServerStart, RulesClientApi, ActionPolicyClientApi } from '../types';
 
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Start).toDynamicValue(({ get }) => {
@@ -23,8 +24,8 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       scope.bind(Request).toConstantValue(request);
       scope.bind(Global).toConstantValue(Request);
       if (spaceId) {
-        scope.bind(RulesClientSpaceIdToken).toConstantValue(spaceId);
-        scope.bind(Global).toConstantValue(RulesClientSpaceIdToken);
+        scope.bind(RequestSpaceIdToken).toConstantValue(spaceId);
+        scope.bind(Global).toConstantValue(RequestSpaceIdToken);
       }
       return scope;
     };
@@ -38,6 +39,17 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         spaceId: string
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
+      },
+      async getActionPolicyClientWithRequest(
+        request: KibanaRequest
+      ): Promise<ActionPolicyClientApi> {
+        return buildScope(request).get(ActionPolicyClient);
+      },
+      async getActionPolicyClientWithRequestInSpace(
+        request: KibanaRequest,
+        spaceId: string
+      ): Promise<ActionPolicyClientApi> {
+        return buildScope(request, spaceId).get(ActionPolicyClient);
       },
     };
     return contract;

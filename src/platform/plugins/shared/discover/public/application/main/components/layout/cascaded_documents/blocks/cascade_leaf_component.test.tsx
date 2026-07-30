@@ -23,6 +23,7 @@ import { createChildVirtualizerController } from '@kbn/shared-ux-document-data-c
 import { createDiscoverServicesMock } from '../../../../../../__mocks__/services';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
 import { dataViewWithTimefieldMock } from '../../../../../../__mocks__/data_view_with_timefield';
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../../../../context_awareness';
 import {
   CascadedDocumentsProvider,
   type CascadedDocumentsContext,
@@ -65,6 +66,7 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   };
   const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
     scopedEbtManager: services.ebtManager.createScopedEBTManager(),
+    toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
   });
 
   return new CascadedDocumentsFetcher(services, scopedProfilesManager, stateManager);
@@ -139,6 +141,7 @@ const createContextValue = ({
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
+    isApproximate: false,
     viewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(expandedDoc),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(currentOwner),

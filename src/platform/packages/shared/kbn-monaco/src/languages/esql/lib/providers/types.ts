@@ -12,8 +12,9 @@ import type { ESQLTelemetryCallbacks, ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '../../../../monaco_imports';
 
 export type MonacoMessage = monaco.editor.IMarkerData & {
-  code: string;
-
+  code: ESQLMessage['code'];
+  data?: ESQLMessage['data'];
+  location?: ESQLMessage['location'];
   // By default warnings are not underlined, use this flag to indicate it should be
   underlinedWarning?: ESQLMessage['underlinedWarning'];
 };
@@ -25,6 +26,11 @@ export type ESQLDependencies = ESQLCallbacks &
      * Latest validation messages (errors + warnings) for the current model.
      */
     getEditorMessages?: () => { errors: MonacoMessage[]; warnings: MonacoMessage[] };
+    /**
+     * When true, a "Fix with AI" code action is added alongside the standard quick fixes.
+     * Requires an Enterprise license and an AI connector configured.
+     */
+    isSuggestFixEnabled: boolean;
     /**
      * Optional resolver to provide model-specific dependencies.
      *

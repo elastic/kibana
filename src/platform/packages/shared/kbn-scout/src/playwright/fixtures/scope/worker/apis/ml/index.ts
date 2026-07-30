@@ -31,6 +31,8 @@ export interface DeleteJobsOptions {
 }
 
 export interface MlADJobsApi {
+  /** Create an anomaly detection job via the Kibana API (registers in current space) */
+  createViaKibana: (jobConfig: Partial<estypes.MlJob>) => Promise<void>;
   /** Delete anomaly detection jobs via the Kibana API */
   delete: (options: DeleteJobsOptions) => Promise<void>;
   /** Get all anomaly detection jobs via the Elasticsearch API */
@@ -48,7 +50,32 @@ export interface MlADJobsApi {
   annotations: MlAnnotationsApi;
 }
 
+// Intentionally duplicated from the ML plugin to avoid a @kbn/scout → ml circular dep.
+export interface MlCalendar {
+  calendar_id: string;
+  description: string;
+  events: estypes.MlCalendarEvent[];
+  job_ids: string[];
+  total_job_count?: number;
+}
+
 export interface MlCalendarsApi {
+  /** Create an ML calendar via the Elasticsearch API */
+  create: (
+    calendarId: string,
+    config?: { job_ids?: string[]; description?: string }
+  ) => Promise<void>;
+  /** Add events to an existing ML calendar via the Elasticsearch API */
+  createCalendarEvents: (calendarId: string, events: estypes.MlCalendarEvent[]) => Promise<void>;
+  /** Wait for specific events to exist in a calendar by polling the Elasticsearch API */
+  waitForEventsToExistInCalendar: (
+    calendarId: string,
+    eventsToCheck: estypes.MlCalendarEvent[]
+  ) => Promise<void>;
+  /** Get all events for an ML calendar via the Elasticsearch API */
+  getCalendarEvents: (calendarId: string) => Promise<{ events: estypes.MlCalendarEvent[] }>;
+  /** Get an ML calendar by ID via the Kibana API (returns Kibana shape, including events) */
+  get: (calendarId: string) => Promise<MlCalendar>;
   /** Get all ML calendars via the Elasticsearch API */
   getAll: () => Promise<estypes.MlGetCalendarsCalendar[]>;
   /** Wait for a calendar to exist by polling the Elasticsearch API */
@@ -62,6 +89,8 @@ export interface MlCalendarsApi {
 }
 
 export interface MlFiltersApi {
+  /** Create an ML filter via the Elasticsearch API */
+  create: (filter: estypes.MlFilter) => Promise<void>;
   /** Get all ML filters via the Elasticsearch API */
   getAll: () => Promise<estypes.MlFilter[]>;
   /** Get an ML filter by ID via the Elasticsearch API */
@@ -77,13 +106,13 @@ export interface MlFiltersApi {
 }
 
 export interface MlAnnotationsApi {
-  /** Get all ML annotations by querying Elasticsearch directly */
+  /** Get all ML annotations via the Elasticsearch API */
   getAll: () => Promise<Array<{ _id: string; _source: Annotation }>>;
-  /** Get an ML annotation by ID by querying Elasticsearch directly */
+  /** Get an ML annotation by ID via the Elasticsearch API */
   getById: (annotationId: string) => Promise<{ _id: string; _source: Annotation } | undefined>;
-  /** Wait for an annotation to exist by polling Elasticsearch directly */
+  /** Wait for an annotation to exist by polling the Elasticsearch API */
   waitForAnnotationToExist: (annotationId: string) => Promise<void>;
-  /** Wait for an annotation to be deleted by polling Elasticsearch directly */
+  /** Wait for an annotation to be deleted by polling the Elasticsearch API */
   waitForAnnotationNotToExist: (annotationId: string) => Promise<void>;
   /** Delete an annotation via the Kibana API */
   delete: (annotationId: string) => Promise<void>;
@@ -191,6 +220,71 @@ export const getMlApiHelper = (
   };
 
   const calendars: MlCalendarsApi = {
+    async create(
+      calendarId: string,
+      config: { job_ids?: string[]; description?: string } = {}
+    ): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.calendars.create [${calendarId}]`, async () => {
+        await esClient.ml.putCalendar({ calendar_id: calendarId, ...config });
+        await this.waitForCalendarToExist(calendarId);
+      });
+    },
+
+    async createCalendarEvents(
+      calendarId: string,
+      events: estypes.MlCalendarEvent[]
+    ): Promise<void> {
+      await measurePerformanceAsync(
+        log,
+        `mlApi.calendars.createCalendarEvents [${calendarId}]`,
+        async () => {
+          await esClient.ml.postCalendarEvents({ calendar_id: calendarId, events });
+          await this.waitForEventsToExistInCalendar(calendarId, events);
+        }
+      );
+    },
+
+    async getCalendarEvents(calendarId: string): Promise<{ events: estypes.MlCalendarEvent[] }> {
+      return measurePerformanceAsync(
+        log,
+        `mlApi.calendars.getCalendarEvents [${calendarId}]`,
+        async () => {
+          const response = await esClient.ml.getCalendarEvents({ calendar_id: calendarId });
+          return { events: response.events };
+        }
+      );
+    },
+
+    async waitForEventsToExistInCalendar(
+      calendarId: string,
+      eventsToCheck: estypes.MlCalendarEvent[]
+    ): Promise<void> {
+      await waitForCondition(`events to exist in calendar '${calendarId}'`, async () => {
+        const { events } = await this.getCalendarEvents(calendarId);
+        const allExist = eventsToCheck.every((e) =>
+          events.some(
+            (ce) =>
+              ce.description === e.description &&
+              String(ce.start_time) === String(e.start_time) &&
+              String(ce.end_time) === String(e.end_time)
+          )
+        );
+        if (allExist) return true;
+        throw new Error(`Expected events not yet present in calendar '${calendarId}'`);
+      });
+    },
+
+    async get(calendarId: string): Promise<MlCalendar> {
+      return measurePerformanceAsync(log, `mlApi.calendars.get [${calendarId}]`, async () => {
+        const { data } = await kbnClient.request<MlCalendar>({
+          method: 'GET',
+          path: `/internal/ml/calendars/${calendarId}`,
+          headers: ML_INTERNAL_HEADERS,
+        });
+        return data;
+      });
+    },
+
     async getAll(): Promise<estypes.MlGetCalendarsCalendar[]> {
       return measurePerformanceAsync(log, 'mlApi.calendars.getAll', async () => {
         const response = await esClient.ml.getCalendars();
@@ -216,11 +310,17 @@ export const getMlApiHelper = (
 
     async delete(calendarId: string): Promise<void> {
       await measurePerformanceAsync(log, `mlApi.calendars.delete [${calendarId}]`, async () => {
-        const response = await esClient.ml.deleteCalendar({ calendar_id: calendarId });
-        if (response.acknowledged !== true) {
-          throw new Error(`Failed to delete calendar ${calendarId}`);
+        let calendarExisted = true;
+        await esClient.ml.deleteCalendar({ calendar_id: calendarId }).catch((err) => {
+          if (err?.statusCode === 404) {
+            calendarExisted = false;
+            return;
+          }
+          throw err;
+        });
+        if (calendarExisted) {
+          await this.waitForCalendarNotToExist(calendarId);
         }
-        await this.waitForCalendarNotToExist(calendarId);
       });
     },
 
@@ -266,6 +366,13 @@ export const getMlApiHelper = (
       await waitForCondition(`filter '${filterId}' to not exist`, async () => {
         if ((await this.getById(filterId)) === null) return true;
         throw new Error(`Filter '${filterId}' still exists`);
+      });
+    },
+
+    async create({ filter_id, ...body }: estypes.MlFilter): Promise<void> {
+      await measurePerformanceAsync(log, `mlApi.filters.create [${filter_id}]`, async () => {
+        await esClient.ml.putFilter({ filter_id, ...body });
+        await this.waitForFilterToExist(filter_id);
       });
     },
 
@@ -384,6 +491,24 @@ export const getMlApiHelper = (
   };
 
   const anomalyDetection: MlADJobsApi = {
+    async createViaKibana(jobConfig: Partial<estypes.MlJob>): Promise<void> {
+      const { job_id: jobId, ...body } = jobConfig;
+      if (!jobId) throw new Error('jobConfig.job_id is required');
+      await measurePerformanceAsync(
+        log,
+        `mlApi.anomalyDetection.createViaKibana [${jobId}]`,
+        async () => {
+          await kbnClient.request({
+            method: 'PUT',
+            path: `/internal/ml/anomaly_detectors/${jobId}`,
+            headers: ML_INTERNAL_HEADERS,
+            body,
+          });
+          await this.waitForJobToExist(jobId);
+        }
+      );
+    },
+
     async delete({
       jobIds,
       deleteUserAnnotations = false,

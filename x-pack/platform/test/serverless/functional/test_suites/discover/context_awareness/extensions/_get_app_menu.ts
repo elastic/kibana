@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+// Original test (remove during Scout migration): src/platform/test/functional/apps/discover/context_awareness/extensions/_get_app_menu.ts
+
 import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -21,7 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
 
-  describe('extension getAppMenu', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/273917
+  describe.skip('extension getAppMenu', () => {
     before(async () => {
       await svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded(

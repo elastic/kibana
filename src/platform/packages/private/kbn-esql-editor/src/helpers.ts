@@ -73,8 +73,10 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
       // if there's line number encoded in the message use it as new positioning
       // and replace the actual message without it
       if (/Line (\d+):(\d+):/.test(warningMessage)) {
-        const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+        const [encodedLine, encodedColumn, innerMessage, ...additionalParts] =
           warningMessage.split(':');
+        const additionalInfoMessage =
+          additionalParts.length > 0 ? additionalParts.join(':') : undefined;
         // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
         warningMessage = additionalInfoMessage ?? innerMessage;
         if (!Number.isNaN(Number(encodedColumn))) {
@@ -85,7 +87,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
         if (openingSquareBracketIndex !== -1) {
           const closingSquareBracketIndex = warningMessage.indexOf(']', openingSquareBracketIndex);
           if (closingSquareBracketIndex !== -1) {
-            errorLength = warningMessage.length - openingSquareBracketIndex - 1;
+            errorLength = closingSquareBracketIndex - openingSquareBracketIndex - 1;
           }
         }
       }
@@ -119,14 +121,15 @@ const ES_PROBLEM_MARKER_REGEX = /line (\d+):(\d+):/g;
 
 export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
   return errors.flatMap((error): MonacoMessage[] => {
+    const errorMessage = typeof error.message === 'string' ? error.message : String(error.message);
     try {
       if (
         // Found while testing random commands (as inlinestats)
-        !error.message.includes('esql_illegal_argument_exception') &&
-        error.message.includes('line')
+        !errorMessage.includes('esql_illegal_argument_exception') &&
+        errorMessage.includes('line')
       ) {
         const markers: Array<{ line: number; column: number; end: number; start: number }> = [];
-        for (const match of error.message.matchAll(ES_PROBLEM_MARKER_REGEX)) {
+        for (const match of errorMessage.matchAll(ES_PROBLEM_MARKER_REGEX)) {
           markers.push({
             line: Number(match[1]),
             column: Number(match[2]),
@@ -137,8 +140,8 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
 
         if (markers.length > 0) {
           return markers.map((marker, i) => {
-            const messageEnd = i + 1 < markers.length ? markers[i + 1].start : error.message.length;
-            const message = error.message.slice(marker.end, messageEnd).replace(/\s+$/, '');
+            const messageEnd = i + 1 < markers.length ? markers[i + 1].start : errorMessage.length;
+            const message = errorMessage.slice(marker.end, messageEnd).replace(/\s+$/, '');
             const bracketed = message.match(/\[([^\]]*)\]/);
             const errorLength = bracketed ? bracketed[1].length : 10;
             return {
@@ -154,7 +157,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         }
       }
 
-      if (error.message.includes('expression was aborted')) {
+      if (errorMessage.includes('expression was aborted')) {
         return [
           {
             message: i18n.translate('esqlEditor.query.aborted', {
@@ -172,7 +175,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
 
       return [
         {
-          message: error.message,
+          message: errorMessage,
           startColumn: 1,
           startLineNumber: 1,
           endColumn: 10,
@@ -184,7 +187,7 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
     } catch (e) {
       return [
         {
-          message: error.message,
+          message: errorMessage,
           startColumn: 1,
           startLineNumber: 1,
           endColumn: 10,
@@ -246,6 +249,7 @@ export const onMouseDownResizeHandler = (
 
   document.body.addEventListener('mousemove', onMouseMove);
   document.body.addEventListener('mouseup', onMouseUp, { once: true });
+  document.body.addEventListener('touchend', onMouseUp, { once: true });
 };
 
 export const onKeyDownResizeHandler = (
@@ -463,27 +467,33 @@ export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): b
 export const trackSuggestionPopupState = (
   editor: monaco.editor.IStandaloneCodeEditor,
   isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
-) => {
+): monaco.IDisposable => {
   const suggestionController = editor.getContribution('editor.contrib.suggestController') as
     | (monaco.editor.IEditorContribution & {
         widget?: {
           value?: {
-            onDidShow?: (cb: () => void) => void;
-            onDidHide?: (cb: () => void) => void;
+            onDidShow?: (cb: () => void) => monaco.IDisposable;
+            onDidHide?: (cb: () => void) => monaco.IDisposable;
           };
         };
       })
     | undefined;
   const suggestionWidget = suggestionController?.widget?.value;
 
+  const disposables: monaco.IDisposable[] = [];
   if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
-    suggestionWidget.onDidShow(() => {
-      isSuggestionPopupOpenRef.current = true;
-    });
-    suggestionWidget.onDidHide(() => {
-      isSuggestionPopupOpenRef.current = false;
-    });
+    disposables.push(
+      suggestionWidget.onDidShow(() => {
+        isSuggestionPopupOpenRef.current = true;
+      })
+    );
+    disposables.push(
+      suggestionWidget.onDidHide(() => {
+        isSuggestionPopupOpenRef.current = false;
+      })
+    );
   }
+  return { dispose: () => disposables.forEach((d) => d.dispose()) };
 };
 
 /**

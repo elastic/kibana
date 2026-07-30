@@ -173,6 +173,10 @@ export function CanvasPageProvider({ getService, getPageObjects }: FtrProviderCo
       await testSubjects.click('breadcrumb first');
     },
 
+    async addNewLensPanel() {
+      await this.addNewPanel('Visualization');
+    },
+
     async addNewPanel(actionName: string) {
       log.debug('CanvasPage.addNewPanel', actionName);
       await testSubjects.click('canvasEditorMenuButton');

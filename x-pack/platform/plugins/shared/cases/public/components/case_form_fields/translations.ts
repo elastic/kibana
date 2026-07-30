@@ -12,3 +12,28 @@ export * from '../../common/translations';
 export const CUSTOM_FIELDS = i18n.translate('xpack.cases.customFields', {
   defaultMessage: 'Custom fields',
 });
+
+export const LEGACY_CUSTOM_FIELDS_SECTION_TITLE = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsSectionTitle',
+  {
+    defaultMessage: 'Legacy custom fields',
+  }
+);
+
+export const LEGACY_CUSTOM_FIELDS_VIEW_CUSTOM_FIELDS = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsViewCustomFields',
+  {
+    defaultMessage: 'custom fields',
+  }
+);
+
+export const LEGACY_CUSTOM_FIELDS_VIEW_SETTINGS = i18n.translate(
+  'xpack.cases.caseFormFields.legacyCustomFieldsViewSettings',
+  {
+    defaultMessage: 'settings',
+  }
+);
+
+export const DEPRECATED_BADGE = i18n.translate('xpack.cases.caseFormFields.deprecatedBadge', {
+  defaultMessage: 'Deprecated',
+});

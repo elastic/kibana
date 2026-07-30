@@ -19,6 +19,7 @@ export {
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
   MAX_DOC_FIELDS_DISPLAYED,
   MODIFY_COLUMNS_ON_SWITCH,
+  OPEN_IN_DISCOVER_TAB_LABEL,
   ROW_HEIGHT_OPTION,
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SAMPLE_SIZE_SETTING,
@@ -28,6 +29,7 @@ export {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
   DataGridDensity,
+  UnifiedHistogramSuggestionType,
   IgnoredReason,
   buildDataTableRecord,
   buildDataTableRecordList,
@@ -41,6 +43,7 @@ export {
   formatFieldValueText,
   formatFieldStringValueWithHighlights,
   formatHitReact,
+  tryPrettyPrintJsonBlocks,
   getDocId,
   getLogDocumentOverview,
   getFlattenedTraceDocumentOverview,
@@ -48,6 +51,7 @@ export {
   getMessageFieldWithFallbacks,
   getChartHidden,
   getTableHidden,
+  getSidebarHidden,
   getTopPanelHeight,
   getBreakdownField,
   getAvailableResourceFields,
@@ -56,6 +60,7 @@ export {
   getLogEventTypeFieldWithFallback,
   getLogExceptionTypeFieldWithFallback,
   getShouldShowFieldHandler,
+  isEsqlSavedSearch,
   isNestedFieldParent,
   usePager,
   calcFieldCounts,
@@ -75,12 +80,14 @@ export {
   getEsqlDataView,
   setChartHidden,
   setTableHidden,
+  setSidebarHidden,
   setTopPanelHeight,
   setBreakdownField,
   LogLevelBadge,
   getDefaultSort,
   getSort,
   getSortArray,
+  isLegacySort,
   getSortForSearchSource,
   getEsQuerySort,
   getTieBreakerFieldName,
@@ -89,6 +96,7 @@ export {
   TABLE_HIDDEN_KEY,
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
+  METRICS_GRID_SETTINGS_DEFAULTS,
 } from './src';
 
 export type {
@@ -98,6 +106,10 @@ export type {
   SortInput,
   SortPair,
   ErrorCalloutProps,
+  DiscoverSessionFinderAttributes,
+  HistogramPercentile,
+  MetricsGridSettings,
+  SimpleAggregation,
 } from './src';
 
 export * from './src/types';

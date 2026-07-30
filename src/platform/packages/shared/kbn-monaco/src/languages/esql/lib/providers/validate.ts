@@ -10,20 +10,22 @@
 import { validateQuery } from '@kbn/esql-language';
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import type { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoMessages } from '../converters/positions';
 
 export async function esqlValidate(
   model: monaco.editor.ITextModel,
   code?: string,
   callbacks?: ESQLCallbacks,
-  options?: { invalidateColumnsCache?: boolean }
+  options?: { invalidateColumnsCache?: boolean },
+  token?: monaco.CancellationToken
 ) {
   return createMonacoProvider({
     model,
     run: async (safeModel) => {
       const text = code ?? safeModel.getValue();
-      const { errors, warnings } = await validateQuery(text, callbacks, options);
+      const cancellableCallbacks = createCancellableCallbacks(callbacks, token);
+      const { errors, warnings } = await validateQuery(text, cancellableCallbacks, options);
       const monacoErrors = wrapAsMonacoMessages(text, errors);
       const monacoWarnings = wrapAsMonacoMessages(text, warnings);
       return { errors: monacoErrors, warnings: monacoWarnings };

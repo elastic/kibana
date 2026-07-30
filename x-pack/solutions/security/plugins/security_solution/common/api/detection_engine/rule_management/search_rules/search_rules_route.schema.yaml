@@ -27,7 +27,9 @@ paths:
                 value:
                   page: 1
                   per_page: 50
-                  filter: 'alert.attributes.enabled:true'
+                  filter:
+                    term: 'alert.attributes.enabled:true'
+                    mode: KQL
                   sort_field: 'name'
                   sort_order: 'asc'
                   search:
@@ -45,11 +47,11 @@ paths:
                   type: array
                   description: Restrict the response to only include the specified fields and necessary metadata.
                   items:
-                    $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesField'
+                    type: string
+                    maxLength: 256
                 filter:
-                  type: string
-                  description: |
-                    KQL filter string.
+                  description: Structured KQL filter applied to detection rules (alert saved objects).
+                  $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/GranularRulesFilter'
                 aggregations:
                   $ref: '../granular_rules/granular_rules_contract.schema.yaml#/components/schemas/SearchRulesAggregations'
                 search:
@@ -66,7 +68,7 @@ paths:
                   example: 1
                 per_page:
                   type: integer
-                  minimum: 0
+                  minimum: 1
                   maximum: 10000
                   default: 20
                   description: Page size.

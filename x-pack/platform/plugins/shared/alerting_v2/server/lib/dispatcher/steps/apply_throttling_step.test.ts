@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import { applyThrottling } from './apply_throttling_step';
-import { createAlertEpisode, createActionGroup, createActionPolicy } from '../fixtures/test_utils';
+import { ApplyThrottlingStep, applyThrottling } from './apply_throttling_step';
+import { createQueryService } from '../../services/query_service/query_service.mock';
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { createLastNotifiedTimestampsResponse } from '../fixtures/dispatcher';
+import {
+  createAlertEpisode,
+  createActionGroup,
+  createActionPolicy,
+  createDispatcherPipelineState,
+} from '../fixtures/test_utils';
 import type { ActionGroupId, LastNotifiedInfo } from '../types';
 
 const NOW = new Date('2026-01-22T10:00:00.000Z');
@@ -455,5 +463,65 @@ describe('applyThrottling', () => {
       expect(dispatch).toHaveLength(0);
       expect(throttled).toHaveLength(0);
     });
+  });
+});
+
+describe('ApplyThrottlingStep', () => {
+  it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new ApplyThrottlingStep(queryService, loggerService);
+
+    const longSegment = 'q'.repeat(10_000);
+    const groups = Array.from({ length: 200 }, (_, i) =>
+      createActionGroup({ id: `${longSegment}-g${i}`, policyId: 'p1' })
+    );
+    const policies = new Map([
+      ['p1', createActionPolicy({ id: 'p1', throttle: { strategy: 'every_time' } })],
+    ]);
+
+    const firstId = groups[0].id;
+    const lastId = groups[groups.length - 1].id;
+
+    // A chunk that contains firstId returns its row, the chunk that contains
+    // lastId returns its row, every other chunk returns an empty result.
+    mockEsClient.esql.query.mockImplementation((args: { query: string }) => {
+      const rows: Array<{ action_group_id: string; last_notified: string }> = [];
+      if (args.query.includes(firstId)) {
+        rows.push({ action_group_id: firstId, last_notified: '2026-01-22T08:00:00.000Z' });
+      }
+      if (args.query.includes(lastId)) {
+        rows.push({ action_group_id: lastId, last_notified: '2026-01-22T08:00:00.000Z' });
+      }
+      return Promise.resolve(createLastNotifiedTimestampsResponse(rows));
+    });
+
+    const state = createDispatcherPipelineState({ groups, policies });
+    const result = await step.execute(state);
+
+    expect(mockEsClient.esql.query.mock.calls.length).toBeGreaterThanOrEqual(2);
+    for (const [args] of mockEsClient.esql.query.mock.calls) {
+      expect((args.query as string).length).toBeLessThan(1_000_000);
+    }
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    // every_time strategy → all groups dispatch regardless of last_notified.
+    expect(result.data?.dispatch).toHaveLength(200);
+    expect(result.data?.throttled).toHaveLength(0);
+  });
+
+  it('returns empty dispatch and throttled when no groups', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const { loggerService } = createLoggerService();
+    const step = new ApplyThrottlingStep(queryService, loggerService);
+
+    const result = await step.execute(createDispatcherPipelineState({ groups: [] }));
+
+    expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.dispatch).toHaveLength(0);
+    expect(result.data?.throttled).toHaveLength(0);
   });
 });

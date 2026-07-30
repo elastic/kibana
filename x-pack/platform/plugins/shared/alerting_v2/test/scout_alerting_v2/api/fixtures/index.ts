@@ -7,17 +7,26 @@
 
 import { apiTest as baseApiTest } from '@kbn/scout';
 import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/scout';
-import { ALERT_ACTIONS_DATA_STREAM } from '../../common/constants';
 import {
-  getDataStreamApiService,
-  getInsightsApiService,
+  getActionPoliciesApiService,
+  getAlertActionsApiService,
+  getAlertActionsEventsService,
+  getDispatcherApiService,
+  getMaintenanceWindowsApiService,
+  getRuleExecutionsApiService,
   getRulesApiService,
-  getTaskExecutionsApiService,
-  type DataStreamApiService,
-  type InsightsApiService,
+  getTaskManagerService,
+  getTelemetryService,
+  type ActionPoliciesApiService,
+  type AlertActionsApiService,
+  type AlertActionsEventsService,
+  type DispatcherApiService,
+  type MaintenanceWindowsApiService,
+  type RuleExecutionsApiService,
   type RulesApiService,
   type RuleEventsApiService,
-  type TaskExecutionsApiService,
+  type TaskManagerService,
+  type TelemetryService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -26,10 +35,15 @@ import { getSourceIndexApiService } from '../../common/services/source_index_api
 export interface AlertingApiServices {
   rules: RulesApiService;
   ruleEvents: RuleEventsApiService;
-  alertActions: DataStreamApiService;
-  insights: InsightsApiService;
+  alertActionsEvents: AlertActionsEventsService;
+  alertActions: AlertActionsApiService;
+  actionPolicies: ActionPoliciesApiService;
+  maintenanceWindows: MaintenanceWindowsApiService;
   sourceIndex: SourceIndexApiService;
-  taskExecutions: TaskExecutionsApiService;
+  ruleExecutions: RuleExecutionsApiService;
+  dispatcher: DispatcherApiService;
+  taskManager: TaskManagerService;
+  telemetry: TelemetryService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -49,18 +63,22 @@ export const buildAlertingApiServices = ({
   esClient: EsClient;
   kbnClient: KbnClient;
   log: ScoutLogger;
-}): AlertingApiServices => ({
-  rules: getRulesApiService({ kbnClient, log }),
-  ruleEvents: getRuleEventsApiService({ esClient, log }),
-  alertActions: getDataStreamApiService({
-    esClient,
-    log,
-    dataStreamName: ALERT_ACTIONS_DATA_STREAM,
-  }),
-  insights: getInsightsApiService({ esClient, log }),
-  sourceIndex: getSourceIndexApiService({ esClient, log }),
-  taskExecutions: getTaskExecutionsApiService({ esClient, log }),
-});
+}): AlertingApiServices => {
+  const taskManager = getTaskManagerService({ kbnClient, log });
+  return {
+    rules: getRulesApiService({ kbnClient, log }),
+    ruleEvents: getRuleEventsApiService({ esClient, log }),
+    alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
+    alertActions: getAlertActionsApiService({ kbnClient, log }),
+    actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
+    maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
+    sourceIndex: getSourceIndexApiService({ esClient, log }),
+    ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
+    dispatcher: getDispatcherApiService({ esClient, log }),
+    taskManager,
+    telemetry: getTelemetryService({ esClient, log, taskManager }),
+  };
+};
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
   apiServices: [
@@ -78,8 +96,63 @@ export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServices
   ],
 });
 
-export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
-export { buildCreateRuleData } from '../../common/builders';
-export { getRuleUrl } from '../../common/urls';
-export { expectNoBulkTruncationMetadata } from '../../common/assertions';
+export {
+  ALL_ROLE,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
+  ALERTING_V2_ALERTS_ALL_ROLE,
+  ALERTING_V2_ALERTS_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
+  ALERTING_V2_ACTION_POLICIES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
+  ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
+} from '../../common/roles';
+export {
+  buildAlertEvent,
+  buildExternalAlertEvent,
+  buildCreateRuleData,
+  buildCreateActionPolicyData,
+  getSnoozeDate,
+} from '../../common/builders';
+export {
+  getActionPolicyUrl,
+  getAckAlertActionUrl,
+  getUnackAlertActionUrl,
+  getAssignAlertActionUrl,
+  getTagAlertActionUrl,
+  getSnoozeAlertActionUrl,
+  getUnsnoozeAlertActionUrl,
+  getActivateAlertActionUrl,
+  getDeactivateAlertActionUrl,
+  getRuleUrl,
+  getRunRuleUrl,
+  getEnableRuleUrl,
+  getDisableRuleUrl,
+  getBulkRulesUrl,
+  BULK_ALERT_ACTION_URL,
+  getBulkDeleteActionPoliciesUrl,
+  getBulkEnableActionPoliciesUrl,
+  getBulkDisableActionPoliciesUrl,
+  getBulkSnoozeActionPoliciesUrl,
+  getBulkUnsnoozeActionPoliciesUrl,
+  getBulkUpdateApiKeyActionPoliciesUrl,
+  getDisableActionPolicyUrl,
+  getEnableActionPolicyUrl,
+  getListActionPoliciesUrl,
+  getSnoozeActionPolicyUrl,
+  getUnsnoozeActionPolicyUrl,
+  getUpdateActionPolicyApiKeyUrl,
+  getListExecutionHistoryUrl,
+  getCountNewExecutionHistoryEventsUrl,
+  getRuleExecutionsUrl,
+} from '../../common/urls';
+export {
+  ACTION_POLICY_PER_PAGE_MAX,
+  ACTION_POLICY_SEARCH_MAX_LENGTH,
+  ACTION_POLICY_TAG_MAX_LENGTH,
+  ACTION_POLICY_TAGS_MAX_COUNT,
+} from '../../common/constants';
 export * as testData from '../../common/constants';

@@ -19,6 +19,7 @@ import {
   isReasoningStep,
   isToolCallStep,
   isBackgroundAgentCompleteStep,
+  isAskUserQuestionStep,
 } from '@kbn/agent-builder-common';
 import {
   createAIMessage,
@@ -27,12 +28,19 @@ import {
   wrapToolResultContent,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import { generateXmlTree, type XmlNode } from '@kbn/agent-builder-genai-utils/tools/utils';
-import type { ProcessedAttachment, ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type {
+  ProcessedAttachment,
+  ProcessedAttachmentType,
+  ProcessedRoundInput,
+} from '@kbn/agent-builder-server';
 import type { CompactionSummary } from '@kbn/agent-builder-common';
 import { formatSystemNotice } from '../prompts/utils/actions';
+import { formatDate } from '../prompts/utils/helpers';
 import type { ProcessedConversation, ProcessedConversationRound } from './prepare_conversation';
-import type { ToolCallResultTransformer } from './create_result_transformer';
-import { serializeCompactionSummary } from './conversation_compactor';
+import type { ToolCallResultTransformer } from './tool_summarization';
+import { serializeCompactionSummary } from './compaction_serialize';
+import { materializeAskUserQuestionToolCall } from './ask_user_question_tool_call';
+import { attachmentTypeInstructions } from '../prompts/utils/attachments';
 
 export interface ConversationToLangchainOptions {
   conversation: ProcessedConversation;
@@ -52,6 +60,13 @@ export interface ConversationToLangchainOptions {
    * user/assistant message pair representing the compacted history.
    */
   compactionSummary?: CompactionSummary;
+  /**
+   * Timestamp of the current (in-progress) round. When provided, it is
+   * prefixed onto the next-input user message. Previous rounds always use
+   * their own `started_at`. Kept out of the system prompt so the system+tools
+   * prefix stays stable across rounds (prompt-cache friendly).
+   */
+  conversationTimestamp?: string;
 }
 
 /**
@@ -65,11 +80,14 @@ export const convertPreviousRounds = async ({
   resultTransformer,
   ignoreSteps = false,
   compactionSummary,
+  conversationTimestamp,
 }: ConversationToLangchainOptions): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
+  const attachmentTypeInstructionsProvided = new Set<string>();
 
   let rounds = conversation.previousRounds;
   let input = conversation.nextInput;
+  let inputTimestamp = conversationTimestamp;
 
   // need to ignore the last round if it's awaiting a prompt, the graph handles resuming the actions
   // we also uses the last message's input as the "next" input (given the actual input will be the prompt response)
@@ -77,6 +95,7 @@ export const convertPreviousRounds = async ({
   if (lastRound && lastRound.status === ConversationRoundStatus.awaitingPrompt) {
     rounds = rounds.slice(0, rounds.length - 1);
     input = lastRound.input;
+    inputTimestamp = lastRound.started_at;
   }
 
   // Inject compaction summary as a user/assistant exchange before remaining rounds
@@ -87,25 +106,55 @@ export const convertPreviousRounds = async ({
   }
 
   for (const round of rounds) {
-    messages.push(...(await roundToLangchain(round, { resultTransformer, ignoreSteps })));
+    messages.push(
+      ...(await roundToLangchain(round, {
+        resultTransformer,
+        ignoreSteps,
+        attachmentTypes: conversation.attachmentTypes,
+        attachmentTypeInstructionsProvided,
+      }))
+    );
   }
 
-  messages.push(formatRoundInput({ input }));
+  messages.push(
+    formatRoundInput({
+      input,
+      timestamp: inputTimestamp,
+      attachmentTypes: conversation.attachmentTypes,
+      attachmentTypeInstructionsProvided,
+    })
+  );
 
   return messages;
 };
+
+export interface RoundToLangchainOptions {
+  resultTransformer?: ToolCallResultTransformer;
+  ignoreSteps?: boolean;
+  attachmentTypes?: ProcessedAttachmentType[];
+  attachmentTypeInstructionsProvided?: Set<string>;
+}
 
 export const roundToLangchain = async (
   round: ProcessedConversationRound,
   {
     resultTransformer,
     ignoreSteps = false,
-  }: { resultTransformer?: ToolCallResultTransformer; ignoreSteps?: boolean } = {}
+    attachmentTypes,
+    attachmentTypeInstructionsProvided,
+  }: RoundToLangchainOptions = {}
 ): Promise<BaseMessage[]> => {
   const messages: BaseMessage[] = [];
 
   // user message
-  messages.push(formatRoundInput({ input: round.input }));
+  messages.push(
+    formatRoundInput({
+      input: round.input,
+      timestamp: round.started_at,
+      attachmentTypes,
+      attachmentTypeInstructionsProvided,
+    })
+  );
 
   // steps
   if (!ignoreSteps) {
@@ -118,6 +167,7 @@ export const roundToLangchain = async (
         messages.push(createUserMessage(formatSystemNotice(step)));
       } else if (isToolCallStep(step)) {
         // Only process when we hit the first tool call of a group
+        // Other tool calls in the same group are handled by createGroupedToolCallMessages
         const group = groups[groupIndex];
         if (group && group[0] === step) {
           messages.push(
@@ -125,7 +175,19 @@ export const roundToLangchain = async (
           );
           groupIndex++;
         }
-        // Other tool calls in the same group are handled by createGroupedToolCallMessages
+      } else if (isAskUserQuestionStep(step) && step.answers !== undefined) {
+        // Render answered ask_user_question steps as a tool-call / tool-response pair.
+        const { toolCallId, toolName, args, content } = materializeAskUserQuestionToolCall({
+          questions: step.questions,
+          answers: step.answers,
+        });
+        messages.push(
+          new AIMessage({
+            content: '',
+            tool_calls: [{ id: toolCallId, name: toolName, args }],
+          })
+        );
+        messages.push(new ToolMessage({ tool_call_id: toolCallId, content }));
       }
       // Reasoning steps are handled inside createGroupedToolCallMessages via reasoningSteps param
     }
@@ -137,8 +199,18 @@ export const roundToLangchain = async (
   return messages;
 };
 
-const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessage => {
-  const { message, attachments } = input;
+const formatRoundInput = ({
+  input,
+  timestamp,
+  attachmentTypes,
+  attachmentTypeInstructionsProvided,
+}: {
+  input: ProcessedRoundInput;
+  timestamp?: string;
+  attachmentTypes?: ProcessedAttachmentType[];
+  attachmentTypeInstructionsProvided?: Set<string>;
+}): HumanMessage => {
+  const { message, attachments, attachment_context, attachment_refs } = input;
 
   let content = message;
 
@@ -152,6 +224,35 @@ const formatRoundInput = ({ input }: { input: ProcessedRoundInput }): HumanMessa
     );
 
     content += `\n\n${attachmentsXml}\n`;
+  }
+  if (attachment_context) {
+    content += `\n\n${attachment_context}\n`;
+  }
+  if (
+    attachment_refs &&
+    attachment_refs.length > 0 &&
+    attachmentTypes &&
+    attachmentTypeInstructionsProvided
+  ) {
+    const roundAttachmentTypes: ProcessedAttachmentType[] = [];
+    for (const ref of attachment_refs) {
+      if (ref.type && !attachmentTypeInstructionsProvided.has(ref.type)) {
+        attachmentTypeInstructionsProvided.add(ref.type);
+        const processedType = attachmentTypes.find((type) => type.type === ref.type);
+        if (processedType) {
+          roundAttachmentTypes.push(processedType);
+        }
+      }
+    }
+    if (roundAttachmentTypes.length > 0) {
+      const attachmentsInstructions = attachmentTypeInstructions(roundAttachmentTypes);
+
+      content += `\n\n${attachmentsInstructions}\n`;
+    }
+  }
+
+  if (timestamp && timestamp !== new Date(0).toISOString()) {
+    content = `[Sent: ${formatDate(timestamp)}]\n\n${content}`;
   }
 
   return createUserMessage(content);

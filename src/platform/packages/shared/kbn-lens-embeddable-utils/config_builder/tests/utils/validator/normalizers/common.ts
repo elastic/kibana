@@ -9,11 +9,20 @@
 
 import { orderBy } from 'lodash';
 
-import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { LEGACY_COMPLIMENTARY_PALETTE, COMPLEMENTARY_PALETTE } from '@kbn/coloring';
+import type { ColorMapping, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import type { Reference } from '@kbn/content-management-utils';
-import type { FormBasedPersistedState, TextBasedPersistedState } from '@kbn/lens-common';
+import type {
+  DataType,
+  FormBasedPersistedState,
+  GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+  TextBasedPersistedState,
+} from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -23,9 +32,12 @@ import type { LensAttributes } from '../../../../types';
 import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
-import { generateAdHocDataViewId } from '../../../../transforms/utils';
+import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const COMMON_STATE_IGNORE_PATHS = [
+  'savedObjectId', // panel-level SO reference, not part of LensAttributes
   'type', // misplaced type, see https://github.com/elastic/kibana/issues/245683
   'state.filters', // remove for now
   'state.visualization.title', // removed by-value nested title
@@ -40,22 +52,42 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.datasourceStates.formBased.layers.*.columns.*.scale', // conditionally set for data columns
   // TODO: check missing ES|QL column properties stripped out in transforms
   'state.datasourceStates.textBased.layers.*.columns.*.inMetricDimension', // dropped at state -> API and only applied from API -> State if explicitly set
-  'state.datasourceStates.textBased.layers.*.columns.*.meta.esType',
-  // TODO: check missing/different properties on adHocDataViews
-  'state.adHocDataViews.*.fieldAttrs',
-  'state.adHocDataViews.*.managed',
-  'state.adHocDataViews.*.timeFieldName', // not saved in API re-derived at runtime
+  'state.datasourceStates.textBased.layers.*.columns.*.meta', // meta is inferred by the transform -> originals may have it, miss it, or have different values
+  'state.datasourceStates.textBased.layers.*.allColumns', // runtime-only property, not persisted or produced by transform
+  'state.datasourceStates.textBased.layers.*.timeField', // inferred at runtime from the data view -> original may have undefined while transform sets @timestamp from query.esql
+  // TODO: check missing/different properties on colorMapping
+  'state.visualization.columns.*.colorMapping.assignments.*.touched', // dropped at state -> API and only applied from API -> State, hardcoded to false by transform
+  'state.visualization.columns.*.colorMapping.specialAssignments.*.touched',
+  'state.visualization.layers.*.colorMapping.assignments.*.touched',
+  'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
+  'state.visualization.layers.*.colorMapping.colorMode.steps.*.touched',
+  'state.visualization.colorMapping.colorMode.steps.*.touched',
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
 
 export type IdRemapping = Array<[old: string | undefined, new: string]>;
 
-function normalizeAdHocDataViews(attributes: LensAttributes) {
-  if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
-    delete attributes.state.adHocDataViews;
-  }
+/**
+ * Resolve the form-based datasource state, falling back to the legacy
+ * `indexpattern` key.
+ */
+export const getFormBasedDatasourceState = (
+  datasourceStates: LensAttributes['state']['datasourceStates']
+): FormBasedPersistedState | undefined =>
+  datasourceStates.formBased ?? ((datasourceStates as any).indexpattern as FormBasedPersistedState);
 
+export const isReferenceBasedColumn = (
+  c: GenericIndexPatternColumn
+): c is ReferenceBasedIndexPatternColumn => 'references' in c && Array.isArray(c.references);
+/**
+ * ES|QL ad-hoc data views: remap existing ones to deterministic IDs or create
+ * new ones from the ES|QL query. Returns rebuilt internalReferences with standard naming.
+ */
+function normalizeESQLAdHocDataViews(
+  attributes: LensAttributes,
+  internalReferences: Reference[]
+): Reference[] {
   if (
     attributes.state.datasourceStates.textBased &&
     'indexPatternRefs' in attributes.state.datasourceStates.textBased
@@ -63,44 +95,306 @@ function normalizeAdHocDataViews(attributes: LensAttributes) {
     delete attributes.state.datasourceStates.textBased.indexPatternRefs;
   }
 
-  const internalReferences = attributes.state.internalReferences ?? [];
+  const textBasedLayerEntries = Object.entries(
+    attributes.state.datasourceStates.textBased?.layers ?? {}
+  );
+  if (textBasedLayerEntries.length === 0) return internalReferences;
 
-  if (
-    attributes.state.datasourceStates.textBased &&
-    attributes.state.adHocDataViews &&
-    attributes.state.datasourceStates.textBased?.layers
-  ) {
-    const layers = Object.values(attributes.state.datasourceStates.textBased.layers);
-    for (const layer of layers) {
-      const oldIndex = layer.index;
-      if (!oldIndex) continue;
+  // Remove 'textBasedLanguages-datasource-layer-*' references — they are rebuilt below
+  const refs = internalReferences.filter(
+    (r) => !r.name.startsWith('textBasedLanguages-datasource-layer-')
+  );
 
+  if (!attributes.state.adHocDataViews) {
+    attributes.state.adHocDataViews = {};
+  }
+
+  for (const [layerId, layer] of textBasedLayerEntries) {
+    const esqlQuery = layer.query?.esql;
+    const oldIndex = layer.index;
+
+    if (oldIndex && attributes.state.adHocDataViews[oldIndex]) {
+      // Existing adHocDataView: remap to a deterministic ID
       const adHocDataView: DataViewSpec = attributes.state.adHocDataViews[oldIndex];
-      if (!adHocDataView) continue;
-
+      // Use the same logic as the transform: derive timeField from the ES|QL query
+      const timeFieldName = esqlQuery
+        ? parseTimeFieldFromESQLQuery(esqlQuery)
+        : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
+      // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
+      // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
+      const indexPattern = esqlQuery
+        ? getIndexPatternFromESQLQuery(esqlQuery)
+        : adHocDataView.name ?? '';
       const newId = generateAdHocDataViewId({
-        index: adHocDataView.name ?? '',
+        index: indexPattern,
         dataSourceType: 'esql',
-        esqlQuery: layer.query?.esql,
-        timeFieldName: undefined, // not saved in API re-derived at runtime
+        esqlQuery,
+        timeFieldName,
       });
 
       layer.index = newId;
       adHocDataView.id = newId;
+      adHocDataView.title = indexPattern;
+      // An ES|QL ad-hoc data view has no dedicated `name` in the `{ type: 'esql', query }` data
+      // source; the transform re-derives both title and name from the query's index pattern
+      // (getAdHocDataViewSpec: `name = dataView.name ?? dataView.index`). This mirrors the DataView
+      // runtime, where `getName() = name || title` and a freshly created ES|QL data view
+      // (getESQLAdHocDataview) sets only `title = queryIndexPattern`, so the effective name is the
+      // query index pattern.
+      adHocDataView.name = adHocDataView.title;
+      // The transform re-derives the time field from the ES|QL query rather than trusting the
+      // persisted value (getAdHocDataViewSpec <- getDataSourceIndex.esql), so align the stored
+      // timeFieldName here instead of skipping it entirely.
+      adHocDataView.timeFieldName = timeFieldName;
+      // Transform always sets type: 'esql' on ESQL adHocDataViews (via getAdHocDataViewSpec)
+      adHocDataView.type = 'esql';
       attributes.state.adHocDataViews[newId] = adHocDataView;
-      delete attributes.state.adHocDataViews[oldIndex];
-
-      internalReferences.push({
-        id: newId,
-        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-        type: 'index-pattern',
+      if (newId !== oldIndex) {
+        delete attributes.state.adHocDataViews[oldIndex];
+      }
+    } else if (esqlQuery) {
+      // No adHocDataView exists: create one from the ES|QL query (matches what the transform produces)
+      const indexPattern = getIndexPatternFromESQLQuery(esqlQuery);
+      const spec = getAdHocDataViewSpec({
+        type: 'adHocDataView',
+        index: indexPattern,
+        dataSourceType: 'esql',
+        esqlQuery,
+        timeFieldName: parseTimeFieldFromESQLQuery(esqlQuery),
       });
+
+      layer.index = spec.id;
+      attributes.state.adHocDataViews[spec.id] = spec;
     }
+
+    if (layer.index) {
+      // Mutate the existing layer ref in place to keep references; fall back to pushing if no existing ref is found.
+      // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
+      const layerRefName = `indexpattern-datasource-layer-${layerId}`;
+      const existingRef = refs.find((r) => r.name === layerRefName);
+      if (existingRef) {
+        existingRef.id = layer.index;
+        // intentionally keep existingRef.name unchanged (still layerId)
+      } else {
+        refs.push({
+          id: layer.index,
+          name: layerRefName,
+          type: 'index-pattern',
+        });
+      }
+    }
+  }
+
+  return refs;
+}
+
+/**
+ * Form-based ad-hoc data views: remap UUID-keyed entries to deterministic IDs
+ * and update internal references to match.
+ */
+function normalizeFormBasedAdHocDataViews(
+  attributes: LensAttributes,
+  internalReferences: Reference[]
+): Reference[] {
+  const formBasedLayers = attributes.state.datasourceStates.formBased?.layers ?? {};
+  const adHocDataViews = attributes.state.adHocDataViews ?? {};
+  const refs = [...internalReferences];
+
+  for (const [layerId, layer] of Object.entries(formBasedLayers)) {
+    const layerRefName = `indexpattern-datasource-layer-${layerId}`;
+    const ref = refs.find((r) => r.name === layerRefName);
+    const adHocId = ref?.id ?? (layer as any).indexPatternId;
+
+    if (adHocId && adHocDataViews[adHocId]) {
+      const adHocDataView: DataViewSpec = adHocDataViews[adHocId];
+      const newId = generateAdHocDataViewId({
+        index: adHocDataView.title ?? '',
+        timeFieldName: adHocDataView.timeFieldName,
+      });
+
+      delete adHocDataViews[adHocId];
+      adHocDataView.id = newId;
+      // A custom form-based name round-trips verbatim
+      adHocDataViews[newId] = adHocDataView;
+      // mirror the transform's `name = name ?? index` (title === index for form-based)
+      adHocDataView.name = adHocDataView.name ?? adHocDataView.title;
+
+      if (ref) {
+        ref.id = newId;
+        // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
+      } else {
+        refs.push({
+          id: newId,
+          name: `indexpattern-datasource-layer-${layerId}`,
+          type: 'index-pattern',
+        });
+      }
+    }
+  }
+
+  return refs;
+}
+
+/**
+ * Remove ad-hoc data views not referenced by any layer or internal reference.
+ */
+function removeOrphanedAdHocDataViews(attributes: LensAttributes, internalReferences: Reference[]) {
+  const referencedAdHocIds = new Set<string>();
+
+  for (const layer of Object.values(attributes.state.datasourceStates.textBased?.layers ?? {})) {
+    if (layer.index) {
+      referencedAdHocIds.add(layer.index);
+    }
+  }
+
+  for (const ref of internalReferences) {
+    referencedAdHocIds.add(ref.id);
+  }
+
+  for (const id of Object.keys(attributes.state.adHocDataViews ?? {})) {
+    if (!referencedAdHocIds.has(id)) {
+      delete attributes.state.adHocDataViews![id];
+    }
+  }
+}
+
+/**
+ * Switching between chart types in ES|QL mode leaves behind empty-column layers
+ * from previously selected charts (Check https://github.com/elastic/kibana/issues/243084).
+ * Only the active layer (in layerRemapping) survives the round-trip.
+ */
+function pruneEmptyColumnTextBasedLayers(attributes: LensAttributes) {
+  const textBasedLayers = attributes.state.datasourceStates.textBased?.layers;
+  if (!textBasedLayers) return;
+
+  for (const [layerId, layer] of Object.entries(textBasedLayers)) {
+    if (layer.columns.length === 0) {
+      delete textBasedLayers[layerId];
+    }
+  }
+}
+
+/**
+ * Normalize ad-hoc data view spec noise the SO -> API -> SO round-trip introduces.
+ *
+ * DROP verdicts — not carried by the embedded API, loss is accepted:
+ * - `managed`: leaked saved-object metadata, never authored on a Lens ad-hoc data view and stripped from
+ *   the public data-views API anyway.
+ * - `allowNoIndex`: a field-fetch option (ES|`allow_no_indices`), not something authored on an
+ *   ad-hoc data-view. The embedded API has no field for it and the transform always emits `false`, so a
+ *   stored `true` (e.g. Fleet dashboards shipped before their indices exist) can't survive the
+ *   round-trip. Coerce the original to `false` to match the transform.
+ * - `allowHidden` on ES|QL DataViews: an ES|QL ad-hoc DataView serializes as an `{ type: 'esql', query }`
+ *   datasource that carries no `allow_hidden_indices`, so the flag is dropped on that path. Strip
+ *   it here. Form-based DataViews round-trip `allowHidden` faithfully and are compared directly.
+ */
+function normalizeAdHocDataViewSpec(dv: DataViewSpec) {
+  delete dv.managed;
+  dv.allowNoIndex = false;
+
+  if (dv.type === 'esql' && dv.allowHidden === false) {
+    delete dv.allowHidden;
+  }
+
+  if (Object.keys(dv.fieldAttrs ?? {}).length === 0) {
+    delete dv.fieldAttrs;
+  }
+  if (Object.keys(dv.fieldFormats ?? {}).length === 0) {
+    delete dv.fieldFormats;
+  }
+  if (Object.keys(dv.runtimeFieldMap ?? {}).length === 0) {
+    delete dv.runtimeFieldMap;
+  }
+}
+
+function normalizeAdHocDataViews(attributes: LensAttributes) {
+  // Clear empty typeMeta objects
+  for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
+    if (dv.typeMeta && Object.keys(dv.typeMeta).length === 0) {
+      delete dv.typeMeta;
+    }
+  }
+
+  let internalReferences = attributes.state.internalReferences ?? [];
+  removeOrphanedAdHocDataViews(attributes, internalReferences);
+  internalReferences = normalizeESQLAdHocDataViews(attributes, internalReferences);
+  internalReferences = normalizeFormBasedAdHocDataViews(attributes, internalReferences);
+
+  // Normalize spec noise last so it covers every ad-hoc data view (both the ES|QL and form-based paths
+  // rebuild/remap specs above).
+  for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
+    normalizeAdHocDataViewSpec(dv);
+  }
+
+  if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
+    delete attributes.state.adHocDataViews;
   }
 
   attributes.state.internalReferences = internalReferences;
   if (attributes.state.internalReferences.length === 0) {
     delete attributes.state.internalReferences;
+  }
+}
+
+/**
+ * For ES|QL panels, the layer query is the source of truth at runtime.
+ * The top-level state.query may diverge in legacy SOs — sync it to the layer.
+ */
+function normalizeESQLQuery(attributes: LensAttributes) {
+  const textBasedLayers = Object.values(attributes.state.datasourceStates.textBased?.layers ?? {});
+  if (textBasedLayers.length > 0) {
+    const layerQuery = textBasedLayers[0].query;
+    // For ES|QL panels the layer query is authoritative; the transform always promotes it to the
+    // top-level state query, replacing any stale legacy query (even a different language).
+    if (layerQuery?.esql && attributes.state.query) {
+      attributes.state.query = layerQuery;
+    }
+  }
+}
+
+/**
+ * An empty query (query: "") is dropped during SO→API conversion, and the API→SO
+ * step defaults to { language: 'kuery', query: '' }. Both are semantically identical.
+ */
+function normalizeEmptyQuery(attributes: LensAttributes) {
+  const q = attributes.state.query;
+  if (q && 'language' in q && typeof q.query === 'string' && q.query === '') {
+    q.language = 'kuery';
+  }
+}
+
+/**
+ * description: null is equivalent to absent
+ */
+function normalizeDescription(attributes: LensAttributes) {
+  if (attributes.description === null) {
+    delete attributes.description;
+  }
+}
+
+/**
+ * dataType cannot always be preserved through transforms — it usually falls back to the
+ * actual field type at runtime. These are the known remappings the transform applies.
+ *
+ * Some charts (e.g. datatable) can derive a more accurate dataType from extra context
+ * (color config, etc.) and provide it via `inferred`. When supplied, it overrides the
+ * generic fallback rules below; otherwise the default coercions are applied.
+ */
+function normalizeDataTypes(col: GenericIndexPatternColumn, inferred?: DataType) {
+  if (inferred !== undefined) {
+    col.dataType = inferred;
+    return;
+  }
+  const { dataType, isBucketed, operationType } = col;
+  if (operationType === 'terms' && dataType === 'number') {
+    col.dataType = 'string';
+  } else if (
+    !isBucketed &&
+    (dataType === 'date' || dataType === 'string' || dataType === 'ip' || dataType === 'boolean')
+  ) {
+    col.dataType = 'number';
+  } else if (isBucketed && (dataType === 'ip' || dataType === 'boolean')) {
+    col.dataType = 'string';
   }
 }
 
@@ -115,8 +409,11 @@ const normalizeReferences = <T extends LensAttributes>(
   return orderBy(
     references
       .filter((reference) => {
-        // ignore filter index pattern references
-        return !(reference.type === 'index-pattern' && filterIndexIds.has(reference.name));
+        // ignore filter index pattern references (legacy: filter-index-pattern-*, current: via filter.meta.index)
+        return !(
+          reference.type === 'index-pattern' &&
+          (filterIndexIds.has(reference.name) || reference.name.startsWith('filter-index-pattern-'))
+        );
       })
       // ignore current index pattern reference
       .filter((reference) => {
@@ -124,6 +421,17 @@ const normalizeReferences = <T extends LensAttributes>(
           reference.type === 'index-pattern' &&
           reference.name === 'indexpattern-datasource-current-indexpattern'
         );
+      })
+      // textBasedLanguages-* references are replaced by indexpattern-datasource-layer-* in internalReferences
+      .filter((reference) => {
+        return !(
+          reference.type === 'index-pattern' &&
+          reference.name.startsWith('textBasedLanguages-datasource-layer-')
+        );
+      })
+      // legacy bare-UUID-named references (pre-standardized naming), probably from dashboard reference extraction
+      .filter((reference) => {
+        return !(reference.type === 'index-pattern' && UUID_PATTERN.test(reference.name));
       })
       .map((reference) => {
         let name = reference.name;
@@ -144,18 +452,64 @@ const normalizeReferences = <T extends LensAttributes>(
   );
 };
 
+/**
+ * Remap column references (e.g. counter_rate → max) using the column ID map.
+ * Formula columns have their internal references cleared — they are not preserved through transforms.
+ */
+function normalizeColumnReferences(
+  col: GenericIndexPatternColumn,
+  columnIdMap: Map<string | undefined, string>
+) {
+  if (isReferenceBasedColumn(col)) {
+    col.references = col.references.map((refId: string) => columnIdMap.get(refId) ?? refId);
+  }
+
+  if (col.operationType === 'formula') {
+    (col as any).references = [];
+  }
+}
+
+export interface CommonNormalizerArgs {
+  layerRemapping: IdRemapping;
+  columnRemapping: IdRemapping;
+  /**
+   * Optional per-chart dataType inference. When provided and returns a value,
+   * it overrides the generic blanket coercions in `normalizeDataTypes`.
+   */
+  inferColumnDataType?: (newColumnId: string) => DataType | undefined;
+}
+
 export const getCommonNormalizer = <T extends LensAttributes>(
-  getArgs: (attributes: T) => { layerRemapping: IdRemapping; columnRemapping: IdRemapping }
+  getArgs: (attributes: T) => CommonNormalizerArgs
 ): NormalizerConfig<T> => ({
   order: -1,
   ignore: COMMON_STATE_IGNORE_PATHS,
   original: (attributes: T) => {
-    const { layerRemapping, columnRemapping } = getArgs(attributes);
+    const { layerRemapping, columnRemapping, inferColumnDataType } = getArgs(attributes);
 
+    pruneEmptyColumnTextBasedLayers(attributes);
     normalizeAdHocDataViews(attributes);
+    normalizeESQLQuery(attributes);
+    normalizeEmptyQuery(attributes);
+    normalizeDescription(attributes);
 
     // replace layer in reference name
     attributes.references = normalizeReferences(attributes, layerRemapping);
+
+    // Remap internalReferences layer IDs using layerRemapping.
+    // normalizeFormBasedAdHocDataViews / normalizeESQLAdHocDataViews now keep the original layer UUID
+    // in the ref name so we can apply the same replacement logic here.
+    if (attributes.state.internalReferences?.length) {
+      attributes.state.internalReferences = attributes.state.internalReferences.map((ref) => {
+        let name = ref.name;
+        layerRemapping.forEach(([oldId, newId]) => {
+          if (oldId && name.includes(oldId)) {
+            name = name.replace(oldId, newId);
+          }
+        });
+        return name !== ref.name ? { ...ref, name } : ref;
+      });
+    }
 
     const layerIdMap = new Map(layerRemapping);
     const columnIdMap = new Map(columnRemapping);
@@ -175,8 +529,11 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 
         if (layerIdMap.has(id)) {
           const newId = layerIdMap.get(id)!;
-          dsState.layers[newId] = layer;
-          delete dsState.layers[id];
+          // Avoid deleting the layer when the canonical id matches the current id
+          if (newId !== id) {
+            dsState.layers[newId] = layer;
+            delete dsState.layers[id];
+          }
         }
       }
 
@@ -193,6 +550,15 @@ export const getCommonNormalizer = <T extends LensAttributes>(
             };
           });
 
+          // Datatable's ESQL output order is driven by `layer.columns` array order
+          // and uses its own canonical (rows → splits → metrics) sort in
+          // the datatable normalizer. For every other chart, alphabetical
+          // canonicalization is fine because column order does not drive
+          // rendering.
+          if (attributes.visualizationType !== 'lnsDatatable') {
+            layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
+          }
+
           if (layer.timeField) {
             layer.timeField = undefined; // not saved in API re-derived at runtime
           }
@@ -201,8 +567,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
         return ds;
       }),
       formBased: normalizeDatasourceState(
-        attributes.state.datasourceStates.formBased ??
-          ((attributes.state.datasourceStates as any).indexpattern as FormBasedPersistedState), // fallback to legacy
+        getFormBasedDatasourceState(attributes.state.datasourceStates),
         (ds) => {
           for (const layer of Object.values(ds.layers)) {
             layer.columns = columnRemapping.reduce((columns, [oldColumn, newColumn]) => {
@@ -220,7 +585,22 @@ export const getCommonNormalizer = <T extends LensAttributes>(
                   columnRemapping.find(([oldColumn]) => oldColumn === colId)?.[1] ?? colId
               );
 
-            // TODO: validate this is order should only be preserved for datatable
+            // Add canonical column IDs that are in layer.columns but were missing from the
+            // original columnOrder (e.g. breakdown or inner-reference columns omitted in older SOs).
+            // Maintain `inOrder` as entries are pushed to prevent duplicates when multiple original
+            // column IDs share the same canonical name (e.g. two layers both mapped to 'line_breakdown').
+            const inOrder = new Set(layer.columnOrder);
+            for (const [, newCol] of columnRemapping) {
+              if (newCol && layer.columns[newCol] && !inOrder.has(newCol)) {
+                layer.columnOrder.push(newCol);
+                inOrder.add(newCol);
+              }
+            }
+
+            // Datatable uses its own canonical (rows → splits → metrics) sort in
+            // the datatable normalizer. For every other chart, alphabetical
+            // canonicalization is fine because column order does not drive
+            // rendering.
             if (attributes.visualizationType !== 'lnsDatatable') {
               layer.columnOrder.sort();
             }
@@ -237,9 +617,14 @@ export const getCommonNormalizer = <T extends LensAttributes>(
               layer.linkToLayers = layer.linkToLayers?.map((l) => layerIdMap.get(l) ?? l);
             }
 
-            for (const col of Object.values(layer.columns)) {
+            for (const [columnId, col] of Object.entries(layer.columns)) {
               // scale is not preserved through transforms
               delete col.scale;
+
+              // Empty-string timeShift is semantically "no shift" and is dropped by the transform
+              if (col.timeShift === '') {
+                delete col.timeShift;
+              }
 
               // remap inner column references (e.g. orderBy.columnId in terms columns)
               const orderByCol = (col as any).params?.orderBy?.columnId;
@@ -247,14 +632,8 @@ export const getCommonNormalizer = <T extends LensAttributes>(
                 (col as any).params.orderBy.columnId = columnIdMap.get(orderByCol);
               }
 
-              if (col.operationType === 'formula') {
-                (col as any).references = [];
-              }
-
-              // TODO: check this dataType mismatch
-              if (col.dataType === 'ip') {
-                col.dataType = 'string'; // ip is set to string in transforms
-              }
+              normalizeColumnReferences(col, columnIdMap);
+              normalizeDataTypes(col, inferColumnDataType?.(columnId));
             }
           }
           return ds;
@@ -281,12 +660,17 @@ export const getCommonNormalizer = <T extends LensAttributes>(
       return !(reference.type === 'index-pattern' && reference.name.startsWith('filter-ref-'));
     });
 
+    // Sort references to match normalizeReferences ordering applied on the original side
+    attributes.references = orderBy(attributes.references, ['name', 'id', 'type']);
+
     attributes.state.needsRefresh = attributes.state.needsRefresh ?? false;
 
-    // TODO: validate this is order should only be preserved for datatable
     if (attributes.visualizationType !== 'lnsDatatable') {
       Object.values(attributes.state.datasourceStates.formBased?.layers ?? {}).forEach((layer) => {
         layer.columnOrder.sort();
+      });
+      Object.values(attributes.state.datasourceStates.textBased?.layers ?? {}).forEach((layer) => {
+        layer.columns.sort((a, b) => a.columnId.localeCompare(b.columnId));
       });
     }
 
@@ -295,57 +679,105 @@ export const getCommonNormalizer = <T extends LensAttributes>(
 });
 
 /**
+ * A named (non-`custom`) palette renders from `palette id + continuity + steps` alone. The stored
+ * stop positions, `colorStops`, and numeric bounds (`rangeMin`/`rangeMax`) are throwaway snapshots
+ * that the transform does not reproduce (it emits empty `stops` and lets the palette service
+ * resupply colors at render time). Drop those.
+ *
+ * `rangeType` is deliberately NOT dropped: it is deterministic per chart (`percent` everywhere
+ * except `legacy_metric` and single-value `metric`, which reconstruct as `number` via
+ * `useNumericRange`). Keeping it in the comparison enforces that each chart passes the correct
+ * `useNumericRange`; the `original` side defaults a missing `rangeType` to `'percent'` so legacy
+ * SOs that omit it still line up.
+ */
+function clearUnusedNamedPaletteParams(palette: PaletteOutput<CustomPaletteParams>) {
+  if (!palette.params) return;
+  delete palette.params.stops;
+  delete palette.params.colorStops;
+  delete palette.params.rangeMin;
+  delete palette.params.rangeMax;
+}
+
+/**
  * Normalized the palette params provided a string path to the palette(s) in the attributes
  *
  * This need to address:
- * - account for bad last color stop including shifting palettes :(
- * - defaulting missing rangeType
- * - defaulting missing continuity
+ * - named palettes: `palette id`, `continuity`, and `rangeType` are compared strictly (see
+ *   `normalizeNamedPaletteParams`); the throwaway stops/colorStops/bounds are dropped.
+ * - custom palettes: account for the last color stop always becoming `rangeMax`, re-derive
+ *   `colorStops` from the normalized `stops`, and default the missing `rangeType`/`continuity`/bounds
+ *   the transform always derives.
  */
 export function getPaletteNormalizer<T extends LensAttributes>(
-  palettePath: string
+  palettePath: string,
+  isSingleValuePalette?: (attributes: T) => boolean
 ): NormalizerConfig<T> {
   return {
     original: (attributes: T) => {
-      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(attributes, palettePath);
+      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(
+        attributes,
+        palettePath
+      ).filter(Boolean);
+
+      const useNumericRange =
+        typeof isSingleValuePalette === 'function' ? isSingleValuePalette(attributes) : false;
 
       palettes.forEach((palette) => {
-        const rangeMin = getRangeValue(palette.params?.rangeMin);
-        const rangeMax = getRangeValue(palette.params?.rangeMax);
+        if (!palette.params) return;
 
-        if (palette.params) {
-          if (palette.params.stops && rangeMax === null) {
-            const isLegacy = palette.name !== 'custom';
-            const needsPaletteShift =
-              isLegacy &&
-              ((rangeMin !== null && rangeMin === palette.params.stops.at(0)?.stop) ||
-                (rangeMax !== null && rangeMax !== palette.params.stops.at(-1)?.stop));
-            const lastStop = palette.params.stops.at(-1);
-            if (lastStop && !needsPaletteShift) lastStop.stop = rangeMax as unknown as number; // can be null
-          }
+        const rangeMin = getRangeValue(palette.params.rangeMin);
+        const rangeMax = getRangeValue(palette.params.rangeMax);
 
-          if (!palette.params?.rangeType) {
-            palette.params.rangeType = 'percent';
-          }
-
-          if (!palette.params?.continuity) {
-            palette.params.continuity = getContinuity(rangeMin, rangeMax);
-          }
-
-          if (palette.name !== 'custom') {
-            delete palette.params.colorStops;
-          }
-        }
-      });
-
-      return attributes;
-    },
-    transformed: (attributes: T) => {
-      const palettes = getValues<PaletteOutput<CustomPaletteParams>>(attributes, palettePath);
-
-      palettes.forEach((palette) => {
         if (palette.name !== 'custom') {
-          delete palette.params?.colorStops;
+          // A distributed palette always opens both bounds so out-of-range values stay colored
+          palette.params.continuity = 'all';
+
+          // The transform canonicalizes the legacy `complimentary` spelling to the GA palette id
+          // (`complementary`), matching runtime. Canonicalize the original side too so the
+          // round-trip identity holds.
+          const canonicalName =
+            palette.name === LEGACY_COMPLIMENTARY_PALETTE ? COMPLEMENTARY_PALETTE : palette.name;
+          palette.name = canonicalName;
+          palette.params.name = canonicalName;
+          palette.params.rangeType = useNumericRange ? 'number' : 'percent';
+          clearUnusedNamedPaletteParams(palette);
+          return;
+        }
+
+        // For multi-stop palettes: the SO→API transform uses rangeMax as the last step's upper
+        // bound (lte), replacing the original stop value. The API→SO step then reconstructs the
+        // stop from lte, so the last stop becomes rangeMax after the round-trip.
+        //
+        // For single stop palettes: the transform's `i === 0` branch emits a closed
+        // `lt: <stop>` and returns before the last-step `lte: rangeMax` branch can run, so
+        // `lte: rangeMax` is never applied to the stop. For an open-above single stop (continuity
+        // 'above'/'all', rangeMax null) the transform instead appends a trailing `gte: <stop>`
+        // continuation step, which `mergeTrailingSameColorStep` collapses back on the reverse pass,
+        // leaving the original `lt` (the stop value) intact.
+        if (palette.params.stops && palette.params.stops.length > 1) {
+          const lastStop = palette.params.stops.at(-1);
+          if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
+        }
+
+        if (!palette.params.rangeType) {
+          palette.params.rangeType = 'percent';
+        }
+
+        if (!palette.params.continuity) {
+          palette.params.continuity = getContinuity(rangeMin, rangeMax);
+        }
+
+        // Legacy SOs may omit params.name, but the transform always sets it from the root name
+        if (palette.params.name === undefined && palette.name) {
+          palette.params.name = palette.name;
+        }
+
+        // Legacy SOs may omit rangeMin/rangeMax, but the transform always derives them (can be null)
+        if (!('rangeMin' in palette.params)) {
+          palette.params.rangeMin = null as unknown as number;
+        }
+        if (!('rangeMax' in palette.params)) {
+          palette.params.rangeMax = null as unknown as number;
         }
       });
 
@@ -357,5 +789,38 @@ export function getPaletteNormalizer<T extends LensAttributes>(
       'reverse', // typically unused or omitted
       'steps', // count of steps in original is not right
     ].map((param) => `${palettePath}.params.${param}`),
+  };
+}
+
+/**
+ * Returns a normalizer that pre-applies the lossy state -> API collapse that
+ * `fromRulesLensStateToAPI` performs on color-mapping rules.
+ *
+ * - `match` with `matchEntireWord: true` becomes a `raw` rule.
+ * - `match` with `matchEntireWord: false`, `regex`, and `range` rules are
+ *   runtime-dead (`getKey` returns `null`) and are stripped.
+ */
+export function getColorMappingNormalizer<T extends LensAttributes>(
+  colorMappingPath: string
+): NormalizerConfig<T> {
+  return {
+    original: (attributes: T) => {
+      const configs = getValues<ColorMapping.Config>(attributes, colorMappingPath).filter(Boolean);
+
+      configs.forEach((config) => {
+        for (const assignment of config.assignments) {
+          assignment.rules = assignment.rules.flatMap((rule): ColorMapping.ColorRule[] => {
+            if (rule.type === 'raw') return [rule];
+            if (rule.type === 'match' && rule.matchEntireWord === true) {
+              const value = rule.matchCase ? rule.pattern : rule.pattern.toLowerCase();
+              return [{ type: 'raw', value }];
+            }
+            return [];
+          });
+        }
+      });
+
+      return attributes;
+    },
   };
 }

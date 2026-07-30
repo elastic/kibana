@@ -7,6 +7,7 @@
 
 import {
   actionPolicyResponseSchema,
+  errorResponseSchema,
   ID_MAX_LENGTH,
   updateActionPolicyBodySchema,
   type UpdateActionPolicyBody,
@@ -20,7 +21,6 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
-import { buildRouteValidationWithZod } from '../route_validation';
 
 const updateActionPolicyParamsSchema = z.object({
   id: z.string().min(1).max(ID_MAX_LENGTH).describe('The action policy identifier.'),
@@ -40,21 +40,27 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
     description:
       'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(updateActionPolicyBodySchema),
-      params: buildRouteValidationWithZod(updateActionPolicyParamsSchema),
+      body: updateActionPolicyBodySchema,
+      params: updateActionPolicyParamsSchema,
     },
     response: {
       200: {
         body: () => actionPolicyResponseSchema,
-        description: 'Indicates a successful call.',
+        description: 'Returns the updated action policy.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates invalid request parameters or body.',
       },
       404: {
+        body: () => errorResponseSchema,
         description: 'Indicates an action policy with the given ID does not exist.',
+      },
+      409: {
+        body: () => errorResponseSchema,
+        description: 'Indicates the action policy was concurrently updated by another caller.',
       },
     },
   };

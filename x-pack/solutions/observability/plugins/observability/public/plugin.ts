@@ -72,11 +72,13 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
+import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
@@ -88,6 +90,7 @@ import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
@@ -102,6 +105,11 @@ import {
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
 import { TelemetryService } from './services/telemetry/telemetry_service';
+import { createNightshiftGlobalSearchProvider } from './pages/nightshift/app/nightshift_global_search_provider';
+
+const nightshiftTitle = i18n.translate('xpack.observability.nightshiftLinkTitle', {
+  defaultMessage: 'Nightshift',
+});
 
 export interface ConfigSchema {
   unsafe: {
@@ -142,6 +150,7 @@ export interface ObservabilityPublicPluginsSetup {
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
   cases?: CasesPublicSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -205,6 +214,7 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+  private significantEventsAvailable = false;
   private telemetry: TelemetryService;
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
@@ -217,8 +227,16 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleIn: [],
+      visibleIn: ['projectSideNav'],
       keywords: ['alerts', 'rules'],
+    },
+    {
+      id: 'nightshift',
+      title: nightshiftTitle,
+      order: 8002,
+      path: NIGHTSHIFT_PATH,
+      visibleIn: [],
+      keywords: ['nightshift', 'significant events'],
     },
   ];
 
@@ -247,13 +265,13 @@ export class Plugin
           extend: {
             [CasesDeepLinkId.cases]: {
               order: 8003,
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesCreate]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
             [CasesDeepLinkId.casesConfigure]: {
-              visibleIn: [],
+              visibleIn: ['projectSideNav'],
             },
           },
         })
@@ -349,11 +367,17 @@ export class Plugin
         'experience',
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
-        ? ['home', 'kibanaOverview']
-        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
+        ? ['projectSideNav', 'home', 'kibanaOverview']
+        : ['globalSearch', 'classicSideNav', 'projectSideNav', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);
+    pluginsSetup.globalSearch?.registerResultProvider(
+      createNightshiftGlobalSearchProvider({
+        isAvailable: () => this.significantEventsAvailable,
+        title: nightshiftTitle,
+      })
+    );
 
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
@@ -535,10 +559,22 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+    this.significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
+      STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
+      false
+    );
+    const deepLinks = this.deepLinks.map<AppDeepLink>((deepLink) =>
+      deepLink.id === 'nightshift'
+        ? {
+            ...deepLink,
+            visibleIn: this.significantEventsAvailable ? ['projectSideNav'] : [],
+          }
+        : deepLink
+    );
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks,
+      deepLinks,
       updater$: this.appUpdater$,
       pricing: coreStart.pricing,
     });
@@ -548,6 +584,19 @@ export class Plugin
         createDefinition(coreStart, pluginsStart)
       );
     });
+
+    const agentBuilder = pluginsStart.agentBuilder;
+    if (agentBuilder) {
+      void import('./pages/nightshift/chat/agent_builder/significant_event_attachments')
+        .then(({ registerNightshiftAgentBuilderAttachments }) => {
+          registerNightshiftAgentBuilderAttachments({ agentBuilder });
+        })
+        .catch((error) => {
+          this.initContext.logger
+            .get('nightshiftAgentBuilderAttachments')
+            .error(`Failed to register agent builder attachments: ${error}`);
+        });
+    }
 
     return {
       config,

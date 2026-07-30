@@ -7,11 +7,16 @@
 
 import type { ToolSelection } from '../tools';
 import type { UserIdAndName } from '../base/users';
-import type { AgentVisibility } from './visibility';
+import type { AgentAccessControl } from './access_control';
 
 /**
- * The type of an agent.
- * Only one type for now, this enum is mostly here for future-proofing.
+ * Id of the default agent type
+ */
+export const chatAgentTypeId = 'chat';
+
+/**
+ * @deprecated agent types are now an open set of registered type ids. Use plain strings
+ * (e.g. {@link chatAgentTypeId}) instead.
  */
 export enum AgentType {
   chat = 'chat',
@@ -31,9 +36,10 @@ export interface AgentDefinition {
    */
   id: string;
   /**
-   * The type of the agent (only for type for now, here for future-proofing)
+   * Id of the agent type this agent derives from.
+   * Defaults to {@link chatAgentTypeId}, whose base is empty.
    */
-  type: AgentType;
+  type: string;
   /**
    * Human-readable name for the agent.
    */
@@ -48,9 +54,9 @@ export interface AgentDefinition {
    */
   readonly: boolean;
   /**
-   * Visibility controls who can read and write this agent.
+   * Access control controls who can read, run, write, delete, and manage this agent.
    */
-  visibility?: AgentVisibility;
+  access_control?: AgentAccessControl;
   /**
    * Agent owner metadata.
    */
@@ -80,15 +86,8 @@ export interface AgentDefinition {
 export interface AgentConfiguration {
   /**
    * Custom instruction for the agent.
-   *
-   * Instructions specified that way will be added to both the research and answer prompts.
-   * For custom per-step instructions, use the `research` and `answer` configuration fields instead.
    */
   instructions?: string;
-  /**
-   * @deprecated does nothing anymore - agent no longer have specific instructions to override
-   */
-  replace_default_instructions?: boolean;
 
   /**
    * List of tools exposed to the agent
@@ -97,7 +96,7 @@ export interface AgentConfiguration {
 
   /**
    * Optional list of skill IDs exposed to the agent.
-   * When undefined, all skills are available (backward compatibility).
+   * When undefined, no additional skills are granted beyond enable_elastic_capabilities/plugin_ids.
    */
   skill_ids?: string[];
 
@@ -123,38 +122,6 @@ export interface AgentConfiguration {
    * When undefined, all connectors remain visible (backward compatibility).
    */
   connector_ids?: string[];
-
-  /**
-   * Custom configuration for the research step of the agent.
-   */
-  research?: AgentResearchStepConfiguration;
-
-  /**
-   * Custom configuration for the answer step of the agent.
-   */
-  answer?: AgentAnswerStepConfiguration;
-}
-
-export interface AgentResearchStepConfiguration {
-  /**
-   * Custom instruction for the agent's research step.
-   */
-  instructions?: string;
-  /**
-   * @deprecated does nothing anymore - agent no longer have specific instructions to override
-   */
-  replace_default_instructions?: boolean;
-}
-
-export interface AgentAnswerStepConfiguration {
-  /**
-   * Custom instruction for the agent's answer step.
-   */
-  instructions?: string;
-  /**
-   * @deprecated does nothing anymore - agent no longer have specific instructions to override
-   */
-  replace_default_instructions?: boolean;
 }
 
 /**
@@ -166,8 +133,8 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions` and `tools` - other fields from AgentConfigurationOverrides
- * (like research/answer step configs) are internal implementation details.
+ * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
+ * are internal implementation details.
  *
  * This type is used for:
  * - API input validation (converse endpoint)
@@ -175,5 +142,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
 >;

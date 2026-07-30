@@ -9,12 +9,12 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
-  ALL_ROLE,
+  ALERTING_V2_RULES_ALL_ROLE,
+  ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
-  NO_ACCESS_ROLE,
-  READ_ROLE,
   getRuleUrl,
+  NO_ACCESS_ROLE,
   testData,
 } from '../../../fixtures';
 
@@ -23,7 +23,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
   let writerHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth }) => {
-    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
+    writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
   });
 
@@ -45,7 +45,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
     expect(response).toHaveStatusCode(204);
     expect(response.body).toStrictEqual({});
 
-    const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+    const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
     expect(remaining.items.map((rule) => rule.id)).not.toContain(created.id);
     expect(remaining.total).toBe(0);
   });
@@ -55,6 +55,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       headers: writerHeaders,
     });
     expect(response).toHaveStatusCode(404);
+    expect(response.body.code).toBe('RULE_NOT_FOUND');
   });
 
   apiTest('validation: rejects ids longer than ID_MAX_LENGTH with a 400', async ({ apiClient }) => {
@@ -63,6 +64,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       headers: writerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -84,13 +86,15 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'reader-cannot-delete' } })
       );
-      const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_RULES_READ_ROLE
+      );
       const response = await apiClient.delete(getRuleUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(403);
       // Verify the rule is still present after the failed delete.
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).toContain(created.id);
     }
   );
@@ -106,7 +110,7 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(403);
-      const remaining = await apiServices.alertingV2.rules.find({ perPage: 100 });
+      const remaining = await apiServices.alertingV2.rules.find({ per_page: 100 });
       expect(remaining.items.map((rule) => rule.id)).toContain(created.id);
     }
   );

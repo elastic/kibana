@@ -26,6 +26,7 @@ import type {
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type {
   FilterManager,
   TimefilterContract,
@@ -70,6 +71,7 @@ import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
+import type { ProfileStateRegistry } from '../common/context_awareness';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
 import {
@@ -157,11 +159,13 @@ export interface DiscoverServices {
   noDataPage?: NoDataPagePluginStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   fieldsMetadata?: FieldsMetadataPublicStart;
   logsDataAccess?: LogsDataAccessPluginStart;
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
+  logger: Logger;
 }
 
 export const buildServices = ({
@@ -175,6 +179,7 @@ export const buildServices = ({
   scopedHistory,
   urlTracker,
   profilesManager,
+  profileStateRegistry,
   ebtManager,
   setHeaderActionMenu = noop,
 }: {
@@ -188,6 +193,7 @@ export const buildServices = ({
   scopedHistory?: ScopedHistory;
   urlTracker: UrlTracker;
   profilesManager: ProfilesManager;
+  profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
@@ -263,6 +269,7 @@ export const buildServices = ({
     noDataPage: plugins.noDataPage,
     observabilityAIAssistant: plugins.observabilityAIAssistant,
     profilesManager,
+    profileStateRegistry,
     ebtManager,
     fieldsMetadata: plugins.fieldsMetadata,
     logsDataAccess: plugins.logsDataAccess,
@@ -271,5 +278,6 @@ export const buildServices = ({
       plugins.embeddable.getStateTransfer(),
       core.application
     ),
+    logger: context.logger.get(),
   };
 };

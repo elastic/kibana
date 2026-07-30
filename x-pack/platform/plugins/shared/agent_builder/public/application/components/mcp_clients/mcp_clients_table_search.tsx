@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiSearchBar,
-  type EuiSearchBarProps,
-  type EuiSearchBarOnChangeArgs,
-  type Search,
-} from '@elastic/eui';
+import { EuiSearchBar, type EuiSearchBarProps, type EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import type { OAuthClient } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
@@ -68,7 +63,7 @@ const getMcpClientsTableSearchConfig = ({
 });
 
 export interface McpClientsTableSearch {
-  searchConfig: Search;
+  searchConfig: EuiSearchBarProps;
   results: OAuthClient[];
 }
 
@@ -116,7 +111,7 @@ export const useMcpClientsTableSearch = ({
     [setSearchQuery]
   );
 
-  const searchConfig: Search = useMemo(() => {
+  const searchConfig: EuiSearchBarProps = useMemo(() => {
     return {
       ...getMcpClientsTableSearchConfig({ matchesByStatus }),
       onChange: handleChange,

@@ -133,9 +133,17 @@ describe('HTTPAuthenticationProvider', () => {
           supportedSchemes: new Set(schemes),
         });
 
+        // Headers above are passed in as-is and lowercased here because the provider only ever
+        // emits a lowercase http_authentication_scheme; Core's xsrf handler (lifecycle_handlers.ts)
+        // doesn't implement its own case normalization and relies on that contract.
+        const scheme = header.split(' ')[0].toLowerCase();
         await expect(provider.authenticate(request)).resolves.toEqual(
           AuthenticationResult.succeeded(
-            { ...user, authentication_provider: { type: 'http', name: 'http' } },
+            {
+              ...user,
+              authentication_provider: { type: 'http', name: 'http' },
+              http_authentication_scheme: scheme,
+            },
             { authHeaders: { authorization: header } }
           )
         );
@@ -162,7 +170,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'bearer',
+          },
           { authHeaders: { authorization: header } }
         )
       );
@@ -189,7 +201,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'basic',
+          },
           { authHeaders: { authorization: header } }
         )
       );
@@ -219,7 +235,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'bearer',
+          },
           { authHeaders: { authorization: header } }
         )
       );
@@ -314,7 +334,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'bearer',
+          },
           {
             authHeaders: {
               authorization: 'Bearer essu_ephemeral_token',
@@ -375,7 +399,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'bearer',
+          },
           { authHeaders: { authorization: header } }
         )
       );
@@ -427,7 +455,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'bearer',
+          },
           { authHeaders: { authorization: header } }
         )
       );
@@ -454,7 +486,11 @@ describe('HTTPAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: { type: 'http', name: 'http' } },
+          {
+            ...user,
+            authentication_provider: { type: 'http', name: 'http' },
+            http_authentication_scheme: 'bearer',
+          },
           { authHeaders: { authorization: header } }
         )
       );

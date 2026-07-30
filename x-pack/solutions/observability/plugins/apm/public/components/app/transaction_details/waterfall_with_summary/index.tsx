@@ -17,6 +17,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
 import type { SavedSearchTableConfig } from '@kbn/saved-search-component';
+import {
+  getTraceParentChildrenMap,
+  getRootItemOrFallback,
+  getSubtreeIds,
+  TRACE_WATERFALL_EBT_ELEMENTS,
+} from '@kbn/apm-ui-shared';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
@@ -27,11 +33,6 @@ import { TraceWaterfallFlyout } from './trace_waterfall_flyout';
 import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
-import {
-  getTraceParentChildrenMap,
-  getRootItemOrFallback,
-  getSubtreeIds,
-} from '../../../shared/trace_waterfall/use_trace_waterfall';
 
 interface Props<TSample extends {}> {
   traceSamples?: TSample[];
@@ -199,6 +200,9 @@ export function WaterfallWithSummary<TSample extends {}>({
                   queryParams={{
                     traceId,
                     sortDirection: 'ASC',
+                  }}
+                  ebt={{
+                    element: TRACE_WATERFALL_EBT_ELEMENTS.WATERFALL_HEADER,
                   }}
                 />
               </EuiFlexItem>

@@ -8,6 +8,7 @@
 import type { QueryClient } from '@kbn/react-query';
 import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
+import type { ConversationsService } from '../../services/conversations/conversations_service';
 import { queryKeys } from '../query_keys';
 
 const agentConversationListKey = (agentId: string) => queryKeys.conversations.byAgent(agentId);
@@ -30,11 +31,13 @@ const buildSidebarConversationListRow = (p: {
 
 export const insertSidebarConversationListRow = async ({
   queryClient,
+  conversationsService,
   agentId,
   conversationId,
   title,
 }: {
   queryClient: QueryClient;
+  conversationsService: ConversationsService;
   agentId: string;
   conversationId: string;
   title: string;
@@ -45,6 +48,21 @@ export const insertSidebarConversationListRow = async ({
     title,
   });
   const key = agentConversationListKey(agentId);
+
+  // Ensure the server list is in cache before we prepend — otherwise `cancelQueries`
+  // below kills the in-flight GET and the sidebar ends up showing only the new row.
+  if (queryClient.getQueryData<ConversationWithoutRounds[]>(key) === undefined) {
+    try {
+      await queryClient.fetchQuery({
+        queryKey: key,
+        queryFn: () => conversationsService.list({ agentId }),
+      });
+    } catch {
+      // Proceed with the optimistic insert even if the prefetch fails — the next
+      // explicit refresh of the sidebar will pick up the server state.
+    }
+  }
+
   await queryClient.cancelQueries({ queryKey: key });
 
   let inserted = false;
@@ -77,32 +95,29 @@ export const removeSidebarConversationListRow = ({
   });
 };
 
-/**
- * Patch the title of a single sidebar list row.
- *
- * Called by `onConversationCreated` when the chat stream emits the
- * `conversation_created` event and we receive the server-generated title that replaces
- * the placeholder "New conversation" set by `insertSidebarConversationListRow`.
- */
-export const patchSidebarConversationListTitle = ({
+export const patchConversationList = ({
   queryClient,
   agentId,
   conversationId,
-  title,
+  values,
 }: {
   queryClient: QueryClient;
   agentId: string;
   conversationId: string;
-  title: string;
+  values: Partial<ConversationWithoutRounds>;
 }) => {
   const key = agentConversationListKey(agentId);
   queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
     if (!prev?.length) return prev;
     let changed = false;
     const next = prev.map((c) => {
-      if (c.id !== conversationId || c.title === title) return c;
+      if (c.id !== conversationId) return c;
+      const hasChanges = (Object.keys(values) as Array<keyof ConversationWithoutRounds>).some(
+        (k) => values[k] !== c[k]
+      );
+      if (!hasChanges) return c;
       changed = true;
-      return { ...c, title };
+      return { ...c, ...values };
     });
     return changed ? next : prev;
   });

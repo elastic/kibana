@@ -51,6 +51,7 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
   );
 
   return (
+    // eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap -- absolute-positioned chart overlay; EuiToolTip wrapper alters snapshot rendering
     <EuiButtonIcon
       type="button"
       iconType="listBullet"

@@ -9,10 +9,11 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { useDynamicTypeIcons } from './use_dynamic_type_icons';
+import { isMonochromeActionType, useDynamicTypeIcons } from './use_dynamic_type_icons';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { createStartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
+import { getIconBase64 } from '../../../shared/ui/step_icons/get_icon_base64';
 
 jest.mock('../../../shared/ui/step_icons/get_icon_base64', () => ({
   getIconBase64: jest.fn().mockResolvedValue('data:image/png;base64,xx'),
@@ -75,4 +76,59 @@ describe('useDynamicTypeIcons', () => {
 
     unmount();
   });
+
+  it('injects inline icon CSS for connector v2 base types', async () => {
+    const services = createStartServicesMock();
+    const connectorsData: ConnectorsResponse = {
+      totalConnectors: 0,
+      connectorTypes: {
+        '.notion': connectorTypeStub('.notion'),
+        '.sharepoint-server': connectorTypeStub('.sharepoint-server'),
+      },
+    };
+    const onShadowIconsCssReady = jest.fn();
+
+    const { unmount } = renderHook(
+      () => useDynamicTypeIcons(connectorsData, undefined, true, undefined, onShadowIconsCssReady),
+      {
+        wrapper: getTestProvider({ services }),
+      }
+    );
+
+    await waitFor(() => {
+      expect(onShadowIconsCssReady).toHaveBeenCalled();
+    });
+
+    const css = onShadowIconsCssReady.mock.calls.at(-1)?.[0] ?? '';
+    expect(css).toContain('.type-inline-highlight.type-notion::after');
+    expect(css).toContain('.type-inline-highlight.type-sharepoint-server::after');
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.notion', kind: 'step' })
+    );
+    expect(getIconBase64).toHaveBeenCalledWith(
+      expect.objectContaining({ actionTypeId: '.sharepoint-server', kind: 'step' })
+    );
+
+    unmount();
+  });
+});
+
+describe('isMonochromeActionType', () => {
+  // Prefix branch: ids NOT explicitly in MonochromeIcons but matched by prefix.
+  // NOTE: these characterize the current, deliberately-broad prefix brush —
+  // narrowing the brush to stop over-masking a colored extension icon would update these.
+  it.each(['data.somethingNew', 'ai.classify', 'security.foo', 'cases.bar', 'search.baz'])(
+    '"%s" is treated as monochrome via prefix match',
+    (id) => {
+      expect(isMonochromeActionType(id)).toBe(true);
+    }
+  );
+
+  // Over-masking guard: colored logos must NEVER be masked (would flatten to a solid currentColor).
+  it.each(['.slack', '.slack_api', 'elasticsearch', 'kibana'])(
+    '"%s" is a colored logo and must NOT be masked',
+    (id) => {
+      expect(isMonochromeActionType(id)).toBe(false);
+    }
+  );
 });

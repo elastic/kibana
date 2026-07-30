@@ -27,6 +27,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PublicSkillSummary } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { Controller } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -35,6 +37,7 @@ import type { AgentFormData } from '../agent_form';
 import { labels } from '../../../../utils/i18n';
 import { useNavigation } from '../../../../hooks/use_navigation';
 import { appPaths } from '../../../../utils/app_paths';
+import { isSkillAutoIncluded as getIsSkillAutoIncluded } from '../../../../utils/tool_selection_utils';
 
 interface SkillsTabProps {
   control: Control<AgentFormData>;
@@ -105,7 +108,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
   const isSkillAutoIncluded = useCallback(
-    (skill: PublicSkillSummary) => areElasticCapabilitiesEnabled && skill.readonly,
+    (skill: PublicSkillSummary) => getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
     [areElasticCapabilitiesEnabled]
   );
 
@@ -231,6 +234,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
       </EuiFlexGroup>
 
       <EuiInMemoryTable
+        tableCaption={labels.skills.skillsTableCaption(filteredSkills.length)}
         columns={columns}
         items={filteredSkills}
         itemId="id"
@@ -243,7 +247,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         onTableChange={handleTableChange}
         sorting={{
           sort: {
-            field: 'id',
+            field: 'name',
             direction: 'asc',
           },
         }}
@@ -272,7 +276,7 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
             <EuiFlexItem>
               <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={iconType} color={statusColor} size="m" />
+                  <EuiIcon type={iconType} color={statusColor} size="m" aria-hidden={true} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="m" color={statusColor}>
@@ -294,7 +298,14 @@ const ActiveSkillsStatus: React.FC<{ activeSkillsCount: number; totalSkills: num
                   defaultMessage="{skillsLink} provide specialized knowledge and instructions that guide agents on specific tasks."
                   values={{
                     skillsLink: (
-                      <EuiLink href={createAgentBuilderUrl(appPaths.skills.list)}>
+                      <EuiLink
+                        href={createAgentBuilderUrl(appPaths.skills.list)}
+                        {...getEbtProps({
+                          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                          action: AGENT_BUILDER_UI_EBT.action.agentEdit.MANAGE_ALL,
+                          detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                        })}
+                      >
                         {labels.skills.title}
                       </EuiLink>
                     ),
@@ -332,7 +343,7 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) 
           font-weight: ${euiTheme.font.weight.semiBold};
         `}
       >
-        {skill.id}
+        {skill.name}
       </EuiText>
       <EuiText size="s" color="subdued">
         {skill.description}
@@ -369,8 +380,8 @@ const createCheckboxColumn = (
 });
 
 const createSkillDetailsColumn = () => ({
-  name: labels.skills.skillIdLabel,
-  sortable: (item: PublicSkillSummary) => item.id,
+  name: labels.skills.nameLabel,
+  sortable: (item: PublicSkillSummary) => item.name,
   width: '60%',
   render: (item: PublicSkillSummary) => <SkillDetailsColumn skill={item} />,
 });

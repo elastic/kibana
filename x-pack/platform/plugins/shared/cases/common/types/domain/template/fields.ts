@@ -14,9 +14,12 @@ export const FieldType = {
   SELECT_BASIC: 'SELECT_BASIC',
   TEXTAREA: 'TEXTAREA',
   DATE_PICKER: 'DATE_PICKER',
+  TOGGLE: 'TOGGLE',
   CHECKBOX_GROUP: 'CHECKBOX_GROUP',
   RADIO_GROUP: 'RADIO_GROUP',
   USER_PICKER: 'USER_PICKER',
+  /** Display-only: renders static authored markdown as formatted, non-editable text (no value). */
+  MARKDOWN: 'MARKDOWN',
 } as const;
 
 export type FieldType = (typeof FieldType)[keyof typeof FieldType];
@@ -24,7 +27,7 @@ export type FieldType = (typeof FieldType)[keyof typeof FieldType];
 export const ConditionRuleSchema = z.object({
   field: z.string(),
   operator: z.enum(['eq', 'neq', 'contains', 'empty', 'not_empty']),
-  value: z.union([z.string(), z.number()]).optional(),
+  value: z.union([z.string(), z.number(), z.boolean()]).optional(),
 });
 
 export const CompoundConditionSchema = z.object({
@@ -41,6 +44,8 @@ export const DisplaySchema = z.object({
 export const ValidationSchema = z.object({
   required: z.boolean().optional(),
   required_when: ConditionSchema.optional(),
+  /** When true, the field must be filled in before a case can be moved to closed status. */
+  required_on_close: z.boolean().optional(),
   pattern: z
     .object({
       regex: z.string(),
@@ -64,11 +69,17 @@ export type Validation = z.infer<typeof ValidationSchema>;
  */
 export interface ConditionRenderProps {
   isRequired?: boolean;
+  /** Field must be filled before the case can be closed (not required now). Drives the field label. */
+  isRequiredOnClose?: boolean;
   patternValidation?: { regex: string; message?: string };
   min?: number;
   max?: number;
   minLength?: number;
   maxLength?: number;
+  /** When provided, the control renders inline confirm/cancel buttons and only calls this on confirm. */
+  onConfirm?: () => void;
+  isSaving?: boolean;
+  isSaveDisabled?: boolean;
 }
 
 const BaseFieldSchema = z.object({
@@ -115,12 +126,20 @@ export const SelectBasicFieldSchema = BaseFieldSchema.extend({
   metadata: z
     .object({
       options: z.array(z.string()),
+      default: z.string().optional(),
     })
     .catchall(z.unknown()),
 });
 
 export const TextareaFieldSchema = BaseFieldSchema.extend({
   control: z.literal(FieldType.TEXTAREA),
+  metadata: z
+    .object({
+      default: z.string().optional(),
+      markdown: z.boolean().optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
 });
 
 export const DatePickerFieldSchema = BaseFieldSchema.extend({
@@ -128,8 +147,27 @@ export const DatePickerFieldSchema = BaseFieldSchema.extend({
   type: z.literal('date'),
   metadata: z
     .object({
+      // A default is honored at runtime for a date picker (a UTC-ISO string flows through
+      // getYamlDefaultAsString and the renderer reads it), so it must be a declared property —
+      // otherwise the editor's strict metadata schema would false-flag a `default` that works.
+      default: z.string().optional(),
       show_time: z.boolean().optional(),
       timezone: z.enum(['utc', 'local']).optional(),
+    })
+    .catchall(z.unknown())
+    .optional(),
+});
+
+export const ToggleFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.TOGGLE),
+  // A toggle stores a boolean value, so its extended-field storage key is `<name>_as_boolean` and
+  // it publishes as a native `boolean` runtime field (see cases_analytics_v2 runtime_fields.ts).
+  // Overriding BaseFieldSchema's `keyword` here is what makes the analytics layer's boolean branch
+  // reachable — without it a toggle would surface as a keyword string ('true'/'false') in Lens/Discover.
+  type: z.literal('boolean'),
+  metadata: z
+    .object({
+      default: z.boolean().optional(),
     })
     .catchall(z.unknown())
     .optional(),
@@ -213,6 +251,11 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
  * `metadata.default` is an optional per-template override for the resolved field's default
  * value. It must satisfy the resolved field's control type — this is enforced when the
  * override is merged onto the inline field at resolve time.
+ *
+ * An explicit `null` is distinct from an absent override: `null` means "this template clears the
+ * field" (do not inherit the library default; the field stays empty), whereas an absent
+ * `metadata.default` inherits the library field's default. This is what the v1→v2 template
+ * migration emits for a legacy template custom field whose value was explicitly cleared.
  */
 export const RefFieldSchema = z.object({
   name: z.string().optional(),
@@ -220,7 +263,14 @@ export const RefFieldSchema = z.object({
   metadata: z
     .object({
       default: z
-        .union([z.string(), z.number(), z.array(z.string()), UserPickerDefaultSchema])
+        .union([
+          z.string(),
+          z.number(),
+          z.boolean(),
+          z.array(z.string()),
+          UserPickerDefaultSchema,
+          z.null(),
+        ])
         .optional(),
     })
     .optional(),
@@ -229,20 +279,46 @@ export const RefFieldSchema = z.object({
 export type RefField = z.infer<typeof RefFieldSchema>;
 
 /**
- * This can be used to parse `fields` section in the YAML `definition` of the template.
- * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ * Display-only field: renders the authored markdown in `metadata.content` as formatted,
+ * non-editable text (e.g. instructions). It is not an input — it holds no value, is never required,
+ * and is excluded from a case's stored `extended_fields` (see isDisplayOnlyField).
+ *
+ * `type` is defaulted to `keyword` (never authored) since a display-only field only inherits it
+ * from BaseFieldSchema to build a snake key, which is then rejected as an unknown extended field.
  */
-export const FieldSchema = z.union([
+export const MarkdownFieldSchema = BaseFieldSchema.extend({
+  control: z.literal(FieldType.MARKDOWN),
+  type: z.literal('keyword').default('keyword'),
+  metadata: z
+    .object({
+      content: z.string(),
+    })
+    .catchall(z.unknown()),
+});
+
+/**
+ * Union of all inline (control-based) field definitions — every concrete field shape that can be
+ * authored directly, excluding library references (`$ref`). This is the schema for a standalone
+ * field-library definition, which stores concrete fields, never references to other fields.
+ */
+export const InlineFieldSchema = z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
   TextareaFieldSchema,
   DatePickerFieldSchema,
+  ToggleFieldSchema,
   UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
-  RefFieldSchema,
+  MarkdownFieldSchema,
 ]);
+
+/**
+ * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ */
+export const FieldSchema = z.union([...InlineFieldSchema.options, RefFieldSchema]);
 
 export type Field = z.infer<typeof FieldSchema>;
 
@@ -253,3 +329,10 @@ export const isRefField = (field: Field): field is RefField =>
   '$ref' in field && !('control' in field);
 
 export const isInlineField = (field: Field): field is InlineField => !isRefField(field);
+
+/**
+ * Display-only fields (e.g. MARKDOWN) render static content and hold no value: they are excluded
+ * from a case's stored `extended_fields` and from value validation.
+ */
+export const isDisplayOnlyField = (field: Field): boolean =>
+  isInlineField(field) && field.control === FieldType.MARKDOWN;

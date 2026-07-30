@@ -5,8 +5,18 @@
  * 2.0.
  */
 
-import { buildConnectorIdFilter, buildAttacksOnlyFilter } from './filtering_configs';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+  ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+} from '@kbn/elastic-assistant-common';
+import {
+  buildAttacksOnlyFilter,
+  buildConnectorIdFilter,
+  buildAttackTypeFilter,
+} from './filtering_configs';
 import { ALERT_ATTACK_IDS } from '../../../../../common/field_maps/field_names';
+import { TYPE_FILTER_SCHEDULED, TYPE_FILTER_MANUALLY_GENERATED } from '../filters/type_filter';
 
 describe('filtering configs', () => {
   describe('buildConnectorIdFilter', () => {
@@ -57,6 +67,64 @@ describe('filtering configs', () => {
             key: ALERT_ATTACK_IDS,
             type: 'exists',
             value: 'exists',
+          },
+        },
+      ]);
+    });
+  });
+
+  describe('buildAttackTypeFilter', () => {
+    it('should return [] if called with []', () => {
+      const result = buildAttackTypeFilter([]);
+      expect(result).toEqual([]);
+    });
+
+    it('should return [] if called with both types', () => {
+      const result = buildAttackTypeFilter([TYPE_FILTER_SCHEDULED, TYPE_FILTER_MANUALLY_GENERATED]);
+      expect(result).toEqual([]);
+    });
+
+    it('should return filter for manually generated attacks', () => {
+      const result = buildAttackTypeFilter([TYPE_FILTER_MANUALLY_GENERATED]);
+      expect(result).toEqual([
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            key: ALERT_RULE_TYPE_ID,
+            type: 'phrase',
+            params: {
+              query: ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+            },
+          },
+          query: {
+            match_phrase: {
+              [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID,
+            },
+          },
+        },
+      ]);
+    });
+
+    it('should return filter for scheduled attacks', () => {
+      const result = buildAttackTypeFilter([TYPE_FILTER_SCHEDULED]);
+      expect(result).toEqual([
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            key: ALERT_RULE_TYPE_ID,
+            type: 'phrase',
+            params: {
+              query: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+            },
+          },
+          query: {
+            match_phrase: {
+              [ALERT_RULE_TYPE_ID]: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
+            },
           },
         },
       ]);

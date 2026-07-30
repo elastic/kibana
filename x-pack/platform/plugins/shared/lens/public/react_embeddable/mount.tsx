@@ -22,7 +22,7 @@ export const mountInlinePanel = async ({
   core,
   api,
   loadContent,
-  options: { dataTestSubj, uuid, container } = {},
+  options: { dataTestSubj, uuid, container, returnFocus } = {},
 }: {
   core: CoreStart;
   api?: unknown;
@@ -36,6 +36,7 @@ export const mountInlinePanel = async ({
     dataTestSubj?: string;
     uuid?: string;
     container?: HTMLElement | null;
+    returnFocus?: () => void;
   };
 }) => {
   if (container) {
@@ -48,6 +49,7 @@ export const mountInlinePanel = async ({
   openLazyFlyout({
     core,
     parentApi: api,
+    returnFocus,
     loadContent,
     flyoutProps: {
       ...lensFlyoutProps,
@@ -74,7 +76,7 @@ const inlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
   }
 `;
 
-export const lensFlyoutProps: OverlayFlyoutOpenOptions & { triggerId?: string } = {
+export const lensFlyoutProps: OverlayFlyoutOpenOptions = {
   css: inlineFlyoutStyles,
   'data-test-subj': 'customizeLens',
   isResizable: true,

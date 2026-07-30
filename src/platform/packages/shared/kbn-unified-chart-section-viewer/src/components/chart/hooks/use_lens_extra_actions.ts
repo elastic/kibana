@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
+import { OPEN_IN_DISCOVER_TAB_LABEL } from '@kbn/discover-utils';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { useMemo } from 'react';
 import {
@@ -80,12 +81,10 @@ const getExploreInDiscoverTabAction = (onExecute: () => void): Action => {
     order: 20, // same position as ACTION_OPEN_IN_DISCOVER action
     type: 'actionButton',
     getDisplayName() {
-      return i18n.translate('metricsExperience.lens.actions.exploreInDiscoverTab', {
-        defaultMessage: 'Explore',
-      });
+      return OPEN_IN_DISCOVER_TAB_LABEL;
     },
     getIconType() {
-      return 'discoverApp';
+      return 'productDiscover';
     },
     async isCompatible() {
       return true;

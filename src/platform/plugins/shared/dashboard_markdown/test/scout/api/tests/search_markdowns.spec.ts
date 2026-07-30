@@ -40,8 +40,10 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(TOTAL_MARKDOWNS);
-    expect(response.body.markdowns.length).toBeGreaterThan(1);
+    expect(response.body.meta.total).toBe(TOTAL_MARKDOWNS);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(20);
   });
 
   apiTest('should narrow results by query', async ({ apiClient }) => {
@@ -54,8 +56,10 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(1);
-    expect(response.body.markdowns).toHaveLength(1);
+    expect(response.body.meta.total).toBe(1);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(20);
+    expect(response.body.data).toHaveLength(1);
   });
 
   apiTest('should allow users to set a per page limit', async ({ apiClient }) => {
@@ -68,8 +72,10 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body.total).toBe(TOTAL_MARKDOWNS);
-    expect(response.body.markdowns).toHaveLength(5);
+    expect(response.body.meta.total).toBe(TOTAL_MARKDOWNS);
+    expect(response.body.meta.page).toBe(1);
+    expect(response.body.meta.per_page).toBe(5);
+    expect(response.body.data).toHaveLength(5);
   });
 
   apiTest(
@@ -84,9 +90,11 @@ apiTest.describe('markdown - search', { tag: tags.deploymentAgnostic }, () => {
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.total).toBe(TOTAL_MARKDOWNS);
-      expect(response.body.markdowns).toHaveLength(10);
-      expect(response.body.markdowns[0].id).toBe(`test-markdown-10`);
+      expect(response.body.meta.total).toBe(TOTAL_MARKDOWNS);
+      expect(response.body.meta.page).toBe(2);
+      expect(response.body.meta.per_page).toBe(10);
+      expect(response.body.data).toHaveLength(10);
+      expect(response.body.data[0].id).toBe(`test-markdown-10`);
     }
   );
 });

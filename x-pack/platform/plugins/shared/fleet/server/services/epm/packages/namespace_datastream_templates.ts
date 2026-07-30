@@ -19,25 +19,16 @@ import {
   getNamespaceTemplatePriority,
 } from '../elasticsearch/template/template';
 import { isUserSettingsTemplate } from '../elasticsearch/template/utils';
+import { deleteComponentTemplates } from '../elasticsearch/template/remove';
 import { getRegistryDataStreamAssetBaseName } from '../../../../common/services';
 import { MAX_CONCURRENT_COMPONENT_TEMPLATES } from '../../../constants';
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 import { throwIfAborted } from '../../../tasks/utils';
+import type { PackageInfo } from '../../../../common/types';
 
 import { updateEsAssetReferences } from './es_assets_reference';
 import { getInstalledPackageWithAssets, getInstallation } from './get';
-
-/**
- * Returns true if any of the data stream's streams use the OTel collector input type
- * AND OTel integrations are enabled. Mirrors the check in `installTemplateForDataStream`.
- */
-function isOtelDataStream(dataStream: RegistryDataStream): boolean {
-  const experimentalFeature = appContextService.getExperimentalFeatures();
-  return (
-    !!experimentalFeature?.enableOtelIntegrations &&
-    (dataStream?.streams || []).some((stream) => stream.input === OTEL_COLLECTOR_INPUT_TYPE)
-  );
-}
+import { handleIlmSettingsRestoreAfterPackageInstall } from './namespace_ilm_settings';
+import { isOtelDataStream, fetchIndexTemplate } from './namespace_template_utils';
 
 /**
  * Returns true if namespace-level customization is opted in for `namespace` on
@@ -109,48 +100,6 @@ export function insertNamespaceCustomTemplate(
 }
 
 /**
- * Fetches a base index template from ES and strips read-only date properties.
- * Returns the cleaned template or undefined if not found.
- */
-async function fetchBaseTemplate(
-  esClient: ElasticsearchClient,
-  templateName: string,
-  logContext: string,
-  abortController?: AbortController
-): Promise<IndexTemplate | undefined> {
-  const logger = appContextService.getLogger();
-  let rawTemplate;
-  try {
-    const res = await esClient.indices.getIndexTemplate(
-      { name: templateName },
-      { signal: abortController?.signal }
-    );
-    rawTemplate = res.index_templates[0]?.index_template;
-  } catch (err: unknown) {
-    if ((err as { meta?: { statusCode?: number } })?.meta?.statusCode !== 404) {
-      throw err;
-    }
-    logger.debug(`[${logContext}] index template ${templateName} not found, skipping`);
-    return undefined;
-  }
-
-  if (!rawTemplate) {
-    return undefined;
-  }
-
-  // Strip system-managed date properties that cannot be set on PUT
-  const {
-    created_date: _cd,
-    created_date_millis: _cdm,
-    modified_date: _md,
-    modified_date_millis: _mdm,
-    ...indexTemplate
-  } = rawTemplate as IndexTemplate;
-
-  return indexTemplate;
-}
-
-/**
  * Builds a namespace-scoped index template from a base template.
  * The namespace template has a more specific index pattern, higher priority,
  * and includes `<namespace>@custom` in its `composed_of`.
@@ -203,18 +152,20 @@ async function createNamespaceTemplatesForPackage({
   soClient,
   esClient,
   packageName,
+  packageInfo,
   dataStreams,
   namespaces,
   logContext,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
   namespaces: string[];
   logContext: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<string[]> {
   if (dataStreams.length === 0 || namespaces.length === 0) {
     return [];
@@ -225,15 +176,10 @@ async function createNamespaceTemplatesForPackage({
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (abortController) throwIfAborted(abortController);
-      const isOtelInputType = isOtelDataStream(dataStream);
+      if (signal) throwIfAborted(signal);
+      const isOtelInputType = isOtelDataStream(dataStream, packageInfo);
       const templateName = getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType);
-      const baseTemplate = await fetchBaseTemplate(
-        esClient,
-        templateName,
-        logContext,
-        abortController
-      );
+      const baseTemplate = await fetchIndexTemplate(esClient, templateName, logContext, signal);
       if (!baseTemplate) return;
 
       for (const namespace of namespaces) {
@@ -245,10 +191,7 @@ async function createNamespaceTemplatesForPackage({
           isOtelInputType,
         });
 
-        await esClient.indices.putIndexTemplate(
-          { name: nsName, ...nsTemplate },
-          { signal: abortController?.signal }
-        );
+        await esClient.indices.putIndexTemplate({ name: nsName, ...nsTemplate }, { signal });
         updatedIndexTemplates.push({ templateName: nsName, indexTemplate: nsTemplate });
       }
     },
@@ -259,7 +202,7 @@ async function createNamespaceTemplatesForPackage({
     return [];
   }
 
-  if (abortController) throwIfAborted(abortController);
+  if (signal) throwIfAborted(signal);
   // A user can opt in a namespace before any data stream for that namespace exists
   // (no data has been ingested yet). In that case `getDataStream` 404s on the
   // namespace-scoped pattern; nothing to update, so just continue.
@@ -295,18 +238,20 @@ async function deleteNamespaceTemplatesForPackage({
   soClient,
   esClient,
   packageName,
+  packageInfo,
   dataStreams,
   namespaces,
   logContext,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
   namespaces: string[];
   logContext: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<string[]> {
   if (dataStreams.length === 0 || namespaces.length === 0) {
     return [];
@@ -317,18 +262,15 @@ async function deleteNamespaceTemplatesForPackage({
   await pMap(
     dataStreams,
     async (dataStream) => {
-      if (abortController) throwIfAborted(abortController);
+      if (signal) throwIfAborted(signal);
       const templateName = getRegistryDataStreamAssetBaseName(
         dataStream,
-        isOtelDataStream(dataStream)
+        isOtelDataStream(dataStream, packageInfo)
       );
       for (const namespace of namespaces) {
         const nsName = generateNamespaceTemplateName(templateName, namespace);
         try {
-          await esClient.indices.deleteIndexTemplate(
-            { name: nsName },
-            { ignore: [404], signal: abortController?.signal }
-          );
+          await esClient.indices.deleteIndexTemplate({ name: nsName }, { ignore: [404], signal });
           deleted.push(nsName);
         } catch (err: unknown) {
           logger.warn(
@@ -350,10 +292,28 @@ async function deleteNamespaceTemplatesForPackage({
     savedObjectsClient: soClient,
     pkgName: packageName,
   });
-  const assetsToRemove = deleted.map((id) => ({
-    id,
-    type: ElasticsearchAssetType.indexTemplate,
-  }));
+
+  // Also delete the Fleet-managed ILM component templates that share these names, but only the
+  // ones Fleet actually tracks in installed_es. The ILM component template shares its name with
+  // the namespace index template, and a component template of the same name could have been
+  // created by a user or another system — deleting purely by derived name would remove those too.
+  const trackedComponentTemplates = new Set(
+    (freshInstallation?.installed_es ?? [])
+      .filter((asset) => asset.type === ElasticsearchAssetType.componentTemplate)
+      .map((asset) => asset.id)
+  );
+  const componentTemplatesToDelete = deleted.filter((name) => trackedComponentTemplates.has(name));
+  if (componentTemplatesToDelete.length > 0) {
+    await deleteComponentTemplates(esClient, componentTemplatesToDelete);
+  }
+
+  const assetsToRemove = [
+    ...deleted.map((id) => ({ id, type: ElasticsearchAssetType.indexTemplate })),
+    ...componentTemplatesToDelete.map((id) => ({
+      id,
+      type: ElasticsearchAssetType.componentTemplate,
+    })),
+  ];
   await updateEsAssetReferences(soClient, packageName, freshInstallation?.installed_es ?? [], {
     assetsToRemove,
   });
@@ -377,11 +337,13 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
   soClient,
   esClient,
   packageName,
+  packageInfo,
   dataStreams,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
+  packageInfo: Pick<PackageInfo, 'policy_templates'>;
   dataStreams: RegistryDataStream[];
 }) {
   if (dataStreams.length === 0) {
@@ -401,9 +363,16 @@ export async function handleNamespaceTemplateRestoreAfterPackageInstall({
     soClient,
     esClient,
     packageName,
+    packageInfo,
     dataStreams,
     namespaces,
     logContext: 'handleNamespaceTemplateRestoreAfterPackageInstall',
+  });
+
+  await handleIlmSettingsRestoreAfterPackageInstall({
+    soClient,
+    esClient,
+    packageName,
   });
 }
 
@@ -431,14 +400,14 @@ export async function syncNamespaceTemplates({
   packageName,
   addedNamespaces,
   removedNamespaces,
-  abortController,
+  signal,
 }: {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
   packageName: string;
   addedNamespaces: string[];
   removedNamespaces: string[];
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<SyncNamespaceTemplatesSummary> {
   const summary: SyncNamespaceTemplatesSummary = {
     packageName,
@@ -469,15 +438,16 @@ export async function syncNamespaceTemplates({
   }
 
   if (addedNamespaces.length > 0) {
-    if (abortController) throwIfAborted(abortController);
+    if (signal) throwIfAborted(signal);
     const createdTemplates = await createNamespaceTemplatesForPackage({
       soClient,
       esClient,
       packageName,
+      packageInfo,
       dataStreams,
       namespaces: addedNamespaces,
       logContext: 'syncNamespaceTemplates',
-      abortController,
+      signal,
     });
     if (createdTemplates.length > 0) {
       summary.created = addedNamespaces;
@@ -485,15 +455,16 @@ export async function syncNamespaceTemplates({
   }
 
   if (removedNamespaces.length > 0) {
-    if (abortController) throwIfAborted(abortController);
+    if (signal) throwIfAborted(signal);
     const deletedTemplates = await deleteNamespaceTemplatesForPackage({
       soClient,
       esClient,
       packageName,
+      packageInfo,
       dataStreams,
       namespaces: removedNamespaces,
       logContext: 'syncNamespaceTemplates',
-      abortController,
+      signal,
     });
     if (deletedTemplates.length > 0) {
       summary.removed = removedNamespaces;

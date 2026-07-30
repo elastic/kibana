@@ -16,11 +16,12 @@ import {
   entityTypeLabel,
   extractIsPrivileged,
 } from './utils';
+import { OBSERVATION_MODULE_WEIGHTS } from './weights';
 
 const MODULE_ID = 'risk_analysis';
 const MODULE_NAME = 'Risk Analysis';
 const MODULE_PRIORITY = 10;
-const MODULE_WEIGHT = 0.35;
+const MODULE_WEIGHT = OBSERVATION_MODULE_WEIGHTS.risk_analysis;
 
 const HIGH_RISK_THRESHOLD = 70;
 const ESCALATION_DELTA_24H = 10;

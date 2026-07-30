@@ -32,7 +32,6 @@ import type {
   RuleAction,
   RuleActionFrequency,
   RuleActionParam,
-  RuleActionParams,
 } from '@kbn/alerting-types';
 import type { ActionConnector, UserConfiguredActionConnector } from '@kbn/alerts-ui-shared';
 import {
@@ -436,33 +435,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     [action, dispatch, validateActionBase]
   );
 
-  const onUseAadTemplateFieldsChange = useCallback(() => {
-    dispatch({
-      type: 'setActionProperty',
-      payload: {
-        uuid: action.uuid!,
-        key: 'useAlertDataForTemplate',
-        value: !!!action.useAlertDataForTemplate,
-      },
-    });
-
-    const currentActionParams = { ...action.params };
-    const newActionParams: RuleActionParams = {};
-    for (const key of Object.keys(currentActionParams)) {
-      newActionParams[key] = storedActionParamsForAadToggle[key] ?? '';
-    }
-
-    dispatch({
-      type: 'setActionParams',
-      payload: {
-        uuid: action.uuid!,
-        value: newActionParams,
-      },
-    });
-
-    setStoredActionParamsForAadToggle(currentActionParams);
-  }, [action, storedActionParamsForAadToggle, dispatch]);
-
   const accordionContent = useMemo(() => {
     if (!connector || !checkEnabledResult) {
       return null;
@@ -521,7 +493,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
             warning={warning}
             templateFields={templateFields}
             onParamsChange={onParamsChange}
-            onUseAadTemplateFieldsChange={onUseAadTemplateFieldsChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -542,7 +513,6 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
     onAlertsFilterChange,
     onTimeframeChange,
     onParamsChange,
-    onUseAadTemplateFieldsChange,
   ]);
 
   const noConnectorContent = useMemo(() => {
@@ -671,21 +641,29 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
         `,
       }}
       extraAction={
-        <EuiButtonIcon
-          data-test-subj="ruleActionsItemDeleteButton"
-          style={{
-            marginRight: euiTheme.size.l,
-          }}
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'responseOpsRuleForm.ruleActionsSystemActionsItem.deleteActionAriaLabel',
-            {
-              defaultMessage: 'delete action',
-            }
+            { defaultMessage: 'delete action' }
           )}
-          iconType="trash"
-          color="danger"
-          onClick={() => onDelete(action.uuid!)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="ruleActionsItemDeleteButton"
+            style={{
+              marginRight: euiTheme.size.l,
+            }}
+            aria-label={i18n.translate(
+              'responseOpsRuleForm.ruleActionsSystemActionsItem.deleteActionAriaLabel',
+              {
+                defaultMessage: 'delete action',
+              }
+            )}
+            iconType="trash"
+            color="danger"
+            onClick={() => onDelete(action.uuid!)}
+          />
+        </EuiToolTip>
       }
       buttonContentClassName="eui-fullWidth"
       buttonContent={

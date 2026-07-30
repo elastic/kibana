@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import useBoolean from 'react-use/lib/useBoolean';
@@ -75,14 +76,16 @@ export const PrebuiltRulesInstallButton = ({
 
   const popoverButton = useMemo(
     () => (
-      <EuiButtonIcon
-        display="empty"
-        size="s"
-        iconType="boxesVertical"
-        aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
-        onClick={onOverflowButtonClick}
-        disabled={isInstallButtonDisabled}
-      />
+      <EuiToolTip content={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          display="empty"
+          size="s"
+          iconType="boxesVertical"
+          aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
+          onClick={onOverflowButtonClick}
+          disabled={isInstallButtonDisabled}
+        />
+      </EuiToolTip>
     ),
     [isInstallButtonDisabled, onOverflowButtonClick]
   );
@@ -115,6 +118,7 @@ export const PrebuiltRulesInstallButton = ({
           closePopover={closeOverflowPopover}
           panelPaddingSize="s"
           anchorPosition="downRight"
+          aria-label={i18n.INSTALL_RULES_OVERFLOW_BUTTON_ARIA_LABEL}
         >
           <EuiContextMenuPanel items={overflowItems} />
         </EuiPopover>

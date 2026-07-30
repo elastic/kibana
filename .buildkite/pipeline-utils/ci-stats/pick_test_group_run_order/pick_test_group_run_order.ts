@@ -9,6 +9,7 @@
 
 import * as Fs from 'fs';
 
+import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
 import type { BuildkiteStep } from '../../buildkite';
 import { BuildkiteClient } from '../../buildkite';
 import { getTrackedBranch } from '../../utils';
@@ -20,6 +21,8 @@ import { loadRunOrderConfig } from './env_config';
 import { getEnabledFtrConfigs } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
 import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
+import { shouldSkipFtrTests } from './selective_ftr';
+import { isScoutPathOnlyDiff } from './selective_scout';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
@@ -41,6 +44,28 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
+  const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
+
+  // Fast path: a PR whose diff is exclusively Scout test files cannot affect
+  // any Jest unit/integration or FTR config — skip emitting them entirely.
+  // The Scout pipeline still runs its own selective testing in parallel.
+  let selectiveChangedFiles: string[] | undefined;
+  if (selectiveTestingMergeBase) {
+    selectiveChangedFiles = listChangedFiles({
+      mergeBase: selectiveTestingMergeBase,
+      commit: 'HEAD',
+    });
+    if (isScoutPathOnlyDiff(selectiveChangedFiles)) {
+      console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
+      bk.setAnnotation(
+        'selective-testing-scout-tests-only',
+        'info',
+        'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
+      );
+      return;
+    }
+  }
+
   const unitIncluded = config.limitConfigType.includes('unit');
   const integrationIncluded = config.limitConfigType.includes('integration');
   const ftrConfigsIncluded = config.limitConfigType.includes('functional');
@@ -55,8 +80,31 @@ export async function pickTestGroupRunOrder() {
   );
   if (!ftrConfigsIncluded) ftrConfigsByQueue.clear();
 
-  if (config.useSelectiveTesting && config.prMergeBase) {
-    const selectiveCtx = await resolveSelectiveTestingContext(config.prMergeBase);
+  if (selectiveTestingMergeBase && selectiveChangedFiles) {
+    const directlyAffected = await getAffectedPackages(selectiveTestingMergeBase, {
+      strategy: 'git',
+      includeDownstream: false,
+      ignoreUncategorizedChanges: true,
+    }).catch((error) => {
+      console.error('Error getting affected packages for FTR skip check', error);
+      return null;
+    });
+
+    if (directlyAffected !== null && shouldSkipFtrTests(directlyAffected, selectiveChangedFiles)) {
+      console.log(
+        `Skipping FTR configs — diff cannot affect FTR: ${
+          directlyAffected.size ? [...directlyAffected].join(', ') : '(irrelevant paths only)'
+        }`
+      );
+      bk.setAnnotation(
+        'selective-testing-ftr-excluded',
+        'info',
+        'Selective testing: FTR configs skipped (excluded modules / irrelevant paths only).'
+      );
+      ftrConfigsByQueue.clear();
+    }
+
+    const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
     if (selectiveCtx !== null) {
       jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
       jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
@@ -67,6 +115,15 @@ export async function pickTestGroupRunOrder() {
   }
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {
+    if (config.useSelectiveTesting) {
+      console.log('Selective testing: no Jest/FTR configs to run for this diff');
+      bk.setAnnotation(
+        'selective-testing-no-jest-ftr',
+        'info',
+        'Selective testing: no Jest unit/integration or FTR configs were scheduled for this diff.'
+      );
+      return;
+    }
     throw new Error('unable to find any unit, integration, or FTR configs');
   }
 

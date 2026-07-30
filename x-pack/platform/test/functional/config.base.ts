@@ -168,9 +168,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       apm: {
         pathname: '/app/apm',
       },
-      watcher: {
-        pathname: '/app/management/insightsAndAlerting/watcher/watches',
-      },
       transform: {
         pathname: '/app/management/data/transform',
       },
@@ -191,6 +188,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      rules: {
+        pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      rules_redirect: {
+        pathname: '/app/rules',
       },
       maintenanceWindows: {
         pathname: '/app/management/insightsAndAlerting/maintenanceWindows',

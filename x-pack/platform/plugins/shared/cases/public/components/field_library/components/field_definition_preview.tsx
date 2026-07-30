@@ -8,10 +8,10 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
-import { load as parseYaml } from 'js-yaml';
-import { FormProvider, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { parse as parseYaml } from 'yaml';
+import { FormProvider, useForm } from 'react-hook-form';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
-import { FieldSchema, isInlineField } from '../../../../common/types/domain/template/fields';
+import { InlineFieldSchema } from '../../../../common/types/domain/template/fields';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../common/utils';
 import { getYamlDefaultAsString } from '../../templates_v2/utils';
@@ -36,16 +36,15 @@ const FieldDefinitionPreviewInner: FC<FieldDefinitionPreviewInnerProps> = ({
     return { [CASE_EXTENDED_FIELDS]: { [fieldKey]: yamlDefault } };
   }, [parsedField]);
 
-  const { form } = useForm<{}>({
-    defaultValue: initialDefaultValues,
-    options: { stripEmptyFields: false },
+  const form = useForm<{}>({
+    defaultValues: initialDefaultValues,
   });
 
   useYamlFormSync(form, fields, onDefaultChange);
 
   return (
-    <FormProvider form={form}>
-      <FieldsRenderer resolvedFields={fields} form={form} />
+    <FormProvider {...form}>
+      <FieldsRenderer resolvedFields={fields} />
     </FormProvider>
   );
 };
@@ -65,8 +64,8 @@ export const FieldDefinitionPreview: FC<FieldDefinitionPreviewProps> = ({
     if (!definition.trim()) return null;
     try {
       const parsed = parseYaml(definition) as unknown;
-      const result = FieldSchema.safeParse(parsed);
-      if (result.success && isInlineField(result.data)) return result.data;
+      const result = InlineFieldSchema.safeParse(parsed);
+      if (result.success) return result.data;
     } catch {
       // fall through to return null
     }

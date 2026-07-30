@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { type FieldPath, useController, useFormContext, useWatch } from 'react-hook-form';
-import { EuiButtonIcon, EuiFormRow, EuiLink, EuiSelect, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiFormRow, EuiLink, EuiSelect, EuiText, EuiToolTip } from '@elastic/eui';
 import type { IlmPhasesFlyoutFormInternal } from '../types';
 
 export interface SearchableSnapshotRepositoryFieldProps {
@@ -88,18 +88,26 @@ export const SearchableSnapshotRepositoryField = ({
           void trigger(path);
         }}
         append={
-          <EuiButtonIcon
-            display="empty"
-            iconType="refresh"
-            size="xs"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.streams.editIlmPhasesFlyout.refreshSnapshotRepositoriesAriaLabel',
               { defaultMessage: 'Refresh snapshot repositories' }
             )}
-            isLoading={Boolean(isLoadingSearchableSnapshotRepositories)}
-            data-test-subj={`${dataTestSubj}SnapshotRepositoryRefreshButton`}
-            onClick={() => onRefreshSearchableSnapshotRepositories?.()}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              display="empty"
+              iconType="refresh"
+              size="xs"
+              aria-label={i18n.translate(
+                'xpack.streams.editIlmPhasesFlyout.refreshSnapshotRepositoriesAriaLabel',
+                { defaultMessage: 'Refresh snapshot repositories' }
+              )}
+              isLoading={Boolean(isLoadingSearchableSnapshotRepositories)}
+              data-test-subj={`${dataTestSubj}SnapshotRepositoryRefreshButton`}
+              onClick={() => onRefreshSearchableSnapshotRepositories?.()}
+            />
+          </EuiToolTip>
         }
       />
     </EuiFormRow>

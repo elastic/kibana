@@ -17,8 +17,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { Controller, useFormContext } from 'react-hook-form';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../../utils/i18n';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
+import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
 import type { EditDetailsFormData } from './types';
 
 const { editDetails: flyoutLabels } = labels.agentOverview;
@@ -31,6 +34,7 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
   showWorkflowSection,
 }) => {
   const { control } = useFormContext<EditDetailsFormData>();
+  const { isAdmin } = useUiPrivileges();
 
   return (
     <>
@@ -65,6 +69,11 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
                   checked={value}
                   onChange={(e) => onChange(e.target.checked)}
                   data-test-subj="editDetailsAutoIncludeSwitch"
+                  {...getEbtProps({
+                    element: AGENT_BUILDER_UI_EBT.element.flyout,
+                    action: AGENT_BUILDER_UI_EBT.action.agentOverview.ELASTIC_CAPABILITIES_TOGGLE,
+                    detail: AGENT_BUILDER_UI_EBT.entity.AGENT,
+                  })}
                 />
               )}
             />
@@ -90,9 +99,14 @@ export const CustomizationSection: React.FC<CustomizationSectionProps> = ({
                   {labels.common.optional}
                 </EuiText>
               }
+              helpText={!isAdmin ? flyoutLabels.workflowAdminOnlyReason : undefined}
               fullWidth
             >
-              <WorkflowPicker name="configuration.workflow_ids" singleSelection={false} />
+              <WorkflowPicker
+                name="configuration.workflow_ids"
+                singleSelection={false}
+                isDisabled={!isAdmin}
+              />
             </EuiFormRow>
           </EuiPanel>
         </>

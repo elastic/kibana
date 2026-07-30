@@ -23,6 +23,7 @@ import type {
 } from '../types';
 import { ACTION_POLICY_EVENT_ACTIONS, type ActionPolicyEventAction } from './constants';
 import { getUnmatchedEpisodes } from './unmatched_episodes';
+import { episodeSubject } from './utils/subject';
 
 const RULE_REF_CAP = 50;
 
@@ -58,6 +59,12 @@ interface PolicySummaryDispatcherFields {
 interface UnmatchedDispatcherFields {
   episode_count: number;
   episode_ids: string[];
+}
+
+interface UnmatchedGroup {
+  episodeIds: Set<string>;
+  space_id: string;
+  ruleId: RuleId | null;
 }
 
 type DispatcherFields = PolicySummaryDispatcherFields | UnmatchedDispatcherFields;
@@ -108,11 +115,11 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       });
     }
 
-    const unmatched = aggregateUnmatchedByRule(
+    const unmatched = aggregateUnmatchedBySubject(
       getUnmatchedEpisodes(dispatchable, dispatch, throttled)
     );
-    for (const [ruleId, episodeIds] of unmatched) {
-      this.emitUnmatchedSummary({ timestamp, executionUuid, ruleId, episodeIds, rules });
+    for (const group of unmatched) {
+      this.emitUnmatchedSummary({ timestamp, executionUuid, group });
     }
 
     return { type: 'continue' };
@@ -139,11 +146,7 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
       policyRef({ id: summary.policyId, spaceId: summary.spaceId }),
       ...capped.map((id) => {
         const rule = rules?.get(id);
-        return ruleRef({
-          id,
-          spaceId: rule?.spaceId ?? summary.spaceId,
-          kind: rule?.kind,
-        });
+        return ruleRef({ id, spaceId: rule?.spaceId ?? summary.spaceId });
       }),
     ];
 
@@ -171,27 +174,24 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   private emitUnmatchedSummary({
     timestamp,
     executionUuid,
-    ruleId,
-    episodeIds,
-    rules,
+    group,
   }: {
     timestamp: string;
     executionUuid: string;
-    ruleId: RuleId;
-    episodeIds: Set<string>;
-    rules: Map<RuleId, Rule> | undefined;
+    group: UnmatchedGroup;
   }): void {
-    const rule = rules?.get(ruleId);
+    const savedObjects: SavedObjectRef[] =
+      group.ruleId != null ? [ruleRef({ id: group.ruleId, spaceId: group.space_id })] : [];
     this.eventLogService.logEvent(
       buildEvent({
         timestamp,
         executionUuid,
         action: ACTION_POLICY_EVENT_ACTIONS.UNMATCHED,
-        spaceId: rule?.spaceId ?? 'default',
-        savedObjects: [ruleRef({ id: ruleId, spaceId: rule?.spaceId, kind: rule?.kind })],
+        spaceId: group.space_id,
+        savedObjects,
         dispatcherFields: {
-          episode_count: episodeIds.size,
-          episode_ids: Array.from(episodeIds),
+          episode_count: group.episodeIds.size,
+          episode_ids: Array.from(group.episodeIds),
         },
       })
     );
@@ -226,39 +226,38 @@ function aggregateByPolicy(
     }
     for (const episode of group.episodes) {
       summary.episodeIds.add(episode.episode_id);
-      summary.ruleIds.add(episode.rule_id);
+      if (episode.rule_id != null) {
+        summary.ruleIds.add(episode.rule_id);
+      }
     }
   }
   return summaries;
 }
 
-function aggregateUnmatchedByRule(
+function aggregateUnmatchedBySubject(
   unmatched: ReturnType<typeof getUnmatchedEpisodes>
-): Map<RuleId, Set<string>> {
-  const byRule = new Map<RuleId, Set<string>>();
+): UnmatchedGroup[] {
+  const bySubject = new Map<string, UnmatchedGroup>();
   for (const episode of unmatched) {
-    let ids = byRule.get(episode.rule_id);
-    if (!ids) {
-      ids = new Set();
-      byRule.set(episode.rule_id, ids);
+    const subject = episodeSubject(episode);
+    let group = bySubject.get(subject);
+    if (!group) {
+      group = {
+        episodeIds: new Set(),
+        space_id: episode.space_id,
+        ruleId: episode.rule_id,
+      };
+      bySubject.set(subject, group);
     }
-    ids.add(episode.episode_id);
+    group.episodeIds.add(episode.episode_id);
   }
-  return byRule;
+  return [...bySubject.values()];
 }
 
-function ruleRef({
-  id,
-  spaceId,
-  kind,
-}: {
-  id: string;
-  spaceId: string | undefined;
-  kind: Rule['kind'] | undefined;
-}): SavedObjectRef {
+function ruleRef({ id, spaceId }: { id: string; spaceId: string | undefined }): SavedObjectRef {
   return {
     type: RULE_SAVED_OBJECT_TYPE,
-    type_id: kind,
+    type_id: 'alert',
     id,
     rel: SAVED_OBJECT_REL_PRIMARY,
     namespace: spaceId === 'default' ? undefined : spaceId,

@@ -276,17 +276,22 @@ actions: {
 
 ### Test
 
-Optional connection test:
+Optional connection test shown in the connector Test tab when `enabled: true`:
 
 ```typescript
 test: {
   handler: async (ctx) => {
-    // Test connection logic
-    return { ok: boolean, message?: string };
+    await ctx.client.get(`${ctx.config.url}/health`);
+    return {};
   },
   description?: string,
+  enabled?: boolean, // requires throw-on-failure handler contract below
 }
 ```
+
+Test handler contract: **throw on failure**; do not return an `{ ok }` flag. A resolved
+return value (including `{}` or optional data) is treated as success. Set `enabled: true` only
+after migrating the handler to this contract.
 
 ### Policies (Optional)
 

@@ -147,7 +147,9 @@ export function SvlTriggersActionsPageProvider({ getService }: FtrProviderContex
     },
     async clickOnRuleInRulesList(name: string) {
       await this.searchRules(name);
-      await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
+      await find.clickDisplayedByCssSelector(
+        `[data-test-subj="rulesList"] [data-test-subj="rulesListTableRowName-${name}"]`
+      );
     },
     async maybeClickOnRuleTab() {
       if (await testSubjects.exists('ruleDetailsTabbedContent')) {

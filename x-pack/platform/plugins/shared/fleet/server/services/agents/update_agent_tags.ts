@@ -17,22 +17,31 @@ import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
-import { getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
+import { closePointInTime, getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import type { GetAgentsOptions } from '.';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 export async function updateAgentTags(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number },
+  options: ({ agents: Agent[] } | GetAgentsOptions) & { batchSize?: number; dryRun?: boolean },
   tagsToAdd: string[],
   tagsToRemove: string[]
-): Promise<{ actionId: string }> {
+): Promise<{ actionId: string } | { count: number }> {
   const currentSpaceId = getCurrentNamespace(soClient);
   const outgoingErrors: Record<Agent['id'], Error> = {};
   const givenAgents: Agent[] = [];
 
-  if ('agentIds' in options) {
+  if ('agents' in options) {
+    if (options.dryRun) {
+      return { count: options.agents.length };
+    }
+    givenAgents.push(...options.agents);
+  } else if ('agentIds' in options) {
+    if (options.dryRun) {
+      const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
+      return { count: maybeAgents.filter((a) => !('notFound' in a)).length };
+    }
     const maybeAgents = await getAgentsById(esClient, soClient, options.agentIds);
     for (const maybeAgent of maybeAgents) {
       if ('notFound' in maybeAgent) {
@@ -64,14 +73,22 @@ export async function updateAgentTags(
     const kuery = filters.join(' AND ');
     const pitId = await openPointInTime(esClient);
 
-    // calculate total count
+    // calculate total count; close PIT before propagating any ES error
     const res = await getAgentsByKuery(esClient, soClient, {
       kuery,
       showAgentless: options.showAgentless,
       showInactive: options.showInactive ?? false,
       perPage: 0,
       pitId,
+    }).catch(async (error) => {
+      await closePointInTime(esClient, pitId);
+      throw error;
     });
+
+    if (options.dryRun) {
+      await closePointInTime(esClient, pitId);
+      return { count: res.total };
+    }
 
     return await new UpdateAgentTagsActionRunner(
       esClient,

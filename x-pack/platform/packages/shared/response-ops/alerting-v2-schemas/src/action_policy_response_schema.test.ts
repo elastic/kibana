@@ -8,7 +8,6 @@
 import {
   actionPolicyResponseSchema,
   findActionPoliciesResponseSchema,
-  bulkActionActionPoliciesResponseSchema,
 } from './action_policy_response_schema';
 
 const validResponse = {
@@ -16,8 +15,6 @@ const validResponse = {
   version: 'WzEsMV0=',
   name: 'My Policy',
   description: 'A test policy',
-  type: 'global' as const,
-  ruleId: null,
   enabled: true,
   destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
   matcher: 'host.name: "server-1"',
@@ -66,28 +63,6 @@ describe('actionPolicyResponseSchema', () => {
   it('rejects invalid enabled type', () => {
     expect(() => actionPolicyResponseSchema.parse({ ...validResponse, enabled: 'yes' })).toThrow();
   });
-
-  it('accepts a single_rule policy with a non-null ruleId', () => {
-    const result = actionPolicyResponseSchema.parse({
-      ...validResponse,
-      type: 'single_rule',
-      ruleId: 'rule-1',
-    });
-
-    expect(result.type).toBe('single_rule');
-    expect(result.ruleId).toBe('rule-1');
-  });
-
-  it('rejects a missing type', () => {
-    const { type: _type, ...rest } = validResponse;
-    expect(() => actionPolicyResponseSchema.parse(rest)).toThrow();
-  });
-
-  it('rejects an unknown type value', () => {
-    expect(() =>
-      actionPolicyResponseSchema.parse({ ...validResponse, type: 'team_rule' })
-    ).toThrow();
-  });
 });
 
 describe('findActionPoliciesResponseSchema', () => {
@@ -118,36 +93,6 @@ describe('findActionPoliciesResponseSchema', () => {
         items: [],
         page: 1,
         perPage: 10,
-      })
-    ).toThrow();
-  });
-});
-
-describe('bulkActionActionPoliciesResponseSchema', () => {
-  it('accepts a valid bulk response', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 5,
-      total: 6,
-      errors: [{ id: 'np-2', message: 'Not found' }],
-    });
-    expect(result.processed).toBe(5);
-    expect(result.errors).toHaveLength(1);
-  });
-
-  it('accepts empty errors', () => {
-    const result = bulkActionActionPoliciesResponseSchema.parse({
-      processed: 3,
-      total: 3,
-      errors: [],
-    });
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('rejects missing processed', () => {
-    expect(() =>
-      bulkActionActionPoliciesResponseSchema.parse({
-        total: 3,
-        errors: [],
       })
     ).toThrow();
   });

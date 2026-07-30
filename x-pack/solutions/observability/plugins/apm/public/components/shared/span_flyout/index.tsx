@@ -28,10 +28,13 @@ import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
 import { OpenInDiscover } from '../links/discover_links/open_in_discover';
+import { SPAN_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import type { Span } from '../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { SpanMetadata } from '../metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
+import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
+import { getGenAiFields, hasGenAiData } from '../genai_tab/get_genai_fields';
 import { Summary } from '../summary';
 import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';
@@ -168,6 +171,7 @@ export function SpanFlyout({
                     spanId,
                     sortDirection: 'DESC',
                   }}
+                  ebt={{ element: SPAN_FLYOUT_EBT_ELEMENTS.HEADER }}
                 />
               </EuiFlexItem>
             )}
@@ -236,6 +240,27 @@ function SpanFlyoutBody({
     processorEvent: ProcessorEvent.span,
   });
 
+  const spanId = span.span?.id;
+  const { data: eventMetadata, status: metadataStatus } = useFetcher(
+    (callApmApi) => {
+      if (!spanId) return;
+      return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
+        params: {
+          path: { processorEvent: ProcessorEvent.span, id: spanId },
+          query: { start: span['@timestamp'], end: span['@timestamp'] },
+        },
+      });
+    },
+    [spanId, span]
+  );
+
+  const metadata = eventMetadata?.metadata ?? {};
+  const isMetadataLoading = isPending(metadataStatus);
+  const isGenAiSpan = hasGenAiData(metadata);
+  const genAi = isGenAiSpan ? getGenAiFields(metadata) : undefined;
+
+  const genAiTabContent = getGenAiTabContent({ isGenAiSpan, genAi });
+
   const tabs = [
     {
       id: 'metadata',
@@ -245,7 +270,10 @@ function SpanFlyoutBody({
       content: (
         <Fragment>
           <EuiSpacer size="m" />
-          <SpanMetadata span={span} />
+          <SpanMetadata
+            span={span}
+            prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
+          />
         </Fragment>
       ),
     },
@@ -274,6 +302,7 @@ function SpanFlyoutBody({
         ]
       : []),
     ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+    ...(genAiTabContent ? [genAiTabContent] : []),
   ];
 
   const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];

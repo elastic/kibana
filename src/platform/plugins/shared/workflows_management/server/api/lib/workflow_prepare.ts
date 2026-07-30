@@ -8,18 +8,14 @@
  */
 
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type {
-  CreateWorkflowCommand,
-  EsWorkflow,
-  EsWorkflowCreate,
-  WorkflowYaml,
-} from '@kbn/workflows';
+import type { EsWorkflow, EsWorkflowCreate, WorkflowYaml } from '@kbn/workflows';
 import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 
 import { generateWorkflowId } from '../../../common/lib/import';
 import { validateWorkflowYaml } from '../../../common/lib/validate_workflow_yaml';
 import { updateWorkflowYamlFields } from '../../../common/lib/yaml';
+import { INITIAL_WORKFLOW_VERSION } from '../../lib/workflow_version';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 /** Derives a list of trigger type ids from a workflow definition. */
@@ -42,29 +38,56 @@ export const workflowYamlDeclaresTopLevelEnabled = (yamlString: string): boolean
 };
 
 /**
- * Validates YAML and builds a WorkflowProperties document ready for indexing.
- * Shared by createWorkflow and bulkCreateWorkflows.
+ * Reads `name`/`description` straight off the YAML without requiring it to pass
+ * schema validation, so a workflow that fails strict validation still keeps its
+ * author-given title instead of collapsing to the "Untitled workflow" fallback.
  */
-export const prepareWorkflowDocument = (params: {
-  workflow: CreateWorkflowCommand;
+const extractLooseTitleFields = (yamlString: string): { name?: string; description?: string } => {
+  const parsed = parseYamlToJSONWithoutValidation(yamlString);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
+    return {};
+  }
+  const json = parsed.json as Record<string, unknown>;
+  return {
+    name: typeof json.name === 'string' && json.name.trim() !== '' ? json.name : undefined,
+    description: typeof json.description === 'string' ? json.description : undefined,
+  };
+};
+
+/**
+ * Validates YAML and builds a WorkflowProperties document ready for indexing.
+ * Shared by user-created and managed workflow creation paths.
+ */
+export const prepareWorkflowDocumentFromYaml = (params: {
+  id?: string;
+  yaml: string;
   zodSchema: z.ZodType;
   authenticatedUser: string;
   now: Date;
   spaceId: string;
   triggerDefinitions?: Array<{ id: string; eventSchema: z.ZodType }>;
 }): { id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml } => {
-  const { workflow, zodSchema, authenticatedUser, now, spaceId, triggerDefinitions } = params;
+  const {
+    id: providedId,
+    yaml,
+    zodSchema,
+    authenticatedUser,
+    now,
+    spaceId,
+    triggerDefinitions,
+  } = params;
 
+  const looseTitle = extractLooseTitleFields(yaml);
   let workflowToCreate: EsWorkflowCreate = {
-    name: 'Untitled workflow',
-    description: undefined,
+    name: looseTitle.name ?? 'Untitled workflow',
+    description: looseTitle.description,
     enabled: false,
     tags: [],
     definition: undefined,
     valid: false,
   };
 
-  const validation = validateWorkflowYaml(workflow.yaml, zodSchema, { triggerDefinitions });
+  const validation = validateWorkflowYaml(yaml, zodSchema, { triggerDefinitions });
   if (validation.valid && validation.parsedWorkflow) {
     workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
   } else if (validation.parsedWorkflow) {
@@ -73,7 +96,7 @@ export const prepareWorkflowDocument = (params: {
     workflowToCreate.definition = undefined;
   }
 
-  const id = workflow.id || generateWorkflowId(workflowToCreate.name);
+  const id = providedId || generateWorkflowId(workflowToCreate.name);
 
   const workflowData: WorkflowProperties = {
     name: workflowToCreate.name,
@@ -81,13 +104,19 @@ export const prepareWorkflowDocument = (params: {
     enabled: workflowToCreate.enabled,
     tags: workflowToCreate.tags || [],
     triggerTypes: getTriggerTypesFromDefinition(workflowToCreate.definition),
-    yaml: workflow.yaml,
+    yaml,
     definition: workflowToCreate.definition ?? null,
     createdBy: authenticatedUser,
     lastUpdatedBy: authenticatedUser,
     spaceId,
+    managed: false,
+    managedBy: null,
+    definitionHash: null,
+    originManagedWorkflowId: null,
+    lifecycle: null,
     valid: workflowToCreate.valid,
     deleted_at: null,
+    version: INITIAL_WORKFLOW_VERSION,
     created_at: now.toISOString(),
     updated_at: now.toISOString(),
   };
@@ -112,8 +141,16 @@ export const applyYamlUpdate = (params: {
   const validation = validateWorkflowYaml(workflowYaml, zodSchema, { triggerDefinitions });
 
   if (!validation.valid || !validation.parsedWorkflow) {
+    const looseTitle = extractLooseTitleFields(workflowYaml);
     return {
-      updatedDataPatch: { definition: null, enabled: false, valid: false, triggerTypes: [] },
+      updatedDataPatch: {
+        definition: null,
+        enabled: false,
+        valid: false,
+        triggerTypes: [],
+        ...(looseTitle.name !== undefined ? { name: looseTitle.name } : {}),
+        ...(looseTitle.description !== undefined ? { description: looseTitle.description } : {}),
+      },
       validationErrors: validation.diagnostics
         .filter((d) => d.severity === 'error')
         .map((d) => d.message),
@@ -185,6 +222,14 @@ export const applyFieldUpdates = (
       workflow,
       patch.enabled ?? existingSource.enabled
     );
+  }
+
+  // Keep definition.enabled in sync with the top-level enabled column so that
+  // any consumer of the parsed definition (e.g. export) always sees the current
+  // value.  The YAML-update path performs this same sync in workflow_crud_service;
+  // mirror it here for the field-only path.
+  if (patch.enabled !== undefined && existingSource?.definition) {
+    patch.definition = { ...existingSource.definition, enabled: patch.enabled };
   }
 
   return { patch, validationErrors };

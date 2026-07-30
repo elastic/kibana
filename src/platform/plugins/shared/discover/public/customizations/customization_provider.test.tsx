@@ -13,6 +13,7 @@ import { getDiscoverInternalStateMock } from '../__mocks__/discover_state.mock';
 import {
   type ConnectedCustomizationService,
   getConnectedCustomizationService,
+  getExtendedDiscoverStateContainer,
   useDiscoverCustomization,
   useDiscoverCustomization$,
 } from './customization_provider';
@@ -21,6 +22,7 @@ import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
 import { DiscoverTestProvider } from '../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../__mocks__/services';
+import { savedSearchMockWithTimeField } from '../__mocks__/saved_search';
 import { createTabActionInjector, selectTab } from '../application/main/state_management/redux';
 
 describe('getConnectedCustomizationService', () => {
@@ -64,6 +66,33 @@ describe('getConnectedCustomizationService', () => {
     });
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('getExtendedDiscoverStateContainer', () => {
+  it('should preserve empty sort arrays when deriving app state from a saved search', async () => {
+    const services = createDiscoverServicesMock();
+    const toolkit = getDiscoverInternalStateMock({ services });
+
+    await toolkit.initializeTabs();
+
+    const tabId = toolkit.getCurrentTab().id;
+    const injectCurrentTab = createTabActionInjector(tabId);
+    const getCurrentTab = () => selectTab(toolkit.internalState.getState(), tabId);
+    const stateContainer = getExtendedDiscoverStateContainer({
+      internalState: toolkit.internalState,
+      injectCurrentTab,
+      getCurrentTab,
+      runtimeStateManager: toolkit.runtimeStateManager,
+      stateStorage: toolkit.stateStorageContainer,
+      services,
+    });
+    const savedSearch = {
+      ...savedSearchMockWithTimeField,
+      sort: [],
+    };
+
+    expect(stateContainer.getAppStateFromSavedSearch(savedSearch).sort).toEqual([]);
   });
 });
 

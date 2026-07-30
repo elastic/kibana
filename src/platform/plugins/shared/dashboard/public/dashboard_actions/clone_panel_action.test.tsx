@@ -8,7 +8,7 @@
  */
 
 import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import type { ClonePanelActionApi } from './clone_panel_action';
 import { ClonePanelAction } from './clone_panel_action';
 
@@ -23,6 +23,7 @@ describe('Clone panel action', () => {
         isDuplicable: true,
         uuid: 'superId',
         viewMode$: new BehaviorSubject<ViewMode>('edit'),
+        anyStateChange$: of(),
         serializeState: () => ({}),
         applySerializedState: () => undefined,
         parentApi: {

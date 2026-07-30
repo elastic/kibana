@@ -8,12 +8,9 @@
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { z } from '@kbn/zod/v4';
-import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  UseField,
-  getFieldValidityAndErrorMessage,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { InlineFieldActions } from '../inline_field_actions';
 import { CASE_EXTENDED_FIELDS } from '../../../../../../common/constants';
 import { getFieldSnakeKey } from '../../../../../../common/utils';
 import type {
@@ -40,7 +37,14 @@ export const UserPicker: React.FC<UserPickerProps> = ({
   type,
   metadata,
   isRequired,
+  isRequiredOnClose,
+  onConfirm,
+  isSaving,
+  isSaveDisabled,
 }) => {
+  const { control, resetField } = useFormContext();
+  const path = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`;
+
   const { owner: owners } = useCasesContext();
   const availableOwners = useAvailableCasesOwners(getAllPermissionsExceptFrom('delete'));
   const hasOwners = owners.length > 0;
@@ -61,13 +65,14 @@ export const UserPicker: React.FC<UserPickerProps> = ({
 
   const isLoading = isLoadingSuggest || isFetchingSuggest || isUserTyping;
   const isMultiple = metadata?.multiple !== false;
-
-  const validations = useUserPickerValidators({ isRequired: isRequired ?? false, security });
-
-  const fieldConfig = useMemo(
-    () => ({ validations, defaultValue: JSON.stringify(metadata?.default ?? []) }),
-    [validations, metadata?.default]
+  const suggestedUids = useMemo(
+    () => new Set(suggestedProfiles.map(({ uid }) => uid)),
+    [suggestedProfiles]
   );
+
+  const rules = useUserPickerValidators({ isRequired: isRequired ?? false, security });
+
+  const defaultValue = useMemo(() => JSON.stringify(metadata?.default ?? []), [metadata?.default]);
 
   const onSearchChange = useCallback(
     (value: string) => {
@@ -79,42 +84,58 @@ export const UserPicker: React.FC<UserPickerProps> = ({
     [onContentChange]
   );
 
-  const renderField = useCallback(
-    (field: FieldHook<string>) => {
-      const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-      const selectedUsers = toSelectedUsers(field.value);
-      const missingUids = selectedUsers
-        .filter((u) => !suggestedProfiles.some((p) => p.uid === u.uid))
-        .map((u) => u.uid);
-
-      return (
-        <UserPickerComboboxWithProfiles
-          label={label}
-          name={name}
-          isInvalid={isInvalid}
-          errorMessage={errorMessage}
-          isLoading={isLoading}
-          isMultiple={isMultiple}
-          isRequired={isRequired ?? false}
-          selectedUsers={selectedUsers}
-          suggestedProfiles={suggestedProfiles}
-          missingUids={missingUids}
-          onSearchChange={onSearchChange}
-          onChange={(next) => field.setValue(JSON.stringify(next))}
-        />
-      );
-    },
-    [label, name, isLoading, isMultiple, isRequired, suggestedProfiles, onSearchChange]
-  );
+  const handleCancel = useCallback(() => {
+    resetField(path);
+  }, [path, resetField]);
 
   return (
-    <UseField
+    <Controller
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
-      config={fieldConfig}
-    >
-      {renderField}
-    </UseField>
+      name={path}
+      control={control}
+      rules={rules}
+      defaultValue={defaultValue}
+      render={({ field, fieldState }) => {
+        const selectedUsers = toSelectedUsers(field.value);
+        const missingUids = selectedUsers.reduce<string[]>((uids, { uid }) => {
+          if (!suggestedUids.has(uid)) uids.push(uid);
+          return uids;
+        }, []);
+
+        return (
+          <>
+            <UserPickerComboboxWithProfiles
+              label={label}
+              name={name}
+              isInvalid={Boolean(fieldState.error)}
+              errorMessage={fieldState.error?.message ?? null}
+              isLoading={isLoading}
+              isMultiple={isMultiple}
+              isRequired={isRequired ?? false}
+              isRequiredOnClose={isRequiredOnClose ?? false}
+              isDisabled={isSaving}
+              selectedUsers={selectedUsers}
+              suggestedProfiles={suggestedProfiles}
+              missingUids={missingUids}
+              onSearchChange={onSearchChange}
+              onChange={(next) => {
+                field.onChange(JSON.stringify(next));
+                field.onBlur();
+              }}
+            />
+            {fieldState.isDirty && onConfirm && (
+              <InlineFieldActions
+                name={name}
+                onConfirm={onConfirm}
+                onCancel={handleCancel}
+                isLoading={isSaving}
+                isDisabled={isSaveDisabled}
+              />
+            )}
+          </>
+        );
+      }}
+    />
   );
 };
 
@@ -128,6 +149,8 @@ interface UserPickerComboboxWithProfilesProps {
   isLoading: boolean;
   isMultiple: boolean;
   isRequired: boolean;
+  isRequiredOnClose?: boolean;
+  isDisabled?: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];
   missingUids: string[];

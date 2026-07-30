@@ -11,7 +11,6 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const { common, discover, timePicker, header, unifiedFieldList } = getPageObjects([
     'common',
@@ -29,9 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover doc viewer', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
-      );
       await browser.setWindowSize(1600, 1200);
     });
 
@@ -121,7 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.findFieldByNameOrValueInDocViewer('time');
 
         await retry.waitFor('updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 5;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 6;
         });
       });
 
@@ -161,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('typeFilter-number');
 
         await retry.waitFor('second updates', async () => {
-          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 7;
+          return (await find.allByCssSelector('.kbnDocViewer__fieldName')).length === 8;
         });
 
         await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
@@ -197,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
 
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
-        const numberFieldsCount = 6;
+        const numberFieldsCount = 7;
 
         expect(initialFieldsCount).to.above(numberFieldsCount);
 
@@ -356,7 +352,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after switching to show only selected', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === 'agent.raw,agent';
+          return fieldNames.join(',') === '@timestamp,agent.raw,agent';
         });
 
         await dataGrid.togglePinActionInFlyout('agent');
@@ -364,7 +360,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates after pinning the last field', async () => {
           fieldNameCells = await find.allByCssSelector('.kbnDocViewer__fieldName');
           fieldNames = await Promise.all(fieldNameCells.map((cell) => cell.getVisibleText()));
-          return fieldNames.join(',') === 'agent,agent.raw';
+          return fieldNames.join(',') === 'agent,@timestamp,agent.raw';
         });
 
         await showOnlySelectedFieldsSwitch.click();

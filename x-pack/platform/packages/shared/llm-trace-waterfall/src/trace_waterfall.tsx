@@ -20,7 +20,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { WaterfallItem, LABEL_WIDTH, SPAN_COLORS, type SpanCategory } from './waterfall_item';
+import {
+  WaterfallItem,
+  LABEL_WIDTH,
+  SPAN_COLORS,
+  getSpanCategory,
+  type SpanCategory,
+} from './waterfall_item';
 import { SpanDetail } from './span_detail';
 import type { SpanNode, TraceSpan } from './types';
 import * as i18n from './translations';
@@ -153,46 +159,54 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({
   const scrollRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
 
-  const { flatSpans, traceStartMs, traceDurationMs, noiseCount, tickPercents, tickLabels } =
-    useMemo(() => {
-      if (!spans.length) {
-        return {
-          flatSpans: [],
-          traceStartMs: 0,
-          traceDurationMs: 0,
-          noiseCount: 0,
-          tickPercents: [],
-          tickLabels: [],
-        };
-      }
-
-      const tree = buildSpanTree(spans);
-      const flat = flattenTree(tree, hideNoise);
-
-      const startTimes = spans.map((s) => new Date(s.start_time).getTime());
-      const minStart = Math.min(...startTimes);
-      const maxEnd = Math.max(
-        ...spans.map((s) => new Date(s.start_time).getTime() + s.duration_ms)
-      );
-      const calculatedDurationMs = maxEnd - minStart;
-      const resolvedDurationMs = durationMs ?? calculatedDurationMs;
-      const noise = spans.filter((s) => isNoiseSpan(s)).length;
-
-      const ticks = computeTickValues(resolvedDurationMs);
-      const percents = ticks.map((t) =>
-        resolvedDurationMs > 0 ? (t / resolvedDurationMs) * 100 : 0
-      );
-      const labels = ticks.map((t) => formatDuration(t));
-
+  const {
+    flatSpans,
+    traceStartMs,
+    traceDurationMs,
+    noiseCount,
+    presentCategories,
+    tickPercents,
+    tickLabels,
+  } = useMemo(() => {
+    if (!spans.length) {
       return {
-        flatSpans: flat,
-        traceStartMs: minStart,
-        traceDurationMs: resolvedDurationMs,
-        noiseCount: noise,
-        tickPercents: percents,
-        tickLabels: labels,
+        flatSpans: [],
+        traceStartMs: 0,
+        traceDurationMs: 0,
+        noiseCount: 0,
+        presentCategories: new Set<SpanCategory>(),
+        tickPercents: [],
+        tickLabels: [],
       };
-    }, [durationMs, hideNoise, spans]);
+    }
+
+    const tree = buildSpanTree(spans);
+    const flat = flattenTree(tree, hideNoise);
+
+    const startTimes = spans.map((s) => new Date(s.start_time).getTime());
+    const minStart = Math.min(...startTimes);
+    const maxEnd = Math.max(...spans.map((s) => new Date(s.start_time).getTime() + s.duration_ms));
+    const calculatedDurationMs = maxEnd - minStart;
+    const resolvedDurationMs = durationMs ?? calculatedDurationMs;
+    const noise = spans.filter((s) => isNoiseSpan(s)).length;
+    const categories = new Set<SpanCategory>(flat.map(getSpanCategory));
+
+    const ticks = computeTickValues(resolvedDurationMs);
+    const percents = ticks.map((t) =>
+      resolvedDurationMs > 0 ? (t / resolvedDurationMs) * 100 : 0
+    );
+    const labels = ticks.map((t) => formatDuration(t));
+
+    return {
+      flatSpans: flat,
+      traceStartMs: minStart,
+      traceDurationMs: resolvedDurationMs,
+      noiseCount: noise,
+      presentCategories: categories,
+      tickPercents: percents,
+      tickLabels: labels,
+    };
+  }, [durationMs, hideNoise, spans]);
 
   const autoSelectedTraceRef = useRef<string | null | undefined>(null);
   useEffect(() => {
@@ -365,41 +379,55 @@ export const TraceWaterfall: React.FC<TraceWaterfallProps> = ({
               &middot; {i18n.getTotalDuration(traceDurationMs.toFixed(1))}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={i18n.HIDE_NOISE_LABEL}
-              checked={hideNoise}
-              onChange={(e) => setHideNoise(e.target.checked)}
-              compressed
-            />
-          </EuiFlexItem>
+          {noiseCount > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={i18n.HIDE_NOISE_LABEL}
+                checked={hideNoise}
+                onChange={(e) => setHideNoise(e.target.checked)}
+                compressed
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-          {LEGEND_ITEMS.map(({ category, label }) => (
-            <EuiFlexItem key={category} grow={false}>
-              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <span
-                    style={{
-                      display: 'inline-block',
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: SPAN_COLORS[category],
-                    }}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {label}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        {presentCategories.size > 0 && (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup
+              gutterSize="s"
+              alignItems="center"
+              responsive={false}
+              wrap
+              data-test-subj="traceWaterfallLegend"
+            >
+              {LEGEND_ITEMS.filter(({ category }) => presentCategories.has(category)).map(
+                ({ category, label }) => (
+                  <EuiFlexItem key={category} grow={false}>
+                    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow={false}>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            width: 8,
+                            height: 8,
+                            borderRadius: '50%',
+                            backgroundColor: SPAN_COLORS[category],
+                          }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {label}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )
+              )}
+            </EuiFlexGroup>
+          </>
+        )}
         <EuiSpacer size="s" />
       </EuiFlexItem>
 

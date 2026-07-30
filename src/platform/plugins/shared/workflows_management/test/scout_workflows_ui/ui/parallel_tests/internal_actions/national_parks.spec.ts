@@ -40,12 +40,10 @@ test.describe('InternalActions/Elasticsearch', { tag: [...tags.stateful.classic]
     await cleanupWorkflowsAndRules({ scoutSpace, apiServices });
   });
 
-  test('should run national park workflow successfully', async ({ page, pageObjects }) => {
+  test('should run national park workflow successfully', async ({ pageObjects }) => {
     await pageObjects.workflowEditor.gotoNewWorkflow();
     await pageObjects.workflowEditor.setYamlEditorValue(nationalParksWorkflow);
-    await page.testSubj.click('runWorkflowHeaderButton');
-    await page.testSubj.waitForSelector('runWorkflowWithUnsavedChangesConfirmationModal');
-    await page.testSubj.click('confirmModalConfirmButton');
+    await pageObjects.workflowEditor.runWorkflowWithUnsavedChanges();
 
     await pageObjects.workflowExecution.waitForExecutionStatus('completed', EXECUTION_TIMEOUT);
 

@@ -43,8 +43,16 @@ export default function (providerContext: FtrProviderContext) {
       attributes: {
         policy_ids: [id],
         name: 'Fleet Server',
+        enabled: true,
+        inputs: [],
+        revision: 1,
+        created_at: new Date().toISOString(),
+        created_by: 'system',
+        updated_at: new Date().toISOString(),
+        updated_by: 'system',
         package: {
           name: 'fleet_server',
+          version: '1.0.0',
         },
         latest_revision: true,
       },

@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/270627
+issues:
+- https://github.com/elastic/kibana/issues/260667
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+title: Improve error handling for metrics information requests

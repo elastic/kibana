@@ -44,6 +44,12 @@ describe('generateParamsSchema', () => {
                 message: z.string(),
                 foobar: z.number(),
               }),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
           z
@@ -52,12 +58,24 @@ describe('generateParamsSchema', () => {
               subActionParams: z.object({
                 bool: z.boolean(),
               }),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
           z
             .object({
               subAction: z.literal('action3'),
               subActionParams: z.object({}),
+              fetchOptions: z
+                .object({
+                  max_content_length: z.number().positive().optional(),
+                })
+                .strict()
+                .optional(),
             })
             .strict(),
         ]),
@@ -79,6 +97,20 @@ describe('generateParamsSchema', () => {
       expect(parsed).toEqual({
         subAction: 'action1',
         subActionParams: { message: 'hello', foobar: 42 },
+      });
+    });
+
+    it('parses reserved fetchOptions', () => {
+      const result = generateParamsSchema(mockActions);
+      const parsed = result.schema.parse({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+        fetchOptions: { max_content_length: 1024 },
+      });
+      expect(parsed).toEqual({
+        subAction: 'action1',
+        subActionParams: { message: 'hello', foobar: 42 },
+        fetchOptions: { max_content_length: 1024 },
       });
     });
 
@@ -137,6 +169,17 @@ describe('generateParamsSchema', () => {
           extraTopLevel: true,
         })
       ).toThrow(/extraTopLevel|Unrecognized/);
+    });
+
+    it('rejects unknown fetchOptions fields', () => {
+      const result = generateParamsSchema(mockActions);
+      expect(() =>
+        result.schema.parse({
+          subAction: 'action1',
+          subActionParams: { message: 'x', foobar: 1 },
+          fetchOptions: { unknown: true },
+        })
+      ).toThrow(/unknown|Unrecognized/);
     });
   });
 });
