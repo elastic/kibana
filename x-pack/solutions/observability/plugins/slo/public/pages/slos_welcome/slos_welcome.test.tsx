@@ -11,8 +11,7 @@ import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { act, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import Router from 'react-router-dom';
-import { emptySloDefinitionList, sloDefinitionList } from '../../data/slo/slo';
-import { useFetchSloDefinitions } from '../../hooks/use_fetch_slo_definitions';
+import { useHasSlos } from '../../hooks/use_has_slos';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLicense } from '../../hooks/use_license';
 import { usePermissions } from '../../hooks/use_permissions';
@@ -31,8 +30,7 @@ jest.mock('react-router-dom', () => ({
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../hooks/use_kibana');
 jest.mock('../../hooks/use_license');
-jest.mock('../../hooks/use_fetch_slo_list');
-jest.mock('../../hooks/use_fetch_slo_definitions');
+jest.mock('../../hooks/use_has_slos');
 jest.mock('../../hooks/use_permissions');
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
@@ -40,7 +38,7 @@ HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
 
 const useKibanaMock = useKibana as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
-const useFetchSloDefinitionsMock = useFetchSloDefinitions as jest.Mock;
+const useHasSlosMock = useHasSlos as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
 
 const mockNavigate = jest.fn();
@@ -90,10 +88,7 @@ describe('SLOs Welcome Page', () => {
 
   describe('when the incorrect license is found', () => {
     it('renders the welcome message with subscription buttons', async () => {
-      useFetchSloDefinitionsMock.mockReturnValue({
-        isLoading: false,
-        data: emptySloDefinitionList,
-      });
+      useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       usePermissionsMock.mockReturnValue({
         isLoading: false,
@@ -127,10 +122,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and no results are found', () => {
       beforeEach(() => {
-        useFetchSloDefinitionsMock.mockReturnValue({
-          isLoading: false,
-          data: emptySloDefinitionList,
-        });
+        useHasSlosMock.mockReturnValue({ hasSlos: false, isLoading: false, isError: false });
       });
 
       it('disables the create slo button when no write capabilities', async () => {
@@ -200,7 +192,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
-        useFetchSloDefinitionsMock.mockReturnValue({ isLoading: false, data: sloDefinitionList });
+        useHasSlosMock.mockReturnValue({ hasSlos: true, isLoading: false, isError: false });
         usePermissionsMock.mockReturnValue({
           isLoading: false,
           data: {
