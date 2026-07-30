@@ -307,10 +307,6 @@ const RESTRICTED_IMPORTS = [
       'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
   {
-    name: '@testing-library/react-hooks',
-    message: 'Please use @testing-library/react instead',
-  },
-  {
     name: '@elastic/ecs',
     importNames: ['EcsFlat'],
     message:
@@ -1750,6 +1746,17 @@ module.exports = {
         },
       },
       rules: {
+        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
+        // calls. The linter can't trace expects into called functions, so without
+        // this config tests using assertion helpers trigger a false-positive
+        // "Test has no assertions" warning. Registering the assert* pattern as
+        // known assertion functions avoids that.
+        'playwright/expect-expect': [
+          'warn',
+          {
+            assertFunctionNames: ['expect', 'expect.soft', 'assert*'],
+          },
+        ],
         'playwright/no-commented-out-tests': 'error',
         'playwright/no-conditional-expect': 'error',
         'playwright/no-conditional-in-test': 'warn',
@@ -3137,6 +3144,30 @@ module.exports = {
         '@kbn/eslint/no_npx_playwright': 'off',
       },
     },
+    {
+      files: [
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/observability/plugins/**/*.test.*',
+        'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/**/*.mock.*',
+        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
+        'x-pack/solutions/observability/packages/**/*.test.*',
+        'x-pack/solutions/observability/packages/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.mock.*',
+        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
+      ],
+      rules: {
+        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
+      },
+    },
   ],
 };
 
@@ -3164,7 +3195,6 @@ module.exports.overrides.push({
     'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
     'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
