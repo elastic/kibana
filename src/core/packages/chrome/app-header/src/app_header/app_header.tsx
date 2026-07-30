@@ -54,6 +54,7 @@ const getPublicAppHeaderViewProps = ({
   badges,
   menu,
   favorite,
+  share,
   description,
   metadata,
   sticky,
@@ -70,6 +71,7 @@ const getPublicAppHeaderViewProps = ({
     badges,
     menu,
     favorite,
+    share,
     ...secondaryContent,
     sticky,
     spacing,
@@ -86,6 +88,7 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     badges,
     menu,
     favorite,
+    share,
     titleAppend,
     description,
     metadata,
@@ -96,7 +99,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
     showAddIntegrations,
   }) => {
     const hasLegacyActionMenu = useHasLegacyActionMenu();
-    const shareAction = useShareAction(menu);
+    const shareFromMenu = useShareAction(share ? undefined : menu);
+    const shareAction = share ?? shareFromMenu;
     const resolvedBadges = useResolvedBadges(badges);
     const canAccessIntegrations = useCanAccessIntegrations();
     const showIntegrations = !!showAddIntegrations && canAccessIntegrations;
@@ -111,7 +115,8 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
       !description &&
       !metadata?.length &&
       !titleAppend &&
-      !favorite;
+      !favorite &&
+      !shareAction;
     const resolvedSpacing = spacing ?? (isSparse ? 'compact' : 'standard');
 
     // Match the title size to the spacing: the shorter `compact` header uses an `xs` title, while the
@@ -144,7 +149,12 @@ const AppHeaderViewInternal = React.memo<AppHeaderViewInternalProps>(
         titleActions={<TitleActions shareAction={shareAction} favorite={favorite} />}
         titleAppend={titleAppend}
         trailing={
-          <AppMenu menu={menu} docLink={docLink} showAddIntegrations={showAddIntegrations} />
+          <AppMenu
+            menu={menu}
+            share={share}
+            docLink={docLink}
+            showAddIntegrations={showAddIntegrations}
+          />
         }
         secondaryContent={
           description ? (

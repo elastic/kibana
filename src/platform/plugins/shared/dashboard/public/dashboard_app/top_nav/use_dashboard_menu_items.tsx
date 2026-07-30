@@ -22,6 +22,7 @@ import type {
   AppMenuPrimaryActionItem,
   AppMenuRunActionParams,
 } from '@kbn/core-chrome-app-menu-components';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import { useDashboardExportItems } from './share/use_dashboard_export_items';
 import { getAccessControlClient } from '../../services/access_control_service';
 import { UI_SETTINGS } from '../../../common/constants';
@@ -33,7 +34,6 @@ import type { SaveDashboardReturn } from '../../dashboard_api/save_modal/types';
 import { coreServices, shareService, dataService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';
-import { ShowShareModal } from './share/show_share_modal';
 import { useShareOptions } from './share/use_share_options';
 
 export const useDashboardMenuItems = ({
@@ -41,11 +41,17 @@ export const useDashboardMenuItems = ({
   setIsLabsShown,
   maybeRedirect,
   showResetChange,
+  includeShareInMenu = true,
+  shareAction,
 }: {
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   maybeRedirect: (result?: SaveDashboardReturn) => void;
   showResetChange?: boolean;
+  /** When false, Share is omitted from menu.items (Chrome Next owns title + overflow placement). */
+  includeShareInMenu?: boolean;
+  /** Used to build the legacy menu Share item when `includeShareInMenu` is true. */
+  shareAction?: AppHeaderShareAction;
 }) => {
   const isMounted = useMountedState();
   const accessControlClient = getAccessControlClient();
@@ -151,14 +157,6 @@ export const useDashboardMenuItems = ({
     );
   }, [dashboardApi]);
 
-  const saveFromShareModal = useCallback(async () => {
-    if (lastSavedId) {
-      quickSaveDashboard();
-    } else {
-      dashboardInteractiveSave();
-    }
-  }, [quickSaveDashboard, dashboardInteractiveSave, lastSavedId]);
-
   const openAddPanelFlyout = useCallback(
     (params?: AppMenuRunActionParams) => {
       openLazyFlyout({
@@ -190,33 +188,6 @@ export const useDashboardMenuItems = ({
 
   const hasExportMenuItems = exportItems.length > 0;
 
-  /**
-   * Show the Dashboard app's share menu
-   */
-  const showShare = useCallback(() => {
-    ShowShareModal({
-      shareOptions,
-      canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
-      accessControl,
-      createdBy: dashboardApi.createdBy,
-      isManaged: dashboardApi.isManaged,
-      accessControlClient,
-      saveDashboard: saveFromShareModal,
-      changeAccessMode: dashboardApi.changeAccessMode,
-    });
-  }, [
-    hasUnsavedChanges,
-    isInEditAccessMode,
-    canManageAccessControl,
-    accessControl,
-    saveFromShareModal,
-    dashboardApi.changeAccessMode,
-    dashboardApi.createdBy,
-    accessControlClient,
-    dashboardApi.isManaged,
-    shareOptions,
-  ]);
-
   const getEditTooltip = useCallback(() => {
     if (dashboardApi.isManaged) {
       return topNavStrings.edit.managedDashboardTooltip;
@@ -226,13 +197,6 @@ export const useDashboardMenuItems = ({
     }
     return topNavStrings.edit.writeRestrictedTooltip;
   }, [isInEditAccessMode, canManageAccessControl, dashboardApi.isManaged]);
-
-  const getShareTooltip = useCallback(() => {
-    if (!dashboardApi.isAccessControlEnabled) return undefined;
-    return isInEditAccessMode
-      ? topNavStrings.share.editModeTooltipContent
-      : topNavStrings.share.writeRestrictedModeTooltipContent;
-  }, [isInEditAccessMode, dashboardApi.isAccessControlEnabled]);
 
   const resetChangesMenuItem = useMemo(() => {
     return {
@@ -293,13 +257,22 @@ export const useDashboardMenuItems = ({
       share: {
         order: viewMode === 'edit' ? 3 : 1,
         label: topNavStrings.share.label,
-        tooltipContent: getShareTooltip(),
-        tooltipTitle: topNavStrings.share.tooltipTitle,
+        tooltipContent: shareAction?.tooltip?.content,
+        tooltipTitle: shareAction?.tooltip?.title ?? topNavStrings.share.tooltipTitle,
         id: 'share',
         iconType: 'share',
         testId: 'shareTopNavButton',
-        disableButton: disableTopNav,
-        run: () => showShare(),
+        disableButton: shareAction?.isDisabled ?? disableTopNav,
+        run: (params) => {
+          const triggerElement = params?.triggerElement;
+          if (!triggerElement || !shareAction) {
+            return;
+          }
+          void shareAction.onClick({
+            triggerElement,
+            returnFocus: params.returnFocus ?? (() => triggerElement.focus()),
+          });
+        },
       } as AppMenuItemType,
 
       export: exportMenuItem,
@@ -430,7 +403,7 @@ export const useDashboardMenuItems = ({
     isSaveInProgress,
     lastSavedId,
     dashboardInteractiveSave,
-    showShare,
+    shareAction,
     dashboardApi,
     setIsLabsShown,
     isLabsShown,
@@ -439,7 +412,6 @@ export const useDashboardMenuItems = ({
     isResetting,
     isEditButtonDisabled,
     getEditTooltip,
-    getShareTooltip,
     appId,
     isQuickSaveButtonDisabled,
     hasUnsavedChanges,
@@ -463,12 +435,14 @@ export const useDashboardMenuItems = ({
       items.push(menuItems.duplicate);
     }
 
-    if (shareService) {
+    if (shareAction && includeShareInMenu) {
       items.push(menuItems.share);
       if (hasExportMenuItems) {
         // only render the export button if we have integrations
         items.push(menuItems.export);
       }
+    } else if (shareService && hasExportMenuItems) {
+      items.push(menuItems.export);
     }
 
     if (showResetChange) {
@@ -505,6 +479,8 @@ export const useDashboardMenuItems = ({
     showResetChange,
     isLabsEnabled,
     hasExportMenuItems,
+    includeShareInMenu,
+    shareAction,
   ]);
 
   const editModeTopNavConfig = useMemo(() => {
@@ -516,12 +492,14 @@ export const useDashboardMenuItems = ({
       menuItems.settings,
     ];
 
-    if (shareService) {
+    if (shareAction && includeShareInMenu) {
       items.push(menuItems.share);
       if (hasExportMenuItems) {
         // only render the export button if we have integrations
         items.push(menuItems.export);
       }
+    } else if (shareService && hasExportMenuItems) {
+      items.push(menuItems.export);
     }
 
     if (storeSearchSession && dataService.search.isBackgroundSearchEnabled) {
@@ -549,6 +527,8 @@ export const useDashboardMenuItems = ({
     menuItems.add,
     hasExportMenuItems,
     isLabsEnabled,
+    includeShareInMenu,
+    shareAction,
   ]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

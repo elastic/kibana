@@ -236,6 +236,24 @@ export interface AppHeaderFavoriteAction {
 }
 
 /**
+ * Share action for the app-header title-actions area and overflow menu.
+ * Apps own behavior; App Header owns presentation and placement.
+ *
+ * @public
+ */
+export interface AppHeaderShareAction {
+  onClick: (context: {
+    triggerElement: HTMLElement;
+    returnFocus: () => void;
+  }) => void | Promise<void>;
+  isDisabled?: boolean;
+  tooltip?: {
+    content: string;
+    title?: string;
+  };
+}
+
+/**
  * Plain-text page description. Use the object form to add a URL rendered with a fixed
  * "Learn more" label.
  *
@@ -255,6 +273,7 @@ interface AppHeaderConfigBase {
   badges?: AppHeaderBadge[];
   menu?: AppMenuConfig;
   favorite?: AppHeaderFavoriteAction;
+  share?: AppHeaderShareAction;
   spacing?: AppHeaderSpacing;
 }
 

@@ -13,6 +13,7 @@ import { APP_MENU_SHARE_ID, getTooltip, isDisabled } from '@kbn/core-chrome-app-
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';
+import type { AppHeaderShareAction } from '../../types';
 
 import { useBasePath, useCanAccessIntegrations } from './chrome';
 import { APP_HEADER_TEST_SUBJECTS } from '../test_subjects';
@@ -98,24 +99,23 @@ export const useAppHeaderStaticItems = ({
   ]);
 };
 
-export interface ShareAction {
-  onClick: (triggerElement: HTMLElement) => void;
-  tooltipContent?: string;
-  tooltipTitle?: string;
-  testId?: string;
-  isDisabled?: boolean;
-}
+const SHARE_DEFAULT_TOOLTIP = i18n.translate('core.ui.chrome.appHeader.shareAriaLabel', {
+  defaultMessage: 'Share',
+});
 
-export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAction | undefined {
-  // Temporary bridge: share is still modeled as a legacy app-menu item. The item stays in the
-  // menu (owned by the app); here we only read it to render the title-row share button.
-  // Replace this with a typed app-header action once share requirements are clear.
-  // https://github.com/elastic/kibana/issues/271401
+/**
+ * Temporary bridge: derive Share from a legacy app-menu item with `id: 'share'`.
+ * Prefer the typed `AppHeaderConfig.share` action. Remove once apps are migrated.
+ * https://github.com/elastic/kibana/issues/271401
+ */
+export function useShareActionFromMenu(
+  pageAppMenu: AppMenuConfig | undefined
+): AppHeaderShareAction | undefined {
   const shareItem = pageAppMenu?.items?.find((item) => item.id === APP_MENU_SHARE_ID);
 
   return useMemo(() => {
     if (!shareItem) return undefined;
-    const { run, tooltipContent, tooltipTitle, testId, disableButton } = shareItem;
+    const { run, tooltipContent, tooltipTitle, disableButton } = shareItem;
     if (!run) return undefined;
 
     const { content, title } = getTooltip({
@@ -124,13 +124,23 @@ export function useShareAction(pageAppMenu: AppMenuConfig | undefined): ShareAct
     });
 
     return {
-      onClick: (triggerElement: HTMLElement) => {
-        run({ triggerElement, returnFocus: () => triggerElement.focus() });
+      onClick: ({ triggerElement, returnFocus }) => {
+        run({ triggerElement, returnFocus });
       },
-      tooltipContent: content,
-      tooltipTitle: title,
-      testId,
+      tooltip:
+        content || title
+          ? {
+              content: content ?? SHARE_DEFAULT_TOOLTIP,
+              title,
+            }
+          : undefined,
       isDisabled: isDisabled(disableButton),
     };
   }, [shareItem]);
 }
+
+/** @deprecated Use AppHeaderShareAction from Core. Kept as alias during migration. */
+export type ShareAction = AppHeaderShareAction;
+
+/** @deprecated Use useShareActionFromMenu. */
+export const useShareAction = useShareActionFromMenu;
