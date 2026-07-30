@@ -107,7 +107,12 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     return (
       <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
         <EuiToolTip content={name} data-test-subj="fieldMarkdownRendererToolTip" position="top">
-          <EuiBadge color="hollow" data-test-subj="disabledActionsBadge" iconType={icon}>
+          <EuiBadge
+            color="hollow"
+            data-test-subj="disabledActionsBadge"
+            iconType={icon}
+            tabIndex={0}
+          >
             {value}
           </EuiBadge>
         </EuiToolTip>

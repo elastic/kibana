@@ -47,91 +47,88 @@ export function getChangePointLabel(type?: ChangePointType): string {
   return CHANGE_POINT_LABELS[type] ?? UNKNOWN_CHANGE_POINT_LABEL;
 }
 
-/**
- * Canonical framing for illustrative time windows (matches the flyout trend).
- * Sparklines may use fewer points for layout, but tooltips share this clock so
- * list + flyout timestamps stay aligned.
- */
-export const ILLUSTRATIVE_SERIES_POINTS = 28;
-export const ILLUSTRATIVE_POINT_INTERVAL_MS = 300_000;
-
-/**
- * Index in an illustrative series where the change-point shape flips. Used to
- * place the detection annotation; with real occurrence data this becomes the
- * API's change-point bucket (#277558).
- */
-export function getChangePointIndex(
-  changePointType: ChangePointType | undefined,
-  points: number
-): number {
-  switch (changePointType) {
-    case 'spike':
-    case 'dip':
-      return points - Math.ceil(points / 5);
-    case 'trend_change':
-    case 'step_change':
-      return Math.floor(points / 2);
-    default:
-      // Flat / unknown shapes: mark the end of the window (detection time).
-      return Math.max(points - 1, 0);
-  }
+export interface OccurrencePoint {
+  x: number;
+  y: number;
 }
 
-/**
- * Timestamp of the illustrative change knee when the series window ends at
- * `endTime` (detection time). Shared by list + flyout tooltips.
- */
-export function getChangePointTimestamp(
-  endTime: string | number,
-  changePointType: ChangePointType | undefined,
-  points: number = ILLUSTRATIVE_SERIES_POINTS,
-  intervalMs: number = ILLUSTRATIVE_POINT_INTERVAL_MS
-): number {
-  const end = typeof endTime === 'number' ? endTime : new Date(endTime).getTime();
-  const changeIndex = getChangePointIndex(changePointType, points);
-  return end - (points - 1 - changeIndex) * intervalMs;
+export interface DetectionOccurrenceTimeRange {
+  from: number;
+  to: number;
 }
 
-/**
- * Illustrative series shaped by the change-point type. Real occurrence
- * timeseries need the `_query_occurrences` API (tracked in #277558).
- */
-export function generateChangePointSeries(
-  changePointType: ChangePointType | undefined,
-  points: number
-): Array<{ x: number; y: number }> {
-  const data: Array<{ x: number; y: number }> = [];
-  const rand = () => Math.random() * 0.3;
-  const changeAt = getChangePointIndex(changePointType, points);
+export const DETECTION_OCCURRENCE_LOOKBACK_MS = 60 * 60 * 1000;
+export const DETECTION_OCCURRENCE_FOLLOWUP_MS = 15 * 60 * 1000;
+export const DETECTION_OCCURRENCE_BUCKET_SIZE = '5m';
+/** Matches server METRIC_SERIES_MAX_WRITE_DELAY so live charts omit unreadable trailing buckets. */
+export const DETECTION_OCCURRENCE_WRITE_HORIZON_MS = 7 * 60 * 1000;
 
-  for (let i = 0; i < points; i++) {
-    let y: number;
-    switch (changePointType) {
-      case 'spike':
-        y = i >= changeAt ? 0.7 + rand() : 0.2 + rand();
-        break;
-      case 'dip':
-        y = i >= changeAt ? 0.1 + rand() : 0.6 + rand();
-        break;
-      case 'trend_change':
-        y = i < changeAt ? 0.4 + rand() : 0.4 + ((i - changeAt) * 0.8) / points + rand();
-        break;
-      case 'step_change':
-        y = i < changeAt ? 0.25 + rand() : 0.65 + rand();
-        break;
-      case 'distribution_change':
-        y = i < changeAt ? 0.25 + rand() * 0.35 : 0.35 + rand() * 0.55;
-        break;
-      case 'non_stationary':
-        y = 0.2 + (i / Math.max(points - 1, 1)) * 0.45 + rand() * 0.2;
-        break;
-      case 'stationary':
-        y = 0.45 + rand() * 0.08;
-        break;
-      default:
-        y = 0.3 + rand();
-    }
-    data.push({ x: i, y });
+const OCCURRENCE_BUCKET_SIZE_PATTERN = /^(\d+)([smhd])$/;
+const OCCURRENCE_BUCKET_UNIT_LABELS = {
+  s: 'seconds',
+  m: 'minutes',
+  h: 'hours',
+  d: 'days',
+} as const;
+const OCCURRENCE_BUCKET_UNIT_MS = {
+  s: 1000,
+  m: 60 * 1000,
+  h: 60 * 60 * 1000,
+  d: 24 * 60 * 60 * 1000,
+} as const;
+
+export function parseOccurrenceBucketSize(bucketSize: string): {
+  value: number;
+  unit: keyof typeof OCCURRENCE_BUCKET_UNIT_LABELS;
+  unitLabel: (typeof OCCURRENCE_BUCKET_UNIT_LABELS)[keyof typeof OCCURRENCE_BUCKET_UNIT_LABELS];
+} {
+  const match = bucketSize.match(OCCURRENCE_BUCKET_SIZE_PATTERN);
+  if (!match) {
+    return { value: 5, unit: 'm', unitLabel: 'minutes' };
   }
-  return data;
+  const value = Number.parseInt(match[1], 10);
+  const unit = match[2] as keyof typeof OCCURRENCE_BUCKET_UNIT_LABELS;
+  if (value < 1 || !(unit in OCCURRENCE_BUCKET_UNIT_LABELS)) {
+    return { value: 5, unit: 'm', unitLabel: 'minutes' };
+  }
+  return { value, unit, unitLabel: OCCURRENCE_BUCKET_UNIT_LABELS[unit] };
+}
+
+export function getOccurrenceBucketIntervalMs(
+  bucketSize: string = DETECTION_OCCURRENCE_BUCKET_SIZE
+): number {
+  const { value, unit } = parseOccurrenceBucketSize(bucketSize);
+  return value * OCCURRENCE_BUCKET_UNIT_MS[unit];
+}
+
+export function getDetectionOccurrenceTimeRange(
+  timestamp: string | number
+): DetectionOccurrenceTimeRange | undefined {
+  const detectionTime = typeof timestamp === 'number' ? timestamp : new Date(timestamp).getTime();
+  if (!Number.isFinite(detectionTime)) {
+    return undefined;
+  }
+
+  const from = detectionTime - DETECTION_OCCURRENCE_LOOKBACK_MS;
+  const requestedTo = detectionTime + DETECTION_OCCURRENCE_FOLLOWUP_MS;
+  const writeHorizon = Date.now() - DETECTION_OCCURRENCE_WRITE_HORIZON_MS;
+  const to = Math.min(requestedTo, writeHorizon);
+
+  if (to < from) {
+    return undefined;
+  }
+
+  return { from, to };
+}
+
+export function filterOccurrencesForDetection(
+  occurrences: readonly OccurrencePoint[],
+  timestamp: string | number
+): OccurrencePoint[] {
+  const range = getDetectionOccurrenceTimeRange(timestamp);
+  if (!range) {
+    return [];
+  }
+
+  return occurrences.filter(({ x }) => x >= range.from && x <= range.to);
 }
