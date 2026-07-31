@@ -378,21 +378,20 @@ export class TaskStore {
           uiamApiKey: savedObject.attributes.uiamApiKey,
         });
         const decryptionErrorMessage = savedObject.error?.message;
-        if (decryptionErrorMessage && decryptionErrorMessage.includes('"uiamApiKey"')) {
+        if (
+          decryptionErrorMessage &&
+          decryptionErrorMessage.includes('"uiamApiKey"') &&
           // Only heal when the raw stored value is positively identified as plaintext from the
           // pre-encryption-fix provisioning bug. Any other decrypt failure (e.g. valid ciphertext
-          // whose encryption key was lost through misconfigured rotation) must stay loud and
-          // untouched, since the data may be recoverable by fixing the key configuration.
-          if (containsPlaintextUiamApiKey(rawUiamApiKeysByTaskId?.get(savedObject.id))) {
-            undecryptableUiamKeyTaskIds.push({
-              id: savedObject.id,
-              errorMessage: decryptionErrorMessage,
-            });
-          } else {
-            this.logger.error(
-              `Failed to decrypt uiamApiKey of task "${savedObject.id}" and its stored value is not recognizable as plaintext, so it will not be cleaned up automatically — it may be valid ciphertext for a lost encryption key (e.g. misconfigured key rotation). Error: ${decryptionErrorMessage}`
-            );
-          }
+          // whose encryption key was lost through misconfigured rotation) is left untouched —
+          // the data may be recoverable by fixing the key configuration, and the ESO service
+          // already logs the decryption failure itself.
+          containsPlaintextUiamApiKey(rawUiamApiKeysByTaskId?.get(savedObject.id))
+        ) {
+          undecryptableUiamKeyTaskIds.push({
+            id: savedObject.id,
+            errorMessage: decryptionErrorMessage,
+          });
         }
       });
     }

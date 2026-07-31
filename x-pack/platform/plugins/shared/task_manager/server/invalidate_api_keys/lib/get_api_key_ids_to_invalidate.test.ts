@@ -774,9 +774,7 @@ describe('undecryptable saved objects', () => {
       apiKeyIdsToExclude: [{ id: '1', apiKeyId: '' }],
     });
     expect(logger.error).toHaveBeenCalledWith(
-      expect.stringContaining(
-        'Failed to decrypt "api_key_pending_invalidation" saved object "1" and its stored attributes are not recognizable as plaintext'
-      )
+      `Failed to decrypt "api_key_pending_invalidation" saved object "1": ${decryptError.message}`
     );
   });
 });

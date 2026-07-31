@@ -95,56 +95,61 @@ export async function getApiKeyIdsToInvalidate({
   const undrainableSOIds: string[] = [];
 
   if (encryptedSavedObjectsClient) {
-    // Decrypt the apiKeyId for each pending invalidation SO
-    await Promise.all(
-      apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) => {
-        let decryptedApiKeyPendingInvalidationObject;
-        try {
-          decryptedApiKeyPendingInvalidationObject =
-            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
-              savedObjectType,
-              apiKeyPendingInvalidationSO.id
-            );
-        } catch (error) {
-          // A decrypt failure never fails the whole batch (that would block draining of healthy
-          // SOs too), but the SO is only routed to deletion when the raw stored values are
-          // positively identified as plaintext from the pre-encryption-fix provisioning bug —
-          // in that case they are the real key id/key and the key can still be invalidated
-          // before the SO is deleted. Any other decrypt failure (e.g. valid ciphertext whose
-          // encryption key was lost through misconfigured rotation) is left in place and kept
-          // loud, since the data may be recoverable by fixing the key configuration.
-          const { uiamApiKey, apiKeyId } = apiKeyPendingInvalidationSO.attributes;
-          if (hasVerifiedPlaintextKeyMaterial({ apiKeyId, uiamApiKey })) {
-            undecryptableApiKeys.push({
-              id: apiKeyPendingInvalidationSO.id,
-              apiKeyId,
-              uiamApiKey,
-              error,
-            });
-          } else {
-            logger?.error(
-              `Failed to decrypt "${savedObjectType}" saved object "${apiKeyPendingInvalidationSO.id}" and its stored attributes are not recognizable as plaintext, so it will not be cleaned up automatically — the attributes may be valid ciphertext for a lost encryption key (e.g. misconfigured key rotation). Error: ${error.message}`
-            );
-            undrainableSOIds.push(apiKeyPendingInvalidationSO.id);
-          }
-          return;
-        }
+    // Decrypt the apiKeyId for each pending invalidation SO. allSettled so a single decrypt
+    // failure does not block draining of the healthy SOs in the batch.
+    const decryptResults = await Promise.allSettled(
+      // async wrapper so a synchronous throw from the client also settles as a rejection
+      apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) =>
+        encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
+          savedObjectType,
+          apiKeyPendingInvalidationSO.id
+        )
+      )
+    );
 
-        const { uiamApiKey, apiKeyId } = decryptedApiKeyPendingInvalidationObject.attributes;
-        if (uiamApiKey) {
-          uiamApiKeys.push({
-            id: decryptedApiKeyPendingInvalidationObject.id,
+    decryptResults.forEach((decryptResult, index) => {
+      const apiKeyPendingInvalidationSO = apiKeySOsPendingInvalidation.saved_objects[index];
+
+      if (decryptResult.status === 'rejected') {
+        // The SO is only routed to deletion when the raw stored values are positively identified
+        // as plaintext from the pre-encryption-fix provisioning bug — in that case they are the
+        // real key id/key and the key can still be invalidated before the SO is deleted. Any
+        // other decrypt failure (e.g. valid ciphertext whose encryption key was lost through
+        // misconfigured rotation) is left in place, since the data may be recoverable by fixing
+        // the key configuration.
+        const { uiamApiKey, apiKeyId } = apiKeyPendingInvalidationSO.attributes;
+        if (hasVerifiedPlaintextKeyMaterial({ apiKeyId, uiamApiKey })) {
+          undecryptableApiKeys.push({
+            id: apiKeyPendingInvalidationSO.id,
             apiKeyId,
             uiamApiKey,
+            error: decryptResult.reason,
           });
         } else {
-          apiKeyIds.push({
-            id: decryptedApiKeyPendingInvalidationObject.id,
-            apiKeyId,
-          });
+          logger?.error(
+            `Failed to decrypt "${savedObjectType}" saved object "${
+              apiKeyPendingInvalidationSO.id
+            }": ${decryptResult.reason?.message ?? decryptResult.reason}`
+          );
+          undrainableSOIds.push(apiKeyPendingInvalidationSO.id);
         }
-      })
-    );
+        return;
+      }
+
+      const { uiamApiKey, apiKeyId } = decryptResult.value.attributes;
+      if (uiamApiKey) {
+        uiamApiKeys.push({
+          id: decryptResult.value.id,
+          apiKeyId,
+          uiamApiKey,
+        });
+      } else {
+        apiKeyIds.push({
+          id: decryptResult.value.id,
+          apiKeyId,
+        });
+      }
+    });
   } else {
     // No decryption needed, return the apiKeyId as-is
     apiKeySOsPendingInvalidation.saved_objects.forEach((apiKeyPendingInvalidationSO) => {

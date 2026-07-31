@@ -1285,12 +1285,8 @@ describe('TaskStore', () => {
 
       await healStore.msearch([{}]);
 
+      // left untouched — the ESO service already logs the decryption failure itself
       expect(mockEsClient.update).not.toHaveBeenCalled();
-      expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'Failed to decrypt uiamApiKey of task "task1" and its stored value is not recognizable as plaintext'
-        )
-      );
     });
 
     test('does not strip anything when the decryption error is not about uiamApiKey', async () => {
