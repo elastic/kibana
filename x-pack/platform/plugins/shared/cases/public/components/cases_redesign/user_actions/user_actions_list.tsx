@@ -6,7 +6,14 @@
  */
 
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
-import { EuiCommentList, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCommentList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import React, { useMemo } from 'react';
@@ -20,6 +27,7 @@ import type { UseUserActionsHandler } from '../../user_actions/use_user_actions_
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { CommentRenderingProvider } from '../../user_actions/comment/comment_rendering_context';
 import { useHighlightLinkedComment } from './hooks/use_highlight_linked_comment';
+import * as i18n from './translations';
 
 const getCommentListCss = (euiTheme: EuiThemeComputed<{}>) => css`
   & .userAction__comment.outlined .euiCommentEvent {
@@ -82,6 +90,9 @@ export const UserActionsList = React.memo(
   }: UserActionListProps) => {
     const { owner } = useCasesContext();
     const { euiTheme } = useEuiTheme();
+    const [collapsedCommentIds, setCollapsedCommentIds] = React.useState<Set<string>>(
+      () => new Set()
+    );
 
     const {
       loadingCommentIds,
@@ -94,6 +105,60 @@ export const UserActionsList = React.memo(
     } = actionsHandler;
 
     useHighlightLinkedComment(handleOutlineComment);
+
+    const toggleComment = React.useCallback((commentId: string) => {
+      setCollapsedCommentIds((currentCollapsedCommentIds) => {
+        const nextCollapsedCommentIds = new Set(currentCollapsedCommentIds);
+        if (nextCollapsedCommentIds.has(commentId)) {
+          nextCollapsedCommentIds.delete(commentId);
+        } else {
+          nextCollapsedCommentIds.add(commentId);
+        }
+        return nextCollapsedCommentIds;
+      });
+    }, []);
+
+    const collapsibleComments = useMemo(
+      () =>
+        comments.map((comment, index) => {
+          const commentId =
+            typeof comment['data-test-subj'] === 'string'
+              ? comment['data-test-subj']
+              : `activity-${index}`;
+          const isCollapsible =
+            comment.children != null &&
+            comment.className !== 'isEdit' &&
+            comment.className !== 'showMoreActivities';
+
+          if (!isCollapsible) {
+            return comment;
+          }
+
+          const isCollapsed = collapsedCommentIds.has(commentId);
+          const toggleLabel = isCollapsed ? i18n.EXPAND_ACTIVITY : i18n.COLLAPSE_ACTIVITY;
+
+          return {
+            ...comment,
+            actions: (
+              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      aria-label={toggleLabel}
+                      iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                      onClick={() => toggleComment(commentId)}
+                      data-test-subj={`case-user-action-collapse-${index}`}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                {comment.actions ? <EuiFlexItem grow={false}>{comment.actions}</EuiFlexItem> : null}
+              </EuiFlexGroup>
+            ),
+            children: isCollapsed ? null : comment.children,
+          };
+        }),
+      [comments, collapsedCommentIds, toggleComment]
+    );
 
     const commentRenderingContext = useMemo(
       () => ({
@@ -130,7 +195,7 @@ export const UserActionsList = React.memo(
       <CommentRenderingProvider value={commentRenderingContext}>
         <EuiCommentList
           css={getCommentListCss(euiTheme)}
-          comments={comments}
+          comments={collapsibleComments}
           data-test-subj="user-actions-list"
         />
       </CommentRenderingProvider>

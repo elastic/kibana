@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { basicCase } from '../../../containers/mock';
 import { UserActionsList } from './user_actions_list';
@@ -61,6 +62,32 @@ describe('UserActionsList', () => {
     ];
 
     renderWithTestingProviders(<UserActionsList {...defaultProps} comments={comments} />);
+
+    expect(await screen.findByTestId('test-comment')).toBeInTheDocument();
+  });
+
+  it('collapses and expands activity comments without affecting the comment editor', async () => {
+    const comments = [
+      {
+        username: 'elastic',
+        children: <div data-test-subj="test-comment">{'Test comment'}</div>,
+      },
+      {
+        username: 'elastic',
+        className: 'isEdit',
+        children: <div data-test-subj="comment-editor">{'Comment editor'}</div>,
+      },
+    ];
+
+    renderWithTestingProviders(<UserActionsList {...defaultProps} comments={comments} />);
+
+    await userEvent.click(await screen.findByTestId('case-user-action-collapse-0'));
+
+    expect(screen.queryByTestId('test-comment')).not.toBeInTheDocument();
+    expect(screen.getByTestId('comment-editor')).toBeInTheDocument();
+    expect(screen.queryByTestId('case-user-action-collapse-1')).not.toBeInTheDocument();
+
+    await userEvent.click(await screen.findByTestId('case-user-action-collapse-0'));
 
     expect(await screen.findByTestId('test-comment')).toBeInTheDocument();
   });

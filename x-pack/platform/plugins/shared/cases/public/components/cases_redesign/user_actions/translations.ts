@@ -31,3 +31,13 @@ export const NO_SEARCH_RESULTS_BODY = i18n.translate(
     defaultMessage: 'Try modifying your search or filters.',
   }
 );
+
+export const COLLAPSE_ACTIVITY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.collapseActivity',
+  { defaultMessage: 'Collapse activity' }
+);
+
+export const EXPAND_ACTIVITY = i18n.translate(
+  'xpack.cases.caseView.redesign.userActions.expandActivity',
+  { defaultMessage: 'Expand activity' }
+);
