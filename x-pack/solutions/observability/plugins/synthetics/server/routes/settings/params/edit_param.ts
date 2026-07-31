@@ -16,6 +16,7 @@ import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../commo
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
+import { buildVaultReference } from '../../../synthetics_service/formatters/vault_param_formatter';
 
 const RequestParamsSchema = schema.object({
   id: schema.string(),
@@ -44,6 +45,13 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
             minLength: 1,
           })
         ),
+        source: schema.maybe(
+          schema.object({
+            type: schema.literal('vault'),
+            path: schema.string({ minLength: 1 }),
+            field: schema.string({ minLength: 1 }),
+          })
+        ),
         description: schema.maybe(schema.string()),
         tags: schema.maybe(schema.arrayOf(schema.string())),
       }),
@@ -69,16 +77,26 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           { namespace: spaceId }
         );
 
-      const newParam = {
+      const newParam: SyntheticsParams = {
         ...existingParam.attributes,
         ...data,
       };
 
-      // value from data since we aren't using encrypted client
-      const { value, key: existingKey } = existingParam.attributes;
+      // For a vault-backed edit, derive the effective value from the source and
+      // persist the structured source. When switching (back) to a literal value,
+      // drop any previously-stored vault source.
+      if (data.source) {
+        newParam.value = buildVaultReference(data.source.path, data.source.field);
+        newParam.source = data.source;
+      } else if (data.value) {
+        newParam.value = data.value;
+        delete newParam.source;
+      }
+
+      const { key: existingKey } = existingParam.attributes;
       const {
         id: responseId,
-        attributes: { key, tags, description },
+        attributes: { key, tags, description, value, source },
         namespaces,
       } = (await savedObjectsClient.update<SyntheticsParams>(
         syntheticsParamType,
@@ -95,7 +113,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         modifiedParamKeys,
       });
 
-      return { id: responseId, key, tags, description, namespaces, value };
+      return { id: responseId, key, tags, description, namespaces, value, source };
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return response.notFound({ body: { message: 'Param not found' } });

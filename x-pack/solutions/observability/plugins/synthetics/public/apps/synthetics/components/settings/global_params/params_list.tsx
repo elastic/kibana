@@ -64,7 +64,14 @@ export const ParamsList = () => {
       name: i18n.translate('xpack.synthetics.settingsRoute.params.value', {
         defaultMessage: 'Value',
       }),
-      render: (item: ListParamItem) => <ParamsText text={item.value ?? ''} />,
+      render: (item: ListParamItem) =>
+        item.source?.type === 'vault' ? (
+          <EuiBadge color="hollow" iconType="lock" data-test-subj="syntheticsParamVaultBadge">
+            {`vault: ${item.source.path}#${item.source.field}`}
+          </EuiBadge>
+        ) : (
+          <ParamsText text={item.value ?? ''} />
+        ),
     },
     {
       name: i18n.translate('xpack.synthetics.settingsRoute.params.description', {

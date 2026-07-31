@@ -36,6 +36,16 @@
 export const VAULT_REF_REGEX = /\$\{vault\/[^#{}]+#[^{}]+\}/g;
 
 /**
+ * Builds the edge-resolved reference token stored as a vault-backed param's
+ * value, e.g. buildVaultReference('myapp/creds', 'password') ->
+ * '${vault/myapp/creds#password}'. Heartbeat expands this token at runtime.
+ */
+export const buildVaultReference = (path: string, field: string): string => {
+  const cleanPath = path.replace(/^\/+|\/+$/g, '');
+  return '${vault/' + cleanPath + '#' + field + '}';
+};
+
+/**
  * Returns true if the given string contains at least one Vault reference.
  */
 export const hasVaultReference = (strVal: string): boolean => {

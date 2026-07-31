@@ -5,18 +5,35 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiCode,
+  EuiFieldText,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTextArea,
+} from '@elastic/eui';
 import React from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { OptionalText } from '../components/optional_text';
 import type { ListParamItem } from './params_list';
-import type { SyntheticsParams } from '../../../../../../common/runtime_types';
+import type { ParamFormData, ParamValueSourceType } from './add_param_form';
 import { VALUE_LABEL, VALUE_REQUIRED } from './add_param_form';
 
-export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamItem | null }) => {
-  const { register } = useFormContext<SyntheticsParams>();
-  const { errors } = useFormState<SyntheticsParams>();
+export const ParamValueField = ({
+  isEditingItem,
+  sourceType,
+}: {
+  isEditingItem: ListParamItem | null;
+  sourceType: ParamValueSourceType;
+}) => {
+  const { register } = useFormContext<ParamFormData>();
+  const { errors } = useFormState<ParamFormData>();
+
+  if (sourceType === 'vault') {
+    return <VaultSourceFields />;
+  }
 
   if (isEditingItem) {
     return (
@@ -73,9 +90,91 @@ export const ParamValueField = ({ isEditingItem }: { isEditingItem: ListParamIte
   );
 };
 
+const VaultSourceFields = () => {
+  const { register } = useFormContext<ParamFormData>();
+  const { errors } = useFormState<ParamFormData>();
+
+  return (
+    <>
+      <EuiFormRow
+        fullWidth
+        label={VAULT_PATH_LABEL}
+        helpText={VAULT_PATH_HELP}
+        isInvalid={Boolean(errors?.source?.path)}
+        error={errors?.source?.path?.message}
+      >
+        <EuiFieldText
+          isInvalid={Boolean(errors?.source?.path)}
+          data-test-subj="syntheticsParamVaultPath"
+          fullWidth
+          placeholder="myapp/creds"
+          aria-label={VAULT_PATH_LABEL}
+          {...register('source.path', {
+            required: { value: true, message: VAULT_PATH_REQUIRED },
+          })}
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        fullWidth
+        label={VAULT_FIELD_LABEL}
+        helpText={VAULT_FIELD_HELP}
+        isInvalid={Boolean(errors?.source?.field)}
+        error={errors?.source?.field?.message}
+      >
+        <EuiFieldText
+          isInvalid={Boolean(errors?.source?.field)}
+          data-test-subj="syntheticsParamVaultField"
+          fullWidth
+          placeholder="password"
+          aria-label={VAULT_FIELD_LABEL}
+          {...register('source.field', {
+            required: { value: true, message: VAULT_FIELD_REQUIRED },
+          })}
+        />
+      </EuiFormRow>
+      <EuiSpacer size="xs" />
+      <EuiCallOut
+        announceOnMount
+        size="s"
+        iconType="lock"
+        title={i18n.translate('xpack.synthetics.paramValueField.vaultCallout', {
+          defaultMessage:
+            'The secret is resolved at runtime by the agent (Heartbeat) from HashiCorp Vault. Kibana stores only this reference and never the plaintext secret.',
+        })}
+      >
+        <EuiCode>{'${vault/<path>#<field>}'}</EuiCode>
+      </EuiCallOut>
+    </>
+  );
+};
+
 export const NEW_VALUE_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.paramForm.newValue',
   {
     defaultMessage: 'New value',
   }
 );
+
+const VAULT_PATH_LABEL = i18n.translate('xpack.synthetics.paramForm.vaultPathLabel', {
+  defaultMessage: 'Vault secret path',
+});
+
+const VAULT_PATH_HELP = i18n.translate('xpack.synthetics.paramForm.vaultPathHelp', {
+  defaultMessage: 'KV v2 secret path, e.g. myapp/creds',
+});
+
+const VAULT_FIELD_LABEL = i18n.translate('xpack.synthetics.paramForm.vaultFieldLabel', {
+  defaultMessage: 'Vault secret field',
+});
+
+const VAULT_FIELD_HELP = i18n.translate('xpack.synthetics.paramForm.vaultFieldHelp', {
+  defaultMessage: 'Key within the secret, e.g. password',
+});
+
+const VAULT_PATH_REQUIRED = i18n.translate('xpack.synthetics.paramForm.vaultPathRequired', {
+  defaultMessage: 'Vault secret path is required',
+});
+
+const VAULT_FIELD_REQUIRED = i18n.translate('xpack.synthetics.paramForm.vaultFieldRequired', {
+  defaultMessage: 'Vault secret field is required',
+});
