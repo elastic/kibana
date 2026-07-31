@@ -194,7 +194,9 @@ export function buildUpdateRuleAttributes(
     // `null` → clear (undefined). SO schema uses `maybe()` without `nullable()`.
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
-    enabled: updateData.enabled ?? existingAttrs.enabled,
+    // `enabled` is never writable via update — lifecycle transitions are owned
+    // exclusively by enableRule/disableRule, so the stored value is preserved.
+    enabled: existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,

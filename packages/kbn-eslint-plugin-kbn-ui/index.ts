@@ -8,6 +8,7 @@
  */
 
 import { PreferToastActionProps } from './rules/prefer_toast_action_props';
+import { PreferKbnUiCallout } from './rules/prefer_kbn_ui_callout';
 
 /**
  * Custom ESLint rules for kbn-ui packages.
@@ -16,4 +17,5 @@ import { PreferToastActionProps } from './rules/prefer_toast_action_props';
  */
 export const rules = {
   prefer_toast_action_props: PreferToastActionProps,
+  prefer_kbn_ui_callout: PreferKbnUiCallout,
 };

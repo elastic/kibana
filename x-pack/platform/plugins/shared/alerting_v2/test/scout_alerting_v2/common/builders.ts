@@ -71,6 +71,12 @@ export const buildActionPolicyDestinations = (count: number) =>
     type: 'workflow' as const,
     id: `wf-${i}`,
   }));
+
+/**
+ * Returns an ISO timestamp `offsetMs` in the future (default: 24h).
+ */
+export const getSnoozeDate = (offsetMs: number = 86_400_000): string =>
+  new Date(Date.now() + offsetMs).toISOString();
 /**
  * Defaults used by `buildAlertEvent` so the integration specs only have to
  * spell out what makes each alert event unique.
@@ -91,4 +97,24 @@ export const buildAlertEvent = (input: BuildAlertEventInput = {}): AlertEvent =>
     space_id: 'default',
     ...input,
   };
+};
+
+/**
+ * Builds an external alert event (no `rule` field) for tests that exercise
+ * the source-based episode path (e.g. PagerDuty, Opsgenie).
+ */
+export type BuildExternalAlertEventInput = Omit<Partial<AlertEvent>, 'rule'>;
+
+export const buildExternalAlertEvent = (input: BuildExternalAlertEventInput = {}): AlertEvent => {
+  const now = new Date().toISOString();
+  return {
+    '@timestamp': now,
+    group_hash: 'external-group-hash',
+    data: {},
+    status: 'breached',
+    source: 'pagerduty',
+    type: 'alert',
+    space_id: 'default',
+    ...input,
+  } as AlertEvent;
 };

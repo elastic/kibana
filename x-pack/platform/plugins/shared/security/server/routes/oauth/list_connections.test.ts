@@ -20,16 +20,16 @@ import { routeDefinitionParamsMock } from '../index.mock';
 
 describe('List OAuth Connections route', () => {
   function getMockContext(
-    licenseCheckResult: { state: string; message?: string } = { state: 'valid' },
-    { oauthManagementEnabled = true }: { oauthManagementEnabled?: boolean } = {}
+    licenseCheckResult: { state: string; message?: string } = { state: 'valid' }
   ) {
     const coreContext = coreMock.createRequestHandlerContext();
-    (coreContext.uiSettings.client.get as jest.Mock).mockResolvedValue(oauthManagementEnabled);
     return coreMock.createCustomRequestHandlerContext({
       core: coreContext,
       licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } },
     });
   }
+
+  const PROJECT_ID = 'test-project-id';
 
   let routeHandler: RequestHandler<any, any, any, any>;
   let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
@@ -39,6 +39,7 @@ describe('List OAuth Connections route', () => {
     oauthMock = authc.oauth as jest.Mocked<UiamOAuthType>;
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.getAuthenticationService.mockReturnValue(authc);
+    mockRouteDefinitionParams.serverlessProjectId = PROJECT_ID;
 
     defineListOAuthConnectionsRoute(mockRouteDefinitionParams);
 
@@ -68,6 +69,23 @@ describe('List OAuth Connections route', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(mockResponse);
+  });
+
+  it('forwards serverless project id as project_id filter to oauth service', async () => {
+    oauthMock.listConnections.mockResolvedValue({ connections: [] });
+
+    await routeHandler(
+      getMockContext(),
+      httpServerMock.createKibanaRequest({ query: {} }),
+      kibanaResponseFactory
+    );
+
+    expect(oauthMock.listConnections).toHaveBeenCalledWith(
+      expect.anything(),
+      undefined,
+      undefined,
+      PROJECT_ID
+    );
   });
 
   it('passes through the client_name from the connection response', async () => {
@@ -290,18 +308,6 @@ describe('List OAuth Connections route', () => {
 
     expect(response.status).toBe(404);
   });
-
-  it('returns 404 when uiamOAuthClientManagement setting is disabled', async () => {
-    const response = await routeHandler(
-      getMockContext({ state: 'valid' }, { oauthManagementEnabled: false }),
-      httpServerMock.createKibanaRequest({ query: {} }),
-      kibanaResponseFactory
-    );
-
-    expect(response.status).toBe(404);
-    expect(oauthMock.listConnections).not.toHaveBeenCalled();
-  });
-
   it('returns error from service', async () => {
     oauthMock.listConnections.mockRejectedValue(Boom.internal('Server error'));
 

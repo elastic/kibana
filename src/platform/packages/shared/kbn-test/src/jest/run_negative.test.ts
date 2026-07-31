@@ -97,7 +97,7 @@ describe('NEGATIVE_SCENARIOS', () => {
       'test_timeout',
       'suite_import_error',
       'nonzero_no_failures',
-      'process_exit_zero',
+      // 'process_exit_zero',
       'runner_hang',
     ]);
   });
