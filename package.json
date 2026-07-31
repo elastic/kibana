@@ -1361,7 +1361,7 @@
     "@turf/length": "6.0.2",
     "@xstate/react": "6.0.0",
     "@xyflow/react": "12.10.2",
-    "adm-zip": "0.5.16",
+    "adm-zip": "0.5.18",
     "ai": "5.0.190",
     "ajv-formats": "3.0.1",
     "antlr4": "4.13.2",
