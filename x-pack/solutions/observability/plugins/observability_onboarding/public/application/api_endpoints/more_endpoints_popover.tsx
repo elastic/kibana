@@ -82,6 +82,7 @@ export const MoreEndpointsPopover = ({
                 css={css`
                   margin-left: ${euiTheme.size.xs};
                 `}
+                aria-hidden={true}
               />
             </EuiButtonEmpty>
           }
