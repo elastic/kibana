@@ -21,10 +21,11 @@ import {
 } from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { getEbtProps } from '@kbn/ebt-click';
 import { css } from '@emotion/react';
+import moment from 'moment';
 import { labels } from '../../../utils/i18n';
+import { resolveOwnerLabel } from '../../../utils/owner';
 import { AgentAvatar } from '../../common/agent_avatar';
 import { AgentAccessControlModeBadge } from '../list/agent_access_control_mode_badge';
 import { AgentTypeBadge, isPreconfiguredAgentType } from '../list/agent_type_badge';
@@ -32,9 +33,6 @@ import { AgentDescription } from './agent_description';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
 const { agentOverview: overviewLabels } = labels;
-
-const resolveOwnerLabel = (username?: string) =>
-  username === SYSTEM_USER_ID ? overviewLabels.createdByElastic : username;
 
 export interface AgentHeaderProps {
   agent: AgentDefinition;
@@ -61,6 +59,8 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
 
   const byAuthorLabel = resolveOwnerLabel(agent.created_by?.username);
   const lastUpdatedByLabel = resolveOwnerLabel(agent.updated_by?.username);
+  const updatedAtRelative = agent.updated_at ? moment(agent.updated_at).fromNow() : undefined;
+  const updatedAtAbsolute = agent.updated_at ? moment(agent.updated_at).format('LL LT') : undefined;
 
   return (
     <>
@@ -86,6 +86,11 @@ export const AgentHeader: React.FC<AgentHeaderProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" color="subdued">
                       {overviewLabels.lastUpdatedBy(lastUpdatedByLabel)}
+                      {updatedAtRelative && (
+                        <EuiToolTip content={updatedAtAbsolute}>
+                          <span>{` · ${updatedAtRelative}`}</span>
+                        </EuiToolTip>
+                      )}
                     </EuiText>
                   </EuiFlexItem>
                 )}

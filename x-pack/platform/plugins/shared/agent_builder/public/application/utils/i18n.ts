@@ -2630,9 +2630,6 @@ export const labels = {
         defaultMessage: 'By {author}',
         values: { author },
       }),
-    updatedByElastic: i18n.translate('xpack.agentBuilder.overview.updatedByElastic', {
-      defaultMessage: 'Elastic',
-    }),
     lastUpdatedBy: (author: string) =>
       i18n.translate('xpack.agentBuilder.overview.lastUpdatedBy', {
         defaultMessage: 'Last updated by {author}',

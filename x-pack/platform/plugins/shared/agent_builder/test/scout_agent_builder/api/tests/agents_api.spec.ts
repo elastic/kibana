@@ -198,6 +198,8 @@ apiTest.describe(
         name: updates.name,
         description: updates.description,
       });
+      expect(response.body.updated_by).toBeDefined();
+      expect(typeof response.body.updated_by.username).toBe('string');
     });
 
     apiTest('PUT /api/agent_builder/agents/:id updates configuration', async ({ asAdmin }) => {

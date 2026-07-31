@@ -24,11 +24,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
-import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import { countBy } from 'lodash';
+import moment from 'moment';
 import React, { useMemo } from 'react';
 import type { AgentDefinitionWithPermissions } from '../../../../../common/http_api/agents';
-import { labels } from '../../../utils/i18n';
+import { resolveOwnerLabel } from '../../../utils/owner';
 import { useDeleteAgent } from '../../../context/delete_agent_context';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -43,17 +43,33 @@ import { AgentTypeBadge, isPreconfiguredAgentType } from './agent_type_badge';
 import { AccessFlyout } from '../access/access_flyout';
 import { accessSummaryManageButton } from '../access/access_i18n';
 
-const resolveOwnerLabel = (username?: string) =>
-  username === SYSTEM_USER_ID ? labels.agentOverview.createdByElastic : username;
-
-const renderOwnerCell = (username?: string) => {
+const renderOwnerCell = (username?: string, date?: string) => {
   const label = resolveOwnerLabel(username);
-  return (
-    label ?? (
+  const relativeDate = date ? moment(date).fromNow() : undefined;
+
+  if (!label) {
+    return (
       <EuiText size="s" color="subdued">
         —
       </EuiText>
-    )
+    );
+  }
+
+  if (!relativeDate) {
+    return label;
+  }
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={moment(date).format('LL LT')}>
+          <EuiText size="xs" color="subdued">
+            {relativeDate}
+          </EuiText>
+        </EuiToolTip>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -182,8 +198,10 @@ export const AgentsList: React.FC = () => {
       width: '15%',
       field: 'created_by',
       name: columnNames.createdBy,
-      render: (createdBy: AgentDefinitionWithPermissions['created_by']) =>
-        renderOwnerCell(createdBy?.username),
+      render: (
+        createdBy: AgentDefinitionWithPermissions['created_by'],
+        agent: AgentDefinitionWithPermissions
+      ) => renderOwnerCell(createdBy?.username, agent.created_at),
       'data-test-subj': 'agentBuilderAgentsListCreatedBy',
     };
 
@@ -191,8 +209,10 @@ export const AgentsList: React.FC = () => {
       width: '15%',
       field: 'updated_by',
       name: columnNames.lastUpdatedBy,
-      render: (updatedBy: AgentDefinitionWithPermissions['updated_by']) =>
-        renderOwnerCell(updatedBy?.username),
+      render: (
+        updatedBy: AgentDefinitionWithPermissions['updated_by'],
+        agent: AgentDefinitionWithPermissions
+      ) => renderOwnerCell(updatedBy?.username, agent.updated_at),
       'data-test-subj': 'agentBuilderAgentsListLastUpdatedBy',
     };
 

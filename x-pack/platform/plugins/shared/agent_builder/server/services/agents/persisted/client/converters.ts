@@ -97,6 +97,8 @@ export const createRequestToEs = ({
       connector_ids: profile.configuration.connector_ids,
     },
     created_at: creationDate.toISOString(),
+    updated_by_id: user.id,
+    updated_by_name: user.username,
     updated_at: creationDate.toISOString(),
   };
 };

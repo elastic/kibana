@@ -14,7 +14,7 @@ import {
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentProperties } from './storage';
 import type { Document } from './converters';
-import { createRequestToEs, fromEs, updateRequestToEs } from './converters';
+import { accessControlUpdateToEs, createRequestToEs, fromEs, updateRequestToEs } from './converters';
 
 const creationDate = '2024-09-04T06:44:17.944Z';
 const updateDate = '2025-08-04T06:44:19.123Z';
@@ -291,6 +291,8 @@ describe('createRequestToEs', () => {
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'user-id',
       created_by_name: 'test-user',
+      updated_by_id: 'user-id',
+      updated_by_name: 'test-user',
       created_at: expect.any(String),
       updated_at: expect.any(String),
     });
@@ -744,5 +746,42 @@ describe('updateRequestToEs', () => {
     });
     expect(docProperties.visibility).toBeUndefined();
     expect(docProperties.acl).toBeUndefined();
+  });
+});
+
+describe('accessControlUpdateToEs', () => {
+  it('sets updated_by and updated_at on access control update', () => {
+    const aclUpdateDate = new Date('2025-10-01T00:00:00.000Z');
+    const entries = [{ type: 'user' as const, name: 'alice', role: AgentAccessControlRole.Editor }];
+
+    const currentProps: AgentProperties = {
+      id: 'id',
+      type: AgentType.chat,
+      name: 'name',
+      description: 'description',
+      space: 'space',
+      config: { instructions: 'instructions', tools: [] },
+      labels: [],
+      access_control: { access_mode: AgentAccessControlMode.Private, entries },
+      created_by_id: 'creator-id',
+      created_by_name: 'creator',
+      created_at: creationDate,
+      updated_at: creationDate,
+    };
+
+    const nextAccessControl = { access_mode: AgentAccessControlMode.Shared, entries };
+
+    const result = accessControlUpdateToEs({
+      currentProps,
+      access_control: nextAccessControl,
+      updateDate: aclUpdateDate,
+      user: testUser,
+    });
+
+    expect(result.updated_by_id).toBe(testUser.id);
+    expect(result.updated_by_name).toBe(testUser.username);
+    expect(result.updated_at).toBe(aclUpdateDate.toISOString());
+    expect(result.access_control).toEqual(nextAccessControl);
+    expect(result.created_by_id).toBe('creator-id');
   });
 });
