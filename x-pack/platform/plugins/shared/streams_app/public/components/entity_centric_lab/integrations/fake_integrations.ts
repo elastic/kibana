@@ -54,14 +54,14 @@ export interface DataStreamAsset {
 export interface AlertRuleAsset {
   readonly id: string;
   readonly name: string;
-  readonly reason: string;
+  readonly description: string;
   readonly tone: SignalTone;
 }
 
 export interface SloTemplateAsset {
   readonly id: string;
   readonly name: string;
-  readonly objective: string;
+  readonly description: string;
   readonly breaching: number;
 }
 
@@ -187,19 +187,22 @@ const KUBERNETES: FakeIntegration = {
       {
         id: 'k8s-node-notready',
         name: 'Node not ready',
-        reason: 'A node reports NotReady for more than 5 minutes.',
+        description:
+          'Fires when a node reports NotReady for more than 5 minutes, indicating the kubelet has stopped reporting healthy status and workloads on that node may be evicted or left unschedulable.',
         tone: 'danger',
       },
       {
         id: 'k8s-pod-crashloop',
         name: 'Pod crash loop',
-        reason: 'A pod restarts more than 3 times in 5 minutes.',
+        description:
+          'Fires when a pod restarts more than 3 times in 5 minutes — a strong signal of a crash loop caused by a failing container, bad configuration, or a missing dependency.',
         tone: 'danger',
       },
       {
         id: 'k8s-pod-oom',
         name: 'Container OOMKilled',
-        reason: 'A container is killed for exceeding its memory limit.',
+        description:
+          'Fires when a container is killed for exceeding its memory limit (OOMKilled), pointing to undersized memory limits or a memory leak in the workload.',
         tone: 'warning',
       },
     ],
@@ -207,19 +210,22 @@ const KUBERNETES: FakeIntegration = {
       {
         id: 'k8s-pvc-usage',
         name: 'Persistent volume almost full',
-        reason: 'A PVC exceeds 90% of its requested capacity.',
+        description:
+          'Fires when a PersistentVolumeClaim exceeds 90% of its requested capacity, giving you time to expand storage before writes begin to fail.',
         tone: 'warning',
       },
       {
         id: 'k8s-deployment-unavailable',
         name: 'Deployment replicas unavailable',
-        reason: 'A deployment has fewer available replicas than desired.',
+        description:
+          'Fires when a Deployment has fewer available replicas than desired, surfacing degraded rollouts or scheduling failures before they eat into capacity.',
         tone: 'warning',
       },
       {
         id: 'k8s-hpa-maxed',
         name: 'HorizontalPodAutoscaler at max',
-        reason: 'An HPA has been pinned at its max replica count.',
+        description:
+          'Fires when a HorizontalPodAutoscaler has been pinned at its maximum replica count, a sign the workload is capacity-constrained and may need a higher ceiling.',
         tone: 'subdued',
       },
     ],
@@ -229,7 +235,8 @@ const KUBERNETES: FakeIntegration = {
       {
         id: 'k8s-api-availability',
         name: 'Kubernetes API availability',
-        objective: '99.9% availability, 30d window',
+        description:
+          'Tracks the availability of the Kubernetes API server, targeting 99.9% of successful control-plane requests over a rolling 30-day window. The API server is the entry point for every cluster operation, so sustained errors here ripple into deployments, scaling, and controllers.',
         breaching: 0,
       },
     ],
@@ -237,13 +244,15 @@ const KUBERNETES: FakeIntegration = {
       {
         id: 'k8s-pod-ready-ratio',
         name: 'Pod ready ratio',
-        objective: '99% of pods ready, 7d window',
+        description:
+          'Tracks the share of pods in a Ready state, targeting 99% of pods ready over a rolling 7-day window so persistent scheduling or readiness-probe failures are caught early.',
         breaching: 0,
       },
       {
         id: 'k8s-scheduler-latency',
         name: 'Scheduler latency',
-        objective: 'p95 < 1s, 30d window',
+        description:
+          'Tracks Kubernetes scheduler end-to-end latency, targeting a p95 below 1s over a rolling 30-day window; rising scheduling latency delays pod placement and slows rollouts.',
         breaching: 0,
       },
     ],
@@ -374,13 +383,15 @@ const AWS_EC2: FakeIntegration = {
       {
         id: 'ec2-status-check',
         name: 'Instance status check failed',
-        reason: 'An instance fails its system or instance status check.',
+        description:
+          'Fires when an instance fails its system or instance status check, indicating the underlying host or the instance OS/network is unhealthy and may need recovery or replacement.',
         tone: 'danger',
       },
       {
         id: 'ec2-cpu-high',
         name: 'High CPU utilisation',
-        reason: 'CPU stays above 90% for 10 minutes.',
+        description:
+          'Fires when CPU utilisation stays above 90% for 10 minutes, a sign the instance is saturated and its workloads may be throttled or latency-bound.',
         tone: 'warning',
       },
     ],
@@ -388,13 +399,15 @@ const AWS_EC2: FakeIntegration = {
       {
         id: 'ec2-credit-low',
         name: 'CPU credit balance low',
-        reason: 'A burstable instance is about to exhaust credits.',
+        description:
+          'Fires when a burstable (T-family) instance is about to exhaust its CPU credits, which would cap it at baseline performance until credits recover.',
         tone: 'warning',
       },
       {
         id: 'ec2-ebs-latency',
         name: 'EBS high latency',
-        reason: 'Volume latency exceeds the expected threshold.',
+        description:
+          'Fires when attached EBS volume latency exceeds the expected threshold, pointing to storage-bound workloads or a need for higher provisioned IOPS.',
         tone: 'subdued',
       },
     ],
@@ -407,13 +420,15 @@ const AWS_EC2: FakeIntegration = {
       {
         id: 'ec2-fleet-availability',
         name: 'EC2 fleet availability',
-        objective: '99.5% healthy instances, 30d window',
+        description:
+          'Tracks the share of healthy instances across the fleet, targeting 99.5% healthy over a rolling 30-day window so gradual erosion in fleet health is measured against a clear error budget.',
         breaching: 1,
       },
       {
         id: 'ec2-status-slo',
         name: 'Instance status check pass rate',
-        objective: '99.9% pass rate, 7d window',
+        description:
+          'Tracks the pass rate of EC2 instance status checks, targeting 99.9% passing over a rolling 7-day window to catch hosts that intermittently fail health checks.',
         breaching: 0,
       },
     ],
@@ -511,13 +526,15 @@ const AWS_LAMBDA: FakeIntegration = {
       {
         id: 'lambda-error-rate',
         name: 'High error rate',
-        reason: 'Function error rate exceeds 2% for 5 minutes.',
+        description:
+          "Fires when a function's error rate exceeds 2% for 5 minutes, surfacing broken deployments, bad input, or failing downstream dependencies before they affect callers.",
         tone: 'danger',
       },
       {
         id: 'lambda-throttle',
         name: 'Function throttled',
-        reason: 'A function is throttled due to concurrency limits.',
+        description:
+          'Fires when a function is throttled due to reserved or account concurrency limits, meaning invocations are being rejected and may need a higher concurrency allocation.',
         tone: 'warning',
       },
     ],
@@ -525,13 +542,15 @@ const AWS_LAMBDA: FakeIntegration = {
       {
         id: 'lambda-duration-high',
         name: 'Duration approaching timeout',
-        reason: 'Function duration nears its configured timeout.',
+        description:
+          "Fires when a function's duration nears its configured timeout, giving you time to optimise or raise the timeout before invocations start failing.",
         tone: 'warning',
       },
       {
         id: 'lambda-dlq',
         name: 'Dead-letter queue growing',
-        reason: 'Failed invocations are accumulating in the DLQ.',
+        description:
+          "Fires when failed invocations accumulate in the function's dead-letter queue, indicating unprocessed events that need investigation or reprocessing.",
         tone: 'subdued',
       },
     ],
@@ -541,7 +560,8 @@ const AWS_LAMBDA: FakeIntegration = {
       {
         id: 'lambda-success-rate',
         name: 'Lambda success rate',
-        objective: '99.9% successful invocations, 30d window',
+        description:
+          'Tracks the share of successful invocations, targeting 99.9% successful over a rolling 30-day window so error-budget burn from failing invocations is easy to see.',
         breaching: 0,
       },
     ],
@@ -549,7 +569,8 @@ const AWS_LAMBDA: FakeIntegration = {
       {
         id: 'lambda-latency-slo',
         name: 'Invocation latency',
-        objective: 'p95 < 500ms, 7d window',
+        description:
+          'Tracks invocation latency, targeting a p95 below 500ms over a rolling 7-day window to catch regressions in cold-start or execution time.',
         breaching: 0,
       },
     ],
@@ -646,13 +667,15 @@ const AWS_RDS: FakeIntegration = {
       {
         id: 'rds-storage-low',
         name: 'Free storage low',
-        reason: 'Free storage space drops below 10%.',
+        description:
+          'Fires when free storage space drops below 10%, giving you time to scale storage before the database becomes read-only or writes start failing.',
         tone: 'danger',
       },
       {
         id: 'rds-cpu-high',
         name: 'High CPU utilisation',
-        reason: 'DB instance CPU stays above 90% for 10 minutes.',
+        description:
+          'Fires when DB instance CPU stays above 90% for 10 minutes, a sign of heavy query load, missing indexes, or an undersized instance class.',
         tone: 'warning',
       },
     ],
@@ -660,13 +683,15 @@ const AWS_RDS: FakeIntegration = {
       {
         id: 'rds-connections-high',
         name: 'Connections near limit',
-        reason: 'Active connections approach max_connections.',
+        description:
+          'Fires when active connections approach max_connections, so connection-pool exhaustion is caught before new clients are refused.',
         tone: 'warning',
       },
       {
         id: 'rds-replica-lag',
         name: 'Replica lag high',
-        reason: 'Read replica lag exceeds the expected threshold.',
+        description:
+          'Fires when read-replica lag exceeds the expected threshold, indicating replicas are serving stale data and may need attention before a failover.',
         tone: 'subdued',
       },
     ],
@@ -676,7 +701,8 @@ const AWS_RDS: FakeIntegration = {
       {
         id: 'rds-availability',
         name: 'RDS availability',
-        objective: '99.9% availability, 30d window',
+        description:
+          'Tracks database availability, targeting 99.9% available over a rolling 30-day window so downtime is measured against a clear error budget.',
         breaching: 0,
       },
     ],
@@ -684,7 +710,8 @@ const AWS_RDS: FakeIntegration = {
       {
         id: 'rds-latency-slo',
         name: 'Query latency',
-        objective: 'p95 < 50ms, 7d window',
+        description:
+          'Tracks query latency, targeting a p95 below 50ms over a rolling 7-day window to catch slowdowns from load or query-plan regressions.',
         breaching: 0,
       },
     ],
@@ -770,7 +797,8 @@ const AZURE: FakeIntegration = {
       {
         id: 'azure-vm-cpu',
         name: 'VM high CPU',
-        reason: 'A VM stays above 90% CPU for 10 minutes.',
+        description:
+          'Fires when a virtual machine stays above 90% CPU for 10 minutes, a sign the VM is saturated and its workloads may be throttled or latency-bound.',
         tone: 'warning',
       },
     ],
@@ -778,13 +806,15 @@ const AZURE: FakeIntegration = {
       {
         id: 'azure-vm-disk',
         name: 'VM disk almost full',
-        reason: 'An OS or data disk exceeds 90% usage.',
+        description:
+          'Fires when an OS or data disk exceeds 90% usage, giving you time to expand the disk before writes start failing.',
         tone: 'warning',
       },
       {
         id: 'azure-throttle',
         name: 'API throttling detected',
-        reason: 'Azure Monitor API requests are being throttled.',
+        description:
+          'Fires when Azure Monitor API requests are being throttled, which can create gaps in collected metrics until request volume drops.',
         tone: 'subdued',
       },
     ],
@@ -794,7 +824,8 @@ const AZURE: FakeIntegration = {
       {
         id: 'azure-vm-availability',
         name: 'VM availability',
-        objective: '99.5% healthy VMs, 30d window',
+        description:
+          'Tracks the share of healthy virtual machines, targeting 99.5% healthy VMs over a rolling 30-day window so fleet-health erosion is visible against a clear error budget.',
         breaching: 2,
       },
     ],
@@ -802,7 +833,8 @@ const AZURE: FakeIntegration = {
       {
         id: 'azure-latency-slo',
         name: 'Metric ingestion latency',
-        objective: 'p95 < 2m, 7d window',
+        description:
+          'Tracks metric ingestion latency, targeting a p95 below 2m over a rolling 7-day window to catch delays that would make dashboards and alerts lag reality.',
         breaching: 0,
       },
     ],
@@ -884,7 +916,8 @@ const SOMETHING_ELSE: FakeIntegration = {
       {
         id: 'se-generic',
         name: 'Signal above threshold',
-        reason: 'A collected metric exceeds its configured threshold.',
+        description:
+          'Fires when a collected metric exceeds its configured threshold — a generic starting point you can tailor to any signal this integration ships.',
         tone: 'warning',
       },
     ],
@@ -895,7 +928,8 @@ const SOMETHING_ELSE: FakeIntegration = {
       {
         id: 'se-availability-slo',
         name: 'Service availability',
-        objective: '99.9% availability, 30d window',
+        description:
+          'Tracks overall service availability, targeting 99.9% available over a rolling 30-day window as a general-purpose starting point you can adapt per service.',
         breaching: 0,
       },
     ],

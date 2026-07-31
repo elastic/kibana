@@ -134,10 +134,10 @@ function createNavTree({
       .filter((integration): integration is IntegrationSummary => Boolean(integration));
 
   // Nav search filter — matches integration names across both lists. Applied
-  // only to integration items; the "All integrations" overview link always
-  // stays visible so the panel never empties. The search box is gated behind the
-  // grouped-favorites toggle, so ignore any leftover query when it's off.
-  const normalizedQuery = (nestedNavEnabled ? integrationsSearchQuery : '').trim().toLowerCase();
+  // only to integration items; the "Overview" link always stays visible so the
+  // panel never empties. The search box is always shown (independent of the
+  // grouped-favorites toggle), so the query applies whenever it's non-empty.
+  const normalizedQuery = integrationsSearchQuery.trim().toLowerCase();
   const matchesQuery = (integration: IntegrationSummary): boolean =>
     normalizedQuery.length === 0 || integration.name.toLowerCase().includes(normalizedQuery);
   const filterByQuery = (integrations: IntegrationSummary[]): IntegrationSummary[] =>
@@ -232,26 +232,26 @@ function createNavTree({
           {
             id: 'entityCentricLab-starredIntegrations',
             title: i18n.translate('xpack.observability.obltNav.integrations.starred', {
-              defaultMessage: 'Starred integrations',
+              defaultMessage: 'Favorites',
             }),
             children: starredSectionChildren,
           },
         ]
       : []),
     {
+      // Intentionally title-less: the mock shows this second section unlabeled
+      // (a plain divider separates it from "Favorites"). A section node with no
+      // `title` renders no header row in the chrome side-nav mapper.
       id: 'entityCentricLab-allIntegrations',
-      title: i18n.translate('xpack.observability.obltNav.integrations.all', {
-        defaultMessage: 'Installed integrations',
-      }),
       // "Overview" spans every installed integration, so it heads this list
-      // rather than living under "Starred integrations". Starred integrations
-      // are shown only in the section above, not duplicated here.
+      // rather than living under "Favorites". Starred integrations are shown only
+      // in the section above, not duplicated here.
       children: [
         {
           id: 'entityCentricLab-integrationsOverview',
           link: 'streams:integrations' as const,
           title: i18n.translate('xpack.observability.obltNav.integrations.overview', {
-            defaultMessage: 'All integrations',
+            defaultMessage: 'Overview',
           }),
         },
         ...unstarredIntegrations.map((integration) => integrationNode(integration, 'all')),

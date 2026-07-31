@@ -74,15 +74,13 @@ const useLabModeIsSuperShortTerm = (coreStart: CoreStart): boolean => {
 const IntegrationsNavHeader = ({ coreStart }: { coreStart: CoreStart }) => {
   const { euiTheme } = useEuiTheme();
   const isSuperShortTerm = useLabModeIsSuperShortTerm(coreStart);
-  const nestedNavEnabled = useNestedNavEnabled();
   const query = useIntegrationsSearch();
 
   if (!isSuperShortTerm) return null;
 
-  // No bottom padding: the divider (and, when grouping is on, the search box)
-  // should sit close to the "Starred integrations" section below, which already
-  // brings its own top padding. Extra bottom padding here would stack on top of
-  // it and leave an oversized gap.
+  // No bottom padding: the search box should sit close to the "Favorites"
+  // section below, which already brings its own top padding. Extra bottom
+  // padding here would stack on top of it and leave an oversized gap.
   const wrapperStyles = css`
     padding: ${euiTheme.size.s} ${euiTheme.size.m} 0;
   `;
@@ -118,41 +116,25 @@ const IntegrationsNavHeader = ({ coreStart }: { coreStart: CoreStart }) => {
           data-test-subj="entityCentricLabNavInfraHosts"
         />
       </EuiListGroup>
-      {/* The search box is gated on the same "Group starred integrations" toggle
-          as the group-management affordances — it only appears once grouping is
-          enabled. When the toggle is OFF we still keep a divider between the
-          "existing experience" links and the "Starred integrations" section. */}
-      {nestedNavEnabled ? (
-        <>
-          <EuiHorizontalRule margin="s" />
-          <EuiFieldSearch
-            compressed
-            fullWidth
-            incremental
-            value={query}
-            placeholder={i18n.translate(
-              'xpack.streams.entityCentricLab.integrations.searchPlaceholder',
-              { defaultMessage: 'Search integrations' }
-            )}
-            onChange={(event) => setIntegrationsSearch(event.target.value)}
-            aria-label={i18n.translate(
-              'xpack.streams.entityCentricLab.integrations.searchAriaLabel',
-              { defaultMessage: 'Search integrations' }
-            )}
-            data-test-subj="entityCentricLabIntegrationsNavSearch"
-          />
-        </>
-      ) : (
-        // Top margin only: the gap below the rule is left to the "Starred
-        // integrations" section's own top padding, so it matches the
-        // section-to-section divider spacing (which has no margin of its own).
-        <EuiHorizontalRule
-          margin="none"
-          css={css`
-            margin-top: ${euiTheme.size.s};
-          `}
-        />
-      )}
+      {/* The search box is always shown (independent of the "Group starred
+          integrations" toggle), sitting between the "existing experience" links
+          and the "Favorites" section, matching the design. */}
+      <EuiHorizontalRule margin="s" />
+      <EuiFieldSearch
+        compressed
+        fullWidth
+        incremental
+        value={query}
+        placeholder={i18n.translate(
+          'xpack.streams.entityCentricLab.integrations.searchPlaceholder',
+          { defaultMessage: 'Search' }
+        )}
+        onChange={(event) => setIntegrationsSearch(event.target.value)}
+        aria-label={i18n.translate('xpack.streams.entityCentricLab.integrations.searchAriaLabel', {
+          defaultMessage: 'Search integrations',
+        })}
+        data-test-subj="entityCentricLabIntegrationsNavSearch"
+      />
     </div>
   );
 };
@@ -179,7 +161,7 @@ const IntegrationsNavFooter = ({ coreStart }: { coreStart: CoreStart }) => {
         compressed
         checked={nestedNavEnabled}
         label={i18n.translate('xpack.streams.entityCentricLab.integrations.nestedNavToggle', {
-          defaultMessage: 'Group starred integrations',
+          defaultMessage: 'Group favorites',
         })}
         onChange={(event) => setNestedNavEnabled(event.target.checked)}
         data-test-subj="entityCentricLabNestedNavToggle"
@@ -204,7 +186,7 @@ const StarredSectionAction = ({ coreStart }: { coreStart: CoreStart }) => {
 
   const manageGroupsLabel = i18n.translate(
     'xpack.streams.entityCentricLab.integrations.manageGroups',
-    { defaultMessage: 'Manage groups' }
+    { defaultMessage: 'Manage favorites' }
   );
 
   return (

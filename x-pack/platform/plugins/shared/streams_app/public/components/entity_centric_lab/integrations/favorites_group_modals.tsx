@@ -306,7 +306,7 @@ export const ManageGroupsModal = ({ onClose }: { onClose: () => void }) => {
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId}>
           {i18n.translate('xpack.streams.entityCentricLab.integrations.groups.manageTitle', {
-            defaultMessage: 'Manage starred groups',
+            defaultMessage: 'Manage favorites',
           })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>

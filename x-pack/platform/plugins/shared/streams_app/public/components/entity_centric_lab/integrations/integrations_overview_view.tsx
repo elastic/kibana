@@ -14,7 +14,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -93,7 +92,8 @@ export const IntegrationsOverviewView = ({ groupId }: { groupId?: string } = {})
   );
 
   const group = useMemo(
-    () => (groupId ? favoritesState.groups.find((candidate) => candidate.id === groupId) : undefined),
+    () =>
+      groupId ? favoritesState.groups.find((candidate) => candidate.id === groupId) : undefined,
     [favoritesState.groups, groupId]
   );
 
@@ -109,19 +109,7 @@ export const IntegrationsOverviewView = ({ groupId }: { groupId?: string } = {})
   const title = group
     ? group.name
     : i18n.translate('xpack.streams.entityCentricLab.integrations.overviewTitle', {
-        defaultMessage: 'All integrations',
-      });
-
-  const subtitle = group
-    ? i18n.translate('xpack.streams.entityCentricLab.integrations.groupOverviewSubtitle', {
-        defaultMessage:
-          '{count, plural, one {# integration} other {# integrations}} in this group. Open one to see everything it ships.',
-        values: { count: installedIntegrations.length },
-      })
-    : i18n.translate('xpack.streams.entityCentricLab.integrations.overviewSubtitle', {
-        defaultMessage:
-          '{count, plural, one {# installed integration} other {# installed integrations}}. Open one to see everything it ships.',
-        values: { count: installedIntegrations.length },
+        defaultMessage: 'Overview',
       });
 
   return (
@@ -138,11 +126,6 @@ export const IntegrationsOverviewView = ({ groupId }: { groupId?: string } = {})
       />
       <StreamsAppPageTemplate.Body>
         <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s" color="subdued">
-              {subtitle}
-            </EuiText>
-          </EuiFlexItem>
           {installedIntegrations.map((integration) => (
             <EuiFlexItem grow={false} key={integration.id}>
               <IntegrationSummaryCard integration={integration} onOpen={openIntegration} />

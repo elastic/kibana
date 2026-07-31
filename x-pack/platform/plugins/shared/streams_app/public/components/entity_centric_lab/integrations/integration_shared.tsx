@@ -56,33 +56,28 @@ export const getRecommendedAssetIds = (integration: FakeIntegration): string[] =
 ];
 
 /**
- * Assets that ship enabled: everything the detail page lists as already-on
- * (dashboards, data streams, anomaly detection jobs/skills) plus the enabled alert rules and
- * SLO templates. Recommended (not-yet-enabled) rules/templates are excluded.
+ * Alert rule + SLO templates that ship enabled ("used") by default. Recommended
+ * (not-yet-enabled) rules/templates are excluded.
  */
-const getBaselineEnabledAssetCount = (integration: FakeIntegration): number =>
-  integration.dashboards.length +
-  integration.dataStreams.length +
-  integration.mlAssets.length +
-  integration.alertRules.enabled.length +
-  integration.sloTemplates.enabled.length;
+const getEnabledTemplateBaseline = (integration: FakeIntegration): number =>
+  integration.alertRules.enabled.length + integration.sloTemplates.enabled.length;
 
 /**
- * Total assets = the enabled baseline plus every recommended rule/template that
- * can still be turned on. Derived from the real content so the gauge always
- * matches what the page shows.
+ * Total alert rule + SLO templates available = the used baseline plus every
+ * recommended rule/template that can still be turned on. Derived from the real
+ * content so the gauge always matches what the page shows.
  */
-export const getTotalAssetCount = (integration: FakeIntegration): number =>
-  getBaselineEnabledAssetCount(integration) + getRecommendedAssetIds(integration).length;
+export const getTotalTemplateCount = (integration: FakeIntegration): number =>
+  getEnabledTemplateBaseline(integration) + getRecommendedAssetIds(integration).length;
 
 /**
- * Live "enabled assets" count = the baseline plus any recommended assets the
+ * Live "used templates" count = the baseline plus any recommended templates the
  * user has since enabled. Re-computes when the asset store changes.
  */
-export const useEnabledAssetCount = (integration: FakeIntegration): number => {
+export const useUsedTemplateCount = (integration: FakeIntegration): number => {
   useIntegrationAssetsVersion();
   return (
-    getBaselineEnabledAssetCount(integration) +
+    getEnabledTemplateBaseline(integration) +
     countEnabledRecommended(integration.id, getRecommendedAssetIds(integration))
   );
 };
@@ -173,12 +168,12 @@ const StatTile = ({
 /**
  * The headline stat row shared by the Overview cards and the detail page:
  * Dashboards / Data streams / Alerts in alert / Breaching SLOs / Anomaly
- * detection jobs & AI skills / Recommended resources / Enabled assets (with a
- * progress bar).
+ * detection jobs & AI skills / Recommended resources / Alerts and SLO templates
+ * (with a "used/total" progress bar).
  */
 export const IntegrationStatRow = ({ integration }: { integration: FakeIntegration }) => {
-  const enabledAssets = useEnabledAssetCount(integration);
-  const totalAssets = getTotalAssetCount(integration);
+  const usedTemplates = useUsedTemplateCount(integration);
+  const totalTemplates = getTotalTemplateCount(integration);
   const { stats } = integration;
   return (
     <EuiFlexGroup gutterSize="xl" alignItems="flexStart" wrap responsive={false}>
@@ -225,21 +220,27 @@ export const IntegrationStatRow = ({ integration }: { integration: FakeIntegrati
       />
       <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
         <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.streams.entityCentricLab.integrations.stat.enabledAssets', {
-            defaultMessage: 'Enabled assets',
-          })}
+          {i18n.translate(
+            'xpack.streams.entityCentricLab.integrations.stat.alertsAndSloTemplates',
+            {
+              defaultMessage: 'Alerts and SLO templates',
+            }
+          )}
         </EuiText>
         <EuiTitle size="s">
           <span>
-            {enabledAssets}/{totalAssets}
+            {i18n.translate('xpack.streams.entityCentricLab.integrations.stat.templatesUsed', {
+              defaultMessage: '{used}/{total} used',
+              values: { used: usedTemplates, total: totalTemplates },
+            })}
           </span>
         </EuiTitle>
         <EuiSpacer size="xs" />
         <EuiProgress
-          value={enabledAssets}
-          max={totalAssets}
+          value={usedTemplates}
+          max={totalTemplates}
           size="s"
-          color={enabledAssets >= totalAssets ? 'success' : 'primary'}
+          color={usedTemplates >= totalTemplates ? 'success' : 'primary'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

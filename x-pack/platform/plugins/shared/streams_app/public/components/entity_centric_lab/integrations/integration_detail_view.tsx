@@ -189,24 +189,6 @@ const DashboardsSection = ({
         defaultMessage: 'Description',
       }),
     },
-    {
-      field: 'aiFinding',
-      name: i18n.translate('xpack.streams.entityCentricLab.integrations.dashboards.aiFinding', {
-        defaultMessage: 'AI summary of recent findings',
-      }),
-      render: (finding: string) => (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="sparkles" size="s" color="accent" />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs" color="subdued">
-              {finding}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
   ];
   return (
     <SectionPanel
@@ -214,12 +196,6 @@ const DashboardsSection = ({
         defaultMessage: 'Dashboards',
       })}
       count={integration.stats.dashboards}
-      action={{
-        label: i18n.translate('xpack.streams.entityCentricLab.integrations.dashboards.open', {
-          defaultMessage: 'Open in Dashboards',
-        }),
-        onClick: onOpenDashboards,
-      }}
       dataTestSubj="entityCentricLabIntegrationDashboards"
     >
       <EuiInMemoryTable
@@ -308,12 +284,6 @@ const DataStreamsSection = ({
         defaultMessage: 'Data streams',
       })}
       count={integration.stats.dataStreams}
-      action={{
-        label: i18n.translate('xpack.streams.entityCentricLab.integrations.dataStreams.open', {
-          defaultMessage: 'Open in Discover',
-        }),
-        onClick: onOpenDiscover,
-      }}
       dataTestSubj="entityCentricLabIntegrationDataStreams"
     >
       <EuiInMemoryTable
@@ -339,7 +309,7 @@ const EnabledAssetsEmptyState = () => (
     title={
       <h3>
         {i18n.translate('xpack.streams.entityCentricLab.integrations.enabledEmptyTitle', {
-          defaultMessage: 'Nothing enabled yet',
+          defaultMessage: 'Nothing used yet',
         })}
       </h3>
     }
@@ -347,7 +317,7 @@ const EnabledAssetsEmptyState = () => (
       <p>
         {i18n.translate('xpack.streams.entityCentricLab.integrations.enabledEmptyBody', {
           defaultMessage:
-            'Switch to the Disabled tab to review and enable what ships with this integration.',
+            'Switch to the Available tab to review and enable what ships with this integration.',
         })}
       </p>
     }
@@ -375,14 +345,14 @@ const EnabledRecommendedToggle = ({
       {
         id: `${idPrefix}-enabled`,
         label: i18n.translate('xpack.streams.entityCentricLab.integrations.tab.enabled', {
-          defaultMessage: 'Enabled ({count})',
+          defaultMessage: 'Used ({count})',
           values: { count: enabledCount },
         }),
       },
       {
         id: `${idPrefix}-recommended`,
         label: i18n.translate('xpack.streams.entityCentricLab.integrations.tab.recommended', {
-          defaultMessage: 'Disabled ({count})',
+          defaultMessage: 'Available ({count})',
           values: { count: recommendedCount },
         }),
       },
@@ -531,9 +501,9 @@ const AlertRulesSection = ({
       render: (name: string) => <EuiLink onClick={onOpenAlerts}>{name}</EuiLink>,
     },
     {
-      field: 'reason',
-      name: i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.reason', {
-        defaultMessage: 'Reason',
+      field: 'description',
+      name: i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.description', {
+        defaultMessage: 'Description',
       }),
     },
   ];
@@ -552,38 +522,13 @@ const AlertRulesSection = ({
     },
   ];
 
-  const recommendedColumns: Array<EuiBasicTableColumn<AlertRuleAsset>> = [
-    ...sharedColumns,
-    {
-      name: i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.action', {
-        defaultMessage: 'Action',
-      }),
-      width: '110px',
-      render: (rule: AlertRuleAsset) => (
-        <EuiButton
-          size="s"
-          onClick={() => enableRecommendedAsset(integration.id, rule.id)}
-          data-test-subj={`entityCentricLabEnableAsset-${rule.id}`}
-        >
-          {i18n.translate('xpack.streams.entityCentricLab.integrations.enable', {
-            defaultMessage: 'Enable',
-          })}
-        </EuiButton>
-      ),
-    },
-  ];
+  const recommendedColumns: Array<EuiBasicTableColumn<AlertRuleAsset>> = [...sharedColumns];
 
   return (
     <SectionPanel
       title={i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.title', {
         defaultMessage: 'Alert rule templates',
       })}
-      action={{
-        label: i18n.translate('xpack.streams.entityCentricLab.integrations.alerts.open', {
-          defaultMessage: 'Open in Alerts',
-        }),
-        onClick: onOpenAlerts,
-      }}
       headerControls={
         <EnabledRecommendedToggle
           tab={tab}
@@ -648,9 +593,9 @@ const SloTemplatesSection = ({
       render: (name: string) => <EuiLink onClick={onOpenSlos}>{name}</EuiLink>,
     },
     {
-      field: 'objective',
-      name: i18n.translate('xpack.streams.entityCentricLab.integrations.slos.objective', {
-        defaultMessage: 'Objective',
+      field: 'description',
+      name: i18n.translate('xpack.streams.entityCentricLab.integrations.slos.description', {
+        defaultMessage: 'Description',
       }),
     },
   ];
@@ -695,12 +640,6 @@ const SloTemplatesSection = ({
       title={i18n.translate('xpack.streams.entityCentricLab.integrations.slos.title', {
         defaultMessage: 'SLO templates',
       })}
-      action={{
-        label: i18n.translate('xpack.streams.entityCentricLab.integrations.slos.open', {
-          defaultMessage: 'Open in SLOs',
-        }),
-        onClick: onOpenSlos,
-      }}
       headerControls={
         <EnabledRecommendedToggle
           tab={tab}
@@ -727,11 +666,9 @@ const SloTemplatesSection = ({
 const MlAssetsSection = ({
   integration,
   onOpenMl,
-  onOpenAgentBuilder,
 }: {
   integration: FakeIntegration;
   onOpenMl: () => void;
-  onOpenAgentBuilder: () => void;
 }) => {
   const anomalyDetectionJobs = integration.mlAssets.filter(
     (asset) => asset.type === 'Anomaly detection job'
@@ -757,12 +694,6 @@ const MlAssetsSection = ({
         defaultMessage: 'Anomaly detection jobs',
       })}
       count={anomalyDetectionJobs.length}
-      action={{
-        label: i18n.translate('xpack.streams.entityCentricLab.integrations.ml.openAgentBuilder', {
-          defaultMessage: 'View in Agent builder',
-        }),
-        onClick: onOpenAgentBuilder,
-      }}
       dataTestSubj="entityCentricLabIntegrationMl"
     >
       <EuiInMemoryTable
@@ -803,15 +734,6 @@ const AiSkillsSection = ({
         defaultMessage: 'AI skills',
       })}
       count={aiSkills.length}
-      action={{
-        label: i18n.translate(
-          'xpack.streams.entityCentricLab.integrations.aiSkills.openAgentBuilder',
-          {
-            defaultMessage: 'View in Agent builder',
-          }
-        ),
-        onClick: onOpenAgentBuilder,
-      }}
       dataTestSubj="entityCentricLabIntegrationAiSkills"
     >
       <EuiInMemoryTable items={aiSkills} columns={columns} pagination={DEFAULT_PAGINATION} />
@@ -1022,11 +944,7 @@ export const IntegrationDetailView = () => {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <MlAssetsSection
-              integration={integration}
-              onOpenMl={() => openApp('/app/ml')}
-              onOpenAgentBuilder={() => openApp('/app/agent_builder')}
-            />
+            <MlAssetsSection integration={integration} onOpenMl={() => openApp('/app/ml')} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AiSkillsSection
