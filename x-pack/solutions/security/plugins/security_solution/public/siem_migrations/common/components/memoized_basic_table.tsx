@@ -27,9 +27,10 @@ import type { EuiBasicTableProps } from '@elastic/eui';
  * Callers must ensure the props they pass are memoized/stable, otherwise the component
  * will re-render as before.
  */
-const MemoizedBasicTableComponent = <T extends object>(props: EuiBasicTableProps<T>) => (
-  <EuiBasicTable<T> {...props} />
-);
+const MemoizedBasicTableComponent = <T extends object>({
+  tableCaption,
+  ...props
+}: EuiBasicTableProps<T>) => <EuiBasicTable<T> tableCaption={tableCaption} {...props} />;
 MemoizedBasicTableComponent.displayName = 'MemoizedBasicTable';
 
 /**
