@@ -18,6 +18,7 @@ import { createRequestToEs, fromEs, updateRequestToEs } from './converters';
 
 const creationDate = '2024-09-04T06:44:17.944Z';
 const updateDate = '2025-08-04T06:44:19.123Z';
+const testUser = { id: 'editor-id', username: 'editor-user' };
 
 describe('fromEs', () => {
   const getSampleDoc = (): Document => {
@@ -68,6 +69,8 @@ describe('fromEs', () => {
       avatar_symbol: 'star',
       access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
+      created_at: creationDate,
+      updated_at: updateDate,
     });
   });
 
@@ -100,7 +103,27 @@ describe('fromEs', () => {
       avatar_symbol: 'star',
       access_control: { access_mode: AgentAccessControlMode.Shared, entries: [] },
       created_by: { id: 'user-id-1', username: 'test-user' },
+      created_at: creationDate,
+      updated_at: updateDate,
     });
+  });
+
+  it('reads updated_by from the document', () => {
+    const document = getSampleDoc();
+    document._source!.updated_by_id = 'editor-id';
+    document._source!.updated_by_name = 'editor-user';
+
+    const definition = fromEs(document);
+
+    expect(definition.updated_by).toEqual({ id: 'editor-id', username: 'editor-user' });
+  });
+
+  it('returns undefined updated_by when updated_by fields are absent', () => {
+    const document = getSampleDoc();
+
+    const definition = fromEs(document);
+
+    expect(definition.updated_by).toBeUndefined();
   });
 
   it('handles legacy doc format without id field', () => {
@@ -420,6 +443,7 @@ describe('updateRequestToEs', () => {
       currentProps: agentProps,
       update: updateRequest,
       updateDate: newUpdateDate,
+      user: testUser,
     });
 
     // Should use config field and omit configuration
@@ -443,6 +467,8 @@ describe('updateRequestToEs', () => {
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
+      updated_by_id: testUser.id,
+      updated_by_name: testUser.username,
       created_at: creationDate,
       updated_at: newUpdateDate.toISOString(),
     });
@@ -490,6 +516,7 @@ describe('updateRequestToEs', () => {
       currentProps: agentProps,
       update: updateRequest,
       updateDate: newUpdateDate,
+      user: testUser,
     });
 
     expect(docProperties).toEqual({
@@ -512,6 +539,8 @@ describe('updateRequestToEs', () => {
       access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
       created_by_id: 'test-user-id',
       created_by_name: 'test-user',
+      updated_by_id: testUser.id,
+      updated_by_name: testUser.username,
       created_at: creationDate,
       updated_at: newUpdateDate.toISOString(),
     });
@@ -553,6 +582,7 @@ describe('updateRequestToEs', () => {
       currentProps: agentProps,
       update: updateRequest,
       updateDate: newUpdateDate,
+      user: testUser,
     });
 
     expect(docProperties.config!.skill_ids).toEqual(['new-skill-1', 'new-skill-2']);
@@ -581,6 +611,7 @@ describe('updateRequestToEs', () => {
       currentProps: agentProps,
       update: { name: 'new name', configuration: { skill_ids: ['a-skill'] } },
       updateDate: new Date(),
+      user: testUser,
     });
 
     expect(docProperties.type).toBe('investigation');
@@ -617,6 +648,7 @@ describe('updateRequestToEs', () => {
       currentProps: agentProps,
       update: updateRequest,
       updateDate: newUpdateDate,
+      user: testUser,
     });
 
     expect(docProperties.access_control).toEqual({
@@ -657,6 +689,7 @@ describe('updateRequestToEs', () => {
       currentProps: agentProps,
       update: updateRequest,
       updateDate: newUpdateDate,
+      user: testUser,
     });
 
     expect(docProperties.access_control).toEqual({
@@ -700,6 +733,7 @@ describe('updateRequestToEs', () => {
       currentProps: agentProps,
       update: updateRequest,
       updateDate: newUpdateDate,
+      user: testUser,
     });
 
     expect(docProperties.name).toBe('new name');

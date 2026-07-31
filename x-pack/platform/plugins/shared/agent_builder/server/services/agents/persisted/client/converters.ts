@@ -6,12 +6,12 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   chatAgentTypeId,
   getDefaultAgentAccessControl,
 } from '@kbn/agent-builder-common';
-import type { AgentAccessControl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
@@ -127,7 +127,7 @@ export const updateRequestToEs = ({
     ...restCurrentProps
   } = currentProps;
 
-  const updated: AgentProperties = {
+  return {
     ...restCurrentProps,
     ...restUpdate,
     id: agentId,
@@ -142,8 +142,6 @@ export const updateRequestToEs = ({
     updated_by_name: user.username,
     updated_at: updateDate.toISOString(),
   };
-
-  return updated;
 };
 
 export const accessControlUpdateToEs = ({
