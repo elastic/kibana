@@ -14,7 +14,6 @@ import {
   SIGNIFICANT_EVENTS_CODE_ANALYSIS_GROUNDING_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DETECTION_SCAN_EVENT_TYPE,
   SIGNIFICANT_EVENTS_DISCOVERY_TRIGGERED_EVENT_TYPE,
-  SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
   SIGNIFICANT_EVENTS_FEATURES_IDENTIFIED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_ONBOARDING_SCHEDULED_EVENT_TYPE,
   SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
@@ -34,16 +33,10 @@ import {
   codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
-  endpointLatencySchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
 } from './schemas';
-
-const endpointLatencyEventType = {
-  eventType: SIGNIFICANT_EVENTS_ENDPOINT_LATENCY_EVENT,
-  schema: endpointLatencySchema,
-};
 
 const knowledgeIndicatorEventsGeneratedEventType = {
   eventType: SIGNIFICANT_EVENTS_KNOWLEDGE_INDICATORS_QUERIES_GENERATED_EVENT_TYPE,
@@ -127,7 +120,6 @@ export {
   codeAnalysisGroundingEventType,
   detectionScanEventType,
   discoveryTriggeredEventType,
-  endpointLatencyEventType,
   knowledgeIndicatorEventsGeneratedEventType,
   knowledgeIndicatorFeaturesIdentifiedEventType,
   onboardingScheduledEventType,
