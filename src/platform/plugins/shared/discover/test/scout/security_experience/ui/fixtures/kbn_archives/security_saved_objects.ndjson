@@ -32,6 +32,22 @@
 
 {
     "attributes": {
+        "name": "security-discover-attacks*",
+        "timeFieldName": "@timestamp",
+        "title": "security-discover-attacks*"
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2025-01-01T00:00:00.000Z",
+    "id": "security-discover-attacks-data-view",
+    "managed": false,
+    "references": [],
+    "type": "index-pattern",
+    "typeMigrationVersion": "8.0.0",
+    "updated_at": "2025-01-01T00:00:00.000Z"
+}
+
+{
+    "attributes": {
         "name": "security-discover-iocs*",
         "timeFieldName": "@timestamp",
         "title": "security-discover-iocs*"
@@ -94,7 +110,7 @@
 
 {
     "attributes": {
-        "columns": ["kibana.alert.rule.name", "source.ip", "kibana.alert.workflow_status"],
+        "columns": ["kibana.alert.rule.name", "source.ip", "host.name", "user.name"],
         "description": "",
         "grid": {},
         "hideChart": false,

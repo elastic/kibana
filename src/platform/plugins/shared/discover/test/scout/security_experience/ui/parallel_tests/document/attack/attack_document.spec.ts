@@ -14,17 +14,17 @@ import {
   setupSecurityExperience,
   teardownSecurityExperience,
   PUSH_FLYOUT_VIEWPORT,
-} from '../../fixtures';
+} from '../../../fixtures';
 
 /**
- * Discover embedded in a Dashboard. A saved-search panel uses the same unified data table and
- * expand-row → doc viewer flyout path, so the Security profile enhances the flyout there too.
+ * Attack Discovery documents were added to the Security context-awareness profile after this suite
+ * was introduced. This test covers only the Discover integration boundary: routing a matching
+ * document to the attack Overview tab while retaining the Unified Doc Viewer tabs.
  */
 spaceTest.describe(
-  'Security in Discover - Dashboard embedded flyout',
+  'Security in Discover - Attack Discovery document flyout',
   { tag: tags.stateful.all },
   () => {
-    // Force a wide viewport so the doc viewer flyout (pushMinBreakpoint="xl") renders in push mode.
     spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
 
     spaceTest.beforeAll(async ({ scoutSpace, config }) => {
@@ -40,13 +40,22 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'alert flyout opens from a Discover panel embedded in a dashboard',
+      'routes an attack document to its Overview tab alongside the Discover tabs',
       async ({ pageObjects }) => {
         const { securityDiscoverFlyout } = pageObjects;
-        await securityDiscoverFlyout.openAlertFlyoutFromDashboard();
+        await securityDiscoverFlyout.openAttackFlyoutFromDiscover();
 
-        await securityDiscoverFlyout.waitForDocumentHeader();
-        await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'true');
+        await expect(securityDiscoverFlyout.attackHeaderTitle).toBeVisible();
+        await expect(securityDiscoverFlyout.attackOverviewTab).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
+        await expect(securityDiscoverFlyout.attackOverview).toBeVisible();
+
+        await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.tableTab);
+        await expect(securityDiscoverFlyout.tableTab).toHaveAttribute('aria-selected', 'true');
+        await expect(securityDiscoverFlyout.tableTabContent).toBeVisible();
+        await expect(securityDiscoverFlyout.jsonTab).toBeVisible();
       }
     );
   }

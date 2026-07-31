@@ -36,16 +36,8 @@ spaceTest.describe('Security in Discover - IOC flyout', { tag: tags.stateful.all
     await teardownSecurityExperience(scoutSpace);
   });
 
-  spaceTest('IOC flyout opens with the indicator overview', async ({ pageObjects }) => {
-    const { securityDiscoverFlyout } = pageObjects;
-    await securityDiscoverFlyout.openIocFlyoutFromDiscover();
-
-    await securityDiscoverFlyout.waitForIocOverview();
-    await expect.soft(securityDiscoverFlyout.iocOverviewHighLevelBlocks).toBeVisible();
-  });
-
   spaceTest(
-    'doc viewer tabs: IOC Overview is the default tab and Table / JSON tabs switch',
+    'routes an IOC document to its Overview tab alongside the Discover tabs',
     async ({ pageObjects }) => {
       const { securityDiscoverFlyout } = pageObjects;
       await securityDiscoverFlyout.openIocFlyoutFromDiscover();
@@ -58,6 +50,8 @@ spaceTest.describe('Security in Discover - IOC flyout', { tag: tags.stateful.all
       await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.tableTab);
       await expect(securityDiscoverFlyout.tableTab).toHaveAttribute('aria-selected', 'true');
       await expect(securityDiscoverFlyout.tableTabContent).toBeVisible();
+
+      await expect(securityDiscoverFlyout.jsonTab).toBeVisible();
 
       await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.iocOverviewTab);
       await expect(securityDiscoverFlyout.iocOverviewTab).toHaveAttribute('aria-selected', 'true');

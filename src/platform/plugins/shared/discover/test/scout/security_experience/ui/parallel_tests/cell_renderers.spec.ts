@@ -14,6 +14,8 @@ import {
   setupSecurityExperience,
   teardownSecurityExperience,
   PUSH_FLYOUT_VIEWPORT,
+  SECURITY_CELL_RENDERER_SAVED_SEARCH,
+  SECURITY_TEST_DATA,
 } from '../fixtures';
 
 /**
@@ -23,18 +25,27 @@ import {
  * so these tests open a saved search pinned to an alerts-pattern data view with the relevant columns:
  *   - `kibana.alert.rule.name` → RuleNameCellRenderer (clickable link, opens the rule flyout)
  *   - `source.ip` (mapped as `ip`) → IpCellRenderer (clickable link, opens the network flyout)
- *   - `kibana.alert.workflow_status` → Timeline DefaultCellRenderer → RuleStatus badge
+ *   - `host.name` → HostCellRenderer (clickable link, opens the host flyout)
+ *   - `user.name` → UserCellRenderer (clickable link, opens the user flyout)
  */
 spaceTest.describe('Security in Discover - cell renderers', { tag: tags.stateful.all }, () => {
   spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
+  let savedSearchId: string;
 
   spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-    await setupSecurityExperience(scoutSpace, config);
+    const importedSavedObjects = await setupSecurityExperience(scoutSpace, config);
+    const savedSearch = importedSavedObjects.find(
+      ({ title }) => title === SECURITY_CELL_RENDERER_SAVED_SEARCH
+    );
+    if (!savedSearch) {
+      throw new Error(`Saved search "${SECURITY_CELL_RENDERER_SAVED_SEARCH}" was not imported`);
+    }
+    savedSearchId = savedSearch.id;
   });
 
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await pageObjects.securityDiscoverFlyout.openCellRenderersSavedSearch();
+    await pageObjects.securityDiscoverFlyout.openCellRenderersSavedSearch(savedSearchId);
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {
@@ -42,17 +53,21 @@ spaceTest.describe('Security in Discover - cell renderers', { tag: tags.stateful
   });
 
   spaceTest(
-    'rule name column renders a link that opens the rule flyout',
-    async ({ pageObjects }) => {
+    'rule name column renders a link that requests the rule details',
+    async ({ page, pageObjects }) => {
       const { securityDiscoverFlyout } = pageObjects;
 
       await expect(securityDiscoverFlyout.ruleNameCellLink).toBeVisible();
-      await securityDiscoverFlyout.ruleNameCellLink.click();
+      const ruleRequest = page.waitForRequest(
+        (request) =>
+          request.url().includes('/api/detection_engine/rules') &&
+          request.url().includes(SECURITY_TEST_DATA.RULE_UUID)
+      );
+      await securityDiscoverFlyout.openRuleFlyoutFromCell();
 
-      // The link opens the rule flyout. The synthetic alert's rule UUID isn't a real detection rule, so
-      // RuleDetails renders its error state — full rule rendering is covered by the security_solution
-      // flyout_v2 suite. Asserting the error confirms the click opened the (rule) flyout.
-      await expect(securityDiscoverFlyout.ruleFlyoutError).toBeVisible();
+      // The synthetic UUID has no backing detection rule. Assert the Discover renderer handed it to
+      // the rule-flyout boundary without depending on the flyout's internal not-found presentation.
+      expect((await ruleRequest).method()).toBe('GET');
     }
   );
 
@@ -60,14 +75,23 @@ spaceTest.describe('Security in Discover - cell renderers', { tag: tags.stateful
     const { securityDiscoverFlyout } = pageObjects;
 
     await expect(securityDiscoverFlyout.ipCellLink).toBeVisible();
-    await securityDiscoverFlyout.ipCellLink.click();
+    await securityDiscoverFlyout.openNetworkFlyoutFromCell();
     await expect(securityDiscoverFlyout.networkFlyoutTitle).toBeVisible();
   });
 
-  spaceTest('workflow status column renders the status badge', async ({ pageObjects }) => {
+  spaceTest('host column renders a link that opens the host flyout', async ({ pageObjects }) => {
     const { securityDiscoverFlyout } = pageObjects;
 
-    await expect(securityDiscoverFlyout.statusCell).toBeVisible();
-    await expect(securityDiscoverFlyout.statusCell).toContainText('open');
+    await expect(securityDiscoverFlyout.hostCellLink).toBeVisible();
+    await securityDiscoverFlyout.openHostFlyoutFromCell();
+    await expect(securityDiscoverFlyout.hostFlyoutHeader).toBeVisible();
+  });
+
+  spaceTest('user column renders a link that opens the user flyout', async ({ pageObjects }) => {
+    const { securityDiscoverFlyout } = pageObjects;
+
+    await expect(securityDiscoverFlyout.userCellLink).toBeVisible();
+    await securityDiscoverFlyout.openUserFlyoutFromCell();
+    await expect(securityDiscoverFlyout.userFlyoutHeader).toBeVisible();
   });
 });

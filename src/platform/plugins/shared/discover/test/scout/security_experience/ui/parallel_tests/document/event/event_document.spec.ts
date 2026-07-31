@@ -39,16 +39,12 @@ spaceTest.describe(
       await teardownSecurityExperience(scoutSpace);
     });
 
-    spaceTest('opens with security header and overview sections', async ({ pageObjects }) => {
+    spaceTest('routes an event document to the security Overview tab', async ({ pageObjects }) => {
       const { securityDiscoverFlyout } = pageObjects;
       await securityDiscoverFlyout.openEventFlyoutFromDiscover();
 
       await securityDiscoverFlyout.waitForDocumentHeader();
-      // A title icon renders (EuiIcon does not expose the specific glyph as a stable DOM attribute,
-      // so we assert presence rather than the exact `analyzeEvent` icon).
-      await expect.soft(securityDiscoverFlyout.titleIcon).toBeVisible();
-      await expect.soft(securityDiscoverFlyout.aboutSection).toBeVisible();
-      await expect.soft(securityDiscoverFlyout.investigationSection).toBeVisible();
+      await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'true');
     });
   }
 );

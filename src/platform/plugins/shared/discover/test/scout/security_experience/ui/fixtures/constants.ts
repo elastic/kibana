@@ -11,16 +11,18 @@
  * Constants for the Security-in-Discover experience tests.
  *
  * These tests exercise the Security Solution context-awareness profile that enhances Discover's
- * document viewer flyout for security documents (alert / event / IOC). The profile only activates
+ * document viewer flyout for security documents (alert / event / attack / IOC). The profile only activates
  * under the `security` space solution view; document type is detected purely from fields
- * (`event.kind === 'signal'` → alert, `event.kind` present & ≠ signal → event, `event.type`
- * includes `indicator` → IOC), so plain synthetic indices are sufficient.
+ * (`event.kind === 'signal'` → alert, the Attack Discovery rule type → attack, `event.kind`
+ * present & ≠ signal → event, `event.type` includes `indicator` → IOC), so plain synthetic indices
+ * are sufficient.
  */
 
 /** Synthetic ES indices created in global setup (see ./generators). */
 export const SECURITY_INDICES = {
   ALERTS: 'security-discover-alerts',
   EVENTS: 'security-discover-events',
+  ATTACKS: 'security-discover-attacks',
   IOCS: 'security-discover-iocs',
 } as const;
 
@@ -31,6 +33,7 @@ export const SECURITY_INDICES = {
 export const SECURITY_DATA_VIEWS = {
   ALERTS: `${SECURITY_INDICES.ALERTS}*`,
   EVENTS: `${SECURITY_INDICES.EVENTS}*`,
+  ATTACKS: `${SECURITY_INDICES.ATTACKS}*`,
   IOCS: `${SECURITY_INDICES.IOCS}*`,
 } as const;
 
@@ -43,7 +46,7 @@ export const SECURITY_SAVED_SEARCH_TITLE = 'Security Discover alerts saved searc
  * `.alerts-security.alerts-` (see `security_root_profile/profile.tsx`). Our synthetic alerts index
  * doesn't match that, so this saved search points at a data view whose title appends a (non-matching)
  * `.alerts-security.alerts-*` pattern to satisfy the gate while still resolving the synthetic index.
- * Its explicit `columns` (rule name, source IP, workflow status) keep the rendered grid deterministic.
+ * Its explicit `columns` (rule name, source IP, host, user) keep the rendered grid deterministic.
  */
 export const SECURITY_CELL_RENDERER_SAVED_SEARCH = 'Security Discover cell renderers';
 
@@ -78,6 +81,7 @@ export const SECURITY_KBN_ARCHIVE =
  */
 export const SECURITY_TEST_DATA = {
   HOST_NAME: 'discover-test-host',
+  RULE_UUID: '00000000-0000-4000-8000-000000000001',
 } as const;
 
 /**
@@ -92,39 +96,26 @@ export const SECURITY_FLYOUT_TEST_SUBJECTS = {
   // Doc viewer tabs (security overview is injected at order 0; Table/JSON are Discover defaults).
   // Tab buttons carry an `aria-selected` attribute reflecting the active tab.
   OVERVIEW_TAB: 'docViewerTab-doc_view_alerts_overview',
+  ATTACK_OVERVIEW_TAB: 'docViewerTab-doc_view_attack_overview',
   IOC_OVERVIEW_TAB: 'docViewerTab-doc_view_ioc_overview',
   TABLE_TAB: 'docViewerTab-doc_view_table',
   JSON_TAB: 'docViewerTab-doc_view_source',
   TABLE_TAB_CONTENT: 'UnifiedDocViewerTableGrid',
   // Alert / event header
   ALERT_TITLE: 'securitySolutionFlyoutAlertTitleText',
-  // Title icon — alerts render the `warning` icon, events the `analyzeEvent` icon (the loaded
-  // EuiIcon exposes the type via the `data-icon-type` attribute).
-  TITLE_ICON: 'securitySolutionFlyoutAlertTitleIcon',
-  SEVERITY: 'severity',
-  STATUS_BADGE: 'rule-status-badge',
-  RISK_SCORE: 'securitySolutionFlyoutHeaderRiskScoreValue',
-  // Alert / event overview tab sections
-  ABOUT_SECTION: 'securitySolutionFlyoutAboutSectionHeader',
-  INVESTIGATION_SECTION: 'securitySolutionFlyoutInvestigationSectionHeader',
-  VISUALIZATIONS_SECTION: 'securitySolutionFlyoutVisualizationsHeader',
-  INSIGHTS_SECTION: 'securitySolutionFlyoutInsightsSectionHeader',
-  RESPONSE_SECTION: 'securitySolutionFlyoutResponseSectionHeader',
-  RULE_SUMMARY_BUTTON: 'securitySolutionFlyoutRuleSummaryButton',
   HIGHLIGHTED_FIELDS_TABLE: 'securitySolutionFlyoutHighlightedFieldsDetails',
+  // Attack profile content
+  ATTACK_HEADER_TITLE: 'attack-flyout-v2-header-titleText',
+  ATTACK_OVERVIEW: 'attack-flyout-overview-tab',
   // Discover cell-actions hover popover on a highlighted field value, and its action buttons. In
   // Discover the flyout uses `DiscoverCellActions` (not the alerts-table cell-action providers).
   CELL_ACTIONS_POPOVER: 'securitySolutionOneDiscoverCellActions',
   CELL_ACTION_FILTER_IN: 'securitySolutionOneDiscoverCellAction-filterIn',
-  CELL_ACTION_FILTER_OUT: 'securitySolutionOneDiscoverCellAction-filterOut',
-  CELL_ACTION_FILTER_EXISTS: 'securitySolutionOneDiscoverCellAction-filterExists',
   CELL_ACTION_TOGGLE_COLUMN: 'securitySolutionOneDiscoverCellAction-toggleColumn',
-  CELL_ACTION_COPY: 'securitySolutionOneDiscoverCellAction-copyToClipboard',
   // Footer
   TAKE_ACTION_BUTTON: 'securitySolutionFlyoutFooterDropdownButton',
   // IOC overview tab content (threat-intelligence overview reused in Discover)
   IOC_OVERVIEW_TITLE: 'tiFlyoutOverviewTitle',
-  IOC_OVERVIEW_HIGH_LEVEL_BLOCKS: 'tiFlyoutOverviewHighLevelBlocks',
 } as const;
 
 /**
@@ -136,53 +127,22 @@ export const SECURITY_FLYOUT_TEST_SUBJECTS = {
 export const CELL_RENDERER_TEST_SUBJECTS = {
   /** Link produced by RuleNameCellRenderer for `kibana.alert.rule.name` (opens the rule flyout). */
   RULE_NAME_LINK: 'one-discover-rule-name-link',
-  /**
-   * Error prompt rendered inside the rule flyout when the rule can't be loaded. The synthetic alert's
-   * `kibana.alert.rule.uuid` is not a real detection rule, so clicking the rule-name link opens the
-   * rule flyout but its `RuleDetails` falls back to this error (full rule rendering is covered by the
-   * security_solution flyout_v2 suite). Asserting it confirms the click opened the system flyout.
-   */
-  RULE_FLYOUT_ERROR: 'securitySolutionFlyoutError',
   /** Link produced by IpCellRenderer for `source.ip` (opens the network flyout). */
   IP_LINK: 'one-discover-ip-link',
   NETWORK_FLYOUT_TITLE: 'network-details-flyout-headerText',
-  /**
-   * `kibana.alert.workflow_status` is rendered by the Timeline DefaultCellRenderer → `RuleStatus`, an
-   * EuiBadge with the same `rule-status-badge` test subject used by the flyout header status badge.
-   */
-  STATUS_CELL: 'rule-status-badge',
+  /** Links produced by the host and user renderers, plus their system-flyout headers. */
+  HOST_LINK: 'one-discover-host-link',
+  HOST_FLYOUT_HEADER: 'host-panel-header',
+  USER_LINK: 'one-discover-user-link',
+  USER_FLYOUT_HEADER: 'user-panel-header',
 } as const;
 
 /**
- * Take-action menu test subjects. The alert/event document flyout shares one footer menu; the IOC
- * flyout has its own. Item visibility is document-type dependent (see take_action_button.tsx):
- * alert-only items (status, tags, assignees, host isolation, run-alert-workflow) are hidden for
- * events; `investigate-in-timeline` only renders inside the security app, so it is hidden in Discover
- * (explore actions render instead).
+ * Take-action test subjects used by the Discover-specific Explore navigation test.
  */
 export const TAKE_ACTION_TEST_SUBJECTS = {
-  // Alert / event document footer menu
-  BUTTON: 'securitySolutionFlyoutFooterDropdownButton',
   MENU: 'takeActionPanelMenu',
-  ADD_TO_NEW_CASE: 'add-to-new-case-action',
-  ADD_TO_EXISTING_CASE: 'add-to-existing-case-action',
-  STATUS_CLOSE: 'alert-close-context-menu-item',
-  ALERT_TAGS: 'alert-tags-context-menu-item',
-  ALERT_ASSIGNEES: 'alert-assignees-context-menu-item',
-  RUN_WORKFLOW: 'run-workflow-action',
-  ADD_NOTE: 'add-note-action',
-  INVESTIGATE_IN_TIMELINE: 'investigate-in-timeline-action-item',
   // Shown only outside the security app (i.e. in Discover) in place of investigate-in-timeline.
   // Label is "Explore in Alerts" for alerts and "Explore in Timeline" for events; same test subject.
   EXPLORE: 'explore-in-alerts-or-timeline',
-  // Sub-panels / modals opened from the document menu
-  ALERT_TAGS_PANEL: 'alert-tags-selectable-menu',
-  ALERT_ASSIGNEES_PANEL: 'alert-assignees-selectable-menu',
-  ALL_CASES_MODAL: 'all-cases-modal',
-  // IOC footer menu
-  IOC_BUTTON: 'tiIndicatorFlyoutTakeActionButton',
-  IOC_INVESTIGATE_IN_TIMELINE: 'tiIndicatorFlyoutInvestigateInTimelineContextMenu',
-  IOC_ADD_TO_EXISTING_CASE: 'tiIndicatorFlyoutAddToExistingCaseContextMenu',
-  IOC_ADD_TO_NEW_CASE: 'tiIndicatorFlyoutAddToNewCaseContextMenu',
-  IOC_ADD_TO_BLOCK_LIST: 'tiIndicatorFlyoutAddToBlockListContextMenu',
 } as const;

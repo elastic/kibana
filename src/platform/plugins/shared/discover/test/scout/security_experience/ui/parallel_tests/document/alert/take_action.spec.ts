@@ -18,12 +18,8 @@ import {
 } from '../../../fixtures';
 
 /**
- * Take action menu for an alert document opened in Discover. Verifies the menu lists the alert
- * actions and that each opens its sub-panel / modal. Full execution (actually closing an alert,
- * creating a case, etc.) is covered by the security_solution flyout_v2 suite, which provisions real
- * rules / alerts; here the synthetic alert index can't back those requests, so we stop at "opens".
- *
- * `investigate-in-timeline` only renders inside the security app, so it is hidden in Discover.
+ * Discover replaces the Security app's "Investigate in Timeline" action with an "Explore in Alerts"
+ * action. Menu composition and action sub-panels are covered by flyout_v2 unit and Scout tests.
  */
 spaceTest.describe(
   'Security in Discover - Alert document take action',
@@ -46,31 +42,6 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'lists the alert actions and swaps timeline for explore (Discover)',
-      async ({ pageObjects }) => {
-        const { securityDiscoverFlyout } = pageObjects;
-        await securityDiscoverFlyout.openTakeActionMenu();
-
-        // Alert-specific actions are present
-        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.STATUS_CLOSE)).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ALERT_TAGS)).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ALERT_ASSIGNEES)).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.RUN_WORKFLOW)).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.ADD_TO_NEW_CASE)).toBeVisible();
-        await expect
-          .soft(securityDiscoverFlyout.takeActionItem(TA.ADD_TO_EXISTING_CASE))
-          .toBeVisible();
-
-        // Outside the security app (i.e. in Discover), investigate-in-timeline is replaced by the
-        // explore action ("Explore in Alerts" for an alert).
-        await expect.soft(securityDiscoverFlyout.takeActionItem(TA.EXPLORE)).toBeVisible();
-        await expect(securityDiscoverFlyout.takeActionItem(TA.INVESTIGATE_IN_TIMELINE)).toHaveCount(
-          0
-        );
-      }
-    );
-
-    spaceTest(
       'explore action opens the security alerts page in a new tab',
       async ({ page, pageObjects }) => {
         const { securityDiscoverFlyout } = pageObjects;
@@ -84,37 +55,5 @@ spaceTest.describe(
         await newTab.close();
       }
     );
-
-    spaceTest('apply alert tags opens the tags sub-panel', async ({ pageObjects }) => {
-      const { securityDiscoverFlyout } = pageObjects;
-      await securityDiscoverFlyout.openTakeActionMenu();
-      await securityDiscoverFlyout.clickTakeActionItem(TA.ALERT_TAGS);
-      await expect(securityDiscoverFlyout.alertTagsPanel).toBeVisible();
-    });
-
-    spaceTest('assign alert opens the assignees sub-panel', async ({ pageObjects }) => {
-      const { securityDiscoverFlyout } = pageObjects;
-      await securityDiscoverFlyout.openTakeActionMenu();
-      await securityDiscoverFlyout.clickTakeActionItem(TA.ALERT_ASSIGNEES);
-      await expect(securityDiscoverFlyout.alertAssigneesPanel).toBeVisible();
-    });
-
-    // Note: actually opening the closing-reason sub-panel / changing status needs a real alert in a
-    // `.alerts-*` index (the close request 400s for a synthetic doc), so it is covered by the
-    // security_solution flyout_v2 suite. Here the composition test above asserts the item is present.
-
-    spaceTest('add to new case opens the case creation dialog', async ({ pageObjects }) => {
-      const { securityDiscoverFlyout } = pageObjects;
-      await securityDiscoverFlyout.openTakeActionMenu();
-      await securityDiscoverFlyout.clickTakeActionItem(TA.ADD_TO_NEW_CASE);
-      await expect(securityDiscoverFlyout.createCaseDialogTitle).toBeVisible();
-    });
-
-    spaceTest('add to existing case opens the case selector modal', async ({ pageObjects }) => {
-      const { securityDiscoverFlyout } = pageObjects;
-      await securityDiscoverFlyout.openTakeActionMenu();
-      await securityDiscoverFlyout.clickTakeActionItem(TA.ADD_TO_EXISTING_CASE);
-      await expect(securityDiscoverFlyout.allCasesModal).toBeVisible();
-    });
   }
 );

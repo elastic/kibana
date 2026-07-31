@@ -53,7 +53,7 @@ spaceTest.describe(
 
         await expect(securityDiscoverFlyout.docViewer).toBeVisible();
         await expect(securityDiscoverFlyout.alertTitle).toBeHidden();
-        await expect(securityDiscoverFlyout.aboutSection).toBeHidden();
+        await expect(securityDiscoverFlyout.overviewTab).toBeHidden();
       }
     );
   }

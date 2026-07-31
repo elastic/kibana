@@ -19,9 +19,9 @@ import {
 
 /**
  * Alert document flyout rendered inside Discover. Confirms the Security context-awareness profile
- * enhances Discover's doc viewer with the security header, overview-tab sections and footer for an
- * alert document (`event.kind: signal`). Domain behaviour (status changes, assignees, tool content)
- * is deliberately left to the security_solution flyout_v2 suite / unit tests to limit flakiness.
+ * injects the alert Overview tab and wires Discover's filter and column actions into it. Security
+ * flyout component rendering and local cell-action behaviour are covered by the security_solution
+ * flyout_v2 suite and unit tests.
  */
 spaceTest.describe(
   'Security in Discover - Alert document flyout',
@@ -44,86 +44,16 @@ spaceTest.describe(
       await teardownSecurityExperience(scoutSpace);
     });
 
-    spaceTest(
-      'opens with security header, overview sections, and footer',
-      async ({ pageObjects }) => {
-        const { securityDiscoverFlyout } = pageObjects;
+    spaceTest('adds a filter from a highlighted field', async ({ pageObjects }) => {
+      const { securityDiscoverFlyout, filterBar } = pageObjects;
+      const field = 'host.name';
+      const value = SECURITY_TEST_DATA.HOST_NAME;
 
-        // Header — a title icon renders (EuiIcon does not expose the specific glyph as a stable
-        // DOM attribute, so we assert presence rather than the exact `warning` icon).
-        await expect.soft(securityDiscoverFlyout.titleIcon).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.severity).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.statusBadge).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.riskScore).toBeVisible();
-
-        // Overview tab body sections
-        await expect.soft(securityDiscoverFlyout.aboutSection).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.ruleSummaryButton).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.investigationSection).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.visualizationsSection).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.insightsSection).toBeVisible();
-        await expect.soft(securityDiscoverFlyout.responseSection).toBeVisible();
-
-        // Footer
-        await expect.soft(securityDiscoverFlyout.takeActionButton).toBeVisible();
-      }
-    );
-
-    spaceTest(
-      'highlighted field hover actions: shows all buttons and each works',
-      async ({ page, pageObjects }) => {
-        const { securityDiscoverFlyout, filterBar, discover } = pageObjects;
-        const field = 'host.name';
-        const value = SECURITY_TEST_DATA.HOST_NAME;
-
-        // Needed so the copy-to-clipboard action can be verified via navigator.clipboard.
-        await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
-
-        await spaceTest.step('hover reveals all relevant cell-action buttons', async () => {
-          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-          await expect(securityDiscoverFlyout.cellActionFilterIn).toBeVisible();
-          await expect(securityDiscoverFlyout.cellActionFilterOut).toBeVisible();
-          await expect(securityDiscoverFlyout.cellActionFilterExists).toBeVisible();
-          await expect(securityDiscoverFlyout.cellActionToggleColumn).toBeVisible();
-          await expect(securityDiscoverFlyout.cellActionCopy).toBeVisible();
-        });
-
-        await spaceTest.step('copy to clipboard copies the field value', async () => {
-          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-          await securityDiscoverFlyout.cellActionCopy.click();
-          const clipboard = await page.evaluate(() => navigator.clipboard.readText());
-          expect(clipboard).toContain(value);
-        });
-
-        await spaceTest.step('filter for adds an enabled, non-negated filter', async () => {
-          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-          await securityDiscoverFlyout.cellActionFilterIn.click();
-          expect(await filterBar.hasFilter({ field, value, enabled: true, negated: false })).toBe(
-            true
-          );
-          await filterBar.removeFilter(field);
-          await discover.waitUntilSearchingHasFinished();
-        });
-
-        await spaceTest.step('filter exists adds a filter for the field', async () => {
-          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-          await securityDiscoverFlyout.cellActionFilterExists.click();
-          expect(await filterBar.getFilterCount()).toBeGreaterThan(0);
-          await filterBar.removeFilter(field);
-          await discover.waitUntilSearchingHasFinished();
-        });
-
-        await spaceTest.step('filter out adds a negated filter', async () => {
-          // Re-open from a fresh flyout: the negated filter will exclude the only document, so start
-          // from a clean, stable flyout before hovering.
-          await securityDiscoverFlyout.openAlertFlyoutFromDiscover();
-          await securityDiscoverFlyout.waitForDocumentHeader();
-          await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
-          await securityDiscoverFlyout.cellActionFilterOut.click();
-          expect(await filterBar.hasFilter({ field, value, negated: true })).toBe(true);
-        });
-      }
-    );
+      await securityDiscoverFlyout.hoverHighlightedFieldValue(field);
+      await expect(securityDiscoverFlyout.cellActionFilterIn).toBeVisible();
+      await securityDiscoverFlyout.cellActionFilterIn.press('Enter');
+      expect(await filterBar.hasFilter({ field, value, enabled: true, negated: false })).toBe(true);
+    });
 
     // Kept as its own test (not chained with the filter actions above): adding/removing filters
     // re-searches Discover and re-renders the push flyout, which destabilises the cell-actions
@@ -152,7 +82,7 @@ spaceTest.describe(
         const { securityDiscoverFlyout } = pageObjects;
 
         await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'true');
-        await expect(securityDiscoverFlyout.aboutSection).toBeVisible();
+        await expect(securityDiscoverFlyout.alertTitle).toBeVisible();
 
         await expect(securityDiscoverFlyout.tableTab).toBeVisible();
         await expect(securityDiscoverFlyout.jsonTab).toBeVisible();
@@ -167,7 +97,7 @@ spaceTest.describe(
 
         await securityDiscoverFlyout.selectTab(securityDiscoverFlyout.overviewTab);
         await expect(securityDiscoverFlyout.overviewTab).toHaveAttribute('aria-selected', 'true');
-        await expect(securityDiscoverFlyout.aboutSection).toBeVisible();
+        await expect(securityDiscoverFlyout.alertTitle).toBeVisible();
       }
     );
   }

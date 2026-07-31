@@ -19,11 +19,12 @@ const DOC_TIMESTAMP = '2025-06-01T12:00:00.000Z';
 
 // Field values only used to build the synthetic documents. `HOST_NAME` is shared with the specs
 // (they hover/filter on it), so it lives in SECURITY_TEST_DATA.
-const { HOST_NAME } = SECURITY_TEST_DATA;
+const { HOST_NAME, RULE_UUID } = SECURITY_TEST_DATA;
 const ALERT_RULE_NAME = 'Security Discover test rule';
 const USER_NAME = 'discover-test-user';
 const SOURCE_IP = '10.0.0.1';
 const IOC_NAME = 'malicious.example.com';
+const ATTACK_TITLE = 'Synthetic lateral movement attack';
 
 /**
  * Minimal alert document: the Security profile treats `event.kind: 'signal'` as an alert and the
@@ -36,7 +37,7 @@ const alertDocument = () => ({
   'event.type': ['connection'],
   'kibana.alert.uuid': 'security-discover-alert-1',
   'kibana.alert.rule.name': ALERT_RULE_NAME,
-  'kibana.alert.rule.uuid': 'security-discover-rule-1',
+  'kibana.alert.rule.uuid': RULE_UUID,
   'kibana.alert.rule.rule_id': 'security-discover-rule-1',
   'kibana.alert.rule.description': 'Synthetic rule used by the Security-in-Discover Scout tests.',
   'kibana.alert.rule.category': 'Custom Query Rule',
@@ -66,6 +67,28 @@ const eventDocument = () => ({
   message: 'Synthetic security event document for Discover flyout tests',
 });
 
+/**
+ * Minimal Attack Discovery document. Attack routing requires both `event.kind: signal` and the
+ * Attack Discovery rule type; the remaining fields let the enhanced header and overview render
+ * without requiring a real scheduled rule.
+ */
+const attackDocument = () => ({
+  '@timestamp': DOC_TIMESTAMP,
+  'event.kind': 'signal',
+  'event.action': 'open',
+  'kibana.alert.uuid': 'security-discover-attack-1',
+  'kibana.alert.rule.name': 'Security Discover attack rule',
+  'kibana.alert.rule.rule_type_id': 'attack-discovery',
+  'kibana.alert.workflow_status': 'open',
+  'kibana.alert.attack_discovery.title': ATTACK_TITLE,
+  'kibana.alert.attack_discovery.title_with_replacements': ATTACK_TITLE,
+  'kibana.alert.attack_discovery.summary_markdown': 'Synthetic attack summary',
+  'kibana.alert.attack_discovery.summary_markdown_with_replacements': 'Synthetic attack summary',
+  'kibana.alert.attack_discovery.details_markdown': 'Synthetic attack details',
+  'kibana.alert.attack_discovery.details_markdown_with_replacements': 'Synthetic attack details',
+  'kibana.alert.attack_discovery.alert_ids': [],
+});
+
 /** Minimal threat-intelligence indicator document (`event.type` includes `indicator`). */
 const iocDocument = () => ({
   '@timestamp': DOC_TIMESTAMP,
@@ -84,6 +107,7 @@ const iocDocument = () => ({
 const INDICES: ReadonlyArray<{ index: string; documents: Array<Record<string, unknown>> }> = [
   { index: SECURITY_INDICES.ALERTS, documents: [alertDocument()] },
   { index: SECURITY_INDICES.EVENTS, documents: [eventDocument()] },
+  { index: SECURITY_INDICES.ATTACKS, documents: [attackDocument()] },
   { index: SECURITY_INDICES.IOCS, documents: [iocDocument()] },
 ];
 
@@ -112,7 +136,7 @@ const createIndexWithDocuments = async (
 };
 
 /**
- * Create the synthetic security indices (alerts, events, IOCs) used by the Security-in-Discover
+ * Create the synthetic security indices (alerts, events, attacks, IOCs) used by the Security-in-Discover
  * tests. Any pre-existing index is dropped and recreated so mapping changes (e.g. the explicit `ip`
  * mapping the IP cell renderer depends on) always take effect, even on a persistent local ES that
  * still holds an index from an earlier run.

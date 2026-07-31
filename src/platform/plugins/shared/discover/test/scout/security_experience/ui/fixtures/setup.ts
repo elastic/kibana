@@ -33,12 +33,14 @@ export async function setupSecurityExperience(
     await scoutSpace.setSolutionView(solutionView);
   }
 
-  await scoutSpace.savedObjects.load(SECURITY_KBN_ARCHIVE);
+  const importedSavedObjects = await scoutSpace.savedObjects.load(SECURITY_KBN_ARCHIVE);
   await scoutSpace.uiSettings.setDefaultIndex(SECURITY_DATA_VIEWS.ALERTS);
   await scoutSpace.uiSettings.setDefaultTime({
     from: SECURITY_TIME_RANGE.from,
     to: SECURITY_TIME_RANGE.to,
   });
+
+  return importedSavedObjects;
 }
 
 export async function teardownSecurityExperience(
