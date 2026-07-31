@@ -75,15 +75,14 @@ export const ControlPanel = ({
   const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
 
   const prependWrapperRef = useRef<HTMLDivElement>(null);
-  const apiRef = useRef<DefaultEmbeddableApi | null>(null);
 
   useEffect(() => {
     return () => {
-      if (apiRef.current && apiCanCancelRequests(apiRef.current)) {
-        apiRef.current.cancelRequests();
+      if (api && apiCanCancelRequests(api)) {
+        api.cancelRequests();
       }
     };
-  }, []);
+  }, [api]);
 
   const selectedPanel = useMemo(
     () =>
@@ -149,7 +148,6 @@ export const ControlPanel = ({
 
   const onApiAvailable = useCallback(
     (controlApi: DefaultEmbeddableApi) => {
-      apiRef.current = controlApi;
       setApi(controlApi);
       parentApi.registerChildApi(controlApi);
     },
