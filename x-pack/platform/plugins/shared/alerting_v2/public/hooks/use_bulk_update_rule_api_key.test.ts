@@ -13,7 +13,7 @@ import { useBulkUpdateRuleApiKey } from './use_bulk_update_rule_api_key';
 const mockBulkUpdateRuleApiKey = jest.fn();
 const mockUpdateRuleApiKeyByQuery = jest.fn();
 const mockAddSuccess = jest.fn();
-const mockAddWarning = jest.fn();
+const mockAddError = jest.fn();
 const mockAddDanger = jest.fn();
 
 jest.mock('@kbn/core-di-browser', () => ({
@@ -22,7 +22,7 @@ jest.mock('@kbn/core-di-browser', () => ({
       return {
         toasts: {
           addSuccess: mockAddSuccess,
-          addWarning: mockAddWarning,
+          addError: mockAddError,
           addDanger: mockAddDanger,
         },
       };
@@ -76,7 +76,7 @@ describe('useBulkUpdateRuleApiKey', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith('API key updated for 3 rules');
   });
 
-  it('shows warning toast with a count title and reason breakdown on partial errors', async () => {
+  it('shows an error toast with a count title and grouped reason summary on partial errors', async () => {
     mockBulkUpdateRuleApiKey.mockResolvedValueOnce({
       affected_count: 1,
       errors: [{ id: 'rule-2', error: { code: 'RULE_NOT_FOUND', message: 'Not found' } }],
@@ -89,14 +89,45 @@ describe('useBulkUpdateRuleApiKey', () => {
       await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
-    expect(mockAddWarning).toHaveBeenCalledWith({
+    expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
       title: expect.stringContaining('1 error'),
-      text: '1 rule not found',
+      toastMessage: '1 rule not found',
     });
     expect(mockAddSuccess).not.toHaveBeenCalled();
   });
 
-  it('groups the partial-error reasons by code in the warning text', async () => {
+  it('lists each affected rule behind "See the full error", using the name when known', async () => {
+    mockBulkUpdateRuleApiKey.mockResolvedValueOnce({
+      affected_count: 1,
+      errors: [
+        {
+          id: 'rule-2',
+          error: {
+            code: 'RULE_ALREADY_RUNNING',
+            message: 'Currently running',
+            details: { name: 'CPU alert' },
+          },
+        },
+        // No name (e.g. a not-found rule) — falls back to the id alone.
+        { id: 'rule-3', error: { code: 'RULE_NOT_FOUND', message: 'Not found' } },
+      ],
+    });
+    const { Wrapper } = createWrapper();
+
+    const { result } = renderHook(() => useBulkUpdateRuleApiKey(), { wrapper: Wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2', 'rule-3'] });
+    });
+
+    // The per-rule detail is carried on the Error's `stack` (rendered by the
+    // core error toast in a copyable code block).
+    const [detailError] = mockAddError.mock.calls[0];
+    expect(detailError.stack).toContain('CPU alert (rule-2) — Currently running');
+    expect(detailError.stack).toContain('rule-3 — Not found');
+  });
+
+  it('groups the partial-error reasons by code in the toast summary', async () => {
     mockBulkUpdateRuleApiKey.mockResolvedValueOnce({
       affected_count: 1,
       errors: [
@@ -116,9 +147,9 @@ describe('useBulkUpdateRuleApiKey', () => {
       });
     });
 
-    expect(mockAddWarning).toHaveBeenCalledWith({
+    expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
       title: expect.stringContaining('3 errors'),
-      text: '2 disabled rules, 1 rule not found',
+      toastMessage: '2 disabled rules, 1 rule not found',
     });
   });
 
@@ -138,9 +169,9 @@ describe('useBulkUpdateRuleApiKey', () => {
       await result.current.mutateAsync({ mode: 'by_ids', ids: ['rule-1', 'rule-2'] });
     });
 
-    expect(mockAddWarning).toHaveBeenCalledWith({
+    expect(mockAddError).toHaveBeenCalledWith(expect.any(Error), {
       title: expect.stringContaining('2 errors'),
-      text: expect.stringContaining('2 rules currently running'),
+      toastMessage: expect.stringContaining('2 rules currently running'),
     });
   });
 

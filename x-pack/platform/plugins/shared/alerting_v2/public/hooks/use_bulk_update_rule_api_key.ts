@@ -98,6 +98,24 @@ const summarizeBulkErrors = (errors: BulkResponse['errors']): string => {
 };
 
 /**
+ * Full per-rule breakdown (one `name (id) — reason` line per rule) surfaced
+ * behind the toast's "See the full error" button, so the user can identify
+ * exactly which rules were not updated (e.g. to retry the running ones). The
+ * server puts the rule name in `error.details.name` when known; a rule that
+ * failed to fetch (`RULE_NOT_FOUND`) has none, so we fall back to the id alone.
+ * Kept as plain text because the core error toast renders it in a copyable
+ * code block.
+ */
+const formatBulkErrorDetail = (errors: BulkResponse['errors']): string =>
+  errors
+    .map(({ id, error }) => {
+      const name = error.details?.name;
+      const label = typeof name === 'string' && name ? `${name} (${id})` : id;
+      return `${label} — ${error.message}`;
+    })
+    .join('\n');
+
+/**
  * Rotates the executor task API key for the selected rules to one derived from
  * the current user's credentials. Backs both the single-rule (details page) and
  * bulk (rules list) "Update API key" actions — the single case passes a
@@ -112,7 +130,22 @@ export const useBulkUpdateRuleApiKey = () => {
     mutationFn: (params: BulkSelection) => dispatchUpdateApiKey(rulesApi, params),
     onSuccess: (data, params) => {
       if (data.errors.length > 0) {
-        toasts.addWarning({
+        // Partial success: keep the toast concise (grouped reason summary) but
+        // list every affected rule behind "See the full error" so the user can
+        // identify which rules were not updated. The per-rule detail lives on
+        // the Error's `stack`, which the core error toast renders in a copyable
+        // code block; the heading (`message`) shows in the modal's callout.
+        const detailError = Object.assign(
+          new Error(
+            i18n.translate('xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.partialErrorHeading', {
+              defaultMessage:
+                'The API key could not be updated for the following {errorCount, plural, one {rule} other {rules}}:',
+              values: { errorCount: data.errors.length },
+            })
+          ),
+          { stack: formatBulkErrorDetail(data.errors) }
+        );
+        toasts.addError(detailError, {
           title: i18n.translate(
             'xpack.alertingV2.hooks.useBulkUpdateRuleApiKey.partialSuccessMessage',
             {
@@ -121,7 +154,7 @@ export const useBulkUpdateRuleApiKey = () => {
               values: { errorCount: data.errors.length },
             }
           ),
-          text: summarizeBulkErrors(data.errors),
+          toastMessage: summarizeBulkErrors(data.errors),
         });
       } else {
         toasts.addSuccess(

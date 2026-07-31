@@ -31,12 +31,21 @@ export const bulkErrorCodeForStatus = (statusCode: number): string => {
   return ALERTING_V2_ERROR_CODES.INTERNAL_SERVER_ERROR;
 };
 
+/**
+ * Optional `details` payload carrying the rule's display name so the client can
+ * identify the affected rule without a follow-up fetch (the id alone is opaque
+ * in the UI). Omitted when the name is unknown — e.g. a rule that failed to
+ * fetch (`RULE_NOT_FOUND`) — so the client falls back to the id.
+ */
+const nameDetails = (name?: string) => (name ? { details: { name } } : {});
+
 export const toBulkError = (
   id: string,
-  err: { statusCode: number; message: string }
+  err: { statusCode: number; message: string },
+  name?: string
 ): BulkOperationError => ({
   id,
-  error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message },
+  error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message, ...nameDetails(name) },
 });
 
 /**
@@ -58,11 +67,12 @@ export const groupCandidatesByInterval = (
 };
 
 /** Per-rule error for a disabled rule — it has no executor task/key to rotate. */
-export const ruleDisabledError = (ruleId: string): BulkOperationError => ({
+export const ruleDisabledError = (ruleId: string, name?: string): BulkOperationError => ({
   id: ruleId,
   error: {
     code: ALERTING_V2_ERROR_CODES.RULE_DISABLED,
     message: `Rule with id "${ruleId}" is disabled and has no API key to update`,
+    ...nameDetails(name),
   },
 });
 
@@ -78,11 +88,12 @@ export const isTaskMidRun = (status?: TaskStatus): boolean =>
   status === TaskStatus.Running || status === TaskStatus.Claiming;
 
 /** Per-rule error for a rule whose executor task is mid-run and was skipped. */
-export const ruleRunningError = (ruleId: string): BulkOperationError => ({
+export const ruleRunningError = (ruleId: string, name?: string): BulkOperationError => ({
   id: ruleId,
   error: {
     code: ALERTING_V2_ERROR_CODES.RULE_ALREADY_RUNNING,
     message: `Rule with id "${ruleId}" is currently running; its API key cannot be updated until the run finishes`,
+    ...nameDetails(name),
   },
 });
 
@@ -91,11 +102,16 @@ export const ruleRunningError = (ruleId: string): BulkOperationError => ({
  * per-task failure (`statusCode` from Task Manager) or a whole-group failure
  * (no `statusCode` → `INTERNAL_SERVER_ERROR`).
  */
-export const rotationFailedError = (ruleId: string, statusCode?: number): BulkOperationError => ({
+export const rotationFailedError = (
+  ruleId: string,
+  statusCode?: number,
+  name?: string
+): BulkOperationError => ({
   id: ruleId,
   error: {
     code: bulkErrorCodeForStatus(statusCode ?? 500),
     message: `Failed to update the executor task API key for rule "${ruleId}"`,
+    ...nameDetails(name),
   },
 });
 

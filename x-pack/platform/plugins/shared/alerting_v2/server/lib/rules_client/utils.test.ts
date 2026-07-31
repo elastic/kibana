@@ -431,6 +431,22 @@ describe('rotation error builders', () => {
   it('rotationFailedError defaults to INTERNAL_SERVER_ERROR without a status', () => {
     expect(rotationFailedError('rule-1').error.code).toBe('INTERNAL_SERVER_ERROR');
   });
+
+  it('carries the rule name in error.details when provided', () => {
+    expect(ruleDisabledError('rule-1', 'My rule').error.details).toEqual({ name: 'My rule' });
+    expect(ruleRunningError('rule-1', 'My rule').error.details).toEqual({ name: 'My rule' });
+    expect(rotationFailedError('rule-1', 409, 'My rule').error.details).toEqual({ name: 'My rule' });
+    expect(toBulkError('rule-1', { statusCode: 409, message: 'x' }, 'My rule').error.details).toEqual(
+      { name: 'My rule' }
+    );
+  });
+
+  it('omits error.details when no name is provided (e.g. a not-found rule)', () => {
+    expect(ruleDisabledError('rule-1').error.details).toBeUndefined();
+    expect(ruleRunningError('rule-1').error.details).toBeUndefined();
+    expect(rotationFailedError('rule-1').error.details).toBeUndefined();
+    expect(toBulkError('rule-1', { statusCode: 404, message: 'x' }).error.details).toBeUndefined();
+  });
 });
 
 describe('isTaskMidRun', () => {

@@ -1744,7 +1744,11 @@ describe('RulesClient', () => {
         errors: [
           {
             id: 'rule-1',
-            error: { code: 'RULE_DISABLED', message: expect.stringContaining('disabled') },
+            error: {
+              code: 'RULE_DISABLED',
+              message: expect.stringContaining('disabled'),
+              details: { name: 'disabled-rule' },
+            },
           },
         ],
       });
@@ -1777,7 +1781,11 @@ describe('RulesClient', () => {
         errors: [
           {
             id: 'rule-1',
-            error: { code: 'RULE_ALREADY_RUNNING', message: expect.stringContaining('running') },
+            error: {
+              code: 'RULE_ALREADY_RUNNING',
+              message: expect.stringContaining('running'),
+              details: { name: 'rule-1' },
+            },
           },
         ],
       });
@@ -1804,7 +1812,11 @@ describe('RulesClient', () => {
         errors: [
           {
             id: 'rule-1',
-            error: { code: 'INTERNAL_SERVER_ERROR', message: expect.stringContaining('rule-1') },
+            error: {
+              code: 'INTERNAL_SERVER_ERROR',
+              message: expect.stringContaining('rule-1'),
+              details: { name: 'rule-1' },
+            },
           },
         ],
       });
@@ -1826,7 +1838,11 @@ describe('RulesClient', () => {
         errors: [
           {
             id: 'rule-1',
-            error: { code: 'RULE_ALREADY_RUNNING', message: expect.stringContaining('running') },
+            error: {
+              code: 'RULE_ALREADY_RUNNING',
+              message: expect.stringContaining('running'),
+              details: { name: 'rule-1' },
+            },
           },
         ],
       });
@@ -1862,7 +1878,11 @@ describe('RulesClient', () => {
         errors: [
           {
             id: 'rule-disabled',
-            error: { code: 'RULE_DISABLED', message: expect.stringContaining('disabled') },
+            error: {
+              code: 'RULE_DISABLED',
+              message: expect.stringContaining('disabled'),
+              details: { name: 'test-rule' },
+            },
           },
         ],
       });
@@ -1891,6 +1911,7 @@ describe('RulesClient', () => {
             error: {
               code: 'INTERNAL_SERVER_ERROR',
               message: expect.stringContaining('rule-1'),
+              details: { name: 'rule-1' },
             },
           },
         ],
@@ -1934,7 +1955,11 @@ describe('RulesClient', () => {
       expect(res.errors).toEqual([
         {
           id: 'rule-5m',
-          error: { code: 'INTERNAL_SERVER_ERROR', message: expect.stringContaining('rule-5m') },
+          error: {
+            code: 'INTERNAL_SERVER_ERROR',
+            message: expect.stringContaining('rule-5m'),
+            details: { name: 'test-rule' },
+          },
         },
       ]);
     });
@@ -1965,7 +1990,11 @@ describe('RulesClient', () => {
         errors: [
           {
             id: 'rule-1',
-            error: { code: 'RULE_VERSION_CONFLICT', message: expect.stringContaining('rule-1') },
+            error: {
+              code: 'RULE_VERSION_CONFLICT',
+              message: expect.stringContaining('rule-1'),
+              details: { name: 'rule-1' },
+            },
           },
         ],
       });
@@ -2049,7 +2078,14 @@ describe('RulesClient', () => {
       expect(res).toEqual({
         affected_count: 0,
         errors: [
-          { id: 'rule-1', error: { code: 'RULE_VERSION_CONFLICT', message: 'Version conflict' } },
+          {
+            id: 'rule-1',
+            error: {
+              code: 'RULE_VERSION_CONFLICT',
+              message: 'Version conflict',
+              details: { name: 'rule-1' },
+            },
+          },
         ],
       });
     });

@@ -920,7 +920,7 @@ export class RulesClient {
       }
 
       if (!doc.attributes.enabled) {
-        errors.push(ruleDisabledError(doc.id));
+        errors.push(ruleDisabledError(doc.id, doc.attributes.metadata.name));
         continue;
       }
 
@@ -970,7 +970,7 @@ export class RulesClient {
       const item = itemsToUpdate[i];
 
       if (!updateResult.success) {
-        errors.push(toBulkError(updateResult.id, updateResult.error));
+        errors.push(toBulkError(updateResult.id, updateResult.error, item.attrs.metadata.name));
         continue;
       }
 
@@ -1001,7 +1001,7 @@ export class RulesClient {
     candidates: RotationCandidate[]
   ): Promise<{ rotated: RotationCandidate[]; errors: BulkOperationError[] }> {
     const errors: BulkOperationError[] = [];
-    const taskIdToRuleId = new Map(candidates.map((candidate) => [candidate.taskId, candidate.id]));
+    const taskIdToCandidate = new Map(candidates.map((candidate) => [candidate.taskId, candidate]));
     const candidatesByInterval = groupCandidatesByInterval(candidates);
 
     const rotatedTaskIds = new Set<string>();
@@ -1029,7 +1029,8 @@ export class RulesClient {
             rotatedTaskIds.add(task.id);
           }
           for (const taskError of result.errors) {
-            const ruleId = taskIdToRuleId.get(taskError.id) ?? taskError.id;
+            const candidate = taskIdToCandidate.get(taskError.id);
+            const ruleId = candidate?.id ?? taskError.id;
             erroredRuleIds.add(ruleId);
             // Task Manager nests the status under `error.statusCode` (a
             // `SavedObjectError`); the top-level `status` on `ErrorOutput` is
@@ -1038,7 +1039,7 @@ export class RulesClient {
             // let a missing code fall back to a 500 in `rotationFailedError`.
             const statusCode =
               'statusCode' in taskError.error ? taskError.error.statusCode : undefined;
-            errors.push(rotationFailedError(ruleId, statusCode));
+            errors.push(rotationFailedError(ruleId, statusCode, candidate?.attrs.metadata.name));
           }
         } catch (e) {
           // A whole-group failure (e.g. the per-task-type key grant was rejected).
@@ -1049,7 +1050,7 @@ export class RulesClient {
           });
           for (const candidate of group) {
             erroredRuleIds.add(candidate.id);
-            errors.push(rotationFailedError(candidate.id));
+            errors.push(rotationFailedError(candidate.id, undefined, candidate.attrs.metadata.name));
           }
         }
       },
@@ -1103,13 +1104,15 @@ export class RulesClient {
       this.logger.warn({
         message: `Failed to read the status of ${skipped.length} skipped executor task(s); assuming they are running: ${failure}`,
       });
-      return skipped.map((candidate) => ruleRunningError(candidate.id));
+      return skipped.map((candidate) =>
+        ruleRunningError(candidate.id, candidate.attrs.metadata.name)
+      );
     }
 
     return skipped.map((candidate) =>
       isTaskMidRun(statusByTaskId.get(candidate.taskId))
-        ? ruleRunningError(candidate.id)
-        : rotationFailedError(candidate.id)
+        ? ruleRunningError(candidate.id, candidate.attrs.metadata.name)
+        : rotationFailedError(candidate.id, undefined, candidate.attrs.metadata.name)
     );
   }
 
