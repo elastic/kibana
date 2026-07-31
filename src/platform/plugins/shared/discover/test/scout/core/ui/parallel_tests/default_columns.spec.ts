@@ -44,7 +44,7 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
 
   spaceTest(
     'should render only available default columns after switching data views',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         '@timestamp',
         'message',
@@ -56,10 +56,6 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // Wait for both an arriving and a departing column: the arriving one alone can't
-      // distinguish the reconciled state from a stale render that also contains it
-      await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         'timestamp',
         'message',
@@ -70,10 +66,6 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // Arriving: DestCountry (absent in TSDB); departing: message and extension
-      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
-      await page.testSubj.locator('dataGridHeaderCell-extension').waitFor({ state: 'hidden' });
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         'timestamp',
         'DestCountry',
@@ -83,9 +75,6 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // Arriving: '@timestamp' (flights used 'timestamp'); departing: DestCountry
-      await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         '@timestamp',
         'extension',
@@ -95,16 +84,11 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
 
   spaceTest(
     'should combine selected columns and default columns after switching data views',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       await pageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
       await pageObjects.unifiedFieldList.clickFieldListItemRemove('DestCountry');
       await pageObjects.unifiedFieldList.clickFieldListItemRemove('message');
       await pageObjects.discover.waitUntilSearchingHasFinished();
-
-      // Arriving: bytes; departing: DestCountry and message (just removed)
-      await page.testSubj.locator('dataGridHeaderCell-bytes').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-DestCountry').waitFor({ state: 'hidden' });
-      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         '@timestamp',
         'extension',
@@ -115,10 +99,6 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // Arriving: 'timestamp' (no @) and message; departing: '@timestamp'
-      await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'hidden' });
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         'timestamp',
         'extension',
@@ -130,9 +110,6 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // Arriving: '@timestamp' (TSDB used 'timestamp'); departing: message
-      await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-message').waitFor({ state: 'hidden' });
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         '@timestamp',
         'extension',
@@ -143,7 +120,7 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
 
   spaceTest(
     'should not change columns if discover:modifyColumnsOnSwitch is off',
-    async ({ page, pageObjects, scoutSpace }) => {
+    async ({ pageObjects, scoutSpace }) => {
       await scoutSpace.uiSettings.set({ 'discover:modifyColumnsOnSwitch': false });
       await pageObjects.discover.goto({ queryMode: 'classic' });
       await pageObjects.discover.waitUntilSearchingHasFinished();
@@ -159,10 +136,6 @@ spaceTest.describe('Discover default columns', { tag: '@local-stateful-classic' 
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await pageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
       await pageObjects.discover.waitUntilSearchingHasFinished();
-      // Arriving: 'timestamp' (no @); departing: '@timestamp' — other columns stay unchanged
-      // because discover:modifyColumnsOnSwitch is off
-      await page.testSubj.locator('dataGridHeaderCell-timestamp').waitFor({ state: 'visible' });
-      await page.testSubj.locator('dataGridHeaderCell-@timestamp').waitFor({ state: 'hidden' });
       expect(await pageObjects.dataGrid.getColumnTitles()).toStrictEqual([
         'timestamp',
         'message',
