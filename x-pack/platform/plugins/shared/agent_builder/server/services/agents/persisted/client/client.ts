@@ -132,7 +132,13 @@ export interface AgentClient {
 
 export interface SystemAgentClient {
   ensureAgent(profile: AgentCreateRequest): Promise<void>;
+  /** Omit `spaceId` to delete in every space. Resolves to the number of documents removed. */
+  removeAgent(opts: { agentId: string; spaceId?: string }): Promise<number>;
 }
+
+// An id yields at most one document per space, so this only truncates on deployments with more
+// spaces than this, where the next call picks up the remainder.
+const REMOVE_AGENT_BATCH_SIZE = 1000;
 
 const getAgentDocument = async ({
   storage,
@@ -220,6 +226,59 @@ const ensureSystemAgent = async ({
   }
 };
 
+/**
+ * The `created_by_name` filter is what makes this safe to run unattended: a user-created agent that
+ * happens to share the id survives, while a system agent the user has since edited is still removed
+ * (`updateRequestToEs` preserves the field).
+ *
+ * Search plus bulk delete rather than `delete_by_query` so it goes through the storage adapter,
+ * which owns the index pattern and tolerates an index that was never created.
+ */
+const removeSystemAgent = async ({
+  storage,
+  space,
+  agentId,
+}: {
+  storage: AgentProfileStorage;
+  space?: string;
+  agentId: string;
+}): Promise<number> => {
+  const client = storage.getClient();
+
+  const response = await client.search({
+    track_total_hits: false,
+    size: REMOVE_AGENT_BATCH_SIZE,
+    query: {
+      bool: {
+        filter: [
+          ...(space === undefined ? [] : [createSpaceDslFilter(space)]),
+          { term: { created_by_name: SYSTEM_USER_ID } },
+          {
+            bool: {
+              // BWC compatibility with M1 - agentId was stored as the _id
+              should: [{ term: { id: agentId } }, { term: { _id: agentId } }],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  const operations = response.hits.hits
+    .map((hit) => hit._id)
+    .filter((id): id is string => typeof id === 'string')
+    .map((id) => ({ delete: { _id: id } }));
+
+  if (operations.length === 0) {
+    return 0;
+  }
+
+  await client.bulk({ operations, throwOnFail: true });
+
+  return operations.length;
+};
+
 export const createClient = async ({
   space,
   request,
@@ -271,6 +330,7 @@ export const createSystemClient = ({
 
   return {
     ensureAgent: (profile) => ensureSystemAgent({ storage, space, profile }),
+    removeAgent: ({ agentId, spaceId }) => removeSystemAgent({ storage, space: spaceId, agentId }),
   };
 };
 

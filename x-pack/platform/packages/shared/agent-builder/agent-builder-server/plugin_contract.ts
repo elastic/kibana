@@ -125,6 +125,11 @@ export interface AgentsStart {
    * Intended for code-owned startup installation; does not require a user request.
    */
   ensure: (opts: { spaceId: string; agent: AgentCreateRequest }) => Promise<void>;
+  /**
+   * Remove agents created by `ensure` and return how many were deleted. Deletes in `spaceId` when
+   * given and in every space otherwise. A user-created agent sharing the id is never matched.
+   */
+  remove: (opts: { agentId: string; spaceId?: string }) => Promise<number>;
 }
 
 /**

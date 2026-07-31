@@ -8,5 +8,6 @@
 import type { FeatureFlagsStart } from '@kbn/core/server';
 import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../../../common/feature_flags';
 
-export const isSignificantEventsAvailable = (featureFlags: FeatureFlagsStart) =>
+/** Feature-flag gate only; use `isSignificantEventsAvailable` for the full requirement set. */
+export const isSignificantEventsFeatureFlagEnabled = (featureFlags: FeatureFlagsStart) =>
   featureFlags.getBooleanValue(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false);

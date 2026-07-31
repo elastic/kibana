@@ -152,11 +152,13 @@ describe('AgentsService', () => {
     let started: AgentsServiceStart;
     let request: KibanaRequest;
     const ensureAgent = jest.fn();
+    const removeAgent = jest.fn();
 
     beforeEach(() => {
       isAllowedBuiltinAgentMock.mockReturnValue(true);
       service.setup({ logger });
       ensureAgent.mockReset();
+      removeAgent.mockReset();
       createClientMock.mockResolvedValue({
         getAgentsUsingTools: (params: { toolIds: string[] }) =>
           runToolRefCleanupMock({
@@ -189,7 +191,7 @@ describe('AgentsService', () => {
             logger: undefined,
           }),
       } as any);
-      createSystemClientMock.mockReturnValue({ ensureAgent });
+      createSystemClientMock.mockReturnValue({ ensureAgent, removeAgent });
       started = service.start(createStartDeps());
       request = httpServerMock.createKibanaRequest();
     });
@@ -216,6 +218,18 @@ describe('AgentsService', () => {
         await expect(
           started.ensure({ spaceId: 'space-1', agent: { ...agent, type: 'unknown' } })
         ).rejects.toThrow('unknown agent type "unknown"');
+      });
+    });
+
+    describe('#remove', () => {
+      it('passes the space through to the system client', async () => {
+        removeAgent.mockResolvedValue(1);
+
+        await expect(started.remove({ agentId: 'system-agent', spaceId: 'space-1' })).resolves.toBe(
+          1
+        );
+
+        expect(removeAgent).toHaveBeenCalledWith({ agentId: 'system-agent', spaceId: 'space-1' });
       });
     });
 

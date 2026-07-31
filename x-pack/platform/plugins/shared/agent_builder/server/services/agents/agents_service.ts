@@ -16,6 +16,7 @@ import type {
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
 import type { AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { createConfigurationResolver } from './resolve_configuration';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -153,6 +154,16 @@ export class AgentsService {
       await systemClient.ensureAgent(agent);
     };
 
+    const remove: AgentsServiceStart['remove'] = async ({ agentId, spaceId }) => {
+      // The constructor space only scopes `ensureAgent`; `removeAgent` carries its own.
+      const systemClient = createSystemClient({
+        space: spaceId ?? DEFAULT_SPACE_ID,
+        elasticsearch,
+        logger,
+      });
+      return systemClient.removeAgent({ agentId, spaceId });
+    };
+
     const resolveAgentConfiguration: AgentsServiceStart['resolveAgentConfiguration'] = ({
       agent,
       request,
@@ -216,6 +227,7 @@ export class AgentsService {
     return {
       getRegistry,
       ensure,
+      remove,
       resolveAgentConfiguration,
       removeToolRefsFromAgents,
       getAgentsUsingTools,

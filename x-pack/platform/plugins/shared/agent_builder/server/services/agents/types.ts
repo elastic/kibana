@@ -39,6 +39,7 @@ export interface SkillRefsParams {
 export interface AgentsServiceStart {
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
   ensure: (opts: { spaceId: string; agent: AgentCreateRequest }) => Promise<void>;
+  remove: (opts: { agentId: string; spaceId?: string }) => Promise<number>;
   resolveAgentConfiguration: (opts: {
     agent: AgentDefinition;
     request: KibanaRequest;
