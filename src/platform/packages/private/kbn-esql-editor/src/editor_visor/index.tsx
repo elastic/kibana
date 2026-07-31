@@ -32,6 +32,8 @@ import {
   stopLabel,
   askAiLabel,
   backToKqlLabel,
+  enterHintFilterLabel,
+  enterHintGenerateLabel,
 } from './visor_i18n';
 import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
