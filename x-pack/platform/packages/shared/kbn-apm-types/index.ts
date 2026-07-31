@@ -47,6 +47,7 @@ export type * from './src/service_anomaly_timeseries';
 export type * from './src/service_groups';
 export * from './src/service_health_status';
 export type * from './src/service_inventory';
+export * from './src/slos';
 export type * from './src/service_map';
 export type * from './src/service_map_diagnostic_types';
 export type * from './src/span_links';

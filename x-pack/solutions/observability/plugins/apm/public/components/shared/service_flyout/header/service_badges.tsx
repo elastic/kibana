@@ -20,10 +20,9 @@ import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 /**
  * Resolves and renders the status badges (alerts, SLO, anomaly) for the service flyout header.
  *
- * The alerts count and anomaly score are fetched for the flyout's time range and only shown once
- * their request resolves (matching the APM service header and service-map node), while the SLO
- * status is read straight from the node data since SLO summaries are evaluated over the SLO's own
- * window, not the flyout range.
+ * Alerts, SLO status, and anomaly score are all fetched on open and shown once their requests
+ * resolve. SLO status uses its own endpoint since SLO summaries are evaluated over the SLO's own
+ * window, not the flyout time range.
  */
 export function ServiceBadges() {
   const {
@@ -32,13 +31,12 @@ export function ServiceBadges() {
     capabilities: flyoutCapabilities,
     filters: { environment, rangeFrom, rangeTo, transactionType },
   } = useServiceFlyoutContext();
-  const { capabilities, navigateToUrl } = core.application;
-  const canReadSlos = !!capabilities.slo?.read;
+  const { navigateToUrl } = core.application;
   const showDynamicBadges = flyoutCapabilities.header?.badges ?? false;
 
   const { slos: slosHref } = useServiceFlyoutLinks();
 
-  const { alertsCount, anomalyData } = useServiceBadgesData({
+  const { alertsCount, anomalyData, sloData } = useServiceBadgesData({
     serviceName: service.name,
     environment,
     rangeFrom,
@@ -47,6 +45,7 @@ export function ServiceBadges() {
 
   const showAlertsBadge = alertsCount !== undefined;
   const showAnomalyBadge = anomalyData !== undefined;
+  const showSloBadge = sloData !== undefined;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
@@ -82,11 +81,11 @@ export function ServiceBadges() {
           />
         </EuiFlexItem>
       )}
-      {showDynamicBadges && canReadSlos && (
+      {showDynamicBadges && showSloBadge && (
         <EuiFlexItem grow={false}>
           <SloStatusBadge
-            sloStatus={service.sloStatus ?? 'noSLOs'}
-            sloCount={service.sloCount}
+            sloStatus={sloData.sloStatus}
+            sloCount={sloData.sloCount}
             serviceName={service.name}
             {...(slosHref
               ? {

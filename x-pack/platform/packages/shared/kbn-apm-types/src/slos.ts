@@ -5,15 +5,6 @@
  * 2.0.
  */
 
-import type { AgentName } from '@kbn/elastic-agent-utils';
+import type { SloStatus } from './service_inventory';
 
-export interface ServiceFlyoutService {
-  name: string;
-  agentName?: AgentName;
-}
-
-export interface ServiceFlyoutOptions {
-  transactionType?: string;
-  rangeFrom?: string;
-  rangeTo?: string;
-}
+export const SLO_STATUS_PRIORITY: SloStatus[] = ['violated', 'degrading', 'noData', 'healthy'];
