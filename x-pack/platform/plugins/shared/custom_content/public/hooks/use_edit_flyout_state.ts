@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useReducer, useCallback, useRef } from 'react';
 import type { TimeRange } from '@kbn/es-query';
 import { getServices } from '../services';
 import { fetchEsqlData, type EsqlDataResult } from '../utils/fetch_esql_data';
+import { flyoutReducer } from './flyout_reducer';
 
 export interface EditFlyoutState {
   draftEsqlQuery: string;
@@ -33,58 +34,71 @@ export const useEditFlyoutState = ({
   template,
   timeRange,
 }: UseEditFlyoutStateParams): EditFlyoutState => {
-  const [draftEsqlQuery, setDraftEsqlQuery] = useState(esqlQuery ?? '');
-  const [draftTemplate, setDraftTemplate] = useState(template ?? '');
-  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
-  const [previewData, setPreviewData] = useState<EsqlDataResult | null>(null);
-  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(flyoutReducer, {
+    draftEsqlQuery: esqlQuery ?? '',
+    draftTemplate: template ?? '',
+    isPreviewLoading: false,
+    previewData: null,
+    previewError: null,
+  });
 
   const abortRef = useRef<AbortController | undefined>(undefined);
 
   const { agentBuilder, core, search } = getServices();
   const isAiAvailable = Boolean(agentBuilder);
 
+  const setDraftEsqlQuery = useCallback(
+    (v: string) => dispatch({ type: 'SET_ESQL_QUERY', payload: v }),
+    []
+  );
+  const setDraftTemplate = useCallback(
+    (v: string) => dispatch({ type: 'SET_TEMPLATE', payload: v }),
+    []
+  );
+
   const handlePreview = useCallback(async () => {
-    if (!draftEsqlQuery) return;
+    if (!state.draftEsqlQuery) return;
 
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    setIsPreviewLoading(true);
-    setPreviewError(null);
+    dispatch({ type: 'PREVIEW_START' });
 
     try {
       const result = await fetchEsqlData(
         search,
         core.http,
-        draftEsqlQuery,
+        state.draftEsqlQuery,
         timeRange,
         controller.signal
       );
       if (!controller.signal.aborted) {
-        setPreviewData(result);
+        dispatch({ type: 'PREVIEW_SUCCESS', payload: result });
       }
     } catch (err) {
       if (!controller.signal.aborted && !(err instanceof Error && err.name === 'AbortError')) {
-        setPreviewError(err instanceof Error ? err.message : String(err));
+        dispatch({
+          type: 'PREVIEW_ERROR',
+          payload: err instanceof Error ? err.message : String(err),
+        });
       }
     } finally {
       if (!controller.signal.aborted) {
-        setIsPreviewLoading(false);
+        dispatch({ type: 'PREVIEW_DONE' });
       }
     }
-  }, [draftEsqlQuery, timeRange, core.http, search]);
+  }, [state.draftEsqlQuery, timeRange, core.http, search]);
 
   return {
-    draftEsqlQuery,
+    draftEsqlQuery: state.draftEsqlQuery,
     setDraftEsqlQuery,
-    draftTemplate,
+    draftTemplate: state.draftTemplate,
     setDraftTemplate,
     isAiAvailable,
-    isPreviewLoading,
-    previewData,
-    previewError,
+    isPreviewLoading: state.isPreviewLoading,
+    previewData: state.previewData,
+    previewError: state.previewError,
     handlePreview,
   };
 };
