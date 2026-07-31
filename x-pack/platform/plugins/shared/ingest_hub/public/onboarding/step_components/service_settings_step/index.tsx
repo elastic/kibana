@@ -111,7 +111,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 'xpack.ingestHub.serviceSettingsStep.table.attentionTooltip',
                 { defaultMessage: 'Required configuration missing' }
               )}
-              data-test-subj={`serviceSettingsStep-attentionIcon-${service.id}`}
+              anchorProps={{ 'data-test-subj': `serviceSettingsStep-attentionIcon-${service.id}` }}
             />
           ) : null,
       },

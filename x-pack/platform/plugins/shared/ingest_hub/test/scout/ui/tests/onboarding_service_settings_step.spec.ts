@@ -186,14 +186,13 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   }) => {
     await navigateToServiceSettings(browserAuth, page, {
       selectedServiceIds: ['ec2_metrics'],
-      globalRegion: '',
+      globalRegion: 'us-east-1',
     });
 
     // Error not visible before interaction
     await expect(page.testSubj.locator('serviceSettingsStep-globalRegionError')).toBeHidden();
 
-    // Select a region then clear it
-    await page.testSubj.locator('serviceSettingsStep-globalRegion').click();
+    // Clear the region — EuiComboBox only shows "Clear input" when a value is selected
     await page.getByRole('button', { name: 'Clear input' }).click();
 
     await expect(page.testSubj.locator('serviceSettingsStep-globalRegionError')).toBeVisible();
