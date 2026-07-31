@@ -206,34 +206,40 @@ describe('ValidationPanel', () => {
     expect(screen.getByText(i18n.VALIDATION_WORKFLOW_HELP)).toBeInTheDocument();
   });
 
-  it('calls onChange when validation workflow is selected', async () => {
-    const onChange = jest.fn();
-    render(
-      <TestProviders>
-        <ValidationPanel {...defaultProps} onChange={onChange} value="" />
-      </TestProviders>
-    );
+  it(
+    'calls onChange when validation workflow is selected',
+    async () => {
+      const onChange = jest.fn();
+      render(
+        <TestProviders>
+          <ValidationPanel {...defaultProps} onChange={onChange} value="" />
+        </TestProviders>
+      );
 
-    // Open the dropdown by clicking the super select control
-    fireEvent.click(screen.getByTestId('validationWorkflowPicker'));
+      // Open the dropdown by clicking the super select control
+      fireEvent.click(screen.getByTestId('validationWorkflowPicker'));
 
-    await waitFor(
-      () => {
-        expect(screen.getByText('My Custom Validation')).toBeInTheDocument();
-      },
-      { timeout: 3000 }
-    );
+      await waitFor(
+        () => {
+          expect(screen.getByText('My Custom Validation')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
-    const option = screen.getByText('My Custom Validation');
-    fireEvent.click(option);
+      const option = screen.getByText('My Custom Validation');
+      fireEvent.click(option);
 
-    await waitFor(
-      () => {
-        expect(onChange).toHaveBeenCalledWith('validation-custom');
-      },
-      { timeout: 3000 }
-    );
-  });
+      await waitFor(
+        () => {
+          expect(onChange).toHaveBeenCalledWith('validation-custom');
+        },
+        { timeout: 3000 }
+      );
+    },
+    // This test stacks two sequential 3s `waitFor` budgets, which can exceed
+    // Jest's default 5s per-test cap under CI load; raise the cap above the sum.
+    15000
+  );
 
   describe('when the real validation workflow is in the list', () => {
     it('does NOT render the artificial default entry', async () => {
