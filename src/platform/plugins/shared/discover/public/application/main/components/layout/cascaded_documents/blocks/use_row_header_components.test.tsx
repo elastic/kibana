@@ -14,6 +14,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import { copyToClipboard } from '@elastic/eui';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import type { ESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { DiscoverTestProvider } from '../../../../../../__mocks__/test_provider';
 import { createDiscoverServicesMock } from '../../../../../../__mocks__/services';
 import type { ESQLDataGroupNode } from './types';
@@ -138,16 +139,18 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     updateESQLQuery,
     groupId = 'clientip',
     groupValue = '192.168.1.1',
+    esqlVariables,
   }: {
     editorQuery: AggregateQuery;
     openInNewTab: (...args: unknown[]) => Promise<void>;
     updateESQLQuery: (...args: unknown[]) => void;
     groupId?: string;
     groupValue?: string;
+    esqlVariables?: ESQLControlVariable[];
   }) => {
     const { renderRowActionPopover, togglePopover } = useEsqlDataCascadeRowActionHelpers({
       dataView,
-      esqlVariables: undefined,
+      esqlVariables,
       editorQuery,
       statsFieldSummary: undefined,
       updateESQLQuery,
@@ -195,14 +198,19 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
 
   it('calls updateESQLQuery with a "filter in" clause appended when "Filter in" is clicked', async () => {
     const editorQuery: AggregateQuery = {
-      esql: 'FROM logstash-* | STATS count = COUNT(bytes) BY clientip',
+      esql: 'FROM logstash-* | STATS count = COUNT(bytes) BY ??field',
     };
+    const esqlVariables: ESQLControlVariable[] = [
+      { key: 'field', type: ESQLVariableType.FIELDS, value: 'clientip' },
+    ];
     const updateESQLQuery = jest.fn();
     const openInNewTab = jest.fn();
 
     render(
       <RowActionsTestComponent
         editorQuery={editorQuery}
+        esqlVariables={esqlVariables}
+        groupId="??field"
         openInNewTab={openInNewTab}
         updateESQLQuery={updateESQLQuery}
       />,
@@ -215,20 +223,26 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     await user.click(screen.getByTestId('dscCascadeRowContextActionFilterIn'));
 
     expect(updateESQLQuery).toHaveBeenCalledWith(
-      'FROM logstash-* | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes) BY clientip'
+      'FROM logstash-* | WHERE clientip == "192.168.1.1" | STATS count = COUNT(bytes) BY ??field'
     );
+    expect(screen.queryByTestId('dscCascadeRowContextActionMenu')).not.toBeInTheDocument();
   });
 
   it('calls updateESQLQuery with a "filter out" clause appended when "Filter out" is clicked', async () => {
     const editorQuery: AggregateQuery = {
-      esql: 'FROM logstash-* | STATS count = COUNT(bytes) BY clientip',
+      esql: 'FROM logstash-* | STATS count = COUNT(bytes) BY ??field',
     };
+    const esqlVariables: ESQLControlVariable[] = [
+      { key: 'field', type: ESQLVariableType.FIELDS, value: 'clientip' },
+    ];
     const updateESQLQuery = jest.fn();
     const openInNewTab = jest.fn();
 
     render(
       <RowActionsTestComponent
         editorQuery={editorQuery}
+        esqlVariables={esqlVariables}
+        groupId="??field"
         openInNewTab={openInNewTab}
         updateESQLQuery={updateESQLQuery}
       />,
@@ -241,8 +255,9 @@ describe('useEsqlDataCascadeRowActionHelpers', () => {
     await user.click(screen.getByTestId('dscCascadeRowContextActionFilterOut'));
 
     expect(updateESQLQuery).toHaveBeenCalledWith(
-      'FROM logstash-* | WHERE clientip != "192.168.1.1" | STATS count = COUNT(bytes) BY clientip'
+      'FROM logstash-* | WHERE clientip != "192.168.1.1" | STATS count = COUNT(bytes) BY ??field'
     );
+    expect(screen.queryByTestId('dscCascadeRowContextActionMenu')).not.toBeInTheDocument();
   });
 
   it('opens a new tab with a rewritten MATCH query when "Open in new tab" is clicked for a CATEGORIZE grouping', async () => {

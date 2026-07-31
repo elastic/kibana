@@ -52,6 +52,9 @@ spaceTest.describe(
           'a grouping query that exceeds the suggested group limit does not show the cascade layout',
           async () => {
             expect(await runCascadeQuery(pageObjects, OVER_GROUP_LIMIT_STATS_QUERY)).toBe(false);
+            await dataGrid.waitForDocTableRendered();
+            await expect(discover.getCascadeLayout()).toBeHidden();
+            await expect(discover.getCascadeLayoutSwitch()).toBeHidden();
           }
         );
 
@@ -59,7 +62,14 @@ spaceTest.describe(
           'an ES|QL grouping query shows the cascade layout with a group count',
           async () => {
             expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
-            await expect(page.testSubj.locator('discoverQueryTotalHits')).toContainText('groups');
+            await expect(discover.getCascadeLayout()).toBeVisible();
+            await expect(discover.getCascadeLayoutSwitch()).toBeVisible();
+            const groupCount = page.testSubj.locator('discoverQueryTotalHits');
+            await expect(groupCount).toHaveText(/^\d[\d,]* groups$/);
+
+            const totalGroups = Number((await groupCount.innerText()).replace(/\D/g, ''));
+            const visibleRootRows = await discover.getCascadeLayoutVisibleRowIds();
+            expect(totalGroups).toBeGreaterThanOrEqual(visibleRootRows.length);
           }
         );
 
@@ -103,8 +113,8 @@ spaceTest.describe(
           await page.testSubj.click('discoverCascadeLayoutOptOutButton');
           await discover.waitUntilTabIsLoaded();
 
-          expect(await discover.isShowingCascadeLayout()).toBe(false);
           await dataGrid.waitForDocTableRendered();
+          await expect(discover.getCascadeLayout()).toBeHidden();
         });
 
         await spaceTest.step(
@@ -115,7 +125,8 @@ spaceTest.describe(
 
             await page.testSubj.click('clientip-cascadeLayoutOptionBtn');
             await discover.waitUntilTabIsLoaded();
-            expect(await discover.isShowingCascadeLayout()).toBe(true);
+            await expect(discover.getCascadeLayout()).toBeVisible();
+            await expect(discover.getCascadeLayoutSwitch()).toBeVisible();
 
             await discover.selectClassicMode();
             await dataGrid.waitForDocTableRendered();

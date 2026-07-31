@@ -1120,23 +1120,20 @@ export class DiscoverApp {
     }
   }
 
-  /**
-   * Whether the ES|QL grouped ("cascade") layout is currently rendered,
-   * as opposed to the classic/flat data grid.
-   */
+  getCascadeLayout(): Locator {
+    return this.page.testSubj.locator('data-cascade');
+  }
+
+  getCascadeLayoutSwitch(): Locator {
+    return this.page.testSubj.locator('discoverEnableCascadeLayoutSwitch');
+  }
+
   async isShowingCascadeLayout(): Promise<boolean> {
-    return Promise.all([
-      this.page.testSubj
-        .locator('data-cascade')
-        .waitFor({ state: 'visible', timeout: 1_000 })
-        .then(() => true)
-        .catch(() => false),
-      this.page.testSubj
-        .locator('discoverEnableCascadeLayoutSwitch')
-        .waitFor({ state: 'visible', timeout: 1_000 })
-        .then(() => true)
-        .catch(() => false),
-    ]).then(([hasCascade, hasSwitch]) => hasCascade && hasSwitch);
+    const cascadeLayout = this.getCascadeLayout();
+    const flatLayout = this.page.testSubj.locator('discoverDocTable');
+
+    await cascadeLayout.or(flatLayout).waitFor({ state: 'visible' });
+    return cascadeLayout.isVisible();
   }
 
   private getCascadeScrollContainer(): Locator {

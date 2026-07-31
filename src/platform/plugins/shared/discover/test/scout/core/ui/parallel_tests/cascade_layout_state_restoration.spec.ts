@@ -43,6 +43,9 @@ spaceTest.describe(
       expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
 
       await discover.scrollCascadeLayoutBy(2000);
+      await expect
+        .poll(async () => Math.abs((await discover.getCascadeLayoutScrollTop()) - 2000))
+        .toBeLessThan(200);
       // The scroll position is persisted for restoration via a
       // debounced/throttled subscription with no externally observable
       // signal, so switching tabs immediately after scrolling can unmount
@@ -80,13 +83,20 @@ spaceTest.describe(
 
         expect(await runCascadeQuery(pageObjects, STATS_QUERY)).toBe(true);
         await discover.scrollCascadeLayoutBy(2000);
+        await expect
+          .poll(async () => Math.abs((await discover.getCascadeLayoutScrollTop()) - 2000))
+          .toBeLessThan(200);
         // See the "restores cascade scroll position" test above for why this
         // wait is needed before the next action can safely trigger a remount.
         await discover.waitForCascadeStatePersisted();
 
         const [targetRowId] = await discover.getCascadeLayoutVisibleRowIds();
         await discover.toggleCascadeLayoutRow(targetRowId);
+        const scrollTopBeforeNestedScroll = await discover.getCascadeLayoutScrollTop();
         await discover.scrollCascadeLayoutBy(200);
+        await expect
+          .poll(async () => await discover.getCascadeLayoutScrollTop())
+          .toBeGreaterThan(scrollTopBeforeNestedScroll + 100);
         await discover.waitForCascadeStatePersisted();
 
         const scrollTopBeforeTabSwitch = await discover.getCascadeLayoutScrollTop();
