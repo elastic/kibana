@@ -239,16 +239,15 @@ function normalizeFormBasedAdHocDataViews(
       continue;
     }
 
-      if (ref) {
-        ref.id = newId;
-        // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
-      } else {
-        refs.push({
-          id: newId,
-          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-          type: 'index-pattern',
-        });
-      }
+    if (ref) {
+      ref.id = newId;
+      // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
+    } else {
+      refs.push({
+        id: newId,
+        name: layerRefName,
+        type: 'index-pattern',
+      });
     }
   }
 
