@@ -176,7 +176,7 @@ actions:
     description: Change tag description and displayName
     update:
       # description: 
-      x-displayName: 'Significant events'
+      x-displayName: 'Significant Events'
 # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'
