@@ -8,7 +8,7 @@
 import type { InferenceClient } from '@kbn/inference-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { classifyServices } from './classify_services';
-import type { IacSignal, IndexedRepoRef, ServiceCandidateRoot } from './types';
+import type { IacSignal, IndexedRepoRef, LanguageCount, ServiceCandidateRoot } from './types';
 
 const cand = (over: Partial<ServiceCandidateRoot> = {}): ServiceCandidateRoot => ({
   repository: 'open-telemetry/opentelemetry-demo',
@@ -52,6 +52,7 @@ const opts = (candidates: ServiceCandidateRoot[]) => ({
     ['open-telemetry/opentelemetry-demo', [{ kind: 'compose' as const, path: 'compose.yaml' }]],
   ]),
   readmeLinesByRepo: new Map<string, string[]>(),
+  repositoryLanguagesByRepo: new Map<string, LanguageCount[]>(),
   candidates,
   logger: loggerMock.create(),
 });

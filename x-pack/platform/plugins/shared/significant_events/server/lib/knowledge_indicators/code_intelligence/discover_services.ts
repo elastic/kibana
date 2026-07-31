@@ -9,13 +9,84 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
+  EXTENSION_LANGUAGE,
   IAC_PATH_MARKERS,
   MANIFEST_PATH_PATTERNS,
   SERVICE_DEPLOY_MARKERS,
+  SOURCERER_FILES_INDEX,
   SOURCERER_LINES_INDEX,
   SOURCERER_REFS_INDEX,
 } from './constants';
-import type { IacSignal, IacKind, IndexedRepoRef, ServiceCandidateRoot } from './types';
+import type {
+  IacSignal,
+  IacKind,
+  IndexedRepoRef,
+  LanguageCount,
+  ServiceCandidateRoot,
+} from './types';
+
+/**
+ * Builds a repository language histogram by aggregating indexed file bytes per
+ * extension (from the Sourcerer files index) and mapping known extensions to a
+ * language via {@link EXTENSION_LANGUAGE}. Byte-weighted so a repo's dominant
+ * language reflects real code volume, not incidental file counts. Unknown
+ * extensions do not vote. Never throws — a query failure yields an empty
+ * histogram (classification then degrades, it does not error).
+ */
+export async function buildLanguageHistogram({
+  esClient,
+  repo,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  repo: IndexedRepoRef;
+  logger: Logger;
+}): Promise<LanguageCount[]> {
+  const { org, repo: repoName, gitSha, repository } = repo;
+  try {
+    const response = (await esClient.esql.query({
+      query: `
+        FROM ${SOURCERER_FILES_INDEX}
+        | WHERE MATCH(git.org, ?git_org)
+            AND git.repo LIKE ?git_repo
+            AND git.commit LIKE ?git_commit
+        | STATS bytes = SUM(file.size) BY file.extension
+        | SORT bytes DESC
+        | LIMIT 200`,
+      params: [{ git_org: org }, { git_repo: repoName }, { git_commit: gitSha || '*' }],
+      drop_null_columns: false,
+    })) as ESQLSearchResponse;
+
+    const extCol = response.columns.findIndex((c) => c.name === 'file.extension');
+    const bytesCol = response.columns.findIndex((c) => c.name === 'bytes');
+    if (extCol === -1 || bytesCol === -1) {
+      return [];
+    }
+
+    // Fold extensions onto their language and sum bytes as the weight.
+    const byLanguage = new Map<string, number>();
+    for (const row of response.values) {
+      const ext = String(row[extCol] ?? '').toLowerCase();
+      const bytes = Number(row[bytesCol] ?? 0);
+      const language = EXTENSION_LANGUAGE[ext];
+      if (!language || bytes <= 0) {
+        continue;
+      }
+      byLanguage.set(language, (byLanguage.get(language) ?? 0) + bytes);
+    }
+
+    return [...byLanguage.entries()]
+      .map(([language, count]) => ({ language, count }))
+      .sort((a, b) => b.count - a.count);
+  } catch (error) {
+    logger.debug(
+      `discover_services: language histogram failed for "${repository}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return [];
+  }
+}
 
 const MANIFEST_CONTENT_PATTERNS: readonly string[] = [
   '.*image:.*',

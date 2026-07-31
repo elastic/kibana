@@ -33,11 +33,13 @@ import {
   classifyLoggingSites,
   listIndexedRepos,
   discoverCandidateRoots,
+  buildLanguageHistogram,
   classifyServices,
   isCodeIntelligenceAgentAvailable,
   CODE_INTELLIGENCE_AGENT_ID,
   type ServiceCandidateRoot,
   type IacSignal,
+  type LanguageCount,
   type DiscoveredService,
   type ServiceCodeMetadata,
   type StreamSamplingSource,
@@ -704,6 +706,7 @@ const discoverServicesRoute = createServerRoute({
     const serviceNameLinesByRepo = new Map<string, string[]>();
     const iacSignalsByRepo = new Map<string, IacSignal[]>();
     const readmeLinesByRepo = new Map<string, string[]>();
+    const repositoryLanguagesByRepo = new Map<string, LanguageCount[]>();
     for (const repo of repos) {
       const {
         candidates: roots,
@@ -723,6 +726,10 @@ const discoverServicesRoute = createServerRoute({
       serviceNameLinesByRepo.set(repo.repository, serviceNameLines);
       iacSignalsByRepo.set(repo.repository, iacSignals);
       readmeLinesByRepo.set(repo.repository, readmeLines);
+      repositoryLanguagesByRepo.set(
+        repo.repository,
+        await buildLanguageHistogram({ esClient, repo, logger: routeLogger })
+      );
     }
 
     const hasManifestLines = [...manifestLinesByRepo.values()].some(
@@ -749,6 +756,7 @@ const discoverServicesRoute = createServerRoute({
       serviceNameLinesByRepo,
       iacSignalsByRepo,
       readmeLinesByRepo,
+      repositoryLanguagesByRepo,
       logger: routeLogger,
     });
 

@@ -7,7 +7,11 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { discoverCandidateRoots, listIndexedRepos } from './discover_services';
+import {
+  buildLanguageHistogram,
+  discoverCandidateRoots,
+  listIndexedRepos,
+} from './discover_services';
 import type { IndexedRepoRef } from './types';
 
 const refsResponse = (rows: Array<[string, string, string, string]>) => ({
@@ -57,6 +61,60 @@ describe('listIndexedRepos', () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.esql.query.mockRejectedValue(new Error('no index'));
     await expect(listIndexedRepos({ esClient, logger: loggerMock.create() })).resolves.toEqual([]);
+  });
+});
+
+describe('buildLanguageHistogram', () => {
+  const extBytesResponse = (rows: Array<[string, number]>) => ({
+    columns: [
+      { name: 'bytes', type: 'long' },
+      { name: 'file.extension', type: 'keyword' },
+    ],
+    values: rows.map(([ext, bytes]) => [bytes, ext]),
+  });
+
+  it('byte-weights known extensions onto languages, folding variants and ignoring unknowns', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(
+      extBytesResponse([
+        ['ts', 250_000_000],
+        ['tsx', 100_000_000],
+        ['js', 10_000_000],
+        ['json', 240_000_000], // unknown/markup -> ignored
+        ['png', 46_000_000], // unknown -> ignored
+        ['yaml', 20_000_000], // markup -> ignored
+      ]) as unknown as Awaited<ReturnType<typeof esClient.esql.query>>
+    );
+
+    const histogram = await buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() });
+
+    // ts + tsx fold into TypeScript (350M), then JavaScript (10M). json/png/yaml
+    // do not vote. TypeScript dominates -> repo reads as an application repo.
+    expect(histogram).toEqual([
+      { language: 'TypeScript', count: 350_000_000 },
+      { language: 'JavaScript', count: 10_000_000 },
+    ]);
+  });
+
+  it('maps terraform/hcl extensions to the iac language bucket', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockResolvedValue(
+      extBytesResponse([
+        ['tf', 5_000_000],
+        ['hcl', 1_000_000],
+      ]) as unknown as Awaited<ReturnType<typeof esClient.esql.query>>
+    );
+
+    const histogram = await buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() });
+    expect(histogram).toEqual([{ language: 'hcl', count: 6_000_000 }]);
+  });
+
+  it('never throws — returns [] on query failure', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockRejectedValue(new Error('no index'));
+    await expect(
+      buildLanguageHistogram({ esClient, repo, logger: loggerMock.create() })
+    ).resolves.toEqual([]);
   });
 });
 

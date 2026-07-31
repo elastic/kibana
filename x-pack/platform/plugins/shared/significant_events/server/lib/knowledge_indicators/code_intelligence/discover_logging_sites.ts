@@ -10,6 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import {
   anchoredPhrasePatterns,
+  isExcludedLoggingPath,
   LOGGER_IDIOM_PATTERNS,
   LOGGER_PHRASE_LEXICON,
   SENTENCE_LITERAL_PATTERNS,
@@ -235,6 +236,7 @@ export async function discoverLoggingSites({
   // sites; phrase patterns are recall candidates the classifier will judge.
   const via = new Map<string, LoggingCandidateVia>();
   let patternErrors = 0;
+  let excludedPaths = 0;
 
   const runGrep = async (regex: string, tag: LoggingCandidateVia) => {
     try {
@@ -255,6 +257,13 @@ export async function discoverLoggingSites({
         );
       }
       for (const { filePath: path, lineNumber } of lines) {
+        // Skip test fixtures and build/CI tooling files: their log-like lines are
+        // developer/CI output, not running-service logs. Excluding here (before
+        // the +/-1 window fetch and the classifier) also saves classify calls.
+        if (isExcludedLoggingPath(path)) {
+          excludedPaths += 1;
+          continue;
+        }
         const location = `${path}:${lineNumber}`;
         // idiom wins the tag; don't downgrade an idiom hit to phrase.
         if (tag === 'idiom' || !via.has(location)) {
@@ -324,6 +333,7 @@ export async function discoverLoggingSites({
   logger.debug(
     `logging_sites: discovered ${candidates.length} candidate line(s) for "${repository}" @ "${root}" ` +
       `(idiom=${idiomCount} phrase=${candidates.length - idiomCount})` +
+      (excludedPaths > 0 ? ` (${excludedPaths} test/build path hit(s) excluded)` : '') +
       (patternErrors > 0 ? ` (${patternErrors} pattern error(s))` : '')
   );
   return candidates;

@@ -48,6 +48,7 @@ export { classifyLoggingSites, type ClassifyLoggingSitesOptions } from './classi
 export {
   listIndexedRepos,
   discoverCandidateRoots,
+  buildLanguageHistogram,
   type DiscoverCandidateRootsOptions,
   type DiscoverCandidateRootsResult,
 } from './discover_services';

@@ -12,7 +12,13 @@ import {
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { IAC_LANGUAGES } from './constants';
-import type { DiscoveredService, IacSignal, IndexedRepoRef, ServiceCandidateRoot } from './types';
+import type {
+  DiscoveredService,
+  IacSignal,
+  IndexedRepoRef,
+  LanguageCount,
+  ServiceCandidateRoot,
+} from './types';
 
 /**
  * Whether a candidate-root marker language denotes application (programming)
@@ -79,6 +85,8 @@ export interface ClassifyServicesOptions {
   iacSignalsByRepo: Map<string, IacSignal[]>;
   /** Per-repository first lines of the repo-root README, keyed by `"org/repo"`. */
   readmeLinesByRepo: Map<string, string[]>;
+  /** Per-repository byte-weighted language histogram, keyed by `"org/repo"`. */
+  repositoryLanguagesByRepo: Map<string, LanguageCount[]>;
   logger: Logger;
   abortSignal?: AbortSignal;
 }
@@ -113,6 +121,7 @@ export async function classifyServices({
   serviceNameLinesByRepo,
   iacSignalsByRepo,
   readmeLinesByRepo,
+  repositoryLanguagesByRepo,
   logger,
   abortSignal,
 }: ClassifyServicesOptions): Promise<DiscoveredService[]> {
@@ -134,6 +143,7 @@ export async function classifyServices({
     name,
     language,
     iacSignals: iacSignalsByRepo.get(repository),
+    repositoryLanguages: repositoryLanguagesByRepo.get(repository),
   });
 
   const degrade = (): DiscoveredService[] =>

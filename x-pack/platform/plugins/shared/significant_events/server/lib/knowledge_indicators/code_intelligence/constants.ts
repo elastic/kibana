@@ -85,6 +85,101 @@ export const DEFAULT_LOG_SEVERITY = 40;
 export const SOURCERER_LINES_INDEX = 'sourcerer-v1-lines*' as const;
 
 /**
+ * Repository-relative path fragments that mark a file as TEST or BUILD/CI
+ * tooling rather than production service code. Logging-site grep excludes any
+ * candidate whose path matches one of these, so test fixtures and build/CI
+ * scripts (whose `echo "Error: ..."`/`log(...)` lines are developer output, not
+ * running-service logs) never reach the classifier. Excluding at grep time also
+ * saves the classify calls those candidates would have cost.
+ *
+ * Deterministic and path-based (the classifier prompt is a softer, fuzzier
+ * backstop). Matched case-insensitively as substrings against the full
+ * repository-relative path, with directory fragments wrapped in `/` so they
+ * match a path segment (e.g. `/test/`), and suffix fragments matched at the end.
+ */
+export const EXCLUDED_PATH_DIR_FRAGMENTS: readonly string[] = [
+  '/test/',
+  '/tests/',
+  '/__tests__/',
+  '/__mocks__/',
+  '/e2e/',
+  '/cypress/',
+  '/fixtures/',
+  '/benchmarks/',
+  // JVM/Gradle test source sets (elasticsearch): src/test, src/internalClusterTest,
+  // src/integTest, src/javaRestTest, src/yamlRestTest, src/test-fixtures, etc.
+  '/internalclustertest/',
+  '/integtest/',
+  '/javaresttest/',
+  '/yamlresttest/',
+  '/test-fixtures/',
+  '/.buildkite/',
+  '/.github/',
+  '/.ci/',
+  '/gradle/',
+  '/node_modules/',
+] as const;
+
+/** Path substrings (anywhere) that mark test or build/CI tooling files. */
+export const EXCLUDED_PATH_SUBSTRINGS: readonly string[] = [
+  '.test.',
+  '.spec.',
+  '_test.',
+  '.buildkite',
+  '.github/workflows',
+] as const;
+
+/**
+ * Path suffixes (basename endings) that mark build tooling or shell-script
+ * files. Shell scripts are excluded wholesale: their `echo`/`printf` output goes
+ * to a terminal, not a service log pipeline, so treating them as logging sites
+ * is almost always a false positive (CI, bootstrap, util, and onboarding
+ * scripts alike). The rare shipped operational script is not worth the noise.
+ */
+export const EXCLUDED_PATH_SUFFIXES: readonly string[] = [
+  '/makefile',
+  '.mk',
+  '/dockerfile',
+  '.gradle',
+  '.gradle.kts',
+  '.sh',
+  '.bash',
+  '.zsh',
+  '.ps1',
+  '_test.go',
+] as const;
+
+/**
+ * Case-SENSITIVE JVM test-class basename convention: `FooTest`, `FooTests`,
+ * `FooIT`, `FooIntegTests`, `FooBenchmarkTests`, etc. in Java/Kotlin/Scala/
+ * Groovy. Matched on the capitalised camelCase boundary so `Latest.java` /
+ * `Unit.java` are NOT excluded. These test classes frequently live outside a
+ * `/test/` directory (e.g. elasticsearch `src/internalClusterTest`).
+ */
+export const JVM_TEST_CLASS_PATTERN = /(?:Test|Tests|IT|IntegTests)\.(?:java|kt|scala|groovy)$/;
+
+/**
+ * Whether a repository-relative file path is a TEST or BUILD/CI tooling file
+ * that should be excluded from logging-site discovery. Case-insensitive.
+ */
+export const isExcludedLoggingPath = (filePath: string): boolean => {
+  // Case-sensitive check first: JVM test classes rely on the camelCase boundary
+  // (`FooTests.java`) so `Latest.java` is not mistaken for a test.
+  if (JVM_TEST_CLASS_PATTERN.test(filePath)) {
+    return true;
+  }
+  const path = filePath.toLowerCase();
+  // Prepend `/` so a repo-root basename (e.g. `Makefile`, `Dockerfile`) matches
+  // a `/`-anchored directory fragment or suffix the same as a nested one.
+  const anchored = `/${path}`;
+  return (
+    EXCLUDED_PATH_DIR_FRAGMENTS.some((fragment) => `${anchored}/`.includes(fragment)) ||
+    EXCLUDED_PATH_SUBSTRINGS.some((fragment) => path.includes(fragment)) ||
+    EXCLUDED_PATH_SUFFIXES.some((suffix) => anchored.endsWith(suffix))
+  );
+};
+
+/**
  * Lucene RLIKE patterns matching production logger idioms, one idiom per pattern
  * (per the grep tool's own guidance — several small greps beat one mega-
  * alternation and avoid automaton determinization blowup). Verified against the
@@ -198,6 +293,52 @@ export const SENTENCE_LITERAL_PATTERNS: readonly string[] = [
  * equivalent of the agent's `sourcerer.refs.list`).
  */
 export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*' as const;
+
+export const SOURCERER_FILES_INDEX = 'sourcerer-v1-files*' as const;
+
+/**
+ * File-extension (lowercase, no dot) -> programming/markup language, used to
+ * build a repository language histogram from the Sourcerer files index so
+ * {@link classifyRepository} can tell an application repo from Infrastructure as
+ * Code. Only extensions that clearly denote a language are mapped; unknown
+ * extensions are ignored (they do not vote). Terraform/HCL map to IaC languages
+ * (see IAC_LANGUAGES) so an IaC repo is still recognised as such.
+ */
+export const EXTENSION_LANGUAGE: Readonly<Record<string, string>> = {
+  ts: 'TypeScript',
+  tsx: 'TypeScript',
+  mts: 'TypeScript',
+  cts: 'TypeScript',
+  js: 'JavaScript',
+  jsx: 'JavaScript',
+  mjs: 'JavaScript',
+  cjs: 'JavaScript',
+  java: 'Java',
+  kt: 'Kotlin',
+  kts: 'Kotlin',
+  scala: 'Scala',
+  groovy: 'Groovy',
+  go: 'Go',
+  rs: 'Rust',
+  py: 'Python',
+  rb: 'Ruby',
+  php: 'PHP',
+  cs: 'C#',
+  cpp: 'C++',
+  cc: 'C++',
+  cxx: 'C++',
+  c: 'C',
+  h: 'C',
+  hpp: 'C++',
+  swift: 'Swift',
+  ex: 'Elixir',
+  exs: 'Elixir',
+  erl: 'Erlang',
+  clj: 'Clojure',
+  hcl: 'hcl',
+  tf: 'hcl',
+  tfvars: 'hcl',
+} as const;
 
 /**
  * Fallback log target for predictive code queries when NO real log-bearing

@@ -9,6 +9,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   anchoredPhrasePatterns,
+  isExcludedLoggingPath,
   LOGGER_IDIOM_PATTERNS,
   LOGGER_PHRASE_LEXICON,
   SENTENCE_LITERAL_PATTERNS,
@@ -77,6 +78,61 @@ describe('logging-site patterns', () => {
     expect(doubleQuoted.test('log("order shipped to customer")')).toBe(true);
     expect(doubleQuoted.test('x := "singleword"')).toBe(false);
     expect(doubleQuoted.test('key = "a.b.c_d"')).toBe(false);
+  });
+});
+
+describe('isExcludedLoggingPath', () => {
+  it('excludes test files and test directories', () => {
+    expect(isExcludedLoggingPath('src/foo/bar.test.ts')).toBe(true);
+    expect(isExcludedLoggingPath('src/foo/bar.spec.ts')).toBe(true);
+    expect(isExcludedLoggingPath('pkg/handler_test.go')).toBe(true);
+    expect(isExcludedLoggingPath('src/__tests__/thing.ts')).toBe(true);
+    expect(isExcludedLoggingPath('test/fixtures/data.go')).toBe(true);
+    expect(isExcludedLoggingPath('e2e/login.ts')).toBe(true);
+  });
+
+  it('excludes build/CI tooling files', () => {
+    expect(isExcludedLoggingPath('Makefile')).toBe(true);
+    expect(isExcludedLoggingPath('o11y/Makefile')).toBe(true);
+    expect(isExcludedLoggingPath('build.mk')).toBe(true);
+    expect(isExcludedLoggingPath('Dockerfile')).toBe(true);
+    expect(isExcludedLoggingPath('.buildkite/scripts/bootstrap.sh')).toBe(true);
+    expect(isExcludedLoggingPath('.github/workflows/ci.yml')).toBe(true);
+    expect(isExcludedLoggingPath('build.gradle')).toBe(true);
+    expect(isExcludedLoggingPath('gradle/wrapper/x.properties')).toBe(true);
+  });
+
+  it('excludes shell scripts wholesale (terminal output, not service logs)', () => {
+    expect(isExcludedLoggingPath('scripts/util.sh')).toBe(true);
+    expect(
+      isExcludedLoggingPath('x-pack/.../observability_onboarding/public/assets/auto_detect.sh')
+    ).toBe(true);
+    expect(isExcludedLoggingPath('tools/setup.bash')).toBe(true);
+  });
+
+  it('excludes JVM test classes outside a /test/ dir (camelCase boundary)', () => {
+    expect(
+      isExcludedLoggingPath(
+        'modules/reindex/src/internalClusterTest/java/org/elasticsearch/BulkTests.java'
+      )
+    ).toBe(true);
+    expect(isExcludedLoggingPath('server/src/main/java/org/elasticsearch/FooTest.java')).toBe(true);
+    expect(isExcludedLoggingPath('x/src/GcsProxyIntegrationIT.java')).toBe(true);
+    expect(isExcludedLoggingPath('x/AzureRepositoryIntegTests.java')).toBe(true);
+    expect(isExcludedLoggingPath('svc/HandlerTests.kt')).toBe(true);
+    // internalClusterTest / yamlRestTest source-set dirs.
+    expect(isExcludedLoggingPath('modules/x/src/yamlRestTest/java/org/x/Thing.java')).toBe(true);
+  });
+
+  it('keeps production application source', () => {
+    expect(isExcludedLoggingPath('src/ad/Main.java')).toBe(false);
+    expect(isExcludedLoggingPath('server/http_server.ts')).toBe(false);
+    expect(isExcludedLoggingPath('cmd/service/main.go')).toBe(false);
+    // "latest" contains "test" but is not a test path segment/suffix.
+    expect(isExcludedLoggingPath('src/latest/handler.ts')).toBe(false);
+    // Case-sensitive JVM guard: `Latest.java` / `Manifest.java` are not tests.
+    expect(isExcludedLoggingPath('server/src/main/java/org/x/Latest.java')).toBe(false);
+    expect(isExcludedLoggingPath('server/src/main/java/org/x/Manifest.java')).toBe(false);
   });
 });
 
@@ -211,6 +267,37 @@ describe('discoverLoggingSites', () => {
         language: 'Java',
       },
     ]);
+  });
+
+  it('drops grep hits in test/build/shell paths before they become candidates', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[42, 'logger.info("hi")']] };
+      }
+      // Each grep returns one real hit and three excluded-path hits.
+      return {
+        columns: COLUMNS,
+        values: [
+          row('src/ad/Main.java', 42, 'logger.info("hi")'),
+          row('src/ad/Main.test.java', 10, 'logger.info("hi")'),
+          row('scripts/deploy.sh', 5, 'echo "Error: boom"'),
+          row('o11y/Makefile', 62, 'echo "Error: usage"'),
+        ],
+      };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src/ad',
+      language: 'Java',
+      logger: loggerMock.create(),
+    });
+
+    // Only the production-source hit survives; test/shell/Makefile are excluded.
+    expect(candidates.map((c) => c.location)).toEqual(['src/ad/Main.java:42']);
   });
 
   it('tags sentence-literal-only hits as phrase candidates', async () => {
