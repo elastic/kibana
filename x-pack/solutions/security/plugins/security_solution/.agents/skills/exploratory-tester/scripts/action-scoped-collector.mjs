@@ -179,11 +179,14 @@ export function redactUrl(url) {
 // consoleText is newline-joined, and without that constraint "Failed to
 // load resource:" from one console message could pair across a `\n` with a
 // status number that actually belongs to a different, later message.
-const BROWSER_NATIVE_LOAD_FAILURE = /Failed to load resource:.*\bresponded with a status of (\d+)\b/g;
-
+// `g` is required for `matchAll` to return every occurrence rather than just
+// the first; it's constructed fresh on every call below rather than hoisted
+// to module scope so nothing can accidentally call `.test()`/`.exec()` on a
+// shared instance and get alternating results from its mutated `lastIndex`.
 function countBrowserNativeLoadFailuresByStatus(consoleText) {
+  const pattern = /Failed to load resource:.*\bresponded with a status of (\d+)\b/g;
   const counts = new Map();
-  for (const match of consoleText.matchAll(BROWSER_NATIVE_LOAD_FAILURE)) {
+  for (const match of consoleText.matchAll(pattern)) {
     const status = Number(match[1]);
     counts.set(status, (counts.get(status) || 0) + 1);
   }
@@ -254,25 +257,58 @@ export function reduceAction(action, priorState) {
   // stable global order — grouping by signature first would let the
   // insertion order of unrelated signatures perturb which event claims which
   // native message.
+  //
+  // Two phases, deliberately not merged into one pass: an event with its own
+  // path-specific console message (e.g. "500 @ /api/foo") is surfaced
+  // regardless of native-message credits, so it must never compete for a
+  // shared credit a *different*, genuinely-silent event needs. Checking
+  // credits first (one combined pass, credit check before the path check)
+  // let whichever event happened to sort first claim the only credit
+  // available even when it didn't need one — a same-status, different-path
+  // 500 pair could then flip between "both surfaced" and "one wrongly
+  // silent" purely based on requestedAt order. Marking path-matches first
+  // removes that dependency entirely: phase 2 only ever has to arbitrate
+  // among events that truly have nothing of their own.
   const nativeFailureCountByStatus = countBrowserNativeLoadFailuresByStatus(consoleText);
   const networkByTime = [...network].sort((a, b) => a.requestedAt - b.requestedAt);
-  for (const ev of networkByTime) {
-    if (ev.status == null || ev.status < 500 || ev.abandonedByNavigation) continue;
+  const qualifying = networkByTime.filter(
+    (ev) => ev.status != null && ev.status >= 500 && !ev.abandonedByNavigation
+  );
+
+  const surfacedByOwnMessage = new Set(
+    qualifying.filter(
+      (ev) =>
+        new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(pathnameOf(ev.url))
+    )
+  );
+
+  // Phase 2: distribute remaining native-message credits, in request order,
+  // among whatever's left over from phase 1. Order can still matter here —
+  // there is no request<->console-message ID linking in the underlying data
+  // to attribute a specific native message to one request over another when
+  // credits are scarcer than qualifying events, so which *specific* event
+  // reads as silent in that case is a heuristic, not a guarantee. This is a
+  // narrower, accepted limitation (which event gets flagged) rather than the
+  // phase-1 bug above (whether a genuinely-silent event gets wrongly
+  // suppressed by an event that didn't need the credit). Relatedly, a native
+  // message genuinely produced by an `abandonedByNavigation` request (never
+  // in `qualifying`, so never consuming its own credit) remains in this pool
+  // and can be claimed here by an unrelated event of the same status — there
+  // is no way to tell those messages apart from the console text alone.
+  const surfacedByNativeCredit = new Set();
+  for (const ev of qualifying) {
+    if (surfacedByOwnMessage.has(ev)) continue;
+    const remaining = nativeFailureCountByStatus.get(ev.status) || 0;
+    if (remaining > 0) {
+      nativeFailureCountByStatus.set(ev.status, remaining - 1);
+      surfacedByNativeCredit.add(ev);
+    }
+  }
+
+  for (const ev of qualifying) {
+    if (surfacedByOwnMessage.has(ev) || surfacedByNativeCredit.has(ev)) continue;
     const path = pathnameOf(ev.url);
     const redacted = redactUrl(ev.url);
-
-    const remainingNativeMessages = nativeFailureCountByStatus.get(ev.status) || 0;
-    let alreadySurfaced = false;
-    if (remainingNativeMessages > 0) {
-      // Claim one native-message slot for this status so a second,
-      // different-path 500 sharing the same status can't also claim it —
-      // see the leading comment on BROWSER_NATIVE_LOAD_FAILURE above.
-      nativeFailureCountByStatus.set(ev.status, remainingNativeMessages - 1);
-      alreadySurfaced = true;
-    } else if (new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(path)) {
-      alreadySurfaced = true;
-    }
-    if (alreadySurfaced) continue;
 
     level1.push({
       type: 'silent_server_error',

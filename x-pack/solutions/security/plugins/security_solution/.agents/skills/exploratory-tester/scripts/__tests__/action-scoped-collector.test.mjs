@@ -226,6 +226,60 @@ console.log('\n── Different statuses each keep their own native-message pool
   );
 }
 
+console.log(
+  '\n── One native message + one path-specific own message, same status, different paths → order must not matter ──'
+);
+{
+  // Regression for a bug the "two distinct 500s + one native message" fix
+  // above introduced: claiming the sole native-message credit strictly by
+  // arrival order (before checking whether an event has its own path-
+  // specific message) let a path-matched event steal the credit a
+  // *different*, genuinely-silent event needed, purely depending on which
+  // one sorted first. Both arrival orders below must produce the same,
+  // correct result: zero silent_server_error findings, since every event
+  // has *something* covering it (its own message or the native one).
+  const networkFor = (bFirst) => [
+    {
+      method: 'GET',
+      url: bFirst ? 'https://kibana.example/api/b' : 'https://kibana.example/api/a',
+      status: 500,
+      ok: false,
+      failure: null,
+      requestedAt: 0,
+      respondedAt: 100,
+      resourceType: 'fetch',
+    },
+    {
+      method: 'GET',
+      url: bFirst ? 'https://kibana.example/api/a' : 'https://kibana.example/api/b',
+      status: 500,
+      ok: false,
+      failure: null,
+      requestedAt: 200,
+      respondedAt: 300,
+      resourceType: 'fetch',
+    },
+  ];
+  const consoleMessages = [
+    { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    { type: 'error', text: '500 @ /api/b' },
+  ];
+
+  const bSecond = reduceAction({ network: networkFor(false), console: consoleMessages });
+  assert(
+    bSecond.level1.filter((i) => i.type === 'silent_server_error').length === 0,
+    '/api/b (own message) arrives SECOND → both /api/a (native credit) and /api/b (own message) are surfaced',
+    JSON.stringify(bSecond.level1)
+  );
+
+  const bFirst = reduceAction({ network: networkFor(true), console: consoleMessages });
+  assert(
+    bFirst.level1.filter((i) => i.type === 'silent_server_error').length === 0,
+    '/api/b (own message) arrives FIRST → /api/b must not steal the native credit /api/a needs; same result as above',
+    JSON.stringify(bFirst.level1)
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // PENDING / STUCK / ABANDONED
 // ══════════════════════════════════════════════════════════════════════════

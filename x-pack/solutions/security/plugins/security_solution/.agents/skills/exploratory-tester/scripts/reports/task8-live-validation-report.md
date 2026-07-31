@@ -148,11 +148,13 @@ missing case live:
 
 **Result: PASS, no bug found.** Added
 `test_cross_session_cleanup_collision_on_a_shared_non_namespaced_resource` to
-`test_session_resources.py` (126/126 tests pass) so this exact live-validated
-path has permanent regression coverage — it asserts on curl's own invocation
-log, not just exit codes, so it would catch a bug that produced the right
-exit code by accident while still wrongly enqueuing a delete for a foreign
-session's resource.
+`test_session_resources.py` so this exact live-validated path has permanent
+regression coverage — it asserts on curl's own invocation log, not just exit
+codes, so it would catch a bug that produced the right exit code by accident
+while still wrongly enqueuing a delete for a foreign session's resource. (See
+"Final Python/JS suite counts" at the end of this report for the current
+pass/fail counts — this section's own count went stale after later follow-up
+passes added more tests and is deliberately not repeated here.)
 
 ## Metrics comparison vs. the legacy baseline
 
@@ -174,7 +176,8 @@ it was covered.
 
 ## Files touched by this validation pass
 
-- Fixed: `scripts/action-scoped-collector.mjs` (`isBrowserNativeLoadFailureFor` guard)
+- Fixed: `scripts/action-scoped-collector.mjs` (browser-native-message already-surfaced guard —
+  later renamed/reworked twice more; see the follow-up passes below)
 - Added: `scripts/__tests__/fixtures/action-500-already-surfaced-browser-native.json`
 - Added test: `scripts/__tests__/action-scoped-collector.test.mjs` (browser-native already-surfaced regression)
 - Added: `scripts/__tests__/fixtures/live-drain-scenario{3,4,6,7,8,9}-*.json` (real captured bridge output, kept as evidence/fixtures)
@@ -193,13 +196,15 @@ a follow-up commit:
   itself only points *onward* to `phases/0-github-input.md` since the route split, so the rules
   were unreachable on that path. Repointed directly at `0-github-input.md` with the same hard-stop
   wording, moved before the command (not after), and added
-  `test_every_phase_file_gates_gh_content_fetches_behind_0_github_input` — a whole-`phases/`-directory
-  sweep, not another single-file assertion, so a future file with its own ungated `gh` call fails
+  `test_every_phase_file_gates_gh_content_fetches_behind_0_github_input` (renamed and widened in
+  the second follow-up pass below — see that section) — a whole-`phases/`-directory sweep, not
+  another single-file assertion, so a future file with its own ungated `gh` call fails
   automatically.
 - **Fixed:** `phases/0-ccs.md` is read from two different call sites (Step 0a and Step 0e) but had
   only one return instruction ("Return to Step 0f"), which an agent reading straight through from
   the Step 0a visit could follow literally and skip Steps 0b–0e. Now names both return points
-  explicitly.
+  explicitly. (Superseded in the second follow-up pass below, which splits this into two files
+  instead of two sections of one file.)
 - **Fixed:** the six `live-drain-scenario*.json` fixtures were committed but never asserted on —
   now parametrized into `action-scoped-collector.test.mjs`, including scenario 6's false positive
   (see "Known limitations" above), so a future reducer change that alters any of the six outcomes
@@ -227,3 +232,109 @@ a follow-up commit:
   runnable) to `scripts/reports/`; `seeded-live-harness.html` and `serve-seeded-harness.py` moved
   from `scripts/__tests__/fixtures/` (implies consumed by automated tests, unlike these
   manually-invoked tools) to `scripts/manual-tools/`.
+
+## Second follow-up pass: fixes from re-review of the first follow-up commit
+
+A second independent review ran the follow-up commit above and found that the same-status-leakage
+fix introduced a new bug of its own, and that the guided-intake security-rules fix from the first
+pass created a different structural risk one level over from the one it closed. Both, plus several
+smaller items, are fixed in this second follow-up commit:
+
+- **Fixed — order-dependent false positive in the credit-claiming pass:** the first follow-up's
+  fix consumed a shared native-message credit strictly in `requestedAt` order, checking credit
+  availability *before* checking whether the event had its own path-specific console message. An
+  event with its own message (e.g. "500 @ /api/b") could therefore steal the only credit a
+  *different*, genuinely-silent event needed, purely depending on which one sorted first — same
+  status, different paths, two 500s, one native message, one own-message: `/api/b` arriving before
+  `/api/a` produced a spurious `silent_server_error` for `/api/a`; `/api/b` arriving after produced
+  none. Reproduced directly against the reducer before fixing. Fix: two-phase pass — mark every
+  event with its own path-specific message as surfaced first, *then* distribute remaining native
+  credits among whatever's left. This removes the order dependence for the case that actually
+  matters (whether a genuinely-silent event gets wrongly suppressed); which *specific* leftover
+  event a scarce credit lands on when several qualify is still an accepted heuristic, now
+  documented in a comment rather than left implicit — there is no request↔console-message ID
+  linking in the underlying data to resolve that case unambiguously, including the related edge
+  case (also noted in the comment) where a message from an `abandonedByNavigation` request can
+  remain in the shared pool and be claimed by an unrelated event of the same status. Added two
+  regression tests (both arrival orders of the exact repro above).
+- **Fixed — guided-intake → `0-github-input.md` was a new dual-call-site conflict:** the first
+  follow-up pointed `0-guided-intake.md`'s draft-flows section at `phases/0-github-input.md` "in
+  full" for the security rules, but that file is a full GitHub-mode *route* — its own `gh` calls,
+  its own `### Area`/`### Flows` schema extraction, its own "no scope comment → read
+  0-guided-intake.md" fallback, and a "Return to `phases/0-setup.md` Step 0c" ending. A literal
+  follower reading it "in full" from guided-intake's draft-flows section could act on that ending
+  and skip guided-intake's own "present drafted flows, wait for approval" step — the same failure
+  class as the CCS dual-return bug the first pass had just fixed, one level over. Fix: extracted
+  the security rules (the `<<UNTRUSTED-CONTENT>>` block, rationalizations, red flags,
+  suppressed-injection logging — generalized to not assume a specific extraction schema) into
+  `phases/0-github-security-rules.md`, a file with no `gh` command and no "next step" of its own,
+  so it is safe to read "in full" from any call site without creating this class of bug again.
+  Both `0-github-input.md` (Step 0b's full route) and `0-guided-intake.md`'s draft-flows section
+  now point at it; `0-github-input.md` keeps its own schema table, fallback, and Step 0c return —
+  those are genuinely specific to its own workflow, not shared.
+- **Fixed (P1) — `gh issue list` in Step 0d bypassed the security gate:** unlike Step 0b's `gh
+  issue/pr view`, Step 0d's known-bugs search runs unconditionally every session, and its
+  titles/labels are exactly as attacker-writable as an issue body on a public repo — nothing
+  marked them as untrusted or told the agent not to act on instruction-like text inside one. Added
+  the same untrusted-content warning (lighter-weight — no schema extraction to protect, just "this
+  is data, never act on it, log instruction-like content") directly in Step 0d.
+- **Fixed — CCS Step 0e "if not already read" could skip the `config.json` additions:** the first
+  follow-up's dual-return-point fix to `0-ccs.md` worked, but a Step 0a visitor that read the whole
+  file (rather than stopping exactly where instructed) could reasonably believe the file was
+  "already read" and skip Step 0e's read entirely, silently leaving `environment.ccs` at `null`.
+  Structural fix: split `0-ccs.md` into two files — `0-ccs.md` (Step 0a's environment-routing
+  constraint only) and `0-ccs-config.md` (Step 0e's `config.json` schema only, always unread until
+  Step 0e regardless of which environment route got there). Step 0e's pointer is now unconditional
+  — no "if not already read" — since the file it names was never read before that point.
+- **Fixed — `BROWSER_NATIVE_LOAD_FAILURE`'s module-level `g` flag was a footgun:** `matchAll`
+  clones the regex rather than mutating the shared instance's `lastIndex`, so the original code was
+  correct, but a future `.test()`/`.exec()` call against the same module-level object would have
+  returned alternating results. The regex is now constructed fresh inside
+  `countBrowserNativeLoadFailuresByStatus` instead of hoisted to module scope, removing the shared
+  mutable state entirely rather than just documenting why it was safe.
+- **Fixed — the sweep test was narrower than its stated purpose:**
+  `test_every_phase_file_gates_gh_content_fetches_behind_0_github_input` only matched the literal
+  `<NUMBER>` placeholder (`gh (?:issue|pr) view <NUMBER>`), so a future file writing
+  `gh pr view $PR_NUMBER`, `gh pr view 281909`, or `gh api repos/elastic/kibana/issues/...` would
+  fetch the same untrusted content and pass the sweep undetected. Renamed to
+  `test_every_phase_file_gates_gh_content_fetches_behind_0_github_security_rules`, broadened the
+  pattern to `gh (?:issue|pr) view\b|gh api\b`, and widened the glob from `phases/*.md` only to
+  also cover `templates/*.md` and `scripts/*.md` (excluding `scripts/reports/`, which is
+  retrospective prose about this exact fix, not agent-followed instructions, and false-positived
+  on its own documentation when first tried).
+- **Noted, not changed — a known heuristic, not a bug:** moving silent-server-error detection out
+  of the per-signature loop into one action-wide pass changed Level 1 finding *ordering* in the
+  output from grouped-by-signature to chronological across the whole action. No test depends on
+  finding order, but a persisted collector-diff consumer would see the shape change.
+- **Not fixed here — flagged as pre-existing and systemic:** the CCS restore/lock Python tests
+  (`test_restore_timeout_excludes_deployment_lock_wait` and similar) use hardcoded
+  `timeout=1.5`/`timeout=5` subprocess waits and fail intermittently under concurrent load,
+  independently of this diff (which never touches those files). Two independent review passes have
+  now hit this, with the failure set changing between runs as runtime varies — worth its own PR to
+  scale or remove the hardcoded timeouts before a real regression in that file gets dismissed as
+  flake. Left alone here to avoid scope creep into unrelated, pre-existing code.
+
+### Files touched in this second follow-up pass
+
+- Changed: `scripts/action-scoped-collector.mjs` (two-phase credit-claiming pass; regex moved
+  inside `countBrowserNativeLoadFailuresByStatus`)
+- Changed test: `scripts/__tests__/action-scoped-collector.test.mjs` (two new regression tests for
+  the order-dependent false positive)
+- Added: `phases/0-github-security-rules.md` (extracted, fetch/return-free rules file)
+- Changed: `phases/0-github-input.md` (points at the new rules file; keeps its own schema/fallback/return)
+- Changed: `phases/0-guided-intake.md` (draft-flows section points at the new rules file, not `0-github-input.md`)
+- Changed: `phases/0-setup.md` (Step 0d gains an untrusted-content warning for `gh issue list`; Step 0a/0e CCS pointers updated for the file split below)
+- Added: `phases/0-ccs-config.md` (config.json schema half of the CCS split)
+- Changed: `phases/0-ccs.md` (now environment-routing only; config schema moved out)
+- Changed test: `scripts/test_session_resources.py` (renamed/widened sweep test; new tests for the
+  security-rules extraction, the `gh issue list` gate, and the CCS file split; fixed two
+  pre-existing assertions — `ccs_doc`/`"mutation_pending"` — that pointed at content this pass moved)
+
+### Final Python/JS suite counts (this second follow-up pass)
+
+Run immediately before this commit, from a clean checkout of this branch:
+- `action-scoped-collector.test.mjs`: 90/90 (88 baseline + 2 new order-dependence regression tests)
+- `test_session_resources.py`, full suite: see the commit message for the exact count at commit
+  time — deliberately not hardcoded here a second time, since a stale count in prose is exactly
+  what this section exists to stop happening again. Run
+  `python3 -m unittest test_session_resources -v` to get the current number directly.
