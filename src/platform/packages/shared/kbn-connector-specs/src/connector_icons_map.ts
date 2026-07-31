@@ -221,6 +221,15 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
   ],
   [
+    '.ansible_controller',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconAnsibleController" */ './specs/ansible_controller/icon'
+        )
+    ),
+  ],
+  [
     '.argocd',
     lazy(() => import(/* webpackChunkName: "connectorIconArgocd" */ './specs/argocd/icon')),
   ],
