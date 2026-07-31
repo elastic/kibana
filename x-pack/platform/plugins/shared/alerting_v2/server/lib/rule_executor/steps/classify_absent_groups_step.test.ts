@@ -245,7 +245,7 @@ describe('ClassifyAbsentGroupsStep', () => {
 
       const finalBatch = results[results.length - 1].state.alertEventsBatch!;
       expect(finalBatch).toHaveLength(1);
-      expect(finalBatch[0].rule.version).toBe(9);
+      expect(finalBatch[0]?.rule?.version).toBe(9);
     });
   });
 
