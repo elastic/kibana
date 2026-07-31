@@ -101,9 +101,12 @@ export const Description = ({
         max-width: 40vw;
       `,
       header: css`
-        padding: ${euiTheme.size.s};
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
         align-items: center;
         min-height: ${euiTheme.size.xxl};
+      `,
+      headerWithBorder: css`
+        border-bottom: ${euiTheme.border.thin};
       `,
       editIcon: css`
         .euiButtonIcon__icon {
@@ -112,8 +115,7 @@ export const Description = ({
       `,
       content: css`
         background: ${euiTheme.colors.backgroundBaseSubdued};
-        border-radius: ${euiTheme.size.xs};
-        padding: ${euiTheme.size.s};
+        padding: ${euiTheme.size.m};
 
         > div {
           padding: 0;
@@ -121,7 +123,7 @@ export const Description = ({
       `,
       unsavedDraft: css`
         border-top: ${euiTheme.border.thin};
-        padding: ${euiTheme.size.s};
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
       `,
     }),
     [euiTheme, sFontSize]
@@ -135,19 +137,19 @@ export const Description = ({
   return (
     <EuiPanel
       paddingSize="none"
-      hasBorder={false}
+      hasBorder
       hasShadow={false}
       grow={false}
       color="transparent"
       data-test-subj="description"
     >
-      <EuiFlexGroup direction="column" gutterSize={isEditable ? 'none' : 's'}>
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem>
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
             gutterSize="s"
-            css={styles.header}
+            css={[styles.header, !isCollapsed && styles.headerWithBorder]}
           >
             <EuiFlexItem grow={false}>
               <EuiText data-test-subj="description-title" css={styles.title}>
