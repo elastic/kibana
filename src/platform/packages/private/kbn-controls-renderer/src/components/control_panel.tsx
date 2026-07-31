@@ -18,11 +18,7 @@ import {
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
 import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
-import {
-  attachClosestEdge,
-  extractClosestEdge,
-  type Edge,
-} from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import { attachClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import {
@@ -52,12 +48,13 @@ import type { ControlsRendererParentApi } from '../types';
 import { apiPublishesLabel } from '../utils';
 import { controlWidthStyles } from './control_panel.styles';
 import { ControlClone } from './control_clone';
+import type { DropIndicatorEdge } from './drag_drop_reorder';
 import { DragHandle, DragHandleContext } from './drag_handle';
 import { FloatingActions } from './floating_actions';
 import { ControlLabelTooltip } from './control_label_tooltip';
 import { useIndicateRelatedPanelsSelector } from '../hooks';
 
-const DropIndicator = ({ edge }: { edge: Edge }) => {
+const DropIndicator = ({ edge }: { edge: DropIndicatorEdge }) => {
   const styles = useMemoCss(controlPanelStyles);
   return (
     <span
@@ -73,12 +70,13 @@ const DropIndicator = ({ edge }: { edge: Edge }) => {
 export const ControlPanel = ({
   parentApi,
   control: { id, grow, width, type },
-  index,
+  dropIndicatorEdge,
   onKeyboardReorder,
 }: {
   parentApi: ControlsRendererParentApi;
   control: Required<PinnedControlLayoutState>;
-  index: number;
+  /** Which edge to preview the in-flight drop against, or `null` when this control is not the drop slot */
+  dropIndicatorEdge: DropIndicatorEdge | null;
   onKeyboardReorder: (id: string, direction: 'back' | 'forward') => void;
 }) => {
   const styles = useMemoCss(controlPanelStyles);
@@ -89,7 +87,6 @@ export const ControlPanel = ({
 
   const elementRef = useRef<HTMLElement | null>(null);
   const dragHandleRef = useRef<HTMLDivElement>(null);
-  const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const [viewMode, disabledActionIds, relatedPanelsIndicatorId] = useBatchedPublishingSubjects(
@@ -180,7 +177,7 @@ export const ControlPanel = ({
       draggable({
         element,
         dragHandle: dragHandleRef.current ?? undefined,
-        getInitialData: () => ({ id, index }),
+        getInitialData: () => ({ id }),
         onGenerateDragPreview: ({ nativeSetDragImage }) => {
           setCustomNativeDragPreview({
             nativeSetDragImage,
@@ -207,17 +204,12 @@ export const ControlPanel = ({
         canDrop: ({ source }) => source.data.id !== id,
         getData: ({ input, element: targetElement }) =>
           attachClosestEdge(
-            { id, index },
+            { id },
             { input, element: targetElement, allowedEdges: ['left', 'right'] }
           ),
-        onDrag: ({ self, source }) => {
-          setClosestEdge(source.data.id === id ? null : extractClosestEdge(self.data));
-        },
-        onDragLeave: () => setClosestEdge(null),
-        onDrop: () => setClosestEdge(null),
       })
     );
-  }, [id, index, isEditable, parentApi]);
+  }, [id, isEditable, parentApi]);
 
   const handleDragHandleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -286,7 +278,7 @@ export const ControlPanel = ({
         css={css([styles.wrapper, isDragging && styles.draggingItem, styles.controlWidthStyles])}
         className={`controlFrameWrapper--${width}`}
       >
-        {closestEdge && <DropIndicator edge={closestEdge} />}
+        {dropIndicatorEdge && <DropIndicator edge={dropIndicatorEdge} />}
         <FloatingActions
           data-test-subj="control-frame-floating-actions"
           api={api}

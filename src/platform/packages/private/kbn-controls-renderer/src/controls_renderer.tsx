@@ -13,11 +13,17 @@ import { distinctUntilChanged } from 'rxjs';
 
 import { monitorForElements } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
+import type { BaseEventPayload, ElementDragType } from '@atlaskit/pragmatic-drag-and-drop/types';
 import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { ControlPanel } from './components/control_panel';
-import { moveControlByStep, reorderControlsByEdge } from './components/drag_drop_reorder';
+import {
+  getDropIndicatorPosition,
+  moveControlByStep,
+  reorderControlsByEdge,
+  type DropIndicatorPosition,
+} from './components/drag_drop_reorder';
 import type { ControlsLayout, ControlsRendererParentApi } from './types';
 import { apiPublishesFocusedPanelId } from './utils';
 
@@ -32,6 +38,7 @@ export const ControlsRenderer = ({
 }) => {
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
   const [announcement, setAnnouncement] = useState('');
+  const [dropIndicator, setDropIndicator] = useState<DropIndicatorPosition | null>(null);
 
   const controlsInOrder: Array<ControlsLayout['controls'][string] & { id: string }> =
     useMemo(() => {
@@ -75,25 +82,39 @@ export const ControlsRenderer = ({
 
   /** Pointer drag-and-drop reordering, handled by a single monitor for the whole group */
   useEffect(() => {
+    /** Reads the drop target under the pointer, or `null` when there is nothing droppable there */
+    const readDropTarget = ({ location, source }: BaseEventPayload<ElementDragType>) => {
+      const target = location.current.dropTargets[0];
+      if (!target) return null;
+
+      const sourceId = source.data.id;
+      const targetId = target.data.id;
+      if (typeof sourceId !== 'string' || typeof targetId !== 'string') return null;
+
+      return { sourceId, targetId, closestEdge: extractClosestEdge(target.data) };
+    };
+
     return monitorForElements({
       canMonitor: ({ source }) =>
         typeof source.data.id === 'string' && Boolean(controlState.controls[source.data.id]),
-      onDrop: ({ location, source }) => {
-        const target = location.current.dropTargets[0];
-        if (!target) return;
+      onDrag: (args) => {
+        const dropTarget = readDropTarget(args);
+        const next = dropTarget
+          ? getDropIndicatorPosition({ controls: controlState.controls, ...dropTarget })
+          : null;
 
-        const sourceId = source.data.id;
-        const targetId = target.data.id;
-        if (typeof sourceId !== 'string' || typeof targetId !== 'string' || sourceId === targetId) {
-          return;
-        }
+        // `onDrag` fires on every pointer move, so only re-render when the slot itself changes
+        setDropIndicator((current) =>
+          current?.index === next?.index && current?.edge === next?.edge ? current : next
+        );
+      },
+      onDrop: (args) => {
+        setDropIndicator(null);
 
-        const result = reorderControlsByEdge({
-          controls: controlState.controls,
-          sourceId,
-          targetId,
-          closestEdge: extractClosestEdge(target.data),
-        });
+        const dropTarget = readDropTarget(args);
+        if (!dropTarget) return;
+
+        const result = reorderControlsByEdge({ controls: controlState.controls, ...dropTarget });
         if (result) {
           onControlsChanged({ controls: result });
         }
@@ -126,7 +147,7 @@ export const ControlsRenderer = ({
               ...control,
               id: control.id!,
             }}
-            index={index}
+            dropIndicatorEdge={dropIndicator?.index === index ? dropIndicator.edge : null}
             onKeyboardReorder={onKeyboardReorder}
           />
         ))}

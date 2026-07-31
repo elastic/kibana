@@ -90,7 +90,7 @@ describe.skip('render', () => {
             order: 0,
           }}
           parentApi={parentApi}
-          index={0}
+          dropIndicatorEdge={null}
           onKeyboardReorder={jest.fn()}
         />
       );
@@ -112,7 +112,7 @@ describe.skip('render', () => {
             grow: true,
           }}
           parentApi={parentApi}
-          index={0}
+          dropIndicatorEdge={null}
           onKeyboardReorder={jest.fn()}
         />
       );

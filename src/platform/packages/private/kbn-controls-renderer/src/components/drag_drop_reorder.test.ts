@@ -7,10 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Edge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 
 import type { ControlsLayout } from '../types';
-import { moveControlByStep, reorderControlsByEdge } from './drag_drop_reorder';
+import {
+  getDropIndicatorPosition,
+  moveControlByStep,
+  reorderControlsByEdge,
+} from './drag_drop_reorder';
 
 type Controls = ControlsLayout['controls'];
 
@@ -123,6 +128,124 @@ describe('reorderControlsByEdge', () => {
     expect(
       reorderControlsByEdge({ controls, sourceId: 'a', targetId: 'missing', closestEdge: 'left' })
     ).toBeNull();
+  });
+});
+
+describe('getDropIndicatorPosition', () => {
+  it('previews the slot after the target when moving a control forwards', () => {
+    expect(
+      getDropIndicatorPosition({
+        controls: buildControls(['a', 'b', 'c', 'd']),
+        sourceId: 'a',
+        targetId: 'c',
+        closestEdge: 'right',
+      })
+    ).toEqual({ index: 2, edge: 'right' });
+  });
+
+  it('previews the slot before the target when moving a control backwards', () => {
+    expect(
+      getDropIndicatorPosition({
+        controls: buildControls(['a', 'b', 'c', 'd']),
+        sourceId: 'd',
+        targetId: 'b',
+        closestEdge: 'left',
+      })
+    ).toEqual({ index: 1, edge: 'left' });
+  });
+
+  it('previews the same slot for both edges that describe a single gap', () => {
+    const controls = buildControls(['a', 'b', 'c', 'd']);
+    // The right edge of `b` and the left edge of `c` are the same gap, so dragging `a` to either
+    // lands it between them and must be previewed identically.
+    const afterB = getDropIndicatorPosition({
+      controls,
+      sourceId: 'a',
+      targetId: 'b',
+      closestEdge: 'right',
+    });
+    const beforeC = getDropIndicatorPosition({
+      controls,
+      sourceId: 'a',
+      targetId: 'c',
+      closestEdge: 'left',
+    });
+
+    expect(afterB).toEqual({ index: 1, edge: 'right' });
+    expect(beforeC).toEqual(afterB);
+  });
+
+  it('hides the indicator when dropping beside the dragged control would not move it', () => {
+    const controls = buildControls(['a', 'b', 'c']);
+    expect(
+      getDropIndicatorPosition({ controls, sourceId: 'a', targetId: 'b', closestEdge: 'left' })
+    ).toBeNull();
+    expect(
+      getDropIndicatorPosition({ controls, sourceId: 'b', targetId: 'a', closestEdge: 'right' })
+    ).toBeNull();
+    expect(
+      getDropIndicatorPosition({ controls, sourceId: 'b', targetId: 'c', closestEdge: 'left' })
+    ).toBeNull();
+  });
+
+  it('returns null when an id is unknown', () => {
+    const controls = buildControls(['a', 'b', 'c']);
+    expect(
+      getDropIndicatorPosition({
+        controls,
+        sourceId: 'missing',
+        targetId: 'b',
+        closestEdge: 'left',
+      })
+    ).toBeNull();
+    expect(
+      getDropIndicatorPosition({
+        controls,
+        sourceId: 'a',
+        targetId: 'missing',
+        closestEdge: 'left',
+      })
+    ).toBeNull();
+  });
+
+  describe('agreement with reorderControlsByEdge', () => {
+    const ids = ['a', 'b', 'c', 'd'];
+    const controls = buildControls(ids);
+    const edges: Array<Edge | null> = ['left', 'right', null];
+    const everyDrop = ids.flatMap((sourceId) =>
+      ids.flatMap((targetId) =>
+        edges.map((closestEdge) => ({ controls, sourceId, targetId, closestEdge }))
+      )
+    );
+
+    it('shows an indicator exactly when the drop would move the control', () => {
+      const mismatches = everyDrop.filter(
+        (drop) => Boolean(getDropIndicatorPosition(drop)) !== Boolean(reorderControlsByEdge(drop))
+      );
+
+      expect(mismatches).toEqual([]);
+    });
+
+    it('shows a single indicator for every hover position that produces the same order', () => {
+      const indicatorsByOrder = new Map<string, Set<string>>();
+
+      everyDrop.forEach((drop) => {
+        const reordered = reorderControlsByEdge(drop);
+        if (!reordered) return;
+
+        const indicator = getDropIndicatorPosition(drop);
+        const key = `${drop.sourceId} -> ${orderedIds(reordered).join(',')}`;
+        const indicators = indicatorsByOrder.get(key) ?? new Set<string>();
+        indicators.add(`${indicator?.index}:${indicator?.edge}`);
+        indicatorsByOrder.set(key, indicators);
+      });
+
+      const ambiguous = [...indicatorsByOrder]
+        .filter(([, indicators]) => indicators.size > 1)
+        .map(([key, indicators]) => [key, [...indicators]]);
+
+      expect(ambiguous).toEqual([]);
+    });
   });
 });
 
