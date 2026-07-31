@@ -36341,7 +36341,6 @@
     "xpack.observability_onboarding.addDataPageV2.subtitle": "システムを接続し、ログ、メトリクス、トレースの状況を網羅的に確認できます。",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "APIキー",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "APIキーはまだありません",
-    "xpack.observability_onboarding.apiEndpoints.copyButton": "クリップボードにコピー",
     "xpack.observability_onboarding.apiEndpoints.createKey": "キーを作成",
     "xpack.observability_onboarding.apiEndpoints.createKeyError": "APIキーを作成できませんでした",
     "xpack.observability_onboarding.apiEndpoints.createKeyErrorFallback": "APIキーの作成中に問題が発生しました。もう一度試すか、管理者に連絡してください。",
