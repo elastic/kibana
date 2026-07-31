@@ -1170,6 +1170,14 @@ module.exports = {
       },
     },
     {
+      // This file is the security control that hardens lodash.template, so it must load the
+      // otherwise-restricted lodash template modules in order to wrap them with safe proxies.
+      files: ['src/setup_node_env/harden/index.js'],
+      rules: {
+        'no-restricted-modules': 'off',
+      },
+    },
+    {
       files: ['**/common/**/*.{js,mjs,ts,tsx}', '**/public/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'no-restricted-imports': [
