@@ -30,6 +30,12 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   actions the connector actually provides. Keep to one sentence, ~15 words.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
+- **No numeric config fields**: Flag any `z.number()` (or `.int()`) field in the connector-level `config`
+  `schema`. The form-generator's widget registry has no numeric widget, so this throws `No widget found
+  for schema type: ZodNumberFormat` when a human opens the connector creation form — a runtime-only error
+  that passes type-check, lint, and mocked unit tests cleanly. It should instead be a `.regex(/^\d+$/)`-validated
+  string with `widget: 'text'`, coerced to a number in the handler. This does not apply to action `input`
+  schemas (never rendered as a form).
 - **Action param schema (Workflow editor)**: For custom connector actions, the Zod schema in the input handler should
   give each param a short, clear `.describe()` so the Workflow editor shows helpful descriptions when mapping inputs.
 - **Auth**: Auth type matches the service. **Auth format** (e.g. header value) must match the vendor's official docs;
@@ -85,6 +91,21 @@ actual documented behavior — flag them even without live access to the API, ba
   relies on the HTTP client's default. A vendor expecting the repeated-key form (`?id=1&id=2`) will reject
   the client library's default bracketed form (`?id[]=1&id[]=2]`), or vice versa — this doesn't show up in
   unit tests that mock the client.
+- **Query params vs. request body for optional modifier params**: If a `POST`/`PATCH` action's only
+  required input is a path segment (an ID) but it also accepts optional modifiers (`scope`, filters,
+  `all_X` flags, an expiry timestamp), verify against the vendor's docs whether those modifiers belong in
+  the query string or the JSON body — check each action independently, don't infer it from a similar
+  sibling action in the same file (e.g. a resource's mute/unmute, or enable/disable). Both halves of such a
+  pair can share the same wrong assumption, so contrasting them against each other won't reveal the bug;
+  only the vendor's own request example will. This doesn't throw — the vendor accepts the request and
+  silently ignores the misplaced param — so it won't show up in a test or live-testing pass unless the
+  optional param is actually set to a non-default value; flag it as unverified if the only tests/live runs
+  exercise the required-fields-only path. If the diff's commit history shows this was *already* "fixed"
+  once (moved from query to body or vice versa), don't treat that as settled — re-derive the answer from
+  the vendor's actual docs page yourself. A prior fix based on a client library's internal code or a
+  third-party OpenAPI mirror can be confidently wrong; those aren't a substitute for the vendor's own
+  parameter table (look for an explicit "Query String(s)" vs. "Request Body" heading on the vendor's own
+  endpoint reference page).
 - **"At least one of" update inputs**: If every field on an update-action's input schema is optional, check
   for a `.refine()` (or equivalent) requiring at least one to be set. Without it, a call with no fields set
   silently no-ops instead of erroring.
@@ -108,6 +129,19 @@ actual documented behavior — flag them even without live access to the API, ba
   promises (e.g. `?include=services,groups`). Without it, those fields come back `null`/empty on a
   successful 200 response — flag any handler returning a "flattened" relationship field with no
   corresponding `include`/field-selection param in the request.
+- **Hardcoded GraphQL type/field names not verified against the real schema**: For any GraphQL-backed
+  connector (queries/mutations built as string templates), every input type name (`$filter: SomeInput`),
+  field selection, and return-type field must be checked against the vendor's *actual* schema, not just
+  a docs example or general familiarity with the vendor. Vendor docs pages frequently show simplified,
+  inconsistent, or outdated examples, and it's easy to write a plausible-sounding but nonexistent type
+  name (e.g. inventing an `XyzFilterInput` suffix, or assuming a field like `routingKey` exists on a
+  response type because it "sounds right"). These errors compile and pass mocked unit tests cleanly —
+  they only surface as `Unknown type "..."` or `Cannot query field "..." on type "..."` errors when a real
+  request hits the live API, so a code-only review can't catch them by inspection alone. If live testing
+  hasn't run yet, flag every GraphQL type/field name in the diff as unverified and recommend confirming it
+  via schema introspection (see `create-connector/reference/custom-connector-setup.md`'s "Verify GraphQL
+  Schemas via Introspection" section) before merging. If live testing already ran, confirm the PR
+  description's `## Validated` table calls out which query/mutation shapes were actually schema-verified.
 
 ### LLM Descriptions and Skill Content
 
@@ -190,6 +224,10 @@ Report documentation issues alongside code issues.
   the PR description
 - **TypeScript** (touched files): Use strict equality (`===` / `!==`), follow repo style (early returns, explicit
   types, no `any`)
+- **Lint**: Run `node scripts/eslint <touched files>` and treat any reported error as a must-fix. This is
+  fast, requires no running Kibana/Elasticsearch, and catches mechanical rule violations (e.g. a forbidden
+  non-null assertion, `@typescript-eslint/no-non-null-assertion`, in a freshly-written test file) that a
+  manual reading pass can miss and that would otherwise only surface once CI's lint step fails.
 - **Dead code from iteration**: Flag schemas, types, or constants that are defined but never referenced —
   common leftovers from an earlier design that was later simplified.
 - **Duplicated calls**: Flag a helper (e.g. a URL builder) called more than once within the same handler
