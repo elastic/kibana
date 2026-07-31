@@ -103,22 +103,35 @@ export function useMigrationRuleDetailsFlyout({
     [extraTabsFactory, migrationRuleData?.migrationRule]
   );
 
-  return {
-    migrationRuleDetailsFlyout: migrationRuleData?.migrationRule && (
-      <MigrationRuleDetailsFlyout
-        migrationRule={migrationRuleData.migrationRule}
-        matchedPrebuiltRule={migrationRuleData.matchedPrebuiltRule}
-        size="l"
-        closeFlyout={closeMigrationRuleDetails}
-        ruleActions={ruleActions}
-        extraTabs={extraTabs}
-        isDataLoading={isLoading}
-        navigation={navigation}
-      />
-    ),
-    openMigrationRuleDetails,
-    closeMigrationRuleDetails,
-    openedMigrationRuleId: migrationRuleData?.migrationRule ? migrationRuleId : undefined,
-    navigation,
-  };
+  return useMemo(
+    () => ({
+      migrationRuleDetailsFlyout: migrationRuleData?.migrationRule && (
+        <MigrationRuleDetailsFlyout
+          migrationRule={migrationRuleData.migrationRule}
+          matchedPrebuiltRule={migrationRuleData.matchedPrebuiltRule}
+          size="l"
+          closeFlyout={closeMigrationRuleDetails}
+          ruleActions={ruleActions}
+          extraTabs={extraTabs}
+          isDataLoading={isLoading}
+          navigation={navigation}
+        />
+      ),
+      openMigrationRuleDetails,
+      closeMigrationRuleDetails,
+      openedMigrationRuleId: migrationRuleData?.migrationRule ? migrationRuleId : undefined,
+      navigation,
+    }),
+    [
+      migrationRuleData?.migrationRule,
+      migrationRuleData?.matchedPrebuiltRule,
+      closeMigrationRuleDetails,
+      ruleActions,
+      extraTabs,
+      isLoading,
+      navigation,
+      openMigrationRuleDetails,
+      migrationRuleId,
+    ]
+  );
 }

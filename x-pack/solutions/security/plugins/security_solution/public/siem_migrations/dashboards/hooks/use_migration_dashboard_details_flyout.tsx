@@ -89,21 +89,32 @@ export function useMigrationDashboardDetailsFlyout({
     [migrationDashboardData, dashboardActionsFactory, closeMigrationDashboardDetails]
   );
 
-  return {
-    migrationDashboardDetailsFlyout: migrationDashboardData?.migrationDashboard ? (
-      <DashboardMigrationDetailsFlyout
-        migrationDashboard={migrationDashboardData.migrationDashboard}
-        closeFlyout={closeMigrationDashboardDetails}
-        isLoading={isLoading}
-        dashboardActions={dashboardActions}
-        navigation={navigation}
-      />
-    ) : null,
-    openMigrationDashboardDetails,
-    closeMigrationDashboardDetails,
-    openedMigrationDashboardId: migrationDashboardData?.migrationDashboard
-      ? migrationDashboardId
-      : undefined,
-    navigation,
-  };
+  return useMemo(
+    () => ({
+      migrationDashboardDetailsFlyout: migrationDashboardData?.migrationDashboard ? (
+        <DashboardMigrationDetailsFlyout
+          migrationDashboard={migrationDashboardData.migrationDashboard}
+          closeFlyout={closeMigrationDashboardDetails}
+          isLoading={isLoading}
+          dashboardActions={dashboardActions}
+          navigation={navigation}
+        />
+      ) : null,
+      openMigrationDashboardDetails,
+      closeMigrationDashboardDetails,
+      openedMigrationDashboardId: migrationDashboardData?.migrationDashboard
+        ? migrationDashboardId
+        : undefined,
+      navigation,
+    }),
+    [
+      migrationDashboardData,
+      closeMigrationDashboardDetails,
+      isLoading,
+      dashboardActions,
+      navigation,
+      openMigrationDashboardDetails,
+      migrationDashboardId,
+    ]
+  );
 }
