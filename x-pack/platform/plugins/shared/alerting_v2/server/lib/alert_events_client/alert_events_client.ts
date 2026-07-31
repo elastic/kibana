@@ -7,6 +7,7 @@
 
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import Boom from '@hapi/boom';
 import { inject, injectable } from 'inversify';
 import type { CreateAlertEventData, CreateAlertEventResponse } from '@kbn/alerting-v2-schemas';
 import {
@@ -127,10 +128,18 @@ export class AlertEventsClient {
       ...(event.severity != null ? { severity: event.severity } : {}),
     };
 
-    await this.storageService.bulkIndexDocs({
+    const { errors } = await this.storageService.bulkIndexDocs({
       index: ALERT_EVENTS_DATA_STREAM,
       docs: [doc],
     });
+
+    if (errors.length > 0) {
+      const first = errors[0];
+      throw Boom.badData(`Failed to persist alert event: ${first.message}`, {
+        code: first.code,
+        details: first.details,
+      });
+    }
 
     return {
       group_hash: groupHash,
