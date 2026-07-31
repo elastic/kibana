@@ -145,8 +145,8 @@ export function ServiceSettingsFlyout({
   const getFieldLabel = (fieldName: string): string => {
     const meta = FIELD_CONFIG[fieldName];
     if (!meta) return fieldName;
-    if (meta.transport === 'aws-s3') return `[S3] ${meta.label}`;
-    if (meta.transport === 'aws-cloudwatch') return `[CloudWatch] ${meta.label}`;
+    if (hasTransport && meta.transport === 'aws-s3') return `[S3] ${meta.label}`;
+    if (hasTransport && meta.transport === 'aws-cloudwatch') return `[CloudWatch] ${meta.label}`;
     return meta.label;
   };
 
