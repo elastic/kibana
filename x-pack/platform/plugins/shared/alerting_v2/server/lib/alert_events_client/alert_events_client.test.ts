@@ -6,11 +6,7 @@
  */
 
 import { createHash } from 'crypto';
-import {
-  AlertEventsClient,
-  getGroupHash,
-  getValueByDottedPath,
-} from './alert_events_client';
+import { AlertEventsClient, getGroupHash, getValueByDottedPath } from './alert_events_client';
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
 import { alertEpisodeStatus } from '../../resources/datastreams/alert_events';
@@ -48,9 +44,9 @@ describe('getGroupHash', () => {
   const spaceId = 'default';
 
   it('hashes explicit fingerprint with space and source once', () => {
-    expect(
-      getGroupHash({ source: 'datadog', fingerprint: 'fp-1' }, spaceId)
-    ).toBe(sha256('default:datadog:fp-1'));
+    expect(getGroupHash({ source: 'datadog', fingerprint: 'fp-1' }, spaceId)).toBe(
+      sha256('default:datadog:fp-1')
+    );
   });
 
   it('resolves fingerprint_fields only under data (bare + nested)', () => {
@@ -62,9 +58,7 @@ describe('getGroupHash', () => {
       },
       spaceId
     );
-    expect(hash).toBe(
-      sha256('default:datadog:monitor_id|scope|labels.env|55501|host:web-01|prod')
-    );
+    expect(hash).toBe(sha256('default:datadog:monitor_id|scope|labels.env|55501|host:web-01|prod'));
   });
 
   it('ignores root fields named in fingerprint_fields', () => {
@@ -108,7 +102,9 @@ describe('getGroupHash', () => {
 describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
   const spaceId = 'default';
 
-  const createClient = (queryRows: Array<{ last_episode_id: string; last_episode_status: string }>) => {
+  const createClient = (
+    queryRows: Array<{ last_episode_id: string; last_episode_status: string }>
+  ) => {
     const storageService = createMockStorageServiceContract();
     storageService.bulkIndexDocs.mockImplementation(async ({ docs }) => ({
       attempted: docs.length,
