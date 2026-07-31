@@ -12,26 +12,138 @@
  * around individual worker hooks. The schema-level A2/A3 assertions live in
  * schema_conformance.test.ts (L1 Jest). This spec covers the behavioral
  * dimension — what happens when the full converse API receives edge-case input.
+ *
+ * A1 was previously a skip-stub attributed to a missing "Orchestrator-level
+ * dedup layer". That attribution was wrong: `saveEvidencePackage` already
+ * writes overwrite-by-id, so collapsing duplicates only ever needed a stable
+ * id, not a new orchestration component. The gate now asserts against a real
+ * opt-in `workerRun.dedupTag` (see `emit_proposal.ts`).
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { tags, evaluate, getToolCallSteps } from '@kbn/evals';
 import {
   DEEP_WATCH_TOOL_IDS,
   DEEP_WATCH_FORENSICS_SKILL_ID,
   agentBuilderDefaultAgentId,
+  PND_EMIT_PROPOSAL_PATH,
+  PND_API_VERSION,
+  PND_EVIDENCE_INDEX,
 } from '../src/constants';
+
+interface EmitProposalResponse {
+  proposalId: string;
+  evidenceId: string;
+  workerEvalId: string;
+  status: string;
+  written: string[];
+}
 
 evaluate.describe(
   'Deep Watch Forensics — Gate Family A (Behavioral)',
   { tag: tags.stateful.classic },
   () => {
     // ── A1: Dedup ────────────────────────────────────────────────────────────
-    evaluate.skip('A1 — duplicate escalation produces no additional evidence package', async () => {
-      // BLOCKED: Orchestrator-level dedup tag mechanism (PR #46)
-      // Two concurrent triggers with the same tag should produce exactly one
-      // evidence package. This requires the Watch Orchestrator's dedup layer,
-      // which is not yet available in the skill-only test surface.
-    });
+    evaluate(
+      'A1 — duplicate escalation produces no additional evidence package',
+      async ({ kbnClient, esClient, log }) => {
+        // Two triggers carrying the SAME orchestrator dedup tag must collapse onto
+        // exactly one EvidencePackage. The dedup key is opt-in (`workerRun.dedupTag`)
+        // rather than derived from alertId, because gate D6 requires a re-triggered
+        // run against the same alert to still record its own Proposal — only the
+        // evidence package is deduplicated.
+        const alertId = `a1-dedup-${uuidv4()}`;
+        const investigationId = `inv-watch-deep-${alertId}`;
+        const dedupTag = `escalation-${alertId}`;
+
+        const emit = async (rationale: string): Promise<EmitProposalResponse> =>
+          (
+            await kbnClient.request<EmitProposalResponse>({
+              path: PND_EMIT_PROPOSAL_PATH,
+              method: 'POST',
+              headers: { 'elastic-api-version': PND_API_VERSION },
+              body: {
+                sourceWatch: 'watch-deep',
+                workerRun: {
+                  alertId,
+                  investigationId,
+                  dedupTag,
+                  classification: 'true_positive',
+                  confidence: 0.9,
+                  rationale,
+                },
+              },
+            })
+          ).data;
+
+        // Fire the same escalation twice — the duplicate the gate is about.
+        const first = await emit('A1 dedup gate — original escalation');
+        const second = await emit('A1 dedup gate — duplicate escalation');
+
+        log.info(
+          `[A1] evidenceId first=${first.evidenceId} second=${second.evidenceId} ` +
+            `identical=${first.evidenceId === second.evidenceId}`
+        );
+
+        // Both calls must resolve to the same evidence id...
+        const sameEvidenceId = first.evidenceId === second.evidenceId;
+
+        // ...and ES must hold exactly one document for it (no additional package).
+        let evidenceDocCount = 0;
+        try {
+          evidenceDocCount = (
+            await esClient.count({
+              index: PND_EVIDENCE_INDEX,
+              query: { term: { id: first.evidenceId } },
+            })
+          ).count;
+        } catch (e) {
+          log.warning(`[A1] evidence count failed: ${(e as Error).message}`);
+        }
+
+        // Control: a DIFFERENT tag on the same investigation must still mint its own
+        // package, proving dedup is keyed on the tag and not collapsing everything.
+        const controlEvidenceId = (
+          await kbnClient.request<EmitProposalResponse>({
+            path: PND_EMIT_PROPOSAL_PATH,
+            method: 'POST',
+            headers: { 'elastic-api-version': PND_API_VERSION },
+            body: {
+              sourceWatch: 'watch-deep',
+              workerRun: {
+                alertId,
+                investigationId,
+                dedupTag: `different-${alertId}`,
+                classification: 'true_positive',
+                confidence: 0.9,
+                rationale: 'A1 dedup gate — distinct escalation',
+              },
+            },
+          })
+        ).data.evidenceId;
+        const distinctTagStillOpens = controlEvidenceId !== first.evidenceId;
+
+        log.info(
+          `[A1] evidenceDocCount=${evidenceDocCount} distinctTagStillOpens=${distinctTagStillOpens}`
+        );
+
+        const success = sameEvidenceId && evidenceDocCount === 1 && distinctTagStillOpens;
+
+        return {
+          success,
+          explanation:
+            `Duplicate escalation with the same dedupTag resolved to ` +
+            `${sameEvidenceId ? 'the same' : 'DIFFERENT'} evidence id, with ` +
+            `${evidenceDocCount} evidence doc(s) in ES (want exactly 1). ` +
+            `A distinct tag still opened its own package: ${distinctTagStillOpens}.`,
+          scorecard: {
+            sameEvidenceId: sameEvidenceId ? 1 : 0,
+            exactlyOneEvidencePackage: evidenceDocCount === 1 ? 1 : 0,
+            distinctTagStillOpens: distinctTagStillOpens ? 1 : 0,
+          },
+        };
+      }
+    );
 
     // ── A2: Output validation (behavioral) ───────────────────────────────────
     evaluate(

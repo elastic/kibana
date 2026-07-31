@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { API_VERSIONS, INTERNAL_API_ACCESS, PND_INVESTIGATIONS_URL } from '@kbn/pnd-common';
@@ -70,6 +71,15 @@ const WorkerRunSchema = z
     // Rule-Tuning trigger (delta #3). The Floor worker YAML renders 'false_positive' here ONLY when
     // the alert was dispositioned as a false positive; empty/absent means no trigger.
     ruleTuningTriggerReason: z.string().optional(),
+    // Orchestrator-supplied dedup tag (gate A1). When present, the EvidencePackage id is derived
+    // deterministically from it, so two concurrent triggers carrying the SAME tag collapse onto one
+    // evidence package instead of minting one each.
+    //
+    // Deliberately OPT-IN rather than always-on keyed off alertId: gate D6 requires that a
+    // re-triggered run against the same alert still records its own Proposal (the analyst must see
+    // both touches). Only the evidence package — the expensive, duplicated artifact A1 names — is
+    // collapsed, and only when the caller explicitly asserts "this is a retry of that trigger".
+    dedupTag: z.string().min(1).max(512).optional(),
   })
   .passthrough();
 
@@ -128,6 +138,23 @@ const buildRuleTuningTrigger = (
   });
   return trigger.success ? trigger.data : undefined;
 };
+
+/**
+ * Derive a deterministic EvidencePackage id from an orchestrator dedup tag (gate A1).
+ *
+ * Two concurrent triggers carrying the same tag must produce exactly ONE evidence package.
+ * `saveEvidencePackage` already writes overwrite-by-id, so a stable id is sufficient to
+ * collapse them — no distributed lock or orchestrator-side dedup layer is required.
+ *
+ * The tag is scoped by investigationId so the same tag reused across different
+ * investigations cannot collide, and hashed so an arbitrary caller-supplied string
+ * can't inject characters into an ES document id.
+ */
+const deriveDedupedEvidenceId = (dedupTag: string, investigationId: string): string =>
+  `evidence-${createHash('sha256')
+    .update(`${investigationId}:${dedupTag}`)
+    .digest('hex')
+    .slice(0, 32)}`;
 
 const EmitProposalRequestBody = z.object({
   sourceWatch: sourceWatchSchema,
@@ -226,8 +253,13 @@ export const registerEmitProposalRoute = ({
           proposedRule: workerRun.proposedRule,
         });
 
+        // Gate A1: when the orchestrator supplies a dedup tag, the evidence id is derived from it
+        // so a duplicate trigger overwrites the same document instead of minting a second package.
         const evidence = buildEvidencePackageFromWorkerRun({
-          id: uuidv4(),
+          id:
+            workerRun.dedupTag != null
+              ? deriveDedupedEvidenceId(workerRun.dedupTag, investigationId)
+              : uuidv4(),
           kind:
             sourceWatch === 'watch-deep'
               ? 'forensic'

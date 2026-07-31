@@ -81,6 +81,8 @@ export const PND_INVESTIGATIONS_INDEX = 'pnd-investigations';
 export const PND_CANONICAL_PROPOSALS_INDEX = 'pnd-canonical-proposals';
 /** Forked Incident roots (D7 — Investigation → Incident promotion). */
 export const PND_INCIDENTS_INDEX = '.pnd-incidents';
+/** Canonical EvidencePackage docs (gate A1 — dedup). */
+export const PND_EVIDENCE_INDEX = 'pnd-evidence';
 /** Builds the promote-to-incident path for a given investigation id. */
 export const pndPromoteToIncidentPath = (investigationId: string) =>
   `/internal/pnd/investigations/${encodeURIComponent(investigationId)}/_promote_to_incident`;
