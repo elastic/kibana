@@ -149,6 +149,15 @@ describe('Policy Response Services', () => {
         expect(esClientMock.search).not.toHaveBeenCalled();
       });
 
+      it('should not search CCS remote outputs, so that a prefixed index can only mean fan-in', async () => {
+        fetchOptions.ccsEnabled = true;
+        await getPolicyResponseByAgentId(fetchOptions);
+
+        expect(readEsClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({ index: policyIndexPattern })
+        );
+      });
+
       it('should return the policy response of an agent that is not enrolled in this project', async () => {
         mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
         fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(

@@ -35,6 +35,7 @@ const mockGetActionListByStatus = getActionListByStatus as jest.Mock;
 
 describe('Action List Handler', () => {
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
+  let mockRequest: ReturnType<typeof httpServerMock.createKibanaRequest>;
   let apiTestSetup: HttpApiTestSetupMock;
 
   let actionListHandler: (
@@ -53,7 +54,7 @@ describe('Action List Handler', () => {
     actionListHandler = async (
       query?: EndpointActionListRequestQuery
     ): Promise<jest.Mocked<KibanaResponseFactory>> => {
-      const req = httpServerMock.createKibanaRequest({
+      mockRequest = httpServerMock.createKibanaRequest({
         query,
       });
       mockResponse = httpServerMock.createResponseFactory();
@@ -69,7 +70,7 @@ describe('Action List Handler', () => {
         coreMock.createCustomRequestHandlerContext(
           createRouteHandlerContext(esClientMock, savedObjectsClientMock.create())
         ) as SecuritySolutionRequestHandlerContext,
-        req,
+        mockRequest,
         mockResponse
       );
 
@@ -127,6 +128,8 @@ describe('Action List Handler', () => {
           commands: ['running-processes'],
           statuses: ['failed'],
           userIds: ['userX'],
+          // without it the read cannot fan out and silently returns origin-only results
+          request: mockRequest,
         })
       );
     });
@@ -160,6 +163,8 @@ describe('Action List Handler', () => {
           commands: ['isolate'],
           elasticAgentIds: ['agentX'],
           userIds: ['userX'],
+          // without it the read cannot fan out and silently returns origin-only results
+          request: mockRequest,
         })
       );
     });

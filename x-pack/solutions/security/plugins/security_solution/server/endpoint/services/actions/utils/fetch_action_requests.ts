@@ -16,9 +16,8 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildOriginSpaceIdFilter } from './build_origin_space_id_filter';
+import { fetchOrphanActionsSpaceId } from './fetch_orphan_actions_space_id';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../constants';
-import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
-import { REF_DATA_KEYS } from '../../../lib/reference_data';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { CROWDSTRIKE_INDEX_PATTERNS_BY_INTEGRATION } from '../../../../../common/endpoint/service/response_actions/crowdstrike';
 import type { EndpointInternalFleetServicesInterface } from '../../fleet';
@@ -95,11 +94,7 @@ export const fetchActionRequests = async ({
   const logger = endpointService.createLogger('FetchActionRequests');
   const fleetServices = endpointService.getInternalFleetServices(spaceId);
   const additionalFilters = [];
-  const orphanActionsSpaceId = (
-    await endpointService
-      .getReferenceDataClient()
-      .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
-  ).metadata.spaceId;
+  const orphanActionsSpaceId = await fetchOrphanActionsSpaceId(endpointService);
 
   if (commands?.length) {
     additionalFilters.push({ terms: { 'data.command': commands } });

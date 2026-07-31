@@ -79,8 +79,11 @@ export const fetchActionResponses = async <
 /**
  * Fetch Response Action response documents from the Endpoint index
  *
- * Safe to fan out with no space filter: the read is always bounded by ids the caller could only have
- * obtained from an already space-checked document. These documents carry no space field anyway.
+ * Safe to fan out with no space filter: the read is bounded by action ids, and no result reaches the
+ * caller unless the matching action request passes its own space check. On the details path that
+ * check runs in parallel with this read rather than before it, so ids can reach the fanned-out index
+ * ahead of validation, but a failure there discards this result too. These documents carry no space
+ * field of their own anyway.
  *
  * @param esClient
  * @param actionIds

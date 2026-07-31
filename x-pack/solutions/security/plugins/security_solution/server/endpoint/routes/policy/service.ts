@@ -65,9 +65,13 @@ export async function getPolicyResponseByAgentId({
   request,
 }: GetPolicyResponseByAgentIdOptions): Promise<GetHostPolicyResponse | undefined> {
   const cpsRead = endpointService.isCpsRead(request);
+  // CCS remote outputs and CPS fan-in both prefix a hit's `_index` with an alias, and the visibility
+  // check below can only read one meaning out of that colon. Under CPS the policy read therefore
+  // gives up searching CCS remote outputs — deliberate, since the two topologies are not meant to be
+  // enabled together.
   const query = getESQueryPolicyResponseByAgentID(
     agentID,
-    prefixIndexPatternsWithCcs(policyIndexPattern, ccsEnabled)
+    prefixIndexPatternsWithCcs(policyIndexPattern, ccsEnabled && !cpsRead)
   );
   const response = await (cpsRead ? endpointService.getReadEsClient(request) : esClient)
     .search<HostPolicyResponse>(query)

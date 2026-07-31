@@ -25,11 +25,14 @@ export const isEndpointIndex = (index: string): boolean =>
   index.includes('endpoint') && !isFleetIndex(index) && !isDefendInternalOnlyIndex(index);
 
 /**
- * Always `true` with CPS off. With CPS on, a single Fleet index in the list keeps the whole search on
- * the internal client, since the request user cannot read it at all.
+ * Always `true` for a read that cannot fan out — CPS off, or on but without a `KibanaRequest` to
+ * scope the search to. For one that can, a single Fleet index in the list still keeps the whole
+ * search on the internal client, since the request user cannot read it at all.
+ *
+ * @param cpsRead the per-request predicate, i.e. `EndpointAppContextService#isCpsRead(request)`
  */
-export const shouldUseInternalSearchClient = (indices: string[], cpsEnabled: boolean): boolean => {
-  if (!cpsEnabled) {
+export const shouldUseInternalSearchClient = (indices: string[], cpsRead: boolean): boolean => {
+  if (!cpsRead) {
     return true;
   }
 

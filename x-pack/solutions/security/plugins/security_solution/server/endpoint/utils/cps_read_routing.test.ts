@@ -67,11 +67,11 @@ describe('CPS read routing classifiers', () => {
   });
 
   describe('shouldUseInternalSearchClient()', () => {
-    it('should keep every read on the internal client when CPS is disabled', () => {
+    it('should keep every read on the internal client when the read cannot fan out', () => {
       expect(shouldUseInternalSearchClient([ENDPOINT_ACTIONS_INDEX], false)).toBe(true);
     });
 
-    it('should move a Defend-only read to the current user when CPS is enabled', () => {
+    it('should move a Defend-only read to the current user when the read can fan out', () => {
       expect(
         shouldUseInternalSearchClient(
           [ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN],

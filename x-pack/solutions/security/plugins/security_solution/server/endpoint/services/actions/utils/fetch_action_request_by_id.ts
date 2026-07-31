@@ -18,8 +18,7 @@ import type {
 import { catchAndWrapError } from '../../../utils';
 import type { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
-import type { OrphanResponseActionsMetadata } from '../../../lib/reference_data';
-import { REF_DATA_KEYS } from '../../../lib/reference_data';
+import { fetchOrphanActionsSpaceId } from './fetch_orphan_actions_space_id';
 
 /**
  * Fetches a single Action request document.
@@ -134,11 +133,7 @@ export const fetchActionRequestById = async <
             `Checking to see if Orphan action [${actionId}] can be displayed in space [${spaceId}]`
           );
 
-          const orphanActionsSpaceId = (
-            await endpointService
-              .getReferenceDataClient()
-              .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
-          ).metadata.spaceId;
+          const orphanActionsSpaceId = await fetchOrphanActionsSpaceId(endpointService);
 
           if (orphanActionsSpaceId && orphanActionsSpaceId === spaceId) {
             logger.debug(`Action [${actionId}] can be returned for spaceId [${spaceId}]`);
@@ -165,16 +160,3 @@ export const fetchActionRequestById = async <
 
   return actionRequest;
 };
-
-/**
- * The space that actions whose integration policy has been deleted are displayed in
- * @internal
- */
-const fetchOrphanActionsSpaceId = async (
-  endpointService: EndpointAppContextService
-): Promise<string | undefined> =>
-  (
-    await endpointService
-      .getReferenceDataClient()
-      .get<OrphanResponseActionsMetadata>(REF_DATA_KEYS.orphanResponseActionsSpace)
-  ).metadata.spaceId;
