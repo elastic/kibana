@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/code-editor-mock'
   - '@kbn/core-http-server'
   - '@kbn/ui-callout'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod

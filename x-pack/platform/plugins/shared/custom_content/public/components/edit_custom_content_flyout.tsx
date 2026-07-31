@@ -24,6 +24,7 @@ import {
   useEuiTheme,
   EuiFormRow,
 } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
@@ -94,9 +95,17 @@ export const EditCustomContentFlyout = ({
   }, [draftEsqlQuery, draftTemplate, onSave, onClose]);
 
   const editorContainerCss = css({
+    position: 'relative',
     border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
     borderRadius: euiTheme.border.radius.medium,
     overflow: 'hidden',
+  });
+
+  const copyButtonCss = css({
+    position: 'absolute',
+    top: euiTheme.size.xs,
+    right: euiTheme.size.m,
+    zIndex: 1,
   });
 
   return (
@@ -168,16 +177,11 @@ export const EditCustomContentFlyout = ({
           </EuiFlexItem>
           {isAiAvailable && (
             <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                iconType="sparkles"
-                color="primary"
-                onClick={handleGenerateWithChat}
-              >
+              <AiButton size="s" iconType="sparkles" onClick={handleGenerateWithChat}>
                 {i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
                   defaultMessage: 'Refine with chat',
                 })}
-              </EuiButton>
+              </AiButton>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -190,43 +194,37 @@ export const EditCustomContentFlyout = ({
             defaultMessage: 'The HTML template uses Liquid syntax filled with live query data.',
           })}
         >
-          <EuiFlexGroup gutterSize="none" alignItems="flexStart">
-            <EuiFlexItem>
-              <div css={editorContainerCss}>
-                <CodeEditor
-                  languageId="liquid"
-                  value={draftTemplate}
-                  onChange={setDraftTemplate}
-                  height={240}
-                  options={{
-                    fontSize: 12,
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    lineNumbers: 'on',
-                    folding: true,
-                  }}
-                />
-              </div>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip
-                content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+          <div css={editorContainerCss}>
+            <CodeEditor
+              languageId="liquid"
+              value={draftTemplate}
+              onChange={setDraftTemplate}
+              height={240}
+              options={{
+                fontSize: 12,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: 'on',
+                lineNumbers: 'on',
+                folding: true,
+              }}
+            />
+            <EuiToolTip
+              content={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
+                defaultMessage: 'Copy template',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                css={copyButtonCss}
+                iconType="copyClipboard"
+                aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
                   defaultMessage: 'Copy template',
                 })}
-                disableScreenReaderOutput
-              >
-                <EuiButtonIcon
-                  iconType="copyClipboard"
-                  aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
-                    defaultMessage: 'Copy template',
-                  })}
-                  onClick={() => navigator.clipboard?.writeText(draftTemplate)}
-                  css={{ marginLeft: euiTheme.size.xs }}
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+                onClick={() => navigator.clipboard?.writeText(draftTemplate)}
+              />
+            </EuiToolTip>
+          </div>
         </EuiFormRow>
 
         <EuiSpacer size="m" />
