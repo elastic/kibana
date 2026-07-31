@@ -299,6 +299,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             warnings,
             frozenIndicesQueriedCount,
             hasDateNanosTimestampFields,
+            mixedTimestampFields,
           } = await runExecutionValidation({
             params,
             inputIndex,
@@ -433,6 +434,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     primaryTimestamp,
                     secondaryTimestamp,
                     hasDateNanosTimestampFields,
+                    mixedTimestampFields,
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,

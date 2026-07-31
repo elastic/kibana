@@ -27,6 +27,7 @@ interface BuildEventsSearchQuery<
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
   hasDateNanosTimestampFields?: boolean;
+  mixedTimestampFields?: string[];
 }
 
 // Raw date_nanos sort values (~1.8e18) don't survive JS number precision, breaking
@@ -130,6 +131,7 @@ export const buildEventsSearchQuery = <
   additionalFilters,
   overrideBody,
   hasDateNanosTimestampFields,
+  mixedTimestampFields,
 }: BuildEventsSearchQuery<TAggs>) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -152,19 +154,26 @@ export const buildEventsSearchQuery = <
     ...(additionalFilters ? additionalFilters : []),
   ];
 
-  const nanosSortOptions = hasDateNanosTimestampFields
-    ? {
-        format: NANOS_SORT_FORMAT,
-        missing: sortOrder === 'desc' ? NANOS_SORT_MISSING_DESC : NANOS_SORT_MISSING_ASC,
-      }
-    : undefined;
+  const getNanosSortOptions = (field: string) => {
+    if (!hasDateNanosTimestampFields) {
+      return undefined;
+    }
+
+    return {
+      format: NANOS_SORT_FORMAT,
+      missing: sortOrder === 'desc' ? NANOS_SORT_MISSING_DESC : NANOS_SORT_MISSING_ASC,
+      ...(mixedTimestampFields?.includes(field)
+        ? { numeric_type: 'date_nanos' as const }
+        : undefined),
+    };
+  };
 
   const sort: estypes.Sort = [];
   sort.push({
     [primaryTimestamp]: {
       order: sortOrder ?? 'asc',
       unmapped_type: 'date',
-      ...nanosSortOptions,
+      ...getNanosSortOptions(primaryTimestamp),
     },
   });
   if (secondaryTimestamp) {
@@ -172,7 +181,7 @@ export const buildEventsSearchQuery = <
       [secondaryTimestamp]: {
         order: sortOrder ?? 'asc',
         unmapped_type: 'date',
-        ...nanosSortOptions,
+        ...getNanosSortOptions(secondaryTimestamp),
       },
     });
   }

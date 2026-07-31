@@ -101,6 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId, logs } = await previewRule({ supertest, rule: getRule() });
 
       expect(logs[0].errors).toEqual([]);
+      expect(logs[0].warnings).toEqual([]);
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: 400 });
       expect(previewAlerts).toHaveLength(25);
     });

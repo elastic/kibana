@@ -79,6 +79,7 @@ export const searchAfterAndBulkCreateFactory = async ({
     primaryTimestamp,
     secondaryTimestamp,
     hasDateNanosTimestampFields,
+    mixedTimestampFields,
     unprocessedExceptions: exceptionsList,
     tuple,
     ruleExecutionLogger,
@@ -95,6 +96,7 @@ export const searchAfterAndBulkCreateFactory = async ({
     let sortIds: estypes.SortResults | undefined;
 
     const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
+    const searchSize = Math.ceil(Math.min(maxSignals, pageSize));
 
     while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
@@ -112,7 +114,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           to: tuple.to.toISOString(),
           runtimeMappings,
           filter,
-          size: Math.ceil(Math.min(maxSignals, pageSize)),
+          size: searchSize,
           sortOrder,
           searchAfterSortIds: sortIds,
           primaryTimestamp,
@@ -120,6 +122,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           trackTotalHits,
           additionalFilters,
           hasDateNanosTimestampFields,
+          mixedTimestampFields,
         });
         const {
           searchResult,
@@ -207,6 +210,10 @@ export const searchAfterAndBulkCreateFactory = async ({
             toReturn.warningMessages.push(getWarningMessage());
             break;
           }
+        }
+
+        if (hasDateNanosTimestampFields && searchResult.hits.hits.length < searchSize) {
+          break;
         }
 
         // in mixed date/date_nanos patterns, timestamps missing or outside the nanos range

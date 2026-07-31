@@ -159,7 +159,55 @@ export default ({ getService }: FtrProviderContext) => {
       expect(previewAlerts).toHaveLength(160);
     });
 
-    it('stops pagination with a warning instead of failing when a mixed pattern has docs without the override field on the date index', async () => {
+    it('selects the earliest events when max_signals truncates a mixed pattern', async () => {
+      const base = new Date();
+      await indexNanosDocs([
+        {
+          '@timestamp': nanosTimestamp(base, 4),
+          event: { ingested: nanosTimestamp(base, 4) },
+          host: { name: 'nanos-5' },
+        },
+        {
+          '@timestamp': nanosTimestamp(base, 2),
+          event: { ingested: nanosTimestamp(base, 2) },
+          host: { name: 'nanos-3' },
+        },
+        {
+          '@timestamp': nanosTimestamp(base, 0),
+          event: { ingested: nanosTimestamp(base, 0) },
+          host: { name: 'nanos-1' },
+        },
+      ]);
+      await indexMillisDocs([
+        {
+          '@timestamp': new Date(base.getTime() - 4000).toISOString(),
+          event: { ingested: new Date(base.getTime() - 4000).toISOString() },
+          host: { name: 'millis-4' },
+        },
+        {
+          '@timestamp': new Date(base.getTime() - 2000).toISOString(),
+          event: { ingested: new Date(base.getTime() - 2000).toISOString() },
+          host: { name: 'millis-2' },
+        },
+      ]);
+
+      const rule = getCustomQueryRuleParams({
+        index: [NANOS_INDEX, MILLIS_INDEX],
+        query: '*:*',
+        from: 'now-1h',
+        timestamp_override: 'event.ingested',
+        max_signals: 3,
+      });
+
+      const { previewId, logs } = await previewRule({ supertest, rule });
+
+      expect(logs[0].errors).toEqual([]);
+      const previewAlerts = await getPreviewAlerts({ es, previewId, size: 10 });
+      const hostNames = previewAlerts.map((alert) => alert._source?.host?.name).sort();
+      expect(hostNames).toEqual(['millis-4', 'nanos-3', 'nanos-5']);
+    });
+
+    it('finishes without a warning when the final mixed-pattern page has an unusable cursor', async () => {
       const base = new Date();
       const nanosDocs = Array.from({ length: 120 }, (_, i) => {
         const timestamp = nanosTimestamp(base, i);
@@ -190,10 +238,7 @@ export default ({ getService }: FtrProviderContext) => {
       const { previewId, logs } = await previewRule({ supertest, rule });
 
       expect(logs[0].errors).toEqual([]);
-      expect(logs[0].warnings).toEqual(
-        expect.arrayContaining([expect.stringContaining('Pagination stopped')])
-      );
-      // every doc is alerted before the guard stops on the very last page
+      expect(logs[0].warnings).toEqual([]);
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: 400 });
       expect(previewAlerts).toHaveLength(125);
     });

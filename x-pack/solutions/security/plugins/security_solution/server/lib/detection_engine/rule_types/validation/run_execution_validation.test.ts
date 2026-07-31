@@ -72,6 +72,7 @@ describe('runExecutionValidation', () => {
       });
       const result = await run();
       expect(result.hasDateNanosTimestampFields).toBe(true);
+      expect(result.mixedTimestampFields).toEqual(['@timestamp']);
     });
 
     it('is true when only the secondary timestamp is mapped as date_nanos', async () => {
@@ -81,12 +82,14 @@ describe('runExecutionValidation', () => {
       });
       const result = await run(getQueryRuleParams(), 'event.ingested');
       expect(result.hasDateNanosTimestampFields).toBe(true);
+      expect(result.mixedTimestampFields).toEqual([]);
     });
 
     it('is false when timestamps are mapped as date only', async () => {
       mockFieldCaps({ '@timestamp': { date: { type: 'date' } } });
       const result = await run();
       expect(result.hasDateNanosTimestampFields).toBe(false);
+      expect(result.mixedTimestampFields).toEqual([]);
     });
 
     it('is false when the timestamp field is unmapped', async () => {

@@ -609,6 +609,42 @@ describe('create_signals', () => {
       ]);
     });
 
+    test('it normalizes only timestamp fields with mixed date resolutions', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: '@timestamp',
+        runtimeMappings: undefined,
+        hasDateNanosTimestampFields: true,
+        mixedTimestampFields: ['event.ingested'],
+      });
+      expect(query?.sort).toEqual([
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+            numeric_type: 'date_nanos',
+          },
+        },
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+      ]);
+    });
+
     test('it uses epoch missing value for desc sort', () => {
       const query = buildEventsSearchQuery({
         aggregations: undefined,

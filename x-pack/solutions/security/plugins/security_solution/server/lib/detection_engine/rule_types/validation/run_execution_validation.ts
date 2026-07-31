@@ -35,6 +35,7 @@ export interface RunExecutionValidationResult {
   warnings: string[];
   frozenIndicesQueriedCount: number;
   hasDateNanosTimestampFields: boolean;
+  mixedTimestampFields: string[];
 }
 
 /**
@@ -61,6 +62,7 @@ export const runExecutionValidation = async (
   let skipExecution = false;
   let frozenIndicesQueriedCount = 0;
   let hasDateNanosTimestampFields = false;
+  let mixedTimestampFields: string[] = [];
 
   if (isMachineLearningParams(params)) {
     return {
@@ -68,6 +70,7 @@ export const runExecutionValidation = async (
       warnings: [],
       frozenIndicesQueriedCount: 0,
       hasDateNanosTimestampFields: false,
+      mixedTimestampFields: [],
     };
   }
 
@@ -137,7 +140,13 @@ export const runExecutionValidation = async (
   }
 
   if (skipExecution) {
-    return { skipExecution, warnings, frozenIndicesQueriedCount, hasDateNanosTimestampFields };
+    return {
+      skipExecution,
+      warnings,
+      frozenIndicesQueriedCount,
+      hasDateNanosTimestampFields,
+      mixedTimestampFields,
+    };
   }
 
   try {
@@ -167,6 +176,12 @@ export const runExecutionValidation = async (
     hasDateNanosTimestampFields = [primaryTimestamp, secondaryTimestamp].some(
       (field) => field != null && 'date_nanos' in (fieldCapsResponse.body.fields[field] ?? {})
     );
+    mixedTimestampFields = [primaryTimestamp, secondaryTimestamp].filter(
+      (field): field is string => {
+        const types = field != null ? fieldCapsResponse.body.fields[field] : undefined;
+        return types != null && 'date' in types && 'date_nanos' in types;
+      }
+    );
   } catch (exc) {
     warnings.push(`Timestamp fields check failed to execute ${exc}`);
   }
@@ -191,5 +206,11 @@ export const runExecutionValidation = async (
     }
   }
 
-  return { skipExecution, warnings, frozenIndicesQueriedCount, hasDateNanosTimestampFields };
+  return {
+    skipExecution,
+    warnings,
+    frozenIndicesQueriedCount,
+    hasDateNanosTimestampFields,
+    mixedTimestampFields,
+  };
 };

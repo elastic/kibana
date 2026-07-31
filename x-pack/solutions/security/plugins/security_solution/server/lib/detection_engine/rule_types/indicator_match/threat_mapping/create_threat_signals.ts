@@ -288,6 +288,10 @@ export const createThreatSignals = async ({
         list = await getDocumentList({ searchAfter: undefined });
         documentCount = totalDocumentCount;
       } else {
+        if (hasDateNanosTimestampFields && list.hits.hits.length < perPage) {
+          break;
+        }
+
         const lastHitSort = list.hits.hits[list.hits.hits.length - 1].sort;
         // with date_nanos, sort values are formatted ISO strings which round-trip exactly;
         // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)

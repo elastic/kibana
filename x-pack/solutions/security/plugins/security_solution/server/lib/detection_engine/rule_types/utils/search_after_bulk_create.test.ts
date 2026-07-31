@@ -961,5 +961,36 @@ describe('searchAfterAndBulkCreate', () => {
       expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
       expect(warningMessages).toEqual([expect.stringContaining('Pagination stopped')]);
     });
+
+    test('should not warn about an unusable cursor on the final partial page', async () => {
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        repeatedSearchResultsWithSortId(1, 1, someGuids.slice(0, 1), undefined, undefined, [
+          '',
+          '2026-07-30T12:00:00.000000001Z',
+        ])
+      );
+      ruleServices.alertWithPersistence.mockResolvedValueOnce({
+        createdAlerts: [createdAlert],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+
+      const { success, warningMessages, createdSignalsCount } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          searchAfterSize: 100,
+          hasDateNanosTimestampFields: true,
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(true);
+      expect(createdSignalsCount).toEqual(1);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+      expect(warningMessages).toEqual([]);
+    });
   });
 });
