@@ -158,9 +158,14 @@ export class SignificantEventsPlugin
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
-      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request, {
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+      // A Query Stream's ES|QL view can resolve to indices that live on remote CPS-connected
+      // projects, so reads of stream data must follow the space's project routing expression
+      // rather than the origin project only. `scopedClusterClient` deliberately stays
+      // origin-only: the plugin's own hidden data streams only ever exist in the origin project.
+      const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
         projectRouting: 'space',
-      });
+      }).asCurrentUser;
       const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
       const licensing = pluginsStart.licensing;
@@ -223,6 +228,7 @@ export class SignificantEventsPlugin
 
       return {
         scopedClusterClient,
+        streamDataEsClient,
         soClient,
         attachmentClient,
         getSignificantEventsAlertingContext: resolveSignificantEventsAlertingContext,
