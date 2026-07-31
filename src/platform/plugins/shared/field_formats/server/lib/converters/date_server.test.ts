@@ -32,21 +32,21 @@ describe('Date Format: Server side edition', () => {
 
   test('should format according to the given timezone parameter', () => {
     const date = new DateFormat({ timezone: 'America/Phoenix' }, getConfig);
-    expect(date.convertToText(dateTime)).toBe('May 5th 2019, 07:04:56.201');
+    expect(date.textConvert(dateTime)).toBe('May 5th 2019, 07:04:56.201');
   });
 
   test('should format according to UTC if no timezone parameter is given or exists in settings', () => {
     const utcFormat = 'May 5th 2019, 14:04:56.201';
     const dateUtc = new DateFormat({ timezone: 'UTC' }, getConfig);
-    expect(dateUtc.convertToText(dateTime)).toBe(utcFormat);
+    expect(dateUtc.textConvert(dateTime)).toBe(utcFormat);
 
     const dateDefault = new DateFormat({}, getConfig);
-    expect(dateDefault.convertToText(dateTime)).toBe(utcFormat);
+    expect(dateDefault.textConvert(dateTime)).toBe(utcFormat);
   });
 
   test('should format missing values with the shared null label, like the client formatter', () => {
     const date = new DateFormat({ timezone: 'UTC' }, getConfig);
-    expect(date.convertToText(null)).toBe(NULL_LABEL);
-    expect(date.convertToText(undefined)).toBe(NULL_LABEL);
+    expect(date.textConvert(null)).toBe(NULL_LABEL);
+    expect(date.textConvert(undefined)).toBe(NULL_LABEL);
   });
 });

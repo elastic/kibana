@@ -62,7 +62,7 @@ describe('Date Nanos Format: Server side edition', () => {
 
   test('should format missing values with the shared null label, like the client formatter', () => {
     const date = new DateNanosFormat({ timezone: 'UTC' }, getConfig);
-    convert = date.convertToText.bind(date);
+    convert = date.textConvert.bind(date);
     expect(convert(null)).toBe(NULL_LABEL);
     expect(convert(undefined)).toBe(NULL_LABEL);
   });
