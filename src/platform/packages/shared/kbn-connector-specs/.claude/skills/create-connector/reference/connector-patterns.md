@@ -89,7 +89,14 @@ export const YourConnector: ConnectorSpec = {
       description: 'Retrieve full details for a single item by ID. Use the IDs returned by the search action.',
       input: GetItemInputSchema,
       handler: async (ctx, input: GetItemInput) => {
-        const response = await ctx.request({ method: 'GET', url: `/items/${input.id}` });
+        // Always encodeURIComponent() a user-supplied value interpolated into a URL
+        // path segment — schemas typically only bound length, not character set, so
+        // an id/slug containing "/", "?", "#", or a space would otherwise corrupt
+        // the request path.
+        const response = await ctx.request({
+          method: 'GET',
+          url: `/items/${encodeURIComponent(input.id)}`,
+        });
         return response.data;
       },
     },
@@ -100,6 +107,17 @@ export const YourConnector: ConnectorSpec = {
     'The `search` action returns at most 20 results by default; use the `limit` parameter to request more.',
     'Item IDs are not stable across connector instances — always search before referencing an ID.',
   ].join('\n'),
+
+  test: {
+    // Must be true, or the "Test connector" button stays disabled in the UI
+    // even though a handler is defined.
+    enabled: true,
+    description: 'Verifies the connection by calling a cheap, read-only endpoint.',
+    handler: async (ctx) => {
+      await ctx.request({ method: 'GET', url: '/ping' });
+      return {};
+    },
+  },
 };
 ```
 
@@ -221,6 +239,13 @@ schema: z.object({
 ```
 
 Available `.meta()` options: `label`, `widget`, `placeholder`, `helpText`, `hidden`, `sensitive`, `disabled`, `order`.
+
+**ICU-unsafe characters in translated help text**: `metadata.description` and any `helpText`/label string
+that goes through `i18n.translate()` is parsed as an ICU message. A literal `<placeholder>` (e.g.
+`'found in the URL: example.com/<slug>/'`) is parsed as an unclosed XML tag and throws a `FORMAT_ERROR`
+when the spec is serialized to JSON schema for Agent Builder/Workflows — this only surfaces at runtime,
+not at compile time or in a quick manual glance at the UI. Write placeholders without angle brackets, e.g.
+`'found in the URL: example.com/your-slug/'`.
 
 For URL fields, use the `UISchemas.url()` helper from `connector_spec_ui.ts`:
 
@@ -450,6 +475,33 @@ Every Zod parameter should have a `.describe()` call that gives the agent the co
 - For ID fields, say where the value comes from (`'The sys_id of the incident, returned by searchIncidents'`).
 - For enum-like strings, list the accepted values inline (`'Filter by state: "new", "in_progress", or "resolved"'`).
 - **Bound user-input strings** — add `.max()` to string fields that accept free-form user input (search queries, AI prompts, natural-language descriptions). Use the service's documented API limit if available; otherwise 2000 for queries and 10000 for AI prompts are safe defaults. Do not bound ID fields or pagination tokens — those have fixed service-side formats.
+- **Bound `z.record()` key strings too** — `z.record(z.string(), z.unknown())` (used for flexible/dynamic
+  objects like alert-rule conditions or config maps) has the same unbounded-input DoS risk as a bare
+  `z.string()`. Apply the same `.max(200)`-style bound to the key type: `z.record(z.string().max(200), z.unknown())`.
+  This also applies to string keys inside `z.array(z.record(...))`.
+- **Bound the collection size too, not just the string lengths inside it** — a `z.array()` needs `.max(N)`
+  on the array itself (e.g. `z.array(z.string().max(64)).max(50)` for a list of IDs), and a `z.record()`
+  needs an entry-count cap via `.refine()` since Zod has no built-in one:
+  `z.record(z.string().max(100), z.string().max(200)).refine((v) => Object.keys(v).length <= 50, { message: '...' })`.
+  Bounding only the elements' string length still leaves an unbounded *number* of elements/entries as a DoS
+  vector, and if the array is later joined into a query string, an oversized array also risks an oversized
+  upstream request.
+- **Require "at least one of" for optional-only update inputs** — if an action updates a resource and
+  every field is `.optional()`, an empty/no-op call is a silent bug. Add `.refine((v) => v.fieldA !== undefined || v.fieldB !== undefined, { message: '...' })`
+  to the schema.
+- **Regex-validate ID/GUID fields that flow into a query or filter string** — if a field's value gets
+  interpolated into a search/filter expression (not just used as a URL path segment or opaque body value),
+  constrain it to the expected character set (e.g. `.regex(/^[A-Za-z0-9+/=_-]+$/)` for a base64url GUID) so
+  it can't be used to inject query syntax.
+- **`encodeURIComponent()` every ID/slug used as a URL path segment** — this is a handler-side fix, not a
+  schema constraint (a `.max()`-bound string is still a valid path segment value; it just needs escaping
+  before interpolation). Any handler that builds a URL with `` `${baseUrl}/things/${input.id}/` `` must wrap
+  the interpolated value: `` `${baseUrl}/things/${encodeURIComponent(input.id)}/` ``. Apply this to every
+  id/slug in the URL, including a connector-config value like an org slug (encode it once at the point
+  it's read from config, so every handler that uses it is safe automatically). Without this, a value
+  containing `/`, `?`, `#`, or a space corrupts the request path instead of erroring — and it's easy to
+  miss because unit tests that hardcode a plain alphanumeric ID in both the input and the expected URL
+  never exercise the encoding path.
 
 ```typescript
 export const SearchInputSchema = z.object({

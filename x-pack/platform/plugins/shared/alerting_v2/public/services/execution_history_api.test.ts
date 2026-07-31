@@ -37,13 +37,13 @@ describe('ExecutionHistoryApi', () => {
 
     await api.listExecutionHistory({
       page: 3,
-      perPage: 25,
+      per_page: 25,
       search: 'foo',
       outcome: 'throttled',
     });
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: 3, perPage: 25, search: 'foo', outcome: 'throttled' },
+      query: { page: 3, per_page: 25, search: 'foo', outcome: 'throttled' },
     });
   });
 
@@ -53,7 +53,7 @@ describe('ExecutionHistoryApi', () => {
     await api.listExecutionHistory();
 
     expect(http.get).toHaveBeenCalledWith(ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH, {
-      query: { page: undefined, perPage: undefined, search: undefined, outcome: undefined },
+      query: { page: undefined, per_page: undefined, search: undefined, outcome: undefined },
     });
   });
 
@@ -67,7 +67,9 @@ describe('ExecutionHistoryApi', () => {
     };
     http.get.mockResolvedValueOnce(fakeResponse);
 
-    await expect(api.listExecutionHistory({ page: 2, perPage: 25 })).resolves.toEqual(fakeResponse);
+    await expect(api.listExecutionHistory({ page: 2, per_page: 25 })).resolves.toEqual(
+      fakeResponse
+    );
   });
 
   it('propagates errors from http.get', async () => {
@@ -79,7 +81,11 @@ describe('ExecutionHistoryApi', () => {
 
   it('forwards search and outcome to countNewSince', async () => {
     const { api, http } = buildApi();
-    await api.countNewSince('2026-01-01T00:00:00.000Z', { search: 'foo', outcome: 'throttled' });
+    await api.countNewSince({
+      since: '2026-01-01T00:00:00.000Z',
+      search: 'foo',
+      outcome: 'throttled',
+    });
     expect(http.get).toHaveBeenCalledWith(
       ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
       { query: { since: '2026-01-01T00:00:00.000Z', search: 'foo', outcome: 'throttled' } }
@@ -89,7 +95,7 @@ describe('ExecutionHistoryApi', () => {
   it('GETs the rule execution history endpoint', async () => {
     const { api, http } = buildApi();
 
-    await api.getRuleExecutions({ page: 1, perPage: 10 });
+    await api.getRuleExecutions({ page: 1, per_page: 10 });
 
     expect(http.get).toHaveBeenCalledWith(
       ALERTING_V2_EXECUTION_HISTORY_RULES_API_PATH,
@@ -101,14 +107,14 @@ describe('ExecutionHistoryApi', () => {
     const { api, http } = buildApi();
 
     const params = {
-      ruleId: ['r1', 'r2'],
+      rule_id: ['r1', 'r2'],
       outcome: ['failure' as const],
       from: '2026-01-01T00:00:00Z',
       to: '2026-01-02T00:00:00Z',
       sort: 'duration' as const,
-      sortOrder: 'asc' as const,
+      sort_order: 'asc' as const,
       page: 3,
-      perPage: 50,
+      per_page: 50,
     };
 
     await api.getRuleExecutions(params);

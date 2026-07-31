@@ -94,7 +94,9 @@ export const CaseViewActivity = ({ caseData }: { caseData: CaseUI }) => {
                   />
                 ) : null
               }
-              attachActionButton={<CaseViewAttachButton caseData={caseData} />}
+              attachActionButton={
+                <CaseViewAttachButton caseData={caseData} attachLocation="activity" />
+              }
               userActivityQueryParams={userActivityQueryParams}
               userActionsStats={userActionsStats}
             />
