@@ -86,7 +86,6 @@ const createHandlerParams = ({
     getSpaceId: jest.fn().mockResolvedValue('space-a'),
     logger: { warn: jest.fn() },
     telemetry: {
-      startTrackingEndpointLatency: jest.fn().mockReturnValue(jest.fn()),
       reportStreamsStateError: jest.fn(),
     },
     response: {},

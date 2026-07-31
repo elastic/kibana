@@ -15,7 +15,7 @@ import { resetSignificantEvents } from '../../../../lib/significant_events/reset
 
 // TODO: Remove with the time-boxed follow-up to nightshift-program#651 once supported
 // upgrade paths can no longer contain Significant Events v1 rules or alerts.
-export const resetKIsRoute = createServerRoute({
+const resetKIsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/significant_events/_reset_kis',
   options: {
     access: 'internal',
