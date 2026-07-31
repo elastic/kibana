@@ -6,7 +6,7 @@
  */
 
 import type { DebugState } from '@elastic/charts';
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { enableElasticChartDebug, getChartDebugData } from '../fixtures/open_in_lens_helpers';
 import { addDataLayer, switchDataPanelIndexPattern, testData } from '../fixtures';
@@ -17,7 +17,7 @@ function getNonEmptyLineSeriesCount(state: DebugState): number {
   return state.lines?.filter((series) => series.points.length > 0).length ?? 0;
 }
 
-spaceTest.describe('Lens with multiple data views', { tag: tags.stateful.classic }, () => {
+spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-classic' }, () => {
   spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.load(
       testData.KBN_ARCHIVE_PATHS.LONG_WINDOW_LOGSTASH_INDEX_PATTERN
