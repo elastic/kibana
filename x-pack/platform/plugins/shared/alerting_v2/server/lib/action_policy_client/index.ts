@@ -7,10 +7,10 @@
 
 export { ActionPolicyClient } from './action_policy_client';
 export type {
-  BulkActionActionPoliciesParams,
-  BulkActionActionPoliciesResponse,
+  BulkActionPoliciesByIdsParams,
+  BulkSnoozeActionPoliciesParams,
   CreateActionPolicyParams,
-  FindActionPoliciesParams,
+  FindActionPoliciesArgs,
   FindActionPoliciesResponse,
   SnoozeActionPolicyParams,
   UpdateActionPolicyApiKeyParams,
