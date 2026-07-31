@@ -7,6 +7,7 @@
 
 import type { ScoutPage, KibanaUrl } from '@kbn/scout';
 import type { DataFrameAnalysisConfigType } from '@kbn/ml-data-frame-analytics-utils';
+import { TRAINING_PERCENT_MIN } from '@kbn/ml-data-frame-analytics-utils';
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 
 /**
@@ -19,6 +20,17 @@ export class DataFrameAnalyticsPage {
 
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
+
+  private async waitForExplainResponse(requestBodyFragment?: string): Promise<void> {
+    await this.page.waitForResponse(
+      (response) =>
+        response.url().includes('/internal/ml/data_frame/analytics/_explain') &&
+        response.ok() &&
+        (requestBodyFragment === undefined ||
+          response.request().postData()?.includes(requestBodyFragment) === true),
+      { timeout: 30_000 }
+    );
   }
 
   // ── Navigation ────────────────────────────────────────────────────────────
@@ -91,7 +103,17 @@ export class DataFrameAnalyticsPage {
   }
 
   async applyRuntimeMappings(): Promise<void> {
+    const outlierDetectionSelected = await this.page.testSubj
+      .locator('mlAnalyticsCreation-outlier_detection-option selectedJobType')
+      .isVisible();
+    const runtimeMappingsExplainResponse = outlierDetectionSelected
+      ? this.waitForExplainResponse('"runtime_mappings"')
+      : undefined;
     await this.page.testSubj.locator('mlDataFrameAnalyticsRuntimeMappingsApplyButton').click();
+    if (runtimeMappingsExplainResponse !== undefined) {
+      await runtimeMappingsExplainResponse;
+      await this.waitForExplainResponse();
+    }
   }
 
   async setScatterplotSampleSize(value: string): Promise<void> {
@@ -108,33 +130,14 @@ export class DataFrameAnalyticsPage {
   }
 
   async continueToAdditionalOptions(): Promise<void> {
-    const configurationStep = this.page.testSubj.locator(
-      'mlAnalyticsCreateJobWizardConfigurationStep active'
-    );
-    const continueButton = this.page.testSubj.locator(
-      'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
-    );
-    const additionalOptionsStep = this.page.testSubj.locator(
-      'mlAnalyticsCreateJobWizardAdvancedStep active'
-    );
-
-    for (let attempt = 0; attempt < 2; attempt++) {
-      await continueButton.click();
-
-      try {
-        await additionalOptionsStep.waitFor({
-          state: 'visible',
-          timeout: attempt === 0 ? 10_000 : 30_000,
-        });
-        return;
-      } catch (error) {
-        // The debounced explain request can re-render the enabled button during the
-        // click. Retry only when the configuration step is still active.
-        if (attempt > 0 || !(await configurationStep.isVisible())) {
-          throw error;
-        }
-      }
-    }
+    await this.page.testSubj
+      .locator(
+        'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
+      )
+      .click();
+    await this.page.testSubj
+      .locator('mlAnalyticsCreateJobWizardAdvancedStep active')
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   // ── Additional options step ───────────────────────────────────────────────
@@ -366,15 +369,16 @@ export class DataFrameAnalyticsPage {
   async setTrainingPercent(percent: number): Promise<void> {
     const slider = this.page.testSubj.locator('mlAnalyticsCreateJobWizardTrainingPercentSlider');
     await slider.waitFor({ state: 'visible' });
-    await slider.fill(String(percent));
-    // Hard fail if EUI ignores the native fill (e.g. only responds to keyboard events).
-    // The fix in that case is a deterministic Home + N×ArrowRight sequence, not the old loop.
+    const explainResponse = this.waitForExplainResponse(`"training_percent":${percent}`);
+    await slider.press('Home');
+    for (let value = TRAINING_PERCENT_MIN; value < percent; value++) {
+      await slider.press('ArrowRight');
+    }
+    await explainResponse;
+
     const actual = Number(await slider.getAttribute('value'));
     if (actual !== percent) {
-      throw new Error(
-        `setTrainingPercent: fill() did not take — expected ${percent}, got ${actual}. ` +
-          `Check whether the EUI slider requires keyboard interaction instead.`
-      );
+      throw new Error(`setTrainingPercent: expected ${percent}, got ${actual}`);
     }
   }
 
@@ -458,8 +462,10 @@ export class DataFrameAnalyticsPage {
   /** Opens the actions menu for the given job, clicks Clone, and waits for the creation wizard. */
   async cloneJob(jobId: string): Promise<void> {
     await this.openActionsMenu(jobId);
+    const explainResponse = this.waitForExplainResponse();
     await this.page.testSubj.locator('mlAnalyticsJobCloneButton').click();
     await this.page.testSubj.locator('mlAnalyticsCreationContainer').waitFor({ state: 'visible' });
+    await explainResponse;
   }
 
   // ── Results view ──────────────────────────────────────────────────────────
