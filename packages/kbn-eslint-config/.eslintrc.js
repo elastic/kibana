@@ -469,6 +469,7 @@ module.exports = {
      * a11y-related rules:
      * all existing violations were fixed; keep this as error to prevent new ones.
      */
+    '@elastic/eui/callout-announce-on-mount': 'error',
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
     '@elastic/eui/badge-accessibility-rules': 'error',
