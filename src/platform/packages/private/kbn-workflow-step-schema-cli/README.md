@@ -89,6 +89,21 @@ The LiquidJS/install alternatives are declared **once** in a shared definition
 it with a single `$ref`, rather than repeating the branches inline. This keeps
 the artifact small.
 
+### Discriminated `steps` / `triggers` unions
+
+Both variants ship the `steps` and `triggers` unions with an OpenAPI-style
+`discriminator` (`{ "propertyName": "type" }`) and each branch's `type` collapsed
+to a bare `const`/`enum`. This lets ajv (and other draft-07 consumers with
+discriminator support) validate an item against **only** its `type`'s branch —
+`O(#steps)` instead of `O(#steps × #branches)` — and produce branch-anchored
+errors instead of a giant `oneOf` dump. The trade-off is that the discriminator
+itself cannot be templated: a step whose `type` is a `{{ … }}` / `__install__`
+placeholder is rejected. Every other value position keeps its template tolerance.
+
+The transform is applied all-or-nothing per union: if a branch has no
+determinable `type` literal, or two branches would map to the same tag, the
+`discriminator` is omitted and the union stays a plain `oneOf`/`anyOf`.
+
 ## Output layout
 
 ```

@@ -6,6 +6,7 @@
  */
 
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { getBlastRadiusEbtDetail } from '../common/ebt_constants';
 import {
   buildBlastRadiusChips,
   eventHasBlastRadiusChip,
@@ -27,6 +28,11 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 });
 
 describe('blast_radius_chips', () => {
+  it('reduces customer-derived chip keys to privacy-safe EBT categories', () => {
+    expect(getBlastRadiusEbtDetail('entity:feat-1:checkout-api')).toBe('entity');
+    expect(getBlastRadiusEbtDetail('logs.customer-stream')).toBe('stream');
+  });
+
   it('builds chips from blast_radius entries on need-action events', () => {
     const chips = buildBlastRadiusChips([
       mockEvent({
