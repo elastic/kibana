@@ -59,25 +59,37 @@ Make sure you can sign in to [figma.com](https://figma.com) with your `@elastic.
 
 ---
 
-## Step 3 — Enable the Figma MCP via Cursor Integrations
+## Step 3 — Enable the Figma MCP
 
 The Figma MCP allows the agent to fetch design context from linked Figma files. The test-plan-generator skill uses the **official Figma MCP tools** (`get_metadata`, `get_screenshot`, `get_design_context`, `get_figjam`) and drives them by the `fileKey` / `nodeId` extracted from each Figma URL found in an issue — often across multiple Figma files in a single session.
 
-**The Cursor Integrations flow is the only supported setup** for this skill. Cursor ships built-in support for the official Figma MCP and it accepts `fileKey` / `nodeId` params on every call, which is what the metadata-first flow in [`references/gathering-context.md`](../../../.agents/skills/test-plan-generator/references/gathering-context.md#figma) relies on.
+The skill requires a Figma MCP setup that accepts explicit `fileKey` / `nodeId` params on every call, which is what the metadata-first flow in [`references/gathering-context.md`](../../../.agents/skills/test-plan-generator/references/gathering-context.md#figma) relies on. **Both of the following official flows produce that setup and are supported** — pick whichever matches your Cursor version. They install the same MCP server; the connection appears under **Cursor Settings → MCP** either way.
 
-> **Why not the Figma Desktop dev-mode MCP server?** Figma Desktop's local MCP server operates on the file that is currently open in Figma Desktop, not on arbitrary `fileKey` values. It works well for interactive designer flows but breaks the skill's core assumption: given a Figma URL from an issue, resolve its file/node and read it. Using it here risks generating a test plan from whichever file happens to be open in Figma Desktop rather than the one the issue links to, with no obvious error surface. Use Cursor Integrations instead.
+> **Why not the Figma Desktop dev-mode MCP server?** Figma Desktop's local MCP server operates on the file that is currently open in Figma Desktop, not on arbitrary `fileKey` values. It works well for interactive designer flows but breaks the skill's core assumption: given a Figma URL from an issue, resolve its file/node and read it. Using it here risks generating a test plan from whichever file happens to be open in Figma Desktop rather than the one the issue links to, with no obvious error surface. Use either supported flow below instead.
 
 > **Note on the GitHub MCP:** The GitHub MCP is optional. In practice, the agent works more reliably using the `gh` CLI for all GitHub interactions (reading issues, posting comments, navigating sub-issues). When the GitHub MCP is enabled alongside the agent doing complex multi-step work, it can interfere with parallel tool calls and cause Cursor to hang. The recommended setup is to use `gh` CLI as the primary GitHub tool and leave the GitHub MCP disabled unless you have a specific reason to enable it.
 
-### Setup
+### Option A — Cursor plugin flow (`/add-plugin figma` or the Figma install deep link)
 
-1. Open **Cursor Settings** (`⌘ ,` on macOS)
-2. Go to the **Integrations** section
-3. Find **Figma** and click **Connect**
-4. Sign in with your `@elastic.co` Figma account and authorize Cursor
+This is Figma's currently documented default install path for Cursor. It works from inside the Agent chat and, on newer Cursor builds, also installs any Figma-side skills that ship with the plugin.
+
+1. Open a new Agent chat in Cursor.
+2. Type `/add-plugin figma` and press Enter. Alternatively, follow Figma's install deep link from [https://developers.figma.com/docs/figma-mcp-server/](https://developers.figma.com/docs/figma-mcp-server/) — the deep link opens Cursor and drives the same flow.
+3. Cursor prompts **Install → Connect → Open → Allow access**. Accept each prompt.
+4. Sign in with your `@elastic.co` Figma account when the browser opens, and authorize Cursor.
+5. Verify: open **Cursor Settings → MCP** and confirm **Figma** appears with a green status indicator. Hovering over it should show `get_metadata`, `get_screenshot`, `get_design_context`, and `get_figjam` among the available tools.
+
+### Option B — Cursor Integrations UI
+
+If your Cursor build does not expose `/add-plugin` yet, use the Integrations UI. It installs the same Figma MCP server.
+
+1. Open **Cursor Settings** (`⌘ ,` on macOS).
+2. Go to the **Integrations** section.
+3. Find **Figma** and click **Connect**.
+4. Sign in with your `@elastic.co` Figma account and authorize Cursor.
 5. Verify: still in Cursor Settings, open the **MCP** tab and confirm Figma appears with a green status indicator. Hovering over it should show `get_metadata`, `get_screenshot`, `get_design_context`, and `get_figjam` among the available tools.
 
-The integration is managed by Cursor — no `mcp.json` entry is required for Figma.
+Either way, the integration is managed by Cursor — no manual `mcp.json` entry is required for Figma.
 
 ### Migrating from older setups
 
@@ -244,15 +256,16 @@ The GitHub MCP is optional — the agent uses `gh` CLI as the primary method for
 
 ### Figma MCP not connecting
 
-The Cursor Integrations flow from Step 3 results in a connection Cursor shows in **Cursor Settings → MCP**. If that entry is red / disconnected:
+Both supported flows from Step 3 (`/add-plugin figma` / Figma install deep link, or Cursor Integrations) surface the Figma connection under **Cursor Settings → MCP**. If that entry is red / disconnected:
 
-- Open Cursor Settings → **Integrations** → **Figma** and re-run **Connect**. Make sure you are signed in with your `@elastic.co` Figma account. Fully quit and reopen Cursor after connecting.
+- **Option A path** — re-run `/add-plugin figma` from the Agent chat, or open the Figma install deep link again. Accept the *Install → Connect → Open → Allow access* prompts, sign in with your `@elastic.co` Figma account when the browser opens, and fully quit and reopen Cursor after connecting.
+- **Option B path** — open Cursor Settings → **Integrations** → **Figma** and re-run **Connect**. Sign in with your `@elastic.co` Figma account and fully quit and reopen Cursor after connecting.
 - **If you followed an older version of this guide** and installed Framelink's `figma-developer-mcp` npm package via `npx`, remove that entry from `mcp.json` — the skill no longer calls Framelink's tools and Cursor will surface a "tool not found" style error when the skill runs. See the migration note at the bottom of Step 3.
-- **If your `mcp.json` has a Figma Desktop local dev-mode entry** (`http://127.0.0.1:3845/mcp`), remove it before connecting via Integrations. That server does not accept `fileKey` params, so the skill can silently generate a test plan against whichever file happens to be open in Figma Desktop instead of the one the issue links to. See the note in Step 3 for why the Cursor Integrations flow is the only supported setup.
+- **If your `mcp.json` has a Figma Desktop local dev-mode entry** (`http://127.0.0.1:3845/mcp`), remove it before running either flow. That server does not accept `fileKey` params, so the skill can silently generate a test plan against whichever file happens to be open in Figma Desktop instead of the one the issue links to. See the note in Step 3 for why neither of the two supported flows uses it.
 
 ### "Cannot read Figma file"
 
-Make sure the Figma file is shared with your `@elastic.co` account and that the OAuth session you connected in Cursor Settings → Integrations → Figma (Step 3) is using that account. The MCP can only access files your account can view.
+Make sure the Figma file is shared with your `@elastic.co` account and that the Figma MCP OAuth session (installed in Step 3 via either `/add-plugin figma` / the install deep link, or Cursor Settings → Integrations → Figma) is using that account. The MCP can only access files your account can view.
 
 ### The agent says it cannot connect to GitHub and falls back to `gh` CLI
 
