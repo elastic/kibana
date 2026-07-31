@@ -401,13 +401,72 @@ console.log(
 }
 
 console.log(
-  '\n── Own-path-message matching consumes individual messages globally, so prefix-overlapping paths cannot share one credit ──'
+  '\n── Explicit acceptance: the reservation above is a deliberate trade-off, not a blind spot — it can create a false positive too ──'
 );
 {
-  // P2 review finding: the per-(status, path) count from the prior fix
-  // still let two *different* keys double-spend the same message whenever
-  // one path is a substring of the other — text.includes("/api/data") is
-  // true for a message about "/api/data/export" too, so a single message
+  // P2 review finding (round 5): the test above only demonstrates the
+  // reservation *fixing* a false negative. Point taken — the exact same
+  // mechanism, run on data where the native message actually belonged to
+  // the real (non-abandoned) request rather than the abandoned one, trades
+  // that false negative for a false positive instead: the real request
+  // gets wrongly reported as silent even though it did have console
+  // coverage. This is not a fixable misattribution the way the exact-path
+  // test above is — a native message carries no path *or timestamp* (see
+  // the ConsoleEvent shape in the module doc comment), so there is no data
+  // in this shape to decide which of the two same-status events actually
+  // produced it. Both directions of this trade-off are accepted
+  // deliberately, because a false positive here is a finding a human
+  // reviews and dismisses, while the false negative this reservation
+  // replaces is a genuinely silent error the whole point of this detector
+  // is to catch. This test is intentionally identical in shape to the one
+  // above — the point is that "the real request has legitimate coverage" is
+  // indistinguishable, from this data, from "the abandoned request does",
+  // so the same fixture must be read as covering both interpretations.
+  const abandoned = {
+    method: 'GET',
+    url: 'https://kibana.example/api/abandoned',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 0,
+    respondedAt: null,
+    abandonedByNavigation: true,
+    resourceType: 'fetch',
+  };
+  const realRequestWithLegitimateCoverage = {
+    method: 'GET',
+    url: 'https://kibana.example/api/normal',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 100,
+    respondedAt: 150,
+    resourceType: 'fetch',
+  };
+  const r = reduceAction({
+    network: [abandoned, realRequestWithLegitimateCoverage],
+    console: [
+      // Ground truth this fixture asserts: this message was actually
+      // logged for /api/normal's failure, not for the abandoned request.
+      // The reducer cannot know that from a native message alone.
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    r.level1.some((i) => i.type === 'silent_server_error' && i.url.includes('normal')),
+    'accepted false positive: /api/normal is reported as silent even though this fixture\'s ground truth is that the console message was really its own — indistinguishable from the true-positive fixture above given only { type, text } console events',
+    JSON.stringify(r.level1)
+  );
+}
+
+console.log(
+  '\n── Own-path-message matching consumes individual messages globally AND requires an exact path, not a substring ──'
+);
+{
+  // P2 review finding (round 4): the per-(status, path) count from the
+  // prior fix still let two *different* keys double-spend the same message
+  // whenever one path is a substring of the other — text.includes("/api/data")
+  // is true for a message about "/api/data/export" too, so a single message
   // wrongly covered two independent requests to genuinely different paths.
   const eventFor = (path, requestedAt) => ({
     method: 'GET',
@@ -431,6 +490,40 @@ console.log(
     JSON.stringify(oneMessage.level1)
   );
 
+  // P2 review finding (round 5): the count-fix above still didn't check
+  // *which* request the round-4 test's single message pinned as silent — it
+  // only checked the count, so a real misattribution bug slipped through:
+  // a plain substring test let the SHORTER path ("/api/data", which sorts
+  // first by requestedAt above) consume a message that unambiguously named
+  // the LONGER path ("/api/data/export"), so the genuinely-silent shorter
+  // request was wrongly marked "surfaced" while the request that really
+  // had its own message got reported as silent instead — the exact inverse
+  // of the correct answer. Unlike the native-message pool (no path data at
+  // all, so misattribution there is a genuine, irreducible ambiguity), a
+  // message that names "/api/data/export" is never actually about
+  // "/api/data" — there is no ambiguity to accept here, only imprecision to
+  // fix. Assert the correct endpoint specifically, in both time orders, so
+  // a future regression can't silently satisfy the weaker "count === 1"
+  // check above while flipping the attribution again.
+  assert(
+    oneMessageSilent[0] && oneMessageSilent[0].path === '/api/data',
+    'the shorter path, which never got its own message, is the one reported as silent — not the longer path that did',
+    JSON.stringify(oneMessageSilent)
+  );
+
+  const oneMessageReversedOrder = reduceAction({
+    network: [eventFor('/api/data/export', 0), eventFor('/api/data', 100)],
+    console: [{ type: 'error', text: '500 @ /api/data/export' }],
+  });
+  const reversedSilent = oneMessageReversedOrder.level1.filter(
+    (i) => i.type === 'silent_server_error'
+  );
+  assert(
+    reversedSilent.length === 1 && reversedSilent[0].path === '/api/data',
+    'same correct attribution regardless of which request sorts first by requestedAt — the fix is exact-path matching, not arrival order',
+    JSON.stringify(reversedSilent)
+  );
+
   const twoMessages = reduceAction({
     network: [eventFor('/api/data', 0), eventFor('/api/data/export', 100)],
     console: [
@@ -440,7 +533,7 @@ console.log(
   });
   assert(
     !twoMessages.level1.some((i) => i.type === 'silent_server_error'),
-    'two prefix-overlapping-path 500s + TWO distinct messages → both are covered, zero silent_server_error findings',
+    'two prefix-overlapping-path 500s + TWO distinct, exactly-matching messages → both are covered, zero silent_server_error findings',
     JSON.stringify(twoMessages.level1)
   );
 }

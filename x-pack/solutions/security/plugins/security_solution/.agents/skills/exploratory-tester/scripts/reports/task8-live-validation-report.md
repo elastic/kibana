@@ -430,3 +430,39 @@ fact feasible without new instrumentation:
 
 Verified after this pass: `action-scoped-collector.test.mjs` 98/98, `action-scoped-collector-bridge.test.mjs`
 52/52, `equivalence.test.mjs` 77/77, `test_session_resources.py` 131/131.
+
+## Fifth follow-up pass: fixes from re-review of the fourth follow-up commit
+
+A fifth review, re-reproducing directly, found the fourth pass's own-message fix was still
+imprecise (global consumption alone didn't fix the underlying substring match), and pushed back
+that the fourth pass's abandoned-reservation test only demonstrated the fix's benefit, never its
+accepted cost:
+
+- **Fixed (P2) — overlapping-path messages could be attributed to the wrong request:** the fourth
+  pass made message consumption global (a message backs at most one event), but each check was
+  still `text.includes(path)` — a plain substring test. With `/api/data` failing silently first
+  (by `requestedAt`) and `/api/data/export` producing a real `"500 @ /api/data/export"` message,
+  the *shorter* path consumed that message first (its substring matched), leaving the request that
+  actually had its own message reported as silent instead — the exact inverse of the correct
+  answer. This is not the same kind of irreducible ambiguity as the native-message pool (which
+  carries no path at all): an own-path message *does* name a specific path, so misattributing it
+  across genuinely different paths was fixable imprecision, not something to accept. Added
+  `textMentionsExactPath`, which requires a match's boundaries on both sides to not be
+  path-continuation characters (`/`, alphanumerics, `-_.~`) — a message about `/api/data/export` no
+  longer satisfies a check for `/api/data`, in either time order. Strengthened the existing
+  prefix-overlap test (which had only checked that exactly one finding existed, not which endpoint)
+  to assert the specific, correct attribution in both time orders.
+- **Addressed (P2) — abandoned-reservation false positives had no explicit test coverage:** fair
+  finding — the fourth pass's regression test only demonstrated the reservation *fixing* a false
+  negative, never exercised (or even named) the mirror-image case where the trade-off creates a
+  false positive instead. Confirmed this direction is not fixable the way the path bug above was:
+  `ConsoleEvent` is `{ type, text }` with no path *or timestamp*, so there is no data in this shape
+  to decide whether a native message belonged to the abandoned request or a same-status real one —
+  both readings of the identical fixture are equally valid. Added a companion test that pins the
+  false-positive reading explicitly, with a comment stating the trade-off is deliberately accepted
+  in both directions (a dismissable false positive is preferable to a missed silent error) rather
+  than leaving that half of the trade-off implicit.
+
+Verified after this pass: `action-scoped-collector.test.mjs` 101/101 (98 + 3 new regression
+tests), `action-scoped-collector-bridge.test.mjs` 52/52, `equivalence.test.mjs` 77/77,
+`test_session_resources.py` 131/131.

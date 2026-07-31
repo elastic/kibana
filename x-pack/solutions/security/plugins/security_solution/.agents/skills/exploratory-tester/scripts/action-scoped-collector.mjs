@@ -205,6 +205,34 @@ function pathnameOf(url) {
   }
 }
 
+// A character that can extend a URL path segment. If either side of a
+// `text.indexOf(path)` match is one of these, the match is only a
+// prefix/suffix of a *longer* path mentioned in the text, not a standalone
+// mention of `path` itself — e.g. "/api/data" is a substring of
+// "/api/data/export", but a message about "/api/data/export" is not a
+// message about "/api/data". Whitespace, punctuation, and end-of-string are
+// all valid path terminators; `/`, letters, digits, and `-_.~` are not.
+const PATH_CONTINUATION_CHAR = /[A-Za-z0-9\-_.~/]/;
+
+// Presence test for "does `text` mention this exact path", not a substring
+// test — see PATH_CONTINUATION_CHAR above. Scans every occurrence of `path`
+// in `text` (there is no message-authoring convention this reducer can rely
+// on to jump straight to the right one) and accepts the first whose
+// boundaries on both sides are not path-continuation characters.
+function textMentionsExactPath(text, path) {
+  let fromIndex = 0;
+  while (true) {
+    const idx = text.indexOf(path, fromIndex);
+    if (idx === -1) return false;
+    const before = idx > 0 ? text[idx - 1] : '';
+    const after = idx + path.length < text.length ? text[idx + path.length] : '';
+    if (!PATH_CONTINUATION_CHAR.test(before) && !PATH_CONTINUATION_CHAR.test(after)) {
+      return true;
+    }
+    fromIndex = idx + 1;
+  }
+}
+
 // Known-noise endpoints — same list dedup-network.js has always suppressed.
 // Matched against the path (query-independent), same as today.
 const POLLING = ['/health', '/status', '/metrics', '/fleet-setup', '/api/security/me'];
@@ -277,18 +305,25 @@ export function reduceAction(action, priorState) {
 
   // Phase 1 consumes individual console messages, not a per-(status, path)
   // count — a per-key count still let two *different* keys double-spend the
-  // *same* message whenever one path is a substring of the other (e.g.
-  // "/api/data" and "/api/data/export": a single "500 @ /api/data/export"
-  // message satisfies `text.includes(path)` for both keys independently,
-  // since `text.includes("/api/data")` is also true). Tracking consumed
-  // message indices in one shared Set, across every key, means a message
-  // can back at most one surfaced event in total, however many different
-  // paths it happens to textually overlap with. Iterating `qualifying` in
-  // time order and taking the first unconsumed match is the same
-  // first-come heuristic already accepted below for the native pool: which
-  // *specific* same-status event a message attributes to when several
-  // equally match it is a heuristic, not a guarantee, but no single message
-  // can silently cover more than one event.
+  // *same* message whenever one path was a substring of the other. Tracking
+  // consumed message indices in one shared Set, across every key, means a
+  // message can back at most one surfaced event in total.
+  //
+  // Matching uses `textMentionsExactPath`, not a plain substring test: a
+  // message about "/api/data/export" is not a message about "/api/data",
+  // even though the shorter path is a literal substring of the longer one.
+  // Unlike phase 2's native-message pool (which carries no path at all, so
+  // attributing a shared credit is genuinely undecidable from the data), an
+  // own-path message *does* name a specific path — treating "/api/data" as
+  // a match there was needless imprecision, not an inherent ambiguity, and
+  // it actively misattributed a real message to the wrong, unrelated
+  // request rather than merely picking arbitrarily between equally
+  // plausible candidates. Iterating `qualifying` in time order and taking
+  // the first unconsumed *exact* match is still a first-come heuristic when
+  // more than one qualifying event shares the exact same path (a real,
+  // narrower ambiguity `textMentionsExactPath` cannot resolve), but a
+  // message can no longer be misattributed across genuinely different
+  // paths.
   const consumedMessageIndices = new Set();
   const surfacedByOwnMessage = new Set();
   for (const ev of qualifying) {
@@ -297,7 +332,7 @@ export function reduceAction(action, priorState) {
     const matchIndex = consoleMessages.findIndex((msg, idx) => {
       if (consumedMessageIndices.has(idx)) return false;
       const text = msg.text || '';
-      return statusPattern.test(text) && text.includes(path);
+      return statusPattern.test(text) && textMentionsExactPath(text, path);
     });
     if (matchIndex !== -1) {
       consumedMessageIndices.add(matchIndex);
@@ -307,13 +342,13 @@ export function reduceAction(action, priorState) {
 
   // Phase 2: distribute remaining native-message credits, in request order,
   // among whatever's left over from phase 1. Order can still matter here —
-  // there is no request<->console-message ID linking in the underlying data
-  // to attribute a specific own-path or native message to one request over
-  // another when credits are scarcer than qualifying events sharing a key,
-  // so which *specific* event reads as silent in that case is a heuristic,
-  // not a guarantee. This is a narrower, accepted limitation (which event
-  // gets flagged) rather than the bugs phase 1 avoids (a message silently
-  // covering more events than it could plausibly describe).
+  // a native message carries no path, so when two or more qualifying
+  // events share a status and credits are scarcer than events, which
+  // *specific* event reads as silent is a heuristic, not a guarantee. This
+  // is a narrower, accepted limitation (which event gets flagged among
+  // otherwise-indistinguishable candidates) than the phase-1 bug fixed
+  // above (a message silently covering an event it could not plausibly
+  // describe, once it named an exact, different path).
   //
   // A native message carries no URL at all, so it can't be attributed to a
   // specific event even in principle — including an `abandonedByNavigation`
