@@ -2318,9 +2318,7 @@ module.exports = {
     {
       files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
       // Playwright resolves its configuration from a default export.
-      excludedFiles: [
-        'src/platform/plugins/shared/vis_types/timeseries/**/*playwright.config.ts',
-      ],
+      excludedFiles: ['src/platform/plugins/shared/vis_types/timeseries/**/*playwright.config.ts'],
       rules: {
         'import/no-default-export': 'error',
       },
