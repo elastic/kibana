@@ -1,4 +1,0 @@
-type: object
-properties:
-  settings:
-    $ref: 'settings.yaml'

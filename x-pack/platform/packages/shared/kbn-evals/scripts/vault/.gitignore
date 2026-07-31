@@ -1,6 +1,0 @@
-#
-# Local-only vault configs (contain secrets) — never commit.
-#
-config*.json
-!config.example.json
-

@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/securitysolution-list-constants",
-  "owner": [
-    "@elastic/security-detection-engineering"
-  ],
-  "group": "security",
-  "visibility": "private"
-}

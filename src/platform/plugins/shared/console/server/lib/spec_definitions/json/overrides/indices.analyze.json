@@ -1,7 +1,0 @@
-{
-  "indices.analyze": {
-    "data_autocomplete_rules": {
-      "__scope_link": "analyze"
-    }
-  }
-}

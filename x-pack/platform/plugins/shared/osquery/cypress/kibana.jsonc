@@ -1,8 +1,0 @@
-{
-  "type": "functional-tests",
-  "id": "@kbn/osquery-plugin-cypress",
-  "owner": "@elastic/security-defend-workflows",
-  "group": "platform",
-  "visibility": "private",
-  "devOnly": true
-}

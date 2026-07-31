@@ -1,7 +1,0 @@
-{
-  "indices.delete_data_stream": {
-    "patterns": [
-      "_data_stream/{data_stream}"
-    ]
-  }
-}

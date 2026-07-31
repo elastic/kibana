@@ -1,7 +1,0 @@
-spec_id: .jina
-name: "Jina Reader (testing)"
-auth_type: bearer
-secrets:
-  token:
-    vault: secret/ent-search-team/connectors-sources/jina_reader
-    field: api_key

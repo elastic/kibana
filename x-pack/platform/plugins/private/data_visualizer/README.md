@@ -1,1 +1,0 @@
-The data_visualizer plugin enables you to explore the fields in your data.

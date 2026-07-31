@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/response-ops-alerts-delete",
-  "owner": "@elastic/response-ops",
-  "group": "platform",
-  "visibility": "shared"
-}

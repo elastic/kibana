@@ -1,8 +1,0 @@
-{
-  "id": "keyword_custom_format_list",
-  "name": "Simple list with a keyword using a custom format",
-  "description": "This parses the first found ipv4 only",
-  "serializer": "(?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))",
-  "deserializer": "{{value}}",
-  "type": "keyword"
-}

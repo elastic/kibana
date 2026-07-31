@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/streams-ai",
-  "owner": "@elastic/streams-ui @elastic/obs-sig-events-team",
-  "group": "platform",
-  "visibility": "shared"
-}

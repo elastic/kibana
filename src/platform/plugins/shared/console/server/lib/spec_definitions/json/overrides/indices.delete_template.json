@@ -1,7 +1,0 @@
-{
-  "indices.delete_template": {
-    "patterns": [
-      "_template/{template}"
-    ]
-  }
-}

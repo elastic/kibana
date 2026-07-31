@@ -1,5 +1,0 @@
-name: test_query
-query: |
-  FROM sample_data
-  | SORT @timestamp DESC
-  | LIMIT 3

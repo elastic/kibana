@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/as-code-data-views-schema",
-  "owner": "@elastic/kibana-data-discovery",
-  "group": "platform",
-  "visibility": "shared"
-}

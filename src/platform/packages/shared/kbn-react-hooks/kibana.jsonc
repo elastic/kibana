@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/react-hooks",
-  "owner": [
-    "@elastic/streams-ui"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

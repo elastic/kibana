@@ -1,7 +1,0 @@
-{
-  "snapshot.create": {
-    "data_autocomplete_rules": {
-      "indices": "*"
-    }
-  }
-}

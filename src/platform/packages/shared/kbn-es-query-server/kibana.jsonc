@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/es-query-server",
-  "owner": "@elastic/kibana-data-discovery",
-  "group": "platform",
-  "visibility": "shared"
-}

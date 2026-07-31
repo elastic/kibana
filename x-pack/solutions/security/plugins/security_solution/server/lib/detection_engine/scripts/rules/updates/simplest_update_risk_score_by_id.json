@@ -1,9 +1,0 @@
-{
-  "id": "1100ba1b-ed7e-4755-b326-1f6fa2bd6758",
-  "name": "Some new name",
-  "description": "Changing the name and changing the risk score",
-  "risk_score": 38,
-  "severity": "high",
-  "type": "query",
-  "query": "user.name: root or user.name: admin"
-}

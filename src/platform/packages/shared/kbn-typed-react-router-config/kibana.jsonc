@@ -1,9 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/typed-react-router-config",
-  "owner": [
-    "@elastic/obs-signals-traces-team"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

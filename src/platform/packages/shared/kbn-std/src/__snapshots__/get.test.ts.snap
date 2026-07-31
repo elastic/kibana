@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws if dot in string 1`] = `"Using dots in \`get\` with a string is not allowed, use array instead"`;

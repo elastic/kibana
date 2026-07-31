@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/shared-url-state",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "shared"
-}

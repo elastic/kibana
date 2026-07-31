@@ -1,7 +1,0 @@
-responses:
-  200:
-    content:
-      application/json:
-        examples:
-          archiveMaintenanceWindowResponse:
-            $ref: './archive_maintenance_window_response.yaml'

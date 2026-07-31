@@ -1,4 +1,0 @@
-type: array
-items:
-  $ref: './string.yaml'
-maxItems: 100

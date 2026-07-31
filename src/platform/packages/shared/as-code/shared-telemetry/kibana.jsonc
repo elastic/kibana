@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/as-code-shared-telemetry",
-  "owner": "@elastic/kibana-presentation",
-  "group": "platform",
-  "visibility": "shared"
-}

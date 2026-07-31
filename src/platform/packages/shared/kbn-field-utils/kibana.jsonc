@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/field-utils",
-  "owner": ["@elastic/kibana-data-discovery"],
-  "group": "platform",
-  "visibility": "shared"
-}

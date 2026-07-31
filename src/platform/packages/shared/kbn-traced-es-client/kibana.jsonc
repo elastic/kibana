@@ -1,9 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/traced-es-client",
-  "owner": [
-    "@elastic/observability-ui"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

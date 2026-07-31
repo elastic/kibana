@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/eslint-plugin-kbn-ui",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "private",
-  "devOnly": true
-}

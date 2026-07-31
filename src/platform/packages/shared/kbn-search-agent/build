@@ -1,2 +1,0 @@
-node scripts/generate.js
-node ../../../../../node_modules/.bin/prettier --write src/skills

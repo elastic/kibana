@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/response-ops-recurring-schedule-form",
-  "owner": "@elastic/response-ops",
-  "group": "platform",
-  "visibility": "shared"
-}

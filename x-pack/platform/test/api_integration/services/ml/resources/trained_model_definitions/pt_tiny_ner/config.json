@@ -1,7 +1,0 @@
-{
-  "description": "Tiny/Dummy PyTorch model (ner)",
-  "model_type": "pytorch",
-  "inference_config": {
-    "ner": {}
-  }
-}

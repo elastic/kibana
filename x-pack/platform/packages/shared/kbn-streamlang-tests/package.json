@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/streamlang-tests",
-  "description": "Tests for the Streamlang DSL and other components from @kbn/streamlang",
-  "private": true,
-  "version": "1.0.0",
-  "license": "Elastic License 2.0"
-}

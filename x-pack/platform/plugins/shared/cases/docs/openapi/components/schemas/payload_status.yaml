@@ -1,4 +1,0 @@
-type: object
-properties:
-  status:
-    $ref: 'case_status.yaml'

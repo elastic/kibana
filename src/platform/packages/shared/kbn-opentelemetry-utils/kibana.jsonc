@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/opentelemetry-utils",
-  "owner": "@elastic/kibana-core",
-  "group": "platform",
-  "visibility": "shared"
-}

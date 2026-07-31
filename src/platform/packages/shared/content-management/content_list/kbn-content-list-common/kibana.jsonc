@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/content-list-common",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "shared"
-}

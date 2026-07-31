@@ -1,2 +1,0 @@
-java.lang.RuntimeException: Simple crash
-	at co.elastic.otel.android.integration.Crasher.crash(Crasher.kt:24)

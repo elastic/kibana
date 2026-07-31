@@ -1,8 +1,0 @@
-{
-  "ml.get_calendars": {
-    "data_autocomplete_rules": {
-      "from": 0,
-      "size": 100
-    }
-  }
-}

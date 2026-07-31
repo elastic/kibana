@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/lens-common-2",
-  "owner": "@elastic/kibana-visualizations",
-  "group": "platform",
-  "visibility": "private"
-}

@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/openapi-common",
-  "owner": [
-    "@elastic/security-detection-engineering"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

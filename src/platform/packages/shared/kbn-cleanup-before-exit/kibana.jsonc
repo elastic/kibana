@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/cleanup-before-exit",
-  "owner": "@elastic/observability-ui",
-  "group": "platform",
-  "visibility": "shared"
-}

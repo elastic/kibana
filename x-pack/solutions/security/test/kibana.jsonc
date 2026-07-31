@@ -1,8 +1,0 @@
-{
-  "type": "test-helper",
-  "id": "@kbn/test-suites-xpack-security",
-  "owner": [],
-  "group": "security",
-  "visibility": "private",
-  "devOnly": true
-}

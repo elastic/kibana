@@ -1,3 +1,0 @@
-java.lang.RuntimeException: Multi-line range
-	at androidx.concurrent.futures.AbstractResolvableFuture.get(AbstractResolvableFuture.java:490)
-	at co.elastic.otel.android.integration.Crasher.crash(Crasher.kt:24)

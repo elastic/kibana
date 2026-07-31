@@ -1,9 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/otel-demo",
-  "owner": "@elastic/streams-ui",
-  "group": "platform",
-  "visibility": "shared",
-  "devOnly": true
-}
-

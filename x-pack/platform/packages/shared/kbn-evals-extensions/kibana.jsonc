@@ -1,7 +1,0 @@
-{
-  "type": "test-helper",
-  "id": "@kbn/evals-extensions",
-  "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/security-genai-research-and-development"],
-  "description": "Experimental and advanced extension capabilities for @kbn/evals.",
-  "devOnly": true
-}

@@ -1,4 +1,0 @@
-type: object
-properties:
-  assignees:
-    $ref: 'assignees.yaml'

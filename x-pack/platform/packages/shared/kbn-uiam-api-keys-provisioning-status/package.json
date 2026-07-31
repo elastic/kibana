@@ -1,7 +1,0 @@
-{
-  "name": "@kbn/uiam-api-keys-provisioning-status",
-  "private": true,
-  "version": "1.0.0",
-  "license": "Elastic License 2.0",
-  "main": "./index.ts"
-}

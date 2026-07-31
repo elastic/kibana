@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/apm-ui-shared",
-  "owner": ["@elastic/obs-signals-traces-team"],
-  "group": "platform",
-  "visibility": "shared"
-}

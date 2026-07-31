@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/agent-builder-dashboards-common",
-  "owner": "@elastic/kibana-presentation",
-  "group": "platform",
-  "visibility": "shared"
-}

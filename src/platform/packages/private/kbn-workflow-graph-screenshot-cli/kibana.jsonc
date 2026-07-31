@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/workflow-graph-screenshot-cli",
-  "owner": ["@elastic/workflows-eng"],
-  "group": "platform",
-  "visibility": "private",
-  "devOnly": true
-}

@@ -1,7 +1,0 @@
-{
-  "type": "tooling",
-  "id": "@kbn/cli",
-  "owner": "@elastic/kibana-operations",
-  "group": "platform",
-  "visibility": "private"
-}

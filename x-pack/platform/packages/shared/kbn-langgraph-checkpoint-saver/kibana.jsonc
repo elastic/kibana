@@ -1,9 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/langgraph-checkpoint-saver",
-  "owner": [
-    "@elastic/security-threat-hunting"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/es-snapshot-loader",
-  "owner": "@elastic/nightshift-context-and-research-team",
-  "group": "platform",
-  "visibility": "shared",
-  "devOnly": true
-}

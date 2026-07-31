@@ -1,7 +1,0 @@
-type: object
-description: Service
-required:
-  - service
-properties:
-  service:
-    $ref: 'service_object.yaml'

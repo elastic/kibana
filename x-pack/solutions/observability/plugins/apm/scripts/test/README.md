@@ -1,1 +1,0 @@
-Go to [testing documentation](../../dev_docs/testing.md)

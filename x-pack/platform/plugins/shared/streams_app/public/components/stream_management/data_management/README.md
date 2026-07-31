@@ -1,1 +1,0 @@
-Components in this folder are only relevant for data management concerns (routing, enrichment, schema, lifecycle)

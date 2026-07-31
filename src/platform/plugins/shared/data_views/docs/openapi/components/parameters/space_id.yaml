@@ -1,7 +1,0 @@
-in: path
-name: spaceId
-description: An identifier for the space. If `/s/` and the identifier are omitted from the path, the default space is used.
-required: true
-schema:
-  type: string
-  example: default

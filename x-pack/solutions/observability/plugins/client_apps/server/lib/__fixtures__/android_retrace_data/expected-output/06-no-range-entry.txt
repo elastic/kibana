@@ -1,2 +1,0 @@
-java.lang.RuntimeException: No range entry
-	at co.elastic.otel.android.internal.features.sessionmanager.samplerate.SampleRateManager.evaluateSampleRate(SampleRateManager.kt)

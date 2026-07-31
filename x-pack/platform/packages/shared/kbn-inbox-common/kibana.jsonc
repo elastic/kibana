@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/inbox-common",
-  "owner": ["@elastic/security-genai-research-and-development"],
-  "group": "platform",
-  "visibility": "shared"
-}

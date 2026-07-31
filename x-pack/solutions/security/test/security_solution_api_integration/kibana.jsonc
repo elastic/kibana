@@ -1,8 +1,0 @@
-{
-  "type": "functional-tests",
-  "id": "@kbn/test-suites-security-solution-apis",
-  "owner": "@elastic/security-detection-engineering",
-  "group": "security",
-  "visibility": "private",
-  "devOnly": true
-}

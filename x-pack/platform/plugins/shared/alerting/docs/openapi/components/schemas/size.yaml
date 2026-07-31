@@ -1,3 +1,0 @@
-description: >
-  The number of documents to pass to the configured actions when the threshold condition is met.
-type: integer

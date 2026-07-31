@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/classic-stream-flyout",
-  "owner": "@elastic/kibana-management",
-  "group": "platform",
-  "visibility": "shared"
-}

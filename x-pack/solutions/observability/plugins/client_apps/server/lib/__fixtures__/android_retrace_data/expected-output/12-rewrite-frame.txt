@@ -1,2 +1,0 @@
-java.lang.NullPointerException: rewriteFrame test
-	at androidx.collection.ArrayMap$EntrySet.size(ArrayMap.java:267)

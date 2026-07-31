@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/llm-trace-waterfall",
-  "owner": ["@elastic/nightshift-context-and-research-team", "@elastic/workchat-eng"],
-  "group": "platform",
-  "visibility": "shared"
-}

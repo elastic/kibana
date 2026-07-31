@@ -1,6 +1,0 @@
-{
-  "id": "byte_list",
-  "name": "Simple list with bytes",
-  "description": "This list has bytes",
-  "type": "byte"
-}

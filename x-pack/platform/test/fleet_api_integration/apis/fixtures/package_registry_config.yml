@@ -1,4 +1,0 @@
-package_paths:
-  - /packages/package-storage
-  - /packages/test-packages
-  - /packages/signed-test-packages

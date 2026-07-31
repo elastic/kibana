@@ -1,8 +1,0 @@
-.mapViewControl__coordinates {
-  // Background color is applied reactively via Emotion (useEuiTheme) in the
-  // component so it updates on reload-less light/dark theme toggles.
-  padding-left: $euiSizeXS;
-  padding-right: $euiSizeXS;
-  justify-content: center;
-  pointer-events: none;
-}

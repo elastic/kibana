@@ -1,2 +1,0 @@
-java.lang.RuntimeException: Catch-all range
-	at com.example.synthetic.CatchAllExample.foo(CatchAllExample.kt:33)

@@ -1,8 +1,0 @@
-{
-  "id": "@kbn/security-solution-test-api-clients",
-  "type": "shared-common",
-  "owner": ["@elastic/security-detection-engineering"],
-  "group": "security",
-  "visibility": "private",
-  "devOnly": true
-}

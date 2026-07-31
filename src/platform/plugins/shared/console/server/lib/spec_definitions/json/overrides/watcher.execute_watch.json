@@ -1,8 +1,0 @@
-{
-  "watcher.execute_watch": {
-    "data_autocomplete_rules": {
-      "ignore_condition": { "__one_of": ["true", "false"] },
-      "record_execution": { "__one_of": ["true", "false"] }
-    }
-  }
-}

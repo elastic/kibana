@@ -1,7 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/inference-tracing",
-  "owner": "@elastic/appex-ai-infra",
-  "group": "platform",
-  "visibility": "shared"
-}

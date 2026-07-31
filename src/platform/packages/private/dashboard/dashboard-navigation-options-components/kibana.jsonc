@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/dashboard-navigation-options-components",
-  "owner": "@elastic/kibana-presentation",
-  "group": "platform",
-  "visibility": "private"
-}

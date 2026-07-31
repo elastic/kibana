@@ -1,9 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/xstate-utils",
-  "owner": [
-    "@elastic/streams-ui"
-  ],
-  "group": "platform",
-  "visibility": "shared"
-}

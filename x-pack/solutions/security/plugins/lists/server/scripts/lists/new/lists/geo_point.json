@@ -1,6 +1,0 @@
-{
-  "id": "geo_point_list",
-  "name": "Simple list with geo points",
-  "description": "This list has geo points",
-  "type": "geo_point"
-}

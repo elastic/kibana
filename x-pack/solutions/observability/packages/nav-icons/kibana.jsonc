@@ -1,9 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/observability-nav-icons",
-  "owner": [
-    "@elastic/obs-presentation-team"
-  ],
-  "group": "observability",
-  "visibility": "private"
-}

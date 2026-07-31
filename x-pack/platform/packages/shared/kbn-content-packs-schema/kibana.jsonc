@@ -1,7 +1,0 @@
-{
-    "type": "shared-common",
-    "id": "@kbn/content-packs-schema",
-    "owner": "@elastic/streams-ui",
-    "group": "platform",
-    "visibility": "shared"
-  }

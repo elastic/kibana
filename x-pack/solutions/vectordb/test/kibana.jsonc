@@ -1,8 +1,0 @@
-{
-  "type": "test-helper",
-  "id": "@kbn/test-suites-xpack-vectordb",
-  "owner": ["@elastic/search-kibana"],
-  "group": "vectordb",
-  "visibility": "private",
-  "devOnly": true
-}

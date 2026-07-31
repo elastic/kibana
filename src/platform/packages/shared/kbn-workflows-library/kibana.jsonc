@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/workflows-library",
-  "owner": "@elastic/workflows-eng",
-  "group": "platform",
-  "visibility": "shared"
-}

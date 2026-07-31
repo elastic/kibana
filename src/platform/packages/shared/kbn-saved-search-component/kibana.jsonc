@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/saved-search-component",
-  "owner": "@elastic/obs-exploration-team",
-  "group": "platform",
-  "visibility": "shared"
-}

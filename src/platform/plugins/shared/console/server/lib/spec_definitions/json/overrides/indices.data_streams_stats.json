@@ -1,8 +1,0 @@
-{
-  "indices.data_streams_stats": {
-    "patterns": [
-      "_data_stream/_stats",
-      "_data_stream/{data_stream}/_stats"
-    ]
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "name": "@kbn/alerting-v2-episodes-ui",
-  "description": "React primitives and client-side logic for Alerting V2 Episodes UIs",
-  "private": true,
-  "version": "1.0.0",
-  "license": "Elastic License 2.0",
-  "sideEffects": false
-}

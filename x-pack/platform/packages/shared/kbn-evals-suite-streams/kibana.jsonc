@@ -1,7 +1,0 @@
-{
-  "type": "functional-tests",
-  "id": "@kbn/evals-suite-streams",
-  "owner": "@elastic/streams-ui",
-  "group": "platform",
-  "visibility": "shared"
-}

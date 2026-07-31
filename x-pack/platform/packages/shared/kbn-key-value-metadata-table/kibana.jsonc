@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/key-value-metadata-table",
-  "owner": ["@elastic/obs-signals-traces-team", "@elastic/obs-exploration-team"],
-  "group": "platform",
-  "visibility": "shared"
-}
-
-

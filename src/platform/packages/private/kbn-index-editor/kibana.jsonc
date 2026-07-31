@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/index-editor",
-  "owner": "@elastic/kibana-esql",
-  "group": "platform",
-  "visibility": "private"
-}

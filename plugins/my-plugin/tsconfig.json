@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {},
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/utils"
+  ]
+}

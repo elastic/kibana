@@ -1,8 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/edot-collector",
-  "owner": "@elastic/nightshift-context-and-research-team",
-  "group": "platform",
-  "visibility": "shared",
-  "devOnly": true
-}

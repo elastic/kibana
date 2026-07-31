@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/product-doc-artifact-builder",
-  "owner": "@elastic/appex-ai-infra",
-  "group": "platform",
-  "visibility": "private",
-  "devOnly": true
-}

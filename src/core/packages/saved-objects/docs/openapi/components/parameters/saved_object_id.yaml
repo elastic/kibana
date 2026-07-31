@@ -1,6 +1,0 @@
-in: path
-name: id
-description: An identifier for the saved object.
-required: true
-schema:
-  type: string

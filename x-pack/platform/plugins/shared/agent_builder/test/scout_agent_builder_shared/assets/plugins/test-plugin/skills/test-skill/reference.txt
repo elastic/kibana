@@ -1,2 +1,0 @@
-This is a referenced file for the test skill.
-It should be installed alongside the skill content.

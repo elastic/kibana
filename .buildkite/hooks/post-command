@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-
-source .buildkite/scripts/lifecycle/post_command.sh

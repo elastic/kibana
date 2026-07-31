@@ -1,8 +1,0 @@
-{
-  "id": "ip_custom_format_list",
-  "name": "Simple list with an ip",
-  "description": "This list describes bad internet ip and matches the first found ip within a list",
-  "serializer": "(?<value>((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))",
-  "deserializer": "{{value}}",
-  "type": "ip"
-}

@@ -1,9 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/reporting-export-types-pdf",
-  "owner": [
-    "@elastic/response-ops"
-  ],
-  "group": "platform",
-  "visibility": "private"
-}

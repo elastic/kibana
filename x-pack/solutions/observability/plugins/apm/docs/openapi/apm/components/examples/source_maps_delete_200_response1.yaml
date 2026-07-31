@@ -1,3 +1,0 @@
-# summary:
-description: An example of a successful response from `DELETE /api/apm/sourcemaps/{id}`. The response body is intentionally empty.
-value: {}

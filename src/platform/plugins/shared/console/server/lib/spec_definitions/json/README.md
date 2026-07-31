@@ -1,1 +1,0 @@
-Please refer to this [README](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/README.md#creating-definitions) file before adding/editing definitions files in this folder.
