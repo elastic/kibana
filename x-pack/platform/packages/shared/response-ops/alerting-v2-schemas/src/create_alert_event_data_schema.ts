@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { ALERT_EPISODE_STATUS } from './alert_action_schema';
 import {
   ID_MAX_LENGTH,
   MAX_ALERT_EVENT_DATA_KEYS,
@@ -17,11 +18,15 @@ import {
 const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'critical']);
 
 /**
- * Mirrors alertEpisodeStatusSchema from alert_events.ts.
- * All four lifecycle states can be set explicitly by external callers.
- * When omitted, status defaults to active.
+ * Same four lifecycle states as {@link ALERT_EPISODE_STATUS} / alert_events.ts.
+ * All can be set explicitly by external callers; when omitted, status defaults to active.
  */
-const externalAlertStatusSchema = z.enum(['active', 'inactive', 'pending', 'recovering']);
+const externalAlertStatusSchema = z.enum([
+  ALERT_EPISODE_STATUS.ACTIVE,
+  ALERT_EPISODE_STATUS.INACTIVE,
+  ALERT_EPISODE_STATUS.PENDING,
+  ALERT_EPISODE_STATUS.RECOVERING,
+]);
 
 const RESERVED_SOURCE_PREFIX = 'elastic';
 
