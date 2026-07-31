@@ -76,30 +76,13 @@ export function initializeUnsavedChangesManager({
   });
 
   const dashboardStateChanges$ = combineLatest([
-    settingsManager.internalApi.startComparing(lastSavedState$).pipe(
-      tap((val) => {
-        console.log('settings', { val });
-      })
-    ),
-    unifiedSearchManager.internalApi.startComparing(lastSavedState$).pipe(
-      tap((val) => {
-        console.log('unified search', { val });
-      })
-    ),
-    layoutManager.internalApi.startComparing(lastSavedState$).pipe(
-      tap((val) => {
-        console.log('layout', { val });
-      })
-    ),
-    projectRoutingManager?.internalApi.startComparing(lastSavedState$).pipe(
-      tap((val) => {
-        console.log('project routing', { val });
-      })
-    ) ?? of({}),
+    settingsManager.internalApi.startComparing(lastSavedState$),
+    unifiedSearchManager.internalApi.startComparing(lastSavedState$),
+    layoutManager.internalApi.startComparing(lastSavedState$),
+    projectRoutingManager?.internalApi.startComparing(lastSavedState$) ?? of({}),
   ]).pipe(
     map(([settings, unifiedSearch, layout, projectRouting]) => {
       console.log('dashboard state changes', { settings, unifiedSearch, layout, projectRouting });
-      debugger;
       return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
     }),
     share()

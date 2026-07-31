@@ -77,31 +77,17 @@ export function initializeHistoryManager({
     .pipe(
       debounceTime(60),
       withLatestFrom(hasOverlays$),
-      filter(([[state, loading], hasOverlays]) => {
-        console.log({ state, loading, hasOverlays });
-        // do not push to history as long as...
-        return (
-          !loading && // at least one child is loading or
-          !hasOverlays // an editor is open
-        );
-      })
+      // do not push to history while a child is loading or an editor is open
+      filter(([[, loading], hasOverlays]) => !loading && !hasOverlays)
     )
-    .subscribe(([[state]]) => {
-      console.log('NEXT STATE', getState());
+    .subscribe(() => {
       dashboardCurrentState$.next(getState());
     });
 
   // when the history's state updates, respond by setting state on the Dashboard
   const historyStateSubscription = historyApi.currentState$
-    .pipe(
-      switchMap(async (newState) => {
-        console.log('before', { setState: newState });
-        await setState(newState);
-      })
-    )
-    .subscribe(() => {
-      console.log('after set state');
-    });
+    .pipe(switchMap(async (newState) => setState(newState)))
+    .subscribe();
 
   return {
     api: historyApi,

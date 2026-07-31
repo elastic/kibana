@@ -19,7 +19,15 @@ import {
   apiPublishesSettings,
   initializeStateApi,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, debounceTime, merge, share, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  merge,
+  share,
+} from 'rxjs';
 import {
   ON_APPLY_FILTER,
   ON_CLICK_VALUE,
@@ -76,7 +84,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
     const titleManager = initializeTitleManager(state);
     const timeRangeManager = initializeTimeRangeManager(state);
     const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
-    const stateLoading$ = new BehaviorSubject<boolean>(false);
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
@@ -87,7 +94,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       state,
       syncColors$: apiPublishesSettings(parentApi) ? parentApi.settings.syncColors$ : undefined,
       uuid,
-      stateLoading$,
     });
     const actionHandlers = initializeActionHandlers(getApi);
     const crossPanelActions = initializeCrossPanelActions({
@@ -99,6 +105,21 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
       uuid,
     });
     const projectRoutingManager = await initializeProjectRoutingManager(savedMap);
+
+    const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
+    const stateLoading$ = new BehaviorSubject<boolean>(false);
+    const dataLoadingSubscription = combineLatest([reduxSync.api.reduxSyncLoading$, stateLoading$])
+      .pipe(
+        debounceTime(100),
+        map(([reduxSyncLoading, stateLoading]) => {
+          console.log('!!!!!!!!!!!!!!!', { reduxSyncLoading, stateLoading });
+          return reduxSyncLoading || stateLoading;
+        }),
+        distinctUntilChanged()
+      )
+      .subscribe((loading) => {
+        dataLoading$.next(loading);
+      });
 
     function getLatestState() {
       return {
@@ -127,38 +148,12 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         return savedObjectId ? serializeByReference(savedObjectId) : serializeByValue();
       },
       anyStateChange$: merge(
-        drilldownsManager.anyStateChange$.pipe(
-          tap(() => {
-            console.log('drilldownsManager');
-          })
-        ),
-        crossPanelActions.anyStateChange$.pipe(
-          tap(() => {
-            console.log('crossPanelActions');
-          })
-        ),
-        reduxSync.anyStateChange$.pipe(
-          tap(() => {
-            console.log('reduxSync');
-          })
-        ),
-        titleManager.anyStateChange$.pipe(
-          tap(() => {
-            console.log('title manager');
-          })
-        ),
-        timeRangeManager.anyStateChange$.pipe(
-          tap(() => {
-            console.log('time range  manager');
-          })
-        )
-      ).pipe(
-        tap((val) => {
-          debugger;
-          console.log('overall state', { val });
-        }),
-        share()
-      ),
+        drilldownsManager.anyStateChange$,
+        crossPanelActions.anyStateChange$,
+        reduxSync.anyStateChange$,
+        titleManager.anyStateChange$,
+        timeRangeManager.anyStateChange$
+      ).pipe(share()),
       getComparators: () => {
         return {
           ...crossPanelActionsComparators,
@@ -172,7 +167,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         };
       },
       applySerializedState: async (nextState) => {
-        console.log('----before');
         stateLoading$.next(true);
 
         drilldownsManager.reinitializeState(nextState);
@@ -180,14 +174,12 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
         titleManager.reinitializeState(nextState);
 
         await savedMap.reset(nextState);
-        // await new Promise((resolve) => setTimeout(resolve, 256)); // wait for map extent to stabilize
-
         stateLoading$.next(false);
-        console.log('----after');
       },
     });
 
     api = finalizeApi({
+      dataLoading$,
       defaultTitle$,
       defaultDescription$,
       ...stateApi,
@@ -244,6 +236,7 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
             reduxSync.cleanup();
             unsubscribeFromFetch();
             projectRoutingManager.cleanup();
+            dataLoadingSubscription.unsubscribe();
           };
         }, []);
 

@@ -35,7 +35,7 @@ export function startTrackingHistory<T extends object = {}>({
   const stateSubscription = state$
     .pipe(map(mapState), pairwise())
     .subscribe(([previous, current]) => {
-      console.log({ undoOrRedoAction });
+      console.log('-----------------', { undoOrRedoAction });
       if (undoOrRedoAction) {
         // do not add to history if state change is coming from undo or redo action
         undoOrRedoAction = false;

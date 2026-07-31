@@ -11,11 +11,11 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
+  firstValueFrom,
   map,
   merge,
-  share,
+  race,
   skip,
-  tap,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
@@ -93,13 +93,11 @@ export function initializeReduxSync({
   state,
   syncColors$,
   uuid,
-  stateLoading$,
 }: {
   savedMap: SavedMap;
   state: MapEmbeddableState;
   syncColors$?: PublishingSubject<boolean | undefined>;
   uuid: string;
-  stateLoading$: BehaviorSubject<boolean>;
 }) {
   const store = savedMap.getStore();
 
@@ -117,9 +115,10 @@ export function initializeReduxSync({
   const openTOCDetails$ = new BehaviorSubject<string[]>(
     state.openTOCDetails ?? getOpenTOCDetails(store.getState())
   );
-  const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
+  const reduxSyncLoading$ = new BehaviorSubject<boolean>(false);
 
   const unsubscribeFromStore = store.subscribe(() => {
+    reduxSyncLoading$.next(true);
     if (!getMapReady(store.getState())) {
       return;
     }
@@ -140,7 +139,6 @@ export function initializeReduxSync({
         nextMapCenterAndZoom
       )
     ) {
-      console.log({ prev: mapCenterAndZoom$.getValue(), nextMapCenterAndZoom });
       mapCenterAndZoom$.next(nextMapCenterAndZoom);
     }
 
@@ -149,17 +147,7 @@ export function initializeReduxSync({
       openTOCDetails$.next(nextOpenTOCDetails);
     }
 
-    const nextIsMapLoading = isMapLoading(store.getState()) || stateLoading$.getValue();
-    if (nextIsMapLoading !== dataLoading$.value) {
-      dataLoading$.next(nextIsMapLoading);
-    }
-  });
-
-  const stateLoadingSubscription = stateLoading$.subscribe((stateLoading) => {
-    const nextIsMapLoading = isMapLoading(store.getState()) || stateLoading$.getValue();
-    if (nextIsMapLoading !== dataLoading$.value) {
-      dataLoading$.next(nextIsMapLoading);
-    }
+    reduxSyncLoading$.next(isMapLoading(store.getState()));
   });
 
   store.dispatch(setReadOnly(true));
@@ -207,11 +195,10 @@ export function initializeReduxSync({
   return {
     cleanup: () => {
       if (syncColorsSubscription) syncColorsSubscription.unsubscribe();
-      stateLoadingSubscription.unsubscribe();
       unsubscribeFromStore();
     },
     api: {
-      dataLoading$,
+      reduxSyncLoading$,
       filters$,
       getInspectorAdapters: () => {
         return getInspectorAdapters(store.getState());
@@ -219,7 +206,7 @@ export function initializeReduxSync({
       getLayerList: () => {
         return getLayerList(store.getState());
       },
-      onRenderComplete$: dataLoading$.pipe(
+      onRenderComplete$: reduxSyncLoading$.pipe(
         filter((isDataLoading) => typeof isDataLoading === 'boolean' && !isDataLoading),
         debounceTime(RENDER_TIMEOUT),
         map(() => {
@@ -243,35 +230,21 @@ export function initializeReduxSync({
     anyStateChange$: merge(
       hiddenLayers$.pipe(
         skip(1),
-        map(() => undefined),
-        tap(() => {
-          console.log('hiddenLayers$ STATE CHANGE');
-        })
+        map(() => undefined)
       ),
       isLayerTOCOpen$.pipe(
         skip(1),
-        map(() => undefined),
-        tap(() => {
-          console.log('oisLayerTOCOpen$ STATE CHANGE');
-        })
+        map(() => undefined)
       ),
       mapCenterAndZoom$.pipe(
         skip(1),
-        debounceTime(100),
-        distinctUntilChanged(reduxSyncComparators.mapCenter as ComparatorFunction),
-        tap((val) => {
-          console.log('mapCenterAndZoom$ STATE CHANGE', { val });
-        }),
+        // distinctUntilChanged(reduxSyncComparators.mapCenter as ComparatorFunction),
         map(() => undefined)
       ),
       openTOCDetails$.pipe(
         skip(1),
         map(() => undefined)
       )
-    ).pipe(
-      tap(() => {
-        console.log('REDUXX STATE CHANGE');
-      })
     ),
     getLatestState: () => {
       return {

@@ -172,7 +172,6 @@ export function initializeLayoutManager(
       if (layoutToApply.panels[uuid] || layoutToApply.pinnedPanels[uuid]) {
         const child = currentChildren[uuid];
         const nextChildState = childStateToApply[uuid];
-        console.log('HERE');
         if (apiHasSerializableState(child)) {
           console.log('before', uuid);
           setStatePromises.push(child.applySerializedState(nextChildState));
