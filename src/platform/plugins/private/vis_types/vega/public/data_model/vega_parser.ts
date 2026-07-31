@@ -14,6 +14,7 @@ import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
 import { i18n } from '@kbn/i18n';
 
+import type { Color, Gradient } from 'vega';
 import { logger, Warn, None, version as vegaVersion, scheme } from 'vega';
 import type { TopLevelSpec } from 'vega-lite';
 import { compile, version as vegaLiteVersion } from 'vega-lite';
@@ -717,7 +718,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     const setMarkDefaultColor = (
       markType: string,
       colorProperty: 'fill' | 'stroke',
-      color: unknown
+      color: Color | Gradient
     ) => {
       const hasCustomColor = [this.spec?.config?.mark, this.spec?.config?.[markType]].some(
         (markConfig) => markConfig?.color !== undefined || markConfig?.[colorProperty] !== undefined

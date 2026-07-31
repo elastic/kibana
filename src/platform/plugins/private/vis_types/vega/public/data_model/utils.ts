@@ -11,7 +11,7 @@ import { prettyCompactStringify } from '@kbn/std';
 import type { CoreTheme } from '@kbn/core/public';
 import { transparentize } from '@elastic/eui';
 import { getEuiThemeVars } from '@kbn/ui-theme';
-import type { Gradient } from 'vega';
+import type { Color, Gradient } from 'vega';
 import { normalizeObject } from '../vega_view/utils';
 
 function normalizeAndStringify(value: unknown) {
@@ -87,12 +87,14 @@ export const VegaThemeColors = {
   },
 };
 
-export function getVegaThemeColors(
+export function getVegaThemeColors<T extends 'grid' | 'title' | 'label' | 'default' | 'visColors'>(
   theme: CoreTheme,
-  colorToken: 'grid' | 'title' | 'label' | 'default' | 'visColors'
+  colorToken: T
 ) {
   const colorMode = theme.darkMode ? 'dark' : 'light';
-  return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken];
+  return VegaThemeColors[theme.name as keyof typeof VegaThemeColors]?.[colorMode][colorToken] as
+    | (T extends 'visColors' ? Color[] : Color)
+    | undefined;
 }
 
 /** Default area fill gradient aligned with Lens styling. */

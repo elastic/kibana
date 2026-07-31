@@ -101,11 +101,10 @@ export function convertStylingToAPIFormat(
     if (!layerPresence.hasAreas) {
       return undefined;
     }
-    const fillOption = config.areaFill ?? getDefaultAreaFill(seriesTypes);
-    const fillOpacity = config.fillOpacity ?? getDefaultAreaFillOpacity(fillOption);
+    const fill = config.areaFill ?? getDefaultAreaFill(seriesTypes);
     return {
-      fill_opacity: fillOpacity,
-      fill: fillOption,
+      fill,
+      fill_opacity: config.fillOpacity ?? getDefaultAreaFillOpacity(fill),
     };
   })();
 
