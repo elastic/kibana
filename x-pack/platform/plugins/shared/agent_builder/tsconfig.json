@@ -20,6 +20,7 @@
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-skill-loader",
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-visualizations",
     "@kbn/agent-builder-visualizations-common",
