@@ -417,7 +417,7 @@ function UnifiedFieldListItemComponent({
       isOpen={infoIsOpen}
       button={
         <Draggable
-          dragType="copy"
+          dragType={isReorderable ? 'move' : 'copy'}
           dragClassName="unifiedFieldListItemButton__dragging"
           order={order}
           value={value}
