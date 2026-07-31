@@ -130,6 +130,8 @@ class ConversationClientImpl implements ConversationClient {
         'read',
         'access_control',
         'origin',
+        'template_id',
+        'metadata',
       ],
       query: {
         bool: {
