@@ -6,6 +6,13 @@
  */
 
 export {
+  ConfidenceStepCommonDefinition,
+  ConfidenceStepInputSchema,
+  ConfidenceStepOutputSchema,
+  ConfidenceStepTypeId,
+} from './confidence_step';
+
+export {
   DefaultAlertRetrievalStepCommonDefinition,
   DefaultAlertRetrievalStepTypeId,
 } from './default_alert_retrieval_step';
@@ -24,6 +31,18 @@ export {
 
 export { RunStepCommonDefinition, RunStepTypeId } from './run_step';
 
-export { AnonymizedAlertSchema, ApiConfigSchema, AttackDiscoverySchema } from './shared_schemas';
+export {
+  AnonymizedAlertSchema,
+  ApiConfigSchema,
+  AttackDiscoverySchema,
+  ConfidenceFactorSchema,
+  ConfidenceSchema,
+} from './shared_schemas';
 
-export type { AnonymizedAlert, ApiConfig, AttackDiscovery } from './shared_schemas';
+export type {
+  AnonymizedAlert,
+  ApiConfig,
+  AttackDiscovery,
+  Confidence,
+  ConfidenceFactor,
+} from './shared_schemas';

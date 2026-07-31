@@ -30,6 +30,24 @@ export const ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
   'kibana.alert.attack_discovery.entity_summary_markdown_with_replacements' as const;
 export const ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS =
   'kibana.alert.attack_discovery.mitre_attack_tactics' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE =
+  'kibana.alert.attack_discovery.confidence' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_SCORE =
+  'kibana.alert.attack_discovery.confidence.score' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_BAND =
+  'kibana.alert.attack_discovery.confidence.band' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_RATIONALE =
+  'kibana.alert.attack_discovery.confidence.rationale' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS =
+  'kibana.alert.attack_discovery.confidence.factors' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_NAME =
+  'kibana.alert.attack_discovery.confidence.factors.name' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_ASSESSMENT =
+  'kibana.alert.attack_discovery.confidence.factors.assessment' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_WEIGHT =
+  'kibana.alert.attack_discovery.confidence.factors.weight' as const;
+export const ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_EVIDENCE =
+  'kibana.alert.attack_discovery.confidence.factors.evidence' as const;
 export const ALERT_ATTACK_DISCOVERY_REPLACEMENTS =
   'kibana.alert.attack_discovery.replacements' as const;
 export const ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID =

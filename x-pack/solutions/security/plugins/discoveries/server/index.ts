@@ -7,8 +7,40 @@
 
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
+import { ATTACK_DISCOVERY_CONFIDENCE_ENABLED_FEATURE_FLAG } from '@kbn/discoveries/impl/lib/helpers/is_confidence_enabled';
 
 export type { DiscoveriesPluginSetup, DiscoveriesPluginStart } from './types';
+
+/**
+ * Feature flag definitions registered by this plugin. Core discovers this named
+ * export from the plugin's server entry. `attackDiscoveryConfidenceEnabled`
+ * gates Attack Discovery confidence scoring; it is independent of
+ * `attackDiscoveryWorkflowsEnabled` and defaults to OFF so it can be
+ * dark-launched additively.
+ */
+export const featureFlags: FeatureFlagDefinitions = [
+  {
+    key: ATTACK_DISCOVERY_CONFIDENCE_ENABLED_FEATURE_FLAG,
+    name: 'Attack Discovery confidence scoring',
+    description:
+      'When enabled, Attack Discovery annotates each generated discovery with a calibrated confidence score (how sure the discovery is real). When disabled, the confidence workflow step is a no-op and discoveries are unchanged.',
+    tags: ['security', 'attack-discovery', 'genai'],
+    variationType: 'boolean',
+    variations: [
+      {
+        name: 'Enabled',
+        description: 'Confidence scoring runs and annotates discoveries',
+        value: true,
+      },
+      {
+        name: 'Disabled',
+        description: 'Confidence scoring is a no-op; discoveries are unchanged',
+        value: false,
+      },
+    ],
+  },
+];
 
 /**
  * Default timeout for LLM connector calls in milliseconds.
