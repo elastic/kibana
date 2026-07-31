@@ -15,7 +15,6 @@ import {
 
 export const EMPTY_VALUE = '—';
 export const LAST_EPISODE_TIMESTAMP_ESQL_VARIABLE = 'lastEpisodeTimestamp';
-export const PAGE_SIZE_ESQL_VARIABLE = 'pageSize';
 export const RELATED_ALERT_EPISODES_PAGE_SIZE = 5;
 /** Max episodes returned per list page (ESQL LIMIT) and max unique rules resolved in one batch. */
 export const ALERT_EPISODES_LIST_PAGE_SIZE = 1000;

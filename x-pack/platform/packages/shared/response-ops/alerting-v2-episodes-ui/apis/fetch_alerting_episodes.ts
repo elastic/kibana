@@ -12,11 +12,11 @@ import type { TimeRange } from '@kbn/es-query';
 import {
   asEsqlRows,
   buildEpisodesQuery,
+  PAGE_SIZE_ESQL_VARIABLE,
   type AlertEpisodeEsqlRow,
   type EpisodesFilterState,
   type EpisodesSortState,
 } from '@kbn/alerting-v2-common-queries';
-import { PAGE_SIZE_ESQL_VARIABLE } from '../constants';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 
 export interface FetchAlertingEpisodesOptions {
