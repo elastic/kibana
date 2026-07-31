@@ -51,6 +51,7 @@ const opts = (candidates: ServiceCandidateRoot[]) => ({
   iacSignalsByRepo: new Map<string, IacSignal[]>([
     ['open-telemetry/opentelemetry-demo', [{ kind: 'compose' as const, path: 'compose.yaml' }]],
   ]),
+  readmeLinesByRepo: new Map<string, string[]>(),
   candidates,
   logger: loggerMock.create(),
 });
@@ -145,23 +146,104 @@ describe('classifyServices', () => {
       connectorId: 'c',
       ...opts(candidates),
     });
-    expect(services).toEqual([
-      {
-        repository: 'open-telemetry/opentelemetry-demo',
-        gitSha: 'abc123',
-        serviceRoot: 'src/checkout',
-        name: 'checkout',
-        language: 'Go',
-        iacSignals: [{ kind: 'compose', path: 'compose.yaml' }],
-      },
+    // The classified `checkout` service, plus the always-on repo-level service
+    // synthesized for the (app-code) repo since none was named after it.
+    expect(services).toContainEqual({
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src/checkout',
+      name: 'checkout',
+      language: 'Go',
+      iacSignals: [{ kind: 'compose', path: 'compose.yaml' }],
+    });
+    expect(services).toContainEqual(
+      expect.objectContaining({ name: 'opentelemetry-demo', serviceRoot: '', language: 'Go' })
+    );
+  });
+
+  it('feeds repo-root README lines into the classifier prompt', async () => {
+    const inferenceClient = mockInference([]);
+    const options = opts([cand()]);
+    options.readmeLinesByRepo.set('open-telemetry/opentelemetry-demo', [
+      '# OpenTelemetry Demo',
+      'A microservices demo application.',
     ]);
+
+    await classifyServices({ inferenceClient, connectorId: 'c', ...options });
+
+    const call = (inferenceClient as unknown as { output: jest.Mock }).output.mock.calls[0][0];
+    expect(call.input).toContain('readme\t# OpenTelemetry Demo');
+    expect(call.system).toContain('README');
+  });
+
+  it('synthesizes a repo-level service for an app-code repo the classifier returned nothing for', async () => {
+    // Monorepo case (e.g. kibana): candidate roots exist, but the classifier
+    // judged them a non-deployable aggregate and returned nothing.
+    const candidates = [
+      cand({
+        serviceRoot: 'packages/core',
+        hasEntrypoint: false,
+        language: 'JavaScript/TypeScript',
+      }),
+    ];
+    const inferenceClient = mockInference([]);
+
+    const services = await classifyServices({
+      inferenceClient,
+      connectorId: 'c',
+      ...opts(candidates),
+    });
+
+    expect(services).toEqual([
+      expect.objectContaining({
+        repository: 'open-telemetry/opentelemetry-demo',
+        serviceRoot: '',
+        name: 'opentelemetry-demo',
+        language: 'JavaScript/TypeScript',
+      }),
+    ]);
+  });
+
+  it('does not synthesize a repo-level service for a pure-IaC repo', async () => {
+    const candidates = [
+      cand({
+        serviceRoot: 'modules/vpc',
+        markers: ['*.tf'],
+        language: 'hcl',
+        hasEntrypoint: false,
+      }),
+    ];
+    const inferenceClient = mockInference([]);
+
+    const services = await classifyServices({
+      inferenceClient,
+      connectorId: 'c',
+      ...opts(candidates),
+    });
+
+    expect(services).toEqual([]);
   });
 
   it('collapses env duplicates: 3 candidate roots -> 1 logical service', async () => {
     const candidates = [
-      cand({ serviceRoot: 'workspaces/acme-production', markers: ['*.tf'], language: 'unknown' }),
-      cand({ serviceRoot: 'workspaces/acme-staging', markers: ['*.tf'], language: 'unknown' }),
-      cand({ serviceRoot: 'workspaces/acme-qa', markers: ['*.tf'], language: 'unknown' }),
+      cand({
+        serviceRoot: 'workspaces/acme-production',
+        markers: ['*.tf'],
+        language: 'hcl',
+        hasEntrypoint: false,
+      }),
+      cand({
+        serviceRoot: 'workspaces/acme-staging',
+        markers: ['*.tf'],
+        language: 'hcl',
+        hasEntrypoint: false,
+      }),
+      cand({
+        serviceRoot: 'workspaces/acme-qa',
+        markers: ['*.tf'],
+        language: 'hcl',
+        hasEntrypoint: false,
+      }),
     ];
     const inferenceClient = mockInference([
       {
@@ -200,7 +282,7 @@ describe('classifyServices', () => {
       connectorId: 'c',
       ...opts(candidates),
     });
-    expect(services).toHaveLength(1);
+    expect(services.filter((s) => s.name === 'checkout')).toHaveLength(1);
   });
 
   it('drops classifier rows for unknown repositories', async () => {
@@ -213,7 +295,12 @@ describe('classifyServices', () => {
       connectorId: 'c',
       ...opts(candidates),
     });
-    expect(services).toEqual([]);
+    // The unknown-repo row is dropped; the known app-code repo still gets its
+    // synthesized repo-level service.
+    expect(services.filter((s) => s.repository === 'someone/else')).toHaveLength(0);
+    expect(services).toEqual([
+      expect.objectContaining({ name: 'opentelemetry-demo', serviceRoot: '' }),
+    ]);
   });
 
   it('degrades gracefully on inference failure: one service per candidate root', async () => {

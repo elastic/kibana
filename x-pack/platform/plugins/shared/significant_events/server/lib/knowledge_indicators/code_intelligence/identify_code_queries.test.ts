@@ -111,7 +111,10 @@ describe('identifyCodeQueries', () => {
     expect(bulk).not.toHaveBeenCalled();
   });
 
-  it('returns no_ingesting when no log-bearing stream is available', async () => {
+  it('falls back to the logs* pattern on the root logs stream when no log-bearing stream exists', async () => {
+    // Chicken-vs-egg: source indexed before any logs ship. Predictive queries
+    // must still be written, targeting `logs*` / `message` on the root `logs`
+    // stream so they match automatically once log data arrives.
     const { kiClient, bulk } = createKiClient([serviceNameFeature()]);
     const result = await identifyCodeQueries({
       serviceName: SERVICE_KEY,
@@ -125,8 +128,18 @@ describe('identifyCodeQueries', () => {
       esClient: createEsClient(false),
       logger: loggerMock.create(),
     });
-    expect(result.status).toBe('no_ingesting');
-    expect(bulk).not.toHaveBeenCalled();
+    expect(result.status).toBe('generated');
+    expect(result.generatedCount).toBe(1);
+    expect(result.streams).toEqual(['logs']);
+
+    expect(bulk).toHaveBeenCalledTimes(1);
+    // Attached to the root `logs` stream, not the service key or a real stream.
+    expect(bulk.mock.calls[0][0]).toBe('logs');
+    const { query } = bulk.mock.calls[0][1][0].index;
+    // Targets the broad logs* pattern and MATCH_PHRASE on `message` (text).
+    expect(query.esql.query).toContain('FROM logs*');
+    expect(query.esql.query).toContain('MATCH_PHRASE(message, "Payment failed for order")');
+    expect(query.esql.query).not.toContain('service.name');
   });
 
   it('generates durable draft predictive queries on the log-bearing stream', async () => {

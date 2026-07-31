@@ -9,8 +9,14 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { normalizeEsqlSafe } from '@kbn/streams-schema';
 import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_indicator_client';
+import {
+  FALLBACK_LOG_INDEX_PATTERN,
+  FALLBACK_LOG_MESSAGE_FIELD,
+  FALLBACK_LOG_STREAM,
+} from './constants';
 import { extractLogSignatures } from './extract_log_signatures';
 import { generatePredictiveQueries } from './generate_predictive_queries';
+import type { LogStreamBinding } from './link_ingesting_streams';
 import {
   filterPredictiveBindings,
   resolveLogBearingStreams,
@@ -87,19 +93,36 @@ export async function identifyCodeQueries({
     return { status: 'no_signatures', serviceName };
   }
 
-  // Predictive queries need a real stream to target. Mirror the log pipeline:
-  // target the log-bearing stream(s) and match on the message content (no
-  // service field — log streams here carry no queryable service field).
-  const bindings = filterPredictiveBindings(
+  // Predictive queries need a stream to target. Mirror the log pipeline: target
+  // the log-bearing stream(s) and match on the message content (no service
+  // field — log streams here carry no queryable service field).
+  const resolvedBindings = filterPredictiveBindings(
     await resolveLogBearingStreams({ streams, esClient, logger }),
     metadata
   );
 
-  if (bindings.length === 0) {
+  // Chicken-vs-egg fallback: a cluster may index its source code before it ever
+  // ships logs, so no log-bearing stream exists yet. Rather than drop the
+  // signatures, write predictive queries against the broad `logs*` index pattern
+  // on the root `logs` stream, matching the conventional `message` field. They
+  // lie dormant until log data arrives, then match automatically.
+  const usingFallback = resolvedBindings.length === 0;
+  const bindings: LogStreamBinding[] = usingFallback
+    ? [
+        {
+          stream: FALLBACK_LOG_STREAM,
+          index: FALLBACK_LOG_INDEX_PATTERN,
+          convention: 'ecs',
+          messageField: FALLBACK_LOG_MESSAGE_FIELD,
+          messageIsText: true,
+        },
+      ]
+    : resolvedBindings;
+
+  if (usingFallback) {
     logger.debug(
-      `code_queries: no log-bearing stream found for service "${serviceName}"; skipping query generation`
+      `code_queries: no log-bearing stream for service "${serviceName}"; writing predictive queries against fallback "${FALLBACK_LOG_INDEX_PATTERN}" on stream "${FALLBACK_LOG_STREAM}"`
     );
-    return { status: 'no_ingesting', serviceName };
   }
 
   let generatedCount = 0;

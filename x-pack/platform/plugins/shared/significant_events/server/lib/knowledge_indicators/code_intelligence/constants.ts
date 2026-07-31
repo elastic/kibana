@@ -200,6 +200,18 @@ export const SENTENCE_LITERAL_PATTERNS: readonly string[] = [
 export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*' as const;
 
 /**
+ * Fallback log target for predictive code queries when NO real log-bearing
+ * stream exists yet (a cluster indexed its source before it started shipping
+ * logs — the chicken-vs-egg case). Predictive queries are written against the
+ * broad `logs*` index pattern and matched on the conventional `message` field,
+ * attached to the root wired-logs stream `logs`. They lie dormant until log
+ * data begins flowing, then start matching automatically — no re-run needed.
+ */
+export const FALLBACK_LOG_INDEX_PATTERN = 'logs*' as const;
+export const FALLBACK_LOG_STREAM = 'logs' as const;
+export const FALLBACK_LOG_MESSAGE_FIELD = 'message' as const;
+
+/**
  * Build/deploy marker basenames that flag a directory as a candidate deployable
  * service, mapped to the primary language they imply. Language falls out of the
  * marker deterministically (no LLM, no drift). A directory containing any of

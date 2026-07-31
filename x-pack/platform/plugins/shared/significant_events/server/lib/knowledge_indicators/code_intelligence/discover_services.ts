@@ -42,6 +42,17 @@ const ENTRYPOINT_PATTERNS: readonly string[] = [
 const EVIDENCE_LINE_LIMIT = 100;
 
 /**
+ * Repo-root README path (case-insensitive, common extensions). Only the repo
+ * root is matched — a README states what the repository *is*, which helps the
+ * classifier judge deployable-service vs library/monorepo. Nested READMEs are
+ * intentionally excluded to keep the single classify call cheap.
+ */
+const README_PATH_PATTERN = '[Rr][Ee][Aa][Dd][Mm][Ee]([.][A-Za-z0-9]+)?';
+
+/** Max README lines (from the top) fed to the classifier per repo. */
+const README_LINE_LIMIT = 40;
+
+/**
  * Enumerates the repositories + immutable commits indexed in Sourcerer, from the
  * refs index (`sourcerer-v1-refs*`). Server-side equivalent of the agent's
  * `sourcerer.refs.list`. One entry per indexed ref; only `complete` refs are
@@ -211,6 +222,43 @@ async function grepLines({
 const formatEvidenceLine = ({ filePath, lineNumber, content }: EvidenceLine): string =>
   `${filePath}:${lineNumber}\t${content}`;
 
+/** Reads the first `limit` lines (ordered) of one file's indexed content. */
+async function readFileHead({
+  esClient,
+  org,
+  repo,
+  gitSha,
+  filePath,
+  limit,
+}: {
+  esClient: ElasticsearchClient;
+  org: string;
+  repo: string;
+  gitSha: string;
+  filePath: string;
+  limit: number;
+}): Promise<string[]> {
+  const response = (await esClient.esql.query({
+    query: `
+      FROM ${SOURCERER_LINES_INDEX}
+      | WHERE MATCH(git.org, ?git_org)
+          AND git.repo LIKE ?git_repo
+          AND git.commit LIKE ?git_commit
+          AND file.path == ?file_path
+      | KEEP line.number, line.content
+      | SORT line.number
+      | LIMIT ${limit}`,
+    params: [{ git_org: org }, { git_repo: repo }, { git_commit: gitSha }, { file_path: filePath }],
+    drop_null_columns: false,
+  })) as ESQLSearchResponse;
+
+  const contentCol = response.columns.findIndex((c) => c.name === 'line.content');
+  if (contentCol === -1) {
+    return [];
+  }
+  return response.values.map((row) => String(row[contentCol] ?? ''));
+}
+
 /** Escapes a literal basename for use inside an RLIKE pattern (dots -> `[.]`). */
 const escapeForRlike = (basename: string): string => basename.replace(/\./g, '[.]');
 
@@ -232,6 +280,8 @@ export interface DiscoverCandidateRootsResult {
   serviceNameLines: string[];
   /** Repository-level IaC signals derived from file paths. */
   iacSignals: IacSignal[];
+  /** First {@link README_LINE_LIMIT} lines of the repo-root README, if present. */
+  readmeLines: string[];
 }
 
 /**
@@ -424,6 +474,41 @@ export async function discoverCandidateRoots({
   const cappedManifestLines = manifestLines.slice(0, EVIDENCE_LINE_LIMIT);
   const cappedServiceNameLines = serviceNameLines.slice(0, EVIDENCE_LINE_LIMIT);
 
+  // Repo-root README: pick the shallowest matching README file (root over any
+  // that slipped through), then read its first README_LINE_LIMIT lines in order.
+  const readmeLines: string[] = [];
+  try {
+    const readmePaths = await listPaths({
+      esClient,
+      org,
+      repo: repoName,
+      gitSha,
+      pattern: README_PATH_PATTERN,
+      limit: perMarkerLimit,
+    });
+    const rootReadme = readmePaths
+      .filter((path) => !path.includes('/'))
+      .sort((a, b) => a.localeCompare(b))[0];
+    if (rootReadme) {
+      readmeLines.push(
+        ...(await readFileHead({
+          esClient,
+          org,
+          repo: repoName,
+          gitSha,
+          filePath: rootReadme,
+          limit: README_LINE_LIMIT,
+        }))
+      );
+    }
+  } catch (error) {
+    logger.debug(
+      `discover_services: README read failed for "${repository}": ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+  }
+
   logger.debug(
     `discover_services: "${repository}" -> ${candidates.length} candidate root(s), ` +
       `${manifestPaths.size} manifest file(s), ${iacSignals.length} IaC signal(s)`
@@ -435,5 +520,6 @@ export async function discoverCandidateRoots({
     manifestLines: cappedManifestLines,
     serviceNameLines: cappedServiceNameLines,
     iacSignals,
+    readmeLines,
   };
 }

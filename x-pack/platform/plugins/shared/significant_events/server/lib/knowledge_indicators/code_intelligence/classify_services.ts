@@ -11,9 +11,23 @@ import {
   SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
+import { IAC_LANGUAGES } from './constants';
 import type { DiscoveredService, IacSignal, IndexedRepoRef, ServiceCandidateRoot } from './types';
 
-const CLASSIFY_SYSTEM = `You are given candidate directories from source repositories, each with the build/deploy marker files found in it and whether an entrypoint was found. You also receive deployment-manifest paths and selected manifest/service-name declaration lines. Decide which candidates are INDEPENDENTLY DEPLOYABLE, OBSERVABLE SERVICES and group them into LOGICAL services.
+/**
+ * Whether a candidate-root marker language denotes application (programming)
+ * code, as opposed to Infrastructure-as-Code or an unknown/empty marker. Used to
+ * decide whether a repository contains application code worth representing as a
+ * service even when the classifier returned none for it.
+ */
+const isApplicationLanguage = (language: string): boolean => {
+  const normalized = language.trim().toLowerCase();
+  return normalized.length > 0 && normalized !== 'unknown' && !IAC_LANGUAGES.has(normalized);
+};
+
+const CLASSIFY_SYSTEM = `You are given candidate directories from source repositories, each with the build/deploy marker files found in it and whether an entrypoint was found. You also receive deployment-manifest paths, selected manifest/service-name declaration lines, and the first lines of each repository's root README. Decide which candidates are INDEPENDENTLY DEPLOYABLE, OBSERVABLE SERVICES and group them into LOGICAL services.
+
+Use the README as context for what the repository IS: it often states plainly whether the repo is a deployable application/service, a shared library, or a monorepo of many services. Prefer README evidence when it clarifies an ambiguous candidate, but never invent a service the markers/manifests do not support.
 
 A logical service:
 - has its own entrypoint / build target / container / deployment manifest and runs as a process that emits logs or telemetry.
@@ -63,6 +77,8 @@ export interface ClassifyServicesOptions {
   serviceNameLinesByRepo: Map<string, string[]>;
   /** Per-repository IaC signals, keyed by `"org/repo"`. */
   iacSignalsByRepo: Map<string, IacSignal[]>;
+  /** Per-repository first lines of the repo-root README, keyed by `"org/repo"`. */
+  readmeLinesByRepo: Map<string, string[]>;
   logger: Logger;
   abortSignal?: AbortSignal;
 }
@@ -96,6 +112,7 @@ export async function classifyServices({
   manifestLinesByRepo,
   serviceNameLinesByRepo,
   iacSignalsByRepo,
+  readmeLinesByRepo,
   logger,
   abortSignal,
 }: ClassifyServicesOptions): Promise<DiscoveredService[]> {
@@ -143,12 +160,14 @@ export async function classifyServices({
     const manifests = manifestPathsByRepo.get(repository) ?? [];
     const manifestLines = manifestLinesByRepo.get(repository) ?? [];
     const serviceNameLines = serviceNameLinesByRepo.get(repository) ?? [];
+    const readmeLines = readmeLinesByRepo.get(repository) ?? [];
     const iac = (iacSignalsByRepo.get(repository) ?? []).map(({ kind }) => kind);
     if (
       roots.length === 0 &&
       manifests.length === 0 &&
       manifestLines.length === 0 &&
       serviceNameLines.length === 0 &&
+      readmeLines.length === 0 &&
       iac.length === 0
     ) {
       continue;
@@ -158,6 +177,7 @@ export async function classifyServices({
         manifests.length ? manifests.join(', ') : 'none'
       } | iac: ${iac.length ? iac.join(', ') : 'none'}`
     );
+    readmeLines.forEach((line) => lines.push(`readme\t${line}`));
     manifestLines.forEach((line) => lines.push(`manifest\t${line}`));
     serviceNameLines.forEach((line) => lines.push(`service-name\t${line}`));
     for (const candidate of roots) {
@@ -218,6 +238,46 @@ export async function classifyServices({
     const candidate = findCandidate(candidates, { repository, serviceRoot, name });
     const language = service.language?.trim() || candidate?.language || 'unknown';
     discovered.push(toService(repository, candidate?.serviceRoot ?? serviceRoot, name, language));
+  }
+
+  // Application-code fallback: guarantee that every repository containing
+  // application code is represented by at least one repo-level service, even when
+  // the classifier returned none for it (e.g. a monorepo it judged a
+  // non-deployable aggregate, like `kibana`). Application code is detected
+  // deterministically from the candidate roots discovery already found: an
+  // app-language deploy marker or a discovered entrypoint. Repos already carrying
+  // a service named after the repo are left as-is (already repo-represented), and
+  // pure IaC/docs repos (no app-language marker, no entrypoint) get nothing.
+  for (const repo of repos) {
+    const { repository } = repo;
+    const roots = rootsByRepo.get(repository) ?? [];
+    const appRoots = roots.filter(
+      (candidate) => isApplicationLanguage(candidate.language) || candidate.hasEntrypoint
+    );
+    if (appRoots.length === 0) {
+      continue;
+    }
+    const repoName = repository.split('/').pop() || repository;
+    const key = `${repository}::${repoName}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    // Primary language = most frequent app-language marker among the app roots.
+    const languageCounts = new Map<string, number>();
+    for (const candidate of appRoots) {
+      if (isApplicationLanguage(candidate.language)) {
+        languageCounts.set(candidate.language, (languageCounts.get(candidate.language) ?? 0) + 1);
+      }
+    }
+    const [primaryLanguage = 'unknown'] =
+      [...languageCounts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] ??
+      [];
+    seen.add(key);
+    discovered.push(toService(repository, '', repoName, primaryLanguage));
+    logger.debug(
+      `classify_services: repo "${repository}" has application code but no repo-level service; ` +
+        `synthesized repo-level service "${repoName}" (${primaryLanguage})`
+    );
   }
 
   logger.debug(

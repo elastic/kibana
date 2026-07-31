@@ -703,6 +703,7 @@ const discoverServicesRoute = createServerRoute({
     const manifestLinesByRepo = new Map<string, string[]>();
     const serviceNameLinesByRepo = new Map<string, string[]>();
     const iacSignalsByRepo = new Map<string, IacSignal[]>();
+    const readmeLinesByRepo = new Map<string, string[]>();
     for (const repo of repos) {
       const {
         candidates: roots,
@@ -710,6 +711,7 @@ const discoverServicesRoute = createServerRoute({
         manifestLines,
         serviceNameLines,
         iacSignals,
+        readmeLines,
       } = await discoverCandidateRoots({
         esClient,
         repo,
@@ -720,6 +722,7 @@ const discoverServicesRoute = createServerRoute({
       manifestLinesByRepo.set(repo.repository, manifestLines);
       serviceNameLinesByRepo.set(repo.repository, serviceNameLines);
       iacSignalsByRepo.set(repo.repository, iacSignals);
+      readmeLinesByRepo.set(repo.repository, readmeLines);
     }
 
     const hasManifestLines = [...manifestLinesByRepo.values()].some(
@@ -745,6 +748,7 @@ const discoverServicesRoute = createServerRoute({
       manifestLinesByRepo,
       serviceNameLinesByRepo,
       iacSignalsByRepo,
+      readmeLinesByRepo,
       logger: routeLogger,
     });
 
