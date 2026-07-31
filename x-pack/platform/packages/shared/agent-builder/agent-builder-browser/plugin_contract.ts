@@ -145,6 +145,13 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
+ * Options passed when opening the conversation metadata flyout.
+ */
+export interface OpenConversationMetadataOptions {
+  conversationId: string;
+}
+
+/**
  * Handle to control a conversation sidebar programmatically.
  */
 export interface ConversationSidebarRef {
@@ -226,6 +233,20 @@ export interface AgentBuilderPluginStart {
   toggleChat: (options?: OpenConversationSidebarOptions) => void;
   setChatConfig: (config: EmbeddableConversationProps) => void;
   clearChatConfig: () => void;
+  /**
+   * Opens a flyout showing the given conversation's metadata.
+   *
+   * @param options - The conversation to show metadata for
+   * @returns A promise resolving to a function that closes the flyout
+   *
+   * @example
+   * ```tsx
+   * const close = await plugins.agentBuilder.openConversationMetadata({ conversationId });
+   * // ...later
+   * close();
+   * ```
+   */
+  openConversationMetadata: (options: OpenConversationMetadataOptions) => Promise<() => void>;
   /**
    * Adds an attachment to the active conversation sidebar.
    * If no sidebar is open, the attachment is ignored.

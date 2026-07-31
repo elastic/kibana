@@ -9,11 +9,13 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { CONVERSATION_TEMPLATES } from '../../../../../common/templates';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useConversation } from '../../../hooks/use_conversation';
 
 export const ConversationTypeButton: React.FC = () => {
   const conversationId = useConversationId();
   const { conversation } = useConversation();
+  const { openConversationMetadata } = useAgentBuilderServices();
 
   if (!conversationId || !conversation?.template_id) {
     return null;
@@ -28,7 +30,7 @@ export const ConversationTypeButton: React.FC = () => {
       size="s"
       color="text"
       fill={false}
-      onClick={() => {}}
+      onClick={() => openConversationMetadata({ conversationId })}
       data-test-subj="agentBuilderConversationTypeButton"
     >
       {appliedTemplate?.name ?? conversation.template_id}

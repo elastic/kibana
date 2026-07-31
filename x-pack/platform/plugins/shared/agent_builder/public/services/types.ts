@@ -43,4 +43,5 @@ export interface AgentBuilderInternalService {
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
   openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;
+  openConversationMetadata: (options: { conversationId: string }) => Promise<() => void>;
 }

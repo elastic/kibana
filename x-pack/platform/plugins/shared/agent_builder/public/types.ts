@@ -36,6 +36,7 @@ export type {
   AgentBuilderPluginStart,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
+  OpenConversationMetadataOptions,
   PublicEmbeddableConversationProps,
   PublicEmbeddableConversationInputProps,
   EmbeddableConversationInputRef,
