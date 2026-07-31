@@ -10,6 +10,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
 
+jest.mock('../../../plugin', () => ({
+  getApmInternalServices: () => ({ callApmApi: jest.fn() }),
+}));
+
+jest.mock('./hooks/use_apm_indices', () => ({
+  useApmIndices: () => ({ indices: undefined, loading: false }),
+}));
+
 jest.mock('../../../context/time_range_metadata/time_range_metadata_context', () => ({
   TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
     <>{children}</>
