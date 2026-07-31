@@ -186,9 +186,8 @@ test.describe(
         'true'
       );
 
-      const flyoutUrl = page.url();
-      expect(flyoutUrl).toContain('flyoutName=');
-      expect(flyoutUrl).toContain('flyoutTab=overview');
+      await expect(page).toHaveURL(/flyoutName=/);
+      await expect(page).toHaveURL(/flyoutTab=overview/);
 
       const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
 
@@ -196,7 +195,7 @@ test.describe(
 
       await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
       // Expect the url to have changed, and to have a certain tab value
-      expect(page.url()).toContain('flyoutTab=attachments');
+      await expect(page).toHaveURL(/flyoutTab=attachments/);
     });
   }
 );

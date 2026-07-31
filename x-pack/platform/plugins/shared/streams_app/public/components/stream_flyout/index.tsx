@@ -128,10 +128,10 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
     [selectedTab, tabLink]
   );
 
-  const page = useMemo(
-    () => TAB_PAGES[selectedTab]({ name, onClose }),
-    [name, selectedTab, onClose]
-  );
+  const page = useMemo(() => {
+    const tab = TAB_PAGES[selectedTab] ?? TAB_PAGES.overview;
+    return tab({ name, onClose });
+  }, [name, selectedTab, onClose]);
   const badges = [];
 
   if (loading) {
