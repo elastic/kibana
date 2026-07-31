@@ -116,29 +116,15 @@ const isVisualizationStateColumnId = (id: string): boolean =>
   isRowColumnId(id) || isSplitMetricColumnId(id) || isMetricColumnId(id);
 
 /**
- * Canonical order for the original side: rows → split_metrics_by → metrics
+ * Canonical order for datasource columnOrder: split_metrics_by → rows → metrics
  * → everything else (refs and any unknowns).
- */
-const sortVisualizationStateColumnsToCanonicalOrder = (ids: string[]): string[] => [
-  ...ids.filter((id) => isRowColumnId(id)),
-  ...ids.filter((id) => isSplitMetricColumnId(id)),
-  ...ids.filter((id) => isMetricColumnId(id)),
-  ...ids.filter((id) => !isVisualizationStateColumnId(id)),
-];
-
-/**
- * Stable partition for the transformed side: move non-visualization-state
- * columns (refs and any unknowns) to the end while preserving the relative
- * order of everything else.
  *
- * Refs (e.g. the `max` referenced by a `counter_rate`) are hidden at render
- * time (`getTableSpec` filters via `isReferenced`), so their position inside
- * `columnOrder` does not affect the rendering. The transform interleaves
- * them with their owning metric via `processMetricColumnsWithReferences`.
- * We normalize that purely cosmetic placement to ease testing.
+ * Matches Lens datatable editor nesting (split outer, rows inner, metrics last).
  */
-const moveNonVisualizationStateColumnsToEnd = (ids: readonly string[]): string[] => [
-  ...ids.filter(isVisualizationStateColumnId),
+const sortDatasourceColumnsToCanonicalOrder = (ids: string[]): string[] => [
+  ...ids.filter((id) => isSplitMetricColumnId(id)),
+  ...ids.filter((id) => isRowColumnId(id)),
+  ...ids.filter((id) => isMetricColumnId(id)),
   ...ids.filter((id) => !isVisualizationStateColumnId(id)),
 ];
 
@@ -499,51 +485,19 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
-  // Align datasource column order for round-trip comparison.
-  //
-  // - `original`: full canonical sort (rows → splits → metrics → refs).
-  //   The API model has three separate arrays (`rows`, `split_metrics_by`,
-  //   `metrics`) and cannot represent arbitrary cross-group orderings, so any
-  //   non-canonical original must be normalized to canonical form before
-  //   comparison (lossy by design).
-  //
-  // - `transformed`: only push refs to the end (stable). Non-ref ordering is
-  //   the transform's emit order and stays untouched.
-  //   We only move the metric_ref columns to the end, because they
-  //   don't affect the rendering column order.
-  const sortDatasourceColumns: NormalizerConfig<DatatableAttributes> = {
+  // ES|QL text-based layers keep columns in editor order (often metrics first).
+  // fromAPIFormat emits split → rows → metrics for nesting; normalize originals only.
+  const sortEsqlDatasourceColumns: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
-      const formBasedLayer = Object.values(
-        getFormBasedDatasourceState(attrs.state.datasourceStates)?.layers ?? {}
-      )[0];
-      if (formBasedLayer) {
-        formBasedLayer.columnOrder = sortVisualizationStateColumnsToCanonicalOrder(
-          formBasedLayer.columnOrder
-        );
-      }
-
       const textBasedLayer = Object.values(attrs.state.datasourceStates.textBased?.layers ?? {})[0];
       if (textBasedLayer) {
         const byId = new Map(textBasedLayer.columns.map((c) => [c.columnId, c]));
-        const orderedIds = sortVisualizationStateColumnsToCanonicalOrder(
+        const orderedIds = sortDatasourceColumnsToCanonicalOrder(
           textBasedLayer.columns.map((c) => c.columnId)
         );
         textBasedLayer.columns = orderedIds.map((id) => byId.get(id)!);
       }
 
-      return attrs;
-    },
-    transformed: (attrs) => {
-      const formBasedLayer = Object.values(
-        getFormBasedDatasourceState(attrs.state.datasourceStates)?.layers ?? {}
-      )[0];
-      if (formBasedLayer) {
-        formBasedLayer.columnOrder = moveNonVisualizationStateColumnsToEnd(
-          formBasedLayer.columnOrder
-        );
-      }
-
-      // ESQL has no refs, so the transform's emit order is already canonical.
       return attrs;
     },
   };
@@ -559,7 +513,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     alignId,
     deduplicateColumns,
     sortColumns,
-    sortDatasourceColumns,
+    sortEsqlDatasourceColumns,
     alignLegacyTypes,
     getColorMappingNormalizer<DatatableAttributes>('state.visualization.columns.*.colorMapping'),
     getPaletteNormalizer<DatatableAttributes>('state.visualization.columns.*.palette'),

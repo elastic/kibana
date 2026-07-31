@@ -87,7 +87,6 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       name: 'minimal-policy',
       description: 'minimal-policy description',
       destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
-      type: 'global',
       enabled: true,
       snoozedUntil: null,
       matcher: null,
@@ -150,37 +149,24 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
   });
 
-  apiTest('type: defaults to "global" when omitted', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ name: 'default-type-policy' }),
-    });
-
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.type).toBe('global');
-  });
-
   apiTest(
-    'type: creates with type:"single_rule" linked to an existing rule',
+    'matcher: scopes a policy to a single rule via a rule.id matcher',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-single-policy' } })
+        buildCreateRuleData({ metadata: { name: 'rule-for-scoped-policy' } })
       );
 
+      const matcher = `rule.id: "${rule.id}"`;
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          name: 'single-rule-policy',
-          type: 'single_rule',
-          ruleId: rule.id,
+          name: 'rule-scoped-policy',
+          matcher,
         }),
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body).toMatchObject({
-        type: 'single_rule',
-        ruleId: rule.id,
-      });
+      expect(response.body).toMatchObject({ matcher });
     }
   );
 
@@ -194,7 +180,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects empty name', async ({ apiClient }) => {
@@ -204,6 +190,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects name over the maximum length', async ({ apiClient }) => {
@@ -213,6 +200,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing description', async ({ apiClient }) => {
@@ -225,6 +213,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects description over the maximum length', async ({ apiClient }) => {
@@ -236,6 +225,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
@@ -245,6 +235,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects empty destinations array', async ({ apiClient }) => {
@@ -254,6 +245,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -267,6 +259,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -282,7 +275,24 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
+
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: {
+          ...buildCreateActionPolicyData(),
+          unknownField: 'x',
+        },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest('validation: rejects destination with empty id', async ({ apiClient }) => {
     const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
@@ -293,6 +303,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects destination with id over max length', async ({ apiClient }) => {
@@ -304,6 +315,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects matcher over the maximum length', async ({ apiClient }) => {
@@ -313,6 +325,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects groupBy with too many fields', async ({ apiClient }) => {
@@ -324,6 +337,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects groupBy with empty field name', async ({ apiClient }) => {
@@ -333,6 +347,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects groupBy field name over max length', async ({ apiClient }) => {
@@ -344,6 +359,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects unknown groupingMode', async ({ apiClient }) => {
@@ -356,6 +372,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects unknown throttle.strategy', async ({ apiClient }) => {
@@ -368,6 +385,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects invalid throttle.interval format', async ({ apiClient }) => {
@@ -379,6 +397,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
@@ -391,6 +410,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -405,6 +425,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -418,36 +439,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects unknown type enum value', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({
-        // @ts-expect-error
-        type: 'group_of_rules',
-      }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects type:"single_rule" without ruleId', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ type: 'single_rule' }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects type:"global" with ruleId', async ({ apiClient }) => {
-    const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ type: 'global', ruleId: 'some-rule-id' }),
-    });
-
-    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('authorization: 201 with full alerting_v2 privileges (write)', async ({ apiClient }) => {

@@ -16,6 +16,7 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
+import { createCoreUiamService } from '@kbn/core-security-server-internal';
 import { apiKeysMock } from './api_keys.mock';
 import { auditServiceMock, type MockedAuditService } from './audit.mock';
 import type { MockAuthenticatedUserProps } from '@kbn/core-security-common/mocks';
@@ -25,6 +26,7 @@ import { lazyObject } from '@kbn/lazy-object';
 const createSetupMock = () => {
   const mock: jest.Mocked<SecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
   });
 
@@ -49,10 +51,16 @@ const createStartMock = (): SecurityStartMock => {
 };
 
 const createInternalSetupMock = () => {
+  // Back the mock with the real CoreUiamService so tests exercise the actual attach/attestation
+  // logic, wrap the method in a jest.fn so callers can still spy on / override it.
+  const uiam = createCoreUiamService('some-shared-secret');
   const mock: jest.Mocked<InternalSecurityServiceSetup> = lazyObject({
     registerSecurityDelegate: jest.fn(),
+    acquireFakeRequestEnricher: jest.fn().mockReturnValue(jest.fn()),
     fips: { isEnabled: jest.fn() },
-    uiam: { sharedSecret: 'some-shared-secret' },
+    uiam: {
+      getElasticsearchClientAuthentication: jest.fn(uiam.getElasticsearchClientAuthentication),
+    },
   });
 
   return mock;

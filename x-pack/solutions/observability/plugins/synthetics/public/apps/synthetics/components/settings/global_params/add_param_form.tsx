@@ -96,7 +96,6 @@ export const AddParamForm = ({
             <EuiCheckbox
               id="isShared"
               label={SHARED_LABEL}
-              aria-label={NAMESPACES_LABEL}
               onChange={(e) => {
                 if (e.target.checked) {
                   field.onChange([ALL_SPACES_ID]);

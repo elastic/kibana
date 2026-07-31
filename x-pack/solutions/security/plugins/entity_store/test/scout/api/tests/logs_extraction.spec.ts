@@ -1238,4 +1238,248 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       expect(normalizeKeywordList(supervisesUser?.name)).toStrictEqual(['supervisor_login']);
     }
   );
+
+  apiTest(
+    'Should route cloud asset users to the correct namespace based on cloud.provider',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-06-01T10:00:00Z';
+      const to = '2026-06-01T12:00:00Z';
+
+      // 1. cloud.provider=aws → namespace aws
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:01:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-aws-user' },
+        cloud: { provider: 'aws' },
+      });
+      // 2. cloud.provider=gcp → namespace gcp
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:02:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-gcp-user' },
+        cloud: { provider: 'gcp' },
+      });
+      // 3. cloud.provider=azure → namespace entra_id (normalised by the mapping)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:03:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-azure-user' },
+        cloud: { provider: 'azure' },
+      });
+      // 4. cloud.provider not in mapping (ibm) → falls through to source value (event.module)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:04:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-ibm-user' },
+        cloud: { provider: 'ibm' },
+      });
+      // 5. cloud.provider absent → falls through to source value (event.module)
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:05:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        user: { id: 'cloud-no-provider-user' },
+      });
+      // 6. event.kind is not 'asset' → field-mapping condition does not fire;
+      //    cloud.provider=aws and event.module=custom-module produce different namespaces so
+      //    the wrong path would yield 'aws' while the correct path yields 'custom-module'.
+      //    IAM event so postAggFilter passes via idpGate (event.category=iam + event.type=user).
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:06:00Z',
+        event: { category: 'iam', type: 'user', module: 'custom-module' },
+        user: { id: 'cloud-non-asset-user' },
+        cloud: { provider: 'aws' },
+      });
+      // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive guard fires;
+      //    cloud.provider mapping does NOT apply; namespace comes from event.module ('other_integration').
+      //    Verifies that only the Cloud Asset Discovery integration triggers the cloud.provider routing.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-06-01T10:07:00Z',
+        event: { kind: 'asset', module: 'other_integration' },
+        user: { id: 'cloud-other-module-user' },
+        cloud: { provider: 'aws' },
+      });
+
+      const extractionResponse = await forceLogExtraction(
+        apiClient,
+        internalHeaders,
+        'user',
+        from,
+        to
+      );
+      expect(extractionResponse.statusCode).toBe(200);
+      expect(extractionResponse.body).toMatchObject({ success: true, count: 7 });
+
+      // 1. aws → namespace aws
+      const awsHit = await searchDocById(esClient, 'user:cloud-aws-user@aws');
+      expect(awsHit.hits.hits).toHaveLength(1);
+      expect(awsHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-aws-user@aws',
+          namespace: 'aws',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'aws' },
+      });
+
+      // 2. gcp → namespace gcp
+      const gcpHit = await searchDocById(esClient, 'user:cloud-gcp-user@gcp');
+      expect(gcpHit.hits.hits).toHaveLength(1);
+      expect(gcpHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-gcp-user@gcp',
+          namespace: 'gcp',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+      });
+
+      // 3. azure → namespace entra_id
+      const azureHit = await searchDocById(esClient, 'user:cloud-azure-user@entra_id');
+      expect(azureHit.hits.hits).toHaveLength(1);
+      expect(azureHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-azure-user@entra_id',
+          namespace: 'entra_id',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'azure' },
+      });
+
+      // 4. ibm not in mapping → source value (event.module = asset_discovery) used as namespace
+      const ibmHit = await searchDocById(esClient, 'user:cloud-ibm-user@asset_discovery');
+      expect(ibmHit.hits.hits).toHaveLength(1);
+      expect(ibmHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-ibm-user@asset_discovery',
+          namespace: 'asset_discovery',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'ibm' },
+      });
+
+      // 5. cloud.provider absent → source value used as namespace
+      const noProviderHit = await searchDocById(
+        esClient,
+        'user:cloud-no-provider-user@asset_discovery'
+      );
+      expect(noProviderHit.hits.hits).toHaveLength(1);
+      expect(noProviderHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-no-provider-user@asset_discovery',
+          namespace: 'asset_discovery',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+      });
+
+      // 6. event.kind ≠ 'asset' → cloud.provider mapping condition does not fire;
+      //    namespace comes from event.module ('custom-module'), not from cloud.provider ('aws')
+      const nonAssetHit = await searchDocById(esClient, 'user:cloud-non-asset-user@custom-module');
+      expect(nonAssetHit.hits.hits).toHaveLength(1);
+      expect(nonAssetHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-non-asset-user@custom-module',
+          namespace: 'custom-module',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'aws' },
+      });
+
+      // 7. event.kind=asset but event.module ≠ 'asset_discovery' → defensive: cloud.provider mapping
+      //    does NOT fire; namespace comes from event.module ('other_integration'), not 'aws'.
+      const otherModuleHit = await searchDocById(
+        esClient,
+        'user:cloud-other-module-user@other_integration'
+      );
+      expect(otherModuleHit.hits.hits).toHaveLength(1);
+      expect(otherModuleHit.hits.hits[0]._source).toMatchObject({
+        entity: {
+          id: 'user:cloud-other-module-user@other_integration',
+          namespace: 'other_integration',
+          confidence: ENTITY_CONFIDENCE.High,
+        },
+        cloud: { provider: 'aws' },
+      });
+    }
+  );
+
+  apiTest(
+    'Should succeed when a data stream matched by the data view has a closed backing index',
+    async ({ apiClient, esClient }) => {
+      const DATA_STREAM = 'logs-closed-smoke';
+      const FROM = '2026-06-24T09:59:00Z';
+      const TO = '2026-06-24T11:00:00Z';
+      const TS = '2026-06-24T10:00:00Z';
+
+      try {
+        // Create a composable index template so the data stream can be created.
+        await esClient.indices.putIndexTemplate({
+          name: 'logs-closed-smoke-template',
+          index_patterns: [`${DATA_STREAM}*`],
+          data_stream: {},
+          priority: 500,
+        });
+
+        // First ingest creates the data stream and its first (soon-to-be-closed) backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'closed-backing-host' } },
+        });
+
+        // Discover the first backing index name before rolling over.
+        const beforeRollover = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        const firstBacking = ([] as string[]).concat(
+          beforeRollover.data_streams[0]?.backing_indices ?? []
+        )[0];
+
+        // Roll over to create a second (open) backing index.
+        await esClient.indices.rollover({ alias: DATA_STREAM });
+
+        // The entity we will assert on lands in the new open backing index.
+        await esClient.index({
+          index: DATA_STREAM,
+          refresh: 'wait_for',
+          body: { '@timestamp': TS, host: { name: 'open-smoke-host' } },
+        });
+
+        // Simulate the production scenario: close the older backing index.
+        await esClient.indices.close({ index: firstBacking });
+
+        // Extraction must not throw cluster_block_exception and must succeed.
+        const extractionResponse = await forceLogExtraction(
+          apiClient,
+          internalHeaders,
+          'host',
+          FROM,
+          TO
+        );
+        expect(extractionResponse.statusCode).toBe(200);
+        expect(extractionResponse.body).toMatchObject({ success: true });
+
+        // The entity from the open backing index must be extracted.
+        const hit = await searchDocById(esClient, 'host:open-smoke-host');
+        expect(hit.hits.hits).toHaveLength(1);
+      } finally {
+        // Re-open closed backing indices before deleting the data stream (ES rejects
+        // deleteDataStream when backing indices are closed).
+        const resolved = await esClient.indices.resolveIndex({
+          name: DATA_STREAM,
+          expand_wildcards: ['open', 'closed', 'hidden'] as Array<'open' | 'closed' | 'hidden'>,
+        });
+        if (resolved.data_streams.length > 0) {
+          const allBacking = resolved.data_streams.flatMap((ds) =>
+            ([] as string[]).concat(ds.backing_indices)
+          );
+          await esClient.indices.open({ index: allBacking, ignore_unavailable: true });
+        }
+        await esClient.indices.deleteDataStream({ name: DATA_STREAM }, { ignore: [404] });
+        await esClient.indices.deleteIndexTemplate(
+          { name: 'logs-closed-smoke-template' },
+          { ignore: [404] }
+        );
+      }
+    }
+  );
 });

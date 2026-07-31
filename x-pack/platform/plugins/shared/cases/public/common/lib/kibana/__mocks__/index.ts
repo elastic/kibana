@@ -57,5 +57,8 @@ export const useApplicationCapabilities = jest.fn().mockReturnValue({
 // https://github.com/elastic/security-team/issues/15066
 export const useCasesConfig = jest.fn().mockReturnValue({
   attachmentsEnabled: false,
+  chatEnabled: false,
   templatesEnabled: false,
+  detailsRedesignEnabled: false,
+  casesRedesign: { list: false, details: false, settings: false },
 });

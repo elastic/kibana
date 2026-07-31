@@ -11,7 +11,10 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { ExecutionHistoryApi } from '../services/execution_history_api';
 import { executionHistoryKeys } from './query_key_factory';
-import { useFetchExecutionHistory } from './use_fetch_execution_history';
+import {
+  toListExecutionHistoryRequest,
+  useFetchExecutionHistory,
+} from './use_fetch_execution_history';
 
 jest.mock('@kbn/core-di-browser');
 
@@ -40,15 +43,29 @@ describe('useFetchExecutionHistory', () => {
     });
   });
 
-  it('calls listExecutionHistory with the provided page and perPage', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 2, perPage: 25, totalEvents: 0 });
-
-    renderHook(() => useFetchExecutionHistory({ page: 2, perPage: 25 }), {
-      wrapper: createWrapper(),
+  it('calls listExecutionHistory with the provided params (page, perPage, search, outcome)', async () => {
+    mockListExecutionHistory.mockResolvedValue({
+      items: [],
+      page: 2,
+      perPage: 25,
+      totalEvents: 0,
+      searchMatches: null,
     });
 
+    renderHook(
+      () => useFetchExecutionHistory({ page: 2, perPage: 25, search: 'foo', outcome: 'throttled' }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
     await waitFor(() => {
-      expect(mockListExecutionHistory).toHaveBeenCalledWith({ page: 2, perPage: 25 });
+      expect(mockListExecutionHistory).toHaveBeenCalledWith({
+        page: 2,
+        per_page: 25,
+        search: 'foo',
+        outcome: 'throttled',
+      });
     });
   });
 
@@ -58,6 +75,7 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       perPage: 50,
       totalEvents: 1,
+      searchMatches: null,
     };
     mockListExecutionHistory.mockResolvedValue(fakeResponse);
 
@@ -82,7 +100,13 @@ describe('useFetchExecutionHistory', () => {
   });
 
   it('uses a query key derived from page and perPage', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
+    mockListExecutionHistory.mockResolvedValue({
+      items: [],
+      page: 1,
+      perPage: 50,
+      totalEvents: 0,
+      searchMatches: null,
+    });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
       React.createElement(QueryClientProvider, { client: queryClient }, children);
@@ -95,11 +119,18 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       perPage: 50,
       totalEvents: 0,
+      searchMatches: null,
     });
   });
 
   it('refetches when page or perPage change', async () => {
-    mockListExecutionHistory.mockResolvedValue({ items: [], page: 1, perPage: 50, totalEvents: 0 });
+    mockListExecutionHistory.mockResolvedValue({
+      items: [],
+      page: 1,
+      perPage: 50,
+      totalEvents: 0,
+      searchMatches: null,
+    });
 
     const { rerender } = renderHook(
       ({ page, perPage }) => useFetchExecutionHistory({ page, perPage }),
@@ -109,6 +140,30 @@ describe('useFetchExecutionHistory', () => {
 
     rerender({ page: 2, perPage: 50 });
     await waitFor(() => expect(mockListExecutionHistory).toHaveBeenCalledTimes(2));
-    expect(mockListExecutionHistory).toHaveBeenLastCalledWith({ page: 2, perPage: 50 });
+    expect(mockListExecutionHistory).toHaveBeenLastCalledWith({ page: 2, per_page: 50 });
+  });
+});
+
+describe('toListExecutionHistoryRequest', () => {
+  it('maps camelCase view state to the snake_case request', () => {
+    expect(
+      toListExecutionHistoryRequest({
+        page: 1,
+        perPage: 100,
+        search: 'foo',
+        ruleIds: ['rule-1', 'rule-2'],
+        outcome: 'dispatched',
+        episodeIds: ['ep-1'],
+        startDate: '2026-01-01T00:00:00.000Z',
+      })
+    ).toEqual({
+      page: 1,
+      per_page: 100,
+      search: 'foo',
+      rule_ids: ['rule-1', 'rule-2'],
+      outcome: 'dispatched',
+      episode_ids: ['ep-1'],
+      start_date: '2026-01-01T00:00:00.000Z',
+    });
   });
 });

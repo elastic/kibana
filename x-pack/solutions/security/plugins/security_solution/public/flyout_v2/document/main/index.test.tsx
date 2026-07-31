@@ -9,11 +9,19 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { DocumentFlyout } from '.';
+import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
+import { DocumentFlyout, JSON_TAB_TEST_ID, OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID } from '.';
 import { TestProviders } from '../../../common/mock';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 
 jest.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../common/hooks/is_in_security_app');
+jest.mock('./tabs/table_tab', () => ({
+  TableTab: () => <div data-test-subj="mock-table-tab" />,
+}));
+jest.mock('./tabs/json_tab', () => ({
+  JsonTab: () => <div data-test-subj="mock-json-tab" />,
+}));
 jest.mock('./header', () => ({
   Header: ({
     onAlertUpdated,
@@ -51,6 +59,7 @@ describe('<DocumentFlyout />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIsInSecurityApp as jest.Mock).mockReturnValue(true);
   });
 
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
@@ -102,6 +111,58 @@ describe('<DocumentFlyout />', () => {
     expect(getByTestId('mock-header')).toBeInTheDocument();
     expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
     expect(getByTestId('mock-footer')).toBeInTheDocument();
+  });
+
+  it('renders Overview, Table and JSON tabs and switches between them in Security Solution', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <DocumentFlyout
+          hit={createAlertHit()}
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    // all three tab buttons are present
+    expect(getByTestId(OVERVIEW_TAB_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(JSON_TAB_TEST_ID)).toBeInTheDocument();
+
+    // overview is selected by default
+    expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
+
+    // switching to the Table tab renders the table content
+    fireEvent.click(getByTestId(TABLE_TAB_TEST_ID));
+    expect(getByTestId('mock-table-tab')).toBeInTheDocument();
+    expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
+    expect(queryByTestId('mock-json-tab')).not.toBeInTheDocument();
+
+    // switching to the JSON tab renders the json content
+    fireEvent.click(getByTestId(JSON_TAB_TEST_ID));
+    expect(getByTestId('mock-json-tab')).toBeInTheDocument();
+    expect(queryByTestId('mock-overview-tab')).not.toBeInTheDocument();
+    expect(queryByTestId('mock-table-tab')).not.toBeInTheDocument();
+  });
+
+  it('does not render the Table and JSON tabs outside Security Solution (e.g. Discover)', () => {
+    (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasAlertsRead: true, loading: false });
+    (useIsInSecurityApp as jest.Mock).mockReturnValue(false);
+
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <DocumentFlyout
+          hit={createAlertHit()}
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId(JSON_TAB_TEST_ID)).not.toBeInTheDocument();
+    // the overview content still renders directly
+    expect(getByTestId('mock-overview-tab')).toBeInTheDocument();
   });
 
   it('opens notes in a system flyout when notes action is clicked', () => {

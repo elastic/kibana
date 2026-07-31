@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 
@@ -18,6 +19,7 @@ import AddToTimelineButton, {
 import type { DataProvider } from '../../../../common/types';
 import { IS_OPERATOR } from '../../../../common/types';
 import { TestProviders } from '../../../mock';
+import { PRESS } from '../../tooltip_with_keyboard_shortcut';
 import * as i18n from './translations';
 
 const coreStart = coreMock.createStart();
@@ -32,8 +34,8 @@ jest.mock('../../../hooks/use_app_toasts', () => ({
 jest.mock('../../../hooks/use_selector');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const originalModule = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const originalModule = jest.requireActual('react-redux-v7');
 
   return {
     ...originalModule,
@@ -86,6 +88,8 @@ const providerB: DataProvider = {
   },
 };
 
+const getButton = () => screen.getByTestId('add-to-timeline');
+
 describe('add to timeline', () => {
   beforeEach(() => {
     jest.resetAllMocks();
@@ -103,11 +107,11 @@ describe('add to timeline', () => {
     });
 
     test('it renders the button icon', () => {
-      expect(screen.getByRole('button')).toHaveClass('timelines__hoverActionButton');
+      expect(getButton()).toHaveClass('timelines__hoverActionButton');
     });
 
     test('it has the expected aria label', () => {
-      expect(screen.getByLabelText(i18n.ADD_TO_TIMELINE)).toBeInTheDocument();
+      expect(getButton()).toHaveAttribute('aria-label', i18n.ADD_TO_TIMELINE);
     });
   });
 
@@ -126,37 +130,41 @@ describe('add to timeline', () => {
     });
 
     test('it renders the component provided via the `Component` prop', () => {
-      expect(screen.getByRole('button')).toHaveClass('euiButtonEmpty');
+      expect(getButton()).toHaveClass('euiButtonEmpty');
     });
 
     test('it has the expected aria label', () => {
-      expect(screen.getByLabelText(i18n.ADD_TO_TIMELINE)).toBeInTheDocument();
+      expect(getButton()).toHaveAttribute('aria-label', i18n.ADD_TO_TIMELINE);
     });
   });
 
-  test('it renders a tooltip when `showTooltip` is true', () => {
-    const { container } = render(
+  test('it renders the keyboard shortcut tooltip content when `showTooltip` is true', async () => {
+    render(
       <TestProviders>
         <AddToTimelineButton
           field={field}
-          ownFocus={false}
+          ownFocus={true}
           showTooltip={true}
           startServices={coreStart}
         />
       </TestProviders>
     );
 
-    expect(container?.firstChild).toHaveClass('euiToolTipAnchor');
+    await userEvent.hover(screen.getByRole('button'));
+
+    expect(await screen.findByText(PRESS)).toBeInTheDocument();
   });
 
-  test('it does NOT render a tooltip when `showTooltip` is false (default)', () => {
-    const { container } = render(
+  test('it does NOT render keyboard shortcut tooltip content when `showTooltip` is false (default)', () => {
+    render(
       <TestProviders>
-        <AddToTimelineButton field={field} ownFocus={false} startServices={coreStart} />
+        <AddToTimelineButton field={field} ownFocus={true} startServices={coreStart} />
       </TestProviders>
     );
 
-    expect(container?.firstChild).not.toHaveClass('euiToolTipAnchor');
+    fireEvent.mouseOver(screen.getByRole('button'));
+
+    expect(screen.queryByText(PRESS)).not.toBeInTheDocument();
   });
 
   describe('when the user clicks the button', () => {
@@ -174,7 +182,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(getButton());
 
       expect(mockStartDragToTimeline).toBeCalled();
     });
@@ -186,7 +194,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(getButton());
 
       expect(mockStartDragToTimeline).not.toBeCalled();
     });
@@ -203,7 +211,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(getButton());
 
       expect(mockDispatch).toHaveBeenCalledTimes(1);
 
@@ -238,7 +246,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(getButton());
 
       expect(mockDispatch).toHaveBeenCalledTimes(2);
 
@@ -275,7 +283,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(getButton());
 
       expect(onClick).toBeCalled();
     });
@@ -432,7 +440,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(getButton());
 
       const message: SuccessMessageProps = {
         children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, true),
@@ -454,7 +462,7 @@ describe('add to timeline', () => {
         </TestProviders>
       );
 
-      fireEvent.click(screen.getByRole('button'));
+      fireEvent.click(getButton());
 
       const message: SuccessMessageProps = {
         children: i18n.ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(providerA.name, false),

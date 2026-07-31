@@ -79,6 +79,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
         css: css({ containerType: 'inline-size' }),
         'data-test-subj': 'lensAlertRule',
         'aria-labelledby': 'flyoutTitle',
+        focusedPanelId: embeddable.uuid,
       },
       loadContent: async ({ closeFlyout }) => {
         const { loadAlertRuleFlyoutContent } = await import('./load_alert_rule_flyout_content');

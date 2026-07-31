@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import moment from 'moment';
+import { entityStoreMetrics } from '../../monitor/metrics';
 import type { EntityStoreGlobalState } from '../saved_objects';
 import type { EntityStoreGlobalStateClient } from '../saved_objects';
 import { createIndex, reindex, updateByQueryWithScript } from '../../infra/elasticsearch';
@@ -25,6 +26,9 @@ export interface RunHistorySnapshotOptions {
 }
 
 export { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
+
+const POLL_INTERVAL_MS = 30 * 1000;
+const POLL_MIN_INTERVAL_MS = 5 * 1000;
 
 export interface HistorySnapshotClientDependencies {
   logger: Logger;
@@ -71,25 +75,51 @@ export class HistorySnapshotClient {
     try {
       await createIndex(this.esClient, historySnapshotIndex, { throwIfExists: false });
 
+      const reindexStart = Date.now();
       const reindexResult = await reindex(this.esClient, {
         source: { index: latestIndex },
         dest: { index: historySnapshotIndex },
         signal: abortSignal,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
       });
+      entityStoreMetrics.historySnapshotReindexDurationMs.record(Date.now() - reindexStart, {
+        namespace: this.namespace,
+      });
+
       const docCount = reindexResult.total;
       if (docCount === 0) {
         await this.updateGlobalStateOnSuccess(globalState);
+        entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
+        entityStoreMetrics.historySnapshotDocCount.record(0, { namespace: this.namespace });
         return { ok: true, historySnapshotIndex, docCount: 0, resetCount: 0 };
       }
 
+      const resetStart = Date.now();
       const updateResult = await updateByQueryWithScript(this.esClient, {
         index: latestIndex,
         query: { match_all: {} },
         script: HISTORY_SNAPSHOT_RESET_SCRIPT,
         params: { timestampNow },
         signal: abortSignal,
+        waitForTask: {
+          logger: this.logger,
+          minTimeout: POLL_MIN_INTERVAL_MS,
+          maxTimeout: POLL_INTERVAL_MS,
+          forever: true,
+        },
       });
+      entityStoreMetrics.historySnapshotResetDurationMs.record(Date.now() - resetStart, {
+        namespace: this.namespace,
+      });
+
       await this.updateGlobalStateOnSuccess(globalState);
+      entityStoreMetrics.historySnapshotSuccess.add(1, { namespace: this.namespace });
+      entityStoreMetrics.historySnapshotDocCount.record(docCount, { namespace: this.namespace });
       return {
         ok: true,
         historySnapshotIndex,
@@ -98,7 +128,7 @@ export class HistorySnapshotClient {
       };
     } catch (err) {
       const caughtError = err instanceof Error ? err : new Error(String(err));
-      this.logger.error(`history snapshot failed: ${caughtError.message}`);
+      this.logger.error(`history snapshot failed: ${caughtError.message}`, { error: caughtError });
       await this.updateGlobalStateOnError(globalState, caughtError);
       return { ok: false, error: new Error('History snapshot failed') };
     }

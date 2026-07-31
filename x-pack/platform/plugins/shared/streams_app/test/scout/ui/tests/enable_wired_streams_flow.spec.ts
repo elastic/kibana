@@ -65,7 +65,7 @@ test.describe(
       expect(logsEcsExists).toBe(false);
 
       // Open settings and enable wired streams
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(settingsFlyoutTitle).toBeVisible();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeVisible();
       await expect(page.getByTestId(WIRED_SWITCH)).not.toBeChecked();
@@ -104,7 +104,7 @@ test.describe(
       const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
 
       // Enable wired streams
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(settingsFlyoutTitle).toBeVisible();
       await page.getByTestId(WIRED_SWITCH).click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
@@ -127,7 +127,7 @@ test.describe(
       const settingsFlyoutTitle = page.locator('#streamsSettingsFlyoutTitle');
 
       // First enable wired streams
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(settingsFlyoutTitle).toBeVisible();
       await page.getByTestId(WIRED_SWITCH).click();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked({
@@ -143,7 +143,7 @@ test.describe(
       await pageObjects.streams.verifyStreamsAreInTable(['logs.otel', 'logs.ecs']);
 
       // Now disable wired streams
-      await page.getByRole('button', { name: 'Settings' }).click();
+      await pageObjects.streams.openStreamsSettings();
       await expect(page.getByTestId(WIRED_SWITCH)).toBeChecked();
       await page.getByTestId(WIRED_SWITCH).click();
 

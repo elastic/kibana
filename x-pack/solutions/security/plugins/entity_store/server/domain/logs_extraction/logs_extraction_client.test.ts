@@ -6,7 +6,8 @@
  */
 
 import { LogsExtractionClient } from './logs_extraction_client';
-import type { CcsLogsExtractionClient } from '.';
+import type { RemoteExtractionStrategy } from './remote/strategies';
+import type { RemoteLogsExtractionClient } from './remote';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
@@ -27,7 +28,12 @@ const LOG_PAGINATION_CURSOR_PROBE_COLUMNS: ESQLSearchResponse['columns'] = [
   { name: LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD, type: 'long' },
 ];
 
-/** Default total_logs = maxLogsPerPage so interpret marks a non-final slice (full page → more may follow). */
+/**
+ * Default total_logs = maxLogsPerPage, which is always >= the scaled sample limit
+ * (`scaledProbeLimit(maxLogsPerPage) = round(maxLogsPerPage * 0.1)`), so by default this mocks a
+ * saturated (non-final) slice — more pages may follow. Pass a smaller `totalLogsInSlice` below
+ * the effective page's scaled limit to mock a last/partial page instead.
+ */
 function mockLogPaginationCursorProbeRow(
   timestamp: string,
   totalLogsInSlice: number = LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT
@@ -45,7 +51,14 @@ function mockLogPaginationCursorProbeEmpty(): ESQLSearchResponse {
   };
 }
 
-/** First slice + extraction + terminal empty log pagination cursor probe (end of window). */
+/**
+ * First slice + extraction + terminal empty log pagination cursor probe (end of window) +
+ * the follow-up sweep extraction that the terminal empty probe now unconditionally triggers.
+ * A sampled probe returning zero rows does not prove the real remainder is empty, so the loop
+ * always re-scans `[logsPageCursorStart, toDateISO]` for real docs before exiting — see
+ * `runMainExtractionLoop`'s unification of the `hasLogsToProcess: false` and `isLastLogsPage`
+ * branches. That sweep is a 4th ESQL call (an extraction, here mocked empty).
+ */
 function mockExtractSuccessSequence(
   mainExtractionResponse: ESQLSearchResponse,
   totalLogsInSlice?: number
@@ -58,7 +71,8 @@ function mockExtractSuccessSequence(
       )
     )
     .mockResolvedValueOnce(mainExtractionResponse)
-    .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
+    .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+    .mockResolvedValueOnce({ columns: [], values: [] });
 }
 import {
   LogExtractionConfig,
@@ -70,11 +84,19 @@ import {
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
-function createMockCcsLogsExtractionClient(): jest.Mocked<
-  Pick<CcsLogsExtractionClient, 'extractToUpdates'>
-> {
+type MockRemoteLogsExtractionClient = jest.Mocked<
+  Pick<RemoteLogsExtractionClient, 'extractToUpdates'>
+> & {
+  strategy: Pick<RemoteExtractionStrategy, 'id' | 'buildPatterns'>;
+};
+
+function createMockRemoteLogsExtractionClient(): MockRemoteLogsExtractionClient {
   return {
     extractToUpdates: jest.fn().mockResolvedValue({ count: 0, pages: 0 }),
+    strategy: {
+      id: 'ccs',
+      buildPatterns: jest.fn(({ remoteIndexPatterns }) => remoteIndexPatterns),
+    },
   };
 }
 
@@ -147,7 +169,7 @@ describe('LogsExtractionClient', () => {
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
-  let mockCcsLogsExtractionClient: ReturnType<typeof createMockCcsLogsExtractionClient>;
+  let mockRemoteLogsExtractionClient: ReturnType<typeof createMockRemoteLogsExtractionClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -158,7 +180,11 @@ describe('LogsExtractionClient', () => {
     mockIngestEntities.mockReset();
 
     mockLogger = loggerMock.create();
-    mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
+    mockEsClient = {
+      indices: {
+        resolveIndex: jest.fn().mockResolvedValue({ indices: [], aliases: [], data_streams: [] }),
+      },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
     mockDataViewsService = {
       get: jest.fn(),
     } as unknown as jest.Mocked<DataViewsService>;
@@ -167,7 +193,7 @@ describe('LogsExtractionClient', () => {
       update: jest.fn().mockResolvedValue({}),
     };
     mockGlobalStateClient = createMockGlobalStateClient();
-    mockCcsLogsExtractionClient = createMockCcsLogsExtractionClient();
+    mockRemoteLogsExtractionClient = createMockRemoteLogsExtractionClient();
 
     client = new LogsExtractionClient({
       logger: mockLogger,
@@ -176,7 +202,8 @@ describe('LogsExtractionClient', () => {
       dataViewsService: mockDataViewsService,
       engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
       globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-      ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+      remoteLogsExtractionClient:
+        mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
     });
   });
 
@@ -225,13 +252,18 @@ describe('LogsExtractionClient', () => {
       );
 
       expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('user');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.any(String),
-      });
+      // probe, extraction, terminal empty probe, and the follow-up sweep extraction it triggers.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          query: expect.any(String),
+        })
+      );
 
-      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+      // The sweep extraction after the terminal empty probe ingests 0 rows but still calls
+      // ingestEntities unconditionally (see ingestEntityPagesWithinCurrentLogPage).
+      expect(mockIngestEntities).toHaveBeenCalledTimes(2);
       expect(mockIngestEntities).toHaveBeenCalledWith({
         esClient: mockEsClient,
         esqlResponse: mockEsqlResponse,
@@ -241,6 +273,7 @@ describe('LogsExtractionClient', () => {
         logger: expect.any(Object),
         abortController: undefined,
         refresh: true,
+        onDropped: expect.any(Function),
       });
 
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
@@ -270,7 +303,8 @@ describe('LogsExtractionClient', () => {
         dataViewsService: mockDataViewsService,
         engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
         globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
+        remoteLogsExtractionClient:
+          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
       });
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -306,8 +340,11 @@ describe('LogsExtractionClient', () => {
       expect(result.success).toBe(true);
       expect(result.success && result.count).toBe(0);
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
-      expect(mockIngestEntities).toHaveBeenCalledTimes(0);
+      // A terminal empty probe no longer breaks immediately: it is unified with the last-page
+      // path and still runs a follow-up sweep extraction over the window before the loop exits,
+      // since a sampled probe returning zero rows does not prove the real remainder is empty.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
         'user',
         expect.objectContaining({
@@ -318,6 +355,89 @@ describe('LogsExtractionClient', () => {
           }),
         })
       );
+    });
+
+    it('sweeps and ingests real docs when the sampled probe returns zero rows (does not silently drop them)', async () => {
+      // Core correctness guarantee of the SAMPLE-based probe: sampling can return zero rows
+      // (hasLogsToProcess: false) even though real, unsampled docs still exist in the window
+      // (e.g. a couple of docs, ~90% chance neither gets sampled at the default p=0.1). The
+      // follow-up sweep extraction always re-scans the real [logsPageCursorStart, toDateISO]
+      // window and ingests idempotently, so nothing the sample missed is silently dropped.
+      const realDocsResponse: ESQLSearchResponse = {
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: HASHED_ID_FIELD, type: 'keyword' },
+        ],
+        values: [
+          ['2024-01-02T10:00:00.000Z', 'hash1'],
+          ['2024-01-02T10:00:01.000Z', 'hash2'],
+        ],
+      };
+
+      const mockDataView = {
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      };
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
+      // Probe samples zero rows, but the follow-up sweep extraction still finds real docs.
+      mockExecuteEsqlQuery
+        .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty())
+        .mockResolvedValueOnce(realDocsResponse);
+      mockIngestEntities.mockResolvedValue(undefined);
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      // Nothing is silently dropped: the sweep extraction's real docs are still ingested.
+      expect(result.success && result.count).toBe(2);
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).toHaveBeenCalledWith(
+        expect.objectContaining({ esqlResponse: realDocsResponse })
+      );
+    });
+
+    it('does not run a sweep extraction when an exact (unsampled) probe finds nothing', async () => {
+      // effectiveMaxLogsPerPage=1 (via maxLogsPerWindow=1) → pickSampleProbability(1)=1: too
+      // small for sampling to help, so the probe is exact. An empty result from an exact probe
+      // is definitive (no real docs can be missed the way a sampled probe can miss them), so
+      // the loop should stop immediately instead of running a redundant sweep extraction.
+      mockGlobalStateClient = createMockGlobalStateClient({ maxLogsPerWindow: 1 });
+      client = new LogsExtractionClient({
+        logger: mockLogger,
+        namespace: 'default',
+        esClient: mockEsClient,
+        dataViewsService: mockDataViewsService,
+        engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+        globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
+        remoteLogsExtractionClient:
+          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
+      });
+
+      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+        createMockEngineDescriptor('user') as Awaited<
+          ReturnType<EngineDescriptorClient['findOrThrow']>
+        >
+      );
+      mockDataViewsService.get.mockResolvedValue({
+        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+      } as any);
+      mockExecuteEsqlQuery.mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
+
+      const result = await client.extractLogs('user');
+
+      expect(result.success).toBe(true);
+      expect(result.success && result.count).toBe(0);
+      expect(result.success && result.logsProcessed).toBe(0);
+      expect(result.success && result.logsCapApplied).toBe(false);
+      // Only the single (empty) probe call — no follow-up sweep extraction.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+      expect(mockIngestEntities).not.toHaveBeenCalled();
     });
 
     it('should compute extraction window from lookbackPeriod and delay when no custom range', async () => {
@@ -351,14 +471,18 @@ describe('LogsExtractionClient', () => {
       const expectedFrom = moment.utc(fixedNow).subtract(3, 'hours').toISOString();
       const expectedTo = moment.utc(fixedNow).subtract(5, 'seconds').toISOString();
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(expectedFrom),
-      });
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(expectedTo),
-      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          query: expect.stringContaining(expectedFrom),
+        })
+      );
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          query: expect.stringContaining(expectedTo),
+        })
+      );
 
       jest.useRealTimers();
     });
@@ -460,14 +584,18 @@ describe('LogsExtractionClient', () => {
 
       const expectedTo = moment.utc(fixedNow).subtract(1, 'minute').toISOString();
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(checkpointTimestamp),
-      });
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(expectedTo),
-      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          query: expect.stringContaining(checkpointTimestamp),
+        })
+      );
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          query: expect.stringContaining(expectedTo),
+        })
+      );
 
       jest.useRealTimers();
     });
@@ -536,7 +664,8 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
       const firstProbeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
       expect(firstProbeQuery).toContain(checkpointTimestamp);
       jest.useRealTimers();
@@ -628,14 +757,18 @@ describe('LogsExtractionClient', () => {
         specificWindow: { fromDateISO: fromDate, toDateISO: toDate },
       });
 
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(fromDate),
-      });
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(toDate),
-      });
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          query: expect.stringContaining(fromDate),
+        })
+      );
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({
+          esClient: mockEsClient,
+          query: expect.stringContaining(toDate),
+        })
+      );
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
     });
 
@@ -673,8 +806,9 @@ describe('LogsExtractionClient', () => {
 
       expect(result.success).toBe(true);
       expect(result.success && result.count).toBe(2);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
-      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(2);
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
     });
 
@@ -736,7 +870,7 @@ describe('LogsExtractionClient', () => {
       });
     });
 
-    it('should filter out cross-cluster search (CCS) remote indices from main query and run CCS in parallel', async () => {
+    it('should filter remote index patterns from the main query and run remote extraction in parallel', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -764,14 +898,21 @@ describe('LogsExtractionClient', () => {
       const result = await client.extractLogs('user');
 
       expect(result.success).toBe(true);
-      // Main extraction uses local indices only; CCS client (injected) runs in parallel.
+      // Main path uses local patterns only; remote client runs in parallel via strategy.buildPatterns.
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('metrics-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
       expect(result.success && result.scannedIndices).toContain('other:filebeat-*');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
-      expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
-      expect(mockCcsLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
+      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
+      expect(mockRemoteLogsExtractionClient.strategy.buildPatterns).toHaveBeenCalledWith(
+        expect.objectContaining({
+          localIndexPatterns: expect.arrayContaining(['logs-*', 'metrics-*']),
+          remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
+        })
+      );
+      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledTimes(1);
+      expect(mockRemoteLogsExtractionClient.extractToUpdates).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'user',
           remoteIndexPatterns: ['remote_cluster:logs-*', 'other:filebeat-*'],
@@ -779,7 +920,7 @@ describe('LogsExtractionClient', () => {
       );
     });
 
-    it('should store CCS errors in the saved object while main execution remains unchanged', async () => {
+    it('should store remote errors in the saved object while main execution remains unchanged', async () => {
       const mockEsqlResponse: ESQLSearchResponse = {
         columns: [
           { name: '@timestamp', type: 'date' },
@@ -793,7 +934,7 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*,remote_cluster:logs-*'),
       };
 
-      const ccsError = new Error('CCS connection failed');
+      const remoteError = new Error('remote connection failed');
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -802,10 +943,10 @@ describe('LogsExtractionClient', () => {
       mockDataViewsService.get.mockResolvedValue(mockDataView as any);
       mockExtractSuccessSequence(mockEsqlResponse);
       mockIngestEntities.mockResolvedValue(undefined);
-      mockCcsLogsExtractionClient.extractToUpdates.mockResolvedValue({
+      mockRemoteLogsExtractionClient.extractToUpdates.mockResolvedValue({
         count: 0,
         pages: 0,
-        error: ccsError,
+        error: remoteError,
       });
 
       const result = await client.extractLogs('user');
@@ -814,10 +955,11 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.count).toBe(1);
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('remote_cluster:logs-*');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
-      expect(mockIngestEntities).toHaveBeenCalledTimes(1);
+      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
+      expect(mockIngestEntities).toHaveBeenCalledTimes(2);
 
-      // CCS error is stored in the saved object alongside the cleared log extraction state.
+      // Remote error is stored in the saved object alongside the cleared log extraction state.
       expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
         'user',
         expect.objectContaining({
@@ -826,7 +968,7 @@ describe('LogsExtractionClient', () => {
             paginationId: null,
             lastExecutionTimestamp: expect.any(String),
           }),
-          error: { message: ccsError.message, action: 'extractLogs' },
+          error: { message: remoteError.message, action: 'extractLogs' },
         })
       );
     });
@@ -896,7 +1038,8 @@ describe('LogsExtractionClient', () => {
       await client.extractLogs('host');
 
       expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('host');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+      // probe, extraction, terminal empty probe, and its follow-up sweep extraction.
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(4);
       expect(mockIngestEntities).toHaveBeenCalledWith(
         expect.objectContaining({
           targetIndex: expect.stringContaining('.entities.v2.latest.security_default'),
@@ -990,6 +1133,10 @@ describe('LogsExtractionClient', () => {
         if (!result.success) return;
         expect(result.count).toBe(2);
         expect(result.logsCapApplied).toBe(true);
+        // effectiveMaxLogsPerPage=1 → pickSampleProbability(1)=1 (too small for sampling to help,
+        // falls back to an exact probe) → scaledProbeLimit(1, 1)=1 → LIMIT 1 → total_logs=1
+        // (saturated, not last) → sliceLogCount=round(1 / 1)=1 (exact, no estimation). This
+        // already meets maxLogsPerWindow=1, so the cap fires after slice 1.
         expect(result.logsProcessed).toBe(1);
 
         // Final engineDescriptorClient.update must NOT include logExtractionState —
@@ -1026,6 +1173,9 @@ describe('LogsExtractionClient', () => {
         if (!result.success) return;
         expect(result.count).toBe(2);
         expect(result.logsCapApplied).toBe(true);
+        // effectiveMaxLogsPerPage=1 → pickSampleProbability(1)=1 (exact probe) →
+        // scaledProbeLimit(1, 1)=1 → total_logs=1 (saturated) → sliceLogCount=round(1 / 1)=1,
+        // which already meets maxLogsPerWindow=1.
         expect(result.logsProcessed).toBe(1);
         expect(result.lastSearchTimestamp).toBe(effectiveWindowEnd);
 
@@ -1093,7 +1243,11 @@ describe('LogsExtractionClient', () => {
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
-        // effectiveMaxLogsPerPage=1 → LIMIT 1 → total_logs=1 → sliceLogCount=1
+        // effectiveMaxLogsPerPage=1 → pickSampleProbability(1)=1 (exact probe) →
+        // scaledProbeLimit(1, 1)=1 → LIMIT 1 → total_logs=1 (saturates the scaled limit, so not
+        // the last page) → sliceLogCount=round(1 / 1)=1, which already meets
+        // maxLogsPerWindow=1, so the cap fires after the first slice — the terminal empty probe
+        // below is never reached.
         mockExecuteEsqlQuery
           .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(lastPageTimestamp, 1))
           .mockResolvedValueOnce(mainExtractionResponse)
@@ -1140,6 +1294,9 @@ describe('LogsExtractionClient', () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         expect(result.logsCapApplied).toBe(true);
+        // effectiveMaxLogsPerPage=1 → pickSampleProbability(1)=1 (exact probe) →
+        // scaledProbeLimit(1, 1)=1 → total_logs=1 (saturated) → sliceLogCount=round(1 / 1)=1,
+        // which already meets maxLogsPerWindow=1.
         expect(result.logsProcessed).toBe(1);
         // drop: lastSearchTimestamp is advanced to the window end
         expect(result.lastSearchTimestamp).toBe(toDateISO);
@@ -1153,7 +1310,9 @@ describe('LogsExtractionClient', () => {
       // Stall can only fire from iteration 2 onward (once `isFirstRunInThisCycle` is cleared).
       // Tests therefore use two slice iterations: slice 1 advances `checkpointTimestamp`
       // via `advanceEngineStateAfterLogPageCompletes`, and slice 2 is the stall candidate.
-      // After the stall, a terminal empty probe ends the loop (full-page count no longer signals last page).
+      // After the stall, a terminal empty probe is reached (full-page count no longer signals
+      // last page); a terminal empty probe is unified with the last-page path, so it still
+      // triggers one more (swept) extraction call before the loop actually ends.
 
       const setupStallTest = () => {
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
@@ -1174,21 +1333,27 @@ describe('LogsExtractionClient', () => {
 
         // Slice 1: ends at stalledTs (full page → not last, loop continues).
         // Slice 2: same stalledTs + full page → stall fires, extraction skipped, cursor bumped.
-        // Probe 3 (with bumpedTs): empty → loop ends.
+        // Probe 3 (with bumpedTs): empty → unified with the last-page path, so the loop still
+        // runs one more (swept) extraction over [bumpedTs, toDateISO] before ending.
         mockExecuteEsqlQuery
           .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(stalledTs)) // slice 1, not last
           .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
           .mockResolvedValueOnce(
             mockLogPaginationCursorProbeRow(stalledTs, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // slice 2: stall fires, extraction skipped
           )
-          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()); // probe 3 with bumpedTs → loop ends
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()) // probe 3 with bumpedTs → last page
+          .mockResolvedValueOnce({ columns: [], values: [] }); // follow-up sweep extraction → loop ends
 
         const result = await client.extractLogs('user');
 
         expect(result.success).toBe(true);
         expect(mockLogger.warn).toHaveBeenCalledTimes(1);
+        // The message names the concrete effective per-page limit, not the (unavailable in this
+        // scope) raw config variable name.
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          expect.stringContaining(`Log-slice probe stalled at ${stalledTs}`)
+          expect.stringContaining(
+            `Log-slice probe stalled at ${stalledTs} with a saturated page; advancing cursor by 1ms. Docs sharing this timestamp beyond the configured per-page limit (${LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT}) will be dropped.`
+          )
         );
         // After the stall bump, a later update persists checkpointTimestamp = bumpedTs.
         const updateCalls = (mockEngineDescriptorClient.update as jest.Mock).mock.calls;
@@ -1204,7 +1369,8 @@ describe('LogsExtractionClient', () => {
         setupStallTest();
 
         // Slice 1 ends at ts1; slice 2 ends at ts2 (advances) → no stall.
-        // Full page (total=max) → isLastLogsPage=false → loop continues; terminal empty probe ends it.
+        // Full page (total=max) → isLastLogsPage=false → loop continues; terminal empty probe
+        // still triggers one more (swept) extraction before the loop ends.
         mockExecuteEsqlQuery
           .mockResolvedValueOnce(mockLogPaginationCursorProbeRow(ts1)) // slice 1, not last
           .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 1
@@ -1212,7 +1378,8 @@ describe('LogsExtractionClient', () => {
             mockLogPaginationCursorProbeRow(ts2, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT) // full page, different ts → not last
           )
           .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction 2
-          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()); // terminal probe → loop ends
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()) // terminal probe → last page
+          .mockResolvedValueOnce({ columns: [], values: [] }); // follow-up sweep extraction → loop ends
 
         const result = await client.extractLogs('user');
 
@@ -1243,13 +1410,15 @@ describe('LogsExtractionClient', () => {
         setupStallTest();
 
         const someTs = '2024-01-02T10:00:00.000Z';
-        // Full page (total=max → isLastLogsPage=false): loop continues; terminal empty probe ends it.
+        // Full page (total=max → isLastLogsPage=false): loop continues; terminal empty probe
+        // still triggers one more (swept) extraction before the loop ends.
         mockExecuteEsqlQuery
           .mockResolvedValueOnce(
             mockLogPaginationCursorProbeRow(someTs, LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT)
           )
           .mockResolvedValueOnce({ columns: [], values: [] }) // entity extraction
-          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()); // terminal probe → loop ends
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty()) // terminal probe → last page
+          .mockResolvedValueOnce({ columns: [], values: [] }); // follow-up sweep extraction → loop ends
 
         const result = await client.extractLogs('user');
 
@@ -1303,12 +1472,15 @@ describe('LogsExtractionClient', () => {
         const result = await client.extractLogs('user');
 
         expect(result.success).toBe(true);
-        // 6 sub-windows × 1 probe each. Each probe returns empty so the inner outer-loop never
-        // runs `advanceEngineStateAfterLogPageCompletes` — no per-slice persistence either.
-        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
+        // 6 sub-windows × (1 probe + 1 follow-up sweep extraction) each. A terminal empty probe
+        // is unified with the last-page path: it still runs `advanceEngineStateAfterLogPageCompletes`
+        // and a swept extraction before that sub-window's inner loop ends, since a sampled probe
+        // returning zero rows does not prove the real remainder is empty.
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(12);
 
-        // Single update call: the final cleanup at the end of extractLogs.
-        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(1);
+        // 6 per-slice persistence calls (one per sub-window's inner loop) + 1 final cleanup call
+        // at the end of extractLogs.
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(7);
         expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
           'user',
           expect.objectContaining({
@@ -1330,8 +1502,10 @@ describe('LogsExtractionClient', () => {
 
         await client.extractLogs('user');
 
-        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
-        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(1);
+        // 1 probe + 1 follow-up sweep extraction (terminal empty probe unified with last-page path).
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
+        // 1 per-slice persistence call (inner loop) + 1 final cleanup call.
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(2);
         expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith(
           'user',
           expect.objectContaining({
@@ -1369,8 +1543,9 @@ describe('LogsExtractionClient', () => {
           specificWindow: { fromDateISO: fromDate, toDateISO: toDate },
         });
 
-        // A single probe over the full user-supplied window — no sub-window splitting.
-        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
+        // A single probe over the full user-supplied window (no sub-window splitting), plus its
+        // follow-up sweep extraction; specificWindow mode never persists to the engine descriptor.
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(2);
         const probeQuery = mockExecuteEsqlQuery.mock.calls[0][0].query;
         expect(probeQuery).toContain(fromDate);
         expect(probeQuery).toContain(toDate);
@@ -1387,17 +1562,20 @@ describe('LogsExtractionClient', () => {
 
         await client.extractLogs('user');
 
-        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+        // Each sub-window's terminal empty probe now also triggers a follow-up sweep extraction
+        // (same bounds as the probe), so calls interleave as [probe, sweep] per sub-window —
+        // index 0/2/4 are the probes, index 1/3/5 the sweeps.
+        expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(6);
 
         const subWindow1 = mockExecuteEsqlQuery.mock.calls[0][0].query;
         expect(subWindow1).toContain('2025-01-15T11:44:00.000Z');
         expect(subWindow1).toContain('2025-01-15T11:49:00.000Z');
 
-        const subWindow2 = mockExecuteEsqlQuery.mock.calls[1][0].query;
+        const subWindow2 = mockExecuteEsqlQuery.mock.calls[2][0].query;
         expect(subWindow2).toContain('2025-01-15T11:49:00.000Z');
         expect(subWindow2).toContain('2025-01-15T11:54:00.000Z');
 
-        const subWindow3 = mockExecuteEsqlQuery.mock.calls[2][0].query;
+        const subWindow3 = mockExecuteEsqlQuery.mock.calls[4][0].query;
         expect(subWindow3).toContain('2025-01-15T11:54:00.000Z');
         expect(subWindow3).toContain(effectiveWindowEnd);
       });
@@ -1405,7 +1583,7 @@ describe('LogsExtractionClient', () => {
   });
 
   describe('getLocalAndRemoteIndexPatterns', () => {
-    it('should split local and CCS remote index patterns', async () => {
+    it('should split local and cluster-prefixed remote index patterns', async () => {
       const mockDataView = {
         getIndexPattern: jest
           .fn()
@@ -1499,7 +1677,7 @@ describe('LogsExtractionClient', () => {
       );
 
       expect(indexPatterns).toContain('-logs-proxy-*');
-      // CCS-prefixed exclude is routed to remote and not returned here
+      // Cluster-prefixed excludes are routed to remote and not returned here
       expect(indexPatterns).not.toContain('-remote_cluster:logs-debug-*');
       // remote includes are also not returned
       expect(indexPatterns).not.toContain('remote_cluster:logs-*');
@@ -1566,264 +1744,6 @@ describe('LogsExtractionClient', () => {
         'No global state found for this namespace'
       );
       expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('getRemainingLogsCount', () => {
-    it('should return document_count from ESQL response when engine is started', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [{ name: 'document_count', type: 'long' }],
-        values: [[42]],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
-
-      const result = await client.getRemainingLogsCount('user');
-
-      expect(result).toBe(42);
-      expect(mockEngineDescriptorClient.findOrThrow).toHaveBeenCalledWith('user');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining('STATS document_count = COUNT()'),
-      });
-      expect(mockIngestEntities).not.toHaveBeenCalled();
-    });
-
-    it('applies excludedIndexPatterns to the count query', async () => {
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockGlobalStateClient = createMockGlobalStateClient({
-        excludedIndexPatterns: ['logs-proxy-*'],
-      });
-      client = new LogsExtractionClient({
-        logger: mockLogger,
-        namespace: 'default',
-        esClient: mockEsClient,
-        dataViewsService: mockDataViewsService,
-        engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
-        globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        ccsLogsExtractionClient: mockCcsLogsExtractionClient as unknown as CcsLogsExtractionClient,
-      });
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue({
-        columns: [{ name: 'document_count', type: 'long' }],
-        values: [[0]],
-      });
-
-      await client.getRemainingLogsCount('user');
-
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining('-logs-proxy-*'),
-      });
-    });
-
-    it('should return 0 when ESQL response has no rows', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [{ name: 'document_count', type: 'long' }],
-        values: [],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
-
-      const result = await client.getRemainingLogsCount('user');
-
-      expect(result).toBe(0);
-    });
-
-    it('should return 0 when document_count column is missing', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [{ name: 'other_column', type: 'keyword' }],
-        values: [['value']],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
-
-      const result = await client.getRemainingLogsCount('user');
-
-      expect(result).toBe(0);
-    });
-
-    it('should use fromDateISO from extraction window and toDateISO as now', async () => {
-      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
-
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [{ name: 'document_count', type: 'long' }],
-        values: [[0]],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', { lookbackPeriod: '3h', delay: '5s' }) as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
-
-      await client.getRemainingLogsCount('user');
-
-      const expectedFrom = moment.utc(fixedNow).subtract(3, 'hours').toISOString();
-      const expectedTo = moment.utc(fixedNow).toISOString();
-
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(expectedFrom),
-      });
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(expectedTo),
-      });
-
-      jest.useRealTimers();
-    });
-
-    it('should throw and log when executeEsqlQuery throws', async () => {
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      const testError = new Error('ESQL query failed');
-      mockExecuteEsqlQuery.mockRejectedValue(testError);
-
-      await expect(client.getRemainingLogsCount('user')).rejects.toThrow('ESQL query failed');
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(1);
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to get remaining logs count for entity type "user"')
-      );
-    });
-
-    it('should pass recoveryId when engine has paginationId', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [{ name: 'document_count', type: 'long' }],
-        values: [[5]],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      const descriptor = createMockEngineDescriptor('user') as Awaited<
-        ReturnType<EngineDescriptorClient['findOrThrow']>
-      >;
-      descriptor.logExtractionState = {
-        ...descriptor.logExtractionState,
-        paginationId: 'recovery-cursor-id',
-      } as typeof descriptor.logExtractionState;
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(descriptor);
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
-
-      const result = await client.getRemainingLogsCount('user');
-
-      expect(result).toBe(5);
-      // When recoveryId is set, buildExtractionSourceClause uses >= for timestamp (recovery boundary)
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringMatching(/@timestamp\s*>=\s*TO_DATETIME/),
-      });
-    });
-
-    it('should use checkpointTimestamp as both window start and log-slice lower bound in remaining-count ESQL', async () => {
-      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
-      jest.useFakeTimers({ now: fixedNow.getTime() });
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [{ name: 'document_count', type: 'long' }],
-        values: [[3]],
-      };
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-      const checkpointTimestamp = '2025-01-15T10:20:00.000Z';
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user', {
-          lookbackPeriod: '3h',
-          delay: '1m',
-          checkpointTimestamp,
-        }) as Awaited<ReturnType<EngineDescriptorClient['findOrThrow']>>
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
-
-      const result = await client.getRemainingLogsCount('user');
-      expect(result).toBe(3);
-      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith({
-        esClient: mockEsClient,
-        query: expect.stringContaining(checkpointTimestamp),
-      });
-      jest.useRealTimers();
-    });
-
-    it('should convert document_count to number via Number()', async () => {
-      const mockEsqlResponse: ESQLSearchResponse = {
-        columns: [{ name: 'document_count', type: 'long' }],
-        values: [['100'] as unknown as ESQLSearchResponse['values'][0]],
-      };
-
-      const mockDataView = {
-        getIndexPattern: jest.fn().mockReturnValue('logs-*'),
-      };
-
-      mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
-        createMockEngineDescriptor('user') as Awaited<
-          ReturnType<EngineDescriptorClient['findOrThrow']>
-        >
-      );
-      mockDataViewsService.get.mockResolvedValue(mockDataView as any);
-      mockExecuteEsqlQuery.mockResolvedValue(mockEsqlResponse);
-
-      const result = await client.getRemainingLogsCount('user');
-
-      expect(result).toBe(100);
     });
   });
 });

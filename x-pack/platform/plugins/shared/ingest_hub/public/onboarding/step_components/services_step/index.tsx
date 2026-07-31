@@ -15,23 +15,22 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
-  euiPaletteColorBlind,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
-import { useServicesStep, CATEGORY_ORDER } from './use_services_step';
+import { useServicesStep } from './use_services_step';
 import type { SignalFilter } from './use_services_step';
 
 interface ServicesStepProps {
-  onNext: () => void;
+  onContinue: () => void;
+  onBack?: () => void;
 }
 
 const SIGNAL_FILTER_OPTIONS = [
@@ -51,37 +50,30 @@ const SIGNAL_FILTER_OPTIONS = [
   },
 ];
 
-const CATEGORY_COLORS = euiPaletteColorBlind({ rotations: 2 });
-
-function categoryColor(category: string): string {
-  const index = CATEGORY_ORDER.indexOf(category as (typeof CATEGORY_ORDER)[number]);
-  return CATEGORY_COLORS[Math.max(0, index)];
-}
-
-export function ServicesStep({ onNext }: ServicesStepProps) {
+export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
   const {
     signalFilter,
     setSignalFilter,
     searchQuery,
     setSearchQuery,
-    filteredServices,
     categories,
     activeCategory,
     setSelectedCategory,
     servicesInCategory,
     duplicateNamesInCategory,
     selectedSet,
+    categoryStats,
     isReady,
     handleToggle,
     allInCategorySelected,
     handleSelectAllInCategory,
     handleDeselectAllInCategory,
     handleNext,
-  } = useServicesStep({ onNext });
+  } = useServicesStep({ onContinue });
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiTitle size="l">
+      <EuiTitle size="m">
         <h2>
           <FormattedMessage
             id="xpack.ingestHub.servicesStep.title"
@@ -128,15 +120,14 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup gutterSize="m" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false} style={{ width: 240 }}>
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false} style={{ maxWidth: 350 }}>
           {categories.map((cat) => {
             const isActive = cat === activeCategory;
-            const catServices = filteredServices.filter((s) => s.category === cat);
-            const catSelectedCount = catServices.filter((s) => selectedSet.has(s.id)).length;
-            const uniqueNames = [...new Set(catServices.map((s) => s.name))];
-            const preview =
-              uniqueNames.slice(0, 2).join(', ') + (uniqueNames.length > 2 ? ', ...' : '');
+            const stats = categoryStats.get(cat);
+            const selected = stats?.selected ?? 0;
+            const total = stats?.total ?? 0;
+            const preview = stats?.preview ?? '';
 
             return (
               <EuiPanel
@@ -149,20 +140,29 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
                 style={{ cursor: 'pointer' }}
                 data-test-subj={`servicesStep-category-${cat}`}
               >
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem>
-                    <EuiHealth color={categoryColor(cat)} textSize="s">
-                      {cat}
-                    </EuiHealth>
-                    <EuiText size="xs" color="subdued" style={{ paddingLeft: 20 }}>
+                    <EuiText size="s">
+                      <strong>{cat}</strong>
+                    </EuiText>
+                    <EuiText size="xs" color="subdued">
                       {preview}
                     </EuiText>
                   </EuiFlexItem>
-                  {catSelectedCount > 0 && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="hollow">{catSelectedCount}</EuiBadge>
-                    </EuiFlexItem>
-                  )}
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge
+                      color="default"
+                      aria-label={i18n.translate(
+                        'xpack.ingestHub.servicesStep.categoryBadgeAriaLabel',
+                        {
+                          defaultMessage: '{selected} of {total} services selected',
+                          values: { selected, total },
+                        }
+                      )}
+                    >
+                      {selected > 0 ? `${selected}/${total}` : total}
+                    </EuiBadge>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>
             );
@@ -170,58 +170,71 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiPanel paddingSize="m" hasBorder>
+          <EuiPanel paddingSize="none" hasBorder>
             {activeCategory ? (
               <>
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h3>{activeCategory}</h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {allInCategorySelected ? (
-                      <EuiButtonEmpty
-                        size="s"
-                        onClick={handleDeselectAllInCategory}
-                        data-test-subj="servicesStep-deselectAllButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.ingestHub.servicesStep.deselectAll"
-                          defaultMessage="Deselect all"
-                        />
-                      </EuiButtonEmpty>
-                    ) : (
-                      <EuiButtonEmpty
-                        size="s"
-                        onClick={handleSelectAllInCategory}
-                        data-test-subj="servicesStep-selectAllButton"
-                      >
-                        <FormattedMessage
-                          id="xpack.ingestHub.servicesStep.selectAll"
-                          defaultMessage="Select all"
-                        />
-                      </EuiButtonEmpty>
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiFlexGrid columns={2} gutterSize="s">
-                  {servicesInCategory.map((service) => (
-                    <EuiFlexItem key={service.id}>
-                      <ServiceRow
-                        service={service}
-                        isSelected={selectedSet.has(service.id)}
-                        onToggle={handleToggle}
-                        displayName={
-                          duplicateNamesInCategory.has(service.name)
-                            ? `${service.name} ${SIGNAL_TYPE_LABELS[service.signalType]}`
-                            : undefined
-                        }
-                      />
+                <EuiPanel
+                  color="subdued"
+                  hasBorder={false}
+                  hasShadow={false}
+                  paddingSize="m"
+                  borderRadius="none"
+                >
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="spaceBetween"
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h3>{activeCategory}</h3>
+                      </EuiTitle>
                     </EuiFlexItem>
-                  ))}
-                </EuiFlexGrid>
+                    <EuiFlexItem grow={false}>
+                      {allInCategorySelected ? (
+                        <EuiButtonEmpty
+                          size="s"
+                          onClick={handleDeselectAllInCategory}
+                          data-test-subj="servicesStep-deselectAllButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.ingestHub.servicesStep.deselectAll"
+                            defaultMessage="Deselect all"
+                          />
+                        </EuiButtonEmpty>
+                      ) : (
+                        <EuiButtonEmpty
+                          size="s"
+                          onClick={handleSelectAllInCategory}
+                          data-test-subj="servicesStep-selectAllButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.ingestHub.servicesStep.selectAll"
+                            defaultMessage="Select all"
+                          />
+                        </EuiButtonEmpty>
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+                <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
+                  <EuiFlexGrid columns={2} gutterSize="m">
+                    {servicesInCategory.map((service) => (
+                      <EuiFlexItem key={service.id}>
+                        <ServiceRow
+                          service={service}
+                          isSelected={selectedSet.has(service.id)}
+                          onToggle={handleToggle}
+                          displayName={
+                            duplicateNamesInCategory.has(service.name)
+                              ? `${service.name} ${SIGNAL_TYPE_LABELS[service.signalType]}`
+                              : undefined
+                          }
+                        />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGrid>
+                </EuiPanel>
               </>
             ) : null}
           </EuiPanel>
@@ -230,15 +243,28 @@ export function ServicesStep({ onNext }: ServicesStepProps) {
 
       <EuiSpacer size="l" />
 
-      <EuiFlexGroup justifyContent="flexEnd">
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          {onBack && (
+            <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.backButton"
+                defaultMessage="Back"
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
             onClick={handleNext}
             isDisabled={!isReady}
-            data-test-subj="servicesStep-nextButton"
+            data-test-subj="servicesStep-continueButton"
           >
-            <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.continueButton"
+              defaultMessage="Continue"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

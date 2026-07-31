@@ -501,13 +501,16 @@ const ESQLEditorInternal = function ESQLEditor({
   const { editorActions, onClickQueryHistory, onToggleVisor } = useEsqlEditorActions({
     code,
     isHistoryOpen,
+    isLanguageComponentOpen,
     isCurrentQueryStarred,
+    editorIsInline: Boolean(editorIsInline),
     onUpdateAndSubmitQuery,
     onVisorClosed: () => editorRef.current?.focus(),
     starredQueriesService,
     trimmedQuery,
     isVisorOpenRef,
     setIsHistoryOpen,
+    setIsLanguageComponentOpen,
     setIsCurrentQueryStarred,
     setIsVisorOpen,
     trackQueryHistoryOpened: (isOpen) => telemetryService.trackQueryHistoryOpened(isOpen),
@@ -518,6 +521,20 @@ const ESQLEditorInternal = function ESQLEditor({
   const stableOnQuerySubmit = useStableCallback(onQuerySubmit);
   const stableOnToggleVisor = useStableCallback(onToggleVisor);
   const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
+
+  const expandToFitContent = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+    const lineCount = editor.getModel()?.getLineCount() || 1;
+    const contentHeight = editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical
+    setEditorHeight((currentHeight) => {
+      if (contentHeight > currentHeight) {
+        return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
+      }
+      return currentHeight;
+    });
+  }, [setEditorHeight]);
 
   const esqlCallbacks = useEsqlCallbacks({
     core,
@@ -581,6 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isEnabled: isNlToEsqlEnabled,
     clearGhostHintRef,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -642,6 +660,7 @@ const ESQLEditorInternal = function ESQLEditor({
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
@@ -751,7 +770,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   isNlToEsqlEnabled
                     ? i18n.translate('esqlEditor.placeholder', {
                         defaultMessage:
-                          "Start typing ES|QL, or write a // comment and press {commandKey}+J to describe what you're looking for",
+                          "Start typing ES|QL, or describe what you're looking for in a // comment, then press {commandKey}+J to generate the query",
                         values: { commandKey: isMac ? '⌘' : 'Ctrl' },
                       })
                     : i18n.translate('esqlEditor.placeholder.basic', {
@@ -831,7 +850,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   // Add Tab keybinding rules for inline suggestions
                   addTabKeybindingRules();
 
-                  editor.onMouseDown((e) => {
+                  const mouseDownDisposable = editor.onMouseDown((e) => {
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
                     }
@@ -843,7 +862,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     }
                   });
 
-                  editor.onDidFocusEditorText(() => {
+                  const focusDisposable = editor.onDidFocusEditorText(() => {
                     // Skip triggering suggestions on initial focus to avoid interfering
                     // with editor initialization and automated tests
                     // Also skip when date picker is open to prevent overlap
@@ -854,7 +873,10 @@ const ESQLEditorInternal = function ESQLEditor({
                     isFirstFocusRef.current = false;
                   });
 
-                  trackSuggestionPopupState(editor, isSuggestionPopupOpenRef);
+                  const suggestionPopupDisposable = trackSuggestionPopupState(
+                    editor,
+                    isSuggestionPopupOpenRef
+                  );
 
                   // on CMD/CTRL + / comment out the entire line
                   editor.addCommand(
@@ -865,21 +887,14 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   setMeasuredEditorWidth(editor.getLayoutInfo().width);
                   if (expandToFitQueryOnMount) {
-                    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-                    const lineCount = editor.getModel()?.getLineCount() || 1;
-                    const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
-                    const height = editor.getTopForLineNumber(lineCount + 1) + padding;
-                    if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(height);
-                    } else if (height >= EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(EDITOR_MAX_HEIGHT);
-                    }
+                    expandToFitContent();
                   }
-                  editor.onDidLayoutChange((layoutInfoEvent) => {
+
+                  const layoutChangeDisposable = editor.onDidLayoutChange((layoutInfoEvent) => {
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });
 
-                  editor.onDidChangeModelContent(async () => {
+                  const modelContentDisposable = editor.onDidChangeModelContent(async () => {
                     trackInputLatencyOnKeystroke(editor.getValue() ?? '');
                     await addLookupIndicesDecorator();
                     if (enableResourceBrowser) {
@@ -887,6 +902,15 @@ const ESQLEditorInternal = function ESQLEditor({
                     }
                     maybeTriggerSuggestions();
                   });
+
+                  const listenerDisposables = [
+                    mouseDownDisposable,
+                    focusDisposable,
+                    layoutChangeDisposable,
+                    modelContentDisposable,
+                    suggestionPopupDisposable,
+                  ];
+                  editorCommandDisposables.current.get(currentEditor)?.push(...listenerDisposables);
 
                   // Auto-focus the editor and move the cursor to the end.
                   if (!disableAutoFocus) {

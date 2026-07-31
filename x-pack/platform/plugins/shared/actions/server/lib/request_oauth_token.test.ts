@@ -260,6 +260,34 @@ describe('requestOAuthToken', () => {
     });
   });
 
+  test('accepts a 201 response as success, matching providers like CrowdStrike', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    axiosInstanceMock.mockReturnValueOnce({
+      status: 201,
+      data: {
+        token_type: 'bearer',
+        access_token: 'crowdstrike-token-123',
+        expires_in: 1799,
+      },
+    });
+
+    const result = await requestOAuthToken<TestOAuthRequestParams>(
+      'https://test',
+      'client_credentials',
+      configurationUtilities,
+      mockLogger,
+      { client_id: 'id', client_secret: 'secret' }
+    );
+
+    expect(result).toEqual({
+      tokenType: 'bearer',
+      accessToken: 'crowdstrike-token-123',
+      expiresIn: 1799,
+      refreshToken: undefined,
+      refreshTokenExpiresIn: undefined,
+    });
+  });
+
   test('throws when the token endpoint returns a non-JSON (string) response body', async () => {
     const configurationUtilities = actionsConfigMock.create();
     axiosInstanceMock.mockReturnValueOnce({

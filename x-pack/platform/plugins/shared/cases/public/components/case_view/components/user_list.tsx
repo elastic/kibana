@@ -12,11 +12,12 @@ import { sortBy } from 'lodash';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
-  EuiTitle,
-  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -58,15 +59,22 @@ const renderUsers = (
         <HoverableUserWithAvatar userInfo={userInfo} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          data-test-subj="user-list-email-button"
-          onClick={handleSendEmail.bind(null, userInfo.user?.email)}
-          iconType="mail"
-          aria-label={i18n.SEND_EMAIL_ARIA(
+        <EuiToolTip
+          content={i18n.SEND_EMAIL_ARIA(
             userInfo.user?.full_name ? userInfo.user?.full_name : userInfo.user?.username ?? ''
           )}
-          isDisabled={isEmpty(userInfo.user?.email)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="user-list-email-button"
+            onClick={handleSendEmail.bind(null, userInfo.user?.email)}
+            iconType="mail"
+            aria-label={i18n.SEND_EMAIL_ARIA(
+              userInfo.user?.full_name ? userInfo.user?.full_name : userInfo.user?.username ?? ''
+            )}
+            isDisabled={isEmpty(userInfo.user?.email)}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   ));

@@ -6,6 +6,7 @@
  */
 
 import type { WorkflowsSearchParams } from '@kbn/workflows';
+import type { GetRuleExecutionsUiParams } from './use_fetch_rule_executions';
 
 export const ruleKeys = {
   all: ['rule'] as const,
@@ -34,8 +35,8 @@ export const workflowKeys = {
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: (matcher?: string) =>
-    [...matcherSuggestionKeys.all, 'dataFields', { matcher: matcher || undefined }] as const,
+  ruleEventFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'ruleEventFields', { matcher: matcher || undefined }] as const,
 };
 
 export const actionPolicyKeys = {
@@ -53,13 +54,35 @@ export const actionPolicyKeys = {
   }) => [...actionPolicyKeys.lists(), filters] as const,
   allTags: () => [...actionPolicyKeys.all, 'tags'] as const,
   tags: (search?: string) => [...actionPolicyKeys.allTags(), { search }] as const,
+  linkedForRule: (ruleId: string) =>
+    [...actionPolicyKeys.lists(), 'linkedForRule', ruleId] as const,
 };
 
 export const executionHistoryKeys = {
   all: ['executionHistory'] as const,
-  list: (filters: { page: number; perPage: number }) =>
-    [...executionHistoryKeys.all, 'list', filters] as const,
-  countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
+  list: (filters: {
+    page: number;
+    perPage: number;
+    search?: string;
+    ruleIds?: string[];
+    outcome?: 'all' | 'dispatched' | 'throttled';
+    episodeIds?: string[];
+    startDate?: string;
+  }) => [...executionHistoryKeys.all, 'list', filters] as const,
+  countSince: (
+    since: string,
+    filters: {
+      search?: string;
+      ruleIds?: string[];
+      outcome?: 'all' | 'dispatched' | 'throttled';
+    } = {}
+  ) => [...executionHistoryKeys.all, 'countSince', since, filters] as const,
+};
+
+export const ruleExecutionKeys = {
+  all: ['ruleExecution'] as const,
+  list: (filters: GetRuleExecutionsUiParams) =>
+    [...ruleExecutionKeys.all, 'list', filters] as const,
 };
 
 export const userProfileKeys = {

@@ -16,8 +16,6 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   ErrorsByTraceId,
-  FocusedTraceWaterfallProps,
-  FullTraceWaterfallProps,
   SpanLinks,
   TraceRootSpan,
   UnifiedSpanDocument,
@@ -42,12 +40,12 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export interface ObservabilityStreamsFeatureRenderByStreamNameDeps {
   streamName: string;
-  renderCpsWarning?: boolean;
+  cpsHasLinkedProjects?: boolean;
 }
 
 export interface ObservabilityStreamsFeature {
@@ -160,6 +158,25 @@ export interface SecuritySolutionIOCFlyoutFooterFeature {
   renderFooter: (props: DocViewRenderProps) => JSX.Element;
 }
 
+interface SecuritySolutionAttackFlyoutRenderProps extends DocViewRenderProps {
+  onAttackUpdated: () => void;
+}
+
+export interface SecuritySolutionAttackFlyoutOverviewTabFeature {
+  id: 'security-solution-attack-flyout-overview-tab';
+  render: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAttackFlyoutHeaderFeature {
+  id: 'security-solution-attack-flyout-header';
+  renderHeader: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
+export interface SecuritySolutionAttackFlyoutFooterFeature {
+  id: 'security-solution-attack-flyout-footer';
+  renderFooter: (props: SecuritySolutionAttackFlyoutRenderProps) => JSX.Element;
+}
+
 export type SecuritySolutionFeature =
   | SecuritySolutionCellRendererFeature
   | SecuritySolutionAlertFlyoutOverviewTabFeature
@@ -167,22 +184,14 @@ export type SecuritySolutionFeature =
   | SecuritySolutionAlertFlyoutFooterFeature
   | SecuritySolutionIOCFlyoutOverviewTabFeature
   | SecuritySolutionIOCFlyoutHeaderFeature
-  | SecuritySolutionIOCFlyoutFooterFeature;
+  | SecuritySolutionIOCFlyoutFooterFeature
+  | SecuritySolutionAttackFlyoutOverviewTabFeature
+  | SecuritySolutionAttackFlyoutHeaderFeature
+  | SecuritySolutionAttackFlyoutFooterFeature;
 
 /** ****************************************************************************************/
 
 /** **************** Observability Traces ****************/
-
-interface ObservabilityFocusedTraceWaterfallFeature {
-  id: 'observability-focused-trace-waterfall';
-  render: (props: FocusedTraceWaterfallProps) => JSX.Element;
-}
-
-interface ObservabilityFullTraceWaterfallFeature {
-  id: 'observability-full-trace-waterfall';
-  render: (props: FullTraceWaterfallProps) => JSX.Element;
-}
-
 export interface ObservabilityTracesSpanLinksFeature {
   id: 'observability-traces-fetch-span-links';
   fetchSpanLinks: (
@@ -281,9 +290,7 @@ export type ObservabilityTracesFeature =
   | ObservabilityTracesFetchRootSpanByTraceIdFeature
   | ObservabilityTracesFetchSpanFeature
   | ObservabilityTracesFetchLatencyOverallTransactionDistributionFeature
-  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature
-  | ObservabilityFocusedTraceWaterfallFeature
-  | ObservabilityFullTraceWaterfallFeature;
+  | ObservabilityTracesFetchLatencyOverallSpanDistributionFeature;
 
 /** ****************************************************************************************/
 

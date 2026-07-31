@@ -66,7 +66,6 @@ import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
   OutputUnauthorizedError,
-  FleetError,
 } from '../errors';
 
 import type { OutputType } from '../types';
@@ -494,17 +493,21 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list();
+    // Query the default outputs directly to avoid decrypting every output in the cluster.
+    const [defaultDataOutputs, defaultMonitoringOutputs] = await Promise.all([
+      this._getDefaultDataOutputsSO(),
+      this._getDefaultMonitoringOutputsSO(),
+    ]);
 
-    const defaultOutput = outputs.items.find((o) => o.is_default);
-    const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
+    const defaultOutput = defaultDataOutputs.saved_objects[0];
+    const hasDefaultMonitoringOutput = defaultMonitoringOutputs.saved_objects.length > 0;
 
     if (!defaultOutput) {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: this.getDefaultESHosts(),
         ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
-        is_default_monitoring: !defaultMonitoringOutput,
+        is_default_monitoring: !hasDefaultMonitoringOutput,
       } as NewOutput;
 
       return await this.create(soClient, esClient, newDefaultOutput, {
@@ -513,7 +516,7 @@ class OutputService {
       });
     }
 
-    return defaultOutput;
+    return outputSavedObjectToOutput(defaultOutput);
   }
 
   public getDefaultESHosts(): string[] {
@@ -646,7 +649,7 @@ class OutputService {
       data.shipper = null;
     }
 
-    if (!data.preset && data.type === outputType.Elasticsearch) {
+    if (!data.preset && outputTypeSupportPresets(data.type)) {
       data.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
@@ -874,10 +877,6 @@ class OutputService {
       name: outputSO?.attributes?.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
-
-    if (outputSO.error) {
-      throw new FleetError(outputSO.error.message);
-    }
 
     return outputSavedObjectToOutput(outputSO);
   }
@@ -1172,7 +1171,7 @@ class OutputService {
       }
     }
 
-    if (!data.preset && data.type === outputType.Elasticsearch) {
+    if (!data.preset && data.type && outputTypeSupportPresets(data.type)) {
       updateData.preset = getDefaultPresetForEsOutput(data.config_yaml ?? '', parse);
     }
 
@@ -1228,15 +1227,11 @@ class OutputService {
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
-    const outputSO = await this.soClient.update<Nullable<OutputSOAttributes>>(
+    await this.soClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData
     );
-
-    if (outputSO.error) {
-      throw new FleetError(outputSO.error.message);
-    }
 
     if (secretsToDelete.length) {
       try {
@@ -1252,10 +1247,32 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
-    const outputs = await this.list();
+    // Only ES/remote-ES outputs missing a preset need backfilling. Query for just those to avoid
+    // decrypting every output, and bail out early when there are none.
+    const outputsWithoutPreset = await this.soClient.find<OutputSOAttributes>({
+      type: OUTPUT_SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+      filter:
+        `(${OUTPUT_SAVED_OBJECT_TYPE}.attributes.type:${outputType.Elasticsearch} or ` +
+        `${OUTPUT_SAVED_OBJECT_TYPE}.attributes.type:${outputType.RemoteElasticsearch}) and ` +
+        `not ${OUTPUT_SAVED_OBJECT_TYPE}.attributes.preset:*`,
+    });
+
+    if (!outputsWithoutPreset.saved_objects.length) {
+      return;
+    }
+
+    for (const output of outputsWithoutPreset.saved_objects) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: output.id,
+        name: output.attributes.name,
+        savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
+      });
+    }
 
     await pMap(
-      outputs.items.filter((output) => outputTypeSupportPresets(output.type) && !output.preset),
+      outputsWithoutPreset.saved_objects.map<Output>(outputSavedObjectToOutput),
       async (output) => {
         const preset = getDefaultPresetForEsOutput(output.config_yaml ?? '', parse);
 
@@ -1321,15 +1338,6 @@ class OutputService {
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id)
     );
-
-    if (outputSO.error) {
-      appContextService
-        .getLogger()
-        .debug(
-          `Error getting output ${id} SO, using updated_at:undefined, cause: ${outputSO.error.message}`
-        );
-      return undefined;
-    }
 
     return outputSO.updated_at;
   }

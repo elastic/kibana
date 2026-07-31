@@ -16,7 +16,7 @@ const mockRule = {
   enabled: true,
   kind: 'signal',
   metadata: { name: 'My rule' },
-  evaluation: { query: { base: 'FROM logs-* | WHERE foo=1' } },
+  query: { format: 'standalone', breach: { query: 'FROM logs-* | WHERE foo=1' } },
 } as unknown as RuleResponse;
 
 const alertRule = { ...mockRule, kind: 'alert' } as unknown as RuleResponse;
@@ -55,5 +55,22 @@ describe('AlertEpisodeRuleOverviewPanel', () => {
 
     const badge = screen.getByTestId('alertingV2EpisodeDetailsRuleKindBadge');
     expect(badge).toHaveTextContent('Alert');
+  });
+
+  it('renders composed query with breach segment (alert condition)', () => {
+    const composedRule = {
+      ...mockRule,
+      query: {
+        format: 'composed',
+        base: 'FROM logs-*',
+        breach: { segment: '| WHERE foo > 10' },
+      },
+    } as RuleResponse;
+
+    renderPanel(composedRule);
+
+    expect(screen.getByTestId('alertingV2EpisodeDetailsRuleQueryCodeBlock')).toHaveTextContent(
+      'FROM logs-* | WHERE foo > 10'
+    );
   });
 });

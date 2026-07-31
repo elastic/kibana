@@ -24,6 +24,12 @@ const createActionsConfigMock = () => {
     getSSLSettings: jest.fn().mockReturnValue({
       verificationMode: 'full',
     }),
+    getEARSSSLSettings: jest.fn().mockReturnValue({
+      verificationMode: 'full',
+    }),
+    getRelaySSLSettings: jest.fn().mockReturnValue({
+      verificationMode: 'full',
+    }),
     getProxySettings: jest.fn().mockReturnValue(undefined),
     getResponseSettings: jest.fn().mockReturnValue({
       maxContentLength: 1000000,

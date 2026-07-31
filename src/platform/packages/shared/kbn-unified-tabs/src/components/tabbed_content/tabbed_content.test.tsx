@@ -31,6 +31,8 @@ describe('TabbedContent', () => {
     onEBTEvent,
     onTabLimitReached,
     disableRenderContent = false,
+    wrapTabsBar,
+    hideTabsBar,
   }: {
     initialItems: TabbedContentProps['items'];
     initialSelectedItemId?: TabbedContentProps['selectedItemId'];
@@ -41,6 +43,8 @@ describe('TabbedContent', () => {
     onEBTEvent: TabbedContentProps['onEBTEvent'];
     onTabLimitReached?: TabbedContentProps['onTabLimitReached'];
     disableRenderContent?: boolean;
+    wrapTabsBar?: TabbedContentProps['wrapTabsBar'];
+    hideTabsBar?: TabbedContentProps['hideTabsBar'];
   }) => {
     const [{ managedItems, managedSelectedItemId }, setState] = useState<{
       managedItems: TabbedContentProps['items'];
@@ -73,6 +77,8 @@ describe('TabbedContent', () => {
             ? (item) => <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
             : undefined
         }
+        wrapTabsBar={wrapTabsBar}
+        hideTabsBar={hideTabsBar}
       />
     );
   };
@@ -590,5 +596,55 @@ describe('TabbedContent', () => {
     expect(screen.queryByTestId('unifiedTabs_tabsBar')).toBeInTheDocument();
     // When renderContent is not provided, the tab content area should NOT be rendered
     expect(screen.queryByTestId('unifiedTabs_selectedTabContent')).not.toBeInTheDocument();
+  });
+
+  describe('wrapTabsBar', () => {
+    const initialItems = [
+      { id: 'tab1', label: 'Tab 1' },
+      { id: 'tab2', label: 'Tab 2' },
+    ];
+
+    it('wraps the tabs bar when wrapTabsBar is provided', () => {
+      const wrapTabsBar = jest.fn((tabsBar) => (
+        <div data-test-subj="custom-tabs-header">{tabsBar}</div>
+      ));
+
+      render(
+        <TabsWrapper
+          initialItems={initialItems}
+          initialSelectedItemId={initialItems[0].id}
+          onChanged={jest.fn()}
+          onEBTEvent={jest.fn()}
+          disableRenderContent
+          wrapTabsBar={wrapTabsBar}
+        />
+      );
+
+      expect(wrapTabsBar).toHaveBeenCalledTimes(1);
+
+      const wrapper = screen.getByTestId('custom-tabs-header');
+      expect(wrapper).toContainElement(screen.getByTestId('unifiedTabs_tabsBar'));
+      expect(screen.getByTestId('unifiedTabs_selectTabBtn_tab1')).toBeInTheDocument();
+      expect(screen.getByTestId('unifiedTabs_selectTabBtn_tab2')).toBeInTheDocument();
+    });
+
+    it('passes null to wrapTabsBar when hideTabsBar is true', () => {
+      const wrapTabsBar = jest.fn(() => <div data-test-subj="custom-tabs-header" />);
+
+      render(
+        <TabsWrapper
+          initialItems={initialItems}
+          initialSelectedItemId={initialItems[0].id}
+          onChanged={jest.fn()}
+          onEBTEvent={jest.fn()}
+          disableRenderContent
+          hideTabsBar
+          wrapTabsBar={wrapTabsBar}
+        />
+      );
+
+      expect(wrapTabsBar).toHaveBeenCalledWith(null);
+      expect(screen.queryByTestId('unifiedTabs_tabsBar')).not.toBeInTheDocument();
+    });
   });
 });

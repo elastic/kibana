@@ -70,6 +70,7 @@ describe('runResolutionScoringStep', () => {
       scoresWritten: 0,
       pagesProcessed: 0,
       skippedReason: undefined,
+      scores: {},
     });
   });
 
@@ -96,6 +97,7 @@ describe('runResolutionScoringStep', () => {
       scoresWritten: 0,
       pagesProcessed: 0,
       skippedReason: 'lookup_empty',
+      scores: {},
     });
   });
 });

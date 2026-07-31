@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { useShouldShowAnomalyUi } from '../../../../hooks/use_should_show_anomaly_ui';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmIndexSettingsContextProvider } from '../../../../context/apm_index_settings/apm_index_settings_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
@@ -31,7 +32,6 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'transactions'
     | 'dependencies'
     | 'errors-and-crashes'
-    | 'service-map'
     | 'logs'
     | 'alerts'
     | 'dashboards';
@@ -74,6 +74,8 @@ function TemplateWithContext({
   } = useApmParams('/mobile-services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const shouldShowAnomalyUi = useShouldShowAnomalyUi();
 
   const router = useApmRouter();
 
@@ -120,7 +122,13 @@ function TemplateWithContext({
         searchBar={
           <>
             {BottomHeaderContent && <BottomHeaderContent />}
-            {customSearchBar ?? <MobileSearchBar {...searchBarOptions} />}
+            {customSearchBar ?? (
+              <MobileSearchBar
+                {...searchBarOptions}
+                showEnvironmentFilter
+                showAnomalyThresholdSelector={shouldShowAnomalyUi}
+              />
+            )}
           </>
         }
         pageHeader={{
@@ -213,16 +221,6 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       }),
       label: i18n.translate('xpack.apm.serviceDetails.mobileErrorsTabLabel', {
         defaultMessage: 'Errors & Crashes',
-      }),
-    },
-    {
-      key: 'service-map',
-      href: router.link('/mobile-services/{serviceName}/service-map', {
-        path: { serviceName },
-        query,
-      }),
-      label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
-        defaultMessage: 'Service map',
       }),
     },
     {

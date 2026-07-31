@@ -9,13 +9,14 @@
 
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiHorizontalRule,
   EuiPopover,
   EuiPopoverTitle,
-  EuiContextMenuItem,
-  toSentenceCase,
-  EuiHorizontalRule,
-  EuiButtonIcon,
   EuiSelectable,
+  EuiToolTip,
+  toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
@@ -58,22 +59,26 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   isDisabled,
   deps: { docLinks },
 }: QueryLanguageSwitcherProps) {
-  const kueryQuerySyntaxDocs = docLinks.links.query.kueryQuerySyntax;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
-    <EuiButtonIcon
-      size="s"
-      iconType="filter"
-      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-      className="kqlQueryBar__languageSwitcherButton"
-      data-test-subj={'switchQueryLanguageButton'}
-      aria-label={strings.getSwitchLanguageButtonText()}
-      disabled={isDisabled}
-    />
+    <EuiToolTip content={strings.getSwitchLanguageButtonText()} disableScreenReaderOutput>
+      <EuiButtonIcon
+        size="s"
+        iconType="filter"
+        onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        className="kqlQueryBar__languageSwitcherButton"
+        data-test-subj={'switchQueryLanguageButton'}
+        aria-label={strings.getSwitchLanguageButtonText()}
+        disabled={isDisabled}
+      />
+    </EuiToolTip>
   );
 
   const isKqlSelected = language === 'kuery';
+  const querySyntaxDocs = isKqlSelected
+    ? docLinks.links.query.kueryQuerySyntax
+    : docLinks.links.query.luceneQuerySyntax;
 
   const languageMenuItem = (
     <>
@@ -109,7 +114,7 @@ export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
       <EuiContextMenuItem
         key={'documentation'}
         icon={'documentation'}
-        href={kueryQuerySyntaxDocs}
+        href={querySyntaxDocs}
         target="_blank"
       >
         {strings.documentationLabel()}

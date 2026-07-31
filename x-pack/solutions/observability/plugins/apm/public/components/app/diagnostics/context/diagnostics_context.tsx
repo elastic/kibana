@@ -45,7 +45,8 @@ export function DiagnosticsContextProvider({ children }: { children: React.React
         },
       });
     },
-    [start, end, kuery]
+    [start, end, kuery],
+    { useLegacyCallApmApi: true }
   );
 
   const [importedDiagnosticsBundle, setImportedDiagnosticsBundle] = useState<

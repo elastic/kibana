@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/275686
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Alerting and reporting
+title: Add cases analytics activity index for user actions
+description: "Adds the `.cases-activity` index for cases analytics, storing one document per case user action so activity can be joined back to cases in ES|QL."

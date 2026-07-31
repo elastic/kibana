@@ -57,6 +57,7 @@ import {
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
 import { loadMappingForTransform } from './mappings';
+import { removeRemoteClusterSourceIndicesOnServerless } from './ccs_transform_source';
 import { appContextService } from '../../../app_context';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
@@ -752,6 +753,7 @@ export const isTransform = (path: string) => {
 interface TransformEsAssetReference extends EsAssetReference {
   version?: string;
 }
+
 /**
  * Create transform and optionally start transform
  * Note that we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
@@ -772,6 +774,8 @@ async function handleTransformInstall({
   startTransform?: boolean;
   secondaryAuth?: SecondaryAuthorizationHeader;
 }): Promise<TransformEsAssetReference> {
+  removeRemoteClusterSourceIndicesOnServerless(transform, logger);
+
   let isUnauthorizedAPIKey = false;
   try {
     await retryTransientEsErrors(

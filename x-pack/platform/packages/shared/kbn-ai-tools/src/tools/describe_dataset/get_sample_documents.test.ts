@@ -6,6 +6,7 @@
  */
 
 import { esql } from '@elastic/esql';
+import objectHash from 'object-hash';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 
@@ -42,6 +43,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: ['logs-a', 'logs-b'],
       start: 100,
       end: 200,
@@ -49,25 +51,28 @@ describe('getSampleDocumentsEsql', () => {
     });
 
     expect(query).toHaveBeenCalledTimes(1);
-    expect(query).toHaveBeenCalledWith({
-      query: 'FROM logs-a, logs-b METADATA _id, _source | LIMIT 2',
-      filter: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: 100,
-                  lte: 200,
-                  format: 'epoch_millis',
+    expect(query).toHaveBeenCalledWith(
+      {
+        query: 'FROM logs-a, logs-b METADATA _id, _source | LIMIT 2',
+        filter: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: 100,
+                    lte: 200,
+                    format: 'epoch_millis',
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
+        drop_null_columns: true,
       },
-      drop_null_columns: true,
-    });
+      { signal: expect.any(AbortSignal) }
+    );
     expect(result).toEqual({
       hits: [
         { _index: '', _id: 'doc-1', _source: { message: 'first' } },
@@ -95,6 +100,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -110,12 +116,57 @@ describe('getSampleDocumentsEsql', () => {
     });
   });
 
+  it('reconstructs documents from row columns when a view drops _id and _source metadata', async () => {
+    const { esClient, query } = createEsClient();
+    // ES|QL views silently drop outer `METADATA _id, _source`, so the response
+    // only contains the view's projected columns.
+    query.mockResolvedValueOnce(
+      createResponse({
+        columns: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'message', type: 'text' },
+          { name: 'service.name', type: 'keyword' },
+        ],
+        values: [
+          ['2026-04-28T08:00:00.000Z', 'first', 'checkout'],
+          ['2026-04-28T08:01:00.000Z', 'second', null],
+        ],
+      })
+    );
+
+    const result = await getSampleDocumentsEsql({
+      esClient,
+      requestTimeout: 30_000,
+      index: '$.query',
+      start: 100,
+      end: 200,
+      size: 2,
+    });
+
+    // Views expose no `_id`, so a stable content hash of the reconstructed
+    // source is synthesized (enables cross-bucket sample dedup for query streams).
+    const firstSource = {
+      '@timestamp': '2026-04-28T08:00:00.000Z',
+      message: 'first',
+      'service.name': 'checkout',
+    };
+    const secondSource = { '@timestamp': '2026-04-28T08:01:00.000Z', message: 'second' };
+    expect(result).toEqual({
+      hits: [
+        { _index: '', _id: objectHash(firstSource), _source: firstSource },
+        { _index: '', _id: objectHash(secondSource), _source: secondSource },
+      ],
+      total: 2,
+    });
+  });
+
   it('combines KQL and ES|QL where conditions and enables unmapped field loading', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(createResponse({ values: [] }));
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -147,6 +198,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -170,6 +222,7 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -194,6 +247,7 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -215,6 +269,7 @@ describe('getSampleDocumentsEsql', () => {
 
     await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -230,6 +285,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -245,6 +301,7 @@ describe('getSampleDocumentsEsql', () => {
 
     const result = await getSampleDocumentsEsql({
       esClient,
+      requestTimeout: 30_000,
       index: 'logs-*',
       start: 100,
       end: 200,
@@ -255,15 +312,16 @@ describe('getSampleDocumentsEsql', () => {
     expect(result).toEqual({ hits: [], total: 0 });
   });
 
-  it('returns an empty result when metadata columns are missing', async () => {
+  it('returns an empty result when a view row has no non-null projected columns', async () => {
     const { esClient, query } = createEsClient();
     query.mockResolvedValueOnce(
-      createResponse({ columns: [{ name: 'message', type: 'keyword' }], values: [['hello']] })
+      createResponse({ columns: [{ name: 'message', type: 'keyword' }], values: [[null]] })
     );
 
     const result = await getSampleDocumentsEsql({
       esClient,
-      index: 'logs-*',
+      requestTimeout: 30_000,
+      index: '$.query',
       start: 100,
       end: 200,
     });

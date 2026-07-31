@@ -16,7 +16,10 @@ import {
 } from '../screens/fleet';
 import { login } from '../tasks/login';
 
-describe('Edit settings', () => {
+// The Fleet AppHeader (title + tabs) is sticky at the top of the scroll container, so the default
+// 'top' scroll behavior can align action targets underneath it and report them as "covered". Scroll
+// targets to the center of the viewport instead so they stay clear of the sticky header.
+describe('Edit settings', { scrollBehavior: 'center' }, () => {
   beforeEach(() => {
     login();
 

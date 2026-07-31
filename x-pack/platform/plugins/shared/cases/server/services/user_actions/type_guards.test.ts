@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isAssigneesArray, isStringArray } from './type_guards';
+import { isAssigneesArray, isCaseTemplate, isStringArray } from './type_guards';
 
 describe('type_guards', () => {
   describe('isStringArray', () => {
@@ -57,6 +57,28 @@ describe('type_guards', () => {
 
     it('returns false when the value is an array of strings and objects', () => {
       expect(isAssigneesArray(['a', {}])).toBeFalsy();
+    });
+  });
+
+  describe('isCaseTemplate', () => {
+    it('returns true for a valid template reference', () => {
+      expect(isCaseTemplate({ id: 'tmpl-1', version: 3 })).toBeTruthy();
+    });
+
+    it('returns false when version is missing', () => {
+      expect(isCaseTemplate({ id: 'tmpl-1' })).toBeFalsy();
+    });
+
+    it('returns false when version is not a number', () => {
+      expect(isCaseTemplate({ id: 'tmpl-1', version: '3' })).toBeFalsy();
+    });
+
+    it('returns false for null', () => {
+      expect(isCaseTemplate(null)).toBeFalsy();
+    });
+
+    it('returns false for a non-object value', () => {
+      expect(isCaseTemplate('tmpl-1')).toBeFalsy();
     });
   });
 });

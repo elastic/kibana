@@ -47,6 +47,10 @@ describe('shouldFailOnWorkflowRunRetry', () => {
     expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.WAITING_FOR_INPUT))).toBe(false);
   });
 
+  it('returns false for queued concurrency backlog', () => {
+    expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.QUEUED))).toBe(false);
+  });
+
   it('returns true for running', () => {
     expect(shouldFailOnWorkflowRunRetry(base(ExecutionStatus.RUNNING))).toBe(true);
   });
@@ -65,8 +69,8 @@ describe('resolveInterruptedWorkflowRunTask', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
+    repository = new WorkflowExecutionRepository(esClient, logger);
+    stepExecutionRepository = new StepExecutionRepository(esClient, logger);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
   });
 
@@ -228,8 +232,8 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
+    repository = new WorkflowExecutionRepository(esClient, logger);
+    stepExecutionRepository = new StepExecutionRepository(esClient, logger);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
   });
 
@@ -386,8 +390,8 @@ describe('resolveExhaustedWorkflowRunTask', () => {
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowExecutionRepository(esClient);
-    stepExecutionRepository = new StepExecutionRepository(esClient);
+    repository = new WorkflowExecutionRepository(esClient, logger);
+    stepExecutionRepository = new StepExecutionRepository(esClient, logger);
     jest.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     jest.spyOn(logger, 'error').mockImplementation(() => {});
   });

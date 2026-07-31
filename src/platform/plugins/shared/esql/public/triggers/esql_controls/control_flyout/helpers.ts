@@ -11,6 +11,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
 import { TIME_SPAN_UNITS } from '@elastic/esql';
 import { css } from '@emotion/react';
+import { getVariableNamePrefix } from '@kbn/esql-utils';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return TIME_SPAN_UNITS.some((unit) => unit === timeIntervalUnit.toLowerCase());
@@ -168,19 +169,6 @@ export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariable
   }
 
   return variableType;
-};
-
-export const getVariableNamePrefix = (type: ESQLVariableType) => {
-  switch (type) {
-    case ESQLVariableType.FIELDS:
-    case ESQLVariableType.FUNCTIONS:
-      return VariableNamePrefix.IDENTIFIER;
-    case ESQLVariableType.VALUES:
-    case ESQLVariableType.TIME_LITERAL:
-    case ESQLVariableType.MULTI_VALUES:
-    default:
-      return VariableNamePrefix.VALUE;
-  }
 };
 
 export const checkVariableExistence = (

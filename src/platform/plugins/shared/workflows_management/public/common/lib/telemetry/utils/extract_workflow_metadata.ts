@@ -8,6 +8,8 @@
  */
 
 import {
+  collectAllSteps,
+  getStepByNameFromNestedSteps,
   isTriggerType,
   isWellKnownWorkflowTriggerSource,
   WORKFLOW_EVENTS_VALUES_SET,
@@ -29,8 +31,6 @@ function isConnectorStep(step: unknown): boolean {
     step['connector-id'] !== undefined
   );
 }
-
-const ON_FAILURE_KEYS = ['on-failure', 'iteration-on-failure'] as const;
 
 /**
  * Reads `on.workflowEvents` from triggers. Only known enum strings count (matches runtime scheduling).
@@ -68,20 +68,6 @@ function extractWorkflowEventsTelemetry(triggers: unknown[]): {
     hasTriggerWorkflowEventsAllow,
     hasTriggerWorkflowEventsAvoidLoop,
   };
-}
-
-function getFallbackSteps(step: Record<string, unknown>): Array<WorkflowYaml['steps']> {
-  const result: Array<WorkflowYaml['steps']> = [];
-  for (const key of ON_FAILURE_KEYS) {
-    const container = step[key];
-    if (container && typeof container === 'object' && 'fallback' in container) {
-      const { fallback } = container as { fallback: unknown };
-      if (Array.isArray(fallback)) {
-        result.push(fallback as WorkflowYaml['steps']);
-      }
-    }
-  }
-  return result;
 }
 
 /**
@@ -219,41 +205,18 @@ export function extractWorkflowMetadata(
   const stepTypeCounts: Record<string, number> = {};
   const connectorTypes = new Set<string>();
 
-  function countStepTypesRecursive(steps: WorkflowYaml['steps']): void {
-    if (!steps || !Array.isArray(steps)) {
-      return;
-    }
+  for (const step of collectAllSteps(workflow.steps || [])) {
+    if (step && typeof step === 'object' && 'type' in step && typeof step.type === 'string') {
+      const stepType = step.type;
+      stepTypeCounts[stepType] = (stepTypeCounts[stepType] || 0) + 1;
 
-    for (const step of steps) {
-      if (step && typeof step === 'object' && 'type' in step && typeof step.type === 'string') {
-        const stepType = step.type;
-        // Count this step type
-        stepTypeCounts[stepType] = (stepTypeCounts[stepType] || 0) + 1;
-
-        // Track connector types by checking if step has 'connector-id' field
-        // Extract only the connector name (part before the dot), not the full step type
-        if (isConnectorStep(step)) {
-          const connectorName = stepType.split('.')[0];
-          connectorTypes.add(connectorName);
-        }
-
-        // Recursively process nested steps
-        if ('steps' in step && Array.isArray(step.steps)) {
-          countStepTypesRecursive(step.steps);
-        }
-        if ('else' in step && Array.isArray(step.else)) {
-          countStepTypesRecursive(step.else);
-        }
-        for (const fb of getFallbackSteps(step as Record<string, unknown>)) {
-          countStepTypesRecursive(fb);
-        }
+      if (isConnectorStep(step)) {
+        const connectorName = stepType.split('.')[0];
+        connectorTypes.add(connectorName);
       }
     }
   }
 
-  countStepTypesRecursive(workflow.steps || []);
-
-  // Derive stepCount from stepTypeCounts (sum of all counts) to avoid traversing steps twice
   const stepCount = Object.values(stepTypeCounts).reduce((sum, count) => sum + count, 0);
 
   // Extract unique step types as an array for easy aggregation
@@ -360,47 +323,6 @@ export interface StepTelemetryInfo {
 }
 
 /**
- * Recursively searches for a step by stepId in a workflow's steps array
- */
-function findStepRecursive(
-  steps: WorkflowYaml['steps'],
-  stepId: string
-): { stepType: string; connectorType?: string } | null {
-  if (!Array.isArray(steps)) {
-    return null;
-  }
-
-  for (const step of steps) {
-    if (step && typeof step === 'object' && 'name' in step && step.name === stepId) {
-      if ('type' in step && typeof step.type === 'string') {
-        const stepType = step.type;
-        // Check if it's a connector step
-        const connectorType =
-          'connector-id' in step && step['connector-id'] !== undefined ? stepType : undefined;
-        return { stepType, connectorType };
-      }
-      return null;
-    }
-
-    // Recursively search nested steps
-    if ('steps' in step && Array.isArray(step.steps)) {
-      const found = findStepRecursive(step.steps, stepId);
-      if (found) return found;
-    }
-    if ('else' in step && Array.isArray(step.else)) {
-      const found = findStepRecursive(step.else, stepId);
-      if (found) return found;
-    }
-    for (const fb of getFallbackSteps(step as Record<string, unknown>)) {
-      const found = findStepRecursive(fb, stepId);
-      if (found) return found;
-    }
-  }
-
-  return null;
-}
-
-/**
  * Extracts step information from a workflow YAML string for telemetry purposes.
  * This function parses the YAML and finds the step by stepId, extracting its type and connector type.
  *
@@ -439,7 +361,17 @@ export function extractStepInfoFromWorkflowYaml(
 
   // Find the step by stepId
   const steps = workflowDefinition.steps as WorkflowYaml['steps'] | undefined;
-  const stepInfo = steps ? findStepRecursive(steps, stepId) : null;
+  const matchedStep = steps ? getStepByNameFromNestedSteps(steps, stepId) : null;
+  const stepInfo =
+    matchedStep && 'type' in matchedStep && typeof matchedStep.type === 'string'
+      ? {
+          stepType: matchedStep.type,
+          connectorType:
+            'connector-id' in matchedStep && matchedStep['connector-id'] !== undefined
+              ? matchedStep.type
+              : undefined,
+        }
+      : null;
 
   if (!stepInfo) {
     return { stepType: 'unknown', workflowId };

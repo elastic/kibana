@@ -71,17 +71,31 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
       })
     );
 
+    // Wipe via both the fixed backing indices AND their aliases. In CI,
+    // ILM may have rolled the index forward (e.g. -000002), so the alias
+    // points at a different backing index than the hardcoded -000001. Without
+    // this alias-based wipe, stale docs in the alias-target could be picked
+    // up by the deletion task and count toward numDeleted, causing our own
+    // DELETED docs to survive.
     await esClient.deleteByQuery({
-      index: '.internal.alerts-*',
-      query: { ids: { values: ALL_ALERT_IDS } },
+      index: [
+        ...ALERT_INDEX_ALIASES.map(({ index }) => index),
+        ...ALERT_INDEX_ALIASES.map(({ alias }) => alias),
+      ],
+      query: { match_all: {} },
       refresh: true,
       conflicts: 'proceed',
     });
 
+    // Insert via aliases so docs land in whatever backing index the deletion
+    // task will search (the current write target of each alias).
+    const indexToAlias = Object.fromEntries(
+      ALERT_INDEX_ALIASES.map(({ index, alias }) => [index, alias])
+    );
     await esClient.bulk({
       refresh: 'wait_for',
       operations: getTestAlertDocs('default').flatMap(({ _index, _id, _source }) => [
-        { index: { _index, _id } },
+        { index: { _index: indexToAlias[_index] ?? _index, _id } },
         _source,
       ]),
     });
@@ -92,7 +106,7 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
 
   test.afterEach(async ({ esClient }) => {
     await esClient.deleteByQuery({
-      index: '.internal.alerts-*',
+      index: ALERT_INDEX_ALIASES.map(({ alias }) => alias),
       query: { ids: { values: ALL_ALERT_IDS } },
       refresh: true,
       conflicts: 'proceed',
@@ -162,15 +176,33 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
         numDeleted: DELETED_ALERT_IDS.length,
       });
 
-    // Only the newer alerts should remain across stack, observability, and
-    // security.
+    // The deletion task bulk-deletes without refresh and logs num_deleted as soon
+    // as the bulk response returns, so the event-log poll above can succeed before
+    // the alert indices have refreshed. Force a refresh and poll the remaining count
+    // until it settles, otherwise we race the ~1s auto-refresh and still see some of
+    // the just-deleted docs.
+    const aliases = ALERT_INDEX_ALIASES.map(({ alias }) => alias);
+    await expect
+      .poll(
+        async () => {
+          await esClient.indices.refresh({ index: aliases });
+          const settling = await esClient.search({
+            index: aliases,
+            size: ALL_ALERT_IDS.length,
+            query: { ids: { values: ALL_ALERT_IDS } },
+          });
+          return settling.hits.hits.length;
+        },
+        { timeout: 30000, intervals: [1000] }
+      )
+      .toBe(EXPECTED_ALERT_IDS.length);
+
+    // Count has settled — verify the surviving docs are exactly the expected set.
     const remaining = await esClient.search({
-      index: '.internal.alerts-*',
+      index: aliases,
       size: ALL_ALERT_IDS.length,
       query: { ids: { values: ALL_ALERT_IDS } },
     });
-
-    expect(remaining.hits.hits).toHaveLength(EXPECTED_ALERT_IDS.length);
     const remainingIds = remaining.hits.hits.map((h) => h._id);
     expect(remainingIds).toStrictEqual(expect.arrayContaining(EXPECTED_ALERT_IDS));
     expect(remainingIds).toStrictEqual(expect.not.arrayContaining(DELETED_ALERT_IDS));

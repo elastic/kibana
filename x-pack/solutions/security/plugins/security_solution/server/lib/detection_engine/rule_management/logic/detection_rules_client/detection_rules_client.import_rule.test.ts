@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import { SecurityRuleChangeTrackingAction } from '../../../../../../common/detection_engine/rule_management/rule_change_tracking';
+import { DETECTION_RULE_IMPORT_EVENT } from '../../../../telemetry/event_based/events';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getRulesSchemaMock } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -31,6 +34,7 @@ jest.mock('./methods/get_rule_by_rule_id');
 describe('DetectionRulesClient.importRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let detectionRulesClient: IDetectionRulesClient;
+  let analytics: AnalyticsServiceSetup;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
   const rulesAuthz = getMockRulesAuthz();
@@ -51,15 +55,33 @@ describe('DetectionRulesClient.importRule', () => {
     rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     const savedObjectsClient = savedObjectsClientMock.create();
+    analytics = { reportEvent: jest.fn() } as unknown as AnalyticsServiceSetup;
     detectionRulesClient = createDetectionRulesClient({
       actionsClient,
       rulesClient,
+      userProfile: userProfileServiceMock.createStart(),
       mlAuthz,
       rulesAuthz,
       savedObjectsClient,
       license: licenseMock.createLicenseMock(),
       productFeaturesService: createProductFeaturesServiceMock(),
+      analytics,
     });
+  });
+
+  it('sends detection_rule_import telemetry with the correct payload', async () => {
+    (getRuleByRuleId as jest.Mock).mockResolvedValueOnce(null);
+
+    await detectionRulesClient.importRule({
+      ruleToImport,
+      overwriteRules: true,
+      allowMissingConnectorSecrets,
+    });
+
+    expect(analytics.reportEvent).toHaveBeenCalledWith(
+      DETECTION_RULE_IMPORT_EVENT.eventType,
+      expect.objectContaining({ isPrebuilt: false, isCustomized: false, ruleType: 'query' })
+    );
   });
 
   it('calls rulesClient.create with the correct parameters when rule_id does not match an installed rule', async () => {

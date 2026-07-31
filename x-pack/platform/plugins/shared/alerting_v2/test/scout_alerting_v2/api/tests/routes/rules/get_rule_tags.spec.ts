@@ -121,6 +121,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
         buildCreateRuleData({
           kind: 'signal',
           state_transition: undefined,
+          recovery_strategy: undefined,
           metadata: { name: 'signal-rule', tags: ['signal-tag'] },
         })
       );
@@ -154,6 +155,7 @@ apiTest.describe('Get rule tags API', { tag: '@local-stateful-classic' }, () => 
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('INVALID_FILTER_FIELD');
     }
   );
 

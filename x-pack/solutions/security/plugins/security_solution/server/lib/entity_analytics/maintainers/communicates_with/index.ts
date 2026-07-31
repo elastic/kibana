@@ -8,27 +8,63 @@
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 
 import { runRelationshipMaintainer } from '../engine/run_relationship_maintainer';
+import type { RelationshipMaintainerTelemetryCollector } from '../types';
 import { COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS } from './configs';
 
 export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
   id: 'communicates_with',
   description: 'Computes communicates_with relationships from cloud API and MDM activity events',
   interval: '1d',
+  timeout: '1h',
   initialState: {},
-  run: async ({ esClient, cpsEsClient, logger, status, crudClient, abortController }) => {
+  run: async ({
+    esClient,
+    cpsEsClient,
+    logger,
+    status,
+    crudClient,
+    entityMetadataClient,
+    signal,
+    telemetry,
+  }) => {
     const namespace = status.metadata.namespace;
-    logger.info('Starting communicates_with maintainer run');
+    logger.info('[communicates_with] Starting run');
+
+    const collector: RelationshipMaintainerTelemetryCollector = {
+      sources: [],
+      relationshipTypeApplied: {},
+    };
+
     const result = await runRelationshipMaintainer({
       esClient,
       cpsEsClient,
       logger,
       namespace,
       crudClient,
+      entityMetadataClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
-      abortController,
+      signal,
+      telemetryCollector: collector,
     });
+
+    telemetry.report({
+      iterations: result.totalIterations,
+      truncated: result.truncated,
+      funnel: {
+        scanned: result.totalBuckets,
+        qualified: result.totalRecords,
+        proposed: result.totalRecords, // engine has no distinct proposal phase; echo qualified
+        applied: result.totalWritten,
+        droppedNotInStore: result.totalNotFound,
+        failed: result.totalWriteErrors,
+        metadataDocsApplied: result.totalMetadataDocsApplied,
+      },
+      sources: collector.sources,
+      // no breakdown — communicates_with is a single relationship type
+    });
+
     logger.info(
-      `Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written`
+      `[communicates_with] Completed run: ${result.totalBuckets} buckets, ${result.totalRecords} records, ${result.totalWritten} entities written, ${result.totalDroppedTargets} targets dropped, ${result.totalMetadataDocsApplied} metadata docs appended`
     );
     return result;
   },

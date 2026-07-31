@@ -38,7 +38,7 @@ apiTest.describe(
   { tag: tags.stateful.classic },
   () => {
     apiTest.beforeAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -60,7 +60,7 @@ apiTest.describe(
     });
 
     apiTest.beforeEach(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.sourceIndex.deleteDocs({
@@ -73,7 +73,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.alertActions.cleanUp();
+      await apiServices.alertingV2.alertActionsEvents.cleanUp();
       await apiServices.alertingV2.ruleEvents.cleanUp();
       await apiServices.alertingV2.rules.cleanUp();
       await apiServices.alertingV2.actionPolicies.cleanUp();
@@ -100,9 +100,10 @@ apiTest.describe(
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             metadata: { name: 'end-to-end-active' },
-            evaluation: {
-              query: {
-                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            query: {
+              format: 'standalone',
+              breach: {
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             },
           })
@@ -119,7 +120,7 @@ apiTest.describe(
         });
 
         // 3) Dispatcher produced a `fire` action for that rule.
-        await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+        await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
           ruleId: rule.id,
           actionTypes: ['fire'],
         });
@@ -146,21 +147,22 @@ apiTest.describe(
         const rule = await apiServices.alertingV2.rules.create(
           buildCreateRuleData({
             metadata: { name: 'end-to-end-recovery' },
-            evaluation: {
-              query: {
-                base: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            query: {
+              format: 'standalone',
+              breach: {
+                query: `FROM ${SOURCE_INDEX} | WHERE host.name == "${host}" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
               },
             },
           })
         );
 
         // 1) Wait for the active-side fire.
-        await apiServices.alertingV2.alertActions.waitForAtLeast(1, {
+        await apiServices.alertingV2.alertActionsEvents.waitForAtLeast(1, {
           ruleId: rule.id,
           actionTypes: ['fire'],
         });
 
-        const firesAfterActive = await apiServices.alertingV2.alertActions.find({
+        const firesAfterActive = await apiServices.alertingV2.alertActionsEvents.find({
           ruleId: rule.id,
           actionTypes: ['fire'],
         });
@@ -188,7 +190,7 @@ apiTest.describe(
         await expect
           .poll(
             async () => {
-              const fires = await apiServices.alertingV2.alertActions.find({
+              const fires = await apiServices.alertingV2.alertActionsEvents.find({
                 ruleId: rule.id,
                 actionTypes: ['fire'],
               });
@@ -198,7 +200,7 @@ apiTest.describe(
           )
           .toBe(true);
 
-        const fires = await apiServices.alertingV2.alertActions.find({
+        const fires = await apiServices.alertingV2.alertActionsEvents.find({
           ruleId: rule.id,
           actionTypes: ['fire'],
         });

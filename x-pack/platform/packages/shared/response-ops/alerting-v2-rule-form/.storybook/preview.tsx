@@ -38,6 +38,18 @@ const buildContainer = () => {
     get$: () => ({ subscribe: () => ({ unsubscribe: () => {} }) }),
   } as any);
 
+  container.bind(CoreStart('settings')).toConstantValue({
+    client: {
+      get: () => undefined,
+      set: async () => {},
+    },
+  } as any);
+
+  container.bind(CoreStart('docLinks')).toConstantValue({
+    links: {},
+    basePath: '',
+  } as any);
+
   container.bind(CoreStart('notifications')).toConstantValue({
     toasts: {
       addError: action('notifications.toasts.addError'),
@@ -72,7 +84,7 @@ const buildContainer = () => {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiCallOut title="Storybook stub" color="primary" iconType="iInCircle">
+          <EuiCallOut title="Storybook stub" color="primary" iconType="info">
             <p>Action type: {initialConnector?.actionTypeId ?? 'any'}</p>
           </EuiCallOut>
           <EuiButton

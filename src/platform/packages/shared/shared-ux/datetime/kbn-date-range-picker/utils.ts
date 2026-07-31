@@ -210,17 +210,29 @@ export function resolveInitialFocus(
 
 /**
  * Returns a human-readable display label for a time range option.
- * Uses the existing label when present, otherwise generates one using the same
- * pipeline as the control button: build text → parse → format.
+ *
+ * Natural-language labels (e.g. "Last 15 minutes", "Today") are kept verbatim —
+ * they carry semantics the bounds alone can't reconstruct (e.g. "now/d to now/d"
+ * is "Today"). Every other label is regenerated from the bounds using the same
+ * pipeline as the control button (build text → parse → format), so the list always
+ * uses the `→` delimiter and honours the current `timePrecision`, rather than
+ * echoing a frozen display string or a raw input-form label saved earlier.
  */
 export function getOptionDisplayLabel(
   option: TimeRangeBoundsOption,
-  options?: Pick<TimeRangeTransformOptions, 'timePrecision'>
+  options?: Pick<TimeRangeTransformOptions, 'timePrecision' | 'presets' | 'dateFormat' | 'locale'>
 ): string {
-  if (option.label) return option.label;
+  // Pass only `locale` to the parser: callers hand in the full `transformOptions`,
+  // and its `presets` would let the option's own label self-match as "natural language".
+  if (
+    option.label &&
+    textToTimeRange(option.label, { locale: options?.locale }).isNaturalLanguage
+  ) {
+    return option.label;
+  }
 
   const text = `${option.start} ${DATE_RANGE_INPUT_DELIMITER} ${option.end}`;
-  const timeRange = textToTimeRange(text);
+  const timeRange = textToTimeRange(text, options);
   return timeRangeToDisplayText(timeRange, options);
 }
 
@@ -259,15 +271,29 @@ export function getOptionShorthand(option: TimeRangeBoundsOption): string | null
 /**
  * Determines the text to populate the input with when an option is selected.
  *
- * 1. If the option has a label that parses to a valid time range, returns it
- *    so natural-language input round-trips (e.g. "Last 15 minutes").
- * 2. Otherwise generates a user-friendly shorthand from the bounds, stripping
- *    the `now` prefix where possible (e.g. "-15m" instead of "now-15m").
+ * 1. If the option has a natural-language label (e.g. "Last 15 minutes", "Today"),
+ *    returns it so that input round-trips. Only natural-language labels qualify:
+ *    display-form labels (e.g. "Feb 3 → Feb 10") must not leak into the input, and
+ *    we cannot rely on `!isInvalid` because moment's forgiving parser "validates"
+ *    them by matching a fragment and discarding the rest (producing garbage bounds).
+ * 2. Otherwise derives re-parseable input text from the bounds: relative offsets
+ *    are stripped of the `now` prefix (e.g. "-15m"), and absolute bounds are
+ *    formatted as readable dates rather than raw ISO. Absolute bounds use full
+ *    millisecond precision (not the display `timePrecision`), reproducing the
+ *    bounds verbatim (rounding included) so that re-applying the text yields
+ *    exactly the stored range — no unintended precision or rounding change.
  */
-export function getOptionInputText(option: TimeRangeBoundsOption): string {
-  if (option.label) {
-    const parsed = textToTimeRange(option.label);
-    if (!parsed.isInvalid) return option.label;
+export function getOptionInputText(
+  option: TimeRangeBoundsOption,
+  options?: Pick<TimeRangeTransformOptions, 'locale'>
+): string {
+  // Pass only `locale` to the parser: callers hand in the full `transformOptions`,
+  // and its `presets` would let the option's own label self-match as "natural language".
+  if (
+    option.label &&
+    textToTimeRange(option.label, { locale: options?.locale }).isNaturalLanguage
+  ) {
+    return option.label;
   }
 
   const startFragment = boundToInputFragment(option.start);
@@ -328,13 +354,23 @@ function boundToRelativeShorthand(bound: string): string | 'now' | null {
 
 /**
  * Converts a date math bound into a user-friendly input fragment.
- * Uses `boundToRelativeShorthand` to strip the `now` prefix when possible,
- * falling back to the original string for absolute dates and rounding-only expressions.
+ * - Relative offsets are stripped of the `now` prefix via `boundToRelativeShorthand`,
+ *   keeping any rounding suffix so the range round-trips unchanged.
+ * - Absolute ISO bounds are formatted as readable dates at full millisecond
+ *   precision (not the display `timePrecision`), so the range round-trips
+ *   unchanged instead of leaking the raw ISO string into the input.
+ * - Rounding-only datemath (e.g. `now/d`) and anything unrecognised pass through as-is.
  */
 function boundToInputFragment(bound: string): { text: string; isNow: boolean } {
   const shorthand = boundToRelativeShorthand(bound);
   if (shorthand === 'now') return { text: '', isNow: true };
   if (shorthand !== null) return { text: shorthand, isNow: false };
+
+  const parsed = moment(bound, moment.ISO_8601, true);
+  if (parsed.isValid()) {
+    return { text: formatAbsoluteDate(parsed.toDate(), 'ms'), isNow: false };
+  }
+
   return { text: bound, isNow: false };
 }
 

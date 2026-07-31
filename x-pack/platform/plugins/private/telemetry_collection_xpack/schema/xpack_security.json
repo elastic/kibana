@@ -8024,6 +8024,22 @@
                       }
                     }
                   }
+                },
+                "changes_history_usage": {
+                  "properties": {
+                    "revision_saved": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of detection rule revisions saved to changes history in the collection period"
+                      }
+                    },
+                    "rule_restored": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Number of detection rules restored from changes history in the collection period"
+                      }
+                    }
+                  }
                 }
               }
             },

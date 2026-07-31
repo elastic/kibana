@@ -86,11 +86,14 @@ const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : `
 export const buildFiredAlertReason: (
   alertResults: Array<Record<string, Evaluation>>,
   group: string,
-  dataView: string
-) => string = (alertResults, group, dataView) => {
+  dataView: string,
+  useWarningThreshold?: boolean
+) => string = (alertResults, group, dataView, useWarningThreshold) => {
   const aggregationReason =
     alertResults
-      .map((result: any) => buildAggregationReason(formatAlertResult(result[group])))
+      .map((result: any) =>
+        buildAggregationReason(formatAlertResult(result[group], useWarningThreshold))
+      )
       .join('; ') + '.';
   const sharedReason =
     '(' +

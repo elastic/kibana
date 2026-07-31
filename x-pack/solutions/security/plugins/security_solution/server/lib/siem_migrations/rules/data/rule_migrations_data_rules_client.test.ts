@@ -954,12 +954,12 @@ describe('RuleMigrationsDataRulesClient', () => {
               {
                 bool: {
                   should: [
-                    { match: { 'elastic_rule.title': 'test' } },
+                    { match: { 'elastic_rule.title': { query: 'test', operator: 'and' } } },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match: { 'original_rule.title': 'test' } },
+                          { match: { 'original_rule.title': { query: 'test', operator: 'and' } } },
                         ],
                       },
                     },
@@ -1136,12 +1136,12 @@ describe('RuleMigrationsDataRulesClient', () => {
               {
                 bool: {
                   should: [
-                    { match: { 'elastic_rule.title': 'test' } },
+                    { match: { 'elastic_rule.title': { query: 'test', operator: 'and' } } },
                     {
                       bool: {
                         must: [
                           { term: { status: 'failed' } },
-                          { match: { 'original_rule.title': 'test' } },
+                          { match: { 'original_rule.title': { query: 'test', operator: 'and' } } },
                         ],
                       },
                     },

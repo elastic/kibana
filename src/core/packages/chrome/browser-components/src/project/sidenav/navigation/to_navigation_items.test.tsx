@@ -29,7 +29,7 @@ const createNavigationItems = (
   tree: NavigationTreeDefinitionUI = navigationTree,
   activeNodes: ChromeProjectNavigationNode[][] = []
 ) => {
-  return toNavigationItems(tree, activeNodes, mockPanelStateManager);
+  return toNavigationItems(tree, activeNodes, [], mockPanelStateManager);
 };
 
 beforeEach(() => {
@@ -296,7 +296,7 @@ describe('Chrome Next mode (isNextChrome)', () => {
     tree: NavigationTreeDefinitionUI = navigationTree,
     activeNodes: ChromeProjectNavigationNode[][] = []
   ) => {
-    return toNavigationItems(tree, activeNodes, mockPanelStateManager, true);
+    return toNavigationItems(tree, activeNodes, [], mockPanelStateManager, true);
   };
 
   it('should not extract logoItem when isNextChrome is true', () => {
@@ -310,13 +310,13 @@ describe('Chrome Next mode (isNextChrome)', () => {
     expect(logoItem?.id).toBe('security_solution_home');
   });
 
-  it('should keep visible home node in primaryItems with title "Home" and icon "home"', () => {
+  it('keeps the home node as a regular primary item using its declared title/icon (normalization happens in the model, not here)', () => {
     const {
       navItems: { primaryItems },
     } = createChromeNextNavigationItems();
     const homeItem = primaryItems.find((item) => item.id === 'security_solution_home');
     expect(homeItem).toBeDefined();
-    expect(homeItem?.label).toBe('Home');
-    expect(homeItem?.iconType).toBe('home');
+    expect(homeItem?.label).toBe('Security');
+    expect(homeItem?.iconType).toBe('logoSecurity');
   });
 });

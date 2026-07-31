@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/275553
+issues:
+- https://github.com/elastic/kibana/issues/274838
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Improve display of long service names in the Traces table
+description: "Long service names in the Originating service column now truncate with an ellipsis; the full name is still available in the tooltip on hover."

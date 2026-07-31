@@ -12,13 +12,21 @@ import type {
   AppHeaderBadge as CoreAppHeaderBadge,
   AppHeaderBadgeItem as CoreAppHeaderBadgeItem,
   AppHeaderConfig as CoreAppHeaderConfig,
+  AppHeaderDescription as CoreAppHeaderDescription,
   AppHeaderEditableTitle as CoreAppHeaderEditableTitle,
+  AppHeaderFavoriteAction as CoreAppHeaderFavoriteAction,
+  AppHeaderFavoriteStatus as CoreAppHeaderFavoriteStatus,
   AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
   AppHeaderMetadataItem as CoreAppHeaderMetadataItem,
   AppHeaderMetadataItems as CoreAppHeaderMetadataItems,
   AppHeaderMetadataTextItem as CoreAppHeaderMetadataTextItem,
+  AppHeaderSpacing as CoreAppHeaderSpacing,
   AppHeaderTab as CoreAppHeaderTab,
+  AppHeaderTabAction as CoreAppHeaderTabAction,
+  AppHeaderTabActions as CoreAppHeaderTabActions,
+  AppHeaderTabBadge as CoreAppHeaderTabBadge,
+  AppHeaderTabIconBadge as CoreAppHeaderTabIconBadge,
   AppHeaderTitle as CoreAppHeaderTitle,
   AppHeaderTitleSaveResult as CoreAppHeaderTitleSaveResult,
 } from '@kbn/core-chrome-browser';
@@ -28,27 +36,21 @@ export type AppHeaderBack = CoreAppHeaderBack;
 export type AppHeaderBadge = CoreAppHeaderBadge;
 export type AppHeaderBadgeItem = CoreAppHeaderBadgeItem;
 export type AppHeaderConfig = CoreAppHeaderConfig;
+export type AppHeaderDescription = CoreAppHeaderDescription;
 export type AppHeaderEditableTitle = CoreAppHeaderEditableTitle;
+export type AppHeaderFavoriteAction = CoreAppHeaderFavoriteAction;
+export type AppHeaderFavoriteStatus = CoreAppHeaderFavoriteStatus;
 export type AppHeaderMetadataButtonItem = CoreAppHeaderMetadataButtonItem;
 export type AppHeaderMetadataHealthItem = CoreAppHeaderMetadataHealthItem;
 export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;
 export type AppHeaderMetadataItems = CoreAppHeaderMetadataItems;
 export type AppHeaderMetadataTextItem = CoreAppHeaderMetadataTextItem;
 export type AppHeaderTab = CoreAppHeaderTab;
+export type AppHeaderTabAction = CoreAppHeaderTabAction;
+export type AppHeaderTabActions = CoreAppHeaderTabActions;
+export type AppHeaderTabBadge = CoreAppHeaderTabBadge;
+export type AppHeaderTabIconBadge = CoreAppHeaderTabIconBadge;
 export type AppHeaderTitle = CoreAppHeaderTitle;
 export type AppHeaderTitleSaveResult = CoreAppHeaderTitleSaveResult;
 
-// Controls the header's HORIZONTAL layout only. Vertical padding is standardized internally so
-// the header keeps a consistent height regardless of this value.
-export type AppHeaderPadding =
-  | 'none' // no horizontal padding, no bleed
-  | 'm' // symmetric horizontal padding
-  | {
-      /**
-       * Negative margin on left/right + top: cancels a padded container so the header spans to
-       * its edges and sits flush at the top. Set this to your container's padding when rendering
-       * the header inline inside a padded page template. Content is auto re-inset to match, so it
-       * stays aligned with the page gutter.
-       */
-      bleed: 'm' | 'l';
-    };
+export type AppHeaderSpacing = CoreAppHeaderSpacing;

@@ -11,9 +11,9 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
 import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
-import { alertingTools } from '../../common/constants';
 import {
   actionPolicyOperationSchema,
   executeActionPolicyOperations,
@@ -45,7 +45,7 @@ export const manageActionPolicyTool = ({
   getWorkflow,
   getAvailableConnectors,
 }: ManageActionPolicyToolDeps): BuiltinSkillBoundedTool<typeof manageActionPolicySchema> => ({
-  id: alertingTools.manageActionPolicy,
+  id: ALERTING_TOOL_IDS.manageActionPolicy,
   type: ToolType.builtin,
   description: `Create or update an alerting V2 action policy (notification policy) in the conversation.
 
@@ -56,11 +56,10 @@ user to the "Create policy" or "Update Policy" button in the rendered attachment
 Use operations[] to:
 1. set_metadata — set name, description, and tags
 2. set_destinations — set workflow destinations (type: 'workflow', id: '<workflow-id>')
-3. set_matcher — set a KQL query to filter alert episodes, or null for catch-all
+3. set_matcher — set a KQL query to filter alert episodes, or null for catch-all. To scope a policy to a single rule, use \`rule.id: "<ruleId>"\`.
 4. set_grouping — set groupingMode (per_episode | all | per_field) and groupBy fields
 5. set_throttle — set throttle strategy and optional interval
-6. set_type — set the policy type ('single_rule' with ruleId, or 'global'). Prefer 'single_rule' when the policy is scoped to one rule.
-7. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
+6. validate — validate the accumulated policy against the API request schema; throws if not ready to save`,
   schema: manageActionPolicySchema,
   handler: async (
     { actionPolicyAttachmentId: previousAttachmentId, operations },
@@ -142,8 +141,6 @@ Use operations[] to:
                 id: attachment.id,
                 policyId: updatedData.id,
                 name: updatedData.name,
-                type: updatedData.type,
-                ruleId: updatedData.ruleId,
                 destinations: updatedData.destinations,
                 matcher: updatedData.matcher,
                 groupingMode: updatedData.groupingMode,

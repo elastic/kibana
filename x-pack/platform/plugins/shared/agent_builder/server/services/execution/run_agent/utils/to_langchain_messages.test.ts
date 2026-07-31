@@ -8,6 +8,7 @@
 import type { AIMessage, ToolMessage } from '@langchain/core/messages';
 import { isAIMessage, isHumanMessage } from '@langchain/core/messages';
 import type {
+  CompactionSummary,
   ConversationRoundStep,
   ReasoningStep,
   ToolCallStep,
@@ -21,7 +22,8 @@ import {
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
 import { convertPreviousRounds, groupToolCallSteps } from './to_langchain_messages';
-import type { ToolCallResultTransformer } from './create_result_transformer';
+import { formatDate } from '../prompts/utils/helpers';
+import type { ToolCallResultTransformer } from './tool_summarization';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
@@ -33,10 +35,12 @@ describe('convertPreviousRounds', () => {
 
   const makeRoundInput = (
     message: string,
-    attachments: ProcessedAttachment[] = []
+    attachments: ProcessedAttachment[] = [],
+    overrides: Partial<Pick<ProcessedRoundInput, 'attachment_refs' | 'attachment_context'>> = {}
   ): ProcessedRoundInput => ({
     message,
     attachments,
+    ...overrides,
   });
   const makeAssistantResponse = (message: string) => ({ message });
   const makeToolCallWithResult = (
@@ -78,7 +82,6 @@ describe('convertPreviousRounds', () => {
     return {
       nextInput: { message: '', attachments: [] },
       previousRounds: [],
-      attachments: [],
       attachmentTypes: [],
       attachmentStateManager: createAttachmentStateManager([], {
         getTypeDefinition: (type: string) =>
@@ -129,6 +132,86 @@ describe('convertPreviousRounds', () => {
     expect(result[0].content).toBe('hello');
   });
 
+  it('prefixes the next-input user message when conversationTimestamp is provided', async () => {
+    const nextInput = makeRoundInput('hello');
+    const result = await convertPreviousRounds({
+      conversation: createConversation({ nextInput }),
+      conversationTimestamp: now,
+    });
+    expect(result).toHaveLength(1);
+    expect(isHumanMessage(result[0])).toBe(true);
+    expect(result[0].content).toBe(`[Sent: ${formatDate(now)}]\n\nhello`);
+  });
+
+  it('places the next-input date prefix above attachment XML', async () => {
+    const attachment = makeProcessedAttachment(
+      'att-1',
+      'text',
+      { content: 'test content' },
+      'This is the formatted text content'
+    );
+    const nextInput = makeRoundInput('hello with attachment', [attachment]);
+    const result = await convertPreviousRounds({
+      conversation: createConversation({ nextInput }),
+      conversationTimestamp: now,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(isHumanMessage(result[0])).toBe(true);
+
+    const content = result[0].content as string;
+    expect(content.startsWith(`[Sent: ${formatDate(now)}]\n\nhello with attachment`)).toBe(true);
+    expect(content.indexOf('[Sent: ')).toBeLessThan(content.indexOf('<attachments>'));
+  });
+
+  it('uses the pending round timestamp when an awaiting-prompt round is promoted to next input', async () => {
+    const pendingStartedAt = '2026-06-30T12:34:56.000Z';
+    const previousRounds = [
+      createRound({
+        id: 'round-1',
+        status: ConversationRoundStatus.awaitingPrompt,
+        input: makeRoundInput('original user request'),
+        started_at: pendingStartedAt,
+      }),
+    ];
+
+    const result = await convertPreviousRounds({
+      conversation: createConversation({
+        previousRounds,
+        nextInput: makeRoundInput('prompt answer'),
+      }),
+    });
+
+    expect(result).toHaveLength(1);
+    expect(isHumanMessage(result[0])).toBe(true);
+    expect(result[0].content).toBe(
+      `[Sent: ${formatDate(pendingStartedAt)}]\n\noriginal user request`
+    );
+  });
+
+  it('ignores epoch started_at dates', async () => {
+    const epochStartedAt = new Date(0).toISOString();
+    const previousRounds = [
+      createRound({
+        id: 'round-1',
+        input: makeRoundInput('legacy user message'),
+        response: makeAssistantResponse('hello!'),
+        started_at: epochStartedAt,
+      }),
+    ];
+
+    const result = await convertPreviousRounds({
+      conversation: createConversation({
+        previousRounds,
+        nextInput: makeRoundInput('current message'),
+      }),
+    });
+
+    const [firstHumanMessage] = result;
+    expect(isHumanMessage(firstHumanMessage)).toBe(true);
+    expect(firstHumanMessage.content).toBe('legacy user message');
+  });
+
   it('handles a round with only user and assistant messages', async () => {
     const previousRounds = [
       createRound({
@@ -150,7 +233,7 @@ describe('convertPreviousRounds', () => {
 
     const [firstHumanMessage, firstAssistantMessage, secondHumanMessage] = result;
     expect(isHumanMessage(firstHumanMessage)).toBe(true);
-    expect(firstHumanMessage.content).toBe('hi');
+    expect(firstHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nhi`);
     expect(isAIMessage(firstAssistantMessage)).toBe(true);
     expect(firstAssistantMessage.content).toBe('hello!');
     expect(isHumanMessage(secondHumanMessage)).toBe(true);
@@ -192,7 +275,7 @@ describe('convertPreviousRounds', () => {
       nextHumanMessage,
     ] = result;
     expect(isHumanMessage(firstHumanMessage)).toBe(true);
-    expect(firstHumanMessage.content).toBe('find foo');
+    expect(firstHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nfind foo`);
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-1');
@@ -262,11 +345,11 @@ describe('convertPreviousRounds', () => {
       lastHumanMessage,
     ] = result;
     expect(isHumanMessage(firstHumanMessage)).toBe(true);
-    expect(firstHumanMessage.content).toBe('hi');
+    expect(firstHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nhi`);
     expect(isAIMessage(firstAssistantMessage)).toBe(true);
     expect(firstAssistantMessage.content).toBe('hello!');
     expect(isHumanMessage(secondHumanMessage)).toBe(true);
-    expect(secondHumanMessage.content).toBe('search for bar');
+    expect(secondHumanMessage.content).toBe(`[Sent: ${formatDate(now)}]\n\nsearch for bar`);
     expect(isAIMessage(toolCallAIMessage)).toBe(true);
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');
@@ -415,6 +498,251 @@ describe('convertPreviousRounds', () => {
       expect(isHumanMessage(secondHumanMessage)).toBe(true);
       expect(secondHumanMessage.content).toBe('next message');
       expect(secondHumanMessage.content).not.toContain('<attachments>');
+    });
+  });
+
+  describe('with attachment type instructions', () => {
+    it('renders type instructions when a ref introduces a new type', async () => {
+      const nextInput = makeRoundInput('tell me about this', [], {
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(isHumanMessage(result[0])).toBe(true);
+      const content = result[0].content as string;
+      expect(content).toContain('## ATTACHMENT TYPES');
+      expect(content).toContain('### esql attachments');
+      expect(content).toContain('An ES|QL query.');
+    });
+
+    it('renders type instructions on the first occurrence only — subsequent rounds with the same type get no instructions', async () => {
+      // Previous round introduces 'esql' → shared Set records it.
+      // Next-input also has an esql ref → already provided, so instructions are suppressed.
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('first message', [], {
+            attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
+          }),
+          response: makeAssistantResponse('got it'),
+        }),
+      ];
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds,
+          nextInput: makeRoundInput('follow-up', [], {
+            attachment_refs: [{ attachment_id: 'a-1', version: 2, type: 'esql' }],
+          }),
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
+      });
+
+      // [round user msg, round assistant msg, nextInput user msg]
+      expect(result).toHaveLength(3);
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect(result[0].content as string).toContain('## ATTACHMENT TYPES');
+
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+
+    it('omits type instructions when the ref type is not in the conversation attachmentTypes', async () => {
+      const nextInput = makeRoundInput('hello', [], {
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'unknown-type' }],
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [], // 'unknown-type' has no entry in the master list
+        }),
+      });
+
+      expect(result[0].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+
+    it('omits type instructions when there are no attachment_refs', async () => {
+      const nextInput = makeRoundInput('hello');
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
+      });
+
+      expect(result[0].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+
+    it('re-renders type instructions after compaction — the first remaining round that references a type gets instructions even if it appeared in a now-compacted round', async () => {
+      // The compaction summary replaces earlier rounds where 'esql' was first introduced.
+      // Because attachmentTypeInstructionsProvided starts empty each call, the first
+      // remaining round that has an esql ref must re-render the type instructions.
+      const compactionSummary: CompactionSummary = {
+        summarized_round_count: 2,
+        created_at: '2024-01-01T00:00:00.000Z',
+        token_count: 100,
+        structured_data: {
+          discussion_summary: 'User shared ES|QL queries.',
+          user_intent: 'Understand ES|QL syntax',
+          key_topics: [],
+          outcomes_and_decisions: [],
+          agent_actions: [],
+          entities: [],
+          unanswered_questions: [],
+          tool_calls_summary: [],
+        },
+      };
+
+      const previousRounds = [
+        createRound({
+          id: 'round-3',
+          input: makeRoundInput('what is this query doing?', [], {
+            attachment_refs: [{ attachment_id: 'q-1', version: 1, type: 'esql' }],
+          }),
+          response: makeAssistantResponse('It filters by status.'),
+        }),
+      ];
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds,
+          nextInput: makeRoundInput('follow-up', [], {
+            attachment_refs: [{ attachment_id: 'q-1', version: 1, type: 'esql' }],
+          }),
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
+        compactionSummary,
+      });
+
+      // compaction user + compaction assistant + round user + round assistant + nextInput user
+      expect(result).toHaveLength(5);
+
+      expect(isHumanMessage(result[0])).toBe(true);
+      expect(result[0].content).toContain('[Previous conversation context was compacted]');
+      expect(isAIMessage(result[1])).toBe(true);
+
+      // First remaining round after compaction gets type instructions (Set starts fresh)
+      expect(isHumanMessage(result[2])).toBe(true);
+      expect(result[2].content as string).toContain('## ATTACHMENT TYPES');
+      expect(result[2].content as string).toContain('An ES|QL query.');
+
+      // nextInput has the same type ref but should not repeat instructions (Set is shared within the call)
+      expect(isHumanMessage(result[4])).toBe(true);
+      expect(result[4].content as string).not.toContain('## ATTACHMENT TYPES');
+    });
+  });
+
+  describe('with attachment_context', () => {
+    const sampleContext =
+      '<attachments count="1">' +
+      '<attachment attachment_id="a-1" type="text" version="1" /></attachments>';
+
+    it('renders attachment_context on the next-input message', async () => {
+      const nextInput = makeRoundInput('here is a new attachment', [], {
+        attachment_context: sampleContext,
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(isHumanMessage(result[0])).toBe(true);
+      const content = result[0].content as string;
+      expect(content).toContain('<attachments');
+      expect(content).toContain('attachment_id="a-1"');
+    });
+
+    it('renders attachment_context on a previous round message but not on the next-input message', async () => {
+      const previousRounds = [
+        createRound({
+          id: 'round-1',
+          input: makeRoundInput('round with attachment', [], {
+            attachment_context: sampleContext,
+          }),
+          response: makeAssistantResponse('noted'),
+        }),
+      ];
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          previousRounds,
+          nextInput: makeRoundInput('next question'),
+        }),
+      });
+
+      expect(result).toHaveLength(3);
+      expect(result[0].content as string).toContain('<attachments');
+      expect(result[2].content as string).not.toContain('<attachments');
+    });
+
+    it('omits attachment_context when the field is absent', async () => {
+      const nextInput = makeRoundInput('just a message');
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({ nextInput }),
+      });
+
+      expect(result[0].content as string).not.toContain('<attachments');
+      expect(result[0].content as string).not.toContain('<attachments');
+    });
+  });
+
+  describe('attachment content ordering and interaction', () => {
+    it('orders message → attachments XML → attachment_context within a single message → type instructions', async () => {
+      const attachment = makeProcessedAttachment('att-1', 'text', { content: 'data' }, 'text data');
+      const nextInput = makeRoundInput('user message', [attachment], {
+        attachment_refs: [{ attachment_id: 'att-1', version: 1, type: 'text' }],
+        attachment_context:
+          '<attachment-context count="1"><attachment attachment_id="att-1" /></attachment-context>',
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'text', description: 'Plain text.' }],
+        }),
+      });
+
+      const content = result[0].content as string;
+      const msgIdx = content.indexOf('user message');
+      const attachXmlIdx = content.indexOf('<attachments>');
+      const contextIdx = content.indexOf('<attachment-context');
+      const typeIdx = content.indexOf('## ATTACHMENT TYPES');
+
+      expect(msgIdx).toBeGreaterThanOrEqual(0);
+      expect(msgIdx).toBeLessThan(attachXmlIdx);
+      expect(attachXmlIdx).toBeLessThan(contextIdx);
+      expect(contextIdx).toBeLessThan(typeIdx);
+    });
+
+    it('timestamp prefix stays before type instructions and attachment_context', async () => {
+      const nextInput = makeRoundInput('timestamped message', [], {
+        attachment_refs: [{ attachment_id: 'a-1', version: 1, type: 'esql' }],
+        attachment_context: 'The following attachment(s) were added this turn:\n\n<x/>',
+      });
+
+      const result = await convertPreviousRounds({
+        conversation: createConversation({
+          nextInput,
+          attachmentTypes: [{ type: 'esql', description: 'An ES|QL query.' }],
+        }),
+        conversationTimestamp: now,
+      });
+
+      const content = result[0].content as string;
+      expect(content.startsWith('[Sent: ')).toBe(true);
+      expect(content.indexOf('[Sent: ')).toBeLessThan(content.indexOf('## ATTACHMENT TYPES'));
+      expect(content.indexOf('[Sent: ')).toBeLessThan(content.indexOf('added this turn'));
     });
   });
 

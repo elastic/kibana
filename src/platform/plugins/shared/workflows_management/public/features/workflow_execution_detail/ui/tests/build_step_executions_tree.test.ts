@@ -321,6 +321,166 @@ describe('buildStepExecutionsTree', () => {
     });
   });
 
+  describe('with static parallel branches', () => {
+    const parallelStep = (state: Record<string, unknown>): WorkflowStepExecutionDto =>
+      createStepExecution({
+        id: 'exec-parallel',
+        stepId: 'enrich',
+        stepType: 'parallel',
+        status: ExecutionStatus.RUNNING,
+        stepExecutionIndex: 0,
+        scopeStack: [],
+        // Engine snapshots the static branch names as branch `key`s, index-aligned.
+        state,
+      });
+
+    const branchStep = (
+      overrides: Partial<WorkflowStepExecutionDto> & { branchIndex: number }
+    ): WorkflowStepExecutionDto => {
+      const { branchIndex, ...rest } = overrides;
+      return createStepExecution({
+        stepType: 'http',
+        status: ExecutionStatus.COMPLETED,
+        scopeStack: [
+          {
+            stepId: 'enrich',
+            nestedScopes: [
+              { nodeId: 'enrich', nodeType: 'enter-parallel', scopeId: String(branchIndex) },
+            ],
+          },
+        ],
+        ...rest,
+      });
+    };
+
+    // Two single-step branches.
+    const buildSingleStepBranches = (): WorkflowStepExecutionDto[] => [
+      parallelStep({
+        static: true,
+        branches: [
+          { index: 0, key: 'virustotal' },
+          { index: 1, key: 'geoip' },
+        ],
+      }),
+      branchStep({ id: 'exec-branch-0', stepId: 'scan_hash', branchIndex: 0 }),
+      branchStep({
+        id: 'exec-branch-1',
+        stepId: 'geo_lookup',
+        branchIndex: 1,
+        stepExecutionIndex: 1,
+      }),
+    ];
+
+    it('collapses a single-step branch into the step row, labeled with the branch name', () => {
+      const result = buildStepExecutionsTree(buildSingleStepBranches());
+
+      expect(result[0].stepType).toBe('parallel');
+      expect(result[0].children).toHaveLength(2);
+
+      // The intermediate "parallel-branch" node is gone; the row *is* the step,
+      // but shows the branch name and links to the step's own execution.
+      expect(result[0].children[0]).toEqual(
+        expect.objectContaining({
+          stepId: 'scan_hash',
+          displayLabel: 'virustotal',
+          stepType: 'http',
+          stepExecutionId: 'exec-branch-0',
+          children: [],
+        })
+      );
+      expect(result[0].children[1]).toEqual(
+        expect.objectContaining({
+          stepId: 'geo_lookup',
+          displayLabel: 'geoip',
+          stepType: 'http',
+          stepExecutionId: 'exec-branch-1',
+          children: [],
+        })
+      );
+    });
+
+    it('keeps the branch grouping node when a branch has more than one step', () => {
+      const executions: WorkflowStepExecutionDto[] = [
+        parallelStep({
+          static: true,
+          branches: [
+            { index: 0, key: 'virustotal' },
+            { index: 1, key: 'geoip' },
+          ],
+        }),
+        // virustotal has two steps -> must stay grouped under the named branch node.
+        branchStep({ id: 'exec-vt-1', stepId: 'scan_hash', branchIndex: 0 }),
+        branchStep({
+          id: 'exec-vt-2',
+          stepId: 'log_result',
+          stepType: 'console',
+          branchIndex: 0,
+          stepExecutionIndex: 1,
+        }),
+        // geoip has a single step -> collapses.
+        branchStep({ id: 'exec-geo', stepId: 'geo_lookup', branchIndex: 1, stepExecutionIndex: 2 }),
+      ];
+
+      const result = buildStepExecutionsTree(executions);
+
+      const virustotal = result[0].children[0];
+      expect(virustotal).toEqual(
+        expect.objectContaining({
+          stepId: '0',
+          displayLabel: 'virustotal',
+          stepType: 'parallel-branch',
+        })
+      );
+      expect(virustotal.children.map((c) => c.stepId)).toEqual(['scan_hash', 'log_result']);
+
+      const geoip = result[0].children[1];
+      expect(geoip).toEqual(
+        expect.objectContaining({
+          stepId: 'geo_lookup',
+          displayLabel: 'geoip',
+          stepType: 'http',
+          stepExecutionId: 'exec-geo',
+          children: [],
+        })
+      );
+    });
+
+    it('falls back to the index when the parallel state has no branch name (dynamic foreach)', () => {
+      const executions = buildSingleStepBranches();
+      // Simulate a parallel step that does not expose named branches in state.
+      executions[0].state = {};
+
+      const result = buildStepExecutionsTree(executions);
+
+      // No branch name resolved -> branch node is not a "parallel-branch", so it
+      // is not collapsed and keeps the raw index.
+      expect(result[0].children[0].displayLabel).toBeUndefined();
+      expect(result[0].children[0].stepId).toBe('0');
+      expect(result[0].children[0].children[0].stepId).toBe('scan_hash');
+    });
+
+    it('does NOT use the snapshotted item as a label in dynamic foreach mode', () => {
+      // Regression: dynamic fan-out snapshots each foreach item as the branch
+      // `key` (e.g. an agent prompt). That is data, not an author-chosen name, so
+      // it must NOT become the branch label — the fan-out index is the identity.
+      const executions = buildSingleStepBranches();
+      executions[0].state = {
+        static: false,
+        branches: [
+          { index: 0, key: 'In one sentence, what data sources can you access?' },
+          { index: 1, key: 'List up to 3 things you could help an analyst investigate.' },
+        ],
+      };
+
+      const result = buildStepExecutionsTree(executions);
+
+      // The long prompt must not leak into the label; index identity is kept.
+      expect(result[0].children[0].displayLabel).toBeUndefined();
+      expect(result[0].children[0].stepId).toBe('0');
+      expect(result[0].children[0].children[0].stepId).toBe('scan_hash');
+    });
+  });
+
   describe('with deeply nested structures', () => {
     it('should build tree with multiple levels of nesting', () => {
       const stepExecutions: WorkflowStepExecutionDto[] = [

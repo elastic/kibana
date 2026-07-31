@@ -12,6 +12,7 @@ import type { STACK_ALERTS_FEATURE_ID } from './stack_rules';
 
 export * from './stack_rules';
 export * from './o11y_rules';
+export * from './o11y_alerting_features';
 
 export type RuleCreationValidConsumer =
   | typeof AlertConsumers.LOGS

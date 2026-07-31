@@ -57,7 +57,6 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
       expect(response.body.name).toBe(body.name);
       expect(response.body.description).toBe(body.description);
       expect(response.body.destinations).toStrictEqual(body.destinations);
-      expect(response.body.type).toBe('global');
       expect(response.body.enabled).toBe(true);
       expect(response.body.snoozedUntil).toBeNull();
       // On create, updatedAt equals createdAt — there has been no replace yet.
@@ -66,37 +65,24 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     }
   );
 
-  apiTest('type: defaults to "global" on create-via-PUT', async ({ apiClient }) => {
-    const id = 'upsert-default-type';
-
-    const response = await apiClient.put(getActionPolicyUrl(id), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ name: 'default-type-via-put' }),
-    });
-
-    expect(response).toHaveStatusCode(201);
-    expect(response.body.type).toBe('global');
-  });
-
   apiTest(
-    'type: creates with type:"single_rule" linked to an existing rule via PUT',
+    'matcher: scopes a policy to a single rule via a rule.id matcher on create-via-PUT',
     async ({ apiClient, apiServices }) => {
       const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-upsert-single' } })
+        buildCreateRuleData({ metadata: { name: 'rule-for-upsert-scoped' } })
       );
 
-      const response = await apiClient.put(getActionPolicyUrl('upsert-single-rule-policy'), {
+      const matcher = `rule.id: "${rule.id}"`;
+      const response = await apiClient.put(getActionPolicyUrl('upsert-rule-scoped-policy'), {
         headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
         body: buildCreateActionPolicyData({
-          name: 'single-rule-via-put',
-          type: 'single_rule',
-          ruleId: rule.id,
+          name: 'rule-scoped-via-put',
+          matcher,
         }),
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body.type).toBe('single_rule');
-      expect(response.body.ruleId).toBe(rule.id);
+      expect(response.body.matcher).toBe(matcher);
     }
   );
 
@@ -212,6 +198,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing description', async ({ apiClient }) => {
@@ -224,6 +211,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
@@ -233,6 +221,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects empty destinations array', async ({ apiClient }) => {
@@ -242,6 +231,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects name over the maximum length', async ({ apiClient }) => {
@@ -251,6 +241,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects destination with unknown type', async ({ apiClient }) => {
@@ -265,7 +256,24 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
+
+  apiTest(
+    'validation: rejects body with unknown top-level keys (strict schema)',
+    async ({ apiClient }) => {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-unknown-field'), {
+        headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
+        body: {
+          ...buildCreateActionPolicyData(),
+          unknownField: 'x',
+        },
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
+    }
+  );
 
   apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
     const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
@@ -277,6 +285,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
@@ -289,24 +298,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     });
 
     expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects type:"single_rule" without ruleId', async ({ apiClient }) => {
-    const response = await apiClient.put(getActionPolicyUrl('upsert-single-no-rule-id'), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ type: 'single_rule' }),
-    });
-
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('validation: rejects type:"global" with ruleId', async ({ apiClient }) => {
-    const response = await apiClient.put(getActionPolicyUrl('upsert-global-with-rule-id'), {
-      headers: { ...testData.COMMON_HEADERS, ...writerHeaders },
-      body: buildCreateActionPolicyData({ type: 'global', ruleId: 'some-rule-id' }),
-    });
-
-    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('authorization: 201 with full alerting_v2 privileges (write)', async ({ apiClient }) => {
