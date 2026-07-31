@@ -2316,10 +2316,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.4.0":
-  version "9.4.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.4.0.tgz#3ae5e4ef9d4167cc36782c0658a6a0f783e51b4a"
-  integrity sha512-UbvHAtGAqiQdAsAmb3vfCMwOTIf6BoSf6MDpz7mw5UzpU3pRSl4KeFzaXRfrk4+PrgiudYx14socGCI6frgguQ==
+"@elastic/elasticsearch@9.4.2":
+  version "9.4.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.4.2.tgz#be41243fb67b73b3114ca803cd153591782b6c8b"
+  integrity sha512-H9myMlLUeotkZhZ4ppinoMGDFxmW3lY8/s+4TIk1vFHyCvWU1Ej4T7azX5buCzemyFApgN0ywnEuvOtpel2VZg==
   dependencies:
     "@elastic/transport" "^9.3.5"
     tslib "^2.4.0"
@@ -4986,10 +4986,6 @@
   uid ""
 
 "@kbn/babel-preset@link:packages/kbn-babel-preset":
-  version "0.0.0"
-  uid ""
-
-"@kbn/babel-register@link:src/platform/packages/shared/kbn-babel-register":
   version "0.0.0"
   uid ""
 
@@ -9698,6 +9694,10 @@
   uid ""
 
 "@kbn/swc-config@link:packages/kbn-swc-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/swc-register@link:src/platform/packages/shared/kbn-swc-register":
   version "0.0.0"
   uid ""
 
