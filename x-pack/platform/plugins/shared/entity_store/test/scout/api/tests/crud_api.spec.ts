@@ -6,7 +6,7 @@
  */
 
 import { apiTest } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 import type { Client } from '@elastic/elasticsearch';
 import { hashEuid, getEuidFromObject } from '../../../../common/domain/euid';
 import type { Entity, HostEntity } from '../../../../common/domain/definitions/entity.gen';

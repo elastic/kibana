@@ -7,7 +7,7 @@
 
 import type { ElasticsearchRoleDescriptor } from '@kbn/scout-security';
 import { apiTest } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 
 import {
   ENTITY_STORE_CLUSTER_PRIVILEGES,

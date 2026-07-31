@@ -6,7 +6,7 @@
  */
 
 import { apiTest } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 import {
   PUBLIC_HEADERS,
   INTERNAL_HEADERS,

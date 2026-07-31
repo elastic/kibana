@@ -66,9 +66,7 @@ describe('uninstallElasticsearchAssets', () => {
     );
     // Verify the resolved name matches the entity metadata datastream that
     // relationship maintainers write to.
-    expect(getMetadataEntitiesDataStreamName(namespace)).toBe(
-      '.entities.v2.metadata.default'
-    );
+    expect(getMetadataEntitiesDataStreamName(namespace)).toBe('.entities.v2.metadata.default');
   });
 
   it('deletes all three resources in a single uninstall call', async () => {

@@ -9,14 +9,10 @@ import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
 
 describe('getMetadataEntitiesDataStreamName', () => {
   it('returns the v2 metadata datastream name for the default namespace', () => {
-    expect(getMetadataEntitiesDataStreamName('default')).toBe(
-      '.entities.v2.metadata.default'
-    );
+    expect(getMetadataEntitiesDataStreamName('default')).toBe('.entities.v2.metadata.default');
   });
 
   it('returns the v2 metadata datastream name for a custom namespace', () => {
-    expect(getMetadataEntitiesDataStreamName('my-space')).toBe(
-      '.entities.v2.metadata.my-space'
-    );
+    expect(getMetadataEntitiesDataStreamName('my-space')).toBe('.entities.v2.metadata.my-space');
   });
 });

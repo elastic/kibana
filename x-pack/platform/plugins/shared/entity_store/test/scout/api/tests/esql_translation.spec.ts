@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 import { apiTest } from '@kbn/scout-security';
 import {
   PUBLIC_HEADERS,

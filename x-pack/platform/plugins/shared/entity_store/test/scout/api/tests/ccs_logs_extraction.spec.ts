@@ -6,7 +6,7 @@
  */
 
 import { apiTest } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 import type { EsClient } from '@kbn/scout-security';
 import { get } from 'lodash';
 import {

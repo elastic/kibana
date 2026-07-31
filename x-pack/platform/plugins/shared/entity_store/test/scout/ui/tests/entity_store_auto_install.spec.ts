@@ -7,7 +7,7 @@
 
 import { test, tags } from '@kbn/scout-security';
 import type { ScoutPage, KbnClient } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/ui';
+import { expect } from '@kbn/scout/ui';
 import { API_VERSIONS, ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 
 // Installing/starting the store is slow and blocking, so timeouts sit well above Scout's 60s default.

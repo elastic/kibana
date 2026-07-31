@@ -257,10 +257,7 @@ describe('AssetManagerClient', () => {
 
     it('checks the cluster + target assets that install creates as the requesting user', async () => {
       // The updates data stream is also returned as an extraction source.
-      getLocalIndexPatternsMock.mockResolvedValue([
-        'logs-*',
-        '.entities.v2.updates.default',
-      ]);
+      getLocalIndexPatternsMock.mockResolvedValue(['logs-*', '.entities.v2.updates.default']);
 
       await getPrivilegesClient.getPrivileges({} as KibanaRequest);
 

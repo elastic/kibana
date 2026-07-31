@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { apiTest } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 import { PUBLIC_HEADERS, ENTITY_STORE_TAGS } from '../fixtures/constants';
 import { installAllEntityTypes, uninstallAllEntityTypes } from '../fixtures/helpers';
 import { createSystemIndicesEsClient } from '../fixtures/system_indices_es_client';

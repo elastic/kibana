@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 import type { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/types';
 import { getLatestEntitiesIndexName } from '../../../../common/domain/entity_index';
 

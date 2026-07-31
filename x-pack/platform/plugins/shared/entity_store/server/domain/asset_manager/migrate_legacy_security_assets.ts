@@ -146,10 +146,7 @@ async function migrateLatestIndex({
 
   try {
     await esClient.indices.updateAliases({
-      actions: [
-        { remove: { index: legacyIndex, alias } },
-        { add: { index: newIndex, alias } },
-      ],
+      actions: [{ remove: { index: legacyIndex, alias } }, { add: { index: newIndex, alias } }],
     });
   } catch (error) {
     // Alias may already point at the new index, or may not have existed on legacy.

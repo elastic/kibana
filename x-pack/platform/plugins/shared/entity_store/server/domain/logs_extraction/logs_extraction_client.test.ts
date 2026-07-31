@@ -244,9 +244,7 @@ describe('LogsExtractionClient', () => {
       expect(result.success && result.count).toBe(2);
       expect(result.success && result.scannedIndices).toContain('logs-*');
       expect(result.success && result.scannedIndices).toContain('filebeat-*');
-      expect(result.success && result.scannedIndices).toContain(
-        '.entities.v2.updates.default'
-      );
+      expect(result.success && result.scannedIndices).toContain('.entities.v2.updates.default');
       expect(result.success && result.scannedIndices).not.toContain(
         '.alerts-security.alerts-default'
       );

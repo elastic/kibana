@@ -6,7 +6,7 @@
  */
 
 import { apiTest } from '@kbn/scout-security';
-import { expect } from '@kbn/scout-security/api';
+import { expect } from '@kbn/scout/api';
 import { hashEuid } from '../../../../common/domain/euid';
 import {
   PUBLIC_HEADERS,
