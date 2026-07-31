@@ -210,9 +210,9 @@ For each detection, determine whether it continues an existing open event.
 
 **`platform_sig_events_event_search` instructions**
 - Use `platform_sig_events_event_search` with `status: "open"`, `view: "compact"`, `per_page: 50`, and `exclude_unconfirmed_signals: true`. **Every call must include `exclude_unconfirmed_signals: true` — omitting it is never valid.**
-- 4 calls total maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and at most one `next_page`. No additional calls outside the two phases.
+- 4 calls total maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and at most one additional page. No additional calls outside the two phases.
 - Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a stream-only search.
-- `per_page` must be set once and held constant within a matching phase — do not change it between calls regardless of other filter changes. When `has_more` is true, page with `next_page` and all other parameters unchanged. When `has_more` is false, the result set is complete — do not re-query.
+- `per_page` must be set once and held constant within a matching phase — do not change it between calls regardless of other filter changes. When `has_more` is true, set `page` to the previous response's `next_page` value with all other parameters unchanged. When `has_more` is false, the result set is complete — do not re-query.
 
 For events returned by `platform_sig_events_event_search`, derive:
 - **Domain, Alert symptom, and Current evidence** — confirmed signal descriptions first, then `symptom_hypothesis`, `summary`, and `title`.
@@ -227,12 +227,13 @@ Run 3.1 then 3.2 for each detection
 
 1. Call `platform_sig_events_event_search` once with all distinct `rule_uuids` and `stream_names` from detections.
 2. A detection rule-matches an event only when `events[].signals[].rule_uuid` includes any rule from the detection.
-3. A `rule_uuid` match defaults to accept — the rule is already confirmed against the open event, so do not re-derive its symptom from scratch. Collect all rule-uuid-matching events before selecting the best one (tie-break: greatest rule coverage, then evidence similarity). Reject a match only when one of these holds:
+3. A `rule_uuid` match defaults to accept — the open event already carries this rule as a signal that is not disconfirmed, so do not re-derive its symptom from scratch. Collect all rule-uuid-matching events before selecting the best one (tie-break: greatest rule coverage, then evidence similarity). Reject a match only when one of these holds:
   - The **Current evidence**'s query rows show the failure now targets a different resource, host, or downstream dependency than the open event's confirmed signals, `causal_features`, or `blast_radius`.
   - The authored KI explicitly scopes the new detection away from the open event's incident.
-  A different title or `symptom_hypothesis` wording for the same `rule_uuid` is never, by itself, one of these two conditions — evaluate the underlying target and mechanism, not how the symptom is phrased.
+  - The **Current evidence**'s query rows show a substantively different active failure mechanism or error signature from the open event's confirmed signals — title or `symptom_hypothesis` wording alone never qualifies.
+  A different title or `symptom_hypothesis` wording for the same `rule_uuid` is never, by itself, sufficient to reject — evaluate the underlying target and mechanism, not how the symptom is phrased.
   Add accepted rules to `matched_rule_uuids`.
-4. When `has_more` is true and some rules remain unmatched, request `next_page` with all other parameters unchanged and `per_page` held constant. When `has_more` is false, proceed to 3.2 for any unmatched rules.
+4. When `has_more` is true and some rules remain unmatched, set `page` to the previous response's `next_page` value with all other parameters unchanged and `per_page` held constant. When `has_more` is false, proceed to 3.2 for any unmatched rules.
 
 #### 3.2. Topology Match
 
@@ -245,7 +246,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 4.1 resu
 3. Otherwise, call `platform_sig_events_event_search` with `topology_feature_ids`; omit `rule_uuids` and `stream_names`. **Always run this call when topology_feature_ids is non-empty — do not skip it.**
 4. Accept an event continuation only when the current detection pairs with at least one of the event's signals under <incident_matching>.
    Add accepted rules to `matched_rule_uuids`.
-5. When `has_more` is true and some discoveries remain unmatched, request `next_page` with all other parameters unchanged and `per_page` held constant.
+5. When `has_more` is true and some discoveries remain unmatched, set `page` to the previous response's `next_page` value with all other parameters unchanged and `per_page` held constant.
 
 Assign each matched detection to at most one accepted event continuation. The continuation is a discovery that reuses the matched event's `event_id`. If multiple events continuation match a single detection, prefer greatest rule coverage, then evidence similarity. 
 
