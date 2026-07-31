@@ -284,6 +284,38 @@ describe('RulesListTableContainer', () => {
       });
       expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
     });
+
+    it('clears a stale exclusion when the excluded row is deleted in select-all mode', async () => {
+      renderContainer();
+
+      // Enter select-all, then explicitly exclude rule-1.
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+
+      expect(screen.getByTestId('checkboxSelectRow-rule-1')).not.toBeChecked();
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('1 Selected');
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      const [, options] = mockDeleteMutate.mock.calls[mockDeleteMutate.mock.calls.length - 1];
+      options.onSuccess();
+
+      // The stale exclusion is cleared, so the remaining row goes back to selected.
+      await waitFor(() => {
+        expect(screen.getByTestId('checkboxSelectRow-rule-2')).toBeChecked();
+      });
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+    });
   });
 
   describe('run rule', () => {
