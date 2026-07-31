@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-07-28
 - product: kibana
-title: Fix collapsed Actions column width in Entity Analytics
+title: Fix collapsed actions column width in Entity Analytics

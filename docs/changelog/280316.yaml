@@ -9,5 +9,5 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Add allow_outdated_version flag for pinned Fleet package installs
+title: Add `allow_outdated_version` flag for pinned Fleet package installs
 description: Fleet package install APIs accept an `allow_outdated_version` option to install a specific registry version older than the latest release without using the broader `force` flag.

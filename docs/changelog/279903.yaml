@@ -9,5 +9,5 @@ products:
 - product: kibana
 areas:
 - Dashboards and visualizations
-title: Fix ES|QL failures when Fast mode is enabled on Basic or Platinum licenses
+title: Fix ES|QL failures when fast mode is enabled on Basic or Platinum licenses
 description: Saved Discover sessions and dashboards with Fast mode enabled now return results after a license downgrade, and the Fast mode toggle is disabled when your license is not Enterprise.

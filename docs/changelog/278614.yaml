@@ -7,5 +7,5 @@ products:
 - product: cloud-serverless
   target: 2026-07-28
 - product: kibana
-title: Fix Similar errors panel failures in Discover when field mappings differ
+title: 'Fix "Similar errors" panel failures in Discover when field mappings differ'
 description: Discover no longer fails to load the Similar errors panel when the logs index pattern includes fields that are unmapped for the current document.

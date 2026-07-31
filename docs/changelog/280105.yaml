@@ -9,5 +9,5 @@ products:
 - product: kibana
 areas:
 - Discover and ES|QL
-title: Fix rounding units for `roundRelativeTime` setting (disabled by default)
+title: Fix rounding units for `roundRelativeTime` setting
 description: Relative time ranges, for example "last 15 minutes", are no longer rounded by default in the time range selector in Discover and Dashboards. You can enable automatic rounding of relative ranges again in the time range selector settings.
