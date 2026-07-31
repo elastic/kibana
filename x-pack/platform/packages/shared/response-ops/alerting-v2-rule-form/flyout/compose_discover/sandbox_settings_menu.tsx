@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -44,22 +44,20 @@ export const SandboxSettingsMenu: React.FC<SandboxSettingsMenuProps> = ({
   onDisableManualSplit,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const closePopover = useCallback(() => setIsOpen(false), []);
-  const togglePopover = useCallback(() => setIsOpen((open) => !open), []);
 
-  const handleToggleSplit = useCallback(() => {
+  const handleToggleSplit = () => {
     if (manualSplitEnabled) {
       onDisableManualSplit();
     } else {
       onEnableManualSplit();
     }
-    closePopover();
-  }, [manualSplitEnabled, onEnableManualSplit, onDisableManualSplit, closePopover]);
+    setIsOpen(false);
+  };
 
   return (
     <EuiPopover
       isOpen={isOpen}
-      closePopover={closePopover}
+      closePopover={() => setIsOpen(false)}
       panelPaddingSize="none"
       anchorPosition="downRight"
       button={
@@ -68,7 +66,7 @@ export const SandboxSettingsMenu: React.FC<SandboxSettingsMenuProps> = ({
           size="s"
           color="text"
           aria-label={SETTINGS_BUTTON_LABEL}
-          onClick={togglePopover}
+          onClick={() => setIsOpen((open) => !open)}
           data-test-subj="querySandboxSettingsButton"
         />
       }
