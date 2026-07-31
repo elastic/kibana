@@ -10,16 +10,18 @@
 /**
  * Profile worker - runs RSPack build with profiling in a clean process.
  *
- * This script uses a minimal setup that avoids require-in-the-middle (from harden),
- * which conflicts with envinfo (used by RsDoctor).
+ * This script uses a minimal setup that avoids the prototype sealing performed by harden,
+ * which conflicts with envinfo (used by RsDoctor). envinfo redefines
+ * `Function.prototype.toString` at load time, which throws once `Object.seal(Function.prototype)`
+ * has been applied.
  *
  * Only loads:
  * - source-map-support for stack traces
  * - @kbn/swc-register for TypeScript transpilation
  *
  * Does NOT load:
- * - @kbn/setup-node-env (which includes harden with require-in-the-middle)
- * - @kbn/security-hardening
+ * - @kbn/setup-node-env (which includes harden's prototype sealing)
+ * - @kbn/security-hardening (which also seals prototypes)
  */
 
 /* eslint-disable no-var */
