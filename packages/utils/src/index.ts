@@ -1,1 +1,1 @@
-export const changed = true;
+export {};
