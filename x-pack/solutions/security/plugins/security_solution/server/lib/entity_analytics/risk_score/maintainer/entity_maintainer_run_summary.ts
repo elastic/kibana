@@ -7,16 +7,67 @@
 
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { RunMetrics } from './utils/run_metrics_tracker';
+import type { BuildLookupIndexResult } from './steps/build_lookup_index';
 
 type EntityMaintainerRunSummary = Parameters<
   Parameters<NonNullable<RegisterEntityMaintainerConfig['run']>>[0]['telemetry']['report']
 >[0];
 
+export interface RiskScoreFrameworkStageSummary {
+  name: 'base' | 'resolution' | 'reset_to_zero';
+  status: 'success' | 'error' | 'skipped';
+  durationMs: number;
+  applied?: number;
+  skipReason?: string;
+  errorKind?: string;
+}
+
+/**
+ * Builds the entity-maintainers framework run-summary payload for phase 0
+ * lookup-index build (once per maintainer run, not per entity type).
+ */
+export const buildRiskScorePhase0EntityMaintainerRunSummary = ({
+  status,
+  durationMs,
+  summary,
+  errorKind,
+}: {
+  status: 'success' | 'error';
+  durationMs: number;
+  summary?: BuildLookupIndexResult;
+  errorKind?: string;
+}): EntityMaintainerRunSummary => {
+  const entitiesIterated = summary?.entitiesIterated ?? 0;
+  const lookupRowsWritten = summary?.lookupRowsWritten ?? 0;
+  const lookupRowsFailed = summary?.lookupRowsFailed ?? 0;
+  const pagesProcessed = summary?.pagesProcessed ?? 0;
+
+  return {
+    iterations: pagesProcessed,
+    funnel: {
+      scanned: entitiesIterated,
+      qualified: entitiesIterated,
+      applied: lookupRowsWritten,
+      failed: lookupRowsFailed,
+    },
+    stages: [
+      {
+        name: 'phase0_lookup_build',
+        status,
+        durationMs,
+        applied: lookupRowsWritten,
+        ...(errorKind !== undefined ? { errorKind } : {}),
+      },
+    ],
+  };
+};
+
 /**
  * Builds the entity-maintainers framework run-summary payload for one
  * risk-score entity-type sub-run.
  *
- * Funnel is base-scoring only for now; resolution/reset land in `stages[]` later.
+ * Funnel is the base-scoring path only
+ * - stages[] = base / resolution / reset_to_zero applied + status/duration
  *
  * TODO - after #280948 (create-if-missing):
  * - scanned           = scores calculated from alerts          (unchanged)
@@ -26,13 +77,16 @@ type EntityMaintainerRunSummary = Parameters<
  *                     → absent at lookup (before create)
  * - skipped           = (unset)
  *                     → absent + policy rejected (score not written)
+ * - optional breakdown for skip/create reasons (e.g. created, skip_host_name_only)
  */
 export const buildRiskScoreEntityMaintainerRunSummary = ({
   entityType,
   metrics,
+  stages,
 }: {
   entityType: string;
   metrics: RunMetrics;
+  stages: RiskScoreFrameworkStageSummary[];
 }): EntityMaintainerRunSummary => {
   const qualifiedBase = metrics.scoresCalculatedBase - metrics.scoresDroppedNotInStore;
 
@@ -46,5 +100,6 @@ export const buildRiskScoreEntityMaintainerRunSummary = ({
       droppedNotInStore: metrics.scoresDroppedNotInStore,
       failed: metrics.scoresFailedBase,
     },
+    stages,
   };
 };
