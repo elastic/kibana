@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { loggerMock } from '@kbn/logging-mocks';
 import { waitGroup } from './kibana_migrator_utils';
 import { next } from './next';
 import type { State } from './state';
@@ -22,7 +23,8 @@ describe('migrations v2 next', () => {
       waitGroup(),
       waitGroup(),
       waitGroup(),
-      []
+      [],
+      loggerMock.create()
     )(state);
     expect(action).toEqual(null);
   });
@@ -34,7 +36,8 @@ describe('migrations v2 next', () => {
       waitGroup(),
       waitGroup(),
       waitGroup(),
-      []
+      [],
+      loggerMock.create()
     )(state);
     expect(action).toEqual(null);
   });

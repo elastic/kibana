@@ -124,7 +124,8 @@ export async function runResilientMigrator({
       readyToReindex,
       doneReindexing,
       updateRelocationAliases,
-      typeRegistry.getLegacyTypes()
+      typeRegistry.getLegacyTypes(),
+      logger
     ),
     model,
     abort: async (state?: State) => {

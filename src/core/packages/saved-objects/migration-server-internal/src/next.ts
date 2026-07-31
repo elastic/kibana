@@ -12,6 +12,7 @@ import * as Option from 'fp-ts/Option';
 import * as TaskEither from 'fp-ts/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
@@ -77,7 +78,8 @@ export const nextActionMap = (
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
   updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
-  removedTypes: string[]
+  removedTypes: string[],
+  logger: Logger
 ) => {
   return {
     INIT: (state: InitState) =>
@@ -277,6 +279,8 @@ export const nextActionMap = (
          * Right now, it's performed during OUTDATED_DOCUMENTS_REFRESH step.
          */
         refresh: false,
+        fetchAllocationExplain: state.retryCount === 0,
+        logger,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
@@ -329,7 +333,8 @@ export const next = (
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
   updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
-  removedTypes: string[]
+  removedTypes: string[],
+  logger: Logger
 ) => {
   const map = nextActionMap(
     client,
@@ -337,7 +342,8 @@ export const next = (
     readyToReindex,
     doneReindexing,
     updateRelocationAliases,
-    removedTypes
+    removedTypes,
+    logger
   );
   return (state: State) => {
     const delay = createDelayFn(state);
