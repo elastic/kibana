@@ -102,3 +102,45 @@ export const NO_NOTES_DESCRIPTION = i18n.translate(
       'This view aggregates notes from all source timelines. Notes added to individual timelines will appear here.',
   }
 );
+
+export const SUPER_TIMELINE_TOO_FEW = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.tooFew',
+  { defaultMessage: 'Select at least 2 timelines.' }
+);
+
+export const SUPER_TIMELINE_TOO_MANY = (max: number) =>
+  i18n.translate('xpack.securitySolution.timeline.superTimeline.tooMany', {
+    values: { max },
+    defaultMessage: 'Select no more than {max} timelines.',
+  });
+
+export const SUPER_TIMELINE_UNSUPPORTED_QUERY_TYPES = (titles: string) =>
+  i18n.translate('xpack.securitySolution.timeline.superTimeline.unsupportedQueryTypes', {
+    values: { titles },
+    defaultMessage: 'Super Timeline cannot merge ES|QL or EQL queries. Deselect: {titles}.',
+  });
+
+export const ESQL_SUPER_TIMELINE_INCOMPATIBLE = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.esqlIncompatible',
+  { defaultMessage: 'This timeline uses ES|QL and cannot be included in a Super Timeline.' }
+);
+
+export const EQL_SUPER_TIMELINE_INCOMPATIBLE = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.eqlIncompatible',
+  { defaultMessage: 'This timeline uses EQL and cannot be included in a Super Timeline.' }
+);
+
+export const SUPER_TIMELINE_QUERY_TYPE_COLUMN_HEADER = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.queryTypeColumnHeader',
+  { defaultMessage: 'Super Timeline compatibility' }
+);
+
+export const ESQL_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.esqlQueryTypeLabel',
+  { defaultMessage: 'ES|QL' }
+);
+
+export const EQL_QUERY_TYPE_LABEL = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.eqlQueryTypeLabel',
+  { defaultMessage: 'EQL' }
+);
