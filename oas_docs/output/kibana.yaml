@@ -53800,6 +53800,7 @@ paths:
       summary: Get risk score history for an entity
       tags:
         - Security Entity Analytics API
+      x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
