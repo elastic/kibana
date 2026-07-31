@@ -221,18 +221,22 @@ const buildMergedFilters = (
     return { filters: [], skippedQueryTimelines };
   }
 
+  const combinedFilter = buildCombinedFilter(
+    BooleanRelation.OR,
+    subFilters,
+    { id: deps.dataView.id },
+    false,
+    false,
+    SUPER_TIMELINE_QUERY_ALIAS,
+    FilterStateStore.APP_STATE
+  );
+  // Mark as multi-index so the filter bar skips per-data-view field validation.
+  // The Super Timeline spans N source timelines which may use different indices,
+  // so validation against any single data view will produce false ": Warning" labels.
+  combinedFilter.meta.isMultiIndex = true;
+
   return {
-    filters: [
-      buildCombinedFilter(
-        BooleanRelation.OR,
-        subFilters,
-        { id: deps.dataView.id },
-        false,
-        false,
-        SUPER_TIMELINE_QUERY_ALIAS,
-        FilterStateStore.APP_STATE
-      ),
-    ],
+    filters: [combinedFilter],
     skippedQueryTimelines,
   };
 };

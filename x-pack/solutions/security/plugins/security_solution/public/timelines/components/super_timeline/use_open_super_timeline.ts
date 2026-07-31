@@ -69,7 +69,7 @@ const fetchTimelines = async (savedObjectIds: string[]): Promise<FetchTimelinesR
 export const useOpenSuperTimeline = () => {
   const [isLoading, setIsLoading] = useState(false);
   const updateTimeline = useUpdateTimeline();
-  const { dataView } = useDataView(PageScope.timeline);
+  const { dataView, status: dataViewStatus } = useDataView(PageScope.timeline);
   const browserFields = useBrowserFields(PageScope.timeline);
   const { services } = useKibana();
   const { uiSettings, notifications, overlays } = services;
@@ -162,5 +162,7 @@ export const useOpenSuperTimeline = () => {
     [activeTimeline, browserFields, dataView, notifications, overlays, uiSettings, updateTimeline]
   );
 
-  return { openSuperTimeline, isLoading };
+  // Also block while the data view hasn't loaded: if clicked before dataView.id is set,
+  // buildCombinedFilter receives meta.index=undefined and the filter bar shows ": Warning".
+  return { openSuperTimeline, isLoading: isLoading || dataViewStatus !== 'ready' };
 };
