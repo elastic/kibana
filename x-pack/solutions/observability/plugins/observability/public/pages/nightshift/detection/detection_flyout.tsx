@@ -38,7 +38,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import { useFormatTimestamp } from '../common/format_timestamp';
 import { getChangePointLabel } from './change_point';
-import { ChangePointTrendChart } from './change_point_visualization';
+import { ChangePointLensChart } from './change_point_lens_chart';
 import { EntityChip } from '../entity/entity_chip';
 import { EntityFlyout } from '../entity/entity_flyout';
 import { FlyoutSectionTitle } from '../common/flyout_section_title';
@@ -290,11 +290,7 @@ export function DetectionFlyout({
             })}
           </FlyoutSectionTitle>
           <EuiSpacer size="s" />
-          <ChangePointTrendChart
-            changePointType={detection.change_point_type}
-            streamName={detection.stream_name}
-            endTime={detection['@timestamp']}
-          />
+          <ChangePointLensChart detection={detection} />
 
           {esqlQuery && (
             <>
