@@ -29,7 +29,7 @@ const assert = require('assert');
  * @property {ChromiumUpdateConfig} mac_x64
  * @property {ChromiumUpdateConfig} win64
  * @property {ChromiumUpdateConfig & ExtraChromiumUpdateConfig} linux_arm64
- * @property {ChromiumUpdateConfig} linux_x64
+ * @property {ChromiumUpdateConfig & ExtraChromiumUpdateConfig} linux_x64
  */
 
 /**
@@ -150,14 +150,12 @@ module.exports = function transformer(file, api, options) {
         });
       }
 
-      // linux x64 is sourced from chrome for testing, so it's matched on its archivePath like the
-      // other chrome for testing packages and keeps the archiveFilename published by that bucket
       if (
         property.type === 'ObjectProperty' &&
         property.key.type === 'Identifier' &&
-        property.key.name === 'archivePath' &&
+        property.key.name === 'binaryRelativePath' &&
         property.value.type === 'StringLiteral' &&
-        property.value.value === 'linux64'
+        /linux_x64/.test(property.value.value)
       ) {
         _properties.forEach((property) => {
           setPropertyValue(
@@ -169,6 +167,11 @@ module.exports = function transformer(file, api, options) {
             property,
             'binaryChecksum',
             options.updateConfig.linux_x64.binaryChecksum
+          );
+          setPropertyValue(
+            property,
+            'archiveFilename',
+            options.updateConfig.linux_x64.archiveFilename
           );
         });
       }

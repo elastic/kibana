@@ -15,12 +15,21 @@ build, using the
 [`headless_shell`](https://chromium.googlesource.com/chromium/src/+/5cf4b8b13ed518472038170f8de9db2f6c258fe4/headless)
 build target. There are no (trustworthy) sources of these builds available elsewhere.
 
-Fortunately, creating the custom builds is only necessary for Linux arm64. Every other platform,
-including Linux x64, consumes the `chrome-headless-shell` archives published by the Chrome team via
-[chrome for testing](https://github.com/GoogleChromeLabs/chrome-for-testing#json-api-endpoints),
-which have no X11 dependency. See `ChromiumArchivePaths.packages` in
+Fortunately, creating the custom builds is only necessary for Linux, and it is necessary for **both**
+x64 and arm64. macOS and Windows consume the `chrome-headless-shell` archives published by the Chrome
+team via [chrome for testing](https://github.com/GoogleChromeLabs/chrome-for-testing#json-api-endpoints).
+See `ChromiumArchivePaths.packages` in
 `src/platform/packages/private/kbn-screenshotting-server/src/paths.ts` for the source each platform
 resolves to.
+
+Note that `chrome-headless-shell` is **not** a drop-in replacement for our Linux builds. Despite the
+name, it still links against libX11, libgtk, libgbm, libatk, libasound and others — 28 `DT_NEEDED`
+entries against our build's 10. The Kibana docker image installs only `nss`, `freetype` and
+`fontconfig` (see the runtime stage of
+`src/dev/build/tasks/os_packages/docker_generator/templates/base/Dockerfile`), and the deb/rpm
+packages declare no dependencies at all, so `chrome-headless-shell` fails in the dynamic linker
+before it can speak CDP. Puppeteer surfaces that as an unhelpful
+`Protocol error (...): Target closed`.
 
 ## Build Script Usage
 
