@@ -55,9 +55,9 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
   const queryTimelineById = useQueryTimelineById();
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
 
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
   const { dataView } = useDataView(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const selectDataView = useSelectDataView();
 
   const dataViewId = dataView?.id ?? '';
