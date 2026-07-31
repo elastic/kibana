@@ -51,10 +51,7 @@ export const WorkflowConfiguration = () => {
           )}
         />
       </EuiFormRow>
-      <ConfirmationPolicySelect
-        id="agentBuilderWorkflowToolConfirmationPolicySelect"
-        data-test-subj="agentBuilderWorkflowToolConfirmationPolicySelect"
-      />
+      <ConfirmationPolicySelect />
     </>
   );
 };

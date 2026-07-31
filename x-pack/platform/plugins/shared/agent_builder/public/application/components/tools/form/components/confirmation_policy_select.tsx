@@ -12,21 +12,13 @@ import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-common';
 import { i18nMessages } from '../i18n';
 import type { ToolConfirmationFormData } from '../types/tool_form_types';
 
-interface ConfirmationPolicySelectProps {
-  id: string;
-  'data-test-subj'?: string;
-}
-
 const confirmationOptions: Array<{ value: ToolConfirmationPolicyMode; text: string }> = [
   { value: 'never' as const, text: i18nMessages.configuration.form.confirmation.neverOption },
   { value: 'once' as const, text: i18nMessages.configuration.form.confirmation.onceOption },
   { value: 'always' as const, text: i18nMessages.configuration.form.confirmation.alwaysOption },
 ];
 
-export const ConfirmationPolicySelect = ({
-  id,
-  'data-test-subj': dataTestSubj = 'agentBuilderToolConfirmationPolicySelect',
-}: ConfirmationPolicySelectProps) => {
+export const ConfirmationPolicySelect = () => {
   const {
     control,
     formState: { errors },
@@ -44,8 +36,8 @@ export const ConfirmationPolicySelect = ({
         name="confirmation_ask_user"
         render={({ field: { ref, onChange, value, ...field } }) => (
           <EuiSelect
-            id={id}
-            data-test-subj={dataTestSubj}
+            id="agentBuilderToolConfirmationPolicySelect"
+            data-test-subj="agentBuilderToolConfirmationPolicySelect"
             options={confirmationOptions}
             value={value ?? 'never'}
             onChange={(e) => onChange(e.target.value)}

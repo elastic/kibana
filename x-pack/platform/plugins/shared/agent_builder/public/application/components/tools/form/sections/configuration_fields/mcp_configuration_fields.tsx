@@ -71,10 +71,7 @@ export const McpConfiguration = ({ mode }: McpConfigurationProps) => {
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
       <EuiSpacer />
-      <ConfirmationPolicySelect
-        id="agentBuilderMcpToolConfirmationPolicySelect"
-        data-test-subj="agentBuilderMcpToolConfirmationPolicySelect"
-      />
+      <ConfirmationPolicySelect />
     </>
   );
 };
