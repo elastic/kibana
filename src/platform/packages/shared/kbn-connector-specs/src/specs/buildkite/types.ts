@@ -330,6 +330,9 @@ export const CallToolInputSchema = lazySchema(() =>
       ),
     arguments: z
       .record(z.string().max(200), z.unknown())
+      .refine((v) => Object.keys(v).length <= 100, {
+        message: 'Must contain at most 100 entries',
+      })
       .optional()
       .describe(
         'Arguments to pass to the tool as a key/value object. The connector automatically fills in "org_slug" from the connector configuration unless you override it here. Use listTools to see each tool\'s parameter schema.'
