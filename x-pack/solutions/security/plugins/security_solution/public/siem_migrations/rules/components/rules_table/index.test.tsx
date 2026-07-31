@@ -232,6 +232,22 @@ describe('MigrationRulesTable', () => {
     expect(getByTestId('siemMigrationsRulesTable')).toBeInTheDocument();
   });
 
+  test('should keep showing the previous rows with a loading indicator while re-fetching after a search or filter change', () => {
+    (useGetMigrationRules as jest.Mock).mockReturnValue({
+      data: { migrationRules: [mockRule], total: 1 },
+      isLoading: false,
+      isFetching: true,
+    });
+
+    render(<MigrationRulesTable migrationStats={mockMigrationStats} />, {
+      wrapper: TestProviders,
+    });
+
+    const table = screen.getByTestId('rules-translation-table');
+    expect(table).toHaveClass('euiBasicTable-loading');
+    expect(table.querySelectorAll('.euiTableRow')).toHaveLength(1);
+  });
+
   describe('Table results', () => {
     const statusColumns: TableColumn[] = [
       {

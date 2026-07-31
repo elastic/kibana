@@ -119,6 +119,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const {
       data: { migrationRules, total } = { migrationRules: [], total: 0 },
       isLoading: isDataLoading,
+      isFetching: isDataFetching,
     } = useGetMigrationRules({
       migrationId,
       page: pageIndex,
@@ -284,7 +285,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
         onStartMigrationWithSettings,
       });
 
-    const isRulesLoading = isPrebuiltRulesLoading || isDataLoading || isTableLoading || isStarting;
+    const isRulesLoading =
+      isPrebuiltRulesLoading || isDataLoading || isDataFetching || isTableLoading || isStarting;
 
     const ruleActionsFactory = useCallback(
       (migrationRule: RuleMigrationRule, closeRulePreview: () => void) => {
@@ -367,7 +369,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     });
 
     const rulesColumns = useMigrationRulesTableColumns({
-      disableActions: isTableLoading,
+      disableActions: isRulesLoading,
       openMigrationRuleDetails: openRulePreview,
       installMigrationRule: installSingleRule,
       getMigrationRuleData,
@@ -443,7 +445,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiBasicTable<RuleMigrationRule>
-                  loading={isTableLoading}
+                  loading={isTableLoading || isDataFetching}
                   items={migrationRules}
                   pagination={pagination}
                   sorting={sorting}
