@@ -8,34 +8,40 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-interface EnterHintProps {
-  label: string;
+interface SubmitButtonProps {
+  tooltip: string;
+  onClick: () => void;
+  'data-test-subj'?: string;
 }
 
-export const EnterHint: React.FC<EnterHintProps> = ({ label }) => {
+export const SubmitButton: React.FC<SubmitButtonProps> = ({
+  tooltip,
+  onClick,
+  'data-test-subj': dataTestSubj,
+}) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiFlexItem
       grow={false}
       css={css`
-        padding-right: ${euiTheme.size.xs};
+        padding-left: ${euiTheme.size.xs};
         flex-shrink: 0;
-        color: ${euiTheme.colors.subduedText};
       `}
     >
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="returnKey" size="s" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {label}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiToolTip position="top" content={tooltip} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="returnKey"
+          display="fill"
+          color="primary"
+          size="s"
+          aria-label={tooltip}
+          onClick={onClick}
+          data-test-subj={dataTestSubj}
+        />
+      </EuiToolTip>
     </EuiFlexItem>
   );
 };

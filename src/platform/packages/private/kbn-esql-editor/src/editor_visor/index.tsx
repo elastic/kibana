@@ -22,8 +22,8 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
+import { SubmitButton } from './submit_button';
 import { VisorMode } from './visor_mode';
-import { EnterHint } from './enter_hint';
 import { useNlGeneration } from './use_nl_generation';
 import {
   searchPlaceholder,
@@ -242,7 +242,13 @@ export function QuickSearchVisor({
                     isClearable={false}
                   />
                 </EuiFlexItem>
-                {searchValue.trim() && <EnterHint label={enterHintFilterLabel} />}
+                {searchValue.trim() && (
+                  <SubmitButton
+                    tooltip={enterHintFilterLabel}
+                    onClick={() => onKqlSubmit(searchValue)}
+                    data-test-subj="esqlVisorKQLSubmit"
+                  />
+                )}
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : (
@@ -255,7 +261,7 @@ export function QuickSearchVisor({
               >
                 <EuiFlexItem grow={false} css={styles.aiBadgeWrapper}>
                   <EuiBadge
-                    color="accent"
+                    color="primary"
                     iconType="cross"
                     iconSide="right"
                     onClick={onBackToKql}
@@ -298,7 +304,13 @@ export function QuickSearchVisor({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 ) : (
-                  nlValue.trim() && <EnterHint label={enterHintGenerateLabel} />
+                  nlValue.trim() && (
+                    <SubmitButton
+                      tooltip={enterHintGenerateLabel}
+                      onClick={onNlSubmit}
+                      data-test-subj="esqlVisorNLSubmit"
+                    />
+                  )
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>

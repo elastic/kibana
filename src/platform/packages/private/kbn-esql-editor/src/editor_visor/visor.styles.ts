@@ -88,7 +88,6 @@ export const visorStyles = (
     `,
     searchWrapper: css`
       justify-content: center;
-      padding-right: ${euiTheme.size.xs};
       position: relative;
       min-width: 0;
 
@@ -122,7 +121,6 @@ export const visorStyles = (
       width: 100%;
     `,
     submitButtonWrapper: css`
-      padding-right: ${euiTheme.size.xs};
       padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
     `,
