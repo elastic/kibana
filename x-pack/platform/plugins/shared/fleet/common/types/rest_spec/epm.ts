@@ -131,6 +131,8 @@ export interface NamespaceConflictWarning {
   namespace: string;
   /** Fleet-managed base template that is being overridden. */
   baseTemplateName: string;
+  /** Fleet-managed namespace index template, e.g. `logs-nginx.access@namespace.production`. */
+  nsTemplateName: string;
   /** Templates conflicting with Fleet's namespace template, with their priority and conflict type. */
   conflictingTemplates: ConflictingTemplate[];
 }

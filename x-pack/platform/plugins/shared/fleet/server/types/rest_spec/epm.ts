@@ -530,6 +530,7 @@ export const NamespaceConflictWarningSchema = schema.object({
   dataStreamName: schema.string(),
   namespace: schema.string(),
   baseTemplateName: schema.string(),
+  nsTemplateName: schema.string(),
   conflictingTemplates: schema.arrayOf(ConflictingTemplateSchema, { maxSize: 100 }),
 });
 

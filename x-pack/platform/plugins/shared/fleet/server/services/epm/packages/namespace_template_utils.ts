@@ -281,6 +281,7 @@ export async function checkNamespaceConflict({
       dataStreamName: indexName,
       namespace,
       baseTemplateName,
+      nsTemplateName,
       conflictingTemplates,
     };
   } catch (err) {

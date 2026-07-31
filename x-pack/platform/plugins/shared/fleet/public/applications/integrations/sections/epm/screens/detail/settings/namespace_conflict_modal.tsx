@@ -25,7 +25,7 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
     <EuiConfirmModal
       title={i18n.translate(
         'xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.title',
-        { defaultMessage: 'Conflicting index templates detected' }
+        { defaultMessage: 'Overlapping index templates detected' }
       )}
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
@@ -44,7 +44,7 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
     >
       <FormattedMessage
         id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.body"
-        defaultMessage="One or more dedicated namespace index templates may conflict with the existing index templates:"
+        defaultMessage="If enabled, one or more namespace index templates (priority 250) will overlap with existing index templates:"
       />
       <EuiSpacer size="s" />
       <ul>
@@ -55,9 +55,9 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
               {t.conflictType === 'overrides_fleet' && (
                 <FormattedMessage
                   id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.overridesFleet"
-                  defaultMessage="Fleet's {dataStream} namespace template will be overridden by {template} (priority: {priority})"
+                  defaultMessage="{nsTemplate} will be overridden by {template}, which has higher priority ({priority})"
                   values={{
-                    dataStream: <EuiCode>{w.dataStreamName}</EuiCode>,
+                    nsTemplate: <EuiCode>{w.nsTemplateName}</EuiCode>,
                     template: <EuiCode>{t.name}</EuiCode>,
                     priority: t.priority,
                   }}
@@ -66,9 +66,9 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
               {t.conflictType === 'blocked_by_same_priority' && (
                 <FormattedMessage
                   id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.blockedBySamePriority"
-                  defaultMessage="Fleet's {dataStream} namespace template cannot be created because {template} (priority {priority}) has the same priority"
+                  defaultMessage="{nsTemplate} will not be created because {template} has the same priority ({priority})"
                   values={{
-                    dataStream: <EuiCode>{w.dataStreamName}</EuiCode>,
+                    nsTemplate: <EuiCode>{w.nsTemplateName}</EuiCode>,
                     template: <EuiCode>{t.name}</EuiCode>,
                     priority: t.priority,
                   }}
@@ -77,9 +77,9 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
               {t.conflictType === 'overridden_by_fleet' && (
                 <FormattedMessage
                   id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.overriddenByFleet"
-                  defaultMessage="Fleet's {dataStream} namespace template will override {template} (priority {priority})"
+                  defaultMessage="{nsTemplate} will override {template}, which has lower priority ({priority})"
                   values={{
-                    dataStream: <EuiCode>{w.dataStreamName}</EuiCode>,
+                    nsTemplate: <EuiCode>{w.nsTemplateName}</EuiCode>,
                     template: <EuiCode>{t.name}</EuiCode>,
                     priority: t.priority,
                   }}
@@ -92,7 +92,7 @@ export const NamespaceConflictModal: React.FC<Props> = ({ conflicts, onConfirm, 
       <EuiSpacer size="s" />
       <FormattedMessage
         id="xpack.fleet.integrations.settings.namespaceCustomization.conflictModal.resolution"
-        defaultMessage="To resolve, remove or adjust the priority of the conflicting templates."
+        defaultMessage="To ensure dedicated namespace index templates work as expected, remove the overlapping index templates or set their priority lower than 250 before enabling."
       />
     </EuiConfirmModal>
   );
