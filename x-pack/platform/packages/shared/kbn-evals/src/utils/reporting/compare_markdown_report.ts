@@ -142,7 +142,9 @@ export function formatMarkdownCompareReport({
     actionLinks.push(`[View full comparison in UI](${comparePageUrl})`);
   }
   if (refreshBaselineUrl) {
-    actionLinks.push(`[Refresh baseline against latest ${baselineBranch}](${refreshBaselineUrl})`);
+    actionLinks.push(
+      `[Refresh baseline against latest ${baselineBranch}](${refreshBaselineUrl}) *(click Unblock in the eval build)*`
+    );
   }
   if (actionLinks.length > 0) {
     lines.push('');

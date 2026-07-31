@@ -318,13 +318,11 @@ EOF
           preemptible: true
 EOF
         # Refresh baseline block + trigger (top-level — 2-space indent).
-        # blocked_state: passed keeps the build green while the block is pending.
         # The trigger fires a fresh main eval run so the PR comment is updated
         # with a same-day baseline when the auto-discovered one is stale.
         cat >>"$FANOUT_PIPELINE_FILE" <<EOF
   - block: "LLM Evals: Refresh ${suite_display_name}"
     key: "kbn-evals-${group_key_safe}-refresh-block"
-    blocked_state: passed
     depends_on:
       - "kbn-evals-${group_key_safe}-post-comparison"
     allow_dependency_failure: true

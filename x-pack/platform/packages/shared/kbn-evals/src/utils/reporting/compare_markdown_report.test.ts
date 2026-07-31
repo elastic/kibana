@@ -87,7 +87,7 @@ describe('formatMarkdownCompareReport', () => {
     });
 
     expect(output).toContain(
-      '[Refresh baseline against latest main](https://buildkite.com/elastic/kibana-pull-request/builds/123#kbn-evals-refresh-block)'
+      '[Refresh baseline against latest main](https://buildkite.com/elastic/kibana-pull-request/builds/123#kbn-evals-refresh-block) *(click Unblock in the eval build)*'
     );
   });
 
@@ -103,7 +103,7 @@ describe('formatMarkdownCompareReport', () => {
     expect(output).toContain('**Baseline (release/9.x)**: exp-b');
     expect(output).toContain('Mean (release/9.x)');
     expect(output).toContain(
-      '[Refresh baseline against latest release/9.x](https://buildkite.com/builds/456#block)'
+      '[Refresh baseline against latest release/9.x](https://buildkite.com/builds/456#block) *(click Unblock in the eval build)*'
     );
   });
 
@@ -118,7 +118,7 @@ describe('formatMarkdownCompareReport', () => {
 
     expect(output).toContain('[View full comparison in UI](https://kibana.example.com/compare)');
     expect(output).toContain(
-      '[Refresh baseline against latest main](https://buildkite.com/builds/123#kbn-evals-refresh-block)'
+      '[Refresh baseline against latest main](https://buildkite.com/builds/123#kbn-evals-refresh-block) *(click Unblock in the eval build)*'
     );
   });
 
