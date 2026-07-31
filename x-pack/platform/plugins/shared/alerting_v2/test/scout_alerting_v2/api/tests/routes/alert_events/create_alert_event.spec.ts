@@ -59,7 +59,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
       expect(response).toHaveStatusCode(201);
       expect(typeof response.body.group_hash).toBe('string');
       expect(typeof response.body.episode_id).toBe('string');
-      expect(response.body.episode_url).toContain('/app/management/alertingV2/episodes/');
+      expect(response.body.episode_url).toBeUndefined();
 
       const doc = await findExternalAlertByGroupHash(esClient, response.body.group_hash);
       expect(doc).toMatchObject({
@@ -90,7 +90,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
       expect(response).toHaveStatusCode(201);
       expect(typeof response.body.group_hash).toBe('string');
       expect(typeof response.body.episode_id).toBe('string');
-      expect(response.body.episode_url).toContain('/app/management/alertingV2/episodes/');
+      expect(response.body.episode_url).toBeUndefined();
 
       const doc = await findExternalAlertByGroupHash(esClient, response.body.group_hash);
       expect(doc).toMatchObject({

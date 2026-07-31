@@ -22,15 +22,8 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
 
-/** Kibana app path for episode detail — callers prepend origin + basePath as needed. */
-const EPISODE_DETAILS_APP_PATH = '/app/management/alertingV2/episodes';
-
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
-}
-
-function buildEpisodeUrl(episodeId: string): string {
-  return `${EPISODE_DETAILS_APP_PATH}/${encodeURIComponent(episodeId)}`;
 }
 
 /**
@@ -137,7 +130,6 @@ export class AlertEventsClient {
     return {
       group_hash: groupHash,
       episode_id: episodeId,
-      episode_url: buildEpisodeUrl(episodeId),
     };
   }
 
