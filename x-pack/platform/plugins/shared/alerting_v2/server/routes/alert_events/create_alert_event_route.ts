@@ -40,16 +40,8 @@ export class CreateAlertEventRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const body = this.request.body;
-    const source = body.source;
-
-    if (!source) {
-      return this.ctx.response.badRequest({
-        body: { message: 'source is required (body field or /:source URL path)' },
-      });
-    }
-
-    const result = await this.alertEventsClient.ingestAlertEvent({ source, body });
+    // Body schema already requires source — pass through as the canonical payload.
+    const result = await this.alertEventsClient.ingestAlertEvent(this.request.body);
     return this.ctx.response.created({ body: result });
   }
 }

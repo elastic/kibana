@@ -41,12 +41,12 @@ function buildEpisodeUrl(episodeId: string): string {
  *
  * `createAlertEventDataSchema` requires one of the three.
  */
-function resolveFingerprint(body: CreateAlertEventData, source: string): string {
-  if (body.fingerprint) return body.fingerprint;
+function resolveFingerprint(event: CreateAlertEventData): string {
+  if (event.fingerprint) return event.fingerprint;
 
-  if (body.fingerprint_fields?.length) {
-    const record = body as CreateAlertEventData & Record<string, unknown>;
-    const values = body.fingerprint_fields.map((field) => {
+  if (event.fingerprint_fields?.length) {
+    const record = event as CreateAlertEventData & Record<string, unknown>;
+    const values = event.fingerprint_fields.map((field) => {
       if (
         field !== 'data' &&
         field !== 'fingerprint_fields' &&
@@ -55,12 +55,12 @@ function resolveFingerprint(body: CreateAlertEventData, source: string): string 
       ) {
         return String(record[field]);
       }
-      return String(body.data?.[field] ?? '');
+      return String(event.data?.[field] ?? '');
     });
     return sha256(values.join(':'));
   }
 
-  if (body.rule_id) return sha256(`${source}:${body.rule_id}`);
+  if (event.rule_id) return sha256(`${event.source}:${event.rule_id}`);
 
   throw new Error('Missing fingerprint, fingerprint_fields, or rule_id');
 }
@@ -76,22 +76,18 @@ export class AlertEventsClient {
   /**
    * Ingests an external alert event into `.rule-events` (no backing rule SO).
    * Shared by POST /api/alerting/v2/alerts and POST /api/alerting/v2/alerts/:source.
+   * Callers must pass a normalized payload with `source` already set.
    */
-  public async ingestAlertEvent({
-    source,
-    body,
-  }: {
-    source: string;
-    body: CreateAlertEventData;
-  }): Promise<CreateAlertEventResponse> {
-    const fingerprint = resolveFingerprint(body, source);
+  public async ingestAlertEvent(event: CreateAlertEventData): Promise<CreateAlertEventResponse> {
+    const { source } = event;
+    const fingerprint = resolveFingerprint(event);
     // spaceId scopes the hash to prevent cross-space group_hash collisions.
     const groupHash = sha256(`${this.spaceId}:${source}:${fingerprint}`);
 
-    const episodeStatus = body.alert_status ?? alertEpisodeStatus.active;
+    const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
     const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus);
 
-    const atTimestamp = body.timestamp ?? new Date().toISOString();
+    const atTimestamp = event.timestamp ?? new Date().toISOString();
 
     const status =
       episodeStatus === alertEpisodeStatus.inactive ||
@@ -111,7 +107,7 @@ export class AlertEventsClient {
       '@timestamp': atTimestamp,
       scheduled_timestamp: atTimestamp,
       group_hash: groupHash,
-      data: body.data ?? {},
+      data: event.data ?? {},
       status,
       source,
       type: alertEventType.alert,
@@ -121,7 +117,7 @@ export class AlertEventsClient {
         ...(statusCount != null ? { status_count: statusCount } : {}),
       },
       space_id: this.spaceId,
-      ...(body.severity != null ? { severity: body.severity } : {}),
+      ...(event.severity != null ? { severity: event.severity } : {}),
     };
 
     await this.storageService.bulkIndexDocs({

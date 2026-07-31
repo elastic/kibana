@@ -10,7 +10,7 @@ import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import type { z } from '@kbn/zod/v4';
 import {
-  createAlertEventDataSchema,
+  createAlertEventPathBodySchema,
   createAlertEventSourceParamsSchema,
   type CreateAlertEventData,
 } from '@kbn/alerting-v2-schemas';
@@ -34,7 +34,7 @@ export class CreateAlertEventBySourceRoute extends BaseAlertingRoute {
   static schemas = {
     request: {
       params: createAlertEventSourceParamsSchema,
-      body: createAlertEventDataSchema,
+      body: createAlertEventPathBodySchema,
     },
     response: createAlertEventRouteSchemas.response,
   };
@@ -47,7 +47,7 @@ export class CreateAlertEventBySourceRoute extends BaseAlertingRoute {
     private readonly request: KibanaRequest<
       z.infer<typeof createAlertEventSourceParamsSchema>,
       unknown,
-      CreateAlertEventData
+      z.infer<typeof createAlertEventPathBodySchema>
     >,
     @inject(AlertEventsClient) private readonly alertEventsClient: AlertEventsClient
   ) {
@@ -55,10 +55,12 @@ export class CreateAlertEventBySourceRoute extends BaseAlertingRoute {
   }
 
   protected async execute() {
-    const result = await this.alertEventsClient.ingestAlertEvent({
+    // Normalize at the edge: path source becomes part of the canonical payload.
+    const event: CreateAlertEventData = {
+      ...this.request.body,
       source: this.request.params.source,
-      body: this.request.body,
-    });
+    };
+    const result = await this.alertEventsClient.ingestAlertEvent(event);
     return this.ctx.response.created({ body: result });
   }
 }

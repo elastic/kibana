@@ -35,7 +35,7 @@ const sourceSchema = z
   });
 
 /**
- * Request body for POST /api/alerting/v2/alerts[/:source].
+ * Shared request-body fields (no `source`).
  *
  * `.passthrough()` keeps unknown top-level keys so `fingerprint_fields` can
  * name either top-level body fields (e.g. Datadog `monitor_id` + `scope`) or
@@ -45,48 +45,68 @@ const sourceSchema = z
  * want them put `rule_name` / `alert_url` inside `data`. The UI reads those
  * keys when present.
  */
-export const createAlertEventDataSchema = z
-  .object({
-    // Required via body or /:source URL path — validated in the route handler.
-    source: sourceSchema.optional(),
+const createAlertEventBodyBaseObjectSchema = z.object({
+  // At least one of fingerprint / fingerprint_fields / rule_id is required
+  // (enforced by .superRefine below). Priority when resolving the series key:
+  // fingerprint > fingerprint_fields > rule_id (hashed with source).
+  fingerprint: z.string().min(1).max(MAX_FINGERPRINT_LENGTH).optional(),
+  fingerprint_fields: z
+    .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+    .min(1)
+    .max(MAX_FINGERPRINT_FIELDS)
+    .optional(),
+  rule_id: z.string().min(1).max(ID_MAX_LENGTH).optional(),
 
-    // At least one of fingerprint / fingerprint_fields / rule_id is required
-    // (enforced by .superRefine below). Priority when resolving the series key:
-    // fingerprint > fingerprint_fields > rule_id (hashed with source).
-    fingerprint: z.string().min(1).max(MAX_FINGERPRINT_LENGTH).optional(),
-    fingerprint_fields: z
-      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
-      .min(1)
-      .max(MAX_FINGERPRINT_FIELDS)
-      .optional(),
-    rule_id: z.string().min(1).max(ID_MAX_LENGTH).optional(),
+  alert_status: externalAlertStatusSchema.optional(),
+  data: z
+    .record(z.string().max(MAX_FIELD_NAME_LENGTH), z.any())
+    .optional()
+    .superRefine((data, ctx) => {
+      if (data != null && Object.keys(data).length > MAX_ALERT_EVENT_DATA_KEYS) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `data must have at most ${MAX_ALERT_EVENT_DATA_KEYS} keys`,
+        });
+      }
+    }),
+  timestamp: z.iso.datetime().optional(),
+  severity: alertEventSeveritySchema.optional(),
+});
 
-    alert_status: externalAlertStatusSchema.optional(),
-    data: z
-      .record(z.string().max(MAX_FIELD_NAME_LENGTH), z.any())
-      .optional()
-      .superRefine((data, ctx) => {
-        if (data != null && Object.keys(data).length > MAX_ALERT_EVENT_DATA_KEYS) {
-          ctx.addIssue({
-            code: 'custom',
-            message: `data must have at most ${MAX_ALERT_EVENT_DATA_KEYS} keys`,
-          });
-        }
-      }),
-    timestamp: z.iso.datetime().optional(),
-    severity: alertEventSeveritySchema.optional(),
+const refineIdentityFields = (
+  body: z.infer<typeof createAlertEventBodyBaseObjectSchema>,
+  ctx: z.RefinementCtx
+) => {
+  if (!body.fingerprint && !body.fingerprint_fields?.length && !body.rule_id) {
+    ctx.addIssue({
+      code: 'custom',
+      message:
+        'one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity',
+      path: ['fingerprint'],
+    });
+  }
+};
+
+/**
+ * HTTP edge only — POST /api/alerting/v2/alerts/:source request body.
+ * `source` is supplied by the path; the route merges it before calling the client.
+ * Do not use this type inward of the route layer.
+ */
+export const createAlertEventPathBodySchema = createAlertEventBodyBaseObjectSchema
+  .passthrough()
+  .superRefine(refineIdentityFields);
+
+/**
+ * Canonical create-alert payload (source required).
+ * Also the POST /api/alerting/v2/alerts request body schema.
+ * Prefer this type everywhere past the HTTP edge.
+ */
+export const createAlertEventDataSchema = createAlertEventBodyBaseObjectSchema
+  .extend({
+    source: sourceSchema,
   })
   .passthrough()
-  .superRefine((body, ctx) => {
-    if (!body.fingerprint && !body.fingerprint_fields?.length && !body.rule_id) {
-      ctx.addIssue({
-        code: 'custom',
-        message:
-          'one of fingerprint, fingerprint_fields, or rule_id is required to establish a stable series identity',
-        path: ['fingerprint'],
-      });
-    }
-  });
+  .superRefine(refineIdentityFields);
 
 /** Path params for POST /api/alerting/v2/alerts/:source */
 export const createAlertEventSourceParamsSchema = z.object({
@@ -99,5 +119,6 @@ export const createAlertEventResponseSchema = z.object({
   episode_url: z.string(),
 });
 
+/** Normalized ingest payload — `source` is always present past the HTTP edge. */
 export type CreateAlertEventData = z.infer<typeof createAlertEventDataSchema>;
 export type CreateAlertEventResponse = z.infer<typeof createAlertEventResponseSchema>;

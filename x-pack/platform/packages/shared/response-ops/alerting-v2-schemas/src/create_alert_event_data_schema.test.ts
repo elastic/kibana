@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { createAlertEventDataSchema } from './create_alert_event_data_schema';
+import {
+  createAlertEventDataSchema,
+  createAlertEventPathBodySchema,
+} from './create_alert_event_data_schema';
 import {
   ID_MAX_LENGTH,
   MAX_ALERT_EVENT_DATA_KEYS,
@@ -13,35 +16,45 @@ import {
   MAX_FINGERPRINT_LENGTH,
 } from './constants';
 
-describe('createAlertEventDataSchema bounds', () => {
-  const base = { source: 'datadog', fingerprint: 'fp-1' };
+describe('create alert event body schemas', () => {
+  const baseWithSource = { source: 'datadog', fingerprint: 'fp-1' };
+  const baseWithoutSource = { fingerprint: 'fp-1' };
 
-  it('accepts a well-formed body', () => {
+  it('accepts a well-formed body with required source', () => {
     expect(
       createAlertEventDataSchema.safeParse({
-        ...base,
+        ...baseWithSource,
         timestamp: '2026-07-29T12:00:00.000Z',
         data: { rule_name: 'CPU high' },
       }).success
     ).toBe(true);
   });
 
+  it('accepts a well-formed path body without source', () => {
+    expect(createAlertEventPathBodySchema.safeParse(baseWithoutSource).success).toBe(true);
+  });
+
+  it('requires source on the canonical schema and not on the path body schema', () => {
+    expect(createAlertEventDataSchema.safeParse(baseWithoutSource).success).toBe(false);
+    expect(createAlertEventPathBodySchema.safeParse(baseWithoutSource).success).toBe(true);
+  });
+
   it('rejects oversized fingerprint / source / fingerprint_fields', () => {
     expect(
       createAlertEventDataSchema.safeParse({
-        ...base,
+        ...baseWithSource,
         fingerprint: 'x'.repeat(MAX_FINGERPRINT_LENGTH + 1),
       }).success
     ).toBe(false);
     expect(
       createAlertEventDataSchema.safeParse({
-        ...base,
+        ...baseWithSource,
         source: 'x'.repeat(ID_MAX_LENGTH + 1),
       }).success
     ).toBe(false);
     expect(
       createAlertEventDataSchema.safeParse({
-        ...base,
+        ...baseWithSource,
         fingerprint: undefined,
         fingerprint_fields: Array.from({ length: MAX_FINGERPRINT_FIELDS + 1 }, (_, i) => `f${i}`),
       }).success
@@ -52,16 +65,21 @@ describe('createAlertEventDataSchema bounds', () => {
     const data = Object.fromEntries(
       Array.from({ length: MAX_ALERT_EVENT_DATA_KEYS + 1 }, (_, i) => [`k${i}`, i])
     );
-    expect(createAlertEventDataSchema.safeParse({ ...base, data }).success).toBe(false);
+    expect(createAlertEventDataSchema.safeParse({ ...baseWithSource, data }).success).toBe(false);
     expect(
-      createAlertEventDataSchema.safeParse({ ...base, timestamp: 'not-a-datetime' }).success
+      createAlertEventDataSchema.safeParse({
+        ...baseWithSource,
+        timestamp: 'not-a-datetime',
+      }).success
     ).toBe(false);
   });
 
-  it('requires one of fingerprint, fingerprint_fields, or rule_id', () => {
+  it('requires one of fingerprint, fingerprint_fields, or rule_id on both schemas', () => {
     expect(createAlertEventDataSchema.safeParse({ source: 'datadog' }).success).toBe(false);
     expect(
       createAlertEventDataSchema.safeParse({ source: 'datadog', rule_id: 'mon-1' }).success
     ).toBe(true);
+    expect(createAlertEventPathBodySchema.safeParse({}).success).toBe(false);
+    expect(createAlertEventPathBodySchema.safeParse({ rule_id: 'mon-1' }).success).toBe(true);
   });
 });
