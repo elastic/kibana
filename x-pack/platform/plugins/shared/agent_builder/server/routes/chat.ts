@@ -20,7 +20,6 @@ import {
   AgentExecutionMode,
   ConversationAccessControlMode,
   ConversationOriginType,
-  ExecutionStatus,
 } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
@@ -656,7 +655,6 @@ export function registerChatRoutes({
         return response.accepted<ChatCallbackAcceptedResponse>({
           body: {
             execution_id: executionId,
-            status: ExecutionStatus.scheduled,
           },
         });
       })

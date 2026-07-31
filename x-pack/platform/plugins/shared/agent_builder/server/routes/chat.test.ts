@@ -7,7 +7,7 @@
 
 import { createHash } from 'crypto';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationOriginType, ExecutionStatus } from '@kbn/agent-builder-common';
+import { ConversationOriginType } from '@kbn/agent-builder-common';
 import { of } from 'rxjs';
 import { internalApiPath } from '../../common/constants';
 import {
@@ -16,7 +16,6 @@ import {
   promptResponseEntrySchema,
   registerChatRoutes,
 } from './chat';
-import { isChatCallbackRequestBodyPayload } from '../../common/http_api/chat_callback';
 
 describe('promptResponseEntrySchema', () => {
   it('accepts the confirmation variant', () => {
@@ -93,7 +92,7 @@ describe('callbackConversePayloadSchema', () => {
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     },
     callback: {
-      url: 'https://relay.example.com/events?token=abc',
+      url: 'https://callback.example.com/events?token=abc',
     },
   };
 
@@ -169,7 +168,7 @@ describe('callbackConversePayloadSchema', () => {
       callbackConversePayloadSchema.validate({
         ...basePayload,
         callback: {
-          url: `https://relay.example.com/events?token=${'x'.repeat(2048)}`,
+          url: `https://callback.example.com/events?token=${'x'.repeat(2048)}`,
         },
       })
     ).toThrow(/url/);
@@ -180,7 +179,7 @@ describe('callbackConversePayloadSchema', () => {
       callbackConversePayloadSchema.validate({
         ...basePayload,
         callback: {
-          url: 'ftp://relay.example.com/events',
+          url: 'ftp://callback.example.com/events',
         },
       })
     ).toThrow(/url/);
@@ -211,11 +210,6 @@ describe('callbackConversePayloadSchema', () => {
         execution_idempotency_key: 'x'.repeat(257),
       })
     ).toThrow(/execution_idempotency_key/);
-  });
-
-  it('identifies callback request payloads', () => {
-    expect(isChatCallbackRequestBodyPayload(basePayload)).toBe(true);
-    expect(isChatCallbackRequestBodyPayload({ agent_id: 'agent-1', input: 'Hello' })).toBe(false);
   });
 });
 
@@ -321,7 +315,7 @@ describe('registerChatRoutes', () => {
           execution_idempotency_key: 'Ev0PV23K4AB1',
           origin,
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         },
       },
@@ -330,9 +324,11 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
+      payload: { execution_id: 'execution-1' },
     });
-    expect(validateCallbackUrl).toHaveBeenCalledWith('https://relay.example.com/events?token=abc');
+    expect(validateCallbackUrl).toHaveBeenCalledWith(
+      'https://callback.example.com/events?token=abc'
+    );
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
         useTaskManager: true,
@@ -340,7 +336,7 @@ describe('registerChatRoutes', () => {
           conversationId: undefined,
           origin,
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         }),
       })
@@ -412,7 +408,7 @@ describe('registerChatRoutes', () => {
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
           },
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         },
       },
@@ -421,7 +417,7 @@ describe('registerChatRoutes', () => {
 
     expect(result).toEqual({
       status: 202,
-      payload: { execution_id: 'execution-1', status: ExecutionStatus.scheduled },
+      payload: { execution_id: 'execution-1' },
     });
     expect(executeAgent).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -514,7 +510,7 @@ describe('registerChatRoutes', () => {
             external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
           },
           callback: {
-            url: 'https://relay.example.com/events?token=abc',
+            url: 'https://callback.example.com/events?token=abc',
           },
         },
       },
@@ -525,7 +521,6 @@ describe('registerChatRoutes', () => {
       status: 202,
       payload: {
         execution_id: '5c48249e-28e9-4711-b9c8-0a09a1a35c02',
-        status: ExecutionStatus.scheduled,
       },
     });
     expect(executeAgent).toHaveBeenCalledWith(
