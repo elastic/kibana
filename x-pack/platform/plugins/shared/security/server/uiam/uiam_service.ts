@@ -11,7 +11,11 @@ import { chunk, partition } from 'lodash';
 import { Agent } from 'undici';
 
 import type { Logger } from '@kbn/core/server';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import type {
   CreateUiamOAuthClientParams,
   UiamOAuthClientLogo,
@@ -30,6 +34,7 @@ import type {
 import { ES_CLIENT_AUTHENTICATION_HEADER } from '../../common/constants';
 import type { UiamConfigType } from '../config';
 import { getDetailedErrorMessage } from '../errors';
+import { securityTelemetry } from '../otel/instrumentation';
 
 /**
  * Represents the request body for granting an API key via UIAM.
@@ -152,6 +157,14 @@ export interface UiamServicePublic {
   getAuthenticationHeaders(accessToken: string): Record<string, string>;
 
   /**
+   * Returns the header(s) a trusted loopback caller stamps on a real HTTP request that carries an
+   * internal UIAM (`essu_`) credential, so the ES cluster client re-attaches the shared secret on
+   * its behalf. Carries a non-reversible HMAC of the shared secret (never the secret itself), bound
+   * to `credential` so it authorizes that credential only.
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string>;
+
+  /**
    * Returns the Elasticsearch client authentication information with the shared secret value. This is to be used with
    * `client_authentication` option in Elasticsearch client.
    */
@@ -257,11 +270,13 @@ export interface UiamServicePublic {
    * @param accessToken UIAM session access token.
    * @param clientId Optional client ID filter.
    * @param connectionId Optional connection ID filter.
+   * @param projectId Optional project ID filter.
    */
   listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse>;
 
   /**
@@ -355,6 +370,18 @@ export class UiamService implements UiamServicePublic {
   }
 
   /**
+   * See {@link UiamServicePublic.getInternalCallerAttestationHeaders}.
+   */
+  getInternalCallerAttestationHeaders(credential: HTTPAuthorizationHeader): Record<string, string> {
+    return {
+      [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+        this.#config.sharedSecret,
+        credential
+      ),
+    };
+  }
+
+  /**
    * See {@link UiamServicePublic.getClientAuthentication}.
    */
   getClientAuthentication(): ClientAuthentication {
@@ -432,6 +459,7 @@ export class UiamService implements UiamServicePublic {
     url.searchParams.set('include_token', 'true');
     url.searchParams.set('audience', expectedAudience);
 
+    const startTime = performance.now();
     try {
       const response = await UiamService.#parseUiamResponse(
         await fetch(url.toString(), {
@@ -454,8 +482,16 @@ export class UiamService implements UiamServicePublic {
         );
       }
 
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'success',
+      });
+
       return response.token;
     } catch (err) {
+      securityTelemetry.recordOAuthTokenExchangeAttempt(performance.now() - startTime, {
+        outcome: 'failure',
+      });
+
       this.#logger.error(
         () => `Failed to exchange OAuth access token: ${getDetailedErrorMessage(err)}`
       );
@@ -742,7 +778,8 @@ export class UiamService implements UiamServicePublic {
   async listOAuthConnections(
     accessToken: string,
     clientId?: string,
-    connectionId?: string
+    connectionId?: string,
+    projectId?: string
   ): Promise<OAuthConnectionsResponse> {
     try {
       this.#logger.debug('Attempting to list OAuth connections.');
@@ -753,6 +790,9 @@ export class UiamService implements UiamServicePublic {
       }
       if (connectionId) {
         url.searchParams.set('connection_id', connectionId);
+      }
+      if (projectId) {
+        url.searchParams.set('project_id', projectId);
       }
 
       const response = await UiamService.#parseUiamResponse(

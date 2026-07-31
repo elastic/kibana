@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 
 import { CalendarsListHeader } from './header';
 
@@ -49,13 +50,20 @@ describe('CalendarListsHeader', () => {
     },
   };
 
-  test('renders header', () => {
+  test('renders header', async () => {
     const props = {
       ...requiredProps,
+      isDst: false,
     };
 
-    const { container } = renderWithI18n(<CalendarsListHeader {...props} />);
+    const { findByTestId, getByRole, getByTestId, getByText } = renderWithI18n(
+      <CalendarsListHeader {...props} />
+    );
 
-    expect(container).toMatchSnapshot();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Calendars');
+    expect(getByText('3 in total')).toBeInTheDocument();
+    await openAppMenuOverflow();
+    expect(await findByTestId('mlCalendarListRefreshButton')).toHaveTextContent('Refresh');
+    expect(getByRole('link', { name: /^Learn more/ })).toHaveAttribute('href', 'calendars link');
   });
 });

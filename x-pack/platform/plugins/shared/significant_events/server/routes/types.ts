@@ -19,12 +19,14 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import type { AttachmentClient } from '@kbn/streams-plugin/server';
 import type { SignificantEventsAlertingContext } from '../lib/significant_events/alerting/significant_events_alerting_context';
-import type { EbtTelemetryClient } from '../lib/telemetry';
+import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../lib/knowledge_indicators';
 import type { SignificantEventsClients } from '../lib/significant_events/significant_events_clients';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
+import type { SyncWorkflowService } from '../lib/workflows/sync_workflow';
 import type { SignificantEventsScheduledWorkflowsService } from '../lib/workflows/significant_events_scheduled_workflows';
 import type { WorkflowClients } from '../lib/workflows/create_workflow_clients';
+import type { SignificantEventsMaintenanceService } from '../lib/maintenance/maintenance_service';
 
 export type GetScopedClients = (params: {
   request: KibanaRequest;
@@ -48,15 +50,14 @@ export interface RouteHandlerScopedClients extends SignificantEventsClients {
   tuningConfig: SignificantEventsTuningConfig;
 }
 
-export interface RouteDependencies {
+export type SignificantEventsRouteHandlerResources = {
   server: StreamsServer;
   telemetry: EbtTelemetryClient;
   getScopedClients: GetScopedClients;
   continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
+  syncWorkflowService?: SyncWorkflowService;
   significantEventsScheduledWorkflowsService?: SignificantEventsScheduledWorkflowsService;
   workflowClients: WorkflowClients;
+  maintenanceService: SignificantEventsMaintenanceService;
   getSpaceId: (request: KibanaRequest) => Promise<string>;
-}
-
-export type SignificantEventsRouteHandlerResources = RouteDependencies &
-  DefaultRouteHandlerResources;
+} & DefaultRouteHandlerResources;

@@ -58,7 +58,11 @@ import { isTimerangeSame } from '../shared/utils';
 import type { TimelineTabCommonProps } from '../shared/types';
 import { useTimelineColumns } from '../shared/use_timeline_columns';
 import { useTimelineControlColumn } from '../shared/use_timeline_control_columns';
-import { DocumentEventTypes, NotesEventTypes } from '../../../../../common/lib/telemetry';
+import {
+  DocumentEventTypes,
+  FLYOUT_ORIGIN,
+  NotesEventTypes,
+} from '../../../../../common/lib/telemetry';
 
 const compareQueryProps = (prevProps: Props, nextProps: Props) =>
   prevProps.kqlMode === nextProps.kqlMode &&
@@ -91,8 +95,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
 
   const { dataView, status: dataViewStatus } = useDataView(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
-  const selectedPatterns = useSelectedPatterns(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
+  const selectedPatterns = useSelectedPatterns(dataView);
   const dataViewLoading = useMemo(() => dataViewStatus !== 'ready', [dataViewStatus]);
   const dataViewId = useMemo(() => dataView.id ?? '', [dataView.id]);
 
@@ -238,7 +242,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         (isAttackRow ? eventData.ecs._index : undefined) ?? selectedPatterns.join(',');
 
       if (enableNewFlyout && eventData) {
-        openNotes({ hit: eventData });
+        openNotes({ hit: eventData, origin: FLYOUT_ORIGIN.TIMELINE });
       } else if (isAttackRow) {
         openFlyout({
           right: {

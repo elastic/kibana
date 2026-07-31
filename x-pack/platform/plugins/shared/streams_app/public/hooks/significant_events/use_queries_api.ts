@@ -11,7 +11,10 @@ import { useKibana } from '../use_kibana';
 
 export interface PromoteResult {
   promoted: number;
+  /** STATS queries, which cannot be rule-backed yet. */
   skipped_stats: number;
+  /** MATCH queries that are not filter-only, so no count series can be compiled. */
+  skipped_ineligible: number;
 }
 
 interface QueriesApi {

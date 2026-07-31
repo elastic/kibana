@@ -1,5 +1,5 @@
 {
-  "sha1": "ff80132de5ac46c3eefe0fc73cf4d034601efff2",
+  "sha1": "16088b659b1e1d0deb83a40b21cad1ee273bf7a1",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -600,8 +600,8 @@
       }
     },
     {
-      "id": "d3ffd39f648f151-77c285778f177cc",
-      "title": "Observability cases - no privileges returns the feature-privileges-required page",
+      "id": "d3ffd39f648f151-47502b229835fc7",
+      "title": "Observability cases - no privileges returns Application not found when the Observability app is inaccessible",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -684,8 +684,8 @@
       }
     },
     {
-      "id": "b997ef31f0ad15f-e93e7fc15d6406a",
-      "title": "Nightshift navigation from Significant Events Discovery navigates to Nightshift page from Streams discovery",
+      "id": "b997ef31f0ad15f-5f0c7e85e95a610",
+      "title": "Nightshift navigation from Significant Events Discovery navigates between Streams discovery, Nightshift, and settings",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -695,7 +695,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/nightshift.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 9
       }
     }

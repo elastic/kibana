@@ -208,6 +208,8 @@ const MonitorTypeCard = ({
             content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_TYPE_HINT}
           >
             <EuiFlexGroup
+              tabIndex={0}
+              role="button"
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -219,6 +221,12 @@ const MonitorTypeCard = ({
                   : ''}
               `}
               onClick={() => onFilter(t.monitorType)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onFilter(t.monitorType);
+                }
+              }}
             >
               <EuiFlexItem
                 grow={false}
@@ -489,6 +497,8 @@ const StatusCodesCard = ({
             content={isSelected ? CLICK_TO_REMOVE_FILTER : FILTER_BY_CODE_HINT}
           >
             <EuiFlexGroup
+              tabIndex={0}
+              role="button"
               alignItems="center"
               gutterSize="s"
               responsive={false}
@@ -500,6 +510,12 @@ const StatusCodesCard = ({
                   : ''}
               `}
               onClick={() => onFilter(String(c.statusCode))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onFilter(String(c.statusCode));
+                }
+              }}
             >
               <EuiFlexItem grow={false}>
                 <EuiBadge color={codeColor} iconType={isSelected ? 'check' : undefined}>
@@ -573,18 +589,26 @@ const EmergingTermsCard = ({
           const truncated = t.term.length > 80 ? t.term.substring(0, 80) + '...' : t.term;
           const intensity = t.foregroundCount / maxCount;
           const badgeColor = intensity >= 0.7 ? 'danger' : intensity >= 0.3 ? 'warning' : 'hollow';
+          const firstWord = t.term.split(/\s+/).find((w) => w.length > 3) ?? t.term.split(/\s+/)[0];
+
           return (
             <EuiFlexItem key={t.term} grow={false}>
               <EuiToolTip content={`${t.foregroundCount} occurrences — ${CLICK_TO_FILTER}`}>
                 <EuiFlexGroup
+                  tabIndex={0}
+                  role="button"
                   alignItems="center"
                   gutterSize="s"
                   responsive={false}
                   css={clickableRow}
                   onClick={() => {
-                    const firstWord =
-                      t.term.split(/\s+/).find((w) => w.length > 3) ?? t.term.split(/\s+/)[0];
                     onFilter(firstWord);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onFilter(firstWord);
+                    }
                   }}
                 >
                   <EuiFlexItem grow={false}>

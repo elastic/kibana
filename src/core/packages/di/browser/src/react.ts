@@ -54,5 +54,5 @@ export function useService<T>(...params: Parameters<Container['get']>): T {
   }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  return useMemo(() => container.get<T>(...params), [container, ...params]);
+  return useMemo(() => container.get(...params) as T, [container, ...params]);
 }

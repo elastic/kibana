@@ -7,6 +7,7 @@
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import {
   withLensReferences,
@@ -76,14 +77,14 @@ export const visualizationSmlType: SmlTypeDefinition = {
 
   toAttachment: async (item, context) => {
     const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id ?? '');
-    const savedObject = resolveResult.saved_object as { error?: { message?: string } };
-    if (savedObject?.error) {
+    const savedObject = resolveResult.saved_object;
+    if (isSavedObjectErrorResult(savedObject)) {
       return undefined;
     }
 
     const lensAttributes = withLensReferences(
-      resolveResult.saved_object.attributes as LensAttributes,
-      resolveResult.saved_object.references
+      savedObject.attributes as LensAttributes,
+      savedObject.references
     );
     const lensApiConfig = toLensApiConfig(lensAttributes);
 

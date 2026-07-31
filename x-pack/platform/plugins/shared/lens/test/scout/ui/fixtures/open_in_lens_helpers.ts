@@ -9,15 +9,11 @@ import type { DebugState } from '@elastic/charts';
 import type { PageObjects, ScoutPage } from '@kbn/scout';
 
 import { DATA_TEST_SUBJECTS, LOGSTASH_IN_RANGE_DATES, DATA_VIEW_ID } from './constants';
+import type { ImportedSavedObject } from './saved_object_helpers';
+import { getImportedDashboardId } from './saved_object_helpers';
 
 interface ElasticChartDebugContext {
   addInitScript: (script: () => void) => Promise<{ dispose: () => Promise<void> }>;
-}
-
-export interface ImportedSavedObject {
-  id: string;
-  type: string;
-  title: string;
 }
 
 interface LogstashOpenInLensSetupContext {
@@ -49,6 +45,16 @@ export async function setupLogstashOpenInLensDefaults({
   await uiSettings.setDefaultIndex(DATA_VIEW_ID.LOGSTASH);
   await uiSettings.setDefaultTime(LOGSTASH_IN_RANGE_DATES);
   await uiSettings.set({ 'dateFormat:tz': 'UTC' });
+}
+
+/** Unsets UI settings applied by `setupLogstashOpenInLensDefaults`. */
+export async function cleanupLogstashOpenInLensDefaults({
+  uiSettings,
+}: LogstashOpenInLensSetupContext): Promise<void> {
+  if (!uiSettings.unset) {
+    throw new Error('scoutSpace.uiSettings.unset is required');
+  }
+  await uiSettings.unset(...OPEN_IN_LENS_UI_SETTINGS);
 }
 
 export function createOpenInLensSuiteSetup({
@@ -99,28 +105,14 @@ export function createOpenInLensSuiteSetup({
   };
 
   const afterAll = async ({ scoutSpace }: { scoutSpace: LogstashOpenInLensSetupContext }) => {
-    if (!scoutSpace.savedObjects || !scoutSpace.uiSettings.unset) {
-      throw new Error('scoutSpace saved object cleanup and uiSettings.unset are required');
+    if (!scoutSpace.savedObjects) {
+      throw new Error('scoutSpace.savedObjects is required to clean up Open in Lens fixtures');
     }
-    await scoutSpace.uiSettings.unset(...OPEN_IN_LENS_UI_SETTINGS);
+    await cleanupLogstashOpenInLensDefaults(scoutSpace);
     await scoutSpace.savedObjects.cleanStandardList();
   };
 
   return { getDashboardId, beforeAll, beforeEach, afterAll };
-}
-
-/** Resolves a dashboard id after `scoutSpace.savedObjects.load()` (createNewCopies assigns new ids). */
-export function getImportedDashboardId(
-  imported: ImportedSavedObject[],
-  dashboardTitle: string
-): string {
-  const dashboard = imported.find(
-    (savedObject) => savedObject.type === 'dashboard' && savedObject.title === dashboardTitle
-  );
-  if (!dashboard?.id) {
-    throw new Error(`Dashboard "${dashboardTitle}" was not imported`);
-  }
-  return dashboard.id;
 }
 
 /** Clicks the "Open in Lens" panel action for the panel with the given title. */

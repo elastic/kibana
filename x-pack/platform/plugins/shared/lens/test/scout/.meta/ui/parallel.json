@@ -1,5 +1,5 @@
 {
-  "sha1": "d32641f90d0c8bd9ee37dc9af57fa711824a5864",
+  "sha1": "5a6114682db754bfb55f26b5cacd85bf47f46f62",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,177 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 11,
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-e22d49720eca493",
+      "title": "Lens ad hoc data view should allow building a chart based on ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 52,
+        "column": 22
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-42d7700c605e8ce",
+      "title": "Lens ad hoc data view should allow managing runtime fields on an ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 86,
         "column": 16
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-3e851f8fb452c95",
+      "title": "Lens ad hoc data view should allow adding an ad-hoc chart to a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 134,
+        "column": 28
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-08429a5fe9cf2a5",
+      "title": "Lens ad hoc data view should allow saving the ad-hoc chart into a saved object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 178,
+        "column": 57
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-b09942a2f451ee7",
+      "title": "Lens ad hoc data view should be possible to share a URL of a visualization with ad hoc data views",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 213,
+        "column": 31
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-5a6b2e6ecddce29",
+      "title": "Lens ad hoc data view should be possible to download a visualization with ad hoc data views as CSV",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 243,
+        "column": 18
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-39ba1618903f884",
+      "title": "Lens ad hoc data view should navigate to Discover correctly from Lens with an ad hoc data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 294,
+        "column": 5
+      }
+    },
+    {
+      "id": "91fe9b1cae52b18-d34e6a66c086509",
+      "title": "Lens ad hoc data view should navigate to Discover correctly from a dashboard embeddable and persist ad hoc data view after refresh",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/ad_hoc_data_view.spec.ts",
+        "line": 347,
+        "column": 26
+      }
+    },
+    {
+      "id": "960754c4adc7473-ec0ed097095fb0e",
+      "title": "Lens chart creation creates and saves an XY area chart, then reopens it with the same configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/chart_creation.spec.ts",
+        "line": 26,
+        "column": 51
+      }
+    },
+    {
+      "id": "960754c4adc7473-e2feb0cd547afef",
+      "title": "Lens chart creation preserves the split field when switching a saved XY chart to filters aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/chart_creation.spec.ts",
+        "line": 53,
+        "column": 60
+      }
+    },
+    {
+      "id": "960754c4adc7473-42fc5ed07c9cb92",
+      "title": "Lens chart creation switches the first layer to a different data view",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/chart_creation.spec.ts",
+        "line": 72,
+        "column": 15
+      }
+    },
+    {
+      "id": "39967da8b6ee942-a2f17ede9b95bc3",
+      "title": "Lens ESQL dashboard inline editing should keep the table type when the user adds a limit via Try ESQL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
+        "line": 37,
+        "column": 13
+      }
+    },
+    {
+      "id": "39967da8b6ee942-4fdca52ef98396c",
+      "title": "Lens ESQL dashboard inline editing should add a limit without changing the chart type or the color",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_dashboard_inline_editing.spec.ts",
+        "line": 61,
+        "column": 20
       }
     },
     {
@@ -25,8 +194,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 55,
-        "column": 14
+        "line": 46,
+        "column": 46
       }
     },
     {
@@ -38,8 +207,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_filter_dataview.spec.ts",
-        "line": 131,
-        "column": 14
+        "line": 113,
+        "column": 30
       }
     },
     {
@@ -51,8 +220,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
-        "line": 146,
-        "column": 14
+        "line": 143,
+        "column": 24
       }
     },
     {
@@ -64,8 +233,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
-        "line": 167,
-        "column": 14
+        "line": 149,
+        "column": 29
       }
     },
     {
@@ -77,8 +246,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/esql_timeseries_dashboard_api.spec.ts",
-        "line": 188,
-        "column": 14
+        "line": 169,
+        "column": 39
+      }
+    },
+    {
+      "id": "86639c1e1b9af16-a6ebcaecfc66cff",
+      "title": "Lens inspector pagination should allow switching between inspector table pages",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/inspector_pagination.spec.ts",
+        "line": 29,
+        "column": 7
       }
     },
     {
@@ -86,13 +268,12 @@
       "title": "Lens metric progress bar in Lens editor uses default progress bar fill color when no custom color is set",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
-        "line": 116,
-        "column": 14
+        "line": 102,
+        "column": 24
       }
     },
     {
@@ -100,13 +281,12 @@
       "title": "Lens metric progress bar in Lens editor applies static color to progress bar fill",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
-        "line": 128,
-        "column": 14
+        "line": 106,
+        "column": 7
       }
     },
     {
@@ -114,13 +294,12 @@
       "title": "Lens metric progress bar in Lens editor applies dynamic color to progress bar fill",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar_lens_editor.spec.ts",
-        "line": 150,
-        "column": 14
+        "line": 118,
+        "column": 27
       }
     },
     {
@@ -128,13 +307,12 @@
       "title": "Lens metric progress bar on dashboard (DSL) renders vertical progress bar on dashboard",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
-        "line": 45,
-        "column": 14
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -142,13 +320,12 @@
       "title": "Lens metric progress bar on dashboard (DSL) renders horizontal progress bar on dashboard",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
-        "line": 97,
-        "column": 14
+        "line": 74,
+        "column": 22
       }
     },
     {
@@ -156,13 +333,12 @@
       "title": "Lens metric progress bar on dashboard (DSL) does not render progress bar when max value is not configured",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_progress_bar.spec.ts",
-        "line": 150,
-        "column": 14
+        "line": 125,
+        "column": 71
       }
     },
     {
@@ -170,13 +346,12 @@
       "title": "Lens metric trendline conversion to ES|QL trendline persists after converting form-based metric to ES|QL",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_conversion.spec.ts",
-        "line": 79,
-        "column": 14
+        "line": 75,
+        "column": 24
       }
     },
     {
@@ -184,13 +359,12 @@
       "title": "Lens ES|QL metric trendline editor interactions toggling background chart to None keeps Color set to Panel",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 70,
-        "column": 14
+        "line": 65,
+        "column": 50
       }
     },
     {
@@ -198,13 +372,12 @@
       "title": "Lens ES|QL metric trendline editor interactions changing ES|QL query updates the trendline background chart",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_editor.spec.ts",
-        "line": 117,
-        "column": 14
+        "line": 105,
+        "column": 72
       }
     },
     {
@@ -212,13 +385,12 @@
       "title": "Lens ES|QL table to metric trendline editing switches an ESQL table with timestamp rows to a metric trendline without stale breakdowns",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_table_switch.spec.ts",
-        "line": 78,
-        "column": 14
+        "line": 75,
+        "column": 24
       }
     },
     {
@@ -226,13 +398,12 @@
       "title": "Lens ES|QL metric trendline toggle can enable and disable trendline via dimension editor with persistence",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql_toggle.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 62,
+        "column": 48
       }
     },
     {
@@ -240,13 +411,12 @@
       "title": "Lens metric trendline on dashboard (ES|QL) renders trendline with ES|QL data source",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline_esql.spec.ts",
-        "line": 31,
-        "column": 14
+        "line": 24,
+        "column": 7
       }
     },
     {
@@ -254,13 +424,12 @@
       "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses inline data view spec",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
-        "line": 45,
-        "column": 14
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -268,13 +437,25 @@
       "title": "Lens metric trendline on dashboard (DSL) renders trendline when panel uses stored data view reference",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/metric_trendline.spec.ts",
-        "line": 85,
-        "column": 14
+        "line": 68,
+        "column": 21
+      }
+    },
+    {
+      "id": "e6ca88dcf9f62d8-38dae6b1e652db6",
+      "title": "Lens with multiple data views should allow building a multi-data-view chart and applying global filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/multiple_data_views.spec.ts",
+        "line": 39,
+        "column": 23
       }
     },
     {
@@ -299,8 +480,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/gauge.spec.ts",
-        "line": 32,
-        "column": 12
+        "line": 26,
+        "column": 13
       }
     },
     {
@@ -325,7 +506,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/gauge.spec.ts",
-        "line": 49,
+        "line": 37,
         "column": 12
       }
     },
@@ -351,8 +532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/gauge.spec.ts",
-        "line": 70,
-        "column": 12
+        "line": 53,
+        "column": 16
       }
     },
     {
@@ -377,8 +558,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/gauge.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 60,
+        "column": 17
       }
     },
     {
@@ -403,8 +584,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/goal.spec.ts",
-        "line": 24,
-        "column": 12
+        "line": 18,
+        "column": 13
       }
     },
     {
@@ -429,8 +610,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/goal.spec.ts",
-        "line": 47,
-        "column": 12
+        "line": 39,
+        "column": 16
       }
     },
     {
@@ -455,8 +636,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/goal.spec.ts",
-        "line": 76,
-        "column": 12
+        "line": 65,
+        "column": 28
       }
     },
     {
@@ -481,8 +662,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/goal.spec.ts",
-        "line": 106,
-        "column": 12
+        "line": 91,
+        "column": 17
       }
     },
     {
@@ -507,8 +688,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/heatmap.spec.ts",
-        "line": 33,
-        "column": 14
+        "line": 27,
+        "column": 15
       }
     },
     {
@@ -533,8 +714,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/heatmap.spec.ts",
-        "line": 69,
-        "column": 14
+        "line": 71,
+        "column": 40
       }
     },
     {
@@ -559,8 +740,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/heatmap.spec.ts",
-        "line": 90,
-        "column": 14
+        "line": 91,
+        "column": 24
       }
     },
     {
@@ -585,8 +766,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/heatmap.spec.ts",
-        "line": 107,
-        "column": 14
+        "line": 108,
+        "column": 26
       }
     },
     {
@@ -611,8 +792,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/metric.spec.ts",
-        "line": 29,
-        "column": 12
+        "line": 23,
+        "column": 13
       }
     },
     {
@@ -637,8 +818,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/metric.spec.ts",
-        "line": 52,
-        "column": 12
+        "line": 44,
+        "column": 16
       }
     },
     {
@@ -663,8 +844,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/metric.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 69,
+        "column": 28
       }
     },
     {
@@ -689,8 +870,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/metric.spec.ts",
-        "line": 109,
-        "column": 12
+        "line": 94,
+        "column": 17
       }
     },
     {
@@ -715,8 +896,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/metric.spec.ts",
-        "line": 119,
-        "column": 12
+        "line": 101,
+        "column": 16
       }
     },
     {
@@ -741,8 +922,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/pie.spec.ts",
-        "line": 53,
-        "column": 12
+        "line": 47,
+        "column": 13
       }
     },
     {
@@ -767,8 +948,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/pie.spec.ts",
-        "line": 65,
-        "column": 12
+        "line": 58,
+        "column": 7
       }
     },
     {
@@ -793,8 +974,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/pie.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 66,
+        "column": 44
       }
     },
     {
@@ -819,8 +1000,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/pie.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 85,
+        "column": 16
       }
     },
     {
@@ -845,8 +1026,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/pie.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 100,
+        "column": 5
       }
     },
     {
@@ -871,8 +1052,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
-        "line": 38,
-        "column": 12
+        "line": 30,
+        "column": 5
       }
     },
     {
@@ -897,8 +1078,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
-        "line": 43,
-        "column": 12
+        "line": 38,
+        "column": 99
       }
     },
     {
@@ -923,8 +1104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
-        "line": 55,
-        "column": 12
+        "line": 44,
+        "column": 11
       }
     },
     {
@@ -949,8 +1130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 55,
+        "column": 83
       }
     },
     {
@@ -975,8 +1156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 64,
+        "column": 17
       }
     },
     {
@@ -1001,8 +1182,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
-        "line": 102,
-        "column": 12
+        "line": 75,
+        "column": 47
       }
     },
     {
@@ -1027,8 +1208,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/table.spec.ts",
-        "line": 122,
-        "column": 12
+        "line": 88,
+        "column": 44
+      }
+    },
+    {
+      "id": "14fc84565fd6c1c-dce60f7b6eb64ac",
+      "title": "Lens open in Lens — agg-based Visualize navigation should navigate between Visualize and Lens",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/visualize_navigation.spec.ts",
+        "line": 34,
+        "column": 15
       }
     },
     {
@@ -1053,8 +1247,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 31,
-        "column": 12
+        "line": 25,
+        "column": 13
       }
     },
     {
@@ -1079,8 +1273,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 63,
-        "column": 12
+        "line": 56,
+        "column": 7
       }
     },
     {
@@ -1105,8 +1299,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 82,
-        "column": 12
+        "line": 68,
+        "column": 13
       }
     },
     {
@@ -1131,8 +1325,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 97,
-        "column": 12
+        "line": 80,
+        "column": 4
       }
     },
     {
@@ -1157,8 +1351,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 110,
-        "column": 12
+        "line": 87,
+        "column": 49
       }
     },
     {
@@ -1183,8 +1377,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 126,
-        "column": 12
+        "line": 98,
+        "column": 24
       }
     },
     {
@@ -1209,8 +1403,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 142,
-        "column": 12
+        "line": 110,
+        "column": 75
       }
     },
     {
@@ -1235,8 +1429,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 152,
-        "column": 12
+        "line": 114,
+        "column": 16
       }
     },
     {
@@ -1261,8 +1455,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 162,
-        "column": 12
+        "line": 126,
+        "column": 72
       }
     },
     {
@@ -1287,8 +1481,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 173,
-        "column": 12
+        "line": 133,
+        "column": 16
       }
     },
     {
@@ -1313,8 +1507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 191,
-        "column": 12
+        "line": 146,
+        "column": 16
       }
     },
     {
@@ -1339,8 +1533,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 212,
-        "column": 12
+        "line": 163,
+        "column": 22
       }
     },
     {
@@ -1365,8 +1559,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/agg_based/xy.spec.ts",
-        "line": 233,
-        "column": 12
+        "line": 176,
+        "column": 11
       }
     },
     {
@@ -1391,8 +1585,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/convert_from_dashboard.spec.ts",
-        "line": 33,
-        "column": 13
+        "line": 32,
+        "column": 3
       }
     },
     {
@@ -1417,8 +1611,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/convert_from_dashboard.spec.ts",
-        "line": 79,
-        "column": 13
+        "line": 64,
+        "column": 7
       }
     },
     {
@@ -1443,8 +1637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/gauge.spec.ts",
-        "line": 26,
-        "column": 12
+        "line": 22,
+        "column": 13
       }
     },
     {
@@ -1469,8 +1663,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/gauge.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 30,
+        "column": 25
       }
     },
     {
@@ -1495,8 +1689,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/gauge.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 44,
+        "column": 5
       }
     },
     {
@@ -1521,8 +1715,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/gauge.spec.ts",
-        "line": 72,
-        "column": 12
+        "line": 48,
+        "column": 21
       }
     },
     {
@@ -1547,8 +1741,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/gauge.spec.ts",
-        "line": 98,
-        "column": 12
+        "line": 81,
+        "column": 26
       }
     },
     {
@@ -1573,7 +1767,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/gauge.spec.ts",
-        "line": 111,
+        "line": 88,
         "column": 12
       }
     },
@@ -1599,8 +1793,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/metric.spec.ts",
-        "line": 26,
-        "column": 12
+        "line": 22,
+        "column": 13
       }
     },
     {
@@ -1625,8 +1819,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/metric.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 30,
+        "column": 25
       }
     },
     {
@@ -1651,8 +1845,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/metric.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 43,
+        "column": 7
       }
     },
     {
@@ -1677,8 +1871,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/metric.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 47,
+        "column": 24
       }
     },
     {
@@ -1703,8 +1897,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/metric.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 56,
+        "column": 59
       }
     },
     {
@@ -1729,8 +1923,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/metric.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 77,
+        "column": 17
       }
     },
     {
@@ -1755,8 +1949,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/metric.spec.ts",
-        "line": 116,
-        "column": 12
+        "line": 81,
+        "column": 11
       }
     },
     {
@@ -1781,8 +1975,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 26,
-        "column": 12
+        "line": 22,
+        "column": 13
       }
     },
     {
@@ -1807,8 +2001,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 87,
-        "column": 12
+        "line": 68,
+        "column": 25
       }
     },
     {
@@ -1833,8 +2027,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 104,
-        "column": 12
+        "line": 89,
+        "column": 18
       }
     },
     {
@@ -1859,8 +2053,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 121,
-        "column": 12
+        "line": 97,
+        "column": 26
       }
     },
     {
@@ -1885,8 +2079,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 138,
-        "column": 12
+        "line": 107,
+        "column": 24
       }
     },
     {
@@ -1911,8 +2105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 158,
-        "column": 12
+        "line": 123,
+        "column": 20
       }
     },
     {
@@ -1937,8 +2131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 172,
-        "column": 12
+        "line": 134,
+        "column": 19
       }
     },
     {
@@ -1963,8 +2157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/table.spec.ts",
-        "line": 198,
-        "column": 12
+        "line": 166,
+        "column": 23
       }
     },
     {
@@ -1989,8 +2183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 26,
-        "column": 12
+        "line": 22,
+        "column": 13
       }
     },
     {
@@ -2015,8 +2209,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 46,
-        "column": 12
+        "line": 30,
+        "column": 25
       }
     },
     {
@@ -2041,8 +2235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 46,
+        "column": 71
       }
     },
     {
@@ -2067,8 +2261,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 69,
-        "column": 12
+        "line": 55,
+        "column": 17
       }
     },
     {
@@ -2093,8 +2287,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 80,
-        "column": 12
+        "line": 59,
+        "column": 22
       }
     },
     {
@@ -2119,8 +2313,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 108,
-        "column": 12
+        "line": 81,
+        "column": 44
       }
     },
     {
@@ -2145,8 +2339,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 120,
-        "column": 12
+        "line": 93,
+        "column": 11
       }
     },
     {
@@ -2171,8 +2365,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 139,
-        "column": 12
+        "line": 103,
+        "column": 26
       }
     },
     {
@@ -2197,8 +2391,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 158,
-        "column": 12
+        "line": 109,
+        "column": 44
       }
     },
     {
@@ -2223,8 +2417,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 171,
-        "column": 12
+        "line": 121,
+        "column": 5
       }
     },
     {
@@ -2249,8 +2443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/timeseries.spec.ts",
-        "line": 187,
-        "column": 12
+        "line": 128,
+        "column": 18
       }
     },
     {
@@ -2275,8 +2469,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 26,
-        "column": 12
+        "line": 22,
+        "column": 13
       }
     },
     {
@@ -2301,8 +2495,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 68,
-        "column": 12
+        "line": 48,
+        "column": 27
       }
     },
     {
@@ -2327,8 +2521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 85,
-        "column": 12
+        "line": 68,
+        "column": 62
       }
     },
     {
@@ -2353,8 +2547,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 103,
-        "column": 12
+        "line": 76,
+        "column": 24
       }
     },
     {
@@ -2379,8 +2573,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 128,
-        "column": 12
+        "line": 86,
+        "column": 24
       }
     },
     {
@@ -2405,8 +2599,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 119,
+        "column": 13
       }
     },
     {
@@ -2431,8 +2625,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 174,
-        "column": 12
+        "line": 130,
+        "column": 38
       }
     },
     {
@@ -2457,8 +2651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 185,
-        "column": 12
+        "line": 139,
+        "column": 25
       }
     },
     {
@@ -2483,8 +2677,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 197,
-        "column": 12
+        "line": 142,
+        "column": 19
       }
     },
     {
@@ -2509,8 +2703,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/parallel_tests/open_in_lens/tsvb/top_n.spec.ts",
-        "line": 210,
-        "column": 12
+        "line": 121,
+        "column": 26
       }
     }
   ]

@@ -134,7 +134,7 @@ xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 xpack.cloud_connect.enabled: false
-xpack.dataFederation.enabled: false
+
 xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
@@ -267,7 +267,6 @@ uiSettings:
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
-xpack.task_manager.request_timeouts.update_by_query: 60000
 xpack.task_manager.metrics_reset_interval: 120000
 
 # Reporting feature
@@ -303,4 +302,3 @@ xpack.genAiSettings:
   showAiBreadcrumb: false
   showSpacesIntegration: false
   showAiAssistantsVisibilitySetting: false
-

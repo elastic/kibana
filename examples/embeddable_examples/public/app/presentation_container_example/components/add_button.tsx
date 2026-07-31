@@ -9,6 +9,7 @@
 
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
+import type { EuiContextMenuItemIcon, IconType } from '@elastic/eui';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -16,6 +17,21 @@ import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { apiPublishesViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { of } from 'rxjs';
+
+/**
+ * EuiContextMenuItem accepts a string icon name or a React element.
+ * Action getIconType() returns IconType, which may be a component — instantiate those.
+ */
+export function toContextMenuIcon(iconType: IconType | undefined): EuiContextMenuItemIcon {
+  if (iconType == null) {
+    return 'empty';
+  }
+  if (typeof iconType === 'string') {
+    return iconType;
+  }
+  const Icon = iconType;
+  return <Icon />;
+}
 
 export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions: UiActionsStart }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -42,13 +58,15 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
         return (
           <EuiContextMenuItem
             key={action.id}
-            icon={action?.getIconType(actionContext) ?? ''}
+            icon={toContextMenuIcon(action.getIconType?.(actionContext))}
             onClick={() => {
               action.execute(actionContext);
               setIsPopoverOpen(false);
             }}
           >
-            {action.getDisplayName(actionContext)}
+            {action.MenuItem
+              ? React.createElement(action.MenuItem, { context: actionContext })
+              : action.getDisplayName(actionContext)}
           </EuiContextMenuItem>
         );
       });
