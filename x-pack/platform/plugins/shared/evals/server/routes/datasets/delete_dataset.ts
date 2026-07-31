@@ -105,7 +105,7 @@ export const registerDeleteDatasetRoute = ({
           logger.error(`Failed to delete evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to delete evaluation dataset: ${errorMessage}` },
+            body: { message: 'Failed to delete evaluation dataset' },
           });
         }
       }

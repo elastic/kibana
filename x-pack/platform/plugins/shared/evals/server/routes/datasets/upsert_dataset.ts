@@ -104,7 +104,7 @@ export const registerUpsertDatasetRoute = ({
           logger.error(`Failed to upsert evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to upsert evaluation dataset: ${errorMessage}` },
+            body: { message: 'Failed to upsert evaluation dataset' },
           });
         }
       }

@@ -111,7 +111,7 @@ export const registerGetDatasetRoute = ({
           logger.error(`Failed to get evaluation dataset: ${errorMessage}`);
           return response.customError({
             statusCode: 500,
-            body: { message: `Failed to get evaluation dataset: ${errorMessage}` },
+            body: { message: 'Failed to get evaluation dataset' },
           });
         }
       }
