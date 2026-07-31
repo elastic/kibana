@@ -323,6 +323,7 @@ export class AlertActionsClient {
       action_type: action.action_type,
       last_series_event_timestamp: alertEvent['@timestamp'],
       rule_id: alertEvent.rule_id,
+      source: alertEvent.source,
       group_hash: alertEvent.group_hash,
       episode_id: alertEvent.episode_id,
       space_id: alertEvent.space_id,
