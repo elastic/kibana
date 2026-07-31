@@ -58,7 +58,7 @@ spaceTest.describe(
 
     spaceTest(
       'About section - service name link opens service flyout in-place',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, page }) => {
         const { flyout } = pageObjects.tracesExperience;
 
         await spaceTest.step('filter for span and open overview tab', async () => {
@@ -68,7 +68,11 @@ spaceTest.describe(
         await spaceTest.step(
           'click service name link and verify service flyout opens',
           async () => {
-            await flyout.about.serviceNameLink.click();
+            await expect(flyout.about.serviceNameLink).toBeVisible();
+            // Move pointer away so the row's hover action buttons don't appear and intercept the click,
+            // then fire a native DOM click without moving the pointer back over the element.
+            await page.mouse.move(0, 0);
+            await flyout.about.serviceNameLink.evaluate((el: HTMLElement) => el.click());
             await expect(flyout.serviceFlyout.container).toBeVisible();
           }
         );

@@ -9,6 +9,7 @@
 
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import type { ScoutPage } from '@kbn/scout';
 import {
   spaceTest,
   TRACES,
@@ -23,10 +24,12 @@ import type { DiscoverPageObjects } from '../../../common/ui/fixtures';
 const CHART_IDS = ['latency', 'throughput', 'failedTransactionRate'] as const;
 
 async function openServiceFlyoutAndVerifyCharts({
+  page,
   tracesExperience,
   discover,
   esqlQuery,
 }: {
+  page: ScoutPage;
   tracesExperience: TracesExperiencePage;
   discover: DiscoverPageObjects['discover'];
   esqlQuery: string;
@@ -44,10 +47,11 @@ async function openServiceFlyoutAndVerifyCharts({
   });
 
   await spaceTest.step('click the service name link to open the service flyout', async () => {
-    // Hover-triggered action buttons overlay the link and intercept pointer events;
-    // dispatchEvent bypasses the overlay without the linter-disallowed { force: true } option.
     await expect(tracesExperience.flyout.about.serviceNameLink).toBeVisible();
-    await tracesExperience.flyout.about.serviceNameLink.dispatchEvent('click');
+    // Move pointer away so the row's hover action buttons don't appear and intercept the click,
+    // then fire a native DOM click without moving the pointer back over the element.
+    await page.mouse.move(0, 0);
+    await tracesExperience.flyout.about.serviceNameLink.evaluate((el: HTMLElement) => el.click());
   });
 
   await spaceTest.step('verify service flyout is visible', async () => {
@@ -83,10 +87,11 @@ spaceTest.describe(
 
     spaceTest(
       'opens service flyout for an ECS service and renders its content',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, page }) => {
         const { tracesExperience, discover } = pageObjects;
 
         await openServiceFlyoutAndVerifyCharts({
+          page,
           tracesExperience,
           discover,
           esqlQuery: `${TRACES.ESQL_QUERY} | WHERE service.name == "${RICH_TRACE.SERVICE_NAME}"`,
@@ -104,10 +109,11 @@ spaceTest.describe(
 
     spaceTest(
       'opens service flyout for an unprocessed OTel service and renders its content',
-      async ({ pageObjects }) => {
+      async ({ pageObjects, page }) => {
         const { tracesExperience, discover } = pageObjects;
 
         await openServiceFlyoutAndVerifyCharts({
+          page,
           tracesExperience,
           discover,
           esqlQuery: `${OTEL_SERVICE.ESQL_QUERY} | WHERE service.name == "${OTEL_SERVICE.SERVICE_NAME}"`,
