@@ -44,7 +44,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
     });
   });
 
-  it('renders the flyout with the dashboard title', () => {
+  it('should render the flyout with the dashboard title', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DashboardMigrationDetailsFlyout
@@ -60,7 +60,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
     );
   });
 
-  it('renders the flyout with the dashboard "updated by" information', () => {
+  it('should render the flyout with the dashboard "updated by" information', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DashboardMigrationDetailsFlyout
@@ -76,7 +76,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
     );
   });
 
-  it('calls closeFlyout when the close button is clicked', () => {
+  it('should call closeFlyout when the close button is clicked', () => {
     const { getByTestId } = render(
       <TestProviders>
         <DashboardMigrationDetailsFlyout
@@ -91,7 +91,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
   });
 
   describe('dashboard navigation', () => {
-    it('moves the user to the previous dashboard on click', () => {
+    it('should move the user to the previous dashboard on click', () => {
       const navigation = getNavigation();
       const { getByTestId } = render(
         <TestProviders>
@@ -102,11 +102,11 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationDashboardFlyoutPreviousButton'));
+      fireEvent.click(getByTestId('migrationFlyoutPreviousButton'));
       expect(navigation.goToPrevious).toHaveBeenCalled();
     });
 
-    it('moves the user to the next dashboard on click', () => {
+    it('should move the user to the next dashboard on click', () => {
       const navigation = getNavigation();
       const { getByTestId } = render(
         <TestProviders>
@@ -117,11 +117,11 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationDashboardFlyoutNextButton'));
+      fireEvent.click(getByTestId('migrationFlyoutNextButton'));
       expect(navigation.goToNext).toHaveBeenCalled();
     });
 
-    it('prevents moving backward from the first dashboard of the page', () => {
+    it('should prevent moving backward from the first dashboard of the page', () => {
       const navigation = getNavigation({ hasPrevious: false });
       const { getByTestId } = render(
         <TestProviders>
@@ -132,10 +132,10 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationDashboardFlyoutPreviousButton')).toBeDisabled();
+      expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
     });
 
-    it('prevents moving forward from the last dashboard of the page', () => {
+    it('should prevent moving forward from the last dashboard of the page', () => {
       const navigation = getNavigation({ hasNext: false });
       const { getByTestId } = render(
         <TestProviders>
@@ -146,7 +146,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationDashboardFlyoutNextButton')).toBeDisabled();
+      expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
     });
   });
 });

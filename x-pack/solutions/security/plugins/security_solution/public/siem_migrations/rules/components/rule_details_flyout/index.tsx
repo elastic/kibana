@@ -261,12 +261,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
             <EuiFlexItem grow={false}>
-              <MigrationFlyoutNav
-                navigation={navigation}
-                isDisabled={!!isLoading}
-                previousButtonTestSubj="migrationRuleFlyoutPreviousRuleButton"
-                nextButtonTestSubj="migrationRuleFlyoutNextRuleButton"
-              />
+              <MigrationFlyoutNav navigation={navigation} isDisabled={!!isLoading} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">

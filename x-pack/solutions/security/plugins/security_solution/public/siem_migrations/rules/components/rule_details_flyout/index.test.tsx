@@ -41,7 +41,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     });
   });
 
-  it('renders the flyout with the rule title', () => {
+  it('should render the flyout with the rule title', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MigrationRuleDetailsFlyout
@@ -57,7 +57,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     );
   });
 
-  it('renders the flyout with the rule "updated by" information', () => {
+  it('should render the flyout with the rule "updated by" information', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MigrationRuleDetailsFlyout
@@ -73,7 +73,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     );
   });
 
-  it('calls closeFlyout when the close button is clicked', () => {
+  it('should call closeFlyout when the close button is clicked', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MigrationRuleDetailsFlyout
@@ -87,7 +87,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     expect(closeFlyout).toHaveBeenCalled();
   });
 
-  it('renders translation tab', () => {
+  it('should render translation tab', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MigrationRuleDetailsFlyout
@@ -101,7 +101,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     expect(getByTestId('tabTranslation')).toBeInTheDocument();
   });
 
-  it('renders overview tab', () => {
+  it('should render overview tab', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MigrationRuleDetailsFlyout
@@ -115,7 +115,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     expect(getByTestId('tabOverview')).toBeInTheDocument();
   });
 
-  it('renders custom rule schedule from original rule annotations in the overview tab', async () => {
+  it('should render custom rule schedule from original rule annotations in the overview tab', async () => {
     const customRule = getRuleMigrationRuleMock({
       original_rule: {
         id: 'sentinel-rule-id',
@@ -160,7 +160,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     });
   });
 
-  it('renders summary tab', () => {
+  it('should render summary tab', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MigrationRuleDetailsFlyout
@@ -174,7 +174,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     expect(getByTestId('tabSummary')).toBeInTheDocument();
   });
 
-  it('renders close button', () => {
+  it('should render close button', () => {
     const { getByTestId } = render(
       <TestProviders>
         <MigrationRuleDetailsFlyout
@@ -189,7 +189,7 @@ describe('MigrationRuleDetailsFlyout', () => {
     expect(getByTestId('detailsFlyoutCloseButton')).toHaveTextContent('Close');
   });
 
-  it('displays MITRE ATT&CK mappings in the overview tab', async () => {
+  it('should display MITRE ATT&CK mappings in the overview tab', async () => {
     const ruleWithThreat = getRuleMigrationRuleMock({
       elastic_rule: {
         severity: 'low',
@@ -262,7 +262,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationRuleFlyoutPreviousRuleButton'));
+      fireEvent.click(getByTestId('migrationFlyoutPreviousButton'));
       expect(navigation.goToPrevious).toHaveBeenCalled();
     });
 
@@ -277,7 +277,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      fireEvent.click(getByTestId('migrationRuleFlyoutNextRuleButton'));
+      fireEvent.click(getByTestId('migrationFlyoutNextButton'));
       expect(navigation.goToNext).toHaveBeenCalled();
     });
 
@@ -292,7 +292,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationRuleFlyoutPreviousRuleButton')).toBeDisabled();
+      expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
     });
 
     it('should prevent moving forward from the last rule of the page', () => {
@@ -306,7 +306,7 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationRuleFlyoutNextRuleButton')).toBeDisabled();
+      expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
     });
 
     it('should disable both arrows when the page has a single rule', () => {
@@ -320,8 +320,8 @@ describe('MigrationRuleDetailsFlyout', () => {
           />
         </TestProviders>
       );
-      expect(getByTestId('migrationRuleFlyoutPreviousRuleButton')).toBeDisabled();
-      expect(getByTestId('migrationRuleFlyoutNextRuleButton')).toBeDisabled();
+      expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
+      expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
     });
   });
 

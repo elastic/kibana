@@ -108,12 +108,7 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
         <EuiSpacer size="s" />
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
           <EuiFlexItem grow={false}>
-            <MigrationFlyoutNav
-              navigation={navigation}
-              isDisabled={isLoading}
-              previousButtonTestSubj="migrationDashboardFlyoutPreviousButton"
-              nextButtonTestSubj="migrationDashboardFlyoutNextButton"
-            />
+            <MigrationFlyoutNav navigation={navigation} isDisabled={isLoading} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">

@@ -21,39 +21,37 @@ const renderNav = (navigationOverrides = {}, isDisabled = false) =>
     <MigrationFlyoutNav
       navigation={{ ...baseNavigation, ...navigationOverrides }}
       isDisabled={isDisabled}
-      previousButtonTestSubj="previousButton"
-      nextButtonTestSubj="nextButton"
     />
   );
 
 describe('MigrationFlyoutNav', () => {
-  it('moves the user to the previous item on click', () => {
+  it('should move the user to the previous item on click', () => {
     const goToPrevious = jest.fn();
     const { getByTestId } = renderNav({ goToPrevious });
-    fireEvent.click(getByTestId('previousButton'));
+    fireEvent.click(getByTestId('migrationFlyoutPreviousButton'));
     expect(goToPrevious).toHaveBeenCalled();
   });
 
-  it('moves the user to the next item on click', () => {
+  it('should move the user to the next item on click', () => {
     const goToNext = jest.fn();
     const { getByTestId } = renderNav({ goToNext });
-    fireEvent.click(getByTestId('nextButton'));
+    fireEvent.click(getByTestId('migrationFlyoutNextButton'));
     expect(goToNext).toHaveBeenCalled();
   });
 
-  it('prevents moving backward when there is no previous item', () => {
+  it('should prevent moving backward when there is no previous item', () => {
     const { getByTestId } = renderNav({ hasPrevious: false });
-    expect(getByTestId('previousButton')).toBeDisabled();
+    expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
   });
 
-  it('prevents moving forward when there is no next item', () => {
+  it('should prevent moving forward when there is no next item', () => {
     const { getByTestId } = renderNav({ hasNext: false });
-    expect(getByTestId('nextButton')).toBeDisabled();
+    expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
   });
 
-  it('disables both controls while data is loading', () => {
+  it('should disable both controls while data is loading', () => {
     const { getByTestId } = renderNav({}, true);
-    expect(getByTestId('previousButton')).toBeDisabled();
-    expect(getByTestId('nextButton')).toBeDisabled();
+    expect(getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
+    expect(getByTestId('migrationFlyoutNextButton')).toBeDisabled();
   });
 });

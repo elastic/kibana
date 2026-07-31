@@ -21,15 +21,11 @@ export interface MigrationFlyoutNavigation {
 export interface MigrationFlyoutNavProps {
   navigation: MigrationFlyoutNavigation;
   isDisabled: boolean;
-  previousButtonTestSubj: string;
-  nextButtonTestSubj: string;
 }
 
 export const MigrationFlyoutNav = React.memo(function MigrationFlyoutNav({
   navigation,
   isDisabled,
-  previousButtonTestSubj,
-  nextButtonTestSubj,
 }: MigrationFlyoutNavProps) {
   const { hasPrevious, hasNext, goToPrevious, goToNext } = navigation;
   return (
@@ -43,7 +39,7 @@ export const MigrationFlyoutNav = React.memo(function MigrationFlyoutNav({
             size="s"
             isDisabled={!hasPrevious || isDisabled}
             onClick={goToPrevious}
-            data-test-subj={previousButtonTestSubj}
+            data-test-subj="migrationFlyoutPreviousButton"
             aria-label={PREVIOUS_BUTTON_LABEL}
           />
         </EuiToolTip>
@@ -57,7 +53,7 @@ export const MigrationFlyoutNav = React.memo(function MigrationFlyoutNav({
             size="s"
             isDisabled={!hasNext || isDisabled}
             onClick={goToNext}
-            data-test-subj={nextButtonTestSubj}
+            data-test-subj="migrationFlyoutNextButton"
             aria-label={NEXT_BUTTON_LABEL}
           />
         </EuiToolTip>

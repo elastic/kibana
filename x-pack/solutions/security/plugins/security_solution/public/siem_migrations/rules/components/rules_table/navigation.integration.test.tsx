@@ -158,7 +158,7 @@ describe('MigrationRulesTable navigation (integration)', () => {
     renderTable();
     openFlyoutForRule('First Rule');
 
-    fireEvent.click(screen.getByTestId('migrationRuleFlyoutNextRuleButton'));
+    fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
 
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Second Rule');
   });
@@ -167,7 +167,7 @@ describe('MigrationRulesTable navigation (integration)', () => {
     renderTable();
     openFlyoutForRule('Second Rule');
 
-    fireEvent.click(screen.getByTestId('migrationRuleFlyoutPreviousRuleButton'));
+    fireEvent.click(screen.getByTestId('migrationFlyoutPreviousButton'));
 
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('First Rule');
   });
@@ -176,15 +176,15 @@ describe('MigrationRulesTable navigation (integration)', () => {
     renderTable();
     openFlyoutForRule('First Rule');
 
-    expect(screen.getByTestId('migrationRuleFlyoutPreviousRuleButton')).toBeDisabled();
-    expect(screen.getByTestId('migrationRuleFlyoutNextRuleButton')).toBeEnabled();
+    expect(screen.getByTestId('migrationFlyoutPreviousButton')).toBeDisabled();
+    expect(screen.getByTestId('migrationFlyoutNextButton')).toBeEnabled();
 
-    fireEvent.click(screen.getByTestId('migrationRuleFlyoutNextRuleButton'));
-    fireEvent.click(screen.getByTestId('migrationRuleFlyoutNextRuleButton'));
+    fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+    fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
 
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule');
-    expect(screen.getByTestId('migrationRuleFlyoutNextRuleButton')).toBeDisabled();
-    expect(screen.getByTestId('migrationRuleFlyoutPreviousRuleButton')).toBeEnabled();
+    expect(screen.getByTestId('migrationFlyoutNextButton')).toBeDisabled();
+    expect(screen.getByTestId('migrationFlyoutPreviousButton')).toBeEnabled();
   });
 
   it('should reset to the first enabled tab when navigating to a rule that cannot show the selected tab', () => {
@@ -194,7 +194,7 @@ describe('MigrationRulesTable navigation (integration)', () => {
     fireEvent.click(screen.getByTestId('tabOverview'));
     expect(screen.getByTestId('tabOverview')).toHaveAttribute('aria-selected', 'true');
 
-    fireEvent.click(screen.getByTestId('migrationRuleFlyoutNextRuleButton'));
+    fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
 
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Second Rule');
     expect(screen.getByTestId('tabOverview')).toBeDisabled();
@@ -206,8 +206,8 @@ describe('MigrationRulesTable navigation (integration)', () => {
     renderTable();
     openFlyoutForRule('First Rule');
 
-    fireEvent.click(screen.getByTestId('migrationRuleFlyoutNextRuleButton'));
-    fireEvent.click(screen.getByTestId('migrationRuleFlyoutNextRuleButton'));
+    fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
+    fireEvent.click(screen.getByTestId('migrationFlyoutNextButton'));
     expect(screen.getByTestId('detailsFlyoutTitle')).toHaveTextContent('Third Rule');
 
     fireEvent.click(screen.getByTestId('installMigrationRuleFromFlyoutButton'));
