@@ -7,24 +7,15 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import type { EsClient } from '@kbn/scout';
 import {
   ALERTING_V2_ALERTS_ALL_ROLE,
+  ALERTING_V2_ALERTS_READ_ROLE,
   apiTest,
   CREATE_ALERT_EVENT_URL,
   getCreateAlertEventBySourceUrl,
+  NO_ACCESS_ROLE,
   testData,
 } from '../../../fixtures';
-
-const findExternalAlertByGroupHash = async (esClient: EsClient, groupHash: string) => {
-  await esClient.indices.refresh({ index: testData.ALERT_EVENTS_DATA_STREAM });
-  const result = await esClient.search({
-    index: testData.ALERT_EVENTS_DATA_STREAM,
-    size: 1,
-    query: { term: { group_hash: groupHash } },
-  });
-  return result.hits.hits[0]?._source as Record<string, unknown> | undefined;
-};
 
 apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -45,7 +36,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
 
   apiTest(
     'POST /alerts: creates an external alert event when source is in the body',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, apiServices }) => {
       const response = await apiClient.post(CREATE_ALERT_EVENT_URL, {
         headers: writerHeaders,
         body: {
@@ -61,7 +52,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
       expect(typeof response.body.episode_id).toBe('string');
       expect(response.body.episode_url).toBeUndefined();
 
-      const doc = await findExternalAlertByGroupHash(esClient, response.body.group_hash);
+      const doc = await apiServices.alertingV2.ruleEvents.findByGroupHash(response.body.group_hash);
       expect(doc).toMatchObject({
         source: 'datadog',
         type: 'alert',
@@ -78,7 +69,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
 
   apiTest(
     'POST /alerts/:source: creates an external alert event when source is in the path',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, apiServices }) => {
       const response = await apiClient.post(getCreateAlertEventBySourceUrl('pagerduty'), {
         headers: writerHeaders,
         body: {
@@ -92,7 +83,7 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
       expect(typeof response.body.episode_id).toBe('string');
       expect(response.body.episode_url).toBeUndefined();
 
-      const doc = await findExternalAlertByGroupHash(esClient, response.body.group_hash);
+      const doc = await apiServices.alertingV2.ruleEvents.findByGroupHash(response.body.group_hash);
       expect(doc).toMatchObject({
         source: 'pagerduty',
         type: 'alert',
@@ -125,4 +116,30 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
     });
     expect(response).toHaveStatusCode(400);
   });
+
+  apiTest(
+    'authorization: returns 403 for a user with read-only alerting_v2 privileges',
+    async ({ apiClient, requestAuth }) => {
+      const readerCredentials = await requestAuth.getApiKeyForCustomRole(
+        ALERTING_V2_ALERTS_READ_ROLE
+      );
+      const response = await apiClient.post(CREATE_ALERT_EVENT_URL, {
+        headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
+        body: { source: 'datadog', fingerprint: 'scout-authz-read-fp' },
+      });
+      expect(response).toHaveStatusCode(403);
+    }
+  );
+
+  apiTest(
+    'authorization: returns 403 for a user without alerting_v2 privileges',
+    async ({ apiClient, requestAuth }) => {
+      const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
+      const response = await apiClient.post(CREATE_ALERT_EVENT_URL, {
+        headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
+        body: { source: 'datadog', fingerprint: 'scout-authz-none-fp' },
+      });
+      expect(response).toHaveStatusCode(403);
+    }
+  );
 });
