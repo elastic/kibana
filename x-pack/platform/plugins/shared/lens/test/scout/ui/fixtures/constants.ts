@@ -93,8 +93,6 @@ export const KBN_ARCHIVE_PATHS = {
 } as const;
 
 export const VISUALIZATION_TITLES = {
-  // Saved legacy metric visualization from the lens_basic archive.
-  LEGACY_METRIC: 'Artistpreviouslyknownaslens',
   OPEN_IN_LENS: {
     AGG_BASED: {
       NAVIGATION_LINE: 'Visualize navigation - Line',

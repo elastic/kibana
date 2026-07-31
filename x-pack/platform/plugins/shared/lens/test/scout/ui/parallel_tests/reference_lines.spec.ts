@@ -7,43 +7,21 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { cleanupLogstashDataView, setupLogstashDataView } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 const REFERENCE_LINE_LEFT = 'lnsXY_yReferenceLineLeftPanel';
 const REFERENCE_LINE_RIGHT = 'lnsXY_yReferenceLineRightPanel';
 
 spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, () => {
-  let storedDataViewId: string | undefined;
+  const suiteSetup = createLogstashLensEditorSuiteSetup();
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-    storedDataViewId = await setupLogstashDataView(
-      { scoutSpace, apiServices },
-      'scout-reference-lines-dv'
-    );
-  });
+  spaceTest.beforeAll(suiteSetup.beforeAll);
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects: { visualize, lens } }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await visualize.goto();
-    await visualize.openNewVisualizationWizard();
-    await visualize.clickVisType('lens');
-    await lens.waitForLensApp();
-  });
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-    await cleanupLogstashDataView({ scoutSpace, apiServices }, storedDataViewId);
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.afterAll(suiteSetup.afterAll);
 
-  // Temporarily disabled: the cross-group move below is silently discarded by Lens when it runs
-  // straight after a dimension-editor edit. The drop itself is well formed (the drag state is set
-  // and the target reports `domDroppable--active`), but Lens commits the preceding fill-below edit
-  // asynchronously and drops that land before it commits are accepted and then thrown away. Only a
-  // fixed settle of a few seconds is reliable: `waitForVisualization` returns immediately in the
-  // Lens editor because `data-rendering-count` is absent there, network idle does not gate the
-  // commit, and retrying the drag is unsafe because a partial drop removes the source dimension
-  // without adding the target one. Re-enable once Lens exposes a "changes applied" signal.
-  spaceTest.fixme(
+  spaceTest(
     'creates, styles and duplicates reference lines',
     async ({ page, pageObjects: { lens } }) => {
       await spaceTest.step(
@@ -114,6 +92,10 @@ spaceTest.describe('Lens reference lines', { tag: '@local-stateful-classic' }, (
           await lens.openDimensionEditor(`${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`, 1);
           await lens.setReferenceLineFillBelow();
           await lens.closeDimensionEditor();
+          // Lens applies the fill to the chart asynchronously, and a drop that lands before
+          // that is applied to stale state (it removes the dimension from this group without
+          // adding it to the target one), so wait for the re-render first.
+          await lens.waitForVisualization('xyVisChart');
 
           await lens.dragDimensionToDimension({
             from: `${REFERENCE_LINE_LEFT} > lns-dimensionTrigger`,

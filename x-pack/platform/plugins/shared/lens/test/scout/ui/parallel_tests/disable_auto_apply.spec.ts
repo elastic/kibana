@@ -7,30 +7,16 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { cleanupLogstashDataView, setupLogstashDataView } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 spaceTest.describe('Lens disable auto-apply', { tag: '@local-stateful-classic' }, () => {
-  let storedDataViewId: string | undefined;
+  const suiteSetup = createLogstashLensEditorSuiteSetup();
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-    storedDataViewId = await setupLogstashDataView(
-      { scoutSpace, apiServices },
-      'scout-disable-auto-apply-dv'
-    );
-  });
+  spaceTest.beforeAll(suiteSetup.beforeAll);
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects: { visualize, lens } }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await visualize.goto();
-    await visualize.openNewVisualizationWizard();
-    await visualize.clickVisType('lens');
-    await lens.waitForLensApp();
-  });
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-    await cleanupLogstashDataView({ scoutSpace, apiServices }, storedDataViewId);
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'toggles auto-apply and applies changes on demand',

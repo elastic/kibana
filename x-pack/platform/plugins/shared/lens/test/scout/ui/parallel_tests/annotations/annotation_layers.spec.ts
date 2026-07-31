@@ -7,32 +7,18 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { cleanupLogstashDataView, setupLogstashDataView } from '../../fixtures';
+import { createLogstashLensEditorSuiteSetup, testData } from '../../fixtures';
 
 const ANNOTATIONS_PANEL = 'lnsXY_xAnnotationsPanel';
 
 spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic' }, () => {
-  let storedDataViewId: string | undefined;
+  const suiteSetup = createLogstashLensEditorSuiteSetup();
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-    storedDataViewId = await setupLogstashDataView(
-      { scoutSpace, apiServices },
-      'scout-annotation-layers-dv'
-    );
-  });
+  spaceTest.beforeAll(suiteSetup.beforeAll);
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects: { visualize, lens } }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    await visualize.goto();
-    await visualize.openNewVisualizationWizard();
-    await visualize.clickVisType('lens');
-    await lens.waitForLensApp();
-  });
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-    await cleanupLogstashDataView({ scoutSpace, apiServices }, storedDataViewId);
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'adds, edits and duplicates manual and query-based annotations',
@@ -40,12 +26,15 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
       await spaceTest.step(
         'disables the annotations layer button when the data layer has no date histogram',
         async () => {
-          await lens.dragFieldToWorkspace('geo.src');
+          await lens.dragFieldToWorkspace('geo.src', testData.XY_CHART);
 
           await page.testSubj.click('lnsLayerAddButton');
-          await expect(page.testSubj.locator('lnsLayerAddButton-annotations')).toBeDisabled();
-          // Close the add-layer popover before rebuilding the chart.
+          const annotationsLayerButton = page.testSubj.locator('lnsLayerAddButton-annotations');
+          await expect(annotationsLayerButton).toBeDisabled();
+          // Close the add-layer popover before rebuilding the chart, so it can't swallow the
+          // clicks the next step makes underneath it.
           await page.keyboard.press('Escape');
+          await expect(annotationsLayerButton).toBeHidden();
         }
       );
 
@@ -53,14 +42,13 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
         'adds a manual annotation layer with a static date and shows its text label',
         async () => {
           await lens.removeLayer();
-          await lens.ensureLayerTabIsActive();
-          await lens.dragFieldToWorkspace('@timestamp');
+          await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
 
           await lens.createLayer('annotations');
           expect(await lens.getLayerCount()).toBe(2);
 
           await lens.ensureLayerTabIsActive(1);
-          expect(await lens.getDimensionTriggerText(ANNOTATIONS_PANEL)).toBe('Event');
+          await expect(lens.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText('Event');
 
           await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
           await lens.setAnnotationTextVisibility('name');
@@ -100,7 +88,7 @@ spaceTest.describe('Lens XY annotation layers', { tag: '@local-stateful-classic'
         expect(await lens.getLayerCount()).toBe(2);
 
         await lens.ensureLayerTabIsActive(1);
-        expect(await lens.getDimensionTriggerText(ANNOTATIONS_PANEL)).toBe('Event');
+        await expect(lens.getDimensionTriggersLocator(ANNOTATIONS_PANEL)).toHaveText('Event');
 
         await lens.openDimensionEditor(`${ANNOTATIONS_PANEL} > lns-dimensionTrigger`, 1);
         await page.testSubj.click('lnsXY_annotation_query');

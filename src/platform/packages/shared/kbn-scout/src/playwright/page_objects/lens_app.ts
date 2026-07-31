@@ -12,6 +12,9 @@ import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
+/** `useDebouncedValue` waits 256ms before committing; add margin for a busy main thread. */
+const FORMAT_PARAM_DEBOUNCE_FLUSH_MS = 500;
+
 const normalizeComputedColor = (color: string | undefined): string | undefined => {
   if (!color) {
     return undefined;
@@ -105,7 +108,7 @@ export class LensApp {
     this.metricProgressBar = this.page.locator('.echSingleMetricProgress');
     // Tab `data-test-subj` values use layer ids (not numeric indices); this only ever
     // resolves to elements when there are 2+ layers (EUI hides the tab strip for one).
-    this.layerTabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
+    this.layerTabsLocator = this.page.testSubj.locator('^unifiedTabs_tab_');
     this.messageListTrigger = this.page.testSubj.locator('lens-message-list-trigger');
     this.dataTable = this.page.testSubj.locator('lnsDataTable');
     this.formulaEditorTextarea = this.page.locator(
@@ -466,12 +469,19 @@ export class LensApp {
    * (e.g. `lnsXY_annotationLayer_saveToLibrary`).
    */
   async performLayerAction(testSubject: string, layerIndex = 0) {
-    const tabs = await this.layerTabsLocator.all();
-    if (tabs[layerIndex]) {
-      await tabs[layerIndex].hover();
-    }
-    await this.page.testSubj.click(`lnsLayerSplitButton--${layerIndex}`);
+    await this.hoverLayerTab(layerIndex);
+    // The layer actions mount after the hover, so wait for the popover trigger to render
+    // instead of clicking straight away.
+    const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${layerIndex}`);
+    await splitButton.waitFor({ state: 'visible' });
+    await splitButton.click();
     await this.page.testSubj.click(testSubject);
+  }
+
+  /** Hovers the layer tab at `index`, if the tabs row is rendered (hidden for a single layer). */
+  private async hoverLayerTab(index: number) {
+    const tabs = await this.layerTabsLocator.all();
+    await tabs[index]?.hover();
   }
 
   /** Returns the selected axis side label from an open dimension editor. */
@@ -724,8 +734,9 @@ export class LensApp {
 
   /**
    * Waits for the Lens visualization workspace to finish rendering.
-   * Polls `data-rendering-count` on the visualization container until it
-   * stabilises across two consecutive reads (500 ms apart).
+   * Polls the render count until it stabilises across two consecutive reads (500 ms apart),
+   * reading `data-rendering-count` from the embeddable container where it exists (dashboards)
+   * and falling back to the Elastic Charts render count, which is all the Lens editor renders.
    */
   async waitForVisualization(chartSubj = 'lnsVisualizationContainer') {
     const workspace = this.page.testSubj.locator('lnsWorkspace');
@@ -741,9 +752,15 @@ export class LensApp {
         if (!el) {
           return false;
         }
-        const count = el.getAttribute('data-rendering-count');
+        const chartStatus = el.querySelector('.echChartStatus');
+        const count =
+          el.getAttribute('data-rendering-count') ??
+          (chartStatus?.getAttribute('data-ech-render-complete') === 'true'
+            ? chartStatus.getAttribute('data-ech-render-count')
+            : null);
         if (count === null) {
-          return true;
+          // Not an Elastic Charts visualization (e.g. a data table): nothing left to poll.
+          return !chartStatus;
         }
         if (count === '0') {
           delete (window as unknown as { __lensScoutPrevRenderCount?: string })
@@ -930,11 +947,6 @@ export class LensApp {
     return data;
   }
 
-  /** Returns whether the metric's secondary-value trend badge (icon/value) is visible. */
-  async hasSecondaryMetricBadge(): Promise<boolean> {
-    return (await this.secondaryMetricBadge.count()) > 0;
-  }
-
   /** Returns the visible text of the secondary-value trend badge, or `undefined` if absent. */
   async getSecondaryMetricBadgeText(): Promise<string | undefined> {
     if ((await this.secondaryMetricBadge.count()) === 0) {
@@ -944,8 +956,9 @@ export class LensApp {
   }
 
   /**
-   * Returns the secondary-value trend badge locator, so callers can assert its background
-   * color with `toHaveCSS` (auto-retries until the debounced color update settles).
+   * Returns the secondary-value trend badge locator, so callers can assert its presence or
+   * background color with `toHaveCount` / `toHaveCSS` (both auto-retry until the debounced
+   * update settles).
    */
   getSecondaryMetricBadgeLocator() {
     return this.secondaryMetricBadge;
@@ -962,11 +975,6 @@ export class LensApp {
   /**
    * Sets the format of the currently open dimension, and optionally its decimal places
    * and suffix/prefix text.
-   *
-   * Suffix commits via `useDebouncedValue` (~256ms) and its onChange spreads the current
-   * format params. Setting decimals *before* that debounce flushes can race: a stale
-   * closure still holding the default `decimals: 2` overwrites a just-applied custom
-   * decimals value. Apply (and flush) the suffix first, then set decimals last.
    */
   async editDimensionFormat(format: string, options?: { decimals?: number; prefix?: string }) {
     await this.page.components
@@ -974,36 +982,47 @@ export class LensApp {
       .setSelectedOptions([format]);
 
     if (options?.prefix != null) {
-      const suffixInput = this.page.testSubj.locator('indexPattern-dimension-formatSuffix');
-      await suffixInput.waitFor({ state: 'visible' });
-      await suffixInput.fill(options.prefix);
-      await this.page.keyboard.press('Tab');
-      // Let the suffix debounce commit before any subsequent decimals edit.
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await this.page.waitForTimeout(300);
+      await this.setFormatParam(
+        'input[data-test-subj="indexPattern-dimension-formatSuffix"]',
+        options.prefix
+      );
     }
 
     if (options?.decimals != null) {
       // EuiRange with `showInput` stamps `data-test-subj` on both the number input and the
       // range slider; target the number input explicitly to avoid a strict-mode violation.
-      const decimalsInput = this.page.locator(
-        'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
+      await this.setFormatParam(
+        'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]',
+        `${options.decimals}`
       );
-      await decimalsInput.waitFor({ state: 'visible' });
-      await decimalsInput.fill(`${options.decimals}`);
-      await this.page.keyboard.press('Tab');
-      await this.page.waitForFunction((expected) => {
-        const el = document.querySelector(
-          'input[type="number"][data-test-subj="indexPattern-dimension-formatDecimals"]'
-        );
-        return el instanceof HTMLInputElement && el.value === expected;
-      }, `${options.decimals}`);
-      // Let the decimals debounce commit before the caller closes the editor, which would
-      // unmount the format editor and cancel the pending (uncommitted) callback — otherwise
-      // decimals can revert to the previously-committed value (mirrors the suffix flush above).
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await this.page.waitForTimeout(300);
     }
+  }
+
+  /**
+   * Fills one format-params input and gives its debounced commit time to reach the Lens state.
+   *
+   * These inputs go through `useDebouncedValue`, whose `onChange` spreads the format params the
+   * closure captured, so editing a second param before the first commits overwrites it — and
+   * unmounting the editor (`closeDimensionEditor`) drops a pending commit altogether, silently
+   * reverting the value. The commit has no DOM signal of its own to wait for.
+   */
+  private async setFormatParam(selector: string, value: string) {
+    await this.page.locator(selector).fill(value);
+    // Dismisses the range popover the decimals input opens, and takes focus off the input.
+    await this.page.keyboard.press('Tab');
+    // React owns these inputs and can reject or reformat what was typed, so wait for the value
+    // to stick before letting the debounce run (readiness wait — assertions stay in specs).
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      ({ sel, expected }) => {
+        const el = document.querySelector(sel);
+        return el instanceof HTMLInputElement && el.value === expected;
+      },
+      { sel: selector, expected: value },
+      { timeout: 10_000 }
+    );
+    // eslint-disable-next-line playwright/no-wait-for-timeout
+    await this.page.waitForTimeout(FORMAT_PARAM_DEBOUNCE_FLUSH_MS);
   }
 
   /**
@@ -1478,6 +1497,14 @@ export class LensApp {
   /**
    * HTML5 DnD between test-subj chains (FTR `browser.html5DragAndDrop`).
    * Chains use `>` separators (e.g. `panel > lns-dimensionTrigger`).
+   *
+   * Dispatches the same event sequence a browser does — dragstart, dragenter, dragover, drop,
+   * dragend — and waits for the target to report each state via `@kbn/dom-drag-drop` classes.
+   * Both waits matter: drop targets register with the drag-drop context only after the drag
+   * starts (`domDroppable--active`), and Lens resolves a drop against the target the last
+   * dragover selected (`domDroppable--hover`). Dropping without those lands a partial change,
+   * for example moving a dimension between groups removes it from the source group and never
+   * adds it to the target one.
    */
   private async html5DragAndDrop(from: string, to: string) {
     await this.page.evaluate(
@@ -1523,20 +1550,48 @@ export class LensApp {
           throw new Error(`html5DragAndDrop: origin not found for ${fromChain}`);
         }
 
+        // Starting a drag re-renders the drop targets, which replaces their DOM nodes, so
+        // re-resolve the target on every step instead of holding on to a detached node.
+        async function waitForTargetWithClass(className: string, timeout: number) {
+          const deadline = Date.now() + timeout;
+          while (Date.now() < deadline) {
+            const element = queryChain(toChain);
+            if (element?.closest('.domDroppable')?.classList.contains(className)) {
+              return element;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          return null;
+        }
+
         const dragStartEvent = createEvent('dragstart');
         origin.dispatchEvent(dragStartEvent);
 
-        // FTR browser.html5DragAndDrop pauses ~100ms between dragstart and drop.
-        await new Promise((resolve) => setTimeout(resolve, 100));
+        // A target that never turns active rejects this drag (Lens has no drop type for it),
+        // in which case dropping on it is a no-op: still dispatch the events so the caller's
+        // assertions, not this helper, describe what the application did.
+        const activeTarget = await waitForTargetWithClass('domDroppable--active', 2_000);
+        if (activeTarget) {
+          const dragEnterEvent = createEvent('dragenter');
+          dragEnterEvent.dataTransfer = dragStartEvent.dataTransfer;
+          activeTarget.dispatchEvent(dragEnterEvent);
 
-        const target = queryChain(toChain);
-        if (!target) {
-          throw new Error(`html5DragAndDrop: target not found for ${toChain}`);
+          const dragOverEvent = createEvent('dragover');
+          dragOverEvent.dataTransfer = dragStartEvent.dataTransfer;
+          activeTarget.dispatchEvent(dragOverEvent);
+
+          if (!(await waitForTargetWithClass('domDroppable--hover', 5_000))) {
+            throw new Error(`html5DragAndDrop: ${toChain} never became the hovered drop target`);
+          }
         }
 
+        const dropTarget = queryChain(toChain);
+        if (!dropTarget) {
+          throw new Error(`html5DragAndDrop: target disappeared for ${toChain}`);
+        }
         const dropEvent = createEvent('drop');
         dropEvent.dataTransfer = dragStartEvent.dataTransfer;
-        target.dispatchEvent(dropEvent);
+        dropTarget.dispatchEvent(dropEvent);
 
         const dragEndEvent = createEvent('dragend');
         dragEndEvent.dataTransfer = dropEvent.dataTransfer;
@@ -1917,23 +1972,60 @@ export class LensApp {
   }
 
   /**
-   * Removes/resets a layer (FTR `removeLayer`). With a single layer this resets the viz.
+   * Removes the layer at `index` (FTR `removeLayer`). With a single layer this clears the viz
+   * instead of dropping a tab. Returns once the removal is reflected in the config panel, so
+   * callers can read the layer count / build a new chart right after.
    */
   async removeLayer(index = 0) {
-    const tabsLocator = this.page.locator('[data-test-subj^="unifiedTabs_tab_"]');
-    const tabs = await tabsLocator.all();
-    if (tabs[index]) {
-      await tabs[index].hover();
-    }
+    const tabsBefore = await this.layerTabsLocator.count();
+    await this.hoverLayerTab(index);
+
     const splitButton = this.page.testSubj.locator(`lnsLayerSplitButton--${index}`);
+    const removeButton = this.page.testSubj.locator(`lnsLayerRemove--${index}`);
+    // Layers with more than one action (e.g. an annotation layer that can also be saved to the
+    // library) hide the remove action behind a split-button popover; single-action layers expose
+    // it directly. Exactly one of the two renders, so wait for whichever appears rather than
+    // racing the layer actions still mounting after the hover.
+    await splitButton.or(removeButton).waitFor({ state: 'visible' });
     if (await splitButton.isVisible()) {
       await splitButton.click();
     }
-    await this.page.testSubj.click(`lnsLayerRemove--${index}`);
-    const modal = this.page.testSubj.locator('lnsLayerRemoveModal');
-    if (await modal.isVisible()) {
-      await this.page.testSubj.click('lnsLayerRemoveConfirmButton');
+    await removeButton.click();
+
+    await this.confirmLayerRemovalIfPrompted();
+
+    if (tabsBefore > 0) {
+      // waitForFunction has no Scout default (unlike expect/actionTimeout).
+      await this.page.waitForFunction(
+        (before) =>
+          document.querySelectorAll('[data-test-subj^="unifiedTabs_tab_"]').length < before,
+        tabsBefore,
+        { timeout: 10_000 }
+      );
+    } else {
+      // Clearing the only layer keeps its (now empty) panel, so wait for its dimensions to go.
+      await this.page.testSubj.waitForSelector(`lns-layerPanel-${index} > lns-dimensionTrigger`, {
+        state: 'detached',
+      });
     }
+  }
+
+  /**
+   * Confirms the modal Lens shows when removing a layer would discard child state it owns
+   * (e.g. a library-linked annotation group). The modal mounts asynchronously, so give it a
+   * bounded window to appear instead of a one-shot visibility read.
+   */
+  private async confirmLayerRemovalIfPrompted() {
+    const removeModal = this.page.testSubj.locator('lnsLayerRemoveModal');
+    const isPrompted = await removeModal.waitFor({ state: 'visible', timeout: 2_500 }).then(
+      () => true,
+      () => false
+    );
+    if (!isPrompted) {
+      return;
+    }
+    await this.page.testSubj.click('lnsLayerRemoveConfirmButton');
+    await removeModal.waitFor({ state: 'hidden' });
   }
 
   /** Returns whether the open dimension editor has top-level aggregation enabled. */
@@ -2204,8 +2296,8 @@ export class LensApp {
 
   /** Adds another tooltip field row to the currently open annotation dimension editor. */
   private async addFieldToTooltip(fieldName: string) {
-    const existingPickers = await this.page
-      .locator('[data-test-subj^="lnsXY-annotation-tooltip-field-picker"]')
+    const existingPickers = await this.page.testSubj
+      .locator('^lnsXY-annotation-tooltip-field-picker')
       .count();
     await this.page.testSubj.click('lnsXY-annotation-tooltip-add_field');
     await this.page.components
@@ -2221,6 +2313,17 @@ export class LensApp {
   /** Enables the "fill below" style for the reference line in the open dimension editor. */
   async setReferenceLineFillBelow() {
     await this.referenceLineFillBelowButton.click();
+    // The button reflects the layer state Lens just committed, so this is the readiness signal
+    // that the style landed before callers move on (assertions stay in specs).
+    // waitForFunction has no Scout default (unlike expect/actionTimeout).
+    await this.page.waitForFunction(
+      () =>
+        document
+          .querySelector('[data-test-subj="lnsXY_fill_below"]')
+          ?.getAttribute('aria-pressed') === 'true',
+      undefined,
+      { timeout: 10_000 }
+    );
   }
 
   /** Reverses the palette colors from the open palette panel. */

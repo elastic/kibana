@@ -88,16 +88,6 @@ export class VisualizeApp {
     }
   }
 
-  /**
-   * Opens a saved Lens visualization from the listing. Unlike `openSavedVisualization`
-   * (which waits for the visualize embeddable loader), this waits for the Lens editor
-   * itself, since native Lens saved objects navigate straight into it.
-   */
-  async openSavedLensVisualization(title: string) {
-    await this.page.testSubj.click(`visListingTitleLink-${title.split(' ').join('-')}`);
-    await this.page.testSubj.locator('lnsApp').waitFor({ state: 'visible' });
-  }
-
   async openSaveModal() {
     await this.visualizeSaveButton.click();
     await expect(this.saveModal.modal).toBeVisible();

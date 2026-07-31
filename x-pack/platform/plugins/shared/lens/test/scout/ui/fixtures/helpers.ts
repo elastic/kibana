@@ -8,13 +8,7 @@
 import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ContentListWrapper } from '@kbn/scout';
-import type {
-  ApiServicesFixture,
-  Locator,
-  PageObjects,
-  ScoutPage,
-  ScoutSpaceParallelFixture,
-} from '@kbn/scout';
+import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
 import {
   DATA_VIEW_ID,
   FORMULA_ESCAPED_RUNTIME_FIELD,
@@ -136,67 +130,6 @@ export async function completeLensCsvExport(page: ScoutPage): Promise<void> {
 
 type DashboardAndLens = Pick<PageObjects, 'dashboard' | 'lens'>;
 type VisualizeAndLens = Pick<PageObjects, 'visualize' | 'lens'>;
-
-const LOGSTASH_UI_SETTINGS_KEYS = ['defaultIndex', 'dateFormat:tz', 'timepicker:timeDefaults'];
-
-/** Sets the logstash default index, UTC timezone and an in-range time default for the space. */
-export async function setLogstashUiSettings({
-  scoutSpace,
-}: {
-  scoutSpace: ScoutSpaceParallelFixture;
-}): Promise<void> {
-  await scoutSpace.uiSettings.set({
-    defaultIndex: DATA_VIEW_ID.LOGSTASH,
-    'dateFormat:tz': 'UTC',
-    'timepicker:timeDefaults': JSON.stringify(LOGSTASH_IN_RANGE_DATES),
-  });
-}
-
-/** Unsets the UI settings applied by `setLogstashUiSettings`. */
-export async function unsetLogstashUiSettings({
-  scoutSpace,
-}: {
-  scoutSpace: ScoutSpaceParallelFixture;
-}): Promise<void> {
-  await scoutSpace.uiSettings.unset(...LOGSTASH_UI_SETTINGS_KEYS);
-}
-
-/**
- * Sets the shared logstash UI settings and creates a `logstash-*` data view scoped to
- * the space (for suites that build a Lens chart from scratch rather than opening one
- * from an archive). Returns the created data view id for teardown via
- * `cleanupLogstashDataView`.
- */
-export async function setupLogstashDataView(
-  {
-    scoutSpace,
-    apiServices,
-  }: { scoutSpace: ScoutSpaceParallelFixture; apiServices: ApiServicesFixture },
-  namePrefix: string
-): Promise<string> {
-  await setLogstashUiSettings({ scoutSpace });
-  const { data: dataView } = await apiServices.dataViews.create({
-    title: DATA_VIEW_ID.LOGSTASH,
-    name: `${namePrefix}-${Date.now()}`,
-    timeFieldName: '@timestamp',
-    spaceId: scoutSpace.id,
-  });
-  return dataView.id;
-}
-
-/** Deletes the data view (if any) and unsets the UI settings from `setupLogstashDataView`. */
-export async function cleanupLogstashDataView(
-  {
-    scoutSpace,
-    apiServices,
-  }: { scoutSpace: ScoutSpaceParallelFixture; apiServices: ApiServicesFixture },
-  dataViewId: string | undefined
-): Promise<void> {
-  if (dataViewId) {
-    await apiServices.dataViews.delete(dataViewId, scoutSpace.id);
-  }
-  await unsetLogstashUiSettings({ scoutSpace });
-}
 
 /**
  * Builds a fresh Lens Metric visualization directly from the editor UI, with a primary and a

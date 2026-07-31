@@ -7,11 +7,7 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  buildMetricVisualization,
-  cleanupLogstashDataView,
-  setupLogstashDataView,
-} from '../fixtures';
+import { buildMetricVisualization, createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 const PRIMARY_PANEL = 'lnsMetric_primaryMetricDimensionPanel';
 const BREAKDOWN_PANEL = 'lnsMetric_breakdownByDimensionPanel';
@@ -22,7 +18,7 @@ const STATIC_MAX_VALUE = '100000';
 
 const DEFAULT_TILE_COLOR = 'rgba(255, 255, 255, 1)';
 // Static/dynamic fill colors are a rendering property of the color editor, not a
-// backend-computed value, so exact colors are kept (plan §2b assertion hygiene).
+// backend-computed value, so exact colors are kept.
 const STATIC_COLOR = 'rgba(0, 0, 0, 1)';
 const DYNAMIC_COLORS = [
   'rgba(246, 114, 106, 1)',
@@ -38,23 +34,14 @@ const NUMERIC_VALUE = /^[\d,]+(\.\d+)?$/;
 const IP_TITLE = /^\d+\.\d+\.\d+\.\d+$/;
 
 spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-classic' }, () => {
-  let storedDataViewId: string | undefined;
+  // Each step builds on the previous one within a single Metric chart, created in the first step.
+  const suiteSetup = createLogstashLensEditorSuiteSetup({ skipEmptyLensOpen: true });
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-    storedDataViewId = await setupLogstashDataView(
-      { scoutSpace, apiServices },
-      'scout-metric-primary-breakdown-dv'
-    );
-  });
+  spaceTest.beforeAll(suiteSetup.beforeAll);
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-  });
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-    await cleanupLogstashDataView({ scoutSpace, apiServices }, storedDataViewId);
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'configures primary/secondary/breakdown metrics, trendlines, colors and formatting',
@@ -142,29 +129,31 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
       });
 
       await spaceTest.step('re-enables the trendline together with the breakdown', async () => {
+        // Trendlines are fetched separately from the tiles, so they appear (and disappear) in a
+        // render pass after the one `waitForVisualization` settles on: poll for both toggles.
+        const someTileShowsTrendline = async () =>
+          (await lens.getMetricVisualizationData()).some(
+            ({ showingTrendline }) => showingTrendline
+          );
+
         await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await page.testSubj.click('lnsMetric_background_chart_line');
-        await lens.waitForVisualization('mtrVis');
-
-        expect(
-          (await lens.getMetricVisualizationData()).some((datum) => datum.showingTrendline)
-        ).toBe(true);
+        await expect.poll(someTileShowsTrendline).toBe(true);
         await lens.closeDimensionEditor();
 
         await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await page.testSubj.click('lnsMetric_background_chart_none');
-        await lens.waitForVisualization('mtrVis');
-
-        expect(
-          (await lens.getMetricVisualizationData()).some((datum) => datum.showingTrendline)
-        ).toBe(false);
+        await expect.poll(someTileShowsTrendline).toBe(false);
         await lens.closeDimensionEditor();
       });
 
       await spaceTest.step('filters by clicking a metric tile', async () => {
         expect(await filterBar.getFilterCount()).toBe(0);
 
-        const title = '93.28.27.24';
+        // Click whichever IP the top-terms query returned first, rather than pinning one.
+        const [firstTile] = await lens.getMetricVisualizationData();
+        const title = firstTile.title ?? '';
+        expect(title).toMatch(IP_TITLE);
         await lens.clickMetricTileByTitle(title);
         // Filtering to a single IP collapses the breakdown to that one term (no "Other" bucket).
         await expect(lens.getMetricTilesLocator()).toHaveCount(1);
@@ -205,12 +194,11 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.openPalettePanelFlyout();
         await page.testSubj.click('lnsPalettePanel_dynamicColoring_rangeType_groups_number');
 
-        // The 3-color palette renders 4 range inputs (disabled "No min"/"No max" boundaries
-        // plus 2 editable thresholds); omit the count so the wait is keyed only on value
-        // stability, then assert on the 2 editable thresholds.
-        const stops = await lens.getPaletteColorStops();
-        const editableStops = stops.filter(({ stop }) => stop);
-        expect(editableStops.map(({ stop }) => stop)).toStrictEqual(['10400.18', '15077.59']);
+        // The 3-color palette renders 4 range inputs: the "No min"/"No max" boundaries, which
+        // hold no value, plus the 2 editable thresholds asserted below.
+        const stops = await lens.getPaletteColorStops(4);
+        const thresholds = stops.map(({ stop }) => stop).filter((stop) => Boolean(stop));
+        expect(thresholds).toStrictEqual(['10400.18', '15077.59']);
 
         await lens.waitForVisualization('mtrVis');
         // Colors shouldn't change just from converting the range type.

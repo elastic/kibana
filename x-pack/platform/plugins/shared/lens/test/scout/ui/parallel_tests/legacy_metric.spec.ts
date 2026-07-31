@@ -7,7 +7,7 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { setLogstashUiSettings, unsetLogstashUiSettings, testData } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, testData } from '../fixtures';
 
 // Dynamic-coloring outputs are deterministic for the fixed logstash archive, so the exact
 // palette colors are asserted (same approach as metric_progress_bar_lens_editor.spec.ts).
@@ -17,23 +17,27 @@ const REVERSED_COLOR = 'rgb(246, 114, 106)';
 const TEMPERATURE_COLOR = 'rgb(235, 239, 245)';
 
 spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () => {
-  spaceTest.beforeAll(async ({ scoutSpace }) => {
-    await setLogstashUiSettings({ scoutSpace });
-    await scoutSpace.savedObjects.load(testData.KBN_ARCHIVE_PATHS.LENS_BASIC);
+  // The saved legacy metric comes from the `lens_basic` archive, so open it instead of an
+  // empty editor.
+  const suiteSetup = createLogstashLensEditorSuiteSetup({
+    loadLensArchives: true,
+    skipEmptyLensOpen: true,
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects: { visualize, listingTable, lens } }) => {
-    await browserAuth.loginAsPrivilegedUser();
+  spaceTest.beforeAll(suiteSetup.beforeAll);
+
+  spaceTest.beforeEach(async ({ browserAuth, context, page, pageObjects }) => {
+    await suiteSetup.beforeEach({ browserAuth, context, page, pageObjects });
+
+    const { visualize, lens } = pageObjects;
     await visualize.goto();
-    await listingTable.searchForItemTitle(testData.VISUALIZATION_TITLES.LEGACY_METRIC);
-    await visualize.openSavedLensVisualization(testData.VISUALIZATION_TITLES.LEGACY_METRIC);
+    await visualize.openSavedVisualization(testData.LENS_BASIC_TITLES.ARTIST_METRIC, {
+      waitFor: 'lens',
+    });
     await lens.waitForVisualization('legacyMtrVis');
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
-    await unsetLogstashUiSettings({ scoutSpace });
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'renders, filters and dynamically colors a legacy metric',
@@ -42,7 +46,7 @@ spaceTest.describe('Lens legacy metric', { tag: '@local-stateful-classic' }, () 
         const { title, value } = await lens.getLegacyMetricData();
         expect(title).toBe('Maximum of bytes');
         // Backend-computed aggregation: assert it renders as a formatted number rather than
-        // pinning the exact figure (plan §2b assertion hygiene).
+        // pinning the exact figure.
         expect(value).toMatch(/^[\d,]+$/);
       });
 

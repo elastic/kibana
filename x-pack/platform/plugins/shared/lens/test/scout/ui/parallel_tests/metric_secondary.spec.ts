@@ -7,11 +7,7 @@
 
 import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import {
-  buildMetricVisualization,
-  cleanupLogstashDataView,
-  setupLogstashDataView,
-} from '../fixtures';
+import { buildMetricVisualization, createLogstashLensEditorSuiteSetup } from '../fixtures';
 
 const PRIMARY_PANEL = 'lnsMetric_primaryMetricDimensionPanel';
 const SECONDARY_PANEL = 'lnsMetric_secondaryMetricDimensionPanel';
@@ -21,38 +17,32 @@ const BREAKDOWN_PANEL = 'lnsMetric_breakdownByDimensionPanel';
 const CUSTOM_STATIC_COLOR_HEX = '#EE72A6';
 const CUSTOM_STATIC_COLOR_RGB = 'rgb(238, 114, 166)';
 // Trend badge numeric values are backend-computed aggregations; assert their shape/sign
-// rather than the exact figure (plan §2b assertion hygiene), matching legacy_metric.spec.ts.
+// rather than the exact figure, matching legacy_metric.spec.ts.
 const TREND_VALUE_WITH_ARROW = /^[+-]?[\d,]+(\.\d+)?\n[↑↓]$/;
 const TREND_VALUE_ONLY = /^[+-]?[\d,]+(\.\d+)?$/;
 
 spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, () => {
-  let storedDataViewId: string | undefined;
+  // Each test builds its own metric below, so don't open an empty editor first.
+  const suiteSetup = createLogstashLensEditorSuiteSetup({ skipEmptyLensOpen: true });
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-    storedDataViewId = await setupLogstashDataView(
-      { scoutSpace, apiServices },
-      'scout-metric-secondary-dv'
-    );
+  spaceTest.beforeAll(suiteSetup.beforeAll);
+
+  // Each test builds its own primary+secondary "average of bytes" metric from scratch,
+  // mirroring the FTR suite's per-`it` re-open of a fresh saved chart (no shared state
+  // across tests), which also keeps these tests parallel-safe.
+  spaceTest.beforeEach(async ({ browserAuth, context, page, pageObjects }) => {
+    await suiteSetup.beforeEach({ browserAuth, context, page, pageObjects });
+    await buildMetricVisualization(pageObjects);
   });
 
-  spaceTest.beforeEach(async ({ browserAuth, pageObjects: { visualize, lens } }) => {
-    await browserAuth.loginAsPrivilegedUser();
-    // Each test builds its own primary+secondary "average of bytes" metric from scratch,
-    // mirroring the FTR suite's per-`it` re-open of a fresh saved chart (no shared state
-    // across tests), which also keeps these tests parallel-safe.
-    await buildMetricVisualization({ visualize, lens });
-  });
-
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-    await cleanupLogstashDataView({ scoutSpace, apiServices }, storedDataViewId);
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'shows a badge for the secondary metric and caches static/dynamic configuration',
     async ({ page, pageObjects: { lens } }) => {
       await lens.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
-      expect(await lens.hasSecondaryMetricBadge()).toBe(false);
+      // Coloring defaults to "None", so the secondary value renders without a trend badge.
+      await expect(lens.getSecondaryMetricBadgeLocator()).toHaveCount(0);
 
       await spaceTest.step('configures a static badge color', async () => {
         await page.testSubj.click('lnsMetric_color_mode_static');
@@ -65,17 +55,21 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
         );
       });
 
+      // Each click re-renders the badge asynchronously, so poll for the new text instead of
+      // reading it once right after the click.
       await spaceTest.step(
         'switches to dynamic coloring with icon/value trend display',
         async () => {
           await page.testSubj.click('lnsMetric_color_mode_dynamic');
-          expect(await lens.getSecondaryMetricBadgeText()).toMatch(TREND_VALUE_WITH_ARROW);
+          await expect
+            .poll(() => lens.getSecondaryMetricBadgeText())
+            .toMatch(TREND_VALUE_WITH_ARROW);
 
           await page.testSubj.click('lnsMetric_secondary_trend_display_icon');
-          expect(await lens.getSecondaryMetricBadgeText()).toBe('↑');
+          await expect.poll(() => lens.getSecondaryMetricBadgeText()).toBe('↑');
 
           await page.testSubj.click('lnsMetric_secondary_trend_display_value');
-          expect(await lens.getSecondaryMetricBadgeText()).toMatch(TREND_VALUE_ONLY);
+          await expect.poll(() => lens.getSecondaryMetricBadgeText()).toMatch(TREND_VALUE_ONLY);
         }
       );
 
@@ -164,8 +158,8 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
         await page.testSubj.click('lnsMetric_color_mode_dynamic');
         await page.testSubj.click('lnsMetric_secondary_trend_baseline_primary');
 
-        expect(await lens.getSecondaryMetricLabel()).toBe('Difference');
-        expect(await lens.getSecondaryMetricBadgeText()).toMatch(TREND_VALUE_WITH_ARROW);
+        await expect.poll(() => lens.getSecondaryMetricLabel()).toBe('Difference');
+        await expect.poll(() => lens.getSecondaryMetricBadgeText()).toMatch(TREND_VALUE_WITH_ARROW);
         await lens.closeDimensionEditor();
       });
 
@@ -183,7 +177,9 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
           // becomes non-numeric; that happens independently of the chart's own re-render, so poll
           // for it rather than assuming it's already settled once `configureDimension` resolves.
           await expect.poll(() => lens.getSecondaryMetricLabel()).toContain('Average of bytes');
-          expect(await lens.getSecondaryMetricBadgeText()).toMatch(TREND_VALUE_WITH_ARROW);
+          await expect
+            .poll(() => lens.getSecondaryMetricBadgeText())
+            .toMatch(TREND_VALUE_WITH_ARROW);
 
           await lens.openDimensionEditor(`${SECONDARY_PANEL} > lns-dimensionTrigger`);
           await expect(

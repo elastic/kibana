@@ -9,9 +9,9 @@ import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   applyLensInlineEditorAndWaitClosed,
-  cleanupLogstashDataView,
+  createLogstashLensEditorSuiteSetup,
   deleteAnnotationGroupFromLibrary,
-  setupLogstashDataView,
+  testData,
 } from '../../fixtures';
 
 const ANNOTATION_GROUP_TITLE = 'library annotation group';
@@ -20,23 +20,14 @@ const SECOND_VIS_TITLE = 'second visualization';
 const DASHBOARD_TITLE = 'annotation sync test dashboard';
 
 spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }, () => {
-  let storedDataViewId: string | undefined;
+  // The steps below open Visualize, Lens and Dashboard in turn, so don't open an editor upfront.
+  const suiteSetup = createLogstashLensEditorSuiteSetup({ skipEmptyLensOpen: true });
 
-  spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
-    storedDataViewId = await setupLogstashDataView(
-      { scoutSpace, apiServices },
-      'scout-annotation-library-dv'
-    );
-  });
+  spaceTest.beforeAll(suiteSetup.beforeAll);
 
-  spaceTest.beforeEach(async ({ browserAuth }) => {
-    await browserAuth.loginAsPrivilegedUser();
-  });
+  spaceTest.beforeEach(suiteSetup.beforeEach);
 
-  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
-    await cleanupLogstashDataView({ scoutSpace, apiServices }, storedDataViewId);
-    await scoutSpace.savedObjects.cleanStandardList();
-  });
+  spaceTest.afterAll(suiteSetup.afterAll);
 
   spaceTest(
     'saves an annotation group to the library, syncs edits across dashboard panels, and propagates deletion',
@@ -47,8 +38,7 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
           await visualize.goto();
           await visualize.openNewVisualizationWizard();
           await visualize.clickVisType('lens');
-          await lens.dragFieldToWorkspace('@timestamp');
-          await lens.waitForVisualization('xyVisChart');
+          await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
 
           await lens.createLayer('annotations');
           await lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
@@ -60,8 +50,11 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
           await saveModal.confirm();
 
           // Confirms this specifically saved a library-linked annotation group (as opposed to
-          // a plain save), which the rest of this test depends on.
-          await expect(page.getByText('View or manage in the annotation library.')).toBeVisible();
+          // a plain save), which the rest of this test depends on. Scoped to the toast list so
+          // it can't match the same copy rendered elsewhere on the page.
+          await expect(page.testSubj.locator('globalToastList')).toContainText(
+            'View or manage in the annotation library.'
+          );
 
           await lens.save(FIRST_VIS_TITLE, { addToDashboard: 'none' });
         }
@@ -73,8 +66,7 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
           await visualize.goto();
           await visualize.openNewVisualizationWizard();
           await visualize.clickVisType('lens');
-          await lens.dragFieldToWorkspace('@timestamp');
-          await lens.waitForVisualization('xyVisChart');
+          await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
 
           await lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
           // Adding a layer from the library is async (fetches the saved annotation group before
@@ -126,8 +118,10 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
           await deleteAnnotationGroupFromLibrary(page, ANNOTATION_GROUP_TITLE);
 
           await visualize.goto();
-          await visualize.openSavedLensVisualization(FIRST_VIS_TITLE);
-          expect(await lens.getLayerCount()).toBe(1);
+          await visualize.openSavedVisualization(FIRST_VIS_TITLE, { waitFor: 'lens' });
+          // Dropping the layer happens once the editor resolves the now-missing library group,
+          // so poll instead of reading the count as soon as the editor renders.
+          await expect.poll(() => lens.getLayerCount()).toBe(1);
         }
       );
 
