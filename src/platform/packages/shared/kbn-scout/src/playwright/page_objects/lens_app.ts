@@ -604,31 +604,8 @@ export class LensApp {
       .waitFor({ state: 'visible' });
   }
 
-  /**
-   * Selects a field in the dimension field combo box.
-   *
-   * Selects by Lens's own per-option `data-test-subj` (`lns-fieldOption(-Incompatible)?-<field>`)
-   * rather than the shared combo-box helper's accessible-name match: a field's option name embeds
-   * its type icon's label right before the field name with no separator (e.g. "ip" renders as
-   * "IP address" + "ip"), so a name-based match can't disambiguate it from another field whose
-   * name merely contains it, like "clientip". `'records'` is accepted as an alias for Lens's
-   * "Records" pseudo-field, whose internal id (`RECORDS_FIELD_ID`) differs from its display label.
-   */
   private async selectField(field: string) {
-    const fieldId = field === 'records' ? RECORDS_FIELD_ID : field;
-    const fieldCombo = this.page.testSubj.locator('indexPattern-dimension-field');
-    const searchField = fieldCombo.getByTestId('comboBoxSearchInput');
-    await fieldCombo.getByTestId('comboBoxInput').click();
-    await searchField.fill(field);
-
-    const option = this.page.locator(
-      `[data-test-subj="lns-fieldOption-${fieldId}"], [data-test-subj="lns-fieldOptionIncompatible-${fieldId}"]`
-    );
-    await option.waitFor({ state: 'visible' });
-    await option.click();
-    // Matches the shared combo-box helper's own selection flow: blurs the search input so the
-    // dropdown fully closes and doesn't intercept focus/keyboard input meant for the next control.
-    await searchField.blur();
+    await this.page.components.comboBox('indexPattern-dimension-field').setSelectedOptions([field]);
   }
 
   /** Clears the dimension field combo box (removes the currently selected field). */
