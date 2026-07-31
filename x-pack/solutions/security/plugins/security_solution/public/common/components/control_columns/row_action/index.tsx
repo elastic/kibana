@@ -6,14 +6,18 @@
  */
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { RefObject } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
+import type { AlertsTableImperativeApi } from '@kbn/response-ops-alerts-table/types';
 import {
   casesCellActionRenderer,
   cellActionRenderer,
+  createCellActionRenderer,
 } from '../../../../flyout_v2/shared/components/cell_actions';
 import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { LeftPanelNotesTab } from '../../../../flyout/document_details/left';
@@ -54,6 +58,11 @@ export type RowActionProps = EuiDataGridCellValueElementProps & {
   showCheckboxes: boolean;
   tabType?: string;
   tableId: string;
+  /**
+   * Handle to the alerts table this row belongs to. Provided by the alerts table so the document
+   * flyout's "Toggle column in table" action can add/remove columns on it. Absent for other tables.
+   */
+  alertsTableRef?: RefObject<AlertsTableImperativeApi>;
   width: number;
 };
 
@@ -77,6 +86,7 @@ const RowActionComponent = ({
   showCheckboxes,
   tabType,
   tableId,
+  alertsTableRef,
   width,
 }: RowActionProps) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
@@ -116,13 +126,33 @@ const RowActionComponent = ({
     refetch?.();
   }, [refetch]);
 
+  // Cell action renderer for the new document details flyout opened from this table.
+  // - Cases uses its own dedicated renderer.
+  // - An alerts table (identified by the presence of `alertsTableRef`) uses the details-flyout
+  //   trigger — which is the only trigger that registers the "Toggle column in table" action — with
+  //   the table scope bound and the table handle forwarded, so the column toggle both shows up and
+  //   targets the imperatively-controlled alerts table.
+  // - Any other table keeps the default renderer.
+  const documentFlyoutCellActionRenderer = useMemo(() => {
+    if (tableId === TableId.alertsOnCasePage) {
+      return casesCellActionRenderer;
+    }
+    if (alertsTableRef) {
+      return createCellActionRenderer(tableId, {
+        triggerId: SECURITY_CELL_ACTIONS_DETAILS_FLYOUT,
+        visibleCellActions: 6,
+        alertsTableRef,
+      });
+    }
+    return cellActionRenderer;
+  }, [tableId, alertsTableRef]);
+
   const handleOnEventDetailPanelOpened = useCallback(() => {
     if (enableNewFlyout && hit) {
       openDocumentFlyoutFromIndex({
         documentId: eventId,
         indexName: indexName ?? undefined,
-        renderCellActions:
-          tableId === TableId.alertsOnCasePage ? casesCellActionRenderer : cellActionRenderer,
+        renderCellActions: documentFlyoutCellActionRenderer,
         onAlertUpdated: handleAlertUpdated,
         origin: FLYOUT_ORIGIN.ALERTS_TABLE,
         title: getDocumentHistoryTitle(hit),
@@ -147,6 +177,7 @@ const RowActionComponent = ({
     enableNewFlyout,
     hit,
     openDocumentFlyoutFromIndex,
+    documentFlyoutCellActionRenderer,
     eventId,
     indexName,
     handleAlertUpdated,
