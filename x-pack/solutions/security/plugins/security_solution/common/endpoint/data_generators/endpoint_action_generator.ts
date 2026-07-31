@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import type { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
@@ -41,6 +43,7 @@ import {
   type ResponseActionUploadOutputContent,
   type ResponseActionUploadParameters,
   type WithAllKeys,
+  type KilledProcessDescendant,
 } from '../types';
 import {
   DEFAULT_EXECUTE_ACTION_TIMEOUT,
@@ -717,6 +720,76 @@ export class EndpointActionGenerator extends BaseDataGenerator {
 
   randomN(max: number): number {
     return super.randomN(max);
+  }
+
+  /**
+   * Generate a random list of processes descendants
+   * @param initialParentPid
+   * @param nLevels the number of child levels
+   * @param maxChildProcesses - the max number of processes per level.
+   */
+  createProcessDescendants(
+    initialParentPid: number = this.randomN(1000),
+    nLevels: number = 5,
+    maxChildProcesses: number = 3
+  ): KilledProcessDescendant[] {
+    const descendants: KilledProcessDescendant[] = [];
+    const possibleErrors = [
+      'process not found',
+      'process cannot be killed',
+      'process failed to be killed',
+    ];
+    let pidSuffix = 1;
+
+    const generateProcess = (
+      parentPid: number,
+      parentEntityId: string = this.randomString(50)
+    ): KilledProcessDescendant => {
+      const wasKilled = this.randomChoice([true, false]);
+
+      return {
+        pid: Number(this.randomN(5000).toString().concat(String(pidSuffix++))),
+        parent_pid: parentPid,
+        entity_id: this.randomString(50),
+        parent_entity_id: parentEntityId,
+        command: this.randomFileSystemPath(this.randomN(80)),
+        was_killed: wasKilled,
+        error: wasKilled ? undefined : this.randomChoice(possibleErrors),
+      };
+    };
+
+    const queue: { parentPID: number; parentEntity: string; levels: number }[] = [
+      { parentPID: initialParentPid, parentEntity: this.randomString(50), levels: nLevels },
+    ];
+
+    while (queue.length > 0) {
+      const { parentPID, parentEntity, levels } = queue.shift()!;
+      const process = generateProcess(parentPID, parentEntity);
+      descendants.push(process);
+
+      const remainingLevels = levels - 1;
+      if (remainingLevels > 0) {
+        queue.push({
+          parentPID: process.pid!,
+          parentEntity: process.entity_id!,
+          levels: remainingLevels,
+        });
+
+        // Now add some siblings at this process level with them having random levels
+        // themselves that does not exceed the next level depth
+        queue.push(
+          ...this.randomArray(maxChildProcesses, () => {
+            return {
+              parentPID: process.pid!,
+              parentEntity: process.entity_id!,
+              levels: this.randomN(remainingLevels),
+            };
+          })
+        );
+      }
+    }
+
+    return descendants;
   }
 
   randomResponseActionProcesses(n?: number): ProcessesEntry[] {

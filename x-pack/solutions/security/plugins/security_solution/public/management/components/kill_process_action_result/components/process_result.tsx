@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiCode, EuiTextColor } from '@elastic/eui';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiTextColor, EuiTextTruncate } from '@elastic/eui';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { KillProcessActionOutputContent } from '../../../../../common/endpoint/types';
 
@@ -103,14 +103,44 @@ export const ProcessResult = memo<ProcessResultProps>(
         }
 
         processResultData.push(
-          <span key="command">
-            <FormattedMessage
-              id="xpack.securitySolution.management.killProcessActionResult.command"
-              defaultMessage="Command {command}"
-              values={{ command: <EuiCode>{processResult?.command}</EuiCode> }}
-            />
+          <span key="command" className="eui-displayInlineBlock">
+            <EuiFlexGroup responsive={false} gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <FormattedMessage
+                  id="xpack.securitySolution.management.killProcessActionResult.command"
+                  defaultMessage="Command"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiCode className="eui-displayBlock">
+                  <EuiTextTruncate
+                    truncation="middle"
+                    width={350}
+                    text={processResult?.command ?? ''}
+                  />
+                </EuiCode>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </span>
         );
+
+        // processResultData.push(
+        //   <span key="command" className="eui-displayInlineBlock">
+        //     {'Command '}
+        //     <EuiCode>
+        //       <EuiTextTruncate
+        //         className="eui-displayInlineBlock"
+        //         truncation="middle"
+        //         text={processResult?.command ?? ''}
+        //       />
+        //     </EuiCode>
+        //     {/* <FormattedMessage*/}
+        //     {/*  id="xpack.securitySolution.management.killProcessActionResult.command"*/}
+        //     {/*  defaultMessage="Command {command}"*/}
+        //     {/*  values={{ command: <EuiCode>{processResult?.command}</EuiCode> }}*/}
+        //     {/* />*/}
+        // </span>
+        // );
       }
 
       if (processResultData.length > 0) {
