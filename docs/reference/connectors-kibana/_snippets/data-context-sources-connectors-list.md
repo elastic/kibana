@@ -10,8 +10,9 @@
 - [Confluence Cloud](/reference/connectors-kibana/confluence-cloud-action-type.md): Search and retrieve Confluence Cloud pages and spaces using the REST API v2.
 - [Datadog](/reference/connectors-kibana/datadog-action-type.md): List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs.
 - [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
+- [Dynatrace](/reference/connectors-kibana/dynatrace-action-type.md): Triage Davis problems, ingest events, query metrics and entities, and manage maintenance windows.
 - [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
-- [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in 
+- [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
 - [GitHub](/reference/connectors-kibana/github-action-type.md): Search code, issues, and pull requests, and access repository contents and metadata from GitHub.
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
@@ -39,8 +40,8 @@ Figma.
 - [Slack (v2)](/reference/connectors-kibana/slack-v2-action-type.md): Search and send messages in Slack.
 - [Snowflake](/reference/connectors-kibana/snowflake-action-type.md): Query Snowflake, discover databases, schemas, tables, and views, and run semantic searches through Cortex Search.
 - [Tavily](/reference/connectors-kibana/tavily-action-type.md): Search the web and extract content from web pages.
-- [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles using the Zendesk API.
 - [Zoom](/reference/connectors-kibana/zoom-action-type.md): Access Zoom meetings, recordings, transcripts, and participants.
+- [Zendesk](/reference/connectors-kibana/zendesk-action-type.md): Search and retrieve Zendesk tickets, users, organizations, and Help Center articles using the Zendesk API.
 
 **Identity management**
 
