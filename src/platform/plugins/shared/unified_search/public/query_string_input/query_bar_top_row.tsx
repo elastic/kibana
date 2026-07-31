@@ -1361,7 +1361,9 @@ export const QueryBarTopRow = React.memo(
                     query={
                       props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
                     }
-                    onNlResult={visorNlResultHandlerReady ? visorNlResultHandlerRef.current : undefined}
+                    onNlResult={
+                      visorNlResultHandlerReady ? visorNlResultHandlerRef.current : undefined
+                    }
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
                   />
                 </EuiFlexItem>

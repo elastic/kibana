@@ -118,9 +118,7 @@ describe('Quick search visor', () => {
 
   it('should build a TS query when the current query uses the TS command', async () => {
     const onUpdateAndSubmitQuery = jest.fn();
-    renderWithI18n(
-      renderESQLVisor({ ...props, query: 'TS ts_index', onUpdateAndSubmitQuery })
-    );
+    renderWithI18n(renderESQLVisor({ ...props, query: 'TS ts_index', onUpdateAndSubmitQuery }));
 
     await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
 

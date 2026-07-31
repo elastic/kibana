@@ -59,7 +59,12 @@ interface SourcesDropdownProps {
   isDisabled?: boolean;
 }
 
-export function SourcesDropdown({ currentSources, onChangeSources, onAutoSelectSources, isDisabled }: SourcesDropdownProps) {
+export function SourcesDropdown({
+  currentSources,
+  onChangeSources,
+  onAutoSelectSources,
+  isDisabled,
+}: SourcesDropdownProps) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [fetchedSources, setFetchedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const euiTheme = useEuiTheme();
@@ -200,23 +205,23 @@ export function SourcesDropdown({ currentSources, onChangeSources, onAutoSelectS
       css={isDisabled ? { opacity: 0.5, pointerEvents: 'none' } : undefined}
     >
       <EuiFlexItem grow={true} css={shrinkableContainerCss}>
-          <EuiFormControlLayout compressed isDropdown fullWidth>
-            <EuiPopover
-              id={popoverId}
-              aria-label={i18n.translate('esqlEditor.visor.sourcesDropdownPopoverLabel', {
-                defaultMessage: 'Data sources',
-              })}
-              button={createTrigger()}
-              isOpen={isPopoverOpen}
-              closePopover={() => setPopoverIsOpen(false)}
-              panelPaddingSize="none"
-              display="block"
-              panelStyle={{ width: POPOVER_WIDTH }}
-            >
-              <EuiContextMenuPanel items={items} />
-            </EuiPopover>
-          </EuiFormControlLayout>
-        </EuiFlexItem>
+        <EuiFormControlLayout compressed isDropdown fullWidth>
+          <EuiPopover
+            id={popoverId}
+            aria-label={i18n.translate('esqlEditor.visor.sourcesDropdownPopoverLabel', {
+              defaultMessage: 'Data sources',
+            })}
+            button={createTrigger()}
+            isOpen={isPopoverOpen}
+            closePopover={() => setPopoverIsOpen(false)}
+            panelPaddingSize="none"
+            display="block"
+            panelStyle={{ width: POPOVER_WIDTH }}
+          >
+            <EuiContextMenuPanel items={items} />
+          </EuiPopover>
+        </EuiFormControlLayout>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

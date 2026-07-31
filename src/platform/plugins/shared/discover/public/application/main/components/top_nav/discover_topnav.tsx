@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
 import {
   DiscoverFlyouts,
   dismissAllFlyoutsExceptFor,

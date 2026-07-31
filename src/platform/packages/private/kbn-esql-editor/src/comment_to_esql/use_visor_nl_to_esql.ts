@@ -31,10 +31,7 @@ export const useVisorNlToEsql = ({
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
 
-  const onAfterAccept = useCallback(
-    () => onSubmit(generatedContentRef.current),
-    [onSubmit]
-  );
+  const onAfterAccept = useCallback(() => onSubmit(generatedContentRef.current), [onSubmit]);
 
   const acceptAction = useMemo(
     () => ({
