@@ -259,6 +259,9 @@ const treeStyles = {
     css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
   count: ({ euiTheme }: UseEuiTheme) =>
     css({ color: euiTheme.colors.textSubdued, marginInlineStart: euiTheme.size.xs }),
+  // The child count is wrapped in the collection's own delimiter ({ } for objects, [ ] for
+  // arrays) so a field's type is obvious at a glance — without adopting full JSON syntax.
+  bracket: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
   // Values: colours come from the colourblind-safe visualisation palette (not the
   // danger/success status tokens), and the value formatting itself (quotes, keywords)
   // conveys type so we never rely on colour alone.
@@ -537,7 +540,11 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
                 {!node.isArrayItem && <span css={styles.key}>{node.key}</span>}
 
                 {node.kind === 'collection' ? (
-                  <span css={styles.count}>{collectionCountLabel(node)}</span>
+                  <span css={styles.count}>
+                    <span css={styles.bracket}>{node.collectionType === 'array' ? '[' : '{'}</span>
+                    {` ${collectionCountLabel(node)} `}
+                    <span css={styles.bracket}>{node.collectionType === 'array' ? ']' : '}'}</span>
+                  </span>
                 ) : (
                   <>
                     {!node.isArrayItem && <span css={styles.separator}>:</span>}
