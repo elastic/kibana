@@ -17,7 +17,7 @@ import {
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { setCustomNativeDragPreview } from '@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview';
-import { pointerOutsideOfPreview } from '@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview';
+import { preserveOffsetOnSource } from '@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source';
 import { attachClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
@@ -178,17 +178,25 @@ export const ControlPanel = ({
         element,
         dragHandle: dragHandleRef.current ?? undefined,
         getInitialData: () => ({ id }),
-        onGenerateDragPreview: ({ nativeSetDragImage }) => {
+        onGenerateDragPreview: ({ location, nativeSetDragImage, source }) => {
           setCustomNativeDragPreview({
             nativeSetDragImage,
-            getOffset: pointerOutsideOfPreview({ x: '8px', y: '8px' }),
+            // Keep the preview under the point that was grabbed, so the drag handle stays
+            // beneath the pointer rather than the control jumping away from it
+            getOffset: preserveOffsetOnSource({
+              element: source.element,
+              input: location.current.input,
+            }),
             render: ({ container }) => {
+              const { width: sourceWidth, height: sourceHeight } =
+                source.element.getBoundingClientRect();
               const root = createRoot(container);
               flushSync(() =>
                 root.render(
                   <ControlClone
                     state={parentApi.getSerializedStateForChild(id)}
-                    width={element.getBoundingClientRect().width}
+                    width={sourceWidth}
+                    height={sourceHeight}
                   />
                 )
               );
