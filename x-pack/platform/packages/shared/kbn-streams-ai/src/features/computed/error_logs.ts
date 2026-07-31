@@ -38,7 +38,7 @@ const ERROR_LOG_KEEP_FIELDS = new Set<string>([
 const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
 
 // Keep the original (dotted) key — the name the LLM must reference in ES|QL — not the leaf.
-const pickErrorLogFields = (fields: Record<string, unknown>): Record<string, unknown> => {
+export const pickErrorLogFields = (fields: Record<string, unknown>): Record<string, unknown> => {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(fields)) {
     if (value === undefined) continue;

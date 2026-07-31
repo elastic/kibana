@@ -8,42 +8,12 @@
 import type { Feature, FeatureUpsert } from '@kbn/significant-events-schema';
 import { computeFeatureUuid } from '@kbn/significant-events-schema';
 import { selectLogPatternsForLlm } from '@kbn/streams-ai/src/features/computed/log_patterns';
+import { pickErrorLogFields } from '@kbn/streams-ai/src/features/computed/error_logs';
 
 const ERROR_KEYWORDS = ['error', 'exception', 'fatal', 'fail', 'panic', 'timeout', 'traceback'];
 const MAX_FIELD_VALUE_SAMPLES = 5;
 const MAX_SAMPLE_DOCS = 5;
 const MAX_ERROR_SAMPLES = 5;
-
-// Mirrors errorLogsGenerator: keep message + signal fields, matching on the
-// OTel-prefix-stripped leaf (keeps `resource.attributes.service.name`, drops
-// `resource.attributes.cloud.service.name`).
-const ERROR_LOG_KEEP_FIELDS = new Set<string>([
-  '@timestamp',
-  'message',
-  'body.text',
-  'log.level',
-  'severity_text',
-  'severity_number',
-  'error.type',
-  'error.message',
-  'exception.type',
-  'exception.message',
-  'event.outcome',
-  'service.name',
-]);
-
-const OTEL_FIELD_PREFIX = /^(?:resource\.)?attributes\./;
-
-const pickErrorLogFields = (doc: Record<string, unknown>): Record<string, unknown> => {
-  const result: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(doc)) {
-    if (value === undefined) continue;
-    if (ERROR_LOG_KEEP_FIELDS.has(key.replace(OTEL_FIELD_PREFIX, ''))) {
-      result[key] = value;
-    }
-  }
-  return result;
-};
 
 /**
  * Recursively flattens a nested ES document into dot-delimited field names.
