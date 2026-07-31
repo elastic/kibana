@@ -31,7 +31,6 @@ interface ServicesStepProps {
   onBack?: () => void;
 }
 
-
 export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
   const {
     signalFilter,

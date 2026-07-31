@@ -266,6 +266,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       {incompleteServices.length > 0 && (
         <>
           <EuiCallOut
+            announceOnMount
             color="warning"
             iconType="warning"
             size="s"
