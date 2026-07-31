@@ -69,7 +69,7 @@ function throwCensysError(error: unknown): void {
         message?: string;
         title?: string;
         reason?: string;
-        errors?: Array<{ message?: string; location?: string }>;
+        errors?: Array<{ message?: string; location?: string } | null>;
         error?: {
           code?: number;
           status?: string;
@@ -91,7 +91,7 @@ function throwCensysError(error: unknown): void {
   const reason = nested?.reason && nested.reason !== baseMessage ? nested.reason : undefined;
 
   const fieldErrors = data?.errors
-    ?.map((e) => (e.location ? `${e.location}: ${e.message ?? 'invalid'}` : e.message))
+    ?.map((e) => (e?.location ? `${e.location}: ${e.message ?? 'invalid'}` : e?.message))
     .filter(Boolean)
     .join('; ');
 

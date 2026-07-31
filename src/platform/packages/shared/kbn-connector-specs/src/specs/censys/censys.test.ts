@@ -475,6 +475,29 @@ describe('CensysConnector', () => {
       );
     });
 
+    it('ignores null entries in errors[]', async () => {
+      mockClient.post.mockRejectedValue({
+        response: {
+          status: 403,
+          data: {
+            title: 'Forbidden',
+            status: 403,
+            detail: 'User does not have access to CensEye entitlement',
+            errors: [null],
+          },
+        },
+      });
+
+      await expect(
+        CensysConnector.actions.censEyeCreateAnalysisJob.handler(mockContext, {
+          type: 'host',
+          host: '8.8.8.8',
+        })
+      ).rejects.toThrow(
+        'Censys API error (403): User does not have access to CensEye entitlement'
+      );
+    });
+
     it('falls back to title when detail is missing', async () => {
       mockClient.get.mockRejectedValue({
         response: { status: 404, data: { title: 'Not Found' } },
