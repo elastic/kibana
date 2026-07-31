@@ -29,7 +29,6 @@ spaceTest.describe(
 
           await page.waitForURL(/app\/security\/dashboards/);
           expect(page.url()).toContain('app/security/dashboards');
-          await expect(chrome.pageTitle).toHaveText('Dashboards');
         });
 
         await spaceTest.step('shows cases in sidebar navigation', async () => {

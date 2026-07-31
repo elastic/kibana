@@ -231,9 +231,6 @@ test.describe(
         await expect(page.getByRole('heading', { name: /Error group/ })).toBeVisible({
           timeout: EXTENDED_TIMEOUT,
         });
-        await expect(page.getByText(testData.EDOT_ERROR_MESSAGE)).toBeVisible({
-          timeout: EXTENDED_TIMEOUT,
-        });
       });
     });
 

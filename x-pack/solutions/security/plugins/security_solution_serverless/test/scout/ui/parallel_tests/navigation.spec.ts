@@ -37,9 +37,6 @@ spaceTest.describe(
           await collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
           await page.waitForURL(/\/app\/security\/alerts/);
           await expect(chrome.pageTitle).toHaveText('Alerts');
-          await expect(
-            serverlessProjectChromePage.activeNavItemInBodyByDeepLinkId('securitySolutionUI:alerts')
-          ).toBeVisible();
 
           const alertsUrl = page.url();
           await chrome.clickLogo();

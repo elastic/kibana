@@ -34,7 +34,7 @@ export class Chrome {
       .filter({ visible: true });
     this.logo = page.testSubj.locator('nav-header-logo');
     this.searchInput = page.testSubj.locator('nav-search-input');
-    this.searchNoResults = page.testSubj.locator('nav-search-no-results');
+    this.searchNoResults = page.testSubj.locator('nav-search-no-results').filter({ visible: true });
     this.nextChromeHeader = page.testSubj.locator('chromeNextGlobalHeader');
     this.searchButton = page.testSubj
       .locator('chromeNextGlobalHeaderSearchButton')
