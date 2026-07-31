@@ -160,8 +160,12 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                               },
                             });
                           }}
-                          min={0}
                           max={100}
+                          isInvalid={
+                            uiConfig.delayedData.docsCountPercentage !== undefined &&
+                            (uiConfig.delayedData.docsCountPercentage <= 0 ||
+                              uiConfig.delayedData.docsCountPercentage > 100)
+                          }
                           step="any"
                           append={i18n.translate(
                             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsSelection.delayedData.docsCountPercentageAppend',

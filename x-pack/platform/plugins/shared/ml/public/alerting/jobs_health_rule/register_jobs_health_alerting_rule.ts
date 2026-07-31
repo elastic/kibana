@@ -35,7 +35,6 @@ export function registerJobsHealthAlertingRule(
         errors: {
           includeJobs: new Array<string>(),
           testsConfig: new Array<string>(),
-          delayedData: new Array<string>(),
         } as Record<keyof MlAnomalyDetectionJobsHealthRuleParams, string[]>,
       };
 
@@ -61,7 +60,7 @@ export function registerJobsHealthAlertingRule(
         !!resultTestConfig.delayedData.timeInterval &&
         validateLookbackInterval(resultTestConfig.delayedData.timeInterval)
       ) {
-        validationResult.errors.delayedData.push(
+        validationResult.errors.testsConfig.push(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.timeIntervalErrorMessage',
             {
@@ -77,7 +76,7 @@ export function registerJobsHealthAlertingRule(
       ) {
         const pct = resultTestConfig.delayedData.docsCountPercentage;
         if (pct <= 0 || pct > 100) {
-          validationResult.errors.delayedData.push(
+          validationResult.errors.testsConfig.push(
             i18n.translate(
               'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountPercentageErrorMessage',
               {
@@ -90,7 +89,7 @@ export function registerJobsHealthAlertingRule(
         resultTestConfig.delayedData.enabled &&
         resultTestConfig.delayedData.docsCount === 0
       ) {
-        validationResult.errors.delayedData.push(
+        validationResult.errors.testsConfig.push(
           i18n.translate(
             'xpack.ml.alertTypes.jobsHealthAlertingRule.testsConfig.delayedData.docsCountErrorMessage',
             {
