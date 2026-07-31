@@ -35,7 +35,6 @@ steps:
     create-conversation: true
     public-conversation: true
     with:
-      timeout: 1800s
       message: |
         First, call the load_skill tool with skill path skills/platform/streams/streams-gap-detection.
         Wait for the skill to load before calling any other tools.
