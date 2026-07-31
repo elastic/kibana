@@ -45,6 +45,12 @@ export const INTERNAL_INFERENCE_CONNECTORS = [
   'Google-Gemini-2-5-Flash-Lite',
   'Google-Gemini-3-0-Pro',
   'Google-Gemini-3-0-Flash',
+  'Anthropic-Claude-Opus-5',
+  'Google-Gemini-3-6-Flash',
+  'Google-Gemini-3-5-Flash-Lite',
+  'OpenAI-GPT-5-6-Sol',
+  'OpenAI-GPT-5-6-Terra',
+  'OpenAI-GPT-5-6-Luna',
 ];
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
