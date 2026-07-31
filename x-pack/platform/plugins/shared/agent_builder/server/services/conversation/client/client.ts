@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import type { ConversationOrigin, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
@@ -16,9 +16,14 @@ import {
   isAgentUnavailableError,
   isConversationNotFoundError,
 } from '@kbn/agent-builder-common';
+import type {
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
+} from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,
+  getConversationPermissions,
   hasConversationConverseAccess,
   hasConversationOwnerAccess,
   type ConversationAccess,
@@ -42,7 +47,7 @@ import {
 } from './converters';
 
 export interface ConversationClient {
-  get(conversationId: string): Promise<Conversation>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
   create(conversation: ConversationCreateRequest): Promise<Conversation>;
@@ -50,7 +55,7 @@ export interface ConversationClient {
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
 }
 
@@ -94,7 +99,9 @@ class ConversationClientImpl implements ConversationClient {
     this.agentRegistry = agentRegistry;
   }
 
-  async list(options: ConversationListOptions = {}): Promise<ConversationWithoutRounds[]> {
+  async list(
+    options: ConversationListOptions = {}
+  ): Promise<ConversationWithoutRoundsWithPermissions[]> {
     const { agentId } = options;
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
@@ -130,13 +137,15 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
+    return response.hits.hits.map((hit) =>
+      this.toResponseConversationWithoutRounds(hit as Document)
+    );
   }
 
-  async get(conversationId: string): Promise<Conversation> {
+  async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return fromEs(document);
+    return this.toResponseConversation(document);
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -246,6 +255,28 @@ class ConversationClientImpl implements ConversationClient {
       }
       throw err;
     }
+  }
+
+  private toResponseConversation(document: Document): ConversationWithPermissions {
+    return {
+      ...fromEs(document),
+      permissions: getConversationPermissions({
+        conversation: document._source!,
+        user: this.user,
+      }),
+    };
+  }
+
+  private toResponseConversationWithoutRounds(
+    document: Document
+  ): ConversationWithoutRoundsWithPermissions {
+    return {
+      ...fromEsWithoutRounds(document),
+      permissions: getConversationPermissions({
+        conversation: document._source!,
+        user: this.user,
+      }),
+    };
   }
 
   private async _get(conversationId: string): Promise<Document | undefined> {

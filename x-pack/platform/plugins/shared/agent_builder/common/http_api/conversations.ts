@@ -5,10 +5,30 @@
  * 2.0.
  */
 
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+
+/**
+ * Permissions the requesting user has on a conversation, resolved server-side so the client does
+ * not have to re-derive ownership. Both actions are owner-only today, but they are kept separate so
+ * rename can be loosened without an API break.
+ */
+export interface ConversationPermissions {
+  rename_conversation: boolean;
+  delete_conversation: boolean;
+}
+
+export type ConversationWithPermissions = Conversation & {
+  permissions: ConversationPermissions;
+};
+
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
+
+export type GetConversationResponse = ConversationWithPermissions;
 
 export interface ListConversationsResponse {
-  results: ConversationWithoutRounds[];
+  results: ConversationWithoutRoundsWithPermissions[];
 }
 
 export interface DeleteConversationResponse {

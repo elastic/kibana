@@ -18,7 +18,11 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
-import { useConversationTitle, useHasPersistedConversation } from '../../../hooks/use_conversation';
+import {
+  useConversationPermissions,
+  useConversationTitle,
+  useHasPersistedConversation,
+} from '../../../hooks/use_conversation';
 import { DeleteConversationModal } from '../delete_conversation_modal';
 import { RenameConversationModal } from '../rename_conversation_modal';
 
@@ -28,6 +32,12 @@ const labels = {
   }),
   delete: i18n.translate('xpack.agentBuilder.conversationTitle.delete', {
     defaultMessage: 'Delete',
+  }),
+  renameNotAllowed: i18n.translate('xpack.agentBuilder.conversationTitle.renameNotAllowed', {
+    defaultMessage: 'Only the conversation owner can rename it.',
+  }),
+  deleteNotAllowed: i18n.translate('xpack.agentBuilder.conversationTitle.deleteNotAllowed', {
+    defaultMessage: 'Only the conversation owner can delete it.',
   }),
   newConversation: i18n.translate('xpack.agentBuilder.conversationTitle.newConversation', {
     defaultMessage: 'New conversation',
@@ -44,6 +54,8 @@ interface ConversationTitleProps {
 export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabelledBy }) => {
   const { title, isLoading: isLoadingTitle } = useConversationTitle();
   const hasPersistedConversation = useHasPersistedConversation();
+  const { rename_conversation: canRename, delete_conversation: canDelete } =
+    useConversationPermissions();
   const { euiTheme } = useEuiTheme();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -71,6 +83,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     <EuiContextMenuItem
       key="rename"
       icon="pencil"
+      disabled={!canRename}
+      toolTipContent={canRename ? undefined : labels.renameNotAllowed}
       onClick={() => {
         setIsPopoverOpen(false);
         setIsRenameModalOpen(true);
@@ -87,6 +101,8 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
     <EuiContextMenuItem
       key="delete"
       icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+      disabled={!canDelete}
+      toolTipContent={canDelete ? undefined : labels.deleteNotAllowed}
       onClick={() => {
         setIsPopoverOpen(false);
         setIsDeleteModalOpen(true);

@@ -6,8 +6,9 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
 import type {
+  ConversationWithoutRoundsWithPermissions,
+  GetConversationResponse,
   ListConversationsResponse,
   DeleteConversationResponse,
   MarkPinnedConversationResponse,
@@ -29,7 +30,9 @@ export class ConversationsService {
     this.http = http;
   }
 
-  async list({ agentId }: ConversationListOptions): Promise<ConversationWithoutRounds[]> {
+  async list({
+    agentId,
+  }: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]> {
     const response = await this.http.get<ListConversationsResponse>(
       `${publicApiPath}/conversations`,
       {
@@ -42,7 +45,9 @@ export class ConversationsService {
   }
 
   async get({ conversationId }: ConversationGetOptions) {
-    return await this.http.get<Conversation>(`${publicApiPath}/conversations/${conversationId}`);
+    return await this.http.get<GetConversationResponse>(
+      `${publicApiPath}/conversations/${conversationId}`
+    );
   }
 
   async delete({ conversationId }: ConversationDeleteOptions) {

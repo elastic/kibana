@@ -14,6 +14,7 @@ import {
   type Conversation,
 } from '@kbn/agent-builder-common';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { ConversationPermissions } from '../../../common/http_api/conversations';
 import type { ErrorPromptType } from '../components/common/prompt/error_prompt';
 import { queryKeys } from '../query_keys';
 import { createNewRound } from '../utils/new_conversation';
@@ -81,6 +82,23 @@ export const useConversation = () => {
   });
 
   return { conversation, isLoading, isFetching, isFetched, isError, error };
+};
+
+/**
+ * Rename and delete permissions for the current conversation, as resolved by the server. Defaults to
+ * denied while the conversation is still loading or when the cached conversation predates the
+ * server-provided flags.
+ */
+export const useConversationPermissions = (): ConversationPermissions => {
+  const { conversation } = useConversation();
+
+  return useMemo(
+    () => ({
+      rename_conversation: conversation?.permissions?.rename_conversation ?? false,
+      delete_conversation: conversation?.permissions?.delete_conversation ?? false,
+    }),
+    [conversation]
+  );
 };
 
 export const useConversationStatus = () => {

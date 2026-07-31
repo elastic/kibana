@@ -27,6 +27,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
+import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { useToasts } from '../../../../../hooks/use_toasts';
@@ -70,6 +71,12 @@ const labels = {
   deleteError: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteError', {
     defaultMessage: 'Failed to delete conversation',
   }),
+  renameNotAllowed: i18n.translate('xpack.agentBuilder.sidebar.conversationList.renameNotAllowed', {
+    defaultMessage: 'Only the conversation owner can rename it.',
+  }),
+  deleteNotAllowed: i18n.translate('xpack.agentBuilder.sidebar.conversationList.deleteNotAllowed', {
+    defaultMessage: 'Only the conversation owner can delete it.',
+  }),
 };
 
 export interface ConversationListItemRowProps {
@@ -83,6 +90,8 @@ export interface ConversationListItemRowProps {
   status?: ConversationDisplayStatus;
   read?: boolean;
   isPinned?: boolean;
+  /** Server-resolved permissions. Absent means denied, so actions stay disabled. */
+  permissions?: ConversationPermissions;
 }
 
 export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = ({
@@ -96,7 +105,10 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   status,
   read,
   isPinned = false,
+  permissions,
 }) => {
+  const canRename = permissions?.rename_conversation ?? false;
+  const canDelete = permissions?.delete_conversation ?? false;
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
@@ -218,6 +230,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       <EuiContextMenuItem
         key="rename"
         icon="pencil"
+        disabled={!canRename}
+        toolTipContent={canRename ? undefined : labels.renameNotAllowed}
         data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
         onClick={() => {
           closePopover();
@@ -273,6 +287,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       <EuiContextMenuItem
         key="delete"
         icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+        disabled={!canDelete}
+        toolTipContent={canDelete ? undefined : labels.deleteNotAllowed}
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
         css={css`
           color: ${euiTheme.colors.danger};
@@ -290,6 +306,8 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       </EuiContextMenuItem>,
     ],
     [
+      canDelete,
+      canRename,
       closePopover,
       conversationId,
       euiTheme.colors.danger,

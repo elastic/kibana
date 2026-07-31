@@ -8,15 +8,15 @@
 import React from 'react';
 
 import { EuiDraggable } from '@elastic/eui';
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
+import type { ConversationWithoutRoundsWithPermissions } from '../../../../../../../common/http_api/conversations';
 import { useStreamingContext } from '../../../../../context/streaming/streaming_context';
 import { ConversationListItemRow } from './conversation_list_item_row';
 import { deriveDisplayStatus } from './derive_display_status';
 
 interface DraggableConversationItemProps {
   agentId: string;
-  conversation: ConversationWithoutRounds;
+  conversation: ConversationWithoutRoundsWithPermissions;
   index: number;
   isActive: boolean;
   routeConversationId: string | undefined;
@@ -54,6 +54,7 @@ export const DraggableConversationItem: React.FC<DraggableConversationItemProps>
         status={status}
         read={conversation.read}
         isPinned={conversation.pinned}
+        permissions={conversation.permissions}
       />
     </EuiDraggable>
   );

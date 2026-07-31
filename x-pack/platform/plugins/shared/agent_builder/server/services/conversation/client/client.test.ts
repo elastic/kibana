@@ -575,4 +575,89 @@ describe('ConversationClient', () => {
       await expect(client.delete('conversation-1')).rejects.toBe(serverError);
     });
   });
+
+  describe('permissions', () => {
+    const publicConversationOwnedByAnotherUser = () =>
+      createConversationDocument({
+        userId: 'other-user-id',
+        username: 'other-user',
+        accessMode: ConversationAccessControlMode.Public,
+      });
+
+    it('grants rename and delete to the owner on get', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      const result = await client.get('conversation-1');
+
+      expect(result.permissions).toEqual({
+        rename_conversation: true,
+        delete_conversation: true,
+      });
+    });
+
+    it('denies rename and delete to a participant of a public conversation on get', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [publicConversationOwnedByAnotherUser()] },
+      });
+
+      const result = await client.get('conversation-1');
+
+      expect(result.permissions).toEqual({
+        rename_conversation: false,
+        delete_conversation: false,
+      });
+    });
+
+    it('resolves permissions per conversation on list', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({ id: 'owned' }),
+            { ...publicConversationOwnedByAnotherUser(), _id: 'participating' },
+          ],
+        },
+      });
+
+      const results = await client.list();
+
+      expect(results.map(({ id, permissions }) => ({ id, permissions }))).toEqual([
+        {
+          id: 'owned',
+          permissions: { rename_conversation: true, delete_conversation: true },
+        },
+        {
+          id: 'participating',
+          permissions: { rename_conversation: false, delete_conversation: false },
+        },
+      ]);
+    });
+
+    it('reports the denial that delete then enforces', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [publicConversationOwnedByAnotherUser()] },
+      });
+
+      const { permissions } = await client.get('conversation-1');
+
+      expect(permissions.delete_conversation).toBe(false);
+      await expect(client.delete('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+
+    it('reports the denial that rename then enforces', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [publicConversationOwnedByAnotherUser()] },
+      });
+
+      const { permissions } = await client.get('conversation-1');
+
+      expect(permissions.rename_conversation).toBe(false);
+      await expect(client.update({ id: 'conversation-1', title: 'renamed' })).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+  });
 });
