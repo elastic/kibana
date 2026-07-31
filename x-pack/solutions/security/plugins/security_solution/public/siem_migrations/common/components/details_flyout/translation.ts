@@ -27,16 +27,6 @@ export const COMMENT_EVENT_UNTRANSLATABLE = i18n.translate(
   }
 );
 
-export const PREVIOUS_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.translationDetails.previousButtonLabel',
-  { defaultMessage: 'Previous' }
-);
-
-export const NEXT_BUTTON_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.common.translationDetails.nextButtonLabel',
-  { defaultMessage: 'Next' }
-);
-
 export const CLOSE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.common.translationDetails.dismissButtonLabel',
   {

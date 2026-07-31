@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { PREVIOUS_BUTTON_LABEL, NEXT_BUTTON_LABEL } from '../details_flyout/translation';
+import { PREVIOUS_BUTTON_LABEL, NEXT_BUTTON_LABEL } from './translation';
 
 export * from './use_migration_flyout_nav';
 

@@ -13,6 +13,7 @@ export * from './details_flyout';
 export * from './memoized_basic_table';
 export * from './empty_migration';
 export * from './filters';
+export * from './flyout_nav';
 export * from './header_buttons';
 export * from './migration_data_input_flyout_context';
 export * from './migration_name_step';
