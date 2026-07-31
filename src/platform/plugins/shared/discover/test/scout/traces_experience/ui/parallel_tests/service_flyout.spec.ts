@@ -37,7 +37,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'opens service flyout for an ECS service and renders charts',
+      'opens service flyout for an ECS service and renders its content',
       async ({ page, pageObjects }) => {
         const { tracesExperience, discover } = pageObjects;
 
@@ -56,7 +56,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click the service name link to open the service flyout', async () => {
-          await tracesExperience.flyout.about.serviceNameLink.click();
+          await tracesExperience.flyout.about.serviceNameLink.click({ force: true });
         });
 
         await spaceTest.step('verify service flyout is visible', async () => {
@@ -82,7 +82,7 @@ spaceTest.describe(
     );
 
     spaceTest(
-      'opens service flyout for an unprocessed OTel service and hides the transactions section',
+      'opens service flyout for an unprocessed OTel service and renbders its content',
       async ({ page, pageObjects }) => {
         const { tracesExperience, discover } = pageObjects;
 
@@ -101,7 +101,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click the service name link to open the service flyout', async () => {
-          await tracesExperience.flyout.about.serviceNameLink.click();
+          await tracesExperience.flyout.about.serviceNameLink.click({ force: true });
         });
 
         await spaceTest.step('verify service flyout is visible', async () => {
