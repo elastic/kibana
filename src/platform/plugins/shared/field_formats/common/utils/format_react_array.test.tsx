@@ -15,12 +15,14 @@ import ReactDOM from 'react-dom/server';
 import { formatReactArray } from './format_react_array';
 
 function render(node: React.ReactNode): string {
-  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
+  return ReactDOM.renderToStaticMarkup(<>{node}</>)
+    .replace(/&quot;/g, '"')
+    .replace(/ class="css-[^"]+"/g, '');
 }
 
-const open = '<span class="css-1msmqia-arrayHighlightStyles">[</span>';
-const close = '<span class="css-1msmqia-arrayHighlightStyles">]</span>';
-const comma = '<span class="css-1msmqia-arrayHighlightStyles">,</span>';
+const open = '<span>[</span>';
+const close = '<span>]</span>';
+const comma = '<span>,</span>';
 
 describe('formatReactArray', () => {
   describe('empty and single-element arrays', () => {

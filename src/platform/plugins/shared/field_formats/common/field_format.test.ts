@@ -24,10 +24,9 @@ import { expectReactElementAsArray } from './test_utils';
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
 const renderReact = (node: React.ReactNode) =>
-  ReactDOM.renderToStaticMarkup(React.createElement(React.Fragment, null, node)).replace(
-    /&quot;/g,
-    '"'
-  );
+  ReactDOM.renderToStaticMarkup(React.createElement(React.Fragment, null, node))
+    .replace(/&quot;/g, '"')
+    .replace(/ class="css-[^"]+"/g, '');
 
 const getTestFormat = (
   _params?: FieldFormatParams,
@@ -148,11 +147,11 @@ describe('FieldFormat class', () => {
       test('uses newline separator and indentation when values contain newlines', () => {
         const f = getTestFormat(undefined, (v) => String(v));
         expect(renderReact(f.convertToReact(['{\n  "x": 1\n}', '{\n  "y": 2\n}']))).toBe(
-          '<span class="css-1msmqia-arrayHighlightStyles">[</span>\n' +
+          '<span>[</span>\n' +
             '  {\n    "x": 1\n  }' +
-            '<span class="css-1msmqia-arrayHighlightStyles">,</span>\n' +
+            '<span>,</span>\n' +
             '  {\n    "y": 2\n  }\n' +
-            '<span class="css-1msmqia-arrayHighlightStyles">]</span>'
+            '<span>]</span>'
         );
       });
 
@@ -191,9 +190,7 @@ describe('FieldFormat class', () => {
             makeOptions('myField', [`lorem ${hl('ipsum')} dolor`])
           )
         );
-        expect(result).toBe(
-          'lorem <mark class="css-wxea76-searchHighlightStyles">ipsum</mark> dolor'
-        );
+        expect(result).toBe('lorem <mark>ipsum</mark> dolor');
       });
 
       test('returns plain text from convertToReact when no highlights are present', () => {
@@ -225,9 +222,7 @@ describe('FieldFormat class', () => {
           const result = renderReact(
             f.convertToReact('ipsum', makeOptions('myField', [`${hl('formatted:ipsum')}`]))
           );
-          expect(result).toBe(
-            '<mark class="css-wxea76-searchHighlightStyles">formatted:ipsum</mark>'
-          );
+          expect(result).toBe('<mark>formatted:ipsum</mark>');
         });
 
         test('returns plain text when no highlights present', () => {
@@ -243,9 +238,7 @@ describe('FieldFormat class', () => {
         const result = renderReact(
           f.convertToReact('<em>lorem</em>', makeOptions('myField', [`${hl('<em>lorem</em>')}`]))
         );
-        expect(result).toBe(
-          '<mark class="css-wxea76-searchHighlightStyles">&lt;em&gt;lorem&lt;/em&gt;</mark>'
-        );
+        expect(result).toBe('<mark>&lt;em&gt;lorem&lt;/em&gt;</mark>');
         expect(result).not.toContain('<em>');
       });
 

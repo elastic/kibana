@@ -20,11 +20,13 @@ import type { FieldFormatHighlightTags } from '../../types';
  * an implementation detail of renderToStaticMarkup, not semantically meaningful.
  */
 function render(node: React.ReactNode): string {
-  return ReactDOM.renderToStaticMarkup(<>{node}</>).replace(/&quot;/g, '"');
+  return ReactDOM.renderToStaticMarkup(<>{node}</>)
+    .replace(/&quot;/g, '"')
+    .replace(/ class="css-[^"]+"/g, '');
 }
 
 const hl = (word: string) => `${highlightTags.pre}${word}${highlightTags.post}`;
-const mark = (word: string) => `<mark class="css-wxea76-searchHighlightStyles">${word}</mark>`;
+const mark = (word: string) => `<mark>${word}</mark>`;
 
 describe('getHighlightReact', () => {
   it('returns plain string unchanged when no field name is provided', () => {

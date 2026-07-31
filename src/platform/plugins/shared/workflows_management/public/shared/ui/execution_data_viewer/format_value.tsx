@@ -11,9 +11,9 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
-const arrayHighlightStyles = ({ euiTheme }: UseEuiTheme) =>
+const arrayHighlightStyles = ({ euiTheme }: Partial<UseEuiTheme>) =>
   css({
-    color: euiTheme.colors.mediumShade,
+    color: euiTheme?.colors.mediumShade ?? 'inherit',
   });
 
 /**
