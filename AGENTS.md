@@ -17,6 +17,7 @@
 
 ## Testing
 Run `node scripts/check.js --scope=local|staged|branch` to validate changes (Jest, types, linting).
+- Do not pipe it (e.g. `| tail`): the pipeline reports the last command's status, masking a non-zero exit from the check itself. Run it unpiped and read the full output afterwards. If a pipeline is unavoidable, use `set -o pipefail` or inspect `${PIPESTATUS[0]}`.
 
 ### Jest unit
 `node scripts/jest [--config=<pathToConfigFile>] [TestPathPattern]`
