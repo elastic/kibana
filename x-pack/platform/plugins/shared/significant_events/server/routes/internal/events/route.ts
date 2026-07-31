@@ -10,6 +10,7 @@ import {
   significantEventStatusSchema,
   CHANGE_POINT_TYPES,
   severitySchema,
+  MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type SignificantEvent,
@@ -197,8 +198,10 @@ const eventsLifecycleRoute = createServerRoute({
 
 /**
  * Used by the managed investigation workflow (`investigation_workflow.yaml`). Keep the endpoint
- * path and body shape (`significantEventInvestigationSchema`) in sync with its
- * `attach_pending_to_significant_event` / `attach_to_significant_event` `kibana.request` steps.
+ * path and body shape in sync with its `attach_pending_to_significant_event` /
+ * `attach_to_significant_event` `kibana.request` steps. The optional `severity`/`summary`/`status`
+ * let the terminal attach also apply the investigation's reassessed fields in the same
+ * append-only version, so a completed investigation and its field updates are a single write.
  */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigations',
@@ -206,7 +209,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     access: 'internal',
     summary: 'Attach investigation to event',
     description:
-      'Record an investigation run against a significant event (pending, success, or failed).',
+      'Record an investigation run against a significant event (pending, success, or failed), optionally applying reassessed severity/summary/status in the same version.',
   },
   security: {
     authz: {
@@ -217,17 +220,24 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema,
+    body: significantEventInvestigationSchema.extend({
+      severity: severitySchema.optional(),
+      summary: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
+      status: significantEventStatusSchema.optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
+    const { severity, summary, status, ...investigation } = params.body;
+
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
       eventUuid: params.path.id,
-      investigation: params.body,
+      investigation,
+      reassessedFields: { severity, summary, status },
     });
   },
 });
