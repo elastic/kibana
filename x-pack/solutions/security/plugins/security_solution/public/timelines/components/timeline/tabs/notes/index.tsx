@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiAvatar,
   EuiComment,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingElastic,
@@ -46,6 +47,7 @@ import { TimelineStatusEnum } from '../../../../../../common/api/timeline';
 import { NotesList } from '../../../../../notes/components/notes_list';
 import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';
+import { NO_NOTES_TITLE, NO_NOTES_DESCRIPTION } from '../../../super_timeline/translations';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
@@ -172,6 +174,9 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
     );
   }, [timeline.description, timeline.updated, timeline.updatedBy]);
 
+  const isSuperTimelineEmpty =
+    isSuperTimeline && fetchStatus === ReqStatus.Succeeded && notes.length === 0;
+
   return (
     <EuiPanel
       css={css`
@@ -179,48 +184,73 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
         overflow: auto;
       `}
     >
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup
+        direction="column"
+        css={css`
+          height: 100%;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup data-test-subj={'new-notes-screen'}>
-            <EuiFlexItem>
-              {timelineDescription}
-              {fetchStatus === ReqStatus.Loading && (
-                <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
-              )}
-              {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
-                <EuiFlexGroup justifyContent="center">
-                  <EuiFlexItem grow={false}>
-                    <p>{NO_NOTES}</p>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                <NotesList
-                  notes={notes}
-                  options={{ hideTimelineIcon: true, hideDeleteIcon: isSuperTimeline }}
-                />
-              )}
-              {!isSuperTimeline && canCreateNotes && (
-                <>
-                  <EuiSpacer />
-                  <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>
-                    {!isTimelineSaved && <SaveTimelineCallout />}
-                  </AddNote>
-                </>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem
+          {isSuperTimelineEmpty ? (
+            <EuiFlexGroup
+              alignItems="center"
+              justifyContent="center"
               css={css`
-                max-width: 350px;
+                height: 100%;
+                padding-bottom: 10%;
               `}
             >
-              <Participants notes={notes} timelineCreatedBy={timeline.createdBy} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiEmptyPrompt
+                  iconType="documents"
+                  title={<h3>{NO_NOTES_TITLE}</h3>}
+                  body={<p>{NO_NOTES_DESCRIPTION}</p>}
+                  data-test-subj="super-timeline-no-notes"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : (
+            <EuiFlexGroup data-test-subj={'new-notes-screen'}>
+              <EuiFlexItem>
+                {timelineDescription}
+                {fetchStatus === ReqStatus.Loading && (
+                  <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+                )}
+                {isTimelineSaved && fetchStatus === ReqStatus.Succeeded && notes.length === 0 ? (
+                  <EuiFlexGroup justifyContent="center">
+                    <EuiFlexItem grow={false}>
+                      <p>{NO_NOTES}</p>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <NotesList
+                    notes={notes}
+                    options={{ hideTimelineIcon: true, hideDeleteIcon: isSuperTimeline }}
+                  />
+                )}
+                {!isSuperTimeline && canCreateNotes && (
+                  <>
+                    <EuiSpacer />
+                    <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>
+                      {!isTimelineSaved && <SaveTimelineCallout />}
+                    </AddNote>
+                  </>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem
+                css={css`
+                  max-width: 350px;
+                `}
+              >
+                <Participants notes={notes} timelineCreatedBy={timeline.createdBy} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -83,3 +83,16 @@ export const ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.superTimeline.errorTitle',
   { defaultMessage: 'Failed to open Super Timeline' }
 );
+
+export const NO_NOTES_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.noNotesTitle',
+  { defaultMessage: 'No notes across the selected timelines' }
+);
+
+export const NO_NOTES_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.timeline.superTimeline.noNotesDescription',
+  {
+    defaultMessage:
+      'This view aggregates notes from all source timelines. Notes added to individual timelines will appear here.',
+  }
+);
