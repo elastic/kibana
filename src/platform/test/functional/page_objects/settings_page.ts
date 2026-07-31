@@ -552,7 +552,12 @@ export class SettingsPageObject extends FtrService {
     dataViewName?: string,
     allowHidden?: boolean
   ) {
+    let hasSubmittedTheForm = false;
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // The save was accepted and the editor flyout closed: the data view was created.
+        return;
+      }
       await this.header.waitUntilLoadingHasFinished();
       await this.clickKibanaIndexPatterns();
 
@@ -601,6 +606,13 @@ export class SettingsPageObject extends FtrService {
       );
 
       await (await this.getSaveDataViewButtonActive()).click();
+      hasSubmittedTheForm = true;
+
+      // The Save click can be swallowed when it races the async CCS source
+      // resolution re-render, leaving the flyout open with nothing submitted.
+      // Confirm the flyout closed inside this retry.try so a swallowed click
+      // re-runs fill→save, rather than the URL loop below dead-polling forever.
+      await this.testSubjects.missingOrFail('indexPatternEditorFlyout', { timeout: 30000 });
     });
     await this.header.waitUntilLoadingHasFinished();
     await this.retry.try(async () => {
