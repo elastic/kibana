@@ -32,7 +32,16 @@ import { CaseDetailsLink } from '../../../links';
 import * as i18n from '../translations';
 import { useActions } from '../../../all_cases/use_actions';
 import { useCasesColumnsConfiguration } from '../../../all_cases/use_cases_columns_configuration';
-import { useApplicationCapabilities, useKibana } from '../../../../common/lib/kibana';
+import {
+  useApplicationCapabilities,
+  useCasesConfig,
+  useKibana,
+} from '../../../../common/lib/kibana';
+import {
+  getExtendedFieldCellValue,
+  getExtendedFieldColumnKey,
+  useGlobalInlineFields,
+} from '../../../all_cases/extended_field_columns';
 import { TruncatedText } from '../../../truncated_text';
 import { getConnectorIcon } from '../../../utils';
 import { AssigneesColumn } from '../../../all_cases/assignees_column';
@@ -83,11 +92,18 @@ export const useCasesColumns = ({
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
   const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
+  const { templatesEnabled } = useCasesConfig();
 
   const {
     data: { customFields },
-    isFetching: isLoadingColumns,
+    isFetching: isLoadingConfiguration,
   } = useGetCaseConfiguration({ keepPreviousData: true });
+
+  const { globalInlineFields, isLoading: isLoadingGlobalFields } = useGlobalInlineFields({
+    enabled: templatesEnabled,
+  });
+
+  const isLoadingColumns = isLoadingConfiguration || isLoadingGlobalFields;
 
   const assignCaseAction = useCallback(
     async (theCase: CaseUI) => {
@@ -342,6 +358,19 @@ export const useCasesColumns = ({
   const allColumnsDict = useMemo(() => {
     const dict = { ...columnsDict };
 
+    // With templates v2, columns come from global field definitions and read live values from
+    // `extendedFields`; otherwise they come from the legacy customFields config.
+    if (templatesEnabled) {
+      globalInlineFields.forEach((field) => {
+        dict[getExtendedFieldColumnKey(field)] = {
+          name: field.label ?? field.name,
+          render: (theCase: CaseUI) => getExtendedFieldCellValue(field, theCase),
+        };
+      });
+
+      return dict;
+    }
+
     customFields.forEach(({ key, type, label }) => {
       if (type in customFieldsBuilderMap) {
         const columnDefinition = customFieldsBuilderMap[type]().getEuiTableColumn({ label });
@@ -364,7 +393,7 @@ export const useCasesColumns = ({
     });
 
     return dict;
-  }, [columnsDict, customFields]);
+  }, [columnsDict, customFields, templatesEnabled, globalInlineFields]);
 
   const columns: CasesColumns[] = [];
 
