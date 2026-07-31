@@ -234,4 +234,41 @@ describe('useApiEndpoints', () => {
 
     expect(result.current.isLoading).toBe(true);
   });
+
+  it('resolves Supabase and Vercel endpoints for OpenTelemetry when the managed service is available', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([
+      expect.objectContaining({
+        id: 'supabase',
+        url: 'https://otlp.example.com:443/supabase/v1/logs',
+      }),
+      expect.objectContaining({
+        id: 'vercel',
+        url: 'https://otlp.example.com:443/vercel',
+      }),
+    ]);
+  });
+
+  it('resolves no additional endpoints for OpenTelemetry when the managed service is unavailable', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: false,
+      elasticsearchUrl: 'https://es.example.com',
+    });
+
+    expect(findEndpoint(result, 'opentelemetry')?.additionalEndpoints).toEqual([]);
+  });
+
+  it('resolves no additional endpoints for Prometheus and Elasticsearch', () => {
+    const { result } = setup({
+      isManagedOtlpServiceAvailable: true,
+      managedOtlpServiceUrl: 'https://otlp.example.com:443',
+    });
+
+    expect(findEndpoint(result, 'prometheus')?.additionalEndpoints).toEqual([]);
+    expect(findEndpoint(result, 'elasticsearch')?.additionalEndpoints).toEqual([]);
+  });
 });

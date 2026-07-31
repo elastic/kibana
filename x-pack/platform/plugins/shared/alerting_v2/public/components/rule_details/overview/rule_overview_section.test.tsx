@@ -22,6 +22,9 @@ jest.mock('./signal_rule_overview', () => ({
 
 jest.mock('./artifacts', () => ({
   ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
+  SignalArtifactsSection: () => (
+    <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
+  ),
 }));
 
 const mockCanRead = jest.fn();
@@ -84,10 +87,12 @@ describe('RuleOverviewSection', () => {
     it('shows the artifacts section for alert rules', () => {
       renderSection({ ...baseRule, kind: 'alert' });
       expect(screen.getByTestId('artifactsSectionMock')).toBeInTheDocument();
+      expect(screen.queryByTestId('signalArtifactsSectionMock')).not.toBeInTheDocument();
     });
 
-    it('does not show artifacts for signal rules', () => {
+    it('shows the signal artifacts section for signal rules', () => {
       renderSection({ ...baseRule, kind: 'signal' });
+      expect(screen.getByTestId('signalArtifactsSectionMock')).toBeInTheDocument();
       expect(screen.queryByTestId('artifactsSectionMock')).not.toBeInTheDocument();
     });
   });

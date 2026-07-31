@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
   cleanupLogstashOpenInLensDefaults,
@@ -21,7 +21,7 @@ const TIMESTAMP_X_AXIS_DIMENSION = {
 
 spaceTest.describe(
   'Lens open in Lens — agg-based Visualize navigation',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.savedObjects.load(
@@ -64,6 +64,7 @@ spaceTest.describe(
           await openInLens();
           await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
           await lens.goBackToPreviousApp();
+          await expect(lens.getDiscardChangesModal()).toBeVisible();
           await lens.confirmDiscardChangesModal();
           await expect(visualize.getEditInLensButton()).toBeVisible();
         });
@@ -75,6 +76,7 @@ spaceTest.describe(
             addToDashboard: 'none',
           });
           await lens.goBackToPreviousApp();
+          await expect(lens.getDiscardChangesModal()).toBeHidden();
           await expect(visualize.getEditInLensButton()).toBeVisible();
         });
       }

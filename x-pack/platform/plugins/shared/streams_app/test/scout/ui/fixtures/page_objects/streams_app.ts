@@ -230,11 +230,18 @@ export class StreamsApp {
     await this.page.getByTestId('breadcrumb first').click();
   }
 
-  async clickStreamsBreadcrumb() {
-    await this.page
-      .locator('a[data-test-subj^="breadcrumb"]')
-      .filter({ hasText: /^Streams$/ })
-      .click();
+  async backToStreamsMainPage() {
+    const backButton = this.page.testSubj.locator('appHeaderBack');
+    // Both the breadcrumb trail and the app header back button can be present at once, and each
+    // navigates to the Streams main page. Prefer the back button when it is rendered.
+    if (await backButton.isVisible()) {
+      await backButton.click();
+    } else {
+      await this.page
+        .locator('a[data-test-subj^="breadcrumb"]')
+        .filter({ hasText: /^Streams$/ })
+        .click();
+    }
     await this.expectStreamsTableVisible();
   }
 
@@ -453,6 +460,26 @@ export class StreamsApp {
   async switchToColumnsView() {
     // Draft streams fetch samples via ES|QL from the parent, which can be slow
     await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
+  }
+
+  /**
+   * Draft-stream samples are fetched via ES|QL from the parent stream's `$.` view,
+   * which the server creates asynchronously. Until it propagates, the query fails with
+   * "Unknown index" and the data-source machine treats that as terminal (empty grid, no
+   * auto-retry), so the preview grid — and the view-mode toggle inside its toolbar — never
+   * render and any wait times out. Re-trigger the fetch via the refresh button until the
+   * grid appears, so a not-yet-propagated parent view is retried rather than fatally awaited.
+   */
+  async waitForDraftPreviewSamples() {
+    const grid = this.page.getByTestId('euiDataGridBody');
+    const refreshButton = this.page.getByRole('button', { name: 'Refresh data preview' });
+
+    await expect(async () => {
+      if (await grid.isVisible()) return;
+      // `click` auto-waits for the button to be enabled (i.e. not mid-load) before refetching.
+      await refreshButton.click({ timeout: 15_000 });
+      await expect(grid).toBeVisible({ timeout: 10_000 });
+    }).toPass({ timeout: 90_000 });
   }
 
   async saveRoutingRule() {

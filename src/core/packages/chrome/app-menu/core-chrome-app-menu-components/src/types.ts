@@ -220,9 +220,10 @@ export type AppMenuItemCommon = AppMenuButtonItem | AppMenuItemWithPopover | App
 
 type AppMenuItemTypeBase = AppMenuItemCommon & {
   /**
-   * Order of the item in the menu. Lower numbers appear first.
+   * Order of the item in the menu. Lower numbers appear first. Defaults to 0.
+   * Items with the same order preserve their array order.
    */
-  order: number;
+  order?: number;
   /**
    * Adds a separator line above or below the item when rendered inside a popover menu.
    * Ignored for top-level, non-popover items.

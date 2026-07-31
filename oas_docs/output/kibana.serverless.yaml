@@ -47,7 +47,8 @@ tags:
   - name: agent builder
     description: |
       Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+
+      Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs. Follow the [Agent Builder API tutorial](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-api-tutorial) for a guided example.
     externalDocs:
       description: Agent Builder docs
       url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
@@ -291,6 +292,12 @@ tags:
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery
+  - description: |
+      Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space.
+
+      A single request can run one or more initialization flows. Each flow provisions a specific set of assets (for example, list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, or detection rule monitoring assets). The response reports a per-flow result so you can tell which flows completed and which returned an error.
+    name: Security Solution Initialization API
+    x-displayName: Security solution initialization
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
@@ -2744,14 +2751,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -2762,6 +2770,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -2772,7 +2781,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -2805,6 +2814,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -2838,9 +2848,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -2889,7 +2909,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -2912,6 +2932,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -3199,14 +3220,15 @@ paths:
               type: object
               properties:
                 _execution_mode:
-                  description: '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)'
+                  description: define how to execute the agent (local execution or via task_manager)
                   enum:
                     - local
                     - task_manager
                   type: string
+                  x-state: Experimental
                 access_control:
                   additionalProperties: false
-                  description: '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.'
+                  description: Optional conversation access control. Defaults to private.
                   type: object
                   properties:
                     access_mode:
@@ -3217,6 +3239,7 @@ paths:
                       type: string
                   required:
                     - access_mode
+                  x-state: Technical Preview
                 action:
                   description: The action to perform. "regenerate" re-executes the last round with the original input. Requires conversation_id.
                   enum:
@@ -3227,7 +3250,7 @@ paths:
                   description: The ID of the agent to chat with. Defaults to the default Elastic AI agent.
                   type: string
                 attachments:
-                  description: '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.'
+                  description: Optional attachments to send with the message.
                   items:
                     additionalProperties: false
                     type: object
@@ -3260,6 +3283,7 @@ paths:
                     required:
                       - type
                   type: array
+                  x-state: Technical Preview
                 browser_api_tools:
                   description: Optional browser API tools to be registered as LLM tools with browser.* namespace. These tools execute on the client side.
                   items:
@@ -3293,9 +3317,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3344,7 +3378,7 @@ paths:
                         required:
                           - authorized
                       - additionalProperties: false
-                        description: '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.'
+                        description: Answers to an `ask_user_question` prompt; one entry per question, in order.
                         type: object
                         properties:
                           answers:
@@ -3367,6 +3401,7 @@ paths:
                             type: array
                         required:
                           - answers
+                        x-state: Technical Preview
                   description: Use this field to respond to a `confirmation`, `authorization`, or `ask_user_question` prompt. Send an `allow` boolean to answer a `confirmation` prompt, an `authorized` boolean to answer an `authorization` prompt, or an `answers` array (one entry per question) to answer an `ask_user_question` prompt.
                   type: object
       responses:
@@ -12269,6 +12304,466 @@ paths:
           source: |
             POST kbn://api/data_views/swap_references/_preview
             {"fromId":"abcd-efg","toId":"xyz-123"}
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/detection_engine/attacks/assignees:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/assignees</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Assign users to attack discovery alerts, and unassign them from alerts.
+        Optionally cascade the change to related detection alerts via `kibana.alert.attack_discovery.alert_ids`.
+        > info
+        > You cannot add and remove the same assignee in the same request.
+      operationId: SetAttacksAssignees
+      requestBody:
+        content:
+          application/json:
+            examples:
+              add:
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+              remove:
+                value:
+                  assignees:
+                    add: []
+                    remove:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+              withRelatedAlerts:
+                value:
+                  assignees:
+                    add:
+                      - u_MxY0jbrft7EcfC6iNZSUGeI_n6iYrSwZj5mWF5EqmSU_0
+                    remove: []
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_SetAttacksAssigneesByIds'
+              description: Set attacks assignees by IDs request
+        description: An object containing assignees to add or remove and attack ids the changes will be applied to
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 76
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body].ids: at least one attack id is required to update assignees'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Assign and unassign users from attack discovery alerts
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/detection_engine/attacks/search:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/search</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Find and/or aggregate attack discovery alerts that match the given query. Searches scheduled and ad hoc attack discovery alert indices for the active space only.
+      operationId: SearchAttacks
+      requestBody:
+        content:
+          application/json:
+            examples:
+              byIds:
+                value:
+                  query:
+                    ids:
+                      values:
+                        - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_QueryAlertsBodyParams'
+              description: Elasticsearch query and aggregation request
+        description: Search and/or aggregation query
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    _shards:
+                      failed: 0
+                      skipped: 0
+                      successful: 1
+                      total: 1
+                    hits:
+                      hits:
+                        - _id: 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                          _index: .internal.adhoc.alerts-security.attack.discovery.alerts-default-000001
+                          _score: 1
+                          _source:
+                            '@timestamp': '2025-06-23T15:16:52.984Z'
+                            kibana.alert.attack_discovery.alert_ids:
+                              - ee183cf525d7e9d0f47d1b2bb928d760a0f53756ffa61edcf0672f71c986ac21
+                              - 46ebac989ca72439b14b57d32102543c17d5f33e0f6532d8a5c148949d8ff7b5
+                            kibana.alert.attack_discovery.title_with_replacements: Widespread Malware Campaign via Compromised Account
+                            kibana.alert.workflow_status: open
+                      max_score: 1
+                      total:
+                        relation: eq
+                        value: 1
+                    timed_out: false
+                    took: 1
+              schema:
+                additionalProperties: true
+                description: Elasticsearch search response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: 'Failed to parse search request: unknown query clause in bool filter'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Find and/or aggregate attack discovery alerts
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/detection_engine/attacks/status:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/status</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Set the workflow status of one or more attack discovery alerts by IDs, optionally cascading the status to their related detection alerts.
+      operationId: SetAttacksStatus
+      requestBody:
+        content:
+          application/json:
+            examples:
+              byId:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  status: acknowledged
+              closedWithReason:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  reason: false_positive
+                  status: closed
+              withRelatedAlerts:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  status: closed
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_SetAttacksStatusByIds'
+              description: Set attacks status by IDs request
+        description: An object containing the desired status and explicit attack ids
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 81
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    error: Bad Request
+                    message: '[request body].ids: at least one attack id is required to update status'
+                    statusCode: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Set attack discovery alerts workflow status
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+  /api/detection_engine/attacks/tags:
+    post:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/attacks/tags</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Add tags to attack discovery alerts, and remove them from alerts, by attack IDs in a single request. Optionally cascade tag changes to related detection alerts.
+      operationId: SetAttacksTags
+      requestBody:
+        content:
+          application/json:
+            examples:
+              add:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add:
+                      - investigation
+                    tags_to_remove: []
+              remove:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add: []
+                    tags_to_remove:
+                      - investigation
+              withRelatedAlerts:
+                value:
+                  ids:
+                    - 80e1383f856e67c1b7f7a1634744fa6d66b6e2ef7aa26d226e57afb5a7b2b4a1
+                  tags:
+                    tags_to_add:
+                      - investigation
+                    tags_to_remove: []
+                  update_related_alerts: true
+            schema:
+              $ref: '#/components/schemas/Security_Detections_API_SetAttacksTagsByIds'
+              description: Set attacks tags by IDs request
+        description: An object containing tags to add or remove and attack ids the changes will be applied to
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                success:
+                  value:
+                    batches: 1
+                    deleted: 0
+                    failures: []
+                    noops: 0
+                    requests_per_second: -1
+                    retries:
+                      bulk: 0
+                      search: 0
+                    throttled_millis: 0
+                    throttled_until_millis: 0
+                    timed_out: false
+                    took: 68
+                    total: 1
+                    updated: 1
+                    version_conflicts: 0
+              schema:
+                additionalProperties: true
+                description: Elasticsearch update by query response
+                type: object
+          description: Successful response
+        '400':
+          content:
+            application/json:
+              examples:
+                badRequest:
+                  value:
+                    message:
+                      - Duplicate tags ["duplicate"] were found in the tags_to_add and tags_to_remove parameters.
+                    status_code: 400
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+                  - $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Invalid input data response
+        '401':
+          content:
+            application/json:
+              examples:
+                unauthorized:
+                  value:
+                    error: Unauthorized
+                    message: |-
+                      [security_exception
+                      	Root causes:
+                      		security_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]
+                    statusCode: 401
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_PlatformErrorResponse'
+          description: Unsuccessful authentication response
+        '500':
+          content:
+            application/json:
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
+              schema:
+                $ref: '#/components/schemas/Security_Detections_API_SiemErrorResponse'
+          description: Internal server error response
+      summary: Add and remove attack discovery alert tags
+      tags:
+        - Security Detections API
+      x-state: added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -26758,6 +27253,8 @@ paths:
                         pipeline_config:
                           maxLength: 10000
                           type: string
+                        policy_base_id:
+                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -27422,6 +27919,8 @@ paths:
                       pipeline_config:
                         maxLength: 10000
                         type: string
+                      policy_base_id:
+                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -27902,6 +28401,8 @@ paths:
                         type: array
                       pipeline_config:
                         maxLength: 10000
+                        type: string
+                      policy_base_id:
                         type: string
                       policy_id:
                         type: string
@@ -52049,6 +52550,83 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/security_solution/initialize:
+    post:
+      description: |
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Run one or more Security Solution initialization flows for the current space.
+        Each flow provisions a specific set of assets, for example list indices,
+        security data views, prebuilt detection rules, endpoint protection, AI prompts,
+        or detection rule monitoring assets. Only the requested flows are run, and the
+        response reports a result for each one.
+      operationId: InitializeSecuritySolution
+      requestBody:
+        content:
+          application/json:
+            examples:
+              default:
+                value:
+                  flows:
+                    - init-prebuilt-rules
+                    - init-endpoint-protection
+                    - init-ai-prompts
+            schema:
+              type: object
+              properties:
+                flows:
+                  items:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowId'
+                  minItems: 1
+                  type: array
+              required:
+                - flows
+        description: The initialization flows to run.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                default:
+                  value:
+                    flows:
+                      init-ai-prompts:
+                        payload:
+                          install_status: installed
+                          name: security_ai_prompts
+                          version: 8.17.1
+                        status: ready
+                      init-endpoint-protection:
+                        payload:
+                          install_status: already_installed
+                          name: endpoint
+                          version: 8.17.1
+                        status: ready
+                      init-prebuilt-rules:
+                        payload:
+                          install_status: installed
+                          name: security_detection_engine
+                          version: 8.17.1
+                        status: ready
+              schema:
+                type: object
+                properties:
+                  flows:
+                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowsResult'
+                required:
+                  - flows
+          description: Indicates a successful call. Returns a result for each requested flow.
+      summary: Initialize security solution flows
+      tags:
+        - Security Solution Initialization API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
   /api/security/entity_store:
     put:
       description: |-
@@ -62936,6 +63514,7 @@ paths:
                           - count: 7
                             date: '2025-01-15T12:00:00.000Z'
                         rule_backed: false
+                        rule_uuid: 9fdfcf5a-4e1d-5ee3-b05d-7bc2b014e81c
                         severity_score: 75
                         stream_name: logs.nginx
                         title: Error count by host
@@ -63289,6 +63868,7 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 2048
             type: string
         - description: The page of results to return.
           in: query
@@ -63498,6 +64078,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '204':
@@ -63529,6 +64111,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       responses:
         '200':
@@ -63598,6 +64182,8 @@ paths:
           name: id
           required: true
           schema:
+            maxLength: 256
+            minLength: 1
             type: string
       requestBody:
         content:
@@ -64960,7 +65546,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -66477,7 +67063,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -73565,6 +74151,12 @@ components:
         hide_title:
           description: When true, the panel title is hidden. Defaults to false.
           type: boolean
+        highlighted_service_names:
+          items:
+            maxLength: 1024
+            type: string
+          maxItems: 50
+          type: array
         kuery:
           maxLength: 2048
           type: string
@@ -74151,6 +74743,10 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -79480,6 +80076,9 @@ components:
           type: string
         created_at:
           type: string
+        expire_at:
+          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
+          type: string
         hidden:
           type: boolean
         id:
@@ -84266,6 +84865,10 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        allow_outdated_version:
+          default: false
+          description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
+          type: boolean
         force:
           default: false
           type: boolean
@@ -87239,6 +87842,10 @@ components:
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
+        allow_hidden_indices:
+          description: When `true`, allows the data view to match hidden indices.
+          title: Allow hidden and system indices
+          type: boolean
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
@@ -87247,6 +87854,12 @@ components:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
           minLength: 1
           title: Index pattern
+          type: string
+        name:
+          description: 'The name of the data view. Example: "Sample data view".'
+          maxLength: 256
+          minLength: 1
+          title: Data view name
           type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
@@ -87439,12 +88052,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -87456,12 +88074,17 @@ components:
       properties:
         color:
           description: The tag color as a hex value (e.g. `#772299`). If omitted, a random color is generated.
+          maxLength: 256
+          minLength: 1
           type: string
         description:
           description: Optional description of the tag.
+          maxLength: 2048
           type: string
         name:
           description: The display name of the tag.
+          maxLength: 256
+          minLength: 1
           type: string
       required:
         - name
@@ -88999,9 +89622,11 @@ components:
       properties:
         end:
           description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+          maxLength: 100
           type: string
         every:
           description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+          maxLength: 100
           type: string
         occurrences:
           description: The total number of recurrences of the schedule.
@@ -89013,6 +89638,7 @@ components:
             maximum: 12
             minimum: 1
             type: number
+          maxItems: 12
           minItems: 1
           type: array
         onMonthDay:
@@ -89021,12 +89647,15 @@ components:
             maximum: 31
             minimum: 1
             type: number
+          maxItems: 31
           minItems: 1
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           minItems: 1
           type: array
       title: maintenance_window_schedule_recurring_request
@@ -89047,16 +89676,20 @@ components:
           description: The specific months for a recurring schedule. Valid values are 1-12.
           items:
             type: number
+          maxItems: 12
           type: array
         onMonthDay:
           description: The specific days of the month for a recurring schedule. Valid values are 1-31.
           items:
             type: number
+          maxItems: 31
           type: array
         onWeekDay:
           description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
           items:
+            maxLength: 10
             type: string
+          maxItems: 77
           type: array
       title: maintenance_window_schedule_recurring_response
       type: object
@@ -89065,14 +89698,17 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_maintenance_window_schedule_recurring_request'
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -95794,6 +96430,8 @@ components:
       additionalProperties: false
       properties:
         expiration:
+          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
+          maxLength: 20
           type: string
         name:
           type: string
@@ -101408,6 +102046,7 @@ components:
       properties:
         duration:
           description: 'The duration of the schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `h`, `m`, or `s` for hours, minutes, seconds. For example: `1d`, `5h`, `30m`, `5000s`.'
+          maxLength: 100
           type: string
         recurring:
           additionalProperties: false
@@ -101415,9 +102054,11 @@ components:
           properties:
             end:
               description: 'The end date of a recurring schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-04-01T00:00:00.000Z`.'
+              maxLength: 100
               type: string
             every:
               description: 'The interval and frequency of a recurring schedule. It allows values in `<integer><unit>` format. `<unit>` is one of `d`, `w`, `M`, or `y` for days, weeks, months, years. For example: `15d`, `2w`, `3m`, `1y`.'
+              maxLength: 100
               type: string
             occurrences:
               description: The total number of recurrences of the schedule.
@@ -101429,6 +102070,7 @@ components:
                 maximum: 12
                 minimum: 1
                 type: number
+              maxItems: 12
               minItems: 1
               type: array
             onMonthDay:
@@ -101437,19 +102079,24 @@ components:
                 maximum: 31
                 minimum: 1
                 type: number
+              maxItems: 31
               minItems: 1
               type: array
             onWeekDay:
               description: The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.
               items:
+                maxLength: 10
                 type: string
+              maxItems: 77
               minItems: 1
               type: array
         start:
           description: 'The start date and time of the schedule, provided in ISO 8601 format and set to the UTC timezone. For example: `2025-03-12T12:00:00.000Z`.'
+          maxLength: 100
           type: string
         timezone:
           description: The timezone of the schedule. The default timezone is UTC.
+          maxLength: 64
           type: string
       required:
         - start
@@ -109770,9 +110417,20 @@ components:
                       minimum: 1
                       nullable: true
                       type: number
+                    docsCountPercentage:
+                      default: null
+                      maximum: 100
+                      minimum: 1
+                      nullable: true
+                      type: number
                     enabled:
                       default: true
                       type: boolean
+                    thresholdType:
+                      enum:
+                        - count
+                        - percentage
+                      type: string
                     timeInterval:
                       default: null
                       nullable: true
@@ -117191,6 +117849,22 @@ components:
       required:
         - query
         - status
+    Security_Detections_API_CloseAttacksByIds:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        reason:
+          $ref: '#/components/schemas/Security_Detections_API_Reason'
+        status:
+          enum:
+            - closed
+          type: string
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - status
     Security_Detections_API_ConcurrentSearches:
       minimum: 1
       type: integer
@@ -121301,6 +121975,50 @@ components:
       required:
         - ids
         - tags
+    Security_Detections_API_SetAttacksAssigneesByIds:
+      type: object
+      properties:
+        assignees:
+          $ref: '#/components/schemas/Security_Detections_API_AlertAssignees'
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - assignees
+    Security_Detections_API_SetAttacksStatusByIds:
+      discriminator:
+        mapping:
+          closed: '#/components/schemas/Security_Detections_API_CloseAttacksByIds'
+        propertyName: status
+      oneOf:
+        - $ref: '#/components/schemas/Security_Detections_API_CloseAttacksByIds'
+        - $ref: '#/components/schemas/Security_Detections_API_SetAttacksStatusByIdsBase'
+    Security_Detections_API_SetAttacksStatusByIdsBase:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        status:
+          $ref: '#/components/schemas/Security_Detections_API_AlertStatusExceptClosed'
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - status
+    Security_Detections_API_SetAttacksTagsByIds:
+      type: object
+      properties:
+        ids:
+          $ref: '#/components/schemas/Security_Detections_API_AlertIds'
+        tags:
+          $ref: '#/components/schemas/Security_Detections_API_SetAlertTags'
+        update_related_alerts:
+          $ref: '#/components/schemas/Security_Detections_API_UpdateRelatedAlerts'
+      required:
+        - ids
+        - tags
     Security_Detections_API_SetupGuide:
       description: Populates the rule’s setup guide with instructions on rule prerequisites such as required integrations, configuration steps, and anything else needed for the rule to work correctly.
       type: string
@@ -122567,6 +123285,10 @@ components:
       type: string
     Security_Detections_API_TimestampOverrideFallbackDisabled:
       description: Disables the fallback to the event's @timestamp field
+      type: boolean
+    Security_Detections_API_UpdateRelatedAlerts:
+      default: false
+      description: When `true`, the change is also applied to detection alerts related to the attacks via `kibana.alert.attack_discovery.alert_ids`.
       type: boolean
     Security_Detections_API_UUID:
       description: A universally unique identifier
@@ -125444,35 +126166,41 @@ components:
       properties:
         has_all_required:
           type: boolean
+        has_install_permissions:
+          type: boolean
         has_read_permissions:
           type: boolean
         has_write_permissions:
           type: boolean
+        install_privileges:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
         privileges:
-          type: object
-          properties:
-            elasticsearch:
-              type: object
-              properties:
-                cluster:
-                  additionalProperties:
-                    type: boolean
-                  type: object
-                index:
-                  additionalProperties:
-                    additionalProperties:
-                      type: boolean
-                    type: object
-                  type: object
-            kibana:
-              additionalProperties:
-                type: boolean
-              type: object
-          required:
-            - elasticsearch
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail'
       required:
         - has_all_required
         - privileges
+    Security_Entity_Analytics_API_EntityAnalyticsPrivilegesDetail:
+      type: object
+      properties:
+        elasticsearch:
+          type: object
+          properties:
+            cluster:
+              additionalProperties:
+                type: boolean
+              type: object
+            index:
+              additionalProperties:
+                additionalProperties:
+                  type: boolean
+                type: object
+              type: object
+        kibana:
+          additionalProperties:
+            type: boolean
+          type: object
+      required:
+        - elasticsearch
     Security_Entity_Analytics_API_EntityRiskLevels:
       enum:
         - Unknown
@@ -126053,6 +126781,9 @@ components:
           items:
             type: string
           type: array
+        hasManualEntities:
+          description: Indicates whether the watchlist contains manually assigned entities
+          type: boolean
         id:
           description: The unique ID of the watchlist
           type: string
@@ -130066,6 +130797,144 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
+    Security_Solution_Initialization_API_CreateListIndicesReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_DataViewPayload:
+      type: object
+      properties:
+        id:
+          type: string
+        patternList:
+          items:
+            type: string
+          type: array
+        title:
+          type: string
+      required:
+        - id
+        - title
+        - patternList
+    Security_Solution_Initialization_API_InitializationFlowErrorResult:
+      type: object
+      properties:
+        error:
+          nullable: true
+          type: string
+        status:
+          enum:
+            - error
+          type: string
+      required:
+        - status
+        - error
+    Security_Solution_Initialization_API_InitializationFlowId:
+      description: Identifier for an initialization flow.
+      enum:
+        - create-list-indices
+        - security-data-views
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-rule-monitoring
+      type: string
+    Security_Solution_Initialization_API_InitializationFlowsResult:
+      description: Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
+      type: object
+      properties:
+        create-list-indices:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_CreateListIndicesReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-ai-prompts:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-detection-rule-monitoring:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-endpoint-protection:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        init-prebuilt-rules:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+        security-data-views:
+          oneOf:
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_SecurityDataViewsReadyResult'
+            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
+    Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      properties:
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+    Security_Solution_Initialization_API_PackageInstallReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            install_status:
+              description: Fleet package installation status (e.g., installed, already_installed).
+              type: string
+            name:
+              type: string
+            version:
+              type: string
+          required:
+            - name
+            - version
+            - install_status
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
+    Security_Solution_Initialization_API_SecurityDataViewsReadyResult:
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            alertDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            attackDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            defaultDataView:
+              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+            kibanaDataViews:
+              items:
+                $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
+              type: array
+            signalIndexName:
+              type: string
+          required:
+            - defaultDataView
+            - alertDataView
+            - kibanaDataViews
+            - signalIndexName
+        status:
+          enum:
+            - ready
+          type: string
+      required:
+        - status
+        - payload
     Security_Timeline_API_AssociatedFilterType:
       description: |
         How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
@@ -133045,8 +133914,9 @@ components:
       enum:
         - webhook-authentication-basic
         - webhook-authentication-ssl
+        - webhook-oauth2-client-credentials
       description: |
-        The type of authentication to use: basic, SSL, or none.
+        The type of authentication to use: basic, SSL, OAuth2 client credentials, or none.
     ca:
       title: Certificate authority
       type: string
@@ -133080,12 +133950,25 @@ components:
       description: Defines properties for connectors when type is `.webhook`.
       type: object
       properties:
+        accessTokenUrl:
+          type: string
+          description: |
+            The URL used to request an OAuth2 access token. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
+        additionalFields:
+          type: string
+          nullable: true
+          description: |
+            Additional fields, encoded as a JSON object, sent as part of the OAuth2 access token request body.
         authType:
           $ref: '#/components/schemas/auth_type'
         ca:
           $ref: '#/components/schemas/ca'
         certType:
           $ref: '#/components/schemas/cert_type'
+        clientId:
+          type: string
+          description: |
+            The client identifier for OAuth2 authentication. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
         hasAuth:
           $ref: '#/components/schemas/has_auth'
         headers:
@@ -133098,8 +133981,15 @@ components:
           enum:
             - post
             - put
+            - patch
+            - get
+            - delete
           description: |
-            The HTTP request method, either `post` or `put`.
+            The HTTP request method: `post`, `put`, `patch`, `get`, or `delete`.
+        scope:
+          type: string
+          description: |
+            The scope requested when acquiring the OAuth2 access token.
         url:
           type: string
           description: |
@@ -133472,6 +134362,10 @@ components:
       description: Defines secrets for connectors when type is `.webhook`.
       type: object
       properties:
+        clientSecret:
+          type: string
+          description: |
+            The client secret for OAuth2 authentication. If `hasAuth` is set to `true` and `authType` is `webhook-oauth2-client-credentials`, this property is required.
         crt:
           $ref: '#/components/schemas/crt'
         key:

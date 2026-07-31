@@ -8,5 +8,9 @@
 export const contextEngineQueryKeys = {
   aiIndex: {
     list: () => ['context_engine', 'ai_index', 'list'] as const,
+    detail: (aiIndexId: string) => ['context_engine', 'ai_index', aiIndexId] as const,
+  },
+  connectors: {
+    list: () => ['context_engine', 'connectors', 'list'] as const,
   },
 };

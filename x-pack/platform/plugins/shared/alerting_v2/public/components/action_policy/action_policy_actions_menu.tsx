@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPanel,
   EuiPopover,
   EuiToolTip,
   type EuiContextMenuPanelDescriptor,
@@ -31,12 +30,12 @@ interface Props {
   onEdit?: (id: string) => void;
   onClone: (policy: ActionPolicyResponse) => void;
   onDelete: (policy: ActionPolicyResponse) => void;
-  onEnable: (id: string) => void;
-  onDisable: (id: string) => void;
+  onEnable?: (id: string) => void;
+  onDisable?: (id: string) => void;
+  isStateLoading?: boolean;
   onSnooze: (id: string, snoozedUntil: string) => void;
   onCancelSnooze: (id: string) => void;
   onUpdateApiKey: (id: string) => void;
-  isStateLoading: boolean;
   isDisabled?: boolean;
   'data-test-subj'?: string;
 }
@@ -49,10 +48,10 @@ export const ActionPolicyActionsMenu = ({
   onDelete,
   onEnable,
   onDisable,
+  isStateLoading = false,
   onSnooze,
   onCancelSnooze,
   onUpdateApiKey,
-  isStateLoading,
   isDisabled = false,
   'data-test-subj': dataTestSubj,
 }: Props) => {
@@ -84,7 +83,7 @@ export const ActionPolicyActionsMenu = ({
 
   const primaryItems = [
     ...snoozeItem,
-    ...(policy.enabled ? [{ isSeparator: true as const }] : []),
+    ...(snoozeItem.length > 0 ? [{ isSeparator: true as const }] : []),
     ...(onViewDetails
       ? [
           {
@@ -123,25 +122,29 @@ export const ActionPolicyActionsMenu = ({
         onClone(policy);
       },
     },
-    {
-      name: policy.enabled
-        ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.disable', {
-            defaultMessage: 'Disable',
-          })
-        : i18n.translate('xpack.alertingV2.actionPoliciesList.action.enable', {
-            defaultMessage: 'Enable',
-          }),
-      icon: policy.enabled ? 'stop' : 'play',
-      disabled: isStateLoading,
-      onClick: () => {
-        closePopover();
-        if (policy.enabled) {
-          onDisable(policy.id);
-        } else {
-          onEnable(policy.id);
-        }
-      },
-    },
+    ...(onEnable && onDisable
+      ? [
+          {
+            name: policy.enabled
+              ? i18n.translate('xpack.alertingV2.actionPoliciesList.action.disable', {
+                  defaultMessage: 'Disable',
+                })
+              : i18n.translate('xpack.alertingV2.actionPoliciesList.action.enable', {
+                  defaultMessage: 'Enable',
+                }),
+            icon: policy.enabled ? 'stop' : 'play',
+            disabled: isStateLoading,
+            onClick: () => {
+              closePopover();
+              if (policy.enabled) {
+                onDisable(policy.id);
+              } else {
+                onEnable(policy.id);
+              }
+            },
+          },
+        ]
+      : []),
     {
       name: i18n.translate('xpack.alertingV2.actionPoliciesList.action.updateApiKey', {
         defaultMessage: 'Update API key',
@@ -159,7 +162,6 @@ export const ActionPolicyActionsMenu = ({
       icon: 'trash',
       css: css`
         color: ${euiTheme.colors.textDanger};
-        padding: ${euiTheme.size.s};
       `,
       onClick: () => {
         closePopover();
@@ -192,9 +194,15 @@ export const ActionPolicyActionsMenu = ({
       ),
       width: 320,
       content: (
-        <EuiPanel>
+        <div
+          css={css`
+            padding: ${euiTheme.size.m};
+            padding-top: ${euiTheme.size.s};
+          `}
+        >
           <ActionPolicySnoozeForm
             isSnoozed={snoozed}
+            showTitle={false}
             onApplySnooze={(snoozedUntil) => {
               onSnooze(policy.id, snoozedUntil);
               closePopover();
@@ -204,7 +212,7 @@ export const ActionPolicyActionsMenu = ({
               closePopover();
             }}
           />
-        </EuiPanel>
+        </div>
       ),
     },
   ];

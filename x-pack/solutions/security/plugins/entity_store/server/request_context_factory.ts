@@ -138,6 +138,7 @@ export async function createRequestHandlerContext({
     assetManagerClient: new AssetManagerClient({
       logger,
       esClient: core.elasticsearch.client.asCurrentUser,
+      internalEsClient: core.elasticsearch.client.asInternalUser,
       taskManager: taskManagerStart,
       engineDescriptorClient,
       globalStateClient,
