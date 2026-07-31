@@ -10,7 +10,7 @@
 import { useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { findChangedRegion } from '../suggest_fix/utils';
 import { useReplaceReview } from './use_replace_review';
@@ -31,25 +31,40 @@ export const useVisorNlToEsql = ({
   const { euiTheme } = useEuiTheme();
   const generatedContentRef = useRef<string>('');
 
+  const onAfterAccept = useCallback(
+    () => onSubmit(generatedContentRef.current),
+    [onSubmit]
+  );
+
+  const acceptAction = useMemo(
+    () => ({
+      id: 'esql.visorReview.accept',
+      label: i18n.translate('esqlEditor.visor.review.acceptLabel', {
+        defaultMessage: 'Replace with generated query',
+      }),
+    }),
+    []
+  );
+
+  const rejectAction = useMemo(
+    () => ({
+      id: 'esql.visorReview.reject',
+      label: i18n.translate('esqlEditor.visor.review.rejectLabel', {
+        defaultMessage: 'Undo generated query',
+      }),
+    }),
+    []
+  );
+
   const { showReview, cleanup } = useReplaceReview({
     editorRef,
     editorModel,
     euiTheme,
     contextKeyId: 'esqlVisorReviewActive',
-    acceptAction: {
-      id: 'esql.visorReview.accept',
-      label: i18n.translate('esqlEditor.visor.review.acceptLabel', {
-        defaultMessage: 'Replace with generated query',
-      }),
-    },
-    rejectAction: {
-      id: 'esql.visorReview.reject',
-      label: i18n.translate('esqlEditor.visor.review.rejectLabel', {
-        defaultMessage: 'Undo generated query',
-      }),
-    },
+    acceptAction,
+    rejectAction,
     editSourceId: 'nl-to-esql-visor',
-    onAfterAccept: () => onSubmit(generatedContentRef.current),
+    onAfterAccept,
   });
 
   const showVisorReview = useCallback(
