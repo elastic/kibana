@@ -21,6 +21,7 @@ import { indexExplorerTool } from './index_explorer';
 import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
 import { searchTool } from './search';
+import { apiTools } from './api';
 
 export const registerTools = ({
   coreSetup,
@@ -41,6 +42,7 @@ export const registerTools = ({
     indexExplorerTool(),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
+    ...apiTools(coreSetup),
   ];
 
   tools.forEach((tool) => {

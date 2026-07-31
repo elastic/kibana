@@ -39,6 +39,10 @@ export const platformCoreTools = {
   smlAttach: platformCoreTool('sml_attach'),
   // Connector tools
   executeConnectorSubAction: platformCoreTool('execute_connector_sub_action'),
+  // API tools
+  discover: platformCoreTool('discover'),
+  describe: platformCoreTool('describe'),
+  execute: platformCoreTool('execute'),
 } as const;
 
 const casesTool = <TName extends string>(
@@ -145,6 +149,9 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.discover,
+  platformCoreTools.describe,
+  platformCoreTools.execute,
 ];
 
 /**
