@@ -86,14 +86,11 @@ export function QuickSearchVisor({
     (kqlQuery: string) => {
       if (selectedSources.length > 0 && kqlQuery.trim()) {
         const selectedSourceNames = selectedSources.map((source) => source.label).join(', ');
-        if (selectedSourceNames && kqlQuery.trim()) {
-          // Support of time_series
-          const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
-          const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("""${kqlQuery.trim()}""")`;
-          onUpdateAndSubmitQuery(newQuery);
-          setSearchValue('');
-          userSelectedSourceRef.current = false;
-        }
+        const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
+        const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("""${kqlQuery.trim()}""")`;
+        onUpdateAndSubmitQuery(newQuery);
+        setSearchValue('');
+        userSelectedSourceRef.current = false;
       }
     },
     [selectedSources, query, onUpdateAndSubmitQuery]
@@ -187,13 +184,16 @@ export function QuickSearchVisor({
           responsive={false}
           css={styles.visorBox}
         >
-          <EuiFlexItem grow={isInline ? true : false} css={styles.comboBoxWrapper}>
+          <EuiFlexItem grow={Boolean(isInline)} css={styles.comboBoxWrapper}>
             <SourcesDropdown
               currentSources={selectedSources.map((source) => source.label)}
               isDisabled={isNlLoading || visorMode === VisorMode.NaturalLanguage}
               onChangeSources={(newSources) => {
                 setSelectedSources(newSources.map((source) => ({ label: source })));
                 userSelectedSourceRef.current = true;
+              }}
+              onAutoSelectSources={(newSources) => {
+                setSelectedSources(newSources.map((source) => ({ label: source })));
               }}
             />
           </EuiFlexItem>

@@ -43,9 +43,6 @@ export function useEsqlEditorActions({
 }: UseEsqlEditorActionsParams): {
   editorActions: EsqlEditorActions;
   onClickQueryHistory: (isOpen: boolean) => void;
-  onSubmitEsqlQuery: (queryString: string) => void;
-  onToggleHistory: () => void;
-  onToggleStarredQuery: () => Promise<void>;
 } {
   const onClickQueryHistory = useCallback(
     (isOpen: boolean) => {
@@ -118,8 +115,5 @@ export function useEsqlEditorActions({
   return {
     editorActions,
     onClickQueryHistory,
-    onSubmitEsqlQuery,
-    onToggleHistory,
-    onToggleStarredQuery,
   };
 }

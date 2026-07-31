@@ -8,7 +8,7 @@
  */
 
 import { monaco } from '@kbn/code-editor';
-import { useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { ReviewActionsWidget } from './review_actions_widget';
@@ -72,6 +72,8 @@ export const useReplaceReview = ({
     contextKeyRef.current?.set(false);
     reviewStateRef.current = null;
   }, []);
+
+  useEffect(() => cleanup, [cleanup]);
 
   const accept = useCallback(() => {
     const editor = editorRef.current;

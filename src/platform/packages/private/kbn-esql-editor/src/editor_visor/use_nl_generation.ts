@@ -83,6 +83,7 @@ export const useNlGeneration = ({
         body: JSON.stringify({ nlInstruction: trimmed, currentQuery: query }),
         signal: abortController.signal,
       });
+      if (abortController.signal.aborted) return;
       if (result.content) {
         trackNlResult(
           trimmed.length,
