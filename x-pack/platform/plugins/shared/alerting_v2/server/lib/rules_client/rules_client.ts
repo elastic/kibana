@@ -65,7 +65,7 @@ import type {
   BulkResponse,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesParams,
+  FindRulesArgs,
   FindRulesResponse,
   FindRulesSortField,
   RotationCandidate,
@@ -97,6 +97,19 @@ const DEFAULT_PER_PAGE = 20;
  * many-distinct-interval by-query batch.
  */
 const ROTATION_CONCURRENCY = 10;
+
+/**
+ * Builds a per-rule bulk error flagging that the rule's saved object was
+ * persisted but the paired Task Manager call failed, leaving its task state
+ * diverged. Surfaced alongside the affected count so clients can detect the
+ * drift and (optionally) retry.
+ */
+const toTaskManagerDriftError = (id: string, message: string): BulkOperationError => ({
+  id,
+  error: { code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT, message },
+});
+
+const errorMessage = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
 const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   if (!sortField) {
@@ -602,7 +615,7 @@ export class RulesClient {
   }
 
   @withApm
-  public async findRules(params: FindRulesParams = {}): Promise<FindRulesResponse> {
+  public async findRules(params: FindRulesArgs = {}): Promise<FindRulesResponse> {
     const page = params.page ?? DEFAULT_PAGE;
     const perPage = params.perPage ?? DEFAULT_PER_PAGE;
     const soFilter = params.filter ? buildRuleSoFilter(params.filter) : undefined;
@@ -650,9 +663,69 @@ export class RulesClient {
   }
 
   /**
+   * Removes the executor tasks for the given rules and records Task Manager
+   * drift for any that could not be removed: it logs at `error` level under the
+   * `TASK_MANAGER_DRIFT` code and, when an `errors` sink is provided, appends a
+   * per-rule `TASK_MANAGER_DRIFT` entry so the drift surfaces in the bulk
+   * response.
+   */
+  private async removeExecutorTasks({
+    ruleIds,
+    spaceId,
+    errors,
+  }: {
+    ruleIds: string[];
+    spaceId: string;
+    errors?: BulkOperationError[];
+  }): Promise<void> {
+    if (ruleIds.length === 0) {
+      return;
+    }
+
+    const ruleIdByTaskId = new Map(
+      ruleIds.map((ruleId) => [getRuleExecutorTaskId({ ruleId, spaceId }), ruleId] as const)
+    );
+
+    let driftedRuleIds = ruleIds;
+    let cause: unknown;
+    try {
+      const { statuses } = await this.taskManager.bulkRemove([...ruleIdByTaskId.keys()]);
+      // A missing task (404) is the desired end state and is ignored.
+      // Any other failed status means the task lingers and is reported as drift.
+      driftedRuleIds = statuses.flatMap((status) => {
+        if (status.success || status.error?.statusCode === 404) {
+          return [];
+        }
+        const ruleId = ruleIdByTaskId.get(status.id);
+        return ruleId ? [ruleId] : [];
+      });
+    } catch (e) {
+      cause = e;
+    }
+
+    if (driftedRuleIds.length === 0) {
+      return;
+    }
+
+    const message = `Failed to remove executor task(s) for rule(s) [${driftedRuleIds.join(
+      ', '
+    )}]; their tasks may still exist but the executor defense halts them${
+      cause ? `: ${errorMessage(cause)}` : ''
+    }`;
+
+    this.logger.error({
+      error: new Error(message),
+      code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+    });
+
+    errors?.push(...driftedRuleIds.map((id) => toTaskManagerDriftError(id, message)));
+  }
+
+  /**
    * Executes a bulk delete against a known list of ids. Task-manager task
    * removal is best-effort; only saved-object errors surface as per-rule
-   * bulk errors.
+   * bulk errors. Task-removal failures do not fail the operation but are
+   * logged and surfaced per-rule as `TASK_MANAGER_DRIFT` errors.
    */
   private async executeBulkDelete(ids: string[]): Promise<BulkResponse> {
     const { spaceId } = this.getSpaceContext();
@@ -661,13 +734,6 @@ export class RulesClient {
 
     if (ids.length === 0) {
       return { affected_count: 0, errors: [] };
-    }
-
-    const taskIds = ids.map((id) => getRuleExecutorTaskId({ ruleId: id, spaceId }));
-    try {
-      await this.taskManager.bulkRemove(taskIds);
-    } catch {
-      // Task removal failures are non-fatal; continue with SO deletion.
     }
 
     const deleteResults = await this.rulesSavedObjectService.bulkDelete(ids);
@@ -680,6 +746,12 @@ export class RulesClient {
       affectedCount += 1;
       deletedRules.push({ id: result.id, spaceId });
     }
+
+    await this.removeExecutorTasks({
+      ruleIds: deletedRules.map((rule) => rule.id),
+      spaceId,
+      errors,
+    });
 
     this.ruleEventPublisher.emitRuleDeleted(this.request, deletedRules);
 
@@ -727,9 +799,6 @@ export class RulesClient {
     }
 
     if (itemsToUpdate.length > 0) {
-      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
-
-      const enabledRules: EventRule[] = [];
       const tasksToSchedule: Array<{
         id: string;
         taskType: string;
@@ -738,7 +807,50 @@ export class RulesClient {
         state: Record<string, unknown>;
         scope: string[];
         enabled: boolean;
-      }> = [];
+      }> = itemsToUpdate.map((item) => ({
+        id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
+        taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
+        schedule: { interval: item.attrs.schedule.every },
+        params: { ruleId: item.id, spaceId },
+        state: {},
+        scope: ['alerting'],
+        enabled: true,
+      }));
+
+      try {
+        await this.taskManager.bulkSchedule(tasksToSchedule, {
+          request: this.request as unknown as CoreKibanaRequest,
+          cloneApiKey: true,
+        });
+      } catch (e) {
+        const driftedRuleIds = itemsToUpdate.map((item) => item.id);
+        const message = `Failed to schedule executor task(s) for rule(s) [${driftedRuleIds.join(
+          ', '
+        )}]; they remain disabled: ${errorMessage(e)}`;
+
+        this.logger.error({
+          error: new Error(message),
+          code: ALERTING_V2_ERROR_CODES.TASK_MANAGER_DRIFT,
+        });
+
+        for (const id of driftedRuleIds) {
+          errors.push(toTaskManagerDriftError(id, message));
+        }
+
+        // bulkSchedule may have created some tasks before throwing on a later
+        // per-item failure; roll them back best-effort before returning.
+        await this.removeExecutorTasks({
+          ruleIds: driftedRuleIds,
+          spaceId,
+        });
+
+        return { affected_count: affectedCount, errors };
+      }
+
+      const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
+
+      const enabledRules: EventRule[] = [];
+      const failedUpdateRuleIds: string[] = [];
 
       for (let i = 0; i < updateResults.length; i++) {
         const updateResult = updateResults[i];
@@ -746,40 +858,18 @@ export class RulesClient {
 
         if (!updateResult.success) {
           errors.push(toBulkError(updateResult.id, updateResult.error));
+          failedUpdateRuleIds.push(item.id);
           continue;
         }
 
         affectedCount += 1;
         enabledRules.push({ id: item.id, spaceId });
-
-        tasksToSchedule.push({
-          id: getRuleExecutorTaskId({ ruleId: item.id, spaceId }),
-          taskType: ALERTING_RULE_EXECUTOR_TASK_TYPE,
-          schedule: { interval: item.attrs.schedule.every },
-          params: { ruleId: item.id, spaceId },
-          state: {},
-          scope: ['alerting'],
-          enabled: true,
-        });
       }
 
-      if (tasksToSchedule.length > 0) {
-        try {
-          await this.taskManager.bulkSchedule(tasksToSchedule, {
-            request: this.request as unknown as CoreKibanaRequest,
-            cloneApiKey: true,
-          });
-        } catch (e) {
-          // Task scheduling failure is non-fatal for the bulk response, but the rules were
-          // already persisted as enabled. Key provisioning (clone / UIAM grant) is per task
-          // type, so a single failure drops the whole batch: those rules stay enabled with no
-          // executor task. Log so the silent drop is observable.
-          const failure = e instanceof Error ? e.message : String(e);
-          this.logger.warn({
-            message: `Failed to schedule executor tasks for ${tasksToSchedule.length} enabled rule(s); they are enabled but will not run: ${failure}`,
-          });
-        }
-      }
+      await this.removeExecutorTasks({
+        ruleIds: failedUpdateRuleIds,
+        spaceId,
+      });
 
       this.ruleEventPublisher.emitRuleEnabled(this.request, enabledRules);
     }
@@ -828,7 +918,6 @@ export class RulesClient {
     }
 
     const disabledRules: EventRule[] = [];
-    const disabledTaskIds: string[] = [];
 
     if (itemsToUpdate.length > 0) {
       const updateResults = await this.rulesSavedObjectService.bulkUpdate(itemsToUpdate);
@@ -844,29 +933,14 @@ export class RulesClient {
 
         affectedCount += 1;
         disabledRules.push({ id: item.id, spaceId });
-        disabledTaskIds.push(getRuleExecutorTaskId({ ruleId: item.id, spaceId }));
       }
     }
 
-    if (disabledTaskIds.length > 0) {
-      try {
-        // Remove the executor tasks rather than flagging them `enabled: false`.
-        // The v2 model is "task exists ⟺ rule enabled": both enable paths create
-        // the task (single `ensureScheduled`, bulk `bulkSchedule`) instead of
-        // re-activating it, so leaving a disabled task doc behind would (a) diverge
-        // from single disable (`removeIfExists`) and (b) make re-enable conflict on
-        // the existing task id, stranding the rule in disabled.
-        await this.taskManager.bulkRemove(disabledTaskIds);
-      } catch (e) {
-        // Task removal failure is non-fatal for the bulk response, but the rules
-        // were already persisted as disabled while their executor tasks keep
-        // running. Log so the divergence is observable rather than silent.
-        const failure = e instanceof Error ? e.message : String(e);
-        this.logger.warn({
-          message: `Failed to remove executor tasks for ${disabledTaskIds.length} rule(s); they are disabled but will keep running: ${failure}`,
-        });
-      }
-    }
+    await this.removeExecutorTasks({
+      ruleIds: disabledRules.map((rule) => rule.id),
+      spaceId,
+      errors,
+    });
 
     this.ruleEventPublisher.emitRuleDisabled(this.request, disabledRules);
 
