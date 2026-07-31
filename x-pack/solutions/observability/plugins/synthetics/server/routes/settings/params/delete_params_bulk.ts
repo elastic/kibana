@@ -11,6 +11,7 @@ import { getExistingParamsInfo } from './delete_param';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { PARAMS_WRITE_API } from '../../../feature';
 import type { DeleteParamsResponse } from '../../../../common/runtime_types';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
@@ -30,6 +31,7 @@ export const deleteSyntheticsParamsBulkRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
+  requiredPrivileges: [PARAMS_WRITE_API],
   handler: async ({ savedObjectsClient, request, server, spaceId }) => {
     const { ids } = request.body;
 

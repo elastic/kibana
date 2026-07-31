@@ -86,7 +86,7 @@ export const AddParamFlyout = ({
 
   const { application } = useKibana<ClientPluginsStart>().services;
 
-  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const canManageParams = (application?.capabilities.uptime.canManageParams ?? false) as boolean;
   const isHeaderAction = useHasSettingsHeaderAction();
   const openFlyout = useCallback(() => setIsFlyoutVisible(true), []);
   const createParamAction = useMemo(
@@ -95,11 +95,11 @@ export const AddParamFlyout = ({
       label: CREATE_PARAM,
       iconType: 'plusCircle',
       testId: 'syntheticsAddParamFlyoutButton',
-      disableButton: !canSave,
-      tooltipContent: !canSave ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined,
+      disableButton: !canManageParams,
+      tooltipContent: !canManageParams ? CANNOT_PERFORM_ACTION_SYNTHETICS : undefined,
       run: openFlyout,
     }),
-    [canSave, openFlyout]
+    [canManageParams, openFlyout]
   );
   useRegisterSettingsHeaderAction(createParamAction);
 
@@ -232,14 +232,14 @@ export const AddParamFlyout = ({
   return (
     <div>
       {!isHeaderAction ? (
-        <NoPermissionsTooltip canEditSynthetics={canSave}>
+        <NoPermissionsTooltip canEditSynthetics={canManageParams}>
           <EuiButton
             data-test-subj="syntheticsAddParamFlyoutButton"
             fill
             iconType="plusCircle"
             iconSide="left"
             onClick={openFlyout}
-            isDisabled={!canSave}
+            isDisabled={!canManageParams}
           >
             {CREATE_PARAM}
           </EuiButton>
