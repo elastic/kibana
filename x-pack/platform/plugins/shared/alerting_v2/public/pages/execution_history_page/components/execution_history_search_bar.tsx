@@ -49,22 +49,25 @@ interface ExecutionHistorySearchBarProps {
   onSearchChange: (search: string) => void;
   outcome: PolicyOutcomeFilter;
   onOutcomeChange: (outcome: PolicyOutcomeFilter) => void;
-  ruleFilters: RuleOption[];
-  onRuleFiltersChange: (rules: RuleOption[]) => void;
+  ruleFilters?: RuleOption[];
+  onRuleFiltersChange?: (rules: RuleOption[]) => void;
+  showRuleFilter?: boolean;
 }
 
 export const ExecutionHistorySearchBar = ({
   onSearchChange,
   outcome,
   onOutcomeChange,
-  ruleFilters,
+  ruleFilters = [],
   onRuleFiltersChange,
+  showRuleFilter = true,
 }: ExecutionHistorySearchBarProps) => {
   const [searchInput, setSearchInput] = useState('');
   const [ruleSearchInput, setRuleSearchInput] = useState('');
   const [debouncedRuleSearch, setDebouncedRuleSearch] = useState('');
 
   const canReadRules = useService(UserCapabilities).canRead('rules');
+  const showRuleComboBox = showRuleFilter && canReadRules;
 
   useDebounce(
     () => {
@@ -86,7 +89,7 @@ export const ExecutionHistorySearchBar = ({
     page: 1,
     perPage: RULE_FILTER_MAX_RESULTS,
     search: debouncedRuleSearch.trim() || undefined,
-    enabled: canReadRules,
+    enabled: showRuleComboBox,
   });
 
   const ruleOptions = (rulesData?.items ?? []).map((r) => ({
@@ -116,7 +119,7 @@ export const ExecutionHistorySearchBar = ({
           )}
         />
       </EuiFlexItem>
-      {canReadRules && (
+      {showRuleComboBox && (
         <EuiFlexItem grow={false} style={{ minWidth: 260 }}>
           <EuiComboBox<RuleOption>
             compressed
@@ -135,7 +138,7 @@ export const ExecutionHistorySearchBar = ({
               const values = picked
                 .map((opt) => opt.value)
                 .filter((v): v is RuleOption => v !== undefined);
-              onRuleFiltersChange(values);
+              onRuleFiltersChange?.(values);
             }}
             aria-label={i18n.translate(
               'xpack.alertingV2.executionHistory.searchBar.ruleAriaLabel',
