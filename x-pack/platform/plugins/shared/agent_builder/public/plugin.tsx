@@ -69,6 +69,7 @@ import {
   clearSidebarRuntimeContext,
 } from './sidebar';
 import { openConversationMetadataFlyout } from './flyout/open_conversation_metadata_flyout';
+import { ConversationBriefCard } from './external_components/conversation_brief_card';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -369,6 +370,7 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
+      ConversationBriefCard,
     };
 
     if (hasAgentBuilder) {

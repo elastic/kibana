@@ -39,6 +39,7 @@ export type {
   OpenConversationMetadataOptions,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
+  ConversationBriefCardProps,
 } from './plugin_contract';
 export { McpClientDetails, McpClientDetailsContent, McpClientLogo } from './oauth_clients';
 export type {

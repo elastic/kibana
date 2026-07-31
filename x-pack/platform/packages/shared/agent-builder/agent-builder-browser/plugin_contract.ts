@@ -122,6 +122,20 @@ export interface PublicEmbeddableConversationProps extends EmbeddableConversatio
   ariaLabelledBy?: string;
 }
 
+/**
+ * Props for the `ConversationBriefCard` component.
+ */
+export interface ConversationBriefCardProps {
+  /** Conversation ID. */
+  conversationId: string;
+  /** Template id (or other type key) the conversation is associated with. */
+  type: string;
+  /** Conversation metadata. Rendered as JSON for now. */
+  metadata?: Record<string, string>;
+  /** Called when the card is clicked. The consumer decides what happens. */
+  onClick?: () => void;
+}
+
 export interface EmbeddableConversationInputRef {
   /**
    * Add an attachment pill to the input. The pill appears immediately and the
@@ -305,4 +319,9 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  /**
+   * Small, reusable card summarizing a conversation. Naive first pass — currently only
+   * takes the conversation's `type` (e.g. its template id).
+   */
+  ConversationBriefCard: ComponentType<ConversationBriefCardProps>;
 }

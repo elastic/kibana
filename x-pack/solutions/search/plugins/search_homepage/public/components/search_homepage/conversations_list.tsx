@@ -6,10 +6,8 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { useConversations } from '../../hooks/api/use_conversations';
 import { useKibana } from '../../hooks/use_kibana';
 
@@ -34,44 +32,24 @@ export const ConversationsList = () => {
     display: flex;
     flex-direction: column;
     gap: ${euiTheme.size.s};
-    width: 600px;
+    width: 800px;
   `;
 
   return (
     <div css={outerStyles}>
       <div css={listStyles}>
-        {templatedConversations.map((conversation) => (
-          <EuiPanel
-            key={conversation.id}
-            hasBorder
-            onClick={() =>
-              agentBuilder?.openConversationMetadata({ conversationId: conversation.id })
-            }
-            data-test-subj="searchHomepageConversationItem"
-          >
-            <EuiText size="m">
-              {i18n.translate(
-                'xpack.searchHomepage.conversationsList.p.theInfamousBriefCardLabel',
-                { defaultMessage: 'The infamous brief card' }
-              )}
-            </EuiText>
-            <EuiText size="s">
-              {i18n.translate('xpack.searchHomepage.conversationsList.conversationIDTextLabel', {
-                defaultMessage: 'Conversation ID:',
-              })}
-              {conversation.id}
-            </EuiText>
-            <EuiText size="s" color="subdued">
-              <p>
-                <FormattedMessage
-                  id="xpack.searchHomepage.conversationsList.p.typeLabel"
-                  defaultMessage="type:"
-                />
-                {conversation.template_id}
-              </p>
-            </EuiText>
-          </EuiPanel>
-        ))}
+        {agentBuilder &&
+          templatedConversations.map((conversation) => (
+            <agentBuilder.ConversationBriefCard
+              key={conversation.id}
+              conversationId={conversation.id}
+              type={conversation.template_id ?? ''}
+              metadata={conversation.metadata as Record<string, string> | undefined}
+              onClick={() =>
+                agentBuilder.openConversationMetadata({ conversationId: conversation.id })
+              }
+            />
+          ))}
       </div>
     </div>
   );

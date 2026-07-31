@@ -99,6 +99,7 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     }),
     EmbeddableConversation: () => null,
     EmbeddableConversationInput: () => null,
+    ConversationBriefCard: () => null,
   };
 };
 
