@@ -61,6 +61,7 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/core-analytics-server'
   - '@kbn/server-route-repository'
+  - '@kbn/server-route-repository-client'
   - '@kbn/server-route-repository-utils'
   - '@kbn/workflows-extensions'
   - '@kbn/zod-helpers'
