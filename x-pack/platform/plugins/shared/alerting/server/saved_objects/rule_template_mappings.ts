@@ -12,6 +12,7 @@ export const ruleTemplateMappings: SavedObjectsTypeMappingDefinition = {
   properties: {
     engine: {
       type: 'keyword',
+      ignore_above: 1024,
     },
     name: {
       type: 'text',

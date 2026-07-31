@@ -60,6 +60,7 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
         addedMappings: {
           engine: {
             type: 'keyword',
+            ignore_above: 1024,
           },
         },
       },
