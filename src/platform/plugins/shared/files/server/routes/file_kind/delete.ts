@@ -12,6 +12,7 @@ import type { FileKind } from '../../../common/types';
 import { FilesClient } from '../../../common/files_client';
 import { fileErrors } from '../../file';
 import { CreateRouteDefinition, FILES_API_ROUTES } from '../api_routes';
+import { fileId } from '../common_schemas';
 import type { CreateHandler, FileKindRouter } from './types';
 
 import { getById } from './helpers';
@@ -20,7 +21,7 @@ export const method = 'delete' as const;
 
 const rt = {
   params: schema.object({
-    id: schema.string(),
+    id: fileId,
   }),
 };
 
