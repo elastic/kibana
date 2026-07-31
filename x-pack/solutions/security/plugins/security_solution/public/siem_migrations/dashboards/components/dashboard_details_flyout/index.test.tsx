@@ -25,6 +25,14 @@ const getMockUser = () => ({
   data: {},
 });
 
+const getNavigation = (overrides = {}) => ({
+  hasPrevious: true,
+  hasNext: true,
+  goToPrevious: jest.fn(),
+  goToNext: jest.fn(),
+  ...overrides,
+});
+
 describe('DashboardMigrationDetailsFlyout', () => {
   const closeFlyout = jest.fn();
 
@@ -42,6 +50,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
         <DashboardMigrationDetailsFlyout
           migrationDashboard={getDashboardMigrationDashboardMock()}
           closeFlyout={closeFlyout}
+          navigation={getNavigation()}
         />
       </TestProviders>
     );
@@ -57,6 +66,7 @@ describe('DashboardMigrationDetailsFlyout', () => {
         <DashboardMigrationDetailsFlyout
           migrationDashboard={getDashboardMigrationDashboardMock()}
           closeFlyout={closeFlyout}
+          navigation={getNavigation()}
         />
       </TestProviders>
     );
@@ -72,10 +82,71 @@ describe('DashboardMigrationDetailsFlyout', () => {
         <DashboardMigrationDetailsFlyout
           migrationDashboard={migrationDashboards[0]}
           closeFlyout={closeFlyout}
+          navigation={getNavigation()}
         />
       </TestProviders>
     );
     fireEvent.click(getByTestId('detailsFlyoutCloseButton'));
     expect(closeFlyout).toHaveBeenCalled();
+  });
+
+  describe('dashboard navigation', () => {
+    it('moves the user to the previous dashboard on click', () => {
+      const navigation = getNavigation();
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      fireEvent.click(getByTestId('migrationDashboardFlyoutPreviousButton'));
+      expect(navigation.goToPrevious).toHaveBeenCalled();
+    });
+
+    it('moves the user to the next dashboard on click', () => {
+      const navigation = getNavigation();
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      fireEvent.click(getByTestId('migrationDashboardFlyoutNextButton'));
+      expect(navigation.goToNext).toHaveBeenCalled();
+    });
+
+    it('prevents moving backward from the first dashboard of the page', () => {
+      const navigation = getNavigation({ hasPrevious: false });
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      expect(getByTestId('migrationDashboardFlyoutPreviousButton')).toBeDisabled();
+    });
+
+    it('prevents moving forward from the last dashboard of the page', () => {
+      const navigation = getNavigation({ hasNext: false });
+      const { getByTestId } = render(
+        <TestProviders>
+          <DashboardMigrationDetailsFlyout
+            migrationDashboard={getDashboardMigrationDashboardMock()}
+            closeFlyout={closeFlyout}
+            navigation={navigation}
+          />
+        </TestProviders>
+      );
+      expect(getByTestId('migrationDashboardFlyoutNextButton')).toBeDisabled();
+    });
   });
 });

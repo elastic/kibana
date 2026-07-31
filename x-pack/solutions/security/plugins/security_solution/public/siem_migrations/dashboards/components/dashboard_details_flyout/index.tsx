@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -28,16 +27,15 @@ import type { DashboardMigrationDashboard } from '../../../../../common/siem_mig
 import {
   CLOSE_BUTTON_LABEL,
   SUMMARY_TAB_LABEL,
-  PREVIOUS_BUTTON_LABEL,
-  NEXT_BUTTON_LABEL,
 } from '../../../common/components/details_flyout/translation';
-import type { MigrationFlyoutNavigation } from '../../../common/components/details_flyout';
+import type { MigrationFlyoutNavigation } from '../../../common/components/flyout_nav';
 import {
   ScrollableFlyoutTabbedContent,
   TabContentPadding,
 } from '../../../common/components/details_flyout/utils';
 import { SummaryTab } from './tabs/summary';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
+import { MigrationFlyoutNav } from '../../../common/components/flyout_nav';
 
 export interface DashboardMigrationDashboardDetailsFlyoutProps {
   migrationDashboard: DashboardMigrationDashboard;
@@ -45,7 +43,7 @@ export interface DashboardMigrationDashboardDetailsFlyoutProps {
   size?: EuiFlyoutProps['size'];
   isLoading?: boolean;
   dashboardActions?: React.ReactNode;
-  navigation?: MigrationFlyoutNavigation;
+  navigation: MigrationFlyoutNavigation;
 }
 
 export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigrationDetailsFlyout({
@@ -107,43 +105,25 @@ export const DashboardMigrationDetailsFlyout = React.memo(function DashboardMigr
       data-test-subj="dashboardDetailsFlyout"
     >
       <EuiFlyoutHeader>
-        {navigation && (
-          <>
-            <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowLeft"
-                  color="text"
-                  display="base"
-                  size="s"
-                  isDisabled={!navigation.hasPrevious || isLoading}
-                  onClick={navigation.goToPrevious}
-                  data-test-subj="migrationDashboardFlyoutPreviousButton"
-                  aria-label={PREVIOUS_BUTTON_LABEL}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="arrowRight"
-                  color="text"
-                  display="base"
-                  size="s"
-                  isDisabled={!navigation.hasNext || isLoading}
-                  onClick={navigation.goToNext}
-                  data-test-subj="migrationDashboardFlyoutNextButton"
-                  aria-label={NEXT_BUTTON_LABEL}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiSpacer size="s" />
-          </>
-        )}
-        <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
-          <h2 id={migrationsDashboardsFlyoutTitleId}>
-            {migrationDashboard.elastic_dashboard?.title ||
-              migrationDashboard.original_dashboard.title}
-          </h2>
-        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
+          <EuiFlexItem grow={false}>
+            <MigrationFlyoutNav
+              navigation={navigation}
+              isDisabled={isLoading}
+              previousButtonTestSubj="migrationDashboardFlyoutPreviousButton"
+              nextButtonTestSubj="migrationDashboardFlyoutNextButton"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
+              <h2 id={migrationsDashboardsFlyoutTitleId}>
+                {migrationDashboard.elastic_dashboard?.title ||
+                  migrationDashboard.original_dashboard.title}
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="s" />
         <UpdatedByLabel
           updatedBy={migrationDashboard.updated_by ?? migrationDashboard.created_by}

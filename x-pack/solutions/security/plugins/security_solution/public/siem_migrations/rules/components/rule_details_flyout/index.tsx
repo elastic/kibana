@@ -8,7 +8,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiTitle,
   EuiFlyout,
   EuiFlyoutHeader,
@@ -53,13 +52,12 @@ import {
 import {
   CLOSE_BUTTON_LABEL,
   SUMMARY_TAB_LABEL,
-  PREVIOUS_BUTTON_LABEL,
-  NEXT_BUTTON_LABEL,
 } from '../../../common/components/details_flyout/translation';
 import { UpdatedByLabel } from '../../../common/components/updated_by_label';
+import { MigrationFlyoutNav } from '../../../common/components/flyout_nav';
 
-import type { MigrationFlyoutNavigation } from '../../../common/components/details_flyout';
-export type { MigrationFlyoutNavigation } from '../../../common/components/details_flyout';
+import type { MigrationFlyoutNavigation } from '../../../common/components/flyout_nav';
+export type { MigrationFlyoutNavigation } from '../../../common/components/flyout_nav';
 
 interface MigrationRuleDetailsFlyoutContentProps {
   migrationRule: RuleMigrationRule;
@@ -260,40 +258,26 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         ownFocus
       >
         <EuiFlyoutHeader>
-          <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" direction="row">
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="arrowLeft"
-                color="text"
-                display="base"
-                size="s"
-                isDisabled={!navigation.hasPrevious || isLoading}
-                onClick={navigation.goToPrevious}
-                data-test-subj="migrationRuleFlyoutPreviousRuleButton"
-                aria-label={PREVIOUS_BUTTON_LABEL}
+              <MigrationFlyoutNav
+                navigation={navigation}
+                isDisabled={!!isLoading}
+                previousButtonTestSubj="migrationRuleFlyoutPreviousRuleButton"
+                nextButtonTestSubj="migrationRuleFlyoutNextRuleButton"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="arrowRight"
-                color="text"
-                display="base"
-                size="s"
-                isDisabled={!navigation.hasNext || isLoading}
-                onClick={navigation.goToNext}
-                data-test-subj="migrationRuleFlyoutNextRuleButton"
-                aria-label={NEXT_BUTTON_LABEL}
-              />
+              <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
+                <h2 id={migrationsRulesFlyoutTitleId}>
+                  {ruleDetailsToOverview?.name ??
+                    migrationRule.original_rule.title ??
+                    i18n.UNKNOWN_MIGRATION_RULE_TITLE}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiTitle size="m" data-test-subj="detailsFlyoutTitle">
-            <h2 id={migrationsRulesFlyoutTitleId}>
-              {ruleDetailsToOverview?.name ??
-                migrationRule.original_rule.title ??
-                i18n.UNKNOWN_MIGRATION_RULE_TITLE}
-            </h2>
-          </EuiTitle>
           <EuiSpacer size="s" />
           <UpdatedByLabel
             updatedBy={migrationRule.updated_by ?? migrationRule.created_by}

@@ -7,7 +7,8 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
-import type { MigrationFlyoutNavigation } from '../../common/components/details_flyout';
+import type { MigrationFlyoutNavigation } from '../../common/components/flyout_nav';
+import { useMigrationFlyoutNav } from '../../common/components/flyout_nav';
 import { DashboardMigrationDetailsFlyout } from '../components/dashboard_details_flyout';
 
 interface UseMigrationDashboardDetailsFlyoutParams {
@@ -46,12 +47,9 @@ export function useMigrationDashboardDetailsFlyout({
     }
   }, [getMigrationDashboardData, migrationDashboardId]);
 
-  const openMigrationDashboardDetails = useCallback(
-    (dashboard: DashboardMigrationDashboard) => {
-      setMigrationDashboardId(dashboard.id);
-    },
-    []
-  );
+  const openMigrationDashboardDetails = useCallback((dashboard: DashboardMigrationDashboard) => {
+    setMigrationDashboardId(dashboard.id);
+  }, []);
   const closeMigrationDashboardDetails = useCallback(() => setMigrationDashboardId(undefined), []);
 
   const openedDashboardIndex = useMemo(
@@ -62,30 +60,24 @@ export function useMigrationDashboardDetailsFlyout({
     [migrationDashboards, migrationDashboardId]
   );
 
-  const goToPrevious = useCallback(() => {
-    const prev = migrationDashboards[openedDashboardIndex - 1];
-    if (openedDashboardIndex > 0 && prev) {
-      setMigrationDashboardId(prev.id);
-    }
-  }, [migrationDashboards, openedDashboardIndex]);
-
-  const goToNext = useCallback(() => {
-    const next = migrationDashboards[openedDashboardIndex + 1];
-    if (openedDashboardIndex !== -1 && next) {
-      setMigrationDashboardId(next.id);
-    }
-  }, [migrationDashboards, openedDashboardIndex]);
-
-  const navigation = useMemo<MigrationFlyoutNavigation>(
-    () => ({
-      hasPrevious: openedDashboardIndex > 0,
-      hasNext:
-        openedDashboardIndex !== -1 && openedDashboardIndex < migrationDashboards.length - 1,
-      goToPrevious,
-      goToNext,
-    }),
-    [openedDashboardIndex, migrationDashboards.length, goToPrevious, goToNext]
+  const goToDashboardAtIndex = useCallback(
+    (index: number) => {
+      const dashboard = migrationDashboards[index];
+      if (dashboard) {
+        setMigrationDashboardId(dashboard.id);
+      }
+    },
+    [migrationDashboards]
   );
+
+  const navigation = useMigrationFlyoutNav({
+    // openedDashboardIndex is -1 when the opened dashboard is not in the loaded page.
+    // Normalizing totalItems to 0 in that case keeps both arrows disabled.
+    currentIdx: openedDashboardIndex === -1 ? 0 : openedDashboardIndex,
+    totalItems: openedDashboardIndex === -1 ? 0 : migrationDashboards.length,
+    onNextCallback: goToDashboardAtIndex,
+    onPrevCallback: goToDashboardAtIndex,
+  });
 
   const dashboardActions = useMemo(
     () =>

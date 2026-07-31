@@ -7,10 +7,3 @@
 
 export * from './tabs/summary';
 export * from './utils';
-
-export interface MigrationFlyoutNavigation {
-  hasPrevious: boolean;
-  hasNext: boolean;
-  goToPrevious: () => void;
-  goToNext: () => void;
-}

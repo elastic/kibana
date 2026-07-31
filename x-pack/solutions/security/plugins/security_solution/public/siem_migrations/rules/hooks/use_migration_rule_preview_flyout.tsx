@@ -10,10 +10,9 @@ import React, { useCallback, useState, useMemo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import type { RuleResponse } from '../../../../common/api/detection_engine';
 import type { RuleMigrationRule } from '../../../../common/siem_migrations/model/rule_migration.gen';
-import {
-  MigrationRuleDetailsFlyout,
-} from '../components/rule_details_flyout';
-import type { MigrationFlyoutNavigation } from '../../common/components/details_flyout';
+import { MigrationRuleDetailsFlyout } from '../components/rule_details_flyout';
+import type { MigrationFlyoutNavigation } from '../../common/components/flyout_nav';
+import { useMigrationFlyoutNav } from '../../common/components/flyout_nav';
 
 interface UseMigrationRuleDetailsFlyoutParams {
   isLoading?: boolean;
@@ -71,30 +70,24 @@ export function useMigrationRuleDetailsFlyout({
     [migrationRules, migrationRuleId]
   );
 
-  const goToPrevious = useCallback(() => {
-    const previousRule = migrationRules[openedRuleIndex - 1];
-    if (openedRuleIndex > 0 && previousRule) {
-      setMigrationRuleId(previousRule.id);
-    }
-  }, [migrationRules, openedRuleIndex]);
+  const goToRuleAtIndex = useCallback(
+    (index: number) => {
+      const rule = migrationRules[index];
+      if (rule) {
+        setMigrationRuleId(rule.id);
+      }
+    },
+    [migrationRules]
+  );
 
-  const goToNext = useCallback(() => {
-    const nextRule = migrationRules[openedRuleIndex + 1];
-    if (openedRuleIndex !== -1 && nextRule) {
-      setMigrationRuleId(nextRule.id);
-    }
-  }, [migrationRules, openedRuleIndex]);
-
-  const navigation = useMemo<MigrationFlyoutNavigation>(() => {
-    // openedRuleIndex is -1 when the opened rule is not in the loaded page:
-    // both flags false, so the arrows render disabled. Flags are computed ONLY here.
-    return {
-      hasPrevious: openedRuleIndex > 0,
-      hasNext: openedRuleIndex !== -1 && openedRuleIndex < migrationRules.length - 1,
-      goToPrevious,
-      goToNext,
-    };
-  }, [openedRuleIndex, migrationRules.length, goToPrevious, goToNext]);
+  const navigation = useMigrationFlyoutNav({
+    // openedRuleIndex is -1 when the opened rule is not in the loaded page. Normalizing
+    // totalItems to 0 in that case keeps both arrows disabled (hasPrevious/hasNext false).
+    currentIdx: openedRuleIndex === -1 ? 0 : openedRuleIndex,
+    totalItems: openedRuleIndex === -1 ? 0 : migrationRules.length,
+    onNextCallback: goToRuleAtIndex,
+    onPrevCallback: goToRuleAtIndex,
+  });
 
   const ruleActions = useMemo(
     () =>
