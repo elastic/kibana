@@ -138,9 +138,7 @@ describe('Transform partial URL state into form state', () => {
     });
 
     it("handles 'preventCrossProjectSearch: true' URL state", () => {
-      expect(
-        transform({ settings: { preventCrossProjectSearch: true } })
-      ).toMatchSnapshot();
+      expect(transform({ settings: { preventCrossProjectSearch: true } })).toMatchSnapshot();
     });
   });
 });
