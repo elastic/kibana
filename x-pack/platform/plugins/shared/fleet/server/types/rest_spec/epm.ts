@@ -530,19 +530,19 @@ export const NamespaceConflictWarningSchema = schema.object({
   dataStreamName: schema.string(),
   namespace: schema.string(),
   baseTemplateName: schema.string(),
-  conflictingTemplates: schema.arrayOf(ConflictingTemplateSchema),
+  conflictingTemplates: schema.arrayOf(ConflictingTemplateSchema, { maxSize: 100 }),
 });
 
 export const UpdatePackageResponseSchema = schema.object(
   {
     item: GetPackageInfoSchema,
-    warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema)),
+    warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 })),
   },
   { meta: { id: 'update_package_response' } }
 );
 
 export const NamespacePreflightCheckResponseSchema = schema.object(
-  { warnings: schema.arrayOf(NamespaceConflictWarningSchema) },
+  { warnings: schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 }) },
   { meta: { id: 'namespace_preflight_check_response' } }
 );
 
@@ -962,7 +962,7 @@ export const BulkNamespaceCustomizationResponseSchema = schema.object(
             },
           })
         ),
-        warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema)),
+        warnings: schema.maybe(schema.arrayOf(NamespaceConflictWarningSchema, { maxSize: 100 })),
         error: schema.maybe(schema.string()),
       }),
       { maxSize: 1000 }
