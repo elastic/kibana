@@ -16689,7 +16689,12 @@ acorn@^8.0.4, acorn@^8.1.0, acorn@^8.10.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
-adm-zip@0.5.18, adm-zip@^0.5.17:
+"@types/adm-zip-0.6@npm:adm-zip@0.6.0", adm-zip@0.6.0, adm-zip@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
+  integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
+
+adm-zip@^0.5.17:
   version "0.5.18"
   resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.18.tgz#283a05f2bf1e3fd315f0f31cde29b7a6e3c1619d"
   integrity sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==
@@ -18506,10 +18511,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@149.0.3:
-  version "149.0.3"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-149.0.3.tgz#7a41f135f1c88f484f992000621290e632302387"
-  integrity sha512-NtyIWevEzga9rwKawaiJi7DE4iSS1DGeUHKHYsliJ+hiq9Ya2ItxSWAvu4GfZx+/zhkMz1Pcb0pc8YOCHNR2cA==
+chromedriver@149.0.4:
+  version "149.0.4"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-149.0.4.tgz#45b14bb54b84269d87e36791e84de8ad8dd8cc2b"
+  integrity sha512-njPxWyJBNbFdsOhCWXWpdbrJEibb3DVnVB02ZI+3ZSVHDmPdw8xKdjZGoOQ5LfGj8ljNwlDwKp/DEvG7orHlfg==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     adm-zip "^0.5.17"
