@@ -33,11 +33,13 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 export const useEditTimelineBatchActions = ({
   deleteTimelines,
   selectedItems,
+  showExportAction = true,
   tableRef,
   timelineType = TimelineTypeEnum.default,
 }: {
   deleteTimelines?: DeleteTimelines;
   selectedItems?: OpenTimelineResult[];
+  showExportAction?: boolean;
   tableRef: React.MutableRefObject<EuiBasicTable<OpenTimelineResult> | null>;
   timelineType: TimelineType | null;
 }) => {
@@ -136,7 +138,7 @@ export const useEditTimelineBatchActions = ({
     (closePopover: () => void) => {
       const disabled = selectedItems == null || selectedItems.length === 0;
       const items = [];
-      if (selectedItems) {
+      if (selectedItems && showExportAction) {
         items.push(
           <EuiContextMenuItem
             data-test-subj="export-timeline-action"
@@ -200,6 +202,7 @@ export const useEditTimelineBatchActions = ({
     },
     [
       selectedItems,
+      showExportAction,
       deleteTimelines,
       timelineIds,
       searchIds,
