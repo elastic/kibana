@@ -7,8 +7,7 @@
 
 import type { EsClient } from '@kbn/scout';
 
-// CCR runs on a single cluster by pointing a remote cluster at the test node's
-// own transport address, mirroring the original FTR's `localhost:9300` seed.
+// Single-cluster CCR: the remote points at the test node's own transport address.
 
 const resolveTransportSeed = async (esClient: EsClient): Promise<string> => {
   const info = await esClient.nodes.info({

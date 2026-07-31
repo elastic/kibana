@@ -7,10 +7,6 @@
 
 import { createPlaywrightConfig } from '@kbn/scout';
 
-// `workers: 1` is required, not just the default: these specs mutate
-// cluster-global `cluster.remote.*` persistent settings and assert on
-// empty-list state, so they must not run in parallel.
 export default createPlaywrightConfig({
   testDir: './tests',
-  workers: 1,
 });

@@ -1,11 +1,20 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
-  "exclude": ["tmp", "target/**/*"],
-  "include": ["**/*"],
+  "exclude": [
+    "tmp",
+    "target/**/*"
+  ],
+  "include": [
+    "**/*"
+  ],
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "isolatedModules": false
   },
-  "kbn_references": ["@kbn/scout",]
+  "kbn_references": [
+    "@kbn/scout",
+  ]
 }

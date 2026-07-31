@@ -6,27 +6,22 @@
  */
 
 import type { ApiClientFixture, EsClient, RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { FOLLOWER_INDEX_ADVANCED_SETTINGS } from '../../../../common/constants';
 import { apiTest, testData, registerSelfReferentialRemote, removeRemote } from '../fixtures';
 
-const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
+const { API_BASE_PATH, FOLLOWER_REMOTE_CLUSTER, COMMON_HEADERS, FOLLOWER_INDEX_ADVANCED_SETTINGS } =
+  testData;
 
-// All test indices share these prefixes so cleanup can sweep by wildcard,
-// covering leftovers from a run that crashed before its `afterEach`.
-const LEADER_INDEX_PREFIX = 'leader-';
-const FOLLOWER_INDEX_PREFIX = 'follower-';
+// Non-overlapping prefixes so cleanup only sweeps this suite's indices on the
+// shared cluster, and the follower sweep can't also match leaders.
+const LEADER_INDEX_PREFIX = 'ccr-scout-leader-';
+const FOLLOWER_INDEX_PREFIX = 'ccr-scout-follower-';
 
-// Runs stateful classic only: the self-referential `localhost` remote is not
-// reachable on Cloud, so CCR API tests can't run there (the FTR was `skipCloud`).
-
-// Best-effort teardown: a follower must be paused, closed, and unfollowed
-// (converting it back to a regular index) before it — and its leader — can be
-// deleted. Sweeps by wildcard so it also clears leftovers from a crashed run.
+// A follower must be paused, closed, and unfollowed (back to a regular index)
+// before it — and its leader — can be deleted.
 const cleanupFollowerResources = async (esClient: EsClient): Promise<void> => {
-  // Read (not delete) may use wildcards; ES blocks wildcard deletes via
-  // `action.destructive_requires_name`, so we resolve names and delete explicitly.
+  // ES blocks wildcard deletes (`action.destructive_requires_name`), so resolve
+  // names by wildcard read and delete them explicitly.
   const listByPrefix = async (prefix: string) =>
     Object.keys(
       await esClient.indices.get({
@@ -54,7 +49,8 @@ const cleanupFollowerResources = async (esClient: EsClient): Promise<void> => {
   }
 };
 
-apiTest.describe('CCR follower indices API', { tag: tags.stateful.classic }, () => {
+// Local only: the self-referential `localhost` remote isn't reachable on ECH.
+apiTest.describe('CCR follower indices API', { tag: ['@local-stateful-classic'] }, () => {
   let credentials: RoleApiCredentials;
 
   const authHeaders = () => ({ ...COMMON_HEADERS, ...credentials.apiKeyHeader });
@@ -82,8 +78,8 @@ apiTest.describe('CCR follower indices API', { tag: tags.stateful.classic }, () 
       responseType: 'json',
     });
 
-  // Poll until the follower reports `active`; ES can briefly return `paused`
-  // right after creation, during which advanced settings aren't reported.
+  // Poll until `active`: ES briefly reports `paused` right after creation, during
+  // which advanced settings aren't returned.
   const waitForFollowerActive = async (apiClient: ApiClientFixture, suffix: string) => {
     for (let attempt = 0; attempt < 20; attempt++) {
       const response = await getFollowerIndex(apiClient, suffix);
@@ -95,16 +91,17 @@ apiTest.describe('CCR follower indices API', { tag: tags.stateful.classic }, () 
     throw new Error(`Follower index '${suffix}' did not become active within the timeout`);
   };
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ esClient, requestAuth }) => {
     credentials = await requestAuth.getApiKey('admin');
-  });
-
-  apiTest.beforeEach(async ({ esClient }) => {
     await cleanupFollowerResources(esClient);
     await registerSelfReferentialRemote(esClient, FOLLOWER_REMOTE_CLUSTER);
   });
 
   apiTest.afterEach(async ({ esClient }) => {
+    await cleanupFollowerResources(esClient);
+  });
+
+  apiTest.afterAll(async ({ esClient }) => {
     await cleanupFollowerResources(esClient);
     await removeRemote(esClient, FOLLOWER_REMOTE_CLUSTER);
   });
@@ -150,8 +147,7 @@ apiTest.describe('CCR follower indices API', { tag: tags.stateful.classic }, () 
       });
 
       expect(createResponse).toHaveStatusCode(200);
-      // ES can respond without acknowledging shard follow; only assert the follow
-      // was created to avoid the `follow_index_shards_acked` race.
+      // Only assert `follow_index_created`; `follow_index_shards_acked` is racy.
       expect(createResponse.body.follow_index_created).toBe(true);
 
       const getResponse = await getFollowerIndex(apiClient, 'create-read');
@@ -199,8 +195,7 @@ apiTest.describe('CCR follower indices API', { tag: tags.stateful.classic }, () 
   apiTest(
     'hard-coded advanced-settings defaults match Elasticsearch',
     async ({ apiClient, esClient }) => {
-      // Create a follower without advanced settings so ES fills in its defaults,
-      // then confirm they match the values hard-coded in the plugin client.
+      // No advanced settings on create, so ES fills in its defaults.
       const leaderIndex = await createLeaderIndex(esClient, 'defaults');
 
       await createFollowerIndex(apiClient, 'defaults', {

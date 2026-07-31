@@ -6,40 +6,43 @@
  */
 
 import type { EsClient, RoleApiCredentials } from '@kbn/scout';
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, registerSelfReferentialRemote, removeRemote } from '../fixtures';
 
 const { API_BASE_PATH, AUTO_FOLLOW_REMOTE_CLUSTER, COMMON_HEADERS } = testData;
 
-// Intentionally does not overlap the follower spec's `leader-*` indices so this
-// pattern can't auto-create a competing follower for another suite's data.
+// Prefixed so cleanup only removes this suite's patterns from the shared cluster.
+const PATTERN_PREFIX = 'ccr-scout-api-pattern-';
+
+// Does not overlap the follower spec's leaders, so this pattern can't auto-create
+// a competing follower for another suite's data.
 const LEADER_INDEX_PATTERNS = ['ccr-scout-auto-leader-*'];
 
-// Runs stateful classic only: the self-referential `localhost` remote is not
-// reachable on Cloud, so CCR API tests can't run there (the FTR was `skipCloud`).
-const deleteAllAutoFollowPatterns = async (esClient: EsClient) => {
+const deleteScoutAutoFollowPatterns = async (esClient: EsClient) => {
   const { patterns } = await esClient.ccr.getAutoFollowPattern();
   for (const { name } of patterns) {
-    await esClient.ccr.deleteAutoFollowPattern({ name });
+    if (name.startsWith(PATTERN_PREFIX)) {
+      await esClient.ccr.deleteAutoFollowPattern({ name });
+    }
   }
 };
 
-apiTest.describe('CCR auto-follow patterns API', { tag: tags.stateful.classic }, () => {
+// Local only: the self-referential `localhost` remote isn't reachable on ECH.
+apiTest.describe('CCR auto-follow patterns API', { tag: ['@local-stateful-classic'] }, () => {
   let credentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ esClient, requestAuth }) => {
     credentials = await requestAuth.getApiKey('admin');
-    await deleteAllAutoFollowPatterns(esClient);
+    await deleteScoutAutoFollowPatterns(esClient);
     await registerSelfReferentialRemote(esClient, AUTO_FOLLOW_REMOTE_CLUSTER);
   });
 
   apiTest.afterEach(async ({ esClient }) => {
-    await deleteAllAutoFollowPatterns(esClient);
+    await deleteScoutAutoFollowPatterns(esClient);
   });
 
   apiTest.afterAll(async ({ esClient }) => {
-    await deleteAllAutoFollowPatterns(esClient);
+    await deleteScoutAutoFollowPatterns(esClient);
     await removeRemote(esClient, AUTO_FOLLOW_REMOTE_CLUSTER);
   });
 
@@ -58,7 +61,7 @@ apiTest.describe('CCR auto-follow patterns API', { tag: tags.stateful.classic },
       headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
       responseType: 'json',
       body: JSON.stringify({
-        id: 'pattern-unknown-cluster',
+        id: `${PATTERN_PREFIX}unknown-cluster`,
         remoteCluster: 'unknown-cluster',
         leaderIndexPatterns: LEADER_INDEX_PATTERNS,
         followIndexPattern: '{{leader_index}}_follower',
@@ -72,7 +75,7 @@ apiTest.describe('CCR auto-follow patterns API', { tag: tags.stateful.classic },
   apiTest(
     'creates and reads an auto-follow pattern for a known remote cluster',
     async ({ apiClient }) => {
-      const id = 'pattern-known-cluster';
+      const id = `${PATTERN_PREFIX}known-cluster`;
 
       const createResponse = await apiClient.post(`${API_BASE_PATH}/auto_follow_patterns`, {
         headers: { ...COMMON_HEADERS, ...credentials.apiKeyHeader },
