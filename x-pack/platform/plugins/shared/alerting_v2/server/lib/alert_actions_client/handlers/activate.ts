@@ -14,6 +14,7 @@ import {
   buildRuleEventDocument,
 } from '../../../resources/datastreams/alert_events';
 import { ALERTING_V2_ERROR_CODES } from '../../errors/error_codes';
+import { getCannotActivateEpisodeMessage } from '../../errors/alert_error_messages';
 import type { ActionHandler } from '../handler';
 import type { AlertEventRecord } from '../types';
 
@@ -39,18 +40,15 @@ const assertEpisodeIsActivatable = (alertEvent: AlertEventRecord): void => {
     return;
   }
 
-  throw Boom.badRequest(
-    `Cannot activate episode [${alertEvent.episode_id}]. It is already active`,
-    {
-      code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
-      details: {
-        group_hash: alertEvent.group_hash,
-        episode_id: alertEvent.episode_id,
-        episode_status: status,
-        action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
-      },
-    }
-  );
+  throw Boom.badRequest(getCannotActivateEpisodeMessage(alertEvent.episode_id), {
+    code: ALERTING_V2_ERROR_CODES.INVALID_EPISODE_STATE_TRANSITION,
+    details: {
+      group_hash: alertEvent.group_hash,
+      episode_id: alertEvent.episode_id,
+      episode_status: status,
+      action_type: ALERT_EPISODE_ACTION_TYPE.ACTIVATE,
+    },
+  });
 };
 
 /**
