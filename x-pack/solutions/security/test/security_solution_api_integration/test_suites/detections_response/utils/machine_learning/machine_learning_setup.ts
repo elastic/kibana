@@ -72,6 +72,36 @@ export const setupMlModulesWithRetry = async ({
     return response;
   });
 
+export const waitForMlJobToBeInstalled = async ({
+  jobId,
+  retry,
+  supertest,
+}: {
+  jobId: string;
+  retry: RetryService;
+  supertest: SuperTest.Agent;
+}) =>
+  retry.try(async () => {
+    const { body } = await supertest
+      .post(`/internal/ml/jobs/jobs_summary`)
+      .set(getCommonRequestHeader('1'))
+      .send({ jobIds: [jobId] });
+
+    const installedJob = (body as Array<{ id: string; groups: string[] }>).find(
+      (job) => job.id === jobId && job.groups.includes(ML_GROUP_ID)
+    );
+
+    if (!installedJob) {
+      throw new Error(
+        `Expected ML job "${jobId}" to be queryable in the "${ML_GROUP_ID}" group, but got ${JSON.stringify(
+          body
+        )}`
+      );
+    }
+
+    return installedJob;
+  });
+
 export const forceStartDatafeeds = async ({
   jobId,
   rspCode,
