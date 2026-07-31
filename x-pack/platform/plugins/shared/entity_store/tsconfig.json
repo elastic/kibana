@@ -50,5 +50,6 @@
     "@kbn/workflows",
     "@kbn/es",
     "@kbn/test-es-server",
+    "@kbn/scout",
   ]
 }
