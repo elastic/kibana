@@ -429,6 +429,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects more than 100 items with 400', async ({ apiClient }) => {
@@ -444,6 +445,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects an item missing group_hash with 400', async ({ apiClient }) => {
@@ -453,6 +455,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('schema: rejects an item with unknown action_type with 400', async ({ apiClient }) => {
@@ -462,6 +465,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -475,6 +479,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -485,6 +490,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -496,6 +502,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
@@ -506,6 +513,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
@@ -524,6 +532,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     }
   );
 
