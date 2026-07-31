@@ -162,7 +162,9 @@ export const nextActionMap = (context: MigratorContext) => {
         index: state.currentIndex,
         operations: state.bulkOperationBatches[state.currentBatch],
         refresh: false,
-        fetchAllocationExplain: state.retryCount === 0,
+        // `_cluster/allocation/explain` isn't available on Serverless, which is the only
+        // place the zdt algorithm runs, so we don't attempt to fetch it here.
+        fetchAllocationExplain: false,
       }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
       Actions.closePit({
