@@ -36,7 +36,8 @@ const createEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEven
 
 const createEventClient = () => {
   const emitTrigger = jest.fn();
-  return { eventClient: { emitTrigger } as unknown as EventClient, emitTrigger };
+  const eventClient: Pick<EventClient, 'emitTrigger'> = { emitTrigger };
+  return { eventClient, emitTrigger };
 };
 
 const investigation = (

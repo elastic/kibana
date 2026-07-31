@@ -19,6 +19,8 @@ import {
 } from '../../../common/workflows/triggers';
 import type { EventClient } from '../../lib/significant_events/events';
 
+type TriggerEmittingClient = Pick<EventClient, 'emitTrigger'>;
+
 type SignificantEventSource = Pick<
   SignificantEvent,
   | '@timestamp'
@@ -66,17 +68,13 @@ export const emitSignificantEventWriteTriggers = ({
   significantEvent,
   priorSignificantEvent,
 }: {
-  eventClient: EventClient;
+  eventClient: TriggerEmittingClient;
   /** The newly written (append-only) significant event version. */
   significantEvent: SignificantEventSource;
   /** The latest version of this event_id that existed before this write, if any. */
   priorSignificantEvent: Pick<SignificantEvent, 'status'> | undefined;
 }): void =>
   emitBestEffort(() => {
-    if (!eventClient.emitTrigger) {
-      return;
-    }
-
     if (!priorSignificantEvent) {
       eventClient.emitTrigger(
         EVENT_CREATED_TRIGGER_ID,
@@ -119,17 +117,13 @@ export const emitSignificantEventInvestigationTriggers = ({
   nextInvestigations,
   targetedWorkflowExecutionId,
 }: {
-  eventClient: EventClient;
+  eventClient: TriggerEmittingClient;
   significantEvent: SignificantEventSource;
   previousInvestigations: SignificantEventInvestigation[];
   nextInvestigations: SignificantEventInvestigation[];
   targetedWorkflowExecutionId: string;
 }): void =>
   emitBestEffort(() => {
-    if (!eventClient.emitTrigger) {
-      return;
-    }
-
     const base = baseSignificantEventPayload(significantEvent);
     const previousByExecutionId = new Map(
       previousInvestigations.map((investigation) => [
