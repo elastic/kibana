@@ -2338,10 +2338,10 @@
     semver "7.7.4"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.14.1":
-  version "2.14.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.14.1.tgz#d9459f4c5439dd81318150f04ca6fc80bd38c5d0"
-  integrity sha512-f2EOViA4nSkSvJ0YxE/7Pkqd/KZvNb8MieU/abGC3BEUeA94LNh4twVIfm0WqGT5bkyQZzAJaR/XBsqPgQYqKA==
+"@elastic/eslint-plugin-eui@2.15.0":
+  version "2.15.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.15.0.tgz#421f4d652813eec7ffcd510415d863ffe28c9e15"
+  integrity sha512-Jq/RrPi/v7rphskU54PBmtvNqMXBvVNPZ4LdB+0kQ+MtRYcJtpCrxn7vnw0hJwC/ubKjmHbIYVlw7fN8KEOvZg==
   dependencies:
     "@typescript-eslint/typescript-estree" "^8.64.0"
     "@typescript-eslint/utils" "^8.64.0"
@@ -2409,10 +2409,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@117.1.0":
-  version "117.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-117.1.0.tgz#ebc1d62951a82aac17fe4c88f8b9c92c6168203e"
-  integrity sha512-0uZvZDxkgPvY7AA3YJ5mC2MZHmFZPZeIgF2KvfOkGXKQKyH1/qMgkp2tenbY/OnOTGSoFb0LbJ2y1bLj+/MNmA==
+"@elastic/eui@118.0.0":
+  version "118.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-118.0.0.tgz#119d4455097baf58d4972a28d55463792bd7510b"
+  integrity sha512-JfibbY9gfIhIh5NPAaoGHkcs8oG2Y+ir7vR6CrKgItrT/Ujk4dMkqBpnGyBxvJd+c6RmCgdCDy2CTjEI+0b40g==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^4.13.0"
@@ -31289,7 +31289,7 @@ require-from-string@^2.0.2:
   resolved "https://registry.yarnpkg.com/require-from-string/-/require-from-string-2.0.2.tgz#89a7fdd938261267318eafe14f9c32e598c36909"
   integrity sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==
 
-require-in-the-middle@7.5.2, require-in-the-middle@^7.1.1:
+require-in-the-middle@^7.1.1:
   version "7.5.2"
   resolved "https://registry.yarnpkg.com/require-in-the-middle/-/require-in-the-middle-7.5.2.tgz#dc25b148affad42e570cf0e41ba30dc00f1703ec"
   integrity sha512-gAZ+kLqBdHarXB64XpAe2VCjB7rIRv+mU8tfRWziHRJ5umKsIHN2tLLv6EtMw7WCdP19S0ERVMldNvxYCHnhSQ==
