@@ -18,6 +18,24 @@ export const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
 export const FIPS_140_3_IMAGE = 'family/kibana-fips-140-3-ubuntu-2404';
 export const FIPS_140_2_IMAGE = 'family/kibana-fips-140-2-ubuntu-2404';
 
+const DEFAULT_SPOT_ZONES =
+  'asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c';
+const N4_SPOT_ZONES =
+  'us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c';
+
+const machineProfiles: Record<string, { spotZones: string; diskType?: string }> = {
+  n4: {
+    diskType: 'hyperdisk-balanced',
+    spotZones: N4_SPOT_ZONES,
+  },
+};
+
+interface ExpandedAgentConfig extends BuildkiteAgentTargetingRule {
+  diskType?: string;
+  enableNestedVirtualization?: boolean;
+  spotZones?: string;
+}
+
 // constrain AgentImageConfig to the type that doesn't have the `queue` property
 export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
@@ -82,20 +100,32 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
 
 const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
-  const zonesToUse =
-    'asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c';
-  const additionalProps =
-    {
-      spot: { preemptible: true, spotZones: zonesToUse },
-      virt: { enableNestedVirtualization: true, spotZones: zonesToUse },
-    }[addition] || {};
-
-  return {
+  const machineProfile = machineProfiles[kind] ?? { spotZones: DEFAULT_SPOT_ZONES };
+  const machineType = `${kind}-standard-${cores}`;
+  const agentConfig: ExpandedAgentConfig = {
     ...getAgentImageConfig(),
-    machineType: `${kind}-standard-${cores}`,
-    ...(diskSizeGb ? { diskSizeGb } : {}),
-    ...additionalProps,
+    machineType,
   };
+
+  if (diskSizeGb) {
+    agentConfig.diskSizeGb = diskSizeGb;
+  }
+
+  if (machineProfile.diskType) {
+    agentConfig.diskType = machineProfile.diskType;
+  }
+
+  if (addition === 'spot') {
+    agentConfig.preemptible = true;
+    agentConfig.spotZones = machineProfile.spotZones;
+  }
+
+  if (addition === 'virt') {
+    agentConfig.enableNestedVirtualization = true;
+    agentConfig.spotZones = machineProfile.spotZones;
+  }
+
+  return agentConfig;
 };
 
 export { getAgentImageConfig, expandAgentQueue };
