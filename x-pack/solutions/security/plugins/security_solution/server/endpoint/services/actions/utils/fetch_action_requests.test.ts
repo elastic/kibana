@@ -564,6 +564,45 @@ describe('fetchActionRequests()', () => {
       );
     });
 
+    it('should keep the orphan actions branch, matched on the tag rather than on originSpaceId', async () => {
+      const initialValue = await REF_DATA_KEY_INITIAL_VALUE[
+        REF_DATA_KEYS.orphanResponseActionsSpace
+      ]({} as SavedObjectsClientContract, {} as ExperimentalFeatures);
+
+      (fetchOptions.endpointService.getReferenceDataClient().get as jest.Mock).mockResolvedValue(
+        set(initialValue, 'metadata.spaceId', 'bar')
+      );
+      fetchOptions.spaceId = 'bar';
+
+      await fetchActionRequests(fetchOptions);
+
+      expect(readEsClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    filter: {
+                      bool: {
+                        should: [
+                          { term: { originSpaceId: 'bar' } },
+                          { term: { tags: ALLOWED_ACTION_REQUEST_TAGS.integrationPolicyDeleted } },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  },
+                },
+                { bool: { filter: [] } },
+              ],
+            },
+          },
+        }),
+        expect.anything()
+      );
+    });
+
     describe('and the caller has no request identity', () => {
       beforeEach(() => {
         fetchOptions.request = undefined;

@@ -119,17 +119,22 @@ describe('Policy Response Services', () => {
     describe('and CPS is enabled', () => {
       let readEsClientMock: ElasticsearchClientMock;
 
-      beforeEach(() => {
-        readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
+      const mockPolicyResponseFrom = (index: string) => {
         applyEsClientSearchMock({
           esClientMock: readEsClientMock,
           index: policyIndexPattern,
           response: EndpointPolicyResponseGenerator.toEsSearchResponse([
             EndpointPolicyResponseGenerator.toEsSearchHit(
-              new EndpointPolicyResponseGenerator('seed').generate({ agent: { id: '1-2-3' } })
+              new EndpointPolicyResponseGenerator('seed').generate({ agent: { id: '1-2-3' } }),
+              index
             ),
           ]),
         });
+      };
+
+      beforeEach(() => {
+        readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
+        mockPolicyResponseFrom('.ds-metrics-endpoint.policy-default-000001');
 
         endpointServiceMock.isCpsEnabled.mockReturnValue(true);
         endpointServiceMock.getReadEsClient.mockReturnValue(readEsClientMock);
@@ -145,6 +150,7 @@ describe('Policy Response Services', () => {
       });
 
       it('should return the policy response of an agent that is not enrolled in this project', async () => {
+        mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
         fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(
           new Error('Agent ID(s) not found: [1-2-3]')
         );
@@ -157,9 +163,21 @@ describe('Policy Response Services', () => {
         );
       });
 
+      it('should still hide an origin-local response whose agent is no longer enrolled in Fleet', async () => {
+        const spaceError = new Error('Agent ID(s) not found: [1-2-3]');
+
+        fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(spaceError);
+        (
+          endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock
+        ).mockResolvedValue([]);
+
+        await expect(getPolicyResponseByAgentId(fetchOptions)).rejects.toThrow(spaceError);
+      });
+
       it('should still hide an agent that is enrolled in this project but in another space', async () => {
         const spaceError = new Error('Agent ID(s) not found: [1-2-3]');
 
+        mockPolicyResponseFrom('linked:.ds-metrics-endpoint.policy-default-000001');
         fleetServicesMock.ensureInCurrentSpace.mockRejectedValue(spaceError);
         (
           endpointServiceMock.getInternalFleetServices(undefined, true).fetchAgentsById as jest.Mock

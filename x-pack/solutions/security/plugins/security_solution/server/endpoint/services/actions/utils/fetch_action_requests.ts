@@ -88,8 +88,8 @@ export const fetchActionRequests = async ({
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
-  const cpsEnabled = endpointService.isCpsRead(request);
-  const esClient = cpsEnabled
+  const cpsRead = endpointService.isCpsRead(request);
+  const esClient = cpsRead
     ? endpointService.getReadEsClient(request)
     : endpointService.getInternalEsClient();
   const logger = endpointService.createLogger('FetchActionRequests');
@@ -121,7 +121,7 @@ export const fetchActionRequests = async ({
 
   // The policy ids below come from local Fleet saved objects, which do not fan out, so under CPS they
   // would filter out every linked project's action. `originSpaceId` replaces the clause one for one.
-  const matchSpace: QueryDslQueryContainer = cpsEnabled
+  const matchSpace: QueryDslQueryContainer = cpsRead
     ? buildOriginSpaceIdFilter(spaceId, { matchMissingOriginSpaceId: false })
     : {
         terms: {
@@ -132,7 +132,7 @@ export const fetchActionRequests = async ({
   logger.debug(
     () =>
       `Narrowing results to only response actions visible in space [${spaceId}] using ${
-        cpsEnabled ? 'the originSpaceId carried by the document' : 'local integration policy ids'
+        cpsRead ? 'the originSpaceId carried by the document' : 'local integration policy ids'
       }`
   );
 

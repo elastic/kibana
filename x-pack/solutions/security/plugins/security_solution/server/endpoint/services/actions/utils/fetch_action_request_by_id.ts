@@ -50,8 +50,8 @@ export const fetchActionRequestById = async <
   }> = {}
 ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> => {
   const logger = endpointService.createLogger('fetchActionRequestById');
-  const cpsEnabled = endpointService.isCpsRead(request);
-  const esClient = cpsEnabled
+  const cpsRead = endpointService.isCpsRead(request);
+  const esClient = cpsRead
     ? endpointService.getReadEsClient(request)
     : endpointService.getInternalEsClient();
   const searchResponse = await esClient
@@ -69,7 +69,7 @@ export const fetchActionRequestById = async <
 
   if (!actionRequest) {
     throw new NotFoundError(`Action with id '${actionId}' not found.`);
-  } else if (!bypassSpaceValidation && cpsEnabled) {
+  } else if (!bypassSpaceValidation && cpsRead) {
     // The Fleet lookup below throws for an agent not enrolled locally, which would 404 every
     // cross-project action, so visibility comes off the document. Strict: a missing `originSpaceId`
     // cannot be told apart from a linked project's document here.

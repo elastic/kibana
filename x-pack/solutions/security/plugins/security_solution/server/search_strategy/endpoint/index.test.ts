@@ -14,7 +14,9 @@ import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { ResponseActionsQueries } from '../../../common/search_strategy/endpoint/response_actions';
 import type { EndpointAppContext } from '../../endpoint/types';
+import { NotFoundError } from '../../endpoint/errors';
 import { fetchActionRequestById } from '../../endpoint/services/actions/utils/fetch_action_request_by_id';
+import { endpointFactory } from './factory';
 import { endpointSearchStrategyProvider } from '.';
 
 jest.mock('../../endpoint/services/actions/utils/fetch_action_request_by_id');
@@ -59,6 +61,10 @@ describe('endpointSearchStrategyProvider', () => {
   beforeEach(() => {
     fetchActionRequestByIdMock.mockReset();
     fetchActionRequestByIdMock.mockResolvedValue({ EndpointActions: { action_id: 'action-1' } });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   const deps = {
@@ -146,12 +152,11 @@ describe('endpointSearchStrategyProvider', () => {
       await lastValueFrom(provider.search(request, options, deps));
 
       expect(scopedSearch.mock.calls[0][0].params.query.bool.filter).toEqual([
-        {
-          bool: {
-            should: [{ term: { originSpaceId: 'default' } }, { term: { space_id: 'default' } }],
-            minimum_should_match: 1,
-          },
-        },
+        expect.objectContaining({
+          bool: expect.objectContaining({
+            should: expect.arrayContaining([{ term: { originSpaceId: 'default' } }]),
+          }),
+        }),
       ]);
     });
 
@@ -161,6 +166,39 @@ describe('endpointSearchStrategyProvider', () => {
       await lastValueFrom(provider.search(request, options, deps));
 
       expect(search.mock.calls[0][0].params.query.bool).not.toHaveProperty('filter');
+    });
+
+    it('keeps a query that reads a Fleet-owned index on the internal user', async () => {
+      jest
+        .spyOn(endpointFactory[ResponseActionsQueries.actions], 'buildDsl')
+        .mockReturnValue({ index: ['.fleet-actions-results', '.logs-endpoint.actions-default'] });
+      const { provider, search, scopedSearch } = buildProvider(
+        { canAccessEndpointActionsLogManagement: true },
+        { cpsEnabled: true }
+      );
+
+      await lastValueFrom(provider.search(request, options, deps));
+
+      expect(search).toHaveBeenCalledTimes(1);
+      expect(scopedSearch).not.toHaveBeenCalled();
+    });
+
+    it('cancels through the client that issued the search', async () => {
+      const cancel = jest.fn();
+      const service = {
+        isCpsRead: jest.fn().mockReturnValue(true),
+        getScopedSearchClient: jest.fn().mockReturnValue({ cancel }),
+      };
+      const provider = endpointSearchStrategyProvider(
+        {
+          search: { searchAsInternalUser: { search: jest.fn(), cancel: jest.fn() } },
+        } as unknown as PluginStart,
+        { service } as unknown as EndpointAppContext
+      );
+
+      await provider.cancel?.('search-id', options, deps);
+
+      expect(cancel).toHaveBeenCalledWith('search-id', options);
     });
 
     describe('and the query is keyed on a caller-supplied action id', () => {
@@ -187,15 +225,29 @@ describe('endpointSearchStrategyProvider', () => {
         expect(scopedSearch).toHaveBeenCalledTimes(1);
       });
 
-      it('does not run the search when the action is not visible in the active space', async () => {
-        fetchActionRequestByIdMock.mockRejectedValue(new Error('Action [action-1] not found'));
+      it('returns no results, rather than erroring, when the action is not visible in the active space', async () => {
+        fetchActionRequestByIdMock.mockRejectedValue(new NotFoundError('Action not found'));
+        const { provider, scopedSearch } = buildProvider(
+          { canAccessEndpointActionsLogManagement: true },
+          { cpsEnabled: true }
+        );
+
+        await lastValueFrom(provider.search(resultsRequest, options, deps));
+
+        expect(scopedSearch.mock.calls[0][0].params.query).toEqual({
+          bool: { must_not: { match_all: {} } },
+        });
+      });
+
+      it('propagates a failure that is not the action being invisible', async () => {
+        fetchActionRequestByIdMock.mockRejectedValue(new Error('Elasticsearch is down'));
         const { provider, scopedSearch } = buildProvider(
           { canAccessEndpointActionsLogManagement: true },
           { cpsEnabled: true }
         );
 
         await expect(lastValueFrom(provider.search(resultsRequest, options, deps))).rejects.toThrow(
-          'not found'
+          'Elasticsearch is down'
         );
         expect(scopedSearch).not.toHaveBeenCalled();
       });

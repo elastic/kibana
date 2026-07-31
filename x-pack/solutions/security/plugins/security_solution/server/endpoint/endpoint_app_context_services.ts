@@ -365,7 +365,8 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    if (!request || !this.isCpsRead(request)) {
+    // `isCpsRead` first, so a caller with no request gets its breadcrumb; the second half narrows
+    if (!this.isCpsRead(request) || !request) {
       return this.getInternalEsClient();
     }
 

@@ -64,12 +64,12 @@ export async function getPolicyResponseByAgentId({
   ccsEnabled,
   request,
 }: GetPolicyResponseByAgentIdOptions): Promise<GetHostPolicyResponse | undefined> {
-  const cpsEnabled = endpointService.isCpsRead(request);
+  const cpsRead = endpointService.isCpsRead(request);
   const query = getESQueryPolicyResponseByAgentID(
     agentID,
     prefixIndexPatternsWithCcs(policyIndexPattern, ccsEnabled)
   );
-  const response = await (cpsEnabled ? endpointService.getReadEsClient(request) : esClient)
+  const response = await (cpsRead ? endpointService.getReadEsClient(request) : esClient)
     .search<HostPolicyResponse>(query)
     .catch(catchAndWrapError);
 
@@ -78,7 +78,8 @@ export async function getPolicyResponseByAgentId({
       agentID,
       endpointService,
       fleetServices,
-      cpsEnabled,
+      cpsRead,
+      hitIndex: response.hits.hits[0]._index,
     });
 
     return {
@@ -88,6 +89,9 @@ export async function getPolicyResponseByAgentId({
 
   return undefined;
 }
+
+/** Elasticsearch prefixes the index of a hit that came from a linked project with its alias */
+const isFannedInHit = (hitIndex?: string): boolean => Boolean(hitIndex?.includes(':'));
 
 /**
  * Ensures the agent whose policy response was found is visible in this space. These documents carry
@@ -102,14 +106,18 @@ const ensureAgentVisibleInCurrentSpace = async ({
   agentID,
   endpointService,
   fleetServices,
-  cpsEnabled,
+  cpsRead,
+  hitIndex,
 }: Pick<GetPolicyResponseByAgentIdOptions, 'agentID' | 'endpointService' | 'fleetServices'> & {
-  cpsEnabled: boolean;
+  cpsRead: boolean;
+  hitIndex?: string;
 }): Promise<void> => {
   try {
     await fleetServices.ensureInCurrentSpace({ agentIds: [agentID] });
   } catch (err) {
-    if (!cpsEnabled) {
+    // An origin-local agent that has since been unenrolled from Fleet is indistinguishable from a
+    // linked project's agent by lookup alone, so the document has to have come from one.
+    if (!cpsRead || !isFannedInHit(hitIndex)) {
       throw err;
     }
 
