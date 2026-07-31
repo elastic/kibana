@@ -1227,6 +1227,10 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
       await userEvent.click(screen.getByText('My button'), { pointerEventsCheck: 0 });
+
+      await userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
+      await waitForEuiPopoverOpen();
+
       await userEvent.click(screen.getByText('My button 2'), { pointerEventsCheck: 0 });
 
       expect(onClick).toHaveBeenCalledTimes(2);
