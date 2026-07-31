@@ -185,6 +185,43 @@ export async function upsertComment(
   }
 }
 
+/**
+ * Deletes a previously upserted comment for the given context, if one exists. Used by checks
+ * whose finding can be fully resolved within a PR, so a stale advisory does not outlive it.
+ * Returns true when a comment was removed.
+ */
+export async function removeComment(
+  commentContext: string,
+  owner = process.env.GITHUB_PR_BASE_OWNER,
+  repo = process.env.GITHUB_PR_BASE_REPO,
+  prNumber: undefined | string | number = process.env.GITHUB_PR_NUMBER
+) {
+  if (!owner || !repo || !prNumber) {
+    throw Error(
+      "Couldn't retrieve Github PR info from environment variables in order to remove a comment"
+    );
+  }
+  if (!commentContext) {
+    throw Error('Comment context is required when removing a comment');
+  }
+
+  const commentMarker = `<!-- ${KIBANA_COMMENT_SIGIL}:${commentContext} -->`;
+  const existingComment = (
+    await github.paginate(github.issues.listComments, {
+      owner,
+      repo,
+      issue_number: typeof prNumber === 'number' ? prNumber : parseInt(prNumber, 10),
+    })
+  ).find((comment) => comment.body?.includes(commentMarker));
+
+  if (!existingComment) {
+    return false;
+  }
+
+  await github.issues.deleteComment({ owner, repo, comment_id: existingComment.id });
+  return true;
+}
+
 export function getGithubClient() {
   return github;
 }

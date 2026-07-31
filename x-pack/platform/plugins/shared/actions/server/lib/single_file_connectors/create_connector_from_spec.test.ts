@@ -73,6 +73,24 @@ describe('createConnectorTypeFromSpec', () => {
     expect(connectorType.isExperimental).toBeUndefined();
   });
 
+  it('keeps support-only connectors executable without advertising a feature', () => {
+    const spec = createMockSpec({
+      metadata: {
+        id: 'support-only-connector',
+        displayName: 'Support-only Connector',
+        description: 'Deployed for rollback compatibility',
+        minimumLicense: 'basic',
+        supportedFeatureIds: [],
+      },
+    });
+
+    const connectorType = createConnectorTypeFromSpec(spec, mockActionsPlugin);
+
+    expect(connectorType.supportedFeatureIds).toEqual([]);
+    expect(connectorType.executor).toBeDefined();
+    expect(connectorType.validate.params).toBeDefined();
+  });
+
   it('sets isExperimental from metadata.isTechnicalPreview', () => {
     const spec = createMockSpec({
       metadata: {

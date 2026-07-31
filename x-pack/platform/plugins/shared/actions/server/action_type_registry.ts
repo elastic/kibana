@@ -165,7 +165,11 @@ export class ActionTypeRegistry {
       );
     }
 
-    if (!actionType.supportedFeatureIds || actionType.supportedFeatureIds.length === 0) {
+    const isSpecConnector = actionType.source === ACTION_TYPE_SOURCES.spec;
+    if (
+      !actionType.supportedFeatureIds ||
+      (!isSpecConnector && actionType.supportedFeatureIds.length === 0)
+    ) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.missingSupportedFeatureIds', {
           defaultMessage:
@@ -190,7 +194,10 @@ export class ActionTypeRegistry {
       );
     }
 
-    if (!areValidFeatures(actionType.supportedFeatureIds)) {
+    if (
+      actionType.supportedFeatureIds.length > 0 &&
+      !areValidFeatures(actionType.supportedFeatureIds)
+    ) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidConnectorFeatureIds', {
           defaultMessage: 'Invalid feature ids "{ids}" for connector type "{connectorTypeId}".',

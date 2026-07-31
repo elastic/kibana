@@ -1,0 +1,15 @@
+steps:
+  - command: .buildkite/scripts/steps/checks/check_connector_specs.sh
+    label: 'Check connector specs release'
+    key: check_connector_specs
+    # Advisory: this check reports on the 2-step release policy, it never blocks a PR.
+    soft_fail: true
+    agents:
+      machineType: n2-standard-2
+      preemptible: true
+      spotZones: us-central1-f,us-central1-c,us-central1-a
+    timeout_in_minutes: 15
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3

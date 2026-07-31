@@ -666,6 +666,21 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       );
     }
 
+    // Run the connector spec release check when connector specs change
+    if (
+      await doAnyChangesMatch([
+        /^src\/platform\/packages\/shared\/kbn-connector-specs\//,
+        /^\.buildkite\/pipelines\/pull_request\/check_connector_specs\.yml/,
+        // Trailing `\.` rather than a concrete extension, so `.test.js` / `.test.ts` match too.
+        /^\.buildkite\/scripts\/steps\/checks\/(check_connector_specs|connector_release_check|run_connector_release_check|notify_connector_specs_changes)\./,
+        /^\.buildkite\/pipeline-utils\/github\/github\.ts/,
+      ])
+    ) {
+      pipeline.push(
+        getPipeline('.buildkite/pipelines/pull_request/check_connector_specs.yml', cancelable)
+      );
+    }
+
     // Run Workflow Schema OOM prevention test when schema or connector whitelist changes
     if (
       GITHUB_PR_LABELS.includes('ci:workflow-oom-test') ||
