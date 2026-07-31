@@ -21,7 +21,7 @@ import { omit } from 'lodash';
 import { getMeta } from '@kbn/as-code-shared-schemas';
 import type { TypeOf } from '@kbn/config-schema';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { Boom } from '@hapi/boom';
+import { badRequest } from '@hapi/boom';
 import type { asCodePaginatedResponseSchema } from '../rest_routes/schema';
 
 export class DataViewsAsCodeService {
@@ -39,7 +39,7 @@ export class DataViewsAsCodeService {
     this.fieldFormats = fieldFormats;
   }
 
-  private getInvalidFieldFormatTypes(spec: AsCodeSavedDataView) {
+  private validateFieldFormatTypes(spec: AsCodeSavedDataView) {
     const invalidFormatTypes = [];
 
     const allFieldSettings = Object.values(spec.field_settings || {});
@@ -55,7 +55,9 @@ export class DataViewsAsCodeService {
       if (!this.fieldFormats.has(fieldFormatType)) invalidFormatTypes.push(fieldFormatType);
     }
 
-    return invalidFormatTypes;
+    if (invalidFormatTypes.length > 0) {
+      throw badRequest(`Invalid field format types: ${invalidFormatTypes.join(', ')}`);
+    }
   }
 
   private async mapDataView(dataView: DataViewLazy) {
@@ -82,12 +84,7 @@ export class DataViewsAsCodeService {
   }
 
   public async create(spec: AsCodeSavedDataView) {
-    const invalidFormatTypes = this.getInvalidFieldFormatTypes(spec);
-    if (invalidFormatTypes.length > 0) {
-      throw new Boom(`Invalid field format types: ${invalidFormatTypes.join(', ')}`, {
-        statusCode: 400,
-      });
-    }
+    this.validateFieldFormatTypes(spec);
 
     const dataViewSpec = toStoredDataView(spec);
 
@@ -101,12 +98,7 @@ export class DataViewsAsCodeService {
   }
 
   public async upsert(id: string, spec: Omit<AsCodeSavedDataView, 'id'>) {
-    const invalidFormatTypes = this.getInvalidFieldFormatTypes(spec);
-    if (invalidFormatTypes.length > 0) {
-      throw new Boom(`Invalid field format types: ${invalidFormatTypes.join(', ')}`, {
-        statusCode: 400,
-      });
-    }
+    this.validateFieldFormatTypes(spec);
 
     const existingDataView = await this.getDataViewLazy(id);
 
