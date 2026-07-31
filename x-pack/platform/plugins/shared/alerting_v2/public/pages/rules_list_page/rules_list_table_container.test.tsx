@@ -252,6 +252,38 @@ describe('RulesListTableContainer', () => {
         expect(screen.getByTestId('checkboxSelectRow-rule-1')).not.toBeChecked();
       });
     });
+
+    it('does not exclude the deleted row from an active select-all, so selectedCount is not double-decremented', async () => {
+      renderContainer();
+
+      // Select a row to surface the cross-page "Select all" action, then enter select-all mode.
+      fireEvent.click(screen.getByTestId('checkboxSelectRow-rule-1'));
+      fireEvent.click(screen.getByTestId('selectAllRulesButton'));
+
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+
+      fireEvent.click(screen.getByTestId('ruleActionsButton-rule-1'));
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRule-rule-1')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('deleteRule-rule-1'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('deleteRuleConfirmationModal')).toBeInTheDocument();
+      });
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      const [, options] = mockDeleteMutate.mock.calls[mockDeleteMutate.mock.calls.length - 1];
+      options.onSuccess();
+
+      // The row stays selected (still un-excluded) and the displayed count is
+      // unaffected here — the actual -1 comes from the list refetch dropping
+      // totalItemCount, not from touching the exclusion set.
+      await waitFor(() => {
+        expect(screen.getByTestId('checkboxSelectRow-rule-1')).toBeChecked();
+      });
+      expect(screen.getByTestId('bulkActionsButton')).toHaveTextContent('2 Selected');
+    });
   });
 
   describe('run rule', () => {
