@@ -25,6 +25,10 @@ export const translateVegaSandboxError = (message: VegaSandboxMessage): string =
         defaultMessage: 'Vega sandbox rendering failed: {message}',
         values: { message: getMessageValue(message) },
       });
+    case VegaSandboxErrorCode.UnsupportedProtocolVersion:
+      return i18n.translate('visTypeVega.sandbox.unsupportedProtocolVersionErrorMessage', {
+        defaultMessage: 'The Vega sandbox protocol version is not supported.',
+      });
   }
 };
 

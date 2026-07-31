@@ -22,6 +22,7 @@ export type VegaSandboxRenderFunction = (typeof VEGA_SANDBOX_RENDER_FUNCTIONS)[n
 
 export enum VegaSandboxErrorCode {
   RenderFailed = 'render_failed',
+  UnsupportedProtocolVersion = 'unsupported_protocol_version',
 }
 
 export enum VegaSandboxWarningCode {

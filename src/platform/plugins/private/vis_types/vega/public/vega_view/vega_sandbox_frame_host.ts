@@ -8,15 +8,11 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { VegaSandboxMessage } from '@kbn/vega-sandbox';
 import { VEGA_SANDBOX_ROUTE_PATH } from '../../common/sandbox_constants';
 
 const SANDBOX_ATTRIBUTE = 'allow-scripts';
 const DISALLOWED_SANDBOX_TOKENS = ['allow-same-origin', 'allow-top-navigation', 'allow-popups'];
-
-export interface VegaSandboxMessage {
-  type: string;
-  [key: string]: unknown;
-}
 
 export interface VegaSandboxFrameHost {
   destroy: () => void;
