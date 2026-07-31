@@ -72,50 +72,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted]
   );
 
-  const setServiceTransport = useCallback(
-    (serviceId: string, transport: TransportType) => {
-      const current = getServiceVars(serviceId);
-      setPersisted({
-        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        serviceVars: {
-          ...(persisted?.serviceVars ?? {}),
-          [serviceId]: { ...current, trigger: transport },
-        },
-      });
-    },
-    [persisted, setPersisted, getServiceVars]
-  );
-
-  const setServiceField = useCallback(
-    (serviceId: string, fieldName: string, value: string) => {
-      const current = getServiceVars(serviceId);
-      setPersisted({
-        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        serviceVars: {
-          ...(persisted?.serviceVars ?? {}),
-          [serviceId]: { ...current, vars: { ...current.vars, [fieldName]: value } },
-        },
-      });
-    },
-    [persisted, setPersisted, getServiceVars]
-  );
-
   // Applies multiple field changes (and optional transport) in a single write to avoid
-  // stale-closure overwrites when several vars are committed at once (flyout Apply).
-  const setServiceFields = useCallback(
-    (serviceId: string, newFields: Record<string, string>) => {
-      const current = getServiceVars(serviceId);
-      setPersisted({
-        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        serviceVars: {
-          ...(persisted?.serviceVars ?? {}),
-          [serviceId]: { ...current, vars: { ...current.vars, ...newFields } },
-        },
-      });
-    },
-    [persisted, setPersisted, getServiceVars]
-  );
-
+  // stale-closure overwrites when several vars are committed at once (flyout Save).
   const setServiceFieldsAndTransport = useCallback(
     (serviceId: string, newFields: Record<string, string>, transport: TransportType | null) => {
       const current = getServiceVars(serviceId);
@@ -183,9 +141,6 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     signalFilter,
     setSignalFilter,
     getServiceVars,
-    setServiceTransport,
-    setServiceField,
-    setServiceFields,
     setServiceFieldsAndTransport,
     globalRegionTouched,
     setGlobalRegionTouched,

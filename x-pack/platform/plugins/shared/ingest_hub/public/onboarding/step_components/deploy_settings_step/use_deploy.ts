@@ -14,6 +14,7 @@ import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
+import { FIELD_CONFIG } from '../service_settings_step/field_config';
 import { SERVICE_SETTINGS_SESSION_KEY } from '../service_settings_step/use_service_settings';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
@@ -65,8 +66,7 @@ export function buildStreamVars(
   for (const [key, value] of Object.entries(serviceVars.vars)) {
     if (BOOLEAN_VAR_NAMES.has(key)) {
       result[key] = value === 'true';
-    } else if (key === 'regions') {
-      // multi: true — emit as string array, not a comma-joined string
+    } else if (FIELD_CONFIG[key]?.multi) {
       const parts = value
         .split(',')
         .map((s) => s.trim())

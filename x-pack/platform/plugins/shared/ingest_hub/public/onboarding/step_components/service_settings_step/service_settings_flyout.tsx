@@ -35,6 +35,7 @@ import type { ServiceVars } from './use_service_settings';
 import {
   AWS_REGION_OPTIONS,
   FIELD_CONFIG,
+  REGION_FIELD_NAMES,
   getFlyoutFields,
   getMandatoryBooleanFields,
   getRegionFieldName,
@@ -51,8 +52,6 @@ interface ServiceSettingsFlyoutProps {
   onApply: (fields: Record<string, string>, transport: TransportType | null) => void;
   onClose: () => void;
 }
-
-const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
 
 const TRANSPORT_OPTIONS = [
   {
@@ -109,10 +108,11 @@ export function ServiceSettingsFlyout({
 
   const hasTransport = hasTransportChoice(service);
   const requiredTextFields = getRequiredTextFields(service, draftTransport);
+  const requiredTextFieldSet = new Set(requiredTextFields);
   const flyoutFields = getFlyoutFields(service, draftTransport);
   const regionField = getRegionFieldName(service, draftTransport);
   const otherFlyoutFields = flyoutFields.filter(
-    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFields.includes(f)
+    (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f)
   );
   const mandatoryBoolFields = getMandatoryBooleanFields(service, draftTransport);
 
@@ -151,7 +151,13 @@ export function ServiceSettingsFlyout({
   };
 
   return (
-    <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby={flyoutTitleId}>
+    <EuiFlyout
+      size="s"
+      ownFocus
+      onClose={onClose}
+      aria-labelledby={flyoutTitleId}
+      data-test-subj="serviceSettingsFlyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
           <EuiFlexItem grow={false}>

@@ -219,7 +219,7 @@ export function getMandatoryBooleanFields(
   });
 }
 
-const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
+export const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
 
 export function getRegionFieldName(
   service: AwsServiceMatrixEntry,

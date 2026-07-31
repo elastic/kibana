@@ -13,6 +13,53 @@ import { test } from '../fixtures';
 // ec2_metrics: agentless metrics — no required text fields; Continue enabled once global region is set
 // firewall_metrics: regions-only optionalConfig — no required text fields, no attention badge
 
+const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
+const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
+
+async function navigateToServiceSettings(
+  browserAuth: any,
+  page: any,
+  opts: {
+    selectedServiceIds: string[];
+    globalRegion?: string;
+    serviceVars?: Record<string, unknown>;
+  }
+): Promise<void> {
+  const { selectedServiceIds, globalRegion = 'us-east-1', serviceVars = {} } = opts;
+  await browserAuth.loginAsAdmin();
+  await page.gotoApp('onboarding/aws#service-settings');
+  await page.evaluate(
+    ({
+      ids,
+      region,
+      vars,
+      servicesKey,
+      settingsKey,
+    }: {
+      ids: string[];
+      region: string;
+      vars: Record<string, unknown>;
+      servicesKey: string;
+      settingsKey: string;
+    }) => {
+      sessionStorage.setItem(servicesKey, JSON.stringify({ selectedServiceIds: ids }));
+      sessionStorage.setItem(
+        settingsKey,
+        JSON.stringify({ globalRegion: region, serviceVars: vars })
+      );
+    },
+    {
+      ids: selectedServiceIds,
+      region: globalRegion,
+      vars: serviceVars,
+      servicesKey: SERVICES_STEP_SESSION_KEY,
+      settingsKey: SERVICE_SETTINGS_SESSION_KEY,
+    }
+  );
+  await page.reload();
+  await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
+}
+
 test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, config }) => {
     // The /internal/core/_settings route is only registered when
@@ -50,20 +97,9 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics', 'cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
     await expect(page.testSubj.locator('serviceSettingsStep-table')).toBeVisible();
 
     // Column headers
@@ -80,38 +116,16 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   });
 
   test('service count reflects selected services', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics', 'cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
     await expect(page.getByText(/Showing.*2.*services/)).toBeVisible();
   });
 
   test('search bar filters table rows by name', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics', 'cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-searchBox').fill('CloudTrail');
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
@@ -120,21 +134,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   });
 
   test('signal filter narrows table rows by signal type', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      // ec2_metrics = metrics, cloudtrail = logs
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics', 'cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    // ec2_metrics = metrics, cloudtrail = logs
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     // Filter to Metrics — only ec2_metrics visible
     await page.testSubj.locator('serviceSettingsStep-signalFilter').getByText('Metrics').click();
@@ -153,25 +156,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics', 'cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({
-          globalRegion: 'us-east-1',
-          serviceVars: {
-            cloudtrail: { trigger: 'aws-s3', vars: { region: 'eu-west-1' } },
-          },
-        })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics', 'cloudtrail'],
+      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: { region: 'eu-west-1' } } },
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     // ec2_metrics has no override — shows global region
     const ec2Row = page.getByRole('row', { name: /AWS EC2/ });
@@ -183,20 +171,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   });
 
   test('Continue is disabled without global region', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: '', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics'],
+      globalRegion: '',
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
   });
@@ -205,30 +183,17 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: '', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics'],
+      globalRegion: '',
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     // Error not visible before interaction
     await expect(page.testSubj.locator('serviceSettingsStep-globalRegionError')).toBeHidden();
 
     // Select a region then clear it
     await page.testSubj.locator('serviceSettingsStep-globalRegion').click();
-    await page.testSubj
-      .locator('serviceSettingsStep-globalRegion')
-      .locator('[aria-label="Clear input"]')
-      .click();
+    await page.getByRole('button', { name: 'Clear input' }).click();
 
     await expect(page.testSubj.locator('serviceSettingsStep-globalRegionError')).toBeVisible();
   });
@@ -237,25 +202,11 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-
     // cloudtrail with S3 trigger: bucket_arn is required and empty
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({
-          globalRegion: 'us-east-1',
-          serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
-        })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     // Callout visible, badge on cloudtrail row, Continue disabled
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
@@ -269,22 +220,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-
     // firewall_metrics: optionalConfig: ['regions'] — no required text fields
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['firewall_metrics'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['firewall_metrics'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await expect(
       page.testSubj.locator('serviceSettingsStep-attentionIcon-firewall_metrics')
@@ -294,72 +233,37 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   });
 
   test('expand icon opens flyout for the correct service', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-editButton-ec2_metrics').click();
     await expect(page.getByRole('heading', { name: 'AWS EC2' })).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
-    await expect(page.locator('.euiFlyout')).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeHidden();
   });
 
   test('service name link also opens flyout', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics').click();
-    await expect(page.locator('.euiFlyout')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
   });
 
   test('flyout shows transport toggle and required fields for dual-transport service', async ({
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({
-          globalRegion: 'us-east-1',
-          serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
-        })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
-    await expect(page.locator('.euiFlyout')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
 
     // Transport toggle visible
     await expect(page.testSubj.locator('serviceSettingsFlyout-transportToggle')).toBeVisible();
@@ -381,23 +285,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     browserAuth,
     page,
   }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['cloudtrail'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({
-          globalRegion: 'us-east-1',
-          serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
-        })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['cloudtrail'],
+      serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: {} } },
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     // Callout and badge visible, Continue disabled
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
@@ -419,26 +310,15 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
   });
 
   test('flyout region override pre-populated with global region', async ({ browserAuth, page }) => {
-    await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding/aws#service-settings');
-    await page.evaluate(() => {
-      sessionStorage.setItem(
-        'onboarding.aws.servicesStep',
-        JSON.stringify({ selectedServiceIds: ['ec2_metrics'] })
-      );
-      sessionStorage.setItem(
-        'onboarding.aws.serviceSettingsStep',
-        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
-      );
+    await navigateToServiceSettings(browserAuth, page, {
+      selectedServiceIds: ['ec2_metrics'],
     });
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-editButton-ec2_metrics').click();
-    await expect(page.locator('.euiFlyout')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
 
-    await expect(page.locator('.euiFlyout').getByLabel('AWS Region (override)')).toHaveValue(
-      'us-east-1'
-    );
+    await expect(
+      page.testSubj.locator('serviceSettingsFlyout').getByLabel('AWS Region (override)')
+    ).toHaveValue('us-east-1');
   });
 });
