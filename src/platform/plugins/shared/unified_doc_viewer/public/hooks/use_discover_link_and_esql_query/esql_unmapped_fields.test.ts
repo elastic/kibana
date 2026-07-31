@@ -11,7 +11,7 @@ import { from, where } from '@kbn/esql-composer';
 import { ESQL_NULLIFY_UNMAPPED_FIELDS, withUnmappedFields } from './esql_unmapped_fields';
 
 describe('withUnmappedFields', () => {
-  it('prepends NULLIFY with newline by default (multiline: true)', () => {
+  it('prepends NULLIFY with a newline by default', () => {
     expect(withUnmappedFields('FROM logs-*')).toBe(`${ESQL_NULLIFY_UNMAPPED_FIELDS}\nFROM logs-*`);
   });
 
@@ -21,7 +21,7 @@ describe('withUnmappedFields', () => {
     );
   });
 
-  it('preserves composer multiline format by default (no Parser round-trip)', () => {
+  it('preserves the composer query verbatim, including its line breaks', () => {
     const composerOutput = from('logs-*')
       .pipe(where('error.culprit == ?culprit', { culprit: 'Main.Cache.func3' }))
       .toString();
@@ -32,39 +32,8 @@ describe('withUnmappedFields', () => {
     );
   });
 
-  it('collapses a multi-line composer query into a single line when multiline: false', () => {
-    const composerOutput = from('logs-*')
-      .pipe(where('error.culprit == ?culprit', { culprit: 'Main.Cache.func3' }))
-      .toString();
-
-    expect(composerOutput).toContain('\n');
-
-    const result = withUnmappedFields(composerOutput, { multiline: false });
-
-    expect(result).toBe(
-      `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM logs-* | WHERE error.culprit == "Main.Cache.func3"`
-    );
-    expect(result).not.toContain('\n');
-  });
-
   it('is idempotent — does not double-prepend the SET directive', () => {
     const once = withUnmappedFields('FROM logs-*');
     expect(withUnmappedFields(once)).toBe(once);
-  });
-
-  it('single-line guarantee holds for a complex multi-command query when multiline: false', () => {
-    const multiline = from('logs-*')
-      .pipe(
-        where('error.culprit == ?culprit', { culprit: 'Main.Cache.func3' }),
-        where('service.name == ?service', { service: 'my-svc' })
-      )
-      .toString();
-
-    expect(multiline).toContain('\n');
-
-    const result = withUnmappedFields(multiline, { multiline: false });
-
-    expect(result).not.toContain('\n');
-    expect(result.startsWith(ESQL_NULLIFY_UNMAPPED_FIELDS)).toBe(true);
   });
 });

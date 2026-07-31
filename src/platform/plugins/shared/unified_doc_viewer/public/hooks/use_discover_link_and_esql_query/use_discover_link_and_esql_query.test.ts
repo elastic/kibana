@@ -53,7 +53,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     expect(result.current.esqlQueryString).toContain('trace.id == "abc123"');
   });
 
-  it('prepends SET directive single-line when unmappedFieldsPolicy is provided', () => {
+  it('prepends the SET directive when unmappedFieldsPolicy is provided', () => {
     const DISCOVER_URL = 'http://discover/url';
     const generateDiscoverLink = jest.fn(() => DISCOVER_URL);
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
@@ -66,8 +66,7 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     );
 
     expect(result.current.esqlQueryString).toBe(
-      `${ESQL_NULLIFY_UNMAPPED_FIELDS} FROM logs-* | WHERE trace.id == "abc123"`
+      `${ESQL_NULLIFY_UNMAPPED_FIELDS}\nFROM logs-*\n  | WHERE trace.id == "abc123"`
     );
-    expect(result.current.esqlQueryString).not.toContain('\n');
   });
 });

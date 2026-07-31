@@ -39,7 +39,7 @@ export function useDiscoverLinkAndEsqlQuery({
 
   const rawQuery = from(indexPattern).pipe(whereClause).toString();
   const esqlQueryString = unmappedFieldsPolicy
-    ? withUnmappedFields(rawQuery, { policy: unmappedFieldsPolicy, multiline: false }) // multiline: false required — Discover drops the SET header from multi-line queries
+    ? withUnmappedFields(rawQuery, { policy: unmappedFieldsPolicy })
     : rawQuery;
   const discoverUrl = generateDiscoverLink(whereClause);
 
