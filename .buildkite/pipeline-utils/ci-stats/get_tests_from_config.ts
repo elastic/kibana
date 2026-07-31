@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { dirname, isAbsolute, relative, resolve } from 'path';
+import { dirname, resolve } from 'path';
 import * as globby from 'globby';
+import minimatch from 'minimatch';
 import { getKibanaDir } from '#pipeline-utils';
 
 /**
@@ -93,23 +94,6 @@ function parseJestConfigRules(configAbsPath: string): JestConfigRules {
   };
 }
 
-function normalizeTestMatchForRoot(pattern: string, root: string, rootDir: string): string {
-  const expandedPattern = pattern.replace(/<rootDir>/g, rootDir);
-
-  if (expandedPattern.startsWith('/**/')) {
-    return expandedPattern.slice(1);
-  }
-
-  if (isAbsolute(expandedPattern)) {
-    const relativePattern = relative(root, expandedPattern);
-    if (relativePattern && !relativePattern.startsWith('..') && !isAbsolute(relativePattern)) {
-      return relativePattern;
-    }
-  }
-
-  return expandedPattern;
-}
-
 /**
  * Fast check for whether a jest config actually selects any test files, honoring
  * its `roots` and `testMatch`. Uses globby instead of Jest's full resolver
@@ -127,16 +111,23 @@ function hasTestFiles(configAbsPath: string): boolean {
   }
 
   return rules.roots.some((root) => {
-    const testMatch = rules.testMatch.map((pattern) =>
-      normalizeTestMatchForRoot(pattern, root, rules.rootDir)
-    );
-    const matches = globby.sync(testMatch, {
+    const testFiles = globby.sync(UNIT_TEST_MATCH, {
       cwd: root,
       ignore: rules.ignore,
       onlyFiles: true,
       absolute: true,
     });
-    return matches.length > 0;
+    const testMatch = rules.testMatch.map((pattern) =>
+      pattern.replace(/<rootDir>/g, rules.rootDir)
+    );
+
+    // Jest applies testMatch to each absolute test-file path, not to paths
+    // relative to each configured root. This matters when a root is itself an
+    // integration_tests directory: the absolute path still contains that
+    // segment, while a root-relative path does not.
+    return testFiles.some((testFile) =>
+      testMatch.some((pattern) => minimatch(testFile, pattern, { dot: true }))
+    );
   });
 }
 

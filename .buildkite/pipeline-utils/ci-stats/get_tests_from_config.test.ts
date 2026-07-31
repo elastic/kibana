@@ -94,6 +94,17 @@ describe('filterEmptyJestConfigs', () => {
     ]);
   });
 
+  it('keeps an integration config whose root is the integration_tests directory', () => {
+    writeConfig('pkg/integration_root/jest.integration.config.js', {
+      roots: ['<rootDir>/pkg/integration_root/integration_tests'],
+    });
+    write('pkg/integration_root/integration_tests/tests/foo.test.ts', '');
+
+    expect(filterEmptyJestConfigs(['pkg/integration_root/jest.integration.config.js'])).toEqual([
+      'pkg/integration_root/jest.integration.config.js',
+    ]);
+  });
+
   it('drops an integration config whose root only has unit .test files (not under integration_tests/)', () => {
     // Mirrors alerting_v2: a plugin full of unit tests but an integration config
     // pointing at an integration_tests dir that has none.
