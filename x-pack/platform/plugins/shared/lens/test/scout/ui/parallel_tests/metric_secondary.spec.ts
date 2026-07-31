@@ -154,7 +154,9 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
       await lens.configureDimension({
         dimension: `${PRIMARY_PANEL} > lns-dimensionTrigger`,
         operation: 'count',
-        field: 'records',
+        // Lens renders the "Records" pseudo-field capitalized; Scout's combo box helper
+        // matches the option label verbatim (FTR's was case-insensitive).
+        field: 'Records',
       });
 
       await spaceTest.step('shows the difference against the primary metric', async () => {

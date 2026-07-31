@@ -70,8 +70,14 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.closeDimensionEditor();
         await lens.waitForVisualization('mtrVis');
 
-        const [datum] = await lens.getMetricVisualizationData();
-        expect(datum.showingTrendline).toBe(true);
+        // The trendline needs its own data fetch, which lands a render pass after the one
+        // `waitForVisualization` settles, so poll rather than reading the debug state once.
+        await expect
+          .poll(async () => {
+            const [datum] = await lens.getMetricVisualizationData();
+            return datum?.showingTrendline;
+          })
+          .toBe(true);
       });
 
       await spaceTest.step('breaks down the metric by terms', async () => {
@@ -265,7 +271,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
 
         await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await lens.switchToFormula();
-        await lens.typeFormula('');
+        await lens.typeInFormula('', { replace: true });
         await lens.waitForVisualization('mtrVis');
 
         await expect(lens.getMessageListItems('error')).toHaveCount(0);

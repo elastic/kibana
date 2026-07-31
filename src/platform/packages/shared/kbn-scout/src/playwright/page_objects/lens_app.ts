@@ -12,9 +12,6 @@ import type { ScoutPage } from '..';
 import { expect } from '..';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 
-/** Internal field id of Lens's "Records" pseudo-field (`DOCUMENT_FIELD_NAME` in the Lens plugin). */
-const RECORDS_FIELD_ID = '___records___';
-
 const normalizeComputedColor = (color: string | undefined): string | undefined => {
   if (!color) {
     return undefined;
@@ -43,7 +40,6 @@ export class LensApp {
   /** Style flyout title — Lens uses a DOM id, not a data-test-subj (FTR parity). */
   private readonly dimensionContainerTitle;
   private readonly suggestionPanelToggle;
-  public readonly applyChangesButton;
   public readonly chartTitle;
   /** XY legend items (elastic-charts does not expose a `data-test-subj` for these). */
   public readonly xyLegendItems;
@@ -63,10 +59,6 @@ export class LensApp {
   private readonly autoApplyToggle;
   private readonly emptyWorkspacePrompt;
   private readonly workspaceApplyChangesPrompt;
-  private readonly formulaTab;
-  private readonly formulaEditorInput;
-  private readonly formulaFullscreenButton;
-  private readonly layerAddButton;
   private readonly referenceLineFillBelowButton;
   private readonly legacyMetricValue;
   private readonly metricTilesLocator;
@@ -91,7 +83,6 @@ export class LensApp {
     this.styleSettingsButton = this.page.locator('button[data-test-subj="style"]');
     this.dimensionContainerTitle = this.page.locator('#lnsDimensionContainerTitle');
     this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
-    this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
     this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
     this.xyLegendItems = this.page.locator('.echLegendItem');
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
@@ -102,14 +93,6 @@ export class LensApp {
     this.autoApplyToggle = this.page.testSubj.locator('lnsToggleAutoApply');
     this.emptyWorkspacePrompt = this.page.testSubj.locator('workspace-drag-drop-prompt');
     this.workspaceApplyChangesPrompt = this.page.testSubj.locator('workspace-apply-changes-prompt');
-    this.formulaTab = this.page.testSubj.locator('lens-dimensionTabs-formula');
-    // Scoped to `.lnsFormula` (the formula tab's own wrapper) rather than the
-    // `lnsFormulaWidget` test subject, which is Monaco's overflow-widget host
-    // (appended directly to `document.body` for autocomplete popups) and is
-    // unrelated to whether the formula editor itself is visible.
-    this.formulaEditorInput = this.page.locator('.lnsFormula .monaco-editor');
-    this.formulaFullscreenButton = this.page.testSubj.locator('lnsFormula-fullscreen');
-    this.layerAddButton = this.page.testSubj.locator('lnsLayerAddButton');
     this.referenceLineFillBelowButton = this.page.testSubj.locator('lnsXY_fill_below');
     this.legacyMetricValue = this.page.testSubj.locator('metric_value');
     // Elastic Charts pads the last grid row with empty filler cells (`role="presentation"`,
@@ -1460,11 +1443,27 @@ export class LensApp {
   /**
    * Adds a visualization layer of the given type (opens the layer-type menu).
    * Caller must use a chart that shows `lnsLayerAddButton-{layerType}` after Add.
+   *
+   * Annotation layers open a second menu to pick between a new annotation group and one
+   * saved in the annotation library; pass `annotationFromLibraryTitle` for the latter.
    */
-  async createLayer(layerType: 'data' | 'referenceLine' | 'annotations') {
+  async createLayer(
+    layerType: 'data' | 'referenceLine' | 'annotations',
+    annotationFromLibraryTitle?: string
+  ) {
     const tabsBefore = await this.getLayerCount();
     await this.page.testSubj.click('lnsLayerAddButton');
     await this.page.testSubj.click(`lnsLayerAddButton-${layerType}`);
+    if (layerType === 'annotations') {
+      if (annotationFromLibraryTitle) {
+        await this.page.testSubj.click('lnsAnnotationLayer_addFromLibrary');
+        await this.page.testSubj.click(
+          `savedObjectTitle${annotationFromLibraryTitle.split(' ').join('-')}`
+        );
+      } else {
+        await this.page.testSubj.click('lnsAnnotationLayer_new');
+      }
+    }
     await this.page.waitForFunction(
       (before) => {
         const tabs = document.querySelectorAll('[data-test-subj^="unifiedTabs_tab_"]').length;
@@ -2127,21 +2126,6 @@ export class LensApp {
     return readColorStops();
   }
 
-  /**
-   * Types a formula into the open formula editor, replacing any existing content.
-   * Pass an empty string to clear the formula. Callers should wait for the
-   * visualization to re-render afterwards (the editor debounces input).
-   */
-  async typeFormula(formula: string) {
-    await this.formulaEditorInput.waitFor({ state: 'visible' });
-    await this.formulaEditorInput.click();
-    await this.page.keyboard.press('ControlOrMeta+A');
-    await this.page.keyboard.press('Delete');
-    if (formula) {
-      await this.page.keyboard.type(formula);
-    }
-  }
-
   /** Opens the Lens settings menu (auto-apply toggle lives here). */
   async openSettingsMenu() {
     await this.settingsButton.click();
@@ -2288,13 +2272,6 @@ export class LensApp {
 
   /** Parses the inline `style` attribute of the legacy metric value element into a map. */
   async getLegacyMetricStyle(): Promise<Record<string, string>> {
-    const style = (await this.legacyMetricValue.getAttribute('style')) ?? '';
-    return style.split(';').reduce<Record<string, string>>((memo, cssLine) => {
-      const [prop, value] = cssLine.split(':');
-      if (prop && value) {
-        memo[prop.trim()] = value.trim();
-      }
-      return memo;
-    }, {});
+    return this.parseInlineStyle((await this.legacyMetricValue.getAttribute('style')) ?? '');
   }
 }
