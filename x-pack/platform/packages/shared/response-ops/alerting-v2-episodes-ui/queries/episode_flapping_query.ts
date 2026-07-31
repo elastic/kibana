@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { buildEpisodeFlappingQuery } from '@kbn/alerting-v2-common-queries';
-import { DEFAULT_EPISODE_FLAPPING_SETTINGS } from '../utils/is_episode_flapping';
+import {
+  buildEpisodeFlappingQuery,
+  DEFAULT_FLAPPING_LOOKBACK,
+} from '@kbn/alerting-v2-common-queries';
 
 /**
  * ES|QL query returning the most recent `limit` rule-event statuses for a single
@@ -15,5 +17,5 @@ import { DEFAULT_EPISODE_FLAPPING_SETTINGS } from '../utils/is_episode_flapping'
 export const buildEpisodeFlappingEsqlQuery = (
   spaceId: string,
   episodeId: string,
-  limit: number = DEFAULT_EPISODE_FLAPPING_SETTINGS.lookBackWindow
+  limit: number = DEFAULT_FLAPPING_LOOKBACK
 ) => buildEpisodeFlappingQuery(spaceId, episodeId, limit);
