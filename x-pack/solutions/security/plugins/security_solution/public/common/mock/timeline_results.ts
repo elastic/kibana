@@ -2107,6 +2107,8 @@ export const defaultTimelineProps: CreateTimelineProps = {
     isDataProviderVisible: false,
     isSuperTimeline: false,
     superTimelineSourceIds: [],
+    superTimelineSourceTitles: [],
+    superTimelineDescriptions: [],
     sampleSize: 500,
     rowHeight: 3,
   },

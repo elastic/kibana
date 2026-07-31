@@ -430,6 +430,8 @@ describe('alert actions', () => {
             isDataProviderVisible: false,
             isSuperTimeline: false,
             superTimelineSourceIds: [],
+            superTimelineSourceTitles: [],
+            superTimelineDescriptions: [],
             rowHeight: 3,
             sampleSize: 500,
           },
