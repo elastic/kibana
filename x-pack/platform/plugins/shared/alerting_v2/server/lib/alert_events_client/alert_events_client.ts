@@ -44,27 +44,34 @@ export function getValueByDottedPath(obj: unknown, path: string): unknown {
 }
 
 /**
- * Resolves the fingerprint in priority order:
- *   1. Explicit `fingerprint` field
- *   2. `fingerprint_fields` — hash of dotted paths on the payload (e.g. `rule_id`, `data.host`)
- *   3. `rule_id` — hashed with source for a stable per-rule series key
+ * Computes `group_hash` in a single sha256, in priority order:
+ *   1. Explicit `fingerprint`
+ *   2. `fingerprint_fields` — field names + dotted-path values on the payload
+ *   3. `rule_id` (schema guarantees one of the three)
  *
- * `createAlertEventDataSchema` requires one of the three.
+ * Always includes `spaceId` and `source` so series keys cannot collide across
+ * spaces or vendors.
  */
-function resolveFingerprint(event: CreateAlertEventData): string {
-  if (event.fingerprint) return event.fingerprint;
+function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
+  const { source } = event;
 
-  if (event.fingerprint_fields?.length) {
-    const values = event.fingerprint_fields.map((field) => {
-      const value = getValueByDottedPath(event, field);
-      return value == null ? '' : String(value);
-    });
-    return sha256(values.join(':'));
+  if (event.fingerprint) {
+    return sha256(`${spaceId}:${source}:${event.fingerprint}`);
   }
 
-  if (event.rule_id) return sha256(`${event.source}:${event.rule_id}`);
+  if (event.fingerprint_fields?.length) {
+    const keyPart = event.fingerprint_fields.join('|');
+    const valuePart = event.fingerprint_fields
+      .map((field) => {
+        const value = getValueByDottedPath(event, field);
+        return value == null ? '' : String(value);
+      })
+      .join('|');
+    return sha256(`${spaceId}:${source}:${keyPart}|${valuePart}`);
+  }
 
-  throw new Error('Missing fingerprint, fingerprint_fields, or rule_id');
+  // Schema requires fingerprint, fingerprint_fields, or rule_id.
+  return sha256(`${spaceId}:${source}:${event.rule_id}`);
 }
 
 @injectable()
@@ -82,9 +89,7 @@ export class AlertEventsClient {
    */
   public async ingestAlertEvent(event: CreateAlertEventData): Promise<CreateAlertEventResponse> {
     const { source } = event;
-    const fingerprint = resolveFingerprint(event);
-    // spaceId scopes the hash to prevent cross-space group_hash collisions.
-    const groupHash = sha256(`${this.spaceId}:${source}:${fingerprint}`);
+    const groupHash = getGroupHash(event, this.spaceId);
 
     const episodeStatus = event.alert_status ?? alertEpisodeStatus.active;
     const episodeId = await this.resolveEpisodeId(groupHash, episodeStatus);
