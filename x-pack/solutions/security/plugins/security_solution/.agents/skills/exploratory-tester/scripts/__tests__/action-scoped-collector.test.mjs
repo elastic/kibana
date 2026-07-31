@@ -81,6 +81,26 @@ console.log('\n── 500 already surfaced via console → not double-reported �
   );
 }
 
+console.log('\n── 500 surfaced only via the browser\'s own auto-generated console message (no path in text) → still not double-reported ──');
+{
+  // Regression test for a real gap found during Task 8 live browser validation
+  // (browser_run_code_unsafe against a real fetch() 500 with no app-level error
+  // handling at all): Chromium auto-logs "Failed to load resource: the server
+  // responded with a status of 500 (Internal Server Error)" for every failed
+  // load, with NO path/URL in the text — unlike the "500 @ /api/foo" shape the
+  // action-500-already-surfaced fixture above uses. classify-console.js's own
+  // `\b50[0-9]\b` rule has no path requirement, so Detector B always classifies
+  // this message as a Level 1 server_error regardless of path. Before this
+  // fixture existed, `alreadySurfaced`'s path-match requirement meant this
+  // real, common message shape could never satisfy it, so the reducer wrongly
+  // emitted a second, differently-worded Level 1 finding for the same event.
+  const r = reduceAction(json('action-500-already-surfaced-browser-native'));
+  assert(
+    !r.level1.some((i) => i.type === 'silent_server_error'),
+    'action-500-already-surfaced-browser-native → no silent_server_error (browser-native message already covers it, even without a path)'
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // PENDING / STUCK / ABANDONED
 // ══════════════════════════════════════════════════════════════════════════

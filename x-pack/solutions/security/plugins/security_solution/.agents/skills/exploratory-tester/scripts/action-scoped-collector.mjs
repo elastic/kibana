@@ -148,6 +148,28 @@ export function redactUrl(url) {
   return `${base}?${redacted}${hash}`;
 }
 
+// Chromium (and Firefox) auto-generate this exact console message for every
+// failed resource load, regardless of whether app code logs anything of its
+// own — verified against a real browser via the browser_run_code_unsafe
+// bridge (see live-drain-scenario1-silent500.json). Critically, this
+// auto-generated text never includes the request's path/URL, unlike the
+// hand-authored "500 @ /api/foo"-style messages some app code produces.
+// classify-console.js's own `\b50[0-9]\b` rule has no path requirement
+// either, so this message ALWAYS makes Detector B report a Level 1
+// `server_error` for it — meaning any 5xx that produced this message is
+// already surfaced by console, full stop, regardless of path. Without
+// recognizing this pattern, `alreadySurfaced` below required a path match
+// that this real, common message shape can never satisfy, so the "avoid
+// double-reporting relative to Detector B" guard silently never fired for
+// the single most common form of a truly-unhandled failed request.
+//
+// Scoped to one specific status code (not a bare /Failed to load resource/
+// test) so that, when an action has multiple failed requests with different
+// statuses, a browser-native message for one status can't wrongly suppress
+// a genuinely-unsurfaced finding for a different status.
+const isBrowserNativeLoadFailureFor = (status, text) =>
+  new RegExp(`Failed to load resource:.*\\bresponded with a status of ${status}\\b`).test(text);
+
 // Pathname only (no scheme/host/query/hash) — this is what actually appears
 // in console-message text like "500 @ /api/foo", so it's what "already
 // surfaced via console" needs to match against, and it reads better in a
@@ -232,7 +254,9 @@ export function reduceAction(action, priorState) {
     // be misleading double-counting, not a second independent problem.
     for (const ev of events) {
       if (ev.status == null || ev.status < 500 || ev.abandonedByNavigation) continue;
-      const alreadySurfaced = new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(path);
+      const alreadySurfaced =
+        isBrowserNativeLoadFailureFor(ev.status, consoleText) ||
+        (new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(path));
       if (alreadySurfaced) continue;
       level1.push({
         type: 'silent_server_error',

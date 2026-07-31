@@ -3760,6 +3760,141 @@ print("200")
 
         self.assertEqual(cleanup_candidates(config), [owned])
 
+    def test_cross_session_cleanup_collision_on_a_shared_non_namespaced_resource(self):
+        """Live, end-to-end regression for Task 8's "cleanup collision" scenario.
+
+        `kibana_space` ids are always namespaced by `namespaced_flow_space_id`
+        (session id baked into the id itself), so two DIFFERENT sessions can
+        never collide on the same space id through create-flow-spaces.py — see
+        that function's own id derivation. A real collision is only possible
+        for kinds like `es_index`, whose ids are caller-chosen and can be
+        identical across sessions (e.g. a shared noise index two parallel
+        sessions both want and neither wants to leak).
+        Before this test, that scenario was only ever exercised as an
+        in-memory `cleanup_candidates()` call with a hand-inserted
+        "wrong-session" marker (see the test above) — never through two real,
+        independent on-disk session directories and the actual
+        cleanup-session-resources.py CLI end-to-end, which is what this test
+        adds. It asserts on curl's own invocation log, not just exit codes, so
+        it would catch a bug that produced the right exit code by accident
+        while still wrongly enqueuing a delete for a foreign session's own
+        resource.
+        """
+        with tempfile.TemporaryDirectory() as raw_dir:
+            root = Path(raw_dir)
+            shared_environment = {
+                "type": "managed",
+                "url": "https://kibana.example.test",
+                "es_url": "https://es.example.test",
+            }
+            shared_credentials = {"username": "elastic", "password": "changeme"}
+            shared_resource_id = "exploratory-testing-noise-index-1"
+            shared_endpoint = f"/{shared_resource_id}"
+
+            session_a = root / "session-a"
+            session_b = root / "session-b"
+            for session_dir, session_id in ((session_a, "sessionaaaa"), (session_b, "sessionbbbb")):
+                session_dir.mkdir()
+                (session_dir / "config.json").write_text(
+                    json.dumps(
+                        {
+                            "session_id": session_id,
+                            "mode": "single",
+                            "environment": shared_environment,
+                            "credentials": shared_credentials,
+                            "session_resources": [],
+                            "created_flow_spaces": [],
+                            "reused_flow_spaces": [],
+                        }
+                    ),
+                    encoding="utf-8",
+                )
+
+            # Session A is the one that actually creates the shared index
+            # (real HTTP 200 in a live run) — owned=True.
+            config_a = json.loads((session_a / "config.json").read_text(encoding="utf-8"))
+            register_resource(
+                config_a,
+                kind="es_index",
+                resource_id=shared_resource_id,
+                owned=True,
+                endpoint=shared_endpoint,
+                base_url="es_url",
+            )
+            (session_a / "config.json").write_text(json.dumps(config_a), encoding="utf-8")
+
+            # Session B runs independently/later, finds the SAME shared index
+            # already exists (real HTTP 409 in a live run) — owned=False, and
+            # must never claim cleanup rights over it.
+            config_b = json.loads((session_b / "config.json").read_text(encoding="utf-8"))
+            register_resource(
+                config_b,
+                kind="es_index",
+                resource_id=shared_resource_id,
+                owned=False,
+                endpoint=shared_endpoint,
+                base_url="es_url",
+            )
+            (session_b / "config.json").write_text(json.dumps(config_b), encoding="utf-8")
+
+            fake_curl = root / "curl"
+            fake_curl.write_text(
+                """#!/usr/bin/env python3
+import os
+import sys
+
+log_path = os.environ.get("FAKE_CURL_LOG")
+if log_path:
+    with open(log_path, "a", encoding="utf-8") as log:
+        log.write(" ".join(sys.argv[1:]) + "\\n")
+print("")
+print("200")
+""",
+                encoding="utf-8",
+            )
+            fake_curl.chmod(0o755)
+            environment = os.environ.copy()
+            environment["PATH"] = f"{root}{os.pathsep}{environment['PATH']}"
+
+            # Session B's cleanup — real run, not dry-run — must never invoke
+            # curl for the shared resource at all: no log file means no
+            # DELETE was ever attempted.
+            log_b = root / "curl-b.log"
+            environment_b = dict(environment, FAKE_CURL_LOG=str(log_b))
+            result_b = subprocess.run(
+                [sys.executable, str(CLEANUP_SCRIPT), "--session-dir", str(session_b)],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment_b,
+            )
+            self.assertEqual(result_b.returncode, 0, result_b.stderr)
+            self.assertIn("No owned session resources to clean up", result_b.stdout)
+            self.assertFalse(
+                log_b.exists(),
+                "session B must never call curl for a resource it does not own",
+            )
+
+            # Session A's cleanup must actually delete the resource it owns.
+            log_a = root / "curl-a.log"
+            environment_a = dict(environment, FAKE_CURL_LOG=str(log_a))
+            result_a = subprocess.run(
+                [sys.executable, str(CLEANUP_SCRIPT), "--session-dir", str(session_a)],
+                capture_output=True,
+                text=True,
+                check=False,
+                env=environment_a,
+            )
+            self.assertEqual(result_a.returncode, 0, result_a.stdout + result_a.stderr)
+            self.assertIn(f"Resource {shared_resource_id!r}: deleted", result_a.stdout)
+            self.assertTrue(log_a.exists(), "session A must call curl to delete its own resource")
+            self.assertIn(f"-X\nDELETE", log_a.read_text(encoding="utf-8").replace(" ", "\n"))
+
+            # Session B's own config must be completely untouched by A's cleanup.
+            final_b = json.loads((session_b / "config.json").read_text(encoding="utf-8"))
+            self.assertEqual(final_b["session_resources"][0]["state"], "reused")
+            self.assertNotIn("cleanup_status", final_b["session_resources"][0])
+
     def test_create_flow_spaces_separates_created_and_reused_spaces(self):
         with tempfile.TemporaryDirectory() as raw_dir:
             root = Path(raw_dir)
