@@ -3845,6 +3845,13 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.buildkite/scripts/steps/checks/notify_api_contract_owners.test.ts @elastic/kibana-core
 /.buildkite/scripts/steps/checks/unused_deps.sh @elastic/kibana-security
 /.buildkite/scripts/steps/checks/verify_codeowners_teams.ts @elastic/kibana-security
+/.buildkite/scripts/steps/checks/check_connector_specs.sh @elastic/response-ops
+/.buildkite/scripts/steps/checks/connector_release_check.js @elastic/response-ops
+/.buildkite/scripts/steps/checks/connector_release_check.test.js @elastic/response-ops
+/.buildkite/scripts/steps/checks/run_connector_release_check.js @elastic/response-ops
+/.buildkite/scripts/steps/checks/run_connector_release_check.test.js @elastic/response-ops
+/.buildkite/scripts/steps/checks/notify_connector_specs_changes.ts @elastic/response-ops
+/.buildkite/scripts/steps/checks/notify_connector_specs_changes.test.ts @elastic/response-ops
 /.buildkite/pipelines/performance/streams_weekly.yml @elastic/obs-sig-events-team @elastic/streams-ui
 /.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/streams-ui
 /.buildkite/pipeline-resource-definitions/kibana-streams-performance-weekly.yml @elastic/obs-sig-events-team @elastic/streams-ui

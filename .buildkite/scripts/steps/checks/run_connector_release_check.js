@@ -18,9 +18,11 @@
  *                SHAs, and fetch each distinct ref. Always runs, and always logs, so a
  *                CI run proves this path works even when the PR changes no connector.
  *   2. applicable which connectors this PR changes the *exposure* of, computed against
- *                `<merge-base>..HEAD` (never the latest commit) so that a fully reverted
- *                connector change becomes non-applicable and clears its advisory, while a
- *                later unrelated commit cannot hide an earlier unsafe change.
+ *                `<merge-base>..HEAD` (never the latest commit), so a later unrelated commit
+ *                cannot hide an earlier unsafe change and an unrelated edit does not inherit
+ *                an advisory caused by an earlier PR. Note the step is path-gated on connector
+ *                changes, so it cannot be relied on to run once a change is fully reverted;
+ *                the notifier therefore never deletes an existing comment.
  *   3. registered whether each applicable connector is exported from `all_specs.ts` at
  *                every PNC ref. Registration iterates that barrel, so a spec file that
  *                exists at a ref without being exported there was never registered.
@@ -220,7 +222,7 @@ const toPathSet = (output) =>
  * Connectors whose exposure this PR changes: newly added modules, modules newly exported from
  * the barrel, and modules whose `supportedFeatureIds` value changed. Always computed against
  * the merge base, so an unrelated edit to a connector left unpublished by an earlier PR does
- * not inherit that PR's advisory, and a fully reverted change becomes non-applicable.
+ * not inherit that PR's advisory.
  *
  * @returns {{known: boolean, connectors: Array<object>}}
  */

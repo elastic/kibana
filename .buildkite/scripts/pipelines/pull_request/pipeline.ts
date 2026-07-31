@@ -673,7 +673,6 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
         /^\.buildkite\/pipelines\/pull_request\/check_connector_specs\.yml/,
         // Trailing `\.` rather than a concrete extension, so `.test.js` / `.test.ts` match too.
         /^\.buildkite\/scripts\/steps\/checks\/(check_connector_specs|connector_release_check|run_connector_release_check|notify_connector_specs_changes)\./,
-        /^\.buildkite\/pipeline-utils\/github\/github\.ts/,
       ])
     ) {
       pipeline.push(

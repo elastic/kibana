@@ -10,22 +10,26 @@
 /**
  * Pure classifier for the connector 2-step release check.
  *
- * A connector type must be registered in every Production-NonCanary (PNC) Kibana
- * version before it can declare user-facing features. Serverless rollouts and
- * rollbacks leave nodes on different versions for a while, and an action persisted
- * against a connector type that a node does not have breaks on that node. Once the
- * type is registered in every PNC version, anything else is safe (every node can
- * already handle actions of that type).
+ * A connector type should be registered in every version currently pinned for the
+ * Production-NonCanary (PNC) slices before it declares user-facing features. Serverless
+ * rollouts and rollbacks leave nodes on different versions for a while, and an action
+ * persisted against a connector type that a node does not have breaks on that node.
+ * Once the type is registered in every pinned version, this advisory allows any
+ * `supportedFeatureIds`.
+ *
+ * The GitOps pins are an approximation of what is actually running, and this check only
+ * decides whether feature exposure is allowed — it is not a guarantee about any node.
  *
  * This module is pure. The runner resolves the PNC versions, decides which connectors
  * this PR makes applicable, and hands plain data here.
  */
 
-// ponytail: allowlist, not a config file — these are the only feature ids safe to ship
-// on a connector that is not yet registered in every PNC version, because they persist
-// no rollback-fragile user actions.
-// NOTE: `agentBuilder` is allowlisted only while the feature is not yet GA. Revisit and
-// remove this entry once agentBuilder reaches GA.
+// ponytail: allowlist, not a config file — these are the only feature ids allowed on a
+// connector that is not yet registered in every pinned PNC version.
+// NOTE: `agentBuilder` is allowlisted only while the feature is not yet GA. Its execution is
+// request-scoped and schedules no durable background work, so a rollback cannot leave
+// scheduled work behind pointing at a missing type. Revisit and remove this entry once
+// agentBuilder reaches GA.
 const ALLOWED_INITIAL_FEATURE_IDS = ['agentBuilder'];
 
 const shortSha = (sha) => sha.slice(0, 12);
@@ -56,7 +60,7 @@ function classifyConnectorRelease(applicableConnectors, release = {}, opts = {})
   const findings = [];
 
   for (const connector of applicableConnectors) {
-    // Registered in every PNC version → every node can handle actions of this type.
+    // Registered in every pinned PNC version → this advisory allows any feature ids.
     const missingFromRefs = connector.missingFromRefs ?? [];
     if (missingFromRefs.length === 0) continue;
 
@@ -70,11 +74,12 @@ function classifyConnectorRelease(applicableConnectors, release = {}, opts = {})
       disallowedFeatureIds,
       missingFromRefs,
       message:
-        `Connector \`${connector.id}\` is not registered in Production-NonCanary ` +
-        `(missing from ${missingFromRefs.map(shortSha).join(', ')}) but already declares ` +
-        `feature(s) [${disallowedFeatureIds.join(', ')}]. Ship it with ` +
-        `\`supportedFeatureIds: []\`${allowedHint} first; once it is registered in every ` +
-        `Production-NonCanary version, add the remaining feature IDs in a follow-up PR.`,
+        `Connector \`${connector.id}\` is not registered in every version currently pinned for ` +
+        `the Production-NonCanary slices (missing from ${missingFromRefs
+          .map(shortSha)
+          .join(', ')}) but already declares feature(s) [${disallowedFeatureIds.join(', ')}]. ` +
+        `Ship it with \`supportedFeatureIds: []\`${allowedHint} first; once it is registered in ` +
+        `every pinned version, add the remaining feature IDs in a follow-up PR.`,
     });
   }
 

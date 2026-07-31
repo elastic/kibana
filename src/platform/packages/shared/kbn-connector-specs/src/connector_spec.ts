@@ -67,13 +67,15 @@ export interface ConnectorMetadata {
   /**
    * Features this connector type is exposed through.
    *
-   * A brand-new connector type must reach Production-NonCanary before it can declare
+   * A brand-new connector type should reach Production-NonCanary before it declares
    * user-facing features: serverless rollouts and rollbacks leave nodes on different Kibana
    * versions for a while, and a user action referencing a type a node does not have breaks
-   * on that node. Ship a new connector with `['agentBuilder']`, or `[]` when it is
-   * Workflows-only (a support-only state: registered and executable, but hidden from pickers
-   * and not creatable), then add the remaining feature IDs in a follow-up PR. See the
-   * "Intermediate release state" section of the package README.
+   * on that node. So ship a new connector with `['agentBuilder']`, then add the remaining
+   * feature IDs in a follow-up PR.
+   *
+   * An empty array is the support-only state, for any connector that should not be exposed
+   * through Agent Builder initially: the type is registered and executable, but hidden from
+   * connector pickers and not creatable, so no user action can reference it yet.
    */
   supportedFeatureIds: Array<
     | 'alerting'

@@ -8,7 +8,7 @@
  */
 
 import { readFileSync, existsSync } from 'fs';
-import { upsertComment, removeComment } from '#pipeline-utils';
+import { upsertComment } from '#pipeline-utils';
 
 /**
  * Report shape produced by run_connector_release_check.js. Inlined here (rather than
@@ -39,14 +39,17 @@ const COMMENT_CONTEXT = 'connector-specs-check';
 const ADVISORY_NOTE =
   '> [!NOTE]\n' +
   '> This is **advisory** — it does not block the PR. It checks the 2-step release policy ' +
-  'for connector types: until a type is registered in every Production-NonCanary version, a ' +
-  'rollout or rollback can leave a node without it, breaking any user action that references it.';
+  'for connector types: until a type is registered in every version currently pinned for the ' +
+  'Production-NonCanary slices, a rollout or rollback can leave a node without it, breaking any ' +
+  'user action that references it.';
 
 const shortSha = (sha: string) => sha.slice(0, 12);
 
 const inspectedVersions = (refs: string[]) =>
   refs.length > 0
-    ? `Production-NonCanary versions inspected: ${refs.map(shortSha).join(', ')}.`
+    ? `Versions currently pinned for the Production-NonCanary slices: ${refs
+        .map(shortSha)
+        .join(', ')}.`
     : 'No Production-NonCanary versions were inspected.';
 
 export function buildUnsafeBody(report: ConnectorReleaseReport): string {
@@ -88,9 +91,10 @@ ${inspectedVersions(report.refs)}`;
 }
 
 export function buildCommentBody(report: ConnectorReleaseReport): string | null {
-  // Nothing connector-shaped changed (a lib, docs, or icon edit), so there is nothing to say.
-  // The caller removes any stale advisory in this case.
-  if (report.applicableConnectors.length === 0) {
+  // Nothing to say: either applicability could not be determined, or this PR changed no connector
+  // exposure (a lib, docs, or icon edit). Any existing comment is left alone — the step is
+  // path-gated on connector changes, so it cannot be relied on to run and clean up after itself.
+  if (!report.applicabilityKnown || report.applicableConnectors.length === 0) {
     return null;
   }
 
@@ -101,25 +105,6 @@ export function buildCommentBody(report: ConnectorReleaseReport): string | null 
     return buildInconclusiveBody(report);
   }
   return buildSafeBody(report);
-}
-
-/**
- * What to do with the PR comment for this report.
- *  - `skip`:   applicability is unknown, so leave whatever is on the PR alone rather than
- *              deleting a valid advisory or posting one off incomplete data.
- *  - `remove`: this PR changes no connector exposure, so a previous advisory (from a change
- *              that has since been reverted) must not outlive it.
- *  - `post`:   upsert the outcome, replacing any stale advisory.
- */
-export function resolveAction(
-  report: ConnectorReleaseReport
-): { action: 'skip' } | { action: 'remove' } | { action: 'post'; body: string } {
-  if (!report.applicabilityKnown) {
-    return { action: 'skip' };
-  }
-
-  const body = buildCommentBody(report);
-  return body ? { action: 'post', body } : { action: 'remove' };
 }
 
 async function main() {
@@ -142,26 +127,15 @@ async function main() {
     return;
   }
 
-  const resolved = resolveAction(report);
-
-  if (resolved.action === 'skip') {
-    console.log('Applicability could not be determined; leaving any existing comment untouched.');
-    return;
-  }
-
-  if (resolved.action === 'remove') {
-    const removed = await removeComment(COMMENT_CONTEXT);
-    console.log(
-      removed
-        ? 'No connector exposure changed; removed the stale connector spec release advisory.'
-        : 'No connector exposure changed; nothing to post.'
-    );
+  const body = buildCommentBody(report);
+  if (!body) {
+    console.log('Nothing to report for this PR; leaving any existing comment untouched.');
     return;
   }
 
   console.log(`Posting connector spec release check comment (${report.status})...`);
   await upsertComment({
-    commentBody: resolved.body,
+    commentBody: body,
     commentContext: COMMENT_CONTEXT,
     clearPrevious: true,
   });

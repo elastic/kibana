@@ -9,12 +9,10 @@
 
 jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
-  removeComment: jest.fn(),
 }));
 
 import {
   buildCommentBody,
-  resolveAction,
   type ConnectorReleaseFinding,
   type ConnectorReleaseReport,
 } from './notify_connector_specs_changes';
@@ -115,30 +113,16 @@ describe('buildCommentBody', () => {
   });
 });
 
-describe('resolveAction', () => {
-  it('posts the advisory when a connector exposure changed', () => {
-    expect(resolveAction(report({ status: 'unsafe', findings: [finding()] }))).toEqual({
-      action: 'post',
-      body: expect.stringContaining('needs attention'),
-    });
+describe('buildCommentBody, no-comment cases', () => {
+  it('says nothing when applicability could not be determined', () => {
+    // Posting off an unknown diff would be guesswork, and the step is path-gated so it cannot be
+    // relied on to run again and correct itself.
+    expect(
+      buildCommentBody(report({ applicabilityKnown: false, status: 'inconclusive' }))
+    ).toBeNull();
   });
 
-  it('posts the safe outcome so it replaces a stale warning from an earlier run', () => {
-    expect(resolveAction(report())).toEqual({
-      action: 'post',
-      body: expect.stringContaining('no issues found'),
-    });
-  });
-
-  it('removes an existing advisory once every applicable connector change is reverted', () => {
-    // Applicability is computed against the merge base, so a fully reverted connector change
-    // leaves nothing applicable and the earlier warning must not outlive it.
-    expect(resolveAction(report({ applicableConnectors: [] }))).toEqual({ action: 'remove' });
-  });
-
-  it('leaves an existing advisory alone when applicability is unknown', () => {
-    expect(resolveAction(report({ applicabilityKnown: false, status: 'inconclusive' }))).toEqual({
-      action: 'skip',
-    });
+  it('says nothing when this PR changed no connector exposure', () => {
+    expect(buildCommentBody(report({ applicableConnectors: [] }))).toBeNull();
   });
 });
