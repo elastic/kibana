@@ -36,6 +36,38 @@ describe('transformAttackDiscoveryAlertDocumentToApi', () => {
     'kibana.alert.attack_discovery.title_with_replacements': 'title',
   } as const;
 
+  it('reads the confidence object back off the alert document', () => {
+    const confidence = {
+      band: 'high' as const,
+      factors: [{ name: 'evidence_breadth', assessment: '2 datasets', weight: 0.6 }],
+      rationale: 'Coherent multi-stage chain across process and network.',
+      score: 0.82,
+    };
+
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: {
+        ...baseDoc,
+        'kibana.alert.attack_discovery.confidence': confidence,
+      },
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.confidence).toEqual(confidence);
+  });
+
+  it('returns undefined confidence when the alert document has none', () => {
+    const result = transformAttackDiscoveryAlertDocumentToApi({
+      attackDiscoveryAlertDocument: baseDoc,
+      enableFieldRendering: true,
+      id: 'id-1',
+      withReplacements: false,
+    });
+
+    expect(result.confidence).toBeUndefined();
+  });
+
   it('returns rendered details_markdown when enableFieldRendering is false', () => {
     const result = transformAttackDiscoveryAlertDocumentToApi({
       attackDiscoveryAlertDocument: baseDoc,

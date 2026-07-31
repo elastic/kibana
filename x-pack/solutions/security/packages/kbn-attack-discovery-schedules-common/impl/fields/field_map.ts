@@ -22,6 +22,15 @@ import {
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_SCORE,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_BAND,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_RATIONALE,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_NAME,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_ASSESSMENT,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_WEIGHT,
+  ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_EVIDENCE,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS_VALUE,
@@ -127,6 +136,53 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: {
     type: 'keyword',
     array: true,
+    required: false,
+  },
+  // Optional calibrated confidence object. MUST stay byte-identical to the
+  // kbn-discoveries alert field map (the two indices share a generated schema).
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE]: {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_SCORE]: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_BAND]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_RATIONALE]: {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS]: {
+    type: 'nested',
+    array: true,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_NAME]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_ASSESSMENT]: {
+    type: 'text',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_WEIGHT]: {
+    type: 'float',
+    array: false,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_CONFIDENCE_FACTORS_EVIDENCE]: {
+    type: 'text',
+    array: false,
     required: false,
   },
   [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: {

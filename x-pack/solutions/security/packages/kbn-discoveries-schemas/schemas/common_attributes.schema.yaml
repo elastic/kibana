@@ -46,6 +46,51 @@ components:
       additionalProperties:
         type: string
 
+    ConfidenceFactor:
+      type: object
+      description: A single contributing factor behind a confidence score
+      required:
+        - name
+        - assessment
+      properties:
+        name:
+          type: string
+          maxLength: 1024
+        assessment:
+          type: string
+          maxLength: 4096
+        weight:
+          type: number
+        evidence:
+          type: string
+          maxLength: 4096
+
+    Confidence:
+      type: object
+      description: Calibrated confidence for an attack discovery (how sure it is real; orthogonal to severity)
+      required:
+        - score
+        - rationale
+        - factors
+      properties:
+        score:
+          type: number
+          description: Confidence from 0.0 (not sure) to 1.0 (certain)
+        band:
+          type: string
+          enum:
+            - high
+            - medium
+            - low
+        rationale:
+          type: string
+          maxLength: 4096
+        factors:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ConfidenceFactor'
+
     Provider:
       type: string
       description: LLM Provider

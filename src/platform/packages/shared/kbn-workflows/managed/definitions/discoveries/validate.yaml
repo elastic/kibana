@@ -96,7 +96,22 @@ steps:
       generation_uuid: ${{ inputs.generation_uuid }}
       replacements: ${{ inputs.replacements }}
 
-  # Step 2: Persist validated discoveries to the Elasticsearch index
+  # Step 2: Annotate each validated discovery with a calibrated confidence score.
+  # Always present; gated internally by the `attackDiscoveryConfidenceEnabled`
+  # feature flag (no-op pass-through when OFF), so persist can read it
+  # unconditionally.
+  - name: score_confidence
+    type: security.attack-discovery.confidence
+    timeout: '5m'
+    with:
+      anonymized_alerts: ${{ inputs.anonymized_alerts }}
+      api_config: ${{ inputs.api_config }}
+      attack_discoveries: ${{ steps.validate_discoveries.output.validated_discoveries }}
+      connector_name: ${{ inputs.connector_name }}
+      generation_uuid: ${{ inputs.generation_uuid }}
+      replacements: ${{ inputs.replacements }}
+
+  # Step 3: Persist validated (and confidence-annotated) discoveries to the index
   - name: persist_discoveries
     type: security.attack-discovery.persistDiscoveries
     timeout: '5m'
@@ -104,7 +119,7 @@ steps:
       alerts_context_count: ${{ inputs.alerts_context_count }}
       anonymized_alerts: ${{ inputs.anonymized_alerts }}
       api_config: ${{ inputs.api_config }}
-      attack_discoveries: ${{ steps.validate_discoveries.output.validated_discoveries }}
+      attack_discoveries: ${{ steps.score_confidence.output.attack_discoveries }}
       connector_name: ${{ inputs.connector_name }}
       enable_field_rendering: ${{ inputs.enable_field_rendering }}
       generation_uuid: ${{ inputs.generation_uuid }}

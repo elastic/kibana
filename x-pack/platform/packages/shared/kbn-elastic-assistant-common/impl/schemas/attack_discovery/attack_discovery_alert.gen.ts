@@ -16,6 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+import { Confidence } from './common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 import { NonEmptyTimestamp, User } from '../common_attributes.gen';
 
@@ -84,6 +85,10 @@ export const AttackDiscoveryAlert = lazySchema(() =>
      * An optional array of MITRE ATT&CK tactic for the attack discovery
      */
     mitreAttackTactics: z.array(z.string()).optional(),
+    /**
+     * Optional calibrated confidence for this attack discovery
+     */
+    confidence: Confidence.optional(),
     /**
      * Key-value pairs that are used to replace placeholders in the markdown fields
      */
