@@ -6,19 +6,13 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { ScoutPage, Locator } from '@kbn/scout';
-
-const CHROME_NEXT_HEADER = 'chromeNextGlobalHeader';
+import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
 
 export class PageNavigation {
   readonly allBreadcrumbs: Locator;
 
-  constructor(private readonly page: ScoutPage) {
+  constructor(private readonly page: ScoutPage, private readonly chrome: PageObjects['chrome']) {
     this.allBreadcrumbs = page.testSubj.locator('~breadcrumb');
-  }
-
-  async isChromeNext(): Promise<boolean> {
-    return this.page.testSubj.locator(CHROME_NEXT_HEADER).isVisible();
   }
 
   async expectClassicBreadcrumbTexts(expectedTexts: string[]): Promise<void> {
@@ -45,7 +39,7 @@ export class PageNavigation {
     await expect(options.pageHeader).toBeVisible();
     await this.expectPageUrlContains(options.urlPath);
 
-    if (await this.isChromeNext()) {
+    if (await this.chrome.isNextChrome()) {
       return;
     }
 

@@ -22,7 +22,6 @@ export class ObservabilityNavigation {
   public readonly primaryNav: Locator;
   public readonly footerNav: Locator;
   public readonly morePopover: Locator;
-  public readonly logo: Locator;
   public readonly moreMenuTrigger: Locator;
 
   constructor(private readonly page: ScoutPage) {
@@ -30,7 +29,6 @@ export class ObservabilityNavigation {
     this.primaryNav = this.page.testSubj.locator('kbnChromeNav-primaryNavigation');
     this.footerNav = this.page.testSubj.locator('kbnChromeNav-footer');
     this.morePopover = this.page.testSubj.locator('side-nav-popover-More');
-    this.logo = this.page.testSubj.locator('nav-header-logo');
     this.moreMenuTrigger = this.page.testSubj.locator('kbnChromeNav-moreMenuTrigger');
   }
 
@@ -124,13 +122,6 @@ export class ObservabilityNavigation {
     );
   }
 
-  pageTitle(): Locator {
-    return this.page.testSubj
-      .locator('appHeaderTitle')
-      .or(this.page.locator('.euiPageHeader h1.euiTitle'))
-      .filter({ visible: true });
-  }
-
   sidePanel(id: string): Locator {
     return this.page.testSubj.locator(`~kbnChromeNav-sidePanel_${id}`);
   }
@@ -151,10 +142,6 @@ export class ObservabilityNavigation {
     }
     await this.moreMenuTrigger.click();
     await this.morePopover.waitFor({ state: 'visible' });
-  }
-
-  async clickLogo() {
-    await this.logo.click();
   }
 
   /** Returns a function that is false after a full page reload (spec asserts). */

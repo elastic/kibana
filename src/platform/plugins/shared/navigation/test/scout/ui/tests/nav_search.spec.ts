@@ -41,18 +41,13 @@ test.describe('nav search', { tag: tags.stateful.classic }, () => {
     await apiServices.spaces.delete(SPACE.id).catch(() => {});
   });
 
-  test('opens search and selects a result', async ({ page, browserAuth, kbnUrl }) => {
+  test('opens search and selects a result', async ({ page, browserAuth, kbnUrl, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await page.goto(kbnUrl.app('home', { space: SPACE.id }));
 
-    await page.testSubj
-      .locator('chromeNextGlobalHeaderSearchButton')
-      .or(page.testSubj.locator('nav-search-reveal'))
-      .click();
-    await page.testSubj.fill('nav-search-input', 'dashboards');
-    await page
-      .locator(`[data-test-subj="nav-search-option"][url="/s/${SPACE.id}/app/dashboards"]`)
-      .click();
+    await pageObjects.chrome.openSearch();
+    await pageObjects.chrome.search('dashboards');
+    await pageObjects.chrome.searchOptionByUrl(`/s/${SPACE.id}/app/dashboards`).click();
 
     await page.waitForURL(/app\/dashboards/);
     expect(page.url()).toContain('app/dashboards');

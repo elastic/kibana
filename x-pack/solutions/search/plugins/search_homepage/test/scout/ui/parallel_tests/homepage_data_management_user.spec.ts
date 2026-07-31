@@ -48,18 +48,15 @@ spaceTest.describe(
       }
     );
 
-    spaceTest('should only see expected primary sidenav items', async ({ page }) => {
-      const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
-      const navItems = primaryNav.locator('[data-test-subj*="nav-item-id-"]');
-      const homeLink = primaryNav.locator('[data-test-subj~="nav-item-id-searchHomepage"]');
-      const dataManagementLink = primaryNav.locator(
-        '[data-test-subj~="nav-item-id-data_management"]'
-      );
-      const isChromeNext = await page.testSubj.locator('chromeNextGlobalHeader').isVisible();
+    spaceTest('should only see expected primary sidenav items', async ({ pageObjects }) => {
+      const { chrome } = pageObjects;
+      const isChromeNext = await chrome.isNextChrome();
 
-      await expect(navItems).toHaveCount(Number(isChromeNext) + 1);
-      await expect(dataManagementLink).toBeVisible();
-      await expect(homeLink).toBeVisible({ visible: isChromeNext });
+      await expect(chrome.primaryNavigationItems).toHaveCount(Number(isChromeNext) + 1);
+      await expect(chrome.navItemInPrimaryById('data_management')).toBeVisible();
+      await expect(chrome.navItemInPrimaryById('searchHomepage')).toBeVisible({
+        visible: isChromeNext,
+      });
     });
   }
 );

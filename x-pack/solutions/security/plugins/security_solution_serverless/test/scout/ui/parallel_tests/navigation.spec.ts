@@ -22,7 +22,7 @@ spaceTest.describe(
     spaceTest(
       'security serverless navigation, Launchpad panel, and active nav highlight',
       async ({ page, pageObjects, browserAuth }) => {
-        const { serverlessProjectChromePage, collapsibleNav } = pageObjects;
+        const { serverlessProjectChromePage, collapsibleNav, chrome } = pageObjects;
 
         await browserAuth.loginAsPrivilegedUser();
         await serverlessProjectChromePage.navigateToSecuritySolutionHomeForChromeNav();
@@ -36,13 +36,13 @@ spaceTest.describe(
           await collapsibleNav.getNavItemById('securityGroup:alertDetections').click();
           await collapsibleNav.clickNavItemByDeepLinkId('securitySolutionUI:alerts');
           await page.waitForURL(/\/app\/security\/alerts/);
-          await expect(serverlessProjectChromePage.pageTitle).toHaveText('Alerts');
+          await expect(chrome.pageTitle).toHaveText('Alerts');
           await expect(
             serverlessProjectChromePage.activeNavItemInBodyByDeepLinkId('securitySolutionUI:alerts')
           ).toBeVisible();
 
           const alertsUrl = page.url();
-          await serverlessProjectChromePage.clickLogo();
+          await chrome.clickLogo();
           await expect(page).not.toHaveURL(alertsUrl);
         });
 

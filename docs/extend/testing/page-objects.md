@@ -38,6 +38,10 @@ test.describe('My suite', { tag: tags.deploymentAgnostic }, () => {
 - Solution Scout packages may provide additional page objects (their internal folder layout varies—search within the package for `page_objects` if you need the source).
 - Plugin-local page objects: `<plugin-root>/test/scout/ui/fixtures/page_objects`
 
+Use `pageObjects.chrome` for Kibana Chrome interactions such as global search, page titles,
+badges, the logo, and primary navigation. Keep application routes, readiness signals, and
+solution-specific navigation in local page objects.
+
 To make your page object available as `pageObjects.newPage`, register it in your plugin fixtures.
 
 ## Create and register a new page object in your plugin

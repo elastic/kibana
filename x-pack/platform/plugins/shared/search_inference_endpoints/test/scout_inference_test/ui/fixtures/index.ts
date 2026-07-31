@@ -54,7 +54,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
       featureSettings: createLazyPageObject(FeatureSettingsPage, page),
       eisModels: createLazyPageObject(EisModelsPage, page),
       externalInference: createLazyPageObject(ExternalInferencePage, page),
-      navigation: createLazyPageObject(PageNavigation, page),
+      navigation: createLazyPageObject(PageNavigation, page, pageObjects.chrome),
     };
 
     await use(extendedPageObjects);
@@ -80,7 +80,7 @@ export const spaceTest = spaceBase.extend<
       featureSettings: createLazyPageObject(FeatureSettingsPage, page),
       eisModels: createLazyPageObject(EisModelsPage, page),
       externalInference: createLazyPageObject(ExternalInferencePage, page),
-      navigation: createLazyPageObject(PageNavigation, page),
+      navigation: createLazyPageObject(PageNavigation, page, pageObjects.chrome),
     };
 
     await use(extendedPageObjects);

@@ -31,15 +31,4 @@ export class FeatureControlsPage {
   async waitForApmToLoad() {
     await this.apmMainContainer.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
   }
-
-  public get readOnlyBadge() {
-    const classicBadge = this.page
-      .getByTestId('headerBadge')
-      .and(this.page.locator('[data-test-badge-label="Read only"]'));
-    const chromeNextBadge = this.page
-      .getByTestId('appHeaderBadge')
-      .filter({ hasText: 'Read only' });
-
-    return classicBadge.or(chromeNextBadge).filter({ visible: true });
-  }
 }

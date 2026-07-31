@@ -12,15 +12,6 @@ import type { ScoutPage } from '@kbn/scout';
 export class Navigation {
   constructor(private readonly page: ScoutPage) {}
 
-  async clickLogo() {
-    await this.page.testSubj.locator('nav-header-logo').waitFor({ state: 'visible' });
-    await this.page.testSubj.click('nav-header-logo');
-  }
-
-  getSidenav() {
-    return this.page.testSubj.locator('kbnChromeLayoutNavigation');
-  }
-
   async openUserMenu() {
     await this.page.testSubj.click('userMenuButton');
     await this.page.testSubj.locator('userMenu').waitFor({ state: 'visible' });
