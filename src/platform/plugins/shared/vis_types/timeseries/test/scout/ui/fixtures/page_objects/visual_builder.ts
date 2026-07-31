@@ -49,7 +49,12 @@ const REPEATED = {
   chartCanvas: '.echChart canvas:last-of-type',
 } as const;
 
-/** Playwright's positional selector; `-1` addresses the last match. */
+/**
+ * Picks the match at `index` through Playwright's positional selector, the form the
+ * `playwright/no-nth-methods` rule leaves available. Position is what the elements
+ * above have to be told apart by, since each of them is the same component repeated
+ * under one `data-test-subj`.
+ */
 const at = (selector: string, index: number) => `${selector} >> nth=${index}`;
 
 /**
@@ -125,7 +130,7 @@ export class VisualBuilder {
   private async switchEditorTab(panelType: PanelType, tab: EditorTab) {
     const tabButton = this.page.testSubj.locator(`${panelType}Editor${tab}Btn`);
     await tabButton.click();
-    await expect(tabButton).toHaveClass(/euiTab-isSelected/);
+    await expect(tabButton).toHaveAttribute('aria-selected', 'true');
   }
 
   // ============================================================
