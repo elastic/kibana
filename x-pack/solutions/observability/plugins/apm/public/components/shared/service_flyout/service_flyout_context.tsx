@@ -54,7 +54,8 @@ export interface ServiceFlyoutContextValue {
   // Resolved once on open — drives conditional rendering throughout the flyout
   capabilities: ServiceFlyoutCapabilities;
   // APM index patterns — fetched once at the top level and shared to avoid duplicate requests
-  indices: APMIndices | undefined;
+  // undefined = still loading, null = fetch failed, APMIndices = ready
+  indices: APMIndices | null | undefined;
   // Mutable query scope — changes stay local to the flyout and do not propagate to the host
   filters: {
     environment: Environment;

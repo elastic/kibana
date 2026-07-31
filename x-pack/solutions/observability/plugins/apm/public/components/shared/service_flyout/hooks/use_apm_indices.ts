@@ -11,12 +11,13 @@ import type { APMIndices } from '@kbn/apm-sources-access-plugin/common/config_sc
 
 export function useApmIndices({ http }: { http: HttpStart }): {
   indices: APMIndices | undefined;
+  loading: boolean;
 } {
-  const { value } = useAbortableAsync(
+  const { value, loading } = useAbortableAsync(
     ({ signal }) =>
       http.fetch<APMIndices>('/internal/apm-sources/settings/apm-indices', { signal }),
     [http]
   );
 
-  return { indices: value };
+  return { indices: value, loading };
 }

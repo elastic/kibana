@@ -9,6 +9,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiSkeletonTitle,
   EuiSpacer,
@@ -18,6 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { ServiceFlyoutTransactionsSection } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useMemo, useState } from 'react';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import type { LensESQLConfig } from './types';
@@ -39,6 +41,10 @@ const INFRASTRUCTURE_METRICS_SECTION_TITLE = i18n.translate(
   { defaultMessage: 'Infrastructure metrics' }
 );
 
+const CHARTS_LOAD_ERROR = i18n.translate('xpack.apm.serviceFlyout.chartsUnavailable', {
+  defaultMessage: 'Unable to load charts',
+});
+
 const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
   'xpack.apm.serviceFlyout.infrastructureMetricsSectionTooltip',
   {
@@ -46,6 +52,30 @@ const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
       'Infrastructure metrics reflect system-level data and are not filtered by transaction type.',
   }
 );
+
+function LensChartsSkeleton({
+  count,
+  'data-test-subj': testSubj,
+}: {
+  count: number;
+  'data-test-subj': string;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      data-test-subj={testSubj}
+      css={css`
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: ${euiTheme.size.m};
+      `}
+    >
+      {Array.from({ length: count }, (_, i) => (
+        <EuiSkeletonRectangle key={i} width="100%" height={200} borderRadius="m" />
+      ))}
+    </div>
+  );
+}
 
 interface FlyoutLensChartDefinition {
   id: string;
@@ -59,6 +89,8 @@ function ServiceFlyoutChartsSection({
   title,
   description,
   charts,
+  isLoading,
+  hasError,
   rangeFrom,
   rangeTo,
   refreshToken,
@@ -67,6 +99,8 @@ function ServiceFlyoutChartsSection({
   title: string;
   description?: string;
   charts: FlyoutLensChartDefinition[];
+  isLoading: boolean;
+  hasError: boolean;
   rangeFrom: string;
   rangeTo: string;
   refreshToken: number;
@@ -86,33 +120,46 @@ function ServiceFlyoutChartsSection({
             <h3>{title}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        {description ? (
+        {description && (
           <EuiFlexItem grow={false}>
             <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
           </EuiFlexItem>
-        ) : null}
+        )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <div
-        css={css`
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: ${euiTheme.size.m};
-        `}
-      >
-        {charts.map((chart) => (
-          <ServiceFlyoutLensChart
-            key={chart.id}
-            id={chart.id}
-            title={chart.title}
-            titleAction={chart.titleAction}
-            config={chart.config}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            refreshToken={refreshToken}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <LensChartsSkeleton
+          count={charts.length}
+          data-test-subj={`serviceFlyoutSection-${id}-skeleton`}
+        />
+      ) : hasError ? (
+        <KbnWarningCallout
+          size="s"
+          data-test-subj={`serviceFlyoutSection-${id}-error`}
+          title={CHARTS_LOAD_ERROR}
+        />
+      ) : (
+        <div
+          css={css`
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: ${euiTheme.size.m};
+          `}
+        >
+          {charts.map((chart) => (
+            <ServiceFlyoutLensChart
+              key={chart.id}
+              id={chart.id}
+              title={chart.title}
+              titleAction={chart.titleAction}
+              config={chart.config}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              refreshToken={refreshToken}
+            />
+          ))}
+        </div>
+      )}
     </>
   );
 }
@@ -139,7 +186,7 @@ export function ServiceFlyoutOverview() {
   const { keyMetrics, infrastructureMetrics } = useMemo(
     () =>
       getChartDefinitions({
-        indices,
+        indices: indices ?? undefined,
         schema: capabilities.schema,
         serviceName: service.name,
         environment,
@@ -187,6 +234,8 @@ export function ServiceFlyoutOverview() {
             id="keyMetrics"
             title={KEY_METRICS_SECTION_TITLE}
             charts={keyMetrics}
+            isLoading={indices === undefined}
+            hasError={indices === null}
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             refreshToken={refreshToken}
@@ -206,6 +255,8 @@ export function ServiceFlyoutOverview() {
                 title={INFRASTRUCTURE_METRICS_SECTION_TITLE}
                 description={INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION}
                 charts={infrastructureMetrics}
+                isLoading={indices === undefined}
+                hasError={indices === null}
                 rangeFrom={rangeFrom}
                 rangeTo={rangeTo}
                 refreshToken={refreshToken}
