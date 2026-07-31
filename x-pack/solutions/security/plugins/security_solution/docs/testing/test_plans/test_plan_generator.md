@@ -100,8 +100,8 @@ Either way, the integration is managed by Cursor — no manual `mcp.json` entry 
     "args": ["-y", "figma-developer-mcp", "--figma-api-key=…", "--stdio"]
   }
   ```
-  before enabling Cursor Integrations. Otherwise Cursor connects to Framelink's server, the skill's Figma calls fail with "tool not found", and the setup silently falls back to metadata-less scenarios.
-- **Figma Desktop local dev-mode MCP entry.** If your `mcp.json` has an entry pointing at `http://127.0.0.1:3845/mcp` (Figma Desktop's local MCP server), remove it before enabling Cursor Integrations — for the reason called out above, it is not a drop-in replacement for URL-driven fetches and can silently target the wrong file.
+  before running either supported flow from Step 3. Otherwise Cursor connects to Framelink's server, the skill's Figma calls fail with "tool not found", and the setup silently falls back to metadata-less scenarios.
+- **Figma Desktop local dev-mode MCP entry.** If your `mcp.json` has an entry pointing at `http://127.0.0.1:3845/mcp` (Figma Desktop's local MCP server), remove it before running either supported flow from Step 3 — for the reason called out above, it is not a drop-in replacement for URL-driven fetches and can silently target the wrong file.
 
 > If Figma shows as disconnected in Cursor Settings → MCP, sign out of the integration and reconnect. If `mcp.json` has other entries and Cursor reports a JSON error, validate with [jsonlint.com](https://jsonlint.com).
 
