@@ -36,8 +36,7 @@ FROM ai-index-*
 | SORT ki_count DESC
 ```
 
-The same works for `tags`. Multi-valued fields are expanded automatically, so each tag gets
-its own row:
+The same works for `tags`:
 
 ```esql
 FROM ai-index-*
