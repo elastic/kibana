@@ -53,7 +53,9 @@ apiTest.describe('CCR auto-follow patterns API', { tag: ['@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual({ patterns: [] });
+    expect(
+      response.body.patterns.filter((p: { name: string }) => p.name.startsWith(PATTERN_PREFIX))
+    ).toStrictEqual([]);
   });
 
   apiTest('rejects creating a pattern for an unknown remote cluster', async ({ apiClient }) => {

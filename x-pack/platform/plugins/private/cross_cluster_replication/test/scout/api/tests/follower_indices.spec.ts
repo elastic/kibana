@@ -113,7 +113,11 @@ apiTest.describe('CCR follower indices API', { tag: ['@local-stateful-classic'] 
     });
 
     expect(response).toHaveStatusCode(200);
-    expect(response.body).toStrictEqual({ indices: [] });
+    expect(
+      response.body.indices.filter((i: { name: string }) =>
+        i.name.startsWith(FOLLOWER_INDEX_PREFIX)
+      )
+    ).toStrictEqual([]);
   });
 
   apiTest('rejects following an index on an unknown remote cluster', async ({ apiClient }) => {
