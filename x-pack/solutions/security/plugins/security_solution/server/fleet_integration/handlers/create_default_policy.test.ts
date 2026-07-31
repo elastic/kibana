@@ -13,7 +13,10 @@ import { LicenseService } from '../../../common/license';
 import { createDefaultPolicy } from './create_default_policy';
 import { ProtectionModes } from '../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../common/endpoint/types';
-import { policyFactory } from '../../../common/endpoint/models/policy_config';
+import {
+  policyFactory,
+  policyFactoryWithoutPaidEnterpriseFeatures,
+} from '../../../common/endpoint/models/policy_config';
 import * as PolicyConfigHelpers from '../../../common/endpoint/models/policy_config_helpers';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type {
@@ -30,6 +33,9 @@ describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
   const Platinum = licenseMock.createLicense({
     license: { type: 'platinum', mode: 'platinum', uid: '' },
+  });
+  const Enterprise = licenseMock.createLicense({
+    license: { type: 'enterprise', mode: 'enterprise', uid: '' },
   });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold', uid: '' } });
   let licenseEmitter: Subject<ILicense>;
@@ -231,17 +237,37 @@ describe('Create Default Policy tests ', () => {
       });
     });
 
-    it('Should return the default config when preset is EDR Complete', async () => {
+    it('Should return the default config without enterprise features when preset is EDR Complete on platinum', async () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = await createDefaultPolicyCallback(config);
       const license = 'platinum';
+      const isCloud = true;
+      const defaultPolicy = policyFactoryWithoutPaidEnterpriseFeatures(
+        policyFactory({
+          license,
+          cloud: isCloud,
+          isGlobalTelemetryEnabled: true,
+        })
+      );
+      // update defaultPolicy w/ platinum license & cloud info
+      defaultPolicy.meta.license = license;
+      defaultPolicy.meta.cloud = isCloud;
+      expect(policy).toMatchObject(defaultPolicy);
+    });
+
+    it('Should return the default config when preset is EDR Complete on enterprise', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const config = createEndpointConfig({ preset: 'EDRComplete' });
+      const policy = await createDefaultPolicyCallback(config);
+      const license = 'enterprise';
       const isCloud = true;
       const defaultPolicy = policyFactory({
         license,
         cloud: isCloud,
         isGlobalTelemetryEnabled: true,
       });
-      // update defaultPolicy w/ platinum license & cloud info
+      // update defaultPolicy w/ enterprise license & cloud info
       defaultPolicy.meta.license = license;
       defaultPolicy.meta.cloud = isCloud;
       expect(policy).toMatchObject(defaultPolicy);
@@ -332,6 +358,42 @@ describe('Create Default Policy tests ', () => {
       telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(undefined);
       const policyConfig = await createDefaultPolicyCallback();
       expect(policyConfig.global_telemetry_enabled).toBe(false);
+    });
+  });
+
+  describe('Device Control license gating', () => {
+    const edrCompleteConfig: PolicyCreateEndpointConfig = {
+      type: 'endpoint',
+      endpointConfig: { preset: 'EDRComplete' },
+    };
+
+    it('should disable device control when license is platinum', async () => {
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expect(policy.windows.device_control?.enabled).toBe(false);
+      expect(policy.windows.popup.device_control?.enabled).toBe(false);
+      expect(policy.mac.device_control?.enabled).toBe(false);
+      expect(policy.mac.popup.device_control?.enabled).toBe(false);
+    });
+
+    it('should disable device control when license is below platinum', async () => {
+      licenseEmitter.next(Gold);
+
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expect(policy.windows.device_control?.enabled).toBe(false);
+      expect(policy.windows.popup.device_control?.enabled).toBe(false);
+      expect(policy.mac.device_control?.enabled).toBe(false);
+      expect(policy.mac.popup.device_control?.enabled).toBe(false);
+    });
+
+    it('should keep device control enabled when license is enterprise', async () => {
+      licenseEmitter.next(Enterprise);
+
+      const policy = await createDefaultPolicyCallback(edrCompleteConfig);
+
+      expect(policy.windows.device_control?.enabled).toBe(true);
+      expect(policy.mac.device_control?.enabled).toBe(true);
     });
   });
 
