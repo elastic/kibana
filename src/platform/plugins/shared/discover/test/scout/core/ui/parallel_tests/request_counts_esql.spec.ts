@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { spaceTest } from '../fixtures';
 
@@ -16,20 +17,31 @@ const REQUEST_COUNT_OPTIONS = {
   exactPathname: true,
 } as const;
 
+// Keeps the countMatchingRequests window open until the chart (Lens) fires its esql_async request.
+const waitForChartRequest = (page: ScoutPage) =>
+  page.waitForResponse((r) => r.url().includes(ESQL_ENDPOINT), { timeout: 10_000 }).catch(() => {});
+
 spaceTest.describe(
   'Discover request counts - ES|QL mode',
   { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ discoverScoutSpace, scoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
-      // ES|QL mode does not trigger a search on page load by default in these tests
       await scoutSpace.uiSettings.set({ 'discover:searchOnPageLoad': false });
     });
 
-    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsPrivilegedUser();
       await pageObjects.discover.goto({ queryMode: 'esql' });
       await pageObjects.discover.selectTextBaseLang();
+      // Activate the histogram so setCodeEditorValue auto-submits trigger both docs + chart requests.
+      let initialCount = 0;
+      const drainInitial = page.waitForResponse(
+        (r) => r.url().includes(ESQL_ENDPOINT) && ++initialCount >= 2,
+        { timeout: 30_000 }
+      );
+      await pageObjects.discover.submitQuery();
+      await drainInitial;
     });
 
     spaceTest.afterAll(async ({ discoverScoutSpace, scoutSpace }) => {
@@ -37,153 +49,138 @@ spaceTest.describe(
       await discoverScoutSpace.teardownDiscoverDefaults();
     });
 
-    spaceTest('ES|QL mode request counts', async ({ page, pageObjects, network }) => {
-      // This test collapses the 7 scenarios of the original FTR suite (which shared one browser
-      // session) into a single test, so it needs more than the default 60s budget — CI serverless
-      // runs exceed it on esql_async searches alone.
-      spaceTest.setTimeout(120_000);
-
-      // In ES|QL mode the chart (Lens) fires its esql_async request as a React effect that runs
-      // after the docs response is processed — i.e. after waitUntilSearchingHasFinished() returns.
-      // Awaiting a waitForResponse for the chart endpoint after the docs wait keeps the
-      // network.countMatchingRequests listener alive long enough to capture both requests.
-      const waitForChartRequest = () =>
-        page
-          .waitForResponse((r) => r.url().includes(ESQL_ENDPOINT), { timeout: 10_000 })
-          .catch(() => {});
-
-      // setCodeEditorValue fires onDidChangeContent which Discover auto-submits after a debounce.
-      // Waiting for the search to finish ensures that debounced request completes and is not
-      // captured by the next network.countMatchingRequests listener.
-      const resetQuery = async () => {
-        await pageObjects.discover.codeEditor.setCodeEditorValue(
-          'from logstash-* | where bytes > 1000 '
-        );
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await waitForChartRequest();
-      };
-
-      await spaceTest.step('should send 2 requests (documents + chart) on submit', async () => {
-        await resetQuery();
+    spaceTest(
+      'should send 2 requests (documents + chart) on submit',
+      async ({ page, pageObjects, network }) => {
         const count = await network.countMatchingRequests(
           ESQL_ENDPOINT,
           async () => {
             await pageObjects.discover.submitQuery();
             await pageObjects.discover.waitUntilSearchingHasFinished();
-            await waitForChartRequest();
+            await waitForChartRequest(page);
           },
           REQUEST_COUNT_OPTIONS
         );
         expect(count).toBe(2);
-      });
+      }
+    );
 
-      await spaceTest.step(
-        'should send 2 requests (documents + chart) when refreshing',
-        async () => {
-          // No resetQuery here — tests that re-submitting an already-set query fires new requests
-          const count = await network.countMatchingRequests(
-            ESQL_ENDPOINT,
-            async () => {
-              await pageObjects.discover.submitQuery();
-              await pageObjects.discover.waitUntilSearchingHasFinished();
-              await waitForChartRequest();
-            },
-            REQUEST_COUNT_OPTIONS
-          );
-          expect(count).toBe(2);
-        }
-      );
+    spaceTest(
+      'should send 2 requests (documents + chart) when refreshing',
+      async ({ page, pageObjects, network }) => {
+        const count = await network.countMatchingRequests(
+          ESQL_ENDPOINT,
+          async () => {
+            await pageObjects.discover.submitQuery();
+            await pageObjects.discover.waitUntilSearchingHasFinished();
+            await waitForChartRequest(page);
+          },
+          REQUEST_COUNT_OPTIONS
+        );
+        expect(count).toBe(2);
+      }
+    );
 
-      await spaceTest.step(
-        'should send 2 requests (documents + chart) when changing the query',
-        async () => {
-          const count = await network.countMatchingRequests(
-            ESQL_ENDPOINT,
-            async () => {
-              await pageObjects.discover.codeEditor.setCodeEditorValue(
-                'from logstash-* | where bytes > 1000 '
-              );
-              await pageObjects.discover.submitQuery();
-              await pageObjects.discover.waitUntilSearchingHasFinished();
-              await waitForChartRequest();
-            },
-            REQUEST_COUNT_OPTIONS
-          );
-          expect(count).toBe(2);
-        }
-      );
-
-      await spaceTest.step(
-        'should send 2 requests (documents + chart) when changing the time range',
-        async () => {
-          await resetQuery();
-          const count = await network.countMatchingRequests(
-            ESQL_ENDPOINT,
-            async () => {
-              await pageObjects.datePicker.setAbsoluteRange({
-                from: 'Sep 21, 2015 @ 06:31:44.000',
-                to: 'Sep 23, 2015 @ 00:00:00.000',
-              });
-              await pageObjects.discover.waitUntilSearchingHasFinished();
-              await waitForChartRequest();
-            },
-            REQUEST_COUNT_OPTIONS
-          );
-          expect(count).toBe(2);
-        }
-      );
-
-      await spaceTest.step(
-        'should send no requests when toggling the chart visibility',
-        async () => {
-          await resetQuery();
-          const count = await network.countMatchingRequests(
-            ESQL_ENDPOINT,
-            async () => {
-              await pageObjects.discover.hideChart();
-              await pageObjects.discover.showChart();
-            },
-            REQUEST_COUNT_OPTIONS
-          );
-          expect(count).toBe(0);
-        }
-      );
-
-      await spaceTest.step(
-        'should send a request for chart data when showing the chart after a time range change',
-        async () => {
-          await pageObjects.discover.hideChart();
-          await pageObjects.datePicker.setAbsoluteRange({
-            from: 'Sep 21, 2015 @ 06:31:44.000',
-            to: 'Sep 24, 2015 @ 00:00:00.000',
-          });
-          await pageObjects.discover.waitUntilSearchingHasFinished();
-
-          const count = await network.countMatchingRequests(
-            ESQL_ENDPOINT,
-            async () => {
-              await pageObjects.discover.showChart();
-              await waitForChartRequest();
-            },
-            REQUEST_COUNT_OPTIONS
-          );
-          expect(count).toBe(1);
-        }
-      );
-
-      await spaceTest.step('should send expected requests for saved search changes', async () => {
+    spaceTest(
+      'should send 2 requests (documents + chart) when changing the query',
+      async ({ page, pageObjects, network }) => {
+        // The debounce auto-submit only fires the docs request; the chart only fires on explicit submit.
+        // Change the query and drain docs outside the count window, then count the explicit submit.
         await pageObjects.discover.codeEditor.setCodeEditorValue(
           'from logstash-* | where bytes > 1000 '
         );
-        await pageObjects.discover.submitQuery();
         await pageObjects.discover.waitUntilSearchingHasFinished();
-        await waitForChartRequest();
+        const count = await network.countMatchingRequests(
+          ESQL_ENDPOINT,
+          async () => {
+            await pageObjects.discover.submitQuery();
+            await pageObjects.discover.waitUntilSearchingHasFinished();
+            await waitForChartRequest(page);
+          },
+          REQUEST_COUNT_OPTIONS
+        );
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send 2 requests (documents + chart) when changing the time range',
+      async ({ page, pageObjects, network }) => {
+        const count = await network.countMatchingRequests(
+          ESQL_ENDPOINT,
+          async () => {
+            // Pre-register before the range change so neither the docs nor chart response can be missed.
+            let esqlCount = 0;
+            const waitForBoth = page.waitForResponse(
+              (r) => r.url().includes(ESQL_ENDPOINT) && ++esqlCount >= 2,
+              { timeout: 30_000 }
+            );
+            await pageObjects.datePicker.setAbsoluteRange({
+              from: 'Sep 21, 2015 @ 06:31:44.000',
+              to: 'Sep 23, 2015 @ 00:00:00.000',
+            });
+            await waitForBoth;
+          },
+          REQUEST_COUNT_OPTIONS
+        );
+        expect(count).toBe(2);
+      }
+    );
+
+    spaceTest(
+      'should send no requests when toggling the chart visibility',
+      async ({ pageObjects, network }) => {
+        const count = await network.countMatchingRequests(
+          ESQL_ENDPOINT,
+          async () => {
+            await pageObjects.discover.hideChart();
+            await pageObjects.discover.showChart();
+          },
+          REQUEST_COUNT_OPTIONS
+        );
+        expect(count).toBe(0);
+      }
+    );
+
+    spaceTest(
+      'should send a request for chart data when showing the chart after a time range change',
+      async ({ page, pageObjects, network }) => {
+        // Hide chart, change time range (docs only), then show chart — should fire 1 chart request for the new range.
+        await pageObjects.discover.hideChart();
+        await pageObjects.datePicker.setAbsoluteRange({
+          from: 'Sep 21, 2015 @ 06:31:44.000',
+          to: 'Sep 24, 2015 @ 00:00:00.000',
+        });
+        await pageObjects.discover.waitUntilSearchingHasFinished();
+
+        const count = await network.countMatchingRequests(
+          ESQL_ENDPOINT,
+          async () => {
+            await pageObjects.discover.showChart();
+            await waitForChartRequest(page);
+          },
+          REQUEST_COUNT_OPTIONS
+        );
+        expect(count).toBe(1);
+      }
+    );
+
+    spaceTest(
+      'should send expected requests for saved search changes',
+      async ({ page, pageObjects, network }) => {
+        spaceTest.setTimeout(120_000);
+
+        // Set a specific time range before saving so the saved search captures it.
+        let setupTimeCount = 0;
+        const drainTimeRange = page.waitForResponse(
+          (r) => r.url().includes(ESQL_ENDPOINT) && ++setupTimeCount >= 2,
+          { timeout: 30_000 }
+        );
         await pageObjects.datePicker.setAbsoluteRange({
           from: 'Sep 21, 2015 @ 06:31:44.000',
           to: 'Sep 23, 2015 @ 00:00:00.000',
         });
-        await pageObjects.discover.waitUntilSearchingHasFinished();
-        await waitForChartRequest();
+        await drainTimeRange;
 
         const saveCount = await network.countMatchingRequests(
           ESQL_ENDPOINT,
@@ -194,19 +191,21 @@ spaceTest.describe(
         );
         expect(saveCount).toBe(0);
 
+        // setCodeEditorValue auto-submit doesn't update URL state, so the revert button stays disabled.
+        // Explicitly submitQuery to push a URL update, then drain before counting the revert.
         await pageObjects.discover.codeEditor.setCodeEditorValue(
           'from logstash-* | where bytes < 2000 '
         );
         await pageObjects.discover.submitQuery();
         await pageObjects.discover.waitUntilSearchingHasFinished();
-        await waitForChartRequest();
+        await waitForChartRequest(page);
 
         const revertCount = await network.countMatchingRequests(
           ESQL_ENDPOINT,
           async () => {
             await pageObjects.discover.revertUnsavedChanges();
             await pageObjects.discover.waitUntilSearchingHasFinished();
-            await waitForChartRequest();
+            await waitForChartRequest(page);
           },
           REQUEST_COUNT_OPTIONS
         );
@@ -218,7 +217,7 @@ spaceTest.describe(
             await pageObjects.discover.clickNewSearch();
             await pageObjects.discover.submitQuery();
             await pageObjects.discover.waitUntilSearchingHasFinished();
-            await waitForChartRequest();
+            await waitForChartRequest(page);
           },
           REQUEST_COUNT_OPTIONS
         );
@@ -229,12 +228,12 @@ spaceTest.describe(
           async () => {
             await pageObjects.discover.loadSavedSearch('esql test');
             await pageObjects.discover.waitUntilSearchingHasFinished();
-            await waitForChartRequest();
+            await waitForChartRequest(page);
           },
           REQUEST_COUNT_OPTIONS
         );
         expect(loadCount).toBe(2);
-      });
-    });
+      }
+    );
   }
 );
