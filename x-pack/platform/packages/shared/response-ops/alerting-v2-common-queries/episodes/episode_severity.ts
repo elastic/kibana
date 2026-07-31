@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { includes, isEmpty, isString, lowerCase } from 'lodash';
+
 export enum EpisodeSeverity {
   Info = 'info',
   Low = 'low',
@@ -37,12 +39,13 @@ export const EPISODE_SEVERITY_FILTER_NONE = '__no_severity__';
 export const isSupportedEpisodeSeverity = (
   severity: string | undefined | null
 ): severity is string => {
-  if (!severity || typeof severity !== 'string') {
+  if (!isString(severity) || isEmpty(severity)) {
     return false;
   }
-  return (EPISODE_SEVERITIES as readonly string[]).includes(severity.toLowerCase());
+
+  return includes(EPISODE_SEVERITIES, lowerCase(severity));
 };
 
 export const normalizeEpisodeSeverity = (severity: string): EpisodeSeverity => {
-  return severity.toLowerCase() as EpisodeSeverity;
+  return lowerCase(severity) as EpisodeSeverity;
 };
