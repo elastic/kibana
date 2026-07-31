@@ -454,9 +454,9 @@ const xyStylingSchema = schema.object(
             schema.oneOf([schema.literal('solid'), schema.literal('gradient')], {
               defaultValue: DEFAULT_AREAS_FILL,
               meta: {
-                availability: { stability: 'stable', since: '9.6.0' },
+                availability: { since: '9.6.0' },
                 description:
-                  'Area fill type: solid or gradient. Defaults to solid for stacked and percentage, and to gradient for unstacked areas',
+                  'Area fill type: solid or gradient. Defaults to solid for stacked and percentage, and to gradient for unstacked areas.',
               },
             })
           ),
