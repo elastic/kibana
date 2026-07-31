@@ -48,7 +48,7 @@ export const ParamsList = () => {
 
   const { application } = useKibana().services;
 
-  const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
+  const canManageParams = (application?.capabilities.uptime.canManageParams ?? false) as boolean;
 
   const columns: Array<EuiBasicTableColumn<ListParamItem>> = [
     {
@@ -142,7 +142,7 @@ export const ParamsList = () => {
             setIsDeleteModalVisible(true);
           },
           'data-test-subj': 'action-delete',
-          enabled: () => canSave,
+          enabled: () => canManageParams,
         },
         {
           name: EDIT_PARAM,
@@ -153,7 +153,7 @@ export const ParamsList = () => {
             setIsEditingItem(item);
           },
           'data-test-subj': 'action-edit',
-          enabled: () => canSave,
+          enabled: () => canManageParams,
         },
       ],
     },
@@ -269,7 +269,7 @@ export const ParamsList = () => {
           setPageSize(page?.size ?? 10);
         }}
         selection={{
-          selectable: () => canSave,
+          selectable: () => canManageParams,
           onSelectionChange: (sItems) => {
             setSelectedItems(sItems);
           },

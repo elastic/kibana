@@ -42,6 +42,17 @@ const ROLE_CONFIGS = {
     },
     kibana: [{ base: [], spaces: ['*'], feature: { uptime: ['read'] } }],
   },
+  // Monitor-only role: base `all` (monitor + rule CRUD) WITHOUT the
+  // `can_manage_params` sub-feature. `minimal_all` is the base `all` privilege
+  // minus the sub-features that the full `all` auto-includes via `includeIn: 'all'`,
+  // so this role can write monitors and read params but cannot manage params.
+  SYNTHETICS_MONITOR_ONLY: {
+    elasticsearch: {
+      cluster: [],
+      indices: [{ names: ['synthetics-*'], privileges: ['all'] }],
+    },
+    kibana: [{ base: [], spaces: ['*'], feature: { uptime: ['minimal_all'] } }],
+  },
   SYNTHETICS_ALL_WITH_READ_PARAMS: {
     elasticsearch: {
       cluster: [],
@@ -121,6 +132,7 @@ apiTest.describe(
     let editorHeaders: Record<string, string>;
     let allHeaders: Record<string, string>;
     let readOnlyHeaders: Record<string, string>;
+    let monitorOnlyHeaders: Record<string, string>;
     let noSyntheticsHeaders: Record<string, string>;
     let allWithReadParamsHeaders: Record<string, string>;
     let minimalAllWithReadParamsHeaders: Record<string, string>;
@@ -139,6 +151,7 @@ apiTest.describe(
       editorHeaders = mergeSyntheticsApiHeaders(editorKey);
       allHeaders = await resolveCustomRole(ROLE_CONFIGS.SYNTHETICS_ALL);
       readOnlyHeaders = await resolveCustomRole(ROLE_CONFIGS.SYNTHETICS_READ_ONLY);
+      monitorOnlyHeaders = await resolveCustomRole(ROLE_CONFIGS.SYNTHETICS_MONITOR_ONLY);
       noSyntheticsHeaders = await resolveCustomRole(ROLE_CONFIGS.NO_SYNTHETICS);
       allWithReadParamsHeaders = await resolveCustomRole(
         ROLE_CONFIGS.SYNTHETICS_ALL_WITH_READ_PARAMS
@@ -455,11 +468,10 @@ apiTest.describe(
           key: 'syntheticsReadParamsTestParam',
           value: 'syntheticsReadParamsTestParamValue',
         };
-        const postRes = await createParam(
-          apiClient,
-          minimalAllWithReadParamsHeaders,
-          readParamsTestParam
-        );
+        // `minimal_all` no longer grants param write (that moved to the
+        // `can_manage_params` sub-feature, only folded into full `all`), so this
+        // read-values role reads a param seeded by a writer role.
+        const postRes = await createParam(apiClient, adminHeaders, readParamsTestParam);
         const getAllResp = await getParams(apiClient, minimalAllWithReadParamsHeaders);
         const getResp = await getParam(
           apiClient,
@@ -545,6 +557,61 @@ apiTest.describe(
       const noDuplicates = (getAllResp.body as ParamBody[]).filter((p) => p.key === param.key);
       expect(noDuplicates).toHaveLength(1);
     });
+
+    apiTest(
+      'monitor-only role (all minus can_manage_params) can read but NOT manage params',
+      async ({ apiClient }) => {
+        // Seed a param with a role that can write params.
+        const postRes = await createParam(apiClient, allHeaders, {
+          key: 'monitorOnlyParam',
+          value: 'monitorOnlyValue',
+        });
+        const paramId = (postRes.body as ParamBody).id;
+
+        // Read is allowed — monitors reference global params by key.
+        const getAllResp = await getParams(apiClient, monitorOnlyHeaders);
+        const found = (getAllResp.body as ParamBody[]).find((p) => p.key === 'monitorOnlyParam');
+        expect(found).toBeDefined();
+        // Value stays hidden (no can_read_param_values sub-feature).
+        expect(found?.value).toBeUndefined();
+
+        // Writes are forbidden — missing the `params-write` privilege.
+        await createParam(
+          apiClient,
+          monitorOnlyHeaders,
+          { key: 'foo', value: 'bar' },
+          { statusCode: 403 }
+        );
+        await updateParam(
+          apiClient,
+          monitorOnlyHeaders,
+          paramId,
+          { key: 'foo', value: 'bar' },
+          { statusCode: 403 }
+        );
+        await deleteParam(apiClient, monitorOnlyHeaders, paramId, { statusCode: 403 });
+        await bulkDeleteParams(apiClient, monitorOnlyHeaders, [paramId], { statusCode: 403 });
+      }
+    );
+
+    apiTest(
+      'custom role with full `all` retains param management (non-breaking)',
+      async ({ apiClient }) => {
+        // `includeIn: 'all'` auto-grants the can_manage_params sub-feature to `all`,
+        // so existing roles keep full param CRUD after the privilege split.
+        const postRes = await createParam(apiClient, allHeaders, {
+          key: 'nonBreakingParam',
+          value: 'nonBreakingValue',
+        });
+        const paramId = (postRes.body as ParamBody).id;
+        await updateParam(apiClient, allHeaders, paramId, {
+          key: 'nonBreakingParamUpdated',
+          value: 'nonBreakingValueUpdated',
+        });
+        await deleteParam(apiClient, allHeaders, paramId);
+        await getParam(apiClient, allHeaders, paramId, { statusCode: 404 });
+      }
+    );
 
     apiTest('returns 403 for a user with no synthetics privileges', async ({ apiClient }) => {
       await getParams(apiClient, noSyntheticsHeaders, { statusCode: 403 });

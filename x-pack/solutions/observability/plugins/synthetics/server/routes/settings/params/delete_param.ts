@@ -12,6 +12,7 @@ import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
+import { PARAMS_WRITE_API } from '../../../feature';
 import type { DeleteParamsResponse, SyntheticsParams } from '../../../../common/runtime_types';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 
@@ -38,6 +39,7 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
+  requiredPrivileges: [PARAMS_WRITE_API],
   handler: async ({ savedObjectsClient, request, response, server }) => {
     const { ids } = request.body ?? {};
     const { id: paramId } = request.params ?? {};
