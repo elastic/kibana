@@ -82,4 +82,29 @@ describe('create alert event body schemas', () => {
     expect(createAlertEventPathBodySchema.safeParse({}).success).toBe(false);
     expect(createAlertEventPathBodySchema.safeParse({ rule_id: 'mon-1' }).success).toBe(true);
   });
+
+  it('rejects unknown top-level keys (closed schema, no passthrough)', () => {
+    expect(
+      createAlertEventDataSchema.safeParse({
+        ...baseWithSource,
+        monitor_id: '55501',
+      }).success
+    ).toBe(false);
+    expect(
+      createAlertEventPathBodySchema.safeParse({
+        ...baseWithoutSource,
+        scope: 'host:web-01',
+      }).success
+    ).toBe(false);
+  });
+
+  it('allows vendor dimensions under data with explicit fingerprint_fields paths', () => {
+    expect(
+      createAlertEventDataSchema.safeParse({
+        source: 'datadog',
+        fingerprint_fields: ['data.monitor_id', 'data.scope'],
+        data: { monitor_id: '55501', scope: 'host:web-01' },
+      }).success
+    ).toBe(true);
+  });
 });

@@ -34,9 +34,26 @@ function buildEpisodeUrl(episodeId: string): string {
 }
 
 /**
+ * Keep-style dotted path lookup on the normalized create-alert payload.
+ * Examples: `rule_id`, `data.monitor_id`, `data.labels.env`.
+ * Bare names do not magically fall through into `data`.
+ */
+export function getValueByDottedPath(obj: unknown, path: string): unknown {
+  if (!path) return undefined;
+  let cur: unknown = obj;
+  for (const part of path.split('.')) {
+    if (cur == null || typeof cur !== 'object' || Array.isArray(cur)) {
+      return undefined;
+    }
+    cur = (cur as Record<string, unknown>)[part];
+  }
+  return cur;
+}
+
+/**
  * Resolves the fingerprint in priority order:
  *   1. Explicit `fingerprint` field
- *   2. `fingerprint_fields` — hash of named fields (body top-level, then data.*)
+ *   2. `fingerprint_fields` — hash of dotted paths on the payload (e.g. `rule_id`, `data.host`)
  *   3. `rule_id` — hashed with source for a stable per-rule series key
  *
  * `createAlertEventDataSchema` requires one of the three.
@@ -45,17 +62,9 @@ function resolveFingerprint(event: CreateAlertEventData): string {
   if (event.fingerprint) return event.fingerprint;
 
   if (event.fingerprint_fields?.length) {
-    const record = event as CreateAlertEventData & Record<string, unknown>;
     const values = event.fingerprint_fields.map((field) => {
-      if (
-        field !== 'data' &&
-        field !== 'fingerprint_fields' &&
-        Object.prototype.hasOwnProperty.call(record, field) &&
-        record[field] != null
-      ) {
-        return String(record[field]);
-      }
-      return String(event.data?.[field] ?? '');
+      const value = getValueByDottedPath(event, field);
+      return value == null ? '' : String(value);
     });
     return sha256(values.join(':'));
   }
