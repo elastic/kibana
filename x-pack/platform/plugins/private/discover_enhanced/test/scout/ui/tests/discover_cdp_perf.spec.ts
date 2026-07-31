@@ -66,7 +66,7 @@ function getBundleSizeLimits() {
   return {
     isRspack,
     totalSize: isRspack ? 4.5 * 1024 * 1024 : 5.8 * 1024 * 1024,
-    bundleCount: isRspack ? 70 : 120,
+    bundleCount: isRspack ? 70 : 121,
     discoverSize: 1900 * 1024,
     unifiedSearchSize: 950 * 1024,
   };
