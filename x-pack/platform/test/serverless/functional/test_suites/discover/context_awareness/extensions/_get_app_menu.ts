@@ -16,8 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
     'timePicker',
     'discover',
-    'header',
-    'timePicker',
     'svlCommonPage',
   ]);
   const esArchiver = getService('esArchiver');
