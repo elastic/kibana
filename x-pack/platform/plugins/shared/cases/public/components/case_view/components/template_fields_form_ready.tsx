@@ -192,7 +192,7 @@ export const TemplateFieldsFormReady: FC<TemplateFieldsFormReadyProps> = ({
   }, []);
 
   const persist = useCallback(
-    async (fieldName: string, fieldType: string) => {
+    async (fieldName: string, fieldType: string, onPersisted?: () => void) => {
       if (inflightRef.current) return;
       inflightRef.current = true;
       const snakeKey = getFieldSnakeKey(fieldName, fieldType);
@@ -211,6 +211,7 @@ export const TemplateFieldsFormReady: FC<TemplateFieldsFormReadyProps> = ({
         onSuccess: () => {
           form.resetField(path, { defaultValue: value });
           releaseLock();
+          onPersisted?.();
         },
         onError: releaseLock,
       });
@@ -227,6 +228,7 @@ export const TemplateFieldsFormReady: FC<TemplateFieldsFormReadyProps> = ({
           // already hides them when onFieldConfirm is undefined.
           onFieldConfirm={isBatchMode ? undefined : persist}
           savingFieldKey={isBatchMode ? undefined : savingFieldKey}
+          viewMode={!isBatchMode}
         />
       </div>
     </FormProvider>

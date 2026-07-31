@@ -909,6 +909,14 @@ export const CANCEL_FIELD_EDIT = i18n.translate('xpack.cases.templates.cancelFie
   defaultMessage: 'Cancel field edit',
 });
 
+export const EDIT_FIELD = i18n.translate('xpack.cases.templates.editFieldButtonLabel', {
+  defaultMessage: 'Edit',
+});
+
+export const FIELD_VALUE_NOT_SET = i18n.translate('xpack.cases.templates.fieldValueNotSet', {
+  defaultMessage: 'Not set',
+});
+
 export const FIELD_TYPE_TITLE_INPUT_TEXT = i18n.translate(
   'xpack.cases.templates.fieldType.inputText',
   { defaultMessage: 'Text Input' }

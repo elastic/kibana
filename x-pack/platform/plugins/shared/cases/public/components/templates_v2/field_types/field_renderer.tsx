@@ -6,10 +6,10 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { z } from '@kbn/zod/v4';
 import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 import { isDisplayOnlyField } from '../../../../common/types/domain/template/fields';
@@ -21,6 +21,8 @@ import { getFieldSnakeKey } from '../../../../common/utils';
 import { getYamlDefaultAsString } from '../utils';
 import { useResolvedFields } from '../../field_library/hooks/use_resolved_fields';
 import { useCasesContext } from '../../cases_context/use_cases_context';
+import { FieldValueView } from './field_value_view';
+import * as i18n from '../translations';
 
 type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
 
@@ -36,10 +38,14 @@ interface TemplateFieldRowProps {
   value: unknown;
   isRequired: boolean;
   isRequiredOnClose: boolean;
-  onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  onFieldConfirm?: (fieldName: string, fieldType: string, onPersisted?: () => void) => void;
   isSaving: boolean;
   isSaveDisabled: boolean;
   marginBottom: string;
+  showValueView: boolean;
+  onEdit?: () => void;
+  onEditCancel?: () => void;
+  showExitEdit: boolean;
 }
 
 /**
@@ -74,10 +80,18 @@ const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
     isSaving,
     isSaveDisabled,
     marginBottom,
+    showValueView,
+    onEdit,
+    onEditCancel,
+    showExitEdit,
   }) => {
     const handleConfirm = useCallback(() => {
+      if (onEditCancel) {
+        onFieldConfirm?.(field.name, field.type, onEditCancel);
+        return;
+      }
       onFieldConfirm?.(field.name, field.type);
-    }, [onFieldConfirm, field.name, field.type]);
+    }, [onFieldConfirm, field.name, field.type, onEditCancel]);
 
     const controlProps = {
       ...field,
@@ -95,9 +109,33 @@ const TemplateFieldRow: FC<TemplateFieldRowProps> = React.memo(
       isSaveDisabled,
     };
 
+    if (showValueView) {
+      return (
+        <div data-test-subj={`template-field-${field.name}`} css={{ marginBottom }}>
+          <FieldValueView
+            field={field}
+            value={value}
+            isRequired={isRequired}
+            isRequiredOnClose={isRequiredOnClose}
+            onEdit={onEdit}
+          />
+        </div>
+      );
+    }
+
     return (
       <div data-test-subj={`template-field-${field.name}`} css={{ marginBottom }}>
-        <Control {...controlProps} />
+        <Control {...controlProps} onEditCancel={onEditCancel} />
+        {showExitEdit && onEditCancel ? (
+          <EuiButtonEmpty
+            size="s"
+            iconType="cross"
+            onClick={onEditCancel}
+            data-test-subj={`template-field-exit-edit-${field.name}`}
+          >
+            {i18n.CANCEL_FIELD_EDIT}
+          </EuiButtonEmpty>
+        ) : null}
       </div>
     );
   }
@@ -106,11 +144,15 @@ TemplateFieldRow.displayName = 'TemplateFieldRow';
 
 export const FieldsRenderer: FC<{
   resolvedFields: InlineField[];
-  onFieldConfirm?: (fieldName: string, fieldType: string) => void;
+  onFieldConfirm?: (fieldName: string, fieldType: string, onPersisted?: () => void) => void;
   savingFieldKey?: string;
-}> = ({ resolvedFields, onFieldConfirm, savingFieldKey }) => {
+  /** Renders read-only values with an explicit per-field Edit control. */
+  viewMode?: boolean;
+}> = ({ resolvedFields, onFieldConfirm, savingFieldKey, viewMode = false }) => {
   const { euiTheme } = useEuiTheme();
   const { control } = useFormContext();
+  const { permissions } = useCasesContext();
+  const [editingFieldName, setEditingFieldName] = useState<string>();
 
   const fieldTypeMap = useMemo(
     () => Object.fromEntries(resolvedFields.map((f) => [f.name, f.type])),
@@ -164,6 +206,19 @@ export const FieldsRenderer: FC<{
         const Control = controlRegistry[field.control] as unknown as FC<Record<string, unknown>>;
         if (!Control) return null;
 
+        const canEdit =
+          viewMode &&
+          permissions?.update === true &&
+          !isDisplayOnlyField(field) &&
+          (editingFieldName === undefined || editingFieldName === field.name);
+        const isEditing = editingFieldName === field.name;
+        const showValueView = viewMode && !isEditing && !isDisplayOnlyField(field);
+        const fieldPath = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(field.name, field.type)}`;
+        const showExitEdit = isEditing && !control.getFieldState(fieldPath).isDirty;
+
+        const handleEdit = canEdit ? () => setEditingFieldName(field.name) : undefined;
+        const handleEditCancel = isEditing ? () => setEditingFieldName(undefined) : undefined;
+
         return (
           <TemplateFieldRow
             key={field.name}
@@ -176,6 +231,10 @@ export const FieldsRenderer: FC<{
             isSaving={savingFieldKey === getFieldSnakeKey(field.name, field.type)}
             isSaveDisabled={savingFieldKey != null}
             marginBottom={euiTheme.size.m}
+            showValueView={showValueView}
+            onEdit={handleEdit}
+            onEditCancel={handleEditCancel}
+            showExitEdit={showExitEdit}
           />
         );
       })}
