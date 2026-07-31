@@ -295,7 +295,7 @@ If the `get_screenshot` responses returned URLs, include those (short-lived) URL
 **Metadata-only case — small feature, no visual assertion needed.** When every scenario can be written from named components alone (e.g. *"the User flyout opens when clicking the user avatar"* without asserting on its internal layout), no screenshots are needed:
 
 ```markdown
-| Figma — User avatar interactions (frame) | ✅ Metadata read (4 fetchable children catalogued) |
+| Figma — User avatar interactions (frame) | ✅ Metadata read (4 fetchable elements catalogued) |
 ```
 
 Again, no Known Limitations entry is required — the intent was structural coverage and it was met.

@@ -91,7 +91,7 @@ Extract `fileKey` and `nodeId` from the URL, and route to the correct handler:
 | `figma.com/design/:fileKey/branch/:branchKey/:name` | Branched design file. Use `branchKey` as the `fileKey`. Proceed to Step 2. |
 | `figma.com/board/:fileKey/...` | FigJam. Use `get_figjam`, then skip Step 2 (design-file structural inspection only). |
 | `figma.com/slides/:fileKey/...` | Figma Slides. `get_metadata` is not supported — use `get_screenshot` for the referenced node and continue. |
-| `figma.com/make/:makeFileKey/...` | Figma Make. Not supported by `get_metadata` / `get_design_context` — flag in Known Limitations with ⚠️ and continue. |
+| `figma.com/make/:makeFileKey/...` | Figma Make. `get_metadata` is not supported (Design-only), so there is no structural inventory step for Make files. `get_design_context` **is** supported per the official Figma MCP docs — call it with the extracted `makeFileKey` as `fileKey` and the fixed `nodeId` `0:1` (Make files have a single implicit root, per the tool description). Skip Step 2 entirely; the design-context response carries the reference code and screenshot needed for scenario drafting. Note in the Sources Summary that this link used the `get_design_context` path instead of the metadata-first flow, and only add a ⚠️ Known Limitations entry when the `get_design_context` response itself fails or returns insufficient detail — not just because the link is Make. |
 | Any design URL **without** `node-id` | Vague link — the URL points at the whole file. Call `get_metadata` with `fileKey` only to list top-level pages, then **stop and ask** the user which page or node matters before spending further calls. |
 
 ### Step 2 — Build the structural inventory with `get_metadata`
@@ -100,7 +100,9 @@ For design-file URLs with a `nodeId`, call `get_metadata` **exactly once**. The 
 
 From that XML, extract three lists and hold them as the "Figma inventory" for the link:
 
-1. **Fetchable elements** — direct or nested children whose type is `frame`, `instance`, `section`, `component`, or `component_set`. These are the ones that map to real UI components (flyouts, panels, forms, etc.). Include `component` and `component_set` because a Figma link may target a component definition directly rather than a frame instance of it — the metadata inventory would come back empty without them.
+Before applying any of the filters below, **case-normalize the `type` attribute of every node in the XML response to lowercase** (e.g. `FRAME` → `frame`, `COMPONENT_SET` → `component_set`) and match against the lowercase literals used in this file. Today's Figma MCP happens to emit lowercase, but the underlying Figma API type enum is uppercase and other clients (Desktop MCP, future MCP versions) may forward it as-is; without normalization the filters below would silently return zero fetchable nodes and every downstream count / threshold check would be wrong. Apply the same normalization anywhere else in this file that references a specific node type (Step 2 special-case rules, Step 6 KL triggers, etc.).
+
+1. **Fetchable elements** — the root itself (when its own type is `frame`, `instance`, `section`, `component`, or `component_set`) plus any direct or nested children of the same types. Including the root matters for URLs that point directly at a `component` / `component_set` whose children are only leaf shapes: without counting the root the inventory would be empty even though a real UI element was linked. Include `component` and `component_set` because a Figma link may target a component definition directly rather than a frame instance of it — the metadata inventory would come back empty without them.
 2. **Leaf-shape elements** — `text`, `vector`, `rectangle` / `rounded-rectangle` / `ellipse` / `line` / `star` / `regular-polygon`. These are decorative or per-label; ignore them when writing scenarios, but count them if you need to explain to the user what a container holds.
 3. **Nested containers** — `section` or `canvas` nodes below the root. Note them but do **not** recurse into their children via more `get_metadata` calls unless a scenario explicitly requires it.
 
@@ -109,7 +111,7 @@ The inventory alone is usually enough to write scenarios that assert on which fl
 **Special case — canvas root, or oversized section root.** A `canvas` URL points at a whole Figma page and typically bundles dozens of unrelated frames; a large `section` root can do the same when a designer groups every state and variant of a screen under one section. Apply the same stop-and-ask in either case:
 
 - Root is `canvas` (regardless of child count), **or**
-- Root is `section` with **more than 20 fetchable children** (counted using the fetchable-element filter above — `frame` / `instance` / `section` / `component` / `component_set` — not raw XML children).
+- Root is `section` with **more than 20 fetchable children** — where "children" means direct fetchable descendants of the root (using the case-normalized fetchable-element filter above — `frame` / `instance` / `section` / `component` / `component_set` — not raw XML children). The root itself is not counted in this specific 20-threshold check; it is only counted in the inventory total N reported in the Sources Summary.
 
 In either case, list the direct-child fetchable elements and **stop and ask** the user which are in scope before continuing. Do not build an inventory of the entire canvas or oversized section — that is exactly the fan-out this flow is meant to avoid. Whichever children the user excludes must be surfaced per Step 6 (Sources Summary partial-catalogue status + Known Limitations entry).
 
@@ -160,7 +162,7 @@ To keep the agent's context healthy across the rest of Step 1 (parent issue, sub
 |---|---|---|
 | `get_metadata` | 3 | 1 per Figma link on the target + 1 for the parent's link + 1 spare. Nested-container recursion is not counted here — it should not happen. |
 | `get_screenshot` | 8 opened PNGs | Enough for the P0 flyout + a handful of P1 states + 1–2 error/empty states. The cap is on **opened PNGs** (the vision-token cost), not on `get_screenshot` calls that only returned a URL. |
-| `get_design_context` | 2 | The escape hatch above. If a plan needs more than 2, the plan is probably asserting on the wrong things. |
+| `get_design_context` | 2 | The escape hatch above. If a plan needs more than 2, the plan is probably asserting on the wrong things. Figma Make links routed to `get_design_context` per Step 1 also count against this cap — a plan with more than 2 Make links must announce overage before the extra call. |
 | `get_figjam` | 1 per FigJam link | FigJam is background context. |
 
 These are **soft caps.** If a plan legitimately needs more (very large multi-flyout epic, several linked Figma files), announce the overage in chat before the extra call and note it in the Sources Summary. Do not silently exceed.
@@ -169,7 +171,7 @@ If a session hits the combined `get_screenshot` cap mid-draft, stop calling and 
 
 ### Step 6 — Announce and propagate
 
-- **Sources Summary.** One row per Figma link, describing what was fetched. Use one of the status cells from [`output-formats.md`](output-formats.md#sources-summary) — e.g. `✅ Metadata read (N fetchable children catalogued)` or `✅ Metadata read + 3 opened PNGs for visual verification`. When a screenshot was fetched **and the response returned a URL**, include that URL from `get_screenshot` in the status cell so the reader can open it — the URL is short-lived (Figma expires it after ~15 minutes), so treat it as a preview, not a stable reference. For **inline-base64 responses** (no shareable URL), use the node name/id as the reference in the status cell instead — do not fabricate a URL. This mirrors the URL vs. inline-base64 distinction in Step 3 above.
+- **Sources Summary.** One row per Figma link, describing what was fetched. Use one of the status cells from [`output-formats.md`](output-formats.md#sources-summary) — e.g. `✅ Metadata read (N fetchable elements catalogued)` or `✅ Metadata read + 3 opened PNGs for visual verification`. Here N counts the root itself (when it is fetchable) plus every fetchable descendant, per Step 2 above. When a screenshot was fetched **and the response returned a URL**, include that URL from `get_screenshot` in the status cell so the reader can open it — the URL is short-lived (Figma expires it after ~15 minutes), so treat it as a preview, not a stable reference. For **inline-base64 responses** (no shareable URL), use the node name/id as the reference in the status cell instead — do not fabricate a URL. This mirrors the URL vs. inline-base64 distinction in Step 3 above.
 - **Known Limitations.** Only add a ⚠️ entry when coverage is genuinely incomplete:
   - The user narrowed a canvas via stop-and-ask (`section` / `canvas`), and specific children were excluded from the inventory.
   - The session budget cap fired mid-draft and remaining scenarios could not be visually verified.
