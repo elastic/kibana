@@ -221,6 +221,15 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconOneDrive" */ './specs/one_drive/icon')),
   ],
   [
+    '.ansible_controller',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconAnsibleController" */ './specs/ansible_controller/icon'
+        )
+    ),
+  ],
+  [
     '.argocd',
     lazy(() => import(/* webpackChunkName: "connectorIconArgocd" */ './specs/argocd/icon')),
   ],
@@ -242,6 +251,10 @@ export const ConnectorIconsMap: Map<
     lazy(() => import(/* webpackChunkName: "connectorIconKubernetes" */ './specs/kubernetes/icon')),
   ],
   [
+    '.new_relic',
+    lazy(() => import(/* webpackChunkName: "connectorIconNewRelic" */ './specs/new_relic/icon')),
+  ],
+  [
     '.grafana',
     lazy(() => import(/* webpackChunkName: "connectorIconGrafana" */ './specs/grafana/icon')),
   ],
@@ -253,9 +266,12 @@ export const ConnectorIconsMap: Map<
     '.sentry',
     lazy(() => import(/* webpackChunkName: "connectorIconSentry" */ './specs/sentry/icon')),
   ],
-
   [
     '.dynatrace',
     lazy(() => import(/* webpackChunkName: "connectorIconDynatrace" */ './specs/dynatrace/icon')),
+  ],
+  [
+    '.datadog',
+    lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
   ],
 ]);
