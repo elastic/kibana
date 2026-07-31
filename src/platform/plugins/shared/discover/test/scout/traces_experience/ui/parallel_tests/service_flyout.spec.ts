@@ -56,6 +56,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click the service name link to open the service flyout', async () => {
+          // Hover-triggered action buttons appear over the link and intercept pointer events;
+          // force bypasses the overlay while the explicit visibility check ensures the link is ready.
+          await expect(tracesExperience.flyout.about.serviceNameLink).toBeVisible();
           await tracesExperience.flyout.about.serviceNameLink.click({ force: true });
         });
 
@@ -101,6 +104,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('click the service name link to open the service flyout', async () => {
+          // Hover-triggered action buttons appear over the link and intercept pointer events;
+          // force bypasses the overlay while the explicit visibility check ensures the link is ready.
+          await expect(tracesExperience.flyout.about.serviceNameLink).toBeVisible();
           await tracesExperience.flyout.about.serviceNameLink.click({ force: true });
         });
 
