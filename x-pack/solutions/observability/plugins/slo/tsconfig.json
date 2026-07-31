@@ -133,6 +133,8 @@
     "@kbn/inspector-plugin",
     "@kbn/zod-helpers",
     "@kbn/core-spaces-common",
-    "@kbn/core-feature-flags-server"
+    "@kbn/core-feature-flags-server",
+    "@kbn/cps",
+    "@kbn/cps-server-utils"
   ]
 }

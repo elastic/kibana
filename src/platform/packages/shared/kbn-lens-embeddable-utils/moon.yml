@@ -38,6 +38,7 @@ dependsOn:
   - '@kbn/palettes'
   - '@kbn/crypto-browser'
   - '@kbn/zod-helpers'
+  - '@kbn/std'
 tags:
   - shared-common
   - package
