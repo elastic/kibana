@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Environment } from '@kbn/apm-types';
 import { useFetcher } from '../../hooks/use_fetcher';
 
 const INITIAL_STATE = {
@@ -23,7 +24,7 @@ export function useServiceAgentFetcher({
   end,
 }: {
   serviceName?: string;
-  environment: string;
+  environment: Environment;
   start: string;
   end: string;
 }) {

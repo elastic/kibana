@@ -22,7 +22,8 @@ const end = 1_700_000_900_000;
 
 const baseParams = {
   serviceName: 'my-service',
-  environment: 'production',
+  environment: ENVIRONMENT_ALL.value,
+
   start,
   end,
 };
@@ -130,7 +131,7 @@ describe('getServiceAgent', () => {
     const search: SearchMock = jest.fn().mockResolvedValueOnce(emptyResponse());
     const apmEventClient = { search } as unknown as APMEventClient;
 
-    await getServiceAgent({ ...baseParams, environment: ENVIRONMENT_ALL.value, apmEventClient });
+    await getServiceAgent({ ...baseParams, apmEventClient });
 
     const filters = getSearchParams(search)?.query?.bool?.filter ?? [];
     expect(filters).not.toEqual(
