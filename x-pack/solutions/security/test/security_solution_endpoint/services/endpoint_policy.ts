@@ -253,27 +253,36 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             const deletePackagePolicyData: DeletePackagePoliciesRequest['body'] = {
               packagePolicyIds: [packagePolicy.id],
             };
-            await supertest
-              .post(
-                addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_PACKAGE_POLICIES_DELETE)
-              )
-              .set('kbn-xsrf', 'xxx')
-              .send(deletePackagePolicyData)
-              .expect(200);
-            log.info(`Fleet Endpoint integration policy deleted: ${packagePolicy.id}`);
+            // Retry so a transient 409 version conflict (this delete bumps the agent policy's
+            // revision, racing the agent-policy delete below) is retried instead of failing
+            // teardown, while still tolerating the 404/500 already-deleted terminal case.
+            await retry.try(async () => {
+              try {
+                await supertest
+                  .post(
+                    addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_PACKAGE_POLICIES_DELETE)
+                  )
+                  .set('kbn-xsrf', 'xxx')
+                  .send(deletePackagePolicyData)
+                  .expect(200);
+                log.info(`Fleet Endpoint integration policy deleted: ${packagePolicy.id}`);
+              } catch (error) {
+                // Handle cases where package policy might already be deleted or doesn't exist
+                const statusCode = error?.response?.status;
+                if (statusCode === 404 || statusCode === 500) {
+                  log.warning(
+                    `Package Policy [${packagePolicy.id}] may already be deleted or not found (${statusCode}). Continuing cleanup...`
+                  );
+                  return;
+                }
+                throw error;
+              }
+            });
           } catch (error) {
-            // Handle cases where package policy might already be deleted or doesn't exist
-            const statusCode = error?.response?.status;
-            if (statusCode === 404 || statusCode === 500) {
-              log.warning(
-                `Package Policy [${packagePolicy.id}] may already be deleted or not found (${statusCode}). Continuing cleanup...`
-              );
-            } else {
-              logSupertestApiErrorAndThrow(
-                `Unable to delete Endpoint Integration Policy [${packagePolicy.id}] via Fleet!`,
-                error
-              );
-            }
+            logSupertestApiErrorAndThrow(
+              `Unable to delete Endpoint Integration Policy [${packagePolicy.id}] via Fleet!`,
+              error
+            );
           }
 
           // Delete Agent Policy
@@ -281,25 +290,36 @@ export function EndpointPolicyTestResourcesProvider({ getService }: FtrProviderC
             const deleteAgentPolicyData: DeleteAgentPolicyRequest['body'] = {
               agentPolicyId: agentPolicy.id,
             };
-            await supertest
-              .post(addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_AGENT_POLICIES_DELETE))
-              .set('kbn-xsrf', 'xxx')
-              .send(deleteAgentPolicyData)
-              .expect(200);
-            log.info(`Fleet Agent policy deleted: ${agentPolicy.id}`);
+            // Retry the same way as the package-policy delete above: a transient 409 version
+            // conflict is retried instead of failing teardown, while the 404/500 already-deleted
+            // terminal case is still tolerated.
+            await retry.try(async () => {
+              try {
+                await supertest
+                  .post(
+                    addSpaceIdToPath('/', options?.spaceId ?? '', FLEET_API_AGENT_POLICIES_DELETE)
+                  )
+                  .set('kbn-xsrf', 'xxx')
+                  .send(deleteAgentPolicyData)
+                  .expect(200);
+                log.info(`Fleet Agent policy deleted: ${agentPolicy.id}`);
+              } catch (error) {
+                // Handle cases where agent policy might already be deleted or doesn't exist
+                const statusCode = error?.response?.status;
+                if (statusCode === 404 || statusCode === 500) {
+                  log.warning(
+                    `Agent Policy [${agentPolicy.id}] may already be deleted or not found (${statusCode}). Continuing cleanup...`
+                  );
+                  return;
+                }
+                throw error;
+              }
+            });
           } catch (error) {
-            // Handle cases where agent policy might already be deleted or doesn't exist
-            const statusCode = error?.response?.status;
-            if (statusCode === 404 || statusCode === 500) {
-              log.warning(
-                `Agent Policy [${agentPolicy.id}] may already be deleted or not found (${statusCode}). Continuing cleanup...`
-              );
-            } else {
-              logSupertestApiErrorAndThrow(
-                `Unable to delete Agent Policy [${agentPolicy.id}] via Fleet!`,
-                error
-              );
-            }
+            logSupertestApiErrorAndThrow(
+              `Unable to delete Agent Policy [${agentPolicy.id}] via Fleet!`,
+              error
+            );
           }
         },
       };
