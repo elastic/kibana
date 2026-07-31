@@ -66,6 +66,23 @@ steps:
             summary: On alert - classifies FP / TP / inconclusive
             gated: false
             enabled: true
+  - name: run_continuous_hunt_worker
+    # D10 + mvp-slice: the Dark Orchestrator invokes the continuous_threat_hunt
+    # Worker (lifted from kibana#278905) on its scheduled sweep. The Worker
+    # selects <=10 candidate threat reports, runs Tier 1 -> Tier 2 per report,
+    # and writes hunt feedback back onto .kibana-threat-reports. Reviewable
+    # findings are persisted by the hunt_orchestrator service; clean runs write
+    # feedback only. Runs before the domain worker so its corroboration context
+    # is fresh for the sweep.
+    if: '{{ inputs.escalation == null }}'
+    type: workflow.execute
+    on-failure:
+      continue: true
+    with:
+      workflow-id: 'system-security-watch-dark-continuous-hunt-worker'
+      inputs:
+        investigationId: '{{ inputs.escalation.investigationId }}'
+        escalation: '${{ inputs.escalation }}'
   - name: run_dark_worker
     type: workflow.execute
     with:
