@@ -12,7 +12,6 @@ import * as Option from 'fp-ts/Option';
 import * as TaskEither from 'fp-ts/TaskEither';
 import { omit } from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 import type { WaitGroup } from './kibana_migrator_utils';
 import type {
   AllActionStates,
@@ -78,8 +77,7 @@ export const nextActionMap = (
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
   updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
-  removedTypes: string[],
-  logger: Logger
+  removedTypes: string[]
 ) => {
   return {
     INIT: (state: InitState) =>
@@ -280,7 +278,6 @@ export const nextActionMap = (
          */
         refresh: false,
         fetchAllocationExplain: state.retryCount === 0,
-        logger,
       }),
     MARK_VERSION_INDEX_READY: (state: MarkVersionIndexReady) =>
       Actions.updateAliases({ client, aliasActions: state.versionIndexReadyActions.value }),
@@ -333,8 +330,7 @@ export const next = (
   readyToReindex: WaitGroup<void>,
   doneReindexing: WaitGroup<void>,
   updateRelocationAliases: WaitGroup<Actions.AliasAction[]>,
-  removedTypes: string[],
-  logger: Logger
+  removedTypes: string[]
 ) => {
   const map = nextActionMap(
     client,
@@ -342,8 +338,7 @@ export const next = (
     readyToReindex,
     doneReindexing,
     updateRelocationAliases,
-    removedTypes,
-    logger
+    removedTypes
   );
   return (state: State) => {
     const delay = createDelayFn(state);

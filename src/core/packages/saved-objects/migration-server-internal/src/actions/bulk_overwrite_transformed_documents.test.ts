@@ -267,7 +267,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     expect((result as Either.Left<any>).left.message).toContain('new_index');
   });
 
-  it('includes allocation explain detail in the message when allocationExplain succeeds', async () => {
+  it('explains the replica when the primary is started (yellow index)', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.resolve({
         items: [
@@ -283,6 +283,13 @@ describe('bulkOverwriteTransformedDocuments', () => {
         ],
       })
     );
+    // Primary is healthy — problem is with the replica.
+    client.cluster.allocationExplain.mockResolvedValueOnce({
+      index: 'new_index',
+      shard: 0,
+      primary: true,
+      current_state: 'started',
+    } as any);
     client.cluster.allocationExplain.mockResolvedValueOnce({
       index: 'new_index',
       shard: 0,
@@ -320,7 +327,14 @@ describe('bulkOverwriteTransformedDocuments', () => {
 
     const result = await task();
 
-    expect(client.cluster.allocationExplain).toHaveBeenCalledWith(
+    expect(client.cluster.allocationExplain).toHaveBeenCalledTimes(2);
+    expect(client.cluster.allocationExplain).toHaveBeenNthCalledWith(
+      1,
+      { index: 'new_index', shard: 0, primary: true, master_timeout: '30s' },
+      { maxRetries: 0 }
+    );
+    expect(client.cluster.allocationExplain).toHaveBeenNthCalledWith(
+      2,
       { index: 'new_index', shard: 0, primary: false, master_timeout: '30s' },
       { maxRetries: 0 }
     );
@@ -332,7 +346,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     expect(left.message).toContain('90%');
   });
 
-  it('retries allocation explain against the primary copy when the replica request is rejected', async () => {
+  it('explains the primary directly when it is unassigned (red index / node loss)', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.resolve({
         items: [
@@ -348,44 +362,18 @@ describe('bulkOverwriteTransformedDocuments', () => {
         ],
       })
     );
-    // A red index (unassigned primary) rejects the replica-copy explain request with a 400.
-    const unableToFindShardsError = new EsErrors.ResponseError(
-      elasticsearchClientMock.createApiResponse({
-        statusCode: 400,
-        body: {
-          error: {
-            type: 'illegal_argument_exception',
-            reason: 'unable to find any shards to explain [new_index][0] in the routing table',
-          },
-        },
-      })
-    );
-    client.cluster.allocationExplain.mockRejectedValueOnce(unableToFindShardsError);
+    // Primary is unassigned (node holding the data left the cluster).
     client.cluster.allocationExplain.mockResolvedValueOnce({
       index: 'new_index',
       shard: 0,
       primary: true,
       current_state: 'unassigned',
+      unassigned_info: {
+        reason: 'NODE_LEFT',
+        last_allocation_status: 'no_valid_shard_copy',
+      },
       allocate_explanation:
-        'cannot allocate because allocation is not permitted to any of the nodes',
-      node_allocation_decisions: [
-        {
-          node_id: 'abc',
-          node_name: 'instance-0000000003',
-          node_decision: 'no' as any,
-          node_attributes: {},
-          roles: [] as any,
-          transport_address: '10.0.0.1:9300',
-          deciders: [
-            {
-              decider: 'enable',
-              decision: 'NO' as const,
-              explanation:
-                'no allocations are allowed due to index setting [index.routing.allocation.enable=none]',
-            },
-          ],
-        },
-      ],
+        'cannot allocate because a previous copy of the primary shard existed but can no longer be found on the nodes in the cluster',
     } as any);
 
     const task = bulkOverwriteTransformedDocuments({
@@ -398,14 +386,8 @@ describe('bulkOverwriteTransformedDocuments', () => {
 
     const result = await task();
 
-    expect(client.cluster.allocationExplain).toHaveBeenCalledTimes(2);
-    expect(client.cluster.allocationExplain).toHaveBeenNthCalledWith(
-      1,
-      { index: 'new_index', shard: 0, primary: false, master_timeout: '30s' },
-      { maxRetries: 0 }
-    );
-    expect(client.cluster.allocationExplain).toHaveBeenNthCalledWith(
-      2,
+    expect(client.cluster.allocationExplain).toHaveBeenCalledTimes(1);
+    expect(client.cluster.allocationExplain).toHaveBeenCalledWith(
       { index: 'new_index', shard: 0, primary: true, master_timeout: '30s' },
       { maxRetries: 0 }
     );
@@ -413,10 +395,10 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const left = (result as Either.Left<any>).left;
     expect(left.type).toEqual('unavailable_shards_exception');
     expect(left.message).toContain('Shard allocation explain:');
-    expect(left.message).toContain('index.routing.allocation.enable=none');
+    expect(left.message).toContain('NODE_LEFT');
   });
 
-  it('falls back to base message when allocationExplain call fails', async () => {
+  it('includes explain failure reason in the message when the primary explain call fails', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.resolve({
         items: [
@@ -444,16 +426,15 @@ describe('bulkOverwriteTransformedDocuments', () => {
 
     const result = await task();
 
-    // Only 400s trigger the primary-copy retry; other failures give up after one request.
     expect(client.cluster.allocationExplain).toHaveBeenCalledTimes(1);
     expect(Either.isLeft(result)).toBe(true);
     const left = (result as Either.Left<any>).left;
     expect(left.type).toEqual('unavailable_shards_exception');
     expect(left.message).toContain('new_index');
-    expect(left.message).not.toContain('Shard allocation explain:');
+    expect(left.message).toContain('Shard allocation explain: explain unavailable: 403 Forbidden');
   });
 
-  it('falls back to base message when both allocation explain requests fail', async () => {
+  it('includes explain failure reason in the message when the replica explain call fails', async () => {
     const client = elasticsearchClientMock.createInternalClient(
       Promise.resolve({
         items: [
@@ -469,18 +450,13 @@ describe('bulkOverwriteTransformedDocuments', () => {
         ],
       })
     );
-    const unableToFindShardsError = new EsErrors.ResponseError(
-      elasticsearchClientMock.createApiResponse({
-        statusCode: 400,
-        body: {
-          error: {
-            type: 'illegal_argument_exception',
-            reason: 'unable to find any shards to explain [new_index][0] in the routing table',
-          },
-        },
-      })
-    );
-    client.cluster.allocationExplain.mockRejectedValueOnce(unableToFindShardsError);
+    // Primary is started, so we proceed to the replica — which then fails.
+    client.cluster.allocationExplain.mockResolvedValueOnce({
+      index: 'new_index',
+      shard: 0,
+      primary: true,
+      current_state: 'started',
+    } as any);
     client.cluster.allocationExplain.mockRejectedValueOnce(new Error('socket hang up'));
 
     const task = bulkOverwriteTransformedDocuments({
@@ -498,7 +474,9 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const left = (result as Either.Left<any>).left;
     expect(left.type).toEqual('unavailable_shards_exception');
     expect(left.message).toContain('new_index');
-    expect(left.message).not.toContain('Shard allocation explain:');
+    expect(left.message).toContain(
+      'Shard allocation explain: explain unavailable: socket hang up'
+    );
   });
 
   it('resolves with `left:unavailable_shards_exception` when mixed with version_conflict_engine_exception', async () => {
