@@ -16,7 +16,7 @@ import {
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
 import { getOrElse, isRight } from 'fp-ts/Either';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
@@ -45,8 +45,9 @@ const TITLE = i18n.translate(
 );
 
 export const UserActivityPrivilegedUsersPanel: React.FC<{
-  dataViewSpec: DataViewSpec;
-}> = ({ dataViewSpec }) => {
+  indexPattern: string;
+  fields: DataViewFieldMap;
+}> = ({ indexPattern, fields }) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(PRIVILEGED_USER_ACTIVITY_QUERY_ID);
   const { from, to } = useGlobalTime();
   const [selectedToggleOption, setToggleOption] = useState<VisualizationToggleOptions>(
@@ -55,7 +56,7 @@ export const UserActivityPrivilegedUsersPanel: React.FC<{
 
   const { getAppUrl } = useNavigation();
   const { getLensAttributes, columns, generateVisualizationQuery, generateTableQuery } =
-    usePrivilegedUserActivityParams(selectedToggleOption, dataViewSpec);
+    usePrivilegedUserActivityParams(selectedToggleOption, indexPattern, fields);
   const stackByOptions = useStackByOptions(selectedToggleOption);
   const stackByLabel = i18n.translate('xpack.securitySolution.genericDashboard.stackBy.label', {
     defaultMessage: 'Stack by',
