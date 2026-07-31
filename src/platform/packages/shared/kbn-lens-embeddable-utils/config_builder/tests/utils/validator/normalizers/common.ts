@@ -33,6 +33,7 @@ import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
 import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
+import { toApiFieldSettings } from '../../../../transforms/columns/field_settings';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -199,28 +200,48 @@ function normalizeFormBasedAdHocDataViews(
   const adHocDataViews = attributes.state.adHocDataViews ?? {};
   const refs = [...internalReferences];
 
+  // Compute the deterministic id for every form-based ad-hoc data view once. The
+  // transform dedupes views by id, so several layers can reference the same view;
+  // remapping per data view (instead of per layer) keeps every referencing layer
+  // pointing at the same new id. Doing it per layer would delete the entry on the
+  // first layer and leave the rest pointing at the stale id.
+  const idRemap = new Map<string, string>();
+  for (const [oldId, adHocDataView] of Object.entries(adHocDataViews)) {
+    // ES|QL ad-hoc data views are handled by normalizeESQLAdHocDataViews; skip them here.
+    if (adHocDataView.type === 'esql') {
+      continue;
+    }
+    const newId = generateAdHocDataViewId({
+      index: adHocDataView.title ?? '',
+      timeFieldName: adHocDataView.timeFieldName,
+      name: adHocDataView.name,
+      allowHidden: adHocDataView.allowHidden,
+      fieldSettings: toApiFieldSettings(adHocDataView),
+    });
+    idRemap.set(oldId, newId);
+
+    if (oldId !== newId) {
+      delete adHocDataViews[oldId];
+      adHocDataView.id = newId;
+      adHocDataViews[newId] = adHocDataView;
+    }
+    // mirror the transform's `name = name ?? index` (title === index for form-based)
+    adHocDataView.name = adHocDataView.name ?? adHocDataView.title;
+  }
+
   for (const [layerId, layer] of Object.entries(formBasedLayers)) {
     const layerRefName = `indexpattern-datasource-layer-${layerId}`;
     const ref = refs.find((r) => r.name === layerRefName);
     const adHocId = ref?.id ?? (layer as any).indexPatternId;
+    const newId = adHocId ? idRemap.get(adHocId) : undefined;
 
-    if (adHocId && adHocDataViews[adHocId]) {
-      const adHocDataView: DataViewSpec = adHocDataViews[adHocId];
-      const newId = generateAdHocDataViewId({
-        index: adHocDataView.title ?? '',
-        timeFieldName: adHocDataView.timeFieldName,
-      });
-
-      delete adHocDataViews[adHocId];
-      adHocDataView.id = newId;
-      // A custom form-based name round-trips verbatim
-      adHocDataViews[newId] = adHocDataView;
-      // mirror the transform's `name = name ?? index` (title === index for form-based)
-      adHocDataView.name = adHocDataView.name ?? adHocDataView.title;
+    if (!newId) {
+      continue;
+    }
 
       if (ref) {
         ref.id = newId;
-        ref.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+        // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
       } else {
         refs.push({
           id: newId,
