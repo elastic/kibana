@@ -127,33 +127,10 @@ export class SecurityDiscoverFlyout {
     this.userFlyoutHeader = page.testSubj.locator(CR.USER_FLYOUT_HEADER);
   }
 
-  private async selectDataView(name: string) {
-    const discoverSwitch = this.page.testSubj.locator('discover-dataView-switch-link');
-    const fallbackSwitch = this.page.testSubj.locator('dataView-switch-link');
-    const dataViewSwitch = (await discoverSwitch.isVisible()) ? discoverSwitch : fallbackSwitch;
-
-    if ((await dataViewSwitch.innerText()).trim() === name) {
-      return;
-    }
-
-    await dataViewSwitch.click();
-    const switcher = this.page.testSubj.locator('indexPattern-switcher');
-    await switcher.waitFor({ state: 'visible' });
-
-    const searchInput = this.page.testSubj.locator('indexPattern-switcher--input');
-    await searchInput.waitFor({ state: 'visible' });
-    await searchInput.fill(name);
-
-    const matchingDataView = switcher.locator(`[data-test-subj="dataView-${name}"]`);
-    await matchingDataView.waitFor({ state: 'visible', timeout: FLYOUT_TIMEOUT });
-    await matchingDataView.click();
-    await switcher.waitFor({ state: 'hidden' });
-  }
-
   /** Navigate to Discover, select the data view, and expand a row to open the doc viewer flyout. */
   async openFlyoutFromDiscover(dataView: string, rowIndex = 0) {
     await this.discover.goto({ queryMode: 'classic' });
-    await this.selectDataView(dataView);
+    await this.discover.selectDataView(dataView, { createAdHocIfMissing: false });
     await this.discover.waitUntilSearchingHasFinished();
     await this.dataGrid.waitForDocTableRendered();
     await this.docViewerPageObject.openAndWaitForFlyout({ rowIndex });

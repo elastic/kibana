@@ -32,8 +32,8 @@ spaceTest.describe('Security in Discover - cell renderers', { tag: tags.stateful
   spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
   let savedSearchId: string;
 
-  spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-    const importedSavedObjects = await setupSecurityExperience(scoutSpace, config);
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    const importedSavedObjects = await setupSecurityExperience(scoutSpace);
     const savedSearch = importedSavedObjects.find(
       ({ title }) => title === SECURITY_CELL_RENDERER_SAVED_SEARCH
     );

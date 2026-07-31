@@ -31,8 +31,8 @@ spaceTest.describe(
     // Force a wide viewport so the doc viewer flyout (pushMinBreakpoint="xl") renders in push mode.
     spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
 
-    spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-      await setupSecurityExperience(scoutSpace, config);
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await setupSecurityExperience(scoutSpace);
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {

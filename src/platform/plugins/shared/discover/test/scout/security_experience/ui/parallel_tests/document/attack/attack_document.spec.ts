@@ -27,8 +27,8 @@ spaceTest.describe(
   () => {
     spaceTest.use({ viewport: PUSH_FLYOUT_VIEWPORT });
 
-    spaceTest.beforeAll(async ({ scoutSpace, config }) => {
-      await setupSecurityExperience(scoutSpace, config);
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await setupSecurityExperience(scoutSpace);
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {

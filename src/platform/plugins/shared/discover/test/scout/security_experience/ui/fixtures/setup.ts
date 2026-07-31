@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ScoutParallelWorkerFixtures, ScoutTestConfig, SpaceSolutionView } from '@kbn/scout';
+import type { ScoutParallelWorkerFixtures, SpaceSolutionView } from '@kbn/scout';
 import { SECURITY_DATA_VIEWS, SECURITY_KBN_ARCHIVE, SECURITY_TIME_RANGE } from './constants';
 
 interface SetupOptions {
@@ -23,15 +23,11 @@ interface SetupOptions {
  */
 export async function setupSecurityExperience(
   scoutSpace: ScoutParallelWorkerFixtures['scoutSpace'],
-  config: ScoutTestConfig,
   options: SetupOptions = {}
 ) {
   const { solutionView = 'security' } = options;
 
-  // On serverless the project type fixes the solution view; only stateful spaces can be switched.
-  if (!config.serverless) {
-    await scoutSpace.setSolutionView(solutionView);
-  }
+  await scoutSpace.setSolutionView(solutionView);
 
   const importedSavedObjects = await scoutSpace.savedObjects.load(SECURITY_KBN_ARCHIVE);
   await scoutSpace.uiSettings.setDefaultIndex(SECURITY_DATA_VIEWS.ALERTS);
