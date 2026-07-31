@@ -397,6 +397,34 @@ describe('connector_add_flyout', () => {
       expect(screen.getByText('Send data via spec connector')).toBeInTheDocument();
     });
 
+    it('does not render a support-only spec connector', async () => {
+      const onActionTypeChange = jest.fn();
+      loadActionTypes.mockResolvedValue([
+        {
+          id: 'support-only-spec-connector',
+          source: ACTION_TYPE_SOURCES.spec,
+          enabled: true,
+          name: 'Support-only Spec Connector',
+          description: 'Not ready for user creation',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: [],
+          isDeprecated: false,
+        },
+      ]);
+
+      appMockRenderer.render(
+        <ActionTypeMenu
+          onActionTypeChange={onActionTypeChange}
+          actionTypeRegistry={actionTypeRegistry}
+        />
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(screen.queryByTestId('support-only-spec-connector-card')).not.toBeInTheDocument();
+    });
+
     it('does not render a spec connector when enabledInConfig is false', async () => {
       const onActionTypeChange = jest.fn();
       loadActionTypes.mockResolvedValue([
