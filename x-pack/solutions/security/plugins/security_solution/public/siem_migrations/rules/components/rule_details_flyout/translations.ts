@@ -27,5 +27,3 @@ export const TRANSLATION_TAB_LABEL = i18n.translate(
     defaultMessage: 'Translation',
   }
 );
-
-
