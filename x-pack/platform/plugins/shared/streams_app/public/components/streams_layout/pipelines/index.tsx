@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-// EBT (Event-Based Telemetry) exports
-export * from './ebt';
+import React from 'react';
+import { TabPlaceholder } from '../tab_placeholder';
+
+export const PipelinesTab = () => (
+  <TabPlaceholder data-test-subj="streamsLayoutPipelinesPlaceholder" />
+);
