@@ -452,7 +452,11 @@ describe('validateFile', () => {
       expect(result.schemaPassed).toBe(false);
       expect(warningsOf(result)).toEqual([]);
       expect(schemaIssuesOf(result)).toEqual([
-        { source: 'schema', path: 'steps.0.type', message: 'unknown step type "{{ inputs.type }}"' },
+        {
+          source: 'schema',
+          path: 'steps.0.type',
+          message: 'unknown step type "{{ inputs.type }}"',
+        },
       ]);
     });
   });
