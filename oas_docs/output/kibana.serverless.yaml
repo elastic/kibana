@@ -113468,7 +113468,7 @@ components:
       description: Area-specific rendering settings
       properties:
         fill:
-          description: 'Area fill type: solid or gradient. Defaults to solid for stacked and gradient for unstacked areas'
+          description: 'Area fill type: solid or gradient. Defaults to solid for stacked and percentage, and to gradient for unstacked areas'
           enum:
             - solid
             - gradient
