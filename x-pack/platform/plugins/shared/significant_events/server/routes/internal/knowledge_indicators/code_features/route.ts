@@ -285,8 +285,8 @@ const serviceDistributionRoute = createServerRoute({
       }
       const source = feature.source ?? deriveKnowledgeIndicatorSource(feature.evidence);
       const entry = byService.get(name) ?? { code: false, log: false };
-      entry.code = source.includes('code');
-      entry.log = source.includes('logs');
+      entry.code = entry.code || source.includes('code');
+      entry.log = entry.log || source.includes('logs');
       byService.set(name, entry);
     }
 
