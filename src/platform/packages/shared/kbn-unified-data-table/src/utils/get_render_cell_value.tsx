@@ -70,7 +70,10 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-  }: EuiDataGridCellValueElementProps) => {
+    // Delivered via `cellContext` (see data_table.tsx), so only visible cells receive it — the
+    // offscreen match counter renders without `cellContext` and skips the tree's match scan.
+    jsonTreeSearchTerm,
+  }: EuiDataGridCellValueElementProps & { jsonTreeSearchTerm?: string }) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = getDataViewFieldOrCreateFromColumnMeta({
       dataView,
@@ -202,6 +205,7 @@ export const getRenderCellValueFn = ({
               json={documentTree}
               initialState={getTreeExpansion(row.raw)}
               onStateChange={(state) => setTreeExpansion(row.raw, state)}
+              searchTerm={jsonTreeSearchTerm}
             />
           </span>
         );

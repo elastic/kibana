@@ -919,6 +919,22 @@ const InternalUnifiedDataTable = React.forwardRef<
       onInitialStateChange: onInTableSearchInitialStateChange,
     });
 
+    // The in-table search wrapper strips the term from the cell's props. Re-expose it under a
+    // distinct key so the JSON tree cell can flag collapsed matches — but keyed through `cellContext`
+    // so it reaches only the VISIBLE cells. The offscreen match counter renders every row's cell
+    // WITHOUT `cellContext`, so keying it here keeps that per-keystroke pass free of the tree's
+    // per-row match scan. `cellContext` is EUI's untyped bag, so read the term defensively.
+    const inTableSearchTermValue = cellContextWithInTableSearchSupport?.inTableSearchTerm;
+    const inTableSearchTerm =
+      typeof inTableSearchTermValue === 'string' ? inTableSearchTermValue : '';
+    const cellContextWithJsonTreeSearchTerm = useMemo(
+      () =>
+        inTableSearchTerm
+          ? { ...cellContextWithInTableSearchSupport, jsonTreeSearchTerm: inTableSearchTerm }
+          : cellContextWithInTableSearchSupport,
+      [cellContextWithInTableSearchSupport, inTableSearchTerm]
+    );
+
     const renderCustomPopover = useMemo(() => {
       if (disableCellPopover) {
         return;
@@ -1485,7 +1501,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 renderCustomGridBody={renderCustomGridBody}
                 renderCustomToolbar={renderCustomToolbarFn}
                 trailingControlColumns={trailingControlColumns}
-                cellContext={cellContextWithInTableSearchSupport}
+                cellContext={cellContextWithJsonTreeSearchTerm}
                 renderCellPopover={renderCustomPopover}
                 virtualizationOptions={virtualizationOptions}
                 onFullScreenChange={onFullScreenChange}
