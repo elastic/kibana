@@ -295,6 +295,7 @@ export const ListHolidaysInputSchema = z.object({
   workerIds: z
     .array(z.string().max(256))
     .min(1)
+    .max(100)
     .describe(
       'One or more worker WIDs to retrieve holidays for. Required — omitting returns empty results. ' +
         'Obtain WIDs from whoAmI (current user) or searchWorkers.'
