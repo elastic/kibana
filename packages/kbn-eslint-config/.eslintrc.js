@@ -480,6 +480,7 @@ module.exports = {
     '@elastic/eui/accessible-interactive-element': 'error',
     '@elastic/eui/icon-accessibility-rules': 'error',
     '@elastic/eui/tooltip-button-icon-wrap': 'error',
+    '@elastic/eui/tooltip-focusable-anchor': 'error',
   },
 
   overrides: [
