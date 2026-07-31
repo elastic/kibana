@@ -25,6 +25,19 @@ import { selectOverviewGroupBy, selectServiceLocationsState } from '../../../../
 import type { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 
+const HEARTBEAT_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.heartbeatMonitors',
+  { defaultMessage: 'Heartbeat monitors' }
+);
+const REMOTE_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.remoteMonitors',
+  { defaultMessage: 'Remote monitors' }
+);
+const LOCAL_MONITORS_LABEL = i18n.translate(
+  'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.localMonitors',
+  { defaultMessage: 'Local monitors' }
+);
+
 export const GridItemsByGroup = ({
   setFlyoutConfigCallback,
   view,
@@ -125,18 +138,48 @@ export const GridItemsByGroup = ({
             .filter((name): name is string => Boolean(name))
         ),
       ];
+      // Break heartbeat/autodiscovery monitors out into their own bucket instead
+      // of hiding them inside "Local monitors" alongside UI/project monitors.
+      const heartbeatItems = allConfigs?.filter((monitor) => monitor.origin === 'heartbeat') ?? [];
+      const remoteValues = [
+        ...remoteNames.map((name) => ({ label: name, count: 0 })),
+        ...(heartbeatItems.length
+          ? [{ label: HEARTBEAT_MONITORS_LABEL, count: heartbeatItems.length }]
+          : []),
+      ];
       selectedGroup = {
         key: 'remote.remoteName',
-        items: remoteNames.map((name) => ({ label: name, count: 0 })),
-        values: remoteNames.map((name) => ({ label: name, count: 0 })),
+        items: remoteValues,
+        values: remoteValues,
         otherValues: {
-          label: i18n.translate(
-            'xpack.synthetics.monitorsPage.overview.gridItemsByGroup.localMonitors',
-            {
-              defaultMessage: 'Local monitors',
-            }
-          ),
-          items: allConfigs?.filter((monitor) => !monitor.remote),
+          label: LOCAL_MONITORS_LABEL,
+          items: allConfigs?.filter((monitor) => !monitor.remote && monitor.origin !== 'heartbeat'),
+        },
+      };
+      break;
+    }
+    case 'origin': {
+      // Coarse monitor-source grouping (distinct from the per-cluster
+      // "Remote cluster" grouping): break heartbeat/autodiscovery monitors out
+      // of the "Local monitors" catch-all they'd otherwise hide in. Heartbeat
+      // and remote are mutually exclusive; everything else is local (UI/project).
+      const heartbeatItems = allConfigs?.filter((monitor) => monitor.origin === 'heartbeat') ?? [];
+      const remoteItems = allConfigs?.filter((monitor) => Boolean(monitor.remote)) ?? [];
+      const originValues = [
+        ...(heartbeatItems.length
+          ? [{ label: HEARTBEAT_MONITORS_LABEL, count: heartbeatItems.length }]
+          : []),
+        ...(remoteItems.length
+          ? [{ label: REMOTE_MONITORS_LABEL, count: remoteItems.length }]
+          : []),
+      ];
+      selectedGroup = {
+        key: 'origin',
+        items: originValues,
+        values: originValues,
+        otherValues: {
+          label: LOCAL_MONITORS_LABEL,
+          items: allConfigs?.filter((monitor) => monitor.origin !== 'heartbeat' && !monitor.remote),
         },
       };
       break;
@@ -155,6 +198,17 @@ export const GridItemsByGroup = ({
       {selectedValues.map((groupItem) => {
         const filteredMonitors =
           allConfigs?.filter((monitor) => {
+            // A "Heartbeat" bucket appears under both the Monitor source and the
+            // Remote cluster groupings; match it by origin regardless of key.
+            if (groupItem.label === HEARTBEAT_MONITORS_LABEL) {
+              return monitor.origin === 'heartbeat';
+            }
+            if (selectedGroup.key === 'origin') {
+              if (groupItem.label === REMOTE_MONITORS_LABEL) {
+                return Boolean(monitor.remote);
+              }
+              return false;
+            }
             if (selectedGroup.key === 'locationLabel') {
               return monitor.locations?.some((loc) => loc.label === groupItem.label);
             }
