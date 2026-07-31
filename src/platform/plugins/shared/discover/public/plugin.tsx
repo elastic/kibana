@@ -29,6 +29,7 @@ import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/co
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
 import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
+import type { TimeRange } from '@kbn/es-query';
 import { DISCOVER_APP_LOCATOR, PLUGIN_ID, type DiscoverAppLocator } from '../common';
 import {
   DISCOVER_CONTEXT_APP_LOCATOR,
@@ -107,6 +108,11 @@ export class DiscoverPlugin
 
       this.locator = plugins.share.url.locators.create({
         id: DISCOVER_APP_LOCATOR,
+        getTimeRange: (params) => params.timeRange,
+        setTimeRange: (params, timeRange?: TimeRange) => ({
+          ...params,
+          timeRange,
+        }),
         getLocation: async (params) => {
           const [{ appLocatorGetLocation }, profileStateRegistry] = await Promise.all([
             getLocators(),
