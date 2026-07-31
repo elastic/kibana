@@ -9,8 +9,7 @@
 import React, { useCallback, useRef } from 'react';
 import { EuiTextArea } from '@elastic/eui';
 import type { SerializedStyles } from '@emotion/react';
-
-export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
+import { NL_TEXTAREA_MAX_HEIGHT } from './visor.styles';
 
 interface NLInputProps {
   value: string;

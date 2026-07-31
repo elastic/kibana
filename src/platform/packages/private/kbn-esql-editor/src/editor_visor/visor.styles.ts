@@ -12,6 +12,11 @@ import { css } from '@emotion/react';
 
 export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
+
+// Cap the expanded NL textarea height to roughly a third of the viewport,
+// offset by 100px to leave room for the editor chrome above and below.
+// Matches the max-height used by the KQL QueryStringInput textarea.
+export const NL_TEXTAREA_MAX_HEIGHT = 'calc(35vh - 100px)';
 const VISOR_INNER_PADDING = '2px';
 
 export const visorStyles = (
@@ -119,11 +124,6 @@ export const visorStyles = (
       .euiBadge__icon {
         cursor: pointer;
       }
-    `,
-    enterHint: css`
-      padding-right: ${euiTheme.size.xs};
-      flex-shrink: 0;
-      color: ${euiTheme.colors.subduedText};
     `,
     nlInputWrapper: css`
       justify-content: center;
