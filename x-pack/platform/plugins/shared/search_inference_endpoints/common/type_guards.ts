@@ -84,7 +84,7 @@ export const isCspRegion = (value: unknown): value is CspRegion => {
   );
 };
 
-const REASONING_EFFORT_LEVELS: ReasoningEffortLevel[] = [
+const REASONING_EFFORT_LEVELS: readonly string[] = [
   'none',
   'minimal',
   'low',
@@ -94,5 +94,5 @@ const REASONING_EFFORT_LEVELS: ReasoningEffortLevel[] = [
 ];
 
 export function isReasoningEffortLevel(value: unknown): value is ReasoningEffortLevel {
-  return typeof value === 'string' && REASONING_EFFORT_LEVELS.some((level) => level === value);
+  return typeof value === 'string' && REASONING_EFFORT_LEVELS.includes(value);
 }
