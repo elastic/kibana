@@ -6,7 +6,7 @@
  */
 
 import {
-  getDefaultAgentAccessControl,
+  AgentAccessControlMode,
   type AgentAccessControl,
   type CurrentUser,
   type UserIdAndName,
@@ -28,16 +28,18 @@ import type { AgentProperties } from '../persisted/client/storage';
  * `access_control` is the current field. `visibility` and `acl` are legacy fields, and are only
  * used when the corresponding current field is missing so migrated documents keep current data as
  * the source of truth.
+ *
+ * Documents that predate both keep resolving to Public for backward compatibility, even though new
+ * agents now default to Private (`getDefaultAgentAccessControl`). This must stay in sync with the
+ * legacy clause of `buildReadAccessFilter` in `./query.ts`.
  */
 export const normalizeAccessControl = (
   source: Pick<AgentProperties, 'access_control' | 'visibility' | 'acl'>
-): AgentAccessControl => {
-  const defaults = getDefaultAgentAccessControl();
-  return {
-    access_mode: source.access_control?.access_mode ?? source.visibility ?? defaults.access_mode,
-    entries: source.access_control?.entries ?? source.acl?.entries ?? defaults.entries,
-  };
-};
+): AgentAccessControl => ({
+  access_mode:
+    source.access_control?.access_mode ?? source.visibility ?? AgentAccessControlMode.Public,
+  entries: source.access_control?.entries ?? source.acl?.entries ?? [],
+});
 
 const sourceToOwner = (source: AgentProperties): UserIdAndName | undefined =>
   source.created_by_name !== undefined

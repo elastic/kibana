@@ -66,8 +66,14 @@ export interface AgentAccessControl {
   entries: AgentAccessControlEntry[];
 }
 
+/**
+ * Access control applied to a newly created agent when the create request doesn't specify one.
+ *
+ * This is *not* the fallback used when reading legacy documents that predate the access-control
+ * fields: those intentionally resolve to Public, see `normalizeAccessControl` on the server.
+ */
 export const getDefaultAgentAccessControl = (): AgentAccessControl => ({
-  access_mode: AgentAccessControlMode.Public,
+  access_mode: AgentAccessControlMode.Private,
   entries: [],
 });
 

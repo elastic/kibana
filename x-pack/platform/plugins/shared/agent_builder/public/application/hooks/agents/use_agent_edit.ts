@@ -39,7 +39,7 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
-  access_control: { access_mode: AgentAccessControlMode.Public, entries: [] },
+  access_control: { access_mode: AgentAccessControlMode.Private, entries: [] },
   labels: [],
   avatar_color: '',
   avatar_symbol: '',
@@ -122,6 +122,7 @@ export function useAgentEdit({
 
     if (agent) {
       const { type, permissions, ...agentState } = agent;
+      // Legacy agents without access control resolve to Public server-side, unlike new agents.
       agentState.access_control = agentState.access_control ?? {
         access_mode: AgentAccessControlMode.Public,
         entries: [],
