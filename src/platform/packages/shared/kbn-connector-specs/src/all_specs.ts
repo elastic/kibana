@@ -56,4 +56,5 @@ export * from './specs/new_relic/new_relic';
 export * from './specs/grafana/grafana';
 export * from './specs/rootly/rootly';
 export * from './specs/sentry/sentry';
+export * from './specs/dynatrace/dynatrace';
 export * from './specs/datadog/datadog';

@@ -29,39 +29,9 @@ export const sourcererScope = createSelector(
   }
 );
 
-export const sourcererScopeSelectedDataViewId = createSelector(
-  sourcererScope,
-  (scope) => scope.selectedDataViewId,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
 export const sourcererScopeMissingPatterns = createSelector(
   sourcererScope,
   (scope) => scope.missingPatterns,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
-export const defaultDataView = createSelector(
-  selectSourcerer,
-  (sourcerer) => sourcerer.defaultDataView,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
-export const signalIndexName = createSelector(
-  selectSourcerer,
-  (sourcerer) => sourcerer.signalIndexName,
   {
     memoizeOptions: {
       maxSize: SOURCERER_SCOPE_MAX_SIZE,
