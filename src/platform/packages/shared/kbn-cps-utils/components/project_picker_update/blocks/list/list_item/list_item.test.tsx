@@ -20,14 +20,20 @@ const defaultProject: ProjectPickerListItemProps['project'] = {
   _organisation: 'org-1',
 };
 
-const createDefaultProps = (): ProjectPickerListItemProps => ({
-  isSelected: true,
+const createDefaultProps = (
+  props: Pick<ProjectPickerListItemProps, 'isOriginProject' | 'isSelected' | 'isToggleDisabled'> = {
+    isSelected: true,
+    isOriginProject: false,
+    isToggleDisabled: false,
+  }
+): ProjectPickerListItemProps => ({
   isToggleDisabled: false,
   project: defaultProject,
   toggleDisabledMessage: 'You must be searching a minimum of one project.',
   onContextMenu: jest.fn() as ProjectPickerListItemProps['onContextMenu'],
   onToggle: jest.fn() as ProjectPickerListItemProps['onToggle'],
   onLabelClick: jest.fn() as ProjectPickerListItemProps['onLabelClick'],
+  ...props,
 });
 
 const renderComponent = (props: Partial<ProjectPickerListItemProps> = {}) => {

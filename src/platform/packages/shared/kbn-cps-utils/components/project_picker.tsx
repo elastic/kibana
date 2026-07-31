@@ -73,13 +73,44 @@ export const ProjectPicker = ({
 
   const { origin: originProject, linkedProjects } = projects;
 
-  const button = (
+  const projectPickerPopoverTriggerButton = (
     <ProjectPickerButton
       size="s"
       onClick={() => setShowPopover(!showPopover)}
       isDisabled={isDisabled}
     />
   );
+
+  const projectPickerPopover = (
+    <ProjectPickerStateProvider
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      originProjectId={originProject._id}
+      availableProjects={([] as CPSProject[]).concat(originProject, linkedProjects)}
+      onProjectRoutingChange={onProjectRoutingChange}
+      isReadOnly={isReadonly}
+    >
+      <EuiPopover
+        button={projectPickerPopoverTriggerButton}
+        isOpen={showPopover}
+        closePopover={() => setShowPopover(false)}
+        repositionOnScroll
+        anchorPosition="downLeft"
+        ownFocus
+        panelPaddingSize="none"
+        panelProps={{ css: styles.popover }}
+        hasArrow
+        aria-label={strings.getProjectPickerPopoverTitle()}
+      >
+        <ProjectPickerFrame>
+          <ProjectPickerList />
+        </ProjectPickerFrame>
+      </EuiPopover>
+    </ProjectPickerStateProvider>
+  );
+
+  if (isDisabled) {
+    return projectPickerPopover;
+  }
 
   return (
     <EuiTourStep
@@ -108,30 +139,7 @@ export const ProjectPicker = ({
         'data-test-subj': 'project-picker-tour',
       }}
     >
-      <ProjectPickerStateProvider
-        defaultProjectRoutingGetter={defaultProjectRoutingGetter}
-        originProjectId={originProject._id}
-        availableProjects={([] as CPSProject[]).concat(originProject, linkedProjects)}
-        onProjectRoutingChange={onProjectRoutingChange}
-        isReadOnly={isReadonly}
-      >
-        <EuiPopover
-          button={button}
-          isOpen={showPopover}
-          closePopover={() => setShowPopover(false)}
-          repositionOnScroll
-          anchorPosition="downLeft"
-          ownFocus
-          panelPaddingSize="none"
-          panelProps={{ css: styles.popover }}
-          hasArrow
-          aria-label={strings.getProjectPickerPopoverTitle()}
-        >
-          <ProjectPickerFrame>
-            <ProjectPickerList />
-          </ProjectPickerFrame>
-        </EuiPopover>
-      </ProjectPickerStateProvider>
+      {projectPickerPopover}
     </EuiTourStep>
   );
 };

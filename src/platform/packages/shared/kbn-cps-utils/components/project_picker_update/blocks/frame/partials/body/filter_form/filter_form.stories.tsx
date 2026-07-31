@@ -10,6 +10,7 @@
 import React from 'react';
 import { faker } from '@faker-js/faker';
 import type { Meta, StoryObj } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import {
   ProjectPickerStateProvider,
   type ProjectPickerStateProviderProps,
@@ -22,7 +23,14 @@ export default {
 } satisfies Meta<typeof ProjectPickerFilterForm>;
 
 export const ProjectPickerFilterBoxStory: StoryObj<
-  Pick<ProjectPickerStateProviderProps, 'availableProjects'> & ProjectPickerFilterFormProps
+  Pick<
+    ProjectPickerStateProviderProps,
+    | 'availableProjects'
+    | 'defaultProjectRoutingGetter'
+    | 'onProjectRoutingChange'
+    | 'originProjectId'
+  > &
+    ProjectPickerFilterFormProps
 > = {
   name: 'ProjectPickerFilterBox',
   args: {
@@ -34,9 +42,25 @@ export const ProjectPickerFilterBoxStory: StoryObj<
       _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
       _provider: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
     })),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    get originProjectId(): string {
+      return this.availableProjects![0]._id;
+    },
   },
-  render: ({ availableProjects, ...props }) => (
-    <ProjectPickerStateProvider availableProjects={availableProjects}>
+  render: ({
+    availableProjects,
+    defaultProjectRoutingGetter,
+    onProjectRoutingChange,
+    originProjectId,
+    ...props
+  }) => (
+    <ProjectPickerStateProvider
+      availableProjects={availableProjects}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      onProjectRoutingChange={onProjectRoutingChange}
+      originProjectId={originProjectId}
+    >
       <ProjectPickerFilterForm {...props} />
     </ProjectPickerStateProvider>
   ),
