@@ -7,11 +7,9 @@
   "include": [
     "../../../../../typings/**/*",
     "common/**/*",
-    "docs/**/*",
     "scripts/**/*",
     "server/**/*",
     "public/**/*",
-    "types/**/*",
     "test/**/*"
   ],
   "exclude": ["target/**/*"],
