@@ -11,7 +11,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils';
-import type { DataTableRecord, DataTableColumnsMeta, EsHitRecord } from '@kbn/discover-utils/types';
+import type {
+  DataTableRecord,
+  DataTableColumnsMeta,
+  EsHitRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
 import { set } from '@kbn/safer-lodash-set';
 import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
 
@@ -32,12 +37,18 @@ import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer'
 // rather than the object the fields API returns. Those are decoded back to structure — keyed on
 // the column's ES type — so the tree matches Classic mode; everything else flows through the same
 // un-flatten.
+//
+// Multi-fields (e.g. `agent.keyword`, the keyword sub-field of `agent`) are skipped via the shared
+// `shouldShowFieldHandler`, matching the Summary column and the `discover:showMultiFields` setting.
+// Otherwise the redundant `.keyword` key would both duplicate the parent and — once un-flattened —
+// clobber the parent's scalar value (`agent: "…"` overwritten by `agent: { keyword: "…" }`).
 
 interface FormatContext {
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
   columnsMeta: DataTableColumnsMeta | undefined;
   hit: EsHitRecord;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
 const documentTreeCache = new WeakMap<EsHitRecord, JsonValue>();
@@ -119,7 +130,9 @@ const processFieldValue = (rawValue: unknown, fieldName: string, ctx: FormatCont
     return objects.map((object) => {
       const inner: Record<string, unknown> = {};
       for (const key of Object.keys(object)) {
-        inner[key] = processFieldValue(object[key], `${fieldName}.${key}`, ctx);
+        const qualifiedName = `${fieldName}.${key}`;
+        if (!ctx.shouldShowFieldHandler(qualifiedName)) continue;
+        inner[key] = processFieldValue(object[key], qualifiedName, ctx);
       }
       return unflattenKeys(inner);
     });
@@ -137,21 +150,30 @@ export const buildDocumentTree = ({
   dataView,
   fieldFormats,
   columnsMeta,
+  shouldShowFieldHandler,
 }: {
   row: DataTableRecord;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
   columnsMeta: DataTableColumnsMeta | undefined;
+  shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }): JsonValue => {
   const cached = documentTreeCache.get(row.raw);
   if (cached) return cached;
 
-  const ctx: FormatContext = { dataView, fieldFormats, columnsMeta, hit: row.raw };
+  const ctx: FormatContext = {
+    dataView,
+    fieldFormats,
+    columnsMeta,
+    hit: row.raw,
+    shouldShowFieldHandler,
+  };
   const metaFields = new Set(dataView.metaFields);
   const documentFlat: Record<string, unknown> = {};
 
   for (const fieldName of Object.keys(row.flattened)) {
     if (metaFields.has(fieldName)) continue;
+    if (!shouldShowFieldHandler(fieldName)) continue;
     documentFlat[fieldName] = processFieldValue(row.flattened[fieldName], fieldName, ctx);
   }
 

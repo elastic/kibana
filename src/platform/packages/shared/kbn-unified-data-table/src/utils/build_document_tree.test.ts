@@ -8,9 +8,9 @@
  */
 
 import { createElement } from 'react';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewField, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { buildDocumentTree } from './build_document_tree';
@@ -34,6 +34,7 @@ const buildTree = (hit: EsHitRecord): Record<string, unknown> => {
     dataView: dataViewMock,
     fieldFormats,
     columnsMeta: undefined,
+    shouldShowFieldHandler: () => true,
   });
   if (typeof tree !== 'object' || tree === null || Array.isArray(tree)) {
     throw new Error('expected an object document tree');
@@ -135,6 +136,7 @@ describe('buildDocumentTree', () => {
       dataView: nestedDataView,
       fieldFormats,
       columnsMeta: undefined,
+      shouldShowFieldHandler: () => true,
     });
 
     expect(tree).toEqual({
@@ -201,6 +203,7 @@ describe('buildDocumentTree', () => {
         histogram: { type: 'number', esType: 'histogram' },
         agg_metric: { type: 'number', esType: 'aggregate_metric_double' },
       },
+      shouldShowFieldHandler: () => true,
     });
 
     expect(tree).toEqual({
@@ -223,8 +226,51 @@ describe('buildDocumentTree', () => {
       dataView: dataViewMock,
       fieldFormats,
       columnsMeta: { note: { type: 'string', esType: 'keyword' } },
+      shouldShowFieldHandler: () => true,
     });
 
     expect(tree).toEqual({ note: '{"looks":"like json"}' });
+  });
+
+  it('drops multi-fields (agent.keyword), keeping the parent scalar', () => {
+    // The fields API returns both the parent `agent` and its `keyword` multi-field. Un-flattening
+    // `agent.keyword` would nest it as `{ agent: { keyword } }` and clobber the parent scalar; the
+    // shared `shouldShowFieldHandler` hides the multi-field just like the Summary column does.
+    const dataView = buildDataViewMock({
+      name: 'multifield-view',
+      fields: [
+        new DataViewField({ name: 'agent', type: 'string', searchable: true, aggregatable: false }),
+        new DataViewField({
+          name: 'agent.keyword',
+          type: 'string',
+          searchable: true,
+          aggregatable: true,
+          subType: { multi: { parent: 'agent' } },
+        }),
+      ] as DataView['fields'],
+    });
+    const row = buildDataTableRecord(
+      {
+        _id: '1',
+        _index: 'test',
+        _source: undefined,
+        fields: { agent: ['Mozilla/5.0'], 'agent.keyword': ['Mozilla/5.0'] },
+      },
+      dataView
+    );
+
+    const tree = buildDocumentTree({
+      row,
+      dataView,
+      fieldFormats,
+      columnsMeta: undefined,
+      shouldShowFieldHandler: getShouldShowFieldHandler(
+        ['agent', 'agent.keyword'],
+        dataView,
+        false
+      ),
+    });
+
+    expect(tree).toEqual({ agent: 'Mozilla/5.0' });
   });
 });

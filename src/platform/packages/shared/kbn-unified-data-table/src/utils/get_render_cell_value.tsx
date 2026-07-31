@@ -187,7 +187,13 @@ export const getRenderCellValueFn = ({
       // Evaluation toggle (see SOURCE_CELL_RENDERER): swap the field-summary view for the
       // JSON tree of the document. In-grid only — the popover path is untouched.
       if (SOURCE_CELL_RENDERER === 'jsonTreeViewer') {
-        const documentTree = buildDocumentTree({ row, dataView, fieldFormats, columnsMeta });
+        const documentTree = buildDocumentTree({
+          row,
+          dataView,
+          fieldFormats,
+          columnsMeta,
+          shouldShowFieldHandler,
+        });
         // Persist expand/reveal state outside the cell (keyed by the row) so it survives the
         // remount in-table search forces on every keystroke.
         return (
