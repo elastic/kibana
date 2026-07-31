@@ -63,6 +63,13 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   `types.ts` file alongside the spec (not inline in the spec file, and not as `as` casts in handlers).
   Handlers must be typed with the inferred type (e.g. `handler: async (ctx, input: SearchInput) => {}`),
   not `input as { field: string }`. See `servicenow_search/types.ts` for the canonical pattern.
+- **`lazySchema()` wrapping**: Every schema in `types.ts` — and every inline `z.object()` used as an
+  action `input` — must be wrapped with `lazySchema(() => z.object({...}))` from `@kbn/zod/v4`. Bare
+  `z.object()` is a runtime behavior difference, not just style. Flag any unwrapped schema.
+- **`callToolJson` vs `callToolContent`** (MCP connectors): Typed data actions (search, list, get) must
+  use `callToolJson(ctx, 'tool_name', args)`. File download or binary actions must use
+  `callToolContent(ctx, 'tool_name', args)`. Using `callToolJson` on a binary response corrupts data;
+  using `callToolContent` on a JSON response forces callers to parse raw content. Flag any mismatch.
 
 ### Vendor API Correctness
 
@@ -127,12 +134,19 @@ actual documented behavior — flag them even without live access to the API, ba
 
 ### Documentation and Icons
 
-- Generator scaffold docs are filled in (no remaining `TODO:` placeholders)
+- Generator scaffold docs are filled in (no remaining `TODO:` placeholders in docs **or** source files)
 - **Snippets file**: Third-party data connectors (cloud storage, SaaS search, etc.) belong in
   `docs/reference/connectors-kibana/_snippets/data-context-sources-connectors-list.md`, **not**
   `elastic-connectors-list.md` (which is reserved for Kibana-native connectors like Cases, Index,
   ServerLog, and Obs AI Assistant). Order them alphabetically. Flag any third-party connector 
   entry added to the wrong file.
+- **`toc.yml` placement**: Third-party connectors belong under the `data-context-sources-connectors.md`
+  node, **not** `elastic-connectors.md`. Flag any third-party connector whose `toc.yml` entry is a
+  child of `elastic-connectors.md`.
+- **Doc frontmatter version**: `applies_to.stack` must include a version number — `stack: preview X.Y`,
+  not just `stack: preview`. The version must be ≥ every other version referenced anywhere in the doc
+  (a new connector cannot have been available before any feature it references). Flag any doc where it
+  is missing or where the version is lower than another version referenced in the same file.
 - `docs/reference/toc.yml` entry exists in the correct section and matches alphabetical order in that section.
 - **Icon**: Connector has an icon (ConnectorIconsMap entry and icon component or asset). No
   placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
@@ -169,6 +183,9 @@ Report documentation issues alongside code issues.
 - Directory and file names follow repo conventions (snake_case for dirs/files; camelCase for TS exports)
 - Connector IDs don't collide with existing ones. If a connector already exists for the same product, use
   a distinct ID (e.g. `.servicenow_search`)
+- **CODEOWNERS section**: The connector's entry must appear in `# Connector Specs`, inserted
+  alphabetically among the other `src/platform/packages/shared/kbn-connector-specs/src/specs/**`
+  lines, not in `# Connector Agent Skills` or any other section. Flag misplacement.
 - If the PR changes behavior that could affect existing callers, document why and address backwards compatibility in
   the PR description
 - **TypeScript** (touched files): Use strict equality (`===` / `!==`), follow repo style (early returns, explicit
@@ -177,6 +194,13 @@ Report documentation issues alongside code issues.
   common leftovers from an earlier design that was later simplified.
 - **Duplicated calls**: Flag a helper (e.g. a URL builder) called more than once within the same handler
   when the result could be computed once into a local variable.
+
+### Tests
+
+- **Test file mock pattern**: The test file must mock `withMcpClient` (for MCP connectors) with both
+  `mockCallTool` and `mockListTools` so handlers do not require a real MCP transport. The mock should
+  route through `withMcpClient` so that `callToolJson`/`callToolContent` calls are also captured.
+  Flag test files that skip this mock, instantiate a real MCP client, or leave handlers untested.
 
 ### Security
 
