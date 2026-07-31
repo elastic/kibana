@@ -403,6 +403,7 @@ test.describe(
     }) => {
       await test.step('open create flyout and type a query against an index with two date fields', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
+        await pageObjects.composeDiscover.openSandbox();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
         await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
         await pageObjects.composeDiscover.setSandboxQuery(TWO_DATE_FIELDS_UNIFIED_QUERY);
