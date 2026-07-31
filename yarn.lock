@@ -14604,6 +14604,11 @@
   dependencies:
     tslib "^2.4.0"
 
+"@types/adm-zip-0.6@npm:adm-zip@0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
+  integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
+
 "@types/adm-zip@0.5.7":
   version "0.5.7"
   resolved "https://registry.yarnpkg.com/@types/adm-zip/-/adm-zip-0.5.7.tgz#eec10b6f717d3948beb64aca0abebc4b344ac7e9"
@@ -16689,7 +16694,7 @@ acorn@^8.0.4, acorn@^8.1.0, acorn@^8.10.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.15.0.tgz#a360898bc415edaac46c8241f6383975b930b816"
   integrity sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==
 
-"@types/adm-zip-0.6@npm:adm-zip@0.6.0", adm-zip@0.6.0, adm-zip@^0.6.0:
+adm-zip@0.6.0:
   version "0.6.0"
   resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.6.0.tgz#bbc5c6c333755e967a06dd98747f431e1d53a3cf"
   integrity sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==
