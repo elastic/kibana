@@ -12,7 +12,6 @@ import type * as TaskEither from 'fp-ts/TaskEither';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
@@ -55,8 +54,6 @@ export interface BulkOverwriteTransformedDocumentsParams {
    * retry of a long-running failure.
    */
   fetchAllocationExplain?: boolean;
-  /** Optional logger — used to surface explain-call errors during development. */
-  logger?: Logger;
 }
 
 /**
@@ -72,7 +69,6 @@ export const bulkOverwriteTransformedDocuments =
     useAliasToPreventAutoCreate = false,
     timeout = DEFAULT_TIMEOUT,
     fetchAllocationExplain = false,
-    logger,
   }: BulkOverwriteTransformedDocumentsParams): TaskEither.TaskEither<
     | RetryableEsClientError
     | TargetIndexHadWriteBlock
@@ -137,11 +133,9 @@ export const bulkOverwriteTransformedDocuments =
           const explain = await explainShardAllocation(client, index);
           allocationReason = formatAllocationExplanation(explain);
         } catch (explainError) {
-          logger?.debug(
-            `[${index}] Failed to fetch allocation explain: ${
-              explainError instanceof Error ? explainError.message : String(explainError)
-            }`
-          );
+          allocationReason = `explain unavailable: ${
+            explainError instanceof Error ? explainError.message : String(explainError)
+          }`;
         }
       }
       return Either.left({
@@ -159,24 +153,27 @@ const explainShardAllocation = async (
   client: ElasticsearchClient,
   index: string
 ): Promise<estypes.ClusterAllocationExplainResponse> => {
-  try {
+  const primaryExplain = await client.cluster.allocationExplain(
+    { index, shard: 0, primary: true, master_timeout: '30s' },
+    { maxRetries: 0 }
+  );
+  // Primary is healthy, the problem is with the replica
+  if (primaryExplain.current_state === 'started') {
     return await client.cluster.allocationExplain(
       { index, shard: 0, primary: false, master_timeout: '30s' },
       { maxRetries: 0 }
     );
-  } catch (error) {
-    if (error instanceof esErrors.ResponseError && error.statusCode === 400) {
-      return await client.cluster.allocationExplain(
-        { index, shard: 0, primary: true, master_timeout: '30s' },
-        { maxRetries: 0 }
-      );
-    }
-    throw error;
   }
+  return primaryExplain;
 };
 
 const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainResponse): string => {
   const parts: string[] = [];
+
+  if (explain.unassigned_info) {
+    const { reason, details } = explain.unassigned_info;
+    parts.push(`unassigned reason: ${details ? `${reason}: ${details}` : reason}`);
+  }
 
   if (explain.allocate_explanation) {
     parts.push(explain.allocate_explanation);
@@ -201,7 +198,7 @@ const formatAllocationExplanation = (explain: estypes.ClusterAllocationExplainRe
     }
 
     if (blockingReasons.length > 0) {
-      parts.push(`blocking deciders: ${blockingReasons.join('; ')}`);
+      parts.push(`blocking deciders: ${blockingReasons.slice(0, 5).join('; ')}`);
     }
   }
 
