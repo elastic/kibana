@@ -9,6 +9,7 @@ import type { z } from '@kbn/zod';
 import type {
   notificationWriteSchema,
   notificationReadSchema,
+  notificationQueryParamsSchema,
   ctaSchema,
 } from './notification_schema';
 import type {
@@ -74,13 +75,8 @@ export type Severity = Notification['severity'];
 
 export type Cta = z.infer<typeof ctaSchema>;
 
-export interface NotificationQueryParams {
-  namespace?: string;
-  type?: string;
-  severity?: Severity[];
-  from?: string;
-  to?: string;
-}
+/** Read-path query params; validated by `notificationQueryParamsSchema`. */
+export type NotificationQueryParams = z.input<typeof notificationQueryParamsSchema>;
 
 /** The full collapsed, filtered notification set the client paginates over. */
 export interface NotificationQueryResult {

@@ -41,12 +41,13 @@ describe('queryNotifications', () => {
       expect.objectContaining({
         collapse: { field: 'notification_id' },
         sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
-        size: NOTIFICATION_QUERY_RESULT_LIMIT,
+        // One over the limit so a full page is distinguishable from a truncated one.
+        size: NOTIFICATION_QUERY_RESULT_LIMIT + 1,
       })
     );
   });
 
-  it('applies one severity-TTL horizon window per tier', async () => {
+  it('applies one severity-TTL horizon window per tier plus a forward-compat window', async () => {
     const { deps, search } = setup();
 
     await queryNotifications(deps);
@@ -77,6 +78,13 @@ describe('queryNotifications', () => {
                 { terms: { severity: ['error', 'critical'] } },
                 { range: { '@timestamp': { gte: 'now-180d' } } },
               ],
+            },
+          },
+          // Unknown/future severity tiers stay visible for the longest window instead of dropping.
+          {
+            bool: {
+              must_not: { terms: { severity: ['info', 'warning', 'error', 'critical'] } },
+              filter: [{ range: { '@timestamp': { gte: 'now-180d' } } }],
             },
           },
         ],
@@ -131,7 +139,7 @@ describe('queryNotifications', () => {
     expect(result.truncated).toBe(false);
   });
 
-  it('flags truncated when the fetch fills the group limit', async () => {
+  it('does not flag truncated when exactly the group limit is returned', async () => {
     const { deps } = setup(
       Array.from({ length: NOTIFICATION_QUERY_RESULT_LIMIT }, (_, i) =>
         doc(`id-${i}`, '2026-07-15T00:00:00.000Z')
@@ -140,7 +148,28 @@ describe('queryNotifications', () => {
 
     const result = await queryNotifications(deps);
 
+    expect(result.items).toHaveLength(NOTIFICATION_QUERY_RESULT_LIMIT);
+    expect(result.truncated).toBe(false);
+  });
+
+  it('flags truncated and caps items when the fetch overflows the group limit', async () => {
+    const { deps } = setup(
+      Array.from({ length: NOTIFICATION_QUERY_RESULT_LIMIT + 1 }, (_, i) =>
+        doc(`id-${i}`, '2026-07-15T00:00:00.000Z')
+      )
+    );
+
+    const result = await queryNotifications(deps);
+
+    expect(result.items).toHaveLength(NOTIFICATION_QUERY_RESULT_LIMIT);
     expect(result.truncated).toBe(true);
+  });
+
+  it('rejects params that fail schema validation before querying', async () => {
+    const { deps, search } = setup();
+
+    await expect(queryNotifications(deps, { from: 'not-a-date' })).rejects.toThrow();
+    expect(search).not.toHaveBeenCalled();
   });
 
   it('drops malformed docs instead of failing the response', async () => {

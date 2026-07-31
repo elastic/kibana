@@ -8,13 +8,17 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import { notificationReadSchema, SEVERITY_TTL_GROUPS } from '../../common/notification_schema';
+import {
+  notificationQueryParamsSchema,
+  notificationReadSchema,
+} from '../../common/notification_schema';
 import type {
   Notification,
   NotificationQueryParams,
   NotificationQueryResult,
 } from '../../common/types';
 import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
+import { severityTTLQuery } from './severity_ttl_query';
 
 /**
  * Ceiling on collapsed notifications returned per query, after collapsing duplicates
@@ -28,24 +32,9 @@ export interface NotificationQueryDeps {
   logger: Logger;
 }
 
-/** Docs older than their severity's TTL are invisible even before cleanup deletes them. */
-const severityTTLFilter = (): QueryDslQueryContainer => ({
-  bool: {
-    should: [...SEVERITY_TTL_GROUPS.entries()].map(([days, severities]) => ({
-      bool: {
-        filter: [
-          { terms: { severity: severities } },
-          { range: { '@timestamp': { gte: `now-${days}d` } } },
-        ],
-      },
-    })),
-    minimum_should_match: 1,
-  },
-});
-
 const buildFilters = (params: NotificationQueryParams): QueryDslQueryContainer[] => {
   const { namespace, type, severity, from, to } = params;
-  const filters: QueryDslQueryContainer[] = [severityTTLFilter()];
+  const filters: QueryDslQueryContainer[] = [severityTTLQuery('visible')];
   if (namespace) {
     filters.push({ term: { namespace } });
   }
@@ -74,27 +63,39 @@ export const queryNotifications = async (
   params: NotificationQueryParams = {}
 ): Promise<NotificationQueryResult> => {
   const { dataStreams, logger } = deps;
+  const validated = notificationQueryParamsSchema.parse(params);
 
   const client = await getNotificationDataStreamClient(dataStreams);
+  // Over-fetch by one collapse group so a full page is distinguishable from a truncated one
   const response = await client.search({
-    query: { bool: { filter: buildFilters(params) } },
+    query: { bool: { filter: buildFilters(validated) } },
     collapse: { field: 'notification_id' },
     sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
-    size: NOTIFICATION_QUERY_RESULT_LIMIT,
+    size: NOTIFICATION_QUERY_RESULT_LIMIT + 1,
     track_total_hits: false,
   });
 
-  const items = response.hits.hits.flatMap((hit): Notification[] => {
-    const parsed = notificationReadSchema.safeParse(hit._source);
-    if (!parsed.success) {
-      logger.debug(`Dropping malformed notification doc ${hit._id}: ${parsed.error.message}`);
-      return [];
-    }
-    return [parsed.data];
-  });
+  const truncated = response.hits.hits.length > NOTIFICATION_QUERY_RESULT_LIMIT;
+  const hits = response.hits.hits.slice(0, NOTIFICATION_QUERY_RESULT_LIMIT);
 
-  return {
-    items,
-    truncated: response.hits.hits.length === NOTIFICATION_QUERY_RESULT_LIMIT,
-  };
+  const items: Notification[] = [];
+  const malformedIds: string[] = [];
+  for (const hit of hits) {
+    const parsed = notificationReadSchema.safeParse(hit._source);
+    if (parsed.success) {
+      items.push(parsed.data);
+    } else {
+      malformedIds.push(hit._id ?? 'unknown');
+    }
+  }
+
+  if (malformedIds.length) {
+    logger.debug(
+      `Dropped ${malformedIds.length} malformed notification docs. Sample: ${malformedIds
+        .slice(0, 10)
+        .join(', ')}`
+    );
+  }
+
+  return { items, truncated };
 };

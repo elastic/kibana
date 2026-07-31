@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   RunContext,
@@ -12,7 +13,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
-import { SEVERITY_TTL_GROUPS } from '../../common/notification_schema';
+import { severityTTLQuery } from '../lib/severity_ttl_query';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
@@ -20,22 +21,9 @@ export const CLEANUP_TASK_TYPE = 'notification-center:cleanup';
 export const CLEANUP_TASK_ID = 'notification-center:cleanup';
 
 /**
- * Builds an ES query that matches all notification docs older than their severity's TTL.
- * Uses ES date-math on the indexed `@timestamp` field so no client-side time arithmetic is needed.
+ * ES query matching every notification doc past its severity's TTL
  */
-export const buildCleanupQuery = () => ({
-  bool: {
-    minimum_should_match: 1 as const,
-    should: [...SEVERITY_TTL_GROUPS.entries()].map(([days, severities]) => ({
-      bool: {
-        filter: [
-          { terms: { severity: severities } },
-          { range: { '@timestamp': { lt: `now-${days}d/d` } } },
-        ],
-      },
-    })),
-  },
-});
+export const buildCleanupQuery = (): QueryDslQueryContainer => severityTTLQuery('expired');
 
 export const registerNotificationCleanupTask = (
   core: CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>,

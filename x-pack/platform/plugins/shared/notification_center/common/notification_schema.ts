@@ -118,3 +118,17 @@ export const notificationReadSchema = notificationObject
     severity: z.enum(SEVERITIES).default('info').catch('info'),
   })
   .loose();
+
+/**
+ * Read-path query params. Used primarily at the HTTP GET route boundary.
+ *`queryNotifications` re-parses it for extra validation..
+ */
+export const notificationQueryParamsSchema = z
+  .object({
+    namespace: z.string().min(1).max(64).optional(),
+    type: z.string().min(1).max(64).optional(),
+    severity: z.array(z.enum(SEVERITIES)).max(SEVERITIES.length).optional(),
+    from: z.iso.datetime().optional(),
+    to: z.iso.datetime().optional(),
+  })
+  .strict();
