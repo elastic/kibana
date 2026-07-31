@@ -8,16 +8,13 @@
 import type { SmlEntry, SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { type SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { EventService } from '../../lib/significant_events/events/event_service';
 import type { GetScopedClients } from '../../routes/types';
-import { isSignificantEventsAvailable } from '../../routes/utils/assert_significant_events_access';
 
 interface CreateSignificantEventSmlTypeOptions {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
 }
 
 const PAGE_SIZE = 100;
@@ -38,26 +35,14 @@ const eventToSmlContent = (event: SignificantEvent): string => {
 
 export const createSignificantEventSmlType = ({
   getScopedClients,
-  server,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
   const eventService = new EventService();
-
-  // Registered in setup and polled every 10 minutes, so the handlers carry the gate.
-  // `server.licensing` is read lazily because it is only assigned in start.
-  const isAvailable = () => isSignificantEventsAvailable({ server, licensing: server.licensing });
 
   return {
     id: SIGNIFICANT_EVENT_SML_TYPE,
     fetchFrequency: () => '10m',
 
     async *list(context) {
-      if (!(await isAvailable())) {
-        context.logger.debug(
-          'SML significant event: significant events is unavailable, not listing'
-        );
-        return;
-      }
-
       const eventClient = eventService.getClient({
         esClient: context.esClient,
         space: DEFAULT_SPACE_ID,
@@ -92,13 +77,6 @@ export const createSignificantEventSmlType = ({
     },
 
     getSmlEntry: async (originId, context): Promise<SmlEntry | undefined> => {
-      if (!(await isAvailable())) {
-        context.logger.debug(
-          `SML significant event: significant events is unavailable, not resolving '${originId}'`
-        );
-        return undefined;
-      }
-
       try {
         const eventClient = eventService.getClient({
           esClient: context.esClient,
