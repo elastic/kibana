@@ -207,6 +207,7 @@ steps:
                       description: The summary from inputs.context.summary — the value before this investigation ran.
                     to:
                       type: string
+                      minLength: 1
                       maxLength: 10000
                       description: The corrected summary. Objective, self-contained account of the problem and impact.
                     reason:

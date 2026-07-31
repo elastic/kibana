@@ -258,6 +258,16 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(emptyEvidence).success).toBe(false);
   });
 
+  it('rejects a summary event_update with an empty `to` under both schemas', () => {
+    const emptySummary = {
+      ...validPayload,
+      significant_event_updates: [{ ...summaryUpdate, to: '' }],
+    };
+
+    expect(validate(emptySummary)).toBe(false);
+    expect(investigationStateSchema.safeParse(emptySummary).success).toBe(false);
+  });
+
   it('rejects a significant_event_updates array exceeding MAX_SIGNIFICANT_EVENT_UPDATES under both schemas', () => {
     const tooMany = {
       ...validPayload,

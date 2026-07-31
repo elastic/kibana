@@ -89,7 +89,7 @@ export const significantEventUpdateSchema = z.discriminatedUnion('field', [
   z.object({
     field: z.literal('summary'),
     from: z.string().max(MAX_TEXT_LENGTH),
-    to: z.string().max(MAX_TEXT_LENGTH),
+    to: z.string().min(1).max(MAX_TEXT_LENGTH),
     ...significantEventUpdateBase,
   }),
   z.object({
