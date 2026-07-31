@@ -99,7 +99,7 @@ export const fetchEndpointActionResponses = async <
   Array<LogsEndpointActionResponse<TOutputContent, TResponseMeta>>
 > => {
   const ccsEnabled = await endpointService.isCcsEnabled();
-  const readEsClient = endpointService.isCpsEnabled()
+  const readEsClient = endpointService.isCpsRead(request)
     ? endpointService.getReadEsClient(request)
     : esClient;
   const searchResponse = await readEsClient

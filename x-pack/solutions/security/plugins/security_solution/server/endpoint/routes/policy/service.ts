@@ -64,7 +64,7 @@ export async function getPolicyResponseByAgentId({
   ccsEnabled,
   request,
 }: GetPolicyResponseByAgentIdOptions): Promise<GetHostPolicyResponse | undefined> {
-  const cpsEnabled = endpointService.isCpsEnabled();
+  const cpsEnabled = endpointService.isCpsRead(request);
   const query = getESQueryPolicyResponseByAgentID(
     agentID,
     prefixIndexPatternsWithCcs(policyIndexPattern, ccsEnabled)

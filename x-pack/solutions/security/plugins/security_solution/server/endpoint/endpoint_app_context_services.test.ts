@@ -119,6 +119,20 @@ describe('test endpoint app context services', () => {
       expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
     });
 
+    it('reports a read with no request identity as not fanning out, whatever the flag says', () => {
+      startService(true);
+
+      expect(service.isCpsRead()).toBe(false);
+      expect(service.isCpsRead(request)).toBe(true);
+    });
+
+    it('returns the internal ES client when CPS is enabled but the caller has no request', () => {
+      startService(true);
+
+      expect(service.getReadEsClient()).toBe(startContract.esClient);
+      expect(startContract.clusterClient.asScoped).not.toHaveBeenCalled();
+    });
+
     it('returns a current-user client with space project routing when CPS is enabled', () => {
       startService(true);
 

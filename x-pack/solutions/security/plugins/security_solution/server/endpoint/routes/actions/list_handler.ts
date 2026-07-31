@@ -65,14 +65,19 @@ export const actionListHandler = (
     const activeSpaceId = (await context.securitySolution).getSpaceId();
 
     try {
-      const indexExists = await doesLogsEndpointActionsIndexExist({
-        esClient,
-        logger,
-        indexName: ENDPOINT_ACTIONS_INDEX,
-      });
+      // The probe is origin-only, so under CPS an origin that has never dispatched an action would
+      // 404 the whole list even when linked projects hold history. The search tolerates the missing
+      // index on its own.
+      if (!endpointContext.service.isCpsRead(req)) {
+        const indexExists = await doesLogsEndpointActionsIndexExist({
+          esClient,
+          logger,
+          indexName: ENDPOINT_ACTIONS_INDEX,
+        });
 
-      if (!indexExists) {
-        return res.notFound({ body: 'index_not_found_exception' });
+        if (!indexExists) {
+          return res.notFound({ body: 'index_not_found_exception' });
+        }
       }
 
       // verify feature flag for sentinel_one `agentType`

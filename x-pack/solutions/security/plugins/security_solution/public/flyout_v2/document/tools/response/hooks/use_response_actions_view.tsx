@@ -143,8 +143,9 @@ export const useResponseActionsView = ({ hit }: UseResponseActionsViewParams): R
     canAccessEndpointActionsLogManagement && isFetched && !!automatedList?.items?.length;
 
   useEffect(() => {
-    setIsLive(!!responseActions?.length && !automatedList?.items?.length);
-  }, [automatedList?.items?.length, responseActions?.length]);
+    // A failed fetch leaves the list empty, which would otherwise keep polling behind the callout
+    setIsLive(!isError && !!responseActions?.length && !automatedList?.items?.length);
+  }, [automatedList?.items?.length, isError, responseActions?.length]);
 
   if (!hasAlertId) {
     return <EmptyResponseActions />;

@@ -88,7 +88,7 @@ export const fetchActionRequests = async ({
   unExpiredOnly = false,
   types,
 }: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
-  const cpsEnabled = endpointService.isCpsEnabled();
+  const cpsEnabled = endpointService.isCpsRead(request);
   const esClient = cpsEnabled
     ? endpointService.getReadEsClient(request)
     : endpointService.getInternalEsClient();

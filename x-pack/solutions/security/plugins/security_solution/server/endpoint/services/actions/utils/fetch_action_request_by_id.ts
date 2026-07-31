@@ -50,7 +50,7 @@ export const fetchActionRequestById = async <
   }> = {}
 ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> => {
   const logger = endpointService.createLogger('fetchActionRequestById');
-  const cpsEnabled = endpointService.isCpsEnabled();
+  const cpsEnabled = endpointService.isCpsRead(request);
   const esClient = cpsEnabled
     ? endpointService.getReadEsClient(request)
     : endpointService.getInternalEsClient();

@@ -92,6 +92,17 @@ describe('Action List Handler', () => {
       expect(mockResponse.ok).toHaveBeenCalled();
     });
 
+    it('should skip the index check under CPS, where the origin may hold no actions of its own', async () => {
+      (apiTestSetup.endpointAppContextMock.service.isCpsEnabled as jest.Mock).mockReturnValue(true);
+      mockDoesLogsEndpointActionsIndexExist.mockClear();
+      mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
+
+      await actionListHandler(defaultParams);
+
+      expect(mockDoesLogsEndpointActionsIndexExist).not.toHaveBeenCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
+    });
+
     it('should call `getActionListByStatus` when statuses filter values are provided', async () => {
       await actionListHandler({ ...defaultParams, statuses: ['failed', 'pending'] });
       expect(mockGetActionListByStatus).toBeCalledWith(

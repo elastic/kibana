@@ -14,7 +14,12 @@ import type { EndpointAuthz } from '../../../common/endpoint/types/authz';
 import { getEndpointAuthzInitialStateMock } from '../../../common/endpoint/service/authz/mocks';
 import { ResponseActionsQueries } from '../../../common/search_strategy/endpoint/response_actions';
 import type { EndpointAppContext } from '../../endpoint/types';
+import { fetchActionRequestById } from '../../endpoint/services/actions/utils/fetch_action_request_by_id';
 import { endpointSearchStrategyProvider } from '.';
+
+jest.mock('../../endpoint/services/actions/utils/fetch_action_request_by_id');
+
+const fetchActionRequestByIdMock = fetchActionRequestById as jest.Mock;
 
 describe('endpointSearchStrategyProvider', () => {
   type SearchArgs = Parameters<ReturnType<typeof endpointSearchStrategyProvider>['search']>;
@@ -38,6 +43,8 @@ describe('endpointSearchStrategyProvider', () => {
         getEndpointAuthz,
         isCcsEnabled,
         isCpsEnabled: jest.fn().mockReturnValue(cpsEnabled),
+        isCpsRead: jest.fn((req) => cpsEnabled && req != null),
+        getActiveSpaceId: jest.fn().mockReturnValue('default'),
         getScopedSearchClient: jest.fn().mockReturnValue({ search: scopedSearch }),
       },
     } as unknown as EndpointAppContext;
@@ -48,6 +55,11 @@ describe('endpointSearchStrategyProvider', () => {
       scopedSearch,
     };
   };
+
+  beforeEach(() => {
+    fetchActionRequestByIdMock.mockReset();
+    fetchActionRequestByIdMock.mockResolvedValue({ EndpointActions: { action_id: 'action-1' } });
+  });
 
   const deps = {
     request: httpServerMock.createKibanaRequest(),
@@ -106,6 +118,96 @@ describe('endpointSearchStrategyProvider', () => {
         expect.anything(),
         expect.objectContaining({ strategy: 'ese' })
       );
+    });
+
+    it('drops a caller-supplied projectRouting so the routing stays the one derived here', async () => {
+      const { provider, scopedSearch } = buildProvider(
+        { canAccessEndpointActionsLogManagement: true },
+        { cpsEnabled: true }
+      );
+
+      await lastValueFrom(
+        provider.search(
+          request,
+          { projectRouting: '_alias: "somewhere-else"' } as SearchArgs[1],
+          deps
+        )
+      );
+
+      expect(scopedSearch.mock.calls[0][1]).not.toHaveProperty('projectRouting');
+    });
+
+    it('bounds the alert-driven actions query to the active space', async () => {
+      const { provider, scopedSearch } = buildProvider(
+        { canAccessEndpointActionsLogManagement: true },
+        { cpsEnabled: true }
+      );
+
+      await lastValueFrom(provider.search(request, options, deps));
+
+      expect(scopedSearch.mock.calls[0][0].params.query.bool.filter).toEqual([
+        {
+          bool: {
+            should: [{ term: { originSpaceId: 'default' } }, { term: { space_id: 'default' } }],
+            minimum_should_match: 1,
+          },
+        },
+      ]);
+    });
+
+    it('leaves the actions query unbounded when the flag is off', async () => {
+      const { provider, search } = buildProvider({ canAccessEndpointActionsLogManagement: true });
+
+      await lastValueFrom(provider.search(request, options, deps));
+
+      expect(search.mock.calls[0][0].params.query.bool).not.toHaveProperty('filter');
+    });
+
+    describe('and the query is keyed on a caller-supplied action id', () => {
+      const resultsRequest = {
+        factoryQueryType: ResponseActionsQueries.results,
+        actionId: 'action-1',
+        sort: { field: '@timestamp', order: 'desc' as const },
+      } as unknown as SearchArgs[0];
+
+      it('resolves the action first, so the space check happens before the fan-out', async () => {
+        const { provider, scopedSearch } = buildProvider(
+          { canAccessEndpointActionsLogManagement: true },
+          { cpsEnabled: true }
+        );
+
+        await lastValueFrom(provider.search(resultsRequest, options, deps));
+
+        expect(fetchActionRequestByIdMock).toHaveBeenCalledWith(
+          expect.anything(),
+          'default',
+          'action-1',
+          { request: deps.request }
+        );
+        expect(scopedSearch).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not run the search when the action is not visible in the active space', async () => {
+        fetchActionRequestByIdMock.mockRejectedValue(new Error('Action [action-1] not found'));
+        const { provider, scopedSearch } = buildProvider(
+          { canAccessEndpointActionsLogManagement: true },
+          { cpsEnabled: true }
+        );
+
+        await expect(lastValueFrom(provider.search(resultsRequest, options, deps))).rejects.toThrow(
+          'not found'
+        );
+        expect(scopedSearch).not.toHaveBeenCalled();
+      });
+
+      it('does not resolve the action when the flag is off', async () => {
+        const { provider, search } = buildProvider({ canAccessEndpointActionsLogManagement: true });
+
+        await lastValueFrom(provider.search(resultsRequest, options, deps));
+
+        expect(fetchActionRequestByIdMock).not.toHaveBeenCalled();
+        expect(search).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

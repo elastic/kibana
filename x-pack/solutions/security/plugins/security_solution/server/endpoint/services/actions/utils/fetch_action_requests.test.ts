@@ -563,5 +563,41 @@ describe('fetchActionRequests()', () => {
         expect.anything()
       );
     });
+
+    describe('and the caller has no request identity', () => {
+      beforeEach(() => {
+        fetchOptions.request = undefined;
+      });
+
+      it('should keep the pre-CPS space filter, since the read cannot fan out', async () => {
+        await fetchActionRequests(fetchOptions);
+
+        expect(esClientMock.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: {
+              bool: {
+                must: [
+                  {
+                    bool: {
+                      filter: {
+                        terms: { 'agent.policy.integrationPolicyId': ['111', '222'] },
+                      },
+                    },
+                  },
+                  { bool: { filter: [] } },
+                ],
+              },
+            },
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should read as the internal user', async () => {
+        await fetchActionRequests(fetchOptions);
+
+        expect(readEsClientMock.search).not.toHaveBeenCalled();
+      });
+    });
   });
 });

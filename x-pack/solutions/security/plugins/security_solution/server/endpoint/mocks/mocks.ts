@@ -138,6 +138,7 @@ export const createMockEndpointAppContextService = (
   const licenseServiceMock = createLicenseServiceMock();
   const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
   const scriptsClient = ScriptsLibraryMock.getMockedClient();
+  const isCpsEnabled = jest.fn().mockReturnValue(false);
 
   return {
     start: jest.fn(),
@@ -167,7 +168,9 @@ export const createMockEndpointAppContextService = (
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
     isCcsEnabled: jest.fn().mockResolvedValue(false),
-    isCpsEnabled: jest.fn().mockReturnValue(false),
+    isCpsEnabled,
+    // Mirrors production: a read with no request identity cannot fan out, whatever the flag says
+    isCpsRead: jest.fn((request?: KibanaRequest) => isCpsEnabled() && request != null),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
     // Matches the flag-off branch; fan-out tests override this along with `isCpsEnabled`
     getReadEsClient: jest.fn().mockReturnValue(esClient),

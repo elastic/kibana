@@ -338,25 +338,34 @@ export class EndpointAppContextService {
   }
 
   /**
-   * The client for reads against Defend-owned indices. Fleet-owned ones keep `getInternalEsClient()`.
-   *
-   * Background callers with no request identity fall back to the internal client, with a breadcrumb
-   * since origin-only data looks the same as a missing index grant.
+   * `true` when this particular read fans out. Background callers hold no request identity, so they
+   * stay origin-only even with CPS on, and must keep the pre-CPS space semantics along with it:
+   * client choice and space filtering have to agree on one answer or a local document can be
+   * filtered out of an origin-only read.
    */
+  public isCpsRead(request?: KibanaRequest): boolean {
+    if (!this.isCpsEnabled()) {
+      return false;
+    }
+
+    if (!request) {
+      this.createLogger('isCpsRead').debug(
+        'CPS is enabled but this read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /** The client for reads against Defend-owned indices. Fleet-owned ones keep `getInternalEsClient()` */
   public getReadEsClient(request?: KibanaRequest): ElasticsearchClient {
     if (!this.startDependencies?.clusterClient) {
       throw new EndpointAppContentServicesNotStartedError();
     }
 
-    if (!this.isCpsEnabled()) {
-      return this.getInternalEsClient();
-    }
-
-    if (!request) {
-      this.createLogger('getReadEsClient').debug(
-        'CPS is enabled but this read was requested without a KibanaRequest, so it cannot fan out and will return origin data only'
-      );
-
+    if (!request || !this.isCpsRead(request)) {
       return this.getInternalEsClient();
     }
 
