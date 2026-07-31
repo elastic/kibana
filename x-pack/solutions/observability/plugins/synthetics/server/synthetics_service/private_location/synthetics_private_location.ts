@@ -24,6 +24,7 @@ import {
 import { scheduleCleanUpTask } from './clean_up_task';
 import type { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
+import { getVaultConnectionConfig } from '../get_vault_connection';
 import type {
   HeartbeatConfig,
   MonitorFields,
@@ -216,6 +217,13 @@ export class SyntheticsPrivateLocation {
 
       newPolicy.namespace = await this.getPolicyNamespace(configNamespace);
 
+      // Assemble the vault connection (base64 JSON) so vault-backed monitors can
+      // resolve ${vault/..} refs at the edge. Fleet stores it as a Fleet secret.
+      const vaultConnection = await getVaultConnectionConfig(this.server, spaceId);
+      const vaultConfigB64 = vaultConnection
+        ? Buffer.from(JSON.stringify(vaultConnection)).toString('base64')
+        : undefined;
+
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
         config.type,
@@ -240,7 +248,9 @@ export class SyntheticsPrivateLocation {
           ...(config.fields?.kibanaUrl ? { kibanaUrl: config.fields.kibanaUrl } : {}),
         },
         globalParams,
-        maintenanceWindows
+        maintenanceWindows,
+        undefined,
+        vaultConfigB64
       );
 
       return formattedPolicy;

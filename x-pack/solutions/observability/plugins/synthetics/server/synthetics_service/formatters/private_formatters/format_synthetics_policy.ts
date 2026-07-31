@@ -18,6 +18,7 @@ import {
   handleMultilineStringFormatter,
   replaceStringWithParams,
 } from '../formatting_utils';
+import { valueContainsVaultReference } from '../vault_param_formatter';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
@@ -39,7 +40,8 @@ export const formatSyntheticsPolicy = (
   config: Partial<MonitorFields & ProcessorFields>,
   params: Record<string, string>,
   mws: MaintenanceWindow[],
-  isLegacy?: boolean
+  isLegacy?: boolean,
+  vaultConfigB64?: string
 ) => {
   const configKeys = Object.keys(config) as ConfigKey[];
 
@@ -128,6 +130,21 @@ export const formatSyntheticsPolicy = (
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
   if (throttling) {
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+  }
+
+  // Vault connection: when this monitor references a vault-backed secret
+  // (${vault/<path>#<field>} in any field) and a connection is configured, set
+  // the base64 connection on the `vault` var. That var is `secret: true` in the
+  // package, so Fleet stores the whole connection as a single Fleet secret and
+  // the compiled policy carries only a $co.elastic.secret{...} reference.
+  const vaultItem = dataStream?.vars?.vault;
+  if (vaultItem && vaultConfigB64) {
+    const usesVault = Object.values(dataStream?.vars ?? {}).some((v) =>
+      valueContainsVaultReference(v?.value)
+    );
+    if (usesVault) {
+      vaultItem.value = vaultConfigB64;
+    }
   }
 
   return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };
