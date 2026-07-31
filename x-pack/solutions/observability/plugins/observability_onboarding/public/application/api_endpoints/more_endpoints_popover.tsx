@@ -79,6 +79,7 @@ export const MoreEndpointsPopover = ({
               <EuiIcon
                 type={isPopoverOpen ? 'arrowUp' : 'arrowDown'}
                 size="s"
+                aria-hidden={true}
                 css={css`
                   margin-left: ${euiTheme.size.xs};
                 `}
