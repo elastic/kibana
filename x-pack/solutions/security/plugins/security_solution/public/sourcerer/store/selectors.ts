@@ -29,16 +29,6 @@ export const sourcererScope = createSelector(
   }
 );
 
-export const sourcererScopeSelectedDataViewId = createSelector(
-  sourcererScope,
-  (scope) => scope.selectedDataViewId,
-  {
-    memoizeOptions: {
-      maxSize: SOURCERER_SCOPE_MAX_SIZE,
-    },
-  }
-);
-
 export const sourcererScopeMissingPatterns = createSelector(
   sourcererScope,
   (scope) => scope.missingPatterns,
