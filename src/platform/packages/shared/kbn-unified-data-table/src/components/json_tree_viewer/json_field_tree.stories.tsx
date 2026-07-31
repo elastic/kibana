@@ -49,6 +49,19 @@ const largeDocument = Object.fromEntries(
   Array.from({ length: 30 }, (_, i) => [`field_${i + 1}`, i % 3 === 0 ? null : i + 1])
 );
 
+// A deliberately huge document: a 2,000-field object, a 5,000-element array of nested
+// objects, plus small collections. Fully expanded it would be ~7,000 rows without caps;
+// the per-collection cap must keep the rendered DOM tiny at every level.
+const largeNestedDocument = {
+  summary: Object.fromEntries(Array.from({ length: 2000 }, (_, i) => [`field_${i + 1}`, i + 1])),
+  events: Array.from({ length: 5000 }, (_, i) => ({
+    id: i,
+    name: `event_${i}`,
+    tags: ['authentication', 'security', 'network'],
+  })),
+  meta: { total: 7000, truncated: true },
+};
+
 const longValueDocument = {
   message:
     'GET /api/v1/very/long/path?with=a&bunch=of&query=parameters that keeps going well beyond the width of the container to show wrapping behaviour',
@@ -126,6 +139,14 @@ export const FieldTreeLargeObject: StoryObj<typeof JsonFieldTree> = {
   render: () => (
     <div style={{ width: 440 }}>
       <JsonFieldTree json={largeDocument} />
+    </div>
+  ),
+};
+
+export const FieldTreeLargeNested: StoryObj<typeof JsonFieldTree> = {
+  render: () => (
+    <div style={{ width: 440 }}>
+      <JsonFieldTree json={largeNestedDocument} />
     </div>
   ),
 };

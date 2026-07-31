@@ -21,6 +21,11 @@
  * closing bracket is a real interleaved line and the collapsed preview is a plain JS
  * branch — none of the `key`-remount, negative-margin, `:has()` or `!important` hacks the
  * `EuiTreeView`-based version needs.
+ *
+ * Large documents are kept cheap by capping *every* collection (the root and each expanded
+ * node) at `INITIAL_CHILDREN` rendered children, with an inline "Show N more" row that
+ * reveals the next chunk. This bounds the DOM per cell at any depth — Expand-all included —
+ * so the grid's own row virtualization is all that's needed; the viewer never virtualizes.
  */
 
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
@@ -47,13 +52,18 @@ export interface JsonSyntaxTreeProps {
   json: JsonValue;
 }
 
-const INITIAL_VISIBLE_ITEMS = 10;
-const VISIBLE_ITEMS_INCREMENT = 10;
+// Each collection (root + every expanded node) renders at most this many children before a
+// "Show N more" row appears; revealing bumps the collection's budget by this increment.
+const INITIAL_CHILDREN = 10;
+const CHILDREN_INCREMENT = 10;
+
+// Stable id for the (container-less) root list, so it can carry its own reveal budget.
+const ROOT_ID = 'json-syntax-$root';
 
 const OPEN_BRACKET = { object: '{', array: '[' } as const;
 const CLOSE_BRACKET = { object: '}', array: ']' } as const;
 
-// ---- Data model (a plain tree, not React elements) ----
+// ---- Data model (a plain tree; a leaf may carry a pre-rendered node, e.g. a highlighted value) ----
 
 type CollectionType = 'object' | 'array';
 type PrimitiveType = 'string' | 'number' | 'boolean' | 'null';
@@ -74,6 +84,8 @@ interface LeafNode {
   kind: 'leaf';
   primitiveType: PrimitiveType;
   value: JsonPrimitive;
+  // A search-highlighted value arrives already rendered (matched terms marked); render it verbatim.
+  rendered?: React.ReactNode;
 }
 
 type JsonNode = CollectionNode | LeafNode;
@@ -108,6 +120,20 @@ const buildNode = ({
   value: unknown;
   isArrayItem: boolean;
 }): JsonNode => {
+  // A highlighted value is a React element — a leaf that renders itself, not a collection to
+  // recurse into (React elements are objects, so this must precede the object check below).
+  if (React.isValidElement(value)) {
+    return {
+      id: getNodeId(path),
+      key,
+      isArrayItem,
+      kind: 'leaf',
+      primitiveType: 'string',
+      value: null,
+      rendered: value,
+    };
+  }
+
   if (Array.isArray(value)) {
     return {
       id: getNodeId(path),
@@ -182,6 +208,10 @@ const collectExpandableIds = (nodes: JsonNode[]): string[] =>
 // Unlike Prototype A, an expanded collection also emits a synthetic `closing` row after
 // its children, so the tree reads like formatted JSON. Closing rows are presentational
 // (`aria-hidden`, no role, not focusable) and are excluded from keyboard navigation.
+//
+// Every collection is capped at its reveal budget; when a list is truncated a `more` row is
+// emitted at the children's depth (before the closing bracket). `more` rows are real,
+// focusable treeitems so they stay in the roving-tabindex order.
 
 interface NodeRow {
   kind: 'node';
@@ -204,18 +234,40 @@ interface ClosingRow {
   trailingComma: boolean;
 }
 
-type RenderRow = NodeRow | ClosingRow;
+// A pager row reveals the next chunk of a truncated collection (`more`) or resets it back to
+// the initial cap (`fewer`). Both are real, focusable treeitems.
+interface PagerRow {
+  kind: 'pager';
+  variant: 'more' | 'fewer';
+  id: string;
+  depth: number;
+  parentId: string | null;
+  collectionId: string;
+  collectionType: CollectionType;
+  hiddenCount: number;
+}
 
-const isNodeRow = (row: RenderRow): row is NodeRow => row.kind === 'node';
+type RenderRow = NodeRow | ClosingRow | PagerRow;
+
+const rowKey = (row: RenderRow) => (row.kind === 'node' ? row.node.id : row.id);
+
+// Closing brackets are presentational; nodes and pager rows are the focusable treeitems.
+const isFocusable = (row: RenderRow): row is NodeRow | PagerRow => row.kind !== 'closing';
 
 const flattenRows = (
   nodes: JsonNode[],
+  listId: string,
+  listType: CollectionType,
   expanded: ReadonlySet<string>,
+  revealed: ReadonlyMap<string, number>,
   depth: number,
   parentId: string | null,
   out: RenderRow[]
 ): RenderRow[] => {
-  nodes.forEach((node, index) => {
+  const shown = Math.min(revealed.get(listId) ?? INITIAL_CHILDREN, nodes.length);
+  for (let index = 0; index < shown; index++) {
+    const node = nodes[index];
+    // Full-length comparison: the last *shown* item still gets a comma when more are hidden.
     const trailingComma = index < nodes.length - 1;
     const hasChildren = node.kind === 'collection' && node.children.length > 0;
     const isExpanded = hasChildren && expanded.has(node.id);
@@ -231,7 +283,16 @@ const flattenRows = (
       posInSet: index + 1,
     });
     if (isExpanded && node.kind === 'collection') {
-      flattenRows(node.children, expanded, depth + 1, node.id, out);
+      flattenRows(
+        node.children,
+        node.id,
+        node.collectionType,
+        expanded,
+        revealed,
+        depth + 1,
+        node.id,
+        out
+      );
       out.push({
         kind: 'closing',
         id: `${node.id}__close`,
@@ -240,7 +301,34 @@ const flattenRows = (
         trailingComma,
       });
     }
-  });
+  }
+  const hidden = nodes.length - shown;
+  if (hidden > 0) {
+    out.push({
+      kind: 'pager',
+      variant: 'more',
+      id: `${listId}__more`,
+      depth,
+      parentId,
+      collectionId: listId,
+      collectionType: listType,
+      hiddenCount: hidden,
+    });
+  }
+  // Offer "Show fewer" whenever this list was revealed past its initial cap, so a collection
+  // grown large can be compacted again.
+  if (shown > INITIAL_CHILDREN) {
+    out.push({
+      kind: 'pager',
+      variant: 'fewer',
+      id: `${listId}__fewer`,
+      depth,
+      parentId,
+      collectionId: listId,
+      collectionType: listType,
+      hiddenCount: 0,
+    });
+  }
   return out;
 };
 
@@ -256,6 +344,26 @@ const collectionCountLabel = (node: CollectionNode) => {
         values: { count },
       });
 };
+
+const showMoreLabel = (collectionType: CollectionType, count: number) =>
+  collectionType === 'array'
+    ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showMoreItems', {
+        defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
+        values: { count },
+      })
+    : i18n.translate('unifiedDataTable.jsonSyntaxTree.showMoreFields', {
+        defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
+        values: { count },
+      });
+
+const showFewerLabel = (collectionType: CollectionType) =>
+  collectionType === 'array'
+    ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showFewerItems', {
+        defaultMessage: 'Show fewer items',
+      })
+    : i18n.translate('unifiedDataTable.jsonSyntaxTree.showFewerFields', {
+        defaultMessage: 'Show fewer fields',
+      });
 
 // ---- Styles ----
 
@@ -325,6 +433,8 @@ const treeStyles = {
     css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
   copyButton: ({ euiTheme }: UseEuiTheme) =>
     css({ opacity: 0, marginInlineStart: euiTheme.size.xs, '&:focus-visible': { opacity: 1 } }),
+  // The inline "Show N more" affordance: muted, sitting where the JSON would continue.
+  moreLabel: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSubdued }),
   // Values: colours come from the colourblind-safe visualisation palette (not the
   // danger/success status tokens), and the formatting itself (quotes, keywords) conveys
   // type so we never rely on colour alone.
@@ -415,9 +525,13 @@ const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
     return (
       <span css={styles.label}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
-        <PrimitiveValue primitiveType={node.primitiveType} value={node.value} />
+        {node.rendered ? (
+          <span css={styles.value}>{node.rendered}</span>
+        ) : (
+          <PrimitiveValue primitiveType={node.primitiveType} value={node.value} />
+        )}
         {trailingComma && <Comma />}
-        <ValueCopyButton value={node.value} />
+        {!node.rendered && <ValueCopyButton value={node.value} />}
       </span>
     );
   }
@@ -468,7 +582,7 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
 
   const nodes = useMemo(() => buildNodes(json), [json]);
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
-  const rootIsArray = Array.isArray(json);
+  const rootType: CollectionType = Array.isArray(json) ? 'array' : 'object';
 
   const { openBracket, closeBracket } = useMemo(() => {
     if (Array.isArray(json)) return { openBracket: '[', closeBracket: ']' };
@@ -477,26 +591,19 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
   }, [json]);
 
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS);
+  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(() => new Map());
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
 
-  const visibleTopLevel = useMemo(
-    () => nodes.slice(0, Math.min(visibleCount, nodes.length)),
-    [nodes, visibleCount]
-  );
-
   const rows = useMemo(
-    () => flattenRows(visibleTopLevel, expanded, 0, null, []),
-    [visibleTopLevel, expanded]
+    () => flattenRows(nodes, ROOT_ID, rootType, expanded, revealed, 0, null, []),
+    [nodes, rootType, expanded, revealed]
   );
 
-  const orderedIds = useMemo(() => rows.filter(isNodeRow).map((row) => row.node.id), [rows]);
+  const orderedIds = useMemo(() => rows.filter(isFocusable).map(rowKey), [rows]);
   const orderedIdSet = useMemo(() => new Set(orderedIds), [orderedIds]);
 
-  const hiddenCount = nodes.length - visibleTopLevel.length;
-  const nextChunk = Math.min(VISIBLE_ITEMS_INCREMENT, hiddenCount);
   const hasControls = expandableIds.length > 0;
   const isAllExpanded = hasControls && expandableIds.every((id) => expanded.has(id));
 
@@ -518,11 +625,26 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
     [expanded, setExpandedFor]
   );
 
-  const expandAll = useCallback(() => {
-    setExpanded(new Set(expandableIds));
-    setVisibleCount(nodes.length);
-  }, [expandableIds, nodes.length]);
+  const revealMore = useCallback((id: string) => {
+    setRevealed((prev) => {
+      const next = new Map(prev);
+      next.set(id, (prev.get(id) ?? INITIAL_CHILDREN) + CHILDREN_INCREMENT);
+      return next;
+    });
+  }, []);
 
+  const showFewer = useCallback((id: string) => {
+    setRevealed((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  // Expand-all only flips expansion; it never raises reveal budgets, so the DOM stays
+  // bounded by the per-collection caps even for a huge document.
+  const expandAll = useCallback(() => setExpanded(new Set(expandableIds)), [expandableIds]);
   const collapseAll = useCallback(() => setExpanded(new Set()), []);
 
   const focusRow = useCallback((id: string | undefined) => {
@@ -532,8 +654,8 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
   }, []);
 
   const onRowKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>, row: NodeRow) => {
-      const index = orderedIds.indexOf(row.node.id);
+    (event: React.KeyboardEvent<HTMLDivElement>, row: NodeRow | PagerRow) => {
+      const index = orderedIds.indexOf(rowKey(row));
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault();
@@ -553,17 +675,27 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
           break;
         case 'ArrowRight':
           event.preventDefault();
-          if (row.hasChildren && !row.isExpanded) setExpandedFor(row.node.id, true);
+          if (row.kind === 'pager') {
+            if (row.variant === 'more') revealMore(row.collectionId);
+            else showFewer(row.collectionId);
+          } else if (row.hasChildren && !row.isExpanded) setExpandedFor(row.node.id, true);
           else if (row.hasChildren && row.isExpanded) focusRow(orderedIds[index + 1]);
           break;
         case 'ArrowLeft':
           event.preventDefault();
-          if (row.hasChildren && row.isExpanded) setExpandedFor(row.node.id, false);
-          else if (row.parentId) focusRow(row.parentId);
+          if (row.kind === 'node' && row.hasChildren && row.isExpanded) {
+            setExpandedFor(row.node.id, false);
+          } else if (row.parentId) {
+            focusRow(row.parentId);
+          }
           break;
         case 'Enter':
         case ' ':
-          if (row.hasChildren) {
+          if (row.kind === 'pager') {
+            event.preventDefault();
+            if (row.variant === 'more') revealMore(row.collectionId);
+            else showFewer(row.collectionId);
+          } else if (row.hasChildren) {
             event.preventDefault();
             toggle(row.node.id);
           }
@@ -572,34 +704,8 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
           break;
       }
     },
-    [orderedIds, focusRow, setExpandedFor, toggle]
+    [orderedIds, focusRow, setExpandedFor, toggle, revealMore, showFewer]
   );
-
-  const paginationLabels = {
-    more: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showMoreItems', {
-          defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
-          values: { count: nextChunk },
-        })
-      : i18n.translate('unifiedDataTable.jsonSyntaxTree.showMoreFields', {
-          defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
-          values: { count: nextChunk },
-        }),
-    all: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showAllItems', {
-          defaultMessage: 'Show all items',
-        })
-      : i18n.translate('unifiedDataTable.jsonSyntaxTree.showAllFields', {
-          defaultMessage: 'Show all fields',
-        }),
-    fewer: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showFewerItems', {
-          defaultMessage: 'Show fewer items',
-        })
-      : i18n.translate('unifiedDataTable.jsonSyntaxTree.showFewerFields', {
-          defaultMessage: 'Show fewer fields',
-        }),
-  };
 
   return (
     <>
@@ -655,6 +761,39 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
               );
             }
 
+            if (row.kind === 'pager') {
+              const isMore = row.variant === 'more';
+              const label = isMore
+                ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
+                : showFewerLabel(row.collectionType);
+              return (
+                <div
+                  key={row.id}
+                  ref={(element) => {
+                    if (element) rowRefs.current.set(row.id, element);
+                    else rowRefs.current.delete(row.id);
+                  }}
+                  role="treeitem"
+                  aria-level={row.depth + 1}
+                  aria-selected={row.id === activeRowId}
+                  tabIndex={row.id === activeRowId ? 0 : -1}
+                  css={[styles.row, styles.expandableRow]}
+                  style={{ paddingInlineStart }}
+                  onClick={() =>
+                    isMore ? revealMore(row.collectionId) : showFewer(row.collectionId)
+                  }
+                  onFocus={() => setActiveId(row.id)}
+                  onKeyDown={(event) => onRowKeyDown(event, row)}
+                  data-test-subj={`jsonSyntaxTree${isMore ? 'More' : 'Fewer'}-${row.collectionId}`}
+                >
+                  <span css={styles.caret}>
+                    <EuiIcon type={isMore ? 'plus' : 'minus'} size="s" aria-hidden />
+                  </span>
+                  <span css={styles.moreLabel}>{label}</span>
+                </div>
+              );
+            }
+
             const { node, hasChildren, isExpanded } = row;
             return (
               <div
@@ -692,51 +831,6 @@ export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
 
         {closeBracket !== null && <div css={styles.rootBracket}>{closeBracket}</div>}
       </div>
-
-      {(hiddenCount > 0 || visibleCount > INITIAL_VISIBLE_ITEMS) && (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          {visibleCount > INITIAL_VISIBLE_ITEMS && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                flush="left"
-                iconType="arrowUp"
-                onClick={() => setVisibleCount(INITIAL_VISIBLE_ITEMS)}
-                size="xs"
-              >
-                {paginationLabels.fewer}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {hiddenCount > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="left"
-                  iconType="plus"
-                  onClick={() =>
-                    setVisibleCount((prev) =>
-                      Math.min(prev + VISIBLE_ITEMS_INCREMENT, nodes.length)
-                    )
-                  }
-                  size="xs"
-                >
-                  {paginationLabels.more}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="left"
-                  iconType="listBullet"
-                  onClick={() => setVisibleCount(nodes.length)}
-                  size="xs"
-                >
-                  {paginationLabels.all}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </>
-          )}
-        </EuiFlexGroup>
-      )}
     </>
   );
 });

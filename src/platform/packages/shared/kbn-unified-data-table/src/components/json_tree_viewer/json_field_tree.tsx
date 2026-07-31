@@ -16,6 +16,11 @@
  * expand/collapse-all keep keyboard focus and scroll position. It is a self-contained,
  * accessible tree (roving tabindex + arrow-key navigation) so we are not constrained by
  * `EuiTreeView`'s lack of a controlled-expansion API.
+ *
+ * Large documents are kept cheap by capping *every* collection (the root and each expanded
+ * node) at `INITIAL_CHILDREN` rendered children, with an inline "Show N more" row that
+ * reveals the next chunk. This bounds the DOM per cell at any depth — Expand-all included —
+ * so the grid's own row virtualization is all that's needed; the viewer never virtualizes.
  */
 
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
@@ -42,10 +47,15 @@ export interface JsonFieldTreeProps {
   json: JsonValue;
 }
 
-const INITIAL_VISIBLE_ITEMS = 10;
-const VISIBLE_ITEMS_INCREMENT = 10;
+// Each collection (root + every expanded node) renders at most this many children before a
+// "Show N more" row appears; revealing bumps the collection's budget by this increment.
+const INITIAL_CHILDREN = 10;
+const CHILDREN_INCREMENT = 10;
 
-// ---- Data model (a plain tree, not React elements) ----
+// Stable id for the (container-less) root list, so it can carry its own reveal budget.
+const ROOT_ID = 'json-field-$root';
+
+// ---- Data model (a plain tree; a leaf may carry a pre-rendered node, e.g. a highlighted value) ----
 
 type CollectionType = 'object' | 'array';
 type PrimitiveType = 'string' | 'number' | 'boolean' | 'null';
@@ -66,6 +76,8 @@ interface LeafNode {
   kind: 'leaf';
   primitiveType: PrimitiveType;
   value: JsonPrimitive;
+  // A search-highlighted value arrives already rendered (matched terms marked); render it verbatim.
+  rendered?: React.ReactNode;
 }
 
 type JsonNode = CollectionNode | LeafNode;
@@ -100,6 +112,20 @@ const buildNode = ({
   value: unknown;
   isArrayItem: boolean;
 }): JsonNode => {
+  // A highlighted value is a React element — a leaf that renders itself, not a collection to
+  // recurse into (React elements are objects, so this must precede the object check below).
+  if (React.isValidElement(value)) {
+    return {
+      id: getNodeId(path),
+      key,
+      isArrayItem,
+      kind: 'leaf',
+      primitiveType: 'string',
+      value: null,
+      rendered: value,
+    };
+  }
+
   if (Array.isArray(value)) {
     return {
       id: getNodeId(path),
@@ -165,9 +191,14 @@ const collectCollectionIds = (nodes: JsonNode[]): string[] =>
     node.kind === 'collection' ? [node.id, ...collectCollectionIds(node.children)] : []
   );
 
-// ---- Flatten visible nodes (drives both rendering order and keyboard navigation) ----
+// ---- Flatten visible rows (drives rendering order and keyboard navigation) ----
+//
+// Every collection is capped at its reveal budget; when a list is truncated a synthetic
+// `more` row is emitted at the children's depth. `more` rows are real (focusable) treeitems
+// so they stay in the roving-tabindex order.
 
-interface FlatRow {
+interface NodeRow {
+  kind: 'node';
   node: JsonNode;
   depth: number;
   hasChildren: boolean;
@@ -177,29 +208,90 @@ interface FlatRow {
   posInSet: number;
 }
 
+// A pager row reveals the next chunk of a truncated collection (`more`) or resets it back to
+// the initial cap (`fewer`). Both are real, focusable treeitems.
+interface PagerRow {
+  kind: 'pager';
+  variant: 'more' | 'fewer';
+  id: string;
+  depth: number;
+  parentId: string | null;
+  collectionId: string;
+  collectionType: CollectionType;
+  hiddenCount: number;
+}
+
+type RenderRow = NodeRow | PagerRow;
+
+const rowKey = (row: RenderRow) => (row.kind === 'node' ? row.node.id : row.id);
+
 const flattenVisible = (
   nodes: JsonNode[],
+  listId: string,
+  listType: CollectionType,
   expanded: ReadonlySet<string>,
+  revealed: ReadonlyMap<string, number>,
   depth: number,
   parentId: string | null,
-  out: FlatRow[]
-): FlatRow[] => {
-  nodes.forEach((node, index) => {
+  out: RenderRow[]
+): RenderRow[] => {
+  const shown = Math.min(revealed.get(listId) ?? INITIAL_CHILDREN, nodes.length);
+  for (let index = 0; index < shown; index++) {
+    const node = nodes[index];
     const hasChildren = node.kind === 'collection' && node.children.length > 0;
     const isExpanded = hasChildren && expanded.has(node.id);
     out.push({
+      kind: 'node',
       node,
       depth,
       hasChildren,
       isExpanded,
       parentId,
+      // `setSize`/`posInSet` reflect the full sibling count even while capped, so a screen
+      // reader still announces "3 of 250".
       setSize: nodes.length,
       posInSet: index + 1,
     });
     if (isExpanded && node.kind === 'collection') {
-      flattenVisible(node.children, expanded, depth + 1, node.id, out);
+      flattenVisible(
+        node.children,
+        node.id,
+        node.collectionType,
+        expanded,
+        revealed,
+        depth + 1,
+        node.id,
+        out
+      );
     }
-  });
+  }
+  const hidden = nodes.length - shown;
+  if (hidden > 0) {
+    out.push({
+      kind: 'pager',
+      variant: 'more',
+      id: `${listId}__more`,
+      depth,
+      parentId,
+      collectionId: listId,
+      collectionType: listType,
+      hiddenCount: hidden,
+    });
+  }
+  // Offer "Show fewer" whenever this list was revealed past its initial cap, so a collection
+  // grown large can be compacted again.
+  if (shown > INITIAL_CHILDREN) {
+    out.push({
+      kind: 'pager',
+      variant: 'fewer',
+      id: `${listId}__fewer`,
+      depth,
+      parentId,
+      collectionId: listId,
+      collectionType: listType,
+      hiddenCount: 0,
+    });
+  }
   return out;
 };
 
@@ -262,6 +354,8 @@ const treeStyles = {
   // The child count is wrapped in the collection's own delimiter ({ } for objects, [ ] for
   // arrays) so a field's type is obvious at a glance — without adopting full JSON syntax.
   bracket: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
+  // The inline "Show N more" affordance: muted, but darkens on hover/focus like a link.
+  moreLabel: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSubdued }),
   // Values: colours come from the colourblind-safe visualisation palette (not the
   // danger/success status tokens), and the value formatting itself (quotes, keywords)
   // conveys type so we never rely on colour alone.
@@ -335,6 +429,26 @@ const collectionCountLabel = (node: CollectionNode) => {
       });
 };
 
+const showMoreLabel = (collectionType: CollectionType, count: number) =>
+  collectionType === 'array'
+    ? i18n.translate('unifiedDataTable.jsonFieldTree.showMoreItems', {
+        defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
+        values: { count },
+      })
+    : i18n.translate('unifiedDataTable.jsonFieldTree.showMoreFields', {
+        defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
+        values: { count },
+      });
+
+const showFewerLabel = (collectionType: CollectionType) =>
+  collectionType === 'array'
+    ? i18n.translate('unifiedDataTable.jsonFieldTree.showFewerItems', {
+        defaultMessage: 'Show fewer items',
+      })
+    : i18n.translate('unifiedDataTable.jsonFieldTree.showFewerFields', {
+        defaultMessage: 'Show fewer fields',
+      });
+
 // ---- Main component ----
 
 export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTreeProps) {
@@ -344,29 +458,22 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
 
   const nodes = useMemo(() => buildNodes(json), [json]);
   const allCollectionIds = useMemo(() => collectCollectionIds(nodes), [nodes]);
-  const rootIsArray = Array.isArray(json);
+  const rootType: CollectionType = Array.isArray(json) ? 'array' : 'object';
 
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS);
+  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(() => new Map());
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
 
-  const visibleTopLevel = useMemo(
-    () => nodes.slice(0, Math.min(visibleCount, nodes.length)),
-    [nodes, visibleCount]
-  );
-
   const rows = useMemo(
-    () => flattenVisible(visibleTopLevel, expanded, 0, null, []),
-    [visibleTopLevel, expanded]
+    () => flattenVisible(nodes, ROOT_ID, rootType, expanded, revealed, 0, null, []),
+    [nodes, rootType, expanded, revealed]
   );
 
-  const orderedIds = useMemo(() => rows.map((row) => row.node.id), [rows]);
-  const rowById = useMemo(() => new Map(rows.map((row) => [row.node.id, row])), [rows]);
+  const orderedIds = useMemo(() => rows.map(rowKey), [rows]);
+  const rowById = useMemo(() => new Map(rows.map((row) => [rowKey(row), row] as const)), [rows]);
 
-  const hiddenCount = nodes.length - visibleTopLevel.length;
-  const nextChunk = Math.min(VISIBLE_ITEMS_INCREMENT, hiddenCount);
   const hasControls = allCollectionIds.length > 0;
   const isAllExpanded = hasControls && allCollectionIds.every((id) => expanded.has(id));
 
@@ -388,11 +495,26 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
     [expanded, setExpandedFor]
   );
 
-  const expandAll = useCallback(() => {
-    setExpanded(new Set(allCollectionIds));
-    setVisibleCount(nodes.length);
-  }, [allCollectionIds, nodes.length]);
+  const revealMore = useCallback((id: string) => {
+    setRevealed((prev) => {
+      const next = new Map(prev);
+      next.set(id, (prev.get(id) ?? INITIAL_CHILDREN) + CHILDREN_INCREMENT);
+      return next;
+    });
+  }, []);
 
+  const showFewer = useCallback((id: string) => {
+    setRevealed((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Map(prev);
+      next.delete(id);
+      return next;
+    });
+  }, []);
+
+  // Expand-all only flips expansion; it never raises reveal budgets, so the DOM stays
+  // bounded by the per-collection caps even for a huge document.
+  const expandAll = useCallback(() => setExpanded(new Set(allCollectionIds)), [allCollectionIds]);
   const collapseAll = useCallback(() => setExpanded(new Set()), []);
 
   const focusRow = useCallback((id: string | undefined) => {
@@ -402,8 +524,8 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
   }, []);
 
   const onRowKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>, row: FlatRow) => {
-      const index = orderedIds.indexOf(row.node.id);
+    (event: React.KeyboardEvent<HTMLDivElement>, row: RenderRow) => {
+      const index = orderedIds.indexOf(rowKey(row));
       switch (event.key) {
         case 'ArrowDown':
           event.preventDefault();
@@ -423,17 +545,27 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
           break;
         case 'ArrowRight':
           event.preventDefault();
-          if (row.hasChildren && !row.isExpanded) setExpandedFor(row.node.id, true);
+          if (row.kind === 'pager') {
+            if (row.variant === 'more') revealMore(row.collectionId);
+            else showFewer(row.collectionId);
+          } else if (row.hasChildren && !row.isExpanded) setExpandedFor(row.node.id, true);
           else if (row.hasChildren && row.isExpanded) focusRow(orderedIds[index + 1]);
           break;
         case 'ArrowLeft':
           event.preventDefault();
-          if (row.hasChildren && row.isExpanded) setExpandedFor(row.node.id, false);
-          else if (row.parentId) focusRow(row.parentId);
+          if (row.kind === 'node' && row.hasChildren && row.isExpanded) {
+            setExpandedFor(row.node.id, false);
+          } else if (row.parentId) {
+            focusRow(row.parentId);
+          }
           break;
         case 'Enter':
         case ' ':
-          if (row.hasChildren) {
+          if (row.kind === 'pager') {
+            event.preventDefault();
+            if (row.variant === 'more') revealMore(row.collectionId);
+            else showFewer(row.collectionId);
+          } else if (row.hasChildren) {
             event.preventDefault();
             toggle(row.node.id);
           }
@@ -442,34 +574,8 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
           break;
       }
     },
-    [orderedIds, focusRow, setExpandedFor, toggle]
+    [orderedIds, focusRow, setExpandedFor, toggle, revealMore, showFewer]
   );
-
-  const paginationLabels = {
-    more: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonFieldTree.showMoreItems', {
-          defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
-          values: { count: nextChunk },
-        })
-      : i18n.translate('unifiedDataTable.jsonFieldTree.showMoreFields', {
-          defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
-          values: { count: nextChunk },
-        }),
-    all: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonFieldTree.showAllItems', {
-          defaultMessage: 'Show all items',
-        })
-      : i18n.translate('unifiedDataTable.jsonFieldTree.showAllFields', {
-          defaultMessage: 'Show all fields',
-        }),
-    fewer: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonFieldTree.showFewerItems', {
-          defaultMessage: 'Show fewer items',
-        })
-      : i18n.translate('unifiedDataTable.jsonFieldTree.showFewerFields', {
-          defaultMessage: 'Show fewer fields',
-        }),
-  };
 
   return (
     <>
@@ -503,7 +609,42 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
         data-test-subj="jsonFieldTree"
       >
         {rows.map((row) => {
-          const { node, depth, hasChildren, isExpanded } = row;
+          const paddingInlineStart = `calc(${euiTheme.size.s} + ${row.depth} * ${euiTheme.size.base})`;
+
+          if (row.kind === 'pager') {
+            const isMore = row.variant === 'more';
+            const label = isMore
+              ? showMoreLabel(row.collectionType, Math.min(CHILDREN_INCREMENT, row.hiddenCount))
+              : showFewerLabel(row.collectionType);
+            return (
+              <div
+                key={row.id}
+                ref={(element) => {
+                  if (element) rowRefs.current.set(row.id, element);
+                  else rowRefs.current.delete(row.id);
+                }}
+                role="treeitem"
+                aria-level={row.depth + 1}
+                aria-selected={row.id === activeRowId}
+                tabIndex={row.id === activeRowId ? 0 : -1}
+                css={[styles.row, styles.expandableRow]}
+                style={{ paddingInlineStart }}
+                onClick={() =>
+                  isMore ? revealMore(row.collectionId) : showFewer(row.collectionId)
+                }
+                onFocus={() => setActiveId(row.id)}
+                onKeyDown={(event) => onRowKeyDown(event, row)}
+                data-test-subj={`jsonFieldTree${isMore ? 'More' : 'Fewer'}-${row.collectionId}`}
+              >
+                <span css={styles.caret}>
+                  <EuiIcon type={isMore ? 'plus' : 'minus'} size="s" aria-hidden />
+                </span>
+                <span css={styles.moreLabel}>{label}</span>
+              </div>
+            );
+          }
+
+          const { node, hasChildren, isExpanded } = row;
           return (
             <div
               key={node.id}
@@ -512,16 +653,14 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
                 else rowRefs.current.delete(node.id);
               }}
               role="treeitem"
-              aria-level={depth + 1}
+              aria-level={row.depth + 1}
               aria-setsize={row.setSize}
               aria-posinset={row.posInSet}
               aria-expanded={hasChildren ? isExpanded : undefined}
               aria-selected={node.id === activeRowId}
               tabIndex={node.id === activeRowId ? 0 : -1}
               css={hasChildren ? [styles.row, styles.expandableRow] : styles.row}
-              style={{
-                paddingInlineStart: `calc(${euiTheme.size.s} + ${depth} * ${euiTheme.size.base})`,
-              }}
+              style={{ paddingInlineStart }}
               onClick={() => hasChildren && toggle(node.id)}
               onFocus={() => setActiveId(node.id)}
               onKeyDown={(event) => onRowKeyDown(event, row)}
@@ -548,8 +687,14 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
                 ) : (
                   <>
                     {!node.isArrayItem && <span css={styles.separator}>:</span>}
-                    <PrimitiveValue primitiveType={node.primitiveType} value={node.value} />
-                    <ValueCopyButton value={node.value} />
+                    {node.rendered ? (
+                      <span css={styles.value}>{node.rendered}</span>
+                    ) : (
+                      <>
+                        <PrimitiveValue primitiveType={node.primitiveType} value={node.value} />
+                        <ValueCopyButton value={node.value} />
+                      </>
+                    )}
                   </>
                 )}
               </span>
@@ -557,51 +702,6 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
           );
         })}
       </div>
-
-      {(hiddenCount > 0 || visibleCount > INITIAL_VISIBLE_ITEMS) && (
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          {visibleCount > INITIAL_VISIBLE_ITEMS && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                flush="left"
-                iconType="arrowUp"
-                onClick={() => setVisibleCount(INITIAL_VISIBLE_ITEMS)}
-                size="xs"
-              >
-                {paginationLabels.fewer}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {hiddenCount > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="left"
-                  iconType="plus"
-                  onClick={() =>
-                    setVisibleCount((prev) =>
-                      Math.min(prev + VISIBLE_ITEMS_INCREMENT, nodes.length)
-                    )
-                  }
-                  size="xs"
-                >
-                  {paginationLabels.more}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="left"
-                  iconType="listBullet"
-                  onClick={() => setVisibleCount(nodes.length)}
-                  size="xs"
-                >
-                  {paginationLabels.all}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </>
-          )}
-        </EuiFlexGroup>
-      )}
     </>
   );
 });
