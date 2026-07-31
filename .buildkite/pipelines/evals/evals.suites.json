@@ -95,7 +95,6 @@
         "eis/openai-gpt-5.4-mini",
         "eis/openai-gpt-5.4-nano",
         "eis/openai-gpt-5.6-luna",
-        "eis/openai-gpt-5.6-sol",
         "eis/openai-gpt-5.6-terra",
         "eis/openai-gpt-oss-120b"
       ]
