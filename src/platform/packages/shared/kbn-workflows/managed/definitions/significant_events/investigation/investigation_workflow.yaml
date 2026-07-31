@@ -148,7 +148,7 @@ steps:
               investigation established. Each entry targets one field (severity, summary, or status)
               with a typed from/to, a one-or-two-sentence reason tied to the confirmed findings, and
               1–10 evidence items. Omit entries — or the whole array — for fields that do not need
-              changing. Changes are applied automatically via the apply_significant_event_updates step; only
+              changing. Changes are applied automatically via the attach_to_significant_event step; only
               propose what the listed evidence can defend. When no significant-event context was
               provided (no event_uuid in inputs.context), omit significant_event_updates entirely.
             maxItems: 3

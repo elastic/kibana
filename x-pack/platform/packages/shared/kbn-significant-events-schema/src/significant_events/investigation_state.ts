@@ -74,10 +74,10 @@ const significantEventUpdateBase = {
  * Each entry is self-contained: `from` records what the value was before this investigation ran
  * (populated from `inputs.context`), so the UI never needs to thread prior state from elsewhere.
  *
- * Applied deterministically by the `apply_significant_event_updates` step in `investigation_workflow.yaml`;
- * `reason`/`evidence` persist only here (the workflow execution's structured output), never on
- * the event document — the event version records only the changed field values plus the workflow
- * execution id.
+ * Applied deterministically by the `attach_to_significant_event` step in `investigation_workflow.yaml`
+ * (in the same append-only version that records the completed investigation); `reason`/`evidence`
+ * persist only here (the workflow execution's structured output), never on the event document — the
+ * event version records only the changed field values plus the workflow execution id.
  */
 export const significantEventUpdateSchema = z.discriminatedUnion('field', [
   z.object({
@@ -127,7 +127,8 @@ export const investigationStateSchema = z.object({
    * the event field being changed (`severity`, `summary`, or `status`) along with the old and
    * new values, a one-or-two-sentence reason tied to the confirmed findings, and the evidence
    * backing the change. Omit the array (or omit a field's entry) when no change is warranted
-   * for that field. Applied automatically by the `apply_significant_event_updates` step.
+   * for that field. Applied automatically by the `attach_to_significant_event` step, in the same
+   * event version that records the completed investigation.
    */
   significant_event_updates: z
     .array(significantEventUpdateSchema)
