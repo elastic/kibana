@@ -108,14 +108,33 @@ export class DataFrameAnalyticsPage {
   }
 
   async continueToAdditionalOptions(): Promise<void> {
-    await this.page.testSubj
-      .locator(
-        'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
-      )
-      .click();
-    await this.page.testSubj
-      .locator('mlAnalyticsCreateJobWizardAdvancedStep active')
-      .waitFor({ state: 'visible', timeout: 30_000 });
+    const configurationStep = this.page.testSubj.locator(
+      'mlAnalyticsCreateJobWizardConfigurationStep active'
+    );
+    const continueButton = this.page.testSubj.locator(
+      'mlAnalyticsCreateJobWizardConfigurationStep active > mlAnalyticsCreateJobWizardContinueButton'
+    );
+    const additionalOptionsStep = this.page.testSubj.locator(
+      'mlAnalyticsCreateJobWizardAdvancedStep active'
+    );
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await continueButton.click();
+
+      try {
+        await additionalOptionsStep.waitFor({
+          state: 'visible',
+          timeout: attempt === 0 ? 10_000 : 30_000,
+        });
+        return;
+      } catch (error) {
+        // The debounced explain request can re-render the enabled button during the
+        // click. Retry only when the configuration step is still active.
+        if (attempt > 0 || !(await configurationStep.isVisible())) {
+          throw error;
+        }
+      }
+    }
   }
 
   // ── Additional options step ───────────────────────────────────────────────

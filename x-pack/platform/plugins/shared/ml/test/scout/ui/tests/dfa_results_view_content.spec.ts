@@ -228,6 +228,10 @@ test.describe('DFA results view content', { tag: '@local-stateful-classic' }, ()
   let regressionDestViewId: string | undefined;
 
   test.beforeAll(async ({ esArchiver, apiServices }) => {
+    // Three DFA training jobs run below; increase the hook's timeout to cover their
+    // createAndRun waitForStopped budgets on slow CI workers.
+    test.setTimeout(5 * 60 * 1000);
+
     // Defensive cleanup: remove any jobs left over from a previously interrupted run
     // so that createAndRun does not fail with "resource already exists".
     await Promise.allSettled([
