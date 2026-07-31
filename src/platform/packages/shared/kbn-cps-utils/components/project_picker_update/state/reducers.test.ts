@@ -29,8 +29,6 @@ const regionUsEastExpression = {
   tagValue: 'us-east-1',
 } as const;
 
-const regionUsEastKey = getFilterExpressionLookupKey(regionUsEastExpression);
-
 const createProject = (overrides: Partial<CPSProject> & Pick<CPSProject, '_id'>): CPSProject => ({
   _alias: 'alias',
   _type: 'security',

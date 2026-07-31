@@ -79,7 +79,7 @@ export function ProjectPickerListItemTagsPopover({
           return (
             <EuiFlexItem key={`${tag.tagName}.${tag.tagValue}`} grow={false}>
               {React.createElement(isAlreadyAdded ? EuiToolTip : React.Fragment, {
-                ...(state.isReadOnly
+                ...(isAlreadyAdded
                   ? {
                       content: i18n.translate(
                         'cpsUtils.projectPicker.list.projectTags.filterAlreadyAdded',

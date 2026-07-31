@@ -189,5 +189,5 @@ export type FilterExpressionCodecOutput = z.output<typeof FilterExpressionSchema
 
 /** Canonical Map key for a stored filter expression (matches encoded badge text semantics). */
 export function getFilterExpressionLookupKey(expression: FilterExpressionValue): string {
-  return filterExpressionCodec.encode(expression);
+  return filterExpressionCodec.encode(expression) as string;
 }
