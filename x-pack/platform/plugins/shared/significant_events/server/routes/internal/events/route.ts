@@ -22,7 +22,6 @@ import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
-import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
