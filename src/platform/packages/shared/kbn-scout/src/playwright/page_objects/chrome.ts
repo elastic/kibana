@@ -57,7 +57,7 @@ export class Chrome {
     await this.searchInput.fill(term);
   }
 
-  searchOptionByUrl(url: string): Locator {
+  getSearchOptionByUrl(url: string): Locator {
     return this.page.locator(`[data-test-subj="nav-search-option"][url="${url}"]`);
   }
 

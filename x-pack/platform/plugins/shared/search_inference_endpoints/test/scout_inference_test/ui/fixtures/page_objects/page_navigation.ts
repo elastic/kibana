@@ -6,12 +6,12 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import type { Locator, PageObjects, ScoutPage } from '@kbn/scout';
+import type { Locator, ScoutPage } from '@kbn/scout';
 
 export class PageNavigation {
   readonly allBreadcrumbs: Locator;
 
-  constructor(private readonly page: ScoutPage, private readonly chrome: PageObjects['chrome']) {
+  constructor(private readonly page: ScoutPage) {
     this.allBreadcrumbs = page.testSubj.locator('~breadcrumb');
   }
 
@@ -34,12 +34,13 @@ export class PageNavigation {
     pageHeader: Locator;
     urlPath: string;
     classicBreadcrumbs: string[];
+    isNextChrome: boolean;
     isServerless?: boolean;
   }): Promise<void> {
     await expect(options.pageHeader).toBeVisible();
     await this.expectPageUrlContains(options.urlPath);
 
-    if (await this.chrome.isNextChrome()) {
+    if (options.isNextChrome) {
       return;
     }
 

@@ -47,7 +47,7 @@ test.describe('nav search', { tag: tags.stateful.classic }, () => {
 
     await pageObjects.chrome.openSearch();
     await pageObjects.chrome.search('dashboards');
-    await pageObjects.chrome.searchOptionByUrl(`/s/${SPACE.id}/app/dashboards`).click();
+    await pageObjects.chrome.getSearchOptionByUrl(`/s/${SPACE.id}/app/dashboards`).click();
 
     await page.waitForURL(/app\/dashboards/);
     expect(page.url()).toContain('app/dashboards');

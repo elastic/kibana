@@ -25,7 +25,7 @@ spaceTest.describe(
           // one on the search result) are space-prefixed rather than root-relative.
           await chrome.openSearch();
           await chrome.search('security dashboards');
-          await chrome.searchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`).click();
+          await chrome.getSearchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`).click();
 
           await page.waitForURL(/app\/security\/dashboards/);
           expect(page.url()).toContain('app/security/dashboards');

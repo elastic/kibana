@@ -38,6 +38,7 @@ spaceTest.describe(
           pageHeader: pageObjects.eisModels.pageHeader,
           urlPath: INFERENCE_PAGES.eisModels.urlPath,
           classicBreadcrumbs: [...BREADCRUMBS.stateful.searchSolution, 'Elastic Inference'],
+          isNextChrome: await pageObjects.chrome.isNextChrome(),
         });
       }
     );
@@ -52,6 +53,7 @@ spaceTest.describe(
           pageHeader: pageObjects.externalInference.pageHeader,
           urlPath: INFERENCE_PAGES.externalInference.urlPath,
           classicBreadcrumbs: [...BREADCRUMBS.stateful.searchSolution, 'External Inference'],
+          isNextChrome: await pageObjects.chrome.isNextChrome(),
         });
       }
     );
@@ -66,6 +68,7 @@ spaceTest.describe(
           pageHeader: pageObjects.featureSettings.pageHeader,
           urlPath: INFERENCE_PAGES.featureSettings.urlPath,
           classicBreadcrumbs: [...BREADCRUMBS.stateful.searchSolution, 'Feature Settings'],
+          isNextChrome: await pageObjects.chrome.isNextChrome(),
         });
       }
     );
