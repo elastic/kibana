@@ -112,7 +112,7 @@ const ActiveStateSwitchComponent: React.FC<ActiveStateSwitchProps> = ({ item }) 
             defaultMessage: 'Please assign at least one policy to enable this schedule.',
           })}
         >
-          <span>{euiSwitch}</span>
+          <span tabIndex={0}>{euiSwitch}</span>
         </EuiToolTip>
       ) : (
         euiSwitch

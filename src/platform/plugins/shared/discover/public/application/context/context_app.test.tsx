@@ -166,11 +166,11 @@ describe('ContextApp test', () => {
 
     expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
     expect(screen.getByTestId('discoverContextAppTitle')).toBeVisible();
-    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toBeVisible();
+    expect(screen.getByTestId('appHeaderTitle')).toBeVisible();
     expect(screen.getByTestId('discoverContextAppTitle')).toHaveTextContent(
       'Documents surrounding #mocked_anchor_id'
     );
-    expect(screen.getByTestId('contextDocumentSurroundingHeader')).toHaveTextContent(
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent(
       'Documents surrounding #mocked_anchor_id'
     );
   });
