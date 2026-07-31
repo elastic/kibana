@@ -148,27 +148,47 @@ export function redactUrl(url) {
   return `${base}?${redacted}${hash}`;
 }
 
-// Chromium (and Firefox) auto-generate this exact console message for every
-// failed resource load, regardless of whether app code logs anything of its
-// own — verified against a real browser via the browser_run_code_unsafe
-// bridge (see live-drain-scenario1-silent500.json). Critically, this
-// auto-generated text never includes the request's path/URL, unlike the
-// hand-authored "500 @ /api/foo"-style messages some app code produces.
-// classify-console.js's own `\b50[0-9]\b` rule has no path requirement
-// either, so this message ALWAYS makes Detector B report a Level 1
-// `server_error` for it — meaning any 5xx that produced this message is
-// already surfaced by console, full stop, regardless of path. Without
+// Chromium auto-generates this exact console message for every failed
+// resource load, regardless of whether app code logs anything of its own —
+// verified against a real browser via the browser_run_code_unsafe bridge
+// (see __tests__/fixtures/action-500-already-surfaced-browser-native.json).
+// Critically, this auto-generated text never includes the request's
+// path/URL, unlike the hand-authored "500 @ /api/foo"-style messages some
+// app code produces. classify-console.js's own `\b50[0-9]\b` rule has no
+// path requirement either, so this message ALWAYS makes Detector B report a
+// Level 1 `server_error` for it — meaning a 5xx that produced this message
+// is already surfaced by console, full stop, regardless of path. Without
 // recognizing this pattern, `alreadySurfaced` below required a path match
 // that this real, common message shape can never satisfy, so the "avoid
 // double-reporting relative to Detector B" guard silently never fired for
 // the single most common form of a truly-unhandled failed request.
+// Verified against Chromium only — Firefox's equivalent browser-native
+// message has not been captured, may differ in wording, and must not be
+// assumed to match this pattern.
 //
-// Scoped to one specific status code (not a bare /Failed to load resource/
-// test) so that, when an action has multiple failed requests with different
-// statuses, a browser-native message for one status can't wrongly suppress
-// a genuinely-unsurfaced finding for a different status.
-const isBrowserNativeLoadFailureFor = (status, text) =>
-  new RegExp(`Failed to load resource:.*\\bresponded with a status of ${status}\\b`).test(text);
+// Global + capturing (not scoped to a single status via interpolation) so
+// one pass over consoleText can count *how many* native messages exist per
+// status — see `countBrowserNativeLoadFailuresByStatus` below. Counting
+// (rather than a bare presence test) matters because consoleText is the
+// whole action's console joined together: presence alone would let one
+// native 500 message wrongly cover *every* 500 in the action regardless of
+// which specific request produced it, silently missing a second,
+// genuinely-unsurfaced 500 to a different path.
+//
+// `.` intentionally does NOT match newlines here (no `s`/dotAll flag) —
+// consoleText is newline-joined, and without that constraint "Failed to
+// load resource:" from one console message could pair across a `\n` with a
+// status number that actually belongs to a different, later message.
+const BROWSER_NATIVE_LOAD_FAILURE = /Failed to load resource:.*\bresponded with a status of (\d+)\b/g;
+
+function countBrowserNativeLoadFailuresByStatus(consoleText) {
+  const counts = new Map();
+  for (const match of consoleText.matchAll(BROWSER_NATIVE_LOAD_FAILURE)) {
+    const status = Number(match[1]);
+    counts.set(status, (counts.get(status) || 0) + 1);
+  }
+  return counts;
+}
 
 // Pathname only (no scheme/host/query/hash) — this is what actually appears
 // in console-message text like "500 @ /api/foo", so it's what "already
@@ -219,6 +239,51 @@ export function reduceAction(action, priorState) {
   // this reducer does not re-derive react-warning/infinite-rerender findings).
   const consoleText = consoleMessages.map((m) => m.text || '').join('\n');
 
+  // ── Silent server errors: a 5xx that produced no console message ─────────
+  // Excludes abandonedByNavigation: its `status` reflects headers that
+  // genuinely arrived, but the request never completed from the app's
+  // perspective — the page moved on before it could act on that response.
+  // Reporting it as a Level 1 silent_server_error alongside the Level 3
+  // request_abandoned_by_navigation finding for the exact same event would
+  // be misleading double-counting, not a second independent problem.
+  //
+  // Deliberately action-wide (over all `network` events, sorted by time, not
+  // grouped by signature) rather than nested inside the per-signature loop
+  // below: `nativeFailureCountByStatus` is a shared pool consumed across
+  // every event regardless of URL, so it must be walked in one pass in a
+  // stable global order — grouping by signature first would let the
+  // insertion order of unrelated signatures perturb which event claims which
+  // native message.
+  const nativeFailureCountByStatus = countBrowserNativeLoadFailuresByStatus(consoleText);
+  const networkByTime = [...network].sort((a, b) => a.requestedAt - b.requestedAt);
+  for (const ev of networkByTime) {
+    if (ev.status == null || ev.status < 500 || ev.abandonedByNavigation) continue;
+    const path = pathnameOf(ev.url);
+    const redacted = redactUrl(ev.url);
+
+    const remainingNativeMessages = nativeFailureCountByStatus.get(ev.status) || 0;
+    let alreadySurfaced = false;
+    if (remainingNativeMessages > 0) {
+      // Claim one native-message slot for this status so a second,
+      // different-path 500 sharing the same status can't also claim it —
+      // see the leading comment on BROWSER_NATIVE_LOAD_FAILURE above.
+      nativeFailureCountByStatus.set(ev.status, remainingNativeMessages - 1);
+      alreadySurfaced = true;
+    } else if (new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(path)) {
+      alreadySurfaced = true;
+    }
+    if (alreadySurfaced) continue;
+
+    level1.push({
+      type: 'silent_server_error',
+      method: ev.method,
+      path,
+      url: redacted,
+      status: ev.status,
+      text: `${ev.method} ${redacted} returned HTTP ${ev.status} with no corresponding console error — Detector B alone would miss this`,
+    });
+  }
+
   // Group by exact signature (method + full URL) — NOT method+path. Grouping
   // by path alone (as the legacy dedup-network.js does) misclassifies
   // meaningfully-different query strings (e.g. ?page=1 vs ?page=2) as
@@ -239,34 +304,11 @@ export function reduceAction(action, priorState) {
       for (const ev of events) {
         suppressed.push({ type: 'noise', text: `${method} ${redacted} (known polling endpoint)` });
       }
-      // Silent-server-error detection below still runs for polling paths —
+      // Silent-server-error detection above already ran for polling paths —
       // suppressing duplicate noise is not the same as hiding a real outage.
     }
 
     events.sort((a, b) => a.requestedAt - b.requestedAt);
-
-    // ── Silent server errors: a 5xx that produced no console message ───────
-    // Excludes abandonedByNavigation: its `status` reflects headers that
-    // genuinely arrived, but the request never completed from the app's
-    // perspective — the page moved on before it could act on that response.
-    // Reporting it as a Level 1 silent_server_error alongside the Level 3
-    // request_abandoned_by_navigation finding for the exact same event would
-    // be misleading double-counting, not a second independent problem.
-    for (const ev of events) {
-      if (ev.status == null || ev.status < 500 || ev.abandonedByNavigation) continue;
-      const alreadySurfaced =
-        isBrowserNativeLoadFailureFor(ev.status, consoleText) ||
-        (new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(path));
-      if (alreadySurfaced) continue;
-      level1.push({
-        type: 'silent_server_error',
-        method,
-        path,
-        url: redacted,
-        status: ev.status,
-        text: `${method} ${redacted} returned HTTP ${ev.status} with no corresponding console error — Detector B alone would miss this`,
-      });
-    }
 
     // ── Pending / stuck / navigation-abandoned requests ─────────────────────
     // "Still open" is decided by `respondedAt` (true completion), never by

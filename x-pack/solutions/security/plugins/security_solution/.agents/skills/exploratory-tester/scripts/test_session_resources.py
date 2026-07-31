@@ -4,6 +4,7 @@ import fcntl
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -3888,7 +3889,7 @@ print("200")
             self.assertEqual(result_a.returncode, 0, result_a.stdout + result_a.stderr)
             self.assertIn(f"Resource {shared_resource_id!r}: deleted", result_a.stdout)
             self.assertTrue(log_a.exists(), "session A must call curl to delete its own resource")
-            self.assertIn(f"-X\nDELETE", log_a.read_text(encoding="utf-8").replace(" ", "\n"))
+            self.assertIn("-X DELETE", log_a.read_text(encoding="utf-8"))
 
             # Session B's own config must be completely untouched by A's cleanup.
             final_b = json.loads((session_b / "config.json").read_text(encoding="utf-8"))
@@ -7220,6 +7221,22 @@ class RouteLoadOptimizationTests(unittest.TestCase):
         self.ccs = (PHASES_DIR / "0-ccs.md").read_text(encoding="utf-8")
 
     def test_all_four_route_files_exist_and_are_nonempty(self):
+        # setUp() already calls .read_text() on all four files, so a MISSING
+        # file would error every test in this class in setUp, not fail this
+        # test specifically — read_text() alone can't distinguish "exists
+        # but empty" from "never existed" either. Check existence
+        # independently, by path, so this test can actually fail on its own
+        # "exist" half rather than only ever being able to fail on
+        # "nonempty".
+        for name in (
+            "0-github-input.md",
+            "0-managed-environment.md",
+            "0-user-provided-environment.md",
+            "0-ccs.md",
+        ):
+            path = PHASES_DIR / name
+            self.assertTrue(path.is_file(), f"{name} does not exist under {PHASES_DIR}")
+
         for doc in (
             self.github_input,
             self.managed_env,
@@ -7240,6 +7257,44 @@ class RouteLoadOptimizationTests(unittest.TestCase):
         # live in 0-setup.md — only the heavy per-route content moved out.
         self.assertIn("Environment: profile", step_0a)
         self.assertIn("Environment.url", step_0a)
+
+        # "Exactly one per case" is a claim about the numbered route list's
+        # STRUCTURE, not just which filenames are mentioned somewhere in
+        # Step 0a — three independently-true conditions could all match the
+        # same invocation and still pass a mere presence check. Verify the
+        # list is actually evaluated in order with an exhaustive, mutually
+        # exclusive final fallback (mutual exclusivity + exhaustiveness is
+        # what makes "exactly one" true by construction):
+        route_list_idx = step_0a.index("**Route (check in order):**")
+        route_list = step_0a[route_list_idx:]
+        numbered_items = re.findall(r"^\d+\. ", route_list, flags=re.MULTILINE)
+        self.assertEqual(
+            len(numbered_items),
+            3,
+            "expected exactly 3 numbered route cases in the 'check in order' list",
+        )
+        self.assertIn(
+            "Neither of the above",
+            route_list,
+            "the final route case must be phrased as the exhaustive negation "
+            "of the earlier cases, not another independent condition — this "
+            "is what makes the three cases mutually exclusive and exhaustive "
+            "rather than merely three checks that happen not to overlap today",
+        )
+        # Each of the three numbered cases must route to exactly one target
+        # file, never more than one — a case naming two files would mean
+        # "exactly one" is false for that case regardless of the exclusivity
+        # of the conditions themselves.
+        for item_number, item_text in zip(
+            (1, 2, 3), re.split(r"^\d+\. ", route_list, flags=re.MULTILINE)[1:]
+        ):
+            targets = set(re.findall(r"phases/0-[\w-]+\.md", item_text))
+            self.assertEqual(
+                len(targets),
+                1,
+                f"route case {item_number} must name exactly one target "
+                f"phase file, found {targets or 'none'}",
+            )
 
         # The heavy content itself (Scout start-server table, curl
         # connectivity/API-key validation script) must not be duplicated
@@ -7272,6 +7327,51 @@ class RouteLoadOptimizationTests(unittest.TestCase):
         # reading 0-setup.md alone.
         self.assertNotIn("gh issue view <NUMBER>", step_0b)
         self.assertNotIn("gh pr view <NUMBER>", step_0b)
+
+    def test_every_phase_file_gates_gh_content_fetches_behind_0_github_input(self):
+        # Whole-directory sweep, not a per-file assertion: any `gh issue
+        # view`/`gh pr view` call anywhere under phases/ fetches untrusted
+        # GitHub content, so it must be preceded, in the *same file*, by an
+        # unconditional hard-stop pointer to 0-github-input.md — the one
+        # place the untrusted-content rules live. The test above only
+        # inspects 0-setup.md and would stay green even if a different phase
+        # file (e.g. 0-guided-intake.md, which has its own legitimate
+        # "draft flows from a GitHub PR" path) grew an ungated `gh` call of
+        # its own — which is exactly the regression this sweep exists to
+        # catch on every future phase file, not just the ones enumerated
+        # here today.
+        gh_command_pattern = re.compile(r"gh (?:issue|pr) view <NUMBER>")
+        hard_stop_pattern = re.compile(r"Stop\. Read `phases/0-github-input\.md` in full")
+
+        for md_file in sorted(PHASES_DIR.glob("*.md")):
+            text = md_file.read_text(encoding="utf-8")
+            command_positions = [m.start() for m in gh_command_pattern.finditer(text)]
+            if not command_positions:
+                continue
+
+            if md_file.name == "0-github-input.md":
+                # This file *is* the gate — it must read itself in full
+                # before its own command, not point at itself.
+                self.assertIn("Read this file in full before running any", text)
+                self.assertLess(
+                    text.index("Read this file in full before running any"),
+                    command_positions[0],
+                )
+                continue
+
+            hard_stop_positions = [m.start() for m in hard_stop_pattern.finditer(text)]
+            self.assertTrue(
+                hard_stop_positions,
+                f"{md_file.name} runs `gh issue/pr view` but has no hard-stop "
+                "pointer to phases/0-github-input.md anywhere in the file",
+            )
+            for command_pos in command_positions:
+                self.assertTrue(
+                    any(hs < command_pos for hs in hard_stop_positions),
+                    f"{md_file.name} runs `gh issue/pr view` at offset "
+                    f"{command_pos} without a preceding hard-stop pointer to "
+                    "0-github-input.md earlier in the same file",
+                )
 
     def test_github_input_file_preserves_full_untrusted_content_rules(self):
         # Every load-bearing security invariant from the pre-split GitHub
@@ -7327,6 +7427,23 @@ class RouteLoadOptimizationTests(unittest.TestCase):
         self.assertIn('"mutation_pending"', doc)
         self.assertIn('"restored"', doc)
         self.assertIn("phases/0-user-provided-environment.md", doc)
+
+        # This file is read from two different call sites in 0-setup.md
+        # (Step 0a, then again — "if not already read" — from Step 0e). It
+        # must name both return points explicitly: an agent reading straight
+        # through from the Step 0a visit must not fall into the Step-0e-only
+        # "Return to Step 0f" instruction and skip Steps 0b-0e.
+        self.assertIn("read **twice**", doc)
+        self.assertIn("From Step 0a", doc)
+        self.assertIn("From Step 0e", doc)
+        self.assertLess(
+            doc.index("From Step 0a"),
+            doc.index("This constrains Step 0a"),
+            "the dual-return guidance must appear before the Step 0a "
+            "instruction it disambiguates",
+        )
+        self.assertIn("Return to `phases/0-setup.md` Step 0f", doc)
+        self.assertIn("second visit's return point", doc)
 
     def test_environment_managed_flag_instructions_are_consistent_across_routes(self):
         self.assertIn("environment.managed` to `true", self.managed_env)

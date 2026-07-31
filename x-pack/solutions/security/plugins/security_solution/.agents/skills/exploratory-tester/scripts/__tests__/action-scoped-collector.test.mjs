@@ -101,6 +101,131 @@ console.log('\n── 500 surfaced only via the browser\'s own auto-generated co
   );
 }
 
+console.log(
+  '\n── Two distinct 500s sharing a status but only ONE native message → the second is still reported (no cross-path leakage) ──'
+);
+{
+  // P2 review finding on the fix above: consoleText is action-wide, so a
+  // naive "does a native 500 message exist anywhere in this action"
+  // presence check would let ONE native message wrongly cover EVERY 500 in
+  // the action, silently missing a second, genuinely-unsurfaced 500 to a
+  // different path. The fix consumes one message per qualifying event
+  // instead of testing presence, so only as many events as there are
+  // matching native messages get treated as already-surfaced.
+  const r = reduceAction({
+    network: [
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/entity_analytics/monitoring/entity_source',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 0,
+        respondedAt: 100,
+        resourceType: 'fetch',
+      },
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/entity_analytics/risk_score',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 200,
+        respondedAt: 300,
+        resourceType: 'fetch',
+      },
+    ],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  const silentErrors = r.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    silentErrors.length === 1,
+    'two distinct 500s + one native message → exactly one silent_server_error survives, not zero',
+    JSON.stringify(r.level1)
+  );
+  assert(
+    !!silentErrors[0] && silentErrors[0].path === '/internal/entity_analytics/risk_score',
+    'the second (later-in-time) 500 is the one still reported — the first claims the sole native message',
+    JSON.stringify(silentErrors)
+  );
+}
+
+console.log('\n── Two 500s with TWO native messages → both are covered, neither double-reported ──');
+{
+  const r = reduceAction({
+    network: [
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/a',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 0,
+        respondedAt: 100,
+        resourceType: 'fetch',
+      },
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/b',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 200,
+        respondedAt: 300,
+        resourceType: 'fetch',
+      },
+    ],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    !r.level1.some((i) => i.type === 'silent_server_error'),
+    'two 500s + two native messages → both are covered, zero silent_server_error findings',
+    JSON.stringify(r.level1)
+  );
+}
+
+console.log('\n── Different statuses each keep their own native-message pool (no cross-status leakage) ──');
+{
+  const r = reduceAction({
+    network: [
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/a',
+        status: 500,
+        ok: false,
+        failure: null,
+        requestedAt: 0,
+        respondedAt: 100,
+        resourceType: 'fetch',
+      },
+      {
+        method: 'GET',
+        url: 'https://kibana.example/internal/b',
+        status: 503,
+        ok: false,
+        failure: null,
+        requestedAt: 200,
+        respondedAt: 300,
+        resourceType: 'fetch',
+      },
+    ],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  const silentErrors = r.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    silentErrors.length === 1 && silentErrors[0].status === 503,
+    'a native 500 message never covers a 503 — the 503 is still reported',
+    JSON.stringify(silentErrors)
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // PENDING / STUCK / ABANDONED
 // ══════════════════════════════════════════════════════════════════════════
@@ -635,6 +760,80 @@ console.log('\n── Bridge redaction (doc snippet) agrees with redactUrl (redu
         `doc=${redactFromDoc(url)}\n         reducer=${redactUrl(url)}`
       );
     }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// LIVE-CAPTURED FIXTURES (Task 8 seeded-harness validation, real browser)
+//
+// Each live-drain-scenario*.json is a verbatim drain captured via the
+// browser_run_code_unsafe bridge against
+// ../manual-tools/seeded-live-harness.html, not hand-authored like the
+// fixtures above. Parametrized here so a future reducer change that
+// silently alters one of these six scenarios' outcomes fails a test run
+// instead of only being noticed on the next manual MCP pass — see
+// ../reports/task8-live-validation-report.md for the full narrative.
+// ══════════════════════════════════════════════════════════════════════════
+
+console.log('\n── Live-captured fixtures: documented outcome per scenario is pinned ───');
+{
+  const expectations = [
+    {
+      name: 'live-drain-scenario3-query-variants',
+      describe: 'three ?q=/?page= variants of the same path',
+      check: (r) =>
+        r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
+      label: 'query-variants → 0 findings (full-URL grouping correctly treats them as distinct)',
+    },
+    {
+      name: 'live-drain-scenario4-duplicate-click',
+      describe: 'the same exact call fired twice in quick succession, overlapping in flight',
+      check: (r) => r.level2.some((i) => i.type === 'duplicate_api_call'),
+      label: 'duplicate-click → Level 2 duplicate_api_call',
+    },
+    {
+      name: 'live-drain-scenario6-known-noise-genuine-failure',
+      describe:
+        '5 sequential (non-overlapping) polls to a seeded endpoint, one of which fails with a 500',
+      // Documented gap, not a silently-expected pass: DUPLICATE_WINDOW_MS is
+      // a time-span threshold, not an in-flight-overlap check, so five
+      // sequential polls landing within 500ms of each other are flagged as
+      // duplicate_api_call exactly like a genuine double-submit would be.
+      // See ../reports/task8-live-validation-report.md's "Known limitations" — an
+      // overlap check (are two requests for the same signature ever
+      // in-flight at the same time?) would distinguish this from a true
+      // duplicate without relying on a path allowlist. The genuine failure
+      // itself is correctly not double-reported (0 Level 1).
+      check: (r) =>
+        r.level1.length === 0 &&
+        r.level2.some((i) => i.type === 'duplicate_api_call' && i.count === 5),
+      label:
+        'known-noise-genuine-failure → 0 Level 1 (no double-report), but a documented Level 2 ' +
+        'false positive on the sequential polling (duplicate_api_call, count 5) — tracked, not silently expected to disappear',
+    },
+    {
+      name: 'live-drain-scenario7-permission-gating',
+      describe: 'a 403 from an admin-only endpoint',
+      check: (r) => r.level1.length === 0 && r.level2.length === 0,
+      label: 'permission-gating (403) → 0 Level 1/2 findings (status < 500 is out of scope by design)',
+    },
+    {
+      name: 'live-drain-scenario8-cancellation',
+      describe: 'a request cancelled by the user before it settles',
+      check: (r) => r.level1.length === 0 && r.level2.length === 0 && r.level3.length === 0,
+      label: 'cancellation → 0 findings (correctly silent)',
+    },
+    {
+      name: 'live-drain-scenario9-refresh-mid-request',
+      describe: 'a page refresh while a request is still in flight',
+      check: (r) => r.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
+      label: 'refresh-mid-request → Level 3 request_abandoned_by_navigation (value-add over legacy, which has no equivalent)',
+    },
+  ];
+
+  for (const { name, describe, check, label } of expectations) {
+    const r = reduceAction(json(name));
+    assert(check(r), `${name} (${describe}) → ${label}`, JSON.stringify({ level1: r.level1, level2: r.level2, level3: r.level3 }));
   }
 }
 

@@ -10,11 +10,15 @@ JS, so the browser's actual fetch()/console/network stack produces them.
 
 Usage: python3 serve-seeded-harness.py [port]   (default port 8931)
 """
+import functools
 import http.server
+import os
 import socketserver
 import sys
 import time
 import urllib.parse
+
+HARNESS_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class SeededHandler(http.server.SimpleHTTPRequestHandler):
@@ -65,8 +69,21 @@ class SeededHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write(payload)
 
 
+class Server(socketserver.ThreadingTCPServer):
+    # Without these, a quick restart after a 5s /slow request can fail with
+    # "Address already in use" (TIME_WAIT), and Ctrl-C can hang waiting for
+    # an in-flight /slow handler thread that outlives the main thread.
+    allow_reuse_address = True
+    daemon_threads = True
+
+
 if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8931
-    with socketserver.ThreadingTCPServer(("127.0.0.1", port), SeededHandler) as httpd:
+    # Serve this script's own directory (where seeded-live-harness.html
+    # lives) regardless of the caller's cwd — SimpleHTTPRequestHandler
+    # otherwise serves the process's CWD, which would expose the whole repo
+    # over HTTP if this were ever run from the repo root instead of here.
+    handler = functools.partial(SeededHandler, directory=HARNESS_DIR)
+    with Server(("127.0.0.1", port), handler) as httpd:
         print("serving seeded harness on http://127.0.0.1:{}/seeded-live-harness.html".format(port))
         httpd.serve_forever()
