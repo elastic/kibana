@@ -8,8 +8,11 @@
 import React from 'react';
 import { EuiIcon, EuiSkeletonRectangle } from '@elastic/eui';
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
 
-import { ELASTIC_PACKAGE_REGISTRY_URL } from '../../../../common/constants';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
 const ICON_SIZE = 24;
@@ -19,32 +22,41 @@ interface ServiceIconProps {
 }
 
 export const ServiceIcon: React.FC<ServiceIconProps> = ({ service }) => {
+  const { services } = useKibana<CoreStart>();
   const { data, isLoading } = useGetPackageInfoByKeyQuery(service.packageName);
 
   if (isLoading) {
-    return <EuiSkeletonRectangle width="16px" height="16px" borderRadius="s" />;
+    return (
+      <EuiSkeletonRectangle width={`${ICON_SIZE}px`} height={`${ICON_SIZE}px`} borderRadius="s" />
+    );
   }
 
   const packageInfo = data?.item;
 
-  // Tier 1: icon from the matching policy template (RegistryImage, always has path at runtime)
-  const policyTemplateIcon = packageInfo?.policy_templates?.find(
-    (pt) => pt.name === service.policyTemplate
-  )?.icons?.[0] as { path?: string } | undefined;
+  // Tier 1: icon from the matching policy template
+  const policyTemplateIcon = packageInfo?.policy_templates
+    ?.find((pt) => pt.name === service.policyTemplate)
+    ?.icons?.find((icon) => icon.type === 'image/svg+xml');
 
-  // Tier 2: package-level icon (PackageSpecIcon from manifest, path present at runtime)
-  const packageIcon = packageInfo?.icons?.[0] as { path?: string } | undefined;
+  // Tier 2: package-level icon
+  const packageIcon = packageInfo?.icons?.find((icon) => icon.type === 'image/svg+xml');
 
-  const iconPath = policyTemplateIcon?.path ?? packageIcon?.path;
+  const icon = policyTemplateIcon ?? packageIcon;
 
-  if (iconPath) {
+  if (icon && packageInfo) {
+    // Use .src (relative path within the package) the same way Fleet's getEuiIconType does,
+    // so epmRouteService.getFilePath builds a valid Kibana proxy URL instead of a malformed one.
+    const src = services.http.basePath.prepend(
+      epmRouteService.getFilePath(`/package/${packageInfo.name}/${packageInfo.version}${icon.src}`)
+    );
     return (
       <img
-        src={ELASTIC_PACKAGE_REGISTRY_URL + iconPath}
+        src={src}
         width={ICON_SIZE}
         height={ICON_SIZE}
         alt=""
         aria-hidden={true}
+        loading="lazy"
         style={{ flexShrink: 0 }}
       />
     );

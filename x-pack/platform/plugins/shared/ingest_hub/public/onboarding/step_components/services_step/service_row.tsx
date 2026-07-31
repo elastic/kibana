@@ -26,28 +26,30 @@ export const ServiceRow: React.FC<ServiceRowProps> = ({
   displayName,
 }) => {
   return (
-    <EuiCheckableCard
-      id={`service-toggle-${service.id}`}
-      css={{ flex: 1 }}
-      data-test-subj={`servicesStep-serviceRow-${service.id}`}
-      label={
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <ServiceIcon service={service} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
-              <strong>{displayName ?? service.name}</strong>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <SignalTypeBadge signalType={service.signalType} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      checkableType="checkbox"
-      checked={isSelected}
-      onChange={(e) => onToggle(service.id, e.target.checked)}
-    />
+    <div data-test-subj={`servicesStep-serviceRow-${service.id}`} css={{ flex: 1 }}>
+      <EuiCheckableCard
+        id={`service-toggle-${service.id}`}
+        css={{ height: '100%' }}
+        data-test-subj={`servicesStep-toggle-${service.id}`}
+        label={
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <ServiceIcon service={service} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <strong>{displayName ?? service.name}</strong>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SignalTypeBadge signalType={service.signalType} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        checkableType="checkbox"
+        checked={isSelected}
+        onChange={(e) => onToggle(service.id, e.target.checked)}
+      />
+    </div>
   );
 };

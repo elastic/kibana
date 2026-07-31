@@ -13,8 +13,23 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   useGetPackageInfoByKeyQuery: jest.fn(),
 }));
 
+jest.mock('@kbn/fleet-plugin/common', () => ({
+  epmRouteService: {
+    getFilePath: (path: string) => `/api/fleet/epm${path.replace('/package', '/packages')}`,
+  },
+}));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  useKibana: () => ({
+    services: {
+      http: {
+        basePath: { prepend: (path: string) => path },
+      },
+    },
+  }),
+}));
+
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
-import { ELASTIC_PACKAGE_REGISTRY_URL } from '../../../../common/constants';
 import { ServiceIcon } from './service_icon';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
@@ -71,6 +86,7 @@ describe('ServiceIcon', () => {
       isLoading: false,
       data: {
         item: {
+          name: 'aws',
           version: '7.1.0',
           icons: [AWS_PKG_ICON],
           policy_templates: [{ name: 's3', icons: [S3_ICON] }],
@@ -80,9 +96,7 @@ describe('ServiceIcon', () => {
 
     const { container } = renderIcon(BASE_SERVICE);
     const img = container.querySelector('img');
-    expect(img?.getAttribute('src')).toBe(
-      `${ELASTIC_PACKAGE_REGISTRY_URL}/package/aws/7.1.0/img/logo_s3.svg`
-    );
+    expect(img?.getAttribute('src')).toBe('/api/fleet/epm/packages/aws/7.1.0/img/logo_s3.svg');
   });
 
   it('tier 2: falls back to the package-level icon when no policy-template match', () => {
@@ -96,6 +110,7 @@ describe('ServiceIcon', () => {
       isLoading: false,
       data: {
         item: {
+          name: 'awsfargate',
           version: '1.3.0',
           icons: [FARGATE_ICON],
           policy_templates: [],
@@ -106,14 +121,14 @@ describe('ServiceIcon', () => {
     const { container } = renderIcon(service);
     const img = container.querySelector('img');
     expect(img?.getAttribute('src')).toBe(
-      `${ELASTIC_PACKAGE_REGISTRY_URL}/package/awsfargate/1.3.0/img/logo_fargate.svg`
+      '/api/fleet/epm/packages/awsfargate/1.3.0/img/logo_fargate.svg'
     );
   });
 
   it('tier 3: renders logoAWS EuiIcon when package returns no icons', () => {
     mockUseGetPackageInfoByKeyQuery.mockReturnValue({
       isLoading: false,
-      data: { item: { version: '7.1.0', icons: [], policy_templates: [] } },
+      data: { item: { name: 'aws', version: '7.1.0', icons: [], policy_templates: [] } },
     });
 
     const { container } = renderIcon(BASE_SERVICE);

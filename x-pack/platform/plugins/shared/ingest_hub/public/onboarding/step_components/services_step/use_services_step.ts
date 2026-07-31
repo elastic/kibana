@@ -75,15 +75,16 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   const categoryStats = useMemo(() => {
     const stats = new Map<ServiceCategory, { total: number; selected: number; preview: string }>();
     for (const cat of categories) {
-      const catServices = filteredServices.filter((s) => s.category === cat);
-      const total = catServices.length;
-      const selected = catServices.filter((s) => selectedSet.has(s.id)).length;
-      const uniqueNames = [...new Set(catServices.map((s) => s.name))];
+      // Use the unfiltered matrix so total/selected are stable while search is active.
+      const allCatServices = AWS_SERVICES_MATRIX.filter((s) => s.showInUI && s.category === cat);
+      const total = allCatServices.length;
+      const selected = allCatServices.filter((s) => selectedSet.has(s.id)).length;
+      const uniqueNames = [...new Set(allCatServices.map((s) => s.name))];
       const preview = uniqueNames.slice(0, 2).join(', ') + (uniqueNames.length > 2 ? ', ...' : '');
       stats.set(cat, { total, selected, preview });
     }
     return stats;
-  }, [categories, filteredServices, selectedSet]);
+  }, [categories, selectedSet]);
 
   const isReady = selectedServiceIds.length > 0;
 

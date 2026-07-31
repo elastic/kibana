@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { EuiBadge, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -26,9 +27,15 @@ interface SignalTypeBadgeProps {
 
 export const SignalTypeBadge: React.FC<SignalTypeBadgeProps> = ({ signalType }) => {
   const { euiTheme } = useEuiTheme();
-  const color = signalType === 'logs' ? euiTheme.colors.primary : euiTheme.colors.success;
+  const color = signalType === 'logs' ? euiTheme.colors.textPrimary : euiTheme.colors.textSuccess;
   return (
-    <EuiBadge color="hollow" style={{ color, borderColor: color }}>
+    <EuiBadge
+      color="hollow"
+      css={css`
+        color: ${color} !important;
+        border-color: ${color};
+      `}
+    >
       {SIGNAL_TYPE_LABELS[signalType]}
     </EuiBadge>
   );
