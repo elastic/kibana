@@ -86,6 +86,7 @@ plugins:
     - unified_search
     - upgrade_assistant
     - uptime
+    - usage_collection
     - ux
     - watcher
     - workflows_extensions
