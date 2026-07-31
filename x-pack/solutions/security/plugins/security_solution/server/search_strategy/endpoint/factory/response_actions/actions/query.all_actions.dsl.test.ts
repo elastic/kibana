@@ -53,23 +53,12 @@ describe('buildResponseActionsQuery', () => {
     });
   });
 
-  it('admits field-less Osquery documents in the default space, but never field-less Defend ones', () => {
+  it('treats the default space no differently, since a missing field proves nothing once a read fans out', () => {
     const [spaceFilter] = getFilter(buildResponseActionsQuery({ ...options, spaceId: 'default' }));
 
     expect(spaceFilter).toEqual({
       bool: {
-        should: [
-          { term: { originSpaceId: 'default' } },
-          { term: { space_id: 'default' } },
-          {
-            bool: {
-              must_not: [
-                { exists: { field: 'space_id' } },
-                { exists: { field: 'EndpointActions.action_id' } },
-              ],
-            },
-          },
-        ],
+        should: [{ term: { originSpaceId: 'default' } }, { term: { space_id: 'default' } }],
         minimum_should_match: 1,
       },
     });

@@ -152,11 +152,12 @@ describe('endpointSearchStrategyProvider', () => {
       await lastValueFrom(provider.search(request, options, deps));
 
       expect(scopedSearch.mock.calls[0][0].params.query.bool.filter).toEqual([
-        expect.objectContaining({
-          bool: expect.objectContaining({
-            should: expect.arrayContaining([{ term: { originSpaceId: 'default' } }]),
-          }),
-        }),
+        {
+          bool: {
+            should: [{ term: { originSpaceId: 'default' } }, { term: { space_id: 'default' } }],
+            minimum_should_match: 1,
+          },
+        },
       ]);
     });
 
