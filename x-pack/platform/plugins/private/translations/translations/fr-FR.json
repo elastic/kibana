@@ -49531,8 +49531,6 @@
     "xpack.securitySolution.siemReadiness.visibility.retention.title": "Conservation",
     "xpack.securitySolution.some_page.flyoutCreateSubmitSuccess": "\"{name}\" a été ajouté.",
     "xpack.securitySolution.source.destination.packetsLabel": "pkts",
-    "xpack.securitySolution.sourcerer.error.title": "Erreur lors de la mise à jour de la vue de données Security",
-    "xpack.securitySolution.sourcerer.error.toastMessage": "Actualiser la page",
     "xpack.securitySolution.stepDefineRule.lastDay": "Dernier jour",
     "xpack.securitySolution.stepDefineRule.lastHour": "Dernière heure",
     "xpack.securitySolution.stepDefineRule.lastMonth": "Mois dernier",
