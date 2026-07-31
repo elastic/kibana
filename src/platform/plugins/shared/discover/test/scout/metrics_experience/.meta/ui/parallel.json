@@ -1,5 +1,5 @@
 {
-  "sha1": "17f07b1e6959a2b62a6c6dc95776daa3617a2c4a",
+  "sha1": "fb39b8e935e4bc9e457f9ebbff113a15a60b0bf3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -908,8 +908,8 @@
       }
     },
     {
-      "id": "256fa95cada9520-f5166729a5e8ca8",
-      "title": "Metrics in Discover - Recently explored moves an interacted metric to the front",
+      "id": "256fa95cada9520-0bd4c3a11610e38",
+      "title": "Metrics in Discover - Recently explored records \"View details\" and moves the interacted metric to the front",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -927,8 +927,128 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 32,
-        "column": 66
+        "line": 88,
+        "column": 47
+      }
+    },
+    {
+      "id": "256fa95cada9520-59fd9fcf8d1b921",
+      "title": "Metrics in Discover - Recently explored records \"Open in Discover tab\" and moves the interacted metric to the front",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
+        "line": 88,
+        "column": 47
+      }
+    },
+    {
+      "id": "256fa95cada9520-600ec95d83d3462",
+      "title": "Metrics in Discover - Recently explored records \"Inspect\" and moves the interacted metric to the front",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
+        "line": 88,
+        "column": 47
+      }
+    },
+    {
+      "id": "256fa95cada9520-1c188ae3e7ac47a",
+      "title": "Metrics in Discover - Recently explored records \"Copy to dashboard\" and moves the interacted metric to the front",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
+        "line": 88,
+        "column": 47
+      }
+    },
+    {
+      "id": "256fa95cada9520-7b3bf2cfdee91b3",
+      "title": "Metrics in Discover - Recently explored records \"Actions toggle button\" and moves the interacted metric to the front",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
+        "line": 88,
+        "column": 47
+      }
+    },
+    {
+      "id": "256fa95cada9520-33844baac28eb95",
+      "title": "Metrics in Discover - Recently explored does not record clicks outside the panel actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
+        "line": 105,
+        "column": 15
       }
     },
     {
@@ -951,8 +1071,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
-        "line": 44,
-        "column": 15
+        "line": 113,
+        "column": 33
       }
     },
     {

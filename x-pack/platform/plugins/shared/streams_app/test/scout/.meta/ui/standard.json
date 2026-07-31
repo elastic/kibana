@@ -1,5 +1,5 @@
 {
-  "sha1": "39bbb2c828d0161c4f48d271a7640940387602c6",
+  "sha1": "158db121900005e1ea52b1b11516e9484c2b356c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.teardown.ts",
-        "line": 10,
-        "column": 19
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -23,8 +23,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 75,
-        "column": 9
+        "line": 71,
+        "column": 10
       }
     },
     {
@@ -55,8 +55,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 88,
-        "column": 9
+        "line": 78,
+        "column": 13
       }
     },
     {
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 86,
+        "column": 7
       }
     },
     {
@@ -87,8 +87,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 116,
-        "column": 9
+        "line": 97,
+        "column": 7
       }
     },
     {
@@ -103,8 +103,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 129,
-        "column": 9
+        "line": 104,
+        "column": 13
       }
     },
     {
@@ -119,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 152,
-        "column": 9
+        "line": 122,
+        "column": 13
       }
     },
     {
@@ -135,8 +135,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 164,
-        "column": 9
+        "line": 138,
+        "column": 7
       }
     },
     {
@@ -151,8 +151,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/canvas.spec.ts",
-        "line": 171,
-        "column": 9
+        "line": 143,
+        "column": 24
       }
     },
     {
@@ -167,8 +167,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
-        "line": 39,
-        "column": 9
+        "line": 30,
+        "column": 25
       }
     },
     {
@@ -183,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
-        "line": 50,
-        "column": 9
+        "line": 37,
+        "column": 7
       }
     },
     {
@@ -199,8 +199,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/classic_streams_schema.spec.ts",
-        "line": 128,
-        "column": 9
+        "line": 107,
+        "column": 23
       }
     },
     {
@@ -215,8 +215,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 35,
+        "column": 25
       }
     },
     {
@@ -231,8 +231,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 53,
+        "column": 68
       }
     },
     {
@@ -247,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 106,
-        "column": 9
+        "line": 81,
+        "column": 20
       }
     },
     {
@@ -263,8 +263,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 141,
-        "column": 9
+        "line": 123,
+        "column": 24
       }
     },
     {
@@ -279,8 +279,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 183,
-        "column": 9
+        "line": 147,
+        "column": 25
       }
     },
     {
@@ -295,8 +295,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 244,
-        "column": 9
+        "line": 200,
+        "column": 7
       }
     },
     {
@@ -311,8 +311,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/data_mapping.spec.ts",
-        "line": 297,
-        "column": 9
+        "line": 242,
+        "column": 7
       }
     },
     {
@@ -327,8 +327,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 42,
+        "column": 7
       }
     },
     {
@@ -343,8 +343,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 83,
+        "column": 24
       }
     },
     {
@@ -359,8 +359,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 140,
-        "column": 9
+        "line": 109,
+        "column": 7
       }
     },
     {
@@ -375,8 +375,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 194,
-        "column": 9
+        "line": 158,
+        "column": 23
       }
     },
     {
@@ -389,8 +389,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 86,
+        "column": 17
       }
     },
     {
@@ -403,8 +403,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 103,
-        "column": 9
+        "line": 90,
+        "column": 7
       }
     },
     {
@@ -417,8 +417,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 127,
-        "column": 9
+        "line": 111,
+        "column": 25
       }
     },
     {
@@ -431,8 +431,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 146,
-        "column": 9
+        "line": 129,
+        "column": 79
       }
     },
     {
@@ -445,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 170,
-        "column": 9
+        "line": 148,
+        "column": 10
       }
     },
     {
@@ -461,8 +461,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/fetch_more_matching_samples.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 40,
+        "column": 25
       }
     },
     {
@@ -477,8 +477,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 73,
+        "column": 7
       }
     },
     {
@@ -493,8 +493,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 101,
-        "column": 9
+        "line": 81,
+        "column": 13
       }
     },
     {
@@ -509,8 +509,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 119,
-        "column": 9
+        "line": 98,
+        "column": 13
       }
     },
     {
@@ -525,8 +525,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 133,
-        "column": 9
+        "line": 109,
+        "column": 8
       }
     },
     {
@@ -541,8 +541,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 151,
-        "column": 9
+        "line": 122,
+        "column": 13
       }
     },
     {
@@ -557,8 +557,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 184,
-        "column": 9
+        "line": 148,
+        "column": 25
       }
     },
     {
@@ -573,8 +573,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 207,
-        "column": 9
+        "line": 167,
+        "column": 7
       }
     },
     {
@@ -589,8 +589,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 217,
-        "column": 9
+        "line": 170,
+        "column": 24
       }
     },
     {
@@ -605,8 +605,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 242,
-        "column": 9
+        "line": 197,
+        "column": 7
       }
     },
     {
@@ -621,8 +621,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 269,
-        "column": 9
+        "line": 217,
+        "column": 77
       }
     },
     {
@@ -637,8 +637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_quality.spec.ts",
-        "line": 294,
-        "column": 9
+        "line": 234,
+        "column": 14
       }
     },
     {
@@ -651,8 +651,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 96,
-        "column": 9
+        "line": 67,
+        "column": 21
       }
     },
     {
@@ -665,8 +665,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 109,
-        "column": 9
+        "line": 74,
+        "column": 13
       }
     },
     {
@@ -679,8 +679,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 133,
-        "column": 9
+        "line": 91,
+        "column": 23
       }
     },
     {
@@ -693,8 +693,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 188,
-        "column": 9
+        "line": 133,
+        "column": 10
       }
     },
     {
@@ -707,8 +707,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 204,
-        "column": 9
+        "line": 144,
+        "column": 7
       }
     },
     {
@@ -721,8 +721,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 240,
-        "column": 9
+        "line": 177,
+        "column": 82
       }
     },
     {
@@ -735,8 +735,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 255,
-        "column": 9
+        "line": 189,
+        "column": 7
       }
     },
     {
@@ -749,8 +749,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_data_phase_flow.spec.ts",
-        "line": 269,
-        "column": 9
+        "line": 191,
+        "column": 24
       }
     },
     {
@@ -763,8 +763,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_delete_phase_flow.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 37,
+        "column": 7
       }
     },
     {
@@ -777,8 +777,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/add_delete_phase_flow.spec.ts",
-        "line": 55,
-        "column": 9
+        "line": 41,
+        "column": 7
       }
     },
     {
@@ -793,7 +793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 132,
+        "line": 118,
         "column": 9
       }
     },
@@ -809,8 +809,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 144,
-        "column": 9
+        "line": 127,
+        "column": 5
       }
     },
     {
@@ -825,8 +825,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 165,
-        "column": 9
+        "line": 139,
+        "column": 13
       }
     },
     {
@@ -841,7 +841,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 184,
+        "line": 151,
         "column": 9
       }
     },
@@ -857,8 +857,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 201,
-        "column": 9
+        "line": 164,
+        "column": 5
       }
     },
     {
@@ -873,8 +873,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 235,
-        "column": 9
+        "line": 180,
+        "column": 13
       }
     },
     {
@@ -889,8 +889,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/data_retention.spec.ts",
-        "line": 301,
-        "column": 9
+        "line": 251,
+        "column": 23
       }
     },
     {
@@ -905,8 +905,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 67,
+        "column": 14
       }
     },
     {
@@ -921,8 +921,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 89,
+        "column": 44
       }
     },
     {
@@ -935,8 +935,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 124,
-        "column": 9
+        "line": 107,
+        "column": 35
       }
     },
     {
@@ -949,8 +949,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 147,
-        "column": 9
+        "line": 122,
+        "column": 5
       }
     },
     {
@@ -963,8 +963,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 167,
-        "column": 9
+        "line": 129,
+        "column": 73
       }
     },
     {
@@ -979,8 +979,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 67,
+        "column": 14
       }
     },
     {
@@ -995,8 +995,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 104,
-        "column": 9
+        "line": 89,
+        "column": 44
       }
     },
     {
@@ -1009,8 +1009,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 124,
-        "column": 9
+        "line": 107,
+        "column": 35
       }
     },
     {
@@ -1023,8 +1023,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 147,
-        "column": 9
+        "line": 122,
+        "column": 5
       }
     },
     {
@@ -1037,8 +1037,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 167,
-        "column": 9
+        "line": 129,
+        "column": 73
       }
     },
     {
@@ -1053,8 +1053,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 192,
-        "column": 11
+        "line": 152,
+        "column": 69
       }
     },
     {
@@ -1069,8 +1069,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 220,
-        "column": 7
+        "line": 179,
+        "column": 15
       }
     },
     {
@@ -1085,8 +1085,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 235,
-        "column": 7
+        "line": 197,
+        "column": 83
       }
     },
     {
@@ -1101,8 +1101,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 274,
-        "column": 7
+        "line": 238,
+        "column": 46
       }
     },
     {
@@ -1117,8 +1117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 299,
-        "column": 7
+        "line": 254,
+        "column": 9
       }
     },
     {
@@ -1133,8 +1133,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/failure_store.spec.ts",
-        "line": 332,
-        "column": 7
+        "line": 282,
+        "column": 56
       }
     },
     {
@@ -1147,7 +1147,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 63,
+        "line": 50,
         "column": 7
       }
     },
@@ -1161,8 +1161,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 69,
-        "column": 7
+        "line": 55,
+        "column": 27
       }
     },
     {
@@ -1175,8 +1175,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 63,
+        "column": 59
       }
     },
     {
@@ -1189,8 +1189,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 97,
-        "column": 7
+        "line": 72,
+        "column": 66
       }
     },
     {
@@ -1203,8 +1203,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 115,
-        "column": 7
+        "line": 85,
+        "column": 11
       }
     },
     {
@@ -1217,8 +1217,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 198,
-        "column": 9
+        "line": 175,
+        "column": 70
       }
     },
     {
@@ -1231,8 +1231,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 264,
-        "column": 9
+        "line": 220,
+        "column": 14
       }
     },
     {
@@ -1245,8 +1245,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/ilm_policy_retention.spec.ts",
-        "line": 339,
-        "column": 9
+        "line": 288,
+        "column": 14
       }
     },
     {
@@ -1261,8 +1261,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 60,
-        "column": 9
+        "line": 52,
+        "column": 10
       }
     },
     {
@@ -1277,8 +1277,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_display_values.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 54,
+        "column": 7
       }
     },
     {
@@ -1293,8 +1293,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_flyout_interactions.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 55,
+        "column": 10
       }
     },
     {
@@ -1309,8 +1309,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_flyout_interactions.spec.ts",
-        "line": 72,
-        "column": 9
+        "line": 59,
+        "column": 46
       }
     },
     {
@@ -1323,8 +1323,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_frozen_phase.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 32,
+        "column": 27
       }
     },
     {
@@ -1337,8 +1337,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_frozen_phase.spec.ts",
-        "line": 51,
-        "column": 7
+        "line": 37,
+        "column": 23
       }
     },
     {
@@ -1351,8 +1351,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_frozen_phase.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 45,
+        "column": 89
       }
     },
     {
@@ -1367,8 +1367,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 50,
-        "column": 9
+        "line": 41,
+        "column": 13
       }
     },
     {
@@ -1383,8 +1383,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 71,
-        "column": 9
+        "line": 55,
+        "column": 25
       }
     },
     {
@@ -1399,8 +1399,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 89,
-        "column": 9
+        "line": 71,
+        "column": 10
       }
     },
     {
@@ -1415,8 +1415,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 114,
-        "column": 9
+        "line": 84,
+        "column": 13
       }
     },
     {
@@ -1431,8 +1431,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 135,
-        "column": 9
+        "line": 101,
+        "column": 24
       }
     },
     {
@@ -1447,8 +1447,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_inheritance.spec.ts",
-        "line": 157,
-        "column": 9
+        "line": 116,
+        "column": 18
       }
     },
     {
@@ -1463,8 +1463,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
-        "line": 60,
-        "column": 9
+        "line": 52,
+        "column": 10
       }
     },
     {
@@ -1479,8 +1479,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_retention/retention_storage_metrics.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 56,
+        "column": 46
       }
     },
     {
@@ -1493,8 +1493,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 42,
-        "column": 7
+        "line": 29,
+        "column": 54
       }
     },
     {
@@ -1507,8 +1507,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 34,
+        "column": 11
       }
     },
     {
@@ -1521,8 +1521,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_button.spec.ts",
-        "line": 62,
-        "column": 7
+        "line": 45,
+        "column": 11
       }
     },
     {
@@ -1535,8 +1535,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 62,
-        "column": 9
+        "line": 49,
+        "column": 47
       }
     },
     {
@@ -1549,8 +1549,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 74,
-        "column": 9
+        "line": 57,
+        "column": 70
       }
     },
     {
@@ -1563,8 +1563,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 92,
-        "column": 9
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -1577,8 +1577,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 109,
-        "column": 9
+        "line": 80,
+        "column": 25
       }
     },
     {
@@ -1591,8 +1591,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_editing_validation.spec.ts",
-        "line": 145,
-        "column": 9
+        "line": 114,
+        "column": 11
       }
     },
     {
@@ -1605,8 +1605,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 36,
+        "column": 56
       }
     },
     {
@@ -1619,8 +1619,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_generation.spec.ts",
-        "line": 59,
-        "column": 9
+        "line": 44,
+        "column": 39
       }
     },
     {
@@ -1633,8 +1633,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 38,
+        "column": 10
       }
     },
     {
@@ -1647,8 +1647,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 39,
+        "column": 13
       }
     },
     {
@@ -1661,8 +1661,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 70,
-        "column": 9
+        "line": 51,
+        "column": 13
       }
     },
     {
@@ -1675,8 +1675,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 58,
+        "column": 13
       }
     },
     {
@@ -1689,8 +1689,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 108,
-        "column": 9
+        "line": 73,
+        "column": 13
       }
     },
     {
@@ -1703,8 +1703,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 138,
-        "column": 9
+        "line": 101,
+        "column": 22
       }
     },
     {
@@ -1717,8 +1717,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/ai_suggestions_interactions.spec.ts",
-        "line": 172,
-        "column": 9
+        "line": 134,
+        "column": 13
       }
     },
     {
@@ -1733,8 +1733,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 31,
-        "column": 9
+        "line": 26,
+        "column": 10
       }
     },
     {
@@ -1749,8 +1749,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 68,
-        "column": 9
+        "line": 47,
+        "column": 16
       }
     },
     {
@@ -1765,8 +1765,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 81,
-        "column": 9
+        "line": 56,
+        "column": 24
       }
     },
     {
@@ -1781,8 +1781,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 68,
+        "column": 66
       }
     },
     {
@@ -1797,8 +1797,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 131,
-        "column": 9
+        "line": 102,
+        "column": 11
       }
     },
     {
@@ -1813,8 +1813,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 145,
-        "column": 9
+        "line": 112,
+        "column": 27
       }
     },
     {
@@ -1829,8 +1829,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 158,
-        "column": 9
+        "line": 121,
+        "column": 26
       }
     },
     {
@@ -1845,8 +1845,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 183,
-        "column": 9
+        "line": 141,
+        "column": 25
       }
     },
     {
@@ -1861,8 +1861,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/create_routing_rules.spec.ts",
-        "line": 208,
-        "column": 9
+        "line": 158,
+        "column": 10
       }
     },
     {
@@ -1877,7 +1877,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 40,
+        "line": 30,
         "column": 9
       }
     },
@@ -1893,8 +1893,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -1909,8 +1909,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 84,
-        "column": 9
+        "line": 53,
+        "column": 13
       }
     },
     {
@@ -1925,8 +1925,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 105,
-        "column": 9
+        "line": 78,
+        "column": 25
       }
     },
     {
@@ -1941,8 +1941,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 131,
-        "column": 9
+        "line": 97,
+        "column": 13
       }
     },
     {
@@ -1957,8 +1957,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 153,
-        "column": 9
+        "line": 114,
+        "column": 25
       }
     },
     {
@@ -1973,8 +1973,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 175,
-        "column": 9
+        "line": 131,
+        "column": 10
       }
     },
     {
@@ -1989,8 +1989,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 199,
-        "column": 9
+        "line": 150,
+        "column": 7
       }
     },
     {
@@ -2005,8 +2005,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/edit_routing_rules.spec.ts",
-        "line": 211,
-        "column": 9
+        "line": 147,
+        "column": 24
       }
     },
     {
@@ -2021,8 +2021,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/error_handling.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 21,
+        "column": 28
       }
     },
     {
@@ -2037,8 +2037,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/error_handling.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 39,
+        "column": 7
       }
     },
     {
@@ -2053,8 +2053,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/error_handling.spec.ts",
-        "line": 90,
-        "column": 9
+        "line": 68,
+        "column": 7
       }
     },
     {
@@ -2069,8 +2069,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 43,
-        "column": 9
+        "line": 38,
+        "column": 28
       }
     },
     {
@@ -2086,7 +2086,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
         "line": 62,
-        "column": 9
+        "column": 47
       }
     },
     {
@@ -2101,8 +2101,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 80,
-        "column": 9
+        "line": 85,
+        "column": 7
       }
     },
     {
@@ -2117,8 +2117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 100,
-        "column": 9
+        "line": 86,
+        "column": 24
       }
     },
     {
@@ -2134,7 +2134,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
         "line": 118,
-        "column": 9
+        "column": 68
       }
     },
     {
@@ -2149,8 +2149,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/reorder_routing_rules.spec.ts",
-        "line": 135,
-        "column": 9
+        "line": 136,
+        "column": 11
       }
     },
     {
@@ -2165,8 +2165,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 28,
+        "column": 25
       }
     },
     {
@@ -2181,8 +2181,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 61,
-        "column": 9
+        "line": 46,
+        "column": 16
       }
     },
     {
@@ -2197,8 +2197,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 102,
-        "column": 9
+        "line": 81,
+        "column": 7
       }
     },
     {
@@ -2213,8 +2213,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 117,
-        "column": 9
+        "line": 93,
+        "column": 24
       }
     },
     {
@@ -2229,8 +2229,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 139,
-        "column": 9
+        "line": 106,
+        "column": 7
       }
     },
     {
@@ -2245,8 +2245,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 171,
-        "column": 9
+        "line": 124,
+        "column": 7
       }
     },
     {
@@ -2261,7 +2261,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 208,
+        "line": 150,
         "column": 9
       }
     },
@@ -2277,8 +2277,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_routing/routing_data_preview.spec.ts",
-        "line": 231,
-        "column": 9
+        "line": 173,
+        "column": 25
       }
     },
     {
@@ -2293,8 +2293,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 42,
+        "column": 46
       }
     },
     {
@@ -2309,8 +2309,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 52,
+        "column": 25
       }
     },
     {
@@ -2325,8 +2325,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 61,
+        "column": 7
       }
     },
     {
@@ -2341,8 +2341,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow_permissions.spec.ts",
-        "line": 107,
-        "column": 9
+        "line": 84,
+        "column": 11
       }
     },
     {
@@ -2357,8 +2357,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 49,
+        "column": 10
       }
     },
     {
@@ -2373,8 +2373,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 100,
-        "column": 9
+        "line": 87,
+        "column": 20
       }
     },
     {
@@ -2389,8 +2389,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 126,
-        "column": 9
+        "line": 109,
+        "column": 18
       }
     }
   ]

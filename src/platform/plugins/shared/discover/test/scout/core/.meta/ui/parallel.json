@@ -1,5 +1,5 @@
 {
-  "sha1": "304d98e4eec1d08a2455440b827339c3645953e4",
+  "sha1": "0c5b0ba9e280576f0427ee365bc63b14951b38bc",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -127,8 +127,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 28,
+        "column": 23
       }
     },
     {
@@ -140,8 +140,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
-        "line": 45,
-        "column": 12
+        "line": 34,
+        "column": 5
       }
     },
     {
@@ -153,8 +153,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
-        "line": 96,
-        "column": 12
+        "line": 92,
+        "column": 20
       }
     },
     {
@@ -166,8 +166,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/default_columns.spec.ts",
-        "line": 144,
-        "column": 12
+        "line": 147,
+        "column": 3
       }
     },
     {
@@ -218,8 +218,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/drag_drop.spec.ts",
-        "line": 36,
-        "column": 12
+        "line": 23,
+        "column": 23
       }
     },
     {
@@ -244,8 +244,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/drag_drop.spec.ts",
-        "line": 56,
-        "column": 12
+        "line": 45,
+        "column": 84
       }
     },
     {
@@ -335,8 +335,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 49,
-        "column": 12
+        "line": 38,
+        "column": 31
       }
     },
     {
@@ -348,8 +348,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 58,
-        "column": 12
+        "line": 43,
+        "column": 23
       }
     },
     {
@@ -361,8 +361,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 67,
-        "column": 12
+        "line": 49,
+        "column": 13
       }
     },
     {
@@ -374,7 +374,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/field_data.spec.ts",
-        "line": 103,
+        "line": 73,
         "column": 12
       }
     },
@@ -595,8 +595,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 51,
-        "column": 14
+        "line": 40,
+        "column": 20
       }
     },
     {
@@ -621,8 +621,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 74,
-        "column": 14
+        "line": 53,
+        "column": 22
       }
     },
     {
@@ -647,8 +647,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 89,
-        "column": 14
+        "line": 61,
+        "column": 19
       }
     },
     {
@@ -673,8 +673,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 105,
-        "column": 14
+        "line": 75,
+        "column": 7
       }
     },
     {
@@ -699,8 +699,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 123,
-        "column": 14
+        "line": 90,
+        "column": 7
       }
     },
     {
@@ -725,8 +725,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 138,
-        "column": 14
+        "line": 97,
+        "column": 31
       }
     },
     {
@@ -751,8 +751,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 160,
-        "column": 14
+        "line": 115,
+        "column": 31
       }
     },
     {
@@ -777,8 +777,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 216,
-        "column": 14
+        "line": 162,
+        "column": 27
       }
     },
     {
@@ -803,8 +803,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 235,
-        "column": 14
+        "line": 174,
+        "column": 31
       }
     },
     {
@@ -829,8 +829,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 254,
-        "column": 14
+        "line": 187,
+        "column": 31
       }
     },
     {
@@ -855,8 +855,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 269,
-        "column": 14
+        "line": 201,
+        "column": 9
       }
     },
     {
@@ -881,8 +881,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 284,
-        "column": 14
+        "line": 214,
+        "column": 6
       }
     },
     {
@@ -907,8 +907,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_data_view.spec.ts",
-        "line": 299,
-        "column": 14
+        "line": 223,
+        "column": 33
       }
     },
     {
@@ -920,8 +920,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/request_counts_esql.spec.ts",
-        "line": 40,
-        "column": 14
+        "line": 31,
+        "column": 25
       }
     },
     {
