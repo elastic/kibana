@@ -13,7 +13,7 @@ paths:
       deprecated: true
       summary: Create an index for Privileges Monitoring import
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
         Create an index for Privileges Monitoring import.
 

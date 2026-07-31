@@ -12,7 +12,7 @@ paths:
       deprecated: true
       summary: Upsert multiple monitored users via CSV upload
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
       requestBody:

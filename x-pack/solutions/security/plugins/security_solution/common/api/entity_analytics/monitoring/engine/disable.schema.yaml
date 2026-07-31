@@ -11,7 +11,7 @@ paths:
       operationId: DisableMonitoringEngine
       deprecated: true
       summary: Disable the Privilege Monitoring Engine
-      description: '**Deprecated in 9.6.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.'
+      description: '**Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.'
 
       responses:
         "200":

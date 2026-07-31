@@ -194,7 +194,7 @@ If a record already exists for the specified entity, that record is overwritten 
       .send(props.body as object);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Create a new entity source configuration.
 
@@ -208,7 +208,7 @@ Create a new entity source configuration.
       .send(props.body as object);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Create an index for Privileges Monitoring import.
 
@@ -225,7 +225,7 @@ Create an index for Privileges Monitoring import.
       .send(props.body as object);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
 
@@ -286,7 +286,7 @@ Delete the asset criticality record for a specific entity.
       .query(props.query);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Delete an entity source configuration.
 
@@ -304,7 +304,7 @@ Delete an entity source configuration.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * **Deprecated in 9.6.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+   * **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
   deleteMonitoringEngine(props: DeleteMonitoringEngineProps, kibanaSpace: string = 'default') {
     return supertest
@@ -315,7 +315,7 @@ Delete an entity source configuration.
       .query(props.query);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Removes a privileged user from monitoring by their document ID.
 
@@ -365,7 +365,7 @@ Removes a privileged user from monitoring by their document ID.
       .send(props.body as object);
   },
   /**
-   * **Deprecated in 9.6.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+   * **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
   disableMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
@@ -474,7 +474,7 @@ Removes a privileged user from monitoring by their document ID.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Get an entity source configuration by ID.
 
@@ -558,7 +558,7 @@ Get an entity source configuration by ID.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * **Deprecated in 9.6.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+   * **Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
    */
   initMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
@@ -608,7 +608,7 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 List all entity source configurations.
 
@@ -622,7 +622,7 @@ List all entity source configurations.
       .query(props.query);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
 
@@ -676,7 +676,7 @@ Returns a list of all privileged users currently being monitored. Supports optio
       .send(props.body as object);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
 
@@ -689,7 +689,7 @@ Bulk upserts privileged users by uploading a CSV file. Returns per-row errors an
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * **Deprecated in 9.6.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+   * **Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
    */
   privMonHealth(kibanaSpace: string = 'default') {
     return supertest
@@ -699,7 +699,7 @@ Bulk upserts privileged users by uploading a CSV file. Returns per-row errors an
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Check if the current user has all required permissions for Privilege Monitoring.
 
@@ -735,7 +735,7 @@ Check if the current user has all required permissions for Privilege Monitoring.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-   * **Deprecated in 9.6.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+   * **Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
    */
   scheduleMonitoringEngine(kibanaSpace: string = 'default') {
     return supertest
@@ -758,7 +758,7 @@ Check if the current user has all required permissions for Privilege Monitoring.
       .send(props.body as object);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Search Indices for Privileges Monitoring import.
 
@@ -824,7 +824,7 @@ remain on the watchlist.
       .send(props.body as object);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Update an entity source configuration.
 
@@ -843,7 +843,7 @@ Update an entity source configuration.
       .send(props.body as object);
   },
   /**
-      * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+      * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Updates the details of an existing monitored privileged user by their document ID.
 

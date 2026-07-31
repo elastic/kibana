@@ -841,7 +841,7 @@ If a record already exists for the specified entity, that record is overwritten 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Create a new entity source configuration.
 
@@ -860,7 +860,7 @@ Create a new entity source configuration.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Create an index for Privileges Monitoring import.
 
@@ -879,7 +879,7 @@ Create an index for Privileges Monitoring import.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
 
@@ -1158,7 +1158,7 @@ Delete the asset criticality record for a specific entity.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Delete an entity source configuration.
 
@@ -1176,7 +1176,7 @@ Delete an entity source configuration.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **Deprecated in 9.6.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+   * **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
    */
   async deleteMonitoringEngine(props: DeleteMonitoringEngineProps) {
     this.log.info(`${new Date().toISOString()} Calling API DeleteMonitoringEngine`);
@@ -1214,7 +1214,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Removes a privileged user from monitoring by their document ID.
 
@@ -1319,7 +1319,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **Deprecated in 9.6.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+   * **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
    */
   async disableMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API DisableMonitoringEngine`);
@@ -1973,7 +1973,7 @@ finishes and then call this operation once.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Get an entity source configuration by ID.
 
@@ -2403,7 +2403,7 @@ response reports a result for each one.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **Deprecated in 9.6.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+   * **Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
    */
   async initMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API InitMonitoringEngine`);
@@ -2548,7 +2548,7 @@ Each row will match up to 10,000 entities.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 List all entity source configurations.
 
@@ -2568,7 +2568,7 @@ List all entity source configurations.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
 
@@ -2769,7 +2769,7 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
 
@@ -2788,7 +2788,7 @@ Bulk upserts privileged users by uploading a CSV file. Returns per-row errors an
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **Deprecated in 9.6.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+   * **Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
    */
   async privMonHealth() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonHealth`);
@@ -2803,7 +2803,7 @@ Bulk upserts privileged users by uploading a CSV file. Returns per-row errors an
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Check if the current user has all required permissions for Privilege Monitoring.
 
@@ -3138,7 +3138,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * **Deprecated in 9.6.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+   * **Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
    */
   async scheduleMonitoringEngine() {
     this.log.info(`${new Date().toISOString()} Calling API ScheduleMonitoringEngine`);
@@ -3201,7 +3201,7 @@ matching documents, and inspect execution logs. Pair `invocationCount` and `time
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Search Indices for Privileges Monitoring import.
 
@@ -3565,7 +3565,7 @@ remain on the watchlist.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 Update an entity source configuration.
 
@@ -3584,7 +3584,7 @@ Update an entity source configuration.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.6.0.** Use the Watchlists API instead.
+    * **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 Updates the details of an existing monitored privileged user by their document ID.
 

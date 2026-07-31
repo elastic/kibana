@@ -12,7 +12,7 @@ paths:
       deprecated: true
       summary: Delete a monitored user
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Removes a privileged user from monitoring by their document ID.
       parameters:

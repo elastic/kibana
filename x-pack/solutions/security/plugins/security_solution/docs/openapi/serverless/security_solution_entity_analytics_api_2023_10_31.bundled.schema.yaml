@@ -325,7 +325,7 @@ paths:
   /api/entity_analytics/monitoring/engine/delete:
     delete:
       deprecated: true
-      description: '**Deprecated in 9.6.0.** Deletes the Privilege Monitoring Engine
+      description: '**Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine
         and optionally removes all associated privileged user data.'
       operationId: DeleteMonitoringEngine
       parameters:
@@ -359,7 +359,7 @@ paths:
   /api/entity_analytics/monitoring/engine/disable:
     post:
       deprecated: true
-      description: '**Deprecated in 9.6.0.** Disables the Privilege Monitoring Engine,
+      description: '**Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine,
         stopping all monitoring activity without removing data.'
       operationId: DisableMonitoringEngine
       responses:
@@ -380,7 +380,7 @@ paths:
   /api/entity_analytics/monitoring/engine/init:
     post:
       deprecated: true
-      description: '**Deprecated in 9.6.0.** Initializes the Privilege Monitoring
+      description: '**Deprecated in 9.4.0.** Initializes the Privilege Monitoring
         Engine, setting up the required resources and starting the engine.'
       operationId: InitMonitoringEngine
       responses:
@@ -414,7 +414,7 @@ paths:
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
       deprecated: true
-      description: '**Deprecated in 9.6.0.** Schedules the Privilege Monitoring Engine
+      description: '**Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine
         to run as soon as possible, triggering an immediate monitoring cycle.'
       operationId: ScheduleMonitoringEngine
       responses:
@@ -454,7 +454,7 @@ paths:
   /api/entity_analytics/monitoring/privileges/health:
     get:
       deprecated: true
-      description: '**Deprecated in 9.6.0.** Returns the current health status of the
+      description: '**Deprecated in 9.4.0.** Returns the current health status of the
         Privilege Monitoring Engine, including engine status, error details, and
         user count statistics.'
       operationId: PrivMonHealth
@@ -505,7 +505,7 @@ paths:
     get:
       deprecated: true
       description: >
-        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
 
         Check if the current user has all required permissions for Privilege
@@ -535,7 +535,7 @@ paths:
     post:
       deprecated: true
       description: >
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 
         Creates a new privileged user to be monitored by the Privilege
@@ -588,7 +588,7 @@ paths:
     post:
       deprecated: true
       description: >
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 
         Bulk upserts privileged users by uploading a CSV file. Returns per-row
@@ -653,7 +653,7 @@ paths:
     delete:
       deprecated: true
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
@@ -693,7 +693,7 @@ paths:
     put:
       deprecated: true
       description: >
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 
         Updates the details of an existing monitored privileged user by their
@@ -754,7 +754,7 @@ paths:
     get:
       deprecated: true
       description: >
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
 
         Returns a list of all privileged users currently being monitored.

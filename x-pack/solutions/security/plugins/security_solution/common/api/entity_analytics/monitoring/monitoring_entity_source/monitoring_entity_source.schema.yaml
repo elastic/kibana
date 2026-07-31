@@ -12,7 +12,7 @@ paths:
       deprecated: true
       summary: Create a new entity source configuration
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
         Create a new entity source configuration.
       requestBody:
@@ -56,7 +56,7 @@ paths:
       deprecated: true
       summary: Get an entity source configuration by ID
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
         Get an entity source configuration by ID.
       parameters:
@@ -80,7 +80,7 @@ paths:
       deprecated: true
       summary: Update an entity source configuration
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
         Update an entity source configuration.
       parameters:
@@ -110,7 +110,7 @@ paths:
       deprecated: true
       summary: Delete an entity source configuration
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
         Delete an entity source configuration.
       parameters:
@@ -131,7 +131,7 @@ paths:
       deprecated: true
       summary: List all entity source configurations
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists APIs instead.
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
 
         List all entity source configurations.
       parameters:

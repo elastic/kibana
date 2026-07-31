@@ -11,7 +11,7 @@ paths:
       operationId: InitMonitoringEngine
       deprecated: true
       summary: Initialize the Privilege Monitoring Engine
-      description: '**Deprecated in 9.6.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.'
+      description: '**Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.'
 
       responses:
         "200":

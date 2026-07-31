@@ -12,7 +12,7 @@ paths:
       deprecated: true
       summary: List all monitored users
       description: |
-        **Deprecated in 9.6.0.** Use the Watchlists API instead.
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
       parameters:
