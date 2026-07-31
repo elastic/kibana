@@ -155,20 +155,21 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [selectedServices, getServiceVars]
   );
 
+  const incompleteServiceIds = useMemo(
+    () => new Set(incompleteServices.map((s) => s.id)),
+    [incompleteServices]
+  );
+
   const isReady = useMemo(
     () => !!globalRegion.trim() && incompleteServices.length === 0,
     [globalRegion, incompleteServices]
   );
 
-  const [showValidation, setShowValidation] = useState(false);
+  const [globalRegionTouched, setGlobalRegionTouched] = useState(false);
 
   const handleNext = useCallback(() => {
-    if (!isReady) {
-      setShowValidation(true);
-      return;
-    }
     onContinue();
-  }, [isReady, onContinue]);
+  }, [onContinue]);
 
   return {
     globalRegion,
@@ -176,6 +177,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     selectedServices,
     filteredServices,
     incompleteServices,
+    incompleteServiceIds,
     searchQuery,
     setSearchQuery,
     signalFilter,
@@ -185,7 +187,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setServiceField,
     setServiceFields,
     setServiceFieldsAndTransport,
-    showValidation,
+    globalRegionTouched,
+    setGlobalRegionTouched,
     isReady,
     handleNext,
   };

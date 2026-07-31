@@ -10,7 +10,8 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 // cloudtrail: dual-transport (S3 + CloudWatch); required fields are bucket_arn (S3) / log_group_arn (CW)
-// ec2_metrics: agentless metrics — no required text fields beyond region; Continue enabled once global region is set
+// ec2_metrics: agentless metrics — no required text fields; Continue enabled once global region is set
+// firewall_metrics: regions-only optionalConfig — no required text fields, no attention badge
 
 test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ apiServices, config }) => {
@@ -78,7 +79,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
   });
 
-  test('endpoint count reflects selected services', async ({ browserAuth, page }) => {
+  test('service count reflects selected services', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#service-settings');
     await page.evaluate(() => {
@@ -93,7 +94,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     });
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
-    await expect(page.getByText(/Showing.*2.*endpoints/)).toBeVisible();
+    await expect(page.getByText(/Showing.*2.*services/)).toBeVisible();
   });
 
   test('search bar filters table rows by name', async ({ browserAuth, page }) => {
@@ -115,7 +116,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.testSubj.locator('serviceSettingsStep-searchBox').fill('CloudTrail');
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
     await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')).toBeHidden();
-    await expect(page.getByText(/Showing.*1.*endpoint/)).toBeVisible();
+    await expect(page.getByText(/Showing.*1.*service/)).toBeVisible();
   });
 
   test('signal filter narrows table rows by signal type', async ({ browserAuth, page }) => {
@@ -181,13 +182,14 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(cloudtrailRow.getByText('eu-west-1')).toBeVisible();
   });
 
-  test('Continue blocked without global region; error shown on click', async ({
-    browserAuth,
-    page,
-  }) => {
+  test('Continue is disabled without global region', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#service-settings');
     await page.evaluate(() => {
+      sessionStorage.setItem(
+        'onboarding.aws.servicesStep',
+        JSON.stringify({ selectedServiceIds: ['ec2_metrics'] })
+      );
       sessionStorage.setItem(
         'onboarding.aws.serviceSettingsStep',
         JSON.stringify({ globalRegion: '', serviceVars: {} })
@@ -196,12 +198,42 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
-    await page.testSubj.locator('serviceSettingsStep-continueButton').click();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
+  });
+
+  test('region error shown only after touching and clearing the global region field', async ({
+    browserAuth,
+    page,
+  }) => {
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws#service-settings');
+    await page.evaluate(() => {
+      sessionStorage.setItem(
+        'onboarding.aws.servicesStep',
+        JSON.stringify({ selectedServiceIds: ['ec2_metrics'] })
+      );
+      sessionStorage.setItem(
+        'onboarding.aws.serviceSettingsStep',
+        JSON.stringify({ globalRegion: '', serviceVars: {} })
+      );
+    });
+    await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
+
+    // Error not visible before interaction
+    await expect(page.testSubj.locator('serviceSettingsStep-globalRegionError')).toBeHidden();
+
+    // Select a region then clear it
+    await page.testSubj.locator('serviceSettingsStep-globalRegion').click();
+    await page.testSubj
+      .locator('serviceSettingsStep-globalRegion')
+      .locator('[aria-label="Clear input"]')
+      .click();
+
     await expect(page.testSubj.locator('serviceSettingsStep-globalRegionError')).toBeVisible();
   });
 
-  test('Continue blocked when required flyout fields are empty; form-level error lists service', async ({
+  test('attention callout and badge shown when required flyout fields are empty', async ({
     browserAuth,
     page,
   }) => {
@@ -225,12 +257,40 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
-    await page.testSubj.locator('serviceSettingsStep-continueButton').click();
+    // Callout visible, badge on cloudtrail row, Continue disabled
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
+    await expect(
+      page.testSubj.locator('serviceSettingsStep-attentionIcon-cloudtrail')
+    ).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
+  });
+
+  test('regions-only service shows no attention badge and does not block Continue', async ({
+    browserAuth,
+    page,
+  }) => {
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws#service-settings');
+
+    // firewall_metrics: optionalConfig: ['regions'] — no required text fields
+    await page.evaluate(() => {
+      sessionStorage.setItem(
+        'onboarding.aws.servicesStep',
+        JSON.stringify({ selectedServiceIds: ['firewall_metrics'] })
+      );
+      sessionStorage.setItem(
+        'onboarding.aws.serviceSettingsStep',
+        JSON.stringify({ globalRegion: 'us-east-1', serviceVars: {} })
+      );
+    });
+    await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsStep-validationError')).toBeVisible();
-    await expect(page.testSubj.locator('serviceSettingsStep-validationError')).toContainText(
-      'AWS CloudTrail'
-    );
+
+    await expect(
+      page.testSubj.locator('serviceSettingsStep-attentionIcon-firewall_metrics')
+    ).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
   test('expand icon opens flyout for the correct service', async ({ browserAuth, page }) => {
@@ -250,10 +310,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-editButton-ec2_metrics').click();
-    await expect(page.getByText('Collection settings — AWS EC2')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'AWS EC2' })).toBeVisible();
 
-    await page.testSubj.locator('collectionSettingsFlyout-closeButton').click();
-    await expect(page.getByText('Collection settings — AWS EC2')).toBeHidden();
+    await page.testSubj.locator('serviceSettingsFlyout-closeButton').click();
+    await expect(page.locator('.euiFlyout')).toBeHidden();
   });
 
   test('service name link also opens flyout', async ({ browserAuth, page }) => {
@@ -273,7 +333,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics').click();
-    await expect(page.getByText('Collection settings — AWS EC2')).toBeVisible();
+    await expect(page.locator('.euiFlyout')).toBeVisible();
   });
 
   test('flyout shows transport toggle and required fields for dual-transport service', async ({
@@ -299,29 +359,25 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
-    await expect(page.getByText('Collection settings — AWS CloudTrail')).toBeVisible();
+    await expect(page.locator('.euiFlyout')).toBeVisible();
 
-    // Transport toggle visible in flyout
-    await expect(page.testSubj.locator('collectionSettingsFlyout-transportToggle')).toBeVisible();
+    // Transport toggle visible
+    await expect(page.testSubj.locator('serviceSettingsFlyout-transportToggle')).toBeVisible();
 
-    // S3 active → bucket_arn field shown
-    await expect(page.testSubj.locator('collectionSettingsFlyout-field-bucket_arn')).toBeVisible();
-    await expect(
-      page.testSubj.locator('collectionSettingsFlyout-field-log_group_arn')
-    ).toBeHidden();
+    // S3 active → bucket_arn field shown (label includes [S3])
+    await expect(page.testSubj.locator('serviceSettingsFlyout-field-bucket_arn')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsFlyout-field-log_group_arn')).toBeHidden();
 
     // Switch to CloudWatch → log_group_arn shown, bucket_arn hidden
     await page.testSubj
-      .locator('collectionSettingsFlyout-transportToggle')
+      .locator('serviceSettingsFlyout-transportToggle')
       .getByText('CloudWatch')
       .click();
-    await expect(
-      page.testSubj.locator('collectionSettingsFlyout-field-log_group_arn')
-    ).toBeVisible();
-    await expect(page.testSubj.locator('collectionSettingsFlyout-field-bucket_arn')).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsFlyout-field-log_group_arn')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsFlyout-field-bucket_arn')).toBeHidden();
   });
 
-  test('filling required field in flyout and applying unblocks Continue', async ({
+  test('filling required field in flyout and saving unblocks Continue', async ({
     browserAuth,
     page,
   }) => {
@@ -343,19 +399,23 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
-    // Trigger validation
-    await page.testSubj.locator('serviceSettingsStep-continueButton').click();
-    await expect(page.testSubj.locator('serviceSettingsStep-validationError')).toBeVisible();
+    // Callout and badge visible, Continue disabled
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
 
-    // Open flyout, fill required field, apply
+    // Open flyout, fill required field, save
     await page.testSubj.locator('serviceSettingsStep-editButton-cloudtrail').click();
     await page.testSubj
-      .locator('collectionSettingsFlyout-field-bucket_arn')
+      .locator('serviceSettingsFlyout-field-bucket_arn')
       .fill('arn:aws:s3:::my-bucket');
-    await page.getByRole('button', { name: 'Apply' }).click();
+    await page.testSubj.locator('serviceSettingsFlyout-saveButton').click();
 
-    // Validation error gone
-    await expect(page.testSubj.locator('serviceSettingsStep-validationError')).toBeHidden();
+    // Badge gone, callout gone, Continue enabled
+    await expect(
+      page.testSubj.locator('serviceSettingsStep-attentionIcon-cloudtrail')
+    ).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
 
   test('flyout region override pre-populated with global region', async ({ browserAuth, page }) => {
@@ -375,7 +435,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-editButton-ec2_metrics').click();
-    await expect(page.getByText('Collection settings — AWS EC2')).toBeVisible();
+    await expect(page.locator('.euiFlyout')).toBeVisible();
 
     await expect(page.locator('.euiFlyout').getByLabel('AWS Region (override)')).toHaveValue(
       'us-east-1'

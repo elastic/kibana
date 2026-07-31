@@ -120,4 +120,41 @@ describe('getFlyoutFields', () => {
     expect(result).not.toContain('bucket_arn');
     expect(result).toContain('log_group_arn');
   });
+
+  it('includes fields from optionalConfig (e.g. regions)', () => {
+    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
+    expect(getFlyoutFields(service, null)).toContain('regions');
+  });
+
+  it('includes regions from optionalConfig and required bucket_arn together', () => {
+    const service = makeService({
+      requiredConfig: ['bucket_arn', 'region'],
+      optionalConfig: ['regions'],
+    });
+    const result = getFlyoutFields(service, 'aws-s3');
+    expect(result).toContain('bucket_arn');
+    expect(result).toContain('regions');
+  });
+});
+
+describe('getRequiredTextFields — optionalConfig exclusion', () => {
+  it('does not count regions in optionalConfig as required', () => {
+    // Services that moved regions to optionalConfig should not block Continue
+    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
+    expect(getRequiredTextFields(service, null)).toEqual([]);
+  });
+
+  it('does not count metrics in optionalConfig as required', () => {
+    const service = makeService({ requiredConfig: [], optionalConfig: ['regions', 'metrics'] });
+    expect(getRequiredTextFields(service, null)).toEqual([]);
+  });
+
+  it('still returns bucket_arn when in requiredConfig alongside optionalConfig', () => {
+    const service = makeService({
+      requiredConfig: ['bucket_arn', 'region'],
+      optionalConfig: ['regions'],
+    });
+    expect(getRequiredTextFields(service, 'aws-s3')).toContain('bucket_arn');
+    expect(getRequiredTextFields(service, 'aws-s3')).not.toContain('regions');
+  });
 });

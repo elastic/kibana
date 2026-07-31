@@ -30,6 +30,8 @@ export interface FieldMeta {
   transport?: TransportType;
   placeholder?: string;
   helpText?: string;
+  /** True when the manifest var is multi: true (Fleet expects an array, not a string) */
+  multi?: boolean;
 }
 
 export const FIELD_CONFIG: Record<string, FieldMeta> = {
@@ -74,6 +76,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Regions',
     }),
     placement: 'flyout',
+    multi: true,
     helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.regions.helpText', {
       defaultMessage: 'Optional. Restrict collection to specific AWS regions.',
     }),
@@ -180,7 +183,8 @@ export function getInlineFields(
   service: AwsServiceMatrixEntry,
   activeTransport: TransportType | null
 ): string[] {
-  return (service.requiredConfig ?? []).filter((f) => {
+  const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  return allFields.filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
     if (meta.placement !== 'inline') return false;
@@ -193,7 +197,8 @@ export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
   activeTransport: TransportType | null
 ): string[] {
-  return (service.requiredConfig ?? []).filter((f) => {
+  const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  return allFields.filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
     if (meta.placement !== 'flyout') return false;
