@@ -105,7 +105,14 @@ export const useFetchDiscoveryQueries = (
       perPage: response.perPage,
       total: response.total,
       queries: response.queries.map((series: QueryWithOccurrences) => {
-        const { occurrences, change_points, stream_name, rule_backed, ...rest } = series;
+        const {
+          occurrences,
+          change_points,
+          rule_uuid: _ruleUuid,
+          stream_name,
+          rule_backed,
+          ...rest
+        } = series;
         return {
           query: rest,
           stream_name,

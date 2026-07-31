@@ -1,10 +1,36 @@
 {
-  "sha1": "930ba9869f3f02ec13419b63ee4966c09f10cdba",
+  "sha1": "6cdf0d873b32dab8fc774f11acb3f884d19418f3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
+    {
+      "id": "4189aabe6643ea7-8cf1f3cf6c6d663",
+      "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_crud.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "4189aabe6643ea7-a0554bccd589a70",
+      "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_crud.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
     {
       "id": "a3812d69333baa9-c6dcf15528a3e01",
       "title": "Action Policies - read/write privileges editor sees every write affordance",
@@ -14,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 36,
+        "column": 23
       }
     },
     {
@@ -27,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 47,
+        "column": 11
       }
     },
     {
@@ -40,8 +66,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_privileges.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 65,
+        "column": 13
       }
     },
     {
@@ -53,8 +79,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/alerts_privileges.spec.ts",
-        "line": 47,
-        "column": 7
+        "line": 41,
+        "column": 5
       }
     },
     {
@@ -66,8 +92,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/alerts_privileges.spec.ts",
-        "line": 56,
-        "column": 7
+        "line": 47,
+        "column": 77
       }
     },
     {
@@ -79,8 +105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 103,
-        "column": 9
+        "line": 131,
+        "column": 71
       }
     },
     {
@@ -92,8 +118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 188,
-        "column": 9
+        "line": 205,
+        "column": 23
       }
     },
     {
@@ -105,8 +131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 253,
-        "column": 9
+        "line": 271,
+        "column": 26
       }
     },
     {
@@ -118,7 +144,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 311,
+        "line": 322,
+        "column": 15
+      }
+    },
+    {
+      "id": "a3a9f820a79c452-fa08c7c1ae41791",
+      "title": "ComposeDiscoverFlyout — create and edit flows create flow: manually selected sandbox time field holds and persists (#281806)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
+        "line": 377,
         "column": 9
       }
     },
@@ -131,8 +170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 367,
-        "column": 9
+        "line": 429,
+        "column": 26
       }
     },
     {
@@ -144,8 +183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 406,
-        "column": 9
+        "line": 454,
+        "column": 26
       }
     },
     {
@@ -157,8 +196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 449,
-        "column": 9
+        "line": 501,
+        "column": 26
       }
     },
     {
@@ -170,8 +209,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 513,
-        "column": 9
+        "line": 558,
+        "column": 13
       }
     },
     {
@@ -183,8 +222,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 543,
-        "column": 9
+        "line": 583,
+        "column": 15
       }
     },
     {
@@ -196,8 +235,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 564,
-        "column": 9
+        "line": 601,
+        "column": 15
       }
     },
     {
@@ -209,8 +248,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 593,
-        "column": 9
+        "line": 624,
+        "column": 7
       }
     },
     {
@@ -222,7 +261,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/compose_discover_flyout.spec.ts",
-        "line": 615,
+        "line": 644,
         "column": 9
       }
     },
@@ -235,8 +274,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_alerts_menu.spec.ts",
-        "line": 42,
-        "column": 9
+        "line": 30,
+        "column": 25
       }
     },
     {
@@ -248,8 +287,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/discover_query_sync.spec.ts",
-        "line": 46,
-        "column": 7
+        "line": 42,
+        "column": 26
+      }
+    },
+    {
+      "id": "cb7694bb7388506-9b8bdbc9e8d75a4",
+      "title": "Episode details — action policy history tab mounts the episode-scoped policy history tab from the details route",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/episode_action_policy_history.spec.ts",
+        "line": 39,
+        "column": 48
       }
     },
     {
@@ -262,8 +314,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
-        "line": 34,
-        "column": 7
+        "line": 25,
+        "column": 41
       }
     },
     {
@@ -276,8 +328,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/esql_rule_flyout_validation.spec.ts",
-        "line": 58,
-        "column": 7
+        "line": 38,
+        "column": 24
       }
     },
     {
@@ -289,8 +341,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/execution_history_smoke.spec.ts",
-        "line": 32,
-        "column": 7
+        "line": 22,
+        "column": 5
       }
     },
     {
@@ -315,8 +367,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 58,
-        "column": 7
+        "line": 57,
+        "column": 14
       }
     },
     {
@@ -341,8 +393,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 60,
-        "column": 7
+        "line": 57,
+        "column": 69
       }
     },
     {
@@ -367,8 +419,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 65,
-        "column": 7
+        "line": 57,
+        "column": 97
       }
     },
     {
@@ -393,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 58,
+        "column": 8
       }
     },
     {
@@ -419,8 +471,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 75,
-        "column": 7
+        "line": 71,
+        "column": 5
       }
     },
     {
@@ -445,8 +497,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 80,
-        "column": 7
+        "line": 86,
+        "column": 5
       }
     },
     {
@@ -471,8 +523,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/management_required_privileges.spec.ts",
-        "line": 85,
-        "column": 7
+        "line": 51,
+        "column": 24
       }
     },
     {
@@ -484,8 +536,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 59,
-        "column": 9
+        "line": 54,
+        "column": 38
       }
     },
     {
@@ -497,8 +549,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 130,
-        "column": 9
+        "line": 115,
+        "column": 13
       }
     },
     {
@@ -510,8 +562,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 189,
-        "column": 9
+        "line": 169,
+        "column": 26
       }
     },
     {
@@ -523,8 +575,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 44,
+        "column": 41
       }
     },
     {
@@ -536,8 +588,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 48,
+        "column": 8
       }
     },
     {
@@ -549,8 +601,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 71,
-        "column": 7
+        "line": 58,
+        "column": 5
       }
     },
     {
@@ -562,8 +614,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_bulk_respects_filters.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 43,
+        "column": 28
       }
     },
     {
@@ -575,8 +627,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_privileges.spec.ts",
-        "line": 39,
-        "column": 7
+        "line": 31,
+        "column": 6
       }
     },
     {
@@ -588,8 +640,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/rules_list_privileges.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 37,
+        "column": 5
       }
     }
   ]

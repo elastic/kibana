@@ -51,6 +51,13 @@ export const ALERTING_V2_ERROR_CODES = {
   SCHEDULE_INTERVAL_TOO_SHORT: 'SCHEDULE_INTERVAL_TOO_SHORT',
   /** Scheduling the rule would exceed the configured maximum rule runs per minute. */
   MAX_SCHEDULES_PER_MINUTE_EXCEEDED: 'MAX_SCHEDULES_PER_MINUTE_EXCEEDED',
+  /**
+   * A bulk operation persisted the rule saved object, but the paired Task
+   * Manager call failed, leaving the rule's task state diverged from its saved object.
+   * The saved-object change already committed; this entry flags the drift so the client
+   * can detect and (optionally) retry.
+   */
+  TASK_MANAGER_DRIFT: 'TASK_MANAGER_DRIFT',
   /** A manual "run now" was requested for a disabled rule (it has no executor task to run). */
   RULE_DISABLED: 'RULE_DISABLED',
   /** A manual "run now" was requested for a rule whose executor task is already running. */
