@@ -1,5 +1,5 @@
 {
-  "sha1": "93f6d018f6f74df8958bcc347959a83be58a929f",
+  "sha1": "db8495f796ecf25f43819326b7f2a88d915ff9c1",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -36,7 +36,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_accessibility.spec.ts",
-        "line": 34,
+        "line": 29,
         "column": 12
       }
     },
@@ -231,7 +231,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 53,
+        "line": 50,
         "column": 12
       }
     },
@@ -257,7 +257,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 80,
+        "line": 77,
         "column": 12
       }
     },
@@ -283,7 +283,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 104,
+        "line": 101,
         "column": 12
       }
     },
@@ -309,7 +309,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 120,
+        "line": 117,
         "column": 12
       }
     },
@@ -335,7 +335,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_filters.spec.ts",
-        "line": 160,
+        "line": 157,
         "column": 12
       }
     },
@@ -366,8 +366,8 @@
       }
     },
     {
-      "id": "2abb03108f9a5a2-54f12c8b1f5a450",
-      "title": "Discover context - back navigation should go back via breadcrumbs with preserved state",
+      "id": "2abb03108f9a5a2-552649e6024fe00",
+      "title": "Discover context - back navigation should go back to Discover with preserved state",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -392,8 +392,8 @@
       }
     },
     {
-      "id": "2abb03108f9a5a2-33efc0baf01bdfb",
-      "title": "Discover context - back navigation should go back via breadcrumbs with preserved state after page refresh",
+      "id": "2abb03108f9a5a2-6be08197dc53bba",
+      "title": "Discover context - back navigation should go back to Discover with preserved state after page refresh",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -492,6 +492,45 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/context_size.spec.ts",
         "line": 49,
+        "column": 12
+      }
+    },
+    {
+      "id": "ec0fe18338751e8-71337924280cc0e",
+      "title": "Discover tabs - navigation goes back to the last active tab when returning from Surrounding Docs page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "ec0fe18338751e8-ca1a4d5ac2c4cf9",
+      "title": "Discover tabs - navigation returns to the last active tab from Single Doc page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
+        "line": 92,
+        "column": 12
+      }
+    },
+    {
+      "id": "ec0fe18338751e8-2fa468ec2b3afdd",
+      "title": "Discover tabs - navigation restores the latest tabs when returning via app navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/surrounding_docs/ui/parallel_tests/navigation.spec.ts",
+        "line": 121,
         "column": 12
       }
     }
