@@ -50,6 +50,7 @@ dependsOn:
   - '@kbn/css-utils'
   - '@kbn/field-formats-common'
   - '@kbn/ebt-click'
+  - '@kbn/scout'
 tags:
   - shared-browser
   - package
@@ -62,6 +63,7 @@ fileGroups:
     - '*.ts'
     - src/**/*
     - __mocks__/**/*.ts
+    - test/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js
