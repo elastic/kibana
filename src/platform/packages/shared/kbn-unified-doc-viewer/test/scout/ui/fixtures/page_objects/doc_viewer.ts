@@ -83,7 +83,7 @@ export class DocViewer {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     await flyout.waitFor({ state: 'visible' });
 
-    // EUI flyout menu customActions expose aria-label only (no data-test-subj).
+    // EUI flyout menu actions expose an aria-label only, no data-test-subj.
     return flyout
       .getByRole('button', {
         name: /View single document|View surrounding documents/,

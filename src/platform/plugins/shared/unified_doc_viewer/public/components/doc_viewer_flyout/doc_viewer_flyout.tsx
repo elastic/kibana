@@ -12,11 +12,7 @@ import type { DocViewerProps } from '@kbn/unified-doc-viewer';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
-  EuiFlyoutMenuCustomAction,
-  EuiFlyoutMenuPagination,
-  EuiFlyoutProps,
-} from '@elastic/eui';
+import type { EuiFlyoutMenuAction, EuiFlyoutMenuPagination, EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -46,9 +42,13 @@ export interface UnifiedDocViewerFlyoutProps
   flyoutTitle?: string;
   flyoutDefaultWidth?: EuiFlyoutProps['size'];
   /**
+   * Icon actions rendered in the flyout menu bar, after the pagination controls.
+   */
+  flyoutMenuLeadingActions?: EuiFlyoutMenuAction[];
+  /**
    * Icon actions rendered in the flyout menu bar, immediately to the left of the close button.
    */
-  flyoutMenuCustomActions?: EuiFlyoutMenuCustomAction[];
+  flyoutMenuTrailingActions?: EuiFlyoutMenuAction[];
   flyoutType?: 'push' | 'overlay';
   flyoutWidthLocalStorageKey?: string;
   originDocType?: string;
@@ -94,7 +94,8 @@ export function UnifiedDocViewerFlyout({
   'data-test-subj': dataTestSubj,
   flyoutTitle,
   flyoutDefaultWidth,
-  flyoutMenuCustomActions,
+  flyoutMenuLeadingActions,
+  flyoutMenuTrailingActions,
   flyoutType,
   flyoutWidthLocalStorageKey,
   originDocType,
@@ -155,7 +156,9 @@ export function UnifiedDocViewerFlyout({
   );
 
   // Pagination takes the left menu slot from back/history — harmless here
-  // because this flyout starts its own session.
+  // because this flyout starts its own session. Supplying onFirst/onLast also
+  // switches EUI's default chevrons to the horizontal axis, matching the
+  // ArrowLeft/ArrowRight keyboard mapping below.
   const pagination = useMemo<EuiFlyoutMenuPagination | undefined>(
     () =>
       activePage === -1
@@ -163,8 +166,10 @@ export function UnifiedDocViewerFlyout({
         : {
             currentIndex: activePage,
             total: pageCount,
+            onFirst: () => setPage(0),
             onPrevious: () => setPage(activePage - 1),
             onNext: () => setPage(activePage + 1),
+            onLast: () => setPage(pageCount - 1),
           },
     [activePage, pageCount, setPage]
   );
@@ -266,13 +271,14 @@ export function UnifiedDocViewerFlyout({
             session="start"
             historyKey={historyKey}
             flyoutMenuProps={{
+              // The title is not rendered visibly in the menu bar; it labels the
+              // flyout for assistive tech and names the session in flyout history.
               title: currentFlyoutTitle,
               titleId: 'docViewerFlyoutTitle',
               'data-test-subj': 'docViewerRowDetailsTitle',
-              hideTitle: false,
               pagination,
-              // Custom actions sit in the top-right, immediately left of the close button.
-              customActions: flyoutMenuCustomActions,
+              leadingActions: flyoutMenuLeadingActions,
+              trailingActions: flyoutMenuTrailingActions,
             }}
             className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
             onClose={onClose}

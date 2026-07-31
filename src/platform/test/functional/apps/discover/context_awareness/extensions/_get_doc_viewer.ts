@@ -23,9 +23,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const incrementButtonTestSubj = 'example-restorable-state-doc-view-increment-button';
   const countTestSubj = 'example-restorable-state-doc-view-count';
 
+  // The flyout menu title is screen-reader-only, so read textContent rather
+  // than visible text.
   const getDocViewerTitle = async () => {
     const title = await find.byCssSelector('#docViewerFlyoutTitle');
-    return title.getVisibleText();
+    return (await title.getAttribute('textContent'))?.trim();
   };
 
   describe('extension getDocViewer', () => {

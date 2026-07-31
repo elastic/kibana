@@ -305,8 +305,11 @@ exports[`#start() returns \`Context\` component 1`] = `
     \\"euiHue.ariaRoleDescription\\": \\"Hue slider\\",
     \\"euiColorPicker.selectedColorLabel\\": \\"Selected color\\",
     \\"euiContextMenuPanelTitle.ariaLabel\\": \\"Close current panel:\\",
+    \\"euiFlyoutMenu.history.tooltip\\": \\"Recently visited\\",
+    \\"euiFlyoutMenu.pagination.first\\": \\"First\\",
     \\"euiFlyoutMenu.pagination.previous\\": \\"Previous\\",
-    \\"euiFlyoutMenu.pagination.next\\": \\"Next\\"
+    \\"euiFlyoutMenu.pagination.next\\": \\"Next\\",
+    \\"euiFlyoutMenu.pagination.last\\": \\"Last\\"
   }
 }"
 `;

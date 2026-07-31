@@ -39,7 +39,26 @@ jest.mock('@kbn/unified-doc-viewer-plugin/public', () => {
         </div>
         {/* EUI's Jest flyout stub ignores flyoutMenuProps; surface actions for assertions. */}
         <div data-test-subj="mockFlyoutMenuActions">
-          {(props.flyoutMenuCustomActions ?? []).map((action) => action['aria-label']).join('|')}
+          {[
+            ...(props.flyoutMenuLeadingActions ?? []).map((action) => ({
+              action,
+              slot: 'leading',
+            })),
+            ...(props.flyoutMenuTrailingActions ?? []).map((action) => ({
+              action,
+              slot: 'trailing',
+            })),
+          ].map(({ action, slot }) => (
+            <div
+              key={action['aria-label']}
+              data-test-subj={`mockFlyoutMenuAction-${action['aria-label']}`}
+              data-slot={slot}
+              data-icon-type={action.iconType}
+              data-tooltip={
+                typeof action.toolTipContent === 'string' ? action.toolTipContent : undefined
+              }
+            />
+          ))}
         </div>
         <OriginalFlyout
           {...props}
@@ -119,10 +138,13 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view without timefield', async () => {
     const { props, user } = await renderComponent({});
 
-    expect(screen.getByTestId('mockFlyoutMenuActions')).toHaveTextContent('View single document');
-    expect(screen.getByTestId('mockFlyoutMenuActions')).not.toHaveTextContent(
-      'View surrounding documents'
-    );
+    const singleDocument = screen.getByTestId('mockFlyoutMenuAction-View single document');
+    expect(singleDocument).toHaveAttribute('data-slot', 'trailing');
+    expect(singleDocument).toHaveAttribute('data-icon-type', 'maximize');
+    expect(singleDocument).toHaveAttribute('data-tooltip', 'View single document');
+    expect(
+      screen.queryByTestId('mockFlyoutMenuAction-View surrounding documents')
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
     expect(props.onClose).toHaveBeenCalled();
@@ -131,8 +153,19 @@ describe('Discover flyout', function () {
   it('should be rendered correctly using an data view with timefield', async () => {
     const { props, user } = await renderComponent({ dataView: dataViewWithTimefieldMock });
 
-    expect(screen.getByTestId('mockFlyoutMenuActions')).toHaveTextContent(
-      'View single document|View surrounding documents'
+    expect(screen.getByTestId('mockFlyoutMenuAction-View single document')).toHaveAttribute(
+      'data-slot',
+      'trailing'
+    );
+
+    const surroundingDocuments = screen.getByTestId(
+      'mockFlyoutMenuAction-View surrounding documents'
+    );
+    expect(surroundingDocuments).toHaveAttribute('data-slot', 'leading');
+    expect(surroundingDocuments).toHaveAttribute('data-icon-type', 'documents');
+    expect(surroundingDocuments).toHaveAttribute(
+      'data-tooltip',
+      'Inspect documents that occurred before and after this document. Only pinned filters remain active in the Surrounding documents view.'
     );
 
     await user.click(screen.getByTestId('euiFlyoutCloseButton'));
@@ -194,7 +227,7 @@ describe('Discover flyout', function () {
       query: { esql: 'FROM indexpattern' },
     });
 
-    expect(screen.getByTestId('mockFlyoutMenuActions')).toHaveTextContent('');
+    expect(screen.getByTestId('mockFlyoutMenuActions')).toBeEmptyDOMElement();
     expect(screen.getByTestId('mockFlyoutTitle')).toHaveTextContent('Result');
   });
 

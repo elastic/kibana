@@ -535,7 +535,7 @@ export class DataGridService extends FtrService {
     return await this.testSubjects.getVisibleText(`tableDocViewRow-${fieldName}-value`);
   }
 
-  public async getDocViewerActivePage() {
+  private async readDocViewerCounter() {
     const menu = await this.testSubjects.find('docViewerRowDetailsTitle');
     const text = await menu.getVisibleText();
     const match = text.match(/(\d+)\s+of\s+(\d+)/);
@@ -545,7 +545,17 @@ export class DataGridService extends FtrService {
     }
 
     // Counter is 1-based; callers expect a zero-based index.
-    return Number(match[1]) - 1;
+    return { activePage: Number(match[1]) - 1, pageCount: Number(match[2]) };
+  }
+
+  public async getDocViewerActivePage() {
+    const { activePage } = await this.readDocViewerCounter();
+    return activePage;
+  }
+
+  public async getDocViewerPageCount() {
+    const { pageCount } = await this.readDocViewerCounter();
+    return pageCount;
   }
 
   public async expectDocViewerActivePage(activePage: number) {
@@ -560,6 +570,14 @@ export class DataGridService extends FtrService {
 
   public async clickDocViewerPreviousPage() {
     await this.testSubjects.click('docViewerFlyout > euiFlyoutMenuPaginationPrev');
+  }
+
+  public async clickDocViewerFirstPage() {
+    await this.testSubjects.click('docViewerFlyout > euiFlyoutMenuPaginationFirst');
+  }
+
+  public async clickDocViewerLastPage() {
+    await this.testSubjects.click('docViewerFlyout > euiFlyoutMenuPaginationLast');
   }
 
   public async getHeaderFields(): Promise<string[]> {
@@ -584,12 +602,22 @@ export class DataGridService extends FtrService {
     return textArr;
   }
 
+  /**
+   * Doc viewer flyout menu actions, in a stable order: single document first,
+   * surrounding documents second. Callers destructure by position, so the order
+   * is fixed here rather than left to the DOM — the two actions live in
+   * different menu slots (trailing and leading), which reverses document order.
+   * EUI flyout menu actions expose an aria-label only, no data-test-subj.
+   */
   public async getRowActions(): Promise<WebElementWrapper[]> {
     const detailsRow = await this.testSubjects.find('docViewerFlyout');
-    // EUI flyout menu customActions expose aria-label only (no data-test-subj).
-    return await detailsRow.findAllByCssSelector(
-      'button[aria-label="View single document"], button[aria-label="View surrounding documents"]'
-    );
+    const actions: WebElementWrapper[] = [];
+
+    for (const label of ['View single document', 'View surrounding documents']) {
+      actions.push(...(await detailsRow.findAllByCssSelector(`button[aria-label="${label}"]`)));
+    }
+
+    return actions;
   }
 
   public async openColMenuByField(field: string) {

@@ -589,6 +589,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
+      describe('flyout menu pagination', () => {
+        it('should navigate between documents with the prev/next buttons', async () => {
+          await dataGrid.clickRowToggle({ defaultTabId: false });
+          await discover.isShowingDocViewer();
+          await dataGrid.expectDocViewerActivePage(0);
+          await dataGrid.clickDocViewerNextPage();
+          await dataGrid.expectDocViewerActivePage(1);
+          await dataGrid.clickDocViewerPreviousPage();
+          await dataGrid.expectDocViewerActivePage(0);
+        });
+
+        it('should jump to the last and first documents with the last/first buttons', async () => {
+          await dataGrid.clickRowToggle({ defaultTabId: false });
+          await discover.isShowingDocViewer();
+          await dataGrid.expectDocViewerActivePage(0);
+          const pageCount = await dataGrid.getDocViewerPageCount();
+          await dataGrid.clickDocViewerLastPage();
+          await dataGrid.expectDocViewerActivePage(pageCount - 1);
+          await dataGrid.clickDocViewerFirstPage();
+          await dataGrid.expectDocViewerActivePage(0);
+        });
+      });
+
       describe('accessibility', () => {
         it('should focus the flyout on open, and retain focus when resizing between push and overlay flyouts', async () => {
           // push -> overlay -> push

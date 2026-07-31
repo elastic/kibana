@@ -1871,11 +1871,20 @@ export const getEuiContextMapping = (): EuiTokensObject => {
           title,
         },
       }),
+    'euiFlyoutMenu.history.tooltip': i18n.translate('core.euiFlyoutMenu.history.tooltip', {
+      defaultMessage: 'Recently visited',
+    }),
+    'euiFlyoutMenu.pagination.first': i18n.translate('core.euiFlyoutMenu.pagination.first', {
+      defaultMessage: 'First',
+    }),
     'euiFlyoutMenu.pagination.previous': i18n.translate('core.euiFlyoutMenu.pagination.previous', {
       defaultMessage: 'Previous',
     }),
     'euiFlyoutMenu.pagination.next': i18n.translate('core.euiFlyoutMenu.pagination.next', {
       defaultMessage: 'Next',
+    }),
+    'euiFlyoutMenu.pagination.last': i18n.translate('core.euiFlyoutMenu.pagination.last', {
+      defaultMessage: 'Last',
     }),
     'euiFlyoutMenu.pagination.counter': ({ position, total }: EuiValues) =>
       i18n.translate('core.euiFlyoutMenu.pagination.counter', {

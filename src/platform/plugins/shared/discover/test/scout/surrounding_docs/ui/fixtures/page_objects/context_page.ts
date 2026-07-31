@@ -170,7 +170,7 @@ export class ContextPage {
   async clickRowAction(actionIndex: number) {
     const flyout = this.page.testSubj.locator('docViewerFlyout');
     await expect(flyout).toBeVisible({ timeout: 10_000 });
-    // EUI flyout menu customActions expose aria-label only (no data-test-subj).
+    // EUI flyout menu actions expose an aria-label only, no data-test-subj.
     const actionLabels = ['View single document', 'View surrounding documents'] as const;
     const actionButton = flyout.getByRole('button', { name: actionLabels[actionIndex] });
     await expect(actionButton).toBeVisible();

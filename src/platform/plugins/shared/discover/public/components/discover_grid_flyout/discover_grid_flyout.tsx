@@ -83,7 +83,7 @@ export function DiscoverGridFlyout({
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
 
-  const { flyoutMenuCustomActions } = useFlyoutActions({
+  const { leadingActions, trailingActions } = useFlyoutActions({
     dataView,
     rowIndex: actualHit.raw._index,
     rowId: actualHit.raw._id,
@@ -114,9 +114,8 @@ export function DiscoverGridFlyout({
     <UnifiedDocViewerFlyout
       originDocType={originDocType}
       flyoutTitle={docViewer.title}
-      flyoutMenuCustomActions={
-        !isESQLQuery && flyoutMenuCustomActions.length > 0 ? flyoutMenuCustomActions : undefined
-      }
+      flyoutMenuLeadingActions={isESQLQuery ? undefined : leadingActions}
+      flyoutMenuTrailingActions={isESQLQuery ? undefined : trailingActions}
       flyoutWidthLocalStorageKey={FLYOUT_WIDTH_KEY}
       services={services}
       docViewsRegistry={docViewer.docViewsRegistry}
