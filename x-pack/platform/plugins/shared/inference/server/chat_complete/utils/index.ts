@@ -28,4 +28,4 @@ export {
   handleConnectorDataResponse,
 } from './handle_connector_response';
 export { handleLifecycleCallbacks } from './handle_lifecycle_callbacks';
-export { holdTokenCountEventsUntilMessage } from './hold_token_count_events';
+export { retryHoldingTokenCountEvents } from './hold_token_count_events';

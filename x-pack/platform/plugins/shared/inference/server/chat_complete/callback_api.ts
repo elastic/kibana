@@ -37,11 +37,10 @@ import {
   resolveInferenceEndpoint,
   handleCancellation,
   handleLifecycleCallbacks,
-  holdTokenCountEventsUntilMessage,
+  retryHoldingTokenCountEvents,
   streamToResponse,
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
-import { retryWithExponentialBackoff } from '../../common/utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../../common/utils/error_retry_filter';
 import { deanonymizeMessage } from './anonymization/deanonymize_message';
 import { addAnonymizationInstruction } from './anonymization/add_anonymization_instruction';
@@ -150,9 +149,7 @@ export function createChatCompleteCallbackApi({
         isTokenUsageTrackingEnabled,
       })
     ).pipe(
-      // must stay upstream of the retry so failed attempts drop their token counts
-      holdTokenCountEventsUntilMessage(),
-      retryWithExponentialBackoff({
+      retryHoldingTokenCountEvents({
         maxRetry: maxRetries,
         backoffMultiplier: retryConfiguration.backoffMultiplier,
         initialDelay: retryConfiguration.initialDelay,

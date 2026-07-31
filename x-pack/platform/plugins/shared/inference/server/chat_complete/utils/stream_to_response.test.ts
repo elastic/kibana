@@ -50,7 +50,7 @@ describe('streamToResponse', () => {
     expect(response.model).toEqual('my_model');
   });
 
-  it('uses the last token event when multiple were emitted (e.g. leaked from retried attempts)', async () => {
+  it('uses the last token event when multiple are present', async () => {
     const response = await streamToResponse(
       fromEvents(
         tokensEvent({ prompt: 1, completion: 2, total: 3 }, { model: 'failed_attempt_model' }),

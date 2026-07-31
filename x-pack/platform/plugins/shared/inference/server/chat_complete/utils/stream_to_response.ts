@@ -27,7 +27,7 @@ export const streamToResponse = <TToolOptions extends ToolOptions = ToolOptions>
       toArray(),
       map((events) => {
         const messageEvent = events.find(isChatCompletionMessageEvent);
-        // last one wins: earlier token events may belong to failed, retried attempts
+        // if several token events are present, the latest reflects the final usage
         const tokenEvent = events.findLast(isChatCompletionTokenCountEvent);
 
         if (!messageEvent) {

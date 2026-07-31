@@ -22,6 +22,7 @@ import {
   type ChatCompletionChunkEvent,
   MessageRole,
   isChatCompletionChunkEvent,
+  isChatCompletionTokenCountEvent,
   createInferenceProviderError,
   InferenceTaskErrorCode,
 } from '@kbn/inference-common';
@@ -434,6 +435,102 @@ describe('createChatCompleteApi', () => {
           type: 'chatCompletionMessage',
         },
       ]);
+    });
+
+    it('only emits the successful attempt token counts when a tool validation error is retried', async () => {
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        count++;
+        const isFirstAttempt = count === 1;
+        return of(
+          chunkEvent('', [
+            {
+              index: 0,
+              toolCallId: `call-${count}`,
+              function: {
+                name: 'myTool',
+                arguments: isFirstAttempt ? 'not-valid-json{' : '{}',
+              },
+            },
+          ]),
+          tokensEvent(
+            isFirstAttempt
+              ? { prompt: 1, completion: 2, total: 3 }
+              : { prompt: 4, completion: 5, total: 6 },
+            { model: isFirstAttempt ? 'failed_attempt_model' : 'success_attempt_model' }
+          )
+        );
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          myTool: {
+            description: 'my tool',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+        maxRetries: 1,
+        retryConfiguration: {
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      const events = await firstValueFrom(events$.pipe(toArray()));
+      const tokenEvents = events.filter(isChatCompletionTokenCountEvent);
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
+      expect(tokenEvents).toEqual([
+        tokensEvent({ prompt: 4, completion: 5, total: 6 }, { model: 'success_attempt_model' }),
+      ]);
+    });
+
+    it('emits the token counts before the error when the call fails terminally', async () => {
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        return of(
+          chunkEvent('', [
+            {
+              index: 0,
+              toolCallId: 'call-1',
+              function: { name: 'myTool', arguments: 'not-valid-json{' },
+            },
+          ]),
+          tokensEvent({ prompt: 1, completion: 2, total: 3 }, { model: 'failed_attempt_model' })
+        );
+      });
+
+      const events$ = chatComplete({
+        stream: true,
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          myTool: {
+            description: 'my tool',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+        maxRetries: 0,
+      });
+
+      const emitted: unknown[] = [];
+      let caughtError: any;
+      await new Promise<void>((resolve) => {
+        events$.subscribe({
+          next: (event) => emitted.push(event),
+          error: (err) => {
+            caughtError = err;
+            resolve();
+          },
+        });
+      });
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(emitted).toContainEqual(
+        tokensEvent({ prompt: 1, completion: 2, total: 3 }, { model: 'failed_attempt_model' })
+      );
     });
 
     it('implicitly retries errors when configured to', async () => {
