@@ -17,6 +17,9 @@ const PRIMARY_PANEL = 'lnsMetric_primaryMetricDimensionPanel';
 const BREAKDOWN_PANEL = 'lnsMetric_breakdownByDimensionPanel';
 const MAX_PANEL = 'lnsMetric_maxDimensionPanel';
 
+// Comfortably above the largest "Average of bytes" tile so the progress bar has room to fill.
+const STATIC_MAX_VALUE = '100000';
+
 const DEFAULT_TILE_COLOR = 'rgba(255, 255, 255, 1)';
 // Static/dynamic fill colors are a rendering property of the color editor, not a
 // backend-computed value, so exact colors are kept (plan §2b assertion hygiene).
@@ -111,6 +114,15 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
 
       await spaceTest.step('enables a progress bar via the max dimension', async () => {
         await lens.openDimensionEditor(`${MAX_PANEL} > lns-empty-dimension`);
+
+        // Lens seeds the max dimension's static value from the active data and falls back to 0
+        // when that data has not arrived yet; a zero max renders no progress bar at all. Set the
+        // value explicitly, the same way metric_progress_bar_lens_editor.spec.ts does.
+        const staticValueInput = page.testSubj.locator('lns-indexPattern-static_value-input');
+        await expect(staticValueInput).toBeVisible();
+        await staticValueInput.fill(STATIC_MAX_VALUE);
+        await page.keyboard.press('Tab');
+
         await lens.waitForVisualization('mtrVis');
         // The progress bar lands in a render pass after the one `waitForVisualization` settles
         // on, so wait for it directly (auto-retries) rather than racing a one-shot data snapshot.
@@ -220,16 +232,28 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.waitForVisualization('mtrVis');
         await lens.closeDimensionEditor();
 
-        const tiles = await lens.getMetricTiles();
-        const lastTile = tiles[tiles.length - 1];
+        // The tile list keeps growing for several render passes after `waitForVisualization`
+        // settles, and it only becomes tall enough to scroll once every bucket has a tile.
+        // Snapshotting a partially rendered list makes `scrollIntoViewIfNeeded` a no-op, so
+        // retry the whole scroll instead and assert the last tile moved up.
+        await expect
+          .poll(async () => {
+            const tiles = await lens.getMetricTiles();
+            const lastTile = tiles[tiles.length - 1];
+            if (!lastTile) {
+              return 0;
+            }
 
-        const initialBox = await lastTile.boundingBox();
-        await lastTile.scrollIntoViewIfNeeded();
-        const scrolledBox = await lastTile.boundingBox();
+            const initialBox = await lastTile.boundingBox();
+            await lastTile.scrollIntoViewIfNeeded();
+            const scrolledBox = await lastTile.boundingBox();
+            if (!initialBox || !scrolledBox) {
+              return 0;
+            }
 
-        expect(initialBox).not.toBeNull();
-        expect(scrolledBox).not.toBeNull();
-        expect(scrolledBox!.y).toBeLessThan(initialBox!.y);
+            return scrolledBox.y - initialBox.y;
+          })
+          .toBeLessThan(0);
       });
 
       await spaceTest.step("doesn't error with an empty formula", async () => {

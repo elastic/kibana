@@ -99,7 +99,7 @@ spaceTest.describe('Lens metric secondary', { tag: '@local-stateful-classic' }, 
         );
 
         await page.testSubj.click('lnsMetric_color_mode_dynamic');
-        expect(await lens.getSecondaryMetricBadgeText()).toBe('0');
+        await expect.poll(() => lens.getSecondaryMetricBadgeText()).toBe('0');
       });
     }
   );
