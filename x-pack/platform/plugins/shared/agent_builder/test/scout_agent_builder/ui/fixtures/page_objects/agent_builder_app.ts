@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ToolType } from '@kbn/agent-builder-common';
+import type { ToolConfirmationPolicyMode, ToolType } from '@kbn/agent-builder-common';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ScoutPage } from '@kbn/scout';
@@ -266,6 +266,28 @@ export class AgentBuilderApp {
       .locator('agentBuilderToolFormPage')
       .locator('[data-test-subj="euiMarkdownEditorTextArea"]');
     return (await ta.inputValue()).trim();
+  }
+
+  async setConfirmationPolicyValue(value: ToolConfirmationPolicyMode) {
+    await this.page.testSubj
+      .locator('agentBuilderToolConfirmationPolicySelect')
+      .selectOption(value);
+  }
+
+  async getConfirmationPolicyValue(): Promise<string> {
+    return this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect').inputValue();
+  }
+
+  async expectConfirmationPolicyValueToBeVisible() {
+    await expect(
+      this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect')
+    ).toBeVisible();
+  }
+
+  async expectConfirmationPolicyValue(value: ToolConfirmationPolicyMode) {
+    await expect(
+      this.page.testSubj.locator('agentBuilderToolConfirmationPolicySelect')
+    ).toHaveValue(value);
   }
 
   async setIndexPattern(indexPattern: string) {
