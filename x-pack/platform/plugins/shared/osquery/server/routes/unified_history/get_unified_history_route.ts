@@ -237,7 +237,7 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                     // Graceful degradation: if the osquery integration has not been
                     // upgraded yet, `planned_schedule_time` may be mapped as `keyword`
                     // instead of `date`, which makes the `max` aggregation fail.
-                    // Return empty scheduled results until the integration is updated.`````
+                    // Return empty scheduled results until the integration is updated.
                     logger.warn(
                       `Scheduled query aggregation failed (likely outdated integration mappings): ${err.message}`
                     );

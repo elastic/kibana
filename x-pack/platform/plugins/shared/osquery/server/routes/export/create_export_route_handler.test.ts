@@ -68,16 +68,22 @@ const baseParams: ExportRouteParams = {
   fileNamePrefix: 'osquery-results-test',
 };
 
-const mockOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
-const mockClosePointInTime = jest.fn().mockResolvedValue({});
+const mockInternalOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
+const mockInternalClosePointInTime = jest.fn().mockResolvedValue({});
+const mockScopedOpenPointInTime = jest.fn().mockResolvedValue({ id: 'mock-pit-id' });
+const mockScopedClosePointInTime = jest.fn().mockResolvedValue({});
 const mockSearchSearch = jest.fn();
 const mockSearch: jest.Mocked<IScopedSearchClient> = {
   search: mockSearchSearch,
 } as unknown as jest.Mocked<IScopedSearchClient>;
 const mockCpsSearch = jest.fn().mockReturnValue(mockSearch);
-const mockReadEsClient = {
-  openPointInTime: mockOpenPointInTime,
-  closePointInTime: mockClosePointInTime,
+const mockInternalEsClient = {
+  openPointInTime: mockInternalOpenPointInTime,
+  closePointInTime: mockInternalClosePointInTime,
+};
+const mockScopedEsClient = {
+  openPointInTime: mockScopedOpenPointInTime,
+  closePointInTime: mockScopedClosePointInTime,
 };
 
 const createContext = () =>
@@ -85,9 +91,9 @@ const createContext = () =>
     core: Promise.resolve({
       elasticsearch: {
         client: {
-          asInternalUser: mockReadEsClient,
+          asInternalUser: mockInternalEsClient,
           asScoped: jest.fn().mockReturnValue({
-            asCurrentUser: mockReadEsClient,
+            asCurrentUser: mockScopedEsClient,
           }),
         },
       },
@@ -164,11 +170,11 @@ const createOsqueryContext = (options?: {
       {
         elasticsearch: {
           client: {
-            asInternalUser: mockReadEsClient,
+            asInternalUser: mockInternalEsClient,
             asScoped: jest.fn().mockReturnValue({
-              asCurrentUser: mockReadEsClient,
-              asInternalUser: mockReadEsClient,
-              asSecondaryAuthUser: mockReadEsClient,
+              asCurrentUser: mockScopedEsClient,
+              asInternalUser: mockInternalEsClient,
+              asSecondaryAuthUser: mockInternalEsClient,
             }),
           },
         },
@@ -190,7 +196,8 @@ describe('createExportRouteHandler', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     auditLoggerLog.mockClear();
-    mockOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
+    mockInternalOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
+    mockScopedOpenPointInTime.mockResolvedValue({ id: 'mock-pit-id' });
     const stream = new PassThrough();
     stream.end();
     mockExportResultsToStream.mockResolvedValue(stream);
@@ -445,7 +452,7 @@ describe('createExportRouteHandler', () => {
 
     // Handler opens PIT with the broad index pattern (array shape) when no
     // integration namespaces are resolved.
-    expect(mockOpenPointInTime).toHaveBeenCalledWith(
+    expect(mockInternalOpenPointInTime).toHaveBeenCalledWith(
       expect.objectContaining({
         index: [`logs-${OSQUERY_INTEGRATION_NAME}.result*`],
         keep_alive: '5m',
@@ -476,7 +483,7 @@ describe('createExportRouteHandler', () => {
 
     // The PIT must scan the same namespace-scoped targets the factory sets on the
     // search body — ES ignores the body `index` once a PIT is present.
-    expect(mockOpenPointInTime).toHaveBeenCalledWith(
+    expect(mockInternalOpenPointInTime).toHaveBeenCalledWith(
       expect.objectContaining({
         index: [
           `logs-${OSQUERY_INTEGRATION_NAME}.result-team.a`,
@@ -508,7 +515,7 @@ describe('createExportRouteHandler', () => {
         body: { message: 'Invalid integration namespace' },
       })
     );
-    expect(mockOpenPointInTime).not.toHaveBeenCalled();
+    expect(mockInternalOpenPointInTime).not.toHaveBeenCalled();
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
   });
 
@@ -526,8 +533,8 @@ describe('createExportRouteHandler', () => {
 
     expect(response.forbidden).toHaveBeenCalled();
     // No PIT is allocated when the caller lacks read access.
-    expect(mockOpenPointInTime).not.toHaveBeenCalled();
-    expect(mockClosePointInTime).not.toHaveBeenCalled();
+    expect(mockInternalOpenPointInTime).not.toHaveBeenCalled();
+    expect(mockInternalClosePointInTime).not.toHaveBeenCalled();
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
     expect(auditLoggerLog).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -550,11 +557,19 @@ describe('createExportRouteHandler', () => {
     await handler(createContext(), request, response, baseParams);
 
     expect(response.forbidden).not.toHaveBeenCalled();
-    expect(mockOpenPointInTime).toHaveBeenCalled();
+    expect(mockInternalOpenPointInTime).toHaveBeenCalled();
     expect(response.ok).toHaveBeenCalled();
   });
 
   it('uses scoped search client when CPS is enabled', async () => {
+    mockExportResultsToStream.mockImplementationOnce(async ({ closePit, pit }) => {
+      await closePit(pit.id);
+      const stream = new PassThrough();
+      stream.end();
+
+      return stream;
+    });
+
     const handler = createExportRouteHandler(createOsqueryContext({ cpsEnabled: true }));
     const response = httpServerMock.createResponseFactory();
     const request = createExportRequest({
@@ -565,6 +580,16 @@ describe('createExportRouteHandler', () => {
     await handler(createContext(), request, response, baseParams);
 
     expect(mockCpsSearch).toHaveBeenCalledWith(request, { projectRouting: 'space' });
+    expect(mockScopedOpenPointInTime).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: [`logs-${OSQUERY_INTEGRATION_NAME}.result*`],
+        keep_alive: '5m',
+        ignore_unavailable: true,
+      })
+    );
+    expect(mockScopedClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalOpenPointInTime).not.toHaveBeenCalled();
+    expect(mockInternalClosePointInTime).not.toHaveBeenCalled();
     expect(mockExportResultsToStream).toHaveBeenCalledWith(
       expect.objectContaining({ search: mockSearch })
     );
@@ -659,7 +684,7 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
   });
@@ -677,7 +702,7 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
   });
@@ -695,13 +720,13 @@ describe('createExportRouteHandler', () => {
 
     await handler(context, request, response, baseParams);
 
-    expect(mockClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
+    expect(mockInternalClosePointInTime).toHaveBeenCalledWith({ id: 'mock-pit-id' });
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
     expect(mockExportResultsToStream).not.toHaveBeenCalled();
   });
 
   it('returns 500 when openPointInTime throws (no closePit needed)', async () => {
-    mockOpenPointInTime.mockRejectedValueOnce(
+    mockInternalOpenPointInTime.mockRejectedValueOnce(
       Object.assign(new Error('ES cluster unavailable'), { statusCode: 503 })
     );
     const handler = createExportRouteHandler(createOsqueryContext());
@@ -713,7 +738,7 @@ describe('createExportRouteHandler', () => {
 
     await handler(createContext(), request, response, baseParams);
 
-    expect(mockClosePointInTime).not.toHaveBeenCalled();
+    expect(mockInternalClosePointInTime).not.toHaveBeenCalled();
     expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
   });
 

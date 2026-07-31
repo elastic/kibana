@@ -42,7 +42,7 @@ export const buildScheduledResponsesQuery = ({
     { exists: { field: 'schedule_id' } },
     buildSpaceIdFilter(spaceId, {
       matchMissingSpaceId: !cpsEnabled,
-    }) as estypes.QueryDslQueryContainer,
+    }),
   ];
 
   if (packIds !== undefined || scheduleIds !== undefined) {

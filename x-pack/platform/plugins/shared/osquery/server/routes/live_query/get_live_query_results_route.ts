@@ -6,7 +6,7 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import { map } from 'lodash';
+import { find, map } from 'lodash';
 import { lastValueFrom, zip } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
@@ -156,6 +156,15 @@ export const getLiveQueryResultsRoute = (
           }
 
           const queries = actionDetails?._source?.queries;
+
+          // The results read below is keyed on the sub-action id taken straight from the
+          // URL, so it has to be confirmed to belong to the parent action rather than
+          // trusted as supplied. Without this, a caller holding any readable parent id
+          // could pair it with an arbitrary actionId — and under CPS the agent indices
+          // that read resolves against span every linked project.
+          if (!find(queries, ['action_id', request.params.actionId])) {
+            return response.notFound({ body: { message: 'Live query action not found' } });
+          }
 
           const osqueryNamespaces = integrationNamespaces[OSQUERY_INTEGRATION_NAME];
           const namespacesOrUndefined =

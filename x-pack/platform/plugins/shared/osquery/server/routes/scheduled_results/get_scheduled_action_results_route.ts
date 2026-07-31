@@ -139,6 +139,7 @@ export const getScheduledActionResultsRoute = (
                   field: request.query.sort ?? '@timestamp',
                 },
                 integrationNamespaces: namespacesOrUndefined,
+                ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
               },
               { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )

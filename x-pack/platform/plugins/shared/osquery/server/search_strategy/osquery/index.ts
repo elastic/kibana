@@ -79,6 +79,9 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             ...('scheduleId' in request ? { scheduleId: request.scheduleId } : {}),
             ...('executionCount' in request ? { executionCount: request.executionCount } : {}),
             ...('esFilters' in request ? { esFilters: request.esFilters } : {}),
+            ...('matchMissingSpaceId' in request
+              ? { matchMissingSpaceId: request.matchMissingSpaceId }
+              : {}),
             // exportResults factory fields — baseFilter is required and unique to this
             // factory type, so its presence is a reliable discriminator for all six fields.
             ...('baseFilter' in request
@@ -95,6 +98,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
           const spaceId = activeSpace?.id ?? DEFAULT_SPACE_ID;
 
+          const spaceScopeOptions =
+            'matchMissingSpaceId' in request && request.matchMissingSpaceId !== undefined
+              ? { matchMissingSpaceId: request.matchMissingSpaceId }
+              : undefined;
+
           const dsl = enforceSpaceScope(
             queryFactory.buildDsl({
               ...strictRequest,
@@ -102,7 +110,8 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               componentTemplateExists: actionsIndexExists,
               ccsEnabled,
             } as StrategyRequestType<T>),
-            spaceId
+            spaceId,
+            spaceScopeOptions
           );
 
           const indices = Array.isArray(dsl.index) ? dsl.index : dsl.index ? [dsl.index] : [];
@@ -145,7 +154,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             mergeMap((legacyIndexResponse) => {
               if (
                 request.factoryQueryType === OsqueryQueries.actionResults &&
-                (newDataStreamIndexExists || ccsEnabled)
+                (newDataStreamIndexExists || ccsEnabled || osqueryContext.cpsEnabled)
               ) {
                 const dataStreamDsl = enforceSpaceScope(
                   queryFactory.buildDsl({
@@ -155,7 +164,8 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
                     ccsEnabled,
                     useNewDataStream: true,
                   } as StrategyRequestType<T>),
-                  spaceId
+                  spaceId,
+                  spaceScopeOptions
                 );
 
                 return from(

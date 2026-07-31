@@ -30,7 +30,10 @@ import type {
 import { generateTablePaginationOptions } from '../../../common/utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { getScopedSearch } from '../../utils/get_scoped_search';
+import { getReadEsClient } from '../../utils/get_read_es_client';
+import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { ACTIONS_INDEX } from '../../../common/constants';
 import { actionResultsResponseSchema } from './response_schemas';
 
 export const getActionResultsRoute = (
@@ -102,6 +105,26 @@ export const getActionResultsRoute = (
             osqueryContext.cpsEnabled,
             osqueryContext.getStartServices
           );
+
+          if (osqueryContext.cpsEnabled) {
+            const [coreStartServices] = await osqueryContext.getStartServices();
+            const clusterClient = coreStartServices.elasticsearch.client;
+            const readEsClient = getReadEsClient(clusterClient, request, true);
+            const actionsIndexExists = await clusterClient.asInternalUser.indices.exists({
+              index: `${ACTIONS_INDEX}*`,
+            });
+
+            const hasMetadata = await findOsqueryActionMetadata({
+              esClient: readEsClient,
+              spaceId,
+              actionId: request.params.actionId,
+              actionsIndexExists,
+            });
+
+            if (!hasMetadata) {
+              return response.notFound({ body: { message: 'Action not found' } });
+            }
+          }
 
           // Parse agentIds from query parameter
           const agentIds = request.query.agentIds

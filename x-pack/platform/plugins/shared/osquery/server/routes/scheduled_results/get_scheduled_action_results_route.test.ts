@@ -253,6 +253,79 @@ describe('getScheduledActionResultsRoute', () => {
     });
   });
 
+  describe('CPS strict space scoping', () => {
+    it('passes matchMissingSpaceId false to the search strategy when CPS is enabled', async () => {
+      const mockSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockSearchFn });
+
+      const mockOsqueryContext = {
+        cpsEnabled: true,
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([
+            { elasticsearch: { client: { asInternalUser: {} } } },
+            { data: { search: { asScoped: mockCpsSearch } } },
+          ]),
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(mockOsqueryContext);
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        params: { scheduleId: 'sched-1', executionCount: 1 },
+        query: {},
+      });
+      const mockResponse = httpServerMock.createResponseFactory();
+
+      await routeHandler(createMockContext(mockSearchFn) as any, mockRequest, mockResponse);
+
+      expect(mockSearchFn).toHaveBeenCalledWith(
+        expect.objectContaining({ matchMissingSpaceId: false }),
+        expectedSearchOptions
+      );
+    });
+
+    it('uses the CPS-scoped search client when CPS is enabled', async () => {
+      const mockCpsSearchFn = jest
+        .fn()
+        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockCpsSearch = jest.fn().mockReturnValue({ search: mockCpsSearchFn });
+      const contextSearchFn = jest.fn();
+
+      const cpsContext = {
+        cpsEnabled: true,
+        service: {
+          getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
+        },
+        getStartServices: jest
+          .fn()
+          .mockResolvedValue([
+            { elasticsearch: { client: { asInternalUser: {} } } },
+            { data: { search: { asScoped: mockCpsSearch } } },
+          ]),
+      } as unknown as OsqueryAppContext;
+
+      registerRoute(cpsContext);
+
+      await routeHandler(
+        createMockContext(contextSearchFn) as never,
+        httpServerMock.createKibanaRequest({
+          params: { scheduleId: 'sched-1', executionCount: 1 },
+          query: {},
+        }),
+        httpServerMock.createResponseFactory()
+      );
+
+      expect(mockCpsSearch).toHaveBeenCalledWith(expect.anything(), { projectRouting: 'space' });
+      expect(mockCpsSearchFn).toHaveBeenCalled();
+      expect(contextSearchFn).not.toHaveBeenCalled();
+    });
+  });
+
   describe('integration namespace scoping', () => {
     it('passes resolved integration namespaces to the search strategy', async () => {
       const mockSearchFn = jest

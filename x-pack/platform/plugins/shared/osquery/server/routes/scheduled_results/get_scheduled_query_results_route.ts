@@ -142,6 +142,7 @@ export const getScheduledQueryResultsRoute = (
                   },
                 ],
                 integrationNamespaces: namespacesOrUndefined,
+                ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
               },
               { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )

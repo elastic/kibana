@@ -111,6 +111,9 @@ export const updateActionTagsRoute = (
           const index = actionsIndexExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX;
 
           const spaceFilter = buildSpaceIdFilter(spaceId);
+          const scheduledSpaceFilter = buildSpaceIdFilter(spaceId, {
+            matchMissingSpaceId: !osqueryContext.cpsEnabled,
+          });
 
           const searchResult = await internalEsClient.search({
             index,
@@ -136,7 +139,7 @@ export const updateActionTagsRoute = (
               size: 0,
               query: {
                 bool: {
-                  filter: [{ term: { schedule_id: request.params.id } }, spaceFilter],
+                  filter: [{ term: { schedule_id: request.params.id } }, scheduledSpaceFilter],
                 },
               },
             });

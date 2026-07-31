@@ -375,6 +375,23 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
     const legacyResponse = { rawResponse: { hits: { total: 3, hits: [{ _id: 'legacy' }] } } };
 
+    it('routes actionResults reads to the enhanced strategy when CPS is enabled', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        actionsIndexExists: true,
+        newDataStreamIndexExists: true,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await lastValueFrom(
+        provider.search(actionResultsRequest, {} as never, { request: {} } as never)
+      );
+
+      expect(getSearchStrategy).toHaveBeenCalled();
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
     it('prefers the new data-stream response when it returns hits', async () => {
       const { provider, searchMock } = setup({ newDataStreamIndexExists: true });
       searchMock
@@ -402,6 +419,37 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       )) as ActionResultsStrategyResponse;
 
       expect(searchMock).toHaveBeenCalledTimes(2);
+      expect(response.edges).toEqual([{ _id: 'legacy' }]);
+    });
+
+    it('queries the new data stream when CPS is enabled even if the origin index is absent', async () => {
+      const { provider, searchMock } = setup({ cpsEnabled: true, newDataStreamIndexExists: false });
+      searchMock
+        .mockReturnValueOnce(of({ rawResponse: { hits: { total: 0, hits: [] } } }))
+        .mockReturnValueOnce(
+          of({ rawResponse: { hits: { total: 5, hits: [{ _id: 'data-stream' }] } } })
+        );
+
+      const response = (await lastValueFrom(
+        provider.search(actionResultsRequest, {} as never, { request: {} } as never)
+      )) as ActionResultsStrategyResponse;
+
+      expect(searchMock).toHaveBeenCalledTimes(2);
+      expect(response.edges).toEqual([{ _id: 'data-stream' }]);
+    });
+
+    it('skips the new data stream when CPS is disabled and the origin index is absent', async () => {
+      const { provider, searchMock } = setup({
+        cpsEnabled: false,
+        newDataStreamIndexExists: false,
+      });
+      searchMock.mockReturnValueOnce(of(legacyResponse));
+
+      const response = (await lastValueFrom(
+        provider.search(actionResultsRequest, {} as never, { request: {} } as never)
+      )) as ActionResultsStrategyResponse;
+
+      expect(searchMock).toHaveBeenCalledTimes(1);
       expect(response.edges).toEqual([{ _id: 'legacy' }]);
     });
   });

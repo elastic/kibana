@@ -222,4 +222,43 @@ describe('processLiveHistory', () => {
     expect(result.sortValuesMap.size).toBe(0);
     expect(mockGetResultCountsForActions).not.toHaveBeenCalled();
   });
+
+  it('passes the scoped ES client to getResultCountsForActions when CPS is enabled', async () => {
+    const mockInternalEsClient = { marker: 'internal' };
+    const mockScopedEsClient = { marker: 'scoped' };
+
+    mockGetResultCountsForActions.mockResolvedValue(
+      new Map([
+        ['query-1', { totalRows: 42, respondedAgents: 2, successfulAgents: 2, errorAgents: 0 }],
+      ])
+    );
+
+    await processLiveHistory({
+      liveHits: [createLiveHit()],
+      osqueryContext: {
+        cpsEnabled: true,
+        getStartServices: jest.fn().mockResolvedValue([
+          {
+            elasticsearch: {
+              client: {
+                asInternalUser: mockInternalEsClient,
+                asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockScopedEsClient }),
+              },
+            },
+          },
+        ]),
+      } as never,
+      request: mockRequest,
+      spaceId: 'default',
+      logger: {} as never,
+    });
+
+    expect(mockGetResultCountsForActions).toHaveBeenCalledWith(
+      mockScopedEsClient,
+      ['query-1'],
+      'default',
+      undefined,
+      false
+    );
+  });
 });

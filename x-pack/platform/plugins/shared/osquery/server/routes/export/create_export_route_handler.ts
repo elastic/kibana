@@ -40,6 +40,11 @@ export interface ExportRouteParams {
   /** Filename prefix (e.g. `osquery-results-{id}` or `osquery-scheduled-results-{id}-{count}`) */
   fileNamePrefix: string;
   /**
+   * When false, default-space export reads match only documents with an explicit
+   * `space_id: default` stamp. Required for URL-supplied scheduled exports under CPS.
+   */
+  matchMissingSpaceId?: boolean;
+  /**
    * ECS mapping from the originating action/saved query. Plumbed into the
    * row-flattener so the export surfaces the same ECS-mapped columns users
    * see in the UI.
@@ -55,7 +60,13 @@ export const createExportRouteHandler =
     response: KibanaResponseFactory,
     params: ExportRouteParams
   ) => {
-    const { baseFilter, metadata: routeMetadata, fileNamePrefix, ecsMapping } = params;
+    const {
+      baseFilter,
+      metadata: routeMetadata,
+      fileNamePrefix,
+      ecsMapping,
+      matchMissingSpaceId,
+    } = params;
     const { format } = request.query;
     const kuery = request.body?.kuery;
     const agentIds = request.body?.agentIds;
@@ -261,6 +272,7 @@ export const createExportRouteHandler =
           ecsMapping,
           integrationNamespaces,
           spaceId,
+          ...(matchMissingSpaceId !== undefined ? { matchMissingSpaceId } : {}),
         },
         formatter,
         metadata: {
