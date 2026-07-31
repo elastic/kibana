@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApiEndpointId } from '../../../common/api_endpoints';
@@ -39,7 +40,9 @@ jest.mock('./endpoint_field', () => ({
 }));
 
 jest.mock('./api_key_field', () => ({
-  ApiKeyField: () => <div data-test-subj="apiKeyFieldStub" />,
+  ApiKeyField: ({ dataTestSubjSuffix = '' }: { dataTestSubjSuffix?: string }) => (
+    <div data-test-subj={`apiKeyFieldStub${dataTestSubjSuffix}`} />
+  ),
 }));
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -70,6 +73,7 @@ describe('ApiEndpoints', () => {
           additionalEndpoints: [],
         },
       ],
+      popoverEndpoints: [],
       isLoading: false,
       isError: false,
     });
@@ -94,6 +98,11 @@ describe('ApiEndpoints', () => {
                 getUrl: jest.fn().mockReturnValue(new Promise<string>(() => {})),
               }),
             },
+          },
+        },
+        http: {
+          staticAssets: {
+            getPluginAssetHref: jest.fn().mockReturnValue('supabase.svg'),
           },
         },
       },
@@ -124,6 +133,7 @@ describe('ApiEndpoints', () => {
           additionalEndpoints: [],
         },
       ],
+      popoverEndpoints: [],
       isLoading: false,
       isError: false,
     });
@@ -159,6 +169,7 @@ describe('ApiEndpoints', () => {
           additionalEndpoints: [],
         },
       ],
+      popoverEndpoints: [],
       isLoading: false,
       isError: false,
     });
@@ -179,7 +190,7 @@ describe('ApiEndpoints', () => {
     ).toHaveAttribute('href', 'https://ela.st/managed-inputs');
   });
 
-  it('renders vendor endpoint fields when the selected endpoint has additional endpoints', () => {
+  it('renders a full vendor row with its own API key field on the OpenTelemetry tab', () => {
     mockUseApiEndpoints.mockReturnValue({
       endpoints: [
         {
@@ -190,38 +201,27 @@ describe('ApiEndpoints', () => {
           usesManagedInput: true,
           additionalEndpoints: [
             {
-              id: 'supabase',
-              label: 'Supabase logs endpoint',
+              id: ApiEndpointId.Supabase,
+              cardTitle: 'Supabase',
+              fieldLabel: 'Supabase logs endpoint',
+              logo: 'supabase' as const,
               url: 'https://otlp.example.com:443/supabase/v1/logs',
-            },
-            {
-              id: 'vercel',
-              label: 'Vercel endpoint',
-              url: 'https://otlp.example.com:443/vercel',
             },
           ],
         },
       ],
+      popoverEndpoints: [],
       isLoading: false,
       isError: false,
     });
 
     renderApiEndpoints();
 
-    expect(screen.getByTestId('endpointFieldStub-supabase')).toHaveTextContent(
-      'https://otlp.example.com:443/supabase/v1/logs'
-    );
     expect(screen.getByTestId('endpointFieldStub-supabase')).toHaveAttribute(
       'data-label',
       'Supabase logs endpoint'
     );
-    expect(screen.getByTestId('endpointFieldStub-vercel')).toHaveTextContent(
-      'https://otlp.example.com:443/vercel'
-    );
-    expect(screen.getByTestId('endpointFieldStub-vercel')).toHaveAttribute(
-      'data-label',
-      'Vercel endpoint'
-    );
+    expect(screen.getByTestId('apiKeyFieldStub-supabase')).toBeInTheDocument();
   });
 
   it('renders no vendor endpoint fields when the selected endpoint has none', () => {
@@ -242,13 +242,17 @@ describe('ApiEndpoints', () => {
           usesManagedInput: true,
           additionalEndpoints: [
             {
-              id: 'supabase',
-              label: 'Supabase logs endpoint',
+              id: ApiEndpointId.Supabase,
+              cardTitle: 'Supabase',
+              fieldLabel: 'Supabase logs endpoint',
+              logo: 'supabase' as const,
               url: 'https://otlp.example.com:443/supabase/v1/logs',
             },
             {
-              id: 'vercel',
-              label: 'Vercel endpoint',
+              id: ApiEndpointId.Vercel,
+              cardTitle: 'Vercel',
+              fieldLabel: 'Vercel endpoint',
+              logo: 'vercel' as const,
               url: 'https://otlp.example.com:443/vercel',
             },
           ],
@@ -262,6 +266,7 @@ describe('ApiEndpoints', () => {
           additionalEndpoints: [],
         },
       ],
+      popoverEndpoints: [],
       isLoading: false,
       isError: false,
     });
@@ -274,5 +279,56 @@ describe('ApiEndpoints', () => {
 
     expect(screen.queryByTestId('endpointFieldStub-supabase')).not.toBeInTheDocument();
     expect(screen.queryByTestId('endpointFieldStub-vercel')).not.toBeInTheDocument();
+  });
+  it('hides the More button when no popover endpoints resolve', () => {
+    renderApiEndpoints();
+
+    expect(
+      screen.queryByTestId('observabilityOnboardingMoreEndpointsButton')
+    ).not.toBeInTheDocument();
+  });
+
+  it('opens the Other endpoints popover with vendor cards', async () => {
+    mockUseApiEndpoints.mockReturnValue({
+      endpoints: [
+        {
+          id: ApiEndpointId.OpenTelemetry,
+          label: 'OpenTelemetry',
+          logo: 'opentelemetry',
+          url: 'https://otlp.example.com:443',
+          usesManagedInput: true,
+          additionalEndpoints: [],
+        },
+      ],
+      popoverEndpoints: [
+        {
+          id: ApiEndpointId.Supabase,
+          cardTitle: 'Supabase',
+          fieldLabel: 'Supabase logs endpoint',
+          logo: 'supabase' as const,
+          url: 'https://otlp.example.com:443/supabase/v1/logs',
+        },
+        {
+          id: ApiEndpointId.Vercel,
+          cardTitle: 'Vercel',
+          fieldLabel: 'Vercel endpoint',
+          logo: 'vercel' as const,
+          url: 'https://otlp.example.com:443/vercel',
+        },
+      ],
+      isLoading: false,
+      isError: false,
+    });
+
+    renderApiEndpoints();
+
+    fireEvent.click(screen.getByTestId('observabilityOnboardingMoreEndpointsButton'));
+    await waitForEuiPopoverOpen();
+
+    expect(screen.getByText('Other endpoints')).toBeInTheDocument();
+    expect(screen.getByTestId('endpointFieldStub-supabase-popover')).toBeInTheDocument();
+    expect(screen.getByTestId('endpointFieldStub-vercel-popover')).toBeInTheDocument();
+    expect(screen.getByTestId('apiKeyFieldStub-supabase-popover')).toBeInTheDocument();
+    expect(screen.getByTestId('apiKeyFieldStub-vercel-popover')).toBeInTheDocument();
   });
 });

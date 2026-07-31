@@ -52,4 +52,51 @@ describe('ApiKeyField', () => {
 
     expect(screen.getByRole('button', { name: /show password/i })).toBeInTheDocument();
   });
+
+  it('renders default test subjects without a suffix', () => {
+    render(<ApiKeyField {...defaultProps} />);
+
+    expect(screen.getByTestId('observabilityOnboardingApiEndpointApiKeyValue')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton')
+    ).toBeInTheDocument();
+  });
+
+  it('suffixes test subjects and applies a custom aria label', () => {
+    render(
+      <ApiKeyField
+        {...defaultProps}
+        dataTestSubjSuffix="-supabase"
+        ariaLabel="Supabase API key"
+        encodedApiKey="encoded-key"
+      />
+    );
+
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointApiKeyValue-supabase')
+    ).toHaveAttribute('aria-label', 'Supabase API key');
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointApiKeyCopyButton-supabase')
+    ).toHaveAttribute('aria-label', 'Copy Supabase API key to clipboard');
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton-supabase')
+    ).toBeInTheDocument();
+  });
+
+  it('names the copy button after the default label when no aria label is given', () => {
+    render(<ApiKeyField {...defaultProps} encodedApiKey="encoded-key" />);
+
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointApiKeyCopyButton')
+    ).toHaveAttribute('aria-label', 'Copy API key to clipboard');
+  });
+
+  it('disables only the create button when isDisabled is set', () => {
+    render(<ApiKeyField {...defaultProps} isDisabled={true} />);
+
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton')
+    ).toBeDisabled();
+    expect(screen.queryByText(/don't have permission/)).not.toBeInTheDocument();
+  });
 });

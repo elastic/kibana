@@ -41,6 +41,25 @@ export interface ApiEndpointApiKeyResponse {
 export const hasManagedElasticsearchBulkEndpoint = (managedOtlpServiceUrl?: string): boolean =>
   Boolean(managedOtlpServiceUrl?.trim());
 
+const VENDOR_ENDPOINT_IDS: readonly ApiEndpointId[] = [
+  ApiEndpointId.Supabase,
+  ApiEndpointId.Vercel,
+];
+
+// Vendor paths only exist on the managed OTLP collector, so a key for them is
+// useless anywhere else. The UI never offers creation in that state, this
+// guard makes the API honest anyway.
+export function ensureVendorEndpointAvailable(
+  id: ApiEndpointId,
+  isManagedOtlpServiceAvailable: boolean
+): void {
+  if (VENDOR_ENDPOINT_IDS.includes(id) && !isManagedOtlpServiceAvailable) {
+    throw Boom.badRequest(
+      `The ${id} endpoint requires the managed OTLP service, which is not available on this deployment.`
+    );
+  }
+}
+
 function hasRequiredPrivileges(
   id: ApiEndpointId,
   {
@@ -64,6 +83,9 @@ function hasRequiredPrivileges(
       return isManagedElasticsearchBulkEndpointAvailable
         ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
         : hasLogMonitoringPrivileges(esClient, true);
+    case ApiEndpointId.Supabase:
+    case ApiEndpointId.Vercel:
+      return hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] });
   }
 }
 
@@ -104,6 +126,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
         [ApiEndpointId.Prometheus]: null,
         [ApiEndpointId.OpenTelemetry]: null,
         [ApiEndpointId.Elasticsearch]: null,
+        [ApiEndpointId.Supabase]: null,
+        [ApiEndpointId.Vercel]: null,
       }),
     }),
   }),
@@ -139,6 +163,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       managedOtlpPrwEndpointEnabled,
       isManagedElasticsearchBulkEndpointAvailable,
     };
+
+    ensureVendorEndpointAvailable(id, isManagedOtlpServiceAvailable);
 
     const hasPrivileges = await hasRequiredPrivileges(
       id,
