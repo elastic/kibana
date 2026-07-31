@@ -43,7 +43,7 @@ export const ruleTemplateResponseSchema = schema.object(
       schema.string({
         meta: {
           description:
-            'The alerting engine this template targets (for example, "v1" or"v2"). Omit for the default engine.',
+            'The alerting engine this template targets (for example, "v1" or "v2"). Omit for the default engine.',
         },
       })
     ),
