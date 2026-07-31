@@ -33,6 +33,7 @@ export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
+export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/tools/features_tool';
 export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
