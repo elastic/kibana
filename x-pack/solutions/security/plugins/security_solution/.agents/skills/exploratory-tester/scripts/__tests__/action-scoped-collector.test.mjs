@@ -280,6 +280,109 @@ console.log(
   );
 }
 
+console.log(
+  '\n── Own-path-message matching is count-based, not presence-based: query variants must not share one credit unboundedly ──'
+);
+{
+  // P2 review finding: a hand-authored message like "500 @ /api/data" never
+  // includes the query string (pathnameOf strips it), so a presence test
+  // (`consoleText.includes(path)`) would let ONE such message wrongly cover
+  // every query-variant request to that path — two independent requests,
+  // /api/data?page=1 and /api/data?page=2, are not the same request just
+  // because they share a pathname.
+  const eventFor = (query, requestedAt) => ({
+    method: 'GET',
+    url: `https://kibana.example/api/data?page=${query}`,
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt,
+    respondedAt: requestedAt + 50,
+    resourceType: 'fetch',
+  });
+
+  const oneMessage = reduceAction({
+    network: [eventFor(1, 0), eventFor(2, 100)],
+    console: [{ type: 'error', text: '500 @ /api/data' }],
+  });
+  const oneMessageSilent = oneMessage.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    oneMessageSilent.length === 1,
+    'two query-variant 500s + ONE path-only own-message → exactly one is still reported, not zero',
+    JSON.stringify(oneMessage.level1)
+  );
+  assert(
+    !!oneMessageSilent[0] && oneMessageSilent[0].url.includes('page=2'),
+    'the second (later-in-time) query variant is the one still reported — the first claims the sole own-message credit',
+    JSON.stringify(oneMessageSilent)
+  );
+
+  const twoMessages = reduceAction({
+    network: [eventFor(1, 0), eventFor(2, 100)],
+    console: [
+      { type: 'error', text: '500 @ /api/data' },
+      { type: 'error', text: '500 @ /api/data' },
+    ],
+  });
+  assert(
+    !twoMessages.level1.some((i) => i.type === 'silent_server_error'),
+    'two query-variant 500s + TWO path-only own-messages → both are covered, zero silent_server_error findings',
+    JSON.stringify(twoMessages.level1)
+  );
+}
+
+console.log(
+  '\n── Pinning a known, documented limitation: an abandoned request\'s native message can still cover an unrelated real 500 ──'
+);
+{
+  // P2 review finding, already called out in the code comment above the
+  // native-credit pool but previously untested: an abandonedByNavigation
+  // event never consumes its own credit (excluded from `qualifying`
+  // entirely), so if the browser genuinely logged a native message for it,
+  // that message stays in the shared pool and can be wrongly claimed by a
+  // completely unrelated real 500 of the same status. This is pinned here
+  // as documented, current (imperfect) behavior — not a regression to fix
+  // silently — because there is no request<->message ID link in the data to
+  // attribute the native message to the abandoned request specifically.
+  const abandonedEvent = {
+    method: 'GET',
+    url: 'https://kibana.example/api/abandoned',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 0,
+    respondedAt: null,
+    abandonedByNavigation: true,
+    resourceType: 'fetch',
+  };
+  const unrelatedRealEvent = {
+    method: 'GET',
+    url: 'https://kibana.example/api/unrelated',
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt: 100,
+    respondedAt: 150,
+    resourceType: 'fetch',
+  };
+  const r = reduceAction({
+    network: [abandonedEvent, unrelatedRealEvent],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    r.level3.some((i) => i.type === 'request_abandoned_by_navigation'),
+    'the abandoned request still gets its own Level 3 finding, independent of the credit pool',
+    JSON.stringify(r)
+  );
+  assert(
+    !r.level1.some((i) => i.type === 'silent_server_error'),
+    "documented limitation: the unrelated real 500 is wrongly covered by the abandoned request's leftover native-message credit — pinned, not silently expected to change",
+    JSON.stringify(r.level1)
+  );
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // PENDING / STUCK / ABANDONED
 // ══════════════════════════════════════════════════════════════════════════

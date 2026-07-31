@@ -338,3 +338,45 @@ Run immediately before this commit, from a clean checkout of this branch:
   time — deliberately not hardcoded here a second time, since a stale count in prose is exactly
   what this section exists to stop happening again. Run
   `python3 -m unittest test_session_resources -v` to get the current number directly.
+
+## Third follow-up pass: fixes from re-review of the second follow-up commit
+
+A third independent review found that the two-phase fix from the second pass still had one
+presence-vs-count asymmetry left (applied to native messages, not yet to own-path messages), plus
+an ordering inconsistency in the `gh issue list` gate added in that same pass. Both fixed here:
+
+- **Fixed (P2) — own-path-message matching was presence-based, not count-based:** phase 1 of the
+  two-phase fix (`surfacedByOwnMessage`) checked `consoleText.includes(path)`, which is a presence
+  test against a *pathname* — it has no way to distinguish `/api/data?page=1` from
+  `/api/data?page=2`, since a hand-authored message like `"500 @ /api/data"` never includes the
+  query string. One such message could therefore wrongly cover **every** query-variant request to
+  that path, not just the one it actually described — reproduced directly (two query-variant 500s,
+  one message, zero findings; correct answer is one finding). Fixed by making phase 1 a
+  consumable-credit pool too, keyed by exact `(status, path)`, counting actual message occurrences
+  instead of testing presence — the same fix already applied to the native-message pool in the
+  second pass, now applied consistently to both. Two new regression tests (one message covers
+  exactly one of two variants; two messages cover both).
+- **Also pinned, not changed — a known limitation, now tested instead of only commented:** an
+  `abandonedByNavigation` request's native message (if the browser genuinely logged one) is never
+  claimed by that request itself (excluded from `qualifying` entirely) and can be wrongly claimed
+  by an unrelated real 500 of the same status from the shared credit pool. This was already
+  documented in a code comment after the second pass; added a regression test that pins it as
+  current, accepted, imperfect behavior — there is no request↔console-message ID link in the
+  underlying data to resolve this without new instrumentation, which is out of scope for an
+  experimental, shadow-only feature.
+- **Fixed (P2) — the `gh issue list` untrusted-content warning was placed after the commands, not
+  before:** every other gate in this skill (Step 0b's GitHub mode, `0-github-input.md`,
+  `0-guided-intake.md`'s draft-flows section, `0-github-security-rules.md`) puts the hard-stop
+  *before* the `gh` command specifically so an agent processing the file sequentially reads the
+  rule before it could see attacker-controlled content. Step 0d's warning (added in the second
+  pass) broke that pattern by appearing after the commands — worse, the test added alongside it
+  explicitly asserted that ordering as correct. Moved the warning before the commands and inverted
+  the test assertion to require the correct order.
+- **Not fixed — reiterated as pre-existing (P3):** the CCS restore/lock Python tests remain
+  timing-sensitive under load; this review's own run hit two failures and a timeout on an
+  unrelated file, consistent with every prior pass. Still out of scope for this PR; still worth its
+  own PR to make those tests load-independent.
+
+Verified after this pass: `action-scoped-collector.test.mjs` 95/95 (90 + 2 query-variant + 1
+abandoned-message regression tests), `action-scoped-collector-bridge.test.mjs` 52/52,
+`equivalence.test.mjs` 77/77, `test_session_resources.py` 131/131.
