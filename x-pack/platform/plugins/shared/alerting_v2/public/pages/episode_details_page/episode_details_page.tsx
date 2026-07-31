@@ -42,10 +42,10 @@ import { AlertEpisodeTimelineHeatmapsSection } from '@kbn/alerting-v2-episodes-u
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
 import { AlertEpisodeRunbookSection } from '@kbn/alerting-v2-episodes-ui/components/details/runbook_section';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-episodes-ui/utils/episode_grouping_data';
 import { css } from '@emotion/react';
 import { useHistory, useParams } from 'react-router-dom';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { z } from '@kbn/zod/v4';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
@@ -65,14 +65,6 @@ import {
 import { EpisodeTimelineTab } from './components/episode_timeline_tab';
 import { EpisodeActionPolicyHistoryTab } from './components/episode_action_policy_history_tab';
 import * as i18n from './translations';
-
-/** Pulls `data.rule_name` from the episode_data JSON blob when present. */
-const episodeDataRuleNameSchema = z
-  .string()
-  .min(1)
-  .transform((s) => JSON.parse(s) as unknown)
-  .pipe(z.object({ rule_name: z.string() }).passthrough())
-  .transform((o) => o.rule_name);
 
 interface EpisodeRouteParams {
   episodeId: string;
@@ -135,10 +127,9 @@ export function EpisodeDetailsPage() {
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
-  const episodeDataRuleNameResult = episodeDataRuleNameSchema.safeParse(episode?.episode_data);
-  const episodeDataRuleName = episodeDataRuleNameResult.success
-    ? episodeDataRuleNameResult.data
-    : undefined;
+  const episodeData = parseEpisodeDataJson(episode?.episode_data);
+  const episodeDataRuleName =
+    typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
