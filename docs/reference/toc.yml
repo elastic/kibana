@@ -79,6 +79,7 @@ toc:
           - file: connectors-kibana/abuseipdb-action-type.md
           - file: connectors-kibana/alienvault-otx-action-type.md
           - file: connectors-kibana/amazon-s3-action-type.md
+          - file: connectors-kibana/ansible-controller-action-type.md
           - file: connectors-kibana/argocd-action-type.md
           - file: connectors-kibana/azure-blob-action-type.md
           - file: connectors-kibana/bigquery-action-type.md
@@ -102,6 +103,7 @@ toc:
           - file: connectors-kibana/kubernetes-action-type.md
           - file: connectors-kibana/microsoft-teams-action-type.md
           - file: connectors-kibana/monday-com-action-type.md
+          - file: connectors-kibana/new-relic-action-type.md
           - file: connectors-kibana/notion-action-type.md
           - file: connectors-kibana/one-drive-action-type.md
           - file: connectors-kibana/one-password-action-type.md
