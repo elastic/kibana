@@ -2210,6 +2210,11 @@ components:
           type: boolean
           default: false
           example: true
+        preventCrossProjectSearch:
+          description: Pin the L1 rollup transform to the local/origin project only, preventing flat-world (cross-linked-project) reads. Only applies on serverless. Default is false (flat-world).
+          type: boolean
+          default: false
+          example: true
     summary_status:
       title: summary status
       type: string
