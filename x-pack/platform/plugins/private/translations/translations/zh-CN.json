@@ -51698,8 +51698,6 @@
     "xpack.slo.sloEdit.calendarTimeWindow.monthly": "每月",
     "xpack.slo.sloEdit.calendarTimeWindow.weekly": "每周",
     "xpack.slo.sloEdit.cancelButton": "取消",
-    "xpack.slo.sloEdit.cpsReadiness.body": "SLO 当前的范围限定在此项目内的数据。跨项目搜索支持即将推出",
-    "xpack.slo.sloEdit.cpsReadiness.title": "跨项目搜索 SLOs 即将推出",
     "xpack.slo.sloEdit.createSloButton": "创建 SLO",
     "xpack.slo.sloEdit.customKql.dataViewSelection.label": "选择数据视图",
     "xpack.slo.sloEdit.customKql.indexSelection.label": "索引",
