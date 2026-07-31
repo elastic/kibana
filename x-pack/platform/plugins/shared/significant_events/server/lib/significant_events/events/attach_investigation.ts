@@ -81,6 +81,7 @@ export const attachInvestigationToEvent = async ({
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     investigations,
+    workflow_execution_id: investigation.workflow_execution_id,
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });

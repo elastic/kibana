@@ -84,6 +84,7 @@ describe('attachInvestigationToEvent', () => {
     expect(written.investigations).toEqual([investigation]);
     expect(written.previous_event_uuid).toBe('event-1');
     expect(written.event_uuid).not.toBe('event-1');
+    expect(written.workflow_execution_id).toBe(investigation.workflow_execution_id);
   });
 
   it('replaces a pending entry with a terminal one, preserving started_at', async () => {
