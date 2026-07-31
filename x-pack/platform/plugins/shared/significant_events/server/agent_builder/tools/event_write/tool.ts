@@ -64,9 +64,24 @@ export const eventsWriteItemSchema = significantEventSchema
     message: 'dedup_window and event_id are mutually exclusive',
   });
 
-export const eventsWriteSchema = z.object({
-  items: z.array(eventsWriteItemSchema).min(1).max(MAX_BULK_WRITE_ITEMS),
-});
+export const eventsWriteSchema = z
+  .object({
+    items: z
+      .array(eventsWriteItemSchema)
+      .min(1)
+      .max(MAX_BULK_WRITE_ITEMS)
+      .describe(
+        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
+          defaultMessage:
+            'The significant event items to write. It must contain at least one item and no more than the maximum allowed.',
+        })
+      ),
+  })
+  .describe(
+    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema', {
+      defaultMessage: 'Bulk-write a batch of significant events.',
+    })
+  );
 
 export function createEventsWriteTool({
   getScopedClients,

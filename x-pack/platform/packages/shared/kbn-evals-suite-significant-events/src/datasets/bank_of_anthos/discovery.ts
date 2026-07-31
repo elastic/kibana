@@ -45,7 +45,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<SignificantEvent> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether transactionhistory cannot obtain SQL connections to the postgresql backend. Expected if true: SQLState 08001 connection-failure errors on the JDBC path. Found: 1 row at 14:34:19Z — SQL Error 0, SQLState: 08001 (connection refused) from transactionhistory. Verdict: confirms — the database backend is unreachable, breaking transaction-history reads.',
+        "'SQL Error 0, SQLState: 08001 (connection refused) from transactionhistory'. Verdict: confirms — database backend unreachable, breaking transaction-history reads.",
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "SQLState: 08001") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -83,7 +83,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<SignificantEvent> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the frontend is actively failing to reach balancereader with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to balancereader:8080. Found: 1 row at 14:33:35Z — connection refused (Errno 111) to balancereader:8080 on the /balances path. Verdict: confirms — earliest confirmed failure in the cascade; users cannot view account balances.',
+        "'connection refused (Errno 111) to balancereader:8080 on /balances'. Verdict: confirms — earliest confirmed failure in the cascade; users cannot view account balances.",
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error getting balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -121,7 +121,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<SignificantEvent> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        "Testing: whether ledgerwriter is blocked from committing transactions because it cannot retrieve account balances from balancereader. Expected if true: ERROR from LedgerWriterController 'Failed to retrieve account balance'. Found: 1 row at 14:34:29Z — ledgerwriter logging 'Failed to retrieve account balance'. Verdict: confirms — ledgerwriter cannot validate balances via balancereader, so payment and deposit submissions fail.",
+        "'Failed to retrieve account balance'. Verdict: confirms — ledgerwriter cannot validate balances via balancereader, so payment and deposit submissions fail.",
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Failed to retrieve account balance") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',
@@ -159,7 +159,7 @@ const LEDGER_DB_CASCADE_DISCOVERY: Partial<SignificantEvent> = {
       stream_name: 'logs',
       confirmed: true,
       description:
-        'Testing: whether the frontend is failing to submit payment transactions to ledgerwriter with connection-refused errors. Expected if true: HTTPConnectionPool connection refused to ledgerwriter:8080. Found: 1 row at 14:33:38Z — connection refused (Errno 111) to ledgerwriter:8080 on the /transactions path. Verdict: confirms — payment submissions are failing; users cannot complete payment transactions.',
+        "'connection refused (Errno 111) to ledgerwriter:8080 on /transactions'. Verdict: confirms — payment submissions failing; users cannot complete payment transactions.",
       evidence: {
         esql_query:
           'FROM logs | WHERE @timestamp >= "2026-06-25T14:30:00Z" AND @timestamp <= NOW() | WHERE MATCH_PHRASE(body.text, "Error submitting payment") | KEEP @timestamp, body.text | SORT @timestamp ASC | LIMIT 1',

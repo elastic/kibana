@@ -128,12 +128,12 @@ Never retry completed checks or run a third wave. Note any checks skipped becaus
 
 **One `signals` entry per rule — never two**, regardless of how many calls you made for it. When a contradiction follow-up ran, the single entry narrates both attempts and its `evidence.esql_query`/`evidence.result` reflect the resolving (second) call. Each signal entry combines the detection metadata and the query result into one object. See `<output_format>` for the exact format.
 
-1. **Write the Signal Verdict** using the format `"<rule_name>: <evidence>. Verdict: <verdict> — <one clause>."`. The **evidence content** (the upstream target or error signature extracted from the row) is the primary signal the grouping step uses to decide whether rules belong to the same incident — name it precisely. `feature.name`, `feature.description`, `feature.meta`, `feature.properties`, and `feature.evidence[]` provide useful information to enrich the description; use only what helps explain the problem. Keep descriptions under 150 chars. Concretely:
-   - **Confirmed**: `"DB Connection Failure: 'dial tcp db-primary:5432 connection refused'. Verdict: confirms — all db-dependent requests blocked."`
-   - **Inconclusive (signature mismatch)**: `"Metrics Export Timeout: 'upstream API error' (not a metrics export failure). Verdict: inconclusive."`
-   - **Inconclusive (off-topic match)**: `"<rule_name>: row matched via substring but describes a different service/failure. Verdict: inconclusive."`
-   - **Refutes (healthy rows)**: `"<rule_name>: healthy transaction log, no error signature. Verdict: refutes."`
-   - **Refutes (no match)**: `"<rule_name>: no match. Verdict: refutes."`
+1. **Write the Signal Verdict** using the compact **Testing / Found / Why / Verdict** format (omit `Expected if true` — keep under 280 chars). The **Found** clause names the row signature and failing target; the **Why** clause names the cross-service causal link and is the primary signal the grouping step uses to decide whether rules belong to the same incident — never drop Why on a `confirms` when an upstream or dependency is visible in the row. `feature.name`, `feature.description`, `feature.meta`, `feature.properties`, and `feature.evidence[]` may enrich Testing or Why; use only what helps explain the problem. Concretely:
+   - **Confirmed**: `"Testing: api-service failing to reach db-primary. Found: dial tcp db-primary:5432 connection refused. Why: api-service cannot reach db-primary — nothing accepting on :5432. Verdict: confirms — db-dependent requests blocked."`
+   - **Inconclusive (signature mismatch)**: `"Testing: metrics export failing. Found: upstream API error, not a metrics export failure. Verdict: inconclusive."`
+   - **Inconclusive (off-topic match)**: `"Testing: <KI hypothesis>. Found: different service/failure; substring match only. Verdict: inconclusive."`
+   - **Refutes (healthy rows)**: `"Testing: elevated error rate. Found: healthy transaction log, no error signature. Verdict: refutes."`
+   - **Refutes (no match)**: `"no match. Verdict: refutes."`
 
    `result: found` means rows were returned — it does **not** mean the hypothesis is confirmed. Healthy or off-topic rows require `refutes` or `inconclusive` in the Verdict. A query may match a row via keyword substring without the row being on-topic; always verify the row content corroborates the KI's hypothesized service, error type, and mechanism before writing `confirms`. The calling agent sets `confirmed: false` when verified evidence does not support its final event grouping.
 

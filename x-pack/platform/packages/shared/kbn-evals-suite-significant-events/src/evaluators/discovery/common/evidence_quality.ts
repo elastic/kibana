@@ -27,21 +27,21 @@ const EVIDENCE_DESCRIPTION_SHARED_CRITERIA: EvaluationCriterion[] = [
 const EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_hypothesis_test',
-    text: 'Every signal where the agent set `confirmed` to true or false must document its verification using the four-part structure: "Testing: … Expected if true: … Found: … Verdict: …". Signals without a confirmed value were not verified and are exempt.',
+    text: 'Every signal where the agent set `confirmed` to true or false must use the compact verification format: "Testing: [hypothesis]. Found: [signature/target from row]. Why: [causal link — failing upstream and mechanism when confirms or inconclusive]. Verdict: confirms | refutes | inconclusive — [impact]." Omit Why only for refutes with no failure signature. "no match. Verdict: refutes." is acceptable when the query returned zero rows. Signals without a confirmed value were not verified and are exempt.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,
 ];
 
 /**
- * Judge-authored descriptions follow the plain-sentence contract from the judge instructions
- * (`<communication>`); carried entries keep whatever format they arrived with, including the
- * legacy four-part template still written by the discovery agent.
+ * Judge-authored descriptions follow the compact re-ran/Found/Why/Verdict contract from the judge
+ * instructions (`<communication>`); carried entries keep whatever format they arrived with,
+ * including the discovery-agent Testing/Found/Why/Verdict template.
  */
 export const JUDGE_EVIDENCE_DESCRIPTION_CRITERIA: EvaluationCriterion[] = [
   {
     id: 'evidence_description_is_grounded_check',
-    text: 'Every signal the judge verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must describe the check in one to three plain sentences covering what was checked, what the data showed, and what that means for the event. The four-part template ("Testing: … Expected if true: … Found: … Verdict: …") is not acceptable for these judge-authored entries. Entries carried forward unchanged from the input (older `collected_at`) are acceptable in any format, including the four-part template. Signals without a confirmed value were not verified and are exempt.',
+    text: 'Every signal the judge verified this cycle (fresh entries — the ones at or near the newest `collected_at` — where it set `confirmed` to true or false) must use: "re-ran at <HH:MMZ> — Found: [signature, target, or endpoint]. Why: [current-state implication]. Verdict: confirms | refutes | inconclusive — [clause]." The discovery-agent Testing/Found/Why/Verdict template is not acceptable for these judge-authored entries. Entries carried forward unchanged from the input (older `collected_at`) are acceptable in any format, including that template. Signals without a confirmed value were not verified and are exempt.',
     score: 1,
   },
   ...EVIDENCE_DESCRIPTION_SHARED_CRITERIA,

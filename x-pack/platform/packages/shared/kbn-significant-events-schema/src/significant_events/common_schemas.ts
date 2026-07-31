@@ -14,6 +14,7 @@ import {
   MAX_TEXT_LENGTH,
   NO_RAW_SENSITIVE_VALUES_RULE,
   MAX_ARRAY_LENGTH,
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
 } from './constants';
 import { detectionSchema } from './detections';
 
@@ -131,12 +132,14 @@ const signalBaseSchema = z.object({
     .describe('Data stream this signal was collected from.'),
   description: z
     .string()
-    .max(MAX_TEXT_LENGTH)
+    .max(MAX_SIGNAL_DESCRIPTION_LENGTH)
     .describe(
       dedent`
-        Human-readable account of what was observed and what it means. Required format for detection signals — do not use alternative shapes: 
-        
-        "Testing: [hypothesis]. Expected if true: [pattern]. Found: [N rows — failing upstream target/endpoint from the row, e.g. service, host:port, or DNS name]. Why: [causal link visible in the row — name the failing upstream and how it is failing, e.g. "api-service cannot reach db-primary:5432 — connection refused"; do not infer beyond what the row shows]. Verdict: confirms | refutes | inconclusive — who/what is blocked."
+        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Testing and Found before omitting Why on confirms.
+
+        "Testing: [short hypothesis]. Found: [signature, target, or endpoint from the row]. Why: [causal link — who fails to reach whom and how; name the failing upstream when visible in the row]. Verdict: confirms | refutes | inconclusive — [who/what is blocked or unaffected]."
+
+        Omit Why only for refutes with no failure signature, or "no match. Verdict: refutes." when the query returned zero rows.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),

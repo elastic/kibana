@@ -6,6 +6,7 @@
  */
 
 import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
@@ -21,10 +22,6 @@ export const EVENT_SEARCH_FULL_MAX_PER_PAGE = 10;
 // via `total_signals`/`signals_truncated` so callers know to re-query with view: 'full' and
 // event_ids: [event_id] for the complete list.
 export const MAX_COMPACT_EVENT_SIGNALS = 10;
-// A single signal's `description` can be as long as MAX_TEXT_LENGTH (10,000 chars), so capping
-// signal *count* alone doesn't bound payload size — a handful of long descriptions can still
-// blow up the prompt. Compact view truncates each description to this length.
-export const MAX_COMPACT_SIGNAL_DESCRIPTION_LENGTH = 500;
 
 export type EventSearchView = 'compact' | 'full';
 
@@ -99,8 +96,8 @@ const byRecencyThenConfirmed = (a: Signal, b: Signal): number => {
 };
 
 const truncateCompactDescription = (description: string | undefined): string | undefined =>
-  description !== undefined && description.length > MAX_COMPACT_SIGNAL_DESCRIPTION_LENGTH
-    ? `${description.slice(0, MAX_COMPACT_SIGNAL_DESCRIPTION_LENGTH)}… [truncated]`
+  description !== undefined && description.length > MAX_SIGNAL_DESCRIPTION_LENGTH
+    ? `${description.slice(0, MAX_SIGNAL_DESCRIPTION_LENGTH)}… [truncated]`
     : description;
 
 // A signal matching the caller's own `rule_uuids`/`stream_names` filter is what the caller
