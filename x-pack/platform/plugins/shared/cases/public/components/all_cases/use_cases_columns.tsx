@@ -147,6 +147,7 @@ export const useCasesColumns = ({
                 data-test-subj="case-table-column-tags"
                 css={getLineClampedCss}
                 gutterSize="xs"
+                tabIndex={0}
               >
                 {tags.map((tag: string, i: number) => (
                   <EuiBadge
@@ -316,7 +317,10 @@ export const useCasesColumns = ({
             if (isAlreadyAttached) {
               return (
                 <EuiToolTip content={i18n.ALREADY_ATTACHED_TOOLTIP}>
-                  <span data-test-subj={`cases-table-row-select-tooltip-${theCase.id}`}>
+                  <span
+                    tabIndex={0}
+                    data-test-subj={`cases-table-row-select-tooltip-${theCase.id}`}
+                  >
                     {selectButton}
                   </span>
                 </EuiToolTip>
