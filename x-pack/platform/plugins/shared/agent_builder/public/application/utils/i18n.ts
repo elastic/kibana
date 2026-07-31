@@ -2625,16 +2625,15 @@ export const labels = {
     createdByElastic: i18n.translate('xpack.agentBuilder.overview.createdByElastic', {
       defaultMessage: 'Elastic',
     }),
-    byAuthor: (author: string) =>
-      i18n.translate('xpack.agentBuilder.overview.byAuthor', {
-        defaultMessage: 'By {author}',
-        values: { author },
-      }),
-    lastUpdatedBy: (author: string) =>
-      i18n.translate('xpack.agentBuilder.overview.lastUpdatedBy', {
-        defaultMessage: 'Last updated by {author}',
-        values: { author },
-      }),
+    createdBy: i18n.translate('xpack.agentBuilder.overview.createdBy', {
+      defaultMessage: 'Created by',
+    }),
+    updatedBy: i18n.translate('xpack.agentBuilder.overview.updatedBy', {
+      defaultMessage: 'Updated by',
+    }),
+    unknown: i18n.translate('xpack.agentBuilder.overview.unknown', {
+      defaultMessage: 'Unknown',
+    }),
     agentId: (id: string) =>
       i18n.translate('xpack.agentBuilder.overview.agentId', {
         defaultMessage: 'ID {id}',

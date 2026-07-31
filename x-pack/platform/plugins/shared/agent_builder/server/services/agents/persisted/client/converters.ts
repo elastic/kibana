@@ -12,6 +12,7 @@ import {
   chatAgentTypeId,
   getDefaultAgentAccessControl,
 } from '@kbn/agent-builder-common';
+import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
 import type { PersistedAgentDefinition } from '../types';
@@ -108,13 +109,13 @@ export const updateRequestToEs = ({
   currentProps,
   update,
   updateDate,
-  user,
+  user = { username: SYSTEM_USER_ID },
 }: {
   agentId: string;
   currentProps: AgentProperties;
   update: AgentUpdateRequest;
   updateDate: Date;
-  user: UserIdAndName;
+  user?: UserIdAndName;
 }): AgentProperties => {
   const currentConfig = currentProps.configuration ?? currentProps.config;
   const { configuration, access_control, ...restUpdate } = update;

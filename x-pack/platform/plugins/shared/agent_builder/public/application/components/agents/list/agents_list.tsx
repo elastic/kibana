@@ -47,10 +47,18 @@ const renderOwnerCell = (username?: string, date?: string) => {
   const label = resolveOwnerLabel(username);
   const relativeDate = date ? moment(date).fromNow() : undefined;
 
-  if (!label) {
+  if (!label && !relativeDate) {
     return (
       <EuiText size="s" color="subdued">
         —
+      </EuiText>
+    );
+  }
+
+  if (!label) {
+    return (
+      <EuiText size="s" color="subdued">
+        {relativeDate}
       </EuiText>
     );
   }
@@ -64,7 +72,7 @@ const renderOwnerCell = (username?: string, date?: string) => {
       <EuiFlexItem grow={false}>{label}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={moment(date).format('LL LT')}>
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" tabIndex={0}>
             {relativeDate}
           </EuiText>
         </EuiToolTip>
@@ -83,7 +91,7 @@ const columnNames = {
     defaultMessage: 'Created by',
   }),
   lastUpdatedBy: i18n.translate('xpack.agentBuilder.agents.lastUpdatedByColumn', {
-    defaultMessage: 'Last updated by',
+    defaultMessage: 'Last updated',
   }),
 };
 
@@ -195,7 +203,7 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentCreatedBy: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
-      width: '15%',
+      width: '12%',
       field: 'created_by',
       name: columnNames.createdBy,
       render: (
@@ -206,7 +214,7 @@ export const AgentsList: React.FC = () => {
     };
 
     const agentLastUpdatedBy: EuiTableFieldDataColumnType<AgentDefinitionWithPermissions> = {
-      width: '15%',
+      width: '12%',
       field: 'updated_by',
       name: columnNames.lastUpdatedBy,
       render: (
