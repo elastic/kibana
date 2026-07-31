@@ -26,6 +26,7 @@ This is **especially** important if your route does any of the following:
     - **AND rules** using `allRequired`: Requires all specified privileges for access.
     - **OR rules** using `anyRequired`: Allows access if any one of the specified privileges is met.
     - **Complex Nested Rules**: Combine both `allRequired` and `anyRequired` for advanced access rules.
+  - Use `extendedPrivileges` to declare optional privileges that are checked and surfaced in `request.authzResult` but never enforced.
 2. **Explicit Opt-out**: Provide a reason for opting out of authorization to maintain transparency.
 3. **Versioned Routes**: Define security configurations for different versions of the same route.
 4. **Improved Documentation with OpenAPI (OAS)**: Automatically generated OAS documentation with the required privileges for each route.
@@ -311,6 +312,32 @@ router.get({
   // }
 });
 ```
+
+## Optional privileges with `extendedPrivileges`
+Sometimes one privilege **gates access** to a route while another privilege only **extends** what the route returns or allows. Declare the gate in `requiredPrivileges` and the optional privileges in `extendedPrivileges`. Extended privileges are checked alongside the required ones (in the same privileges check) and surfaced in `request.authzResult`, but a missing extended privilege never produces a `403`.
+
+```ts
+router.get({
+  path: '/api/path',
+  security: {
+    authz: {
+      requiredPrivileges: ['read_entity'],
+      extendedPrivileges: ['read_entity_details'],
+    },
+  },
+  ...
+}, (context, request, response) => {
+  // `read_entity` is guaranteed here — the route would have returned a 403 otherwise.
+  const includeDetails = request.authzResult?.read_entity_details === true;
+  return response.ok({ body: getEntity({ includeDetails }) });
+});
+```
+
+A few rules are enforced at route registration:
+- When authz is enabled, `requiredPrivileges` is required by the schema — a route cannot rely on `extendedPrivileges` alone (optional privileges never grant access).
+- `extendedPrivileges` is a flat list of privilege name strings; privilege sets (`anyRequired` / `allRequired`) are not supported.
+- `extendedPrivileges` cannot overlap with `requiredPrivileges` (including privileges nested in `allRequired`/`anyRequired`).
+- `ReservedPrivilegesSet.superuser` and `ReservedPrivilegesSet.operator` are not allowed in `extendedPrivileges`.
 
 ## OpenAPI specification (OAS) documentation
 Based on the security configuration defined in routes, OAS documentation will automatically generate and include description about the required privileges. 
