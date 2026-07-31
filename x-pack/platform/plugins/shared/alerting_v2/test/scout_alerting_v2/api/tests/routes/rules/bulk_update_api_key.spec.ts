@@ -23,12 +23,10 @@ apiTest.describe('Bulk update rule API key by IDs API', { tag: '@local-stateful-
   let writerCredentials: RoleApiCredentials;
   let writerHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ requestAuth }) => {
+  apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
     writerCredentials = await requestAuth.getApiKeyForCustomRole(ALERTING_V2_RULES_ALL_ROLE);
     writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
-  });
 
-  apiTest.beforeEach(async ({ apiServices }) => {
     await apiServices.alertingV2.rules.cleanUp();
   });
 
