@@ -70,7 +70,6 @@ steps:
     create-conversation: true
     public-conversation: true
     with:
-      timeout: 1800s
       # Tag the agent execution with the workflow execution id so callers that already know
       # it (e.g. the UI, or the significant event this investigation is attached to) can look
       # up the agent execution's (auto-generated) id via findExecutions and follow its live
@@ -178,7 +177,6 @@ steps:
     aggregate-by: 'significant_events'
     create-conversation: false
     with:
-      timeout: 120s
       message: |
         Call load_skill with path skills/platform/streams/significant-events-memory to get the memory tools.
 
