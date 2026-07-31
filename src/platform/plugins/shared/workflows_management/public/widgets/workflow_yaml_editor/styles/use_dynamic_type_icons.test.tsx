@@ -63,18 +63,22 @@ describe('useDynamicTypeIcons', () => {
       },
     };
 
-    const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
-      wrapper: getTestProvider({ services }),
-    });
+    // Fake timers keep the hook's setTimeout(runInjection, ...) retries from racing the assertions;
+    // registry.get runs synchronously while renderHook flushes the effect, so no waitFor is needed.
+    jest.useFakeTimers();
+    try {
+      const { unmount } = renderHook(() => useDynamicTypeIcons(connectorsData, undefined, true), {
+        wrapper: getTestProvider({ services }),
+      });
 
-    await waitFor(() => {
       expect(get).toHaveBeenCalledTimes(1);
-    });
+      expect(get).toHaveBeenCalledWith(registeredId);
+      expect(has).toHaveBeenCalledWith(unregisteredId);
 
-    expect(get).toHaveBeenCalledWith(registeredId);
-    expect(has).toHaveBeenCalledWith(unregisteredId);
-
-    unmount();
+      unmount();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('injects inline icon CSS for connector v2 base types', async () => {
