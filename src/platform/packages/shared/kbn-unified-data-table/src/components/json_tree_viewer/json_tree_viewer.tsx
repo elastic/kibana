@@ -27,7 +27,7 @@
  * so the grid's own row virtualization is all that's needed; the viewer never virtualizes.
  */
 
-import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -47,8 +47,19 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = Record<string, unknown> | unknown[] | JsonPrimitive | undefined;
 
-export interface JsonSyntaxTreeProps {
+// The tree's expand/collapse and "show N more" state, lifted out so a host can persist it across
+// remounts (in-table search remounts every cell via a search-term-keyed React `key`).
+export interface TreeExpansionState {
+  expanded: ReadonlySet<string>;
+  revealed: ReadonlyMap<string, number>;
+}
+
+export interface JsonTreeViewerProps {
   json: JsonValue;
+  /** Seed expand/reveal state on mount — e.g. restored after in-table search remounts the cell. */
+  initialState?: TreeExpansionState;
+  /** Fires whenever expand/reveal state changes, so a host can persist it across remounts. */
+  onStateChange?: (state: TreeExpansionState) => void;
 }
 
 // Each collection (root + every expanded node) renders at most this many children before a
@@ -574,7 +585,11 @@ const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
 
 // ---- Main component ----
 
-export const JsonTreeViewer = memo(function JsonSyntaxTree({ json }: JsonSyntaxTreeProps) {
+export const JsonTreeViewer = memo(function JsonTreeViewer({
+  json,
+  initialState,
+  onStateChange,
+}: JsonTreeViewerProps) {
   const styles = useMemoCss(treeStyles);
   const { euiTheme } = useEuiTheme();
   const codeFontCss = css(useEuiFontSize('xs'));
@@ -589,11 +604,24 @@ export const JsonTreeViewer = memo(function JsonSyntaxTree({ json }: JsonSyntaxT
     return { openBracket: null, closeBracket: null };
   }, [json]);
 
-  const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
-  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(() => new Map());
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(
+    () => initialState?.expanded ?? new Set()
+  );
+  const [revealed, setRevealed] = useState<ReadonlyMap<string, number>>(
+    () => initialState?.revealed ?? new Map()
+  );
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const rowRefs = useRef(new Map<string, HTMLDivElement>());
+
+  // Mirror expand/reveal state to the host on every change so it can restore the tree after a
+  // remount. Held in a ref so a changing callback identity never re-fires the effect; local state
+  // stays the render source of truth, so expanding still re-renders only this cell.
+  const onStateChangeRef = useRef(onStateChange);
+  onStateChangeRef.current = onStateChange;
+  useEffect(() => {
+    onStateChangeRef.current?.({ expanded, revealed });
+  }, [expanded, revealed]);
 
   const rows = useMemo(
     () => flattenRows(nodes, ROOT_ID, rootType, expanded, revealed, 0, null, []),

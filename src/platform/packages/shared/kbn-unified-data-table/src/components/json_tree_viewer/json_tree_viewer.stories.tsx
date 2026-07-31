@@ -12,7 +12,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { JsonTreeViewer, type JsonValue } from './json_tree_viewer';
 
 export default {
-  title: 'UnifiedDataTable/JsonSyntaxTree',
+  title: 'UnifiedDataTable/JsonTreeViewer',
   component: JsonTreeViewer,
 } as Meta<typeof JsonTreeViewer>;
 
@@ -114,14 +114,6 @@ export const SyntaxTreeLongValues: StoryObj<typeof JsonTreeViewer> = {
   render: () => (
     <div style={{ width: 440 }}>
       <JsonTreeViewer json={longValueDocument} />
-    </div>
-  ),
-};
-
-export const SyntaxTreePrimitiveValue: StoryObj<typeof JsonTreeViewer> = {
-  render: () => (
-    <div style={{ width: 440 }}>
-      <JsonTreeViewer json={42} />
     </div>
   ),
 };

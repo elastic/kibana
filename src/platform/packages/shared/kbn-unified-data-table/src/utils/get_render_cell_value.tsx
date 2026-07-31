@@ -29,6 +29,10 @@ import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 import { SOURCE_CELL_RENDERER } from '../constants';
 import { JsonTreeViewer } from '../components/json_tree_viewer/json_tree_viewer';
+import {
+  getTreeExpansion,
+  setTreeExpansion,
+} from '../components/json_tree_viewer/tree_expansion_store';
 import { buildDocumentTree } from './build_document_tree';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -184,9 +188,15 @@ export const getRenderCellValueFn = ({
       // JSON tree of the document. In-grid only — the popover path is untouched.
       if (SOURCE_CELL_RENDERER === 'jsonTreeViewer') {
         const documentTree = buildDocumentTree({ row, dataView, fieldFormats, columnsMeta });
+        // Persist expand/reveal state outside the cell (keyed by the row) so it survives the
+        // remount in-table search forces on every keystroke.
         return (
           <span className={CELL_CLASS}>
-            <JsonTreeViewer json={documentTree} />
+            <JsonTreeViewer
+              json={documentTree}
+              initialState={getTreeExpansion(row.raw)}
+              onStateChange={(state) => setTreeExpansion(row.raw, state)}
+            />
           </span>
         );
       }
