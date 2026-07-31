@@ -8,7 +8,7 @@
 import type { InferenceClient } from '@kbn/inference-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { classifyServices } from './classify_services';
-import type { IacSignal, ServiceCandidateRoot } from './types';
+import type { IacSignal, IndexedRepoRef, ServiceCandidateRoot } from './types';
 
 const cand = (over: Partial<ServiceCandidateRoot> = {}): ServiceCandidateRoot => ({
   repository: 'open-telemetry/opentelemetry-demo',
@@ -16,6 +16,7 @@ const cand = (over: Partial<ServiceCandidateRoot> = {}): ServiceCandidateRoot =>
   serviceRoot: 'src/checkout',
   markers: ['Dockerfile', 'go.mod'],
   language: 'Go',
+  hasEntrypoint: true,
   ...over,
 });
 
@@ -33,10 +34,20 @@ const mockInference = (
   return { output } as unknown as InferenceClient;
 };
 
+const repo: IndexedRepoRef = {
+  repository: 'open-telemetry/opentelemetry-demo',
+  org: 'open-telemetry',
+  repo: 'opentelemetry-demo',
+  gitSha: 'abc123',
+};
+
 const opts = (candidates: ServiceCandidateRoot[]) => ({
+  repos: [repo],
   manifestPathsByRepo: new Map<string, string[]>([
     ['open-telemetry/opentelemetry-demo', ['compose.yaml']],
   ]),
+  manifestLinesByRepo: new Map<string, string[]>(),
+  serviceNameLinesByRepo: new Map<string, string[]>(),
   iacSignalsByRepo: new Map<string, IacSignal[]>([
     ['open-telemetry/opentelemetry-demo', [{ kind: 'compose' as const, path: 'compose.yaml' }]],
   ]),
@@ -45,7 +56,7 @@ const opts = (candidates: ServiceCandidateRoot[]) => ({
 });
 
 describe('classifyServices', () => {
-  it('returns [] for no candidates without calling inference', async () => {
+  it('returns [] for no candidates or manifest lines without calling inference', async () => {
     const inferenceClient = mockInference([]);
     const services = await classifyServices({
       inferenceClient,
@@ -54,6 +65,70 @@ describe('classifyServices', () => {
     });
     expect(services).toEqual([]);
     expect((inferenceClient as unknown as { output: jest.Mock }).output).not.toHaveBeenCalled();
+  });
+
+  it('classifies manifest-only services and keeps their own root + repo gitSha', async () => {
+    const inferenceClient = mockInference([
+      {
+        name: 'redis',
+        repository: 'open-telemetry/opentelemetry-demo',
+        serviceRoot: 'deploy',
+        language: 'unknown',
+      },
+    ]);
+    const options = opts([]);
+    options.manifestLinesByRepo.set('open-telemetry/opentelemetry-demo', [
+      'deploy/compose.yaml:4\t  image: redis:7',
+    ]);
+
+    const services = await classifyServices({
+      inferenceClient,
+      connectorId: 'c',
+      ...options,
+    });
+
+    expect((inferenceClient as unknown as { output: jest.Mock }).output).toHaveBeenCalledWith(
+      expect.objectContaining({ input: expect.stringContaining('image: redis:7') })
+    );
+    expect(services[0]).toEqual(
+      expect.objectContaining({ serviceRoot: 'deploy', gitSha: 'abc123', name: 'redis' })
+    );
+  });
+
+  it('includes service-name declarations and entrypoint evidence in the prompt', async () => {
+    const candidates = [cand(), cand({ serviceRoot: 'src/lib', hasEntrypoint: false })];
+    const inferenceClient = mockInference([]);
+    const options = opts(candidates);
+    options.serviceNameLinesByRepo.set('open-telemetry/opentelemetry-demo', [
+      'src/checkout/config.env:1\tOTEL_SERVICE_NAME=checkout',
+    ]);
+
+    await classifyServices({ inferenceClient, connectorId: 'c', ...options });
+
+    const call = (inferenceClient as unknown as { output: jest.Mock }).output.mock.calls[0][0];
+    expect(call.input).toContain('OTEL_SERVICE_NAME=checkout');
+    expect(call.input).toContain('entrypoint=yes');
+    expect(call.input).toContain('entrypoint=no');
+    expect(call.system).toContain('DECLARED');
+  });
+
+  it('preserves a returned service root that matches no candidate', async () => {
+    const candidates = [cand({ serviceRoot: 'src/arbitrary' })];
+    const inferenceClient = mockInference([
+      {
+        name: 'manifest-service',
+        repository: 'open-telemetry/opentelemetry-demo',
+        serviceRoot: 'deploy/runtime',
+      },
+    ]);
+
+    const services = await classifyServices({
+      inferenceClient,
+      connectorId: 'c',
+      ...opts(candidates),
+    });
+
+    expect(services[0].serviceRoot).toBe('deploy/runtime');
   });
 
   it('maps classifier services to DiscoveredService with gitSha + iacSignals from the repo', async () => {

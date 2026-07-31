@@ -94,10 +94,11 @@ export const SOURCERER_LINES_INDEX = 'sourcerer-v1-lines*' as const;
  * - a literal dot is written `[.]` (a bare `\.` is rejected by the ES|QL string
  *   literal parser).
  *
- * Recall boundary (Tier-1): convention-named loggers only. Misses custom-named
- * wrapper instances (`audit = createLogger(); audit.write(...)`) and
- * non-severity SDK emit methods. Closing that tail (per-language tree-sitter, as
- * in elastic/semantic-code-search#168) is a later refinement.
+ * Recall boundary (Tier-1): convention-named loggers and standard stream calls
+ * only. Misses custom-named wrapper instances (`audit = createLogger();
+ * audit.write(...)`) and non-severity SDK emit methods. Closing that tail
+ * (per-language tree-sitter, as in elastic/semantic-code-search#168) is a later
+ * refinement.
  */
 export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   // logger.info(...) / Logger.Error(...) / logging.warning(...) — go/java/py method calls.
@@ -118,6 +119,12 @@ export const LOGGER_IDIOM_PATTERNS: readonly string[] = [
   '.*slog[.](Info|Warn|Error|Debug).*',
   // logrus.Info(...) — go logrus.
   '.*logrus[.](Info|Warn|Error|Debug|Fatal).*',
+  // LOG.error(...) / LOGGER.info(...) — uppercase Java constant loggers.
+  '.*(LOG|LOGGER)[.](info|warn|warning|error|debug|trace|fatal).*',
+  // _logger.LogError(...) / logger.LogInformation(...) — Microsoft.Extensions.Logging.
+  '.*[lL]og(ger)?[.]Log(Trace|Debug|Information|Warning|Error|Critical).*',
+  // System.out.println(...) / System.err.print(...) — Java standard streams.
+  '.*System[.](out|err)[.]print(ln)?.*',
 ] as const;
 
 /**
@@ -165,14 +172,23 @@ export const LOGGER_PHRASE_LEXICON: readonly string[] = [
   '[eE]xception',
 ] as const;
 
-/**
- * Builds the string-literal-anchored RLIKE patterns for one phrase body: one for
- * double-quoted literals (double-quote escaped as `\\"`), one for single-quoted.
- */
+/** Builds string-literal-anchored RLIKE patterns for one phrase body. */
 export const anchoredPhrasePatterns = (phrase: string): string[] => [
   `.*\\"[^\\"]*${phrase}[^\\"]*\\".*`,
   `.*'[^']*${phrase}[^']*'.*`,
+  `.*\`[^\`]*${phrase}[^\`]*\`.*`,
 ];
+
+/**
+ * Shape-based recall for human-readable sentence literals not covered by the
+ * phrase lexicon. One pattern per quote style; content must start with a letter
+ * and contain at least 3 space-separated words.
+ */
+export const SENTENCE_LITERAL_PATTERNS: readonly string[] = [
+  '.*\\"[A-Za-z][^\\" ]* [^\\" ]+ [^\\"]+\\".*',
+  ".*'[A-Za-z][^' ]* [^' ]+ [^']+'.*",
+  '.*`[A-Za-z][^` ]* [^` ]+ [^`]+`.*',
+] as const;
 
 /**
  * Elasticsearch index written by Sourcerer's ref indexer — one document per
@@ -194,11 +210,19 @@ export const SOURCERER_REFS_INDEX = 'sourcerer-v1-refs*' as const;
  * markers only. A service with a bespoke build (bare `Makefile`, custom deploy)
  * is missed; the set is intentionally extensible.
  */
-export const SERVICE_DEPLOY_MARKERS: ReadonlyArray<{ marker: string; language: string }> = [
+export interface ServiceDeployMarker {
+  marker: string;
+  language: string;
+  patternOverride?: string;
+  basenameMatches?: (basename: string) => boolean;
+}
+
+export const SERVICE_DEPLOY_MARKERS: readonly ServiceDeployMarker[] = [
   { marker: 'go.mod', language: 'Go' },
   { marker: 'Cargo.toml', language: 'Rust' },
   { marker: 'pom.xml', language: 'Java' },
   { marker: 'build.gradle', language: 'Java' },
+  { marker: 'build.gradle.kts', language: 'Java' },
   { marker: '.csproj', language: 'C#' },
   { marker: 'pyproject.toml', language: 'Python' },
   { marker: 'requirements.txt', language: 'Python' },
@@ -209,7 +233,12 @@ export const SERVICE_DEPLOY_MARKERS: ReadonlyArray<{ marker: string; language: s
   { marker: 'mix.exs', language: 'Elixir' },
   // Dockerfile is the near-universal deploy marker but implies no language on its
   // own; language is resolved from a co-located build marker when present.
-  { marker: 'Dockerfile', language: '' },
+  {
+    marker: 'Dockerfile',
+    language: '',
+    patternOverride: '.*Dockerfile([.][A-Za-z0-9_-]+)?',
+    basenameMatches: (basename) => /^Dockerfile(?:\.[A-Za-z0-9_-]+)?$/.test(basename),
+  },
 ] as const;
 
 /**

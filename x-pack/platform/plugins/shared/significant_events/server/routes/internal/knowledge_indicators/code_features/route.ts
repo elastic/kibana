@@ -700,11 +700,15 @@ const discoverServicesRoute = createServerRoute({
 
     const candidates: ServiceCandidateRoot[] = [];
     const manifestPathsByRepo = new Map<string, string[]>();
+    const manifestLinesByRepo = new Map<string, string[]>();
+    const serviceNameLinesByRepo = new Map<string, string[]>();
     const iacSignalsByRepo = new Map<string, IacSignal[]>();
     for (const repo of repos) {
       const {
         candidates: roots,
         manifestPaths,
+        manifestLines,
+        serviceNameLines,
         iacSignals,
       } = await discoverCandidateRoots({
         esClient,
@@ -713,10 +717,15 @@ const discoverServicesRoute = createServerRoute({
       });
       candidates.push(...roots);
       manifestPathsByRepo.set(repo.repository, manifestPaths);
+      manifestLinesByRepo.set(repo.repository, manifestLines);
+      serviceNameLinesByRepo.set(repo.repository, serviceNameLines);
       iacSignalsByRepo.set(repo.repository, iacSignals);
     }
 
-    if (candidates.length === 0) {
+    const hasManifestLines = [...manifestLinesByRepo.values()].some(
+      (manifestLines) => manifestLines.length > 0
+    );
+    if (candidates.length === 0 && !hasManifestLines) {
       return { services: [] };
     }
 
@@ -731,7 +740,10 @@ const discoverServicesRoute = createServerRoute({
       inferenceClient,
       connectorId,
       candidates,
+      repos,
       manifestPathsByRepo,
+      manifestLinesByRepo,
+      serviceNameLinesByRepo,
       iacSignalsByRepo,
       logger: routeLogger,
     });

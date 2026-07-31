@@ -103,6 +103,65 @@ describe('classifyLoggingSites', () => {
     expect(chunk.classified).toBeUndefined();
   });
 
+  it('classifies 450 candidates in 3 sequential batches with global ids', async () => {
+    const candidates = Array.from({ length: 450 }, (_, index) =>
+      candidate({ location: `src/main.ts:${index}`, content: `logger.info("${index}")` })
+    );
+    const output = jest.fn(async (request: { input: string }) => {
+      const results = request.input
+        .split('\n')
+        .slice(1)
+        .map((line) => ({ id: Number(line.split('\t')[0]), keep: true }));
+      return { id: 'classify_logging_sites', output: { results }, content: '' };
+    });
+    const inferenceClient = { output } as unknown as InferenceClient;
+
+    const chunks = await classifyLoggingSites({
+      inferenceClient,
+      connectorId: 'c',
+      candidates,
+      logger: loggerMock.create(),
+    });
+
+    expect(output).toHaveBeenCalledTimes(3);
+    expect(chunks).toHaveLength(450);
+    expect(chunks[449].location).toBe('src/main.ts:449');
+  });
+
+  it('degrades only a failed batch and classifies the other batches', async () => {
+    const candidates = Array.from({ length: 450 }, (_, index) =>
+      candidate({
+        location: `src/main.ts:${index}`,
+        via: index === 201 ? 'idiom' : index === 202 ? 'phrase' : 'idiom',
+      })
+    );
+    let call = 0;
+    const output = jest.fn(async (request: { input: string }) => {
+      call += 1;
+      if (call === 2) {
+        throw new Error('batch down');
+      }
+      const results = request.input
+        .split('\n')
+        .slice(1)
+        .map((line) => ({ id: Number(line.split('\t')[0]), keep: true }));
+      return { id: 'classify_logging_sites', output: { results }, content: '' };
+    });
+    const inferenceClient = { output } as unknown as InferenceClient;
+
+    const chunks = await classifyLoggingSites({
+      inferenceClient,
+      connectorId: 'c',
+      candidates,
+      logger: loggerMock.create(),
+    });
+
+    expect(output).toHaveBeenCalledTimes(3);
+    expect(chunks.some(({ location }) => location === 'src/main.ts:201')).toBe(true);
+    expect(chunks.some(({ location }) => location === 'src/main.ts:202')).toBe(false);
+    expect(chunks.some(({ location }) => location === 'src/main.ts:449')).toBe(true);
+  });
+
   it('falls back to idiom-only when inference throws (drops phrase candidates)', async () => {
     const candidates = [
       candidate({ location: 'a:1', via: 'idiom' }),

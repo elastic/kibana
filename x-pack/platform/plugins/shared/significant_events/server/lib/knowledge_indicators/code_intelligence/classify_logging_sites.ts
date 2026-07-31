@@ -18,9 +18,9 @@ import type { LoggingCandidate, LoggingChunk } from './types';
  * single batched LLM call. Grep is exhaustive but imprecise (string-anchored
  * phrases match attribute keys, config, i18n as well as real logs) and cannot
  * infer a severity level for a bare `fmt.Errorf("...")`. The classifier does
- * both — keep/drop + level + the static message — over the whole candidate set
- * at once (one call per service here; the task is a per-line judgment, so
- * batching is order-independent).
+ * both — keep/drop + level + the static message — in sequential batches of at
+ * most 200 candidates. The task is a per-line judgment, so batching is
+ * order-independent.
  *
  * Bounded, tool-less, temperature 0: the cheapest inference tier handles it.
  * The connector is the KI-extraction inference feature's mapped connector, so
@@ -65,6 +65,7 @@ const classifySchema = {
 } as const;
 
 const VALID_LEVELS = new Set(['fatal', 'error', 'warn', 'warning', 'info', 'debug', 'trace']);
+const CLASSIFY_BATCH_SIZE = 200;
 
 export interface ClassifyLoggingSitesOptions {
   inferenceClient: InferenceClient;
@@ -94,54 +95,53 @@ export async function classifyLoggingSites({
   const byId = new Map<number, LoggingCandidate>();
   candidates.forEach((candidate, index) => byId.set(index, candidate));
 
-  const input =
-    'Classify these excerpts (id then a TAB then the excerpt, newlines shown as \u23ce):\n' +
-    candidates
-      .map((candidate, index) => `${index}\t${candidate.content.replace(/\n/g, ' \u23ce ')}`)
-      .join('\n');
-
-  let results: Array<{ id: number; keep?: boolean; level?: string; message?: string }>;
-  try {
-    const { output } = await inferenceClient.output({
-      id: 'classify_logging_sites',
-      connectorId,
-      system: CLASSIFY_SYSTEM,
-      input,
-      schema: classifySchema,
-      abortSignal,
-      metadata: {
-        connectorTelemetry: {
-          pluginId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
-          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-        },
-      },
-    });
-    results = output?.results ?? [];
-  } catch (error) {
-    // Degrade gracefully: keep idiom candidates (high confidence, regex-parsable),
-    // drop phrase candidates (they need the classifier's judgement).
-    logger.warn(
-      `classify_logging_sites: inference failed, falling back to idiom-only (${
-        error instanceof Error ? error.message : String(error)
-      })`
-    );
-    return candidates
-      .filter((candidate) => candidate.via === 'idiom')
-      .map((candidate) => ({
-        content: candidate.content,
-        language: candidate.language,
-        location: candidate.location,
-      }));
-  }
-
   const decisions = new Map<number, { keep: boolean; level?: string; message?: string }>();
-  for (const result of results) {
-    if (typeof result?.id === 'number') {
-      decisions.set(result.id, {
-        keep: Boolean(result.keep),
-        level: result.level,
-        message: result.message,
+  const batchCount = Math.ceil(candidates.length / CLASSIFY_BATCH_SIZE);
+  for (let start = 0; start < candidates.length; start += CLASSIFY_BATCH_SIZE) {
+    const batch = candidates.slice(start, start + CLASSIFY_BATCH_SIZE);
+    const input =
+      'Classify these excerpts (id then a TAB then the excerpt, newlines shown as \u23ce):\n' +
+      batch
+        .map(
+          (candidate, offset) =>
+            `${start + offset}\t${candidate.content.replace(/\n/g, ' \u23ce ')}`
+        )
+        .join('\n');
+
+    try {
+      const { output } = await inferenceClient.output({
+        id: 'classify_logging_sites',
+        connectorId,
+        system: CLASSIFY_SYSTEM,
+        input,
+        schema: classifySchema,
+        abortSignal,
+        metadata: {
+          connectorTelemetry: {
+            pluginId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+            aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+          },
+        },
       });
+      for (const result of output?.results ?? []) {
+        if (typeof result?.id === 'number') {
+          decisions.set(result.id, {
+            keep: Boolean(result.keep),
+            level: result.level,
+            message: result.message,
+          });
+        }
+      }
+    } catch (error) {
+      // Degrade only this batch: the missing-decision fallback below keeps its
+      // idiom candidates and drops its phrase candidates.
+      logger.warn(
+        `classify_logging_sites: inference failed for batch ${
+          Math.floor(start / CLASSIFY_BATCH_SIZE) + 1
+        }/${batchCount}, falling back to idiom-only for this batch (${
+          error instanceof Error ? error.message : String(error)
+        })`
+      );
     }
   }
 

@@ -7,7 +7,12 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { anchoredPhrasePatterns, LOGGER_IDIOM_PATTERNS, LOGGER_PHRASE_LEXICON } from './constants';
+import {
+  anchoredPhrasePatterns,
+  LOGGER_IDIOM_PATTERNS,
+  LOGGER_PHRASE_LEXICON,
+  SENTENCE_LITERAL_PATTERNS,
+} from './constants';
 import { codeGrep, discoverLoggingSites, splitRepository } from './discover_logging_sites';
 
 const COLUMNS = [
@@ -24,9 +29,12 @@ const WINDOW_COLUMNS = [
   { name: 'line.content', type: 'keyword' },
 ];
 
-// grep calls issued when there are zero hits (no window fetch): one per idiom
-// pattern + two (double- and single-quote anchored) per phrase-lexicon entry.
-const GREP_CALLS = LOGGER_IDIOM_PATTERNS.length + LOGGER_PHRASE_LEXICON.length * 2;
+// grep calls issued when there are zero hits (no window fetch): one per idiom,
+// three quote variants per phrase, and one per sentence-literal quote style.
+const GREP_CALLS =
+  LOGGER_IDIOM_PATTERNS.length +
+  LOGGER_PHRASE_LEXICON.length * 3 +
+  SENTENCE_LITERAL_PATTERNS.length;
 
 // The window fetch is the only query that filters on an exact file.path (==) and
 // a line.number range; grep patterns use RLIKE. Distinguish by the range clause.
@@ -40,6 +48,37 @@ const row = (path: string, line: number, content: string) => [
   line,
   content,
 ];
+
+describe('logging-site patterns', () => {
+  it('matches the added logger idioms without matching unrelated properties', () => {
+    const [uppercaseLogger, microsoftLogger, javaStreams] = LOGGER_IDIOM_PATTERNS.slice(-3).map(
+      (pattern) => new RegExp(`^${pattern}$`)
+    );
+    expect(uppercaseLogger.test('LOG.error("boom");')).toBe(true);
+    expect(uppercaseLogger.test('catalog.info = parse(x);')).toBe(false);
+    expect(microsoftLogger.test('_logger.LogError("boom");')).toBe(true);
+    expect(microsoftLogger.test('logger.LogInformation("hi");')).toBe(true);
+    expect(javaStreams.test('System.out.println("hi");')).toBe(true);
+  });
+
+  it('anchors phrases inside all 3 quote styles', () => {
+    const patterns = anchoredPhrasePatterns('[fF]ailed to');
+    expect(patterns).toHaveLength(3);
+    const backtick = new RegExp(`^${patterns[2]}$`);
+    expect(backtick.test('const m = `Failed to load ${x}`;')).toBe(true);
+    expect(backtick.test('const m = "unrelated";')).toBe(false);
+  });
+
+  it('matches sentence-shaped double-quoted literals only', () => {
+    const doubleQuoted = new RegExp(`^${SENTENCE_LITERAL_PATTERNS[0]}$`);
+    expect(doubleQuoted.test('return errors.New("failed connecting to database backend")')).toBe(
+      true
+    );
+    expect(doubleQuoted.test('log("order shipped to customer")')).toBe(true);
+    expect(doubleQuoted.test('x := "singleword"')).toBe(false);
+    expect(doubleQuoted.test('key = "a.b.c_d"')).toBe(false);
+  });
+});
 
 describe('splitRepository', () => {
   it('splits "org/repo" into org and repo', () => {
@@ -172,6 +211,79 @@ describe('discoverLoggingSites', () => {
         language: 'Java',
       },
     ]);
+  });
+
+  it('tags sentence-literal-only hits as phrase candidates', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.esql.query.mockImplementation((async (req: {
+      query: string;
+      params?: Array<Record<string, unknown>>;
+    }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[7, 'log("order shipped to customer")']] };
+      }
+      const regex = req.params?.find((param) => 'regex' in param)?.regex;
+      if (regex === SENTENCE_LITERAL_PATTERNS[0]) {
+        return {
+          columns: COLUMNS,
+          values: [row('src/orders/main.go', 7, 'log("order shipped to customer")')],
+        };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    const candidates = await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src/orders',
+      logger: loggerMock.create(),
+    });
+
+    expect(candidates).toEqual([
+      expect.objectContaining({ location: 'src/orders/main.go:7', via: 'phrase' }),
+    ]);
+  });
+
+  it('warns at the per-pattern limit but not below it', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const logger = loggerMock.create();
+    let first = true;
+    esClient.esql.query.mockImplementation((async (req: { query: string }) => {
+      if (isWindowQuery(req.query)) {
+        return { columns: WINDOW_COLUMNS, values: [[7, 'console.error("boom")']] };
+      }
+      if (first) {
+        first = false;
+        return { columns: COLUMNS, values: [row('src/main.ts', 7, 'console.error("boom")')] };
+      }
+      return { columns: COLUMNS, values: [] };
+    }) as unknown as typeof esClient.esql.query);
+
+    await discoverLoggingSites({
+      esClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger,
+      perPatternLimit: 1,
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(LOGGER_IDIOM_PATTERNS[0]));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('limit 1'));
+
+    const belowLimitLogger = loggerMock.create();
+    const belowLimitClient = elasticsearchServiceMock.createElasticsearchClient();
+    belowLimitClient.esql.query.mockResolvedValue({ columns: COLUMNS, values: [] });
+    await discoverLoggingSites({
+      esClient: belowLimitClient,
+      repository: 'open-telemetry/opentelemetry-demo',
+      gitSha: 'abc123',
+      serviceRoot: 'src',
+      logger: belowLimitLogger,
+      perPatternLimit: 1,
+    });
+    expect(belowLimitLogger.warn).not.toHaveBeenCalled();
   });
 
   it('never throws: a failing grep pattern is skipped and the rest still run', async () => {

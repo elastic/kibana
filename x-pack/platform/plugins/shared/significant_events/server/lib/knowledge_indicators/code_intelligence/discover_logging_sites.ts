@@ -12,6 +12,7 @@ import {
   anchoredPhrasePatterns,
   LOGGER_IDIOM_PATTERNS,
   LOGGER_PHRASE_LEXICON,
+  SENTENCE_LITERAL_PATTERNS,
   SOURCERER_LINES_INDEX,
 } from './constants';
 import type { LoggingCandidate, LoggingCandidateVia } from './types';
@@ -246,6 +247,13 @@ export async function discoverLoggingSites({
         regex,
         limit: perPatternLimit,
       });
+      if (lines.length === perPatternLimit) {
+        logger.warn(
+          `logging_sites: grep for "${repository}" @ "${root}" pattern ${JSON.stringify(
+            regex
+          )} reached limit ${perPatternLimit}; path-sorted results may be truncated with alphabetical bias`
+        );
+      }
       for (const { filePath: path, lineNumber } of lines) {
         const location = `${path}:${lineNumber}`;
         // idiom wins the tag; don't downgrade an idiom hit to phrase.
@@ -270,6 +278,9 @@ export async function discoverLoggingSites({
     for (const regex of anchoredPhrasePatterns(phrase)) {
       await runGrep(regex, 'phrase');
     }
+  }
+  for (const regex of SENTENCE_LITERAL_PATTERNS) {
+    await runGrep(regex, 'phrase');
   }
 
   // Fetch +/-1 windows for all hits (batched per file).

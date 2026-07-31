@@ -106,6 +106,8 @@ export interface ServiceCandidateRoot {
   markers: string[];
   /** Language implied by the markers (deterministic), or `unknown`. */
   language: string;
+  /** Whether an entrypoint signature was found under this root. */
+  hasEntrypoint: boolean;
 }
 
 /**

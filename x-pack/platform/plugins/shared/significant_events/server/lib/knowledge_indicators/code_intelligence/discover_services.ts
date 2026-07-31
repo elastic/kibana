@@ -17,6 +17,30 @@ import {
 } from './constants';
 import type { IacSignal, IacKind, IndexedRepoRef, ServiceCandidateRoot } from './types';
 
+const MANIFEST_CONTENT_PATTERNS: readonly string[] = [
+  '.*image:.*',
+  '.*container_name:.*',
+  '.*kind: ?(Deployment|StatefulSet|DaemonSet|CronJob).*',
+  '.*app[.]kubernetes[.]io/name.*',
+] as const;
+
+const SERVICE_NAME_PATTERNS: readonly string[] = [
+  '.*OTEL_SERVICE_NAME.*',
+  '.*OTEL_RESOURCE_ATTRIBUTES.*',
+  '.*spring[.]application[.]name.*',
+] as const;
+
+const ENTRYPOINT_PATTERNS: readonly string[] = [
+  '.*func main[(].*',
+  '.*public static void main.*',
+  '.*if __name__ == .__main__..*',
+  '.*http[.]ListenAndServe.*',
+  '.*app[.]listen[(].*',
+  '.*@SpringBootApplication.*',
+] as const;
+
+const EVIDENCE_LINE_LIMIT = 100;
+
 /**
  * Enumerates the repositories + immutable commits indexed in Sourcerer, from the
  * refs index (`sourcerer-v1-refs*`). Server-side equivalent of the agent's
@@ -83,10 +107,7 @@ const dirOf = (path: string): string => {
   return idx === -1 ? '' : path.slice(0, idx);
 };
 
-/**
- * Lists distinct `file.path`s in a repo whose path matches the given RLIKE
- * pattern. One query per pattern; never throws.
- */
+/** Lists distinct paths in a repo that match one RLIKE pattern. */
 async function listPaths({
   esClient,
   org,
@@ -124,6 +145,72 @@ async function listPaths({
   return response.values.map((row) => String(row[pathCol] ?? '')).filter(Boolean);
 }
 
+interface EvidenceLine {
+  filePath: string;
+  lineNumber: number;
+  content: string;
+}
+
+/** Greps line contents, optionally restricted to a known set of file paths. */
+async function grepLines({
+  esClient,
+  org,
+  repo,
+  gitSha,
+  pattern,
+  filePaths,
+  limit,
+}: {
+  esClient: ElasticsearchClient;
+  org: string;
+  repo: string;
+  gitSha: string;
+  pattern: string;
+  filePaths?: string[];
+  limit: number;
+}): Promise<EvidenceLine[]> {
+  const pathParams = (filePaths ?? []).map((path, index) => ({ [`file_path_${index}`]: path }));
+  const pathClause = filePaths?.length
+    ? `\n          AND file.path IN (${filePaths
+        .map((_, index) => `?file_path_${index}`)
+        .join(', ')})`
+    : '';
+  const response = (await esClient.esql.query({
+    query: `
+      FROM ${SOURCERER_LINES_INDEX}
+      | WHERE MATCH(git.org, ?git_org)
+          AND git.repo LIKE ?git_repo
+          AND git.commit LIKE ?git_commit${pathClause}
+          AND line.content RLIKE ?pattern
+      | KEEP file.path, line.number, line.content
+      | SORT file.path, line.number
+      | LIMIT ${limit}`,
+    params: [
+      { git_org: org },
+      { git_repo: repo },
+      { git_commit: gitSha },
+      ...pathParams,
+      { pattern },
+    ],
+    drop_null_columns: false,
+  })) as ESQLSearchResponse;
+
+  const pathCol = response.columns.findIndex((c) => c.name === 'file.path');
+  const lineCol = response.columns.findIndex((c) => c.name === 'line.number');
+  const contentCol = response.columns.findIndex((c) => c.name === 'line.content');
+  if (pathCol === -1 || lineCol === -1 || contentCol === -1) {
+    return [];
+  }
+  return response.values.map((row) => ({
+    filePath: String(row[pathCol] ?? ''),
+    lineNumber: Number(row[lineCol] ?? 0),
+    content: String(row[contentCol] ?? ''),
+  }));
+}
+
+const formatEvidenceLine = ({ filePath, lineNumber, content }: EvidenceLine): string =>
+  `${filePath}:${lineNumber}\t${content}`;
+
 /** Escapes a literal basename for use inside an RLIKE pattern (dots -> `[.]`). */
 const escapeForRlike = (basename: string): string => basename.replace(/\./g, '[.]');
 
@@ -139,16 +226,17 @@ export interface DiscoverCandidateRootsResult {
   candidates: ServiceCandidateRoot[];
   /** Manifest file paths found in the repo (fed to the classifier as evidence). */
   manifestPaths: string[];
+  /** Selected content lines from the matched manifest files. */
+  manifestLines: string[];
+  /** Lines that declare runtime service names. */
+  serviceNameLines: string[];
   /** Repository-level IaC signals derived from file paths. */
   iacSignals: IacSignal[];
 }
 
 /**
- * Deterministically finds candidate service roots in one repository by greping
- * for deploy-marker files (`Dockerfile`, `go.mod`, `.csproj`, ...). Each marker's
- * directory becomes a candidate root; the marker implies the language. Also
- * collects manifest file paths (compose/k8s/helm/...) and repository IaC signals.
- * No LLM. The classifier ({@link classifyServices}) then judges + collapses.
+ * Deterministically finds candidate service roots and supporting classification
+ * evidence in one repository. No LLM. The classifier then judges + collapses.
  */
 export async function discoverCandidateRoots({
   esClient,
@@ -157,15 +245,11 @@ export async function discoverCandidateRoots({
   perMarkerLimit = 500,
 }: DiscoverCandidateRootsOptions): Promise<DiscoverCandidateRootsResult> {
   const { org, repo: repoName, gitSha, repository } = repo;
-
-  // marker basename -> matching file paths
   const rootMarkers = new Map<string, Set<string>>();
   const rootLanguages = new Map<string, Set<string>>();
 
-  for (const { marker, language } of SERVICE_DEPLOY_MARKERS) {
-    // Match the basename at the end of the path: `.*<marker>` handles both exact
-    // basenames (`go.mod`) and suffix markers (`.csproj`, matched as `[.]csproj`).
-    const pattern = `.*${escapeForRlike(marker)}`;
+  for (const { marker, language, patternOverride, basenameMatches } of SERVICE_DEPLOY_MARKERS) {
+    const pattern = patternOverride ?? `.*${escapeForRlike(marker)}`;
     let paths: string[];
     try {
       paths = await listPaths({
@@ -184,11 +268,19 @@ export async function discoverCandidateRoots({
       );
       continue;
     }
+    if (paths.length === perMarkerLimit) {
+      logger.warn(
+        `discover_services: marker grep for "${repository}" pattern ${JSON.stringify(
+          pattern
+        )} reached limit ${perMarkerLimit}; path-sorted results may be truncated with alphabetical bias`
+      );
+    }
     for (const path of paths) {
-      // Only accept a path whose basename actually is/ends with the marker (RLIKE
-      // `.*<marker>` can match mid-path substrings otherwise).
       const base = path.slice(path.lastIndexOf('/') + 1);
-      if (base !== marker && !base.endsWith(marker)) {
+      const matches = basenameMatches
+        ? basenameMatches(base)
+        : base === marker || base.endsWith(marker);
+      if (!matches) {
         continue;
       }
       const root = dirOf(path);
@@ -203,20 +295,6 @@ export async function discoverCandidateRoots({
     }
   }
 
-  const candidates: ServiceCandidateRoot[] = [];
-  for (const [serviceRoot, markers] of rootMarkers) {
-    const langs = rootLanguages.get(serviceRoot);
-    candidates.push({
-      repository,
-      gitSha,
-      serviceRoot,
-      markers: [...markers].sort(),
-      language: langs && langs.size > 0 ? [...langs].sort()[0] : 'unknown',
-    });
-  }
-  candidates.sort((a, b) => a.serviceRoot.localeCompare(b.serviceRoot));
-
-  // Manifest paths (deploy topology, incl. third-party images with no marker).
   const manifestPaths = new Set<string>();
   for (const pattern of MANIFEST_PATH_PATTERNS) {
     try {
@@ -228,7 +306,14 @@ export async function discoverCandidateRoots({
         pattern,
         limit: perMarkerLimit,
       });
-      paths.forEach((p) => manifestPaths.add(p));
+      if (paths.length === perMarkerLimit) {
+        logger.warn(
+          `discover_services: manifest-path grep for "${repository}" pattern ${JSON.stringify(
+            pattern
+          )} reached limit ${perMarkerLimit}; path-sorted results may be truncated with alphabetical bias`
+        );
+      }
+      paths.forEach((path) => manifestPaths.add(path));
     } catch (error) {
       logger.debug(
         `discover_services: manifest grep failed for "${repository}" pattern ${JSON.stringify(
@@ -238,7 +323,89 @@ export async function discoverCandidateRoots({
     }
   }
 
-  // Repository IaC signals (one example path per kind).
+  const manifestLines: string[] = [];
+  const sortedManifestPaths = [...manifestPaths].sort();
+  if (sortedManifestPaths.length > 0) {
+    for (const pattern of MANIFEST_CONTENT_PATTERNS) {
+      try {
+        const lines = await grepLines({
+          esClient,
+          org,
+          repo: repoName,
+          gitSha,
+          pattern,
+          filePaths: sortedManifestPaths,
+          limit: EVIDENCE_LINE_LIMIT,
+        });
+        manifestLines.push(...lines.map(formatEvidenceLine));
+      } catch (error) {
+        logger.debug(
+          `discover_services: manifest-content grep failed for "${repository}" pattern ${JSON.stringify(
+            pattern
+          )}: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    }
+  }
+
+  const serviceNameLines: string[] = [];
+  for (const pattern of SERVICE_NAME_PATTERNS) {
+    try {
+      const lines = await grepLines({
+        esClient,
+        org,
+        repo: repoName,
+        gitSha,
+        pattern,
+        limit: EVIDENCE_LINE_LIMIT,
+      });
+      serviceNameLines.push(...lines.map(formatEvidenceLine));
+    } catch (error) {
+      logger.debug(
+        `discover_services: service-name grep failed for "${repository}" pattern ${JSON.stringify(
+          pattern
+        )}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  const entrypointPaths = new Set<string>();
+  for (const pattern of ENTRYPOINT_PATTERNS) {
+    try {
+      const lines = await grepLines({
+        esClient,
+        org,
+        repo: repoName,
+        gitSha,
+        pattern,
+        limit: EVIDENCE_LINE_LIMIT,
+      });
+      lines.forEach(({ filePath }) => entrypointPaths.add(filePath));
+    } catch (error) {
+      logger.debug(
+        `discover_services: entrypoint grep failed for "${repository}" pattern ${JSON.stringify(
+          pattern
+        )}: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
+  }
+
+  const candidates: ServiceCandidateRoot[] = [];
+  for (const [serviceRoot, markers] of rootMarkers) {
+    const langs = rootLanguages.get(serviceRoot);
+    candidates.push({
+      repository,
+      gitSha,
+      serviceRoot,
+      markers: [...markers].sort(),
+      language: langs && langs.size > 0 ? [...langs].sort()[0] : 'unknown',
+      hasEntrypoint:
+        (serviceRoot === '' && entrypointPaths.size > 0) ||
+        [...entrypointPaths].some((path) => path.startsWith(`${serviceRoot}/`)),
+    });
+  }
+  candidates.sort((a, b) => a.serviceRoot.localeCompare(b.serviceRoot));
+
   const iacByKind = new Map<IacKind, string>();
   for (const { pattern, kind } of IAC_PATH_MARKERS) {
     if (iacByKind.has(kind as IacKind)) {
@@ -254,11 +421,19 @@ export async function discoverCandidateRoots({
     }
   }
   const iacSignals: IacSignal[] = [...iacByKind].map(([kind, path]) => ({ kind, path }));
+  const cappedManifestLines = manifestLines.slice(0, EVIDENCE_LINE_LIMIT);
+  const cappedServiceNameLines = serviceNameLines.slice(0, EVIDENCE_LINE_LIMIT);
 
   logger.debug(
     `discover_services: "${repository}" -> ${candidates.length} candidate root(s), ` +
       `${manifestPaths.size} manifest file(s), ${iacSignals.length} IaC signal(s)`
   );
 
-  return { candidates, manifestPaths: [...manifestPaths].sort(), iacSignals };
+  return {
+    candidates,
+    manifestPaths: sortedManifestPaths,
+    manifestLines: cappedManifestLines,
+    serviceNameLines: cappedServiceNameLines,
+    iacSignals,
+  };
 }

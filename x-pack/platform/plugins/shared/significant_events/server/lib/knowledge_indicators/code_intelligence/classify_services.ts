@@ -11,31 +11,16 @@ import {
   SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
-import type { DiscoveredService, IacSignal, ServiceCandidateRoot } from './types';
+import type { DiscoveredService, IacSignal, IndexedRepoRef, ServiceCandidateRoot } from './types';
 
-/**
- * Stage 4: judge the deterministically-grepped candidate service roots with a
- * single batched LLM call, and collapse environment/region duplicates into
- * logical services. Marker grep is exhaustive on candidate roots but cannot tell
- * a deployable service from a shared lib / workspace root / tooling / test dir,
- * and cannot know that `acme-certificates-{production,staging,qa}` are one
- * logical service in three environments. The classifier does both.
- *
- * GROUPING RULE (KI-aligned): a logical service's identity is
- * (logical-name x provider/marker-set); collapse (environment x region). Env
- * duplicates run the same code -> same log signatures -> same KIs, so they are
- * one service with env multiplicity. Different providers/clouds (aws vs gcp vs
- * azure) are different resource graphs -> different signals -> different services.
- *
- * Bounded, tool-less, temperature 0: the cheapest inference tier handles it.
- * Connector = the KI-extraction inference feature's mapping (swappable).
- */
-
-const CLASSIFY_SYSTEM = `You are given candidate directories from source repositories, each with the build/deploy marker files found in it (and, per repository, the deployment-manifest files and IaC signals present). Decide which candidates are INDEPENDENTLY DEPLOYABLE, OBSERVABLE SERVICES and group them into LOGICAL services.
+const CLASSIFY_SYSTEM = `You are given candidate directories from source repositories, each with the build/deploy marker files found in it and whether an entrypoint was found. You also receive deployment-manifest paths and selected manifest/service-name declaration lines. Decide which candidates are INDEPENDENTLY DEPLOYABLE, OBSERVABLE SERVICES and group them into LOGICAL services.
 
 A logical service:
 - has its own entrypoint / build target / container / deployment manifest and runs as a process that emits logs or telemetry.
 - is NOT: shared libraries, workspace/monorepo roots that only aggregate others, dev tooling, generated code, tests, examples, or documentation sites.
+- candidates with entrypoint=yes are strong service signals; entrypoint=no suggests a library, but manifest evidence can override this.
+- manifest-declared runtime services (for example image: entries for kafka, redis, or collectors) MAY be returned even without a candidate root. Set serviceRoot to the manifest file's directory.
+- when code or manifests DECLARED a service name (OTEL_SERVICE_NAME, OTEL_RESOURCE_ATTRIBUTES, spring.application.name), prefer the DECLARED name over the directory name.
 
 GROUPING RULE (critical): collapse environment and region duplicates into ONE logical service. e.g. "acme-certificates-production", "acme-certificates-staging" and "acme-certificates-qa" are ONE service named "acme-certificates" seen in 3 environments. Strip environment/region/cloud-instance suffixes (production, staging, qa, dev, govcloud, us-east-1, eu-west-1, etc.) from the name. BUT keep DIFFERENT cloud providers as SEPARATE services when they are genuinely different resource graphs (e.g. an "aws" deployment and a "gcp" deployment of the same platform emit different logs/failures — keep them separate, name them distinctly).
 
@@ -68,49 +53,58 @@ export interface ClassifyServicesOptions {
   inferenceClient: InferenceClient;
   connectorId: string;
   candidates: ServiceCandidateRoot[];
+  /** Enumerated indexed repos, including repos with no deploy-marker candidates. */
+  repos: IndexedRepoRef[];
   /** Per-repository manifest file paths, keyed by `"org/repo"`. */
   manifestPathsByRepo: Map<string, string[]>;
+  /** Per-repository selected manifest content lines. */
+  manifestLinesByRepo: Map<string, string[]>;
+  /** Per-repository service-name declaration lines. */
+  serviceNameLinesByRepo: Map<string, string[]>;
   /** Per-repository IaC signals, keyed by `"org/repo"`. */
   iacSignalsByRepo: Map<string, IacSignal[]>;
   logger: Logger;
   abortSignal?: AbortSignal;
 }
 
-/** Looks up a representative candidate root for a returned service (by root, then name). */
+/** Looks up a candidate root for a returned service by exact root, then name. */
 const findCandidate = (
   candidates: ServiceCandidateRoot[],
   service: { repository: string; serviceRoot: string; name: string }
 ): ServiceCandidateRoot | undefined =>
   candidates.find(
-    (c) => c.repository === service.repository && c.serviceRoot === service.serviceRoot
+    (candidate) =>
+      candidate.repository === service.repository && candidate.serviceRoot === service.serviceRoot
   ) ??
   candidates.find(
-    (c) => c.repository === service.repository && c.serviceRoot.endsWith(`/${service.name}`)
-  ) ??
-  candidates.find((c) => c.repository === service.repository);
+    (candidate) =>
+      candidate.repository === service.repository &&
+      candidate.serviceRoot.endsWith(`/${service.name}`)
+  );
 
 /**
  * Classifies + collapses candidate roots into logical {@link DiscoveredService}s.
- * On inference failure, degrades gracefully: every candidate root becomes a
- * service (no collapse, dir-name as name) so discovery still yields the extraction
- * fan-out something to work on.
+ * On inference failure, only candidate roots degrade to services; manifest-only
+ * services are not synthesized.
  */
 export async function classifyServices({
   inferenceClient,
   connectorId,
   candidates,
+  repos,
   manifestPathsByRepo,
+  manifestLinesByRepo,
+  serviceNameLinesByRepo,
   iacSignalsByRepo,
   logger,
   abortSignal,
 }: ClassifyServicesOptions): Promise<DiscoveredService[]> {
-  if (candidates.length === 0) {
+  const hasManifestLines = [...manifestLinesByRepo.values()].some((lines) => lines.length > 0);
+  if (candidates.length === 0 && !hasManifestLines) {
     return [];
   }
 
-  const gitShaByRepo = new Map<string, string>();
-  candidates.forEach((c) => gitShaByRepo.set(c.repository, c.gitSha));
-
+  const gitShaByRepo = new Map(repos.map((repo) => [repo.repository, repo.gitSha]));
   const toService = (
     repository: string,
     serviceRoot: string,
@@ -126,34 +120,52 @@ export async function classifyServices({
   });
 
   const degrade = (): DiscoveredService[] =>
-    candidates.map((c) =>
+    candidates.map((candidate) =>
       toService(
-        c.repository,
-        c.serviceRoot,
-        c.serviceRoot.split('/').pop() || c.serviceRoot,
-        c.language
+        candidate.repository,
+        candidate.serviceRoot,
+        candidate.serviceRoot.split('/').pop() || candidate.serviceRoot,
+        candidate.language
       )
     );
 
-  // Build the evidence payload: one line per candidate root, plus a per-repo
-  // header listing the manifest files + IaC signals (the deploy topology).
-  const lines: string[] = [];
-  const byRepo = new Map<string, ServiceCandidateRoot[]>();
-  for (const c of candidates) {
-    const list = byRepo.get(c.repository) ?? [];
-    list.push(c);
-    byRepo.set(c.repository, list);
+  const rootsByRepo = new Map<string, ServiceCandidateRoot[]>();
+  for (const candidate of candidates) {
+    const roots = rootsByRepo.get(candidate.repository) ?? [];
+    roots.push(candidate);
+    rootsByRepo.set(candidate.repository, roots);
   }
-  for (const [repository, roots] of byRepo) {
+
+  const lines: string[] = [];
+  for (const repo of repos) {
+    const { repository } = repo;
+    const roots = rootsByRepo.get(repository) ?? [];
     const manifests = manifestPathsByRepo.get(repository) ?? [];
-    const iac = (iacSignalsByRepo.get(repository) ?? []).map((s) => s.kind);
+    const manifestLines = manifestLinesByRepo.get(repository) ?? [];
+    const serviceNameLines = serviceNameLinesByRepo.get(repository) ?? [];
+    const iac = (iacSignalsByRepo.get(repository) ?? []).map(({ kind }) => kind);
+    if (
+      roots.length === 0 &&
+      manifests.length === 0 &&
+      manifestLines.length === 0 &&
+      serviceNameLines.length === 0 &&
+      iac.length === 0
+    ) {
+      continue;
+    }
     lines.push(
       `# repository ${repository} | manifests: ${
         manifests.length ? manifests.join(', ') : 'none'
       } | iac: ${iac.length ? iac.join(', ') : 'none'}`
     );
-    for (const c of roots) {
-      lines.push(`${c.serviceRoot}\tmarkers=${c.markers.join(',')}\tlang=${c.language}`);
+    manifestLines.forEach((line) => lines.push(`manifest\t${line}`));
+    serviceNameLines.forEach((line) => lines.push(`service-name\t${line}`));
+    for (const candidate of roots) {
+      lines.push(
+        `${candidate.serviceRoot}\tmarkers=${candidate.markers.join(',')}\tlang=${
+          candidate.language
+        }\tentrypoint=${candidate.hasEntrypoint ? 'yes' : 'no'}`
+      );
     }
   }
   const input = `Classify and group these candidate service roots:\n${lines.join('\n')}`;
@@ -195,7 +207,7 @@ export async function classifyServices({
     const name = service.name?.trim();
     const repository = service.repository?.trim();
     const serviceRoot = service.serviceRoot?.trim();
-    if (!name || !repository || !serviceRoot || !gitShaByRepo.has(repository)) {
+    if (!name || !repository || serviceRoot === undefined || !gitShaByRepo.has(repository)) {
       continue;
     }
     const key = `${repository}::${name}`;
@@ -208,10 +220,6 @@ export async function classifyServices({
     discovered.push(toService(repository, candidate?.serviceRoot ?? serviceRoot, name, language));
   }
 
-  // Note: an empty `discovered` here means the classifier ran but judged nothing
-  // a service (or returned only unmatched rows) — that is a valid answer, not a
-  // failure, so we do NOT fall back to candidate roots. `degrade()` is reserved
-  // for inference errors (above), where we have no judgement at all.
   logger.debug(
     `classify_services: ${candidates.length} candidate root(s) -> ${discovered.length} logical service(s)`
   );
