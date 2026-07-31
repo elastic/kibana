@@ -234,11 +234,15 @@ spaceTest.describe(
 
     spaceTest(
       'should send 2 requests (documents + chart) when sorting',
-      async ({ pageObjects, network }) => {
+      async ({ page, pageObjects, network }) => {
         const count = await network.countMatchingRequests(
           ESE_ENDPOINT,
           async () => {
-            await pageObjects.discover.clickFieldSort('@timestamp', 'Sort Old-New');
+            await pageObjects.dataGrid.openColumnMenuByField('@timestamp');
+            await page.testSubj
+              .locator('dataGridHeaderCellActionGroup-@timestamp')
+              .getByRole('button', { name: 'Sort Old-New' })
+              .click();
             await pageObjects.discover.waitUntilSearchingHasFinished();
           },
           REQUEST_COUNT_OPTIONS
