@@ -160,8 +160,13 @@ describe('ConversationClient', () => {
                             {
                               bool: {
                                 should: [
-                                  { term: { user_name: 'test-user' } },
                                   { term: { user_id: 'user-1' } },
+                                  {
+                                    bool: {
+                                      must_not: { exists: { field: 'user_id' } },
+                                      filter: { term: { user_name: 'test-user' } },
+                                    },
+                                  },
                                 ],
                                 minimum_should_match: 1,
                               },
@@ -493,6 +498,33 @@ describe('ConversationClient', () => {
         })
       );
       expect(result.read).toBe(true);
+    });
+
+    it('preserves the original owner when a non-owner writes with converse access', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      await client.update({ id: 'conversation-1', read: true }, { access: 'converse' });
+
+      // Guards against a future refactor giving `toEs` a `currentUser` argument, which would let
+      // any converse-access writer silently take ownership of a public conversation.
+      expect(mockEsClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({
+            user_id: 'other-user-id',
+            user_name: 'other-user',
+          }),
+        })
+      );
     });
 
     it('returns not found for converse updates when agent use access fails', async () => {
