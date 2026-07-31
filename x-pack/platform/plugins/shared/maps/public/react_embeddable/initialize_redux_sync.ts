@@ -257,6 +257,7 @@ export function initializeReduxSync({
       ),
       mapCenterAndZoom$.pipe(
         skip(1),
+        debounceTime(100),
         distinctUntilChanged(reduxSyncComparators.mapCenter as ComparatorFunction),
         tap((val) => {
           console.log('mapCenterAndZoom$ STATE CHANGE', { val });

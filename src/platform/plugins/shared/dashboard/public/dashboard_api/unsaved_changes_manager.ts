@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, map, tap, type Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  debounceTime,
+  map,
+  tap,
+  share,
+  type Observable,
+} from 'rxjs';
 
 import type { HasLastSavedChildState } from '@kbn/presentation-publishing';
 import type {
@@ -69,23 +77,23 @@ export function initializeUnsavedChangesManager({
 
   const dashboardStateChanges$ = combineLatest([
     settingsManager.internalApi.startComparing(lastSavedState$).pipe(
-      tap(() => {
-        console.log('settings');
+      tap((val) => {
+        console.log('settings', { val });
       })
     ),
     unifiedSearchManager.internalApi.startComparing(lastSavedState$).pipe(
-      tap(() => {
-        console.log('unified search');
+      tap((val) => {
+        console.log('unified search', { val });
       })
     ),
     layoutManager.internalApi.startComparing(lastSavedState$).pipe(
-      tap(() => {
-        console.log('layout');
+      tap((val) => {
+        console.log('layout', { val });
       })
     ),
     projectRoutingManager?.internalApi.startComparing(lastSavedState$).pipe(
-      tap(() => {
-        console.log('project routing');
+      tap((val) => {
+        console.log('project routing', { val });
       })
     ) ?? of({}),
   ]).pipe(
@@ -93,7 +101,8 @@ export function initializeUnsavedChangesManager({
       console.log('dashboard state changes', { settings, unifiedSearch, layout, projectRouting });
       debugger;
       return { ...settings, ...unifiedSearch, ...layout, ...projectRouting };
-    })
+    }),
+    share()
   );
 
   const unsavedChangesSubscription = combineLatest([viewMode$, dashboardStateChanges$])
