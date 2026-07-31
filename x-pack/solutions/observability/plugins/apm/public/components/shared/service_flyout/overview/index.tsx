@@ -176,7 +176,6 @@ export function ServiceFlyoutOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
-    http: core.http,
     serviceName: service.name,
     environment,
     rangeFrom,

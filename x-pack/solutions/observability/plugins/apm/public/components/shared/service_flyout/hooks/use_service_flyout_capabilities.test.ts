@@ -14,10 +14,12 @@ jest.mock('@kbn/react-hooks', () => ({
   useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
 }));
 
-const mockHttp = { fetch: jest.fn() };
+const mockCallApmApi = jest.fn();
+jest.mock('../../../../plugin', () => ({
+  getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+}));
 
 const baseParams = {
-  http: mockHttp as any,
   serviceName: 'opbeans-java',
   environment: 'production' as const,
   start: '2024-01-01T00:00:00.000Z',
@@ -27,7 +29,7 @@ const baseParams = {
 describe('useServiceFlyoutCapabilities', () => {
   beforeEach(() => {
     mockUseAbortableAsync.mockClear();
-    mockHttp.fetch.mockClear();
+    mockCallApmApi.mockClear();
   });
 
   describe('loading and error states', () => {
@@ -135,20 +137,23 @@ describe('useServiceFlyoutCapabilities', () => {
       const signal = new AbortController().signal;
       fetcherFn({ signal });
 
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/apm/services/opbeans-java/ingestion_type',
+      expect(mockCallApmApi).toHaveBeenCalledWith(
+        'GET /internal/apm/services/{serviceName}/ingestion_type',
         {
-          query: {
-            environment: 'production',
-            start: '2024-01-01T00:00:00.000Z',
-            end: '2024-01-01T01:00:00.000Z',
+          params: {
+            path: { serviceName: 'opbeans-java' },
+            query: {
+              environment: 'production',
+              start: '2024-01-01T00:00:00.000Z',
+              end: '2024-01-01T01:00:00.000Z',
+            },
           },
           signal,
         }
       );
     });
 
-    it('encodes special characters in the service name', () => {
+    it('passes the service name as a path param without manual encoding', () => {
       mockUseAbortableAsync.mockReturnValue({ value: undefined, loading: true, error: undefined });
 
       renderHook(() =>
@@ -158,9 +163,11 @@ describe('useServiceFlyoutCapabilities', () => {
       const [fetcherFn] = mockUseAbortableAsync.mock.calls[0];
       fetcherFn({ signal: new AbortController().signal });
 
-      expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/internal/apm/services/my%20service%2Fv2/ingestion_type',
-        expect.any(Object)
+      expect(mockCallApmApi).toHaveBeenCalledWith(
+        'GET /internal/apm/services/{serviceName}/ingestion_type',
+        expect.objectContaining({
+          params: expect.objectContaining({ path: { serviceName: 'my service/v2' } }),
+        })
       );
     });
   });

@@ -21,10 +21,12 @@ jest.mock('../../../../hooks/use_time_range', () => ({
   }),
 }));
 
-const mockHttp = { fetch: jest.fn() };
+const mockCallApmApi = jest.fn();
+jest.mock('../../../../plugin', () => ({
+  getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+}));
 
 const baseParams = {
-  http: mockHttp as any,
   serviceName: 'opbeans-java',
   environment: 'production' as const,
   rangeFrom: 'now-1h',
@@ -34,7 +36,7 @@ const baseParams = {
 describe('useServiceHasSystemMetrics', () => {
   beforeEach(() => {
     mockUseAbortableAsync.mockClear();
-    mockHttp.fetch.mockClear();
+    mockCallApmApi.mockClear();
   });
 
   it('returns isLoading true and hasSystemMetrics undefined while the fetch is loading', () => {
@@ -88,13 +90,16 @@ describe('useServiceHasSystemMetrics', () => {
     const signal = new AbortController().signal;
     fetcherFn({ signal });
 
-    expect(mockHttp.fetch).toHaveBeenCalledWith(
-      '/internal/apm/services/opbeans-java/has_system_metrics',
+    expect(mockCallApmApi).toHaveBeenCalledWith(
+      'GET /internal/apm/services/{serviceName}/has_system_metrics',
       {
-        query: {
-          environment: 'production',
-          start: '2024-01-01T00:00:00.000Z',
-          end: '2024-01-01T01:00:00.000Z',
+        params: {
+          path: { serviceName: 'opbeans-java' },
+          query: {
+            environment: 'production',
+            start: '2024-01-01T00:00:00.000Z',
+            end: '2024-01-01T01:00:00.000Z',
+          },
         },
         signal,
       }

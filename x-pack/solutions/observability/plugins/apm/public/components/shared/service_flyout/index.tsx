@@ -85,7 +85,6 @@ export function ServiceFlyout({
   const [refreshToken, setRefreshToken] = useState(Date.now());
 
   const capabilities = useServiceFlyoutCapabilities({
-    http: deps.core.http,
     serviceName: service.name,
     environment: flyoutEnvironment,
     start,

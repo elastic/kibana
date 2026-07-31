@@ -6,12 +6,11 @@
  */
 
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { HttpStart } from '@kbn/core/public';
 import type { Environment } from '../../../../../common/environment_rt';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { getApmInternalServices } from '../../../../plugin';
 
 interface Params {
-  http: HttpStart;
   serviceName: string;
   environment: Environment;
   rangeFrom: string;
@@ -19,21 +18,21 @@ interface Params {
 }
 
 export function useServiceHasSystemMetrics({
-  http,
   serviceName,
   environment,
   rangeFrom,
   rangeTo,
 }: Params): { hasSystemMetrics: boolean | undefined; isLoading: boolean } {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { callApmApi } = getApmInternalServices();
 
   const { value, loading } = useAbortableAsync(
     ({ signal }) =>
-      http.fetch<{ hasSystemMetrics: boolean }>(
-        `/internal/apm/services/${encodeURIComponent(serviceName)}/has_system_metrics`,
-        { query: { environment, start, end }, signal }
-      ),
-    [http, serviceName, environment, start, end]
+      callApmApi('GET /internal/apm/services/{serviceName}/has_system_metrics', {
+        params: { path: { serviceName }, query: { environment, start, end } },
+        signal,
+      }),
+    [callApmApi, serviceName, environment, start, end]
   );
 
   return { hasSystemMetrics: value?.hasSystemMetrics, isLoading: loading };

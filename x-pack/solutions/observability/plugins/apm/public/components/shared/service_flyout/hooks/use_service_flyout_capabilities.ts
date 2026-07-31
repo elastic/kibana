@@ -6,13 +6,12 @@
  */
 
 import { useAbortableAsync } from '@kbn/react-hooks';
-import type { HttpStart } from '@kbn/core/public';
 import type { ServiceSchemaType } from '@kbn/apm-types';
 import type { Environment } from '../../../../../common/environment_rt';
 import type { ServiceFlyoutCapabilities } from '../service_flyout_context';
+import { getApmInternalServices } from '../../../../plugin';
 
 interface Params {
-  http: HttpStart;
   serviceName: string;
   environment: Environment;
   start: string;
@@ -46,19 +45,20 @@ const CAPABILITIES_BY_SCHEMA: Record<
 };
 
 export function useServiceFlyoutCapabilities({
-  http,
   serviceName,
   environment,
   start,
   end,
 }: Params): ServiceFlyoutCapabilities {
+  const { callApmApi } = getApmInternalServices();
+
   const { value, loading, error } = useAbortableAsync(
     ({ signal }) =>
-      http.fetch<{ schema: ServiceSchemaType }>(
-        `/internal/apm/services/${encodeURIComponent(serviceName)}/ingestion_type`,
-        { query: { environment, start, end }, signal }
-      ),
-    [http, serviceName, environment, start, end]
+      callApmApi('GET /internal/apm/services/{serviceName}/ingestion_type', {
+        params: { path: { serviceName }, query: { environment, start, end } },
+        signal,
+      }),
+    [callApmApi, serviceName, environment, start, end]
   );
 
   if (!value) {
