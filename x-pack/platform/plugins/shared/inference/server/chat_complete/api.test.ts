@@ -31,6 +31,7 @@ import {
   createInferenceExecutorMock,
   createRegexWorkerServiceMock,
   chunkEvent,
+  tokensEvent,
 } from '../test_utils';
 import { createChatCompleteApi } from './api';
 import { createChatCompleteCallbackApi } from './callback_api';
@@ -297,6 +298,55 @@ describe('createChatCompleteApi', () => {
         metadata: undefined,
         toolCalls: [],
       });
+    });
+
+    it('returns the successful attempt token counts when a tool validation error is retried', async () => {
+      let count = 0;
+      inferenceAdapter.chatComplete.mockImplementation(() => {
+        count++;
+        const isFirstAttempt = count === 1;
+        return of(
+          chunkEvent('', [
+            {
+              index: 0,
+              toolCallId: `call-${count}`,
+              function: {
+                name: 'myTool',
+                arguments: isFirstAttempt ? 'not-valid-json{' : '{}',
+              },
+            },
+          ]),
+          tokensEvent(
+            isFirstAttempt
+              ? { prompt: 1, completion: 2, total: 3 }
+              : { prompt: 4, completion: 5, total: 6 },
+            { model: isFirstAttempt ? 'failed_attempt_model' : 'success_attempt_model' }
+          )
+        );
+      });
+
+      const response = await chatComplete({
+        connectorId: 'connectorId',
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        tools: {
+          myTool: {
+            description: 'my tool',
+            schema: { type: 'object', properties: {} },
+          },
+        },
+        maxRetries: 1,
+        retryConfiguration: {
+          initialDelay: 1,
+          backoffMultiplier: 1,
+        },
+      });
+
+      expect(inferenceAdapter.chatComplete).toHaveBeenCalledTimes(2);
+      expect(response.tokens).toEqual({ prompt: 4, completion: 5, total: 6 });
+      expect(response.model).toBe('success_attempt_model');
+      expect(response.toolCalls).toEqual([
+        { toolCallId: 'call-2', function: { name: 'myTool', arguments: {} } },
+      ]);
     });
 
     describe('request cancellation', () => {

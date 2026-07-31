@@ -37,6 +37,7 @@ import {
   resolveInferenceEndpoint,
   handleCancellation,
   handleLifecycleCallbacks,
+  holdTokenCountEventsUntilMessage,
   streamToResponse,
 } from './utils';
 import type { InferenceCallbackManager } from '../inference_client/callback_manager';
@@ -149,6 +150,8 @@ export function createChatCompleteCallbackApi({
         isTokenUsageTrackingEnabled,
       })
     ).pipe(
+      // must stay upstream of the retry so failed attempts drop their token counts
+      holdTokenCountEventsUntilMessage(),
       retryWithExponentialBackoff({
         maxRetry: maxRetries,
         backoffMultiplier: retryConfiguration.backoffMultiplier,
