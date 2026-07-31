@@ -129,11 +129,11 @@ const streamsAppRoutes = {
               }),
               t.intersection([
                 t.partial({
-                query: timeRangeQueryParams,
-              }),
-              t.partial({
-                query: flyoutParams,
-              })
+                  query: timeRangeQueryParams,
+                }),
+                t.partial({
+                  query: flyoutParams,
+                }),
               ]),
             ]),
           },
