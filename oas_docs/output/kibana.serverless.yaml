@@ -74907,6 +74907,7 @@ components:
                           - name
                           - priority
                           - conflictType
+                      maxItems: 100
                       type: array
                     dataStreamName:
                       type: string
@@ -74917,6 +74918,7 @@ components:
                     - namespace
                     - baseTemplateName
                     - conflictingTemplates
+                maxItems: 100
                 type: array
             required:
               - name
@@ -108391,6 +108393,7 @@ components:
                     - name
                     - priority
                     - conflictType
+                maxItems: 100
                 type: array
               dataStreamName:
                 type: string
@@ -108401,6 +108404,7 @@ components:
               - namespace
               - baseTemplateName
               - conflictingTemplates
+          maxItems: 100
           type: array
       required:
         - item
