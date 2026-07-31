@@ -87,5 +87,7 @@ export interface DocView<TState extends object = object> {
   order: number;
   title: string;
   enabled?: boolean;
+  /** Optional element rendered before the tab title (e.g. a technical preview badge). */
+  prepend?: ReactElement;
   render: DocViewRenderFunction<TState>;
 }

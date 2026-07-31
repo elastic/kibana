@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -177,11 +179,9 @@ export function getGenAiFields(metadata: Record<string, unknown>): GenAiFields {
       // Multi-valued: one finish reason per choice — keep every element.
       finish_reasons: allValues<string>(metadata, ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS),
     },
-    inputMessages: parseGenAiMessages(
-      metadata[ATTRIBUTE_GEN_AI_INPUT_MESSAGES] as string[] | undefined
-    ),
+    inputMessages: parseGenAiMessages(allValues<string>(metadata, ATTRIBUTE_GEN_AI_INPUT_MESSAGES)),
     outputMessages: parseGenAiMessages(
-      metadata[ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES] as string[] | undefined
+      allValues<string>(metadata, ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES)
     ),
     systemInstructions: f(ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS) as string | undefined,
   };

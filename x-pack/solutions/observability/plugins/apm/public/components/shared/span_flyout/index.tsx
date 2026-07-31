@@ -27,6 +27,7 @@ import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
 import { Stacktrace, PlaintextStacktrace } from '@kbn/event-stacktrace';
 import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { getGenAiFields, hasGenAiData } from '@kbn/apm-ui-shared';
 import { OpenInDiscover } from '../links/discover_links/open_in_discover';
 import { SPAN_FLYOUT_EBT_ELEMENTS } from './ebt_constants';
 import type { Span } from '../../../../typings/es_schemas/ui/span';
@@ -34,7 +35,6 @@ import type { Transaction } from '../../../../typings/es_schemas/ui/transaction'
 import { SpanMetadata } from '../metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../span_links/span_links_tab_content';
 import { getGenAiTabContent } from '../genai_tab/get_genai_tab_content';
-import { getGenAiFields, hasGenAiData } from '../genai_tab/get_genai_fields';
 import { Summary } from '../summary';
 import { CompositeSpanDurationSummaryItem } from '../summary/composite_span_duration_summary_item';
 import { HttpInfoSummaryItem } from '../summary/http_info_summary_item';

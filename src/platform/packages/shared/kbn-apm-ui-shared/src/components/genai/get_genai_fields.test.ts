@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -216,6 +218,24 @@ describe('getGenAiFields', () => {
     expect(fields.operationName).toBe('chat');
     expect(fields.requestModel).toBe('claude-3');
     expect(fields.provider).toBe('anthropic');
+  });
+
+  it('parses messages from bare gen_ai.* keys (no attributes. prefix)', () => {
+    const fields = getGenAiFields({
+      'gen_ai.input.messages': [JSON.stringify({ role: 'user', content: 'Hello' })],
+      'gen_ai.output.messages': [JSON.stringify({ role: 'assistant', content: 'Hi!' })],
+    });
+    expect(fields.inputMessages).toHaveLength(1);
+    expect(fields.inputMessages[0].content).toBe('Hello');
+    expect(fields.outputMessages[0].role).toBe('assistant');
+  });
+
+  it('parses messages from labels.gen_ai_* keys (APM Server ingest)', () => {
+    const fields = getGenAiFields({
+      'labels.gen_ai_input_messages': [JSON.stringify({ role: 'user', content: 'Hello' })],
+    });
+    expect(fields.inputMessages).toHaveLength(1);
+    expect(fields.inputMessages[0].role).toBe('user');
   });
 });
 

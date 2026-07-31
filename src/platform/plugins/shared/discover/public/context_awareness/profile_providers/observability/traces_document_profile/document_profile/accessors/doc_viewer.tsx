@@ -9,7 +9,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import { GenAiTechnicalPreviewBadge, hasGenAiData } from '@kbn/apm-ui-shared';
+import {
+  UnifiedDocViewerObservabilityTracesGenAi,
+  UnifiedDocViewerObservabilityTracesOverview,
+} from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import type { DocumentProfileProvider } from '../../../../../profiles';
@@ -42,6 +46,18 @@ export const createGetDocViewer =
             />
           ),
         });
+
+        if (hasGenAiData(params.record.flattened)) {
+          registry.add({
+            id: 'doc_view_obs_traces_genai',
+            title: i18n.translate('discover.docViews.observability.traces.genAi.title', {
+              defaultMessage: 'GenAI',
+            }),
+            order: 5,
+            prepend: <GenAiTechnicalPreviewBadge />,
+            render: (props) => <UnifiedDocViewerObservabilityTracesGenAi {...props} />,
+          });
+        }
 
         return prevDocViewer.docViewsRegistry(registry);
       },

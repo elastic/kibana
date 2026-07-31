@@ -47,6 +47,7 @@ const InternalDocViewer = forwardRef<InternalDocViewerApi, InternalDocViewerProp
       .map((docView: DocView) => ({
         id: getFullTabId(docView.id), // `id` value is used to persist the selected tab in localStorage
         name: docView.title,
+        prepend: docView.prepend,
         content: (
           <DocViewerTab
             key={`${renderProps.hit.id}_${docView.id}`}

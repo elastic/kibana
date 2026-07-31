@@ -24,6 +24,7 @@ export const TRACES_DOC_VIEWER_EBT_ELEMENTS = {
   ABOUT: 'docViewerAbout',
   LOGS: 'docViewerLogs',
   SIMILAR_SPANS: 'docViewerSimilarSpans',
+  GENAI_TAB: 'docViewerGenAiTab',
   WATERFALL_ROW: 'docViewerWaterfallRow',
   WATERFALL_ERROR_BADGE: 'docViewerWaterfallErrorBadge',
   WATERFALL_SERVICE_BADGE: 'docViewerWaterfallServiceBadge',

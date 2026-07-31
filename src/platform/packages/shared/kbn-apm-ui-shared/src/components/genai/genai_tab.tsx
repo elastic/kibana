@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -17,9 +19,10 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { asInteger } from '../../utils';
 import type { GenAiFields } from './get_genai_fields';
 import { GenAiFieldValue } from './genai_field_value';
-import { GenAiMessages } from './genai_messages';
+import { GenAiMessages, type GenAiEbtProps } from './genai_messages';
 import { GenAiSection } from './genai_section';
 
 interface PillProps {
@@ -75,9 +78,11 @@ const DETAIL_COLUMNS: Array<EuiBasicTableColumn<DetailRow>> = [
 
 interface Props {
   genAi: GenAiFields;
+  /** When provided, copy-button clicks are tracked via `data-ebt-*` attributes. */
+  ebt?: GenAiEbtProps;
 }
 
-export function GenAiTab({ genAi }: Props) {
+export function GenAiTab({ genAi, ebt }: Props) {
   const {
     operationName,
     requestModel,
@@ -97,7 +102,7 @@ export function GenAiTab({ genAi }: Props) {
   const pills: PillProps[] = [];
   if (operationName) {
     pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.operationName', {
+      label: i18n.translate('apmUiShared.genAi.pill.operationName', {
         defaultMessage: 'Operation',
       }),
       value: operationName,
@@ -106,33 +111,34 @@ export function GenAiTab({ genAi }: Props) {
   }
   if (requestModel) {
     pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.model', { defaultMessage: 'Model' }),
+      label: i18n.translate('apmUiShared.genAi.pill.model', { defaultMessage: 'Model' }),
       value: requestModel,
       testSubj: 'genAiPillModel',
     });
   }
   if (provider) {
     pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.provider', { defaultMessage: 'Provider' }),
+      label: i18n.translate('apmUiShared.genAi.pill.provider', { defaultMessage: 'Provider' }),
       value: provider,
       testSubj: 'genAiPillProvider',
     });
   }
   if (inputTokens !== undefined) {
     pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.inputTokens', {
+      label: i18n.translate('apmUiShared.genAi.pill.inputTokens', {
         defaultMessage: 'Input tokens',
       }),
-      value: inputTokens,
+      // Same formatting as the waterfall token badges (e.g. 1,438).
+      value: asInteger(inputTokens),
       testSubj: 'genAiPillInputTokens',
     });
   }
   if (outputTokens !== undefined) {
     pills.push({
-      label: i18n.translate('xpack.apm.genAi.pill.outputTokens', {
+      label: i18n.translate('apmUiShared.genAi.pill.outputTokens', {
         defaultMessage: 'Output tokens',
       }),
-      value: outputTokens,
+      value: asInteger(outputTokens),
       testSubj: 'genAiPillOutputTokens',
     });
   }
@@ -143,7 +149,7 @@ export function GenAiTab({ genAi }: Props) {
   if (responseModel) {
     detailRows.push({
       id: 'responseModel',
-      label: i18n.translate('xpack.apm.genAi.params.responseModel', {
+      label: i18n.translate('apmUiShared.genAi.params.responseModel', {
         defaultMessage: 'Response model',
       }),
       content: <GenAiFieldValue value={responseModel} />,
@@ -152,7 +158,7 @@ export function GenAiTab({ genAi }: Props) {
   if (conversationId) {
     detailRows.push({
       id: 'conversationId',
-      label: i18n.translate('xpack.apm.genAi.params.conversationId', {
+      label: i18n.translate('apmUiShared.genAi.params.conversationId', {
         defaultMessage: 'Conversation ID',
       }),
       content: <GenAiFieldValue value={conversationId} />,
@@ -161,7 +167,7 @@ export function GenAiTab({ genAi }: Props) {
   if (response.id) {
     detailRows.push({
       id: 'responseId',
-      label: i18n.translate('xpack.apm.genAi.params.responseId', {
+      label: i18n.translate('apmUiShared.genAi.params.responseId', {
         defaultMessage: 'Response ID',
       }),
       content: <GenAiFieldValue value={response.id} />,
@@ -170,7 +176,7 @@ export function GenAiTab({ genAi }: Props) {
   if (response.finish_reasons?.length) {
     detailRows.push({
       id: 'finishReasons',
-      label: i18n.translate('xpack.apm.genAi.params.finishReasons', {
+      label: i18n.translate('apmUiShared.genAi.params.finishReasons', {
         defaultMessage: 'Finish reasons',
       }),
       content: <GenAiFieldValue value={response.finish_reasons} />,
@@ -191,7 +197,7 @@ export function GenAiTab({ genAi }: Props) {
       {pills.length > 0 && (
         <GenAiSection
           id="summary"
-          title={i18n.translate('xpack.apm.genAi.section.summary', {
+          title={i18n.translate('apmUiShared.genAi.section.summary', {
             defaultMessage: 'Summary',
           })}
         >
@@ -211,7 +217,7 @@ export function GenAiTab({ genAi }: Props) {
           <EuiSpacer size="m" />
           <GenAiSection
             id="details"
-            title={i18n.translate('xpack.apm.genAi.section.details', {
+            title={i18n.translate('apmUiShared.genAi.section.details', {
               defaultMessage: 'Details',
             })}
           >
@@ -223,7 +229,7 @@ export function GenAiTab({ genAi }: Props) {
               columns={DETAIL_COLUMNS}
               data-test-subj="genAiDetails"
               css={detailTableCss}
-              tableCaption={i18n.translate('xpack.apm.genAi.section.details.tableCaption', {
+              tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
                 defaultMessage: 'GenAI details',
               })}
             />
@@ -237,7 +243,7 @@ export function GenAiTab({ genAi }: Props) {
           <EuiSpacer size="m" />
           <GenAiSection
             id="conversation"
-            title={i18n.translate('xpack.apm.genAi.section.conversation', {
+            title={i18n.translate('apmUiShared.genAi.section.conversation', {
               defaultMessage: 'Conversation',
             })}
           >
@@ -245,6 +251,7 @@ export function GenAiTab({ genAi }: Props) {
               inputMessages={inputMessages}
               outputMessages={outputMessages}
               systemInstructions={systemInstructions}
+              ebt={ebt}
             />
           </GenAiSection>
         </>

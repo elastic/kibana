@@ -10,6 +10,7 @@ import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
   ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
   ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
 } from '@kbn/apm-types/es_fields';
 import { castArray } from 'lodash';
 import { ERROR_ID, SPAN_ID, ID, TRANSACTION_ID } from '../../../common/es_fields/apm';
@@ -20,9 +21,10 @@ import { getFieldFromSource } from './get_field_from_source';
 // whose values routinely exceed the limit. Values over the limit are silently
 // dropped from the index at ingest time — invisible to the fields API — but
 // survive in _source, so we fetch them there and merge as a fallback.
-const LONG_FIELDS_SOURCE_FALLBACK = [
+export const LONG_FIELDS_SOURCE_FALLBACK = [
   ATTRIBUTE_GEN_AI_INPUT_MESSAGES,
   ATTRIBUTE_GEN_AI_OUTPUT_MESSAGES,
+  ATTRIBUTE_GEN_AI_SYSTEM_INSTRUCTIONS,
 ];
 
 export async function getEventMetadata({

@@ -8,8 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { GenAiFields } from './get_genai_fields';
-import { GenAiTab } from './genai_tab';
+import { GenAiTab, type GenAiFields } from '@kbn/apm-ui-shared';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
 
 interface Props {
@@ -30,7 +29,7 @@ export function getGenAiTabContent({ isGenAiSpan, genAi }: Props) {
     content: (
       <>
         <EuiSpacer size="m" />
-        <GenAiTab genAi={genAi} />
+        <GenAiTab genAi={genAi} ebt={{ element: 'apmGenAiTab' }} />
       </>
     ),
   };

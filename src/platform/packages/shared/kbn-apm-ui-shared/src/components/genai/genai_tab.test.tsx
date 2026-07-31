@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import React from 'react';
@@ -43,6 +45,12 @@ describe('GenAiTab', () => {
     expect(screen.getByTestId('genAiPillProvider')).toHaveTextContent('openai');
     expect(screen.getByTestId('genAiPillInputTokens')).toHaveTextContent('120');
     expect(screen.getByTestId('genAiPillOutputTokens')).toHaveTextContent('45');
+  });
+
+  it('formats token counts like the waterfall badges (thousands separator)', () => {
+    renderTab({ inputTokens: 960, outputTokens: 1438 });
+    expect(screen.getByTestId('genAiPillInputTokens')).toHaveTextContent('Input tokens: 960');
+    expect(screen.getByTestId('genAiPillOutputTokens')).toHaveTextContent('Output tokens: 1,438');
   });
 
   it('hides pills when values are absent', () => {
