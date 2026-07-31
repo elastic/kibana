@@ -57,3 +57,4 @@ export * from './specs/grafana/grafana';
 export * from './specs/rootly/rootly';
 export * from './specs/sentry/sentry';
 export * from './specs/datadog/datadog';
+export * from './specs/jenkins/jenkins';
