@@ -161,35 +161,24 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('selects the earliest events when max_signals truncates a mixed pattern', async () => {
       const base = new Date();
-      await indexNanosDocs([
-        {
-          '@timestamp': nanosTimestamp(base, 4),
-          event: { ingested: nanosTimestamp(base, 4) },
-          host: { name: 'nanos-5' },
-        },
-        {
-          '@timestamp': nanosTimestamp(base, 2),
-          event: { ingested: nanosTimestamp(base, 2) },
-          host: { name: 'nanos-3' },
-        },
-        {
-          '@timestamp': nanosTimestamp(base, 0),
-          event: { ingested: nanosTimestamp(base, 0) },
-          host: { name: 'nanos-1' },
-        },
-      ]);
-      await indexMillisDocs([
-        {
-          '@timestamp': new Date(base.getTime() - 4000).toISOString(),
-          event: { ingested: new Date(base.getTime() - 4000).toISOString() },
-          host: { name: 'millis-4' },
-        },
-        {
-          '@timestamp': new Date(base.getTime() - 2000).toISOString(),
-          event: { ingested: new Date(base.getTime() - 2000).toISOString() },
-          host: { name: 'millis-2' },
-        },
-      ]);
+      const nanosDocs = [4, 2, 0].map((index) => {
+        const timestamp = nanosTimestamp(base, index);
+        return {
+          '@timestamp': timestamp,
+          event: { ingested: timestamp },
+          host: { name: `nanos-${index + 1}` },
+        };
+      });
+      const millisDocs = [4, 2].map((seconds) => {
+        const timestamp = new Date(base.getTime() - seconds * 1000).toISOString();
+        return {
+          '@timestamp': timestamp,
+          event: { ingested: timestamp },
+          host: { name: `millis-${seconds}` },
+        };
+      });
+      await indexNanosDocs(nanosDocs);
+      await indexMillisDocs(millisDocs);
 
       const rule = getCustomQueryRuleParams({
         index: [NANOS_INDEX, MILLIS_INDEX],
