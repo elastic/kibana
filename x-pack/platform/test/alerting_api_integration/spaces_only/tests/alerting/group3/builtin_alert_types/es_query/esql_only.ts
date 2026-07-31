@@ -368,10 +368,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     });
 
     it('runs correctly: threshold on grouped hit with all columns', async () => {
-      // This test is sensitive to the fields in the index; when adding new fields,
-      // you should drop them here, as it has a limit of 10 or so for grouping,
-      // or otherwise change the grouping values that result.
-      const columnsToDrop = ['tags'];
+      // This test is sensitive to the fields in the index; it groups by every mapped
+      // column. `tags` is mapped but never written, so it comes back as a null column
+      // here.
 
       // this test runs the rule once, injecting data before the first run
       // the rule should fire each time, triggering an index action each time
@@ -386,7 +385,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         objectRemover,
         connectorId,
         { name: 'always fire', groupBy: 'row' },
-        `from kibana-alerting-test-data | drop ${columnsToDrop}`
+        'from kibana-alerting-test-data'
       );
 
       const docs = await waitForDocs(3);
@@ -415,6 +414,9 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(grouping.source).not.to.be(undefined);
         expect(grouping.testedValue).to.be.ok();
         expect(grouping.testedValueFloat).to.be.ok();
+        // `tags` is null on every row, so the null field is dropped from the grouping
+        // rather than shifting the remaining fields onto the wrong names.
+        expect(grouping.tags).to.be(undefined);
       }
 
       const aadDocs = await getAADDocsForRule(ruleId, 3);

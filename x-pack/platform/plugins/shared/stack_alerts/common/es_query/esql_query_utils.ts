@@ -6,7 +6,10 @@
  */
 
 import { entries, findLastIndex, isNil } from 'lodash';
-import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
+import type {
+  ParseAggregationResultsOpts,
+  ParsedAggregationBucket,
+} from '@kbn/triggers-actions-ui-plugin/common';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption, ESQLAstCommand } from '@elastic/esql/types';
 import { Parser, isOptionNode, isColumn, isFunctionExpression, isAssignment } from '@elastic/esql';
@@ -179,7 +182,7 @@ export const toGroupedEsqlQueryHits = async (
     }
   }
 
-  const aggregations = {
+  const aggregations: { groupAgg: { buckets: ParsedAggregationBucket[] } } = {
     groupAgg: {
       buckets: entries(groupedHits).map(([key, value]) => {
         return {
