@@ -9,8 +9,12 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { htmlIdGenerator } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { ConversationsService } from '../services/conversations/conversations_service';
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationMetadataFlyoutTitle');
+
+const flyoutQueryClient = new QueryClient();
 
 export const openConversationMetadataFlyout = async (
   core: CoreStart,
@@ -18,10 +22,17 @@ export const openConversationMetadataFlyout = async (
 ): Promise<() => void> => {
   const { ConversationMetadataFlyout } = await import('./conversation_metadata_flyout');
   const titleId = generateTitleId();
+  const conversationsService = new ConversationsService({ http: core.http });
 
   const flyoutRef = core.overlays.openFlyout(
     toMountPoint(
-      <ConversationMetadataFlyout conversationId={conversationId} titleId={titleId} />,
+      <QueryClientProvider client={flyoutQueryClient}>
+        <ConversationMetadataFlyout
+          conversationId={conversationId}
+          titleId={titleId}
+          conversationsService={conversationsService}
+        />
+      </QueryClientProvider>,
       core.rendering
     ),
     {
