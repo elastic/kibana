@@ -23,6 +23,15 @@ export interface UiamApiKeyAndSOId {
   uiamApiKey: string;
 }
 
+export interface UndecryptableApiKeyAndSOId {
+  id: string;
+  /** Raw stored value — plaintext when written by the pre-encryption-fix provisioning bug. */
+  apiKeyId?: string;
+  /** Raw stored value — plaintext when written by the pre-encryption-fix provisioning bug. */
+  uiamApiKey?: string;
+  error: Error;
+}
+
 interface GetApiKeyIdsToInvalidateOpts {
   apiKeySOsPendingInvalidation: SavedObjectsFindResponse<ApiKeyToInvalidate>;
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
@@ -35,6 +44,7 @@ interface GetApiKeysToInvalidateResult {
   apiKeyIdsToInvalidate: ApiKeyIdAndSOId[];
   uiamApiKeysToInvalidate?: UiamApiKeyAndSOId[];
   apiKeyIdsToExclude: ApiKeyIdAndSOId[];
+  undecryptableApiKeysToInvalidate?: UndecryptableApiKeyAndSOId[];
 }
 
 export async function getApiKeyIdsToInvalidate({
@@ -46,16 +56,36 @@ export async function getApiKeyIdsToInvalidate({
 }: GetApiKeyIdsToInvalidateOpts): Promise<GetApiKeysToInvalidateResult> {
   const apiKeyIds: ApiKeyIdAndSOId[] = [];
   const uiamApiKeys: UiamApiKeyAndSOId[] = [];
+  const undecryptableApiKeys: UndecryptableApiKeyAndSOId[] = [];
 
   if (encryptedSavedObjectsClient) {
     // Decrypt the apiKeyId for each pending invalidation SO
     await Promise.all(
       apiKeySOsPendingInvalidation.saved_objects.map(async (apiKeyPendingInvalidationSO) => {
-        const decryptedApiKeyPendingInvalidationObject =
-          await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
-            savedObjectType,
-            apiKeyPendingInvalidationSO.id
-          );
+        let decryptedApiKeyPendingInvalidationObject;
+        try {
+          decryptedApiKeyPendingInvalidationObject =
+            await encryptedSavedObjectsClient.getDecryptedAsInternalUser<ApiKeyToInvalidate>(
+              savedObjectType,
+              apiKeyPendingInvalidationSO.id
+            );
+        } catch (error) {
+          // Decryption failures are deterministic (e.g. attributes persisted in plaintext by a
+          // pre-encryption-fix provisioning run), so this SO can never be drained through the
+          // normal path — without special handling it would produce decrypt errors on every task
+          // run, forever, and (because the whole batch is decrypted together) block draining of
+          // healthy SOs. Collect it with the raw stored attribute values: when the root cause is
+          // the plaintext bug those values are the real key id/key and the key can still be
+          // invalidated before the SO is deleted.
+          const { uiamApiKey, apiKeyId } = apiKeyPendingInvalidationSO.attributes;
+          undecryptableApiKeys.push({
+            id: apiKeyPendingInvalidationSO.id,
+            apiKeyId,
+            uiamApiKey,
+            error,
+          });
+          return;
+        }
 
         const { uiamApiKey, apiKeyId } = decryptedApiKeyPendingInvalidationObject.attributes;
         if (uiamApiKey) {
@@ -91,10 +121,17 @@ export async function getApiKeyIdsToInvalidate({
     });
   }
 
-  // Query saved objects index to see if any API keys are in use
+  // Query saved objects index to see if any API keys are in use. Raw ids from undecryptable SOs
+  // are included: when the stored value is plaintext (the provisioning bug) it is a real key id
+  // that may still be referenced.
   const apiKeyIdStrings = apiKeyIds.map(({ apiKeyId }) => apiKeyId);
   const uiamApiKeyIdStrings = uiamApiKeys.map(({ apiKeyId }) => apiKeyId);
-  const allApiKeyIdStrings = apiKeyIdStrings.concat(uiamApiKeyIdStrings);
+  const undecryptableApiKeyIdStrings = undecryptableApiKeys
+    .map(({ apiKeyId }) => apiKeyId)
+    .filter((apiKeyId): apiKeyId is string => Boolean(apiKeyId));
+  const allApiKeyIdStrings = apiKeyIdStrings
+    .concat(uiamApiKeyIdStrings)
+    .concat(undecryptableApiKeyIdStrings);
 
   let apiKeyIdsInUseBuckets: AggregationsStringTermsBucketKeys[] = [];
 
@@ -111,6 +148,7 @@ export async function getApiKeyIdsToInvalidate({
   const apiKeyIdsToInvalidate: ApiKeyIdAndSOId[] = [];
   const uiamApiKeysToInvalidate: UiamApiKeyAndSOId[] = [];
   const apiKeyIdsToExclude: ApiKeyIdAndSOId[] = [];
+  const undecryptableApiKeysToInvalidate: UndecryptableApiKeyAndSOId[] = [];
 
   apiKeyIds.forEach(({ id, apiKeyId }) => {
     if (apiKeyIdsInUseBuckets.find((bucket) => bucket.key === apiKeyId)) {
@@ -128,9 +166,26 @@ export async function getApiKeyIdsToInvalidate({
     }
   });
 
+  undecryptableApiKeys.forEach((undecryptableApiKey) => {
+    // If the raw id matches a key still in use, keep the SO for a later run rather than
+    // deleting it — deleting now would leak the key once the referencing object releases it.
+    if (
+      undecryptableApiKey.apiKeyId &&
+      apiKeyIdsInUseBuckets.find((bucket) => bucket.key === undecryptableApiKey.apiKeyId)
+    ) {
+      apiKeyIdsToExclude.push({
+        id: undecryptableApiKey.id,
+        apiKeyId: undecryptableApiKey.apiKeyId,
+      });
+    } else {
+      undecryptableApiKeysToInvalidate.push(undecryptableApiKey);
+    }
+  });
+
   return {
     apiKeyIdsToInvalidate,
     apiKeyIdsToExclude,
     ...(uiamApiKeysToInvalidate.length > 0 ? { uiamApiKeysToInvalidate } : {}),
+    ...(undecryptableApiKeysToInvalidate.length > 0 ? { undecryptableApiKeysToInvalidate } : {}),
   };
 }

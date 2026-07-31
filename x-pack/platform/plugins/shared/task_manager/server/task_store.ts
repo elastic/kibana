@@ -353,6 +353,7 @@ export class TaskStore {
     );
 
     const result = new Map<string, { apiKey?: string; uiamApiKey?: string }>();
+    const undecryptableUiamKeyTaskIds: Array<{ id: string; errorMessage: string }> = [];
     const finder =
       await this.esoClient!.createPointInTimeFinderDecryptedAsInternalUser<SerializedConcreteTaskInstance>(
         {
@@ -367,11 +368,67 @@ export class TaskStore {
           apiKey: savedObject.attributes.apiKey,
           uiamApiKey: savedObject.attributes.uiamApiKey,
         });
+        const decryptionErrorMessage = savedObject.error?.message;
+        if (decryptionErrorMessage && decryptionErrorMessage.includes('"uiamApiKey"')) {
+          undecryptableUiamKeyTaskIds.push({
+            id: savedObject.id,
+            errorMessage: decryptionErrorMessage,
+          });
+        }
       });
     }
 
     await finder.close();
+
+    if (undecryptableUiamKeyTaskIds.length > 0) {
+      await this.stripUndecryptableUiamApiKeys(undecryptableUiamKeyTaskIds);
+    }
+
     return result;
+  }
+
+  /**
+   * Self-heals task docs whose `uiamApiKey` cannot be decrypted (e.g. persisted in plaintext by a
+   * pre-encryption-fix provisioning run). A poisoned `uiamApiKey` fails the whole decrypted read,
+   * which strips the sibling `apiKey` too, so the task runs with raw ciphertext credentials and
+   * fails to authenticate on every run. Removing `uiamApiKey` and `userScope.uiamApiKeyId` (and
+   * not touching `id`/`taskType`, the only fields in the `apiKey` AAD) makes `apiKey` decryptable
+   * again on the next read and lets provisioning re-mint a properly encrypted UIAM key.
+   *
+   * Removing an attribute is not expressible as a partial saved object update (`uiamApiKey` is
+   * `schema.maybe(schema.string())`, so it cannot be cleared with `null`), hence the script update
+   * against the raw document. A version conflict from a concurrent task update is left for the
+   * next read to heal.
+   */
+  private async stripUndecryptableUiamApiKeys(tasks: Array<{ id: string; errorMessage: string }>) {
+    await Promise.all(
+      tasks.map(async ({ id, errorMessage }) => {
+        try {
+          await this.esClient.update({
+            index: this.index,
+            id: this.serializer.generateRawId(undefined, TASK_SO_NAME, id),
+            script: {
+              source: `
+                if (ctx._source.task != null) {
+                  ctx._source.task.remove('uiamApiKey');
+                  if (ctx._source.task.userScope != null) {
+                    ctx._source.task.userScope.remove('uiamApiKeyId');
+                  }
+                }
+              `,
+              lang: 'painless',
+            },
+          });
+          this.logger.warn(
+            `Removed undecryptable uiamApiKey from task "${id}" so its ES API key is readable again and a new UIAM key can be provisioned. Decryption error: ${errorMessage}`
+          );
+        } catch (error) {
+          this.logger.error(
+            `Failed to remove undecryptable uiamApiKey from task "${id}": ${error.message}`
+          );
+        }
+      })
+    );
   }
 
   private async bulkGetAndMergeTasksWithDecryptedApiKey(tasks: ConcreteTaskInstance[]) {
