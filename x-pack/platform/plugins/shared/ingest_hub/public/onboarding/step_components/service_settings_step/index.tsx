@@ -302,7 +302,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       <EuiInMemoryTable
         items={filteredServices}
         columns={columns}
-        compressed
         pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         sorting={true}
         tableLayout="auto"
