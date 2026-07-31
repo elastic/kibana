@@ -12,7 +12,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { TaskCost } from '@kbn/task-manager-plugin/server';
-import { SEVERITIES, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
+import { SEVERITY_TTL_GROUPS } from '../../common/notification_schema';
 import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
@@ -26,11 +26,11 @@ export const CLEANUP_TASK_ID = 'notification-center:cleanup';
 export const buildCleanupQuery = () => ({
   bool: {
     minimum_should_match: 1 as const,
-    should: SEVERITIES.map((severity) => ({
+    should: [...SEVERITY_TTL_GROUPS.entries()].map(([days, severities]) => ({
       bool: {
         filter: [
-          { term: { severity } },
-          { range: { '@timestamp': { lt: `now-${SEVERITY_TTL_DAYS[severity]}d/d` } } },
+          { terms: { severity: severities } },
+          { range: { '@timestamp': { lt: `now-${days}d/d` } } },
         ],
       },
     })),

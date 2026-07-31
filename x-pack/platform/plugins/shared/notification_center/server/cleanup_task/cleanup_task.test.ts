@@ -38,30 +38,29 @@ describe('cleanup_task', () => {
       expect(query.bool.minimum_should_match).toBe(1);
     });
 
-    it('produces one should-clause per severity (4 total)', () => {
+    it('produces one should-clause per TTL window (3 total)', () => {
       const query = buildCleanupQuery();
-      expect(query.bool.should).toHaveLength(4);
+      expect(query.bool.should).toHaveLength(3);
     });
 
-    it('each clause filters by term severity and @timestamp range', () => {
+    it('each clause filters by terms severity and @timestamp range', () => {
       const query = buildCleanupQuery();
       const clauses = query.bool.should;
 
-      const infoClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'info');
+      const byLt = (lt: string) =>
+        clauses.find((c) => c.bool.filter[1].range?.['@timestamp'].lt === lt);
+
+      const infoClause = byLt('now-30d/d');
       expect(infoClause).toBeDefined();
-      expect(infoClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-30d/d');
+      expect(infoClause!.bool.filter[0].terms?.severity).toEqual(['info']);
 
-      const warningClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'warning');
+      const warningClause = byLt('now-60d/d');
       expect(warningClause).toBeDefined();
-      expect(warningClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-60d/d');
+      expect(warningClause!.bool.filter[0].terms?.severity).toEqual(['warning']);
 
-      const errorClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'error');
-      expect(errorClause).toBeDefined();
-      expect(errorClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-180d/d');
-
-      const criticalClause = clauses.find((c) => c.bool.filter[0].term?.severity === 'critical');
-      expect(criticalClause).toBeDefined();
-      expect(criticalClause!.bool.filter[1].range?.['@timestamp'].lt).toBe('now-180d/d');
+      const longLivedClause = byLt('now-180d/d');
+      expect(longLivedClause).toBeDefined();
+      expect(longLivedClause!.bool.filter[0].terms?.severity).toEqual(['error', 'critical']);
     });
   });
 

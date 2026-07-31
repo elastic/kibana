@@ -73,3 +73,18 @@ export type NotificationDocument = z.output<typeof notificationWriteSchema> & {
 export type Severity = Notification['severity'];
 
 export type Cta = z.infer<typeof ctaSchema>;
+
+export interface NotificationQueryParams {
+  namespace?: string;
+  type?: string;
+  severity?: Severity[];
+  from?: string;
+  to?: string;
+}
+
+/** The full collapsed, filtered notification set the client paginates over. */
+export interface NotificationQueryResult {
+  items: Notification[];
+  /** Ensure the client knows if the query hit the result limit and older matches are omitted. */
+  truncated: boolean;
+}

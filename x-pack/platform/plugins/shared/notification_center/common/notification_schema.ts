@@ -15,8 +15,6 @@ import type { Severity } from './types';
 
 /**
  * Visibility window per severity tier, in days.
- * When querying notifications, we exclude docs older than their tier's TTL.
- * The retention cleanup task deletes docs older than their tier's TTL.
  * The longest TTL must stay within the data stream's 180d retention ceiling.
  */
 export const SEVERITY_TTL_DAYS: Record<Severity, number> = {
@@ -41,6 +39,20 @@ export const SEVERITIES = [
   SEVERITY.error,
   SEVERITY.critical,
 ] as const;
+
+/**
+ * Severities grouped by TTL window (days). Used for queries against the notifications
+ * index and the cleanup task. Query will build one clause per time window.
+ * e.g. 'error' and 'critical' both have a TTL of 180 days
+ */
+export const SEVERITY_TTL_GROUPS: ReadonlyMap<number, Severity[]> = SEVERITIES.reduce(
+  (groups, severity) => {
+    const days = SEVERITY_TTL_DAYS[severity];
+    groups.set(days, [...(groups.get(days) ?? []), severity]);
+    return groups;
+  },
+  new Map<number, Severity[]>()
+);
 
 /** Call-to-action: an internal link and its display text. */
 export const ctaSchema = z

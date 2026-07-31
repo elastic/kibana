@@ -8,57 +8,30 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import { notificationReadSchema, SEVERITY_TTL_DAYS } from '../../common/notification_schema';
-import type { Notification, Severity } from '../../common/types';
+import { notificationReadSchema, SEVERITY_TTL_GROUPS } from '../../common/notification_schema';
+import type {
+  Notification,
+  NotificationQueryParams,
+  NotificationQueryResult,
+} from '../../common/types';
 import { getNotificationDataStreamClient } from '../storage/notification_data_stream';
 
 /**
- * Ceiling on collapsed notifications fetched per query. Pagination happens in
- * memory (read-state annotation will join per-user data that ES cannot see);
- * severity TTLs and curated producers keep real volumes far under this.
+ * Ceiling on collapsed notifications returned per query, after collapsing duplicates
+ * and filtering by severity TTL. The client paginates over this set and (as a follow-up)
+ * annotates it with the user's read state; severity TTLs keep real volumes well under it.
  */
-export const COLLAPSED_GROUP_LIMIT = 1000;
-
-export interface NotificationQueryParams {
-  namespace?: string;
-  type?: string;
-  severity?: Severity[];
-  /** ISO lower bound on `@timestamp`, inclusive. */
-  from?: string;
-  /** ISO upper bound on `@timestamp`, inclusive. */
-  to?: string;
-  /** 1-based page, defaults to 1. */
-  page?: number;
-  /** Page size, defaults to 20. */
-  perPage?: number;
-}
-
-export interface NotificationQueryResult {
-  items: Notification[];
-  /** Collapsed notifications matching all filters. */
-  total: number;
-}
+export const NOTIFICATION_QUERY_RESULT_LIMIT = 1000;
 
 export interface NotificationQueryDeps {
   dataStreams: DataStreamsStart;
   logger: Logger;
 }
 
-const DEFAULT_PER_PAGE = 20;
-
-/** Severities grouped by TTL so the horizon filter emits one clause per window. */
-const ttlGroups = Object.entries(SEVERITY_TTL_DAYS).reduce<Map<number, Severity[]>>(
-  (groups, [severity, days]) => {
-    groups.set(days, [...(groups.get(days) ?? []), severity as Severity]);
-    return groups;
-  },
-  new Map()
-);
-
 /** Docs older than their severity's TTL are invisible even before cleanup deletes them. */
-const horizonFilter = (): QueryDslQueryContainer => ({
+const severityTTLFilter = (): QueryDslQueryContainer => ({
   bool: {
-    should: [...ttlGroups.entries()].map(([days, severities]) => ({
+    should: [...SEVERITY_TTL_GROUPS.entries()].map(([days, severities]) => ({
       bool: {
         filter: [
           { terms: { severity: severities } },
@@ -72,7 +45,7 @@ const horizonFilter = (): QueryDslQueryContainer => ({
 
 const buildFilters = (params: NotificationQueryParams): QueryDslQueryContainer[] => {
   const { namespace, type, severity, from, to } = params;
-  const filters: QueryDslQueryContainer[] = [horizonFilter()];
+  const filters: QueryDslQueryContainer[] = [severityTTLFilter()];
   if (namespace) {
     filters.push({ term: { namespace } });
   }
@@ -91,12 +64,10 @@ const buildFilters = (params: NotificationQueryParams): QueryDslQueryContainer[]
 };
 
 /**
- * Fetch the notification list: latest doc per `notification_id` (field collapse),
- * severity-TTL horizon, attribute and time-range filters, newest first.
- *
- * Per-user read-state annotation (`isRead`, unread counts, read/unread filtering)
- * is a follow-up on top of this function; it joins user storage data ES cannot
- * see, which is why pagination is already applied in memory here.
+ * Fetch the notification list
+ * - Return only the newest doc per `notification_id`, collapse duplicates.
+ * - Filter by severity TTL, namespace, type, severity and time-range.
+ * - Sort by newest first.
  */
 export const queryNotifications = async (
   deps: NotificationQueryDeps,
@@ -109,11 +80,11 @@ export const queryNotifications = async (
     query: { bool: { filter: buildFilters(params) } },
     collapse: { field: 'notification_id' },
     sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
-    size: COLLAPSED_GROUP_LIMIT,
+    size: NOTIFICATION_QUERY_RESULT_LIMIT,
     track_total_hits: false,
   });
 
-  const notifications = response.hits.hits.flatMap((hit): Notification[] => {
+  const items = response.hits.hits.flatMap((hit): Notification[] => {
     const parsed = notificationReadSchema.safeParse(hit._source);
     if (!parsed.success) {
       logger.debug(`Dropping malformed notification doc ${hit._id}: ${parsed.error.message}`);
@@ -122,12 +93,8 @@ export const queryNotifications = async (
     return [parsed.data];
   });
 
-  const page = params.page ?? 1;
-  const perPage = params.perPage ?? DEFAULT_PER_PAGE;
-  const start = (page - 1) * perPage;
-
   return {
-    items: notifications.slice(start, start + perPage),
-    total: notifications.length,
+    items,
+    truncated: response.hits.hits.length === NOTIFICATION_QUERY_RESULT_LIMIT,
   };
 };

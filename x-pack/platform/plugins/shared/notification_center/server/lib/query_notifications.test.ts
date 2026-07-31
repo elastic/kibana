@@ -7,7 +7,7 @@
 
 import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { queryNotifications, COLLAPSED_GROUP_LIMIT } from './query_notifications';
+import { queryNotifications, NOTIFICATION_QUERY_RESULT_LIMIT } from './query_notifications';
 
 const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) => ({
   '@timestamp': ts,
@@ -41,7 +41,7 @@ describe('queryNotifications', () => {
       expect.objectContaining({
         collapse: { field: 'notification_id' },
         sort: [{ '@timestamp': 'desc' }, { notification_id: 'asc' }],
-        size: COLLAPSED_GROUP_LIMIT,
+        size: NOTIFICATION_QUERY_RESULT_LIMIT,
       })
     );
   });
@@ -120,15 +120,27 @@ describe('queryNotifications', () => {
     expect(query.bool.filter).toHaveLength(1);
   });
 
-  it('paginates the collapsed set', async () => {
+  it('returns the full collapsed set for the client to paginate', async () => {
     const { deps } = setup(
       ['a', 'b', 'c', 'd', 'e'].map((id, i) => doc(id, `2026-07-1${i}T00:00:00.000Z`))
     );
 
-    const result = await queryNotifications(deps, { page: 2, perPage: 2 });
+    const result = await queryNotifications(deps);
 
-    expect(result.items.map(({ notification_id: id }) => id)).toEqual(['c', 'd']);
-    expect(result.total).toBe(5);
+    expect(result.items.map(({ notification_id: id }) => id)).toEqual(['a', 'b', 'c', 'd', 'e']);
+    expect(result.truncated).toBe(false);
+  });
+
+  it('flags truncated when the fetch fills the group limit', async () => {
+    const { deps } = setup(
+      Array.from({ length: NOTIFICATION_QUERY_RESULT_LIMIT }, (_, i) =>
+        doc(`id-${i}`, '2026-07-15T00:00:00.000Z')
+      )
+    );
+
+    const result = await queryNotifications(deps);
+
+    expect(result.truncated).toBe(true);
   });
 
   it('drops malformed docs instead of failing the response', async () => {

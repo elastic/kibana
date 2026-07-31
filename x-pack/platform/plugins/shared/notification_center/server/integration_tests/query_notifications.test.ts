@@ -82,7 +82,7 @@ describe('queryNotifications [integration]', () => {
   });
 
   it('returns each notification_id once, represented by its latest doc, newest first', async () => {
-    const { items, total } = await query();
+    const { items, truncated } = await query();
 
     expect(items.map(({ notification_id: id }) => id)).toEqual([
       'recent-warning',
@@ -91,7 +91,7 @@ describe('queryNotifications [integration]', () => {
       'old-error',
     ]);
     expect(items.find(({ notification_id: id }) => id === 'dup')?.title).toBe('dup v2');
-    expect(total).toBe(4);
+    expect(truncated).toBe(false);
   });
 
   it('excludes docs past their severity TTL while keeping longer-lived tiers of the same age', async () => {
@@ -111,14 +111,5 @@ describe('queryNotifications [integration]', () => {
 
     const byNamespace = await query({ namespace: 'nonexistent' });
     expect(byNamespace.items).toEqual([]);
-  });
-
-  it('paginates collapsed results', async () => {
-    const pageOne = await query({ page: 1, perPage: 2 });
-    const pageTwo = await query({ page: 2, perPage: 2 });
-
-    expect(pageOne.items.map(({ notification_id: id }) => id)).toEqual(['recent-warning', 'dup']);
-    expect(pageTwo.items.map(({ notification_id: id }) => id)).toEqual(['other-type', 'old-error']);
-    expect(pageOne.total).toBe(4);
   });
 });
