@@ -166,6 +166,19 @@ export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): str
 };
 
 /**
+ * In-batch dedup key: fingerprint plus per-rule change_point_type so distinct operational
+ * states (e.g. spike vs dip) are not collapsed within the same events_write batch.
+ */
+const makeInBatchDedupKey = (fingerprint: string, signals: SignalEntry[] | undefined): string => {
+  const ruleTypes = (signals ?? [])
+    .filter((s): s is Extract<SignalEntry, { type: 'detection' }> => s.type === 'detection')
+    .map((s) => `${s.metadata.rule_uuid}:${s.metadata.change_point_type ?? ''}`)
+    .sort()
+    .join(',');
+  return `${fingerprint}|${ruleTypes}`;
+};
+
+/**
  * Per-incident event ID: a hash of the primary stream name, every detection rule UUID, and a
  * random UUID8 suffix. The suffix keeps distinct incidents for the same rules separate.
  * Deduplication uses `makeFingerprint` (stream and rules only), not this ID.
@@ -297,21 +310,29 @@ const buildWriteCandidates = (inputs: EventsWriteInput[]): WriteCandidate[] =>
   });
 
 /**
- * Flags candidates that share a fingerprint (dedup mode) or event_id (snapshot/anonymous mode)
- * as `duplicate_key` errors in `results`, keeping the first occurrence. Returns the remainder.
+ * Flags candidates that share an in-batch dedup identity (fingerprint + per-rule
+ * change_point_type) or event_id (snapshot mode) as `duplicate_key` errors, keeping the first
+ * occurrence. Returns the remainder.
  */
 const markDuplicateKeys = (
   candidates: WriteCandidate[],
   results: BulkResults
 ): WriteCandidate[] => {
-  const seenEventIds = new Map<string, number>();
-  const seenFingerprints = new Map<string, number>();
+  const seenKeys = new Map<string, number>();
 
   for (const candidate of candidates) {
-    const key = candidate.mode === 'dedup' ? candidate.fingerprint : candidate.eventId;
-    const seenMap = candidate.mode === 'dedup' ? seenFingerprints : seenEventIds;
-    const firstIndex = seenMap.get(key);
+    const key =
+      candidate.mode === 'dedup'
+        ? makeInBatchDedupKey(candidate.fingerprint, candidate.input.signals)
+        : candidate.eventId;
+    const firstIndex = seenKeys.get(key);
+
     if (firstIndex !== undefined) {
+      const keyLabel =
+        candidate.mode === 'dedup'
+          ? `dedup fingerprint ${JSON.stringify(candidate.fingerprint)}`
+          : `event_id ${JSON.stringify(candidate.eventId)}`;
+
       results[candidate.index] = {
         index: candidate.index,
         event_id: candidate.eventId,
@@ -320,14 +341,12 @@ const markDuplicateKeys = (
         reason: 'duplicate_key',
         error: {
           type: 'validation_error',
-          reason: `Duplicate ${
-            candidate.mode === 'dedup' ? 'dedup fingerprint' : 'event_id'
-          } ${JSON.stringify(key)} at items[${firstIndex}] and items[${candidate.index}]`,
+          reason: `Duplicate ${keyLabel} at items[${firstIndex}] and items[${candidate.index}]`,
           status: 400,
         },
       };
     } else {
-      seenMap.set(key, candidate.index);
+      seenKeys.set(key, candidate.index);
     }
   }
 

@@ -511,6 +511,23 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     dedup_window: 'now-24h',
   };
 
+  const makeDedupInputWithChangePointType = (
+    changePointType: string | undefined
+  ): EventsWriteInput => ({
+    ...dedupInput,
+    signals: [
+      {
+        type: 'detection',
+        metadata: {
+          rule_uuid: 'rule-abc',
+          rule_name: 'High Latency',
+          ...(changePointType !== undefined ? { change_point_type: changePointType } : {}),
+        },
+        confirmed: true,
+      } as never,
+    ],
+  });
+
   it('skips write and returns existing event_id when an active duplicate is found in window', async () => {
     const existingEvent = {
       event_id: 'existing-event-id',
@@ -656,6 +673,69 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
     expect(results[1]).toMatchObject({ index: 1, written: false, reason: 'duplicate_key' });
     // Only one item should have been written.
     expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(1);
+  });
+
+  it('writes both in-batch items when they share a fingerprint but differ in change_point_type', async () => {
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [
+        makeDedupInputWithChangePointType('spike'),
+        makeDedupInputWithChangePointType('dip'),
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(results[1]).toMatchObject({ index: 1, written: true });
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
+  });
+
+  it('deduplicates a later in-batch item against an earlier one with the same change_point_type', async () => {
+    const spikeInput = makeDedupInputWithChangePointType('spike');
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [spikeInput, makeDedupInputWithChangePointType('dip'), { ...spikeInput }],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(results[1]).toMatchObject({ index: 1, written: true });
+    expect(results[2]).toMatchObject({ index: 2, written: false, reason: 'duplicate_key' });
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
+  });
+
+  it('writes both in-batch items when change_point_type is omitted on one and explicit on the other', async () => {
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [
+        makeDedupInputWithChangePointType(undefined),
+        makeDedupInputWithChangePointType('spike'),
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ index: 0, written: true });
+    expect(results[1]).toMatchObject({ index: 1, written: true });
+    expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
   });
 
   it('uses only one findLatestActive scan for multiple dedup candidates', async () => {
