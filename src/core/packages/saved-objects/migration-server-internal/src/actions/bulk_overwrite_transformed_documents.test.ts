@@ -474,9 +474,7 @@ describe('bulkOverwriteTransformedDocuments', () => {
     const left = (result as Either.Left<any>).left;
     expect(left.type).toEqual('unavailable_shards_exception');
     expect(left.message).toContain('new_index');
-    expect(left.message).toContain(
-      'Shard allocation explain: explain unavailable: socket hang up'
-    );
+    expect(left.message).toContain('Shard allocation explain: explain unavailable: socket hang up');
   });
 
   it('resolves with `left:unavailable_shards_exception` when mixed with version_conflict_engine_exception', async () => {
