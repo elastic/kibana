@@ -2062,7 +2062,6 @@ describe('RulesClient', () => {
     });
 
     it('skips already-disabled rules without updating them', async () => {
-      const mockBulkUpdate = jest.spyOn(rulesSavedObjectService, 'bulkUpdate');
       const client = createClient();
 
       const disabledAttrs = createRuleSoAttributes({
@@ -2084,9 +2083,10 @@ describe('RulesClient', () => {
 
       const res = await client.bulkDisableRules({ ids: ['rule-1'] });
 
-      expect(mockBulkUpdate).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
       expect(res.rules).toHaveLength(1);
+      expect(res.rules[0]).toEqual(expect.objectContaining({ id: 'rule-1', enabled: false }));
       expect(res.errors).toEqual([]);
     });
 
