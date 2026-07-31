@@ -75,7 +75,11 @@ const createFsReader = (baseDir: string): BundleReader => ({
 });
 
 const createHttpReader = (baseUrl: string): BundleReader => {
-  const normalizedBase = baseUrl.replace(/\/+$/, '');
+  let end = baseUrl.length;
+  while (end > 0 && baseUrl.charCodeAt(end - 1) === 47 /* '/' */) {
+    end--;
+  }
+  const normalizedBase = baseUrl.slice(0, end);
   return {
     source: normalizedBase,
     readText: async (relativePath) => {
