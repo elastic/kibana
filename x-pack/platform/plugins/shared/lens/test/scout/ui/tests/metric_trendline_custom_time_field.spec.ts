@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout';
+import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
@@ -15,7 +15,10 @@ const ECOMMERCE_TIME_RANGE = { from: 'now-7d', to: 'now' } as const;
 
 test.describe(
   'Lens metric trendline with custom time field',
-  { tag: tags.stateful.classic },
+  // Local-only: forcing the `lens.apiFormat` flag via `apiServices.core.settings` needs the
+  // `/internal/core/_settings` route, which exists only when `coreApp.allowDynamicConfigOverrides`
+  // is enabled (local Scout servers) and 404s on cloud deployments.
+  { tag: '@local-stateful-classic' },
   () => {
     let storedDataViewId: string | undefined;
 

@@ -274,26 +274,34 @@ export const validateCaseExtendedFields = async ({
     );
   }
 
-  // Validate template-specific keys against the resolved template fields.
+  // Validate template-specific keys against the resolved template fields. On a storage-key
+  // collision the global definition is authoritative (see resolveApplicableFields), so fields
+  // the template `$ref`s from the global library are excluded here — their values live under
+  // global keys and are validated in the global pass below. Without this exclusion a required
+  // global field referenced by the template is checked against an always-absent value and
+  // wrongly fails as "required".
   const templateOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => !globalKeySet.has(k))
   );
-  const templateErrors = validateExtendedFields(templateOnlyFields, resolvedTemplateFields, {
+  const templateNonGlobalFields = resolvedTemplateFields.filter(
+    (f) => !globalKeySet.has(getFieldSnakeKey(f.name, f.type))
+  );
+  const templateErrors = validateExtendedFields(templateOnlyFields, templateNonGlobalFields, {
     partial,
   });
   if (templateErrors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${templateErrors.join('; ')}`);
   }
 
-  // Also validate global-key VALUES against their own definitions.
+  // Also validate global-key VALUES against their own definitions. Runs even when the request
+  // carries no global keys so that non-partial (create) requests still enforce required global
+  // fields — the template pass above no longer covers the ones the template `$ref`s.
   const globalOnlyFields = Object.fromEntries(
     Object.entries(extendedFields).filter(([k]) => globalKeySet.has(k))
   );
-  if (Object.keys(globalOnlyFields).length > 0) {
-    const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, { partial });
-    if (globalErrors.length) {
-      throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
-    }
+  const globalErrors = validateExtendedFields(globalOnlyFields, globalFields, { partial });
+  if (globalErrors.length) {
+    throw Boom.badRequest(`Invalid extended_fields: ${globalErrors.join('; ')}`);
   }
 };
 

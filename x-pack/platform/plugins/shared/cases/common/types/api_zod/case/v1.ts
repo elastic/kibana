@@ -305,6 +305,20 @@ export const CasesFindResponseSchema = CasesStatusResponseSchema.extend({
   total: z.number(),
 });
 
+/**
+ * Response of the internal `_search` API. A superset of the public `_find` response: it adds
+ * `mttr` so the (internal-only) cases list metrics bar can reflect the same query as the table.
+ * `mttr` deliberately lives here and NOT on `CasesFindResponseSchema` so the public `_find`
+ * contract (and its generated OpenAPI) never advertises a field the public API does not return.
+ */
+export const CasesSearchResponseSchema = CasesFindResponseSchema.extend({
+  /**
+   * The average resolve time in seconds of the cases matching the search, ignoring the
+   * status filter (like the status counts). Null when no matching case has been closed.
+   */
+  mttr: z.number().nullable().optional(),
+});
+
 export const CasesSimilarResponseSchema = z.object({
   cases: z.array(SimilarCaseSchema),
   page: z.number(),
@@ -424,6 +438,7 @@ export type CasesDeleteRequest = z.infer<typeof CasesDeleteRequestSchema>;
 export type CasesByAlertIDRequest = z.infer<typeof CasesByAlertIDRequestSchema>;
 export type CasesFindRequest = z.infer<typeof CasesFindRequestSchema>;
 export type CasesFindResponse = z.infer<typeof CasesFindResponseSchema>;
+export type CasesSearchResponse = z.infer<typeof CasesSearchResponseSchema>;
 export type CasePatchRequest = z.infer<typeof CasePatchRequestSchema>;
 export type CasesPatchRequest = z.infer<typeof CasesPatchRequestSchema>;
 export type GetTagsResponse = z.infer<typeof GetTagsResponseSchema>;

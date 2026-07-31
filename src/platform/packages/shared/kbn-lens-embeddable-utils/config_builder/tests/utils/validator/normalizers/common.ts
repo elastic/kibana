@@ -22,7 +22,7 @@ import type {
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
-import { getIndexPatternFromESQLQuery, getTimeFieldFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 
 import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
@@ -33,6 +33,7 @@ import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
 import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
+import { toApiFieldSettings } from '../../../../transforms/columns/field_settings';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -118,7 +119,7 @@ function normalizeESQLAdHocDataViews(
       const adHocDataView: DataViewSpec = attributes.state.adHocDataViews[oldIndex];
       // Use the same logic as the transform: derive timeField from the ES|QL query
       const timeFieldName = esqlQuery
-        ? getTimeFieldFromESQLQuery(esqlQuery)
+        ? parseTimeFieldFromESQLQuery(esqlQuery)
         : adHocDataView.timeFieldName ?? layer.timeField ?? undefined;
       // The transform re-derives the index pattern (and the data view title/name) from the ES|QL
       // query, so a stale persisted name (e.g. a broader multi-index pattern) is normalized away.
@@ -134,8 +135,14 @@ function normalizeESQLAdHocDataViews(
 
       layer.index = newId;
       adHocDataView.id = newId;
-      adHocDataView.name = indexPattern;
       adHocDataView.title = indexPattern;
+      // An ES|QL ad-hoc data view has no dedicated `name` in the `{ type: 'esql', query }` data
+      // source; the transform re-derives both title and name from the query's index pattern
+      // (getAdHocDataViewSpec: `name = dataView.name ?? dataView.index`). This mirrors the DataView
+      // runtime, where `getName() = name || title` and a freshly created ES|QL data view
+      // (getESQLAdHocDataview) sets only `title = queryIndexPattern`, so the effective name is the
+      // query index pattern.
+      adHocDataView.name = adHocDataView.title;
       // The transform re-derives the time field from the ES|QL query rather than trusting the
       // persisted value (getAdHocDataViewSpec <- getDataSourceIndex.esql), so align the stored
       // timeFieldName here instead of skipping it entirely.
@@ -154,7 +161,7 @@ function normalizeESQLAdHocDataViews(
         index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
-        timeFieldName: getTimeFieldFromESQLQuery(esqlQuery),
+        timeFieldName: parseTimeFieldFromESQLQuery(esqlQuery),
       });
 
       layer.index = spec.id;
@@ -163,15 +170,16 @@ function normalizeESQLAdHocDataViews(
 
     if (layer.index) {
       // Mutate the existing layer ref in place to keep references; fall back to pushing if no existing ref is found.
+      // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
       const layerRefName = `indexpattern-datasource-layer-${layerId}`;
       const existingRef = refs.find((r) => r.name === layerRefName);
       if (existingRef) {
         existingRef.id = layer.index;
-        existingRef.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
+        // intentionally keep existingRef.name unchanged (still layerId)
       } else {
         refs.push({
           id: layer.index,
-          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+          name: layerRefName,
           type: 'index-pattern',
         });
       }
@@ -193,33 +201,54 @@ function normalizeFormBasedAdHocDataViews(
   const adHocDataViews = attributes.state.adHocDataViews ?? {};
   const refs = [...internalReferences];
 
+  // Compute the deterministic id for every form-based ad-hoc data view once. The
+  // transform dedupes views by id, so several layers can reference the same view;
+  // remapping per data view (instead of per layer) keeps every referencing layer
+  // pointing at the same new id. Doing it per layer would delete the entry on the
+  // first layer and leave the rest pointing at the stale id.
+  const idRemap = new Map<string, string>();
+  for (const [oldId, adHocDataView] of Object.entries(adHocDataViews)) {
+    // ES|QL ad-hoc data views are handled by normalizeESQLAdHocDataViews; skip them here.
+    if (adHocDataView.type === 'esql') {
+      continue;
+    }
+    const newId = generateAdHocDataViewId({
+      index: adHocDataView.title ?? '',
+      timeFieldName: adHocDataView.timeFieldName,
+      name: adHocDataView.name,
+      allowHidden: adHocDataView.allowHidden,
+      fieldSettings: toApiFieldSettings(adHocDataView),
+    });
+    idRemap.set(oldId, newId);
+
+    if (oldId !== newId) {
+      delete adHocDataViews[oldId];
+      adHocDataView.id = newId;
+      adHocDataViews[newId] = adHocDataView;
+    }
+    // mirror the transform's `name = name ?? index` (title === index for form-based)
+    adHocDataView.name = adHocDataView.name ?? adHocDataView.title;
+  }
+
   for (const [layerId, layer] of Object.entries(formBasedLayers)) {
     const layerRefName = `indexpattern-datasource-layer-${layerId}`;
     const ref = refs.find((r) => r.name === layerRefName);
     const adHocId = ref?.id ?? (layer as any).indexPatternId;
+    const newId = adHocId ? idRemap.get(adHocId) : undefined;
 
-    if (adHocId && adHocDataViews[adHocId]) {
-      const adHocDataView: DataViewSpec = adHocDataViews[adHocId];
-      const newId = generateAdHocDataViewId({
-        index: adHocDataView.title ?? '',
-        timeFieldName: adHocDataView.timeFieldName,
+    if (!newId) {
+      continue;
+    }
+
+    if (ref) {
+      ref.id = newId;
+      // Keep the original layerId in the name so getCommonNormalizer can apply layerRemapping to it.
+    } else {
+      refs.push({
+        id: newId,
+        name: layerRefName,
+        type: 'index-pattern',
       });
-
-      delete adHocDataViews[adHocId];
-      adHocDataView.id = newId;
-      adHocDataView.name = adHocDataView.title ?? adHocDataView.name;
-      adHocDataViews[newId] = adHocDataView;
-
-      if (ref) {
-        ref.id = newId;
-        ref.name = `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`;
-      } else {
-        refs.push({
-          id: newId,
-          name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-          type: 'index-pattern',
-        });
-      }
     }
   }
 
@@ -487,6 +516,21 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     // replace layer in reference name
     attributes.references = normalizeReferences(attributes, layerRemapping);
 
+    // Remap internalReferences layer IDs using layerRemapping.
+    // normalizeFormBasedAdHocDataViews / normalizeESQLAdHocDataViews now keep the original layer UUID
+    // in the ref name so we can apply the same replacement logic here.
+    if (attributes.state.internalReferences?.length) {
+      attributes.state.internalReferences = attributes.state.internalReferences.map((ref) => {
+        let name = ref.name;
+        layerRemapping.forEach(([oldId, newId]) => {
+          if (oldId && name.includes(oldId)) {
+            name = name.replace(oldId, newId);
+          }
+        });
+        return name !== ref.name ? { ...ref, name } : ref;
+      });
+    }
+
     const layerIdMap = new Map(layerRemapping);
     const columnIdMap = new Map(columnRemapping);
 
@@ -561,6 +605,18 @@ export const getCommonNormalizer = <T extends LensAttributes>(
                   columnRemapping.find(([oldColumn]) => oldColumn === colId)?.[1] ?? colId
               );
 
+            // Add canonical column IDs that are in layer.columns but were missing from the
+            // original columnOrder (e.g. breakdown or inner-reference columns omitted in older SOs).
+            // Maintain `inOrder` as entries are pushed to prevent duplicates when multiple original
+            // column IDs share the same canonical name (e.g. two layers both mapped to 'line_breakdown').
+            const inOrder = new Set(layer.columnOrder);
+            for (const [, newCol] of columnRemapping) {
+              if (newCol && layer.columns[newCol] && !inOrder.has(newCol)) {
+                layer.columnOrder.push(newCol);
+                inOrder.add(newCol);
+              }
+            }
+
             // Datatable uses its own canonical (rows → splits → metrics) sort in
             // the datatable normalizer. For every other chart, alphabetical
             // canonicalization is fine because column order does not drive
@@ -623,6 +679,9 @@ export const getCommonNormalizer = <T extends LensAttributes>(
     attributes.references = attributes.references.filter((reference) => {
       return !(reference.type === 'index-pattern' && reference.name.startsWith('filter-ref-'));
     });
+
+    // Sort references to match normalizeReferences ordering applied on the original side
+    attributes.references = orderBy(attributes.references, ['name', 'id', 'type']);
 
     attributes.state.needsRefresh = attributes.state.needsRefresh ?? false;
 
@@ -705,10 +764,17 @@ export function getPaletteNormalizer<T extends LensAttributes>(
           return;
         }
 
-        // The SO→API transform always uses rangeMax as the last step's upper bound (lte),
-        // replacing the original stop value. The API→SO step then reconstructs the stop from lte,
-        // so the last stop always becomes rangeMax after the round-trip.
-        if (palette.params.stops) {
+        // For multi-stop palettes: the SO→API transform uses rangeMax as the last step's upper
+        // bound (lte), replacing the original stop value. The API→SO step then reconstructs the
+        // stop from lte, so the last stop becomes rangeMax after the round-trip.
+        //
+        // For single stop palettes: the transform's `i === 0` branch emits a closed
+        // `lt: <stop>` and returns before the last-step `lte: rangeMax` branch can run, so
+        // `lte: rangeMax` is never applied to the stop. For an open-above single stop (continuity
+        // 'above'/'all', rangeMax null) the transform instead appends a trailing `gte: <stop>`
+        // continuation step, which `mergeTrailingSameColorStep` collapses back on the reverse pass,
+        // leaving the original `lt` (the stop value) intact.
+        if (palette.params.stops && palette.params.stops.length > 1) {
           const lastStop = palette.params.stops.at(-1);
           if (lastStop) lastStop.stop = rangeMax as unknown as number; // can be null
         }

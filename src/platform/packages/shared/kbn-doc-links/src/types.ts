@@ -198,6 +198,7 @@ export interface DocLinks {
     readonly vectorSearchDenseVector: string;
     readonly jinaEmbeddingModels: string;
     readonly vectorSearchBringOwnVectors: string;
+    readonly vectorDatabaseGetStarted: string;
     readonly start: string;
     readonly supportedNlpModels: string;
     readonly syncRules: string;
@@ -325,6 +326,7 @@ export interface DocLinks {
     readonly automaticImport: string;
     readonly attacksPage: string;
     readonly mitreCoverage: string;
+    readonly remapMitreAttack: string;
   };
   readonly server: {
     readonly protocol: string;

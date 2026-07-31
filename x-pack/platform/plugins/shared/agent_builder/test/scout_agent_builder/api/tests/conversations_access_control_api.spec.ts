@@ -738,6 +738,56 @@ apiTest.describe(
       }
     );
 
+    // ── auto-create IDOR ──────────────────────────────────────────────────────
+
+    apiTest(
+      'auto-create cannot overwrite or take over another user conversation',
+      async ({ apiClient }) => {
+        const agentId = `${ACCESS_CONTROL_TEST_PREFIX}-autocreate-agent-${testRunId.slice(0, 8)}`;
+        await createAgentAs(apiClient, alice, mockAgent(agentId, AgentAccessControlMode.Shared));
+
+        const aliceConversation = await createConversationAs({
+          apiClient,
+          user: alice,
+          agentId,
+          input: 'alice data',
+          title: 'Alice private conversation',
+        });
+        const conversationId = aliceConversation.conversation_id;
+
+        // converse auto-creates a conversation with the caller-supplied id, so Bob replaying
+        // Alice's id previously overwrote and took over her conversation. It must now be
+        // rejected before any create, with no LLM round (so no interceptor is set up).
+        const attempt = await apiClient.post(`${accessControlApiBase}/converse`, {
+          headers: headersFor(bob),
+          body: {
+            agent_id: agentId,
+            input: 'bob data',
+            connector_id: connectorId,
+            _execution_mode: 'local',
+            conversation_id: conversationId,
+          },
+          responseType: 'json',
+        });
+        expect(attempt).toHaveStatusCode(404);
+
+        const aliceView = await apiClient.get(
+          `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+          { headers: headersFor(alice), responseType: 'json' }
+        );
+        expect(aliceView).toHaveStatusCode(200);
+        const conversation = aliceView.body as Conversation;
+        expect(conversation.user.username).toBe(alice.username);
+        expect(conversation.rounds).toHaveLength(1);
+
+        const bobView = await apiClient.get(
+          `${accessControlApiBase}/conversations/${encodeURIComponent(conversationId)}`,
+          { headers: headersFor(bob), responseType: 'json' }
+        );
+        expect(bobView).toHaveStatusCode(404);
+      }
+    );
+
     // ── route-level privileges ──────────────────────────────────────────────
 
     apiTest(
