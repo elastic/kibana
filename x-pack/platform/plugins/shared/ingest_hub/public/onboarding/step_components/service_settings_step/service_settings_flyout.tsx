@@ -153,29 +153,20 @@ export function ServiceSettingsFlyout({
   return (
     <EuiFlyout size="m" ownFocus onClose={onClose} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" id={flyoutTitleId}>
-          <h2>{service.name}</h2>
-        </EuiTitle>
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="xpack.ingestHub.serviceSettingsStep.flyout.subtitle"
-              defaultMessage="Set how Elastic Managed integrations authenticate with AWS"
-            />
-          </p>
-        </EuiText>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>{service.name}</strong>
-            </EuiText>
+            <EuiTitle size="m" id={flyoutTitleId}>
+              <h2>{service.name}</h2>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SignalTypeBadge signalType={service.signalType} />
           </EuiFlexItem>
-          {hasTransport && (
+        </EuiFlexGroup>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        {hasTransport && (
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonGroup
                 legend={i18n.translate(
@@ -190,8 +181,8 @@ export function ServiceSettingsFlyout({
                 data-test-subj="serviceSettingsFlyout-transportToggle"
               />
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+          </EuiFlexGroup>
+        )}
 
         {requiredTextFields.length > 0 && (
           <>
