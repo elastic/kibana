@@ -1,0 +1,1151 @@
+{
+  "sha1": "17f07b1e6959a2b62a6c6dc95776daa3617a2c4a",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "52c78078719bb17-1ee8b379c33773f",
+      "title": "Teardown metrics experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.teardown.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "0f64951867b1265-04ed931b557bf1b",
+      "title": "Setup metrics experience tests data",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/global.setup.ts",
+        "line": 7,
+        "column": 1
+      }
+    },
+    {
+      "id": "bfa3a55297278ef-88da4c36b9f9cd5",
+      "title": "Metrics in Discover - Add to Case should show Add to case action in chart context menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/add_to_case_privileged.spec.ts",
+        "line": 28,
+        "column": 25
+      }
+    },
+    {
+      "id": "4fe5f065b797bb2-f194d10eab3988e",
+      "title": "Metrics in Discover - Breakdown by dimension should propagate field list breakdown selection to toolbar selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/breakdown_by_dimension.spec.ts",
+        "line": 28,
+        "column": 15
+      }
+    },
+    {
+      "id": "4fe5f065b797bb2-6da72ca70f18e6d",
+      "title": "Metrics in Discover - Breakdown by dimension hides metrics that do not declare every selected dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/breakdown_by_dimension.spec.ts",
+        "line": 41,
+        "column": 15
+      }
+    },
+    {
+      "id": "61219b003328df0-896ca919fb9b0e1",
+      "title": "Metrics in Discover - Brush to Zoom should narrow time range when brushing a chart in the grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/brush_to_zoom.spec.ts",
+        "line": 37,
+        "column": 66
+      }
+    },
+    {
+      "id": "c7c6095da4aaeb9-70bc8f10babd4cc",
+      "title": "Metrics in Discover - Dimensions wipe on stream switch drops a selected dimension when switching to a stream that does not emit it, and keeps the chart rendered",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/dimensions_wipe.spec.ts",
+        "line": 27,
+        "column": 25
+      }
+    },
+    {
+      "id": "c7c6095da4aaeb9-fd7c0486ff4d467",
+      "title": "Metrics in Discover - Dimensions wipe on stream switch preserves the breakdown when the dimension is shared across streams",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/dimensions_wipe.spec.ts",
+        "line": 50,
+        "column": 24
+      }
+    },
+    {
+      "id": "ee1dd74a08bb25f-5e6d6232d074dc9",
+      "title": "Metrics in Discover - Insights Flyout Persistence persists open metric and selected tab across Discover tab navigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
+        "line": 41,
+        "column": 58
+      }
+    },
+    {
+      "id": "ee1dd74a08bb25f-210633fb01c8208",
+      "title": "Metrics in Discover - Insights Flyout Persistence duplicating a tab preserves the open metric and selected flyout tab in the new tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
+        "line": 72,
+        "column": 11
+      }
+    },
+    {
+      "id": "ee1dd74a08bb25f-b4c7dd9b70683b9",
+      "title": "Metrics in Discover - Insights Flyout Persistence opening a different metric flyout in the duplicated tab does not affect the original tab",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
+        "line": 107,
+        "column": 36
+      }
+    },
+    {
+      "id": "ee1dd74a08bb25f-70c1747ee807ac5",
+      "title": "Metrics in Discover - Insights Flyout Persistence clears stale flyout state when the underlying metric disappears from a populated grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/flyout_persistence.spec.ts",
+        "line": 140,
+        "column": 31
+      }
+    },
+    {
+      "id": "ade5e13e5240519-63613ad83c0a103",
+      "title": "Metrics in Discover - Fullscreen Mode (privileged) should interact with metrics in fullscreen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen_privileged.spec.ts",
+        "line": 41,
+        "column": 48
+      }
+    },
+    {
+      "id": "39748a59e2848e5-dbeac393b8a72d5",
+      "title": "Metrics in Discover - Fullscreen Mode should toggle fullscreen mode via button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
+        "line": 27,
+        "column": 66
+      }
+    },
+    {
+      "id": "39748a59e2848e5-8f591993a7ea7f1",
+      "title": "Metrics in Discover - Fullscreen Mode should exit fullscreen mode with Escape key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
+        "line": 58,
+        "column": 9
+      }
+    },
+    {
+      "id": "39748a59e2848e5-ed73a308e43416f",
+      "title": "Metrics in Discover - Fullscreen Mode should persist fullscreen state during interactions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
+        "line": 70,
+        "column": 9
+      }
+    },
+    {
+      "id": "39748a59e2848e5-2eb4af6d08d70ba",
+      "title": "Metrics in Discover - Fullscreen Mode should show insights flyout without clipping in fullscreen mode",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/fullscreen.spec.ts",
+        "line": 89,
+        "column": 15
+      }
+    },
+    {
+      "id": "8556b3250071fcb-2d73f7a19a37d50",
+      "title": "Metrics in Discover - Grid Settings commits a staged counter selection on \"Apply and close\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 25,
+        "column": 61
+      }
+    },
+    {
+      "id": "8556b3250071fcb-263d455d08e5934",
+      "title": "Metrics in Discover - Grid Settings discards a staged gauge selection when \"Cancel\" is clicked",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 46,
+        "column": 30
+      }
+    },
+    {
+      "id": "8556b3250071fcb-298a4c29d01886a",
+      "title": "Metrics in Discover - Grid Settings persists an applied histogram percentile selection across a page reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 67,
+        "column": 46
+      }
+    },
+    {
+      "id": "8556b3250071fcb-53c2f05d3eb155c",
+      "title": "Metrics in Discover - Grid Settings applies counter, gauge and histogram aggregations end to end and persists them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid_settings.spec.ts",
+        "line": 99,
+        "column": 30
+      }
+    },
+    {
+      "id": "2794e156800ad6c-08fc1aac24baf7e",
+      "title": "Metrics in Discover - Grid Navigation should paginate through metrics",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
+        "line": 43,
+        "column": 24
+      }
+    },
+    {
+      "id": "2794e156800ad6c-24dd19c631bbb2d",
+      "title": "Metrics in Discover - Grid Navigation should filter metrics using search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
+        "line": 67,
+        "column": 13
+      }
+    },
+    {
+      "id": "2794e156800ad6c-db2eb32b27f9a66",
+      "title": "Metrics in Discover - Grid Navigation should render grid with wildcard TS query and WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
+        "line": 105,
+        "column": 22
+      }
+    },
+    {
+      "id": "2794e156800ad6c-7e0cfd9d76ffb61",
+      "title": "Metrics in Discover - Grid Navigation should update grid when selecting a breakdown dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.navigation.spec.ts",
+        "line": 115,
+        "column": 15
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-5dffb57f64bb9de",
+      "title": "Metrics in Discover - Grid should render metrics grid with cards",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 32,
+        "column": 66
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-f2ef49ddfad8ddc",
+      "title": "Metrics in Discover - Grid should render grid with WHERE filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 48,
+        "column": 13
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-67aeead5ce34d63",
+      "title": "Metrics in Discover - Grid should render grid with LIMIT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 52,
+        "column": 9
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-d62abe4ab8aa5fe",
+      "title": "Metrics in Discover - Grid should render grid with SORT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 54,
+        "column": 43
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-14688950b91de99",
+      "title": "Metrics in Discover - Grid should not render grid with FROM command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 58,
+        "column": 16
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-02d09836901d31f",
+      "title": "Metrics in Discover - Grid should not render grid with STATS command",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 62,
+        "column": 64
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-479858a2e43f91f",
+      "title": "Metrics in Discover - Grid should persist grid when changing time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "e97c0a4fb3ba0dc-6b49fa74c75c906",
+      "title": "Metrics in Discover - Grid should show chart actions menu on metric card",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/grid.spec.ts",
+        "line": 75,
+        "column": 25
+      }
+    },
+    {
+      "id": "e37f49eb59899ba-19f2470031ff098",
+      "title": "Metrics in Discover - Insights Flyout should open insights flyout and verify tab content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/insights_flyout.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "e37f49eb59899ba-a3a7f6f7e5ef6d7",
+      "title": "Metrics in Discover - Insights Flyout should paginate through dimensions in flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/insights_flyout.spec.ts",
+        "line": 62,
+        "column": 23
+      }
+    },
+    {
+      "id": "daf02946c6fe3cf-546bf85ae11def5",
+      "title": "Metrics in Discover - Inspect should open inspector and navigate through views and tabs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/inspect.spec.ts",
+        "line": 35,
+        "column": 25
+      }
+    },
+    {
+      "id": "4683a0f92a2b580-4f5ab8197dea4e8",
+      "title": "Metrics in Discover - Query kickstart should apply Search all metrics recommended query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/query_kickstart.spec.ts",
+        "line": 27,
+        "column": 25
+      }
+    },
+    {
+      "id": "4683a0f92a2b580-0b66da6e49963e2",
+      "title": "Metrics in Discover - Query kickstart should enter the metrics experience when typing a TS query directly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/query_kickstart.spec.ts",
+        "line": 39,
+        "column": 24
+      }
+    },
+    {
+      "id": "69bceb5337b8971-bf00e45d3f04c73",
+      "title": "Metrics in Discover - Quick action placement (popover) should keep Add to case in the 3-dot popover",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/quick_actions_privileged.spec.ts",
+        "line": 45,
+        "column": 66
+      }
+    },
+    {
+      "id": "256fa95cada9520-f5166729a5e8ca8",
+      "title": "Metrics in Discover - Recently explored moves an interacted metric to the front",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
+        "line": 32,
+        "column": 66
+      }
+    },
+    {
+      "id": "256fa95cada9520-5c33ee6fcbb7238",
+      "title": "Metrics in Discover - Recently explored disables the direction toggle when sorting by recency",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/recently_explored.spec.ts",
+        "line": 44,
+        "column": 15
+      }
+    },
+    {
+      "id": "722fb5fc48cd135-af3779e74d07e98",
+      "title": "Metrics in Discover - Save Session should save and restore a metrics session",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/save_session.spec.ts",
+        "line": 34,
+        "column": 66
+      }
+    },
+    {
+      "id": "9901fdc737200ac-cb5ac16f8b0b490",
+      "title": "Metrics in Discover - Share Session should preserve metrics view state through a shared URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/share_session.spec.ts",
+        "line": 33,
+        "column": 66
+      }
+    },
+    {
+      "id": "8932175b6997324-f784bf53941747d",
+      "title": "Metrics in Discover - Sorting shows the sort control when the feature flag is enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 41,
+        "column": 25
+      }
+    },
+    {
+      "id": "8932175b6997324-1dadaea18fbb270",
+      "title": "Metrics in Discover - Sorting reorders the grid when toggling sort direction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/sort.spec.ts",
+        "line": 46,
+        "column": 24
+      }
+    },
+    {
+      "id": "cf6e48e94eaa59e-49fe70160a5ca0f",
+      "title": "Metrics in Discover - Tab Duplication State preserves currentPage and breakdown dimension when a tab is duplicated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
+        "line": 44,
+        "column": 25
+      }
+    },
+    {
+      "id": "cf6e48e94eaa59e-e5bd02d65698019",
+      "title": "Metrics in Discover - Tab Duplication State resets currentPage to 1 when the user changes the breakdown via the toolbar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
+        "line": 60,
+        "column": 34
+      }
+    },
+    {
+      "id": "cf6e48e94eaa59e-f77d8f1dec27b8d",
+      "title": "Metrics in Discover - Tab Duplication State resets currentPage to 1 when the user adds a secondary breakdown dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
+        "line": 76,
+        "column": 31
+      }
+    },
+    {
+      "id": "cf6e48e94eaa59e-f0ce44d6c59b152",
+      "title": "Metrics in Discover - Tab Duplication State resets currentPage to 1 when the user removes a secondary breakdown dimension",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/metrics_experience/ui/parallel_tests/tab_duplication_state.spec.ts",
+        "line": 96,
+        "column": 50
+      }
+    }
+  ]
+}

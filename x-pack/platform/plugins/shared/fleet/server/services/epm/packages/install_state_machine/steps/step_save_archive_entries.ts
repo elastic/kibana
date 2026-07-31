@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isSavedObjectErrorResult } from '@kbn/core/server';
+
 import { ASSETS_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import type { AssetsMap, KibanaAssetType, PackageAssetReference } from '../../../../../types';
 
@@ -40,7 +42,7 @@ export async function stepSaveArchiveEntries(context: InstallContext) {
       ...packageAssetRefs,
       ...packageAssetResults.saved_objects.map((result) => ({
         id: result.id,
-        path: result.attributes?.asset_path,
+        path: isSavedObjectErrorResult(result) ? undefined : result.attributes?.asset_path,
         type: ASSETS_SAVED_OBJECT_TYPE as typeof ASSETS_SAVED_OBJECT_TYPE,
       })),
     ];

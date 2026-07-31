@@ -37,18 +37,20 @@ apiTest.describe(
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
-      const response = await apiClient.get(getListExecutionHistoryUrl({ perPage: 0 }), {
+      const response = await apiClient.get(getListExecutionHistoryUrl({ per_page: 0 }), {
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: accepts perPage at the maximum', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ perPage: POLICY_EXECUTION_HISTORY_MAX_PER_PAGE }),
+        getListExecutionHistoryUrl({ per_page: POLICY_EXECUTION_HISTORY_MAX_PER_PAGE }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(200);
@@ -57,18 +59,20 @@ apiTest.describe(
 
     apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
       const response = await apiClient.get(
-        getListExecutionHistoryUrl({ perPage: POLICY_EXECUTION_HISTORY_MAX_PER_PAGE + 1 }),
+        getListExecutionHistoryUrl({ per_page: POLICY_EXECUTION_HISTORY_MAX_PER_PAGE + 1 }),
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects non-numeric perPage', async ({ apiClient }) => {
       const response = await apiClient.get(
-        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?perPage=banana`,
+        `${ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH}?per_page=banana`,
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects non-numeric page', async ({ apiClient }) => {
@@ -77,6 +81,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest(
