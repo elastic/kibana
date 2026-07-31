@@ -576,7 +576,7 @@ src/platform/packages/shared/kbn-dev-proc-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-utils @elastic/kibana-operations
 src/platform/packages/shared/kbn-dev-validation-runner @elastic/kibana-operations
 src/platform/packages/shared/kbn-developer-toolbar @elastic/appex-sharedux
-src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-signals-logs-team @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-discover-contextual-components @elastic/obs-signals-logs-team @elastic/obs-signals-traces-team @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-discover-utils @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-doc-links @elastic/docs
 src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @elastic/kibana-data-discovery
@@ -670,7 +670,7 @@ src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-restorable-state @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-rison @elastic/kibana-operations
 src/platform/packages/shared/kbn-router-to-openapispec @elastic/kibana-core
-src/platform/packages/shared/kbn-router-utils @elastic/obs-signals-traces-team @elastic/obs-signals-metrics-team
+src/platform/packages/shared/kbn-router-utils @elastic/obs-signals-traces-team @elastic/obs-signals-metrics-team @elastic/obs-signals-logs-team
 src/platform/packages/shared/kbn-rrule @elastic/response-ops
 src/platform/packages/shared/kbn-rule-data-utils @elastic/security-detection-engineering @elastic/response-ops @elastic/actionable-obs-team
 src/platform/packages/shared/kbn-safer-lodash-set @elastic/kibana-security
@@ -879,7 +879,7 @@ src/platform/plugins/shared/data_views_as_code @elastic/kibana-data-discovery
 src/platform/plugins/shared/dev_tools @elastic/kibana-management
 src/platform/plugins/shared/developer_toolbar @elastic/appex-sharedux
 src/platform/plugins/shared/discover @elastic/kibana-data-discovery
-src/platform/plugins/shared/discover_shared @elastic/kibana-data-discovery @elastic/obs-signals-traces-team
+src/platform/plugins/shared/discover_shared @elastic/kibana-data-discovery @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team
 src/platform/plugins/shared/embeddable @elastic/kibana-presentation
 src/platform/plugins/shared/es_ui_shared @elastic/kibana-management
 src/platform/plugins/shared/esql @elastic/kibana-esql
@@ -1609,7 +1609,7 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability @elastic/kibana-data-discovery @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_document_profile @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/observability_root_profile @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
-/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-signals-traces-team @elastic/obs-signals-logs-team @elastic/obs-signals-metrics-team
+/src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_data_source_profile @elastic/obs-signals-traces-team
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/observability/traces_document_profile @elastic/obs-signals-traces-team 
 /src/platform/plugins/shared/discover/public/context_awareness/profile_providers/security @elastic/kibana-data-discovery @elastic/security-threat-hunting
 
@@ -1886,7 +1886,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_alerts @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/http_api/log_analysis @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/log_analysis @elastic/obs-signals-logs-team
-/x-pack/solutions/observability/plugins/infra/common/performance_tracing.ts @elastic/obs-signals-metrics-team
+/x-pack/solutions/observability/plugins/infra/common/performance_tracing.ts @elastic/obs-signals-metrics-team @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/common/search_strategies/log_entries @elastic/obs-signals-logs-team
 /x-pack/solutions/observability/plugins/infra/docs/state_machines @elastic/obs-signals-metrics-team
 /x-pack/solutions/observability/plugins/infra/public/apps/logs_app.tsx @elastic/obs-signals-logs-team
