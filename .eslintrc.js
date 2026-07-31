@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
@@ -1167,6 +1167,14 @@ module.exports = {
               'lodash.template is unsafe, and not compatible with our content security policy.',
           },
         ],
+      },
+    },
+    {
+      // This file is the security control that hardens lodash.template, so it must load the
+      // otherwise-restricted lodash template modules in order to wrap them with safe proxies.
+      files: ['src/setup_node_env/harden/index.js'],
+      rules: {
+        'no-restricted-modules': 'off',
       },
     },
     {
