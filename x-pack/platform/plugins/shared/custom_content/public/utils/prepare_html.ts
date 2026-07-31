@@ -7,7 +7,7 @@
 
 import DOMPurify from 'dompurify';
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
-import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
+import { CUSTOM_CONTENT_CSP_META, CUSTOM_CONTENT_SCRIPT_PATTERN } from '../../common/constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
   if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
@@ -54,10 +54,8 @@ export function stripMarkdownFences(raw: string): string {
 // The rendering iframe is scripting-disabled and sanitizeHtml() strips <script> tags outright,
 // so a template relying on one wouldn't error — it would just silently render blank. Catching it
 // here, before that silent stripping, turns it into a clear error instead.
-const SCRIPT_TAG_PATTERN = /<script[\s>]/i;
-
 export function containsScript(template: string): boolean {
-  return SCRIPT_TAG_PATTERN.test(template);
+  return CUSTOM_CONTENT_SCRIPT_PATTERN.test(template);
 }
 
 // LLMs can return plain text, markdown, or empty strings — any of which would render blank.
