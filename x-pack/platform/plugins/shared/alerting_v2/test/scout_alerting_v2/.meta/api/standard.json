@@ -1,5 +1,5 @@
 {
-  "sha1": "36fa08c71555da1b3ea4dc90dd46c5fba42932af",
+  "sha1": "ab2106f68e26845b4cf685a08fe8a1f0105c85a0",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -5298,188 +5298,6 @@
       }
     },
     {
-      "id": "a0345db0bf45ea2-64e3251c74944b7",
-      "title": "Count new action policy execution events API validation: rejects missing since",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
-        "line": 33,
-        "column": 23
-      }
-    },
-    {
-      "id": "a0345db0bf45ea2-0e6cbf6c84c3db0",
-      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history read privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
-        "line": 36,
-        "column": 75
-      }
-    },
-    {
-      "id": "a0345db0bf45ea2-b6eb46719bf8e7e",
-      "title": "Count new action policy execution events API authorization: 200 with alerting_v2_execution_history all privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
-        "line": 47,
-        "column": 16
-      }
-    },
-    {
-      "id": "a0345db0bf45ea2-d827b87a9dd2102",
-      "title": "Count new action policy execution events API authorization: 403 without any alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/count_new_execution_history_events.spec.ts",
-        "line": 58,
-        "column": 45
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-e7c46255bb0b177",
-      "title": "Get rule executions API happy path: returns at least one execution record after the rule executor runs",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 37,
-        "column": 11
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-b26b1557e1acb5c",
-      "title": "Get rule executions API space scoping: does not return executions from another space",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 65,
-        "column": 16
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-4a97685f2d24f0f",
-      "title": "Get rule executions API validation: rejects page=0",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 102,
-        "column": 77
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-bbb37e34c6eed53",
-      "title": "Get rule executions API validation: rejects perPage=0",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 123,
-        "column": 14
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-1d569c8e3d39e5a",
-      "title": "Get rule executions API validation: rejects perPage above the maximum",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 130,
-        "column": 7
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-527497dd36a8817",
-      "title": "Get rule executions API validation: rejects unknown outcome values",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 136,
-        "column": 81
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-c5d7412a0cad57f",
-      "title": "Get rule executions API validation: rejects malformed datetimes for from",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 143,
-        "column": 69
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-ec7e5df9cdee069",
-      "title": "Get rule executions API authorization: 200 with alerting_v2_execution_history read privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 147,
-        "column": 12
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-a1c5b7876ca7cb9",
-      "title": "Get rule executions API authorization: 200 with alerting_v2_execution_history all privilege",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 152,
-        "column": 22
-      }
-    },
-    {
-      "id": "dcdb7b9643217d3-9ad31784ffaf791",
-      "title": "Get rule executions API authorization: 403 without any alerting_v2 privileges",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/get_rule_executions.spec.ts",
-        "line": 161,
-        "column": 16
-      }
-    },
-    {
       "id": "4922743ba5f5535-aaee8a03285479c",
       "title": "List execution history — tolerates missing rule ids resolves names for surviving rules and falls back to id for deleted ones",
       "expectedStatus": "passed",
@@ -5501,20 +5319,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 32,
+        "line": 35,
         "column": 23
       }
     },
     {
-      "id": "1e38d3a6f95185b-5ebd7738a8f9927",
-      "title": "List action policy execution history API validation: rejects perPage=0",
+      "id": "1e38d3a6f95185b-a3ceb105eb3f0d9",
+      "title": "List action policy execution history API validation: accepts perPage=0 (count-only read)",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 36,
+        "line": 39,
         "column": 79
       }
     },
@@ -5527,8 +5345,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 43,
-        "column": 71
+        "line": 47,
+        "column": 24
       }
     },
     {
@@ -5540,8 +5358,60 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 51,
+        "line": 55,
         "column": 13
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-e717ac28a025e9c",
+      "title": "List action policy execution history API validation: rejects page * perPage above the result window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 61,
+        "column": 14
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-17c2dac57d3d987",
+      "title": "List action policy execution history API validation: accepts a start_date lower bound",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 71,
+        "column": 7
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-f5bee2448bf9504",
+      "title": "List action policy execution history API validation: accepts an outcome array filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 77,
+        "column": 54
+      }
+    },
+    {
+      "id": "1e38d3a6f95185b-7c661738ba52f3a",
+      "title": "List action policy execution history API validation: rejects an unknown outcome value",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
+        "line": 88,
+        "column": 50
       }
     },
     {
@@ -5553,8 +5423,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 94,
+        "column": 69
       }
     },
     {
@@ -5566,8 +5436,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 63,
-        "column": 9
+        "line": 99,
+        "column": 14
       }
     },
     {
@@ -5579,8 +5449,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 69,
-        "column": 65
+        "line": 106,
+        "column": 8
       }
     },
     {
@@ -5592,8 +5462,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 75,
-        "column": 14
+        "line": 111,
+        "column": 81
       }
     },
     {
@@ -5605,8 +5475,138 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_execution_history.spec.ts",
-        "line": 85,
+        "line": 121,
+        "column": 24
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-7203929f492383a",
+      "title": "List rule executions API happy path: returns at least one execution record after the rule executor runs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 37,
+        "column": 11
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-b1832491e84c04e",
+      "title": "List rule executions API space scoping: does not return executions from another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 65,
+        "column": 16
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-9c3299cf0e9b518",
+      "title": "List rule executions API validation: rejects page=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 102,
+        "column": 78
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-554c6ef42ef9692",
+      "title": "List rule executions API validation: rejects perPage=0",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 123,
+        "column": 14
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-5da988c52fd8619",
+      "title": "List rule executions API validation: rejects perPage above the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 130,
         "column": 7
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-37ffaf2c2ffce93",
+      "title": "List rule executions API validation: rejects unknown outcome values",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 136,
+        "column": 82
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-c69da1a84fa65de",
+      "title": "List rule executions API validation: rejects malformed datetimes for from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 143,
+        "column": 69
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-77783faff1b5063",
+      "title": "List rule executions API authorization: 200 with alerting_v2_execution_history read privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 147,
+        "column": 12
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-6a966cfb4221288",
+      "title": "List rule executions API authorization: 200 with alerting_v2_execution_history all privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 152,
+        "column": 22
+      }
+    },
+    {
+      "id": "8773fbf2f1ea1f7-459ac26444f350d",
+      "title": "List rule executions API authorization: 403 without any alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/execution_history/list_rule_executions.spec.ts",
+        "line": 161,
+        "column": 16
       }
     },
     {
