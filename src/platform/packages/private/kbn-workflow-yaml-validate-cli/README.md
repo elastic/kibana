@@ -106,7 +106,7 @@ Validating on the main thread would overflow the stack after only a few levels,
 because the main thread's stack is capped by the OS thread stack (~8 MB).
 
 To avoid that, the schema is compiled and validated inside a **worker thread**
-whose stack is sized explicitly (`resourceLimits.stackSizeMb`, 128 MB by
+whose stack is sized explicitly (`resourceLimits.stackSizeMb`, 32 MB by
 default). That comfortably validates thousands of nesting levels — far beyond any
 real workflow. If a pathologically deep document still overflows even the
 enlarged stack, it is reported as a single actionable
