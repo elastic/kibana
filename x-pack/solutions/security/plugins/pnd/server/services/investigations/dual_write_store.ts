@@ -74,6 +74,22 @@ export class DualWriteStore implements PndStore {
     this.fanOutWrite('createInvestigationIfMissing', args);
   }
 
+  async forkToIncident(...args: Parameters<PndStore['forkToIncident']>) {
+    const result = await this.primary.forkToIncident(...args);
+    this.fanOutWrite('forkToIncident', args);
+    return result;
+  }
+
+  async getIncident(...args: Parameters<PndStore['getIncident']>) {
+    return this.primary.getIncident(...args);
+  }
+
+  async findIncidentForInvestigation(
+    ...args: Parameters<PndStore['findIncidentForInvestigation']>
+  ) {
+    return this.primary.findIncidentForInvestigation(...args);
+  }
+
   async updateProposalStatus(...args: Parameters<PndStore['updateProposalStatus']>) {
     const result = await this.primary.updateProposalStatus(...args);
     this.fanOutWrite('updateProposalStatus', args);

@@ -40,6 +40,9 @@ const createStubStore = (overrides: Partial<PndStore> = {}): PndStore =>
     recordEscalation: jest.fn().mockResolvedValue(undefined),
     recordDeepWatchOutcome: jest.fn().mockResolvedValue(undefined),
     recordDetectionChangeSignal: jest.fn().mockResolvedValue(undefined),
+    forkToIncident: jest.fn().mockResolvedValue({ outcome: 'investigation_not_found' }),
+    getIncident: jest.fn().mockResolvedValue(null),
+    findIncidentForInvestigation: jest.fn().mockResolvedValue(null),
     ...overrides,
   } as unknown as PndStore);
 
@@ -83,6 +86,9 @@ describe('DualWriteStore', () => {
       saveWorkerEvaluationRecord = jest.fn();
       recordEscalation = jest.fn();
       recordDetectionChangeSignal = jest.fn();
+      forkToIncident = jest.fn();
+      getIncident = jest.fn();
+      findIncidentForInvestigation = jest.fn();
     }
 
     const shadow = new ThisDependentShadow();

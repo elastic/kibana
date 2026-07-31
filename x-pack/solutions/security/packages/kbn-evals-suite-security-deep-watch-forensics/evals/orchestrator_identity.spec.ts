@@ -13,14 +13,19 @@
  * investigation containment. These are object-model invariants (PR #46), not
  * quality evals.
  *
- * D3 and D6 exercise real code paths already shipped in the PND plugin
- * (`InvestigationStore.createInvestigationIfMissing` + the `investigationId`
- * derivation in `emit_proposal.ts`) and are asserted for real against a live
- * Kibana + ES via the `_emit_proposal` route. The remaining D-gates (D1, D2,
- * D4, D5, D7) have no implementation to test against yet — they are genuinely
- * blocked on platform primitives (run-as/UIAM #17942, HIL/Approval Gate #17944,
- * Watch Orchestrator graph-as-allowlist / Incident object model PR #46) and
- * remain honest skip-stubs rather than fabricated coverage.
+ * D3, D6 and D7 exercise real code paths shipped in the PND plugin
+ * (`InvestigationStore.createInvestigationIfMissing`, the `investigationId`
+ * derivation in `emit_proposal.ts`, and `IncidentForkStore.forkToIncident`
+ * behind `_promote_to_incident`) and are asserted for real against a live
+ * Kibana + ES.
+ *
+ * D1, D2, D4 and D5 remain honest skip-stubs. They are NOT missing code — each
+ * is blocked on a platform primitive or an architecture decision that has not
+ * been made yet (run-as/UIAM #17942, HIL/Approval Gate #17944, and the still-
+ * open `orchestration.workers` vs. graph-as-allowlist question). Substituting
+ * an assertion against some adjacent endpoint would produce a green checkmark
+ * that does not test the invariant the gate names, which is worse than an
+ * acknowledged gap.
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -31,6 +36,8 @@ import {
   PND_API_VERSION,
   PND_INVESTIGATIONS_INDEX,
   PND_CANONICAL_PROPOSALS_INDEX,
+  PND_INCIDENTS_INDEX,
+  pndPromoteToIncidentPath,
 } from '../src/constants';
 
 interface EmitProposalResponse {
@@ -39,6 +46,14 @@ interface EmitProposalResponse {
   workerEvalId: string;
   status: string;
   written: string[];
+}
+
+interface PromoteToIncidentResponse {
+  outcome: 'forked' | 'already_forked';
+  incidentId: string;
+  forkedFromInvestigationId: string;
+  carriedEventCount: number;
+  message: string;
 }
 
 const emitProposal = async (
@@ -152,19 +167,30 @@ evaluate.describe(
     evaluate.skip(
       'D4 — HIL-pause fail-closed: rejected/expired pause does not proceed',
       async () => {
-        // BLOCKED: HIL/Approval Gate primitive (#17944)
-        // Reject/expire a pause → run halts in terminal safe state with prior
-        // evidence preserved; never resumes the consequential step on timeout.
+        // BLOCKED: no HIL/Approval Gate primitive exists in the workflow engine
+        // (#17944). Verified directly: `kbn-workflows`' step-type registry has
+        // no waitForApproval/waitForInput step, so there is no mid-execution
+        // pause to reject or expire.
+        // NOTE: PND's proposal decision routes (accept/reject/defer) are NOT a
+        // substitute — they are direct REST mutations on an already-completed
+        // run, not a workflow pause. Asserting against them would test a
+        // different thing entirely while appearing to cover this gate.
+        // When it lands: reject/expire a pause → run halts in a terminal safe
+        // state with prior evidence preserved; never resumes on timeout.
       }
     );
 
     evaluate.skip(
       'D5 — Allowlist boundary: Orchestrator invokes only allowlisted Workers',
       async () => {
-        // BLOCKED: Watch Orchestrator graph-as-allowlist (PR #46)
-        // Attempt workflow.execute* a Worker outside the Orchestrator's
-        // orchestration.workers allowlist → invocation refused. No workflow
-        // YAML/allowlist definition exists in this repo yet to test against.
+        // BLOCKED: the allowlist mechanism itself is an OPEN DECISION, not
+        // merely unimplemented. daybreak-watches-object-model.md's "Still open"
+        // section lists verbatim: "Explicit `orchestration.workers` field vs
+        // graph-as-allowlist today". Until that resolves there is no schema to
+        // enforce, and inventing one here would bake an unratified product
+        // decision into a gate test.
+        // When it lands: attempt workflow.execute* a Worker outside the
+        // Orchestrator's allowlist → invocation refused.
       }
     );
 
@@ -260,10 +286,127 @@ evaluate.describe(
       }
     );
 
-    evaluate.skip('D7 — Incident-fork integrity: escalation forks losslessly', async () => {
-      // BLOCKED: Incident object model (PR #46)
-      // Fork Investigation → new template_id:incident root contains every
-      // prior thread/artifact, promotion recorded as audit event.
-    });
+    evaluate(
+      'D7 — Incident-fork integrity: escalation forks losslessly',
+      async ({ kbnClient, esClient, log }) => {
+        // A promotion must FORK to a new `template_id: 'incident'` root — the
+        // object model calls this out explicitly as "not a status rename"
+        // (daybreak-watches-object-model.md, D13). Three things have to hold:
+        //   1. the source Investigation SURVIVES (it is not mutated away), and
+        //   2. the new Incident root carries EVERY prior thread forward
+        //      (lossless — that's the "integrity" in the gate name), and
+        //   3. the promotion itself is recorded as an audit event on both.
+        const alertId = `d7-fork-${uuidv4()}`;
+        const investigationId = `inv-watch-floor-${alertId}`;
+
+        // Build real prior history on the Investigation: two worker touches,
+        // so a lossy fork (one that drops or truncates threads) is detectable.
+        await emitProposal(kbnClient, {
+          sourceWatch: 'watch-floor',
+          workerRun: workerRun({ alertId, investigationId }),
+        });
+        await emitProposal(kbnClient, {
+          sourceWatch: 'watch-deep',
+          workerRun: workerRun({ alertId, investigationId }),
+        });
+
+        // Snapshot the pre-fork timeline so carry-over can be compared exactly.
+        let preForkEventCount = 0;
+        try {
+          const pre = await esClient.get<{ events?: unknown[] }>({
+            index: PND_INVESTIGATIONS_INDEX,
+            id: investigationId,
+          });
+          preForkEventCount = pre._source?.events?.length ?? 0;
+        } catch (e) {
+          log.warning(`[D7] pre-fork investigation read failed: ${(e as Error).message}`);
+        }
+
+        const promote = await kbnClient.request<PromoteToIncidentResponse>({
+          path: pndPromoteToIncidentPath(investigationId),
+          method: 'POST',
+          headers: { 'elastic-api-version': PND_API_VERSION },
+          body: { reason: 'D7 gate — escalation fork integrity' },
+        });
+        const incidentId = promote.data.incidentId;
+        log.info(
+          `[D7] promote outcome=${promote.data.outcome} incidentId=${incidentId} ` +
+            `carriedEventCount=${promote.data.carriedEventCount} (preFork=${preForkEventCount})`
+        );
+
+        // 1. Source Investigation still exists — a fork, not a rename/move.
+        let investigationSurvives = false;
+        try {
+          investigationSurvives =
+            (
+              await esClient.count({
+                index: PND_INVESTIGATIONS_INDEX,
+                query: { term: { id: investigationId } },
+              })
+            ).count === 1;
+        } catch (e) {
+          log.warning(`[D7] post-fork investigation count failed: ${(e as Error).message}`);
+        }
+
+        // 2. + 3. Incident root exists, is lineage-linked, and carried the
+        // prior threads forward plus the promotion audit event.
+        let incidentIsLineageLinked = false;
+        let carriedAllPriorThreads = false;
+        let promotionAudited = false;
+        try {
+          const incidentDoc = await esClient.get<{
+            template_id?: string;
+            forkedFromInvestigationId?: string;
+            events?: Array<{ type?: string; summary?: string }>;
+          }>({ index: PND_INCIDENTS_INDEX, id: incidentId });
+
+          const src = incidentDoc._source;
+          incidentIsLineageLinked =
+            src?.template_id === 'incident' && src?.forkedFromInvestigationId === investigationId;
+
+          const incidentEvents = src?.events ?? [];
+          // Lossless: every pre-fork event carried over, PLUS the fork event.
+          carriedAllPriorThreads =
+            preForkEventCount > 0 && incidentEvents.length === preForkEventCount + 1;
+          promotionAudited = incidentEvents.some(
+            (evt) =>
+              evt?.type === 'decision' && (evt?.summary ?? '').includes('promoted to Incident')
+          );
+        } catch (e) {
+          log.warning(`[D7] incident doc read failed: ${(e as Error).message}`);
+        }
+
+        log.info(
+          `[D7] investigationSurvives=${investigationSurvives} ` +
+            `incidentIsLineageLinked=${incidentIsLineageLinked} ` +
+            `carriedAllPriorThreads=${carriedAllPriorThreads} promotionAudited=${promotionAudited}`
+        );
+
+        const success =
+          promote.data.outcome === 'forked' &&
+          investigationSurvives &&
+          incidentIsLineageLinked &&
+          carriedAllPriorThreads &&
+          promotionAudited;
+
+        return {
+          success,
+          explanation:
+            `Promoted ${investigationId} -> ${incidentId} (outcome=${promote.data.outcome}). ` +
+            `Source Investigation survives: ${investigationSurvives} (fork, not rename). ` +
+            `Incident lineage-linked via forkedFromInvestigationId: ${incidentIsLineageLinked}. ` +
+            `Carried ${promote.data.carriedEventCount} events vs ${preForkEventCount} pre-fork ` +
+            `+1 promotion event (lossless: ${carriedAllPriorThreads}). ` +
+            `Promotion recorded as audit event: ${promotionAudited}.`,
+          scorecard: {
+            forked: promote.data.outcome === 'forked' ? 1 : 0,
+            investigationSurvives: investigationSurvives ? 1 : 0,
+            incidentIsLineageLinked: incidentIsLineageLinked ? 1 : 0,
+            carriedAllPriorThreads: carriedAllPriorThreads ? 1 : 0,
+            promotionAudited: promotionAudited ? 1 : 0,
+          },
+        };
+      }
+    );
   }
 );

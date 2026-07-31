@@ -10,6 +10,7 @@ import type {
   GetInvestigationResponse,
   ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
+  Incident,
   TimelineEvent,
 } from '@kbn/pnd-common';
 import type {
@@ -22,6 +23,8 @@ import type { PndStore, WatchActivityMetrics } from './pnd_store';
 import { InvestigationIndexBootstrap } from './investigation_index_bootstrap';
 import { InvestigationRecordStore } from './investigation_record_store';
 import { InvestigationTimelineStore } from './investigation_timeline_store';
+import { IncidentForkStore } from './incident_fork_store';
+import type { ForkIncidentArgs, ForkIncidentResult } from './incident_fork_store';
 import { ProposalDecisionStore } from './proposal_decision_store';
 import { WatchMetricsStore } from './watch_metrics_store';
 import { WorkerOutputStore } from './worker_output_store';
@@ -45,6 +48,7 @@ import type { ProposalStatusUpdate } from './proposal_decision_store';
  *  - {@link ProposalDecisionStore}       — proposal listing + analyst decisions
  *  - {@link WorkerOutputStore}           — canonical Worker run output
  *  - {@link InvestigationTimelineStore}  — escalation/forensic/detection-change events
+ *  - {@link IncidentForkStore}           — Investigation → Incident fork (new root)
  *  - {@link WatchMetricsStore}           — per-watch activity aggregations
  *
  * The public API is deliberately unchanged, so `DualWriteStore`,
@@ -59,6 +63,7 @@ export class InvestigationStore implements PndStore {
   private readonly proposals: ProposalDecisionStore;
   private readonly workerOutput: WorkerOutputStore;
   private readonly timeline: InvestigationTimelineStore;
+  private readonly incidents: IncidentForkStore;
   private readonly watchMetrics: WatchMetricsStore;
 
   constructor(logger: Logger) {
@@ -67,6 +72,7 @@ export class InvestigationStore implements PndStore {
     this.proposals = new ProposalDecisionStore(this.bootstrap);
     this.workerOutput = new WorkerOutputStore(this.bootstrap, logger);
     this.timeline = new InvestigationTimelineStore(this.bootstrap, logger);
+    this.incidents = new IncidentForkStore(this.bootstrap, this.investigations, this.timeline);
     this.watchMetrics = new WatchMetricsStore(this.bootstrap);
   }
 
@@ -104,6 +110,31 @@ export class InvestigationStore implements PndStore {
     investigation: Investigation
   ): Promise<void> {
     return this.investigations.createInvestigationIfMissing(esClient, investigation);
+  }
+
+  // -- Incident fork (Investigation -> Incident, new root) --
+
+  /**
+   * Promotes an Investigation to an Incident by forking to a new root
+   * (object model D13 — "not a status rename"). Idempotent; see
+   * {@link IncidentForkStore.forkToIncident}.
+   */
+  public async forkToIncident(
+    esClient: ElasticsearchClient,
+    args: ForkIncidentArgs
+  ): Promise<ForkIncidentResult> {
+    return this.incidents.forkToIncident(esClient, args);
+  }
+
+  public async getIncident(esClient: ElasticsearchClient, id: string): Promise<Incident | null> {
+    return this.incidents.getIncident(esClient, id);
+  }
+
+  public async findIncidentForInvestigation(
+    esClient: ElasticsearchClient,
+    investigationId: string
+  ): Promise<Incident | null> {
+    return this.incidents.findIncidentForInvestigation(esClient, investigationId);
   }
 
   // -- Proposals and analyst decisions --

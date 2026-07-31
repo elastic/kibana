@@ -30,6 +30,7 @@ import { registerGenerateProposalRoute } from './investigations/generate_proposa
 import { registerEmitProposalRoute } from './investigations/emit_proposal';
 import { registerGetConversationRoute } from './investigations/get_conversation';
 import { registerEnrichAlertRoute } from './investigations/enrich_alert';
+import { registerPromoteToIncidentRoute } from './investigations/promote_to_incident';
 
 export interface RouteDependencies {
   router: IRouter;
@@ -73,4 +74,5 @@ export const registerRoutes = (deps: RouteDependencies): void => {
   registerEmitProposalRoute(deps);
   registerGetConversationRoute(deps);
   registerEnrichAlertRoute(deps);
+  registerPromoteToIncidentRoute(deps);
 };

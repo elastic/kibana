@@ -62,6 +62,26 @@ export class PndConversationStore implements PndStore {
     return this.legacy.createInvestigationIfMissing(...args);
   }
 
+  async forkToIncident(...args: Parameters<PndStore['forkToIncident']>) {
+    // Incident forking writes a `template_id: 'incident'` root. The platform
+    // Conversation mapping for that template exists
+    // (`incidentToConversationCreate`) but the fork mechanic itself is owned
+    // by Conversation Support upstream (object model D13), so the durable
+    // write stays on the legacy ES-backed store for now — same reasoning as
+    // createInvestigationIfMissing above.
+    return this.legacy.forkToIncident(...args);
+  }
+
+  async getIncident(...args: Parameters<PndStore['getIncident']>) {
+    return this.legacy.getIncident(...args);
+  }
+
+  async findIncidentForInvestigation(
+    ...args: Parameters<PndStore['findIncidentForInvestigation']>
+  ) {
+    return this.legacy.findIncidentForInvestigation(...args);
+  }
+
   async listProposals(esClient: ElasticsearchClient, investigationId: string) {
     return this.legacy.listProposals(esClient, investigationId);
   }

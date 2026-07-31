@@ -79,3 +79,8 @@ export const PND_EMIT_PROPOSAL_PATH = '/internal/pnd/investigations/_emit_propos
 export const PND_API_VERSION = '1';
 export const PND_INVESTIGATIONS_INDEX = 'pnd-investigations';
 export const PND_CANONICAL_PROPOSALS_INDEX = 'pnd-canonical-proposals';
+/** Forked Incident roots (D7 — Investigation → Incident promotion). */
+export const PND_INCIDENTS_INDEX = '.pnd-incidents';
+/** Builds the promote-to-incident path for a given investigation id. */
+export const pndPromoteToIncidentPath = (investigationId: string) =>
+  `/internal/pnd/investigations/${encodeURIComponent(investigationId)}/_promote_to_incident`;

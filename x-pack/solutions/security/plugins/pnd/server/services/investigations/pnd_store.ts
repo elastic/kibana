@@ -10,12 +10,14 @@ import type {
   GetInvestigationResponse,
   ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
+  Incident,
   TimelineEvent,
 } from '@kbn/pnd-common';
 import type { EvidencePackage, WorkerEvaluationRecord } from '../../common/schemas';
 import type { DetectionChangeSignal } from '../../common/schemas/detection_change';
 import type { Proposal as CanonicalProposal } from '../../common/schemas';
 import type { DismissalReason, ProposalStatusUpdate } from './proposal_decision_store';
+import type { ForkIncidentArgs, ForkIncidentResult } from './incident_fork_store';
 
 type Investigation = ListInvestigationsResponse['investigations'][number];
 
@@ -45,6 +47,27 @@ export interface PndStore {
     esClient: ElasticsearchClient,
     investigation: Investigation
   ): Promise<void>;
+
+  /**
+   * Promote an Investigation to an Incident by **forking to a new root**
+   * (locked object model D13 — a fork, explicitly "not a status rename": the
+   * source Investigation survives and the Incident carries prior threads
+   * forward). Idempotent — a repeat promote returns the existing Incident.
+   */
+  forkToIncident(
+    esClient: ElasticsearchClient,
+    args: ForkIncidentArgs
+  ): Promise<ForkIncidentResult>;
+
+  /** Fetch a forked Incident root by id. */
+  getIncident(esClient: ElasticsearchClient, id: string): Promise<Incident | null>;
+
+  /** Find the Incident forked from a given Investigation, if one exists. */
+  findIncidentForInvestigation(
+    esClient: ElasticsearchClient,
+    investigationId: string
+  ): Promise<Incident | null>;
+
   listProposals(
     esClient: ElasticsearchClient,
     investigationId: string
