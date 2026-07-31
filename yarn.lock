@@ -16691,7 +16691,7 @@ acorn@^8.0.4, acorn@^8.1.0, acorn@^8.10.0, acorn@^8.11.0, acorn@^8.14.0, acorn@^
 
 adm-zip@0.5.18, adm-zip@^0.5.17:
   version "0.5.18"
-  resolved "https://registry.npmjs.org/adm-zip/-/adm-zip-0.5.18.tgz"
+  resolved "https://registry.yarnpkg.com/adm-zip/-/adm-zip-0.5.18.tgz#283a05f2bf1e3fd315f0f31cde29b7a6e3c1619d"
   integrity sha512-ufJnssQGbxzLNS1Ho9bCtX4rQKCCvoVuDLHoJyc3F9dOGDB4BkWs2Ci0kv53lqocAEQ/Cbi+I2XCsNYGqVYqng==
 
 after-all-results@^2.0.0:
