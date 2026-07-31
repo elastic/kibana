@@ -40,7 +40,7 @@ export function getFlyoutDiscoverNavigation({
   queryParams,
 }: {
   share: SharePublicStart | undefined;
-  indices: APMIndices | undefined;
+  indices: APMIndices | null | undefined;
   indexType: IndexType;
   rangeFrom: string;
   rangeTo: string;
