@@ -12,13 +12,6 @@ import type { ScoutPage } from '@kbn/scout';
 export class Navigation {
   constructor(private readonly page: ScoutPage) {}
 
-  async goToSecurity() {
-    await this.page.gotoApp('security');
-    await this.page.testSubj
-      .locator('kbnChromeLayoutNavigation')
-      .waitFor({ state: 'visible', timeout: 30_000 });
-  }
-
   async clickLogo() {
     await this.page.testSubj.locator('nav-header-logo').waitFor({ state: 'visible' });
     await this.page.testSubj.click('nav-header-logo');
