@@ -15,7 +15,7 @@ import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration'
 import type { TaskManagerStartContract } from '../plugin';
 import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ActivityTrackingMode, ApiKeyType, type TaskManagerConfig } from '../config';
+import { ApiKeyType, type TaskManagerConfig } from '../config';
 import { BulkUpdateError } from '../lib/errors';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
@@ -71,11 +71,7 @@ describe('managed configuration', () => {
   const config = {
     activity_tracking: {
       enabled: false,
-      mode: ActivityTrackingMode.Off,
-      sample_rate: 0.1,
-      task_types: [],
-      sampler_interval: 30000,
-      dead_task_threshold: 60000,
+      track_heap_growth: false,
     },
     discovery: {
       active_nodes_lookback: '30s',

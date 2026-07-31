@@ -123,7 +123,12 @@ export const EventSchema = schema.maybe(
                 longest_idle_gap_ms: ecsStringOrNumber(),
                 longest_event_loop_block_ms: ecsStringOrNumber(),
                 callbacks: ecsStringOrNumber(),
-                max_memory_per_callback_bytes: ecsStringOrNumber(),
+                sync_ms: ecsStringOrNumber(),
+                event_loop_delay_max_ms: ecsStringOrNumber(),
+                unattributed_block_ms: ecsStringOrNumber(),
+                process_cpu_ms: ecsStringOrNumber(),
+                unattributed_cpu_ms: ecsStringOrNumber(),
+                max_heap_growth_per_callback_bytes: schema.maybe(ecsStringOrNumber()),
               })
             ),
           })

@@ -62,8 +62,24 @@ exports.EcsCustomPropertyMappings = {
               callbacks: {
                 type: 'long',
               },
-              max_memory_per_callback_bytes: {
+              sync_ms: {
                 type: 'long',
+              },
+              event_loop_delay_max_ms: {
+                type: 'long',
+              },
+              unattributed_block_ms: {
+                type: 'long',
+              },
+              process_cpu_ms: {
+                type: 'long',
+              },
+              unattributed_cpu_ms: {
+                type: 'long',
+              },
+              max_heap_growth_per_callback_bytes: {
+                type: 'long',
+                meta: { optional: 'true' },
               },
             },
           },

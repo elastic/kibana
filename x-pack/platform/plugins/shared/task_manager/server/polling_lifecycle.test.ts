@@ -28,12 +28,7 @@ import { FillPoolResult } from './lib/fill_pool';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
 import { TaskCost } from './task';
 import type { TaskEventLogger } from './task';
-import {
-  ActivityTrackingMode,
-  ApiKeyType,
-  CLAIM_STRATEGY_MGET,
-  DEFAULT_KIBANAS_PER_PARTITION,
-} from './config';
+import { ApiKeyType, CLAIM_STRATEGY_MGET, DEFAULT_KIBANAS_PER_PARTITION } from './config';
 import { TaskPartitioner } from './lib/task_partitioner';
 import type { KibanaDiscoveryService } from './kibana_discovery_service';
 import { TaskEventType } from './task_events';
@@ -92,11 +87,7 @@ describe('TaskPollingLifecycle', () => {
     config: {
       activity_tracking: {
         enabled: false,
-        mode: ActivityTrackingMode.Off,
-        sample_rate: 0.1,
-        task_types: [],
-        sampler_interval: 30000,
-        dead_task_threshold: 60000,
+        track_heap_growth: false,
       },
       discovery: {
         active_nodes_lookback: '30s',

@@ -7,5 +7,10 @@
 
 export { TaskActivityTracker } from './task_activity_tracker';
 export type { TaskActivityTrackerOpts } from './task_activity_tracker';
-export { getTaskActivityRunFields, setActiveTaskActivityTracker } from './task_activity_tracker';
+export {
+  beginTaskActivityRun,
+  getTaskActivityRunFields,
+  runTaskWithActivityTracking,
+  setActiveTaskActivityTracker,
+} from './task_activity_tracker';
 export type { TaskActivityRunFields } from './types';

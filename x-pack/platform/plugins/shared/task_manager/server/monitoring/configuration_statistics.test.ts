@@ -8,7 +8,7 @@
 import { Subject } from 'rxjs';
 import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
-import { ActivityTrackingMode, ApiKeyType, type TaskManagerConfig } from '../config';
+import { ApiKeyType, type TaskManagerConfig } from '../config';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 
 describe('Configuration Statistics Aggregator', () => {
@@ -27,11 +27,7 @@ describe('Configuration Statistics Aggregator', () => {
     const configuration: TaskManagerConfig = {
       activity_tracking: {
         enabled: false,
-        mode: ActivityTrackingMode.Off,
-        sample_rate: 0.1,
-        task_types: [],
-        sampler_interval: 30000,
-        dead_task_threshold: 60000,
+        track_heap_growth: false,
       },
       discovery: {
         active_nodes_lookback: '30s',

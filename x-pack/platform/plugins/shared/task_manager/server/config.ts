@@ -83,50 +83,19 @@ const requestTimeoutsConfig = schema.object({
   update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
 
-export enum ActivityTrackingMode {
-  /* Tracking disabled (equivalent to enabled:false). */
-  Off = 'off',
-  /* Track a random subset of runs (see sample_rate) and/or a task_types allowlist. */
-  Sampled = 'sampled',
-  /* Track every run. */
-  Full = 'full',
-  /* Track every run and force GC around each run for a clean per-run memory delta. Requires node --expose-gc. Diagnostic harness only. */
-  Benchmark = 'benchmark',
-}
-
-export const DEFAULT_ACTIVITY_TRACKING_SAMPLER_INTERVAL = 30 * 1000; // 30 seconds
-export const DEFAULT_ACTIVITY_TRACKING_DEAD_TASK_THRESHOLD = 60 * 1000; // 60 seconds
-
 /*
  * Diagnostic per-task execution accounting. Uses async_hooks and has real global
  * overhead, so it ships disabled by default and should be enabled only while
  * investigating. See the task_activity_tracking module for details.
  */
 const activityTrackingSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  mode: schema.oneOf(
-    [
-      schema.literal(ActivityTrackingMode.Off),
-      schema.literal(ActivityTrackingMode.Sampled),
-      schema.literal(ActivityTrackingMode.Full),
-      schema.literal(ActivityTrackingMode.Benchmark),
-    ],
-    { defaultValue: ActivityTrackingMode.Full }
-  ),
-  /* Fraction (0-1) of runs to track when mode is "sampled". */
-  sample_rate: schema.number({ defaultValue: 0.1, min: 0, max: 1 }),
-  /* When non-empty, only these task types are tracked (scopes overhead to a specific type). */
-  task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
-  /* How often (ms) the in-flight dead-task sampler scans for stuck tasks. */
-  sampler_interval: schema.number({
-    defaultValue: DEFAULT_ACTIVITY_TRACKING_SAMPLER_INTERVAL,
-    min: 1000,
-  }),
-  /* Warn when an in-flight task holds a worker slot for this long (ms) without any on-CPU activity. */
-  dead_task_threshold: schema.number({
-    defaultValue: DEFAULT_ACTIVITY_TRACKING_DEAD_TASK_THRESHOLD,
-    min: 1000,
-  }),
+  enabled: schema.boolean({ defaultValue: false }),
+  /*
+   * Track the largest positive V8 heap growth within one callback. This is an
+   * allocation heuristic rather than retained memory, and reading heap statistics
+   * before and after each callback adds overhead, so it is independently opt-in.
+   */
+  track_heap_growth: schema.boolean({ defaultValue: false }),
 });
 
 const validateDuration = (duration: string) => {

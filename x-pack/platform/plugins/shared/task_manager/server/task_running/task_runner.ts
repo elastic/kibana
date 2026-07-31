@@ -69,7 +69,11 @@ import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
 import { EVENT_LOG_ACTIONS, EventLogOutcomes } from '../constants';
 import { millisToNanos } from '../lib/millis_to_nanos';
-import { getTaskActivityRunFields } from '../task_activity_tracking';
+import {
+  beginTaskActivityRun,
+  getTaskActivityRunFields,
+  runTaskWithActivityTracking,
+} from '../task_activity_tracking';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -500,8 +504,15 @@ export class TaskManagerRunner implements TaskRunner {
             description: 'run task',
           });
 
+          beginTaskActivityRun(this.id, this.taskType);
+
           const result = await runner.run(() =>
-            withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
+            withSpan({ name: 'run', type: 'task manager' }, () =>
+              // Whatever `run()` does before it first yields executes in this callback,
+              // which may belong to the caller rather than to the run, so it has to be
+              // measured at the call site. The wrapper also handles synchronous throws.
+              runTaskWithActivityTracking(this.id, () => this.task!.run())
+            )
           );
 
           stopUpdatingLongRunningTasks();
@@ -1179,7 +1190,11 @@ export class TaskManagerRunner implements TaskRunner {
       : {};
     // When per-task activity tracking is enabled, enrich the run document with
     // on-CPU / idle / memory accounting. Returns undefined (no-op) when disabled.
-    const runActivity = getTaskActivityRunFields(this.id, taskTiming.stop - taskTiming.start);
+    const runActivity = getTaskActivityRunFields(
+      this.id,
+      taskTiming.stop - taskTiming.start,
+      taskTiming.eventLoopBlockMs
+    );
     this.eventLogger.logEvent({
       event: {
         action: EVENT_LOG_ACTIONS.taskRun,

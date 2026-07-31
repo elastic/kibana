@@ -13,12 +13,8 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "activity_tracking": Object {
-          "dead_task_threshold": 60000,
           "enabled": false,
-          "mode": "full",
-          "sample_rate": 0.1,
-          "sampler_interval": 30000,
-          "task_types": Array [],
+          "track_heap_growth": false,
         },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
@@ -85,12 +81,8 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "activity_tracking": Object {
-          "dead_task_threshold": 60000,
           "enabled": false,
-          "mode": "full",
-          "sample_rate": 0.1,
-          "sampler_interval": 30000,
-          "task_types": Array [],
+          "track_heap_growth": false,
         },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
@@ -155,12 +147,8 @@ describe('config validation', () => {
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
         "activity_tracking": Object {
-          "dead_task_threshold": 60000,
           "enabled": false,
-          "mode": "full",
-          "sample_rate": 0.1,
-          "sampler_interval": 30000,
-          "task_types": Array [],
+          "track_heap_growth": false,
         },
         "allow_reading_invalid_state": true,
         "api_key_type": "es",
