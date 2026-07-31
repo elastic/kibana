@@ -28,7 +28,9 @@ Semantic sub-fields use **dot notation**: `content.semantic`, `title.semantic`, 
 
 ## Aggregation
 
-Before querying, you can orient yourself with an aggregation to see what types of KIs exist in the index:
+`type` and `tags` values are both set by whichever workflows generated the KIs, so neither is
+a fixed vocabulary. Aggregate to discover what this index actually holds before filtering on
+either one:
 
 ```esql
 FROM ai-index-*
@@ -36,16 +38,11 @@ FROM ai-index-*
 | SORT ki_count DESC
 ```
 
-The same works for `tags`. Tag values are arbitrary, set by whichever workflow generated the
-KIs, so aggregate to discover them rather than assuming a vocabulary:
-
 ```esql
 FROM ai-index-*
 | STATS ki_count = COUNT(*) BY tags
 | SORT ki_count DESC
 ```
-
-Use either to find valid values before adding a `type` or `tags` filter to a query.
 
 ---
 
