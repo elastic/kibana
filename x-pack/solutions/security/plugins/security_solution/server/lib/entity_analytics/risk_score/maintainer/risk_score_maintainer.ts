@@ -46,6 +46,7 @@ import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
 import { buildLookupIndex } from './steps/build_lookup_index';
+import { buildRiskScoreEntityMaintainerRunSummary } from './entity_maintainer_run_summary';
 
 export interface RiskScoreMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -58,6 +59,7 @@ export interface RiskScoreMaintainerDeps {
 }
 
 type RiskScoreMaintainerConfig = Pick<RegisterEntityMaintainerConfig, 'setup' | 'run'>;
+type FrameworkTelemetry = Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['telemetry'];
 type StartServices = Awaited<ReturnType<RiskScoreMaintainerDeps['getStartServices']>>;
 type CoreStart = StartServices[0];
 type PluginsStart = StartServices[1];
@@ -135,7 +137,7 @@ export const createRiskScoreMaintainer = ({
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
-    run: async ({ status, crudClient, signal }) => {
+    run: async ({ status, crudClient, signal, telemetry: frameworkTelemetry }) => {
       const runContext = await initializeRunContext({
         getStartServices,
         namespace: status.metadata.namespace,
@@ -215,6 +217,7 @@ export const createRiskScoreMaintainer = ({
               logger,
               abortSignal: signal,
               telemetryReporter,
+              frameworkTelemetry,
               metricsTracker,
               runContext,
               runConfig,
@@ -413,6 +416,7 @@ const executeEntityTypeRun = async ({
   logger,
   abortSignal,
   telemetryReporter,
+  frameworkTelemetry,
   metricsTracker,
   runContext,
   runConfig,
@@ -423,7 +427,11 @@ const executeEntityTypeRun = async ({
   crudClient: Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['crudClient'];
   logger: Logger;
   abortSignal?: AbortSignal;
+  // Dual telemetry: Entity Maintainers framework (`frameworkTelemetry`) plus the
+  // legacy risk-score reporter (`telemetryReporter`). Goal is to migrate all
+  // events onto the framework and retire the risk-score-specific reporter.
   telemetryReporter: TelemetryReporter;
+  frameworkTelemetry: FrameworkTelemetry;
   metricsTracker: RunMetricsTracker;
   runContext: InitializedRunContext;
   runConfig: LoadedRunConfig;
@@ -611,11 +619,25 @@ const executeEntityTypeRun = async ({
     }
   }
 
+  // Keep risk-score-specific reporter event fields explicit so framework-only counters
+  // are not leaked into risk_score_maintainer_run_summary
   runTelemetry.completionSummary({
     runStatus,
     runErrorKind,
-    ...runMetrics,
+    scoresWrittenBase: runMetrics.scoresWrittenBase,
+    scoresWrittenResolution: runMetrics.scoresWrittenResolution,
+    scoresWrittenResetToZero: runMetrics.scoresWrittenResetToZero,
+    pagesProcessed: runMetrics.pagesProcessed,
+    lookupPrunedDocs: runMetrics.lookupPrunedDocs,
   });
+
+  frameworkTelemetry.report(
+    buildRiskScoreEntityMaintainerRunSummary({
+      entityType,
+      metrics: runMetrics,
+    })
+  );
+
   const entityRunDurationMs = Date.now() - entityRunStartedAtMs;
   const runSummary = metricsTracker.toRunSummary(runMetrics, {
     entityType,

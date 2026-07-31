@@ -50,6 +50,8 @@ interface ScoreAndPersistBaseEntitiesParams extends ScoreBaseEntitiesParams {
 export interface Phase1BaseScoringSummary extends StepResult {
   pagesProcessed: number;
   scoresWritten: number;
+  scoresCalculated: number;
+  scoresDroppedNotInStore: number;
   scores: Record<string, number>;
 }
 
@@ -151,10 +153,14 @@ export const scoreBaseEntities = async ({
 }: ScoreAndPersistBaseEntitiesParams): Promise<Phase1BaseScoringSummary> => {
   let pagesProcessed = 0;
   let scoresWritten = 0;
+  let scoresCalculated = 0;
+  let scoresDroppedNotInStore = 0;
+  let scoresFailed = 0;
   const newScores: Record<string, number> = {};
 
   for await (const page of calculateBaseEntityScores(params)) {
     pagesProcessed += 1;
+    scoresCalculated += page.scores.length;
     // Drop scores for entities that aren't in the entity store. The composite
     // aggregation discovers EUIDs from alerts, which can include identifiers
     // with no canonical store entity (host.id variations, synthetic identifiers,
@@ -163,11 +169,13 @@ export const scoreBaseEntities = async ({
     // anchor on the entity, no place on the entity flyout, and bloat trend
     // graphs. The V1 maintainer dropped them in `categorizePhase1Entities`;
     // do the same here.
+
     const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
-    if (inStoreScores.length < page.scores.length) {
+    const droppedCount = page.scores.length - inStoreScores.length;
+    if (droppedCount > 0) {
+      scoresDroppedNotInStore += droppedCount;
       params.logger.debug(
-        `dropped ${page.scores.length - inStoreScores.length} not_in_store scores ` +
-          `from page (kept ${inStoreScores.length})`
+        `dropped ${droppedCount} not_in_store scores from page (kept ${inStoreScores.length})`
       );
     }
     scoresWritten += await persistScoresToRiskIndex({
@@ -177,13 +185,14 @@ export const scoreBaseEntities = async ({
       logger: params.logger,
       refresh,
     });
-    await persistScoresToEntityStore({
+    const { errorsCount } = await persistScoresToEntityStore({
       crudClient: params.crudClient,
       logger: params.logger,
       entityType: params.entityType,
       scores: inStoreScores,
       enabled: idBasedRiskScoringEnabled,
     });
+    scoresFailed += errorsCount;
 
     if (collectScores) {
       for (const score of inStoreScores) {
@@ -195,6 +204,9 @@ export const scoreBaseEntities = async ({
   return {
     pagesProcessed,
     scoresWritten,
+    scoresCalculated,
+    scoresDroppedNotInStore,
+    scoresFailed,
     scores: newScores,
   };
 };

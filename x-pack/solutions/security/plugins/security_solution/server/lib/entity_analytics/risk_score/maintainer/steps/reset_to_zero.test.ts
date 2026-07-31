@@ -68,7 +68,12 @@ describe('resetToZero (maintainer)', () => {
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWritten: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).toHaveBeenCalledWith({
       host: [
         expect.objectContaining({
@@ -115,7 +120,12 @@ describe('resetToZero (maintainer)', () => {
         filter: { terms: { 'entity.id': ['host:host-1'] } },
       })
     );
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWritten: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
 
     expect(writerBulkMock).toHaveBeenCalledWith({
       host: [
@@ -176,7 +186,12 @@ describe('resetToZero (maintainer)', () => {
       watchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWritten: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).toHaveBeenCalledWith({
       user: [
         expect.objectContaining({
@@ -210,7 +225,12 @@ describe('resetToZero (maintainer)', () => {
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWritten: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).toHaveBeenCalledWith({
       service: [
         expect.objectContaining({
@@ -245,7 +265,12 @@ describe('resetToZero (maintainer)', () => {
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 1, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWritten: 1,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Error fetching entities for reset-to-zero')
     );
@@ -278,7 +303,12 @@ describe('resetToZero (maintainer)', () => {
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWritten: 0,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(writerBulkMock).not.toHaveBeenCalled();
   });
 
@@ -298,7 +328,12 @@ describe('resetToZero (maintainer)', () => {
       watchlistConfigs: emptyWatchlistConfigs,
     });
 
-    expect(result).toEqual({ scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false });
+    expect(result).toEqual({
+      scoresWritten: 0,
+      scoresFailed: 0,
+      pagesProcessed: 0,
+      resetBatchLimitHit: false,
+    });
     expect(esClient.esql.query).not.toHaveBeenCalled();
     expect(writerBulkMock).not.toHaveBeenCalled();
   });

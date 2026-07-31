@@ -225,6 +225,9 @@ describe('score_base_entities', () => {
       expect(writtenScores[0].id_value).toBe('user:in-store@okta');
 
       expect(summary.scoresWritten).toBe(1);
+      expect(summary.scoresCalculated).toBe(2);
+      expect(summary.scoresDroppedNotInStore).toBe(1);
+      expect(summary.scoresFailed).toBe(0);
     });
 
     it('writes no scores when no entity on the page is in the entity store', async () => {
@@ -253,6 +256,9 @@ describe('score_base_entities', () => {
       const writtenScores = (writer.bulk as jest.Mock).mock.calls[0][0][EntityType.user];
       expect(writtenScores).toHaveLength(0);
       expect(summary.scoresWritten).toBe(0);
+      expect(summary.scoresCalculated).toBe(2);
+      expect(summary.scoresDroppedNotInStore).toBe(2);
+      expect(summary.scoresFailed).toBe(0);
     });
   });
 });

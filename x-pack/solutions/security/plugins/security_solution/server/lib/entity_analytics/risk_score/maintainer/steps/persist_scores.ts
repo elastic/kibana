@@ -52,9 +52,9 @@ export const persistScoresToEntityStore = async ({
   entityType: EntityType;
   scores: EntityRiskScoreRecord[];
   enabled: boolean;
-}): Promise<void> => {
+}): Promise<{ errorsCount: number }> => {
   if (!enabled) {
-    return;
+    return { errorsCount: 0 };
   }
 
   const entityStoreErrors = await persistRiskScoresToEntityStore({
@@ -69,4 +69,5 @@ export const persistScoresToEntityStore = async ({
       )}`
     );
   }
+  return { errorsCount: entityStoreErrors.length };
 };

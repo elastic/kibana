@@ -61,6 +61,7 @@ export interface ScoredEntityPage {
 export interface StepResult {
   pagesProcessed: number;
   scoresWritten: number;
+  scoresFailed: number;
 }
 
 /** Phase 2 scoring summary with optional skip reason. */

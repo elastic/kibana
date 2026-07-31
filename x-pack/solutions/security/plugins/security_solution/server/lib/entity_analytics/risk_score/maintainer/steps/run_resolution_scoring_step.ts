@@ -60,6 +60,7 @@ export const runResolutionScoringStep = async ({
   );
   let pagesProcessed = 0;
   let scoresWrittenResolution = 0;
+  let scoresFailed = 0;
   let abortedBetweenPages = false;
   const newScores: Record<string, number> = {};
 
@@ -92,13 +93,14 @@ export const runResolutionScoringStep = async ({
         logger: runLogger,
         refresh,
       });
-      await persistScoresToEntityStore({
+      const { errorsCount } = await persistScoresToEntityStore({
         crudClient,
         logger: runLogger,
         entityType,
         scores: pageScores,
         enabled: idBasedRiskScoringEnabled,
       });
+      scoresFailed += errorsCount;
 
       if (collectScores) {
         for (const score of pageScores) {
@@ -121,6 +123,7 @@ export const runResolutionScoringStep = async ({
     );
     return {
       scoresWritten: 0,
+      scoresFailed,
       pagesProcessed,
       skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
       scores: newScores,
@@ -133,6 +136,7 @@ export const runResolutionScoringStep = async ({
 
   return {
     scoresWritten: scoresWrittenResolution,
+    scoresFailed,
     pagesProcessed,
     scores: newScores,
   };

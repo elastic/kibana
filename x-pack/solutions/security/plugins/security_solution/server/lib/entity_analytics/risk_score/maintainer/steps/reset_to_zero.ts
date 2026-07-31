@@ -67,7 +67,7 @@ export const resetToZero = async ({
   const indexExists = await esClient.indices.exists({ index: alias });
   if (!indexExists) {
     logger.debug(`reset_to_zero skipped because index "${alias}" does not exist yet`);
-    return { scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false };
+    return { scoresWritten: 0, scoresFailed: 0, pagesProcessed: 0, resetBatchLimitHit: false };
   }
 
   const entityField = `${entityType}.${RISK_SCORE_ID_VALUE_FIELD}`;
@@ -125,7 +125,7 @@ export const resetToZero = async ({
 
   if (allEntityIds.length === 0) {
     logger.debug('reset_to_zero found no stale entities');
-    return { scoresWritten: 0, pagesProcessed: 0, resetBatchLimitHit: false };
+    return { scoresWritten: 0, scoresFailed: 0, pagesProcessed: 0, resetBatchLimitHit: false };
   }
 
   const resetBatchLimitHit =
@@ -182,7 +182,7 @@ export const resetToZero = async ({
     logger,
   });
 
-  await persistScoresToEntityStore({
+  const { errorsCount: scoresFailed } = await persistScoresToEntityStore({
     crudClient,
     logger,
     entityType,
@@ -190,5 +190,5 @@ export const resetToZero = async ({
     enabled: idBasedRiskScoringEnabled,
   });
 
-  return { scoresWritten, pagesProcessed: 0, resetBatchLimitHit };
+  return { scoresWritten, scoresFailed, pagesProcessed: 0, resetBatchLimitHit };
 };
