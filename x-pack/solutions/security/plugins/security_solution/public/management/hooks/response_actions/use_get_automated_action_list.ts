@@ -146,7 +146,9 @@ export const useGetAutomatedActionResponseList = (
     select: (response) => combineResponse(requestAction, response),
     keepPreviousData: true,
     enabled,
-    refetchInterval: isLive ? 5000 : false,
+    // A failed fetch leaves no data behind, which is the same state that keeps the poll alive
+    refetchInterval: (_, currentQuery) =>
+      isLive && currentQuery.state.status !== 'error' ? 5000 : false,
   });
 };
 
