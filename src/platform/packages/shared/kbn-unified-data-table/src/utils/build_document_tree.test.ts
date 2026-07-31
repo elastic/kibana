@@ -11,7 +11,7 @@ import { createElement } from 'react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { buildDocumentTree } from './build_document_tree';
 
@@ -178,5 +178,53 @@ describe('buildDocumentTree', () => {
     // into its (possibly cyclic) internals and overflow the stack. Other values stay raw + typed.
     expect(tree.message).toBe(highlightedNode);
     expect(tree.count).toBe(5);
+  });
+
+  it('decodes ES|QL complex columns delivered as JSON strings into structure (via esType)', () => {
+    // In ES|QL mode `flattened` is the raw columnar row (no array wrapping), and `histogram` /
+    // `aggregate_metric_double` arrive as JSON strings rather than the objects the fields API
+    // returns. `columnsMeta` carries the ES type that marks them for decoding.
+    const row: DataTableRecord = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {
+        histogram: '{"values":[0.1,0.2,0.3],"counts":[3,7,23]}',
+        agg_metric: '{"min":-302.5,"max":702.3,"sum":200,"value_count":25}',
+      },
+    };
+
+    const tree = buildDocumentTree({
+      row,
+      dataView: dataViewMock,
+      fieldFormats,
+      columnsMeta: {
+        histogram: { type: 'number', esType: 'histogram' },
+        agg_metric: { type: 'number', esType: 'aggregate_metric_double' },
+      },
+    });
+
+    expect(tree).toEqual({
+      histogram: { values: [0.1, 0.2, 0.3], counts: [3, 7, 23] },
+      agg_metric: { min: -302.5, max: 702.3, sum: 200, value_count: 25 },
+    });
+  });
+
+  it('leaves a JSON-looking ES|QL keyword string untouched (only known complex types decode)', () => {
+    // The decode is gated on the ES type: a genuine keyword whose value merely looks like JSON
+    // must stay a raw string.
+    const row: DataTableRecord = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: { note: '{"looks":"like json"}' },
+    };
+
+    const tree = buildDocumentTree({
+      row,
+      dataView: dataViewMock,
+      fieldFormats,
+      columnsMeta: { note: { type: 'string', esType: 'keyword' } },
+    });
+
+    expect(tree).toEqual({ note: '{"looks":"like json"}' });
   });
 });

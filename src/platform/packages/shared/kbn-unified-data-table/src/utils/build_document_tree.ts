@@ -26,6 +26,12 @@ import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer'
 // intact. A plain `object`-mapped array (e.g. ecommerce `products`) is decorrelated by ES into
 // parallel dotted keys with no correlation metadata, so it un-flattens to an honest
 // object-of-arrays.
+//
+// ES|QL mode differs: `row.flattened` is the query's columnar row (values are not array-wrapped),
+// and a few complex types (`histogram`, `aggregate_metric_double`) arrive as a JSON-encoded string
+// rather than the object the fields API returns. Those are decoded back to structure — keyed on
+// the column's ES type — so the tree matches Classic mode; everything else flows through the same
+// un-flatten.
 
 interface FormatContext {
   dataView: DataView;
@@ -38,6 +44,24 @@ const documentTreeCache = new WeakMap<EsHitRecord, JsonValue>();
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
+
+// ES types that ES|QL delivers as a JSON-encoded string instead of a structured value.
+const ESQL_JSON_STRUCTURED_ES_TYPES = new Set(['aggregate_metric_double', 'histogram']);
+
+// Decode a complex ES|QL column that arrived as a JSON string back into its object/array value.
+// Gated on the column's ES type so a genuine keyword string that merely looks like JSON is never
+// touched; returns `undefined` when there is nothing to decode, so the caller keeps the raw value.
+const parseEsqlStructuredValue = (value: unknown, esType: string | undefined): unknown => {
+  if (typeof value !== 'string' || !esType || !ESQL_JSON_STRUCTURED_ES_TYPES.has(esType)) {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = JSON.parse(value);
+    return isPlainObject(parsed) || Array.isArray(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 // Rebuild the nested document from the flat, dotted-key map. Unlike a deep un-flatten, this only
 // de-dots the keys and treats each value as opaque — the values are already fully processed, and
@@ -73,6 +97,11 @@ const toLeaf = (
 };
 
 const processFieldValue = (rawValue: unknown, fieldName: string, ctx: FormatContext): unknown => {
+  // An ES|QL complex column (histogram, aggregate_metric_double) delivered as a JSON string: hand
+  // the decoded structure straight to the tree — its inner values are already concrete.
+  const structured = parseEsqlStructuredValue(rawValue, ctx.columnsMeta?.[fieldName]?.esType);
+  if (structured !== undefined) return structured;
+
   const values: unknown[] = Array.isArray(rawValue) ? rawValue : [rawValue];
   const field = getDataViewFieldOrCreateFromColumnMeta({
     dataView: ctx.dataView,
