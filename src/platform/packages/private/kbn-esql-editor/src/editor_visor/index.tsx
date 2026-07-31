@@ -23,6 +23,7 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
+import { VisorMode } from './visor_mode';
 import {
   searchPlaceholder,
   nlPlaceholder,
@@ -69,7 +70,7 @@ export function QuickSearchVisor({
   const euiThemeContext = useEuiTheme();
   const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState<'kql' | 'nl'>('kql');
+  const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
@@ -180,11 +181,11 @@ export function QuickSearchVisor({
   ]);
 
   const onAskAiClick = useCallback(() => {
-    setVisorMode('nl');
+    setVisorMode(VisorMode.NaturalLanguage);
   }, []);
 
   const onBackToKql = useCallback(() => {
-    setVisorMode('kql');
+    setVisorMode(VisorMode.KQL);
     setNlValue('');
   }, []);
 
@@ -278,7 +279,7 @@ export function QuickSearchVisor({
           <EuiFlexItem grow={isInline ? true : false} css={styles.comboBoxWrapper}>
             <SourcesDropdown
               currentSources={selectedSources.map((source) => source.label)}
-              isDisabled={isNlLoading || visorMode === 'nl'}
+              isDisabled={isNlLoading || visorMode === VisorMode.NaturalLanguage}
               onChangeSources={(newSources) => {
                 setSelectedSources(newSources.map((source) => ({ label: source })));
                 userSelectedSourceRef.current = true;
@@ -287,7 +288,7 @@ export function QuickSearchVisor({
           </EuiFlexItem>
           {!isInline && <EuiFlexItem grow={false} css={styles.separator} />}
 
-          {visorMode === 'kql' ? (
+          {visorMode === VisorMode.KQL ? (
             <EuiFlexItem css={styles.searchWrapper}>
               <EuiFlexGroup
                 gutterSize="none"
