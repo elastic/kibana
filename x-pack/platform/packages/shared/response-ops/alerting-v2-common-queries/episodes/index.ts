@@ -7,6 +7,15 @@
 
 export { PAGE_SIZE_ESQL_VARIABLE, DEFAULT_FLAPPING_LOOKBACK } from './constants';
 
+export {
+  EpisodeSeverity,
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_CHART_VALUE,
+  EPISODE_SEVERITY_FILTER_NONE,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+} from './episode_severity';
+
 export { asTypedEsqlQuery, rowsFromEsql, asEsqlRows } from './typed_esql_query';
 export type { TypedEsqlQuery } from './typed_esql_query';
 

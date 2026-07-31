@@ -11,6 +11,13 @@ import { escapeStringValue } from '@kbn/esql-utils';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { ALERT_EPISODE_STATUS, type AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { PAGE_SIZE_ESQL_VARIABLE } from './constants';
+import {
+  EPISODE_SEVERITIES,
+  EPISODE_SEVERITY_CHART_VALUE,
+  EPISODE_SEVERITY_FILTER_NONE,
+  isSupportedEpisodeSeverity,
+  normalizeEpisodeSeverity,
+} from './episode_severity';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 export interface AlertEpisode {
@@ -90,16 +97,6 @@ export interface EpisodesSortState {
   sortDirection: 'asc' | 'desc';
 }
 
-const EPISODE_SEVERITIES = ['critical', 'high', 'medium', 'low', 'info'] as const;
-const EPISODE_SEVERITY_CHART_VALUE: Record<(typeof EPISODE_SEVERITIES)[number], number> = {
-  info: 0,
-  low: 1,
-  medium: 2,
-  high: 3,
-  critical: 4,
-};
-const EPISODE_SEVERITY_FILTER_NONE = '__no_severity__';
-
 const ALLOWLISTED_SORT_FIELDS = new Set([
   '@timestamp',
   'episode.id',
@@ -110,15 +107,6 @@ const ALLOWLISTED_SORT_FIELDS = new Set([
 
 const SEVERITY_SORT_FIELD = '_severity_sort';
 const EPISODE_WITHOUT_SEVERITY_SORT_VALUE = -1;
-
-const isSupportedEpisodeSeverity = (severity: string | undefined | null): severity is string => {
-  if (!severity || typeof severity !== 'string') {
-    return false;
-  }
-  return (EPISODE_SEVERITIES as readonly string[]).includes(severity.toLowerCase());
-};
-
-const normalizeEpisodeSeverity = (severity: string): string => severity.toLowerCase();
 
 const sanitizeSortField = (field: string) => {
   return ALLOWLISTED_SORT_FIELDS.has(field) ? field : '@timestamp';
