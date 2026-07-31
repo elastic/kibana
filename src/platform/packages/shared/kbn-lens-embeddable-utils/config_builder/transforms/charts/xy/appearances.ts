@@ -14,6 +14,8 @@ import type { XYConfig } from '../../../schema/charts/xy';
 import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import {
+  DEFAULT_AREAS_FILL,
+  DEFAULT_AREAS_FILL_OPACITY,
   DEFAULT_BARS_MINIMUM_HEIGHT,
   DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
   DEFAULT_DATA_LABELS_VISIBLE,
@@ -97,17 +99,6 @@ export function convertStylingToAPIFormat(
   const layerPresence = getLayerPresence(seriesTypes);
   const hasLinesOrAreas = layerPresence.hasLines || layerPresence.hasAreas;
 
-  const areas = (() => {
-    if (!layerPresence.hasAreas) {
-      return undefined;
-    }
-    const fill = config.areaFill ?? getDefaultAreaFill(seriesTypes);
-    return {
-      fill,
-      fill_opacity: config.fillOpacity ?? getDefaultAreaFillOpacity(fill),
-    };
-  })();
-
   return stripUndefined<XYStyling>({
     // Chart-level (always present)
     overlays: {
@@ -131,7 +122,12 @@ export function convertStylingToAPIFormat(
         }
       : undefined,
     // Series-type specific (alphabetical)
-    areas,
+    areas: layerPresence.hasAreas
+      ? {
+          fill: config.areaFill ?? DEFAULT_AREAS_FILL,
+          fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
+        }
+      : undefined,
     bars: layerPresence.hasBars
       ? {
           minimum_height: config.minBarHeight ?? DEFAULT_BARS_MINIMUM_HEIGHT,
@@ -166,6 +162,9 @@ export function convertStylingToStateFormat(
   config: XYStyling,
   seriesTypes: SeriesType[]
 ): XYLensAppearanceState {
+  const areaFill = config.areas?.fill ?? getDefaultAreaFill(seriesTypes);
+  const fillOpacity = config.areas?.fill_opacity ?? getDefaultAreaFillOpacity(areaFill);
+
   return stripUndefined<XYLensAppearanceState>({
     hideEndzones:
       config.overlays?.partial_buckets?.visible != null
@@ -181,8 +180,8 @@ export function convertStylingToStateFormat(
     pointVisibility: pointVisibilityCompat.toState(config.points?.visibility),
     curveType: curveTypeCompat.toState(config.interpolation),
     minBarHeight: config.bars?.minimum_height,
-    fillOpacity: config.areas?.fill_opacity,
-    areaFill: config.areas?.fill ?? getDefaultAreaFill(seriesTypes),
+    fillOpacity,
+    areaFill,
     fittingFunction: fittingFunctionCompat.toState(config.fitting?.type),
     emphasizeFitting: config.fitting?.emphasize,
     endValue: extendCompat.toState(config.fitting?.extend),

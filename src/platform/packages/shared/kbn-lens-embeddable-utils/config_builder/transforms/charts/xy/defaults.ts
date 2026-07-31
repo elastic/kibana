@@ -28,13 +28,12 @@ export const DEFAULT_LINES_INTERPOLATION = 'linear' as const;
 export const DEFAULT_BARS_MINIMUM_HEIGHT = 1;
 export const DEFAULT_AREAS_FILL_OPACITY = 0.3;
 export const DEFAULT_AREAS_GRADIENT_FILL_OPACITY = 0.6;
+export const DEFAULT_AREAS_FILL = 'solid' as const;
 export const DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING: ColorMappingCategoricalType = {
   mode: 'categorical',
   palette: 'elastic_line_optimized',
   mapping: [],
 };
-
-export const DEFAULT_AREAS_FILL = 'solid' as const;
 
 export const getDefaultAreaFill = (seriesTypes: SeriesType[]) => {
   if (seriesTypes.includes('area_percentage_stacked') || seriesTypes.includes('area_stacked')) {
@@ -47,7 +46,12 @@ export const getDefaultAreaFill = (seriesTypes: SeriesType[]) => {
 };
 
 export const getDefaultAreaFillOpacity = (fillOption: AreaFillOption | undefined) => {
-  return fillOption === 'gradient'
-    ? DEFAULT_AREAS_GRADIENT_FILL_OPACITY
-    : DEFAULT_AREAS_FILL_OPACITY;
+  switch (fillOption) {
+    case 'gradient':
+      return DEFAULT_AREAS_GRADIENT_FILL_OPACITY;
+    case 'solid':
+      return DEFAULT_AREAS_FILL_OPACITY;
+    default:
+      return undefined;
+  }
 };

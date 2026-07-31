@@ -169,7 +169,7 @@ export function buildVisualizationState(
     preferredSeriesType: dataLayers[0]?.seriesType ?? 'bar_stacked',
     ...convertLegendToStateFormat(config.legend),
     ...convertAxisSettingsToStateFormat(config.axis),
-    ...(config.styling ? convertStylingToStateFormat(config.styling, seriesTypes) : {}),
+    ...convertStylingToStateFormat(config.styling ?? {}, seriesTypes),
     layers,
   };
 }

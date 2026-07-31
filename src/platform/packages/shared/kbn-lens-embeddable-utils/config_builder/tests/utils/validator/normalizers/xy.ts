@@ -18,10 +18,6 @@ import {
   getColorMappingNormalizer,
   getFormBasedDatasourceState,
 } from './common';
-import {
-  getDefaultAreaFill,
-  getDefaultAreaFillOpacity,
-} from '../../../../transforms/charts/xy/defaults';
 
 // Default colorMappings in Lens state format, mirroring what fromColorMappingAPIToLensState
 // produces for DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING and DEFAULT_CATEGORICAL_COLOR_MAPPING.
@@ -317,10 +313,8 @@ const alignLegacyTypes: NormalizerConfig<XYAttributes> = {
       delete viz.curveType; // curveType only preserved for line/area charts
     }
     if (hasAreas) {
-      // Mirrors convertStylingToStateFormat / convertStylingToAPIFormat defaults
-      const seriesTypes = dataLayers.map((l: any) => l.seriesType);
-      viz.areaFill ??= getDefaultAreaFill(seriesTypes);
-      viz.fillOpacity ??= getDefaultAreaFillOpacity(viz.areaFill);
+      viz.areaFill ??= 'solid';
+      viz.fillOpacity ??= 0.3;
     } else {
       delete viz.fillOpacity; // fillOpacity only preserved for area charts
       delete viz.areaFill;
