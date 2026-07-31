@@ -33,11 +33,11 @@ export const flyoutReducer = (
     case 'SET_TEMPLATE':
       return { ...state, draftTemplate: action.payload };
     case 'PREVIEW_START':
-      return { ...state, isPreviewLoading: true, previewError: null };
+      return { ...state, isPreviewLoading: true, previewError: null, previewData: null };
     case 'PREVIEW_SUCCESS':
       return { ...state, previewData: action.payload };
     case 'PREVIEW_ERROR':
-      return { ...state, previewError: action.payload };
+      return { ...state, previewError: action.payload, previewData: null };
     case 'PREVIEW_DONE':
       return { ...state, isPreviewLoading: false };
   }
