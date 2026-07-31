@@ -7,6 +7,7 @@
 
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type { ISavedObjectsRepository, Logger, SavedObject } from '@kbn/core/server';
+import { isSavedObjectErrorResult } from '@kbn/core/server';
 import { CASE_CONFIGURE_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type { CasePersistedAttributes } from '../../common/types/case';
@@ -179,7 +180,7 @@ const backfillCasesForSpace = async (
 
     if (updates.length > 0) {
       const res = await repo.bulkUpdate<CasePersistedAttributes>(updates, { refresh: false });
-      const failed = res.saved_objects.filter((s) => s.error != null);
+      const failed = res.saved_objects.filter(isSavedObjectErrorResult);
       if (failed.length > 0) {
         // A 404 means the case can't be resolved for update — it was deleted between the scan and the
         // update, or its stored id/namespace don't line up (e.g. synthetic data inserted straight

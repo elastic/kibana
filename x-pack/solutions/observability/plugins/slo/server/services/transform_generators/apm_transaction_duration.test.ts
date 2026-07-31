@@ -160,6 +160,7 @@ describe('APM Transaction Duration Transform Generator', () => {
         frequency: twoMinute(),
         syncDelay: twoMinute(),
         preventInitialBackfill: true,
+        preventCrossProjectSearch: false,
       },
     });
 
