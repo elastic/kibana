@@ -27,15 +27,18 @@ import type { LoggingCandidate, LoggingChunk } from './types';
  * it is swappable by remapping that feature (recommended: a fast, cheap model).
  */
 
-const CLASSIFY_SYSTEM = `You classify source-code excerpts as production log statements. Each excerpt is a small window (the matched line and +/-1 neighbour lines, joined by newlines).
+const CLASSIFY_SYSTEM = `You classify source-code excerpts as production log statements emitted by a running service. Each candidate is given as: id, the source FILE PATH it came from, the LANGUAGE, then a small excerpt window (the matched line and +/-1 neighbour lines, joined by newlines).
 
 For each id decide:
-- keep: true ONLY if the excerpt emits a runtime log/diagnostic MESSAGE a human sees in logs. This includes logger calls (logger.info/error/warn/...), print/eprintln/println/Console.WriteLine to standard streams, error-wrapping with a human message (fmt.Errorf("..."), .expect("..."), panic("...")), and structured/source-generated logging (e.g. [LoggerMessage(... Message="...")]).
+- keep: true ONLY if the excerpt emits a runtime log/diagnostic MESSAGE that a RUNNING SERVICE writes to its logs. This includes logger calls (logger.info/error/warn/...), application print/eprintln/println/Console.WriteLine to standard streams from service code, error-wrapping with a human message (fmt.Errorf("..."), .expect("..."), panic("...")), and structured/source-generated logging (e.g. [LoggerMessage(... Message="...")]).
 - keep: false for metric or span attribute names/keys, config values, i18n/UI strings, code comments, test assertions, enum/const string values, and raw JSON payloads.
+- keep: false for BUILD / TOOLING / CI output. If the FILE PATH is a build or automation file — Makefile or *.mk, shell scripts (*.sh, *.bash), Dockerfile, CI config (.github/, .gitlab-ci, .buildkite/, *.yml pipelines), or package-manager scripts — the excerpt is developer/CLI output, NOT a running-service log. Set keep=false even when it contains words like "Error:" or prints to stdout (e.g. a shell \`echo "Error: ..."\` in a Makefile recipe).
+- keep: false for CLI USAGE / HELP text: strings describing how to invoke a command ("USAGE:", "Usage:", option/argument descriptions, --help output), even if prefixed with "Error:".
+- keep: false for USAGE TEMPLATES with placeholder enumerations (e.g. "resource1 resource2 ..."): the literal text never appears verbatim in real logs, so it cannot match.
 - level: if keep, exactly one of fatal|error|warn|info|debug. Infer from the message: failures/exceptions/panic => error (fatal if it aborts the process); could-not/deprecated/retry => warn; started/listening/received/connected/processing => info.
 - message: if keep, the STATIC human-readable text of the log message with interpolation/format placeholders removed (e.g. fmt.Errorf("failed to charge card: %+v", err) => "failed to charge card"). Empty string when keep is false.
 
-Return one result per id. Be strict: when unsure whether an excerpt is a real log emission, set keep=false.`;
+Return one result per id. Be strict: when unsure whether an excerpt is a real running-service log emission, set keep=false.`;
 
 const classifySchema = {
   type: 'object',
@@ -100,12 +103,14 @@ export async function classifyLoggingSites({
   for (let start = 0; start < candidates.length; start += CLASSIFY_BATCH_SIZE) {
     const batch = candidates.slice(start, start + CLASSIFY_BATCH_SIZE);
     const input =
-      'Classify these excerpts (id then a TAB then the excerpt, newlines shown as \u23ce):\n' +
+      'Classify these excerpts (TAB-separated: id, file path, language, excerpt; newlines shown as \u23ce):\n' +
       batch
-        .map(
-          (candidate, offset) =>
-            `${start + offset}\t${candidate.content.replace(/\n/g, ' \u23ce ')}`
-        )
+        .map((candidate, offset) => {
+          const path = candidate.location?.replace(/:\d+$/, '') || 'unknown';
+          const language = candidate.language || 'unknown';
+          const excerpt = candidate.content.replace(/\n/g, ' \u23ce ');
+          return `${start + offset}\t${path}\t${language}\t${excerpt}`;
+        })
         .join('\n');
 
     try {

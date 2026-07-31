@@ -66,6 +66,36 @@ describe('classifyLoggingSites', () => {
     expect(chunks[0].classified).toEqual({ level: 'error', message: 'boom' });
   });
 
+  it('includes the file path and language in the classifier input', async () => {
+    const candidates = [
+      candidate({
+        location: 'o11y/Makefile:62',
+        language: 'Make',
+        content: 'echo "Error: No resources specified. USAGE: make taint ..."',
+        via: 'phrase',
+      }),
+    ];
+    const output = jest.fn(async (_request: { input: string; system: string }) => ({
+      id: 'classify_logging_sites',
+      output: { results: [{ id: 0, keep: false }] },
+      content: '',
+    }));
+    const inferenceClient = { output } as unknown as InferenceClient;
+
+    await classifyLoggingSites({
+      inferenceClient,
+      connectorId: 'c',
+      candidates,
+      logger: loggerMock.create(),
+    });
+
+    const { input, system } = output.mock.calls[0][0];
+    // Path (without the trailing :line) and language are provided as context.
+    expect(input).toContain('0\to11y/Makefile\tMake\t');
+    // Prompt instructs dropping build/tooling output.
+    expect(system).toContain('BUILD / TOOLING / CI output');
+  });
+
   it('attaches classified level+message for phrase-only lines (the recall lift)', async () => {
     const candidates = [
       candidate({
