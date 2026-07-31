@@ -288,10 +288,20 @@ steps:
       continue: true
 
   # Connects this investigation back to the Significant Event that triggered it, so the
-  # UI can surface investigation history and link to the full RCA result. Only runs when
-  # a sig-event context was supplied (i.e. the investigation was triggered from triage or
-  # from the chat agent for a specific event). Other callers (free-form issues, alerts)
-  # that do not supply `inputs.context.event_uuid` are unaffected.
+  # UI can surface investigation history and link to the full RCA result, and — in the same
+  # append-only version — applies any field changes the agent proposed via
+  # `significant_event_updates` (severity/summary/status). Recording the completed investigation
+  # and its reassessed fields as one write keeps the lifecycle to a single meaningful version
+  # rather than two. Only runs when a sig-event context was supplied (i.e. the investigation was
+  # triggered from triage or from the chat agent for a specific event). Other callers (free-form
+  # issues, alerts) that do not supply `inputs.context.event_uuid` are unaffected.
+  #
+  # The agent only *proposes* field changes; this deterministic step performs the write. Each
+  # attribute the agent didn't reassess resolves to `undefined` (empty `first`) and is dropped from
+  # the request; proposing the current value is a server-side no-op. `reason`/`evidence` stay in the
+  # `investigate` structured output and are intentionally never forwarded to the event document —
+  # the version records only the changed field values plus this execution's id as the audit trail.
+  # `on-failure: continue` so a failed write never fails the overall workflow run.
   - name: attach_to_significant_event
     type: kibana.request
     if: '${{ inputs.context.event_uuid != null }}'
@@ -304,36 +314,9 @@ steps:
         workflow_execution_id: "{{ execution.id }}"
         started_at: '{{ execution.startedAt | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
         completed_at: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S%:z" }}'
-    on-failure:
-      continue: true
-
-  # Applies the agent-proposed field changes (if any) to the Significant Event as a new
-  # append-only version. Deterministic: the agent only *proposes* via `significant_event_updates` in its
-  # structured output; this step performs the write. Reason and evidence intentionally stay in
-  # this workflow execution's `investigate` structured output — the event version records only
-  # the changed field values plus this execution's id as the audit trail. The route derives that
-  # id from the `x-kibana-workflow-execution-id` header the engine stamps on outbound
-  # kibana.request calls, so it is never passed (or spoofable) via the body.
-  # Proposing the current value is a server-side no-op (the update route ignores identical
-  # values), so no field comparison is needed here. Runs after attach_to_significant_event so
-  # a failed field write never blocks recording the investigation; both endpoints re-resolve the
-  # latest event version by lineage, so ordering is otherwise safe.
-  - name: apply_significant_event_updates
-    type: kibana.request
-    if: '${{ inputs.context.event_uuid != null and steps.investigate.output.structured_output.significant_event_updates != null and steps.investigate.output.structured_output.significant_event_updates != empty }}'
-    with:
-      method: POST
-      path: '/internal/significant_events/events/{{ inputs.context.event_uuid }}/update'
-      headers:
-        x-elastic-internal-origin: 'kibana'
-      # Map the agent's `significant_event_updates` proposals onto the flat update body. Each attribute the
-      # agent didn't reassess resolves to `undefined` (empty `first`) and is dropped from the
-      # request, so only the changed fields are sent. `reason`/`evidence` stay in the structured
-      # output and are intentionally never forwarded to the event document.
-      body:
-        severity: "${{ steps.investigate.output.structured_output.significant_event_updates | where: 'field', 'severity' | map: 'to' | first }}"
-        summary: "${{ steps.investigate.output.structured_output.significant_event_updates | where: 'field', 'summary' | map: 'to' | first }}"
-        status: "${{ steps.investigate.output.structured_output.significant_event_updates | where: 'field', 'status' | map: 'to' | first }}"
+        severity: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'severity' | map: 'to' | first }}"
+        summary: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'summary' | map: 'to' | first }}"
+        status: "${{ steps.investigate.output.structured_output.significant_event_updates | default: [] | where: 'field', 'status' | map: 'to' | first }}"
     on-failure:
       continue: true
 

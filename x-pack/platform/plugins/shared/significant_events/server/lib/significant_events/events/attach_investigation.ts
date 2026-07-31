@@ -7,17 +7,55 @@
 
 import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
+import type {
+  Severity,
+  SignificantEventInvestigation,
+  SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
+
+interface SignificantEventFieldChanges {
+  status?: SignificantEventStatus;
+  severity?: Severity;
+  summary?: string;
+}
+
+/**
+ * Narrow a requested field patch to only the attributes that actually differ from the current
+ * version, so proposing the current value is a no-op and never writes a redundant version.
+ */
+const pickChangedFields = (
+  current: SignificantEventFieldChanges,
+  fields: SignificantEventFieldChanges
+): SignificantEventFieldChanges => {
+  const changed: SignificantEventFieldChanges = {};
+  if (fields.status !== undefined && fields.status !== current.status) {
+    changed.status = fields.status;
+  }
+  if (fields.severity !== undefined && fields.severity !== current.severity) {
+    changed.severity = fields.severity;
+  }
+  if (fields.summary !== undefined && fields.summary !== current.summary) {
+    changed.summary = fields.summary;
+  }
+  return changed;
+};
 
 export const attachInvestigationToEvent = async ({
   eventClient,
   eventUuid,
   investigation,
+  reassessedFields,
 }: {
   eventClient: EventClient;
   eventUuid: string;
   investigation: SignificantEventInvestigation;
+  /**
+   * Optional severity/summary/status the investigation reassessed, applied in the same
+   * append-only version that records the investigation. Only values that differ from the current
+   * version are written; unchanged/undefined ones are ignored.
+   */
+  reassessedFields?: SignificantEventFieldChanges;
 }): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
   const { hits } = await eventClient.findByEventUuid(eventUuid);
   const referenced = hits[hits.length - 1];
@@ -70,7 +108,10 @@ export const attachInvestigationToEvent = async ({
     investigations = reconciled;
   }
 
-  if (isEqual(investigations, existing)) {
+  const changedFields = reassessedFields ? pickChangedFields(latest, reassessedFields) : {};
+
+  // No-op only when neither the investigation list nor any reassessed field actually changed.
+  if (isEqual(investigations, existing) && Object.keys(changedFields).length === 0) {
     return { event_uuid: eventUuid, updated: 0, ignored: 1 };
   }
 
@@ -82,9 +123,10 @@ export const attachInvestigationToEvent = async ({
     previous_event_uuid: latest.event_uuid,
     investigations,
     workflow_execution_id: investigation.workflow_execution_id,
+    ...changedFields,
   };
 
-  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true, refresh: 'wait_for' });
+  await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
 
   return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
 };

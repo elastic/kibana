@@ -19,7 +19,7 @@ interface UpdateSignificantEventResult {
   event_uuid: string;
   updated: number;
   ignored: number;
-  status?: SignificantEventStatus;
+  status: SignificantEventStatus;
 }
 
 const UPDATE_SUCCESS_TOAST_TITLE = i18n.translate(

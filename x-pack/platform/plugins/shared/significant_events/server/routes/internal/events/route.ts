@@ -20,9 +20,8 @@ import {
 } from '@kbn/significant-events-schema';
 import { notFound, serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { getEmitterWorkflowExecutionIdFromRequest } from '@kbn/workflows-extensions/server';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { updateSignificantEvent } from '../../../lib/significant_events/events/update_event';
+import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
@@ -255,8 +254,10 @@ const eventsLifecycleRoute = createServerRoute({
 
 /**
  * Used by the managed investigation workflow (`investigation_workflow.yaml`). Keep the endpoint
- * path and body shape (`significantEventInvestigationSchema`) in sync with its
- * `attach_pending_to_significant_event` / `attach_to_significant_event` `kibana.request` steps.
+ * path and body shape in sync with its `attach_pending_to_significant_event` /
+ * `attach_to_significant_event` `kibana.request` steps. The optional `severity`/`summary`/`status`
+ * let the terminal attach also apply the investigation's reassessed fields in the same
+ * append-only version, so a completed investigation and its field updates are a single write.
  */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigations',
@@ -264,7 +265,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     access: 'internal',
     summary: 'Attach investigation to event',
     description:
-      'Record an investigation run against a significant event (pending, success, or failed).',
+      'Record an investigation run against a significant event (pending, success, or failed), optionally applying reassessed severity/summary/status in the same version.',
   },
   security: {
     authz: {
@@ -275,17 +276,24 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema,
+    body: significantEventInvestigationSchema.extend({
+      severity: severitySchema.optional(),
+      summary: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
+      status: significantEventStatusSchema.optional(),
+    }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
     const { getEventClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
+    const { severity, summary, status, ...investigation } = params.body;
+
     return attachInvestigationToEvent({
       eventClient: getEventClient(),
       eventUuid: params.path.id,
-      investigation: params.body,
+      investigation,
+      reassessedFields: { severity, summary, status },
     });
   },
 });
@@ -349,9 +357,9 @@ const eventsUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/update',
   options: {
     access: 'internal',
-    summary: 'Update a significant event',
+    summary: 'Update a significant event status',
     description:
-      'Override attributes (status, severity, summary) of a significant event, writing a new append-only version.',
+      "Override a significant event's status, writing a new append-only version. Severity/summary reassessments are applied by the investigation workflow via the investigations endpoint, not here.",
   },
   security: {
     authz: {
@@ -363,9 +371,7 @@ const eventsUpdateRoute = createServerRoute({
       id: z.string().max(255),
     }),
     body: z.object({
-      severity: severitySchema.optional(),
-      summary: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
-      status: significantEventStatusSchema.optional(),
+      status: significantEventStatusSchema,
     }),
   }),
   handler: async ({ params, request, getScopedClients, server }) => {
@@ -373,18 +379,10 @@ const eventsUpdateRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const eventClient = getEventClient();
-    const { severity, summary, status } = params.body;
-
-    const workflowExecutionId = getEmitterWorkflowExecutionIdFromRequest(request);
-
-    // `updateSignificantEvent` ignores `undefined` fields (and values equal to the current
-    // version), so passing the whole set through is safe even when only some attributes change.
-    return updateSignificantEvent({
-      eventClient,
+    return updateSignificantEventStatus({
+      eventClient: getEventClient(),
       eventUuid: params.path.id,
-      fields: { severity, summary, status },
-      workflowExecutionId,
+      status: params.body.status,
     });
   },
 });
