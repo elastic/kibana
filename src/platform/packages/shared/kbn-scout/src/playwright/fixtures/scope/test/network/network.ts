@@ -17,9 +17,9 @@ export interface RequestMatcher {
 export class Network {
   constructor(private readonly page: ScoutPage) {}
 
-  async countMatchingRequests(
+  async trackMatchingRequests(
     matchOptions: RequestMatcher,
-    action: () => Promise<void>
+    action: (getCount: () => number) => Promise<void>
   ): Promise<number> {
     let count = 0;
     const listener = (request: { url: () => string; method: () => string }) => {
@@ -33,11 +33,19 @@ export class Network {
 
     this.page.on('request', listener);
     try {
-      await action();
+      await action(() => count);
+      return count;
     } finally {
       this.page.off('request', listener);
     }
+  }
 
-    return count;
+  async countMatchingRequests(
+    matchOptions: RequestMatcher,
+    action: () => Promise<void>
+  ): Promise<number> {
+    return this.trackMatchingRequests(matchOptions, async () => {
+      await action();
+    });
   }
 }
