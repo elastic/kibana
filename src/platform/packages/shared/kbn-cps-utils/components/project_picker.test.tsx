@@ -132,7 +132,7 @@ describe('ProjectPicker', () => {
     const onProjectRoutingChange = jest.fn();
     await renderProjectPicker({ onProjectRoutingChange });
 
-    expect(onProjectRoutingChange).toHaveBeenCalledWith('_id:*');
+    expect(onProjectRoutingChange).toHaveBeenCalledWith('');
   });
 
   it('should update project routing when a project is excluded', async () => {
@@ -148,8 +148,8 @@ describe('ProjectPicker', () => {
     expect(screen.getByTestId('cps-project-picker-button-label')).toHaveTextContent('2/3');
   });
 
-  it('should render a disabled button when isReadonly is true', async () => {
-    await renderProjectPicker({ isReadonly: true });
+  it('should render a disabled button when isDisabled is true', async () => {
+    await renderProjectPicker({ isDisabled: true });
 
     const button = screen.getByTestId('cps-project-picker-button-disabled');
     expect(button).toBeDisabled();

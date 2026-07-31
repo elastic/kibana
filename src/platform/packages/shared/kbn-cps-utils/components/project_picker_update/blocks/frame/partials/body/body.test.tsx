@@ -44,6 +44,9 @@ const createFilterExpressions = (
   );
 
 const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
+  originProjectId: 'origin',
+  defaultProjectRouting: '',
+  projectRoutingStrategy: 'dynamic',
   filterExpressions: new Map(),
   filteringDimensions: [],
   availableProjects: new Map(),
@@ -51,6 +54,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   filteredProjectIds: [],
   visibleProjectIds: [],
   selectedProjects: [],
+  currentProjectRouting: '',
+  isUsingSpaceDefaults: false,
   ...overrides,
   defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
   hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,

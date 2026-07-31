@@ -20,6 +20,7 @@ import {
   isValidFilterExpression,
   OperatorKind,
 } from '../utils/filter_input_codec';
+import { PROJECT_SELECTION_DIMENSION, projectRoutingCodec } from '../utils/project_routing_codec';
 
 export const PREVIEW_FILTER_EXPRESSION_ID = '__preview__';
 
@@ -190,10 +191,32 @@ export const projectPickerDerivatives = [
       const dimensions = new Set<string>();
       for (const project of state.availableProjects.values()) {
         for (const key of Object.keys(project)) {
-          dimensions.add(key);
+          if (key !== PROJECT_SELECTION_DIMENSION) {
+            dimensions.add(key);
+          }
         }
       }
       return Array.from(dimensions);
     },
+  },
+  {
+    key: 'currentProjectRouting',
+    compute: (state: ProjectPickerState) =>
+      projectRoutingCodec.encode({
+        filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
+          if (entry.enabled) {
+            acc.push(entry.expression);
+          }
+          return acc;
+        }, [] as FilterExpressionValue[]),
+        excludedProjectIds: state.excludedOverrides,
+        selectedProjectIds: state.selectedProjects,
+        projectRoutingStrategy: state.projectRoutingStrategy,
+      }),
+  },
+  {
+    key: 'isUsingSpaceDefaults',
+    compute: (state: ProjectPickerState) =>
+      state.currentProjectRouting === state.defaultProjectRouting,
   },
 ] as const satisfies Array<StoreDerivative<ProjectPickerState, keyof ProjectPickerState>>;

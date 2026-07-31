@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState } from 'react';
-import { isUsingProjectRouting, type ProjectPickerState } from '../../../../state/reducers';
+import type { ProjectPickerState } from '../../../../state/reducers';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../state';
 import { strings } from '../../../../../strings';
 
@@ -38,8 +38,8 @@ interface HeaderContextMenuItemProps
 
 const getContextMenuItems = (
   actions: ReturnType<typeof useProjectPickerActions>
-): Array<HeaderContextMenuItemProps>[] => {
-  const defaultItems: HeaderContextMenuItemProps[] = [
+): Array<HeaderContextMenuItemProps>[] => [
+  [
     {
       icon: 'eraser',
       label: i18n.translate('cpsUtils.projectPicker.frameHeader.clearProjectFilters', {
@@ -61,112 +61,38 @@ const getContextMenuItems = (
         actions.revertToSpaceDefaults();
       },
       isDisabled: ({ state }) => {
-        return (
-          isUsingProjectRouting(state, state.defaultProjectRouting) || Boolean(state.isReadOnly)
-        );
+        return state.isUsingSpaceDefaults || Boolean(state.isReadOnly);
       },
     },
-  ];
+  ],
+  // TODO: These actions are not yet supported and only show placeholder labels.
+  // Hide these until they are supported.
+  // [
+  //   {
+  //     icon: 'controls',
+  //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
+  //       defaultMessage: 'Adjust space defaults',
+  //     }),
+  //   },
+  //   {
+  //     icon: 'gear',
+  //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
+  //       defaultMessage: 'Manage cross-project search',
+  //     }),
+  //     external: true,
+  //   },
+  // ],
+];
 
-  return [
-    defaultItems,
-    // TODO: These actions are not yet supported and only show placeholder labels.
-    // Hide these until they are supported.
-    // [
-    //   {
-    //     icon: 'controls',
-    //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
-    //       defaultMessage: 'Adjust space defaults',
-    //     }),
-    //   },
-    //   {
-    //     icon: 'gear',
-    //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
-    //       defaultMessage: 'Manage cross-project search',
-    //     }),
-    //     external: true,
-    //   },
-    // ],
-  ];
-};
-
-export function ProjectPickerFrameHeaderActions() {
+export function ProjectPickerFrameHeader() {
   const [isOpen, setIsOpen] = useState(false);
   const actions = useProjectPickerActions();
   const state = useProjectPickerState();
   const contextMenuTooltipId = useGeneratedHtmlId();
 
-  const isUsingSpaceDefaults = useMemo(
-    () => isUsingProjectRouting(state, state.defaultProjectRouting),
-    [state]
-  );
-
   const closePopover = useCallback(() => setIsOpen(false), []);
   const contextMenuConfig = useMemo(() => getContextMenuItems(actions), [actions]);
 
-  return (
-    <EuiFlexGroup responsive={false}>
-      {isUsingSpaceDefaults && (
-        <EuiFlexItem>
-          <EuiBadge color="primary">
-            {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {
-              defaultMessage: 'Using space defaults',
-            })}
-          </EuiBadge>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        <EuiPopover
-          panelPaddingSize="none"
-          aria-labelledby={contextMenuTooltipId}
-          button={
-            <EuiToolTip
-              id={contextMenuTooltipId}
-              content={i18n.translate('cpsUtils.projectPicker.frameHeader.addProjectTooltip', {
-                defaultMessage: 'Global actions',
-              })}
-            >
-              <EuiButtonIcon
-                aria-labelledby={contextMenuTooltipId}
-                data-test-subj="projectPickerHeaderActionsButton"
-                iconType="ellipsis"
-                onClick={() => setIsOpen(true)}
-                color="text"
-              />
-            </EuiToolTip>
-          }
-          isOpen={isOpen}
-          closePopover={closePopover}
-        >
-          <EuiContextMenuPanel
-            items={contextMenuConfig.reduce((acc, section, index) => {
-              acc = acc.concat(
-                section.map((item) => (
-                  <EuiContextMenuItem
-                    key={item.label}
-                    icon={item.icon}
-                    onClick={item.onClick}
-                    disabled={item.isDisabled?.({ state }) ?? false}
-                  >
-                    {item.label}
-                  </EuiContextMenuItem>
-                ))
-              );
-
-              if (index < contextMenuConfig.length - 1) {
-                acc.push(<EuiHorizontalRule key={`separator-${index}`} margin="xs" />);
-              }
-
-              return acc;
-            }, [] as React.ReactElement[])}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-}
-
-export function ProjectPickerFrameHeader() {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem grow>
@@ -180,7 +106,7 @@ export function ProjectPickerFrameHeader() {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false}>
-          {isUsingSpaceDefaults && (
+          {state.isUsingSpaceDefaults && (
             <EuiFlexItem>
               <EuiToolTip content={strings.getProjectPickerReadonlyCallout()}>
                 <EuiBadge tabIndex={0} color="primary">

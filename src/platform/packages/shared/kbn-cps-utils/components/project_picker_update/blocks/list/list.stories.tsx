@@ -10,6 +10,7 @@
 import React, { type ComponentProps } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { faker } from '@faker-js/faker';
+import { action } from '@storybook/addon-actions';
 import { ProjectPickerList } from './list';
 import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from '../../state';
 
@@ -19,7 +20,14 @@ export default {
 } satisfies Meta<typeof ProjectPickerList>;
 
 export const ProjectPickerListItemStory: StoryObj<
-  Pick<ProjectPickerStateProviderProps, 'availableProjects' | 'isReadOnly'> &
+  Pick<
+    ProjectPickerStateProviderProps,
+    | 'availableProjects'
+    | 'isReadOnly'
+    | 'defaultProjectRoutingGetter'
+    | 'onProjectRoutingChange'
+    | 'originProjectId'
+  > &
     ComponentProps<typeof ProjectPickerList>
 > = {
   name: 'ProjectPickerListItem',
@@ -40,9 +48,27 @@ export const ProjectPickerListItemStory: StoryObj<
       _region: faker.helpers.arrayElement(['us-east-1', 'us-west-1', 'eu-west-1']),
       _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
     })),
+    defaultProjectRoutingGetter: () => '_alias:origin',
+    onProjectRoutingChange: action('onProjectRoutingChange'),
+    get originProjectId(): string {
+      return this.availableProjects![0]._id;
+    },
   },
-  render: ({ availableProjects, isReadOnly, ...props }) => (
-    <ProjectPickerStateProvider availableProjects={availableProjects} isReadOnly={isReadOnly}>
+  render: ({
+    availableProjects,
+    isReadOnly,
+    defaultProjectRoutingGetter,
+    onProjectRoutingChange,
+    originProjectId,
+    ...props
+  }) => (
+    <ProjectPickerStateProvider
+      availableProjects={availableProjects}
+      isReadOnly={isReadOnly}
+      originProjectId={originProjectId}
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
+      onProjectRoutingChange={onProjectRoutingChange}
+    >
       <ProjectPickerList {...props} />
     </ProjectPickerStateProvider>
   ),

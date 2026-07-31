@@ -17,6 +17,7 @@ import {
   previewFilterMatchingIds,
   projectPickerDerivatives,
 } from './derivatives';
+import { applyStoreDerivatives } from './store';
 import {
   FilterOperator,
   getFilterExpressionLookupKey,
@@ -53,6 +54,9 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
 
   return {
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
     filterExpressions: new Map(),
     filteringDimensions: [],
     availableProjects,
@@ -60,6 +64,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     filteredProjectIds: [],
     visibleProjectIds: [],
     selectedProjects: [],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
     ...overrides,
     defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
     hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
@@ -423,6 +429,17 @@ describe('computeVisibleProjectIds', () => {
 });
 
 describe('projectPickerDerivatives', () => {
+  it('excludes _id from filteringDimensions', () => {
+    const availableProjects = new Map([['p1', createProject({ _id: 'p1', _type: 'security' })]]);
+
+    const derivedState = applyStoreDerivatives(createState({ availableProjects }), [
+      ...projectPickerDerivatives,
+    ]);
+
+    expect(derivedState.filteringDimensions).not.toContain('_id');
+    expect(derivedState.filteringDimensions).toContain('_type');
+  });
+
   it('computes filteredProjectIds before selectedProjects', () => {
     const availableProjects = new Map([
       ['p1', createProject({ _id: 'p1', _type: 'security' })],
@@ -460,5 +477,38 @@ describe('projectPickerDerivatives', () => {
     };
 
     expect(projectPickerDerivatives[1].compute(afterFiltered)).toEqual(['p1']);
+  });
+
+  it('computes currentProjectRouting from filters and dynamic exclusions', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'observability' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        defaultProjectRouting: '_type:security AND _id:* AND NOT _id:p2',
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        excludedOverrides: ['p2'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.currentProjectRouting).toBe('_type:security AND _id:* AND NOT _id:p2');
+    expect(derivedState.isUsingSpaceDefaults).toBe(true);
+  });
+
+  it('computes isUsingSpaceDefaults as false when routing diverges from the default', () => {
+    const derivedState = applyStoreDerivatives(
+      createState({
+        defaultProjectRouting: '_type:security',
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        excludedOverrides: ['p2'],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    expect(derivedState.isUsingSpaceDefaults).toBe(false);
   });
 });

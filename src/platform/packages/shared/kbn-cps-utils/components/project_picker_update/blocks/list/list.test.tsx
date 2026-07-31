@@ -67,7 +67,7 @@ const defaultProps = {
     _csp: faker.helpers.arrayElement(['AWS', 'Azure', 'GCP']),
   })),
   originProjectId: 'p1',
-  defaultProjectRoutingGetter: () => '_alias:origin',
+  defaultProjectRoutingGetter: () => '',
   onProjectRoutingChange: jest.fn(),
 };
 
@@ -144,7 +144,7 @@ describe('ProjectPickerList', () => {
       await user.click(lastIncludedProjectSwitchElement);
     } catch (error) {
       expect(error).toBeInstanceOf(Error);
-      expect(error.message).toContain('Unable to perform pointer interaction');
+      expect((error as Error).message).toContain('Unable to perform pointer interaction');
     } finally {
       expect(lastIncludedProjectSwitchElement).toHaveAttribute('aria-checked', 'true');
     }

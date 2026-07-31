@@ -22,6 +22,9 @@ const createProject = (id: string): CPSProject => ({
 });
 
 const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
+  originProjectId: 'origin',
+  defaultProjectRouting: '',
+  projectRoutingStrategy: 'dynamic',
   filterExpressions: new Map(),
   filteringDimensions: [],
   availableProjects: new Map([
@@ -32,6 +35,8 @@ const createMenuState = (overrides: Partial<ProjectPickerState> = {}): ProjectPi
   filteredProjectIds: ['p1', 'p2'],
   visibleProjectIds: ['p1', 'p2'],
   selectedProjects: ['p1', 'p2'],
+  currentProjectRouting: '',
+  isUsingSpaceDefaults: false,
   ...overrides,
   defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
   hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,

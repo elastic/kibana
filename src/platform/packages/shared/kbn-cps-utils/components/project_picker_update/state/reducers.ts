@@ -16,6 +16,12 @@ import {
   getFilterExpressionLookupKey,
   type FilterExpressionValue,
 } from '../utils/filter_input_codec';
+import type { ProjectRoutingStrategy } from '../utils/project_routing_codec';
+import {
+  createFilterExpressionsMap,
+  parseDefaultProjectRouting,
+  PROJECT_SELECTION_DIMENSION,
+} from '../utils';
 import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from './derivatives';
 
 export interface FilterEntry {
@@ -27,6 +33,7 @@ export interface ProjectPickerStoredState {
   isReadOnly?: boolean;
   originProjectId: string;
   defaultProjectRouting: ProjectRouting;
+  projectRoutingStrategy: ProjectRoutingStrategy;
   filteringDimensions: string[];
   filterExpressions: Map<string, FilterEntry>;
   availableProjects: Map<CPSProject['_id'], CPSProject>;
@@ -34,6 +41,8 @@ export interface ProjectPickerStoredState {
 }
 
 export interface ProjectPickerState extends ProjectPickerStoredState {
+  currentProjectRouting: ProjectRouting;
+  isUsingSpaceDefaults: boolean;
   /**
    * This is the list of project ids that match the filter expressions the user has applied.
    */
@@ -65,26 +74,39 @@ export function createStoreReducers() {
     _setStoreState(
       _state: ProjectPickerState,
       payload: Pick<ProjectPickerState, 'availableProjects' | 'isReadOnly'> & {
-        excludedOverrides?: string[];
+        defaultProjectRouting?: ProjectRouting;
         filterExpressions?: FilterExpressionValue[];
+        excludedOverrides?: string[];
       }
     ) {
+      const availableProjectIds = Array.from(payload.availableProjects.keys());
+      const parsed =
+        payload.filterExpressions !== undefined && payload.excludedOverrides !== undefined
+          ? {
+              filterExpressions: payload.filterExpressions,
+              excludedOverrides: payload.excludedOverrides,
+            }
+          : parseDefaultProjectRouting(
+              payload.defaultProjectRouting ?? _state.defaultProjectRouting,
+              availableProjectIds
+            );
+
       return {
         ..._state,
         isReadOnly: payload.isReadOnly,
         availableProjects: payload.availableProjects,
-        filterExpressions: new Map(
-          payload.filterExpressions?.map((expression) => [
-            getFilterExpressionLookupKey(expression),
-            { expression, enabled: true },
-          ])
-        ),
-        excludedOverrides: payload.excludedOverrides ?? [],
+        ...(payload.defaultProjectRouting !== undefined
+          ? { defaultProjectRouting: payload.defaultProjectRouting }
+          : {}),
+        filterExpressions: createFilterExpressionsMap(parsed.filterExpressions),
+        excludedOverrides: [...parsed.excludedOverrides],
         // these states are derived values we reset them for completeness, their values will be recomputed based on the new state
         filteringDimensions: [],
         filteredProjectIds: [],
         selectedProjects: [],
         visibleProjectIds: [],
+        currentProjectRouting: '',
+        isUsingSpaceDefaults: false,
       };
     },
     /**
@@ -94,6 +116,10 @@ export function createStoreReducers() {
       state: ProjectPickerState,
       payload: { expression: FilterExpressionValue }
     ) => {
+      if (payload.expression.tagName === PROJECT_SELECTION_DIMENSION) {
+        return state;
+      }
+
       const id = getFilterExpressionLookupKey(payload.expression);
       if (state.filterExpressions.has(id)) {
         return state;
@@ -114,6 +140,10 @@ export function createStoreReducers() {
       state: ProjectPickerState,
       payload: { id: string; expression: FilterExpressionValue }
     ) => {
+      if (payload.expression.tagName === PROJECT_SELECTION_DIMENSION) {
+        return state;
+      }
+
       const existing = state.filterExpressions.get(payload.id);
       if (!existing) {
         return state;
@@ -236,7 +266,6 @@ export function createStoreReducers() {
       return {
         ...state,
         filterExpressions: new Map(),
-        excludedOverrides: [],
       };
     },
     /**
@@ -261,11 +290,18 @@ export function createStoreReducers() {
       ...state,
       excludedOverrides: removeOverrides(state.excludedOverrides, payload.projects),
     }),
-    revertToSpaceDefaults: (state: ProjectPickerState) => ({
-      ...state,
-      filterExpressions: new Map(),
-      excludedOverrides: [],
-    }),
+    revertToSpaceDefaults: (state: ProjectPickerState) => {
+      const parsed = parseDefaultProjectRouting(
+        state.defaultProjectRouting,
+        Array.from(state.availableProjects.keys())
+      );
+
+      return {
+        ...state,
+        filterExpressions: createFilterExpressionsMap(parsed.filterExpressions),
+        excludedOverrides: [...parsed.excludedOverrides],
+      };
+    },
     /**
      * Includes all visible projects.
      */

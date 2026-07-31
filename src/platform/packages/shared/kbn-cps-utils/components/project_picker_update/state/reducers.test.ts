@@ -15,6 +15,7 @@ import {
   getFilterExpressionLookupKey,
   type FilterExpressionValue,
 } from '../utils/filter_input_codec';
+import { PROJECT_SELECTION_DIMENSION } from '../utils';
 
 const typeSecurityExpression = {
   operator: FilterOperator.EQUALS,
@@ -51,6 +52,9 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   const availableProjects = overrides.availableProjects ?? new Map<string, CPSProject>();
 
   return {
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
     filterExpressions: new Map(),
     filteringDimensions: [],
     availableProjects,
@@ -58,6 +62,8 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     filteredProjectIds: [],
     visibleProjectIds: [],
     selectedProjects: [],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
     ...overrides,
     defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
     hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
@@ -79,7 +85,7 @@ describe('createStoreReducers', () => {
     expect(nextState.excludedOverrides).toEqual([]);
   });
 
-  it('clears stored filters and overrides when clearing project filters', () => {
+  it('clears stored tag filters without clearing project exclusions', () => {
     const state = createState({
       filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       excludedOverrides: ['p2'],
@@ -88,19 +94,27 @@ describe('createStoreReducers', () => {
     const nextState = reducers.clearProjectFilters(state);
 
     expect(nextState.filterExpressions).toEqual(new Map());
-    expect(nextState.excludedOverrides).toEqual([]);
+    expect(nextState.excludedOverrides).toEqual(['p2']);
   });
 
   it('resets filters and overrides when reverting to space defaults', () => {
     const state = createState({
-      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      excludedOverrides: ['p2'],
+      defaultProjectRouting: '_type:security AND _id:* AND NOT _id:p2',
+      availableProjects: new Map([
+        ['p1', createProject({ _id: 'p1' })],
+        ['p2', createProject({ _id: 'p2' })],
+      ]),
+      filterExpressions: createFilterExpressions([[regionUsEastExpression]]),
+      excludedOverrides: ['p1'],
     });
 
     const nextState = reducers.revertToSpaceDefaults(state);
 
-    expect(nextState.filterExpressions).toEqual(new Map());
-    expect(nextState.excludedOverrides).toEqual([]);
+    expect(nextState.filterExpressions.get(typeSecurityKey)).toEqual({
+      expression: typeSecurityExpression,
+      enabled: true,
+    });
+    expect(nextState.excludedOverrides).toEqual(['p2']);
   });
 
   it('resets filters and overrides from origin space defaults', () => {
@@ -157,6 +171,37 @@ describe('createStoreReducers', () => {
 
     expect(nextState).toBe(state);
     expect(nextState.filterExpressions.size).toBe(1);
+  });
+
+  it('rejects _id filter expressions', () => {
+    const state = createState();
+
+    const nextState = reducers.addFilterExpression(state, {
+      expression: {
+        operator: FilterOperator.EQUALS,
+        tagName: PROJECT_SELECTION_DIMENSION,
+        tagValue: 'p1',
+      },
+    });
+
+    expect(nextState).toBe(state);
+  });
+
+  it('rejects updating a filter expression to PROJECT_SELECTION_DIMENSION', () => {
+    const state = createState({
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+    });
+
+    const nextState = reducers.updateFilterExpression(state, {
+      id: typeSecurityKey,
+      expression: {
+        operator: FilterOperator.EQUALS,
+        tagName: PROJECT_SELECTION_DIMENSION,
+        tagValue: 'p1',
+      },
+    });
+
+    expect(nextState).toBe(state);
   });
 
   it('does not update when the new expression collides with another filter key', () => {

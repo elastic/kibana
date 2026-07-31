@@ -16,14 +16,16 @@ import React, {
   useEffect,
 } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { useCreateStore, type ActionsFromReducers } from './store';
 import { createStoreReducers } from './reducers';
 import { type ProjectPickerState } from './reducers';
 import { projectPickerDerivatives } from './derivatives';
 import { type CPSProject } from '../../../types';
-import { getFilterExpressionLookupKey } from '../utils/filter_input_codec';
-import { type ProjectRoutingExpression, projectRoutingCodec, ROUTING_WILDCARD } from '../utils/project_routing_codec';
+import {
+  createFilterExpressionsMap,
+  parseDefaultProjectRouting,
+  type ProjectRoutingStrategy,
+} from '../utils';
 
 interface ProjectPickerContext {
   state: ProjectPickerState;
@@ -46,7 +48,7 @@ export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState
    *
    * @default 'dynamic'
    */
-  projectRoutingStrategy?: 'dynamic' | 'snapshot';
+  projectRoutingStrategy?: ProjectRoutingStrategy;
   /**
    * Callback function invoked with the project routing string when the project selection changes
    */
@@ -75,63 +77,42 @@ export const useProjectPickerState = () => {
   return ctx.state;
 };
 
-const getInitialStateFromProjectRouting = ({
+const createInitialPickerState = ({
   availableProjects,
+  defaultProjectRouting,
+  isReadOnly,
   originProjectId,
-  projectRouting,
+  projectRoutingStrategy,
 }: {
   availableProjects: CPSProject[];
-  originProjectId?: string;
-  projectRouting?: ProjectRouting;
-}): Pick<ProjectRoutingExpression, 'filterExpressions' | 'excludedProjectIds'> => {
-  const allProjectIds = availableProjects.map((project) => project._id);
-
-  if (projectRouting === undefined || projectRouting === PROJECT_ROUTING.ALL) {
-    return {
-      filterExpressions: [],
-      excludedProjectIds: [],
-    };
-  }
-
-  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
-    return {
-      filterExpressions: [],
-      excludedProjectIds: originProjectId
-        ? allProjectIds.filter((projectId) => projectId !== originProjectId)
-        : [],
-    };
-  }
-
-  const { excludedProjectIds, filterExpressions, selectedProjectIds } =
-    projectRoutingCodec.decode(projectRouting);
-
-  if (selectedProjectIds.length > 0) {
-    const selectedProjectIdsSet = new Set(
-      selectedProjectIds.filter((projectId) =>
-        availableProjects.some((project) => project._id === projectId)
-      )
-    );
-
-    return {
-      filterExpressions,
-      excludedProjectIds: allProjectIds.filter(
-        (projectId) => !selectedProjectIdsSet.has(projectId)
-      ),
-    };
-  }
+  defaultProjectRouting: ProjectRouting;
+  isReadOnly?: boolean;
+  originProjectId: string;
+  projectRoutingStrategy: NonNullable<ProjectPickerStateProviderProps['projectRoutingStrategy']>;
+}): ProjectPickerState => {
+  const availableProjectIds = availableProjects.map((project) => project._id);
+  const parsed = parseDefaultProjectRouting(defaultProjectRouting, availableProjectIds);
 
   return {
-    filterExpressions,
-    excludedProjectIds: excludedProjectIds.filter((projectId) =>
-      availableProjects.some((project) => project._id === projectId)
-    ),
+    isReadOnly,
+    originProjectId,
+    defaultProjectRouting,
+    projectRoutingStrategy,
+    filterExpressions: createFilterExpressionsMap(parsed.filterExpressions),
+    filteringDimensions: [],
+    availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
+    excludedOverrides: [...parsed.excludedOverrides],
+    filteredProjectIds: [],
+    visibleProjectIds: [],
+    selectedProjects: [],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
   };
 };
 
 export const ProjectPickerStateProvider = ({
   children,
   availableProjects,
-  initialProjectRouting,
   isReadOnly,
   originProjectId,
   onProjectRoutingChange,
@@ -140,71 +121,38 @@ export const ProjectPickerStateProvider = ({
 }: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
-  const { excludedProjectIds, filterExpressions } = useMemo(
-    () =>
-      getInitialStateFromProjectRouting({
-        availableProjects,
-        originProjectId,
-        projectRouting: initialProjectRouting,
-      }),
-    [availableProjects, initialProjectRouting, originProjectId]
-  );
 
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
-    initialState: {
+    initialState: createInitialPickerState({
+      availableProjects,
+      defaultProjectRouting: defaultProjectRoutingGetter() ?? '',
       isReadOnly,
-      filterExpressions: new Map(
-        filterExpressions.map((expression) => [
-          getFilterExpressionLookupKey(expression),
-          { expression, enabled: true },
-        ])
-      ),
       originProjectId,
-      defaultProjectRouting: defaultProjectRoutingGetter(),
-      filteringDimensions: [],
-      availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
-      excludedOverrides: excludedProjectIds,
-      filteredProjectIds: [],
-      visibleProjectIds: [],
-      selectedProjects: [],
-    },
+      projectRoutingStrategy,
+    }),
     reducers: projectPickerReducers,
     derivatives: [...projectPickerDerivatives],
   });
 
   useEffect(() => {
+    const defaultProjectRouting = defaultProjectRoutingGetter() ?? '';
+    const parsed = parseDefaultProjectRouting(
+      defaultProjectRouting,
+      availableProjects.map((project) => project._id)
+    );
+
     store.actions._setStoreState({
       isReadOnly,
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
-      excludedOverrides: excludedProjectIds,
-      filterExpressions,
+      defaultProjectRouting,
+      filterExpressions: parsed.filterExpressions,
+      excludedOverrides: parsed.excludedOverrides,
     });
-  }, [availableProjects, excludedProjectIds, filterExpressions, isReadOnly, store.actions]);
+  }, [availableProjects, defaultProjectRoutingGetter, isReadOnly, store.actions]);
 
   useEffect(() => {
-    onProjectRoutingChange(
-      Array.from(store.state.filterExpressions.values())
-        .map((filterEntry) =>
-          filterEntry.enabled ? projectRoutingCodec.encode(filterEntry.expression) : null
-        )
-        .concat(
-          projectRoutingStrategy === 'dynamic'
-            ? [
-                `_id:${ROUTING_WILDCARD}`,
-                store.state.excludedOverrides.map((override) => `NOT _id:${override}`),
-              ].flat()
-            : store.state.selectedProjects.map((id) => `_id:${id}`)
-        )
-        .filter(Boolean)
-        .join(' AND ')
-    );
-  }, [
-    store.state.filterExpressions,
-    store.state.selectedProjects,
-    store.state.excludedOverrides,
-    onProjectRoutingChange,
-    projectRoutingStrategy,
-  ]);
+    onProjectRoutingChange(store.state.currentProjectRouting);
+  }, [store.state.currentProjectRouting, onProjectRoutingChange]);
 
   return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
 };

@@ -17,6 +17,7 @@ import { FilterOperator, type FilterExpressionValue } from '../utils/filter_inpu
 import {
   ProjectPickerStateProvider,
   useProjectPickerActions,
+  useProjectPickerState,
   type ProjectPickerStateProviderProps,
 } from '.';
 
@@ -52,7 +53,7 @@ const availableProjects = [originProject, linkedProjectOne, linkedProjectTwo];
 const defaultProviderProps: Omit<ProjectPickerStateProviderProps, 'children'> = {
   availableProjects,
   originProjectId: originProject._id,
-  defaultProjectRoutingGetter: () => '_alias:origin',
+  defaultProjectRoutingGetter: () => '',
   onProjectRoutingChange: jest.fn(),
 };
 
@@ -92,6 +93,20 @@ const AddFilterExpression = ({
   );
 };
 
+const ReadPickerState = ({
+  onChange,
+}: {
+  onChange: (state: ReturnType<typeof useProjectPickerState>) => void;
+}) => {
+  const state = useProjectPickerState();
+
+  React.useEffect(() => {
+    onChange(state);
+  }, [onChange, state]);
+
+  return null;
+};
+
 describe('ProjectPickerStateProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -99,11 +114,34 @@ describe('ProjectPickerStateProvider', () => {
 
   describe('projectRoutingStrategy', () => {
     describe('dynamic', () => {
-      it('calls onProjectRoutingChange with a wildcard id clause on mount by default', async () => {
+      it('calls onProjectRoutingChange with no routing when the default is empty', async () => {
         const { onProjectRoutingChange } = renderProjectPicker();
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('_id:*');
+          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
+        });
+      });
+
+      it('prefills the default tag filter on mount', async () => {
+        const onProjectRoutingChange = jest.fn();
+
+        render(
+          <ProjectPickerStateProvider
+            {...defaultProviderProps}
+            availableProjects={[
+              { ...originProject, _alias: 'origin' },
+              linkedProjectOne,
+              linkedProjectTwo,
+            ]}
+            defaultProjectRoutingGetter={() => '_alias:origin'}
+            onProjectRoutingChange={onProjectRoutingChange}
+          >
+            <ProjectPickerList />
+          </ProjectPickerStateProvider>
+        );
+
+        await waitFor(() => {
+          expect(onProjectRoutingChange).toHaveBeenCalledWith('_alias:origin');
         });
       });
 
@@ -114,7 +152,7 @@ describe('ProjectPickerStateProvider', () => {
         });
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('_id:*');
+          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
         });
 
         await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
@@ -124,7 +162,7 @@ describe('ProjectPickerStateProvider', () => {
         });
       });
 
-      it('includes encoded filter expressions with the wildcard id clause', async () => {
+      it('includes encoded filter expressions without _id clauses until a project is excluded', async () => {
         const user = userEvent.setup();
         const onProjectRoutingChange = jest.fn();
         const securityTypeFilter = {
@@ -145,40 +183,36 @@ describe('ProjectPickerStateProvider', () => {
         );
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith('_id:*');
+          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
         });
 
         await user.click(screen.getByTestId('addFilterExpression'));
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security AND _id:*');
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security');
         });
       });
     });
 
     describe('snapshot', () => {
-      it('calls onProjectRoutingChange with explicit id clauses for selected projects', async () => {
+      it('calls onProjectRoutingChange with no id clauses when there are no exclusions', async () => {
         const { onProjectRoutingChange } = renderProjectPicker({
           projectRoutingStrategy: 'snapshot',
         });
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith(
-            '_id:origin AND _id:linked1 AND _id:linked2'
-          );
+          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
         });
       });
 
-      it('omits deselected projects from the explicit id clauses', async () => {
+      it('omits deselected projects from the explicit id clauses once exclusions exist', async () => {
         const user = userEvent.setup();
         const { onProjectRoutingChange } = renderProjectPicker({
           projectRoutingStrategy: 'snapshot',
         });
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith(
-            '_id:origin AND _id:linked1 AND _id:linked2'
-          );
+          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
         });
 
         await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
@@ -188,7 +222,7 @@ describe('ProjectPickerStateProvider', () => {
         });
       });
 
-      it('includes encoded filter expressions with explicit id clauses for selected projects', async () => {
+      it('includes encoded filter expressions without explicit id clauses until a project is excluded', async () => {
         const user = userEvent.setup();
         const onProjectRoutingChange = jest.fn();
         const securityTypeFilter = {
@@ -209,16 +243,62 @@ describe('ProjectPickerStateProvider', () => {
         );
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenCalledWith(
-            '_id:origin AND _id:linked1 AND _id:linked2'
-          );
+          expect(onProjectRoutingChange).toHaveBeenCalledWith('');
         });
 
         await user.click(screen.getByTestId('addFilterExpression'));
 
         await waitFor(() => {
-          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security AND _id:linked1');
+          expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_type:security');
         });
+      });
+    });
+  });
+
+  describe('isUsingSpaceDefaults', () => {
+    it('is true on mount when current routing matches the default', async () => {
+      const onStateChange = jest.fn();
+
+      render(
+        <ProjectPickerStateProvider {...defaultProviderProps}>
+          <ReadPickerState onChange={onStateChange} />
+          <ProjectPickerList />
+        </ProjectPickerStateProvider>
+      );
+
+      await waitFor(() => {
+        expect(onStateChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({
+            currentProjectRouting: '',
+            isUsingSpaceDefaults: true,
+          })
+        );
+      });
+    });
+
+    it('becomes false when the user changes project exclusions', async () => {
+      const user = userEvent.setup();
+      const onStateChange = jest.fn();
+
+      render(
+        <ProjectPickerStateProvider {...defaultProviderProps}>
+          <ReadPickerState onChange={onStateChange} />
+          <ProjectPickerList />
+        </ProjectPickerStateProvider>
+      );
+
+      await waitFor(() => {
+        expect(onStateChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isUsingSpaceDefaults: true })
+        );
+      });
+
+      await user.click(screen.getByTestId('projectPickerListItemSwitch-linked1'));
+
+      await waitFor(() => {
+        expect(onStateChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isUsingSpaceDefaults: false })
+        );
       });
     });
   });
