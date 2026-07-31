@@ -7,9 +7,9 @@
 
 import type { z } from '@kbn/zod/v4';
 import type {
-  CountPolicyExecutionEventsParams,
-  ListPolicyExecutionHistoryParams,
-  getRuleExecutionsQuerySchema,
+  CountPolicyExecutionEventsRequest,
+  ListPolicyExecutionHistoryRequest,
+  getRuleExecutionsRequestSchema,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERT_API_PATH,
@@ -26,7 +26,7 @@ import {
  * `.default(...)` are optional here, and array-like fields accept either a
  * single value or an array (the schema normalizes them at parse time).
  */
-type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsQuerySchema>;
+type GetRuleExecutionsQueryInput = z.input<typeof getRuleExecutionsRequestSchema>;
 
 /**
  * URL for a single rule resource: `${RULE_API_PATH}/${encodedId}`.
@@ -123,7 +123,7 @@ export const CREATE_ALERT_EVENT_URL = ALERT_API_PATH;
 export const getCreateAlertEventBySourceUrl = (source: string) =>
   `${ALERT_API_PATH}/${encodeURIComponent(source)}`;
 
-export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryParams): string => {
+export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryRequest): string => {
   if (!query) return EXECUTION_HISTORY_API_PATH;
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
@@ -135,7 +135,7 @@ export const getListExecutionHistoryUrl = (query?: ListPolicyExecutionHistoryPar
 };
 
 export const getCountNewExecutionHistoryEventsUrl = (
-  query: CountPolicyExecutionEventsParams
+  query: CountPolicyExecutionEventsRequest
 ): string => {
   const params = new URLSearchParams({ since: query.since });
   return `${EXECUTION_HISTORY_COUNT_API_PATH}?${params.toString()}`;
