@@ -301,6 +301,16 @@ export function useContextSwitcher(): ReactNode {
 }
 
 /**
+ * Returns the current project picker content set via
+ * `chrome.next.projectPicker.set()`, or null if not set.
+ */
+export function useProjectPicker(): ReactNode {
+  const chrome = useChromeService();
+  const content$ = useMemo(() => chrome.next.projectPicker.get$(), [chrome]);
+  return useObservable(content$, null);
+}
+
+/**
  * Returns the home logo icon set via `chrome.next.homeLogoIcon.set()`,
  * or `undefined` to fall back to the Elastic logo.
  */

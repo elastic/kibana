@@ -19,17 +19,10 @@ import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { isAgentFirst, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderAppUpdate, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
-
-const LazyAgentBuilderAnnouncementChromeInner = dynamic(() =>
-  import('./components/announcement/agent_builder_announcement_chrome_inner').then((m) => ({
-    default: m.AgentBuilderAnnouncementChromeInner,
-  }))
-);
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -72,7 +65,6 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
-import { createVisualizationAttachmentDefinition } from './application/components/attachments/visualization_attachment';
 import { storageKeys } from './application/storage_keys';
 import {
   registerAgentWorkspaceSlot,
@@ -145,28 +137,14 @@ export class AgentBuilderPlugin
 
     registerWorkflowSteps(deps.workflowsExtensions, core);
 
-    // Sidebar registration needs FeatureFlagsStart (getBooleanValue); defer until core has started.
-    core.getStartServices()
-      .then(([coreStart]) => {
-        const isAgentFirstChrome =
-          isAgentFirst(coreStart.featureFlags) && isNextChrome(coreStart.featureFlags);
-
-        if (isAgentFirstChrome) {
-          return;
-        }
-
-        core.chrome.sidebar.registerApp({
-          appId: 'agentBuilder',
-          restoreOnReload: false,
-          loadComponent: async () => {
-            const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
-            return SidebarConversation;
-          },
-        });
-      })
-      .catch((error) => {
-        this.logger.error('Failed to register Agent Builder sidebar app', error);
-      });
+    core.chrome.sidebar.registerApp({
+      appId: 'agentBuilder',
+      restoreOnReload: false,
+      loadComponent: async () => {
+        const { SidebarConversation } = await import('./sidebar/sidebar_conversation');
+        return SidebarConversation;
+      },
+    });
 
     return {};
   }
@@ -180,11 +158,6 @@ export class AgentBuilderPlugin
 
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
-
-    attachmentsService.addAttachmentType(
-      'visualization',
-      createVisualizationAttachmentDefinition({ startDependencies })
-    );
 
     const eventsService = new EventsService();
     registerAttachmentLinkEventsService(eventsService);
@@ -207,7 +180,10 @@ export class AgentBuilderPlugin
     const hasAgentBuilder = core.application.capabilities.agentBuilder?.show === true;
     const isAgentFirstChrome =
       isAgentFirst(core.featureFlags) && isNextChrome(core.featureFlags);
-    const sidebar = isAgentFirstChrome ? undefined : core.chrome.sidebar.getApp('agentBuilder');
+    const sidebar =
+      isAgentFirstChrome || !core.chrome.sidebar.hasApp('agentBuilder')
+        ? undefined
+        : core.chrome.sidebar.getApp('agentBuilder');
 
     const noopSidebarChatRef = { close: () => {} };
 
@@ -440,13 +416,14 @@ export class AgentBuilderPlugin
       });
     }
 
-    if (hasAgentBuilder) {
+    if (hasAgentBuilder && !isAgentFirstChrome) {
       core.chrome.navControls.registerRight({
         mount: (element) => {
           ReactDOM.render(
-            <LazyAgentBuilderAnnouncementChromeInner
+            <AgentBuilderNavControlInitiator
               coreStart={core}
               pluginsStart={startDependencies}
+              agentBuilderService={agentBuilderService}
             />,
             element,
             () => {}
@@ -456,45 +433,24 @@ export class AgentBuilderPlugin
             ReactDOM.unmountComponentAtNode(element);
           };
         },
-        order: 1000,
+        // right before the user profile
+        order: 1001,
       });
 
-      if (!isAgentFirstChrome) {
-        core.chrome.navControls.registerRight({
-          mount: (element) => {
-            ReactDOM.render(
-              <AgentBuilderNavControlInitiator
-                coreStart={core}
-                pluginsStart={startDependencies}
-                agentBuilderService={agentBuilderService}
-              />,
-              element,
-              () => {}
-            );
-
-            return () => {
-              ReactDOM.unmountComponentAtNode(element);
-            };
-          },
-          // right before the user profile
-          order: 1001,
-        });
-
-        // Chrome Next transition: also expose this control as an AI button so it renders in the
-        // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
-        // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
-        // Remove the `registerRight` registration once Chrome Next is the only chrome.
-        // See https://github.com/elastic/kibana/issues/260010
-        core.chrome.next.aiButton.register({
-          content: (
-            <AgentBuilderNavControlInitiator
-              coreStart={core}
-              pluginsStart={startDependencies}
-              agentBuilderService={agentBuilderService}
-            />
-          ),
-        });
-      }
+      // Chrome Next transition: also expose this control as an AI button so it renders in the
+      // Chrome Next global header (behind the `core.chrome.next` feature flag). Chrome Next does
+      // not render HeaderNavControls (`registerRight` mount points), so we dual-register for now.
+      // Remove the `registerRight` registration once Chrome Next is the only chrome.
+      // See https://github.com/elastic/kibana/issues/260010
+      core.chrome.next.aiButton.register({
+        content: (
+          <AgentBuilderNavControlInitiator
+            coreStart={core}
+            pluginsStart={startDependencies}
+            agentBuilderService={agentBuilderService}
+          />
+        ),
+      });
     }
 
     return agentBuilderService;

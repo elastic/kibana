@@ -57,13 +57,13 @@ interface ResolvedAppMenu {
   shareItem: AppMenuItemType | undefined;
 }
 
-const useStaticItems = ({
+export const useAppHeaderStaticItems = ({
   docLink: explicitDocLink,
   showAddIntegrations,
 }: {
   docLink?: string;
   showAddIntegrations?: boolean;
-}) => {
+}): AppMenuStaticItem[] => {
   const chrome = useChromeService();
   const basePath = useBasePath();
   const feedbackHandler = useObservable(chrome.next.getFeedbackHandler$(), undefined);
@@ -124,7 +124,7 @@ export function useAppHeaderMenu(
   staticItems: AppMenuStaticItem[];
 } {
   const { menu } = useResolvedAppMenu(pageAppMenu);
-  const staticItems = useStaticItems({ docLink, showAddIntegrations });
+  const staticItems = useAppHeaderStaticItems({ docLink, showAddIntegrations });
 
   return {
     config: menu,

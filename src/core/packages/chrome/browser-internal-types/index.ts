@@ -31,6 +31,7 @@ import type {
   NavigationTreeDefinitionUI,
   CloudURLs,
   SolutionId,
+  NavigationCustomization,
 } from '@kbn/core-chrome-browser';
 
 /** @internal */
@@ -125,6 +126,18 @@ export interface InternalChromeStart extends ChromeStart {
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
       params?: Partial<ChromeSetProjectBreadcrumbsParams>
     ): void;
+
+    /**
+     * Set navigation customization for live preview.
+     * Pass undefined to clear the customization and revert to the original order.
+     */
+    setNavigationCustomization(customization: NavigationCustomization | undefined): void;
+
+    /** Observable that emits the customize navigation handler when registered by the navigation plugin. */
+    getCustomizeNavigationHandler$(): Observable<(() => void) | null>;
+
+    /** Register the handler that opens the navigation customization modal. Called once by the navigation plugin. */
+    registerCustomizeNavigationHandler(handler: () => void): void;
   };
 
   /** @internal Extends public `next` with `get$` for Chrome layout components. */
@@ -137,6 +150,9 @@ export interface InternalChromeNext extends ChromeNext {
     get$(): Observable<GlobalHeaderAiButton[]>;
   };
   contextSwitcher: ChromeNext['contextSwitcher'] & {
+    get$(): Observable<ReactNode>;
+  };
+  projectPicker: ChromeNext['projectPicker'] & {
     get$(): Observable<ReactNode>;
   };
   homeLogoIcon: ChromeNext['homeLogoIcon'] & {

@@ -209,6 +209,14 @@ export interface ChromeNext {
      */
     set(content?: ReactNode): void;
   };
+  /** Project picker content. */
+  projectPicker: {
+    /**
+     * Set the project picker content for the Chrome-Next header.
+     * Pass `undefined` to remove. Global — persists across app changes.
+     */
+    set(content?: ReactNode): void;
+  };
   /** Home logo icon override (e.g. active space solution logo). */
   homeLogoIcon: {
     /**
