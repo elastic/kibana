@@ -43,6 +43,34 @@ const coerceLegacyToggleDefault = (value: string | number | boolean): boolean | 
  * The returned `name` matches the legacy `key` so that per-case `customField.key` references
  * remain meaningful in the v2 system.
  */
+/**
+ * Normalizes a field definition name for deduplication/conflict checks — the same
+ * semantics the field-definitions sub-client enforces at the API layer (trim +
+ * toLowerCase, matching `ensureUniqueTemplateName` in the templates service).
+ */
+export const normalizeFieldDefinitionName = (name: string): string => name.trim().toLowerCase();
+
+/**
+ * Builds a normalized (case-insensitive) name → definition index from any array of
+ * objects. Generic so the hook can index `FieldDefinition` values while the migration
+ * task indexes `SavedObject<FieldDefinition>` values without an intermediate mapping
+ * step.
+ */
+export const buildFieldDefinitionNameIndex = <T>(
+  defs: T[],
+  getName: (def: T) => string
+): Map<string, T> => {
+  const index = new Map<string, T>();
+  for (const def of defs) {
+    const key = normalizeFieldDefinitionName(getName(def));
+    if (!index.has(key)) {
+      // First-wins: stable behaviour when duplicates already exist.
+      index.set(key, def);
+    }
+  }
+  return index;
+};
+
 export const buildFieldDefinitionYaml = (
   legacy: LegacyCustomField
 ): { name: string; yaml: string } => {
