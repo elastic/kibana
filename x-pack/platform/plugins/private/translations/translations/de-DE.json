@@ -51521,8 +51521,6 @@
     "xpack.slo.sloEdit.calendarTimeWindow.monthly": "Monatlich",
     "xpack.slo.sloEdit.calendarTimeWindow.weekly": "Wöchentlich",
     "xpack.slo.sloEdit.cancelButton": "Abbrechen",
-    "xpack.slo.sloEdit.cpsReadiness.body": "Die SLOs beziehen sich aktuell auf Daten innerhalb dieses Projekts. Support für die projektübergreifende Suche ist in Vorbereitung.",
-    "xpack.slo.sloEdit.cpsReadiness.title": "Projektübergreifende Suche für SLOs demnächst verfügbar",
     "xpack.slo.sloEdit.createSloButton": "SLO erstellen",
     "xpack.slo.sloEdit.customKql.dataViewSelection.label": "Wählen Sie eine Datenansicht aus",
     "xpack.slo.sloEdit.customKql.indexSelection.label": "Index",
