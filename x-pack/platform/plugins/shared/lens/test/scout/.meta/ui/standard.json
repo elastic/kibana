@@ -1,5 +1,5 @@
 {
-  "sha1": "78c2de215cc152933e80fb298c48d8e93f3c9a6b",
+  "sha1": "df6ebded2622607e02f4af4314e67328b5cc7e93",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -75,12 +75,11 @@
       "title": "Lens metric trendline with custom time field renders trendline when referenced data view time field is not timestamp",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/lens/test/scout/ui/tests/metric_trendline_custom_time_field.spec.ts",
-        "line": 67,
+        "line": 70,
         "column": 9
       }
     }

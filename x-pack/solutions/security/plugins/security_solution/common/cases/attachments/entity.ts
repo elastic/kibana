@@ -19,6 +19,13 @@ const EntityAttachmentMetadataSchema = z
     riskScore: z.number().min(0).max(100).optional(),
     /** Optional risk level (e.g. Low, Moderate, High, Critical) captured at attach time. */
     riskLevel: z.string().max(50).optional(),
+    /**
+     * The entity store index pattern the attached entity lives in. Read by the Cases
+     * platform (`getIndexFromMetadata`) so the "already attached" duplicate check can
+     * pair this attachment's id with an index — unified attachment matching requires a
+     * 1:1 id/index mapping, and without it the attachment is dropped from the check.
+     */
+    index: z.string().max(256).optional(),
   })
   .strict();
 
