@@ -7,6 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import { createRuleDataBaseSchema, createActionPolicyDataSchema } from '@kbn/alerting-v2-schemas';
+import {
+  ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
+  builtinWorkflowInputDefinitions,
+} from '@kbn/workflows';
 import { ruleOperationSchema } from '../tools/manage_rule/operations';
 
 const LARGE_ENUM_THRESHOLD = 20;
@@ -247,4 +251,50 @@ export const generateActionPolicySchemaDoc = (): string => {
     '',
     fieldTable,
   ].join('\n');
+};
+
+/**
+ * Generates concise markdown documentation for the action-policy → workflow dispatch payload.
+ * Sourced from the `alertingV2NotificationGroup` built-in workflow input definition, which
+ * mirrors `ActionPolicyWorkflowPayload` / `AlertEpisode` in `server/lib/dispatcher/types.ts`.
+ *
+ * At workflow render time the dispatcher schedules with `{ payload }`, so Liquid templates
+ * access these fields as `{{ inputs.payload.<field> }}`.
+ */
+export const generateActionPolicyWorkflowPayloadDoc = (): string => {
+  const jsonSchema =
+    builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
+  if (!jsonSchema) {
+    throw new SchemaTranslationError(
+      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}"`
+    );
+  }
+
+  const topLevelFields = jsonSchemaToFieldTable(jsonSchema);
+  const topLevelTable = formatFieldTable(topLevelFields);
+
+  const properties = (jsonSchema as JsonSchemaNode).properties as JsonSchemaNode | undefined;
+  const episodesProp = properties?.episodes as JsonSchemaNode | undefined;
+  const episodeItems = episodesProp?.items as JsonSchemaNode | undefined;
+  const episodeFields = episodeItems ? jsonSchemaToFieldTable(episodeItems) : [];
+  const episodeTable = formatFieldTable(episodeFields);
+
+  const sections = [
+    '# Action Policy Workflow Dispatch Payload',
+    '',
+    'Access pattern: `{{ inputs.payload.<field> }}` (e.g. `{{ inputs.payload.policyId }}`,',
+    '`{{ inputs.payload.episodes }}`). For episode fields use',
+    '`{% for ep in inputs.payload.episodes %}{{ ep.<field> }}{% endfor %}`.',
+    'Rule names: `{{ inputs.payload.rules[ep.rule_id].name }}`.',
+    '',
+    '## Top-Level Fields (`inputs.payload`)',
+    '',
+    topLevelTable,
+  ];
+
+  if (episodeTable) {
+    sections.push('', '## Episode Fields (`inputs.payload.episodes[]`)', '', episodeTable);
+  }
+
+  return sections.join('\n');
 };

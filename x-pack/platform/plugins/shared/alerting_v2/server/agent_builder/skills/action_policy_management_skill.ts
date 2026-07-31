@@ -13,7 +13,10 @@ import {
 } from '@kbn/alerting-v2-constants';
 import { manageActionPolicyTool } from '../tools/manage_action_policy';
 import type { ManageActionPolicyToolDeps } from '../tools/manage_action_policy';
-import { generateActionPolicySchemaDoc } from './schema_to_skill_docs';
+import {
+  generateActionPolicySchemaDoc,
+  generateActionPolicyWorkflowPayloadDoc,
+} from './schema_to_skill_docs';
 
 export const createActionPolicyManagementSkill = (deps: ManageActionPolicyToolDeps) =>
   defineSkillType({
@@ -105,6 +108,11 @@ Signal rules (\`kind: signal\`) are excluded at step 2 — the dispatcher query 
         name: 'action-policy-schema',
         relativePath: './references',
         content: generateActionPolicySchemaDoc(),
+      },
+      {
+        name: 'workflow-dispatch-payload',
+        relativePath: './references',
+        content: generateActionPolicyWorkflowPayloadDoc(),
       },
     ],
     content: `## Domain Knowledge
@@ -247,8 +255,9 @@ steps:
 
 - **Use \`triggers: - type: manual\`** — action policies invoke workflows programmatically via \`scheduleWorkflow\`.
   The \`alert\` trigger type is for the v1 alerting connector path, which uses a completely different event shape.
-- **Hardcode the rule name** in the subject and message — the dispatch payload includes \`rule_id\` but not the
-  rule's human-readable name. The LLM knows the name from the rule attachment.
+- **Prefer \`inputs.payload.rules[ep.rule_id].name\`** for the rule's display name — the dispatch payload
+  includes a \`rules\` map keyed by rule id. Hardcoding the name is fine for a static default template
+  when the name is already known from the rule attachment.
 - **Reference \`ep.data.*\` fields explicitly** based on the rule's ES|QL output columns. Dotted field names
   (e.g. \`host.name\`, \`event.action\`) are reconstructed into nested objects, so access them as
   \`ep.data.host.name\` (not \`ep.data["host.name"]\`).
@@ -259,16 +268,14 @@ steps:
 
 **Available Liquid variables from action policy dispatch:**
 
+For the full \`inputs.payload.*\` schema (including episode fields and \`rules\`), consult the
+[workflow dispatch payload reference](./references/workflow-dispatch-payload.md) — auto-generated
+from \`ActionPolicyWorkflowPayload\` / the \`alertingV2NotificationGroup\` built-in input definition.
+
+Additional workflow engine variables (not part of the dispatch payload):
+
 | Variable | Description |
 |---|---|
-| \`inputs.payload.episodes\` | Array of alert episodes |
-| \`inputs.payload.episodes[].episode_status\` | \`active\`, \`pending\`, \`recovering\`, or \`inactive\` |
-| \`inputs.payload.episodes[].rule_id\` | The rule's saved object ID |
-| \`inputs.payload.episodes[].episode_id\` | The episode UUID |
-| \`inputs.payload.episodes[].data.*\` | ES|QL output row fields (populated for active/pending) |
-| \`inputs.payload.policyId\` | The action policy ID |
-| \`inputs.payload.id\` | The action group ID |
-| \`inputs.payload.groupKey\` | The grouping key object |
 | \`triggeredBy\` | Always \`"action_policy"\` |
 | \`spaceId\` | The Kibana space |
 | \`execution.url\` | Direct link to the workflow execution in Kibana |

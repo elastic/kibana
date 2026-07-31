@@ -5,11 +5,41 @@
  * 2.0.
  */
 
+import type {
+  ActionPolicyWorkflowPayload,
+  AlertEpisode,
+} from '../../lib/dispatcher/types';
 import {
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
   generateActionPolicySchemaDoc,
+  generateActionPolicyWorkflowPayloadDoc,
 } from './schema_to_skill_docs';
+
+/**
+ * Drift-guard: if `ActionPolicyWorkflowPayload` / `AlertEpisode` gain or lose a
+ * field, these maps cause a TypeScript compile error — forcing the generated
+ * skill docs assertions to be updated in lockstep.
+ */
+const payloadKeyGuard: Record<keyof ActionPolicyWorkflowPayload, true> = {
+  id: true,
+  policyId: true,
+  groupKey: true,
+  episodes: true,
+  rules: true,
+};
+
+const episodeKeyGuard: Record<keyof AlertEpisode, true> = {
+  last_event_timestamp: true,
+  rule_id: true,
+  source: true,
+  space_id: true,
+  group_hash: true,
+  episode_id: true,
+  episode_status: true,
+  severity: true,
+  data: true,
+};
 
 describe('schema_to_skill_docs', () => {
   describe('generateRuleSchemaDoc', () => {
@@ -60,7 +90,16 @@ describe('schema_to_skill_docs', () => {
   });
 
   describe('generateActionPolicySchemaDoc', () => {
-    it('matches the snapshot', () => {
+    /**
+     * Snapshot of the generated skill markdown for the action policy create API
+     * schema (`createActionPolicyDataSchema` from `@kbn/alerting-v2-schemas`).
+     *
+     * This snapshot exists so reviewers can verify the LLM-facing docs look
+     * correct — field names, types, required/optional flags, descriptions, and
+     * constraints. When the upstream Zod schema changes, regenerate with `-u`
+     * and review the diff for accuracy before landing.
+     */
+    it('matches the reviewed skill-doc snapshot', () => {
       expect(generateActionPolicySchemaDoc()).toMatchSnapshot();
     });
 
@@ -71,6 +110,41 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`matcher`');
       expect(doc).toContain('`groupingMode`');
       expect(doc).toContain('`throttle`');
+    });
+  });
+
+  describe('generateActionPolicyWorkflowPayloadDoc', () => {
+    /**
+     * Snapshot of the generated skill markdown for the action-policy → workflow
+     * dispatch payload (`ActionPolicyWorkflowPayload` / `AlertEpisode`).
+     *
+     * This snapshot exists so reviewers can verify the LLM-facing docs look
+     * correct — field names, types, required/optional flags, descriptions, and
+     * Liquid access guidance. When the upstream schema changes
+     * (`alertingV2NotificationGroup` / dispatcher types), regenerate with
+     * `-u` and review the diff for accuracy before landing.
+     */
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateActionPolicyWorkflowPayloadDoc()).toMatchSnapshot();
+    });
+
+    it('documents every ActionPolicyWorkflowPayload top-level field', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      for (const field of Object.keys(payloadKeyGuard)) {
+        expect(doc).toContain(`\`${field}\``);
+      }
+    });
+
+    it('documents every AlertEpisode field', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      for (const field of Object.keys(episodeKeyGuard)) {
+        expect(doc).toContain(`\`${field}\``);
+      }
+    });
+
+    it('documents the inputs.payload Liquid access pattern', () => {
+      const doc = generateActionPolicyWorkflowPayloadDoc();
+      expect(doc).toContain('inputs.payload');
     });
   });
 });
