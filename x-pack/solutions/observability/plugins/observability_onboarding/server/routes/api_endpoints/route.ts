@@ -46,9 +46,7 @@ const VENDOR_ENDPOINT_IDS: readonly ApiEndpointId[] = [
   ApiEndpointId.Vercel,
 ];
 
-// Vendor paths only exist on the managed OTLP collector, so a key for them is
-// useless anywhere else. The UI never offers creation in that state, this
-// guard makes the API honest anyway.
+// Vendor paths exist only on the managed OTLP collector. Reject key creation when it is unavailable.
 export function ensureVendorEndpointAvailable(
   id: ApiEndpointId,
   isManagedOtlpServiceAvailable: boolean

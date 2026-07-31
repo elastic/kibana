@@ -7,15 +7,24 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { EuiThemeProvider } from '@elastic/eui';
+import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ApiEndpointId } from '../../../common/api_endpoints';
 import { VendorEndpointCard } from './vendor_endpoint_card';
 
 jest.mock('../shared/logo_icon', () => ({
-  LogoIcon: ({ logo, color }: { logo?: string; color?: string }) => (
-    <div data-test-subj={`logoIconStub-${logo}`} data-color={color} />
-  ),
+  LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
 }));
+
+const vercelVendor = {
+  id: ApiEndpointId.Vercel,
+  cardTitle: 'Vercel',
+  fieldLabel: 'Vercel endpoint',
+  logo: 'vercel_black' as const,
+  darkLogo: 'vercel_white' as const,
+  url: 'https://otlp.example.com:443/vercel',
+};
 
 const vendor = {
   id: ApiEndpointId.Supabase,
@@ -34,10 +43,15 @@ const defaultProps = {
   onCreateApiKey: jest.fn(),
 };
 
-const renderCard = (props: Partial<React.ComponentProps<typeof VendorEndpointCard>> = {}) =>
+const renderCard = (
+  props: Partial<React.ComponentProps<typeof VendorEndpointCard>> = {},
+  colorMode: EuiThemeColorModeStandard = 'LIGHT'
+) =>
   render(
     <I18nProvider>
-      <VendorEndpointCard {...defaultProps} {...props} />
+      <EuiThemeProvider colorMode={colorMode}>
+        <VendorEndpointCard {...defaultProps} {...props} />
+      </EuiThemeProvider>
     </I18nProvider>
   );
 
@@ -46,10 +60,31 @@ describe('VendorEndpointCard', () => {
     renderCard();
 
     expect(screen.getByText('Supabase')).toBeInTheDocument();
-    expect(screen.getByTestId('logoIconStub-supabase')).toHaveAttribute('data-color', '#FFFFFF');
+    expect(screen.getByTestId('logoIconStub-supabase')).toBeInTheDocument();
     expect(
       screen.getByTestId('observabilityOnboardingApiEndpointValue-supabase-popover')
     ).toHaveValue('https://otlp.example.com:443/supabase/v1/logs');
+    expect(
+      screen.getByTestId('observabilityOnboardingApiEndpointValue-supabase-popover')
+    ).toHaveAttribute('aria-label', 'Supabase logs endpoint');
+  });
+
+  it('uses the light logo variant in the light theme', () => {
+    renderCard({ vendor: vercelVendor }, 'LIGHT');
+
+    expect(screen.getByTestId('logoIconStub-vercel_black')).toBeInTheDocument();
+  });
+
+  it('uses the dark logo variant in the dark theme', () => {
+    renderCard({ vendor: vercelVendor }, 'DARK');
+
+    expect(screen.getByTestId('logoIconStub-vercel_white')).toBeInTheDocument();
+  });
+
+  it('keeps the single logo when a vendor has no dark variant', () => {
+    renderCard({}, 'DARK');
+
+    expect(screen.getByTestId('logoIconStub-supabase')).toBeInTheDocument();
   });
 
   it('disables the create button when another creation is in flight', () => {
@@ -71,6 +106,12 @@ describe('VendorEndpointCard', () => {
     );
 
     expect(onCreateApiKey).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the compact placeholder for an existing key', () => {
+    renderCard({ wasKeyCreatedBefore: true });
+
+    expect(screen.getByPlaceholderText('Cannot display existing keys')).toBeInTheDocument();
   });
 
   it('shows a created key with a vendor-specific aria label', () => {

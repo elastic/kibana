@@ -50,7 +50,8 @@ const SUPPORTED_LOGOS = [
   'salesforce',
   'splunk',
   'supabase',
-  'vercel',
+  'vercel_black',
+  'vercel_white',
 ] as const;
 
 export type SupportedLogo = (typeof SUPPORTED_LOGOS)[number];

@@ -28,7 +28,7 @@ const vendors = [
     id: ApiEndpointId.Vercel,
     cardTitle: 'Vercel',
     fieldLabel: 'Vercel endpoint',
-    logo: 'vercel' as const,
+    logo: 'vercel_black' as const,
     url: 'https://otlp.example.com:443/vercel',
   },
 ];

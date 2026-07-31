@@ -124,7 +124,7 @@ export const ApiEndpoints = () => {
             alignItems={isMobile ? undefined : 'center'}
           >
             <EuiFlexItem>
-              <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false} wrap>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
                 <EuiFlexItem grow={false}>
                   <EuiTabs bottomBorder={false}>
                     {endpoints.map((endpoint) => (

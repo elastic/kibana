@@ -58,7 +58,7 @@ export const MoreEndpointsPopover = ({
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem
         grow={false}
         aria-hidden="true"
@@ -110,7 +110,7 @@ export const MoreEndpointsPopover = ({
               width: min(420px, 80vw);
             `}
           >
-            <EuiPopoverTitle id={titleId}>
+            <EuiPopoverTitle id={titleId} paddingSize="s">
               {i18n.translate('xpack.observability_onboarding.apiEndpoints.otherEndpointsTitle', {
                 defaultMessage: 'Other endpoints',
               })}

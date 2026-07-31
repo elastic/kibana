@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { LogoIcon } from '../shared/logo_icon';
@@ -33,44 +40,52 @@ export const VendorEndpointCard = ({
   isLoading,
   isDisabled = false,
   onCreateApiKey,
-}: Props) => (
-  <EuiPanel
-    hasShadow={false}
-    hasBorder
-    paddingSize="m"
-    data-test-subj={`observabilityOnboardingVendorEndpointCard-${vendor.id}`}
-  >
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        {/* Asset logos render as URL images, an explicit white background keeps
-            the black Vercel mark visible on the dark theme. */}
-        <LogoIcon logo={vendor.logo} isAvatar size="m" hasBorder color="#FFFFFF" />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>{vendor.cardTitle}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="s" />
-    <EndpointField
-      url={vendor.url}
-      isLoading={isLoading}
-      dataTestSubjSuffix={`-${vendor.id}-popover`}
-    />
-    <EuiSpacer size="s" />
-    <ApiKeyField
-      encodedApiKey={encodedApiKey}
-      isCreating={isCreating}
-      canCreate={canCreate}
-      wasKeyCreatedBefore={wasKeyCreatedBefore}
-      onCreate={onCreateApiKey}
-      dataTestSubjSuffix={`-${vendor.id}-popover`}
-      ariaLabel={i18n.translate(
-        'xpack.observability_onboarding.apiEndpoints.vendorApiKeyAriaLabel',
-        { defaultMessage: '{vendor} API key', values: { vendor: vendor.cardTitle } }
-      )}
-      isDisabled={isDisabled}
-    />
-  </EuiPanel>
-);
+}: Props) => {
+  const { colorMode } = useEuiTheme();
+  const logo = colorMode === 'DARK' ? vendor.darkLogo ?? vendor.logo : vendor.logo;
+
+  return (
+    <EuiPanel
+      hasShadow={false}
+      hasBorder
+      paddingSize="m"
+      data-test-subj={`observabilityOnboardingVendorEndpointCard-${vendor.id}`}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <LogoIcon logo={logo} size="m" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="xs">
+            <h4>{vendor.cardTitle}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EndpointField
+        url={vendor.url}
+        isLoading={isLoading}
+        label={vendor.fieldLabel}
+        dataTestSubjSuffix={`-${vendor.id}-popover`}
+      />
+      <EuiSpacer size="s" />
+      <ApiKeyField
+        encodedApiKey={encodedApiKey}
+        isCreating={isCreating}
+        canCreate={canCreate}
+        wasKeyCreatedBefore={wasKeyCreatedBefore}
+        onCreate={onCreateApiKey}
+        dataTestSubjSuffix={`-${vendor.id}-popover`}
+        ariaLabel={i18n.translate(
+          'xpack.observability_onboarding.apiEndpoints.vendorApiKeyAriaLabel',
+          { defaultMessage: '{vendor} API key', values: { vendor: vendor.cardTitle } }
+        )}
+        isDisabled={isDisabled}
+        createdBeforePlaceholder={i18n.translate(
+          'xpack.observability_onboarding.apiEndpoints.vendorApiKeyCreatedBeforePlaceholder',
+          { defaultMessage: 'Cannot display existing keys' }
+        )}
+      />
+    </EuiPanel>
+  );
+};

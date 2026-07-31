@@ -27,6 +27,7 @@ interface Props {
   dataTestSubjSuffix?: string;
   ariaLabel?: string;
   isDisabled?: boolean;
+  createdBeforePlaceholder?: string;
 }
 
 export const ApiKeyField = ({
@@ -38,6 +39,7 @@ export const ApiKeyField = ({
   dataTestSubjSuffix = '',
   ariaLabel,
   isDisabled = false,
+  createdBeforePlaceholder,
 }: Props) => {
   const hasApiKey = Boolean(encodedApiKey);
 
@@ -65,7 +67,8 @@ export const ApiKeyField = ({
             value={encodedApiKey ?? ''}
             placeholder={
               wasKeyCreatedBefore
-                ? i18n.translate(
+                ? createdBeforePlaceholder ??
+                  i18n.translate(
                     'xpack.observability_onboarding.apiEndpoints.apiKeyCreatedBeforePlaceholder',
                     { defaultMessage: 'Existing key cannot be displayed. Create a new one' }
                   )

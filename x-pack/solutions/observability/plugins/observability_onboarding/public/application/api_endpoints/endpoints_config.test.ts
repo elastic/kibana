@@ -304,7 +304,8 @@ describe('vendor endpoints', () => {
           id: ApiEndpointId.Vercel,
           cardTitle: 'Vercel',
           fieldLabel: 'Vercel endpoint',
-          logo: 'vercel',
+          logo: 'vercel_black',
+          darkLogo: 'vercel_white',
           url: 'https://otlp.example.com:443/vercel',
         },
       ]);

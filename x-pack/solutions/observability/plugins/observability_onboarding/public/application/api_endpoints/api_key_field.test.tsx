@@ -31,6 +31,18 @@ describe('ApiKeyField', () => {
     ).toBeInTheDocument();
   });
 
+  it('supports a compact created-before placeholder', () => {
+    render(
+      <ApiKeyField
+        {...defaultProps}
+        wasKeyCreatedBefore={true}
+        createdBeforePlaceholder="Cannot display existing keys"
+      />
+    );
+
+    expect(screen.getByPlaceholderText('Cannot display existing keys')).toBeInTheDocument();
+  });
+
   it('shows the key value when a key is present in memory', () => {
     render(
       <ApiKeyField {...defaultProps} wasKeyCreatedBefore={true} encodedApiKey="encoded-key" />

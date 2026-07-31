@@ -116,6 +116,10 @@ export interface VendorEndpointDefinition {
   cardTitle: string;
   fieldLabel: string;
   logo: SupportedLogo;
+  /**
+   * Fixed-fill brand SVGs may need a contrasting asset for dark mode.
+   */
+  darkLogo?: SupportedLogo;
   placements: readonly VendorPlacement[];
   getUrl: (context: ApiEndpointContext) => string | undefined;
 }
@@ -125,6 +129,7 @@ export interface ResolvedVendorEndpoint {
   cardTitle: string;
   fieldLabel: string;
   logo: SupportedLogo;
+  darkLogo?: SupportedLogo;
   url: string;
 }
 
@@ -161,7 +166,8 @@ export const VENDOR_ENDPOINTS: readonly VendorEndpointDefinition[] = [
     fieldLabel: i18n.translate('xpack.observability_onboarding.apiEndpoints.vercelEndpoint.label', {
       defaultMessage: 'Vercel endpoint',
     }),
-    logo: 'vercel',
+    logo: 'vercel_black',
+    darkLogo: 'vercel_white',
     placements: ['morePopover'],
     getUrl: (context) => getManagedVendorUrl(context, '/vercel'),
   },
@@ -180,8 +186,8 @@ const resolveVendorEndpoints = (
     if (!url) {
       return [];
     }
-    const { id, cardTitle, fieldLabel, logo } = definition;
-    return [{ id, cardTitle, fieldLabel, logo, url }];
+    const { id, cardTitle, fieldLabel, logo, darkLogo } = definition;
+    return [{ id, cardTitle, fieldLabel, logo, darkLogo, url }];
   });
 
 export const getVendorEndpointsForTab = (
