@@ -33,6 +33,14 @@ jest.mock('../hooks/use_fetch_stream_features', () => ({
   }),
 }));
 
+jest.mock('./change_point_lens_chart', () => ({
+  ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
+    <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>
+      [Logs] Spike
+    </div>
+  ),
+}));
+
 jest.mock('../../../utils/kibana_react', () => ({
   useKibana: () => ({
     services: {
@@ -170,6 +178,8 @@ describe('DetectionFlyout', () => {
     const chip = screen.getByTestId('nightshiftDetectionFlyoutEntityChip');
     expect(chip).toHaveTextContent('logs.web-frontend');
     expect(chip.tagName).toBe('BUTTON');
+    expect(chip).toHaveAttribute('data-ebt-action', 'viewEntity');
+    expect(chip).toHaveAttribute('data-ebt-element', 'nightshiftDetectionFlyoutEntities');
   });
 
   it('opens the entity flyout when an associated entity chip is clicked', () => {
@@ -203,11 +213,15 @@ describe('DetectionFlyout', () => {
     expect(screen.queryByText('Impacted entities')).not.toBeInTheDocument();
   });
 
-  it('renders the trend section', () => {
+  it('renders the Lens occurrence chart in the trend section', () => {
     renderFlyout();
 
     expect(screen.getByText('Trend')).toBeInTheDocument();
     expect(screen.getByText('[Logs] Spike')).toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftDetectionLensChart')).toHaveAttribute(
+      'data-rule-uuid',
+      mockDetection.rule_uuid
+    );
   });
 
   it('renders the ES|QL query with an Open in Discover button', () => {
@@ -217,10 +231,9 @@ describe('DetectionFlyout', () => {
     expect(screen.getByTestId('nightshiftDetectionFlyoutEsql')).toHaveTextContent(
       'FROM logs.web-frontend'
     );
-    expect(screen.getByTestId('nightshiftDetectionFlyoutDiscoverLink')).toHaveAttribute(
-      'href',
-      '/app/discover#redirect'
-    );
+    const discoverLink = screen.getByTestId('nightshiftDetectionFlyoutDiscoverLink');
+    expect(discoverLink).toHaveAttribute('href', '/app/discover#redirect');
+    expect(discoverLink).toHaveAttribute('data-ebt-action', 'openInDiscover');
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: { esql: mockSignal.evidence?.esql_query },
       timeRange: {
@@ -244,7 +257,10 @@ describe('DetectionFlyout', () => {
   it('opens a new chat with the detection attached when Open in chat is clicked', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByTestId('nightshiftDetectionFlyoutChatButton'));
+    const chatButton = screen.getByTestId('nightshiftDetectionFlyoutChatButton');
+    expect(chatButton).toHaveAttribute('data-ebt-action', 'openInChat');
+    expect(chatButton).toHaveAttribute('data-ebt-detail', 'newConversation');
+    fireEvent.click(chatButton);
 
     expect(mockOpenChat).toHaveBeenCalledWith({
       newConversation: true,
