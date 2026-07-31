@@ -79,7 +79,6 @@ import type { EntityURLStateResult } from './hooks/use_entity_url_state';
 import {
   ENTITY_FIELDS,
   ENTITY_GROUPING_OPTIONS,
-  DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ENTITIES_TO_LOAD,
   TEST_SUBJ_DATA_GRID,
   TEST_SUBJ_GROUPING,
@@ -253,7 +252,6 @@ export const EntitiesDataTable = ({
     query,
     sort,
     enabled: !queryError,
-    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
   });
 
   const rows = getRowsFromPages(rowsData?.pages);

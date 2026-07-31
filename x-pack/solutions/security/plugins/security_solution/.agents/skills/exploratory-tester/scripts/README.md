@@ -17,11 +17,55 @@ never drives findings). See `action-scoped-collector.md` for the design and
 `action-scoped-collector-spike.md` for the one-time manual capability check
 required before enabling it in any real session.
 
+`knowledge-hash.py` computes a knowledge markdown file's SHA-256 and its
+ordered list of top-level (`##`) section headings, and supports a
+`--verify <sha256>` mode that exits non-zero on a mismatch or missing file
+for a simple bash conditional. It backs the hash-gated knowledge-file
+approval described in `../phases/0-setup.md` Step 0g: an approval is
+recorded against exact file content, not just a path, so an edit to the
+file after approval (most commonly `../phases/3-report.md` Step 3d's own
+end-of-session write) is always detected and re-confirmed rather than
+silently reused. Both `../templates/subagent-prompt.md` and
+`../phases/2-flow-core.md` call it with `--verify` immediately before a
+worker reads the file.
+
+`parse-findings.py` and `render-report.py` move `../phases/3-report.md` Step
+3a's report bookkeeping out of manual, per-session instructions and into
+deterministic scripts, while the Markdown findings files (and the model's
+narrative judgment writing them) stay exactly as they were.
+
+- `parse-findings.py` reads every `findings-flow-<N>.md` in a session
+  directory and writes `findings.jsonl`: one `flow_header` record per file
+  (from its `<!-- flow: ... -->` comment) and one `finding` record per
+  `## Finding: ...` / `## Observation: ...` block. Each finding record
+  carries a `signature` — a hash of level + checklist step + normalized
+  title + normalized evidence facts — that `render-report.py` uses to group
+  the same underlying bug across flows, replacing the old, fragile
+  `type` + first-100-characters-of-`current_behavior` key. Exits non-zero if
+  a block is missing `Level` or `Current behavior`; a finding is never
+  silently dropped.
+- `render-report.py` reads that JSONL sidecar plus `config.json` and writes
+  the full `report.md` skeleton (`../templates/report-format.md`): header
+  metadata, the Timing & Cost table, Summary counts, and Level 1/2/3
+  findings in full finding format. A finding grouped from 2+ flows keeps the
+  **union** of every occurrence's Evidence bullets (never just the first
+  occurrence's) plus a trailing `Also seen in flows: ...` line naming every
+  flow, not just "2+". Judgment calls the script cannot make from data alone
+  — why a flow is `blocked`/`not started`/genuinely `timed out` rather than
+  `completed`, which checklist steps were skipped, and which findings Step
+  3b decided to suppress — are supplied via an `--overrides` JSON file
+  rather than guessed; suppressing a Level 1 finding is a hard error. See
+  either script's own module docstring for the full `--overrides` schema and
+  CLI reference, and `scripts/test_report_bookkeeping.py` for worked
+  examples (including golden `report.md` fixtures under
+  `__tests__/fixtures/report-session-basic*`).
+
 ## Running the Python tests
 
 ```bash
 cd x-pack/solutions/security/plugins/security_solution/.agents/skills/exploratory-tester/scripts
 python3 test_session_resources.py
+python3 test_report_bookkeeping.py
 ```
 
 Requires only the standard library. Add `-k <pattern>` via `unittest` to narrow
