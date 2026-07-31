@@ -916,6 +916,11 @@ export class LensApp {
         );
         return el instanceof HTMLInputElement && el.value === expected;
       }, `${options.decimals}`);
+      // Let the decimals debounce commit before the caller closes the editor, which would
+      // unmount the format editor and cancel the pending (uncommitted) callback — otherwise
+      // decimals can revert to the previously-committed value (mirrors the suffix flush above).
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await this.page.waitForTimeout(300);
     }
   }
 
@@ -1010,9 +1015,29 @@ export class LensApp {
     return readColorStops();
   }
 
-  /** Switches the open dimension editor to the Formula tab and waits for the editor. */
+  /**
+   * Switches the open dimension editor to the Formula tab and waits for the editor.
+   *
+   * After tall metric grids (e.g. date-histogram breakdown with max-cols=1) the
+   * dimension flyout can still be layout-thrashing when this runs. A plain click
+   * then flakes on "element is not stable" or returns without flipping
+   * `aria-pressed`. Force the click (bypassing stability) and poll until the tab
+   * reports pressed; `noWaitAfter` avoids stalling on a phantom navigation.
+   */
   async switchToFormula() {
-    await this.formulaTab.click();
+    await this.formulaTab.waitFor({ state: 'visible' });
+    await expect
+      .poll(
+        async () => {
+          if ((await this.formulaTab.getAttribute('aria-pressed')) === 'true') {
+            return true;
+          }
+          await this.formulaTab.click({ force: true, noWaitAfter: true });
+          return (await this.formulaTab.getAttribute('aria-pressed')) === 'true';
+        },
+        { timeout: 15_000 }
+      )
+      .toBe(true);
     await this.formulaFullscreenButton.waitFor({ state: 'visible' });
   }
 

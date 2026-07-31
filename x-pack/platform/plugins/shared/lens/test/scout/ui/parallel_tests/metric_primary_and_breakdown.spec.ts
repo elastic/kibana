@@ -257,6 +257,12 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
       });
 
       await spaceTest.step("doesn't error with an empty formula", async () => {
+        // The previous step leaves a max-cols=1 date-histogram grid that keeps the
+        // workspace layout thrashing; collapse it before opening the formula editor
+        // so the Formula tab click isn't racing ongoing reflows.
+        await lens.removeAllDimensions(BREAKDOWN_PANEL);
+        await lens.waitForVisualization('mtrVis');
+
         await lens.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
         await lens.switchToFormula();
         await lens.typeFormula('');
