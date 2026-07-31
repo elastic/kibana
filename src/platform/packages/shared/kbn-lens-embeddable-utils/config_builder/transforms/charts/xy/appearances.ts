@@ -15,7 +15,6 @@ import type { XYApiLineInterpolation } from '../../../schema/charts/xy';
 import { getReversibleMappings, stripUndefined } from '../utils';
 import {
   DEFAULT_AREAS_FILL,
-  DEFAULT_AREAS_FILL_OPACITY,
   DEFAULT_BARS_MINIMUM_HEIGHT,
   DEFAULT_CURRENT_TIME_MARKER_VISIBLE,
   DEFAULT_DATA_LABELS_VISIBLE,
@@ -125,7 +124,8 @@ export function convertStylingToAPIFormat(
     areas: layerPresence.hasAreas
       ? {
           fill: config.areaFill ?? DEFAULT_AREAS_FILL,
-          fill_opacity: config.fillOpacity ?? DEFAULT_AREAS_FILL_OPACITY,
+          fill_opacity:
+            config.fillOpacity ?? getDefaultAreaFillOpacity(config.areaFill ?? DEFAULT_AREAS_FILL),
         }
       : undefined,
     bars: layerPresence.hasBars
