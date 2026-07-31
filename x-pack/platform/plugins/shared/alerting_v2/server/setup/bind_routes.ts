@@ -66,6 +66,13 @@ import { MatchActionPoliciesForRuleRoute } from '../routes/action_policies/match
 
 import { ResetResourcesRoute } from '../routes/reset_resources_route';
 
+/**
+ * TEMPORARY perf-test endpoints — remove before merging along with their route
+ * files under `server/routes/perf/`.
+ */
+import { GenerateDataRoute } from '../routes/perf/generate_data_route';
+import { LoadRulesRoute } from '../routes/perf/load_rules_route';
+
 export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(CreateRuleRoute);
   bind(Route).toConstantValue(UpdateRuleRoute);
@@ -118,6 +125,9 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(SuggestUserProfilesRoute);
   // TODO(rna-program#426): remove this binding before GA.
   bind(Route).toConstantValue(ResetResourcesRoute);
+  // TEMPORARY perf-test endpoints — remove before merging.
+  bind(Route).toConstantValue(GenerateDataRoute);
+  bind(Route).toConstantValue(LoadRulesRoute);
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
   bind(Route).toConstantValue(MatchActionPoliciesForRuleRoute);

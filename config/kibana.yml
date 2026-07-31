@@ -195,3 +195,11 @@
 # Maximum number of documents loaded by each shard to generate autocomplete suggestions.
 # This value must be a whole number greater than zero. Defaults to 100_000
 #unifiedSearch.autocomplete.valueSuggestions.terminateAfter: 100000
+# --- Alerting V2 ES|QL streaming perf test overrides (TEMPORARY - do not merge) ---
+# Raise the cross-space rule scheduling cap so >6k rules can be enabled (default 400).
+xpack.alerting_v2.rules.maxScheduledPerMinute: 32000
+# ECH task manager capacity for the saturation test.
+xpack.task_manager.capacity: 50
+# Force the alerting v2 API/UI kill switch on so /api/alerting/v2/* does not 503.
+uiSettings.globalOverrides:
+  'alerting:v2:enabled': true
