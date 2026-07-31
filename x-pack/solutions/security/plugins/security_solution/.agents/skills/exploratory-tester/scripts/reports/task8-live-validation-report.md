@@ -372,11 +372,25 @@ an ordering inconsistency in the `gh issue list` gate added in that same pass. B
   pass) broke that pattern by appearing after the commands — worse, the test added alongside it
   explicitly asserted that ordering as correct. Moved the warning before the commands and inverted
   the test assertion to require the correct order.
-- **Not fixed — reiterated as pre-existing (P3):** the CCS restore/lock Python tests remain
-  timing-sensitive under load; this review's own run hit two failures and a timeout on an
-  unrelated file, consistent with every prior pass. Still out of scope for this PR; still worth its
-  own PR to make those tests load-independent.
+- **Fixed (P3) — two of the three flaky CCS restore tests had an unnecessarily tight budget:**
+  `test_restore_repairs_captured_snapshot_drift_without_modified_state` and
+  `test_restore_timeout_excludes_deployment_lock_wait` both drove `restore-remote-cluster.py` with
+  `--timeout-seconds 1`, but each needs several real subprocess/curl invocations (verify, PUT,
+  re-verify) to finish inside that single second — `_run_curl` raises immediately once the shared
+  deadline is exhausted, so process-spawn overhead alone was enough to flake under load. Neither
+  test exercises the timeout path itself, so raising the budget to `5` (matching the majority of
+  other tests in this file) doesn't weaken what they verify. Bumped the outer
+  `communicate(timeout=8)` in the lock-wait test to `12` to keep margin. Left
+  `test_restore_times_out_when_curl_hangs` untouched — its `--timeout-seconds 1` is load-bearing:
+  it deliberately makes curl hang 10s and asserts the process reports a timeout in well under 6s,
+  so it's deterministic, not flaky, and a larger budget would only slow it down without fixing
+  anything.
+  Verified with 3 isolated runs of each affected test and two full-suite runs (131/131 both times).
+- **Not fixed — still deferred as pre-existing (P3, narrower now):** whether every timing-sensitive
+  assumption elsewhere in the suite is fully load-independent hasn't been audited beyond the three
+  tests named across all three review rounds. If a future run turns up a different flaky test, it's
+  still worth its own pass rather than scope-creeping into this PR.
 
 Verified after this pass: `action-scoped-collector.test.mjs` 95/95 (90 + 2 query-variant + 1
 abandoned-message regression tests), `action-scoped-collector-bridge.test.mjs` 52/52,
-`equivalence.test.mjs` 77/77, `test_session_resources.py` 131/131.
+`equivalence.test.mjs` 77/77, `test_session_resources.py` 131/131 (two full runs, both clean).

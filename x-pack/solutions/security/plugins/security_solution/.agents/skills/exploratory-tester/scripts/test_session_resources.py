@@ -1850,8 +1850,17 @@ print("200")
                         str(RESTORE_CCS_SCRIPT),
                         "--session-dir",
                         str(session_dir),
+                        # 5s, not 1s — same reasoning as the timeout-seconds
+                        # comment in test_restore_repairs_captured_snapshot_
+                        # drift_without_modified_state: several real
+                        # subprocess/curl calls must complete inside this
+                        # budget, and 1s was flaky under load. This test's
+                        # own point (lock-wait time isn't charged against
+                        # --timeout-seconds) is unaffected by the budget's
+                        # size, only by the 2s sleep below happening while
+                        # the lock is held.
                         "--timeout-seconds",
-                        "1",
+                        "5",
                         "--poll-interval-seconds",
                         "0",
                     ],
@@ -1862,7 +1871,7 @@ print("200")
                 )
                 time.sleep(2)
 
-            stdout, stderr = restore_process.communicate(timeout=8)
+            stdout, stderr = restore_process.communicate(timeout=12)
             self.assertEqual(
                 restore_process.returncode,
                 0,
@@ -2701,8 +2710,19 @@ print("200")
                     str(RESTORE_CCS_SCRIPT),
                     "--session-dir",
                     str(session_dir),
+                    # 5s, not 1s: this run needs several real subprocess/curl
+                    # invocations (verify, PUT, re-verify) to complete inside
+                    # the deadline, and a 1s budget was flaky under load — see
+                    # restore-remote-cluster.py's `_run_curl`, which raises
+                    # immediately once the shared deadline is exhausted,
+                    # regardless of how much of that was spent on process
+                    # spawn overhead rather than the fake curl itself. This
+                    # test isn't exercising the timeout path (unlike
+                    # test_restore_times_out_when_curl_hangs below, which
+                    # deliberately keeps the budget tight), so a larger
+                    # budget doesn't weaken what it verifies.
                     "--timeout-seconds",
-                    "1",
+                    "5",
                     "--poll-interval-seconds",
                     "0",
                 ],
