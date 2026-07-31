@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { spaceTest, tags } from '@kbn/scout';
+import { spaceTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { testData } from '../fixtures';
 
 spaceTest.describe(
   'Lens metric trendline on dashboard (ES|QL)',
-  { tag: tags.stateful.classic },
+  { tag: '@local-stateful-classic' },
   () => {
     spaceTest.beforeAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.set({

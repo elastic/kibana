@@ -37,6 +37,7 @@ apiTest.describe(
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
@@ -44,6 +45,7 @@ apiTest.describe(
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: accepts perPage at the maximum', async ({ apiClient }) => {
@@ -61,6 +63,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects non-numeric perPage', async ({ apiClient }) => {
@@ -69,6 +72,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest('validation: rejects non-numeric page', async ({ apiClient }) => {
@@ -77,6 +81,7 @@ apiTest.describe(
         { headers: readerHeaders }
       );
       expect(response).toHaveStatusCode(400);
+      expect(response.body.code).toBe('BAD_REQUEST');
     });
 
     apiTest(
