@@ -89,15 +89,36 @@ const isLiquidjsValue = (value: unknown): boolean =>
   isVariableValue(value) || isDynamicValue(value) || isLiquidTagValue(value);
 
 /**
- * Instance paths whose *own* value is a LiquidJS expression. Scalar-only: a
- * structural error anchored on a parent object (e.g. a templated step `type`,
- * reported at `/steps/N`) resolves to an object, not a template, so it is not
- * collected and stays a failing error.
+ * Managed-workflow install-time token, e.g. `__DETECTION_INTERVAL_MINUTES__`.
+ * These are exact-token-replaced (upper-snake, double-underscore-delimited) when
+ * a managed workflow is installed, so at authoring time they appear both as a
+ * whole value (`__X__`, in a number position) and embedded in a string
+ * (`__X__m`). Distinct from the lowercase `__install__.<name>` library
+ * placeholder. Only tolerated under `--variant managed`.
  */
-const collectLiquidPaths = (errors: ErrorObject[], target: unknown): Set<string> => {
+const MANAGED_PLACEHOLDER_REGEX = /__[A-Z0-9_]+__/;
+const isManagedPlaceholderValue = (value: unknown): boolean =>
+  typeof value === 'string' && MANAGED_PLACEHOLDER_REGEX.test(value);
+
+/**
+ * Instance paths whose *own* value should have strict validation skipped: a
+ * LiquidJS expression, or (only when `tolerateManagedPlaceholders`) a managed
+ * install-time `__SOMETHING__` token. Scalar-only: a structural error anchored
+ * on a parent object (e.g. a templated step `type`, reported at `/steps/N`)
+ * resolves to an object, not a template, so it is not collected and stays a
+ * failing error.
+ */
+const collectToleratedPaths = (
+  errors: ErrorObject[],
+  target: unknown,
+  tolerateManagedPlaceholders: boolean
+): Set<string> => {
   const paths = new Set<string>();
   for (const error of errors) {
-    if (isLiquidjsValue(resolveInstanceValue(target, error.instancePath))) {
+    const value = resolveInstanceValue(target, error.instancePath);
+    const tolerated =
+      isLiquidjsValue(value) || (tolerateManagedPlaceholders && isManagedPlaceholderValue(value));
+    if (tolerated) {
       paths.add(error.instancePath);
     }
   }
@@ -224,6 +245,39 @@ const pruneAncestorNoise = (
   return errors.filter((error) => !(isNoise(error) && isStrictAncestorOfAny(error.instancePath)));
 };
 
+/**
+ * Drop the branch-selection artifacts a `oneOf`/`anyOf` union emits at its own
+ * node when the selected branch fails *only* because of a tolerated (LiquidJS or
+ * managed-placeholder) descendant. Example: the scheduled trigger's
+ * `with: [{ every }, { rrule }]` union — a placeholder `every` fails branch 0 at
+ * the tolerated scalar `.../with/every`, so ajv also reports the sibling `rrule`
+ * branch's `required` / `additionalProperties` errors anchored on the `.../with`
+ * object. Those are not on the tolerated scalar and use "specific" keywords, so
+ * they would otherwise survive as spurious failures. Any genuine content error
+ * lives at a deeper path (e.g. `.../with/rrule/interval`) and is never at the
+ * union node itself, so removing errors anchored exactly on the union node is
+ * safe.
+ */
+const pruneToleratedUnionArtifacts = (
+  errors: ErrorObject[],
+  toleratedPaths: ReadonlySet<string>
+): ErrorObject[] => {
+  if (toleratedPaths.size === 0) {
+    return errors;
+  }
+  const tolerated = [...toleratedPaths];
+  const unionNodes = new Set(
+    errors
+      .filter(isBranchWrapper)
+      .map((error) => error.instancePath)
+      .filter((unionPath) => tolerated.some((path) => path.startsWith(`${unionPath}/`)))
+  );
+  if (unionNodes.size === 0) {
+    return errors;
+  }
+  return errors.filter((error) => !unionNodes.has(error.instancePath));
+};
+
 /** Dedupe issues by path+message and cap the count for readability. */
 const dedupeAndCap = (issues: ValidationIssue[]): ValidationIssue[] => {
   const seen = new Set<string>();
@@ -248,30 +302,54 @@ const dedupeAndCap = (issues: ValidationIssue[]): ValidationIssue[] => {
   return capped;
 };
 
-/** One non-failing warning per LiquidJS-valued path (collapses the oneOf/anyOf noise there). */
-const toLiquidjsWarnings = (liquidPaths: ReadonlySet<string>): ValidationIssue[] =>
-  [...liquidPaths].map((path) => ({
-    source: 'liquidjs-expression' as const,
-    severity: 'warning' as const,
-    message: 'strict validation skipped (liquidjs expression)',
-    path: formatInstancePath(path),
-  }));
+/**
+ * One non-failing warning per tolerated path (collapses the oneOf/anyOf noise
+ * there). A LiquidJS-valued path is reported as a `liquidjs-expression`; a
+ * managed install-time token as a `managed-placeholder`.
+ */
+const toToleratedWarnings = (
+  toleratedPaths: ReadonlySet<string>,
+  target: unknown
+): ValidationIssue[] =>
+  [...toleratedPaths].map((path) =>
+    isLiquidjsValue(resolveInstanceValue(target, path))
+      ? {
+          source: 'liquidjs-expression' as const,
+          severity: 'warning' as const,
+          message: 'strict validation skipped (liquidjs expression)',
+          path: formatInstancePath(path),
+        }
+      : {
+          source: 'managed-placeholder' as const,
+          severity: 'warning' as const,
+          message: 'strict validation skipped (managed placeholder)',
+          path: formatInstancePath(path),
+        }
+  );
 
 /**
  * Turn ajv's raw errors into readable, de-noised issues. Errors whose value is a
- * LiquidJS expression are reclassified as a single non-failing warning per path
- * (mirroring the runtime's suppression); the rest are pruned of tolerant
- * `anyOf`/`oneOf` template-value noise (same-location and ancestor), then mapped,
- * deduped and capped as failing errors.
+ * LiquidJS expression (or, under `--variant managed`, a managed `__SOMETHING__`
+ * token) are reclassified as a single non-failing warning per path (mirroring the
+ * runtime's suppression); the rest are pruned of tolerant `anyOf`/`oneOf`
+ * template-value noise (same-location and ancestor), then mapped, deduped and
+ * capped as failing errors.
  */
-const toSchemaIssues = (errors: ErrorObject[], target: unknown): ValidationIssue[] => {
-  const liquidPaths = collectLiquidPaths(errors, target);
+const toSchemaIssues = (
+  errors: ErrorObject[],
+  target: unknown,
+  tolerateManagedPlaceholders: boolean
+): ValidationIssue[] => {
+  const toleratedPaths = collectToleratedPaths(errors, target, tolerateManagedPlaceholders);
 
-  const realErrors = errors.filter((error) => !liquidPaths.has(error.instancePath));
-  const denoised = pruneAncestorNoise(pruneBranchNoise(realErrors), liquidPaths);
+  const realErrors = pruneToleratedUnionArtifacts(
+    errors.filter((error) => !toleratedPaths.has(error.instancePath)),
+    toleratedPaths
+  );
+  const denoised = pruneAncestorNoise(pruneBranchNoise(realErrors), toleratedPaths);
   const errorIssues = dedupeAndCap(denoised.map(toIssue));
 
-  return [...errorIssues, ...toLiquidjsWarnings(liquidPaths)];
+  return [...errorIssues, ...toToleratedWarnings(toleratedPaths, target)];
 };
 
 /**
@@ -321,8 +399,17 @@ export const validateFile = async ({
 
   const { json } = parsed;
   const isTemplate = isRecord(json) && METADATA_KEY in json;
+  // `managed` is not a published schema; it validates against `strict` and layers
+  // on managed-placeholder tolerance below (see `toSchemaIssues`).
+  const tolerateManagedPlaceholders = variantMode === 'managed';
   const variant: ValidationVariant =
-    variantMode === 'auto' ? (isTemplate ? 'template' : 'strict') : variantMode;
+    variantMode === 'auto'
+      ? isTemplate
+        ? 'template'
+        : 'strict'
+      : variantMode === 'managed'
+      ? 'strict'
+      : variantMode;
 
   const issues: ValidationIssue[] = [];
   let body: Record<string, unknown> | null = isRecord(json) ? json : null;
@@ -362,7 +449,7 @@ export const validateFile = async ({
       path: '<root>',
     });
   } else if (schemaErrors.length > 0) {
-    const schemaIssues = toSchemaIssues(schemaErrors, target);
+    const schemaIssues = toSchemaIssues(schemaErrors, target, tolerateManagedPlaceholders);
     // Safety net: never drop a failure to zero issues.
     issues.push(
       ...(schemaIssues.length > 0

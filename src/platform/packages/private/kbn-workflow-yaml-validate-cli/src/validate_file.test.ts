@@ -460,4 +460,176 @@ describe('validateFile', () => {
       ]);
     });
   });
+
+  describe('managed-placeholder warnings (--variant managed)', () => {
+    /** A single-step workflow whose `with.value` holds `value`. */
+    const withValue = (value: string): string =>
+      [
+        'version: "1"',
+        'steps:',
+        '  - name: detect',
+        '    type: console',
+        '    with:',
+        `      value: ${value}`,
+        '',
+      ].join('\n');
+
+    const errorAt = (instancePath: string): ErrorObject =>
+      ({
+        instancePath,
+        schemaPath: '#/properties/with/properties/value/type',
+        keyword: 'type',
+        params: { type: 'number' },
+        message: 'must be number',
+      } as ErrorObject);
+
+    const warningsOf = (result: { issues: ValidationIssue[] }) =>
+      result.issues.filter((issue) => issue.severity === 'warning');
+
+    it('downgrades a whole-value __TOKEN__ (number position) to a non-failing warning', async () => {
+      const result = await validateFile({
+        yaml: withValue('__DETECTION_INTERVAL_MINUTES__'),
+        validateSchema: failFn([errorAt('/steps/0/with/value')]),
+        variantMode: 'managed',
+      });
+      expect(result.schemaPassed).toBe(true);
+      expect(result.variant).toBe('strict');
+      expect(schemaIssuesOf(result)).toEqual([]);
+      expect(warningsOf(result)).toEqual([
+        {
+          source: 'managed-placeholder',
+          severity: 'warning',
+          message: 'strict validation skipped (managed placeholder)',
+          path: 'steps.0.with.value',
+        },
+      ]);
+    });
+
+    it('downgrades an EMBEDDED __TOKEN__ inside a longer string', async () => {
+      const result = await validateFile({
+        yaml: withValue('"__DETECTION_INTERVAL_MINUTES__m"'),
+        validateSchema: failFn([errorAt('/steps/0/with/value')]),
+        variantMode: 'managed',
+      });
+      expect(result.schemaPassed).toBe(true);
+      expect(warningsOf(result)).toHaveLength(1);
+      expect(schemaIssuesOf(result)).toEqual([]);
+    });
+
+    it('keeps __TOKEN__ as a failing error under strict (tolerance is gated to managed)', async () => {
+      const result = await validateFile({
+        yaml: withValue('__DETECTION_INTERVAL_MINUTES__'),
+        validateSchema: failFn([errorAt('/steps/0/with/value')]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(false);
+      expect(warningsOf(result)).toEqual([]);
+      expect(schemaIssuesOf(result)).toEqual([
+        { source: 'schema', path: 'steps.0.with.value', message: 'must be number' },
+      ]);
+    });
+
+    it('tolerates a placeholder inside a union `with` (scheduled trigger `every`/`rrule`)', async () => {
+      // A `z.union([{ every }, { rrule }])` `with`: the placeholder `every` fails
+      // branch 0 at the tolerated scalar, so the sibling `rrule` branch reports
+      // `required` / `additionalProperties` anchored on the `with` object itself.
+      const yaml = [
+        'version: "1"',
+        'triggers:',
+        '  - type: scheduled',
+        '    with:',
+        '      every: "__DETECTION_INTERVAL_MINUTES__m"',
+        '',
+      ].join('\n');
+      const result = await validateFile({
+        yaml,
+        validateSchema: failFn([
+          {
+            instancePath: '/triggers/0/with/every',
+            schemaPath: '#/.../every/anyOf/0/pattern',
+            keyword: 'pattern',
+            params: { pattern: '^(([6-9]\\d|\\d{3,})s|\\d+[mhd])$' },
+            message: 'must match pattern',
+          },
+          {
+            instancePath: '/triggers/0/with',
+            schemaPath: '#/.../with/anyOf',
+            keyword: 'anyOf',
+            params: {},
+            message: 'must match a schema in anyOf',
+          },
+          {
+            instancePath: '/triggers/0/with',
+            schemaPath: '#/.../with/anyOf/1/required',
+            keyword: 'required',
+            params: { missingProperty: 'rrule' },
+            message: "must have required property 'rrule'",
+          },
+          {
+            instancePath: '/triggers/0/with',
+            schemaPath: '#/.../with/anyOf/1/additionalProperties',
+            keyword: 'additionalProperties',
+            params: { additionalProperty: 'every' },
+            message: 'must NOT have additional properties',
+          },
+        ] as ErrorObject[]),
+        variantMode: 'managed',
+      });
+      expect(result.schemaPassed).toBe(true);
+      expect(schemaIssuesOf(result)).toEqual([]);
+      expect(warningsOf(result)).toEqual([
+        {
+          source: 'managed-placeholder',
+          severity: 'warning',
+          message: 'strict validation skipped (managed placeholder)',
+          path: 'triggers.0.with.every',
+        },
+      ]);
+    });
+
+    it('keeps a real error at a non-placeholder sibling while warning on the token', async () => {
+      const yaml = [
+        'version: "1"',
+        'steps:',
+        '  - name: detect',
+        '    type: console',
+        '    with:',
+        '      value: __DETECTION_INTERVAL_MINUTES__',
+        '  - name: other',
+        '    type: console',
+        '    connector-id: nope',
+        '',
+      ].join('\n');
+      const result = await validateFile({
+        yaml,
+        validateSchema: failFn([
+          errorAt('/steps/0/with/value'),
+          {
+            instancePath: '/steps/1',
+            schemaPath: '#/additionalProperties',
+            keyword: 'additionalProperties',
+            params: { additionalProperty: 'connector-id' },
+            message: 'must NOT have additional properties',
+          },
+        ] as ErrorObject[]),
+        variantMode: 'managed',
+      });
+      expect(result.schemaPassed).toBe(false);
+      expect(schemaIssuesOf(result)).toEqual([
+        {
+          source: 'schema',
+          path: 'steps.1',
+          message: "must NOT have additional property 'connector-id'",
+        },
+      ]);
+      expect(warningsOf(result)).toEqual([
+        {
+          source: 'managed-placeholder',
+          severity: 'warning',
+          message: 'strict validation skipped (managed placeholder)',
+          path: 'steps.0.with.value',
+        },
+      ]);
+    });
+  });
 });
