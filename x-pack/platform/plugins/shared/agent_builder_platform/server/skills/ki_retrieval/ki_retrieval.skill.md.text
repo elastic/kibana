@@ -36,7 +36,8 @@ FROM ai-index-*
 | SORT ki_count DESC
 ```
 
-The same works for `tags`:
+The same works for `tags`. Tag values are arbitrary, set by whichever workflow generated the
+KIs, so aggregate to discover them rather than assuming a vocabulary:
 
 ```esql
 FROM ai-index-*
