@@ -23,7 +23,7 @@ const alertEventSeveritySchema = z.enum(['info', 'low', 'medium', 'high', 'criti
  */
 const externalAlertStatusSchema = z.enum(['active', 'inactive', 'pending', 'recovering']);
 
-const RESERVED_SOURCE_PREFIX = 'elastic.';
+const RESERVED_SOURCE_PREFIX = 'elastic';
 
 const sourceSchema = z
   .string()
@@ -31,7 +31,7 @@ const sourceSchema = z
   .max(ID_MAX_LENGTH)
   .refine((v) => !v.startsWith(RESERVED_SOURCE_PREFIX), {
     message:
-      'source cannot start with "elastic." — this prefix is reserved for Elastic-produced events.',
+      'source cannot start with "elastic" — this prefix is reserved for Elastic-produced events.',
   });
 
 /**

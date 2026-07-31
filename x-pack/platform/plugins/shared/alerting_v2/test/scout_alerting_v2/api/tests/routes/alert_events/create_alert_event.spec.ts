@@ -117,4 +117,12 @@ apiTest.describe('Create alert event API', { tag: '@local-stateful-classic' }, (
     });
     expect(response).toHaveStatusCode(400);
   });
+
+  apiTest('schema: rejects a reserved bare "elastic" source with 400', async ({ apiClient }) => {
+    const response = await apiClient.post(CREATE_ALERT_EVENT_URL, {
+      headers: writerHeaders,
+      body: { source: 'elastic', fingerprint: 'fp-1' },
+    });
+    expect(response).toHaveStatusCode(400);
+  });
 });
