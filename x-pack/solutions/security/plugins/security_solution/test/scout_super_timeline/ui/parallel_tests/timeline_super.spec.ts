@@ -17,10 +17,8 @@ import { expect } from '@kbn/scout-security/ui';
  * Proof of transience: SO counts for timelines are captured before and after
  * opening the Super Timeline and asserted to be unchanged.
  *
- * REQUIREMENT: Kibana must be started with:
- *   --xpack.securitySolution.enableExperimental=superTimeline
- * (The `superTimeline` flag defaults to false and cannot be overridden at runtime
- * via apiServices.core.settings — it is a startup config, not a feature-flag-service entry.)
+ * Server config: this spec runs under the `super_timeline` config set, which boots
+ * Kibana with `--xpack.securitySolution.enableExperimental=superTimeline`.
  */
 
 spaceTest.describe(
@@ -63,7 +61,6 @@ spaceTest.describe(
         await spaceTest.step('Trigger View Super Timeline', async () => {
           await timelinePage.batchActionsButton.click();
           await timelinePage.viewSuperTimelineAction.click();
-          await timelinePage.panel.waitFor({ timeout: 10_000 });
         });
 
         await spaceTest.step('Assert read-only modal — badge present, Save hidden', async () => {

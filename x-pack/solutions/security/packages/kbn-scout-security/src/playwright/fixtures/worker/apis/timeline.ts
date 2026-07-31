@@ -172,11 +172,13 @@ export const getTimelineApiService = ({
     },
 
     getCount: async (timelineType = 'default') => {
-      const response = await kbnClient.request<{ totalCount: number }>({
-        method: 'GET',
-        path: `${basePath}${TIMELINES_URL}?page_size=1&page_index=1&sort_field=updated&sort_order=desc&timeline_type=${timelineType}`,
+      return measurePerformanceAsync(log, 'security.timeline.getCount', async () => {
+        const response = await kbnClient.request<{ totalCount: number }>({
+          method: 'GET',
+          path: `${basePath}${TIMELINES_URL}?page_size=1&page_index=1&timeline_type=${timelineType}`,
+        });
+        return response.data?.totalCount ?? 0;
       });
-      return response.data?.totalCount ?? 0;
     },
 
     deleteAll: async () => {

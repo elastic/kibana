@@ -1,5 +1,5 @@
 {
-  "sha1": "5a3f058ad2552283b6061bdd9717484562b09e09",
+  "sha1": "e6790adbc01bb4a689d8bdebee9c3d35cffb606b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -93,20 +93,6 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_read_only.spec.ts",
         "line": 25,
-        "column": 14
-      }
-    },
-    {
-      "id": "e2028bd2bf19523-38774a366c8fd55",
-      "title": "Super Timeline — Timelines list entry point opens the Super Timeline modal in read-only mode and does not create new saved objects",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/timelines/ui/parallel_tests/timeline_super.spec.ts",
-        "line": 47,
         "column": 14
       }
     }
