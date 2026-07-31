@@ -8,7 +8,11 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
-import { SavedObjectsErrorHelpers, type RequestHandlerContext } from '@kbn/core/server';
+import {
+  SavedObjectsErrorHelpers,
+  isSavedObjectErrorResult,
+  type RequestHandlerContext,
+} from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
 import type { DiscoverSessionApiResponse } from './schema';
@@ -29,6 +33,10 @@ export const getDiscoverSession = async (
   }
 
   const savedObject = result.saved_object;
+
+  if (isSavedObjectErrorResult(savedObject)) {
+    throw SavedObjectsErrorHelpers.createGenericNotFoundError(SavedSearchType, id);
+  }
 
   return {
     id: savedObject.id,
