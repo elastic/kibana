@@ -36230,7 +36230,6 @@
     "xpack.observability_onboarding.addDataPageV2.subtitle": "Verbinden Sie Ihre Systeme und erhalten Sie vollen Einblick in Logs, Metriken und Traces.",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "API-Schlüssel",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "Noch kein API-Schlüssel vorhanden",
-    "xpack.observability_onboarding.apiEndpoints.copyButton": "In die Zwischenablage kopieren",
     "xpack.observability_onboarding.apiEndpoints.createKey": "Schlüssel erstellen",
     "xpack.observability_onboarding.apiEndpoints.createKeyError": "Der API-Schlüssel konnte nicht erstellt werden",
     "xpack.observability_onboarding.apiEndpoints.createKeyErrorFallback": "Beim Erstellen des API-Schlüssels ist ein Fehler aufgetreten. Versuchen Sie es erneut oder wenden Sie sich an Ihren Administrator.",
