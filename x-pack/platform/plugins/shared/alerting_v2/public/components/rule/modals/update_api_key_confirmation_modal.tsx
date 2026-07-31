@@ -66,17 +66,38 @@ export const UpdateApiKeyConfirmationModal = ({
       data-test-subj="updateApiKeyConfirmationModal"
     >
       {isBulk ? (
-        <FormattedMessage
-          id="xpack.alertingV2.updateApiKeyConfirmationModal.bulkBody"
-          defaultMessage="The API {count, plural, one {key} other {keys}} for the selected {count, plural, one {# rule} other {# rules}} will be regenerated using your current credentials."
-          values={{ count: ruleCount }}
-        />
+        <>
+          <p>
+            <FormattedMessage
+              id="xpack.alertingV2.updateApiKeyConfirmationModal.bulkBody"
+              defaultMessage="The API {count, plural, one {key} other {keys}} for the selected {count, plural, one {# rule} other {# rules}} will be regenerated using your current credentials."
+              values={{ count: ruleCount }}
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.alertingV2.updateApiKeyConfirmationModal.bulkRunningCaveat"
+              defaultMessage="{count, plural, one {If the rule is currently running it will be skipped; retry once its run finishes.} other {Rules that are currently running will be skipped; retry those once their run finishes.}}"
+              values={{ count: ruleCount }}
+            />
+          </p>
+        </>
       ) : (
-        <FormattedMessage
-          id="xpack.alertingV2.updateApiKeyConfirmationModal.body"
-          defaultMessage='The API key for the rule "{ruleName}" will be regenerated using your current credentials.'
-          values={{ ruleName }}
-        />
+        <>
+          <p>
+            <FormattedMessage
+              id="xpack.alertingV2.updateApiKeyConfirmationModal.body"
+              defaultMessage='The API key for the rule "{ruleName}" will be regenerated using your current credentials.'
+              values={{ ruleName }}
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="xpack.alertingV2.updateApiKeyConfirmationModal.runningCaveat"
+              defaultMessage="If the rule is currently running, it will be skipped. Try again once its run finishes."
+            />
+          </p>
+        </>
       )}
     </EuiConfirmModal>
   );

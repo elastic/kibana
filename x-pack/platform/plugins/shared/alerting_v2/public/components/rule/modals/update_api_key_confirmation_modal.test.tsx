@@ -37,6 +37,12 @@ describe('UpdateApiKeyConfirmationModal', () => {
     expect(screen.getByText(/My Important Rule/)).toBeInTheDocument();
   });
 
+  it('warns that a running rule will be skipped', () => {
+    renderSingleModal();
+
+    expect(screen.getByText(/currently running, it will be skipped/)).toBeInTheDocument();
+  });
+
   it('calls onCancel when the cancel button is clicked', () => {
     const onCancel = jest.fn();
     renderSingleModal({ onCancel });
@@ -100,6 +106,12 @@ describe('UpdateApiKeyConfirmationModal', () => {
       renderBulkModal({ ruleCount: 3 });
 
       expect(screen.getByText(/The API keys for the selected 3 rules/)).toBeInTheDocument();
+    });
+
+    it('warns that currently-running rules will be skipped', () => {
+      renderBulkModal({ ruleCount: 3 });
+
+      expect(screen.getByText(/currently running will be skipped/)).toBeInTheDocument();
     });
 
     it('calls onConfirm when the confirm button is clicked', () => {
