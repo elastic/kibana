@@ -5,7 +5,17 @@
  * 2.0.
  */
 
-import { merge, of, filter, tap, catchError, throwError, EMPTY } from 'rxjs';
+import {
+  merge,
+  of,
+  filter,
+  tap,
+  catchError,
+  throwError,
+  EMPTY,
+  shareReplay,
+  ignoreElements,
+} from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -31,6 +41,7 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
+import { ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -183,15 +194,17 @@ const handleConversationExecution = async ({
     action,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE)
-  const title$ =
+  // Generate title (for CREATE) or use existing title (for UPDATE).
+  // shareReplay so persistence and the span attribute share one emission.
+  const title$ = (
     conversation.operation === 'CREATE'
       ? generateTitle({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
           nextInput,
         })
-      : of(conversation.title);
+      : of(conversation.title)
+  ).pipe(shareReplay(1));
 
   // Persist conversation (optional)
   const persistenceEvents$ = storeConversation
@@ -229,8 +242,17 @@ const handleConversationExecution = async ({
       spaceId,
       opikHeaders,
     },
-    () =>
-      merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
+    (span) => {
+      const titleAttr$ = storeConversation
+        ? title$.pipe(
+            tap((title) => {
+              span?.setAttribute(ElasticGenAIAttributes.ConversationTitle, title);
+            }),
+            ignoreElements()
+          )
+        : EMPTY;
+
+      return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
           try {
@@ -280,13 +302,14 @@ const handleConversationExecution = async ({
           conversationId: conversation.id,
           executionId: execution.executionId,
         })
-      )
+      );
+    }
   );
 };
 
 /**
  * Subscribe to the event stream and append events to the execution document with 200ms batching.
- * Returns a promise that resolves with the collected events when the observable completes and all events are flushed.
+ * Returns a promise that resolves when the observable completes and all events are flushed.
  */
 export const collectAndWriteEvents = ({
   events$,
@@ -298,9 +321,8 @@ export const collectAndWriteEvents = ({
   execution: AgentExecution;
   executionClient: AgentExecutionClient;
   logger: Logger;
-}): Promise<ChatEvent[]> => {
-  return new Promise<ChatEvent[]>((resolve, reject) => {
-    const collectedEvents: ChatEvent[] = [];
+}): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
     let pendingEvents: ChatEvent[] = [];
     let flushTimer: ReturnType<typeof setTimeout> | undefined;
     let flushInProgress: Promise<void> | undefined;
@@ -336,7 +358,6 @@ export const collectAndWriteEvents = ({
 
     events$.subscribe({
       next: (event) => {
-        collectedEvents.push(event);
         pendingEvents.push(event);
         scheduleFlush();
       },
@@ -352,7 +373,7 @@ export const collectAndWriteEvents = ({
           }
           await flush();
         };
-        finalFlush().then(() => resolve(collectedEvents), reject);
+        finalFlush().then(resolve, reject);
       },
     });
   });

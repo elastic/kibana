@@ -13,11 +13,13 @@ import { Writable } from 'stream';
 
 import del from 'del';
 import LmdbStore = require('lmdb');
+import type { RootDatabaseOptions } from 'lmdb';
 
 import { LmdbCache } from './lmdb_cache';
+import { utf8StringKeyEncoder } from './lmdb_key_encoder';
 
 const DIR = Path.resolve(__dirname, '../__tmp__/cache');
-const DB_DIR = Path.resolve(DIR, 'v1');
+const DB_DIR = Path.resolve(DIR, 'v2');
 const DAY = 1000 * 60 * 60 * 24;
 const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
 
@@ -40,11 +42,17 @@ const getExpectedMetadataKey = (path: string) => {
   return `prefix:stat:${keyParts.join(':')}:${Path.resolve(path)}`;
 };
 
-const openDb = () =>
-  LmdbStore.open<unknown, string>(DB_DIR, {
+const openDb = () => {
+  const databaseOptions: RootDatabaseOptions & {
+    keyEncoder: typeof utf8StringKeyEncoder;
+  } = {
     name: 'db',
     encoding: 'json',
-  });
+    keyEncoder: utf8StringKeyEncoder,
+  };
+
+  return LmdbStore.open<unknown, string>(DB_DIR, databaseOptions);
+};
 
 const waitForAsyncWrites = () => new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -153,6 +161,23 @@ it('stores code and source maps separately', async () => {
   const db = openDb();
   expect(db.get(getCodeKey(key))).toEqual([GLOBAL_ATIME, 'var x = 1']);
   expect(db.get(getMapKey(key))).toEqual({ foo: 'bar' });
+  await db.close();
+});
+
+it('supports UTF-8 cache keys', async () => {
+  const cache = makeCache({
+    dir: DIR,
+    prefix: 'prefix',
+  });
+  const key = 'prefix:日本語:🚀';
+
+  await cache.update(key, {
+    code: 'var utf8 = true',
+  });
+  await cache.close();
+
+  const db = openDb();
+  expect(Array.from(db.getKeys())).toContain(`code:${key}`);
   await db.close();
 });
 
