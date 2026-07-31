@@ -181,6 +181,7 @@ toc:
               - file: api-best-practices.md
               - file: api-auth.md
           - file: migrate-tests.md
+          - file: eui-test-helpers.md
       - file: ftr.md
   - file: plugin-list.md
   - file: dependencies-versions.md
