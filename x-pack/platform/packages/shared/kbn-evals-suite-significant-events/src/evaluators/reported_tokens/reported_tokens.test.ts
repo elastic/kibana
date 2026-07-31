@@ -37,6 +37,15 @@ describe('reported token evaluators', () => {
     expect(result.explanation).toContain('did not report');
   });
 
+  it('scores null when the provider reported no usage, rather than a real zero', async () => {
+    const output = { tokens_used: { prompt: 0, completion: 0, total: 0, cached: 0 } };
+
+    const result = await reportedInputTokens.evaluate(evaluateWith(output));
+
+    expect(result.score).toBeNull();
+    expect(result.explanation).toContain('did not report');
+  });
+
   it.each([null, undefined, [], 'unexpected'])('tolerates %p task output', async (output) => {
     expect(readReportedTokens(output)).toBeUndefined();
     await expect(reportedInputTokens.evaluate(evaluateWith(output))).resolves.toMatchObject({

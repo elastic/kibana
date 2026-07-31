@@ -35,7 +35,9 @@ const createReportedTokensEvaluator = <TExample extends Example, TTaskOutput ext
   evaluate: async ({ output }) => {
     const tokens = readReportedTokens(output);
 
-    if (!tokens) {
+    // `sumTokens` normalizes an absent provider count to an all-zero object, so a zero
+    // total means "not reported". Scoring it 0 would average in as a real observation.
+    if (!tokens || tokens.total === 0) {
       return {
         score: null,
         explanation: 'Task did not report provider token counts',
@@ -52,9 +54,15 @@ const createReportedTokensEvaluator = <TExample extends Example, TTaskOutput ext
 
 /**
  * `Input Tokens` and `Output Tokens` derive their values from exported trace
- * spans. These report the same quantities straight from the inference
- * provider's response instead, so a gap between the two pairs points at trace
- * collection rather than at a change in model behaviour.
+ * spans. These report the same quantities straight from the inference provider's
+ * response instead, so a gap between the two pairs is a collection artefact
+ * rather than a change in model behaviour.
+ *
+ * Two causes produce a gap, and they differ in sign. An unfinished trace export
+ * makes the trace pair lower. A retried call makes it higher: the trace sums
+ * every attempt, while `streamToResponse` returns the first token event it sees,
+ * which for a retry is the discarded attempt's. The trace pair is the one that
+ * reflects true spend.
  */
 export const createReportedTokenEvaluators = <
   TExample extends Example = Example,

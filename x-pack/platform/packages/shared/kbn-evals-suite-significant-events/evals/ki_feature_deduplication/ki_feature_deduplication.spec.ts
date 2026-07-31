@@ -91,10 +91,11 @@ const dedupContextDataset: EvaluationDataset<DedupContextExample> = {
       id: 'known-feature-id-reuse',
       input: {
         sampleDocuments: [checkoutDocument],
-        knownFeatureIds: 'entity: checkout-api',
+        // Deliberately not derivable from `service.name`, so reusing it is observable.
+        knownFeatureIds: 'entity: checkout-api-svc-7',
       },
       output: {
-        expectedId: 'checkout-api',
+        expectedId: 'checkout-api-svc-7',
         expectEntitySearch: false,
       },
     },
@@ -126,9 +127,11 @@ const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContext
       return { score: 0, explanation: 'Expected deduplication contract is missing' };
     }
 
-    const reusedExpectedId = output.features.some(
-      ({ id, type }) => id === expected.expectedId && type === 'entity'
-    );
+    // Membership alone would pass when the model reuses the id AND mints a duplicate
+    // alongside it, which is the deduplication failure these cases exist to catch.
+    const entityFeatures = output.features.filter(({ type }) => type === 'entity');
+    const reusedExpectedId =
+      entityFeatures.length === 1 && entityFeatures[0].id === expected.expectedId;
     const entitySearchCalls = output.searchCalls.filter(({ type }) => type === 'entity');
     const searchBehaviorMatches = expected.expectEntitySearch
       ? entitySearchCalls.length > 0
@@ -139,7 +142,11 @@ const dedupContextContractEvaluator: Evaluator<DedupContextExample, DedupContext
       explanation: [
         reusedExpectedId
           ? `Reused expected id "${expected.expectedId}"`
-          : `Did not reuse expected id "${expected.expectedId}"`,
+          : entityFeatures.length === 1
+          ? `Emitted entity id "${entityFeatures[0].id}" instead of "${expected.expectedId}"`
+          : `Expected exactly 1 entity feature with id "${expected.expectedId}", got ${
+              entityFeatures.length
+            }: ${entityFeatures.map(({ id }) => id).join(', ')}`,
         expected.expectEntitySearch
           ? `Entity semantic search calls: ${entitySearchCalls.length}`
           : `Unexpected entity semantic search calls: ${entitySearchCalls.length}`,
