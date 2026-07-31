@@ -571,6 +571,7 @@ export interface ConnectorInstance {
 
 export interface ConnectorInstanceConfig {
   taskType?: string;
+  selectedActions?: string[];
 }
 
 export interface ConnectorTypeInfo {

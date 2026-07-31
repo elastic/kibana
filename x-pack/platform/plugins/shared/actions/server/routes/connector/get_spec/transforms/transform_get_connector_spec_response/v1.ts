@@ -8,10 +8,17 @@
 import type { ConnectorMetadata } from '@kbn/connector-specs';
 import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes/connector/response';
 
+export interface ConnectorActionDef {
+  name: string;
+  description?: string;
+  isTool: boolean;
+}
+
 export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
+  actions: ConnectorActionDef[];
 }
 
 export const transformGetConnectorSpecResponse = (
@@ -31,4 +38,9 @@ export const transformGetConnectorSpecResponse = (
   },
   schema: spec.schema,
   is_testable: spec.isTestable,
+  actions: spec.actions.map(({ name, description, isTool }) => ({
+    name,
+    is_tool: isTool,
+    ...(description !== undefined ? { description } : {}),
+  })),
 });

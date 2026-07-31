@@ -107,6 +107,13 @@ export const generateExecutorFunction = ({
       throw new Error(errorMessage);
     }
 
+    const selectedActions = config.selectedActions as string[] | undefined;
+    if (Array.isArray(selectedActions) && !selectedActions.includes(subAction)) {
+      const errorMessage = `[Action][ExternalService] Action '${subAction}' is not enabled for this connector.`;
+      logger.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+
     const actionContext = {
       log: logger,
       client: axiosInstance,

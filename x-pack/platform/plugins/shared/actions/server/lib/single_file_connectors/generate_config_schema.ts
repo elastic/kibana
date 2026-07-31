@@ -15,7 +15,11 @@ export const generateConfigSchema = (
   schema: ConnectorSpec['schema']
 ): ValidatorType<ActionTypeConfig> => {
   const authType = z.string().optional();
-  const configSchema = schema ? schema.extend({ authType }) : z.object({ authType });
+  // null = "all actions" sentinel; executor treats non-array as all-allowed.
+  const selectedActions = z.array(z.string()).nullish();
+  const configSchema = schema
+    ? schema.extend({ authType, selectedActions })
+    : z.object({ authType, selectedActions });
   const allowedHostsKeys = getAllowedHostsKeysFromShape(configSchema.shape);
 
   return {

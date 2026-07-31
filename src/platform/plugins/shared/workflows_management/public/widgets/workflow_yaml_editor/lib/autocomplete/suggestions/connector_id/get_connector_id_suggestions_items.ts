@@ -76,6 +76,13 @@ export function getConnectorInstancesForType(
           instances = instances.filter(({ config }) => config?.taskType === taskType);
         }
       }
+      // Filter out instances where this sub-action is not in selectedActions
+      if (subAction) {
+        instances = instances.filter(
+          ({ config }) =>
+            !Array.isArray(config?.selectedActions) || config.selectedActions.includes(subAction)
+        );
+      }
 
       // Return the connector instances for the specific action type ID
       return instances.map((instance) => ({

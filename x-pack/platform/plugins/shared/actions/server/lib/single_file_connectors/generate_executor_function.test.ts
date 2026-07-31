@@ -418,6 +418,65 @@ describe('generateExecutorFunction', () => {
     });
   });
 
+  describe('selectedActions enforcement', () => {
+    it('allows execution when selectedActions is undefined (all actions permitted)', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      const result = await executor({ ...opts, config: { selectedActions: undefined } });
+
+      expect(result.status).toBe('ok');
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('allows execution when subAction is in selectedActions', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      const result = await executor({ ...opts, config: { selectedActions: ['testAction'] } });
+
+      expect(result.status).toBe('ok');
+      expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('throws and logs when subAction is not in selectedActions', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await expect(
+        executor({ ...opts, config: { selectedActions: ['otherAction'] } })
+      ).rejects.toThrow(
+        "[Action][ExternalService] Action 'testAction' is not enabled for this connector."
+      );
+
+      expect(logger.error).toHaveBeenCalledWith(
+        "[Action][ExternalService] Action 'testAction' is not enabled for this connector."
+      );
+      expect(mockHandler).not.toHaveBeenCalled();
+    });
+
+    it('throws when selectedActions is an empty array', async () => {
+      const executor = generateExecutorFunction({
+        actions: makeActions(),
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const opts = makeExecOptions({ subAction: 'testAction', subActionParams: {} });
+      await expect(executor({ ...opts, config: { selectedActions: [] } })).rejects.toThrow(
+        "[Action][ExternalService] Action 'testAction' is not enabled for this connector."
+      );
+    });
+  });
+
   describe('multiple registered actions', () => {
     it('dispatches to the correct handler based on subAction', async () => {
       const handler1 = jest.fn().mockResolvedValue({ from: 'action1' });

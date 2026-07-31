@@ -13,6 +13,7 @@ import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/serv
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 const CONNECTOR_SML_TYPE = 'connector';
 
@@ -30,9 +31,7 @@ interface ConnectorSmlTypeDeps {
 /**
  * Creates the SML type definition for connectors.
  *
- * Connectors are indexed into the SML exclusively via event-driven calls
- * in the connector lifecycle handler (onPostCreate / onPostDelete).
- * No crawling is needed — `list` yields nothing and `fetchFrequency` is omitted.
+ * Connectors are indexed into the SML via event-driven calls and during periodic crawls.
  */
 export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefinition => {
   const { getActionSavedObjectsClient, logger } = deps;
@@ -40,32 +39,70 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
   return {
     id: CONNECTOR_SML_TYPE,
 
-    // Connectors are indexed exclusively via event-driven lifecycle hooks.
-    // The list method yields nothing — no crawling is performed.
-    list: (_context) => ({
-      [Symbol.asyncIterator]: () => ({ next: async () => ({ done: true as const, value: [] }) }),
-    }),
+    async *list(context) {
+      const finder = context.savedObjectsClient.createPointInTimeFinder({
+        type: 'action',
+        perPage: 1000,
+        namespaces: ['*'],
+      });
+      try {
+        for await (const response of finder.find()) {
+          yield response.saved_objects
+            .filter((so) => {
+              const { actionTypeId } = so.attributes as { actionTypeId?: string };
+              return isChatCallableConnectorType(actionTypeId ?? '');
+            })
+            .map((so) => ({
+              id: so.id,
+              updatedAt: so.updated_at ?? new Date().toISOString(),
+              spaces: so.namespaces ?? [],
+            }));
+        }
+      } finally {
+        await finder.close();
+      }
+    },
 
     getSmlEntry: async (originId, context) => {
       try {
         const so = await context.savedObjectsClient.get('action', originId);
-        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        const attrs = so.attributes as {
+          name?: string;
+          actionTypeId?: string;
+          config?: Record<string, unknown>;
+        };
         const name = attrs.name ?? originId;
         const actionTypeId = attrs.actionTypeId ?? '';
+        const selectedActions = attrs.config?.selectedActions as string[] | null | undefined;
 
         const spec = getConnectorSpec(actionTypeId);
         const displayName = spec?.metadata.displayName ?? actionTypeId;
         const description = spec?.metadata.description ?? '';
 
-        // Include sub-action descriptions from the ConnectorSpec
-        const subActionDescriptions = spec?.actions
-          ? Object.entries(spec.actions)
-              .filter(([, action]) => action.isTool && action.description)
-              .map(([actionName, action]) => `${actionName}: ${action.description}`)
-          : [];
+        const allSpecActions = spec?.actions ? Object.entries(spec.actions) : [];
+        const toolActions = allSpecActions.filter(
+          ([, action]) => action.isTool && action.description
+        );
 
+        // When selectedActions restricts the connector, only list callable actions and say so.
+        const isRestricted = Array.isArray(selectedActions) && selectedActions.length > 0;
+        const allowedSet = isRestricted ? new Set(selectedActions) : null;
+
+        const visibleActions = allowedSet
+          ? allSpecActions.filter(
+              ([actionName, action]) => allowedSet.has(actionName) && action.description
+            )
+          : toolActions;
+        const subActionDescriptions = visibleActions.map(([actionName, action]) => {
+          const hitlSuffix = !action.isTool ? ' (requires user confirmation before calling)' : '';
+          return `${actionName}: ${action.description}${hitlSuffix}`;
+        });
+
+        const headerParts = [...new Set([name, displayName, description].filter(Boolean))];
         const contentParts = [
-          ...new Set([name, displayName, description, ...subActionDescriptions].filter(Boolean)),
+          ...headerParts,
+          ...(isRestricted ? ['Only these actions are callable:'] : []),
+          ...subActionDescriptions,
         ];
 
         return {
@@ -82,6 +119,8 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
       }
     },
 
+    requiredHiddenTypes: ['action'],
+
     getPermissions: () => kibanaSavedObjectPermissions({ savedObjectType: 'action' }),
 
     toAttachment: async (item, context) => {
@@ -89,14 +128,25 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         const soClient = await getActionSavedObjectsClient(context.request);
         const originId = item.origin_id ?? '';
         const so = await soClient.get('action', originId);
-        const attrs = so.attributes as { name?: string; actionTypeId?: string };
+        const attrs = so.attributes as {
+          name?: string;
+          actionTypeId?: string;
+          config?: Record<string, unknown>;
+        };
         const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
+        const attachmentSelectedActions = attrs.config?.selectedActions as
+          | string[]
+          | null
+          | undefined;
 
         const data: ConnectorAttachmentData = {
           connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
+          ...(Array.isArray(attachmentSelectedActions) && attachmentSelectedActions.length > 0
+            ? { selected_actions: attachmentSelectedActions }
+            : {}),
         };
 
         return {

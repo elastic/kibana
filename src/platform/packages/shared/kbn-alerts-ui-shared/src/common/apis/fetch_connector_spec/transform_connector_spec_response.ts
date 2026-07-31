@@ -9,6 +9,12 @@
 
 import type { ConnectorMetadata } from '@kbn/connector-specs';
 
+export interface ConnectorActionDef {
+  name: string;
+  description?: string;
+  isTool: boolean;
+}
+
 /**
  * Wire JSON from GET /internal/actions/connector_types/{id}/spec
  * (snake_case metadata; matches server `GetConnectorSpecResponseV1`).
@@ -26,6 +32,7 @@ export interface ConnectorSpecWireResponse {
   };
   schema: Record<string, unknown>;
   is_testable: boolean;
+  actions?: Array<{ name: string; description?: string; is_tool: boolean }>;
 }
 
 /** Client-side connector spec after normalising API casing. */
@@ -33,6 +40,7 @@ export interface ConnectorSpecResponse {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
+  actions?: ConnectorActionDef[];
 }
 
 export function transformConnectorSpecResponse(
@@ -61,6 +69,15 @@ export function transformConnectorSpecResponse(
       ...(isTechnicalPreview !== undefined ? { isTechnicalPreview } : {}),
     },
     schema: wire.schema,
-    isTestable: wire.is_testable,
+    isTestable: wire.is_testable ?? false,
+    ...(wire.actions !== undefined
+      ? {
+          actions: wire.actions.map(({ name, description: desc, is_tool: isTool }) => ({
+            name,
+            isTool,
+            ...(desc !== undefined ? { description: desc } : {}),
+          })),
+        }
+      : {}),
   };
 }

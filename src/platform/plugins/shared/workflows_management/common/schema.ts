@@ -203,6 +203,17 @@ function convertDynamicConnectorsToContractsInternal(
       // If the connector has sub-actions, create separate contracts for each sub-action
       if (connectorType.subActions && connectorType.subActions.length > 0) {
         connectorType.subActions.forEach((subAction) => {
+          const hasPermittedInstance =
+            connectorType.instances.length === 0 ||
+            connectorType.instances.some(
+              ({ config }) =>
+                !Array.isArray(config?.selectedActions) ||
+                config.selectedActions.includes(subAction.name)
+            );
+          if (!hasPermittedInstance) {
+            return;
+          }
+
           // Create type name: actionTypeId.subActionName (e.g., "inference.completion")
           const subActionType = `${connectorTypeName}.${subAction.name}`;
 
