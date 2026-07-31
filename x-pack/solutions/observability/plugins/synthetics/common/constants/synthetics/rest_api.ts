@@ -72,6 +72,7 @@ export enum SYNTHETICS_API_URLS {
   SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_bulk_delete',
 
   DYNAMIC_SETTINGS = `/api/synthetics/settings`,
+  VAULT_CONNECTION = `/internal/synthetics/settings/vault_connection`,
   MULTI_SPACE_SETTINGS = `/internal/synthetics/settings_multi_space`,
 
   INSPECT_STATUS_RULE = '/internal/synthetics/inspect_status_rule',
