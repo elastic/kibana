@@ -16,18 +16,25 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHealth,
+  EuiLink,
   EuiPopover,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-schema';
 import type { Feature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../hooks/use_timefilter';
+import { buildFeatureDiscoverParams } from '../../significant_events_discovery/utils/discover_helpers';
+import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 import { getConfidenceColor } from '../utils/get_confidence_color';
 import { FlyoutMetadataCard } from '../../../flyout_components/flyout_metadata_card';
 import { FlyoutToolbarHeader } from '../../../flyout_components/flyout_toolbar_header';
@@ -53,6 +60,8 @@ interface Props {
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
   features: Feature[];
+  onSelectPrevious?: () => void;
+  onSelectNext?: () => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
@@ -60,12 +69,37 @@ export function KnowledgeIndicatorDetailsFlyout({
   occurrencesByQueryId,
   onClose,
   features,
+  onSelectPrevious,
+  onSelectNext,
 }: Props) {
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+  const { timeState } = useTimefilter();
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+
+  // Reset transient UI (popover/delete modal) when navigating to another indicator.
+  const knowledgeIndicatorItemId = getKnowledgeIndicatorItemId(knowledgeIndicator);
+  useEffect(() => {
+    setShowDeleteModal(false);
+    setIsActionsMenuOpen(false);
+  }, [knowledgeIndicatorItemId]);
+
+  const featureFilter =
+    knowledgeIndicator.kind === 'feature' ? knowledgeIndicator.feature.filter : undefined;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  const discoverHref =
+    featureFilter && discoverLocator
+      ? discoverLocator.getRedirectUrl(
+          buildFeatureDiscoverParams(streamName, featureFilter, timeState)
+        )
+      : undefined;
 
   const streamFeatures = useMemo(
     () => features.filter((f) => f.stream_name === streamName),
@@ -214,7 +248,32 @@ export function KnowledgeIndicatorDetailsFlyout({
         size="40%"
         hideCloseButton
       >
-        <FlyoutToolbarHeader>
+        <FlyoutToolbarHeader
+          leftContent={
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={PREVIOUS_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="arrowLeft"
+                    aria-label={PREVIOUS_BUTTON_ARIA_LABEL}
+                    isDisabled={!onSelectPrevious}
+                    onClick={onSelectPrevious}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={NEXT_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="arrowRight"
+                    aria-label={NEXT_BUTTON_ARIA_LABEL}
+                    isDisabled={!onSelectNext}
+                    onClick={onSelectNext}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </>
+          }
+        >
           <EuiFlexItem grow={false}>
             <EuiPopover
               aria-label={ACTIONS_MENU_POPOVER_ARIA_LABEL}
@@ -249,9 +308,20 @@ export function KnowledgeIndicatorDetailsFlyout({
         </FlyoutToolbarHeader>
 
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="s">
-            <h2 id={flyoutTitleId}>{title}</h2>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2 id={flyoutTitleId}>{title}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            {discoverHref ? (
+              <EuiFlexItem grow={false}>
+                <EuiLink external href={discoverHref} target="_blank">
+                  {OPEN_IN_DISCOVER_LABEL}
+                </EuiLink>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             {knowledgeIndicator.kind === 'feature' ? (
@@ -324,6 +394,27 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
   'xpack.streams.knowledgeIndicatorDetailsFlyout.closeButtonAriaLabel',
   {
     defaultMessage: 'Close',
+  }
+);
+
+const PREVIOUS_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.previousButtonAriaLabel',
+  {
+    defaultMessage: 'Previous',
+  }
+);
+
+const NEXT_BUTTON_ARIA_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.nextButtonAriaLabel',
+  {
+    defaultMessage: 'Next',
+  }
+);
+
+const OPEN_IN_DISCOVER_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.openInDiscoverLabel',
+  {
+    defaultMessage: 'Open in Discover',
   }
 );
 

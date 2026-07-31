@@ -142,8 +142,10 @@ export function KnowledgeIndicatorsTable() {
     handleBulkRestore,
     closeFlyout,
     toggleSelectedKnowledgeIndicator,
+    selectKnowledgeIndicator,
     deleteKnowledgeIndicatorsInBulk,
     handleBulkPromote,
+    goToPageForItemIndex,
   } = useKnowledgeIndicatorsTable();
 
   const wasGeneratingRef = useRef(false);
@@ -160,6 +162,16 @@ export function KnowledgeIndicatorsTable() {
   }, [isGenerating, refetch]);
 
   const features = useMemo(() => getFeaturesFromKIs(knowledgeIndicators), [knowledgeIndicators]);
+
+  const currentIndex = filteredKnowledgeIndicators.findIndex(
+    (ki) => getKnowledgeIndicatorItemId(ki) === selectedKnowledgeIndicatorId
+  );
+  const previousKnowledgeIndicator =
+    currentIndex > 0 ? filteredKnowledgeIndicators[currentIndex - 1] : undefined;
+  const nextKnowledgeIndicator =
+    currentIndex >= 0 && currentIndex < filteredKnowledgeIndicators.length - 1
+      ? filteredKnowledgeIndicators[currentIndex + 1]
+      : undefined;
 
   const columns = useKnowledgeIndicatorsColumns({
     occurrencesByQueryId,
@@ -339,6 +351,22 @@ export function KnowledgeIndicatorsTable() {
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
           features={features}
+          onSelectPrevious={
+            previousKnowledgeIndicator
+              ? () => {
+                  goToPageForItemIndex(currentIndex - 1);
+                  selectKnowledgeIndicator(previousKnowledgeIndicator);
+                }
+              : undefined
+          }
+          onSelectNext={
+            nextKnowledgeIndicator
+              ? () => {
+                  goToPageForItemIndex(currentIndex + 1);
+                  selectKnowledgeIndicator(nextKnowledgeIndicator);
+                }
+              : undefined
+          }
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (
