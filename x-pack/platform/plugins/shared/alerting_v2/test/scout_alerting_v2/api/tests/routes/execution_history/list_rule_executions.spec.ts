@@ -19,7 +19,7 @@ import {
 
 const OTHER_SPACE_ID = 'cross-space-execution-history';
 
-apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' }, () => {
   let readerCredentials: RoleApiCredentials;
   let readerHeaders: Record<string, string>;
 
