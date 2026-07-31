@@ -1920,6 +1920,7 @@ x-pack/platform/plugins/shared/significant_events/server/lib/slack_app @elastic/
 x-pack/platform/plugins/shared/significant_events/common/slack_app @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/significant_events/server/routes/internal/apps/slack @elastic/nightshift-context-and-research-team
 x-pack/platform/plugins/shared/streams_app/public/components/significant_events/significant_events_discovery/components/settings/apps_section @elastic/nightshift-context-and-research-team
+x-pack/platform/packages/shared/kbn-significant-events-schema/src/relay_client.ts @elastic/nightshift-context-and-research-team
 
 # Significant Events - Memory & investigation features (owned by Nightshift context & research)
 x-pack/platform/plugins/shared/significant_events/server/memory_and_investigation @elastic/nightshift-context-and-research-team
