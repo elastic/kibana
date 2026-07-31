@@ -45,7 +45,11 @@ export const toBulkError = (
   name?: string
 ): BulkOperationError => ({
   id,
-  error: { code: bulkErrorCodeForStatus(err.statusCode), message: err.message, ...nameDetails(name) },
+  error: {
+    code: bulkErrorCodeForStatus(err.statusCode),
+    message: err.message,
+    ...nameDetails(name),
+  },
 });
 
 /**

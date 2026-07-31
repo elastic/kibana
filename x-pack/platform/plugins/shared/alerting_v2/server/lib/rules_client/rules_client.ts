@@ -1124,7 +1124,9 @@ export class RulesClient {
           });
           for (const candidate of group) {
             erroredRuleIds.add(candidate.id);
-            errors.push(rotationFailedError(candidate.id, undefined, candidate.attrs.metadata.name));
+            errors.push(
+              rotationFailedError(candidate.id, undefined, candidate.attrs.metadata.name)
+            );
           }
         }
       },
@@ -1157,9 +1159,9 @@ export class RulesClient {
    * Classifies executor tasks that `bulkUpdateSchedules` skipped (non-idle) by
    * observing their real status rather than assuming they are running: only a
    * mid-run task (`running`/`claiming`) frees up on its own, so only those get
-   * `RULE_ALREADY_RUNNING`. Any other non-idle state (`failed`/`unrecognized`/`dead_letter`/…) 
-   * or a task that can't be read is reported as a generic rotation failure. 
-   * If the status lookup itself fails we fall back to `RULE_ALREADY_RUNNING`, 
+   * `RULE_ALREADY_RUNNING`. Any other non-idle state (`failed`/`unrecognized`/`dead_letter`/…)
+   * or a task that can't be read is reported as a generic rotation failure.
+   * If the status lookup itself fails we fall back to `RULE_ALREADY_RUNNING`,
    * the most likely non-idle reason.
    */
   private async classifySkippedRotations(
