@@ -38,9 +38,9 @@ const sourceSchema = z
  * Shared request-body fields (no `source`).
  *
  * Closed object (`.strict()`): unknown top-level keys are rejected. Callers put
- * vendor-specific dimensions under `data` and name them explicitly in
- * `fingerprint_fields` via dotted paths (e.g. `data.monitor_id`), or reference
- * declared top-level keys (e.g. `rule_id`).
+ * vendor-specific dimensions under `data` and name them in `fingerprint_fields`
+ * (resolved only under `data`, e.g. `monitor_id` or `labels.env`). Top-level
+ * identity uses `fingerprint` or `rule_id` instead.
  *
  * Display name / backlink are not first-class request fields — callers who
  * want them put `rule_name` / `alert_url` inside `data`. The UI reads those

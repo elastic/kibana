@@ -28,9 +28,8 @@ function sha256(value: string) {
 }
 
 /**
- * Keep-style dotted path lookup on the normalized create-alert payload.
- * Examples: `rule_id`, `data.monitor_id`, `data.labels.env`.
- * Bare names do not magically fall through into `data`.
+ * Dotted path lookup within an object (e.g. nested keys under `data`).
+ * Examples on `data`: `monitor_id`, `labels.env`.
  */
 export function getValueByDottedPath(obj: unknown, path: string): unknown {
   if (!path) return undefined;
@@ -47,7 +46,7 @@ export function getValueByDottedPath(obj: unknown, path: string): unknown {
 /**
  * Computes `group_hash` in a single sha256, in priority order:
  *   1. Explicit `fingerprint`
- *   2. `fingerprint_fields` — field names + dotted-path values on the payload
+ *   2. `fingerprint_fields` — keys/paths resolved only under `data` (missing → "")
  *   3. `rule_id` (schema guarantees one of the three)
  *
  * Always includes `spaceId` and `source` so series keys cannot collide across
@@ -61,10 +60,11 @@ function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
   }
 
   if (event.fingerprint_fields?.length) {
+    const data = event.data ?? {};
     const keyPart = event.fingerprint_fields.join('|');
     const valuePart = event.fingerprint_fields
       .map((field) => {
-        const value = getValueByDottedPath(event, field);
+        const value = getValueByDottedPath(data, field);
         return value == null ? '' : String(value);
       })
       .join('|');
