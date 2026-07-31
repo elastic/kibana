@@ -70,6 +70,7 @@ describe('fetchSampleDocuments', () => {
       size: 5,
       maxEntityFilters: 10,
       samplingTimeoutMs: 30_000,
+      iteration: 1,
     };
 
     await expect(
@@ -108,6 +109,7 @@ describe('fetchSampleDocuments', () => {
       diverseRatio: 0,
       maxEntityFilters: 10,
       samplingTimeoutMs: 30_000,
+      iteration: 1,
     });
 
     expect(getSampleDocumentsEsqlMock).toHaveBeenCalledWith({
@@ -157,6 +159,7 @@ describe('fetchSampleDocuments', () => {
       diverseRatio: 0.2,
       maxEntityFilters: 1,
       samplingTimeoutMs: 30_000,
+      iteration: 1,
     });
 
     const entityFilteredCall = getSampleDocumentsEsqlMock.mock.calls[0][0];
@@ -181,7 +184,7 @@ describe('fetchSampleDocuments', () => {
       start: 100,
       end: 200,
       size: 6,
-      offset: 0,
+      iteration: 1,
       logger,
       requestTimeout: 30_000,
     });
@@ -230,6 +233,7 @@ describe('fetchSampleDocuments', () => {
       diverseRatio: 0,
       maxEntityFilters: 10,
       samplingTimeoutMs: 30_000,
+      iteration: 1,
     });
 
     expect(logger.warn).toHaveBeenCalledWith(

@@ -14,9 +14,10 @@ import type { Logger } from '@kbn/logging';
 import { get } from 'lodash';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import {
-  buildCategorizeWithSampleQuery,
+  categorizeWithNoiseExclusion,
   columnPath,
-  parseCategorizeWithSampleRows,
+  esqlSupportsTwoPass,
+  type CategorizeWithSampleRow,
 } from '../../utils/esql_categorize';
 import {
   getEsqlDocumentId,
@@ -35,7 +36,7 @@ interface GetDiverseSampleDocumentsOptions {
   index: string | string[];
   start: number;
   end: number;
-  offset: number;
+  iteration: number;
   size?: number;
   logger: Logger;
   requestTimeout: number;
@@ -47,7 +48,7 @@ export async function getDiverseSampleDocuments({
   start,
   end,
   size = 100,
-  offset,
+  iteration,
   logger,
   requestTimeout,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
@@ -80,31 +81,24 @@ export async function getDiverseSampleDocuments({
   const samplingProbability =
     MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
 
-  // Categorize pass: group by message pattern and keep one representative field
-  // value per pattern via `TOP(<field>::keyword, 1)`. This needs no `_index`/
-  // `_id`/`_source` metadata, so unlike the previous two-pass approach it works
-  // on ES|QL views (e.g. query streams' `$.<name>` views), where `FROM <view>
-  // METADATA _index, _id` raises `Unknown column [_index]`.
-  //
-  // Ask for size+offset rows so we can client-side slice the window
-  // [offset, offset+size] after sorting by count.
-  const categorizeQueryParams = {
-    query: buildCategorizeWithSampleQuery({
-      indices,
-      field: messageField,
-      limit: size + offset,
-      samplingProbability,
-    }),
-    filter,
-    drop_null_columns: true,
-  };
-  const categorizeResponse = (await esClient.esql.query(categorizeQueryParams, {
-    signal,
-  })) as unknown as ESQLSearchResponse;
+  // Rare patterns surfaced here become candidate representative documents. The
+  // categorize stays metadata-free, so it works on ES|QL views (query streams'
+  // `$.<name>` views), where `FROM <view> METADATA _index, _id` raises
+  // `Unknown column [_index]`.
+  const rows = await categorizeWithNoiseExclusion({
+    indices,
+    field: messageField,
+    total: totalDocs,
+    samplingProbability,
+    twoPassSupported: await esqlSupportsTwoPass(esClient, { signal }),
+    run: (query) =>
+      esClient.esql.query(
+        { query, filter, drop_null_columns: true },
+        { signal }
+      ) as unknown as Promise<ESQLSearchResponse>,
+  });
 
-  const window = parseCategorizeWithSampleRows(categorizeResponse)
-    .sort((a, b) => b.count - a.count)
-    .slice(offset, offset + size);
+  const window = selectStratifiedWindow(rows, { iteration, size });
 
   const sampleValues = Array.from(
     new Set(window.map((row) => row.sample).filter((sample) => sample.length > 0))
@@ -142,6 +136,53 @@ export async function getDiverseSampleDocuments({
 
   return { hits };
 }
+
+// Orders a pattern by its own identity, not its sampling-jittered count, so
+// re-sampling near-equal counts can't change which representative an iteration
+// picks. Modulo stays in safe-integer range without bitwise ops.
+const hashPattern = (value: string): number => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i++) {
+    hash = (hash * 31 + value.charCodeAt(i)) % 2147483647;
+  }
+  return hash;
+};
+
+/**
+ * Selects a diverse, cursor-free window of patterns for one identify iteration.
+ *
+ * Rank by frequency, cut into `size` equal bands, and take one pattern per band
+ * so every window spans common→rare — a head+mid+tail cross-section helps
+ * entity/dependency discovery and keeps the arm useful when the loop terminates
+ * early. `iteration` rotates the within-band pick, so consecutive iterations
+ * surface different members and coverage advances without a positional cursor.
+ * Within-band order is by {@link hashPattern} to stay stable under sampling jitter.
+ */
+export const selectStratifiedWindow = (
+  rows: CategorizeWithSampleRow[],
+  { iteration, size }: { iteration: number; size: number }
+): CategorizeWithSampleRow[] => {
+  if (rows.length <= size) {
+    return rows;
+  }
+
+  const ranked = rows.slice().sort((a, b) => b.count - a.count);
+  const rotation = Math.max(0, iteration - 1);
+  const window: CategorizeWithSampleRow[] = [];
+
+  for (let band = 0; band < size; band++) {
+    const from = Math.floor((band * ranked.length) / size);
+    const to = Math.floor(((band + 1) * ranked.length) / size);
+    const members = ranked
+      .slice(from, to)
+      .sort((a, b) => hashPattern(a.pattern) - hashPattern(b.pattern));
+    if (members.length > 0) {
+      window.push(members[rotation % members.length]);
+    }
+  }
+
+  return window;
+};
 
 /**
  * Fetches the full document for each representative value, returning a map from

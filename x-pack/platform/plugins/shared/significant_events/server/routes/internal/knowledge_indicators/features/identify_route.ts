@@ -97,7 +97,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxEntityFilters: z.number().optional(),
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
-        diverseOffset: z.number().min(0).optional(),
         samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
@@ -140,7 +139,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
-      diverseOffset,
       samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
 
@@ -192,7 +190,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxPreviouslyIdentifiedFeatures,
           sampling_timeout_ms: samplingTimeoutMs,
         },
-        diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
         // Expose prior Significant Events (read-only search) to feature
         // extraction when Agent Builder tools are available.
