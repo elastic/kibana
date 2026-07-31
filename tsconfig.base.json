@@ -3,8 +3,6 @@
     "rootDir": ".",
     "paths": {
       // Redux Toolkit v2 migration: type mappings for v1 compat aliases
-      // adm-zip 0.6.0 ships its own types; shadow the stale @types/adm-zip@0.5.7
-      "adm-zip": ["./node_modules/@types/adm-zip-0.6"],
       "react-redux-v7": ["./node_modules/@types/react-redux"],
       "react-redux-v7/*": ["./node_modules/@types/react-redux/*"],
       "redux-toolkit-v1": ["./node_modules/redux-toolkit-v1/dist"],
