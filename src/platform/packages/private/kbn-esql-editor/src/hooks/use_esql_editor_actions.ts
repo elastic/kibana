@@ -8,6 +8,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import type { MutableRefObject } from 'react';
 import { QuerySource } from '@kbn/esql-types';
 import type { EsqlEditorActions } from '../editor_actions_context';
 import type { EsqlStarredQueriesService } from '../editor_footer/esql_starred_queries_service';
@@ -25,6 +26,8 @@ interface UseEsqlEditorActionsParams {
   setIsLanguageComponentOpen: (value: boolean) => void;
   setIsCurrentQueryStarred: (value: boolean) => void;
   trackQueryHistoryOpened: (isOpen: boolean) => void;
+  isVisorOpenRef: MutableRefObject<boolean>;
+  setIsVisorOpen: (value: boolean) => void;
 }
 
 export function useEsqlEditorActions({
@@ -40,10 +43,16 @@ export function useEsqlEditorActions({
   setIsLanguageComponentOpen,
   setIsCurrentQueryStarred,
   trackQueryHistoryOpened,
+  isVisorOpenRef,
+  setIsVisorOpen,
 }: UseEsqlEditorActionsParams): {
   editorActions: EsqlEditorActions;
   onClickQueryHistory: (isOpen: boolean) => void;
 } {
+  const onToggleVisor = useCallback(() => {
+    setIsVisorOpen(!isVisorOpenRef.current);
+  }, [isVisorOpenRef, setIsVisorOpen]);
+
   const onClickQueryHistory = useCallback(
     (isOpen: boolean) => {
       trackQueryHistoryOpened(isOpen);
@@ -88,6 +97,7 @@ export function useEsqlEditorActions({
 
   const editorActions = useMemo(
     () => ({
+      toggleVisor: onToggleVisor,
       toggleHistory: onToggleHistory,
       toggleStarredQuery: onToggleStarredQuery,
       toggleLanguageComponent: onToggleLanguageComponent,
@@ -107,6 +117,7 @@ export function useEsqlEditorActions({
       onToggleHistory,
       onToggleLanguageComponent,
       onToggleStarredQuery,
+      onToggleVisor,
       starredQueriesService,
       trimmedQuery,
     ]

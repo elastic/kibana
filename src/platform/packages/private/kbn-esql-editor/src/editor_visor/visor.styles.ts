@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { UseEuiTheme } from '@elastic/eui';
-import { euiFontSizeFromScale, euiShadow } from '@elastic/eui';
+import { euiFontSizeFromScale } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const visorWidthPercentage = 0.5;
 export const dropdownWidthPercentage = 0.35;
+const INLINE_SOURCES_PICKER_WIDTH = 100;
 
 // Cap the expanded NL textarea height to roughly a third of the viewport,
 // offset by 100px to leave room for the editor chrome above and below.
@@ -23,7 +24,8 @@ export const visorStyles = (
   euiThemeContext: UseEuiTheme,
   comboBoxWidth: number,
   isSpaceReduced: boolean,
-  isInline: boolean
+  isInline: boolean,
+  isVisible: boolean = true
 ) => {
   const { euiTheme } = euiThemeContext;
   const fontSize = euiFontSizeFromScale('xs', euiTheme);
@@ -33,7 +35,15 @@ export const visorStyles = (
     visorContainer: css`
       background-color: ${euiTheme.colors.backgroundBasePlain};
       width: 100%;
-      min-height: calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING});
+      ${isInline
+        ? `
+          height: ${isVisible ? `calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING})` : '0'};
+          opacity: ${isVisible ? 1 : 0};
+          pointer-events: ${isVisible ? 'auto' : 'none'};
+          overflow: hidden;
+          transition: height 0.3s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+        `
+        : `min-height: calc(${euiTheme.size.xl} + ${VISOR_INNER_PADDING});`}
     `,
     visorWrapper: css`
       width: 100%;
@@ -41,18 +51,23 @@ export const visorStyles = (
     visorBox: css`
       border: 1px solid ${euiTheme.colors.borderBaseSubdued};
       border-radius: ${borderRadius};
-      ${euiShadow(euiThemeContext, 'xs')}
-      ${isInline ? 'flex-wrap: wrap;' : ''}
     `,
     comboBoxWrapper: css`
       justify-content: center;
       padding-left: ${euiTheme.size.xs};
       overflow: hidden;
+      min-width: 0;
       ${isInline
-        ? 'flex: 1 0 100%;'
-        : `flex-grow: 1; max-width: ${
+        ? `
+          flex: 0 0 ${INLINE_SOURCES_PICKER_WIDTH}px;
+          width: ${INLINE_SOURCES_PICKER_WIDTH}px;
+        `
+        : `
+          flex-grow: 1;
+          max-width: ${
             isSpaceReduced ? `calc(${visorWidthPercentage * 100}%)` : `${comboBoxWidth}px`
-          };`}
+          };
+        `}
     `,
     separator: css`
       width: 1px;
@@ -75,14 +90,10 @@ export const visorStyles = (
       justify-content: center;
       padding-right: ${euiTheme.size.xs};
       position: relative;
-      ${isInline ? 'flex: 1 0 100%;' : ''}
       min-width: 0;
-      ${isInline
-        ? `border-top: 1px solid ${euiTheme.colors.borderBaseSubdued}; padding-right: 0;`
-        : ''}
 
       .euiFormControlLayout--group {
-        border-radius: ${isInline ? '0' : borderRadius};
+        border-radius: ${borderRadius};
       }
       .euiFormControlLayout--group::after {
         border: none;
@@ -95,7 +106,7 @@ export const visorStyles = (
       }
 
       .kbnQueryBar__textarea {
-        border-radius: ${isInline ? '0' : borderRadius} !important;
+        border-radius: ${borderRadius} !important;
         font-size: ${fontSize} !important;
         padding-left: ${euiTheme.size.s} !important;
         padding-top: ${euiTheme.size.s} !important;

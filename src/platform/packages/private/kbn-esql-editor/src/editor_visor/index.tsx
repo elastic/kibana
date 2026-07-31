@@ -48,6 +48,8 @@ export interface QuickSearchVisorProps {
   isSpaceReduced?: boolean;
   // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
   isInline?: boolean;
+  // Whether the visor is currently visible (controls CSS transition for inline toggle)
+  isVisible?: boolean;
   // Called with the LLM-generated ES|QL so the parent editor can show the diff review UI
   onNlResult?: (generatedQuery: string) => void;
   // Callback when the query is updated and submitted
@@ -59,6 +61,7 @@ export function QuickSearchVisor({
   query,
   isSpaceReduced,
   isInline,
+  isVisible = true,
   onNlResult,
   onUpdateAndSubmitQuery,
   telemetryService,
@@ -129,7 +132,7 @@ export function QuickSearchVisor({
   );
 
   useEffect(() => {
-    if (!sourcesKey) {
+    if (!isVisible || !sourcesKey) {
       setAdHocDataView(null);
       return;
     }
@@ -146,19 +149,21 @@ export function QuickSearchVisor({
     return () => {
       cancelled = true;
     };
-  }, [sourcesKey, data.dataViews]);
+  }, [isVisible, sourcesKey, data.dataViews]);
 
   const comboBoxWidth = useMemo(() => {
+    if (isInline) return 0;
     const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
     const maxComboBoxWidth = window.innerWidth * visorWidthPercentage * dropdownWidthPercentage;
     return calculateWidthFromCharCount(labelLength, { maxWidth: maxComboBoxWidth });
-  }, [selectedSources]);
+  }, [isInline, selectedSources]);
 
   const styles = visorStyles(
     euiThemeContext,
     comboBoxWidth,
     Boolean(isSpaceReduced),
-    Boolean(isInline)
+    Boolean(isInline),
+    isVisible
   );
 
   if (!KQLComponent) {
@@ -175,6 +180,7 @@ export function QuickSearchVisor({
       responsive={false}
       css={styles.visorContainer}
       data-test-subj="ESQLEditor-quick-search-visor"
+      {...(!isVisible && { inert: '' })}
     >
       <EuiFlexItem css={styles.visorWrapper}>
         <EuiFlexGroup

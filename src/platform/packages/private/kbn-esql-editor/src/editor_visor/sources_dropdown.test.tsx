@@ -43,11 +43,16 @@ describe('SourcesDropdown', () => {
     };
 
     const onChangeSpy = jest.fn();
+    const onAutoSelectSpy = jest.fn();
     const makeOnChange = () => (newSources: string[]) => onChangeSpy(newSources);
 
     const { rerender } = renderWithI18n(
       <KibanaContextProvider services={services}>
-        <SourcesDropdown currentSources={[]} onChangeSources={makeOnChange()} />
+        <SourcesDropdown
+          currentSources={[]}
+          onChangeSources={makeOnChange()}
+          onAutoSelectSources={onAutoSelectSpy}
+        />
       </KibanaContextProvider>
     );
 
@@ -60,7 +65,11 @@ describe('SourcesDropdown', () => {
       for (let i = 0; i < 10; i++) {
         rerender(
           <KibanaContextProvider services={services}>
-            <SourcesDropdown currentSources={[]} onChangeSources={makeOnChange()} />
+            <SourcesDropdown
+              currentSources={[]}
+              onChangeSources={makeOnChange()}
+              onAutoSelectSources={onAutoSelectSpy}
+            />
           </KibanaContextProvider>
         );
       }
@@ -75,8 +84,8 @@ describe('SourcesDropdown', () => {
     });
 
     await waitFor(() => {
-      expect(onChangeSpy).toHaveBeenCalledTimes(1);
-      expect(onChangeSpy).toHaveBeenCalledWith(['test_index']);
+      expect(onAutoSelectSpy).toHaveBeenCalledTimes(1);
+      expect(onAutoSelectSpy).toHaveBeenCalledWith(['test_index']);
     });
 
     // After sources are fetched, we should not issue additional fetches.

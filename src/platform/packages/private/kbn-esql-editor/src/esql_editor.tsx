@@ -227,6 +227,9 @@ const ESQLEditorInternal = function ESQLEditor({
     useState<EsqlStarredQueriesService | null>(null);
   const [isCurrentQueryStarred, setIsCurrentQueryStarred] = useState(false);
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
+  const [isVisorOpen, setIsVisorOpen] = useState(false);
+  const isVisorOpenRef = useRef(false);
+  isVisorOpenRef.current = isVisorOpen;
 
   // Refs for dynamic dependencies that commands need to access
   const esqlVariablesRef = useRef(esqlVariables);
@@ -505,6 +508,8 @@ const ESQLEditorInternal = function ESQLEditor({
     setIsLanguageComponentOpen,
     setIsCurrentQueryStarred,
     trackQueryHistoryOpened: (isOpen) => telemetryService.trackQueryHistoryOpened(isOpen),
+    isVisorOpenRef,
+    setIsVisorOpen,
   });
   useEsqlEditorActionsRegistration(editorActions);
 
@@ -720,44 +725,29 @@ const ESQLEditorInternal = function ESQLEditor({
           ${editorAiStyle}
         `}
       />
-      {Boolean(editorIsInline) && (!hideRunQueryButton || !hideQuickSearch) ? (
+      {Boolean(editorIsInline) && !hideRunQueryButton ? (
         <EuiFlexGroup
-          gutterSize="s"
+          gutterSize="none"
           responsive={false}
+          justifyContent="flexEnd"
           alignItems="center"
           css={css`
             padding: ${theme.euiTheme.size.s};
           `}
         >
-          {!hideQuickSearch && (
-            <EuiFlexItem>
-              <QuickSearchVisor
-                query={code}
-                isSpaceReduced={measuredEditorWidth < BREAKPOINT_WIDTH}
-                isInline={Boolean(editorIsInline)}
-                onNlResult={showVisorReview}
-                onUpdateAndSubmitQuery={(newQuery) =>
-                  onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
-                }
-                telemetryService={telemetryService}
-              />
-            </EuiFlexItem>
-          )}
-          {!hideRunQueryButton && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color={queryRunButtonProperties.color as EuiButtonColor}
-                onClick={() => onQuerySubmit(QuerySource.MANUAL)}
-                size="s"
-                isLoading={isLoading && !allowQueryCancellation}
-                isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
-                data-test-subj="ESQLEditor-run-query-button"
-                aria-label={queryRunButtonProperties.label}
-              >
-                {queryRunButtonProperties.label}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color={queryRunButtonProperties.color as EuiButtonColor}
+              onClick={() => onQuerySubmit(QuerySource.MANUAL)}
+              size="s"
+              isLoading={isLoading && !allowQueryCancellation}
+              isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
+              data-test-subj="ESQLEditor-run-query-button"
+              aria-label={queryRunButtonProperties.label}
+            >
+              {queryRunButtonProperties.label}
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
       <EuiFlexGroup
@@ -871,6 +861,9 @@ const ESQLEditorInternal = function ESQLEditor({
                     if (datePickerOpenStatusRef.current) {
                       setPopoverPosition({});
                     }
+                    if (isVisorOpenRef.current) {
+                      setIsVisorOpen(false);
+                    }
                     if (enableResourceBrowser) {
                       sourcesLabelClickHandler(e);
                     }
@@ -937,6 +930,19 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </div>
       </EuiFlexGroup>
+      {!hideQuickSearch && Boolean(editorIsInline) && (
+        <QuickSearchVisor
+          query={code}
+          isSpaceReduced={isSpaceReduced}
+          isInline
+          isVisible={isVisorOpen}
+          onNlResult={showVisorReview}
+          onUpdateAndSubmitQuery={(newQuery) =>
+            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+          }
+          telemetryService={telemetryService}
+        />
+      )}
       {(isHistoryOpen || (isLanguageComponentOpen && editorIsInline)) && (
         <ResizableButton
           onMouseDownResizeHandler={(mouseDownEvent) => {
