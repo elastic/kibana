@@ -6,6 +6,7 @@
  */
 
 import { tags } from '@kbn/scout';
+import type { BrowserAuthFixture, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
@@ -17,8 +18,8 @@ const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
 const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
 
 async function navigateToServiceSettings(
-  browserAuth: any,
-  page: any,
+  browserAuth: BrowserAuthFixture,
+  page: ScoutPage,
   opts: {
     selectedServiceIds: string[];
     globalRegion?: string;
