@@ -21,6 +21,11 @@ import {
 import type { EmbeddableDeps } from '../../../../embeddable/types';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 import { AlertDetailsServiceMapSection } from '.';
+import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
+import {
+  SERVICE_MAP_EBT_DETAILS,
+  SERVICE_MAP_EBT_ELEMENTS,
+} from '../../../app/service_map/ebt_constants';
 
 const mockUseApmEmbeddableDeps = jest.fn();
 
@@ -125,6 +130,15 @@ describe('AlertDetailsServiceMapSection', () => {
     expect(screen.getByTestId('apmAlertDetailsExploreInServiceMap')).toBeInTheDocument();
     expect(screen.getByTestId('apmAlertDetailsServiceMapFilters')).toBeInTheDocument();
     expect(screen.getByTestId('mockServiceMapEmbeddable')).toBeInTheDocument();
+  });
+
+  it('instruments the Explore in Service map link with EBT click attributes', () => {
+    renderComponent();
+
+    const exploreLink = screen.getByTestId('apmAlertDetailsExploreInServiceMap');
+    expect(exploreLink).toHaveAttribute('data-ebt-action', APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP);
+    expect(exploreLink).toHaveAttribute('data-ebt-element', SERVICE_MAP_EBT_ELEMENTS.EXPLORE_LINK);
+    expect(exploreLink).toHaveAttribute('data-ebt-detail', SERVICE_MAP_EBT_DETAILS.ALERT_DETAILS);
   });
 
   it('hides the section without a platinum license', () => {

@@ -11,6 +11,7 @@ import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { getKueryWithMobileFilters } from '../../../../../../common/utils/get_kuery_with_mobile_filters';
 import { ContextualServiceMapSection } from '../../../service_map/contextual_map/contextual_service_map_section';
 import { SERVICE_OVERVIEW_CONTEXTUAL_MAP_PANEL_HEIGHT } from '../../../service_map/contextual_map/constants';
+import { SERVICE_MAP_EBT_DETAILS } from '../../../service_map/ebt_constants';
 
 export function MobileServiceOverviewServiceMapSection() {
   const { serviceName } = useApmServiceContext();
@@ -51,6 +52,7 @@ export function MobileServiceOverviewServiceMapSection() {
       sectionTestSubj="apmMobileServiceOverviewServiceMapSection"
       exploreLinkTestSubj="apmMobileServiceOverviewExploreInServiceMap"
       embeddableContainerTestSubj="apmMobileServiceOverviewServiceMapEmbeddableContainer"
+      exploreLinkEbtDetail={SERVICE_MAP_EBT_DETAILS.MOBILE_SERVICE_OVERVIEW}
     />
   );
 }
