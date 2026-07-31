@@ -11,7 +11,7 @@ import kbnRison from '@kbn/rison';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { appMenu, common, discover, header, timePicker, svlCommonPage } = getPageObjects([
+  const { appMenu, common, discover, svlCommonPage } = getPageObjects([
     'appMenu',
     'common',
     'timePicker',
