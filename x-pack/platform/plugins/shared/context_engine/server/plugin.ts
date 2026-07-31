@@ -51,6 +51,10 @@ export class ContextEnginePlugin
         }
         return this.aiIndexService;
       },
+      getActions: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.actions;
+      },
     });
 
     return {

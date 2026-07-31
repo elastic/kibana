@@ -20,6 +20,7 @@ import {
   type DataViewSpec,
 } from '@kbn/data-views-plugin/common';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 const createMockDataViewLazy = ({
   id = 'test-id',
@@ -54,8 +55,20 @@ const createMockDataViewLazy = ({
 const createService = () => {
   dataViewsService.clearInstanceCache = jest.fn();
   const mockSavedObjectsClient = savedObjectsClientMock.create();
-  const service = new DataViewsAsCodeService(dataViewsService, mockSavedObjectsClient);
-  return { service, mockDataViewsService: dataViewsService, mockSavedObjectsClient };
+  const mockFieldFormats = {
+    has: jest.fn().mockReturnValue(true),
+  } as unknown as jest.Mocked<FieldFormatsRegistry>;
+  const service = new DataViewsAsCodeService(
+    dataViewsService,
+    mockSavedObjectsClient,
+    mockFieldFormats
+  );
+  return {
+    service,
+    mockDataViewsService: dataViewsService,
+    mockSavedObjectsClient,
+    mockFieldFormats,
+  };
 };
 
 const getExpectedMappedData = (spec: DataViewSpec) => {
@@ -401,6 +414,32 @@ describe('DataViewsAsCodeService', () => {
         namespaces: ['default', 'space-a'],
       });
     });
+
+    it('should throw a 400 boom when field format type is invalid', async () => {
+      const { service, mockDataViewsService, mockFieldFormats } = createService();
+
+      mockFieldFormats.has.mockReturnValue(false);
+
+      await expect(
+        service.create({
+          id: 'dv-invalid-format',
+          index_pattern: 'logs-*',
+          field_settings: {
+            bytes: {
+              format: {
+                type: 'not-a-real-format',
+              },
+            },
+          },
+        })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: 'Invalid field format types: not-a-real-format',
+      });
+
+      expect(mockDataViewsService.createAndSaveDataViewLazy).not.toHaveBeenCalled();
+    });
   });
 
   describe('delete', () => {
@@ -552,6 +591,44 @@ describe('DataViewsAsCodeService', () => {
         updatableDataView.getAsSavedObjectBody(),
         { mergeAttributes: false, refresh: true }
       );
+    });
+
+    it('should throw a 400 boom when composite runtime field format type is invalid', async () => {
+      const { service, mockDataViewsService, mockFieldFormats } = createService();
+
+      mockFieldFormats.has.mockImplementation((type) => type === 'number');
+
+      await expect(
+        service.upsert('dv-invalid-upsert', {
+          index_pattern: 'logs-*',
+          field_settings: {
+            composite_field: {
+              type: 'composite',
+              script: 'emit("sub_a", "v1"); emit("sub_b", "v2");',
+              fields: {
+                sub_a: {
+                  type: 'keyword',
+                  format: {
+                    type: 'number',
+                  },
+                },
+                sub_b: {
+                  type: 'keyword',
+                  format: {
+                    type: 'invalid-format',
+                  },
+                },
+              },
+            },
+          },
+        })
+      ).rejects.toMatchObject({
+        isBoom: true,
+        output: { statusCode: 400 },
+        message: 'Invalid field format types: invalid-format',
+      });
+
+      expect(mockDataViewsService.getDataViewLazy).not.toHaveBeenCalled();
     });
   });
 });
