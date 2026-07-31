@@ -91,13 +91,16 @@ export const EpisodeRuleCell = ({
 
   const ruleId = row.flattened[columnId] as string;
   const rule = rulesCache[ruleId];
+  const isClassic = Boolean(row.flattened._is_v1);
+  const classicRuleName =
+    typeof row.flattened._v1_rule_name === 'string' ? row.flattened._v1_rule_name : null;
 
-  if (isLoadingRules && !rule) {
+  if (isLoadingRules && !rule && !isClassic) {
     return <EuiSkeletonText />;
   }
 
   if (!rule) {
-    return <>{ruleId}</>;
+    return <>{classicRuleName ?? ruleId}</>;
   }
   const ruleName = (
     <EuiText

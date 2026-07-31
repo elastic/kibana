@@ -14,7 +14,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { filterV2Episodes, uniqueByGroup, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 
 export interface ResolveActionDeps {
@@ -27,15 +27,21 @@ export const createResolveAction = (deps: ResolveActionDeps): EpisodeAction => (
   order: 30,
   displayName: i18n.RESOLVE,
   iconType: 'check',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some((ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE),
+  isCompatible: ({ episodes }: EpisodeActionContext) => {
+    const v2Episodes = filterV2Episodes(episodes);
+    return (
+      v2Episodes.length > 0 &&
+      v2Episodes.some((ep) => ep['episode.status'] !== ALERT_EPISODE_STATUS.INACTIVE)
+    );
+  },
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
-      group_hash: ep.group_hash,
-      action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
-      reason: i18n.RESOLVE_ACTION_REASON,
-    }));
+    const items: BulkCreateAlertActionBody = uniqueByGroup(filterV2Episodes(episodes)).map(
+      (ep) => ({
+        group_hash: ep.group_hash,
+        action_type: ALERT_EPISODE_ACTION_TYPE.DEACTIVATE,
+        reason: i18n.RESOLVE_ACTION_REASON,
+      })
+    );
     if (!items.length) return;
 
     try {

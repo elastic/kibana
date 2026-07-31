@@ -6,12 +6,23 @@
  */
 
 import type { BulkResponse } from '@kbn/alerting-v2-schemas';
+import type { AlertEpisode } from '../queries/episodes_query';
 import * as i18n from './translations';
 
 export const uniqueByGroup = <T extends { group_hash: string }>(items: T[]): T[] => {
   const seen = new Set<string>();
   return items.filter((x) => (seen.has(x.group_hash) ? false : (seen.add(x.group_hash), true)));
 };
+
+/** Classic (v1) AAD rows projected into the unified episodes list. */
+export const isV1AlertEpisode = (episode: AlertEpisode): boolean => Boolean(episode._is_v1);
+
+/**
+ * Episode actions that mutate `.alert-actions` (ack, snooze, tags, …) only apply
+ * to v2 episodes. Filter classic rows out of compatibility checks and execute.
+ */
+export const filterV2Episodes = (episodes: AlertEpisode[]): AlertEpisode[] =>
+  episodes.filter((ep) => !isV1AlertEpisode(ep));
 
 /**
  * Builds the toast for a bulk alert-action response. `affected_count` is how

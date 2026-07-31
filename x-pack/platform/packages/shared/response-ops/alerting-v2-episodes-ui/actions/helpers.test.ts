@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import {
+  uniqueByGroup,
+  successOrPartialToast,
+  filterV2Episodes,
+  isV1AlertEpisode,
+} from './helpers';
 
 const ep = (group_hash: string, id = group_hash) => ({ group_hash, 'episode.id': id } as any);
 
@@ -29,5 +34,18 @@ describe('successOrPartialToast', () => {
       errors: [{ id: 'g1', error: { code: 'ALERT_GROUP_NOT_FOUND', message: 'not found' } }],
     });
     expect(t.color).toBe('warning');
+  });
+});
+
+describe('isV1AlertEpisode / filterV2Episodes', () => {
+  it('detects classic rows via _is_v1', () => {
+    expect(isV1AlertEpisode({ _is_v1: true } as any)).toBe(true);
+    expect(isV1AlertEpisode({} as any)).toBe(false);
+  });
+
+  it('drops classic rows from the actionable set', () => {
+    const v1 = { 'episode.id': 'v1', _is_v1: true } as any;
+    const v2 = { 'episode.id': 'v2' } as any;
+    expect(filterV2Episodes([v1, v2])).toEqual([v2]);
   });
 });

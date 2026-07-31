@@ -50,6 +50,14 @@ describe('createOpenInDiscoverAction', () => {
     ).toBe(false);
   });
 
+  it('not compatible for classic (v1) alerts', () => {
+    expect(
+      createOpenInDiscoverAction(makeDeps()).isCompatible({
+        episodes: [makeEpisode({ _is_v1: true })],
+      })
+    ).toBe(false);
+  });
+
   it('execute: calls getDiscoverHref with episode timestamp and rule id, then navigateToUrl', async () => {
     const deps = makeDeps();
     await createOpenInDiscoverAction(deps).execute({ episodes: [makeEpisode()] });

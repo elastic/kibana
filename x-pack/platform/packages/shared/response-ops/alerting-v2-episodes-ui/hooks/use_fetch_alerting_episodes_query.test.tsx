@@ -6,10 +6,9 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
+import { fetchUnifiedAlertingEpisodes } from '../apis/fetch_unified_alerting_episodes';
 import { useFetchAlertingEpisodesQuery } from './use_fetch_alerting_episodes_query';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
@@ -17,9 +16,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 
-jest.mock('../apis/fetch_alerting_episodes');
+jest.mock('../apis/fetch_unified_alerting_episodes');
 
-const fetchAlertingEpisodesMock = jest.mocked(fetchAlertingEpisodes);
+const fetchUnifiedAlertingEpisodesMock = jest.mocked(fetchUnifiedAlertingEpisodes);
 
 jest.mock('./use_alerting_episodes_data_view');
 const mockDataView = {
@@ -34,7 +33,6 @@ const mockUseAlertingEpisodesDataView = jest
 
 const http = httpServiceMock.createStartContract();
 const { dataViews } = dataPluginMock.createStartContract();
-const mockExpressions = {} as ExpressionsStart;
 const mockSpaces = createMockSpaces();
 
 const mockEpisodesData: AlertEpisode[] = [
@@ -75,23 +73,23 @@ describe('useFetchAlertingEpisodesQuery', () => {
   it('should fetch episodes data with correct page size', async () => {
     const pageSize = 20;
 
-    fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
+    fetchUnifiedAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
 
     const { result } = renderHook(
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          services: { dataViews, http, spaces: mockSpaces },
         }),
       { wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(fetchAlertingEpisodesMock).toHaveBeenCalledWith(
+    expect(fetchUnifiedAlertingEpisodesMock).toHaveBeenCalledWith(
       expect.objectContaining({
         pageSize,
-        services: expect.objectContaining({ expressions: mockExpressions }),
+        services: expect.objectContaining({ http }),
       })
     );
   });
@@ -104,7 +102,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          services: { dataViews, http, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -115,13 +113,13 @@ describe('useFetchAlertingEpisodesQuery', () => {
   it('should return data view along with query result', async () => {
     const pageSize = 10;
 
-    fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
+    fetchUnifiedAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
 
     const { result } = renderHook(
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          services: { dataViews, http, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -134,13 +132,13 @@ describe('useFetchAlertingEpisodesQuery', () => {
   it('should handle empty results', async () => {
     const pageSize = 10;
 
-    fetchAlertingEpisodesMock.mockResolvedValue([]);
+    fetchUnifiedAlertingEpisodesMock.mockResolvedValue([]);
 
     const { result } = renderHook(
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          services: { dataViews, http, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -153,7 +151,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
   it('normalizes last_tags from ES|QL to string[] in select', async () => {
     const pageSize = 10;
 
-    fetchAlertingEpisodesMock.mockResolvedValue([
+    fetchUnifiedAlertingEpisodesMock.mockResolvedValue([
       {
         ...mockEpisodesData[0],
         last_tags: 'solo',
@@ -164,7 +162,7 @@ describe('useFetchAlertingEpisodesQuery', () => {
       () =>
         useFetchAlertingEpisodesQuery({
           pageSize,
-          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          services: { dataViews, http, spaces: mockSpaces },
         }),
       { wrapper }
     );
@@ -177,13 +175,13 @@ describe('useFetchAlertingEpisodesQuery', () => {
   it('should use keepPreviousData for smooth transitions', async () => {
     const pageSize = 10;
 
-    fetchAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
+    fetchUnifiedAlertingEpisodesMock.mockResolvedValue(mockEpisodesData);
 
     const { result, rerender } = renderHook(
       ({ size }) =>
         useFetchAlertingEpisodesQuery({
           pageSize: size,
-          services: { dataViews, http, expressions: mockExpressions, spaces: mockSpaces },
+          services: { dataViews, http, spaces: mockSpaces },
         }),
       { wrapper, initialProps: { size: pageSize } }
     );

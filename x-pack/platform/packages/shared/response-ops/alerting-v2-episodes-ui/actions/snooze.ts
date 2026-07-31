@@ -15,7 +15,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { filterV2Episodes, uniqueByGroup, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openSnoozeExpiryModal } from '../components/snooze_expiry_modal';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
@@ -32,14 +32,21 @@ export const createSnoozeAction = (deps: SnoozeActionDeps): EpisodeAction => ({
   order: 20,
   displayName: i18n.SNOOZE,
   iconType: 'bellSlash',
-  isCompatible: ({ episodes }: EpisodeActionContext) =>
-    episodes.length > 0 &&
-    episodes.some((ep) => !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry)),
+  isCompatible: ({ episodes }: EpisodeActionContext) => {
+    const v2Episodes = filterV2Episodes(episodes);
+    return (
+      v2Episodes.length > 0 &&
+      v2Episodes.some((ep) => !isEpisodeSnoozed(ep.last_snooze_action, ep.snooze_expiry))
+    );
+  },
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
+    const v2Episodes = filterV2Episodes(episodes);
+    if (!v2Episodes.length) return;
+
     const expiry = await openSnoozeExpiryModal(deps.overlays, deps.rendering);
     if (expiry === undefined) return;
 
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
+    const items: BulkCreateAlertActionBody = uniqueByGroup(v2Episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.SNOOZE,
       ...(expiry === null ? {} : { expiry }),

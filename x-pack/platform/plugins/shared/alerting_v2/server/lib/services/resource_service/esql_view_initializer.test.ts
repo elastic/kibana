@@ -39,6 +39,23 @@ describe('ESQLViewInitializer', () => {
     });
   });
 
+  it('URL-encodes view names that contain special characters', async () => {
+    const viewDefinition = {
+      key: 'view:alerts-v1',
+      name: '$.alerts-v1',
+      query: 'FROM .alerts-* | LIMIT 1',
+    };
+    const initializer = new ESQLViewInitializer(mockLogger, esClient, viewDefinition);
+
+    await initializer.initialize();
+
+    expect(transportRequestMock).toHaveBeenCalledWith({
+      method: 'PUT',
+      path: '/_query/view/%24.alerts-v1',
+      body: { query: 'FROM .alerts-* | LIMIT 1' },
+    });
+  });
+
   it('propagates errors from the transport API', async () => {
     const viewDefinition = {
       key: 'view:test-view',
@@ -50,5 +67,6 @@ describe('ESQLViewInitializer', () => {
     const initializer = new ESQLViewInitializer(mockLogger, esClient, viewDefinition);
 
     await expect(initializer.initialize()).rejects.toThrow('ES request failed');
+    expect(mockLogger.error).toHaveBeenCalled();
   });
 });

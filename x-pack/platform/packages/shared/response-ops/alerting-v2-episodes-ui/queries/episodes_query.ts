@@ -43,6 +43,13 @@ export interface AlertEpisode {
   episode_data?: string | null;
   /** Latest top-level `severity` from a breached rule event, when present. */
   severity?: string | null;
+  /**
+   * Set when the row was sourced from classic (v1) alerts via the unified
+   * episodes list API. Used to hide v2-only affordances for classic rows.
+   */
+  _is_v1?: boolean;
+  /** Classic rule name (`kibana.alert.rule.name`), when `_is_v1` is true. */
+  _v1_rule_name?: string | null;
 }
 
 /**

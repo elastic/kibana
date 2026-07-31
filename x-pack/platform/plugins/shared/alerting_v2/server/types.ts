@@ -29,6 +29,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
+import type { AlertingServerStart as ClassicAlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { RulesClient } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 
@@ -74,4 +75,6 @@ export interface AlertingServerStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   eventLog: IEventLogClientService;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
+  /** Classic (v1) alerting — used for classic alert RBAC on the unified episodes list. */
+  alerting?: ClassicAlertingServerStart;
 }

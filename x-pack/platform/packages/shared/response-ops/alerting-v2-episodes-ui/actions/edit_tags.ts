@@ -21,7 +21,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkCreateAlertActions } from './bulk_create_alert_actions';
-import { uniqueByGroup, successOrPartialToast } from './helpers';
+import { filterV2Episodes, uniqueByGroup, successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openTagsFlyout } from '../components/tags_flyout';
 
@@ -40,9 +40,12 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
   order: 40,
   displayName: i18n.EDIT_TAGS,
   iconType: 'tag',
-  isCompatible: ({ episodes }: EpisodeActionContext) => episodes.length > 0,
+  isCompatible: ({ episodes }: EpisodeActionContext) => filterV2Episodes(episodes).length > 0,
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
-    const currentTags = episodes.length === 1 ? episodes[0].last_tags ?? [] : [];
+    const v2Episodes = filterV2Episodes(episodes);
+    if (!v2Episodes.length) return;
+
+    const currentTags = v2Episodes.length === 1 ? v2Episodes[0].last_tags ?? [] : [];
     const tags = await openTagsFlyout(deps.overlays, deps.rendering, currentTags, {
       expressions: deps.expressions,
       spaces: deps.spaces,
@@ -50,7 +53,7 @@ export const createEditTagsAction = (deps: EditTagsActionDeps): EpisodeAction =>
     });
     if (tags == null) return;
 
-    const items: BulkCreateAlertActionBody = uniqueByGroup(episodes).map((ep) => ({
+    const items: BulkCreateAlertActionBody = uniqueByGroup(v2Episodes).map((ep) => ({
       group_hash: ep.group_hash,
       action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
       tags,

@@ -39,6 +39,7 @@ import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useService } from '@kbn/core-di-browser';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
+import { useV1RuleOptionsCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_v1_rule_options_cache';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
@@ -228,14 +229,21 @@ export const AlertEpisodesListPage = () => {
     http: services.http,
   });
 
-  const ruleOptions = useMemo(
-    () =>
-      Object.entries(rulesCache).map(([id, rule]) => ({
-        label: rule.metadata?.name ?? id,
-        value: id,
-      })),
-    [rulesCache]
-  );
+  const v1RuleOptions = useV1RuleOptionsCache(episodesData);
+  const ruleOptions = useMemo(() => {
+    const options = Object.entries(rulesCache).map(([id, rule]) => ({
+      label: rule.metadata?.name ?? id,
+      value: id,
+    }));
+    const seen = new Set(options.map((option) => option.value));
+    v1RuleOptions.forEach((option) => {
+      if (!seen.has(option.value)) {
+        seen.add(option.value);
+        options.push(option);
+      }
+    });
+    return options;
+  }, [rulesCache, v1RuleOptions]);
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
