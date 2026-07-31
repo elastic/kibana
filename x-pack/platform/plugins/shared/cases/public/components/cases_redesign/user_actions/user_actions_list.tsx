@@ -121,10 +121,10 @@ export const UserActionsList = React.memo(
     const collapsibleComments = useMemo(
       () =>
         comments.map((comment, index) => {
-          const commentId =
-            typeof comment['data-test-subj'] === 'string'
-              ? comment['data-test-subj']
-              : `activity-${index}`;
+          // Some registered attachments share a data-test-subj because it identifies
+          // their attachment type. Keep collapse state scoped to the rendered activity
+          // instead, so one attachment cannot collapse another one of the same type.
+          const commentId = `activity-${index}`;
           const isCollapsible =
             comment.children != null &&
             comment.className !== 'isEdit' &&
@@ -139,22 +139,21 @@ export const UserActionsList = React.memo(
 
           return {
             ...comment,
-            actions: (
-              <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            children: (
+              <EuiFlexGroup gutterSize="s" responsive={false} alignItems="flexStart">
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
                     <EuiButtonIcon
                       aria-label={toggleLabel}
-                      iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+                      iconType={isCollapsed ? 'unfold' : 'fold'}
                       onClick={() => toggleComment(commentId)}
                       data-test-subj={`case-user-action-collapse-${index}`}
                     />
                   </EuiToolTip>
                 </EuiFlexItem>
-                {comment.actions ? <EuiFlexItem grow={false}>{comment.actions}</EuiFlexItem> : null}
+                {!isCollapsed ? <EuiFlexItem>{comment.children}</EuiFlexItem> : null}
               </EuiFlexGroup>
             ),
-            children: isCollapsed ? null : comment.children,
           };
         }),
       [comments, collapsedCommentIds, toggleComment]

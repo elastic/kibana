@@ -66,11 +66,17 @@ describe('UserActionsList', () => {
     expect(await screen.findByTestId('test-comment')).toBeInTheDocument();
   });
 
-  it('collapses and expands activity comments without affecting the comment editor', async () => {
+  it('collapses an activity comment without affecting other activities or the comment editor', async () => {
     const comments = [
       {
         username: 'elastic',
+        'data-test-subj': 'comment-alert-security.alert',
         children: <div data-test-subj="test-comment">{'Test comment'}</div>,
+      },
+      {
+        username: 'elastic',
+        'data-test-subj': 'comment-alert-security.alert',
+        children: <div data-test-subj="second-test-comment">{'Second test comment'}</div>,
       },
       {
         username: 'elastic',
@@ -84,8 +90,9 @@ describe('UserActionsList', () => {
     await userEvent.click(await screen.findByTestId('case-user-action-collapse-0'));
 
     expect(screen.queryByTestId('test-comment')).not.toBeInTheDocument();
+    expect(screen.getByTestId('second-test-comment')).toBeInTheDocument();
     expect(screen.getByTestId('comment-editor')).toBeInTheDocument();
-    expect(screen.queryByTestId('case-user-action-collapse-1')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('case-user-action-collapse-2')).not.toBeInTheDocument();
 
     await userEvent.click(await screen.findByTestId('case-user-action-collapse-0'));
 

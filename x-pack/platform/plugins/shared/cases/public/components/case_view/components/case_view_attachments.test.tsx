@@ -313,6 +313,36 @@ describe('Case View Attachments tab', () => {
     ).toHaveAttribute('aria-expanded', 'true');
   });
 
+  it('collapses only the selected attachment section', async () => {
+    const unifiedAttachmentTypeRegistry = buildRegistry();
+    const caseWithComments: CaseUI = {
+      ...basicCase,
+      comments: [alertComment, { ...eventComment, id: 'event-comment-id' }],
+    };
+
+    renderWithTestingProviders(
+      <CaseViewAttachments
+        caseData={caseWithComments}
+        onSearch={onSearchMock}
+        onUpdateField={onUpdateFieldMock}
+      />,
+      { wrapperProps: { unifiedAttachmentTypeRegistry, license: basicLicense } }
+    );
+
+    await userEvent.click(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    );
+
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.alert')
+    ).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      screen.getByTestId('case-view-attachment-accordion-toggle-security.event')
+    ).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.queryByTestId('test-alerts-table')).not.toBeInTheDocument();
+    expect(screen.getByTestId('test-events-table')).toBeInTheDocument();
+  });
+
   it('hides the files accordion when fileStats reports 0 files', () => {
     useGetCaseFileStatsMock.mockReturnValue({ data: { total: 0 } });
     const unifiedAttachmentTypeRegistry = buildRegistry();
