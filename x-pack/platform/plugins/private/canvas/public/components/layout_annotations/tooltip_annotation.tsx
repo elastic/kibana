@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 // @ts-expect-error style types not defined
-import { euiToolTipStyles } from '@elastic/eui/lib/components/tool_tip/tool_tip.styles';
+import { euiToolTipStyles } from '@elastic/eui/es/components/tool_tip/tool_tip.styles';
 import { matrixToCSS } from '../../lib/dom';
 import type { TransformMatrix3d } from '../../lib/aeroelastic';
 
