@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await surroundingActionEl.click();
       await header.waitUntilLoadingHasFinished();
 
-      const headerElement = await testSubjects.find('contextDocumentSurroundingHeader');
+      const headerElement = await testSubjects.find('appHeaderTitle');
 
       expect(await headerElement.getVisibleText()).to.be(
         `Documents surrounding #${customDocIdParam}`
