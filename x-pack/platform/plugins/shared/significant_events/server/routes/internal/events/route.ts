@@ -357,9 +357,9 @@ const eventsUpdateRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/update',
   options: {
     access: 'internal',
-    summary: 'Update a significant event status',
+    summary: 'Update a significant event',
     description:
-      "Override a significant event's status, writing a new append-only version. Severity/summary reassessments are applied by the investigation workflow via the investigations endpoint, not here.",
+      'Manually override attributes of a significant event, writing a new append-only version.',
   },
   security: {
     authz: {
