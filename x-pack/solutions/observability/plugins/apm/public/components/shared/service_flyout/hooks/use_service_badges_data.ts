@@ -6,6 +6,7 @@
  */
 
 import type { ServiceAnomalyScoreResponse } from '@kbn/apm-api-shared';
+import { SLO_STATUS_PRIORITY } from '@kbn/apm-types';
 import type { SloStatus } from '@kbn/apm-types';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import type { Environment } from '../../../../../common/environment_rt';
@@ -18,7 +19,7 @@ function getWorstSloStatus(
   statusCounts: Partial<Record<SloStatus, number>> | undefined
 ): { sloStatus: SloStatus | 'noSLOs'; sloCount: number } {
   if (total === 0 || !statusCounts) return { sloStatus: 'noSLOs', sloCount: 0 };
-  for (const priority of ['violated', 'degrading', 'noData', 'healthy'] as SloStatus[]) {
+  for (const priority of SLO_STATUS_PRIORITY) {
     const count = statusCounts[priority] ?? 0;
     if (count > 0) return { sloStatus: priority, sloCount: count };
   }
