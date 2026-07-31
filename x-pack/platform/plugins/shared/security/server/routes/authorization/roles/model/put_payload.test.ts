@@ -160,6 +160,46 @@ describe('Put payload schema', () => {
     });
   });
 
+  describe('input hardening', () => {
+    test('resolves base privilege names at most once regardless of entry/privilege count', () => {
+      const getBasePrivilegeNames = jest.fn(() => basePrivilegeNamesMap);
+      const kibana = Array.from({ length: 25 }, (_unused, i) => ({
+        spaces: [`space-${i}`],
+        base: ['all', 'read'],
+      }));
+
+      expect(() => getPutPayloadSchema(getBasePrivilegeNames).validate({ kibana })).not.toThrow();
+
+      // Without memoization this would be invoked once per base privilege entry (50 times here);
+      // the expensive privilege-map resolution must happen at most once per schema.
+      expect(getBasePrivilegeNames).toHaveBeenCalledTimes(1);
+    });
+
+    test('rejects more than 1000 Kibana privilege entries', () => {
+      const kibana = Array.from({ length: 1001 }, (_unused, i) => ({
+        spaces: [`space-${i}`],
+        base: ['all'],
+      }));
+
+      expect(() =>
+        getPutPayloadSchema(() => basePrivilegeNamesMap).validate({ kibana })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[kibana]: array size is [1001], but cannot be greater than [1000]"`
+      );
+    });
+
+    test('allows up to 1000 Kibana privilege entries', () => {
+      const kibana = Array.from({ length: 1000 }, (_unused, i) => ({
+        spaces: [`space-${i}`],
+        base: ['all'],
+      }));
+
+      expect(() =>
+        getPutPayloadSchema(() => basePrivilegeNamesMap).validate({ kibana })
+      ).not.toThrow();
+    });
+  });
+
   test('allows empty role', () => {
     expect(getPutPayloadSchema(() => basePrivilegeNamesMap).validate({})).toMatchInlineSnapshot(`
       Object {

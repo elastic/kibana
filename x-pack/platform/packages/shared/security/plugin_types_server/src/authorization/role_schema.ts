@@ -321,7 +321,12 @@ const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
  * feature Kibana privileges. None of the entries should apply to the same spaces.
  */
 export const getKibanaRoleSchema = (
-  getBasePrivilegeNames: () => { global: string[]; space: string[] }
+  getBasePrivilegeNames: () => { global: string[]; space: string[] },
+  // Resolving the known base privilege names builds the full Kibana privilege map, which is an
+  // expensive and request-independent computation. The per-element validators below consult it for
+  // every base privilege in the payload, so memoize it to avoid rebuilding the map once per entry.
+  // The set of base privilege names is constant, so resolving it a single time is safe.
+  getMemoizedBasePrivilegeNames = _.once(getBasePrivilegeNames)
 ) =>
   schema.arrayOf(
     schema.object(
@@ -348,7 +353,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that grants applies to all spaces.',
                 },
                 validate(value) {
-                  const globalPrivileges = getBasePrivilegeNames().global;
+                  const globalPrivileges = getMemoizedBasePrivilegeNames().global;
                   if (!globalPrivileges.some((privilege) => privilege === value)) {
                     return `unknown global privilege "${value}", must be one of [${globalPrivileges}]`;
                   }
@@ -362,7 +367,7 @@ export const getKibanaRoleSchema = (
                   description: 'A base privilege that applies to specific spaces.',
                 },
                 validate(value) {
-                  const spacePrivileges = getBasePrivilegeNames().space;
+                  const spacePrivileges = getMemoizedBasePrivilegeNames().space;
                   if (!spacePrivileges.some((privilege) => privilege === value)) {
                     return `unknown space privilege "${value}", must be one of [${spacePrivileges}]`;
                   }
@@ -430,6 +435,10 @@ export const getKibanaRoleSchema = (
       }
     ),
     {
+      // Bound the number of privilege entries. Each entry drives per-element base-privilege
+      // validation and the O(n^2) space-overlap check below, so an unbounded array would be an
+      // unbounded-input DoS vector for an otherwise low-cost request.
+      maxSize: 1000,
       validate(value) {
         for (const [indexA, valueA] of value.entries()) {
           for (const valueB of value.slice(indexA + 1)) {
