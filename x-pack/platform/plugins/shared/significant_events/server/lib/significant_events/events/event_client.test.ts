@@ -189,5 +189,60 @@ describe('EventClient', () => {
         dataQuery!.indexOf('severity IN')
       );
     });
+
+    it('excludes pending events when no status filter is provided', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({});
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('status != "pending"');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('status !=')
+      );
+    });
+
+    it('does not exclude pending when filtering by explicit event ids without status', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({ eventIds: ['checkout-failure'] });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('event_id IN ("checkout-failure")');
+      expect(dataQuery).not.toContain('status != "pending"');
+    });
+  });
+
+  describe('findLatestActive', () => {
+    it('filters to pending and open statuses after latest-per-event reduction', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestActive({
+        from: 'now-24h',
+        streamNames: ['logs.checkout'],
+        ruleUuids: ['rule-abc'],
+      });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('status IN ("pending", "open")');
+      expect(dataQuery?.indexOf('INLINE STATS latest_ts')).toBeLessThan(
+        dataQuery!.indexOf('status IN')
+      );
+    });
   });
 });

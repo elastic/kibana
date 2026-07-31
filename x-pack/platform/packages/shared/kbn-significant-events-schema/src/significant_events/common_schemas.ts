@@ -135,11 +135,13 @@ const signalBaseSchema = z.object({
     .max(MAX_SIGNAL_DESCRIPTION_LENGTH)
     .describe(
       dedent`
-        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Testing and Found before omitting Why on confirms.
+        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
 
-        "Testing: [short hypothesis]. Found: [signature, target, or endpoint from the row]. Why: [causal link — who fails to reach whom and how; name the failing upstream when visible in the row]. Verdict: confirms | refutes | inconclusive — [who/what is blocked or unaffected]."
+        Confirms: "Found: [signature, target, or endpoint from the row]. Impact: [who/what is blocked or degraded]. Verdict: confirms."
+        Refutes/inconclusive: "Found: [signature or absence]. Impact: [none or why inconclusive]. Verdict: refutes | inconclusive."
+        Omit Impact only for zero-row refutes: "Found: no match. Verdict: refutes."
 
-        Omit Why only for refutes with no failure signature, or "no match. Verdict: refutes." when the query returned zero rows.
+        Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
         ${NO_RAW_SENSITIVE_VALUES_RULE}
       `
     ),
@@ -269,7 +271,7 @@ export const significantEventBaseSchema = z.object({
     .min(0)
     .max(1)
     .describe(
-      'Symptom-hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
+      'symptom_hypothesis correctness 0.0–1.0 float. Higher values reflect stronger evidence grounding and more corroboration. ' +
         'causal_features ceiling: cap at 0.65 when causal_features is empty (applies to open status only).'
     ),
   stream_names: z

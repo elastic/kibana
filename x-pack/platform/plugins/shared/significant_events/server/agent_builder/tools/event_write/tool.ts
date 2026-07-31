@@ -30,7 +30,6 @@ export const SIGNIFICANT_EVENTS_EVENTS_WRITE_TOOL_ID = platformSignificantEvents
 export const eventsWriteItemSchema = significantEventSchema
   .pick({
     event_id: true,
-    discovery_id: true,
     status: true,
     stream_names: true,
     title: true,
@@ -64,24 +63,28 @@ export const eventsWriteItemSchema = significantEventSchema
     message: 'dedup_window and event_id are mutually exclusive',
   });
 
+const eventsWriteItemsSchema = z
+  .array(eventsWriteItemSchema)
+  .min(1)
+  .max(MAX_BULK_WRITE_ITEMS)
+  .describe(
+    i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
+      defaultMessage:
+        'The significant event items to write. It must contain at least one item and no more than the maximum allowed.',
+    })
+  );
+
 export const eventsWriteSchema = z
   .object({
-    items: z
-      .array(eventsWriteItemSchema)
-      .min(1)
-      .max(MAX_BULK_WRITE_ITEMS)
-      .describe(
-        i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema.items', {
-          defaultMessage:
-            'The significant event items to write. It must contain at least one item and no more than the maximum allowed.',
-        })
-      ),
+    items: eventsWriteItemsSchema,
   })
   .describe(
     i18n.translate('xpack.significantEvents.agentBuilder.tools.eventsWrite.schema', {
       defaultMessage: 'Bulk-write a batch of significant events.',
     })
   );
+
+export type EventsWriteParams = z.infer<typeof eventsWriteSchema>;
 
 export function createEventsWriteTool({
   getScopedClients,
@@ -105,8 +108,10 @@ export function createEventsWriteTool({
       reason: duplicate_within_window); otherwise written with status "pending".
 
       **event_id**, no dedup_window: append a version to an existing event with the supplied status.
-      Signals and topology are merged with prior versions. Discovery-stage writes should always use
-      status "pending"; judge/status-update workflows can set final statuses.
+      Signals and topology are merged with prior versions. Use status "open" when continuing an
+      existing event_id so it stays on the default read path; use dedup_window (without event_id)
+      for new candidates, which are written as "pending". Any settled status (open, closed, dismissed)
+      may be set directly on snapshot writes.
 
       **neither**: a synthetic event_id is generated.
     `,

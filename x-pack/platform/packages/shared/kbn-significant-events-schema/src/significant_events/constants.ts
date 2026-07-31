@@ -10,8 +10,7 @@ export const MAX_RULE_NAME_LENGTH = 255;
 export const MAX_TITLE_LENGTH = 512;
 export const MAX_TEXT_LENGTH = 10_000;
 export const MAX_ARRAY_LENGTH = 100;
-/** Compact Testing/Found/Why/Verdict descriptions; Why carries cross-service grouping signal. */
-export const MAX_SIGNAL_DESCRIPTION_LENGTH = 280;
+export const MAX_SIGNAL_DESCRIPTION_LENGTH = 350;
 
 /** Shared narrative-field rule: never let evidence-derived text reproduce a raw sensitive value. */
 export const NO_RAW_SENSITIVE_VALUES_RULE =

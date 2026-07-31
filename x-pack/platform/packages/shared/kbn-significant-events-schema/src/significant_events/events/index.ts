@@ -57,11 +57,6 @@ export type SignificantEventInvestigation = z.infer<typeof significantEventInves
 export const significantEventSchema = significantEventBaseSchema.extend({
   '@timestamp': z.iso.datetime({ offset: true }),
   event_uuid: z.string().max(MAX_ID_LENGTH).describe('Unique ID of an event.'),
-  discovery_id: z
-    .string()
-    .max(MAX_ID_LENGTH)
-    .optional()
-    .describe('ID of the discovery document this event was derived from.'),
   previous_event_uuid: z
     .string()
     .max(MAX_ID_LENGTH)

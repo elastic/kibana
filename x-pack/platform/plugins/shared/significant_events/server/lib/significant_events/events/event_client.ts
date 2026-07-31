@@ -213,7 +213,7 @@ export class EventClient {
 
       if (options.status?.length) {
         query.where`${esql.col('status')} IN (${options.status.map((status) => esql.str(status))})`;
-      } else {
+      } else if (!options.eventIds?.length) {
         query.where`${esql.col('status')} != ${esql.str('pending')}`;
       }
       if (options.severity?.length) {

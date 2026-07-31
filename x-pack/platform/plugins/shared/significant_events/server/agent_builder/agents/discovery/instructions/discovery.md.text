@@ -44,7 +44,7 @@ Use each detection's `change_point_type` as an investigation hint. The type dict
 
 - `significant-events-memory` (via `load_skill`) — prior learnings about services, known-benign patterns, past false positives, and known ongoing/background issues SREs already track. **You MUST load this skill and search memory before promoting any discovery** — treat consulting memory as a required grounding step, never optional. Writing a discovery without first checking memory is an error. An empty memory result is acceptable and expected; skipping the check is not. Use what memory returns so already-known ongoing/background issues and known noise are recognized as such.
 - `platform_sig_events_event_search` — retrieves existing significant events
-- `platform_sig_events_events_write` — final output step; submit every discovery in one `items` array. Include `dedup_window` (e.g. `"now-24h"`) on new discoveries. Every item must use `status: "pending"`.
+- `platform_sig_events_events_write` — final output step. **Always** pass `{ "items": [ ... ] }` — never put discovery fields at the top level, even for a single discovery or continuation. Include `dedup_window` (e.g. `"now-24h"`) on new discoveries; reuse `event_id` with `status: "open"` on continuations.
 
 </tools>
 
@@ -105,6 +105,44 @@ Response:
 }
 ```
 
+Example: platform_sig_events_events_write — single new discovery (still wrapped in `items`)
+```json
+{
+  "items": [
+    {
+      "status": "pending",
+      "dedup_window": "now-24h",
+      "title": "...",
+      "symptom_hypothesis": "...",
+      "summary": "...",
+      "severity": "...",
+      "confidence": 0.6,
+      "stream_names": ["..."],
+      "signals": [{ "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "spike", "p_value": 0.01 } }]
+    }
+  ]
+}
+```
+
+Example: platform_sig_events_events_write — continuation of an open event (reuse `event_id` from `platform_sig_events_event_search`)
+```json
+{
+  "items": [
+    {
+      "event_id": "...",
+      "status": "open",
+      "title": "...",
+      "symptom_hypothesis": "...",
+      "summary": "...",
+      "severity": "...",
+      "confidence": 0.7,
+      "stream_names": ["..."],
+      "signals": [{ "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "spike", "p_value": 0.01 } }]
+    }
+  ]
+}
+```
+
 Example: platform_sig_events_events_write — two grouped detections in one item, one standalone in another
 ```json
 {
@@ -119,13 +157,13 @@ Example: platform_sig_events_events_write — two grouped detections in one item
       "confidence": "...",
       "stream_names": ["..."],
       "signals": [
-        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "Frontend → Balance Reader Connection Error", "rule_uuid": "rule-uuid-1", "change_point_type": "spike", "p_value": 0.01 } },
-        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "Balance Reader Connection Refused", "rule_uuid": "rule-uuid-2", "change_point_type": "stationary", "p_value": 0.04 } }
+        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } },
+        { "type": "detection", "stream_name": "...", "description": "...", "confirmed": true, "evidence": { "esql_query": "...", "result": "found" }, "metadata": { "detection_id": "...", "rule_name": "...", "rule_uuid": "...", "change_point_type": "...", "p_value": "..." } }
       ],
       "blast_radius": [
-        { "type": "dependency", "feature_id": "frontend-balancereader", "source": "...", "target": "...", "protocol": "...", "stream_name": "..." }
+        { "type": "dependency", "feature_id": "...", "source": "...", "target": "...", "protocol": "...", "stream_name": "..." }
       ],
-      "causal_features": [{ "feature_id": "balancereader", "name": "...", "stream_name": "logs" }]
+      "causal_features": [{ "feature_id": "..", "name": "...", "stream_name": "logs" }]
     }
   ]
 }
@@ -180,7 +218,7 @@ For the remaining pairs, match if at least one criterion holds:
 
    - Timing, **Alert symptom**, or mechanism may support a causal chain for the root cause, but topology is the primary signal; **Current evidence** is only used to reject contradictions
 2. **Evidence convergence**
-   - Each side's **Current evidence**, **Alert Symptom**, description, mechanism, or failure keyword must converge on a compatible incident correlation.
+   - Each side's **Current evidence**, **Alert Symptom**, description, mechanism, or failure keyword must converge on a compatible incident correlation or root cause.
    - **Domain** or stream name alone is not sufficient convergence.
 
 </incident_matching>
@@ -248,18 +286,20 @@ Assign each matched detection to at most one accepted event continuation. The co
 
 ### Step 4: Group remaining detections into Discoveries
 
-1. Without prior bias, partition all remaining detections rules that are not in `matched_rule_uuids`, or were not included in open events, into discoveries using `<incident_matching>` pairwise for every unordered pair in this set. 
+1. Without prior bias, partition all remaining detections rules that are not in `matched_rule_uuids`, or were not included in open events, into discoveries using `<incident_matching>` pairwise for every unordered pair in this set, then apply cascade closure from `<incident_matching>`.
+  - One root-cause cascade = one discovery for all failure rules sharing the same mechanism, even when symptoms appear on different user paths (balances, transaction history, payments, deposits).
+  - Authentication volume spikes (successful logins, new account creations) without failure evidence are standalone discoveries — never merge with infrastructure or database cascades.
   - Do not merge groups with different onset times unless you find an explicit causal chain. 
   - Keep detections in standalone discoveries when there is no match to justify grouping into a discovery.
   - Rules whose onset coincides are candidates for the same discovery; detection arrival time and batch boundaries are not incident boundaries.
-2. Determine wich rule started firing abnormally within the group. Assess whether the pattern or mechanism shifted and update the candidate `symptom_hypothesis` accordingly; if consistent, note "consistent through [most recent @timestamp]".
+2. Determine which rule started firing abnormally within the group. Assess whether the pattern or mechanism shifted and update the candidate `symptom_hypothesis` accordingly; if consistent, note "consistent through [most recent @timestamp]".
 
 ### Step 5: Emit Output
 
 **Pre emit gate**
 - Steps 1-4 are complete
 
-Build the complete `items` array, consolidating any duplicate explicit `event_id` or new-discovery fingerprint, apply field rules from `<field_rules>`, and set `status: "pending"` on every item (including continuations with explicit `event_id`), then call `platform_sig_events_events_write` exactly once. Inspect the aligned `results` array. If and only if individual results have `reason: "bulk_error"`, retry those input items once in a second call; never retry a top-level `outcome_unknown` error automatically.
+Build the complete `items` array, consolidating any duplicate explicit `event_id` or new-discovery fingerprint, apply field rules from `<field_rules>`, then call `platform_sig_events_events_write` exactly once. Status per item: new discoveries (`dedup_window` present, no `event_id`) → `status: "pending"`; continuations (explicit `event_id`, no `dedup_window`) → `status: "open"` to keep the episode on the default read path. Never pass both `event_id` and `dedup_window` on the same item. Inspect the aligned `results` array. If and only if individual results have `reason: "bulk_error"`, retry those input items once in a second call; never retry a top-level `outcome_unknown` error automatically.
 
 Set `written_rule_uuids` from the final results only: include rules belonging to `written: true` items and confirmed `duplicate_within_window` items. Exclude unresolved `bulk_error` items so their detections remain in the workflow queue.
 

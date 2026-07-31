@@ -28,7 +28,6 @@ const TS_SUBMITTED = '2024-01-02T00:00:00.000Z';
 const TS_LATER = '2024-01-03T00:00:00.000Z';
 
 const baseInput: EventsWriteInput = {
-  discovery_id: 'disc-1',
   status: 'open' as const,
   stream_names: ['logs.checkout'],
   title: 'Checkout latency',
@@ -790,4 +789,171 @@ describe('eventsWriteBulkHandler — dedup mode', () => {
       );
     }
   );
+
+  it('skips write when the in-window match has status pending', async () => {
+    const existingEvent = {
+      event_id: 'existing-pending-id',
+      event_uuid: 'existing-pending-uuid',
+      status: 'pending',
+      '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout'],
+      signals: dedupInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn(),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [dedupInput],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'duplicate_within_window',
+      existing_event_id: 'existing-pending-id',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('deduplicates when the stored episode has a wider stream set than the candidate', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
+      '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout', 'logs.payments'],
+      signals: dedupInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn(),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [{ ...dedupInput, stream_names: ['logs.payments'] }],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'duplicate_within_window',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it('treats omitted and empty change_point_type as equivalent for window dedup', async () => {
+    const existingEvent = {
+      event_id: 'existing-event-id',
+      event_uuid: 'existing-uuid',
+      status: 'open',
+      '@timestamp': new Date().toISOString(),
+      stream_names: ['logs.checkout'],
+      signals: [
+        {
+          type: 'detection',
+          metadata: { rule_uuid: 'rule-abc', rule_name: 'High Latency', change_point_type: '' },
+          confirmed: true,
+        } as never,
+      ],
+    };
+
+    const eventClient = {
+      findLatestActive: jest.fn().mockResolvedValue({ hits: [existingEvent] }),
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
+      findByEventId: noopFindByEventId,
+      bulkCreate: jest.fn(),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [makeDedupInputWithChangePointType(undefined)],
+    });
+
+    expect(results[0]).toMatchObject({
+      written: false,
+      skipped: true,
+      reason: 'duplicate_within_window',
+    });
+    expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+  });
+});
+
+describe('eventsWriteBulkHandler — continuation status', () => {
+  it('preserves open status when discovery sends pending on an open continuation', async () => {
+    const priorOpen = {
+      '@timestamp': TS_EARLIER,
+      event_uuid: 'prior-uuid',
+      event_id: 'checkout-open',
+      status: 'open' as const,
+      stream_names: ['logs.checkout'],
+      signals: baseInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout-open', priorOpen as never]])),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [priorOpen] }),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [
+        {
+          ...baseInput,
+          event_id: 'checkout-open',
+          status: 'pending',
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'open' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe('open');
+  });
+
+  it('preserves closed status when discovery sends pending on a closed continuation', async () => {
+    const priorClosed = {
+      '@timestamp': TS_EARLIER,
+      event_uuid: 'prior-uuid',
+      event_id: 'checkout-closed',
+      status: 'closed' as const,
+      stream_names: ['logs.checkout'],
+      signals: baseInput.signals,
+    };
+
+    const eventClient = {
+      findLatestActive: noopFindLatestActive,
+      findLatestByEventIds: jest
+        .fn()
+        .mockResolvedValue(new Map([['checkout-closed', priorClosed as never]])),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [priorClosed] }),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const results = await eventsWriteBulkHandler({
+      eventClient: eventClient as never,
+      inputs: [
+        {
+          ...baseInput,
+          event_id: 'checkout-closed',
+          status: 'pending',
+        },
+      ],
+    });
+
+    expect(results[0]).toMatchObject({ written: true, status: 'closed' });
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].status).toBe('closed');
+  });
 });

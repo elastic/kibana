@@ -301,7 +301,7 @@ export async function persistDiscoveriesForSnapshot(
 ): Promise<{ index: string; count: number }> {
   const discoveries = await fetchAllPaginated<SignificantEvent>(
     config,
-    '/internal/significant_events/events',
+    '/internal/significant_events/events?status=pending',
     'events'
   );
   return persistDocsForSnapshot(

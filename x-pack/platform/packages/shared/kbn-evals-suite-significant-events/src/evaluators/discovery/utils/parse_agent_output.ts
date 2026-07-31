@@ -30,29 +30,52 @@ type EventsWriteItemResult =
       existing_event_id?: string;
     };
 
-interface IndexedResult {
-  index: number;
-}
-
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
   steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId && step.params);
 
-const getBulkItems = <T>(params: Record<string, unknown> | undefined, toolId: string): T[] => {
+const getBulkItems = (params: Record<string, unknown> | undefined): Partial<SignificantEvent>[] => {
   if (!Array.isArray(params?.items)) {
-    throw new Error(`${toolId}: expected params.items to be an array, got ${typeof params?.items}`);
+    return [];
   }
-  return params.items as T[];
+  return params.items as Partial<SignificantEvent>[];
 };
 
-const validateAlignedResults = <T extends IndexedResult>(
-  results: T[],
-  itemCount: number,
-  toolId: string
-): T[] => {
-  if (results.length !== itemCount || results.some((result, index) => result.index !== index)) {
-    throw new Error(`${toolId} input and result arrays are not aligned`);
+const getAlignedResults = (
+  items: Partial<SignificantEvent>[],
+  results: EventsWriteItemResult[] | undefined
+): EventsWriteItemResult[] | undefined => {
+  if (!Array.isArray(results) || results.length !== items.length) {
+    return undefined;
+  }
+  if (results.some((result, index) => result.index !== index)) {
+    return undefined;
   }
   return results;
+};
+
+const parseEventsWriteStep = (
+  step: ConverseStep
+): { items: Partial<SignificantEvent>[]; results: EventsWriteItemResult[] } | undefined => {
+  const items = getBulkItems(step.params);
+  const rawResults = (step.results?.[0] as EventsWriteToolResult | undefined)?.data?.results;
+
+  if (items.length > 0) {
+    const alignedResults = getAlignedResults(items, rawResults);
+    return alignedResults ? { items, results: alignedResults } : undefined;
+  }
+
+  // Tool schema may accept a bare item object, but converse steps keep the raw LLM args.
+  if (!Array.isArray(rawResults) || rawResults.length === 0) {
+    return undefined;
+  }
+  if (rawResults.some((result, index) => result.index !== index)) {
+    return undefined;
+  }
+
+  return {
+    items: rawResults.map(() => ({})),
+    results: rawResults,
+  };
 };
 
 /**
@@ -60,13 +83,13 @@ const validateAlignedResults = <T extends IndexedResult>(
  */
 export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
-    const items = getBulkItems<Partial<SignificantEvent>>(step.params, 'events_write');
-    const toolResult = (step.results?.[0] as EventsWriteToolResult | undefined)?.data;
-    const results = toolResult?.results;
-    if (!Array.isArray(results)) {
-      throw new Error('events_write input and result arrays are not aligned');
+    const parsed = parseEventsWriteStep(step);
+    if (!parsed) {
+      return [];
     }
-    return validateAlignedResults(results, items.length, 'events_write')
+
+    const { items, results } = parsed;
+    return results
       .map((result, index) =>
         !result.written && result.reason !== 'duplicate_within_window'
           ? undefined
@@ -84,14 +107,11 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Significa
  * evaluators can distinguish the agent's continuation routing from the final write outcome.
  */
 export const extractRequestedEventIdsFromToolCall = (steps: ConverseStep[]): string[] =>
-  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
-    const items = Array.isArray(step.params?.items)
-      ? (step.params.items as Array<Partial<SignificantEvent>>)
-      : [];
-    return items
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) =>
+    getBulkItems(step.params)
       .map((item) => item.event_id)
-      .filter((eventId): eventId is string => typeof eventId === 'string' && eventId.length > 0);
-  });
+      .filter((eventId): eventId is string => typeof eventId === 'string' && eventId.length > 0)
+  );
 
 /**
  * Extract significant events from `events_write` tool call steps.
@@ -99,13 +119,13 @@ export const extractRequestedEventIdsFromToolCall = (steps: ConverseStep[]): str
  */
 export const extractSignificantEventsFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
-    const items = getBulkItems<Partial<SignificantEvent>>(step.params, 'events_write');
-    const toolResult = (step.results?.[0] as EventsWriteToolResult | undefined)?.data;
-    const results = toolResult?.results;
-    if (!Array.isArray(results)) {
-      throw new Error('events_write input and result arrays are not aligned');
+    const parsed = parseEventsWriteStep(step);
+    if (!parsed) {
+      return [];
     }
-    return validateAlignedResults(results, items.length, 'events_write')
+
+    const { items, results } = parsed;
+    return results
       .map((result, index) =>
         result.written
           ? ({

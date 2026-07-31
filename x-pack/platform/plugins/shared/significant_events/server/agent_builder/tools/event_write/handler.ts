@@ -43,7 +43,6 @@ import {
  */
 export type EventsWriteInput = Pick<
   SignificantEvent,
-  | 'discovery_id'
   | 'status'
   | 'stream_names'
   | 'title'
@@ -124,6 +123,8 @@ export type EventsWriteBulkResult =
 type EpisodeContextSource = Pick<SignificantEvent, '@timestamp'> &
   Partial<Pick<SignificantEvent, 'stream_names' | 'causal_features' | 'blast_radius'>>;
 
+const normalizeChangePointType = (value: string | undefined): string => value ?? '';
+
 const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] => {
   const uuids = (signals ?? [])
     .filter((signal): signal is Extract<SignalEntry, { type: 'detection' }> =>
@@ -155,7 +156,10 @@ const hasChangedChangePointType = (
   return submittedDetections.some((s) => {
     const existing = candidateByRule.get(s.metadata.rule_uuid);
     if (!existing) return false;
-    return s.metadata.change_point_type !== existing.metadata.change_point_type;
+    return (
+      normalizeChangePointType(s.metadata.change_point_type) !==
+      normalizeChangePointType(existing.metadata.change_point_type)
+    );
   });
 };
 
@@ -165,6 +169,34 @@ export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): str
   return [primaryStream, ...[...ruleUuids].sort()].join('|');
 };
 
+const ruleUuidSetsEqual = (left: string[], right: string[]): boolean => {
+  if (left.length !== right.length) return false;
+  const sortedLeft = [...left].sort();
+  const sortedRight = [...right].sort();
+  return sortedLeft.every((ruleUuid, index) => ruleUuid === sortedRight[index]);
+};
+
+/**
+ * Compares dedup identities using the union of stream names so continuation-widened episodes
+ * still match a new write that only carries a subset of the episode's streams.
+ */
+const dedupFingerprintsMatch = (
+  candidateStreams: string[],
+  candidateRuleUuids: string[],
+  event: SignificantEvent
+): boolean => {
+  const eventStreams = event.stream_names ?? [];
+  const eventRuleUuids = extractRuleUuids(event.signals);
+  if (!ruleUuidSetsEqual(candidateRuleUuids, eventRuleUuids)) return false;
+
+  const unionStreams = [...new Set([...eventStreams, ...candidateStreams])];
+  const unionFingerprint = makeFingerprint(unionStreams, candidateRuleUuids);
+  return (
+    unionFingerprint === makeFingerprint(candidateStreams, candidateRuleUuids) ||
+    unionFingerprint === makeFingerprint(eventStreams, eventRuleUuids)
+  );
+};
+
 /**
  * In-batch dedup key: fingerprint plus per-rule change_point_type so distinct operational
  * states (e.g. spike vs dip) are not collapsed within the same events_write batch.
@@ -172,7 +204,7 @@ export const makeFingerprint = (streamNames: string[], ruleUuids: string[]): str
 const makeInBatchDedupKey = (fingerprint: string, signals: SignalEntry[] | undefined): string => {
   const ruleTypes = (signals ?? [])
     .filter((s): s is Extract<SignalEntry, { type: 'detection' }> => s.type === 'detection')
-    .map((s) => `${s.metadata.rule_uuid}:${s.metadata.change_point_type ?? ''}`)
+    .map((s) => `${s.metadata.rule_uuid}:${normalizeChangePointType(s.metadata.change_point_type)}`)
     .sort()
     .join(',');
   return `${fingerprint}|${ruleTypes}`;
@@ -398,8 +430,7 @@ const resolveDedupSkips = (
         (ev) =>
           activeStatuses.includes(ev.status) &&
           ev['@timestamp'] >= candidate.windowFrom &&
-          makeFingerprint(ev.stream_names ?? [], extractRuleUuids(ev.signals)) ===
-            candidate.fingerprint &&
+          dedupFingerprintsMatch(candidate.input.stream_names, candidate.ruleUuids, ev) &&
           !hasChangedChangePointType(candidate.input.signals, ev)
       );
       if (duplicate) {
@@ -474,8 +505,18 @@ const buildPendingWrite = (
         blastRadius: rest.blast_radius ?? [],
       };
 
-  // Dedup writes land as "pending" candidates; snapshot writes persist caller-supplied status.
-  const status = candidate.mode === 'dedup' ? ('pending' as const) : candidate.input.status;
+  // Dedup writes land as "pending" candidates. Snapshot writes persist caller-supplied status,
+  // except continuations must not downgrade a settled episode to `pending` — discovery may
+  // blanket-set pending on every item, but open/closed/dismissed episodes keep their status.
+  const status =
+    candidate.mode === 'dedup'
+      ? ('pending' as const)
+      : isContinuation &&
+        candidate.input.status === 'pending' &&
+        latestEvent?.status &&
+        latestEvent.status !== 'pending'
+      ? latestEvent.status
+      : candidate.input.status;
 
   return {
     candidate,

@@ -21,7 +21,7 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
 
-  it('reports invalid bulk input parameters', () => {
+  it('skips invalid bulk input parameters', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
@@ -31,9 +31,33 @@ describe('extractDiscoveriesFromToolCall', () => {
       },
     ];
 
-    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
-      'events_write: expected params.items to be an array, got string'
-    );
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
+  });
+
+  it('extracts event_id from aligned tool results when params omit the items wrapper', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'dw-bare-item',
+        params: {
+          status: 'pending',
+          dedup_window: 'now-24h',
+          title: 'Bare item write',
+        },
+        results: [
+          {
+            data: {
+              results: [{ index: 0, event_id: 'event-1', event_uuid: 'uuid-1', written: true }],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1' }),
+    ]);
   });
 
   it('extracts aligned bulk results and omits failed items', () => {
@@ -71,7 +95,7 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
-  it('rejects misaligned discovery bulk results', () => {
+  it('skips misaligned discovery bulk results', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
@@ -82,12 +106,10 @@ describe('extractDiscoveriesFromToolCall', () => {
       },
     ];
 
-    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
-      'events_write input and result arrays are not aligned'
-    );
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
 
-  it('rejects reordered discovery bulk results', () => {
+  it('skips reordered discovery bulk results', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
@@ -115,9 +137,7 @@ describe('extractDiscoveriesFromToolCall', () => {
       },
     ];
 
-    expect(() => extractDiscoveriesFromToolCall(steps)).toThrow(
-      'events_write input and result arrays are not aligned'
-    );
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([]);
   });
 });
 
@@ -199,10 +219,7 @@ describe('extractSignificantEventsFromToolCall', () => {
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-bulk',
         params: {
-          items: [
-            { discovery_id: 'd-1', event_id: 'event-1' },
-            { discovery_id: 'd-2', event_id: 'event-2' },
-          ],
+          items: [{ event_id: 'event-1' }, { event_id: 'event-2' }],
         },
         results: [
           {
@@ -224,7 +241,7 @@ describe('extractSignificantEventsFromToolCall', () => {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-retry',
-        params: { items: [{ discovery_id: 'd-2', event_id: 'event-2' }] },
+        params: { items: [{ event_id: 'event-2' }] },
         results: [
           {
             data: {
@@ -243,23 +260,20 @@ describe('extractSignificantEventsFromToolCall', () => {
     ];
 
     expect(extractSignificantEventsFromToolCall(steps)).toEqual([
-      expect.objectContaining({ discovery_id: 'd-1', event_uuid: 'uuid-1' }),
-      expect.objectContaining({ discovery_id: 'd-2', event_uuid: 'uuid-2' }),
+      expect.objectContaining({ event_id: 'event-1', event_uuid: 'uuid-1' }),
+      expect.objectContaining({ event_id: 'event-2', event_uuid: 'uuid-2' }),
     ]);
     expect(extractSignificantEventsFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
-  it('rejects reordered event bulk results', () => {
+  it('skips reordered event bulk results', () => {
     const steps: ConverseStep[] = [
       {
         type: 'tool_call',
         tool_id: TOOL_ID_EVENTS_WRITE,
         tool_call_id: 'ew-reordered',
         params: {
-          items: [
-            { discovery_id: 'd-1', event_id: 'event-1' },
-            { discovery_id: 'd-2', event_id: 'event-2' },
-          ],
+          items: [{ event_id: 'event-1' }, { event_id: 'event-2' }],
         },
         results: [
           {
@@ -284,8 +298,6 @@ describe('extractSignificantEventsFromToolCall', () => {
       },
     ];
 
-    expect(() => extractSignificantEventsFromToolCall(steps)).toThrow(
-      'events_write input and result arrays are not aligned'
-    );
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([]);
   });
 });

@@ -49,6 +49,7 @@ export interface CompactEventSignal {
   stream_name: string;
   rule_uuid?: string;
   rule_name?: string;
+  change_point_type?: string;
   confirmed?: boolean;
   description?: string;
   collected_at?: string;
@@ -150,6 +151,7 @@ const toCompactEvent = (
       stream_name: signal.stream_name,
       rule_uuid: signal.metadata.rule_uuid,
       rule_name: signal.metadata.rule_name,
+      change_point_type: signal.metadata.change_point_type,
       confirmed: signal.confirmed,
       description: truncateCompactDescription(signal.description),
       collected_at: signal.collected_at,

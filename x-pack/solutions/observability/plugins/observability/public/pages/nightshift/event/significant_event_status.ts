@@ -20,11 +20,9 @@ export { getInvestigationProgressStatusLabel };
  * - Needs action: `open`
  * - Resolved: `closed` and `dismissed`
  *
- * The `STATUS_GROUP` map below is the single source of truth for this grouping so
- * the summary cards and event lists cannot drift apart. Because it is a
- * `Record<SignificantEventStatusOptions, StatusGroup>`, adding a status to the
- * schema (other than `pending`, which is excluded and treated as needs-action)
- * without classifying it here is a compile-time error.
+ * `pending` is excluded from Nightshift fetches (see significant-events API default
+ * filters) and is not shown in these lists. The grouping helpers below still map
+ * `pending` to needs-action for type exhaustiveness if it ever appears in a response.
  *
  * The "Investigating" / "Investigated" badge is derived separately from
  * `event.investigations` (see `getInvestigationStatusLabel`).
