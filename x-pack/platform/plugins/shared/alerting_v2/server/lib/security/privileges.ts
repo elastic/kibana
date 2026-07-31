@@ -8,13 +8,13 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import type { AppCategory } from '@kbn/core/types';
+import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 import { APP_ID } from '../constants';
 import {
   ALERTING_V2_API_PRIVILEGES,
   ALERTING_V2_FEATURES,
   type AlertingV2FeatureDefinition,
 } from '../../../common/feature_privileges';
-import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 
 export { ALERTING_V2_API_PRIVILEGES };
 
