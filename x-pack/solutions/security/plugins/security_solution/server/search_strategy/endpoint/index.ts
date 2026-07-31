@@ -7,7 +7,6 @@
 
 import { map, mergeMap, from, forkJoin, of } from 'rxjs';
 import { omit } from 'lodash';
-import type { ISearchRequestParams } from '@kbn/search-types';
 import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
@@ -35,11 +34,23 @@ const resolveIndices = (index: string | string[] | undefined): string[] => {
   return typeof index === 'string' ? index.split(',') : [];
 };
 
-/** Keeps the response, and so the parsing and the aggregation shape, identical to a genuine no-hit search */
-const matchNothing = (params: ISearchRequestParams): ISearchRequestParams => ({
-  ...params,
-  query: { bool: { must_not: { match_all: {} } } },
-});
+/**
+ * Stands in for a search that was never sent. Carries no `aggregations`, which every factory parser
+ * already degrades from, so what the caller receives is indistinguishable from a no-data search.
+ */
+const noResults = <T extends EndpointFactoryQueryTypes>(): EndpointStrategyParseResponseType<T> =>
+  ({
+    rawResponse: {
+      took: 0,
+      timed_out: false,
+      _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+      hits: { total: { value: 0, relation: 'eq' }, max_score: null, hits: [] },
+    },
+    isPartial: false,
+    isRunning: false,
+    total: 0,
+    loaded: 0,
+  } as unknown as EndpointStrategyParseResponseType<T>);
 
 export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTypes>(
   data: PluginStart,
@@ -83,13 +94,13 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
           const dsl = queryFactory.buildDsl(strictRequest, { authz });
           const useInternalUser = shouldUseInternalSearchClient(resolveIndices(dsl.index), cpsRead);
 
-          const runSearch = (params: typeof dsl) =>
+          const runSearch = () =>
             useInternalUser
-              ? es.search({ ...strictRequest, params }, options, deps)
+              ? es.search({ ...strictRequest, params: dsl }, options, deps)
               : service
                   .getScopedSearchClient(deps.request)
                   .search<EndpointStrategyRequestType<T>, EndpointStrategyParseResponseType<T>>(
-                    { ...strictRequest, params },
+                    { ...strictRequest, params: dsl },
                     // `options.strategy` names this strategy and would recurse. `projectRouting` is
                     // dropped so the routing stays the one this client derived from the active space.
                     {
@@ -121,8 +132,9 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
           return isVisibleInSpace$.pipe(
             // An action the caller cannot see resolves to no results rather than an error. Every
             // other way this data can go missing degrades to empty, and the consumers of this
-            // strategy poll on a loop while they hold no data.
-            mergeMap((isVisibleInSpace) => runSearch(isVisibleInSpace ? dsl : matchNothing(dsl))),
+            // strategy poll on a loop while they hold no data. Nothing is sent to Elasticsearch:
+            // this query counts responses in a `global` aggregation, which a query cannot bound.
+            mergeMap((isVisibleInSpace) => (isVisibleInSpace ? runSearch() : of(noResults<T>()))),
             map((response) => {
               return {
                 ...response,
@@ -141,8 +153,9 @@ export const endpointSearchStrategyProvider = <T extends EndpointFactoryQueryTyp
       );
     },
     cancel: async (id, options, deps) => {
-      // Async search ids belong to whoever issued them. Every query this strategy builds reads a
-      // Defend-owned index, so with CPS on they all went out on the scoped client.
+      // Async search ids belong to whoever issued them, and there is no DSL here to re-derive the
+      // routing from. No factory query currently resolves to a Fleet index, so with CPS on the
+      // search this id belongs to went out on the scoped client.
       if (endpointContext.service.isCpsRead(deps.request)) {
         return endpointContext.service.getScopedSearchClient(deps.request).cancel(id, options);
       }

@@ -205,6 +205,8 @@ describe('endpointSearchStrategyProvider', () => {
       const resultsRequest = {
         factoryQueryType: ResponseActionsQueries.results,
         actionId: 'action-1',
+        agents: 1,
+        expiration: new Date(Date.now() + 60_000).toISOString(),
         sort: { field: '@timestamp', order: 'desc' as const },
       } as unknown as SearchArgs[0];
 
@@ -232,11 +234,21 @@ describe('endpointSearchStrategyProvider', () => {
           { cpsEnabled: true }
         );
 
-        await lastValueFrom(provider.search(resultsRequest, options, deps));
+        const response = await lastValueFrom(provider.search(resultsRequest, options, deps));
 
-        expect(scopedSearch.mock.calls[0][0].params.query).toEqual({
-          bool: { must_not: { match_all: {} } },
-        });
+        // Nothing may reach Elasticsearch: the response counts live in a `global` aggregation, which
+        // is built from the search context rather than from the query, so no query can suppress them
+        expect(scopedSearch).not.toHaveBeenCalled();
+        expect(response).toEqual(
+          expect.objectContaining({
+            edges: [],
+            isCompleted: false,
+            isExpired: false,
+            wasSuccessful: true,
+            status: 'pending',
+          })
+        );
+        expect(response.rawResponse.aggregations).toBeUndefined();
       });
 
       it('propagates a failure that is not the action being invisible', async () => {
