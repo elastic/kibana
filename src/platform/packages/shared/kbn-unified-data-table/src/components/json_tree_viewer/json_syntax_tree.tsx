@@ -8,14 +8,19 @@
  */
 
 /**
- * Prototype "Direction A" for the JSON viewer design review.
+ * Prototype "Direction B" for the JSON viewer design review.
  *
- * Instead of imitating literal JSON text (quotes, braces, trailing commas) on top of
- * `EuiTreeView`, this renders a clean *field tree*: `key: value` rows, a visible child
- * count on collapsed nodes, and controlled expansion that never remounts the tree — so
- * expand/collapse-all keep keyboard focus and scroll position. It is a self-contained,
- * accessible tree (roving tabindex + arrow-key navigation) so we are not constrained by
- * `EuiTreeView`'s lack of a controlled-expansion API.
+ * This keeps the self-contained, accessible tree of Prototype A (`json_field_tree`):
+ * controlled expansion that never remounts (so expand/collapse-all keep keyboard focus
+ * and scroll), roving-tabindex arrow-key navigation, and per-value copy buttons that are
+ * plain icon buttons inside `div` rows (no nested-interactive a11y violations).
+ *
+ * But it renders the *literal JSON styling* of the current `JsonTreeViewer`: quoted keys,
+ * opening/closing braces on their own lines, trailing commas, a `{ N fields }` preview on
+ * collapsed nodes, and colour-coded values. Because expansion state lives in JS, the
+ * closing bracket is a real interleaved line and the collapsed preview is a plain JS
+ * branch — none of the `key`-remount, negative-margin, `:has()` or `!important` hacks the
+ * `EuiTreeView`-based version needs.
  */
 
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
@@ -38,12 +43,15 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = Record<string, unknown> | unknown[] | JsonPrimitive | undefined;
 
-export interface JsonFieldTreeProps {
+export interface JsonSyntaxTreeProps {
   json: JsonValue;
 }
 
 const INITIAL_VISIBLE_ITEMS = 10;
 const VISIBLE_ITEMS_INCREMENT = 10;
+
+const OPEN_BRACKET = { object: '{', array: '[' } as const;
+const CLOSE_BRACKET = { object: '}', array: ']' } as const;
 
 // ---- Data model (a plain tree, not React elements) ----
 
@@ -87,7 +95,7 @@ const normalizePrimitive = (value: unknown): JsonPrimitive => {
   return null;
 };
 
-const getNodeId = (path: string[]) => `json-field-${path.join('__')}`;
+const getNodeId = (path: string[]) => `json-syntax-${path.join('__')}`;
 
 const buildNode = ({
   key,
@@ -160,47 +168,93 @@ const buildNodes = (json: JsonValue): JsonNode[] => {
   return [buildNode({ key: 'value', path: ['value'], value: json, isArrayItem: false })];
 };
 
-const collectCollectionIds = (nodes: JsonNode[]): string[] =>
-  nodes.flatMap((node) =>
-    node.kind === 'collection' ? [node.id, ...collectCollectionIds(node.children)] : []
-  );
+// Ids of the collections that can actually be toggled (empty `{}` / `[]` render inline and
+// are not expandable). Drives the Expand/Collapse-all control and `isAllExpanded`.
+const collectExpandableIds = (nodes: JsonNode[]): string[] =>
+  nodes.flatMap((node) => {
+    if (node.kind !== 'collection') return [];
+    const childIds = collectExpandableIds(node.children);
+    return node.children.length > 0 ? [node.id, ...childIds] : childIds;
+  });
 
-// ---- Flatten visible nodes (drives both rendering order and keyboard navigation) ----
+// ---- Flatten visible rows (drives rendering order and keyboard navigation) ----
+//
+// Unlike Prototype A, an expanded collection also emits a synthetic `closing` row after
+// its children, so the tree reads like formatted JSON. Closing rows are presentational
+// (`aria-hidden`, no role, not focusable) and are excluded from keyboard navigation.
 
-interface FlatRow {
+interface NodeRow {
+  kind: 'node';
   node: JsonNode;
   depth: number;
   hasChildren: boolean;
   isExpanded: boolean;
+  // Whether a sibling follows this node, i.e. it needs a trailing comma.
+  trailingComma: boolean;
   parentId: string | null;
   setSize: number;
   posInSet: number;
 }
 
-const flattenVisible = (
+interface ClosingRow {
+  kind: 'closing';
+  id: string;
+  depth: number;
+  collectionType: CollectionType;
+  trailingComma: boolean;
+}
+
+type RenderRow = NodeRow | ClosingRow;
+
+const isNodeRow = (row: RenderRow): row is NodeRow => row.kind === 'node';
+
+const flattenRows = (
   nodes: JsonNode[],
   expanded: ReadonlySet<string>,
   depth: number,
   parentId: string | null,
-  out: FlatRow[]
-): FlatRow[] => {
+  out: RenderRow[]
+): RenderRow[] => {
   nodes.forEach((node, index) => {
+    const trailingComma = index < nodes.length - 1;
     const hasChildren = node.kind === 'collection' && node.children.length > 0;
     const isExpanded = hasChildren && expanded.has(node.id);
     out.push({
+      kind: 'node',
       node,
       depth,
       hasChildren,
       isExpanded,
+      trailingComma,
       parentId,
       setSize: nodes.length,
       posInSet: index + 1,
     });
     if (isExpanded && node.kind === 'collection') {
-      flattenVisible(node.children, expanded, depth + 1, node.id, out);
+      flattenRows(node.children, expanded, depth + 1, node.id, out);
+      out.push({
+        kind: 'closing',
+        id: `${node.id}__close`,
+        depth,
+        collectionType: node.collectionType,
+        trailingComma,
+      });
     }
   });
   return out;
+};
+
+const collectionCountLabel = (node: CollectionNode) => {
+  const count = node.children.length;
+  return node.collectionType === 'array'
+    ? i18n.translate('unifiedDataTable.jsonSyntaxTree.itemCount', {
+        defaultMessage: '{count, plural, one {# item} other {# items}}',
+        values: { count },
+      })
+    : i18n.translate('unifiedDataTable.jsonSyntaxTree.fieldCount', {
+        defaultMessage: '{count, plural, one {# field} other {# fields}}',
+        values: { count },
+      });
 };
 
 // ---- Styles ----
@@ -211,6 +265,13 @@ const treeStyles = {
       fontFamily: euiTheme.font.familyCode,
       margin: 0,
       padding: 0,
+    }),
+  // Root-level braces sit flush-left so the top-level fields read as nested inside them.
+  rootBracket: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      color: euiTheme.colors.textParagraph,
+      paddingBlock: euiTheme.size.xxs,
+      paddingInlineStart: euiTheme.size.xs,
     }),
   row: ({ euiTheme }: UseEuiTheme) =>
     css({
@@ -232,13 +293,19 @@ const treeStyles = {
         outlineOffset: `-${euiTheme.focus.width}`,
       },
       // Reveal the per-value copy button only while the row is hovered or focused.
-      '&:hover .jsonFieldTreeCopyButton, &:focus-within .jsonFieldTreeCopyButton': {
+      '&:hover .jsonSyntaxTreeCopyButton, &:focus-within .jsonSyntaxTreeCopyButton': {
         opacity: 1,
       },
     }),
   expandableRow: () => css({ cursor: 'pointer' }),
-  copyButton: ({ euiTheme }: UseEuiTheme) =>
-    css({ opacity: 0, marginInlineStart: euiTheme.size.xs, '&:focus-visible': { opacity: 1 } }),
+  // Closing brackets share the row's vertical rhythm but are inert (no hover/focus).
+  closingRow: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      display: 'flex',
+      alignItems: 'center',
+      gap: euiTheme.size.xs,
+      minHeight: euiTheme.size.l,
+    }),
   caret: ({ euiTheme }: UseEuiTheme) =>
     css({
       flexShrink: 0,
@@ -247,32 +314,51 @@ const treeStyles = {
       justifyContent: 'center',
       color: euiTheme.colors.textSubdued,
     }),
-  // Key + separator + value share one inline-flow container so that a wrapping value keeps
-  // its key on the first line, while single-line rows still centre vertically (see `row`).
+  // The syntax tokens (key, punctuation, value, comma) share one inline-flow container so
+  // they read like a line of JSON and wrap naturally; `minWidth: 0` lets long values wrap
+  // instead of overflowing the row.
   label: () => css({ minWidth: 0 }),
-  key: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      color: euiTheme.colors.textParagraph,
-      fontWeight: euiTheme.font.weight.medium,
-    }),
-  separator: ({ euiTheme }: UseEuiTheme) =>
-    css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
+  key: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
+  punctuation: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textSubdued }),
+  bracket: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.textParagraph }),
   count: ({ euiTheme }: UseEuiTheme) =>
-    css({ color: euiTheme.colors.textSubdued, marginInlineStart: euiTheme.size.xs }),
+    css({ color: euiTheme.colors.textSubdued, marginInline: euiTheme.size.xs }),
+  copyButton: ({ euiTheme }: UseEuiTheme) =>
+    css({ opacity: 0, marginInlineStart: euiTheme.size.xs, '&:focus-visible': { opacity: 1 } }),
   // Values: colours come from the colourblind-safe visualisation palette (not the
-  // danger/success status tokens), and the value formatting itself (quotes, keywords)
-  // conveys type so we never rely on colour alone.
+  // danger/success status tokens), and the formatting itself (quotes, keywords) conveys
+  // type so we never rely on colour alone.
   value: () => css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
   valueString: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.vis.euiColorVisText1 }),
-  // Numbers and booleans share one scalar colour (blue, distinct from the string teal);
-  // the `true`/`false` keyword vs bare digits already distinguishes them, so a second
-  // hue would only add noise. We deliberately avoid a red/green pairing.
+  // Numbers and booleans share one scalar colour (distinct from the string hue); the
+  // `true`/`false` keyword vs bare digits already distinguishes them. No red/green pairing.
   valueScalar: ({ euiTheme }: UseEuiTheme) => css({ color: euiTheme.colors.vis.euiColorVisText2 }),
   valueNull: ({ euiTheme }: UseEuiTheme) =>
     css({ color: euiTheme.colors.textSubdued, fontStyle: 'italic' }),
 };
 
-// ---- Value rendering ----
+// ---- Label sub-components ----
+
+// Renders the `"key":` prefix. Array items are positional, so they render as bare values
+// with no key (matching JSON, where array elements have no key).
+const KeyPrefix = memo(function KeyPrefix({
+  name,
+  isArrayItem,
+}: {
+  name: string;
+  isArrayItem: boolean;
+}) {
+  const styles = useMemoCss(treeStyles);
+  if (isArrayItem) return null;
+  return (
+    <>
+      <span css={styles.punctuation}>{'"'}</span>
+      <span css={styles.key}>{name}</span>
+      <span css={styles.punctuation}>{'"'}</span>
+      <span css={styles.punctuation}>:</span>{' '}
+    </>
+  );
+});
 
 const PrimitiveValue = memo(function PrimitiveValue({
   primitiveType,
@@ -288,23 +374,24 @@ const PrimitiveValue = memo(function PrimitiveValue({
   if (primitiveType === 'number' || primitiveType === 'boolean') {
     return <span css={[styles.value, styles.valueScalar]}>{String(value)}</span>;
   }
-  return (
-    <span css={[styles.value, styles.valueNull]}>
-      {i18n.translate('unifiedDataTable.jsonFieldTree.nullValue', { defaultMessage: 'null' })}
-    </span>
-  );
+  return <span css={[styles.value, styles.valueNull]}>null</span>;
+});
+
+const Comma = memo(function Comma() {
+  const styles = useMemoCss(treeStyles);
+  return <span css={styles.punctuation}>,</span>;
 });
 
 const ValueCopyButton = memo(function ValueCopyButton({ value }: { value: JsonPrimitive }) {
   const styles = useMemoCss(treeStyles);
-  const label = i18n.translate('unifiedDataTable.jsonFieldTree.copyValue', {
+  const label = i18n.translate('unifiedDataTable.jsonSyntaxTree.copyValue', {
     defaultMessage: 'Copy value',
   });
   return (
     <EuiToolTip content={label} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={label}
-        className="jsonFieldTreeCopyButton"
+        className="jsonSyntaxTreeCopyButton"
         color="text"
         css={styles.copyButton}
         iconSize="s"
@@ -319,29 +406,75 @@ const ValueCopyButton = memo(function ValueCopyButton({ value }: { value: JsonPr
   );
 });
 
-const collectionCountLabel = (node: CollectionNode) => {
-  const count = node.children.length;
-  return node.collectionType === 'array'
-    ? i18n.translate('unifiedDataTable.jsonFieldTree.itemCount', {
-        defaultMessage: '{count, plural, one {# item} other {# items}}',
-        values: { count },
-      })
-    : i18n.translate('unifiedDataTable.jsonFieldTree.fieldCount', {
-        defaultMessage: '{count, plural, one {# field} other {# fields}}',
-        values: { count },
-      });
-};
+// The body of a node row (everything after the caret): key prefix + value/brackets + comma.
+const NodeLabel = memo(function NodeLabel({ row }: { row: NodeRow }) {
+  const styles = useMemoCss(treeStyles);
+  const { node, isExpanded, hasChildren, trailingComma } = row;
+
+  if (node.kind === 'leaf') {
+    return (
+      <span css={styles.label}>
+        <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+        <PrimitiveValue primitiveType={node.primitiveType} value={node.value} />
+        {trailingComma && <Comma />}
+        <ValueCopyButton value={node.value} />
+      </span>
+    );
+  }
+
+  const open = OPEN_BRACKET[node.collectionType];
+  const close = CLOSE_BRACKET[node.collectionType];
+
+  // Empty collection: render `{}` / `[]` inline (never expandable).
+  if (!hasChildren) {
+    return (
+      <span css={styles.label}>
+        <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+        <span css={styles.bracket}>{`${open}${close}`}</span>
+        {trailingComma && <Comma />}
+      </span>
+    );
+  }
+
+  // Expanded: just the opening bracket; children and the closing bracket render as
+  // their own rows. The trailing comma belongs to the closing bracket row.
+  if (isExpanded) {
+    return (
+      <span css={styles.label}>
+        <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+        <span css={styles.bracket}>{open}</span>
+      </span>
+    );
+  }
+
+  // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`.
+  return (
+    <span css={styles.label}>
+      <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
+      <span css={styles.bracket}>{open}</span>
+      <span css={styles.count}>{collectionCountLabel(node)}</span>
+      <span css={styles.bracket}>{close}</span>
+      {trailingComma && <Comma />}
+    </span>
+  );
+});
 
 // ---- Main component ----
 
-export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTreeProps) {
+export const JsonSyntaxTree = memo(function JsonSyntaxTree({ json }: JsonSyntaxTreeProps) {
   const styles = useMemoCss(treeStyles);
   const { euiTheme } = useEuiTheme();
   const codeFontCss = css(useEuiFontSize('xs'));
 
   const nodes = useMemo(() => buildNodes(json), [json]);
-  const allCollectionIds = useMemo(() => collectCollectionIds(nodes), [nodes]);
+  const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
   const rootIsArray = Array.isArray(json);
+
+  const { openBracket, closeBracket } = useMemo(() => {
+    if (Array.isArray(json)) return { openBracket: '[', closeBracket: ']' };
+    if (isJsonObject(json)) return { openBracket: '{', closeBracket: '}' };
+    return { openBracket: null, closeBracket: null };
+  }, [json]);
 
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(() => new Set());
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_ITEMS);
@@ -355,20 +488,20 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
   );
 
   const rows = useMemo(
-    () => flattenVisible(visibleTopLevel, expanded, 0, null, []),
+    () => flattenRows(visibleTopLevel, expanded, 0, null, []),
     [visibleTopLevel, expanded]
   );
 
-  const orderedIds = useMemo(() => rows.map((row) => row.node.id), [rows]);
-  const rowById = useMemo(() => new Map(rows.map((row) => [row.node.id, row])), [rows]);
+  const orderedIds = useMemo(() => rows.filter(isNodeRow).map((row) => row.node.id), [rows]);
+  const orderedIdSet = useMemo(() => new Set(orderedIds), [orderedIds]);
 
   const hiddenCount = nodes.length - visibleTopLevel.length;
   const nextChunk = Math.min(VISIBLE_ITEMS_INCREMENT, hiddenCount);
-  const hasControls = allCollectionIds.length > 0;
-  const isAllExpanded = hasControls && allCollectionIds.every((id) => expanded.has(id));
+  const hasControls = expandableIds.length > 0;
+  const isAllExpanded = hasControls && expandableIds.every((id) => expanded.has(id));
 
   // Exactly one row is part of the tab order (roving tabindex).
-  const activeRowId = activeId && rowById.has(activeId) ? activeId : orderedIds[0] ?? null;
+  const activeRowId = activeId && orderedIdSet.has(activeId) ? activeId : orderedIds[0] ?? null;
 
   const setExpandedFor = useCallback((id: string, shouldExpand: boolean) => {
     setExpanded((prev) => {
@@ -386,9 +519,9 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
   );
 
   const expandAll = useCallback(() => {
-    setExpanded(new Set(allCollectionIds));
+    setExpanded(new Set(expandableIds));
     setVisibleCount(nodes.length);
-  }, [allCollectionIds, nodes.length]);
+  }, [expandableIds, nodes.length]);
 
   const collapseAll = useCallback(() => setExpanded(new Set()), []);
 
@@ -399,7 +532,7 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
   }, []);
 
   const onRowKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>, row: FlatRow) => {
+    (event: React.KeyboardEvent<HTMLDivElement>, row: NodeRow) => {
       const index = orderedIds.indexOf(row.node.id);
       switch (event.key) {
         case 'ArrowDown':
@@ -444,26 +577,26 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
 
   const paginationLabels = {
     more: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonFieldTree.showMoreItems', {
+      ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showMoreItems', {
           defaultMessage: 'Show {count} more {count, plural, one {item} other {items}}',
           values: { count: nextChunk },
         })
-      : i18n.translate('unifiedDataTable.jsonFieldTree.showMoreFields', {
+      : i18n.translate('unifiedDataTable.jsonSyntaxTree.showMoreFields', {
           defaultMessage: 'Show {count} more {count, plural, one {field} other {fields}}',
           values: { count: nextChunk },
         }),
     all: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonFieldTree.showAllItems', {
+      ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showAllItems', {
           defaultMessage: 'Show all items',
         })
-      : i18n.translate('unifiedDataTable.jsonFieldTree.showAllFields', {
+      : i18n.translate('unifiedDataTable.jsonSyntaxTree.showAllFields', {
           defaultMessage: 'Show all fields',
         }),
     fewer: rootIsArray
-      ? i18n.translate('unifiedDataTable.jsonFieldTree.showFewerItems', {
+      ? i18n.translate('unifiedDataTable.jsonSyntaxTree.showFewerItems', {
           defaultMessage: 'Show fewer items',
         })
-      : i18n.translate('unifiedDataTable.jsonFieldTree.showFewerFields', {
+      : i18n.translate('unifiedDataTable.jsonSyntaxTree.showFewerFields', {
           defaultMessage: 'Show fewer fields',
         }),
   };
@@ -480,10 +613,10 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
               size="xs"
             >
               {isAllExpanded
-                ? i18n.translate('unifiedDataTable.jsonFieldTree.collapseAll', {
+                ? i18n.translate('unifiedDataTable.jsonSyntaxTree.collapseAll', {
                     defaultMessage: 'Collapse all',
                   })
-                : i18n.translate('unifiedDataTable.jsonFieldTree.expandAll', {
+                : i18n.translate('unifiedDataTable.jsonSyntaxTree.expandAll', {
                     defaultMessage: 'Expand all',
                   })}
             </EuiButtonEmpty>
@@ -491,64 +624,73 @@ export const JsonFieldTree = memo(function JsonFieldTree({ json }: JsonFieldTree
         </EuiFlexGroup>
       )}
 
-      <div
-        css={[styles.wrapper, codeFontCss]}
-        role="tree"
-        aria-label={i18n.translate('unifiedDataTable.jsonFieldTree.treeAriaLabel', {
-          defaultMessage: 'JSON field tree',
-        })}
-        data-test-subj="jsonFieldTree"
-      >
-        {rows.map((row) => {
-          const { node, depth, hasChildren, isExpanded } = row;
-          return (
-            <div
-              key={node.id}
-              ref={(element) => {
-                if (element) rowRefs.current.set(node.id, element);
-                else rowRefs.current.delete(node.id);
-              }}
-              role="treeitem"
-              aria-level={depth + 1}
-              aria-setsize={row.setSize}
-              aria-posinset={row.posInSet}
-              aria-expanded={hasChildren ? isExpanded : undefined}
-              aria-selected={node.id === activeRowId}
-              tabIndex={node.id === activeRowId ? 0 : -1}
-              css={hasChildren ? [styles.row, styles.expandableRow] : styles.row}
-              style={{
-                paddingInlineStart: `calc(${euiTheme.size.s} + ${depth} * ${euiTheme.size.base})`,
-              }}
-              onClick={() => hasChildren && toggle(node.id)}
-              onFocus={() => setActiveId(node.id)}
-              onKeyDown={(event) => onRowKeyDown(event, row)}
-              data-test-subj={`jsonFieldTreeRow-${node.id}`}
-            >
-              {hasChildren ? (
-                <span css={styles.caret}>
-                  <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} size="s" aria-hidden />
-                </span>
-              ) : (
-                <span css={styles.caret} aria-hidden />
-              )}
+      <div css={[styles.wrapper, codeFontCss]}>
+        {openBracket !== null && <div css={styles.rootBracket}>{openBracket}</div>}
 
-              <span css={styles.label}>
-                {/* Array items are positional, so they render as bare values with no index. */}
-                {!node.isArrayItem && <span css={styles.key}>{node.key}</span>}
+        <div
+          role="tree"
+          aria-label={i18n.translate('unifiedDataTable.jsonSyntaxTree.treeAriaLabel', {
+            defaultMessage: 'JSON tree view',
+          })}
+          data-test-subj="jsonSyntaxTree"
+        >
+          {rows.map((row) => {
+            const paddingInlineStart = `calc(${euiTheme.size.s} + ${row.depth} * ${euiTheme.size.base})`;
 
-                {node.kind === 'collection' ? (
-                  <span css={styles.count}>{collectionCountLabel(node)}</span>
+            if (row.kind === 'closing') {
+              return (
+                <div
+                  key={row.id}
+                  aria-hidden
+                  css={styles.closingRow}
+                  style={{ paddingInlineStart }}
+                  data-test-subj="jsonSyntaxTreeClosingBracket"
+                >
+                  <span css={styles.caret} aria-hidden />
+                  <span css={styles.label}>
+                    <span css={styles.bracket}>{CLOSE_BRACKET[row.collectionType]}</span>
+                    {row.trailingComma && <Comma />}
+                  </span>
+                </div>
+              );
+            }
+
+            const { node, hasChildren, isExpanded } = row;
+            return (
+              <div
+                key={node.id}
+                ref={(element) => {
+                  if (element) rowRefs.current.set(node.id, element);
+                  else rowRefs.current.delete(node.id);
+                }}
+                role="treeitem"
+                aria-level={row.depth + 1}
+                aria-setsize={row.setSize}
+                aria-posinset={row.posInSet}
+                aria-expanded={hasChildren ? isExpanded : undefined}
+                aria-selected={node.id === activeRowId}
+                tabIndex={node.id === activeRowId ? 0 : -1}
+                css={hasChildren ? [styles.row, styles.expandableRow] : styles.row}
+                style={{ paddingInlineStart }}
+                onClick={() => hasChildren && toggle(node.id)}
+                onFocus={() => setActiveId(node.id)}
+                onKeyDown={(event) => onRowKeyDown(event, row)}
+                data-test-subj={`jsonSyntaxTreeRow-${node.id}`}
+              >
+                {hasChildren ? (
+                  <span css={styles.caret}>
+                    <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} size="s" aria-hidden />
+                  </span>
                 ) : (
-                  <>
-                    {!node.isArrayItem && <span css={styles.separator}>:</span>}
-                    <PrimitiveValue primitiveType={node.primitiveType} value={node.value} />
-                    <ValueCopyButton value={node.value} />
-                  </>
+                  <span css={styles.caret} aria-hidden />
                 )}
-              </span>
-            </div>
-          );
-        })}
+                <NodeLabel row={row} />
+              </div>
+            );
+          })}
+        </div>
+
+        {closeBracket !== null && <div css={styles.rootBracket}>{closeBracket}</div>}
       </div>
 
       {(hiddenCount > 0 || visibleCount > INITIAL_VISIBLE_ITEMS) && (
