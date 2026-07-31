@@ -18,10 +18,12 @@ const INITIAL_STATE = {
 
 export function useServiceAgentFetcher({
   serviceName,
+  environment,
   start,
   end,
 }: {
   serviceName?: string;
+  environment: string;
   start: string;
   end: string;
 }) {
@@ -35,12 +37,12 @@ export function useServiceAgentFetcher({
         return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { environment, start, end },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, environment, start, end]
   );
 
   return { ...data, status, error };
