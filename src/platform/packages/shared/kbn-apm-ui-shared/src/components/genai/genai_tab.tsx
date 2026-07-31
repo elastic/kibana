@@ -80,9 +80,14 @@ interface Props {
   genAi: GenAiFields;
   /** When provided, copy-button clicks are tracked via `data-ebt-*` attributes. */
   ebt?: GenAiEbtProps;
+  /**
+   * When provided, replaces the built-in Details table — e.g. with the doc
+   * viewer's field table that offers filter actions in the Discover context.
+   */
+  detailsSlot?: React.ReactNode;
 }
 
-export function GenAiTab({ genAi, ebt }: Props) {
+export function GenAiTab({ genAi, ebt, detailsSlot }: Props) {
   const {
     operationName,
     requestModel,
@@ -212,7 +217,7 @@ export function GenAiTab({ genAi, ebt }: Props) {
       )}
 
       {/* ── Section 2: Details ─────────────────────────────────────────── */}
-      {detailRows.length > 0 && (
+      {(detailsSlot != null || detailRows.length > 0) && (
         <>
           <EuiSpacer size="m" />
           <GenAiSection
@@ -221,18 +226,20 @@ export function GenAiTab({ genAi, ebt }: Props) {
               defaultMessage: 'Details',
             })}
           >
-            <EuiBasicTable
-              itemId="id"
-              tableLayout="auto"
-              compressed
-              items={detailRows}
-              columns={DETAIL_COLUMNS}
-              data-test-subj="genAiDetails"
-              css={detailTableCss}
-              tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
-                defaultMessage: 'GenAI details',
-              })}
-            />
+            {detailsSlot ?? (
+              <EuiBasicTable
+                itemId="id"
+                tableLayout="auto"
+                compressed
+                items={detailRows}
+                columns={DETAIL_COLUMNS}
+                data-test-subj="genAiDetails"
+                css={detailTableCss}
+                tableCaption={i18n.translate('apmUiShared.genAi.section.details.tableCaption', {
+                  defaultMessage: 'GenAI details',
+                })}
+              />
+            )}
           </GenAiSection>
         </>
       )}

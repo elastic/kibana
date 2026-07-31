@@ -17,10 +17,18 @@ import {
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../ebt_constants';
+import { GenAiDetailsTable, hasGenAiDetailFields } from './genai_details_table';
 import { useGenAiData } from './use_genai_data';
 
 export function DocViewerObsTracesGenAi({
   hit,
+  dataView,
+  columnsMeta,
+  textBasedHits,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+  columns,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: DocViewRenderProps) {
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
@@ -57,7 +65,24 @@ export function DocViewerObsTracesGenAi({
       }
     >
       <EuiSpacer size="m" />
-      <GenAiTab genAi={genAi} ebt={{ element: TRACES_DOC_VIEWER_EBT_ELEMENTS.GENAI_TAB }} />
+      <GenAiTab
+        genAi={genAi}
+        ebt={{ element: TRACES_DOC_VIEWER_EBT_ELEMENTS.GENAI_TAB }}
+        detailsSlot={
+          hasGenAiDetailFields(hit.flattened) ? (
+            <GenAiDetailsTable
+              hit={hit}
+              dataView={dataView}
+              columnsMeta={columnsMeta}
+              textBasedHits={textBasedHits}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+              columns={columns}
+            />
+          ) : undefined
+        }
+      />
     </div>
   );
 }

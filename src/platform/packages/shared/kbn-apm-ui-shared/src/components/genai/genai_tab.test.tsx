@@ -53,6 +53,31 @@ describe('GenAiTab', () => {
     expect(screen.getByTestId('genAiPillOutputTokens')).toHaveTextContent('Output tokens: 1,438');
   });
 
+  it('renders detailsSlot in place of the built-in details table', () => {
+    render(
+      <EuiThemeProvider>
+        <GenAiTab
+          genAi={{ ...baseFields, responseModel: 'gpt-4o-2024-08-06' }}
+          detailsSlot={<div data-test-subj="customDetailsSlot">Custom details</div>}
+        />
+      </EuiThemeProvider>
+    );
+    expect(screen.getByTestId('customDetailsSlot')).toBeInTheDocument();
+    expect(screen.queryByTestId('genAiDetails')).toBeNull();
+  });
+
+  it('renders the details section for a detailsSlot even without built-in detail rows', () => {
+    render(
+      <EuiThemeProvider>
+        <GenAiTab
+          genAi={baseFields}
+          detailsSlot={<div data-test-subj="customDetailsSlot">Custom details</div>}
+        />
+      </EuiThemeProvider>
+    );
+    expect(screen.getByTestId('customDetailsSlot')).toBeInTheDocument();
+  });
+
   it('hides pills when values are absent', () => {
     renderTab({ operationName: undefined, provider: undefined, inputTokens: undefined });
     expect(screen.queryByTestId('genAiPillOperationName')).toBeNull();

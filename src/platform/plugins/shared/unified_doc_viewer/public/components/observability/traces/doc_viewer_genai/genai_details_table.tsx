@@ -1,0 +1,130 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  ATTRIBUTE_GEN_AI_CONVERSATION_ID,
+  ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS,
+  ATTRIBUTE_GEN_AI_REQUEST_SEED,
+  ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE,
+  ATTRIBUTE_GEN_AI_REQUEST_TOP_K,
+  ATTRIBUTE_GEN_AI_REQUEST_TOP_P,
+  ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS,
+  ATTRIBUTE_GEN_AI_RESPONSE_ID,
+  ATTRIBUTE_GEN_AI_RESPONSE_MODEL,
+} from '@kbn/apm-types';
+import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { ContentFrameworkTableProps } from '../../../content_framework';
+import { ContentFrameworkTable } from '../../../content_framework';
+
+/**
+ * Expands a canonical `attributes.gen_ai.*` field name into the three key
+ * shapes produced by the different ingest paths:
+ *   1. attributes.gen_ai.*  — OTel / EDOT ingest
+ *   2. gen_ai.*             — bare OTel (no attributes. prefix)
+ *   3. labels.gen_ai_*      — APM Server ingest (dots → underscores)
+ * Only fields present on the hit are rendered by ContentFrameworkTable.
+ */
+const fallbackShapes = (attributeName: string): string[] => {
+  const bare = attributeName.replace(/^attributes\./, '');
+  return [attributeName, bare, `labels.${bare.replace(/\./g, '_')}`];
+};
+
+const DETAIL_FIELD_TITLES: Record<string, string> = {
+  [ATTRIBUTE_GEN_AI_RESPONSE_MODEL]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.responseModel',
+    { defaultMessage: 'Response model' }
+  ),
+  [ATTRIBUTE_GEN_AI_CONVERSATION_ID]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.conversationId',
+    { defaultMessage: 'Conversation ID' }
+  ),
+  [ATTRIBUTE_GEN_AI_RESPONSE_ID]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.responseId',
+    { defaultMessage: 'Response ID' }
+  ),
+  [ATTRIBUTE_GEN_AI_RESPONSE_FINISH_REASONS]: i18n.translate(
+    'unifiedDocViewer.observability.traces.genAi.details.finishReasons',
+    { defaultMessage: 'Finish reasons' }
+  ),
+  // Request params keep their raw semantic-convention names, matching the
+  // legacy APM GenAI tab.
+  [ATTRIBUTE_GEN_AI_REQUEST_TEMPERATURE]: 'temperature',
+  [ATTRIBUTE_GEN_AI_REQUEST_TOP_P]: 'top_p',
+  [ATTRIBUTE_GEN_AI_REQUEST_TOP_K]: 'top_k',
+  [ATTRIBUTE_GEN_AI_REQUEST_MAX_TOKENS]: 'max_tokens',
+  [ATTRIBUTE_GEN_AI_REQUEST_SEED]: 'seed',
+};
+
+export const GENAI_DETAIL_FIELD_NAMES: string[] =
+  Object.keys(DETAIL_FIELD_TITLES).flatMap(fallbackShapes);
+
+const FIELD_CONFIGURATIONS: ContentFrameworkTableProps['fieldConfigurations'] = Object.fromEntries(
+  Object.entries(DETAIL_FIELD_TITLES).flatMap(([attributeName, title]) =>
+    fallbackShapes(attributeName).map((fieldName) => [fieldName, { title }])
+  )
+);
+
+export type GenAiDetailsTableProps = Pick<
+  DocViewRenderProps,
+  | 'hit'
+  | 'dataView'
+  | 'columnsMeta'
+  | 'textBasedHits'
+  | 'filter'
+  | 'onAddColumn'
+  | 'onRemoveColumn'
+  | 'columns'
+>;
+
+/** Returns true when the hit carries at least one GenAI detail field. */
+export function hasGenAiDetailFields(flattened: Record<string, unknown>): boolean {
+  return GENAI_DETAIL_FIELD_NAMES.some((fieldName) => flattened[fieldName] != null);
+}
+
+/**
+ * Renders the GenAI Details section as the doc viewer's field table. Field and
+ * value hover actions (filter for/out, filter exists, toggle column) appear
+ * automatically when the doc viewer callbacks (`filter`, `onAddColumn`,
+ * `onRemoveColumn`, `columns`) are provided — i.e. in the Discover document
+ * flyout — and stay hidden where they are not (trace waterfall span flyout).
+ */
+export function GenAiDetailsTable({
+  hit,
+  dataView,
+  columnsMeta,
+  textBasedHits,
+  filter,
+  onAddColumn,
+  onRemoveColumn,
+  columns,
+}: GenAiDetailsTableProps) {
+  const fieldNames = useMemo(
+    () => GENAI_DETAIL_FIELD_NAMES.filter((fieldName) => hit.flattened[fieldName] != null),
+    [hit]
+  );
+
+  return (
+    <ContentFrameworkTable
+      id="genAiDetailsTable"
+      data-test-subj="unifiedDocViewerObsTracesGenAiDetails"
+      fieldNames={fieldNames}
+      fieldConfigurations={FIELD_CONFIGURATIONS}
+      hit={hit}
+      dataView={dataView}
+      columnsMeta={columnsMeta}
+      textBasedHits={textBasedHits}
+      filter={filter}
+      onAddColumn={onAddColumn}
+      onRemoveColumn={onRemoveColumn}
+      columns={columns}
+    />
+  );
+}
