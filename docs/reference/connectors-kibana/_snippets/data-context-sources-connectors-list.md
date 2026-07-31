@@ -9,6 +9,7 @@
 - [Brave Search](/reference/connectors-kibana/brave-search-action-type.md): Search the web using the Brave Search API.
 - [Buildkite](/reference/connectors-kibana/buildkite-action-type.md): Trigger, observe, retry, and cancel builds, unblock deploy gates, and post annotations.
 - [Confluence Cloud](/reference/connectors-kibana/confluence-cloud-action-type.md): Search and retrieve Confluence Cloud pages and spaces using the REST API v2.
+- [Datadog](/reference/connectors-kibana/datadog-action-type.md): List and mute monitors, manage downtimes and incidents, post events, and query metrics and logs.
 - [Dropbox](/reference/connectors-kibana/dropbox-action-type.md): Search files and folders, retrieve file content and metadata, and manage shared links in Dropbox.
 - [Firecrawl](/reference/connectors-kibana/firecrawl-action-type.md): Scrape, search, map, and crawl the web using the Firecrawl API.
 - [Figma](/reference/connectors-kibana/figma-action-type.md): Browse design files, inspect structure, render nodes as images, and explore team projects in Figma.
@@ -17,6 +18,8 @@
 - [Google Calendar](/reference/connectors-kibana/google-calendar-action-type.md): Search and access events and calendars in Google Calendar.
 - [Google Cloud Storage](/reference/connectors-kibana/google-cloud-storage-action-type.md): Search and access objects in Google Cloud Storage buckets.
 - [Google Drive](/reference/connectors-kibana/google-drive-action-type.md): Search and access files and folders in Google Drive.
+Figma.
+- [Google Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
 - [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
 - [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
