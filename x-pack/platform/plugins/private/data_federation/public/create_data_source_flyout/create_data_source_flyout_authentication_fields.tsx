@@ -10,7 +10,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import type { Control, UseFormUnregister } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
-import type { CreateDataSourceFlyoutFormValues } from './create_data_source_flyout_form_state';
+import type { CreateDataSourceFlyoutFormValues } from './types';
 import type { FederatedIdentityClusterInfo } from './federated_identity_cluster_info';
 import {
   DATA_SOURCE_TYPES_WITH_AUTHENTICATION,

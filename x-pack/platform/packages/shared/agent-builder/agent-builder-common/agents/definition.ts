@@ -96,7 +96,7 @@ export interface AgentConfiguration {
 
   /**
    * Optional list of skill IDs exposed to the agent.
-   * When undefined, all skills are available (backward compatibility).
+   * When undefined, no additional skills are granted beyond enable_elastic_capabilities/plugin_ids.
    */
   skill_ids?: string[];
 
@@ -133,7 +133,7 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
 
 /**
  * Runtime configuration overrides exposed via the public API and persisted on conversation rounds.
- * Limited to `instructions` and `tools` - other fields from AgentConfigurationOverrides
+ * Limited to `instructions`, `tools`, `skill_ids` and `enable_elastic_capabilities` - other fields from AgentConfigurationOverrides
  * are internal implementation details.
  *
  * This type is used for:
@@ -142,5 +142,5 @@ export type AgentConfigurationOverrides = Partial<AgentConfiguration>;
  */
 export type RuntimeAgentConfigurationOverrides = Pick<
   AgentConfigurationOverrides,
-  'instructions' | 'tools'
+  'instructions' | 'tools' | 'skill_ids' | 'enable_elastic_capabilities'
 >;

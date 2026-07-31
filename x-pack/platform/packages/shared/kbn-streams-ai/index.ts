@@ -56,7 +56,7 @@ export type {
 
 export {
   searchKnowledgeIndicators,
-  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE,
 } from './src/knowledge_indicators/search';
 export {
   featureToKnowledgeIndicatorFeature,

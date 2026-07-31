@@ -14,6 +14,7 @@ import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useBulkDeleteRules } from '../../hooks/use_bulk_delete_rules';
 import { useBulkEnableRules, useBulkDisableRules } from '../../hooks/use_bulk_enable_disable_rules';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
+import { useRunRule } from '../../hooks/use_run_rule';
 import { DeleteConfirmationModal } from '../../components/rule/modals/delete_confirmation_modal';
 import { RuleSummaryFlyout } from '../../components/rule/flyouts';
 import { paths } from '../../constants';
@@ -68,6 +69,7 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
   const bulkEnableMutation = useBulkEnableRules();
   const bulkDisableMutation = useBulkDisableRules();
   const toggleEnabledMutation = useToggleRuleEnabled();
+  const runRuleMutation = useRunRule();
 
   const {
     isAllSelected,
@@ -155,9 +157,8 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
         onEdit={(r) => onEditInFlyout(r)}
         onClone={(r) => onCloneInFlyout(r)}
         onDelete={(r) => setRuleToDelete(r)}
-        onToggleEnabled={(r) =>
-          toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled, name: r.metadata.name })
-        }
+        onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+        onRun={(r) => runRuleMutation.mutate({ id: r.id })}
         togglingRuleId={
           toggleEnabledMutation.isLoading ? toggleEnabledMutation.variables?.id : undefined
         }
@@ -182,9 +183,8 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
             onCloneInFlyout(r);
           }}
           onDelete={(r) => setRuleToDelete(r)}
-          onToggleEnabled={(r) =>
-            toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled, name: r.metadata.name })
-          }
+          onToggleEnabled={(r) => toggleEnabledMutation.mutate({ id: r.id, enabled: !r.enabled })}
+          onRun={(r) => runRuleMutation.mutate({ id: r.id })}
         />
       ) : null}
       {ruleToDelete ? (
