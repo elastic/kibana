@@ -72,8 +72,10 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.getByRole('columnheader', { name: 'Region' })).toBeVisible();
 
     // Both services appear as rows
-    await expect(page.getByRole('link', { name: 'AWS EC2' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'AWS CloudTrail' })).toBeVisible();
+    await expect(
+      page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')
+    ).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
   });
 
   test('endpoint count reflects selected services', async ({ browserAuth, page }) => {
@@ -111,8 +113,8 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
     await page.testSubj.locator('serviceSettingsStep-searchBox').fill('CloudTrail');
-    await expect(page.getByRole('link', { name: 'AWS CloudTrail' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'AWS EC2' })).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')).toBeHidden();
     await expect(page.getByText(/Showing.*1.*endpoint/)).toBeVisible();
   });
 
@@ -135,13 +137,15 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
     // Filter to Metrics — only ec2_metrics visible
     await page.testSubj.locator('serviceSettingsStep-signalFilter').getByText('Metrics').click();
-    await expect(page.getByRole('link', { name: 'AWS EC2' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'AWS CloudTrail' })).toBeHidden();
+    await expect(
+      page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')
+    ).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeHidden();
 
     // Filter to Logs — only cloudtrail visible
     await page.testSubj.locator('serviceSettingsStep-signalFilter').getByText('Logs').click();
-    await expect(page.getByRole('link', { name: 'AWS CloudTrail' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'AWS EC2' })).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail')).toBeVisible();
+    await expect(page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics')).toBeHidden();
   });
 
   test('global region shown in Region column; per-service override takes precedence', async ({
@@ -268,7 +272,7 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.reload();
     await expect(page.testSubj.locator('onboardingStep-serviceSettings')).toBeVisible();
 
-    await page.getByRole('link', { name: 'AWS EC2' }).click();
+    await page.testSubj.locator('serviceSettingsStep-serviceLink-ec2_metrics').click();
     await expect(page.getByText('Collection settings — AWS EC2')).toBeVisible();
   });
 

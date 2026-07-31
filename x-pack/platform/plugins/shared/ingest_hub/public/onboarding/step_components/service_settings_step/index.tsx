@@ -93,7 +93,12 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink onClick={() => setActiveFlyoutServiceId(service.id)}>{service.name}</EuiLink>
+              <EuiLink
+                onClick={() => setActiveFlyoutServiceId(service.id)}
+                data-test-subj={`serviceSettingsStep-serviceLink-${service.id}`}
+              >
+                {service.name}
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
