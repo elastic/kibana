@@ -1,5 +1,5 @@
 {
-  "sha1": "9d1cb23f18684d467306165a844fcd242e619ad8",
+  "sha1": "bdbb0913dca070fe62116c863cb3bc4759c87148",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -28,8 +28,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/asset_criticality_management.spec.ts",
-        "line": 32,
-        "column": 14
+        "line": 38,
+        "column": 38
       }
     },
     {
@@ -44,8 +44,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/asset_criticality_management.spec.ts",
-        "line": 49,
-        "column": 14
+        "line": 51,
+        "column": 47
       }
     },
     {
@@ -60,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 24,
-        "column": 14
+        "line": 20,
+        "column": 15
       }
     },
     {
@@ -76,50 +76,50 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/engine_status_management.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 27,
+        "column": 32
       }
     },
     {
       "id": "2cb41e0daf4ee37-cd814a171131ef1",
       "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion adds a host entity to a new case and the Entities accordion shows the attached entity",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 88,
-        "column": 14
+        "line": 78,
+        "column": 25
       }
     },
     {
       "id": "2cb41e0daf4ee37-a37741bc64b3f83",
       "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion Entities accordion renders when entity attachments were added via API",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 119,
-        "column": 14
+        "line": 93,
+        "column": 26
       }
     },
     {
       "id": "2cb41e0daf4ee37-3cf8d4a6f282359",
       "title": "Entity attachment cases – flyout add-to-case actions and Entities accordion renders no Entities accordion when a case has no entity attachments",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_cases.spec.ts",
-        "line": 137,
-        "column": 14
+        "line": 110,
+        "column": 31
       }
     },
     {
@@ -134,8 +134,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 117,
-        "column": 14
+        "line": 119,
+        "column": 22
       }
     },
     {
@@ -150,8 +150,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 136,
-        "column": 14
+        "line": 134,
+        "column": 6
       }
     },
     {
@@ -166,8 +166,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 156,
-        "column": 14
+        "line": 147,
+        "column": 27
       }
     },
     {
@@ -182,8 +182,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 190,
-        "column": 14
+        "line": 178,
+        "column": 27
       }
     },
     {
@@ -198,8 +198,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 207,
-        "column": 14
+        "line": 193,
+        "column": 85
       }
     },
     {
@@ -214,8 +214,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 245,
-        "column": 14
+        "line": 224,
+        "column": 28
       }
     },
     {
@@ -230,8 +230,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 271,
-        "column": 14
+        "line": 251,
+        "column": 26
       }
     },
     {
@@ -246,8 +246,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 296,
-        "column": 14
+        "line": 273,
+        "column": 40
       }
     },
     {
@@ -262,8 +262,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 329,
-        "column": 14
+        "line": 298,
+        "column": 40
       }
     },
     {
@@ -278,8 +278,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/entity_flyout_anomalies.spec.ts",
-        "line": 402,
-        "column": 14
+        "line": 386,
+        "column": 60
       }
     },
     {
@@ -294,8 +294,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 41,
-        "column": 14
+        "line": 36,
+        "column": 15
       }
     },
     {
@@ -310,8 +310,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 48,
-        "column": 14
+        "line": 41,
+        "column": 46
       }
     },
     {
@@ -326,8 +326,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 57,
-        "column": 14
+        "line": 46,
+        "column": 7
       }
     },
     {
@@ -342,8 +342,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 94,
-        "column": 14
+        "line": 80,
+        "column": 13
       }
     },
     {
@@ -358,8 +358,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 105,
-        "column": 14
+        "line": 88,
+        "column": 22
       }
     },
     {
@@ -374,8 +374,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/management_page.spec.ts",
-        "line": 116,
-        "column": 14
+        "line": 97,
+        "column": 32
       }
     },
     {
@@ -388,8 +388,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 37,
-        "column": 14
+        "line": 42,
+        "column": 27
       }
     },
     {
@@ -402,8 +402,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/privileges_management.spec.ts",
-        "line": 50,
-        "column": 14
+        "line": 52,
+        "column": 29
       }
     },
     {
@@ -418,8 +418,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 42,
-        "column": 14
+        "line": 35,
+        "column": 7
       }
     },
     {
@@ -434,8 +434,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 50,
-        "column": 14
+        "line": 40,
+        "column": 7
       }
     },
     {
@@ -450,8 +450,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 71,
-        "column": 14
+        "line": 56,
+        "column": 24
       }
     },
     {
@@ -466,8 +466,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 89,
-        "column": 14
+        "line": 72,
+        "column": 7
       }
     },
     {
@@ -482,8 +482,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 107,
-        "column": 14
+        "line": 85,
+        "column": 81
       }
     },
     {
@@ -498,8 +498,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/parallel_tests/entity_analytics/risk_score_management.spec.ts",
-        "line": 130,
-        "column": 14
+        "line": 105,
+        "column": 6
       }
     }
   ]
