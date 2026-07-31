@@ -28,8 +28,7 @@ import { SourceDocument } from '../components/source_document';
 import SourcePopoverContent from '../components/source_popover_content';
 import { DataTablePopoverCellValue } from '../components/data_table_cell_value';
 import { SOURCE_CELL_RENDERER } from '../constants';
-import { JsonFieldTree } from '../components/json_tree_viewer/json_field_tree';
-import { JsonSyntaxTree } from '../components/json_tree_viewer/json_syntax_tree';
+import { JsonTreeViewer } from '../components/json_tree_viewer/json_tree_viewer';
 import { buildDocumentTree } from './build_document_tree';
 
 export const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -181,17 +180,13 @@ export const getRenderCellValueFn = ({
       useTopLevelObjectColumns ||
       (isPlainRecord && columnId === '_source')
     ) {
-      // Evaluation toggle (see SOURCE_CELL_RENDERER): swap the field-summary view for a
-      // prototype JSON tree of the document. In-grid only — the popover path is untouched.
-      if (SOURCE_CELL_RENDERER === 'jsonFieldTree' || SOURCE_CELL_RENDERER === 'jsonSyntaxTree') {
+      // Evaluation toggle (see SOURCE_CELL_RENDERER): swap the field-summary view for the
+      // JSON tree of the document. In-grid only — the popover path is untouched.
+      if (SOURCE_CELL_RENDERER === 'jsonTreeViewer') {
         const documentTree = buildDocumentTree({ row, dataView, fieldFormats, columnsMeta });
         return (
           <span className={CELL_CLASS}>
-            {SOURCE_CELL_RENDERER === 'jsonFieldTree' ? (
-              <JsonFieldTree json={documentTree} />
-            ) : (
-              <JsonSyntaxTree json={documentTree} />
-            )}
+            <JsonTreeViewer json={documentTree} />
           </span>
         );
       }

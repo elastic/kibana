@@ -13,7 +13,7 @@ import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { formatFieldStringValueWithHighlights } from '@kbn/discover-utils';
 import type { DataTableRecord, DataTableColumnsMeta, EsHitRecord } from '@kbn/discover-utils/types';
 import { set } from '@kbn/safer-lodash-set';
-import type { JsonValue } from '../components/json_tree_viewer/json_field_tree';
+import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
 
 // Discover's grid fetch uses the fields API with `_source: false`, so a cell only ever gets
 // `row.flattened`: a flat map of dotted keys whose values are (single-element) arrays. To render

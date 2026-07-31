@@ -16,12 +16,11 @@ export const SCORE_COLUMN_NAME = '_score';
 
 /**
  * Evaluation toggle for the Summary (`_source`) in-grid cell: render it with the current
- * field-summary view (`'summary'`) or with one of the prototype JSON tree viewers. Flip
- * this to preview a viewer live in the grid. Temporary — the production path is a
+ * field-summary view (`'summary'`) or with the JSON tree viewer (`'jsonSyntaxTree'`). Flip
+ * this to preview the viewer live in the grid. Temporary — the production path is a
  * profile-registered cell renderer.
  */
-export const SOURCE_CELL_RENDERER: 'summary' | 'jsonFieldTree' | 'jsonSyntaxTree' =
-  'jsonSyntaxTree';
+export const SOURCE_CELL_RENDERER: 'summary' | 'jsonTreeViewer' = 'jsonTreeViewer';
 
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const MAX_LOADED_GRID_ROWS = 10000;

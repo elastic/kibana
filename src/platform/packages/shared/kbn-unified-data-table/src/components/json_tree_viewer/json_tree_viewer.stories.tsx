@@ -9,10 +9,10 @@
 
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { JsonTreeViewer } from './json_tree_viewer';
+import { JsonTreeViewer, type JsonValue } from './json_tree_viewer';
 
 export default {
-  title: 'UnifiedDataTable/JsonTreeViewer',
+  title: 'UnifiedDataTable/JsonSyntaxTree',
   component: JsonTreeViewer,
 } as Meta<typeof JsonTreeViewer>;
 
@@ -47,41 +47,80 @@ const largeDocument = Object.fromEntries(
   Array.from({ length: 30 }, (_, i) => [`field_${i + 1}`, i % 3 === 0 ? null : i + 1])
 );
 
-export const SimpleObject: StoryObj<typeof JsonTreeViewer> = {
+// A deliberately huge document: a 2,000-field object, a 5,000-element array of nested
+// objects, plus small collections. Fully expanded it would be ~7,000 rows without caps;
+// the per-collection cap must keep the rendered DOM tiny at every level.
+const largeNestedDocument = {
+  summary: Object.fromEntries(Array.from({ length: 2000 }, (_, i) => [`field_${i + 1}`, i + 1])),
+  events: Array.from({ length: 5000 }, (_, i) => ({
+    id: i,
+    name: `event_${i}`,
+    tags: ['authentication', 'security', 'network'],
+  })),
+  meta: { total: 7000, truncated: true },
+};
+
+const longValueDocument = {
+  message:
+    'GET /api/v1/very/long/path?with=a&bunch=of&query=parameters that keeps going well beyond the width of the container to show wrapping behaviour',
+  url: 'https://example.com/some/extremely/long/url/that/would/otherwise/overflow/the/panel/horizontally',
+  stack: 'Error: boom\n    at handler (server.ts:42:11)\n    at process (runtime.ts:8:3)',
+  status: 500,
+};
+
+const arrayValue: JsonValue = ['alpha', 'beta', { nested: true }, [1, 2, 3]];
+
+export const SyntaxTreeSimpleObject: StoryObj<typeof JsonTreeViewer> = {
   render: () => (
-    <div style={{ width: 400 }}>
+    <div style={{ width: 440 }}>
       <JsonTreeViewer json={{ name: 'Alice', age: 30, active: true, score: null }} />
     </div>
   ),
 };
 
-export const NestedDocument: StoryObj<typeof JsonTreeViewer> = {
+export const SyntaxTreeNestedDocument: StoryObj<typeof JsonTreeViewer> = {
   render: () => (
-    <div style={{ width: 400 }}>
+    <div style={{ width: 440 }}>
       <JsonTreeViewer json={nestedDocument} />
     </div>
   ),
 };
 
-export const LargeObject: StoryObj<typeof JsonTreeViewer> = {
+export const SyntaxTreeLargeObject: StoryObj<typeof JsonTreeViewer> = {
   render: () => (
-    <div style={{ width: 400 }}>
+    <div style={{ width: 440 }}>
       <JsonTreeViewer json={largeDocument} />
     </div>
   ),
 };
 
-export const ArrayValue: StoryObj<typeof JsonTreeViewer> = {
+export const SyntaxTreeLargeNested: StoryObj<typeof JsonTreeViewer> = {
   render: () => (
-    <div style={{ width: 400 }}>
-      <JsonTreeViewer json={['alpha', 'beta', { nested: true }, [1, 2, 3]]} />
+    <div style={{ width: 440 }}>
+      <JsonTreeViewer json={largeNestedDocument} />
     </div>
   ),
 };
 
-export const PrimitiveValue: StoryObj<typeof JsonTreeViewer> = {
+export const SyntaxTreeArrayValue: StoryObj<typeof JsonTreeViewer> = {
   render: () => (
-    <div style={{ width: 400 }}>
+    <div style={{ width: 440 }}>
+      <JsonTreeViewer json={arrayValue} />
+    </div>
+  ),
+};
+
+export const SyntaxTreeLongValues: StoryObj<typeof JsonTreeViewer> = {
+  render: () => (
+    <div style={{ width: 440 }}>
+      <JsonTreeViewer json={longValueDocument} />
+    </div>
+  ),
+};
+
+export const SyntaxTreePrimitiveValue: StoryObj<typeof JsonTreeViewer> = {
+  render: () => (
+    <div style={{ width: 440 }}>
       <JsonTreeViewer json={42} />
     </div>
   ),
