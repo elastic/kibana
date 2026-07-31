@@ -118,6 +118,5 @@ steps:
       alerts: ${{ inputs.additional_alerts }}
       api_config: ${{ inputs.api_config }}
       replacements: ${{ inputs.replacements }}
-      type: attack_discovery
   # Validation is handled outside this workflow by the _generate endpoint,
   # which invokes the alert retrieval, generation, and validation workflows sequentially.
