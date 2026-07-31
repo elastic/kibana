@@ -96,6 +96,30 @@ describe('StepLogistics', () => {
       const nameInput = within(nameRow).getByRole('textbox');
       expect(nameInput).toBeEnabled();
     });
+
+    it('SHOULD reject a name containing a forward slash', async () => {
+      const onChange = jest.fn();
+
+      render(
+        <I18nProvider>
+          <StepLogistics
+            defaultValue={baseDefaultValue}
+            isEditing={false}
+            onChange={onChange}
+            isLegacy={false}
+          />
+        </I18nProvider>
+      );
+
+      const nameRow = await screen.findByTestId('nameField');
+      const nameInput = within(nameRow).getByRole('textbox');
+      fireEvent.change(nameInput, { target: { value: 'a/b' } });
+
+      await screen.findByText('A template name must not contain the character "/"');
+
+      const lastCall = onChange.mock.calls.at(-1)?.[0];
+      expect(await lastCall.validate()).toBe(false);
+    });
   });
 
   it('SHOULD block the step when data lifecycle is invalid', async () => {

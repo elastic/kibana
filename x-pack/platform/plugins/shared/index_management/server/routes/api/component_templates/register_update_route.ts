@@ -12,10 +12,10 @@ import type { DataStreamOptions } from '../../../../common/types/data_streams';
 import { serializeComponentTemplate } from '../../../../common/lib';
 import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
-import { componentTemplateSchema } from './schema_validation';
+import { componentTemplateNameSchema, componentTemplateSchema } from './schema_validation';
 
 const paramsSchema = schema.object({
-  name: schema.string(),
+  name: componentTemplateNameSchema,
 });
 
 export const registerUpdateRoute = ({
