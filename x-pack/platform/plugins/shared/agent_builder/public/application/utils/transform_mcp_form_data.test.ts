@@ -6,7 +6,10 @@
  */
 
 import { omit } from 'lodash';
-import type { McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import type {
+  McpToolDefinition,
+  ToolConfirmationPolicyMode,
+} from '@kbn/agent-builder-common/tools';
 import { ToolType } from '@kbn/agent-builder-common';
 import type { McpToolFormData } from '../components/tools/form/types/tool_form_types';
 import {
@@ -111,20 +114,15 @@ describe('transformMcpFormData', () => {
       expect(result).toEqual(expectedPayload);
     });
 
-    it('includes confirmation in the create payload when policy is not never', () => {
-      const result = transformMcpFormDataForCreate({
-        ...formData,
-        confirmation_ask_user: 'once',
-      });
-      expect(result.confirmation).toEqual({ askUser: 'once' });
-    });
-
-    it('omits confirmation from the create payload when policy is never', () => {
-      const result = transformMcpFormDataForCreate({
-        ...formData,
-        confirmation_ask_user: 'never',
-      });
-      expect(result.confirmation).toMatchObject({ askUser: 'never' });
+    it('includes confirmation in the create payload', () => {
+      const values: ToolConfirmationPolicyMode[] = ['never', 'once', 'always'];
+      for (const value of values) {
+        const result = transformMcpFormDataForCreate({
+          ...formData,
+          confirmation_ask_user: value,
+        });
+        expect(result.confirmation).toEqual({ askUser: value });
+      }
     });
   });
 
