@@ -65,7 +65,8 @@
       "matchDepNames": [
         "@rspack/core",
         "@rspack/plugin-react-refresh",
-        "@rsdoctor/rspack-plugin"
+        "@rsdoctor/rspack-plugin",
+        "@swc/plugin-emotion"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2494,7 +2495,7 @@
     },
     {
       "groupName": "@swc",
-      "matchDepNames": ["@swc/core", "@swc/helpers", "@swc/plugin-emotion"],
+      "matchDepNames": ["@swc/core", "@swc/helpers"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
