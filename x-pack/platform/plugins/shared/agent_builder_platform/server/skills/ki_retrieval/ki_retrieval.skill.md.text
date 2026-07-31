@@ -36,6 +36,17 @@ FROM ai-index-*
 | SORT ki_count DESC
 ```
 
+The same works for `tags`. Multi-valued fields are expanded automatically, so each tag gets
+its own row:
+
+```esql
+FROM ai-index-*
+| STATS ki_count = COUNT(*) BY tags
+| SORT ki_count DESC
+```
+
+Use either to find valid values before adding a `type` or `tags` filter to a query.
+
 ---
 
 ## ES|QL query
