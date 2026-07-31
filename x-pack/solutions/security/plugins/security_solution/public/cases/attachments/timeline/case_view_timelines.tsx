@@ -127,34 +127,32 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="case-view-timelines">
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          padding-top: 16px;
-          padding-bottom: 8px;
-        `}
-      >
-        <UtilityBar>
-          <UtilityBarSection>
-            <UtilityBarGroup>
-              <UtilityBarText data-test-subj="case-view-timelines-showing-count">
-                <>
-                  {SHOWING}{' '}
-                  <FormattedMessage
-                    id="xpack.securitySolution.cases.timelineAttachment.nTimelines"
-                    defaultMessage="{totalCount} {totalCount, plural, =1 {timeline} other {timelines}}"
-                    values={{ totalCount }}
-                  />
-                </>
-              </UtilityBarText>
-            </UtilityBarGroup>
-            <UtilityBarGroup>
-              {isSuperTimelineEnabled && (
+      {isSuperTimelineEnabled && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            padding-top: 16px;
+            padding-bottom: 8px;
+          `}
+        >
+          <UtilityBar>
+            <UtilityBarSection>
+              <UtilityBarGroup>
+                <UtilityBarText data-test-subj="case-view-timelines-showing-count">
+                  <>
+                    {SHOWING}{' '}
+                    <FormattedMessage
+                      id="xpack.securitySolution.cases.timelineAttachment.nTimelines"
+                      defaultMessage="{totalCount} {totalCount, plural, =1 {timeline} other {timelines}}"
+                      values={{ totalCount }}
+                    />
+                  </>
+                </UtilityBarText>
+              </UtilityBarGroup>
+              <UtilityBarGroup>
                 <UtilityBarText data-test-subj="case-view-timelines-selected-count">
                   {SELECTED_TIMELINES(selectedItems.length)}
                 </UtilityBarText>
-              )}
-              {isSuperTimelineEnabled && (
                 <UtilityBarAction
                   dataTestSubj="case-view-timelines-batch-actions-button"
                   iconSide="right"
@@ -164,19 +162,19 @@ export const CaseViewTimelines: React.FC<CommonAttachmentTabViewProps> = ({ case
                 >
                   {BATCH_ACTIONS}
                 </UtilityBarAction>
-              )}
-              <UtilityBarAction
-                dataTestSubj="case-view-timelines-refresh-button"
-                iconSide="right"
-                iconType="refresh"
-                onClick={refetch}
-              >
-                {REFRESH}
-              </UtilityBarAction>
-            </UtilityBarGroup>
-          </UtilityBarSection>
-        </UtilityBar>
-      </EuiFlexItem>
+                <UtilityBarAction
+                  dataTestSubj="case-view-timelines-refresh-button"
+                  iconSide="right"
+                  iconType="refresh"
+                  onClick={refetch}
+                >
+                  {REFRESH}
+                </UtilityBarAction>
+              </UtilityBarGroup>
+            </UtilityBarSection>
+          </UtilityBar>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem>
         <TimelinesTable
           actionTimelineToShow={isSuperTimelineEnabled ? ['selectable'] : []}
