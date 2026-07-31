@@ -503,20 +503,15 @@ export const Workday: ConnectorSpec = {
       defaultMessage: 'Verifies Workday connection by listing up to one worker',
     }),
     handler: async (ctx) => {
-      try {
-        const { base, tenantName } = getBaseUrl(ctx);
-        const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers`;
+      const { base, tenantName } = getBaseUrl(ctx);
+      const url = `${base}/ccx/api/common/${COMMON_API_VERSION}/${tenantName}/workers`;
 
-        await ctx.client.get(url, { params: { limit: 1 } });
+      await ctx.client.get(url, { params: { limit: 1 } });
 
-        return {
-          ok: true,
-          message: 'Successfully connected to Workday',
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
-      }
+      return {
+        ok: true,
+        message: 'Successfully connected to Workday',
+      };
     },
   },
 };
