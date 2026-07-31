@@ -139,33 +139,29 @@ export class AlertEventsClient {
   }
 
   private async resolveEpisodeId(groupHash: string, nextStatus: string): Promise<string> {
-    try {
-      const rows = await this.queryService.executeQueryRows<{
-        last_episode_id: string;
-        last_episode_status: string;
-      }>({
-        query: `FROM ${ALERT_EVENTS_DATA_STREAM}
+    const rows = await this.queryService.executeQueryRows<{
+      last_episode_id: string;
+      last_episode_status: string;
+    }>({
+      query: `FROM ${ALERT_EVENTS_DATA_STREAM}
           | WHERE type == "alert" AND group_hash == "${groupHash}" AND episode.status IS NOT NULL
           | STATS last_episode_id = LAST(episode.id, @timestamp),
                   last_episode_status = LAST(episode.status, @timestamp)
             BY group_hash
           | KEEP last_episode_id, last_episode_status
           | LIMIT 1`,
-      });
+    });
 
-      if (rows.length === 0 || !rows[0].last_episode_id) {
-        return uuidv4();
-      }
-
-      const { last_episode_id: lastEpisodeId, last_episode_status: lastEpisodeStatus } = rows[0];
-
-      const isNewLifecycle =
-        lastEpisodeStatus === alertEpisodeStatus.inactive &&
-        nextStatus !== alertEpisodeStatus.inactive;
-
-      return isNewLifecycle ? uuidv4() : lastEpisodeId;
-    } catch {
+    if (rows.length === 0 || !rows[0].last_episode_id) {
       return uuidv4();
     }
+
+    const { last_episode_id: lastEpisodeId, last_episode_status: lastEpisodeStatus } = rows[0];
+
+    const isNewLifecycle =
+      lastEpisodeStatus === alertEpisodeStatus.inactive &&
+      nextStatus !== alertEpisodeStatus.inactive;
+
+    return isNewLifecycle ? uuidv4() : lastEpisodeId;
   }
 }
