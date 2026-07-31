@@ -55,6 +55,9 @@ export interface TracesFlyout {
   readonly serviceFlyout: {
     readonly container: Locator;
     readonly backButton: Locator;
+    chart(id: 'latency' | 'throughput' | 'failedTransactionRate'): Locator;
+    readonly transactionTypeSelect: Locator;
+    readonly transactionsSection: Locator;
   };
 
   readonly waterfallFlyout: {
@@ -162,6 +165,10 @@ export function createTracesFlyout(page: ScoutPage): TracesFlyout {
       return {
         container,
         backButton: container.locator('[data-test-subj="euiFlyoutMenuBackButton"]'),
+        chart: (id: 'latency' | 'throughput' | 'failedTransactionRate') =>
+          page.testSubj.locator(`serviceFlyoutLensChart-${id}`),
+        transactionTypeSelect: page.testSubj.locator('serviceFlyoutTransactionTypeSelect'),
+        transactionsSection: page.testSubj.locator('serviceFlyoutSection-transactions'),
       };
     })(),
 

@@ -17,6 +17,51 @@ import {
   setupTracesExperience,
   teardownTracesExperience,
 } from '../fixtures';
+import type { TracesExperiencePage } from '../fixtures/page_objects/traces_experience';
+import type { DiscoverPageObjects } from '../../../common/ui/fixtures';
+
+const CHART_IDS = ['latency', 'throughput', 'failedTransactionRate'] as const;
+
+async function openServiceFlyoutAndVerifyCharts({
+  tracesExperience,
+  discover,
+  esqlQuery,
+}: {
+  tracesExperience: TracesExperiencePage;
+  discover: DiscoverPageObjects['discover'];
+  esqlQuery: string;
+}) {
+  await spaceTest.step('navigate to Discover in ES|QL mode', async () => {
+    await discover.goto({ queryMode: 'esql' });
+  });
+
+  await spaceTest.step('run ES|QL query', async () => {
+    await discover.writeAndSubmitEsqlQuery(esqlQuery);
+  });
+
+  await spaceTest.step('open overview tab for the first row', async () => {
+    await tracesExperience.openOverviewTab();
+  });
+
+  await spaceTest.step('click the service name link to open the service flyout', async () => {
+    // Hover-triggered action buttons overlay the link and intercept pointer events;
+    // dispatchEvent bypasses the overlay without the linter-disallowed { force: true } option.
+    await expect(tracesExperience.flyout.about.serviceNameLink).toBeVisible();
+    await tracesExperience.flyout.about.serviceNameLink.dispatchEvent('click');
+  });
+
+  await spaceTest.step('verify service flyout is visible', async () => {
+    await expect(tracesExperience.flyout.serviceFlyout.container).toBeVisible();
+  });
+
+  await spaceTest.step('verify charts render without error', async () => {
+    for (const chartId of CHART_IDS) {
+      const chart = tracesExperience.flyout.serviceFlyout.chart(chartId);
+      await expect(chart).toBeVisible();
+      await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
+    }
+  });
+}
 
 spaceTest.describe(
   'Traces in Discover - Service flyout',
@@ -38,95 +83,41 @@ spaceTest.describe(
 
     spaceTest(
       'opens service flyout for an ECS service and renders its content',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { tracesExperience, discover } = pageObjects;
 
-        await spaceTest.step('navigate to Discover in ES|QL mode', async () => {
-          await discover.goto({ queryMode: 'esql' });
-        });
-
-        await spaceTest.step('run ES|QL query scoped to the ECS service', async () => {
-          await discover.writeAndSubmitEsqlQuery(
-            `${TRACES.ESQL_QUERY} | WHERE service.name == "${RICH_TRACE.SERVICE_NAME}"`
-          );
-        });
-
-        await spaceTest.step('open overview tab for the first row', async () => {
-          await tracesExperience.openOverviewTab();
-        });
-
-        await spaceTest.step('click the service name link to open the service flyout', async () => {
-          // Hover-triggered action buttons appear over the link and intercept pointer events;
-          // force bypasses the overlay while the explicit visibility check ensures the link is ready.
-          await expect(tracesExperience.flyout.about.serviceNameLink).toBeVisible();
-          await tracesExperience.flyout.about.serviceNameLink.click({ force: true });
-        });
-
-        await spaceTest.step('verify service flyout is visible', async () => {
-          await expect(tracesExperience.flyout.serviceFlyout.container).toBeVisible();
-        });
-
-        await spaceTest.step('verify charts render without error', async () => {
-          for (const chartId of ['latency', 'throughput', 'failedTransactionRate']) {
-            const chart = page.testSubj.locator(`serviceFlyoutLensChart-${chartId}`);
-            await expect(chart).toBeVisible();
-            await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
-          }
+        await openServiceFlyoutAndVerifyCharts({
+          tracesExperience,
+          discover,
+          esqlQuery: `${TRACES.ESQL_QUERY} | WHERE service.name == "${RICH_TRACE.SERVICE_NAME}"`,
         });
 
         await spaceTest.step(
           'verify ECS schema: transaction type filter and transactions section are visible',
           async () => {
-            await expect(page.testSubj.locator('serviceFlyoutTransactionTypeSelect')).toBeVisible();
-            await expect(page.testSubj.locator('serviceFlyoutSection-transactions')).toBeVisible();
+            await expect(tracesExperience.flyout.serviceFlyout.transactionTypeSelect).toBeVisible();
+            await expect(tracesExperience.flyout.serviceFlyout.transactionsSection).toBeVisible();
           }
         );
       }
     );
 
     spaceTest(
-      'opens service flyout for an unprocessed OTel service and renbders its content',
-      async ({ page, pageObjects }) => {
+      'opens service flyout for an unprocessed OTel service and renders its content',
+      async ({ pageObjects }) => {
         const { tracesExperience, discover } = pageObjects;
 
-        await spaceTest.step('navigate to Discover in ES|QL mode', async () => {
-          await discover.goto({ queryMode: 'esql' });
-        });
-
-        await spaceTest.step('run ES|QL query scoped to the OTel service', async () => {
-          await discover.writeAndSubmitEsqlQuery(
-            `${OTEL_SERVICE.ESQL_QUERY} | WHERE service.name == "${OTEL_SERVICE.SERVICE_NAME}"`
-          );
-        });
-
-        await spaceTest.step('open overview tab for the first row', async () => {
-          await tracesExperience.openOverviewTab();
-        });
-
-        await spaceTest.step('click the service name link to open the service flyout', async () => {
-          // Hover-triggered action buttons appear over the link and intercept pointer events;
-          // force bypasses the overlay while the explicit visibility check ensures the link is ready.
-          await expect(tracesExperience.flyout.about.serviceNameLink).toBeVisible();
-          await tracesExperience.flyout.about.serviceNameLink.click({ force: true });
-        });
-
-        await spaceTest.step('verify service flyout is visible', async () => {
-          await expect(tracesExperience.flyout.serviceFlyout.container).toBeVisible();
-        });
-
-        await spaceTest.step('verify charts render without error', async () => {
-          for (const chartId of ['latency', 'throughput', 'failedTransactionRate']) {
-            const chart = page.testSubj.locator(`serviceFlyoutLensChart-${chartId}`);
-            await expect(chart).toBeVisible();
-            await expect(chart.locator('[data-test-subj="embeddable-lens-failure"]')).toBeHidden();
-          }
+        await openServiceFlyoutAndVerifyCharts({
+          tracesExperience,
+          discover,
+          esqlQuery: `${OTEL_SERVICE.ESQL_QUERY} | WHERE service.name == "${OTEL_SERVICE.SERVICE_NAME}"`,
         });
 
         await spaceTest.step(
           'verify OTel schema: transaction type filter and transactions section are hidden',
           async () => {
-            await expect(page.testSubj.locator('serviceFlyoutTransactionTypeSelect')).toBeHidden();
-            await expect(page.testSubj.locator('serviceFlyoutSection-transactions')).toBeHidden();
+            await expect(tracesExperience.flyout.serviceFlyout.transactionTypeSelect).toBeHidden();
+            await expect(tracesExperience.flyout.serviceFlyout.transactionsSection).toBeHidden();
           }
         );
       }
