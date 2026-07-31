@@ -49,7 +49,7 @@ export const RETURN_APP_QUERY_PARAM = 'returnApp';
 export const RETURN_PATH_QUERY_PARAM = 'returnPath';
 
 export interface WorkflowReturnDestination {
-  returnApp: string;
+  returnAppId: string;
   returnPath?: string;
 }
 
@@ -69,5 +69,5 @@ export const getReturnDestinationFromSearch = (
 
   const returnPath = params.get(RETURN_PATH_QUERY_PARAM);
 
-  return { returnApp, returnPath: returnPath ?? undefined };
+  return { returnAppId: returnApp, returnPath: returnPath ?? undefined };
 };

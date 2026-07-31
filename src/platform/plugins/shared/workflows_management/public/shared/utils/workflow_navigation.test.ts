@@ -68,14 +68,14 @@ describe('workflow navigation', () => {
       expect(
         getReturnDestinationFromSearch('?returnApp=context_engine&returnPath=%2Fai_index%2F1')
       ).toEqual({
-        returnApp: 'context_engine',
+        returnAppId: 'context_engine',
         returnPath: '/ai_index/1',
       });
     });
 
     it('parses returnApp without a returnPath', () => {
       expect(getReturnDestinationFromSearch('?returnApp=context_engine')).toEqual({
-        returnApp: 'context_engine',
+        returnAppId: 'context_engine',
         returnPath: undefined,
       });
     });

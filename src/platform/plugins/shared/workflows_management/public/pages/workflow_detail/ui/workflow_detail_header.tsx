@@ -75,18 +75,18 @@ const useWorkflowDetailHeaderBack = (): AppHeaderBack => {
   // Honor `returnApp`/`returnPath` query params when the app is known.
   return useMemo<AppHeaderBack>(() => {
     const returnDestination = getReturnDestinationFromSearch(location.search);
-    const returnApp = returnDestination && appList?.get(returnDestination.returnApp);
+    const returnApp = returnDestination && appList?.get(returnDestination.returnAppId);
 
     if (returnDestination && returnApp) {
       return {
-        href: application.getUrlForApp(returnDestination.returnApp, {
+        href: application.getUrlForApp(returnDestination.returnAppId, {
           path: returnDestination.returnPath,
         }),
         label: returnApp.title,
         onClick: (event) => {
           event.preventDefault();
           application.navigateToApp(
-            returnDestination.returnApp,
+            returnDestination.returnAppId,
             returnDestination.returnPath ? { path: returnDestination.returnPath } : undefined
           );
         },
