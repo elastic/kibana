@@ -16,6 +16,7 @@ import {
 import { hasApiKeyPrivileges } from '../../lib/api_key/has_api_key_privileges';
 import { APM_EVENT_WRITE_APPLICATION } from '../../lib/api_key/privileges';
 import { resolveApiKeyFactory } from '../../lib/api_key/resolve_api_key_factory';
+import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url';
 
 jest.mock('../../lib/get_managed_otlp_service_url', () => ({
   getManagedOtlpServiceUrl: jest.fn().mockReturnValue('https://otlp.example.com:443'),
@@ -118,6 +119,7 @@ describe('create_key handler', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (getManagedOtlpServiceUrl as jest.Mock).mockReturnValue('https://otlp.example.com:443');
   });
 
   it.each([ApiEndpointId.Supabase, ApiEndpointId.Vercel])(
@@ -140,6 +142,17 @@ describe('create_key handler', () => {
     await expect(
       handler(createResources({ id: ApiEndpointId.Vercel, isServerless: false }))
     ).rejects.toMatchObject({ output: { statusCode: 400 } });
+
+    expect(hasApiKeyPrivileges).not.toHaveBeenCalled();
+    expect(resolveApiKeyFactory).not.toHaveBeenCalled();
+  });
+
+  it('rejects vendor key creation on serverless when the managed OTLP URL is unavailable', async () => {
+    (getManagedOtlpServiceUrl as jest.Mock).mockReturnValue('');
+
+    await expect(handler(createResources({ id: ApiEndpointId.Supabase }))).rejects.toMatchObject({
+      output: { statusCode: 400 },
+    });
 
     expect(hasApiKeyPrivileges).not.toHaveBeenCalled();
     expect(resolveApiKeyFactory).not.toHaveBeenCalled();

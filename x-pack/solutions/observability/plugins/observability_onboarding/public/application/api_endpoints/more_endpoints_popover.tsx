@@ -49,13 +49,7 @@ export const MoreEndpointsPopover = ({
     return null;
   }
 
-  const isCreatingVendorKey = vendors.some((vendor) => vendor.id === creatingEndpointId);
-  const closePopover = () => {
-    // Closing mid-request would hide the only place the new key is shown.
-    if (!isCreatingVendorKey) {
-      setIsPopoverOpen(false);
-    }
-  };
+  const closePopover = () => setIsPopoverOpen(false);
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -96,7 +90,6 @@ export const MoreEndpointsPopover = ({
           anchorPosition="downLeft"
           panelPaddingSize="m"
           aria-labelledby={titleId}
-          focusTrapProps={{ clickOutsideDisables: !isCreatingVendorKey }}
           panelProps={{
             onKeyDown: (event: React.KeyboardEvent) => {
               if (event.key === 'Escape') {

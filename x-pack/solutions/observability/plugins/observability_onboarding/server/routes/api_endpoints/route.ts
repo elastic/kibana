@@ -154,6 +154,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       Boolean(managedOtlpServiceUrl);
     const isManagedElasticsearchBulkEndpointAvailable =
       hasManagedElasticsearchBulkEndpoint(managedOtlpServiceUrl);
+    const isVendorEndpointAvailable =
+      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl);
 
     const apiKeyFactoryContext: ApiKeyFactoryContext = {
       isManagedOtlpServiceAvailable,
@@ -162,7 +164,7 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       isManagedElasticsearchBulkEndpointAvailable,
     };
 
-    ensureVendorEndpointAvailable(id, isManagedOtlpServiceAvailable);
+    ensureVendorEndpointAvailable(id, isVendorEndpointAvailable);
 
     const hasPrivileges = await hasRequiredPrivileges(
       id,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { ApiKeyField } from './api_key_field';
 
@@ -110,5 +110,15 @@ describe('ApiKeyField', () => {
       screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton')
     ).toBeDisabled();
     expect(screen.queryByText(/don't have permission/)).not.toBeInTheDocument();
+  });
+
+  it('explains when the create button is disabled by another key request', async () => {
+    render(<ApiKeyField {...defaultProps} isDisabled={true} />);
+
+    fireEvent.mouseOver(screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton'));
+
+    expect(
+      await screen.findByText('Another API key is being created. Wait for it to finish.')
+    ).toBeInTheDocument();
   });
 });

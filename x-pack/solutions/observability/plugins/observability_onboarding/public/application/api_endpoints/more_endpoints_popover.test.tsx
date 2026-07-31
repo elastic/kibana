@@ -103,29 +103,20 @@ describe('MoreEndpointsPopover', () => {
     expect(screen.getByRole('dialog', { name: 'Other endpoints' })).toBeInTheDocument();
   });
 
-  it('stays open on Escape while a vendor key is being created', async () => {
+  it('closes on Escape while a vendor key is being created', async () => {
     renderPopover({ creatingEndpointId: ApiEndpointId.Supabase });
     await openPopover();
 
     fireEvent.keyDown(screen.getByRole('dialog', { name: 'Other endpoints' }), { key: 'Escape' });
-
-    expect(
-      screen.getByTestId('observabilityOnboardingVendorEndpointCard-supabase')
-    ).toBeInTheDocument();
+    await waitForPopoverContentUnmount();
   });
 
-  it('stays open on a trigger click while a vendor key is being created and locks the other create buttons', async () => {
+  it('closes on a trigger click while a vendor key is being created', async () => {
     renderPopover({ creatingEndpointId: ApiEndpointId.Supabase });
     await openPopover();
 
     fireEvent.click(screen.getByTestId('observabilityOnboardingMoreEndpointsButton'));
-
-    expect(
-      screen.getByTestId('observabilityOnboardingVendorEndpointCard-supabase')
-    ).toBeInTheDocument();
-    expect(
-      screen.getByTestId('observabilityOnboardingApiEndpointCreateApiKeyButton-vercel-popover')
-    ).toBeDisabled();
+    await waitForPopoverContentUnmount();
   });
 
   it('re-shows a previously created key after close and reopen', async () => {

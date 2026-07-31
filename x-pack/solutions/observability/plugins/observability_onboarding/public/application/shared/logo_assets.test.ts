@@ -8,14 +8,23 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
+const readSvg = (asset: string): Document =>
+  new DOMParser().parseFromString(
+    readFileSync(resolve(__dirname, '../../assets', asset), 'utf8'),
+    'image/svg+xml'
+  );
+
 describe('Vercel logo assets', () => {
   it.each([
     ['vercel_black.svg', 'black'],
     ['vercel_white.svg', 'white'],
   ])('uses the official standalone triangle in %s', (asset, fill) => {
-    const svg = readFileSync(resolve(__dirname, '../../assets', asset), 'utf8');
+    const svg = readSvg(asset);
+    const path = svg.querySelector('path');
 
-    expect(svg).not.toContain('<circle');
-    expect(svg).toContain(`<path d="M8 1L16 15H0L8 1Z" fill="${fill}"/>`);
+    expect(svg.querySelector('parsererror')).toBeNull();
+    expect(svg.querySelector('circle')).toBeNull();
+    expect(path?.getAttribute('d')).toBe('M8 1L16 15H0L8 1Z');
+    expect(path?.getAttribute('fill')).toBe(fill);
   });
 });

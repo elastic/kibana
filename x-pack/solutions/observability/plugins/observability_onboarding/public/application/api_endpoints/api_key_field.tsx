@@ -52,6 +52,17 @@ export const ApiKeyField = ({
       defaultMessage: "You don't have permission to create API keys. Contact your administrator.",
     }
   );
+  const apiKeyCreationInProgressMessage = i18n.translate(
+    'xpack.observability_onboarding.apiEndpoints.apiKeyCreationInProgressMessage',
+    {
+      defaultMessage: 'Another API key is being created. Wait for it to finish.',
+    }
+  );
+  const createButtonTooltip = !canCreate
+    ? noPermissionMessage
+    : isDisabled
+    ? apiKeyCreationInProgressMessage
+    : undefined;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
@@ -104,7 +115,7 @@ export const ApiKeyField = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFormRow hasEmptyLabelSpace>
-          <EuiToolTip content={!canCreate ? noPermissionMessage : undefined}>
+          <EuiToolTip content={createButtonTooltip}>
             <EuiButton
               iconType="plusInCircle"
               onClick={onCreate}
