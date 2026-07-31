@@ -33,6 +33,14 @@ const SERVER_BACKED_COMBO_BOX_TIMEOUT = 20_000;
 const RENDER_TIMEOUT = 30_000;
 
 /**
+ * TSVB hands a model change to the preview a 200ms debounce later and dispatches more
+ * than one render pass per change, so the preview only counts as settled once its
+ * render count has stopped moving for longer than that debounce.
+ */
+const PREVIEW_SETTLED_MS = 1_000;
+const PREVIEW_POLL_INTERVAL_MS = 100;
+
+/**
  * Selectors for the elements TSVB renders more than once (one per series, agg row
  * or filter row), which therefore have to be addressed by position.
  */
@@ -502,18 +510,57 @@ export class VisualBuilder {
    * the place of the sleeps the migrated FTR suite needed for the same reason.
    *
    * Only usable for changes the model actually adopts: setting a control to the
-   * value it already holds does not make the preview render again. And because the
-   * preview renders twice per change, a render pass left over from the previous one
-   * can satisfy this gate, so it leaves the editor usable but does not prove that
-   * the change reached the vis state — anything that reloads the page has to check
-   * the URL for that.
+   * value it already holds does not make the preview render again. And a completed
+   * render pass leaves the editor usable but does not prove that the change reached
+   * the vis state — anything that reloads the page has to check the URL for that.
    */
   private async applyAndWaitForRerender(change: () => Promise<void>) {
     const renderCount = await this.getPreviewRenderCount();
     await change();
+    await this.waitForPreviewSettled(renderCount);
+  }
+
+  /**
+   * Waits until the preview has rendered past `minRenderCount` and has no further
+   * render pass pending.
+   *
+   * Waiting for a single pass is not enough: the preview renders more than once per
+   * change, so a pass still in flight can land while the next interaction is under
+   * way, remount the form control it targets and detach the node the click has
+   * already resolved.
+   */
+  private async waitForPreviewSettled(minRenderCount: number) {
+    let lastCount = minRenderCount;
+    let stableSince: number | null = null;
+
     await expect
-      .poll(() => this.getPreviewRenderCount(), { timeout: RENDER_TIMEOUT })
-      .toBeGreaterThan(renderCount);
+      .poll(
+        async () => {
+          const isComplete = (await this.preview.getAttribute('data-render-complete')) === 'true';
+          const count = await this.getPreviewRenderCount();
+          const now = Date.now();
+
+          // A count that dropped below the baseline means the preview remounted and
+          // reset its counter, which is a render pass just the same.
+          if (!isComplete || count === minRenderCount) {
+            stableSince = null;
+            return false;
+          }
+          if (count !== lastCount) {
+            lastCount = count;
+            stableSince = now;
+            return false;
+          }
+          stableSince ??= now;
+          return now - stableSince >= PREVIEW_SETTLED_MS;
+        },
+        {
+          message: `The TSVB preview did not settle within ${RENDER_TIMEOUT}ms`,
+          timeout: RENDER_TIMEOUT,
+          intervals: [PREVIEW_POLL_INTERVAL_MS],
+        }
+      )
+      .toBe(true);
   }
 
   /**
