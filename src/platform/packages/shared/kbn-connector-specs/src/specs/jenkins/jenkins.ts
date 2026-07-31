@@ -97,6 +97,7 @@ const QUEUE_ITEM_TREE =
 const BLOCKED_PATH_PREFIXES = [
   '/script',
   '/scripttext',
+  '/cli',
   '/credentials',
   '/securityrealm',
   '/configuresecurity',
