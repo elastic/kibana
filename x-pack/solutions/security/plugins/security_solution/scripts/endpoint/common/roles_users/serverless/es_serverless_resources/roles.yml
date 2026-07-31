@@ -60,7 +60,7 @@ viewer:
         - ".fleet-actions*"
         - "risk-score.risk-score-*"
         - ".asset-criticality.asset-criticality-*"
-        - ".entities.v1.latest.security_*"
+        - ".entities.v1.latest.*"
         - ".entities.v1.updates.security_*"
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -143,7 +143,7 @@ editor:
         - "maintenance"
     - names:
         - ".asset-criticality.asset-criticality-*"
-        - ".entities.v1.latest.security_*"
+        - ".entities.v1.latest.*"
         - ".entities.v1.updates.security_*"
         - ".entities.v1.history.*.security_*"
         - ".entities.v1.reset*"
@@ -226,9 +226,9 @@ t1_analyst:
         - ".fleet-actions*"
         - risk-score.risk-score-*
         - .asset-criticality.asset-criticality-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
-        - ".entities.v1.latest.security_*"
+        - ".entities.v1.latest.*"
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
         - "entities-latest-*"
@@ -293,7 +293,7 @@ t2_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -375,7 +375,7 @@ t3_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -468,7 +468,7 @@ threat_intelligence_analyst:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -549,7 +549,7 @@ rule_author:
         - .fleet-agents*
         - .fleet-actions*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -610,7 +610,7 @@ soc_manager:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -732,7 +732,7 @@ detections_admin:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -796,7 +796,7 @@ platform_engineer:
         - all
     - names:
         - .asset-criticality.asset-criticality-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v1.reset*"
@@ -874,7 +874,7 @@ endpoint_operations_analyst:
         - .lists*
         - .items*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"
@@ -967,7 +967,7 @@ endpoint_policy_manager:
         - winlogbeat-*
         - logstash-*
         - risk-score.risk-score-*
-        - .entities.v1.latest.security_*
+        - .entities.v1.latest.*
         - .entities.v1.updates.security_*
         - ".entities.v1.history.*.security_*"
         - ".entities.v2.*"

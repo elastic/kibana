@@ -1,21 +1,28 @@
 ---
 name: entity-store
 description: >
-  Security Solution Entity Store architecture and implementation guide.
-  Use when working with Security Entity Store code, entity analytics, entity resolution,
+  Platform Entity Store architecture and implementation guide (Security Entity Analytics
+  still owns HTTP routes/auth for now).
+  Use when working with Entity Store code, entity analytics, entity resolution,
   golden entity, alias entity, resolved_to, resolution fields, entity maintainers,
-  EUID, entity CRUD API, or related features in the Security Solution.
+  EUID, entity CRUD API, or related features.
   Also use when someone asks "how does entity store work", "entity store v2",
   "entity maintainer", or mentions the entity_store plugin under
-  x-pack/solutions/security/plugins/entity_store/.
-  NOTE: This is the Security Solution Entity Store, not Observability's entity model.
+  x-pack/platform/plugins/shared/entity_store/.
+  NOTE: This is the persisted Entity Store index/engine — not Observability's field-based
+  entity model or KI Features. Obs/KI consumers are a follow-up.
 ---
 
-# Security Solution Entity Store
+# Entity Store (platform shared)
 
-Entity Store is part of Kibana **Security Solution's** Entity Analytics. It aggregates entity-centric security data from multiple sources into a single shared index. It lives in `x-pack/solutions/security/plugins/entity_store/`.
+Entity Store is a **platform shared** plugin (`group: platform`, `visibility: shared`) that
+aggregates entity-centric data into a solution-neutral shared index. It lives in
+`x-pack/platform/plugins/shared/entity_store/`. Security Solution Entity Analytics is still
+the primary product consumer; HTTP routes remain under `/api/security/entity_store` and
+require `securitySolution` privileges in this phase.
 
-> This skill covers the **Security Solution** Entity Store (`entityStore` plugin). It is not related to Observability's entity model or SLO entities.
+> Observability entity helpers / Nightshift KI Features are a separate model today.
+> Wiring Obs/KI to this shared store is an explicit follow-up.
 
 **Two versions exist:**
 - **v2 (ESQL + Kibana Task)** — active architecture, default since 9.4.0. All new features (Entity Resolution, CRUD API, Maintainers) are v2-only.
@@ -27,7 +34,8 @@ Entity Store is part of Kibana **Security Solution's** Entity Analytics. It aggr
 - **Upsert with conflict retry** — never overwrites entire documents
 - **LOOKUP JOIN + COALESCE** for field retention — preserves API-set fields across extraction runs
 - **EUID** — deterministic entity ID via `euid.getEuidFromObject('host', doc)` (from `@kbn/entity-store-plugin`). Also ES stored scripts.
-- **Single shared index** — `.entities.v2.latest.security_{namespace}`, all entity types, scoped by `entity.EngineMetadata.Type`
+- **Single shared index** — `.entities.v2.latest.{namespace}`, all entity types, scoped by `entity.EngineMetadata.Type`
+- **Legacy rename** — pre-platform installs used `.entities.v2.*.security_{namespace}`; install migrates those assets to the neutral names
 - **Auto-enabled** — installs on Security Solution navigation. `entityStore` is a required plugin dependency of `securitySolution`.
 
 ## Entity Types
@@ -39,17 +47,17 @@ User entities use namespace-qualified `entity.id` (`user:id@namespace`). `entity
 ## Plugin Location
 
 ```
-x-pack/solutions/security/plugins/entity_store/
+x-pack/platform/plugins/shared/entity_store/
 ├── common/domain/definitions/        # Entity schemas, field definitions
 ├── server/
 │   ├── plugin.ts                     # Setup + start contracts
 │   ├── domain/
-│   │   ├── asset_manager/            # Engine lifecycle (directory)
+│   │   ├── asset_manager/            # Engine lifecycle + legacy index migration
 │   │   ├── resolution/               # Resolution: link/unlink/group
 │   │   ├── crud_client/              # CRUD: create/update/bulk/delete
 │   │   ├── errors/                   # 12 error classes (see references/errors.md)
 │   │   └── logs_extraction/          # ESQL query builders
-│   ├── routes/apis/                  # Route handlers
+│   ├── routes/apis/                  # Route handlers (still /api/security/...)
 │   └── tasks/
 │       ├── extract_entity_task.ts    # ESQL extraction (~10s)
 │       └── entity_maintainers/       # Maintainers framework (plural)

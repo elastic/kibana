@@ -1204,7 +1204,7 @@ describe('searchEntitiesTool', () => {
 
       // FROM includes both entity index and snapshot index
       expect(query).toContain('entities-latest-default');
-      expect(query).toContain('.entities.v2.history.security_default*');
+      expect(query).toContain('.entities.v2.history.default*');
 
       // Risk score IS NOT NULL and timestamp range filters
       expect(query).toContain('WHERE entity.risk.calculated_score_norm IS NOT NULL');
@@ -1240,7 +1240,7 @@ describe('searchEntitiesTool', () => {
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
       expect(query).toContain('FROM entities-latest-default');
-      expect(query).not.toContain('.entities.v2.history.security_default');
+      expect(query).not.toContain('.entities.v2.history.default');
     });
 
     it('uses start-of-day truncation for the timestamp filter', async () => {

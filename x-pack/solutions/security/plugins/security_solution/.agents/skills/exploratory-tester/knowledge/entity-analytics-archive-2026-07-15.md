@@ -32,7 +32,7 @@
 - Format: CSV/TSV/TXT, max 1 MB. Required columns: `type`, `criticality_level`. Identifier columns: `user.name`, `user.email`, `host.name`, `host.hostname`, `service.name`, etc.
 - Valid criticality values: `extreme_impact`, `high_impact`, `medium_impact`, `low_impact`, `unassigned`.
 - **Known gap:** Client-side validation does not check for required columns before showing the Assign button. A file missing `criticality_level` is accepted in preview with a misleading "N levels will be assigned" count.
-- **Known gap:** When the entity store index does not exist, all rows fail with `index_not_found_exception: no such index [.entities.v2.latest.security_<space>-<suffix>]`.
+- **Known gap:** When the entity store index does not exist, all rows fail with `index_not_found_exception: no such index [.entities.v2.latest.<space>-<suffix>]`.
 - API: `POST /internal/asset_criticality/upload_csv_v2`
 
 ### Entity resolution import
@@ -50,7 +50,7 @@
 
 ### Environment setup notes
 - The API endpoint `POST /api/entity_store/enable` (using API key auth) can initialize 3 engines (user, host, service) reporting "installing" status, but this does NOT enable EA via the UI toggle or create the entity store index.
-- The entity store index name pattern is: `.entities.v2.latest.security_<space-id>-<suffix>` (e.g., `.entities.v2.latest.security_exploratory-testing-00001`).
+- The entity store index name pattern is: `.entities.v2.latest.<space-id>-<suffix>` (e.g., `.entities.v2.latest.exploratory-testing-00001`).
 - The Alerts page requires a security data view to be configured; without one it shows "Unable to retrieve the data view".
 - The Hosts and Users Explore pages show the onboarding empty state when no security integrations are configured.
 

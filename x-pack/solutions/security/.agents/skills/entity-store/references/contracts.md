@@ -46,8 +46,8 @@ interface EntityStoreApiRequestHandlerContext {
 
 ## Index Naming
 
-- **Latest**: `.entities.v2.latest.security_{namespace}` (single-shard, `mode: 'lookup'`)
-- **Updates**: `.entities.v2.updates.security_{namespace}` (data stream)
+- **Latest**: `.entities.v2.latest.{namespace}` (single-shard, `mode: 'lookup'`)
+- **Updates**: `.entities.v2.updates.{namespace}` (data stream)
 
 ## Key Fields
 
