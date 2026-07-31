@@ -351,7 +351,11 @@ describe('serviceHasSystemMetricsRoute params', () => {
     expectParseSuccess(
       serviceHasSystemMetricsRoute.params!.safeParse({
         path: { serviceName: 'opbeans-java' },
-        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
       })
     );
   });
@@ -360,7 +364,11 @@ describe('serviceHasSystemMetricsRoute params', () => {
     expectParseError(
       serviceHasSystemMetricsRoute.params!.safeParse({
         path: { serviceName: 'a'.repeat(1025) },
-        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
       })
     );
   });
@@ -371,7 +379,11 @@ describe('serviceIngestionTypeRoute params', () => {
     expectParseSuccess(
       serviceIngestionTypeRoute.params!.safeParse({
         path: { serviceName: 'opbeans-java' },
-        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
       })
     );
   });
@@ -380,7 +392,11 @@ describe('serviceIngestionTypeRoute params', () => {
     expectParseError(
       serviceIngestionTypeRoute.params!.safeParse({
         path: { serviceName: 'a'.repeat(1025) },
-        query: { start: '2021-01-01T00:00:00.000Z', end: '2021-01-02T00:00:00.000Z' },
+        query: {
+          start: '2021-01-01T00:00:00.000Z',
+          end: '2021-01-02T00:00:00.000Z',
+          environment: 'production',
+        },
       })
     );
   });

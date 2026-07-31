@@ -186,7 +186,9 @@ describe('ServiceFlyoutOverview key metrics indices loading and error states', (
 
     expect(screen.getByTestId('serviceFlyoutSection-keyMetrics-error')).toBeInTheDocument();
     expect(screen.queryByTestId('lensChartMock')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')
+    ).not.toBeInTheDocument();
   });
 
   it('renders key metrics charts when indices are available', () => {
@@ -209,7 +211,9 @@ describe('ServiceFlyoutOverview key metrics indices loading and error states', (
     );
 
     expect(screen.getAllByTestId('lensChartMock').length).toBeGreaterThan(0);
-    expect(screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('serviceFlyoutSection-keyMetrics-skeleton')
+    ).not.toBeInTheDocument();
     expect(screen.queryByTestId('serviceFlyoutSection-keyMetrics-error')).not.toBeInTheDocument();
   });
 });
