@@ -30,7 +30,20 @@ export function buildTaskAttemptsExhaustedMessage(lastError: string): string {
   return `Task Manager exhausted all attempts for this workflow execution task. Last error: ${lastError}`;
 }
 
-export type InterruptedWorkflowRunTaskOutcome = 'run_workflow' | 'task_complete';
+/**
+ * Discriminated result for `workflow:run` interrupt recovery.
+ * - `run_workflow`: continue into `runWorkflow`
+ * - `task_complete` + `interrupted`: prior claim abandoned; execution marked FAILED
+ * - `task_complete` + `noop`: already terminal / waiting_for_input / queued — do not re-run;
+ *   stamp from execution status when terminal, otherwise omit semantic stamp
+ */
+export type InterruptedWorkflowRunTaskResult =
+  | { action: 'run_workflow' }
+  | {
+      action: 'task_complete';
+      reason: 'interrupted' | 'noop';
+      execution: EsWorkflowExecution;
+    };
 
 /**
  * When Task Manager retries `workflow:run` (`attempts > 1`), the prior claim did not finish successfully.
@@ -52,9 +65,9 @@ export async function resolveInterruptedWorkflowRunTask({
   spaceId: string;
   taskAttempts: number;
   logger: Logger;
-}): Promise<InterruptedWorkflowRunTaskOutcome> {
+}): Promise<InterruptedWorkflowRunTaskResult> {
   if (taskAttempts <= 1) {
-    return 'run_workflow';
+    return { action: 'run_workflow' };
   }
 
   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -66,7 +79,7 @@ export async function resolveInterruptedWorkflowRunTask({
     logger.warn(
       `workflow:run retry (attempts=${taskAttempts}) but no execution document for ${workflowRunId}; continuing run`
     );
-    return 'run_workflow';
+    return { action: 'run_workflow' };
   }
 
   if (!shouldFailOnWorkflowRunRetry(execution)) {
@@ -75,7 +88,7 @@ export async function resolveInterruptedWorkflowRunTask({
         `workflow:run retry for execution ${workflowRunId} while status is waiting_for_input; leaving execution unchanged (human resume only)`
       );
     }
-    return 'task_complete';
+    return { action: 'task_complete', reason: 'noop', execution };
   }
 
   await markExecutionFailedTaskRecovery(
@@ -91,10 +104,33 @@ export async function resolveInterruptedWorkflowRunTask({
     `Marked workflow execution ${workflowRunId} FAILED after workflow:run retry (attempts=${taskAttempts}) - prior run was interrupted`
   );
 
-  return 'task_complete';
+  return {
+    action: 'task_complete',
+    reason: 'interrupted',
+    execution: {
+      ...execution,
+      status: ExecutionStatus.FAILED,
+      error: {
+        type: TASK_RECOVERY_ERROR_TYPE,
+        message: taskRecoveryMessages.workflowRunInterrupted,
+      },
+    },
+  };
 }
 
-export type InterruptedWorkflowResumeTaskOutcome = 'resume_workflow' | 'task_complete';
+/**
+ * Discriminated result for `workflow:resume` interrupt recovery.
+ * - `resume_workflow`: continue into `resumeWorkflow`
+ * - `task_complete` + `interrupted`: prior claim abandoned; execution marked FAILED
+ * - `task_complete` + `noop`: already terminal — stamp from status
+ */
+export type InterruptedWorkflowResumeTaskResult =
+  | { action: 'resume_workflow' }
+  | {
+      action: 'task_complete';
+      reason: 'interrupted' | 'noop';
+      execution: EsWorkflowExecution;
+    };
 
 /**
  * When Task Manager retries `workflow:resume` (`attempts > 1`), the prior claim did not finish successfully.
@@ -115,9 +151,9 @@ export async function resolveInterruptedWorkflowResumeTask({
   spaceId: string;
   taskAttempts: number;
   logger: Logger;
-}): Promise<InterruptedWorkflowResumeTaskOutcome> {
+}): Promise<InterruptedWorkflowResumeTaskResult> {
   if (taskAttempts <= 1) {
-    return 'resume_workflow';
+    return { action: 'resume_workflow' };
   }
 
   const execution = await workflowExecutionRepository.getWorkflowExecutionById(
@@ -129,18 +165,18 @@ export async function resolveInterruptedWorkflowResumeTask({
     logger.warn(
       `workflow:resume retry (attempts=${taskAttempts}) but no execution document for ${workflowRunId}; continuing resume`
     );
-    return 'resume_workflow';
+    return { action: 'resume_workflow' };
   }
 
   if (isTerminalStatus(execution.status)) {
-    return 'task_complete';
+    return { action: 'task_complete', reason: 'noop', execution };
   }
 
   if (execution.status === ExecutionStatus.WAITING_FOR_INPUT) {
     logger.warn(
       `workflow:resume retry for execution ${workflowRunId} still waiting_for_input - invoking resume handler again`
     );
-    return 'resume_workflow';
+    return { action: 'resume_workflow' };
   }
 
   await markExecutionFailedTaskRecovery(
@@ -156,7 +192,18 @@ export async function resolveInterruptedWorkflowResumeTask({
     `Marked workflow execution ${workflowRunId} FAILED after workflow:resume retry (attempts=${taskAttempts}) - prior resume task was interrupted`
   );
 
-  return 'task_complete';
+  return {
+    action: 'task_complete',
+    reason: 'interrupted',
+    execution: {
+      ...execution,
+      status: ExecutionStatus.FAILED,
+      error: {
+        type: TASK_RECOVERY_ERROR_TYPE,
+        message: taskRecoveryMessages.workflowResumeInterrupted,
+      },
+    },
+  };
 }
 
 export async function markExecutionFailedTaskRecovery(

@@ -84,7 +84,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 1,
         logger,
       })
-    ).resolves.toBe('run_workflow');
+    ).resolves.toEqual({ action: 'run_workflow' });
     expect(esClient.get).not.toHaveBeenCalled();
   });
 
@@ -108,7 +108,16 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'interrupted',
+        execution: expect.objectContaining({
+          id: 'x',
+          status: ExecutionStatus.FAILED,
+        }),
+      })
+    );
 
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -138,7 +147,7 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('run_workflow');
+    ).resolves.toEqual({ action: 'run_workflow' });
 
     expect(esClient.update).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
@@ -166,7 +175,13 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'noop',
+        execution: expect.objectContaining({ status: ExecutionStatus.FAILED }),
+      })
+    );
 
     expect(esClient.update).not.toHaveBeenCalled();
   });
@@ -191,7 +206,13 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'noop',
+        execution: expect.objectContaining({ status: ExecutionStatus.WAITING_FOR_INPUT }),
+      })
+    );
 
     expect(esClient.update).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('waiting_for_input'));
@@ -218,7 +239,12 @@ describe('resolveInterruptedWorkflowRunTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual(
+      expect.objectContaining({
+        action: 'task_complete',
+        reason: 'interrupted',
+      })
+    );
 
     expect(esClient.update).toHaveBeenCalled();
   });
@@ -247,7 +273,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 1,
         logger,
       })
-    ).resolves.toBe('resume_workflow');
+    ).resolves.toEqual({ action: 'resume_workflow' });
     expect(esClient.get).not.toHaveBeenCalled();
   });
 
@@ -271,7 +297,14 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual({
+      action: 'task_complete',
+      reason: 'interrupted',
+      execution: expect.objectContaining({
+        id: 'x',
+        status: ExecutionStatus.FAILED,
+      }),
+    });
 
     expect(esClient.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -300,7 +333,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('resume_workflow');
+    ).resolves.toEqual({ action: 'resume_workflow' });
 
     expect(esClient.update).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
@@ -328,7 +361,7 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('resume_workflow');
+    ).resolves.toEqual({ action: 'resume_workflow' });
 
     expect(esClient.update).not.toHaveBeenCalled();
   });
@@ -352,7 +385,14 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual({
+      action: 'task_complete',
+      reason: 'noop',
+      execution: expect.objectContaining({
+        id: 'x',
+        status: ExecutionStatus.COMPLETED,
+      }),
+    });
 
     expect(esClient.update).not.toHaveBeenCalled();
   });
@@ -376,7 +416,14 @@ describe('resolveInterruptedWorkflowResumeTask', () => {
         taskAttempts: 2,
         logger,
       })
-    ).resolves.toBe('task_complete');
+    ).resolves.toEqual({
+      action: 'task_complete',
+      reason: 'noop',
+      execution: expect.objectContaining({
+        id: 'x',
+        status: ExecutionStatus.FAILED,
+      }),
+    });
 
     expect(esClient.update).not.toHaveBeenCalled();
   });
