@@ -692,6 +692,83 @@ describe('ESQL query utils', () => {
       ).toEqual(['error.code', 'host']);
     });
 
+    it('correctly gets the alertId from an ESQL query that renames a column inline in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY error.code, host = source.host | KEEP error.code, host, count',
+          [
+            { name: 'error.code', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['error.code', 'host']);
+
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY code = error.code, host = source.host | KEEP code, host, count',
+          [
+            { name: 'code', type: 'keyword' },
+            { name: 'host', type: 'keyword' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['code', 'host']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that groups by an unnamed expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*) BY BUCKET(@timestamp, 1 hour)', [
+          { name: 'BUCKET(@timestamp, 1 hour)', type: 'date' },
+          { name: 'count', type: 'number' },
+        ])
+      ).toEqual(['BUCKET(@timestamp, 1 hour)']);
+
+      expect(
+        getAlertIdFields('FROM test-index | STATS count = COUNT(*) BY a + b', [
+          { name: 'a + b', type: 'number' },
+          { name: 'count', type: 'number' },
+        ])
+      ).toEqual(['a + b']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that mixes a column and an unnamed expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY error.code, BUCKET(@timestamp, 1 hour)',
+          [
+            { name: 'error.code', type: 'keyword' },
+            { name: 'BUCKET(@timestamp, 1 hour)', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['error.code', 'BUCKET(@timestamp, 1 hour)']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that aliases an expression in the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour)',
+          [
+            { name: 'hour', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['hour']);
+    });
+
+    it('correctly gets the alertId from an ESQL query that renames an unnamed expression after the STATS...BY clause', () => {
+      expect(
+        getAlertIdFields(
+          'FROM test-index | STATS count = COUNT(*) BY BUCKET(@timestamp, 1 hour) | RENAME `BUCKET(@timestamp, 1 hour)` AS bucket',
+          [
+            { name: 'bucket', type: 'date' },
+            { name: 'count', type: 'number' },
+          ]
+        )
+      ).toEqual(['bucket']);
+    });
+
     it('correctly gets the alertId from an ESQL query that uses STATS...BY and RENAME', () => {
       expect(
         getAlertIdFields(

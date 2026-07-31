@@ -1240,6 +1240,16 @@ describe('migration actions', () => {
   });
 
   describe('bulkOverwriteTransformedDocuments', () => {
+    afterAll(async () => {
+      await client.indices.delete({
+        index: [
+          'index_with_unavailable_shards',
+          'explain_unavailable_replica',
+          'explain_unavailable_primary',
+        ],
+        ignore_unavailable: true,
+      });
+    });
     it('resolves right when documents do not yet exist in the index', async () => {
       const newDocs = [
         { _source: { title: 'doc 5' } },
@@ -1352,6 +1362,66 @@ describe('migration actions', () => {
       expect(Either.isLeft(result)).toBe(true);
       expect((result as Either.Left<any>).left.type).toEqual('unavailable_shards_exception');
       expect((result as Either.Left<any>).left.message).toContain('index_with_unavailable_shards');
+    });
+    it('includes the allocation explain reason when fetchAllocationExplain=true (unassigned replica)', async () => {
+      // Same single-node + 1-replica setup as above: the replica can't be assigned,
+      // and the allocation explain for the replica copy carries the reason.
+      await client.indices.create({
+        index: 'explain_unavailable_replica',
+        settings: {
+          number_of_replicas: 1,
+          auto_expand_replicas: 'false',
+        },
+        mappings: { properties: {} },
+      });
+
+      const newDocs = [{ _source: { title: 'doc 1' } }] as unknown as SavedObjectsRawDoc[];
+
+      const result = await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'explain_unavailable_replica',
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
+        refresh: 'wait_for',
+        timeout: '1s',
+        fetchAllocationExplain: true,
+      })();
+
+      expect(Either.isLeft(result)).toBe(true);
+      const left = (result as Either.Left<any>).left;
+      expect(left.type).toEqual('unavailable_shards_exception');
+      expect(left.message).toContain('Shard allocation explain:');
+    });
+    it('includes the allocation explain reason when the unavailable copy is the primary (red index)', async () => {
+      // Index-level allocation.enable: 'none' keeps the primary unassigned (red index).
+      // ES rejects the replica-copy explain request with a 400 in this state, so this
+      // exercises the fallback that retries the explain against the primary copy.
+      await client.indices.create({
+        index: 'explain_unavailable_primary',
+        // indices.create defaults to waiting for the primary to become active, which
+        // never happens here; return once the index is in the cluster state instead.
+        wait_for_active_shards: 0,
+        settings: {
+          number_of_replicas: 0,
+          index: { routing: { allocation: { enable: 'none' } } },
+        },
+        mappings: { properties: {} },
+      });
+
+      const newDocs = [{ _source: { title: 'doc 1' } }] as unknown as SavedObjectsRawDoc[];
+
+      const result = await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'explain_unavailable_primary',
+        operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
+        refresh: 'wait_for',
+        timeout: '1s',
+        fetchAllocationExplain: true,
+      })();
+
+      expect(Either.isLeft(result)).toBe(true);
+      const left = (result as Either.Left<any>).left;
+      expect(left.type).toEqual('unavailable_shards_exception');
+      expect(left.message).toContain('Shard allocation explain:');
     });
   });
 });

@@ -28,12 +28,13 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semant
 import { isSignificantEventsAvailable } from '../feature_flags/is_significant_events_available';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import type { EbtTelemetryClient } from '../telemetry';
+import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
 import { MemoryServiceImpl } from '../../memory_and_investigation/lib/memory';
 import { createMemoryDiscoveryTools } from './memory_discovery_tools';
+import { createKiExtractionContextTools } from './ki_extraction_context_tools';
 
 export interface GenerateKIQueriesParams {
   streamName: string;
@@ -139,6 +140,15 @@ export async function generateKIQueries(
     );
   }
 
+  const kiExtractionContextTools =
+    significantEventsAvailable && agentBuilderTools
+      ? await createKiExtractionContextTools({
+          agentBuilderTools,
+          request,
+          logger: logger.get('ki_extraction_context'),
+        })
+      : undefined;
+
   const startedAt = Date.now();
   const result = await identifyKIQueries(
     {
@@ -155,6 +165,7 @@ export async function generateKIQueries(
       logger: logger.get('significant_events_generation'),
       signal,
       memoryTools,
+      kiExtractionContextTools,
       semanticCodeSearchTools,
     }
   ).catch(async (error) => {

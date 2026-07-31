@@ -73,6 +73,7 @@ export function searchHitToAgent(
     access_api_key_id: hit._source?.access_api_key_id,
     default_api_key_id: hit._source?.default_api_key_id,
     policy_id: hit._source?.policy_id,
+    policy_base_id: hit._source?.policy_base_id,
     last_checkin: hit._source?.last_checkin,
     last_checkin_status:
       hit._source?.last_checkin_status?.toLowerCase() as Agent['last_checkin_status'],

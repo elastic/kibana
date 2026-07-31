@@ -16,10 +16,9 @@ import {
   type PromoteResult,
 } from '../../../../hooks/significant_events/use_queries_api';
 import { useStreamFeaturesApi } from '../../../../hooks/significant_events/use_stream_features_api';
-import {
-  PROMOTE_QUERY_ALREADY_PROMOTED,
-  STATS_PROMOTE_DISABLED_TOOLTIP,
-} from '../../significant_events_discovery/components/queries_table/translations';
+import { getFormattedError } from '../../../../util/errors';
+import { PROMOTE_QUERY_ALREADY_PROMOTED } from '../../significant_events_discovery/components/queries_table/translations';
+import { getPromoteSkipReason } from '../../lib/promote_skip_reason';
 
 export const KI_ROW_ACTION_MUTATION_KEY = ['ki-row-action'];
 
@@ -61,7 +60,7 @@ export function useKnowledgeIndicatorActions({
       onSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: EXCLUDE_ERROR_TOAST });
+      toasts.addError(getFormattedError(error), { title: EXCLUDE_ERROR_TOAST });
     },
   });
 
@@ -76,7 +75,7 @@ export function useKnowledgeIndicatorActions({
       onSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: RESTORE_ERROR_TOAST });
+      toasts.addError(getFormattedError(error), { title: RESTORE_ERROR_TOAST });
     },
   });
 
@@ -89,15 +88,15 @@ export function useKnowledgeIndicatorActions({
       await invalidateData();
       if (result.promoted > 0) {
         toasts.addSuccess({ title: PROMOTE_SUCCESS_TOAST });
-      } else if (result.skipped_stats > 0) {
-        toasts.addInfo({ title: STATS_PROMOTE_DISABLED_TOOLTIP });
       } else {
-        toasts.addInfo({ title: PROMOTE_QUERY_ALREADY_PROMOTED });
+        toasts.addInfo({
+          title: getPromoteSkipReason(result) ?? PROMOTE_QUERY_ALREADY_PROMOTED,
+        });
       }
       onSuccess?.();
     },
     onError: (error) => {
-      toasts.addError(error, { title: PROMOTE_ERROR_TOAST });
+      toasts.addError(getFormattedError(error), { title: PROMOTE_ERROR_TOAST });
     },
   });
 
