@@ -6,7 +6,6 @@
  */
 
 import {
-  significantEventSchema,
   significantEventInvestigationSchema,
   significantEventStatusSchema,
   CHANGE_POINT_TYPES,
@@ -119,61 +118,6 @@ const eventsSearchRoute = createServerRoute({
       severity: toArray(severity),
       search: search || undefined,
     });
-  },
-});
-
-const eventsHistoryRoute = createServerRoute({
-  endpoint: 'GET /internal/significant_events/events/{id}/history',
-  options: {
-    access: 'internal',
-    summary: 'Get event history',
-    description: 'Get all historical versions of a significant event entity.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    path: z.object({
-      id: z.string().max(255),
-    }),
-  }),
-  handler: async ({
-    params,
-    request,
-    getScopedClients,
-    server,
-  }): Promise<{ hits: SignificantEvent[] }> => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getEventClient().findByEventUuid(params.path.id);
-  },
-});
-
-const eventsBulkCreateRoute = createServerRoute({
-  endpoint: 'POST /internal/significant_events/events',
-  options: {
-    access: 'internal',
-    summary: 'Bulk create events',
-    description: 'Create event entities in bulk.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
-    },
-  },
-  params: z.object({
-    body: z.array(significantEventSchema),
-  }),
-  handler: async ({ params, request, getScopedClients, server }) => {
-    const { getEventClient, licensing } = await getScopedClients({ request });
-
-    await assertSignificantEventsAccess({ server, licensing });
-
-    return getEventClient().bulkCreate(params.body);
   },
 });
 
@@ -379,9 +323,7 @@ const eventsUpdateRoute = createServerRoute({
 
 export const internalEventsRoutes = {
   ...eventsSearchRoute,
-  ...eventsHistoryRoute,
   ...eventsLifecycleRoute,
-  ...eventsBulkCreateRoute,
   ...eventsAttachInvestigationRoute,
   ...eventsTriggerInvestigationRoute,
   ...eventsUpdateRoute,
