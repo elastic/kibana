@@ -14,7 +14,7 @@
  * @return {unknown}
  */
 export function shortenDottedString(input: unknown) {
-  if (typeof input !== 'string') {
+  if (typeof input !== 'string' || input.indexOf('.') === -1) {
     return input;
   }
 
@@ -23,6 +23,7 @@ export function shortenDottedString(input: unknown) {
     if (i === split.length - 1) {
       return acc + part;
     }
-    return acc + part[0] + '.';
+    // charAt returns '' for empty segments (consecutive/leading dots), preserving them as-is
+    return acc + part.charAt(0) + '.';
   }, '');
 }
