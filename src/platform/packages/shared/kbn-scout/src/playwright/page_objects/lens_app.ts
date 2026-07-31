@@ -312,6 +312,15 @@ export class LensApp {
     await this.closeDimensionEditor();
   }
 
+  /** Enables empty rows for the current date histogram dimension. */
+  async enableIncludeEmptyRows() {
+    const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
+    await includeEmptyRows.click();
+    await includeEmptyRows
+      .and(this.page.locator('[aria-checked="true"]'))
+      .waitFor({ state: 'visible' });
+  }
+
   /** Closes the open dimension editor flyout. */
   async closeDimensionEditor() {
     await this.closeDimensionEditorButton.click();
@@ -452,7 +461,9 @@ export class LensApp {
     await operationButton.waitFor({ state: 'visible' });
     await operationButton.scrollIntoViewIfNeeded();
     await operationButton.click();
-    await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
+    await operationButton
+      .and(this.page.locator('[aria-pressed="true"]'))
+      .waitFor({ state: 'visible' });
   }
 
   private async selectField(field: string) {
