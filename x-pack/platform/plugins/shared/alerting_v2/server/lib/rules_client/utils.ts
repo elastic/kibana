@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { isEqual } from 'lodash';
 import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { IMMUTABLE_RULE_FIELDS, type ImmutableRuleField } from '@kbn/alerting-v2-schemas';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
@@ -64,6 +65,17 @@ export const ruleDisabledError = (ruleId: string): BulkOperationError => ({
     message: `Rule with id "${ruleId}" is disabled and has no API key to update`,
   },
 });
+
+/**
+ * Whether a skipped executor task is worth a retry. `bulkUpdateSchedules` only
+ * touches `idle` tasks, so a skipped task is in some non-idle state — but only a
+ * mid-run task (`running`/`claiming`) frees up on its own and rotates on the
+ * next attempt. A `failed`/`unrecognized`/`dead_letter`/`should_delete` task
+ * will not, so it must not be reported as `RULE_ALREADY_RUNNING` ("try again
+ * once it finishes"), which would be misleading.
+ */
+export const isTaskMidRun = (status?: TaskStatus): boolean =>
+  status === TaskStatus.Running || status === TaskStatus.Claiming;
 
 /** Per-rule error for a rule whose executor task is mid-run and was skipped. */
 export const ruleRunningError = (ruleId: string): BulkOperationError => ({

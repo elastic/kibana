@@ -22,7 +22,7 @@ import type {
   KibanaRequest as CoreKibanaRequest,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
@@ -76,6 +76,7 @@ import {
   assertImmutableUnchanged,
   buildUpdateRuleAttributes,
   groupCandidatesByInterval,
+  isTaskMidRun,
   ruleDisabledError,
   ruleRunningError,
   rotationFailedError,
@@ -1056,9 +1057,9 @@ export class RulesClient {
     );
 
     // `bulkUpdateSchedules` only touches `idle` tasks, so a candidate that was
-    // neither rotated nor errored was skipped because its task is running. Report
-    // it rather than silently leaving its key un-rotated.
+    // neither rotated nor errored was skipped because its task is non-idle.
     const rotated: RotationCandidate[] = [];
+    const skipped: RotationCandidate[] = [];
     for (const candidate of candidates) {
       if (rotatedTaskIds.has(candidate.taskId)) {
         rotated.push(candidate);
@@ -1067,10 +1068,49 @@ export class RulesClient {
       if (erroredRuleIds.has(candidate.id)) {
         continue;
       }
-      errors.push(ruleRunningError(candidate.id));
+      skipped.push(candidate);
+    }
+
+    if (skipped.length > 0) {
+      errors.push(...(await this.classifySkippedRotations(skipped)));
     }
 
     return { rotated, errors };
+  }
+
+  /**
+   * Classifies executor tasks that `bulkUpdateSchedules` skipped (non-idle) by
+   * observing their real status rather than assuming they are running: only a
+   * mid-run task (`running`/`claiming`) frees up on its own, so only those get
+   * `RULE_ALREADY_RUNNING`. Any other non-idle state (`failed`/`unrecognized`/`dead_letter`/…) 
+   * or a task that can't be read is reported as a generic rotation failure. 
+   * If the status lookup itself fails we fall back to `RULE_ALREADY_RUNNING`, 
+   * the most likely non-idle reason.
+   */
+  private async classifySkippedRotations(
+    skipped: RotationCandidate[]
+  ): Promise<BulkOperationError[]> {
+    let statusByTaskId: Map<string, TaskStatus>;
+    try {
+      const results = await this.taskManager.bulkGet(skipped.map((candidate) => candidate.taskId));
+      statusByTaskId = new Map(
+        results.flatMap((result) =>
+          result.tag === 'ok' ? [[result.value.id, result.value.status] as const] : []
+        )
+      );
+    } catch (e) {
+      const failure = e instanceof Error ? e.message : String(e);
+      this.logger.warn({
+        message: `Failed to read the status of ${skipped.length} skipped executor task(s); assuming they are running: ${failure}`,
+      });
+      return skipped.map((candidate) => ruleRunningError(candidate.id));
+    }
+
+    return skipped.map((candidate) =>
+      isTaskMidRun(statusByTaskId.get(candidate.taskId))
+        ? ruleRunningError(candidate.id)
+        : rotationFailedError(candidate.id)
+    );
   }
 
   /**

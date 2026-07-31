@@ -1750,19 +1750,77 @@ describe('RulesClient', () => {
       });
     });
 
-    it('reports a running rule as RULE_ALREADY_RUNNING when its task is skipped', async () => {
+    // Builds a `bulkGet` result for the skipped-task status lookup.
+    const taskStatusResult = (tasks: Array<{ id: string; status: string }>) =>
+      tasks.map((task) => ({ tag: 'ok', value: task })) as unknown as Awaited<
+        ReturnType<typeof taskManager.bulkGet>
+      >;
+
+    it('reports a skipped running task as RULE_ALREADY_RUNNING', async () => {
       const client = createClient();
 
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
       ]);
       // A running task is skipped by bulkUpdateSchedules — absent from both
-      // `tasks` and `errors`.
+      // `tasks` and `errors`. Its real status is then observed via bulkGet.
       taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
+      taskManager.bulkGet.mockResolvedValueOnce(
+        taskStatusResult([{ id: 'task:fallback', status: 'running' }])
+      );
 
       const res = await client.bulkUpdateApiKey({ ids: ['rule-1'] });
 
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        affected_count: 0,
+        errors: [
+          {
+            id: 'rule-1',
+            error: { code: 'RULE_ALREADY_RUNNING', message: expect.stringContaining('running') },
+          },
+        ],
+      });
+    });
+
+    it('reports a skipped non-running task (e.g. failed) as a generic failure, not RULE_ALREADY_RUNNING', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
+      ]);
+      // Skipped by bulkUpdateSchedules, but its task is `failed` (not mid-run),
+      // so a retry would not help — it must not be reported as running.
+      taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
+      taskManager.bulkGet.mockResolvedValueOnce(
+        taskStatusResult([{ id: 'task:fallback', status: 'failed' }])
+      );
+
+      const res = await client.bulkUpdateApiKey({ ids: ['rule-1'] });
+
+      expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
+      expect(res).toEqual({
+        affected_count: 0,
+        errors: [
+          {
+            id: 'rule-1',
+            error: { code: 'INTERNAL_SERVER_ERROR', message: expect.stringContaining('rule-1') },
+          },
+        ],
+      });
+    });
+
+    it('falls back to RULE_ALREADY_RUNNING when the skipped-task status lookup fails', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
+        { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
+      ]);
+      taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
+      taskManager.bulkGet.mockRejectedValueOnce(new Error('ES unavailable'));
+
+      const res = await client.bulkUpdateApiKey({ ids: ['rule-1'] });
+
       expect(res).toEqual({
         affected_count: 0,
         errors: [

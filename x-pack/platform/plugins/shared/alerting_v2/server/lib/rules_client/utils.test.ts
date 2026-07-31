@@ -6,6 +6,7 @@
  */
 
 import type { CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { createRuleSoAttributes } from '../test_utils';
 import type { RotationCandidate } from './types';
 import {
@@ -17,6 +18,7 @@ import {
   bulkErrorCodeForStatus,
   toBulkError,
   groupCandidatesByInterval,
+  isTaskMidRun,
   ruleDisabledError,
   ruleRunningError,
   rotationFailedError,
@@ -428,5 +430,20 @@ describe('rotation error builders', () => {
 
   it('rotationFailedError defaults to INTERNAL_SERVER_ERROR without a status', () => {
     expect(rotationFailedError('rule-1').error.code).toBe('INTERNAL_SERVER_ERROR');
+  });
+});
+
+describe('isTaskMidRun', () => {
+  it('is true only for running and claiming tasks', () => {
+    expect(isTaskMidRun(TaskStatus.Running)).toBe(true);
+    expect(isTaskMidRun(TaskStatus.Claiming)).toBe(true);
+  });
+
+  it('is false for non-mid-run states and an unknown/absent status', () => {
+    expect(isTaskMidRun(TaskStatus.Failed)).toBe(false);
+    expect(isTaskMidRun(TaskStatus.Unrecognized)).toBe(false);
+    expect(isTaskMidRun(TaskStatus.DeadLetter)).toBe(false);
+    expect(isTaskMidRun(TaskStatus.Idle)).toBe(false);
+    expect(isTaskMidRun(undefined)).toBe(false);
   });
 });
