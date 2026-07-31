@@ -74913,10 +74913,13 @@ components:
                       type: string
                     namespace:
                       type: string
+                    nsTemplateName:
+                      type: string
                   required:
                     - dataStreamName
                     - namespace
                     - baseTemplateName
+                    - nsTemplateName
                     - conflictingTemplates
                 maxItems: 100
                 type: array
@@ -108399,10 +108402,13 @@ components:
                 type: string
               namespace:
                 type: string
+              nsTemplateName:
+                type: string
             required:
               - dataStreamName
               - namespace
               - baseTemplateName
+              - nsTemplateName
               - conflictingTemplates
           maxItems: 100
           type: array
