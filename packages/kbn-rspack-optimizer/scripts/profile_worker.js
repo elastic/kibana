@@ -15,7 +15,7 @@
  *
  * Only loads:
  * - source-map-support for stack traces
- * - @kbn/babel-register for TypeScript transpilation
+ * - @kbn/swc-register for TypeScript transpilation
  *
  * Does NOT load:
  * - @kbn/setup-node-env (which includes harden with require-in-the-middle)
@@ -26,7 +26,7 @@
 
 // Minimal setup - just what we need for TypeScript support
 require('source-map-support').install();
-require('@kbn/babel-register').install();
+require('@kbn/swc-register').install();
 
 // Now load the profiler
 var Path = require('path');
