@@ -12,8 +12,8 @@ const evaluate = (
   expectedConfirmedRuleUuids?: Record<string, string[]>
 ) =>
   confirmationAlignmentEvaluator.evaluate({
-    input: { discoveries: [] },
-    output: { significantEvents, steps: [], inputDiscoveries: [] } as never,
+    input: { detections: [] },
+    output: { significantEvents, steps: [] } as never,
     expected: { expected_confirmed_rule_uuids: expectedConfirmedRuleUuids } as never,
     metadata: null,
   });
@@ -34,6 +34,37 @@ describe('confirmationAlignmentEvaluator', () => {
   it('scores 1 for an exact confirmed-membership match', async () => {
     const events = [{ event_id: 'e1', signals: [detection('r1', true)] }];
     expect((await evaluate(events, { e1: ['r1'] })).score).toBe(1);
+  });
+
+  it('matches generated event IDs by their detection-rule membership', async () => {
+    const events = [{ event_id: 'agent-event-12345678', signals: [detection('r1', true)] }];
+    expect((await evaluate(events, { 'canonical-event-id': ['r1'] })).score).toBe(1);
+  });
+
+  it('does not use one generated event for multiple expected events', async () => {
+    const events = [
+      {
+        event_id: 'agent-event-12345678',
+        signals: [detection('r1', true), detection('r2', true)],
+      },
+    ];
+    const result = await evaluate(events, { 'canonical-event-one': ['r1'], 'canonical-event-two': ['r2'] });
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('canonical-event-one:');
+    expect(result.explanation).toContain('canonical-event-two: missing from agent output');
+  });
+
+  it('assigns each expected event to the candidate with the highest shared confirmed-rule count', async () => {
+    const events = [
+      { event_id: 'agent-event-aaa', signals: [detection('r1', true), detection('r2', false)] },
+      { event_id: 'agent-event-bbb', signals: [detection('r2', true), detection('r1', false)] },
+    ];
+    const result = await evaluate(events, {
+      'canonical-event-one': ['r1'],
+      'canonical-event-two': ['r2'],
+    });
+    expect(result.score).toBe(1);
   });
 
   it('ignores signals without a rule identity', async () => {
@@ -65,10 +96,10 @@ describe('confirmationAlignmentEvaluator', () => {
     expect((await evaluate(events, { e1: ['r1'] })).score).toBe(1);
   });
 
-  it('scores 0 and reports an expected event missing from the judge output', async () => {
+  it('scores 0 and reports an expected event missing from the agent output', async () => {
     const result = await evaluate([], { e1: ['r1'] });
     expect(result.score).toBe(0);
-    expect(result.explanation).toContain('missing from judge output');
+    expect(result.explanation).toContain('missing from agent output');
   });
 
   it('averages across expected events', async () => {

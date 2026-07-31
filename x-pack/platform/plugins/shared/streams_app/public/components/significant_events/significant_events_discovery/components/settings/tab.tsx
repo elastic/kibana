@@ -525,44 +525,13 @@ export function SettingsTab() {
                     </EuiFormRow>
                     <EuiFormRow
                       label={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeLabel',
-                        { defaultMessage: 'Triage batch size' }
-                      )}
-                      helpText={i18n.translate(
-                        'xpack.streams.significantEventsDiscovery.settings.triageBatchSizeHelp',
-                        {
-                          defaultMessage: 'Maximum discoveries sent to each scheduled triage pass.',
-                        }
-                      )}
-                    >
-                      <EuiFieldNumber
-                        data-test-subj="streams-settings-scheduled-triage-batch-size"
-                        value={scheduledDiscovery.draft.triageBatchSize}
-                        onChange={(e) =>
-                          scheduledDiscovery.setDraft((prev) => ({
-                            ...prev,
-                            triageBatchSize: clampNumber(
-                              e.target.value,
-                              MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE,
-                              MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE
-                            ),
-                          }))
-                        }
-                        min={MIN_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        max={MAX_SIG_EVENTS_SCHEDULED_BATCH_SIZE}
-                        disabled={isActivityConfigDisabled(scheduledDiscovery.draft.enabled)}
-                      />
-                    </EuiFormRow>
-                    <EuiFormRow
-                      label={i18n.translate(
                         'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesLabel',
                         { defaultMessage: 'Review passes' }
                       )}
                       helpText={i18n.translate(
                         'xpack.streams.significantEventsDiscovery.settings.maxReviewPassesHelp',
                         {
-                          defaultMessage:
-                            'Maximum discovery and triage pass pairs per scheduled review run.',
+                          defaultMessage: 'Maximum discovery passes per scheduled review run.',
                         }
                       )}
                     >

@@ -31,6 +31,30 @@ export interface ToolUsageScore {
   explanation: string;
 }
 
+/** Require events_write and reject workflow-owned discovery stamping. */
+const scoreOutputTool = (
+  calledTools: Set<string>,
+  steps: ConverseStep[]
+): ToolUsageScore | null => {
+  if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
+    return {
+      score: 0,
+      label: 'missing-output-write',
+      explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to persist the decision`,
+    };
+  }
+
+  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
+  if (!persistenceCalls.valid) {
+    return {
+      score: 0.75,
+      label: 'multiple-events-write-calls',
+      explanation: `${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
+    };
+  }
+  return null;
+};
+
 export const scoreToolUsage = ({
   steps,
   detectionCount,
@@ -50,21 +74,9 @@ export const scoreToolUsage = ({
         };
   }
 
-  if (!calledTools.has(TOOL_ID_EVENTS_WRITE)) {
-    return {
-      score: 0,
-      label: `missing-${TOOL_ID_EVENTS_WRITE}`,
-      explanation: `${TOOL_ID_EVENTS_WRITE} was not called — required to emit at least one discovery`,
-    };
-  }
-
-  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
-  if (!persistenceCalls.valid) {
-    return {
-      score: 0.75,
-      label: 'multiple-events-write-calls',
-      explanation: `${TOOL_ID_EVENTS_WRITE} was called ${persistenceCalls.count} times without one justified partial-failure retry`,
-    };
+  const outputCheck = scoreOutputTool(calledTools, steps);
+  if (outputCheck) {
+    return outputCheck;
   }
 
   const orderedCalls = extractOrderedToolCalls(steps);
@@ -98,13 +110,14 @@ export const scoreToolUsage = ({
   // Graded score (0 / 1/3 / 2/3 / 1) keeps the per-tool signal for prompt tuning; a distinct label
   // per failure mode makes the miss attributable/aggregatable across an eval run (free-text
   // explanation is not). The label enumerates exactly which expected tools were skipped.
+  const persistenceCalls = summarizePersistenceCalls(steps, TOOL_ID_EVENTS_WRITE);
   return {
     score,
     label: missing.length === 0 ? 'correct' : `missing-${missing.join('-')}`,
     explanation:
       score === 1
         ? persistenceCalls.retriedPartialFailure
-          ? 'Correctly called all tools and retried only failed discovery items'
+          ? 'Correctly called all tools and retried only failed event items'
           : 'Correctly called all tools'
         : `Missing tools: ${missing.join(', ')}`,
   };

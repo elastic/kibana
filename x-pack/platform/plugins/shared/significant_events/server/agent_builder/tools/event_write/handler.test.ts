@@ -86,6 +86,22 @@ describe('eventsWriteHandler', () => {
     expect(result.event_id).toMatch(/^agent-event-[a-f0-9]{8}$/);
   });
 
+  it('treats an empty event_id as absent and generates a synthetic ID', async () => {
+    const eventClient = {
+      findLatestByEventIds: jest.fn(),
+      bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+    };
+
+    const result = await eventsWriteHandler({
+      eventClient: eventClient as never,
+      input: { ...baseInput, event_id: '' },
+    });
+
+    expect(eventClient.findLatestByEventIds).not.toHaveBeenCalled();
+    expect(result.event_id).toMatch(/^agent-event-[a-f0-9]{8}$/);
+    expect(eventClient.bulkCreate.mock.calls[0][0][0].event_id).toBe(result.event_id);
+  });
+
   it('sets previous_event_uuid from the latest event returned by findLatestByEventIds', async () => {
     const eventClient = {
       findLatestActive: noopFindLatestActive,

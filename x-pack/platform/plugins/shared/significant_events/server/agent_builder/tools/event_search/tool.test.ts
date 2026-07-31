@@ -60,6 +60,8 @@ describe('event_search tool', () => {
     expect(tool.schema.safeParse({ per_page: 51 }).success).toBe(false);
     expect(tool.schema.parse({ query: '' }).query).toBeUndefined();
     expect(tool.schema.parse({ query: '  latency  ' }).query).toBe('latency');
+    expect(tool.schema.parse({ rule_uuids: ['rule-uuid-1'] }).status).toBe('open');
+    expect(tool.schema.safeParse({}).success).toBe(false);
   });
 
   it('returns events on success and tracks telemetry', async () => {

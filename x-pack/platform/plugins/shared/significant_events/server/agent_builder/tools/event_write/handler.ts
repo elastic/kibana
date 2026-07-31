@@ -565,6 +565,9 @@ const applyBulkResults = (
   });
 };
 
+const normalizeEventId = (eventId: string | undefined): string | undefined =>
+  eventId === '' ? undefined : eventId;
+
 /**
  * Versions a batch of significant events in one request while preserving input order in the
  * returned results.

@@ -175,6 +175,12 @@ const toCompactEvent = (
 // The generic lets a call site passing `view: 'full'` (or omitting it, defaulting to 'compact')
 // get back the matching response member, so callers don't need to narrow on `.view` themselves.
 export async function searchEventsToolHandler<V extends EventSearchView = 'compact'>({
+const hasRequestedRule = (event: SignificantEvent, ruleUuids: string[]) =>
+  (event.signals ?? []).some(
+    (signal) => signal.metadata?.rule_uuid !== undefined && ruleUuids.includes(signal.metadata.rule_uuid)
+  )})
+
+export async function searchEventsToolHandler({
   eventClient,
   params,
 }: {
@@ -207,20 +213,29 @@ export async function searchEventsToolHandler<V extends EventSearchView = 'compa
         })
       : await eventClient.findLatestPaginated(sharedParams);
 
-  const envelope = {
-    page: response.page,
-    per_page: response.perPage,
-    returned: response.hits.length,
-    total: response.total,
-    has_more: response.page * response.perPage < response.total,
-    next_page: response.page * response.perPage < response.total ? response.page + 1 : null,
-  };
-  const events = params.exclude_unconfirmed_signals
+  const eventsWithUnconfirmedSignalsExcluded = params.exclude_unconfirmed_signals
     ? response.hits.map((event) => ({
         ...event,
         signals: (event.signals ?? []).filter((signal) => signal.confirmed !== false),
       }))
     : response.hits;
+  // Rule matching happens in the data query before excluded signals are removed. Do not return an
+  // event that only matched one of those removed signals: the agent must not route to an event
+  // without a visible matching rule.
+  const events =
+    params.exclude_unconfirmed_signals && hasRuleFilter && !hasTopologyFilter && !hasEventIdFilter
+      ? eventsWithUnconfirmedSignalsExcluded.filter((event) =>
+          hasRequestedRule(event, params.rule_uuids ?? [])
+        )
+      : eventsWithUnconfirmedSignalsExcluded;
+  const envelope = {
+    page: response.page,
+    per_page: response.perPage,
+    returned: events.length,
+    total: response.total,
+    has_more: response.page * response.perPage < response.total,
+    next_page: response.page * response.perPage < response.total ? response.page + 1 : null,
+  };
 
   return view === 'full'
     ? ({ ...envelope, view, events } as Extract<EventSearchResponse, { view: V }>)

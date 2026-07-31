@@ -112,7 +112,7 @@ describe('scoreToolUsage', () => {
     expect(result).toMatchObject({ score: 0.75, label: 'multiple-events-write-calls' });
   });
 
-  it('allows one retry after a discovery bulk item fails', () => {
+  it('allows one retry after an event bulk item fails', () => {
     const steps = allExpectedTools.map((step) =>
       step.tool_id === TOOL_ID_EVENTS_WRITE ? retryableWriteCall() : step
     );

@@ -6,9 +6,9 @@
  */
 
 import type { EvaluationCriterion, Evaluator } from '@kbn/evals';
-import type { DiscoveryJudgeEvaluationExample, DiscoveryJudgeAgentOutput } from '../../types';
+import type { DiscoveryEvaluationExample, DiscoveryAgentOutput } from '../../types';
 
-/** Status decision gates, mirrored from the judge instructions. Severity is graded separately. */
+/** Status decision gates, mirrored from the discovery agent instructions. Severity is graded separately. */
 const STATUS_DECISION_RUBRIC = [
   "Grade whether the agent's `status` for each event is correct given the gates below. Do not grade severity; the severity-calibration evaluator owns that decision.",
   'You cannot run queries. Use the signal counts in the summary and the agent output evidence.',
@@ -16,8 +16,8 @@ const STATUS_DECISION_RUBRIC = [
   'Status gates:',
   '- `open`: a current failure, material degradation, or sensitive-data exposure is confirmed, or a verification gap leaves one of those conditions plausible.',
   '- `status: "dismissed"`: the proposed incident is a false alarm, benign/positive change, unrelated finding, or non-confirming finding (`confirmedSignalCount == 0`), with no plausible failure, degradation, or exposure left unverified.',
-  '- `closed` is a recovery state, not the disposition for a healthy or positive predicate. For an active or ambiguous failure shape it requires both a fresh re-verification with no active failure rows and a broad `COUNT(*)` confirming live telemetry.',
-  '- `closed` for a settled episode requires every signal to be settled/downward. Carried settled signals are trusted; each fresh settled signal requires a recovery-lens query with no active failure rows. Shape alone is insufficient.',
+  '- `closed` is a recovery state, not the disposition for a healthy or positive predicate. For an active or ambiguous failure shape it requires recovery-lens grounding with no active failure rows.',
+  '- `closed` for a settled episode requires every signal to be settled/downward. Carried settled signals are trusted; each fresh settled signal requires recovery-lens grounding with no active failure rows. Shape alone is insufficient.',
   '',
   'Hard constraints: a matching healthy or positive row is verified but does not confirm an incident; mark it rejected and dismiss when no failure, degradation, or exposure remains. A query error or telemetry gap is not recovery and requires `open` only when one of those conditions remains plausible. A `dip` alone establishes neither active failure nor recovery.',
 ].join('\n');
@@ -28,7 +28,7 @@ const STATUS_DECISION_RUBRIC = [
  */
 export const createStatusCorrectnessEvaluator = (
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator
-): Evaluator<DiscoveryJudgeEvaluationExample, DiscoveryJudgeAgentOutput> => ({
+): Evaluator<DiscoveryEvaluationExample, DiscoveryAgentOutput> => ({
   name: 'status_correctness',
   kind: 'LLM',
   evaluate: async (params) => {
@@ -59,8 +59,8 @@ export const createStatusCorrectnessEvaluator = (
         text:
           `${STATUS_DECISION_RUBRIC}\n\n` +
           `Expected outcome: ${expectedGroundTruth}. ` +
-          `The discovery judge agent returned: ${JSON.stringify(eventsSummary)}. ` +
-          `PASS only if each discovery's returned status matches the expected outcome (match by title/content, not by exact event_id) AND is justified by the event's ` +
+          `The discovery agent returned: ${JSON.stringify(eventsSummary)}. ` +
+          `PASS only if each event's returned status matches the expected outcome (match by title/content, not by exact event_id) AND is justified by the event's ` +
           `signals and the gates above. Ignore severity in this evaluator. A status or constraint violation is a FAIL even if it is "close".`,
       },
     ];

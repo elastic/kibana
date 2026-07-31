@@ -9,11 +9,11 @@ import type { SignalEntry } from '@kbn/significant-events-schema';
 import type { DiscoveryEvaluator } from '../../types';
 
 const detectionSignalsByRuleUuid = (
-  discoveries: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['discoveries']
+  events: Parameters<DiscoveryEvaluator['evaluate']>[0]['output']['significantEvents']
 ): Map<string, SignalEntry[]> => {
   const signalsByRuleUuid = new Map<string, SignalEntry[]>();
-  for (const discovery of discoveries ?? []) {
-    for (const signal of discovery.signals ?? []) {
+  for (const event of events ?? []) {
+    for (const signal of event.signals ?? []) {
       if (signal.type !== 'detection') {
         continue;
       }
@@ -35,7 +35,7 @@ export const evidenceCollectionEvaluator: DiscoveryEvaluator = {
         .map(({ rule_uuid: ruleUuid }) => ruleUuid)
         .filter((ruleUuid): ruleUuid is string => Boolean(ruleUuid))
     );
-    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.discoveries);
+    const signalsByRuleUuid = detectionSignalsByRuleUuid(output.significantEvents);
     const issues: string[] = [];
     let covered = 0;
 

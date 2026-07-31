@@ -1,6 +1,6 @@
 version: "1"
 name: "Significant Events Orchestrator"
-description: "Sequences detection, discovery, and triage. Each workflow handles its own idle-skip logic."
+description: "Sequences detection and discovery. Each workflow handles its own idle-skip logic."
 enabled: true
 tags:
   - observability
@@ -15,7 +15,7 @@ settings:
     max: 1
   on-failure:
     # Sub-workflows exit cancelled (idle) or may fail transiently — always continue
-    # so detection failure never blocks discovery/triage and vice-versa.
+    # so detection failure never blocks discovery and vice-versa.
     continue: true
 triggers:
   - type: manual
@@ -29,8 +29,3 @@ steps:
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-discovery"
-
-  - name: triage
-    type: workflow.execute
-    with:
-      workflow-id: "system-significant-events-triage"
