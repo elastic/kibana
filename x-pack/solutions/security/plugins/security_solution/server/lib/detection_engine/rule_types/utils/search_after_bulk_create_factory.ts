@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { identity, isEqual } from 'lodash';
+import { identity } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
@@ -17,6 +17,7 @@ import {
   getTotalHitsValue,
   mergeReturns,
   getSafeSortIds,
+  getUnusableCursorWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -216,19 +217,12 @@ export const searchAfterAndBulkCreateFactory = async ({
           break;
         }
 
-        // in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
-        // on date-mapped shards yield cursors that either format to null or never advance
-        // (the same docs match again every page); stop paging instead of failing or looping
-        if (
-          hasDateNanosTimestampFields &&
-          lastSortIds != null &&
-          (lastSortIds.some((val) => val == null || val === '') || isEqual(lastSortIds, sortIds))
-        ) {
-          const warning = `Pagination stopped: the last event's sort values ${JSON.stringify(
-            lastSortIds
-          )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining events were not evaluated.`;
-          toReturn.warningMessages.push(warning);
-          ruleExecutionLogger.warn(`${cycleNum}: ${warning}`);
+        const cursorWarning = hasDateNanosTimestampFields
+          ? getUnusableCursorWarning(lastSortIds, sortIds)
+          : undefined;
+        if (cursorWarning != null) {
+          toReturn.warningMessages.push(cursorWarning);
+          ruleExecutionLogger.warn(`${cycleNum}: ${cursorWarning}`);
           break;
         }
 

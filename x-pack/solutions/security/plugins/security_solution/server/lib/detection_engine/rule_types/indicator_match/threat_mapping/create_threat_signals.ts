@@ -11,7 +11,6 @@ import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typ
 import type { estypes } from '@elastic/elasticsearch';
 
 import { uniq, chunk } from 'lodash/fp';
-import { isEqual } from 'lodash';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
@@ -37,7 +36,7 @@ import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_que
 import { MAX_PER_PAGE, getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
-import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
+import { getMaxSignalsWarning, getSafeSortIds, getUnusableCursorWarning } from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 import { getDataStreamNamespaceFilter } from '../../utils/get_data_stream_namespace_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
@@ -297,19 +296,12 @@ export const createThreatSignals = async ({
         // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)
         const sortIds = hasDateNanosTimestampFields ? lastHitSort : getSafeSortIds(lastHitSort);
 
-        // in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
-        // on date-mapped shards yield cursors that either format to null or never advance
-        // (the same docs match again every page); stop paging instead of failing or looping
-        if (
-          hasDateNanosTimestampFields &&
-          sortIds != null &&
-          (sortIds.some((val) => val == null || val === '') || isEqual(sortIds, prevSortIds))
-        ) {
-          const warning = `Pagination stopped: the last document's sort values ${JSON.stringify(
-            sortIds
-          )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining documents were not evaluated.`;
-          results.warningMessages.push(warning);
-          ruleExecutionLogger.warn(warning);
+        const cursorWarning = hasDateNanosTimestampFields
+          ? getUnusableCursorWarning(sortIds, prevSortIds)
+          : undefined;
+        if (cursorWarning != null) {
+          results.warningMessages.push(cursorWarning);
+          ruleExecutionLogger.warn(cursorWarning);
           break;
         }
         prevSortIds = sortIds;

@@ -95,9 +95,9 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   /** True when a timestamp field is mapped as date_nanos somewhere in the input indices */
-  hasDateNanosTimestampFields?: boolean;
+  hasDateNanosTimestampFields: boolean;
   /** Timestamp fields mapped as both date and date_nanos across the input indices */
-  mixedTimestampFields?: string[];
+  mixedTimestampFields: string[];
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;

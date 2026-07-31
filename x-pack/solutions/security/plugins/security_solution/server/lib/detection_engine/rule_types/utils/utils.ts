@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { get, invert, isArray, isEmpty, merge, sum } from 'lodash';
+import { get, invert, isArray, isEmpty, isEqual, merge, sum } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -798,6 +798,26 @@ export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
     }
     return sortId;
   });
+};
+
+// in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
+// on date-mapped shards yield cursors that either format to null or never advance
+// (the same docs match again every page); callers stop paging instead of failing or looping
+export const getUnusableCursorWarning = (
+  sortIds: estypes.SortResults | undefined,
+  prevSortIds: estypes.SortResults | undefined
+): string | undefined => {
+  if (sortIds == null) {
+    return undefined;
+  }
+  const unusable =
+    sortIds.some((val) => val == null || val === '') || isEqual(sortIds, prevSortIds);
+  if (!unusable) {
+    return undefined;
+  }
+  return `Pagination stopped: the last document's sort values ${JSON.stringify(
+    sortIds
+  )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining documents were not evaluated.`;
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {

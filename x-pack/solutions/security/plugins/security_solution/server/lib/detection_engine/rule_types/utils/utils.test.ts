@@ -45,6 +45,7 @@ import {
   getDisabledActionsWarningText,
   calculateFromValue,
   stringifyAfterKey,
+  getUnusableCursorWarning,
 } from './utils';
 import type { SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -1512,6 +1513,38 @@ describe('utils', () => {
       expect(warning).toEqual(
         'Rule action connector .webhook is not enabled. To send notifications, you need a higher Security Analytics license / tier'
       );
+    });
+  });
+
+  describe('getUnusableCursorWarning', () => {
+    const sortIds = ['2262-04-11T23:47:16.854775806Z', '2026-07-30T12:00:00.000000001Z'];
+
+    test('returns undefined when sort ids are undefined', () => {
+      expect(getUnusableCursorWarning(undefined, undefined)).toBeUndefined();
+    });
+
+    test('returns undefined when the cursor advanced with usable values', () => {
+      const prevSortIds = ['2262-04-11T23:47:16.854775805Z', '2026-07-30T11:00:00.000000001Z'];
+      expect(getUnusableCursorWarning(sortIds, prevSortIds)).toBeUndefined();
+    });
+
+    test('returns undefined on the first page when there is no previous cursor', () => {
+      expect(getUnusableCursorWarning(sortIds, undefined)).toBeUndefined();
+    });
+
+    test('returns a warning when a sort value is null', () => {
+      const warning = getUnusableCursorWarning([null, sortIds[1]], undefined);
+      expect(warning).toEqual(expect.stringContaining('Pagination stopped'));
+    });
+
+    test('returns a warning when a sort value is empty', () => {
+      const warning = getUnusableCursorWarning(['', sortIds[1]], undefined);
+      expect(warning).toEqual(expect.stringContaining('Pagination stopped'));
+    });
+
+    test('returns a warning when the cursor did not advance', () => {
+      const warning = getUnusableCursorWarning(sortIds, [...sortIds]);
+      expect(warning).toEqual(expect.stringContaining('Pagination stopped'));
     });
   });
 });
