@@ -84,9 +84,25 @@ export type GenAiDetailsTableProps = Pick<
   | 'columns'
 >;
 
+/**
+ * Resolves each canonical detail attribute to the single field name it is
+ * actually stored under on this hit, picking the first present shape in
+ * priority order (mirrors `rawValue()` in `get_genai_fields.ts`). A document
+ * can carry a value under more than one shape at once (e.g. a derived bare
+ * `gen_ai.*` field alongside the mapped `attributes.gen_ai.*` one) — without
+ * this de-duplication every present shape would render as its own row.
+ */
+export function getGenAiDetailFieldNames(flattened: Record<string, unknown>): string[] {
+  return Object.keys(DETAIL_FIELD_TITLES)
+    .map((attributeName) =>
+      fallbackShapes(attributeName).find((fieldName) => flattened[fieldName] != null)
+    )
+    .filter((fieldName): fieldName is string => fieldName != null);
+}
+
 /** Returns true when the hit carries at least one GenAI detail field. */
 export function hasGenAiDetailFields(flattened: Record<string, unknown>): boolean {
-  return GENAI_DETAIL_FIELD_NAMES.some((fieldName) => flattened[fieldName] != null);
+  return getGenAiDetailFieldNames(flattened).length > 0;
 }
 
 /**
@@ -106,10 +122,7 @@ export function GenAiDetailsTable({
   onRemoveColumn,
   columns,
 }: GenAiDetailsTableProps) {
-  const fieldNames = useMemo(
-    () => GENAI_DETAIL_FIELD_NAMES.filter((fieldName) => hit.flattened[fieldName] != null),
-    [hit]
-  );
+  const fieldNames = useMemo(() => getGenAiDetailFieldNames(hit.flattened), [hit]);
 
   return (
     <ContentFrameworkTable

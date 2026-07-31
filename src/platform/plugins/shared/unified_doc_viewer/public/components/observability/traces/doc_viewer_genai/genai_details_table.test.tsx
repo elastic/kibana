@@ -15,6 +15,7 @@ import type { ContentFrameworkTableProps } from '../../../content_framework';
 import {
   GENAI_DETAIL_FIELD_NAMES,
   GenAiDetailsTable,
+  getGenAiDetailFieldNames,
   hasGenAiDetailFields,
 } from './genai_details_table';
 
@@ -48,6 +49,39 @@ describe('GENAI_DETAIL_FIELD_NAMES', () => {
         'labels.gen_ai_request_temperature',
       ])
     );
+  });
+});
+
+describe('getGenAiDetailFieldNames', () => {
+  it('picks a single field name per canonical attribute, even when multiple shapes are present', () => {
+    // A document can have the mapped attributes.* field AND a derived bare
+    // gen_ai.* field for the same value — this must not produce two rows.
+    const fieldNames = getGenAiDetailFieldNames({
+      'attributes.gen_ai.response.model': ['gpt-4o-2024-08-06'],
+      'gen_ai.response.model': ['gpt-4o-2024-08-06'],
+      'attributes.gen_ai.request.temperature': [0.6],
+      'labels.gen_ai_request_temperature': [0.6],
+    });
+
+    expect(fieldNames).toEqual([
+      'attributes.gen_ai.response.model',
+      'attributes.gen_ai.request.temperature',
+    ]);
+  });
+
+  it('prefers attributes.* over bare gen_ai.* over labels.gen_ai_* when several shapes are present', () => {
+    expect(
+      getGenAiDetailFieldNames({
+        'gen_ai.response.id': ['resp-1'],
+        'labels.gen_ai_response_id': ['resp-1'],
+      })
+    ).toEqual(['gen_ai.response.id']);
+  });
+
+  it('falls back to whichever single shape is present', () => {
+    expect(getGenAiDetailFieldNames({ 'labels.gen_ai_response_id': ['resp-1'] })).toEqual([
+      'labels.gen_ai_response_id',
+    ]);
   });
 });
 
@@ -118,5 +152,22 @@ describe('GenAiDetailsTable', () => {
     expect(props.fieldNames).toEqual(['gen_ai.response.id']);
     expect(props.filter).toBeUndefined();
     expect(props.onAddColumn).toBeUndefined();
+  });
+
+  it('renders a single row per attribute when the hit carries both the mapped and derived field shapes', () => {
+    const hit = buildHit({
+      'attributes.gen_ai.response.model': ['gpt-4o-2024-08-06'],
+      'gen_ai.response.model': ['gpt-4o-2024-08-06'],
+      'attributes.gen_ai.response.finish_reasons': ['stop'],
+      'gen_ai.response.finish_reasons': ['stop'],
+    });
+
+    render(<GenAiDetailsTable hit={hit} dataView={dataView} />);
+
+    const props = mockContentFrameworkTable.mock.calls[0][0];
+    expect(props.fieldNames).toEqual([
+      'attributes.gen_ai.response.model',
+      'attributes.gen_ai.response.finish_reasons',
+    ]);
   });
 });
