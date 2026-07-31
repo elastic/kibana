@@ -53800,6 +53800,7 @@ paths:
       summary: Get risk score history for an entity
       tags:
         - Security Entity Analytics API
+      x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -73343,7 +73344,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve a paginated list of workflows with optional filtering.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows
       parameters:
         - description: Free-text search query.
@@ -74860,7 +74861,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read OR workflowsManagement:managed:read OR workflowsManagement:readExecution OR workflowsManagement:managed:readExecution.
+        Retrieve summary statistics about workflows, including total, enabled, and disabled counts; execution history metrics for the last 30 days are included only when the caller has execution read privilege.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:read. Extended privileges (optional, expand functionality when granted): workflowsManagement:managed:read, workflowsManagement:readExecution, workflowsManagement:managed:readExecution.
       operationId: get-workflows-stats
       parameters: []
       responses:
@@ -87296,6 +87297,12 @@ components:
         hide_title:
           description: When true, the panel title is hidden. Defaults to false.
           type: boolean
+        highlighted_service_names:
+          items:
+            maxLength: 1024
+            type: string
+          maxItems: 50
+          type: array
         kuery:
           maxLength: 2048
           type: string
