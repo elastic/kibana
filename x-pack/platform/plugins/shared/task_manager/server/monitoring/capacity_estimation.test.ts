@@ -867,7 +867,7 @@ function mockStats(
       timestamp: new Date().toISOString(),
       value: {
         capacity: { config: 10, as_cost: 20, as_workers: 10 },
-        claim_strategy: 'update_by_query',
+        claim_strategy: 'mget',
         poll_interval: 0,
         request_capacity: 1000,
         monitored_aggregated_stats_refresh_rate: 5000,

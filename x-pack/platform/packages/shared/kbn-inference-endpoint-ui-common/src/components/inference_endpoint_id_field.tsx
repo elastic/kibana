@@ -20,7 +20,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 import {
   getFieldValidityAndErrorMessage,
@@ -146,16 +145,16 @@ export const InferenceEndpointIdField: React.FC<InferenceEndpointIdFieldProps> =
               beforeMessage={LABELS.COPY_TOOLTIP}
               afterMessage={LABELS.COPIED_TOOLTIP}
               textToCopy={`${inferenceUri}${config.inferenceId ?? ''}`}
+              tooltipProps={{ disableScreenReaderOutput: true }}
             >
               {(copy) => (
-                <EuiToolTip content={LABELS.COPY_TOOLTIP} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="copy"
-                    aria-label={LABELS.COPY_TOOLTIP}
-                    onClick={copy}
-                    data-test-subj="inference-endpoint-api-reference-copy"
-                  />
-                </EuiToolTip>
+                /* eslint-disable-next-line @elastic/eui/tooltip-button-icon-wrap */
+                <EuiButtonIcon
+                  iconType="copy"
+                  aria-label={LABELS.COPY_TOOLTIP}
+                  onClick={copy}
+                  data-test-subj="inference-endpoint-api-reference-copy"
+                />
               )}
             </EuiCopy>
           </EuiFlexItem>
