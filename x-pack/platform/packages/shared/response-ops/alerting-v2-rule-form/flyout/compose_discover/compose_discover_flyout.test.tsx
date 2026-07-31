@@ -1165,6 +1165,7 @@ describe('ComposeDiscoverFlyout', () => {
   describe('sandbox time field selection', () => {
     it('keeps a manually selected sandbox time field instead of reverting to the form value (#281806)', () => {
       renderFlyout({ mode: 'create' });
+      openSandbox();
 
       const select = screen.getByTestId('querySandboxTimeField') as HTMLSelectElement;
       expect(select.value).toBe('@timestamp');
@@ -1184,6 +1185,7 @@ describe('ComposeDiscoverFlyout', () => {
 
     it('syncs a form-step time field change into the draft while the sandbox is closed', () => {
       renderFlyout({ mode: 'create' });
+      openSandbox();
       fireEvent.click(screen.getByTestId('composeDiscoverChildMockClose'));
 
       act(() => {
