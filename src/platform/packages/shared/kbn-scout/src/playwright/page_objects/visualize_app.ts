@@ -39,7 +39,9 @@ export class VisualizeApp {
 
   async goto() {
     await this.page.gotoApp('visualize');
-    await expect(this.landingPage).toBeVisible();
+    // Booting the app takes longer than a regular assertion is given, the same way
+    // it does in the Discover and Dashboard page objects.
+    await expect(this.landingPage).toBeVisible({ timeout: 30_000 });
   }
 
   async openNewVisualizationWizard() {
