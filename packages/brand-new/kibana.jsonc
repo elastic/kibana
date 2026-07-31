@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/brand-new",
-  "owner": "@elastic/test",
-  "group": "platform",
-  "visibility": "shared"
-}
