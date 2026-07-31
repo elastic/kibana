@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/significant-events-app-plugin",
+  "owner": "@elastic/obs-sig-events-team",
+  "description": "Significant Events UI",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "significantEventsApp",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "charts",
+      "data",
+      "licensing",
+      "share",
+      "significant_events",
+      "streams",
+      "unifiedSearch"
+    ],
+    "optionalPlugins": ["agentBuilder", "cloud", "spaces"],
+    "requiredBundles": ["kibanaReact"],
+    "extraPublicDirs": ["common"]
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "test/scout/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/agent-builder-browser",
+    "@kbn/charts-plugin",
+    "@kbn/cloud-plugin",
+    "@kbn/core",
+    "@kbn/core-http-browser",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/data-plugin",
+    "@kbn/deeplinks-management",
+    "@kbn/deeplinks-observability",
+    "@kbn/ebt-tools",
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/inference-common",
+    "@kbn/inference-connectors",
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/kibana-react-plugin",
+    "@kbn/licensing-plugin",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/react-query",
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/significant-events-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/streams-plugin",
+    "@kbn/streams-schema",
+    "@kbn/typed-react-router-config",
+    "@kbn/unified-search-plugin",
+    "@kbn/utility-types"
+  ]
+}
