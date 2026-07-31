@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
 import { validateStepNameUniqueness } from './validate_step_names';
+import type { WorkflowYaml } from '../spec/schema';
 
 describe('validateStepNameUniqueness', () => {
   it('should return valid for workflow with unique step names', () => {
