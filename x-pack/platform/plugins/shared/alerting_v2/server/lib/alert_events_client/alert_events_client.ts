@@ -52,7 +52,7 @@ export function getValueByDottedPath(obj: unknown, path: string): unknown {
  * Always includes `spaceId` and `source` so series keys cannot collide across
  * spaces or vendors.
  */
-function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
+export function getGroupHash(event: CreateAlertEventData, spaceId: string): string {
   const { source } = event;
 
   if (event.fingerprint) {
