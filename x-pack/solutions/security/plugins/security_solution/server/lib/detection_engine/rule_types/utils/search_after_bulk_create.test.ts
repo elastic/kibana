@@ -854,4 +854,112 @@ describe('searchAfterAndBulkCreate', () => {
     expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(4);
     expect(createdSignalsCount).toEqual(3);
   });
+
+  describe('with date_nanos timestamp fields', () => {
+    const createdAlert = {
+      _id: '1',
+      _index: '.internal.alerts-security.alerts-default-000001',
+      ...mockCommonFields,
+    };
+
+    test('should pass formatted ISO sort values through as the next cursor unchanged', async () => {
+      const nanosSortIds = ['2262-04-11T23:47:16.854775806Z', '2026-07-30T12:00:00.000000001Z'];
+      ruleServices.scopedClusterClient.asCurrentUser.search
+        .mockResolvedValueOnce(
+          repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3), undefined, undefined, [
+            ...nanosSortIds,
+          ])
+        )
+        .mockResolvedValueOnce(sampleDocSearchResultsNoSortIdNoHits());
+      ruleServices.alertWithPersistence.mockResolvedValueOnce({
+        createdAlerts: [createdAlert],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+
+      const { success, warningMessages } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          hasDateNanosTimestampFields: true,
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(true);
+      expect(warningMessages).toEqual([]);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenLastCalledWith(
+        expect.objectContaining({ search_after: nanosSortIds })
+      );
+    });
+
+    test('should stop pagination with a warning when the cursor does not advance', async () => {
+      const stuckSortIds = ['2262-04-11T23:47:16.854775806Z', '2026-07-30T12:00:00.000000001Z'];
+      ruleServices.scopedClusterClient.asCurrentUser.search
+        .mockResolvedValueOnce(
+          repeatedSearchResultsWithSortId(8, 4, someGuids.slice(0, 4), undefined, undefined, [
+            ...stuckSortIds,
+          ])
+        )
+        // same sort values again: mixed-resolution cursors can stop advancing
+        .mockResolvedValueOnce(
+          repeatedSearchResultsWithSortId(8, 4, someGuids.slice(4, 8), undefined, undefined, [
+            ...stuckSortIds,
+          ])
+        );
+      ruleServices.alertWithPersistence.mockResolvedValue({
+        createdAlerts: [createdAlert],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+
+      const { success, warningMessages } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          hasDateNanosTimestampFields: true,
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(true);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(2);
+      expect(warningMessages).toEqual([expect.stringContaining('Pagination stopped')]);
+    });
+
+    test('should stop pagination with a warning when a sort value is empty', async () => {
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+        repeatedSearchResultsWithSortId(4, 1, someGuids.slice(0, 3), undefined, undefined, [
+          '',
+          '2026-07-30T12:00:00.000000001Z',
+        ])
+      );
+      ruleServices.alertWithPersistence.mockResolvedValueOnce({
+        createdAlerts: [createdAlert],
+        errors: {},
+        alertsWereTruncated: false,
+      });
+
+      const { success, warningMessages, createdSignalsCount } = await searchAfterAndBulkCreate({
+        sharedParams: {
+          ...sharedParams,
+          hasDateNanosTimestampFields: true,
+        },
+        services: ruleServices,
+        eventsTelemetry: undefined,
+        filter: defaultFilter,
+        buildReasonMessage,
+      });
+
+      expect(success).toEqual(true);
+      expect(createdSignalsCount).toEqual(1);
+      expect(ruleServices.scopedClusterClient.asCurrentUser.search).toHaveBeenCalledTimes(1);
+      expect(warningMessages).toEqual([expect.stringContaining('Pagination stopped')]);
+    });
+  });
 });

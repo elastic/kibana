@@ -8,8 +8,10 @@
 import { firstValueFrom } from 'rxjs';
 
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { uniq, chunk } from 'lodash/fp';
+import { isEqual } from 'lodash';
 
 import { TelemetryChannel } from '../../../../telemetry/types';
 import { getThreatList, getThreatListCount } from './get_threat_list';
@@ -52,6 +54,7 @@ export const createThreatSignals = async ({
     inputIndex,
     primaryTimestamp,
     secondaryTimestamp,
+    hasDateNanosTimestampFields,
     exceptionFilter,
     completeRule,
     tuple,
@@ -194,6 +197,7 @@ export const createThreatSignals = async ({
   }) => {
     let list = await getDocumentList({ searchAfter: undefined });
     let documentCount = totalDocumentCount;
+    let prevSortIds: estypes.SortResults | undefined;
 
     // this is re-assigned depending on max clause count errors
     let chunkPage = itemsPerSearch;
@@ -284,7 +288,27 @@ export const createThreatSignals = async ({
         list = await getDocumentList({ searchAfter: undefined });
         documentCount = totalDocumentCount;
       } else {
-        const sortIds = getSafeSortIds(list.hits.hits[list.hits.hits.length - 1].sort);
+        const lastHitSort = list.hits.hits[list.hits.hits.length - 1].sort;
+        // with date_nanos, sort values are formatted ISO strings which round-trip exactly;
+        // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)
+        const sortIds = hasDateNanosTimestampFields ? lastHitSort : getSafeSortIds(lastHitSort);
+
+        // in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
+        // on date-mapped shards yield cursors that either format to null or never advance
+        // (the same docs match again every page); stop paging instead of failing or looping
+        if (
+          hasDateNanosTimestampFields &&
+          sortIds != null &&
+          (sortIds.some((val) => val == null || val === '') || isEqual(sortIds, prevSortIds))
+        ) {
+          const warning = `Pagination stopped: the last document's sort values ${JSON.stringify(
+            sortIds
+          )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining documents were not evaluated.`;
+          results.warningMessages.push(warning);
+          ruleExecutionLogger.warn(warning);
+          break;
+        }
+        prevSortIds = sortIds;
 
         // ES can return negative sort id for date field, when sort order set to desc
         // this could happen when event has empty sort field

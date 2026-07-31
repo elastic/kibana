@@ -294,18 +294,22 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // as `index`
           agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
 
-          const { skipExecution, warnings, frozenIndicesQueriedCount } =
-            await runExecutionValidation({
-              params,
-              inputIndex,
-              ruleName: rule.name,
-              scopedClusterClient: services.scopedClusterClient,
-              runtimeMappings,
-              primaryTimestamp,
-              secondaryTimestamp,
-              ruleExecutionLogger,
-              isServerless: isServerless ?? false,
-            });
+          const {
+            skipExecution,
+            warnings,
+            frozenIndicesQueriedCount,
+            hasDateNanosTimestampFields,
+          } = await runExecutionValidation({
+            params,
+            inputIndex,
+            ruleName: rule.name,
+            scopedClusterClient: services.scopedClusterClient,
+            runtimeMappings,
+            primaryTimestamp,
+            secondaryTimestamp,
+            ruleExecutionLogger,
+            isServerless: isServerless ?? false,
+          });
 
           warnings.forEach((warningMessage) => ruleExecutionLogger.warn(warningMessage));
 
@@ -428,6 +432,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     mergeStrategy,
                     primaryTimestamp,
                     secondaryTimestamp,
+                    hasDateNanosTimestampFields,
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,

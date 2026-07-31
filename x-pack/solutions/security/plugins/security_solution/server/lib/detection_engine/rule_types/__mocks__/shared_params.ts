@@ -34,6 +34,7 @@ export const getSharedParamsMock = <T extends RuleParams = QueryRuleParams>({
   experimentalFeatures: allowedExperimentalValues,
   intendedTimestamp: undefined,
   primaryTimestamp: '@timestamp',
+  hasDateNanosTimestampFields: false,
   listClient: getListClientMock(),
   tuple: {
     from: dateMath.parse(ruleParams.from) as moment.Moment,

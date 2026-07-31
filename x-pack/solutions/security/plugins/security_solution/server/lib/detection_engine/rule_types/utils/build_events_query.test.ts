@@ -573,4 +573,91 @@ describe('create_signals', () => {
       ],
     });
   });
+
+  describe('hasDateNanosTimestampFields', () => {
+    test('it adds sort format and asc missing value to both sort clauses', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: 'event.ingested',
+        secondaryTimestamp: '@timestamp',
+        runtimeMappings: undefined,
+        hasDateNanosTimestampFields: true,
+      });
+      expect(query?.sort).toEqual([
+        {
+          'event.ingested': {
+            order: 'asc',
+            unmapped_type: 'date',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
+            format: 'strict_date_optional_time_nanos',
+            missing: '9223372036854775806',
+          },
+        },
+      ]);
+    });
+
+    test('it uses epoch missing value for desc sort', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+        sortOrder: 'desc',
+        runtimeMappings: undefined,
+        hasDateNanosTimestampFields: true,
+      });
+      expect(query?.sort).toEqual([
+        {
+          '@timestamp': {
+            order: 'desc',
+            unmapped_type: 'date',
+            format: 'strict_date_optional_time_nanos',
+            missing: '0',
+          },
+        },
+      ]);
+    });
+
+    test('it does not add format or missing when flag is false', () => {
+      const query = buildEventsSearchQuery({
+        aggregations: undefined,
+        index: ['auditbeat-*'],
+        from: 'now-5m',
+        to: 'today',
+        filter: {},
+        size: 100,
+        searchAfterSortIds: undefined,
+        primaryTimestamp: '@timestamp',
+        secondaryTimestamp: undefined,
+        runtimeMappings: undefined,
+        hasDateNanosTimestampFields: false,
+      });
+      expect(query?.sort).toEqual([
+        {
+          '@timestamp': {
+            order: 'asc',
+            unmapped_type: 'date',
+          },
+        },
+      ]);
+    });
+  });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { identity } from 'lodash';
+import { identity, isEqual } from 'lodash';
 import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
@@ -78,6 +78,7 @@ export const searchAfterAndBulkCreateFactory = async ({
     searchAfterSize: pageSize,
     primaryTimestamp,
     secondaryTimestamp,
+    hasDateNanosTimestampFields,
     unprocessedExceptions: exceptionsList,
     tuple,
     ruleExecutionLogger,
@@ -118,6 +119,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           secondaryTimestamp,
           trackTotalHits,
           additionalFilters,
+          hasDateNanosTimestampFields,
         });
         const {
           searchResult,
@@ -148,9 +150,10 @@ export const searchAfterAndBulkCreateFactory = async ({
         loggedRequests.push(...singleSearchLoggedRequests);
         // determine if there are any candidate signals to be processed
         const totalHits = getTotalHitsValue(searchResult.hits.total);
-        const lastSortIds = getSafeSortIds(
-          searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort
-        );
+        const lastHitSort = searchResult.hits.hits[searchResult.hits.hits.length - 1]?.sort;
+        // with date_nanos, sort values are formatted ISO strings which round-trip exactly;
+        // getSafeSortIds would corrupt them (its null branch produces an out-of-range cursor)
+        const lastSortIds = hasDateNanosTimestampFields ? lastHitSort : getSafeSortIds(lastHitSort);
 
         if (totalHits === 0 || searchResult.hits.hits.length === 0) {
           ruleExecutionLogger.trace(
@@ -204,6 +207,22 @@ export const searchAfterAndBulkCreateFactory = async ({
             toReturn.warningMessages.push(getWarningMessage());
             break;
           }
+        }
+
+        // in mixed date/date_nanos patterns, timestamps missing or outside the nanos range
+        // on date-mapped shards yield cursors that either format to null or never advance
+        // (the same docs match again every page); stop paging instead of failing or looping
+        if (
+          hasDateNanosTimestampFields &&
+          lastSortIds != null &&
+          (lastSortIds.some((val) => val == null || val === '') || isEqual(lastSortIds, sortIds))
+        ) {
+          const warning = `Pagination stopped: the last event's sort values ${JSON.stringify(
+            lastSortIds
+          )} cannot be used as a search_after cursor, because a timestamp is missing or outside the date_nanos supported range on an index where it is not mapped as date_nanos. Remaining events were not evaluated.`;
+          toReturn.warningMessages.push(warning);
+          ruleExecutionLogger.warn(`${cycleNum}: ${warning}`);
+          break;
         }
 
         // ES can return negative sort id for date field, when sort order set to desc

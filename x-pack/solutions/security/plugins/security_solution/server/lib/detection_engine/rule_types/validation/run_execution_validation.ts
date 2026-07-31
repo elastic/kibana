@@ -34,6 +34,7 @@ export interface RunExecutionValidationResult {
   skipExecution: boolean;
   warnings: string[];
   frozenIndicesQueriedCount: number;
+  hasDateNanosTimestampFields: boolean;
 }
 
 /**
@@ -59,9 +60,15 @@ export const runExecutionValidation = async (
   const warnings: string[] = [];
   let skipExecution = false;
   let frozenIndicesQueriedCount = 0;
+  let hasDateNanosTimestampFields = false;
 
   if (isMachineLearningParams(params)) {
-    return { skipExecution: false, warnings: [], frozenIndicesQueriedCount: 0 };
+    return {
+      skipExecution: false,
+      warnings: [],
+      frozenIndicesQueriedCount: 0,
+      hasDateNanosTimestampFields: false,
+    };
   }
 
   const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asCurrentUser);
@@ -130,7 +137,7 @@ export const runExecutionValidation = async (
   }
 
   if (skipExecution) {
-    return { skipExecution, warnings, frozenIndicesQueriedCount };
+    return { skipExecution, warnings, frozenIndicesQueriedCount, hasDateNanosTimestampFields };
   }
 
   try {
@@ -155,6 +162,11 @@ export const runExecutionValidation = async (
     if (missingTimestampWarning) {
       warnings.push(missingTimestampWarning);
     }
+
+    // date_nanos sort values need special handling in search_after pagination
+    hasDateNanosTimestampFields = [primaryTimestamp, secondaryTimestamp].some(
+      (field) => field != null && 'date_nanos' in (fieldCapsResponse.body.fields[field] ?? {})
+    );
   } catch (exc) {
     warnings.push(`Timestamp fields check failed to execute ${exc}`);
   }
@@ -179,5 +191,5 @@ export const runExecutionValidation = async (
     }
   }
 
-  return { skipExecution, warnings, frozenIndicesQueriedCount };
+  return { skipExecution, warnings, frozenIndicesQueriedCount, hasDateNanosTimestampFields };
 };

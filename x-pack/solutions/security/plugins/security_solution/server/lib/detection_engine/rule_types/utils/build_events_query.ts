@@ -26,7 +26,18 @@ interface BuildEventsSearchQuery<
   trackTotalHits?: boolean;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
+  hasDateNanosTimestampFields?: boolean;
 }
+
+// Raw date_nanos sort values (~1.8e18) don't survive JS number precision, breaking
+// search_after cursors. When a timestamp field is date_nanos anywhere in the pattern,
+// sort values are formatted as ISO strings instead, which round-trip exactly.
+// `missing` must be numeric (epoch): the default _last sentinel (Long.MAX_VALUE)
+// formats to null, so pin an explicit in-range value keeping missing docs sorted last.
+// asc: max date_nanos minus 1; desc: epoch 0 (resolution-invariant).
+const NANOS_SORT_FORMAT = 'strict_date_optional_time_nanos';
+const NANOS_SORT_MISSING_ASC = '9223372036854775806';
+const NANOS_SORT_MISSING_DESC = '0';
 
 export const buildTimeRangeFilter = ({
   to,
@@ -118,6 +129,7 @@ export const buildEventsSearchQuery = <
   trackTotalHits,
   additionalFilters,
   overrideBody,
+  hasDateNanosTimestampFields,
 }: BuildEventsSearchQuery<TAggs>) => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
@@ -140,11 +152,19 @@ export const buildEventsSearchQuery = <
     ...(additionalFilters ? additionalFilters : []),
   ];
 
+  const nanosSortOptions = hasDateNanosTimestampFields
+    ? {
+        format: NANOS_SORT_FORMAT,
+        missing: sortOrder === 'desc' ? NANOS_SORT_MISSING_DESC : NANOS_SORT_MISSING_ASC,
+      }
+    : undefined;
+
   const sort: estypes.Sort = [];
   sort.push({
     [primaryTimestamp]: {
       order: sortOrder ?? 'asc',
       unmapped_type: 'date',
+      ...nanosSortOptions,
     },
   });
   if (secondaryTimestamp) {
@@ -152,6 +172,7 @@ export const buildEventsSearchQuery = <
       [secondaryTimestamp]: {
         order: sortOrder ?? 'asc',
         unmapped_type: 'date',
+        ...nanosSortOptions,
       },
     });
   }
