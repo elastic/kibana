@@ -160,7 +160,7 @@ export function OnboardingShell() {
 
   return (
     <EuiPageTemplate data-test-subj="onboardingShell">
-      <EuiPageTemplate.Section grow={false} paddingSize="m" restrictWidth>
+      <EuiPageTemplate.Section paddingSize="m" restrictWidth>
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
           <EuiFlexGroup direction="row" alignItems="flexEnd" gutterSize="m">
             <EuiIcon type={meta.icon} size="xl" aria-hidden={true} />
