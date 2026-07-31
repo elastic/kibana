@@ -39,6 +39,7 @@ import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button
 import { buildNightshiftEventFlyoutShareUrl } from '../common/nightshift_url_params';
 import { NightshiftMarkIcon } from '../app/nightshift_mark_icon';
 import { useFormatTimestamp } from '../common/format_timestamp';
+import { useFetchDetectionOccurrences } from '../hooks/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { markEventInvestigationCompleteInCache } from '../hooks/use_fetch_significant_events';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
@@ -47,6 +48,8 @@ import {
   rememberInvestigationTerminalFailure,
 } from './significant_event_status';
 import { useKibana } from '../../../utils/kibana_react';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { setFlyoutMenuCloseButtonEbtProps } from '../common/flyout_close_ebt';
 
 export interface EventFlyoutProps {
   event: SignificantEvent;
@@ -60,6 +63,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const { agentBuilder, http } = useKibana().services;
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_uuid);
+  const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
   const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
 
   const {
@@ -127,8 +131,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, []);
 
   const getShareUrl = useCallback(
-    () => buildNightshiftEventFlyoutShareUrl(event.event_uuid),
-    [event.event_uuid]
+    () => buildNightshiftEventFlyoutShareUrl(event.event_uuid, event.event_id),
+    [event.event_uuid, event.event_id]
   );
   const shareUrlCustomAction = useFlyoutShareUrlCustomAction(getShareUrl);
   const flyoutMenuProps = useMemo(
@@ -150,6 +154,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
       aria-label={event.title}
       flyoutMenuProps={flyoutMenuProps}
       data-test-subj="nightshiftEventFlyout"
+      onClickCapture={(clickEvent: React.MouseEvent<HTMLElement>) =>
+        setFlyoutMenuCloseButtonEbtProps(clickEvent, NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT)
+      }
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
@@ -225,6 +232,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
           event={event}
           eventUuid={event.event_uuid}
           lifecycleQuery={lifecycleQuery}
+          occurrencesByRuleUuid={occurrencesQuery.data}
+          isLoadingOccurrences={occurrencesQuery.isLoading}
           selectedDetectionId={selectedDetectionId}
           onDetectionClick={(detection) => handleDetectionClick(detection.detection_id)}
         />

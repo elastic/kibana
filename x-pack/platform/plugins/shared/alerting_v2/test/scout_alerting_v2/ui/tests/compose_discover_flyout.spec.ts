@@ -42,6 +42,16 @@ const CREATE_SIGNAL_TIMESTAMP_QUERY = `FROM ${TIMESTAMP_ONLY_INDEX} | WHERE Carr
 const BROKEN_TIME_FIELD_RULE_NAME = 'scout-compose-discover-broken-time-field';
 const CREATE_SIGNAL_TIMESTAMP_RULE_NAME = 'scout-compose-discover-standalone-time-field';
 const RUNBOOK_TEXT = 'Investigate failed transactions';
+/**
+ * Index with a valid `@timestamp` (so it auto-detects) plus a second date
+ * field — covers the truthy-guard path that the single-date-field indices
+ * above (`TEST_INDEX`, `TIMESTAMP_ONLY_INDEX`) never exercise. Regression
+ * coverage for #281806.
+ */
+const TWO_DATE_FIELDS_INDEX = 'test-compose-discover-two-date-fields';
+const TWO_DATE_FIELDS_BASE_QUERY = `FROM ${TWO_DATE_FIELDS_INDEX} | STATS count = COUNT(*)`;
+const TWO_DATE_FIELDS_UNIFIED_QUERY = `${TWO_DATE_FIELDS_BASE_QUERY} ${ALERT_SEGMENT}`;
+const TWO_DATE_FIELDS_RULE_NAME = 'scout-compose-discover-two-date-fields';
 
 test.describe(
   'ComposeDiscoverFlyout — create and edit flows',
@@ -86,6 +96,26 @@ test.describe(
         },
         refresh: 'wait_for',
       });
+      await esClient.indices.create(
+        {
+          index: TWO_DATE_FIELDS_INDEX,
+          mappings: {
+            properties: {
+              '@timestamp': { type: 'date' },
+              event: { properties: { ingested: { type: 'date' } } },
+            },
+          },
+        },
+        { ignore: [400] }
+      );
+      await esClient.index({
+        index: TWO_DATE_FIELDS_INDEX,
+        document: {
+          '@timestamp': new Date().toISOString(),
+          event: { ingested: new Date().toISOString() },
+        },
+        refresh: 'wait_for',
+      });
     });
 
     test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
@@ -98,6 +128,7 @@ test.describe(
       await apiServices.alertingV2.rules.cleanUp();
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TIMESTAMP_ONLY_INDEX }, { ignore: [404] });
+      await esClient.indices.delete({ index: TWO_DATE_FIELDS_INDEX }, { ignore: [404] });
     });
 
     test('create flow: open flyout, define query, step through, and submit', async ({
@@ -363,6 +394,58 @@ test.describe(
             timeout: 30_000,
           })
           .toBe('timestamp');
+      });
+    });
+
+    test('create flow: manually selected sandbox time field holds and persists (#281806)', async ({
+      pageObjects,
+      apiServices,
+    }) => {
+      await test.step('open create flyout and type a query against an index with two date fields', async () => {
+        await pageObjects.composeDiscover.openCreateFlyout();
+        await expect(pageObjects.composeDiscover.flyout).toBeVisible();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeVisible();
+        await pageObjects.composeDiscover.setSandboxQuery(TWO_DATE_FIELDS_UNIFIED_QUERY);
+      });
+
+      await test.step('the auto-detected time field is @timestamp', async () => {
+        await pageObjects.composeDiscover.waitForTimeFieldOption(
+          pageObjects.composeDiscover.sandboxTimeFieldSelector,
+          'event.ingested'
+        );
+        await expect(pageObjects.composeDiscover.sandboxTimeFieldSelector).toHaveValue(
+          '@timestamp'
+        );
+      });
+
+      await test.step('manually picking event.ingested in the sandbox holds through Apply, not reverted to @timestamp', async () => {
+        await pageObjects.composeDiscover.selectSandboxTimeField('event.ingested');
+        await pageObjects.composeDiscover.clickApply();
+        await expect(pageObjects.composeDiscover.sandboxApplyButton).toBeHidden();
+        await expect(pageObjects.composeDiscover.timeFieldSelector).toHaveValue('event.ingested');
+      });
+
+      await test.step('name the rule and submit', async () => {
+        await pageObjects.composeDiscover.clickNext(); // Recovery Condition
+        await pageObjects.composeDiscover.clickNext(); // Details
+        await pageObjects.composeDiscover.setRuleName(TWO_DATE_FIELDS_RULE_NAME);
+        await pageObjects.composeDiscover.clickNext(); // Actions
+        await pageObjects.composeDiscover.clickSubmit();
+        await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
+      });
+
+      await test.step('the created rule persists event.ingested, not @timestamp', async () => {
+        await expect
+          .poll(
+            async () => {
+              const { items } = await apiServices.alertingV2.rules.find({
+                search: TWO_DATE_FIELDS_RULE_NAME,
+              });
+              return items[0]?.time_field;
+            },
+            { timeout: 30_000 }
+          )
+          .toBe('event.ingested');
       });
     });
 
