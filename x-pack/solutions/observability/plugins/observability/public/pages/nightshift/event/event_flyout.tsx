@@ -39,6 +39,7 @@ import { useFlyoutShareUrlCustomAction } from '../common/flyout_share_url_button
 import { buildNightshiftEventFlyoutShareUrl } from '../common/nightshift_url_params';
 import { NightshiftMarkIcon } from '../app/nightshift_mark_icon';
 import { useFormatTimestamp } from '../common/format_timestamp';
+import { useFetchDetectionOccurrences } from '../hooks/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { markEventInvestigationCompleteInCache } from '../hooks/use_fetch_significant_events';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
@@ -62,6 +63,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const { agentBuilder, http } = useKibana().services;
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_uuid);
+  const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
   const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
 
   const {
@@ -230,6 +232,8 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
           event={event}
           eventUuid={event.event_uuid}
           lifecycleQuery={lifecycleQuery}
+          occurrencesByRuleUuid={occurrencesQuery.data}
+          isLoadingOccurrences={occurrencesQuery.isLoading}
           selectedDetectionId={selectedDetectionId}
           onDetectionClick={(detection) => handleDetectionClick(detection.detection_id)}
         />

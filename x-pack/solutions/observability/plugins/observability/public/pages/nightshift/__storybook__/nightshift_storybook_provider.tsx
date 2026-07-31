@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
-import { EuiProvider } from '@elastic/eui';
+import { EuiPanel, EuiProvider } from '@elastic/eui';
 import { PerformanceContext } from '@kbn/ebt-tools';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,6 +21,7 @@ import {
 import {
   checkoutFeature,
   checkoutLifecycle,
+  checkoutOccurrences,
   dismissedShippingEvent,
   nightshiftEvents,
   inventoryEvent,
@@ -45,6 +47,24 @@ const performanceApi = {
   onPageReady: () => undefined,
   onPageRefreshStart: () => undefined,
 };
+
+const StorybookLensEmbeddable = ({
+  attributes,
+}: {
+  attributes: { title?: string };
+}): React.ReactElement => (
+  <EuiPanel
+    hasBorder
+    hasShadow={false}
+    paddingSize="s"
+    data-test-subj="nightshiftStorybookLensEmbeddable"
+    css={css`
+      height: 200px;
+    `}
+  >
+    <strong>{attributes.title}</strong>
+  </EuiPanel>
+);
 
 export interface NightshiftStorybookProviderProps {
   children: React.ReactNode;
@@ -145,7 +165,26 @@ const createServices = ({
         useSparklineOverrides: () => ({}),
       },
     },
+    dataViews: {
+      create: async ({
+        id,
+        timeFieldName,
+        title,
+      }: {
+        id: string;
+        timeFieldName: string;
+        title: string;
+      }) => ({
+        id,
+        timeFieldName,
+        title,
+        toSpec: () => ({ id, timeFieldName, title }),
+      }),
+    },
     http,
+    lens: {
+      EmbeddableComponent: StorybookLensEmbeddable,
+    },
     notifications: {
       toasts: {
         addError: () => undefined,
@@ -167,6 +206,13 @@ const createServices = ({
           setting === 'dateFormat' ? 'MMM D, YYYY @ HH:mm:ss.SSS' : undefined,
       },
     },
+    spaces: {
+      getActiveSpace: async () => ({
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: [],
+      }),
+    },
     streams: {
       streamsRepositoryClient: {
         fetch: async (route: string, options?: { params?: { path?: { id?: string } } }) => {
@@ -179,6 +225,9 @@ const createServices = ({
               ignored: 0,
               status: 'closed',
             };
+          }
+          if (route === 'GET /internal/streams/_query_occurrences') {
+            return checkoutOccurrences;
           }
           if (route === 'GET /internal/streams/{name}/features') {
             if (streamFeaturesScenario === 'loading') {

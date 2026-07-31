@@ -22,6 +22,11 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 
 jest.mock('../hooks/use_fetch_event_lifecycle');
 jest.mock('../hooks/use_fetch_stream_features');
+jest.mock('../detection/change_point_visualization', () => ({
+  ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
+    <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />
+  ),
+}));
 
 jest.mock('../../../utils/kibana_react', () => ({
   useKibana: () => ({
@@ -64,6 +69,7 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
 const mockDetection = (overrides: Partial<LifecycleDetection> = {}): LifecycleDetection => ({
   detection_id: 'det-1',
   rule_name: 'latency-p95-spike',
+  rule_uuid: 'rule-1',
   stream_name: 'logs.web-frontend',
   change_point_type: 'spike',
   '@timestamp': '2026-07-10T12:00:00Z',
@@ -195,6 +201,31 @@ describe('DetectionsList', () => {
     expect(screen.getByText('Trend change')).toBeInTheDocument();
     expect(screen.getAllByText('web-frontend').length).toBeGreaterThan(0);
     expect(screen.queryByText('logs.web-frontend')).not.toBeInTheDocument();
+  });
+
+  it('passes real occurrences for the detection rule to its sparkline', () => {
+    setLifecycle({ detections: [mockDetection()] });
+    renderList({
+      occurrencesByRuleUuid: new Map([
+        [
+          'rule-1',
+          [
+            { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
+            { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
+          ],
+        ],
+      ]),
+    });
+
+    expect(screen.getByTestId('mockDetectionSparkline')).toHaveAttribute('data-point-count', '2');
+  });
+
+  it('shows a sparkline skeleton while occurrences load', () => {
+    setLifecycle({ detections: [mockDetection()] });
+    renderList({ isLoadingOccurrences: true });
+
+    expect(screen.getByTestId('nightshiftDetectionSparklineSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('mockDetectionSparkline')).not.toBeInTheDocument();
   });
 
   it('shows at most two entity pills plus an overflow pill', () => {
