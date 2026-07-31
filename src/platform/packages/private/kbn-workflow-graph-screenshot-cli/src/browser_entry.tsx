@@ -14,7 +14,6 @@ import { createRoot } from 'react-dom/client';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { transformWorkflowToGraph } from '@kbn/workflows';
 import {
-  getBaseConnectorType,
   getConnectorSpecIcon,
   getStepIconType,
   HardcodedIcons,
@@ -66,7 +65,7 @@ const TRIGGER_ICONS: Record<string, IconType> = {
 const renderStepIcon: RenderStepIcon = ({ stepType, isTrigger }) => {
   const iconType = isTrigger
     ? TRIGGER_ICONS[stepType] ?? HardcodedIcons.trigger
-    : getConnectorSpecIcon(stepType) ?? getStepIconType(getBaseConnectorType(stepType));
+    : getConnectorSpecIcon(stepType) ?? getStepIconType(stepType);
 
   return (
     <Suspense fallback={<EuiLoadingSpinner size="s" />}>

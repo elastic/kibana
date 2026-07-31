@@ -140,10 +140,10 @@ export const ERROR_PANEL_TITLE = i18n.translate(
 );
 
 export const ERROR_PANEL_MESSAGE = i18n.translate(
-  'xpack.securitySolution.riskScore.errorPanel.message',
+  'xpack.securitySolution.entityAnalytics.errorPanel.message',
   {
     defaultMessage:
-      'The risk score maintainer status could not be changed. Fix the following and try again:',
+      'Entity Analytics status could not be changed. Fix the following and try again:',
   }
 );
 

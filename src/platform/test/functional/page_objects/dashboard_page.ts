@@ -248,10 +248,14 @@ export class DashboardPageObject extends FtrService {
     this.log.debug('gotoDashboardLandingPage');
     if (await this.onDashboardLandingPage()) return;
 
-    const breadcrumbLink = this.config.get('serverless')
-      ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
-      : 'breadcrumb dashboardListingBreadcrumb first';
-    await this.testSubjects.click(breadcrumbLink);
+    if (await this.globalNav.isNextProjectChrome()) {
+      await this.testSubjects.click('appHeaderBack');
+    } else {
+      const breadcrumbLink = this.config.get('serverless')
+        ? 'breadcrumb breadcrumb-deepLinkId-dashboards'
+        : 'breadcrumb dashboardListingBreadcrumb first';
+      await this.testSubjects.click(breadcrumbLink);
+    }
     await this.expectExistsDashboardLandingPage();
   }
 

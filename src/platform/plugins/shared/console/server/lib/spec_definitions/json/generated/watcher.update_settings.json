@@ -15,6 +15,10 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "index.auto_expand_replicas": "",
+      "index.number_of_replicas": ""
+    },
     "methods": [
       "PUT"
     ],

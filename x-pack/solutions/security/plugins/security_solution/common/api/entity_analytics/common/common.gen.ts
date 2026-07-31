@@ -18,18 +18,25 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
+export const EntityAnalyticsPrivilegesDetail = lazySchema(() =>
+  z.object({
+    elasticsearch: z.object({
+      cluster: z.object({}).catchall(z.boolean()).optional(),
+      index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
+    }),
+    kibana: z.object({}).catchall(z.boolean()).optional(),
+  })
+);
+export type EntityAnalyticsPrivilegesDetail = z.infer<typeof EntityAnalyticsPrivilegesDetail>;
+
 export const EntityAnalyticsPrivileges = lazySchema(() =>
   z.object({
     has_all_required: z.boolean(),
     has_read_permissions: z.boolean().optional(),
     has_write_permissions: z.boolean().optional(),
-    privileges: z.object({
-      elasticsearch: z.object({
-        cluster: z.object({}).catchall(z.boolean()).optional(),
-        index: z.object({}).catchall(z.object({}).catchall(z.boolean())).optional(),
-      }),
-      kibana: z.object({}).catchall(z.boolean()).optional(),
-    }),
+    has_install_permissions: z.boolean().optional(),
+    privileges: EntityAnalyticsPrivilegesDetail,
+    install_privileges: EntityAnalyticsPrivilegesDetail.optional(),
   })
 );
 export type EntityAnalyticsPrivileges = z.infer<typeof EntityAnalyticsPrivileges>;

@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { withActiveSpan } from '@kbn/tracing-utils';
 import { v4 as uuidv4 } from 'uuid';
-import { addSpanLabels, withSpan } from '@kbn/apm-utils';
+import { withSpan } from '@kbn/apm-utils';
 import { flow, identity, omit } from 'lodash';
 import type { ExecutionContextStart, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -23,20 +23,10 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { buildChildRequestEnricher, buildTaskFakeRequest } from './fake_request_factory';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
-import {
-  asErr,
-  asOk,
-  eitherAsync,
-  isOk,
-  mapErr,
-  mapOk,
-  promiseResult,
-  unwrap,
-} from '../lib/result_type';
+import { asErr, asOk, eitherAsync, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
-  asTaskMarkRunningEvent,
   asTaskRunEvent,
   asTaskManagerStatEvent,
   startEventLoopMonitoring,
@@ -60,10 +50,10 @@ import type {
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
-import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
+import type { TaskManagerConfig } from '../config';
 import type { ApiKeyStrategy } from '../api_key_strategy';
 import { TaskValidator } from '../task_validator';
-import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
+import { getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
 import { getExecutionId } from '../lib/get_execution_id';
@@ -82,6 +72,7 @@ export const TASK_MANAGER_TRANSACTION_TYPE = 'task-manager';
 export const TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING = 'mark-task-as-running';
 
 const UPDATE_RETRY_AT_INTERVAL = 60000; // 1m
+const MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE = 4096; // 4 KB
 
 export interface TaskRunner {
   isExpired: boolean;
@@ -133,12 +124,11 @@ type Opts = {
   usageCounter?: UsageCounter;
   config: TaskManagerConfig;
   allowReadingInvalidState: boolean;
-  strategy: string;
   getPollInterval: () => number;
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
-} & Pick<Middleware, 'beforeRun' | 'beforeMarkRunning'>;
+} & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
   // Task completed successfully
@@ -181,7 +171,6 @@ export class TaskManagerRunner implements TaskRunner {
   private logger: Logger;
   private bufferedTaskStore: Updatable;
   private beforeRun: Middleware['beforeRun'];
-  private beforeMarkRunning: Middleware['beforeMarkRunning'];
   private onTaskEvent: (event: TaskRun | TaskMarkRunning | TaskManagerStat) => void;
   private defaultMaxAttempts: number;
   private uuid: string;
@@ -190,12 +179,12 @@ export class TaskManagerRunner implements TaskRunner {
   private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private readonly taskValidator: TaskValidator;
-  private readonly claimStrategy: string;
   private getPollInterval: () => number;
   private apiKeyStrategy: ApiKeyStrategy;
   private eventLogger: TaskEventLogger;
   private isCancelled = false;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
+  private taskRunEventCustomFields?: Record<string, unknown>;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -213,14 +202,12 @@ export class TaskManagerRunner implements TaskRunner {
     logger,
     store,
     beforeRun,
-    beforeMarkRunning,
     defaultMaxAttempts,
     onTaskEvent = identity,
     executionContext,
     usageCounter,
     config,
     allowReadingInvalidState,
-    strategy,
     getPollInterval,
     apiKeyStrategy,
     eventLogger,
@@ -231,7 +218,6 @@ export class TaskManagerRunner implements TaskRunner {
     this.logger = logger;
     this.bufferedTaskStore = store;
     this.beforeRun = beforeRun;
-    this.beforeMarkRunning = beforeMarkRunning;
     this.onTaskEvent = onTaskEvent;
     this.defaultMaxAttempts = defaultMaxAttempts;
     this.executionContext = executionContext;
@@ -243,7 +229,6 @@ export class TaskManagerRunner implements TaskRunner {
       definitions: this.definitions,
       allowReadingInvalidState,
     });
-    this.claimStrategy = strategy;
     this.getPollInterval = getPollInterval;
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
@@ -477,6 +462,7 @@ export class TaskManagerRunner implements TaskRunner {
             signal: abortController.signal,
             enrichRequest,
             executionUuid: this.uuid,
+            setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
           });
 
           const originalTaskCancel = this.task.cancel;
@@ -599,107 +585,23 @@ export class TaskManagerRunner implements TaskRunner {
 
     // mget claim strategy sets the task to `running` during the claim cycle
     // so this update to mark the task as running is unnecessary
-    if (this.claimStrategy === CLAIM_STRATEGY_MGET) {
-      const { task } = this.instance;
-      // A ready-to-run mget task should always have a `startedAt`; log if it doesn't
-      // so we can diagnose the issue.
-      if (task.startedAt == null) {
-        this.logger.warn(
-          `Task ${this} is ready to run (mget) without a startedAt, which breaks the running-task invariant. ` +
-            `status=${task.status} attempts=${task.attempts} ` +
-            `runAt=${task.runAt?.toISOString() ?? 'null'} ` +
-            `retryAt=${task.retryAt?.toISOString() ?? 'null'} ` +
-            `scheduledAt=${task.scheduledAt?.toISOString() ?? 'null'} ` +
-            `ownerId=${task.ownerId ?? 'null'} version=${task.version ?? 'null'} ` +
-            `schedule=${task.schedule ? JSON.stringify(task.schedule) : 'null'}`,
-          { tags: [this.taskType, this.id] }
-        );
-      }
-      this.instance = asReadyToRun(task as ConcreteTaskInstanceWithStartedAt);
-      return true;
+    const { task } = this.instance;
+    // A ready-to-run mget task should always have a `startedAt`; log if it doesn't
+    // so we can diagnose the issue.
+    if (task.startedAt == null) {
+      this.logger.warn(
+        `Task ${this} is ready to run (mget) without a startedAt, which breaks the running-task invariant. ` +
+          `status=${task.status} attempts=${task.attempts} ` +
+          `runAt=${task.runAt?.toISOString() ?? 'null'} ` +
+          `retryAt=${task.retryAt?.toISOString() ?? 'null'} ` +
+          `scheduledAt=${task.scheduledAt?.toISOString() ?? 'null'} ` +
+          `ownerId=${task.ownerId ?? 'null'} version=${task.version ?? 'null'} ` +
+          `schedule=${task.schedule ? JSON.stringify(task.schedule) : 'null'}`,
+        { tags: [this.taskType, this.id] }
+      );
     }
-
-    return withActiveSpan(
-      'mark-task-as-running',
-      {
-        attributes: { 'transaction.type': TASK_MANAGER_TRANSACTION_TYPE },
-        // Make sure that this is a parent transaction (not a child of any other ongoing transaction)
-        root: true,
-      },
-      async () => {
-        const apmTrans = apm.startTransaction(
-          TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
-          TASK_MANAGER_TRANSACTION_TYPE
-        );
-        addSpanLabels({ entityId: this.taskType });
-
-        const now = new Date();
-        try {
-          const { taskInstance } = await this.beforeMarkRunning({
-            taskInstance: this.instance.task,
-            executionUuid: this.uuid,
-          });
-
-          const attempts = taskInstance.attempts + 1;
-          const ownershipClaimedUntil = taskInstance.retryAt;
-
-          const { id } = taskInstance;
-
-          const timeUntilClaimExpires = howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
-          if (timeUntilClaimExpires < 0) {
-            this.logger.debug(
-              `[Task Runner] Task ${id} started after ownership expired (${Math.abs(
-                timeUntilClaimExpires
-              )}ms after expiry)`
-            );
-          }
-
-          this.instance = asReadyToRun(
-            (await this.bufferedTaskStore.update(
-              {
-                ...taskWithoutEnabled(taskInstance),
-                status: TaskStatus.Running,
-                startedAt: now,
-                attempts,
-                retryAt: getRetryAt(taskInstance, this.definition) ?? null,
-                // This is a safe conversion as we're setting the startAt above
-              },
-              { validate: false }
-            )) as ConcreteTaskInstanceWithStartedAt
-          );
-
-          const timeUntilClaimExpiresAfterUpdate =
-            howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil);
-          if (timeUntilClaimExpiresAfterUpdate < 0) {
-            this.logger.debug(
-              `[Task Runner] Task ${id} ran after ownership expired (${Math.abs(
-                timeUntilClaimExpiresAfterUpdate
-              )}ms after expiry)`
-            );
-          }
-
-          if (apmTrans) apmTrans.end('success');
-          this.onTaskEvent(asTaskMarkRunningEvent(this.id, asOk(this.instance.task)));
-          return true;
-        } catch (error) {
-          if (apmTrans) apmTrans.end('failure');
-          this.onTaskEvent(asTaskMarkRunningEvent(this.id, asErr(error)));
-          if (!SavedObjectsErrorHelpers.isConflictError(error)) {
-            if (!SavedObjectsErrorHelpers.isNotFoundError(error)) {
-              // try to release claim as an unknown failure prevented us from marking as running
-              mapErr((errReleaseClaim: Error) => {
-                this.logger.error(
-                  `[Task Runner] Task ${this.id} failed to release claim after failure: Error: ${errReleaseClaim.message}`
-                );
-              }, await this.releaseClaimAndIncrementAttempts());
-            }
-
-            throw error;
-          }
-        }
-        return false;
-      }
-    );
+    this.instance = asReadyToRun(task as ConcreteTaskInstanceWithStartedAt);
+    return true;
   }
 
   /**
@@ -726,25 +628,6 @@ export class TaskManagerRunner implements TaskRunner {
       : asOk({
           ...(result || EMPTY_RUN_RESULT),
         });
-  }
-
-  private async releaseClaimAndIncrementAttempts(): Promise<
-    Result<PartialConcreteTaskInstance, Error>
-  > {
-    return promiseResult(
-      this.bufferedTaskStore.partialUpdate(
-        {
-          id: this.instance.task.id,
-          version: this.instance.task.version,
-          status: TaskStatus.Idle,
-          attempts: this.instance.task.attempts + 1,
-          startedAt: null,
-          retryAt: null,
-          ownerId: null,
-        },
-        { validate: false, doc: this.instance.task }
-      )
-    );
   }
 
   private shouldTryToScheduleRetry(): boolean {
@@ -1151,6 +1034,23 @@ export class TaskManagerRunner implements TaskRunner {
     return stop;
   }
 
+  private setCustomTaskRunEventFields = (fields: Record<string, unknown>): void => {
+    try {
+      const serializedSize = JSON.stringify(fields).length;
+      if (serializedSize > MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE) {
+        this.logger.warn(
+          `Dropping custom task run event fields for task ${this.taskType} because the serialized size (${serializedSize} bytes) exceeds the ${MAX_CUSTOM_TASK_RUN_EVENT_FIELDS_SIZE} byte limit.`
+        );
+      } else {
+        this.taskRunEventCustomFields = fields;
+      }
+    } catch (error) {
+      this.logger.warn(
+        `Dropping custom task run event fields for task ${this.taskType} because they could not be serialized to JSON.`
+      );
+    }
+  };
+
   private logTaskRunStartEvent(task: ConcreteTaskInstance, startedAt: Date): void {
     const scheduleDelayNs = task.scheduledAt
       ? millisToNanos(startedAt.getTime() - task.scheduledAt.getTime())
@@ -1212,6 +1112,7 @@ export class TaskManagerRunner implements TaskRunner {
           schedule_delay: scheduleDelayNs,
           execution: { uuid: this.uuid },
           ...(runActivity ? { run: runActivity } : {}),
+          ...(this.taskRunEventCustomFields ? { data: this.taskRunEventCustomFields } : {}),
         },
       },
       message,
@@ -1234,6 +1135,7 @@ export class TaskManagerRunner implements TaskRunner {
           type: this.taskType,
           scheduled: task.scheduledAt.toISOString(),
           execution: { uuid: this.uuid },
+          ...(this.taskRunEventCustomFields ? { data: this.taskRunEventCustomFields } : {}),
         },
       },
       message: `Task ${this.taskType} "${this.id}" has been cancelled.`,
@@ -1247,16 +1149,6 @@ function sanitizeInstance(instance: ConcreteTaskInstance): ConcreteTaskInstance 
     params: instance.params || {},
     state: instance.state || {},
   };
-}
-
-function howManyMsUntilOwnershipClaimExpires(ownershipClaimedUntil: Date | null): number {
-  return ownershipClaimedUntil ? ownershipClaimedUntil.getTime() - Date.now() : 0;
-}
-
-// Omits "enabled" field from task updates so we don't overwrite any user
-// initiated changes to "enabled" while the task was running
-function taskWithoutEnabled(task: ConcreteTaskInstance): ConcreteTaskInstance {
-  return omit(task, 'enabled');
 }
 
 // A type that extracts the Instance type out of TaskRunningStage

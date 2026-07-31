@@ -306,6 +306,9 @@
                                     }
                                 }
                             }
+                        },
+                        "data": {
+                            "type": "flattened"
                         }
                     }
                 },

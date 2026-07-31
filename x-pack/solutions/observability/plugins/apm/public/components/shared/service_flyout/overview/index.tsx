@@ -21,9 +21,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import type { LensESQLConfig } from './types';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import type { Environment } from '../../../../../common/environment_rt';
-import type { ServiceNodeData } from '../../../../../common/service_map';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { useServiceFlyoutContext } from '../service_flyout_context';
 import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { LatencyAggregationTypeSelect } from '../../charts/latency_chart/latency_aggregation_type_select';
@@ -48,20 +46,6 @@ const INFRASTRUCTURE_METRICS_SECTION_DESCRIPTION = i18n.translate(
       'Infrastructure metrics reflect system-level data and are not filtered by transaction type.',
   }
 );
-
-interface ServiceFlyoutOverviewProps {
-  service: ServiceNodeData;
-  environment: Environment;
-  kuery: string;
-  rangeFrom: string;
-  rangeTo: string;
-  transactionType: string;
-  refreshToken: number;
-  onEnvironmentChange: (environment: Environment) => void;
-  onRangeChange: (range: { rangeFrom: string; rangeTo: string }) => void;
-  onRefresh: () => void;
-  onTransactionTypeChange: (transactionType: string) => void;
-}
 
 interface FlyoutLensChartDefinition {
   id: string;
@@ -133,26 +117,18 @@ function ServiceFlyoutChartsSection({
   );
 }
 
-export function ServiceFlyoutOverview({
-  service,
-  environment,
-  kuery,
-  rangeFrom,
-  rangeTo,
-  transactionType,
-  refreshToken,
-  onEnvironmentChange,
-  onRangeChange,
-  onRefresh,
-  onTransactionTypeChange,
-}: ServiceFlyoutOverviewProps) {
+export function ServiceFlyoutOverview() {
   const [latencyAggregationType, setLatencyAggregationType] = useState(LatencyAggregationType.avg);
-  const { core, share } = useApmPluginContext();
+  const {
+    deps: { core, share },
+    service,
+    filters: { environment, rangeFrom, rangeTo, transactionType, refreshToken },
+  } = useServiceFlyoutContext();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { dataView } = useAdHocApmDataView();
   const indexes = dataView?.getIndexPattern();
   const { hasSystemMetrics, isLoading: isSystemMetricsLoading } = useServiceHasSystemMetrics({
-    serviceName: service.id,
+    serviceName: service.name,
     environment,
     rangeFrom,
     rangeTo,
@@ -162,10 +138,9 @@ export function ServiceFlyoutOverview({
     () =>
       getChartDefinitions({
         indexes,
-        serviceName: service.id,
+        serviceName: service.name,
         environment,
-        kuery,
-        transactionType,
+        transactionType: transactionType ?? '',
         latencyAggregationType,
         latencyTitleAction: (
           <LatencyAggregationTypeSelect
@@ -174,24 +149,12 @@ export function ServiceFlyoutOverview({
           />
         ),
       }),
-    [environment, indexes, kuery, latencyAggregationType, service.id, transactionType]
+    [environment, indexes, latencyAggregationType, service.name, transactionType]
   );
 
   return (
     <div data-test-subj="serviceFlyoutOverview">
-      <ServiceFlyoutQueryControls
-        agentName={service.agentName}
-        environment={environment}
-        kuery={kuery}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-        serviceName={service.id}
-        transactionType={transactionType}
-        onEnvironmentChange={onEnvironmentChange}
-        onRangeChange={onRangeChange}
-        onRefresh={onRefresh}
-        onTransactionTypeChange={onTransactionTypeChange}
-      />
+      <ServiceFlyoutQueryControls />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column" responsive={false} gutterSize="m">
         <EuiFlexItem>
@@ -228,11 +191,11 @@ export function ServiceFlyoutOverview({
             http={core.http}
             notifications={core.notifications}
             locators={share.url.locators}
-            serviceName={service.id}
+            serviceName={service.name}
             environment={environment}
             start={start}
             end={end}
-            transactionType={transactionType}
+            transactionType={transactionType ?? ''}
             latencyAggregationType={latencyAggregationType}
             refreshToken={refreshToken}
           />

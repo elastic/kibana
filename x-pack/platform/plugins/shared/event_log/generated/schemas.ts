@@ -131,6 +131,7 @@ export const EventSchema = schema.maybe(
                 max_heap_growth_per_callback_bytes: schema.maybe(ecsStringOrNumber()),
               })
             ),
+            data: ecsFlattened(),
           })
         ),
         alerting: schema.maybe(
