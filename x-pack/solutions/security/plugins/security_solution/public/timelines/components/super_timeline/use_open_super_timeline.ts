@@ -70,7 +70,7 @@ export const useOpenSuperTimeline = () => {
   const [isLoading, setIsLoading] = useState(false);
   const updateTimeline = useUpdateTimeline();
   const { dataView, status: dataViewStatus } = useDataView(PageScope.timeline);
-  const browserFields = useBrowserFields(PageScope.timeline);
+  const browserFields = useBrowserFields(dataView);
   const { services } = useKibana();
   const { uiSettings, notifications, overlays } = services;
 
