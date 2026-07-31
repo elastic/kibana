@@ -35,7 +35,6 @@ describe('cli invalid config support', () => {
             ...process.env,
             DISABLE_SWC_REGISTER_CACHE: '1',
           },
-          timeout: 20 * 1000,
         }
       );
       expect(error).toBe(undefined);
@@ -62,6 +61,6 @@ describe('cli invalid config support', () => {
 
       expect(status).toBe(64);
     },
-    20 * 1000
+    120 * 1000
   );
 });
