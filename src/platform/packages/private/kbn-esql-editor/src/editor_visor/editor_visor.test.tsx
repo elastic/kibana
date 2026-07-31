@@ -116,6 +116,22 @@ describe('Quick search visor', () => {
     });
   });
 
+  it('should build a TS query when the current query uses the TS command', async () => {
+    const onUpdateAndSubmitQuery = jest.fn();
+    renderWithI18n(
+      renderESQLVisor({ ...props, query: 'TS ts_index', onUpdateAndSubmitQuery })
+    );
+
+    await waitFor(() => expect(kqlMock.QueryStringInput).toHaveBeenCalled());
+
+    const { onSubmit } = (kqlMock.QueryStringInput as jest.Mock).mock.calls.at(-1)[0];
+    act(() => onSubmit({ query: 'hostname:web-01', language: 'kuery' }));
+
+    expect(onUpdateAndSubmitQuery).toHaveBeenCalledWith(
+      expect.stringMatching(/^TS ts_index \| WHERE KQL/)
+    );
+  });
+
   it('should not show a submit button', async () => {
     const { queryByTestId } = renderWithI18n(renderESQLVisor({ ...props }));
     await act(async () => {});
@@ -182,6 +198,24 @@ describe('Quick search visor', () => {
         await userEvent.click(getByTestId('esqlVisorAskAiButton'));
       });
       expect(getByTestId('ESQLEditor-visor-sources-dropdown')).toBeInTheDocument();
+    });
+
+    it('should show the Stop button while NL generation is in progress', async () => {
+      (corePluginMock.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
+
+      const { getByTestId } = renderWithI18n(renderWithEnterprise({ ...props }));
+
+      await waitFor(() => expect(getByTestId('esqlVisorAskAiButton')).toBeInTheDocument());
+      await act(async () => {
+        await userEvent.click(getByTestId('esqlVisorAskAiButton'));
+      });
+
+      const nlInput = getByTestId('esqlVisorNLQueryInput');
+      await act(async () => {
+        await userEvent.type(nlInput, 'show me logs{enter}');
+      });
+
+      await waitFor(() => expect(getByTestId('esqlVisorStopGeneration')).toBeInTheDocument());
     });
 
     it('should return to KQL mode when back button is clicked', async () => {

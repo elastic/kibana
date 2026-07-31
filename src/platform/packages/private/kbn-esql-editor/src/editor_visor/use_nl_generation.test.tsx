@@ -8,12 +8,15 @@
  */
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { useNlGeneration } from './use_nl_generation';
+import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
 
-jest.mock('../hooks/use_nl_to_esql_check', () => ({ useNlToEsqlCheck: () => false }));
+jest.mock('../hooks/use_nl_to_esql_check', () => ({
+  useNlToEsqlCheck: jest.fn().mockReturnValue(false),
+}));
 
 describe('useNlGeneration', () => {
   const coreStart = coreMock.createStart();
@@ -130,5 +133,66 @@ describe('useNlGeneration', () => {
 
     expect(result.current.isNlLoading).toBe(false);
     expect(result.current.nlValue).toBe('');
+  });
+
+  it('onNlSubmit is a no-op when already loading', async () => {
+    (coreStart.http.post as jest.Mock).mockImplementation(() => new Promise(() => {}));
+
+    const { result } = renderHook(() => useNlGeneration(defaultParams), {
+      wrapper: createWrapper(),
+    });
+
+    act(() => result.current.setNlValue('show me logs'));
+    act(() => {
+      result.current.onNlSubmit();
+    });
+
+    expect(result.current.isNlLoading).toBe(true);
+
+    await act(async () => {
+      await result.current.onNlSubmit();
+    });
+
+    expect(coreStart.http.post).toHaveBeenCalledTimes(1);
+  });
+
+  describe('connector check', () => {
+    beforeEach(() => {
+      (useNlToEsqlCheck as jest.Mock).mockReturnValue(true);
+    });
+
+    afterEach(() => {
+      (useNlToEsqlCheck as jest.Mock).mockReturnValue(false);
+    });
+
+    it('hasConnector is true when the connectors endpoint returns a non-empty array', async () => {
+      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [{ id: 'c1' }] });
+
+      const { result } = renderHook(() => useNlGeneration(defaultParams), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.hasConnector).toBe(true));
+    });
+
+    it('hasConnector is false when the connectors endpoint returns an empty array', async () => {
+      (coreStart.http.get as jest.Mock).mockResolvedValue({ connectors: [] });
+
+      const { result } = renderHook(() => useNlGeneration(defaultParams), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.hasConnector).toBe(false));
+    });
+
+    it('hasConnector is false when the connectors endpoint throws', async () => {
+      (coreStart.http.get as jest.Mock).mockRejectedValue(new Error('network error'));
+
+      const { result } = renderHook(() => useNlGeneration(defaultParams), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => expect(result.current.hasConnector).toBe(false));
+    });
   });
 });
