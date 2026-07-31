@@ -29,11 +29,18 @@ Follow only the steps for the chosen path. Do not mix them.
 
 For a custom (non-MCP) connector, do this before Step 2. For each action you plan to implement, find the
 vendor's real API docs and verify — don't assume: update semantics (partial vs. full-replace), how array
-query params are encoded, the auth scope each action actually needs, and whether the service has
-regional/self-hosted domain variants. See "Research the Vendor API Before Writing Any Code" in
+query params are encoded, whether optional modifier params (`scope`, filters, flags) on `POST`/`PATCH`
+actions belong in the query string or the JSON body, the auth scope each action actually needs, and
+whether the service has regional/self-hosted domain variants. See "Research the Vendor API Before Writing
+Any Code" in
 [reference/custom-connector-setup.md](reference/custom-connector-setup.md) for the full checklist. Bugs
 found late (during manual testing or review) that trace back to skipping this step are expensive to fix
 one action at a time — verifying up front is cheaper.
+
+**If the vendor API is GraphQL**, docs examples and general familiarity are not enough to get input type
+names and field selections right — verify every hardcoded type/field name against the real schema via
+introspection before writing the handler. See "Verify GraphQL Schemas via Introspection" in
+[reference/custom-connector-setup.md](reference/custom-connector-setup.md).
 
 ## Step 2: Create the Connector Spec
 
@@ -48,6 +55,8 @@ Follow the patterns in [reference/connector-patterns.md](reference/connector-pat
 
 Register in `src/platform/packages/shared/kbn-connector-specs/src/all_specs.ts` and `connector_icons_map.ts`.
 
+**MCP connectors**: Use [reference/mcp-connector-setup.md](reference/mcp-connector-setup.md) as the direct starting template for the spec — it has concrete, copy-ready examples with the correct `lazySchema`, `callToolJson`/`callToolContent`, and test-mock patterns already in place. Do not reverse-engineer from existing connectors.
+
 **Type every handler explicitly.** Annotate each action's `input` parameter with its `z.infer`-derived
 type from `types.ts` (`handler: async (ctx, input: SearchInput) => { ... }`). Without the annotation it
 silently resolves to `any` — nothing fails to compile, but the handler gets zero type checking against
@@ -57,7 +66,8 @@ or more actions in one file it's easy to leave some untyped if you defer it.
 **Keep `test.enabled: true`.** The scaffold generates `test: { enabled: true, handler: ... }` — don't
 drop `enabled` when you flesh out the handler body.
 
-Replace the placeholder icon with a proper brand icon. Search for existing SVG/PNG files in:
+Replace the placeholder icon with a proper brand icon. Do NOT generate an icon, use the official brand icon or tell the
+user you could not find one. Search for existing SVG/PNG files in:
 - `src/platform/packages/shared/kbn-connector-specs/src/specs/*/icon/`
 - `x-pack/platform/plugins/shared/stack_connectors/public/connector_types/{connector}/`
 
@@ -110,14 +120,20 @@ Add tests following the existing examples:
 
 1. **Connector spec tests** — See `google_drive/google_drive.test.ts` or `slack/slack.test.ts` for the pattern.
 
-You do not need to execute the tests — just create the files.
+You do not need to execute the tests — just create the files. You should, however, run
+`node scripts/eslint <path>` on every file you create or edit (including test files) before moving on.
+This is fast, requires no running Kibana/Elasticsearch, and catches mechanical rule violations — e.g. a
+forbidden non-null assertion (`@typescript-eslint/no-non-null-assertion`) in a test file's
+`Connector.action!.handler` — that a code-reading self-review or an AI PR reviewer can miss, and that
+otherwise only surface once CI's lint step fails the build.
 
 Unit tests that mock `ctx.client`/`ctx.request` yourself cannot catch bugs where the mock encodes the same
 wrong assumption as the handler (e.g. asserting on the axios default array-param serialization when the
-vendor actually needs a different form). For any handler you flagged during vendor API research as having
-non-obvious update or serialization semantics, add a test that asserts on the *exact* request shape sent
-(URL, method, body, and params/paramsSerializer) against what the docs say the vendor expects — not just
-that the handler resolves without throwing.
+vendor actually needs a different form, or asserting that an optional modifier param is sent as a query
+param when the vendor actually expects it in the body). For any handler you flagged during vendor API
+research as having non-obvious update, serialization, or query-string-vs-body semantics, add a test that
+asserts on the *exact* request shape sent (URL, method, body, and params/paramsSerializer) against what the
+docs say the vendor expects — not just that the handler resolves without throwing.
 
 ### Self-review before handing off
 
@@ -140,6 +156,13 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
   required scope appears in all of them, not just one
 - Naming/casing inconsistencies vs. sibling connectors (e.g. `webpackChunkName` casing)
 - Doc wording that could misread "required" as applying only to the last-listed parameter
+- `POST`/`PATCH` actions with optional modifier params (`scope`, filters, flags) — confirm against the
+  vendor's docs whether each one belongs in the query string or the JSON body, checked per action against
+  the docs rather than assumed from a similar-looking sibling action in the same file
+- For GraphQL-backed connectors: every input type name and response field selection in a hardcoded
+  query/mutation string has been checked against the real schema via introspection, not just written from
+  a docs example or general knowledge — see "Verify GraphQL Schemas via Introspection" in
+  [reference/custom-connector-setup.md](reference/custom-connector-setup.md)
 
 This mirrors what the `review-connector` skill checks — running it yourself first means real review
 cycles catch new problems instead of re-flagging things you could have caught alone.
