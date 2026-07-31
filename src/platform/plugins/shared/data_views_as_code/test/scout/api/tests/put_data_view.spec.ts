@@ -268,6 +268,96 @@ apiTest.describe('PUT /api/data_views/{id} - as code', { tag: tags.deploymentAgn
   });
 
   apiTest(
+    'returns 400 when creating via PUT and body contains composite field with invalid format type',
+    async ({ apiClient }) => {
+      const id = `dv-put-invalid-format-${Date.now()}-${Math.random()}`;
+
+      const response = await apiClient.put(`${BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          index_pattern: `invalid-format-update-${Date.now()}-*`,
+          field_settings: {
+            composite_field: {
+              type: 'composite',
+              script: 'emit("sub_a", "v1"); emit("sub_b", "v2");',
+              fields: {
+                sub_a: {
+                  type: 'keyword',
+                  format: {
+                    type: 'number',
+                  },
+                },
+                sub_b: {
+                  type: 'keyword',
+                  format: {
+                    type: 'not-a-real-format-type',
+                  },
+                },
+              },
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('Invalid field format types');
+      expect(response.body.message).toContain('not-a-real-format-type');
+    }
+  );
+
+  apiTest(
+    'returns 400 when updating via PUT and body contains composite field with invalid format type',
+    async ({ apiClient, apiServices }) => {
+      const id = `dv-put-invalid-format-update-${Date.now()}-${Math.random()}`;
+
+      await apiServices.dataViews.create({
+        id,
+        title: `put-invalid-format-existing-${Date.now()}-*`,
+      });
+      createdIds.push(id);
+
+      const response = await apiClient.put(`${BASE_PATH}/${id}`, {
+        headers: {
+          ...COMMON_HEADERS,
+          ...adminApiCredentials.apiKeyHeader,
+        },
+        body: {
+          index_pattern: `invalid-format-update-existing-${Date.now()}-*`,
+          field_settings: {
+            composite_field: {
+              type: 'composite',
+              script: 'emit("sub_a", "v1"); emit("sub_b", "v2");',
+              fields: {
+                sub_a: {
+                  type: 'keyword',
+                  format: {
+                    type: 'number',
+                  },
+                },
+                sub_b: {
+                  type: 'keyword',
+                  format: {
+                    type: 'not-a-real-format-type',
+                  },
+                },
+              },
+            },
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(400);
+      expect(response.body.message).toContain('Invalid field format types');
+      expect(response.body.message).toContain('not-a-real-format-type');
+    }
+  );
+
+  apiTest(
     'returns 403 when user does not have indexPatterns manage privilege',
     async ({ apiClient }) => {
       const id = `dv-put-no-manage-${Date.now()}-${Math.random()}`;
