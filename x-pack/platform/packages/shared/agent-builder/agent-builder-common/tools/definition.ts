@@ -57,7 +57,8 @@ export type ToolConfirmationPolicyMode = 'once' | 'always' | 'never';
 
 export interface ToolConfirmationPolicy {
   /**
-   * If true, will prompt the user for confirmation when the agent wants to execute the tool, before the actual execution.
+   * Controls when the agent prompts the user for confirmation before executing the tool.
+   * Defaults to `never` if omitted.
    */
   askUser?: ToolConfirmationPolicyMode;
 }
