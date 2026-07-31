@@ -77,6 +77,8 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
  */
 export const PND_EMIT_PROPOSAL_PATH = '/internal/pnd/investigations/_emit_proposal';
 export const PND_API_VERSION = '1';
+/** Workflows-management versioned routes require a DATE version, not '1' (gate D4). */
+export const WORKFLOWS_API_VERSION = '2023-10-31';
 export const PND_INVESTIGATIONS_INDEX = 'pnd-investigations';
 export const PND_CANONICAL_PROPOSALS_INDEX = 'pnd-canonical-proposals';
 /** Forked Incident roots (D7 — Investigation → Incident promotion). */

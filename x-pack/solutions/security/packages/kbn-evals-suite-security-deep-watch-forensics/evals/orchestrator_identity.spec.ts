@@ -19,13 +19,17 @@
  * behind `_promote_to_incident`) and are asserted for real against a live
  * Kibana + ES.
  *
- * D1, D2, D4 and D5 remain honest skip-stubs. They are NOT missing code — each
- * is blocked on a platform primitive or an architecture decision that has not
- * been made yet (run-as/UIAM #17942, HIL/Approval Gate #17944, and the still-
- * open `orchestration.workers` vs. graph-as-allowlist question). Substituting
- * an assertion against some adjacent endpoint would produce a green checkmark
- * that does not test the invariant the gate names, which is worse than an
- * acknowledged gap.
+ * D1, D2 and D5 remain honest skip-stubs. They are NOT missing code — each is
+ * blocked on a platform primitive or an architecture decision that has not been
+ * made yet (run-as/UIAM #17942 for D1/D2; the still-open `orchestration.workers`
+ * vs. graph-as-allowlist decision for D5). Substituting an assertion against
+ * some adjacent endpoint would produce a green checkmark that does not test the
+ * invariant the gate names, which is worse than an acknowledged gap.
+ *
+ * NOTE on D4: an earlier skip comment claimed "no waitForApproval/waitForInput
+ * step exists in kbn-workflows". That was WRONG (based on a grep that timed
+ * out): the step type ships in `kbn-workflows` (spec/schema.ts) with a full
+ * reject/timeout/resume state machine. D4 is implemented for real below.
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -37,6 +41,7 @@ import {
   PND_INVESTIGATIONS_INDEX,
   PND_CANONICAL_PROPOSALS_INDEX,
   PND_INCIDENTS_INDEX,
+  WORKFLOWS_API_VERSION,
   pndPromoteToIncidentPath,
 } from '../src/constants';
 
@@ -164,31 +169,192 @@ evaluate.describe(
       }
     );
 
-    evaluate.skip(
+    evaluate(
       'D4 — HIL-pause fail-closed: rejected/expired pause does not proceed',
-      async () => {
-        // BLOCKED: no HIL/Approval Gate primitive exists in the workflow engine
-        // (#17944). Verified directly: `kbn-workflows`' step-type registry has
-        // no waitForApproval/waitForInput step, so there is no mid-execution
-        // pause to reject or expire.
-        // NOTE: PND's proposal decision routes (accept/reject/defer) are NOT a
-        // substitute — they are direct REST mutations on an already-completed
-        // run, not a workflow pause. Asserting against them would test a
-        // different thing entirely while appearing to cover this gate.
-        // When it lands: reject/expire a pause → run halts in a terminal safe
-        // state with prior evidence preserved; never resumes on timeout.
+      async ({ kbnClient, esClient, log }) => {
+        // Drives a REAL workflow run into a waitForApproval HIL pause, REJECTS it,
+        // and asserts the consequential step (the Elasticsearch-indexing "write"
+        // after the gate) never executes. This exercises the engine's actual
+        // fail-closed path, not a substitute: the HIL primitive ships in
+        // `kbn-workflows` (spec/schema.ts waitForApproval), driven via
+        // POST /api/workflows/executions/{id}/resume with { approved: false }.
+        const tag = `d4-${uuidv4().slice(0, 8)}`;
+        const workflowName = `d4-hil-gate-${tag}`;
+        const markerIndex = `d4-consequential-${tag}`;
+
+        // A two-step workflow: the HIL gate, then a "consequential" write step
+        // that indexes a marker document. If the gate is fail-closed, a rejected
+        // approval means the marker is never written.
+        const yaml = [
+          `version: '1'`,
+          `name: ${workflowName}`,
+          `description: D4 gate — reject a HIL pause, assert downstream write never runs`,
+          `enabled: true`,
+          `triggers:`,
+          `  - type: manual`,
+          `steps:`,
+          `  - name: approval_gate`,
+          `    type: waitForApproval`,
+          `    with:`,
+          `      message: 'D4 gate: approve to proceed to the consequential write'`,
+          `  - name: consequential_write`,
+          `    type: elasticsearch.index`,
+          `    with:`,
+          `      index: ${markerIndex}`,
+          `      document:`,
+          `        gate: d4`,
+          `        tag: ${tag}`,
+          `        ran: true`,
+        ].join('\n');
+
+        const cleanup = async (workflowId?: string) => {
+          // Remove the throwaway workflow + marker index regardless of outcome.
+          if (workflowId) {
+            await kbnClient
+              .request({
+                path: `/api/workflows/workflow/${encodeURIComponent(workflowId)}`,
+                method: 'DELETE',
+                headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+              })
+              .catch(() => undefined);
+          }
+          await esClient.indices
+            .delete({ index: markerIndex }, { ignore: [404] })
+            .catch(() => undefined);
+        };
+
+        let workflowId: string | undefined;
+        try {
+          // 1. Register the throwaway workflow.
+          const created = (
+            await kbnClient.request<{ id?: string; workflowId?: string }>({
+              path: '/api/workflows/workflow',
+              method: 'POST',
+              headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+              body: { yaml },
+            })
+          ).data;
+          workflowId = created.id ?? created.workflowId;
+          if (!workflowId) {
+            return {
+              success: false,
+              explanation: 'workflow create returned no id',
+              scorecard: { setup: 0 },
+            };
+          }
+
+          // 2. Trigger a run; it should park at the waitForApproval gate.
+          const run = (
+            await kbnClient.request<{ workflowExecutionId: string }>({
+              path: `/api/workflows/workflow/${encodeURIComponent(workflowId)}/run`,
+              method: 'POST',
+              headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+              body: { inputs: {} },
+            })
+          ).data;
+          const executionId = run.workflowExecutionId;
+
+          // 3. Wait for the run to reach the paused (waiting_for_input) state.
+          const pollExecution = async () =>
+            (
+              await kbnClient.request<{
+                status?: string;
+                stepExecutions?: Array<{ status?: string; stepType?: string }>;
+              }>({
+                path: `/api/workflows/executions/${encodeURIComponent(executionId)}`,
+                method: 'GET',
+                headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+              })
+            ).data;
+
+          let status: string | undefined;
+          const deadline = Date.now() + 60_000;
+          while (Date.now() < deadline) {
+            const ex = await pollExecution();
+            status = ex.status;
+            if (status === 'waiting_for_input' || status === 'waiting') break;
+            if (status === 'failed' || status === 'completed' || status === 'cancelled') break;
+            await new Promise((r) => setTimeout(r, 1500));
+          }
+          log.info(`[D4] run ${executionId} pre-reject status=${status}`);
+          const reachedPause = status === 'waiting_for_input' || status === 'waiting';
+
+          // 4. REJECT the approval.
+          await kbnClient.request({
+            path: `/api/workflows/executions/${encodeURIComponent(executionId)}/resume`,
+            method: 'POST',
+            headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+            body: { input: { approved: false } },
+          });
+
+          // 5. Let the engine settle, then assert the consequential write NEVER ran.
+          await new Promise((r) => setTimeout(r, 8000));
+          const postReject = await pollExecution();
+          const finalStatus = postReject.status;
+
+          let markerDocs = 0;
+          try {
+            markerDocs = (
+              await esClient.count({
+                index: markerIndex,
+                query: { term: { tag } },
+              })
+            ).count;
+          } catch {
+            markerDocs = 0; // index never created == step never ran
+          }
+
+          log.info(`[D4] post-reject status=${finalStatus} markerDocs=${markerDocs}`);
+
+          // Fail-closed = the consequential step did not run. The DOCUMENT count is
+          // the invariant: elasticsearch.index auto-creates its target index on
+          // first write, so index *existence* is not a reliable signal of whether
+          // the write ran (an auto-configured empty index could exist either way).
+          // Zero marker documents is the honest assertion that the consequential
+          // write never executed. The run's terminal status may be completed /
+          // failed / cancelled depending on engine semantics for a rejected wait —
+          // the gate invariant is about the SIDE EFFECT, not the status label.
+          const consequentialStepDidNotRun = markerDocs === 0;
+          const halted = finalStatus !== 'running' && finalStatus !== 'waiting_for_input';
+
+          const success = reachedPause && consequentialStepDidNotRun && halted;
+          return {
+            success,
+            explanation:
+              `HIL pause reached=${reachedPause} (status=${status}); after REJECT ` +
+              `the consequential elasticsearch.index step wrote ${markerDocs} marker ` +
+              `doc(s) (must be 0 for fail-closed). Final run status=${finalStatus} ` +
+              `(halted=${halted}).`,
+            scorecard: {
+              reachedHilPause: reachedPause ? 1 : 0,
+              consequentialStepDidNotRun: consequentialStepDidNotRun ? 1 : 0,
+              runHaltedAfterReject: halted ? 1 : 0,
+            },
+          };
+        } finally {
+          await cleanup(workflowId);
+        }
       }
     );
 
     evaluate.skip(
       'D5 — Allowlist boundary: Orchestrator invokes only allowlisted Workers',
       async () => {
-        // BLOCKED: the allowlist mechanism itself is an OPEN DECISION, not
-        // merely unimplemented. daybreak-watches-object-model.md's "Still open"
-        // section lists verbatim: "Explicit `orchestration.workers` field vs
-        // graph-as-allowlist today". Until that resolves there is no schema to
-        // enforce, and inventing one here would bake an unratified product
-        // decision into a gate test.
+        // BLOCKED: the `orchestration.workers` allowlist mechanism itself is an
+        // OPEN DECISION, not merely unimplemented. daybreak-watches-object-model.md's
+        // "Still open" section lists verbatim: "Explicit `orchestration.workers`
+        // field vs graph-as-allowlist today". Until that resolves there is no
+        // schema to enforce, and inventing one here would bake an unratified
+        // product decision into a gate test.
+        //
+        // NOT a substitute: Task 6 registered `security.pnd_watch_orchestrator`
+        // with Agent Builder carrying a `configuration.tools` allowlist — but it
+        // is `tools: []` (degenerate/empty). Asserting "a non-allowlisted tool is
+        // refused" against an empty list is true but vacuous: it does not
+        // exercise the boundary this gate names (Workers the Orchestrator may
+        // invoke), only that an agent with no tools calls no tools. The real
+        // boundary lands with the orchestration.workers decision.
+        //
         // When it lands: attempt workflow.execute* a Worker outside the
         // Orchestrator's allowlist → invocation refused.
       }
