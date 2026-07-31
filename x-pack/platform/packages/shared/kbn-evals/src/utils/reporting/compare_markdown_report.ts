@@ -98,8 +98,8 @@ export function formatMarkdownCompareReport({
     const diffDays = daysSince(baselineTimestamp);
     const commitLabel = baselineCommitSha ? `commit ${baselineCommitSha.slice(0, 7)}` : '';
     const age = relativeAge(diffDays);
-    const parts = ['Baseline:', commitLabel, age].filter(Boolean);
-    lines.push(parts.join(', '));
+    const parts = [commitLabel, age].filter(Boolean);
+    lines.push(`Baseline: ${parts.join(', ')}`);
 
     if (diffDays >= STALENESS_WARNING_DAYS) {
       lines.push(

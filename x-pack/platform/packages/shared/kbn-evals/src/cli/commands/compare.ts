@@ -187,6 +187,16 @@ export const compareCmd: Command<void> = {
           resolveIfNeeded(firstExperimentId),
           resolveIfNeeded(secondExperimentId),
         ]);
+
+        if (format === 'markdown') {
+          const baselineBaseId = secondExperimentId.includes('::')
+            ? secondExperimentId.split('::')[0]
+            : secondExperimentId;
+          baselineMetadata = await evalsClient.findLatestExperimentForBuild({
+            suiteId,
+            baseExecutionId: baselineBaseId,
+          });
+        }
       }
     }
 
