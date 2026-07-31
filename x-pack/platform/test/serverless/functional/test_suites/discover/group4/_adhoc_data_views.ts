@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -42,7 +43,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const goBackToDiscover = async () => {
-    await testSubjects.click('appHeaderBack');
+    const backControl = (await globalNav.isNextProjectChrome())
+      ? 'appHeaderBack'
+      : '~breadcrumb-deepLinkId-discover';
+    await testSubjects.click(backControl);
     await PageObjects.discover.waitUntilTabIsLoaded();
   };
 
