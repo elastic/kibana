@@ -158,7 +158,9 @@ export class SignificantEventsPlugin
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
-      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
+      const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request, {
+        projectRouting: 'space',
+      });
       const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
       const licensing = pluginsStart.licensing;
