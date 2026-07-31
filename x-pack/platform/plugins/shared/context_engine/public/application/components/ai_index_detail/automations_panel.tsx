@@ -21,12 +21,24 @@ import {
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { CONTEXT_ENGINE_APP_ID } from '../../../../common/features';
 import { MAX_AI_INDEX_AUTOMATIONS } from '../../../../common/constants';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
 import { useAutomationsEditor } from '../../hooks/use_automations_editor';
 import { useKibana } from '../../hooks/use_kibana';
 import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
+import { getAiIndexDetailPath } from '../../paths';
 import { AutomationRow } from './automation_row';
+
+/**
+ * Builds the query string that tells the Workflows app to send its back button
+ * here (to this AI index detail page) instead of the Workflows list.
+ */
+const getWorkflowReturnSearch = (aiIndexId: string): string =>
+  new URLSearchParams({
+    returnApp: CONTEXT_ENGINE_APP_ID,
+    returnPath: getAiIndexDetailPath(aiIndexId),
+  }).toString();
 
 interface AutomationsPanelProps {
   isLoading: boolean;
@@ -59,11 +71,13 @@ export const AutomationsPanel = ({
   } = useAutomationsEditor({ aiIndex, onSaved });
   const { summaries, isLoading: isLoadingSummaries } = useWorkflowSummaries(workflowIds);
 
+  const returnSearch = aiIndex ? `?${getWorkflowReturnSearch(aiIndex.id)}` : '';
+
   const handleCreate = async () => {
     const workflowId = await createAndAttach();
     if (workflowId) {
       application.navigateToApp(WORKFLOWS_APP_ID, {
-        path: `/${encodeURIComponent(workflowId)}`,
+        path: `/${encodeURIComponent(workflowId)}${returnSearch}`,
       });
     }
   };
@@ -205,7 +219,7 @@ export const AutomationsPanel = ({
                     name={summary?.name}
                     enabled={summary?.enabled}
                     editHref={application.getUrlForApp(WORKFLOWS_APP_ID, {
-                      path: `/${encodeURIComponent(automation.value)}`,
+                      path: `/${encodeURIComponent(automation.value)}${returnSearch}`,
                     })}
                     isEditing={isEditing}
                     isRemoveDisabled={isBusy}

@@ -173,7 +173,7 @@ describe('AutomationsPanel', () => {
 
     await waitFor(() => {
       expect(services.application.navigateToApp).toHaveBeenCalledWith('workflows', {
-        path: '/wf-created',
+        path: '/wf-created?returnApp=context_engine&returnPath=%2Fai_index%2Fmy-ai-index',
       });
     });
   });
