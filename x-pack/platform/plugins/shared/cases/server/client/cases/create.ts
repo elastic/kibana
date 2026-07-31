@@ -27,7 +27,7 @@ import {
 } from './validators';
 import type { CreateUserAction, CommonUserActionArgs } from '../../services/user_actions/types';
 import { emptyCaseAssigneesSanitizer } from './sanitizers';
-import { normalizeCreateCaseRequest } from './utils';
+import { normalizeCreateCaseRequest, populateAssigneesIdentity } from './utils';
 import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
 import {
   applyTemplateDefaultsToCreateRequest,
@@ -189,11 +189,26 @@ export const create = async (
         undefined; // return type includes null when input is null; CasePostRequest.extended_fields is never null
     }
 
+    const attributes = transformNewCase({
+      user,
+      newCase: normalizedCase,
+    });
+
+    // Server-derived assignee identity: resolve profile uids to username /
+    // full_name / email so downstream consumers (e.g. cases-as-data analytics)
+    // can read human-readable assignees. Gated until the MV10 mapping is rolled
+    // out fleet-wide (off by default on serverless).
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      attributes.assignees =
+        (await populateAssigneesIdentity(
+          clientArgs.securityStartPlugin,
+          logger,
+          attributes.assignees
+        )) ?? [];
+    }
+
     const newCase = await caseService.createCase({
-      attributes: transformNewCase({
-        user,
-        newCase: normalizedCase,
-      }),
+      attributes,
       id: savedObjectID,
       refresh: false,
     });
