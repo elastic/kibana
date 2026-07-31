@@ -85,6 +85,7 @@ toc:
           - file: connectors-kibana/bigquery-action-type.md
           - file: connectors-kibana/box-action-type.md
           - file: connectors-kibana/brave-search-action-type.md
+          - file: connectors-kibana/buildkite-action-type.md
           - file: connectors-kibana/confluence-cloud-action-type.md
           - file: connectors-kibana/datadog-action-type.md
           - file: connectors-kibana/dropbox-action-type.md
