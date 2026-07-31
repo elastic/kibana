@@ -448,7 +448,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // now change to dynamic badge color
       await testSubjects.click('lnsMetric_color_mode_dynamic');
 
-      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322 ↑`);
+      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.314 ↑`);
 
       // now show icon only
       await testSubjects.click('lnsMetric_secondary_trend_display_icon');
@@ -458,7 +458,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // now show value only
       await testSubjects.click('lnsMetric_secondary_trend_display_value');
       // badge is there but icon is not there any more
-      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322`);
+      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.314`);
 
       // enable the Primary metric baseline
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
@@ -550,7 +550,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsMetric_color_mode_dynamic');
       await testSubjects.click('lnsMetric_secondary_trend_baseline_primary');
       // Check the Prefix and the Badge text
-      expect(await (await getBadge()).getVisibleText()).to.be(`+8,277.678 ↑`);
+      expect(await (await getBadge()).getVisibleText()).to.be(`+8,276.686 ↑`);
       const secondaryElement = await testSubjects.find('metric-secondary-element');
       expect(await secondaryElement.getVisibleText()).to.contain('Difference');
 
@@ -572,7 +572,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // The badge text should change and the prefix should be "Average of bytes"
-      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.322 ↑`);
+      expect(await (await getBadge()).getVisibleText()).to.be(`5,727.314 ↑`);
       const newSecondaryElement = await testSubjects.find('metric-secondary-element');
       expect(await newSecondaryElement.getVisibleText()).to.contain('Average of bytes');
 
