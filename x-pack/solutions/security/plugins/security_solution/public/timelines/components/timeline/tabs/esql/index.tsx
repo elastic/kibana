@@ -114,6 +114,19 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
       dispatch(updateSavedSearchId({ id: timelineId, savedSearchId: null }));
       return;
     }
+    // Self-heal stale savedSearchIds from the phantom-creation bug. If the linked saved
+    // search has no actual ES|QL query, the savedSearchId was created when the user opened
+    // the ES|QL tab without typing anything (now prevented by the hasNonEmptyEsqlQuery guard
+    // above). Clear the stale reference so the timeline is no longer incorrectly flagged as
+    // ES|QL-incompatible. The user should save the timeline to persist this correction.
+    if (
+      savedSearchId &&
+      savedSearchById &&
+      !hasNonEmptyEsqlQuery(savedSearchById.searchSource.getField('query'))
+    ) {
+      dispatch(updateSavedSearchId({ id: timelineId, savedSearchId: null }));
+      return;
+    }
     if (!savedObjectId) return;
     if (!status || status === 'draft') return;
     if (!canSaveTimeline) return;

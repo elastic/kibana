@@ -102,4 +102,11 @@ describe('hasNonEmptyEsqlQuery', () => {
   it('returns true for an ES|QL query with surrounding whitespace (content after trim)', () => {
     expect(hasNonEmptyEsqlQuery({ esql: '  FROM logs-*  ' })).toBe(true);
   });
+
+  it('returns false for a SavedSearch-shaped object whose esql field is empty (phantom savedSearchId self-heal path)', () => {
+    // The self-heal check in esql/index.tsx calls hasNonEmptyEsqlQuery(savedSearchById.searchSource.getField('query')).
+    // A phantom saved search created by the old bug has an empty esql field; this must return
+    // false so the stale savedSearchId is cleared.
+    expect(hasNonEmptyEsqlQuery({ esql: '' })).toBe(false);
+  });
 });
