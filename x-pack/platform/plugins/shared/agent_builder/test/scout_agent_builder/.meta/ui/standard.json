@@ -1,5 +1,5 @@
 {
-  "sha1": "3fc4feb1a222ec5f9c4d04e06094903e17833042",
+  "sha1": "17bb10083250a1b4d043d00d4a45b6b5497caa8c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -18,7 +18,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/agents_list.spec.ts",
         "line": 54,
-        "column": 9
+        "column": 49
       }
     },
     {
@@ -33,8 +33,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 26,
+        "column": 28
       }
     },
     {
@@ -49,8 +49,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 77,
-        "column": 9
+        "line": 70,
+        "column": 28
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 103,
-        "column": 9
+        "line": 91,
+        "column": 13
       }
     },
     {
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 153,
+        "line": 134,
         "column": 9
       }
     },
@@ -97,8 +97,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 204,
-        "column": 9
+        "line": 184,
+        "column": 13
       }
     },
     {
@@ -113,8 +113,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_error_handling.spec.ts",
-        "line": 251,
-        "column": 9
+        "line": 226,
+        "column": 16
       }
     },
     {
@@ -129,8 +129,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
-        "line": 25,
-        "column": 9
+        "line": 21,
+        "column": 28
       }
     },
     {
@@ -145,8 +145,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_flow.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -159,8 +159,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/conversation_history.spec.ts",
-        "line": 40,
-        "column": 7
+        "line": 38,
+        "column": 5
       }
     },
     {
@@ -175,8 +175,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_agent.spec.ts",
-        "line": 35,
-        "column": 9
+        "line": 29,
+        "column": 11
       }
     },
     {
@@ -191,8 +191,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
-        "line": 49,
-        "column": 9
+        "line": 42,
+        "column": 48
       }
     },
     {
@@ -207,8 +207,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/create_tool.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 53,
+        "column": 25
       }
     },
     {
@@ -224,7 +224,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/edit_agent.spec.ts",
         "line": 48,
-        "column": 9
+        "column": 58
       }
     },
     {
@@ -239,8 +239,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 25,
+        "column": 39
       }
     },
     {
@@ -255,8 +255,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/landing_page.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 31,
+        "column": 25
       }
     },
     {
@@ -271,8 +271,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 30,
-        "column": 9
+        "line": 25,
+        "column": 39
       }
     },
     {
@@ -287,8 +287,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 53,
-        "column": 9
+        "line": 42,
+        "column": 25
       }
     },
     {
@@ -303,8 +303,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 80,
-        "column": 9
+        "line": 66,
+        "column": 25
       }
     },
     {
@@ -319,8 +319,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 99,
-        "column": 9
+        "line": 87,
+        "column": 68
       }
     },
     {
@@ -335,8 +335,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/manage_tool.spec.ts",
-        "line": 122,
-        "column": 9
+        "line": 109,
+        "column": 25
       }
     },
     {
@@ -348,8 +348,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 40,
-        "column": 9
+        "line": 31,
+        "column": 7
       }
     },
     {
@@ -361,8 +361,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 47,
-        "column": 9
+        "line": 38,
+        "column": 7
       }
     },
     {
@@ -374,8 +374,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 76,
-        "column": 9
+        "line": 63,
+        "column": 13
       }
     },
     {
@@ -387,8 +387,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 95,
-        "column": 9
+        "line": 77,
+        "column": 11
       }
     },
     {
@@ -400,7 +400,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 137,
+        "line": 111,
         "column": 9
       }
     },
@@ -413,8 +413,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_clients.spec.ts",
-        "line": 161,
-        "column": 9
+        "line": 132,
+        "column": 25
       }
     },
     {
@@ -429,8 +429,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/mcp_tools.spec.ts",
-        "line": 54,
-        "column": 9
+        "line": 46,
+        "column": 11
       }
     },
     {
@@ -445,8 +445,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_agent_switch.spec.ts",
-        "line": 52,
-        "column": 9
+        "line": 44,
+        "column": 11
       }
     },
     {
@@ -461,8 +461,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_flow.spec.ts",
-        "line": 26,
-        "column": 9
+        "line": 22,
+        "column": 28
       }
     },
     {
@@ -477,8 +477,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_conversation_history.spec.ts",
-        "line": 38,
-        "column": 9
+        "line": 36,
+        "column": 7
       }
     },
     {
@@ -493,8 +493,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/ui/tests/sidebar_error_handling.spec.ts",
-        "line": 29,
-        "column": 9
+        "line": 25,
+        "column": 28
       }
     }
   ]

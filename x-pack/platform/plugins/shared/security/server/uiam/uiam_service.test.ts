@@ -9,7 +9,11 @@ import fs from 'fs';
 import undici from 'undici';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
+import {
+  deriveInternalCallerAttestation,
+  HTTPAuthorizationHeader,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 
 import {
   type GrantUiamApiKeyRequestBody,
@@ -312,6 +316,30 @@ describe('UiamService', () => {
         scheme: 'SharedSecret',
         value: 'secret',
       });
+    });
+  });
+
+  describe('#getInternalCallerAttestationHeaders', () => {
+    it('carries the attestation derived from the shared secret, and never the secret itself', () => {
+      const credential = new HTTPAuthorizationHeader('Bearer', 'essu_one');
+      expect(uiamService.getInternalCallerAttestationHeaders(credential)).toEqual({
+        [UIAM_INTERNAL_CALLER_ATTESTATION_HEADER]: deriveInternalCallerAttestation(
+          'secret',
+          credential
+        ),
+      });
+    });
+
+    it('binds the attestation to the credential', () => {
+      expect(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_one')
+        )
+      ).not.toEqual(
+        uiamService.getInternalCallerAttestationHeaders(
+          new HTTPAuthorizationHeader('Bearer', 'essu_two')
+        )
+      );
     });
   });
 
