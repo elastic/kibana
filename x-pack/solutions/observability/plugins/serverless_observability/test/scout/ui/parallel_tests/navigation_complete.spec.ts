@@ -63,7 +63,7 @@ test.describe(
       });
     });
 
-    test('clicking body nav items sets the active link, updates breadcrumbs, and navigates', async ({
+    test('clicking body nav items sets the active link and navigates', async ({
       pageObjects,
       page,
     }) => {
@@ -77,9 +77,6 @@ test.describe(
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
       });
 
       await test.step('Dashboards', async () => {
@@ -88,9 +85,6 @@ test.describe(
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
         await expect(nav.activeNavItemByDeepLinkId('dashboards')).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
-        await expect(nav.breadcrumb({ deepLinkId: 'dashboards' })).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -174,7 +168,7 @@ test.describe(
           .sidePanel('data_management')
           .locator('[data-test-subj~="nav-item-deepLinkId-fleet"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Fleet' })).toBeVisible({
+        await expect(nav.pageTitle()).toContainText('Fleet', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -189,7 +183,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible({
+        await expect(nav.pageTitle()).toContainText('Tags', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -204,7 +198,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:maintenanceWindows"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Maintenance Windows' })).toBeVisible({
+        await expect(nav.pageTitle()).toContainText('Maintenance Windows', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -229,18 +223,10 @@ test.describe(
 
       await test.step('Discover via sidenav', async () => {
         await nav.navItemInPrimaryByDeepLinkId('discover').click();
+        await expect(nav.pageOrNoData('dscPage')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
         await expect(nav.activeNavItemByDeepLinkId('discover')).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
-        await expect(nav.breadcrumb({ deepLinkId: 'discover' })).toBeVisible({
-          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
-        });
-      });
-
-      await test.step('Agents via More', async () => {
-        await nav.openMoreMenu();
-        await nav.navItemInMoreById('agent_builder').click();
-        await expect(page.testSubj.locator('agentBuilderWrapper')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -255,7 +241,7 @@ test.describe(
           .sidePanel('admin_and_settings')
           .locator('[data-test-subj~="nav-item-id-management:tags"]')
           .click();
-        await expect(nav.breadcrumb({ text: 'Tags' })).toBeVisible({
+        await expect(nav.pageTitle()).toContainText('Tags', {
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });
@@ -264,6 +250,14 @@ test.describe(
         await nav.clickLogo();
         await nav.waitForLoad();
         await expect(nav.navItemInPrimaryByDeepLinkId('discover')).toBeVisible({
+          timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
+        });
+      });
+
+      await test.step('Agents via More', async () => {
+        await nav.openMoreMenu();
+        await nav.navItemInMoreById('agent_builder').click();
+        await expect(page.testSubj.locator('agentBuilderWrapper')).toBeVisible({
           timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
         });
       });

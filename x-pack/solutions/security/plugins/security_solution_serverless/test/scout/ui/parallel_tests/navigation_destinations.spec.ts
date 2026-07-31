@@ -28,10 +28,10 @@ spaceTest.describe(
           await serverlessProjectChromePage
             .getNavSearchOptionByUrl(`/s/${scoutSpace.id}/app/security/dashboards`)
             .click();
-          await serverlessProjectChromePage.closeNavSearch();
 
           await page.waitForURL(/app\/security\/dashboards/);
           expect(page.url()).toContain('app/security/dashboards');
+          await expect(serverlessProjectChromePage.pageTitle).toHaveText('Dashboards');
         });
 
         await spaceTest.step('shows cases in sidebar navigation', async () => {
@@ -76,9 +76,7 @@ spaceTest.describe(
 
       await collapsibleNav.clickItem('stack_management');
       await collapsibleNav.clickItem('management:maintenanceWindows', { lowercase: false });
-      await expect(
-        serverlessProjectChromePage.getBreadcrumbByText('Maintenance Windows')
-      ).toBeVisible();
+      await expect(serverlessProjectChromePage.pageTitle).toHaveText('Maintenance Windows');
     });
   }
 );

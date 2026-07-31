@@ -63,10 +63,6 @@ test.describe(
       await featureControlsPage.gotoApm();
       await featureControlsPage.waitForApmToLoad();
       await expect(featureControlsPage.readOnlyBadge).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-      await expect(featureControlsPage.readOnlyBadge).toHaveAttribute(
-        'data-test-badge-label',
-        'Read only'
-      );
     });
 
     test('with no apm privileges renders the no-permission page', async ({

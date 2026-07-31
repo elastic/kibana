@@ -12,6 +12,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const spaces = getService('spaces');
   const browser = getService('browser');
   const testSubjects = getService('testSubjects');
+  const globalNav = getService('globalNav');
 
   describe('security solution', () => {
     let cleanUp: () => Promise<unknown>;
@@ -34,18 +35,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/244347
-    describe.skip('sidenav & breadcrumbs', () => {
+    describe.skip('sidenav', () => {
       it('renders the correct nav and navigate to links', async () => {
         const expectNoPageReload = await solutionNavigation.createNoPageReloadCheck();
 
         await solutionNavigation.expectExists();
-        await solutionNavigation.breadcrumbs.expectExists();
 
         // check side nav links
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'securitySolutionUI:get_started',
-        });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'securitySolutionUI:get_started',
         });
 
@@ -54,17 +51,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // open Investigations popover and navigate to some link inside the popover to open the panel
         await solutionNavigation.sidenav.clickLink({ navId: 'securityGroup:investigations' });
         await solutionNavigation.sidenav.clickLink({ navId: 'timelines' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Timelines' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'securitySolutionUI:timelines',
-        });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'timelines' });
+        expect(await globalNav.getPageTitle()).to.be('Timelines');
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'securitySolutionUI:get_started',
-        });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
           deepLinkId: 'securitySolutionUI:get_started',
         });
 

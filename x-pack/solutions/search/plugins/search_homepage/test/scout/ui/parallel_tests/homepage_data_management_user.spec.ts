@@ -48,20 +48,18 @@ spaceTest.describe(
       }
     );
 
-    spaceTest(
-      'should only see Data Management in primary sidenav',
-      async ({ page, pageObjects }) => {
-        const { collapsibleNav } = pageObjects;
+    spaceTest('should only see expected primary sidenav items', async ({ page }) => {
+      const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
+      const navItems = primaryNav.locator('[data-test-subj*="nav-item-id-"]');
+      const homeLink = primaryNav.locator('[data-test-subj~="nav-item-id-searchHomepage"]');
+      const dataManagementLink = primaryNav.locator(
+        '[data-test-subj~="nav-item-id-data_management"]'
+      );
+      const isChromeNext = await page.testSubj.locator('chromeNextGlobalHeader').isVisible();
 
-        // Verify only one nav item in primary navigation
-        const primaryNav = page.testSubj.locator('kbnChromeNav-primaryNavigation');
-        const navItems = primaryNav.locator('[data-test-subj*="nav-item-id-"]');
-        await expect(navItems).toHaveCount(1);
-
-        // Verify it's the Data Management item
-        const dataManagementLink = collapsibleNav.getNavItemById('data_management');
-        await expect(dataManagementLink).toBeVisible();
-      }
-    );
+      await expect(navItems).toHaveCount(Number(isChromeNext) + 1);
+      await expect(dataManagementLink).toBeVisible();
+      await expect(homeLink).toBeVisible({ visible: isChromeNext });
+    });
   }
 );

@@ -37,6 +37,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedSearch',
   ]);
 
+  const assertShareTopNavButtonExists = async () => {
+    if (await testSubjects.exists('appHeader', { timeout: 1000 })) {
+      await retry.try(async () => {
+        await testSubjects.moveMouseTo('appHeader');
+        await testSubjects.existOrFail('~shareTopNavButton');
+      });
+      return;
+    }
+    await PageObjects.appMenu.existOrFail('shareTopNavButton');
+  };
+
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };
@@ -92,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await PageObjects.appMenu.existOrFail('shareTopNavButton');
+        await assertShareTopNavButtonExists();
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('fieldListFiltersFieldSearch');
@@ -118,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await testSubjects.click('app-menu-overflow-button');
         await testSubjects.existOrFail('discoverAlertsButton');
         await testSubjects.click('app-menu-overflow-button');
-        await PageObjects.appMenu.existOrFail('shareTopNavButton');
+        await assertShareTopNavButtonExists();
         await testSubjects.missingOrFail('dataGridColumnSortingButton');
         await testSubjects.existOrFail('docTableExpandToggleColumn');
         await testSubjects.existOrFail('fieldListFiltersFieldTypeFilterToggle');
