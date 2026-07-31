@@ -5049,11 +5049,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/client-apps-plugin@link:x-pack/solutions/observability/plugins/client_apps":
+"@kbn/cli@link:src/cli":
   version "0.0.0"
   uid ""
 
-"@kbn/cli@link:src/cli":
+"@kbn/client-apps-plugin@link:x-pack/solutions/observability/plugins/client_apps":
   version "0.0.0"
   uid ""
 
