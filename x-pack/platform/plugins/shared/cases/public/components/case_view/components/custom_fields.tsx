@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { sortBy } from 'lodash';
+import React, { useCallback } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import type { CasesConfigurationUI, CaseUICustomField } from '../../../../common/ui';
 import type { CaseUI } from '../../../../common';
@@ -30,11 +29,6 @@ const CustomFieldsComponent: React.FC<Props> = ({
   editVariant = 'classic',
 }) => {
   const { permissions } = useCasesContext();
-  const sortedCustomFieldsConfiguration = useMemo(
-    () => sortCustomFieldsByLabel(customFieldsConfiguration),
-    [customFieldsConfiguration]
-  );
-
   const onSubmitCustomField = useCallback(
     (customFieldToAdd: CaseUICustomField) => {
       onSubmit(customFieldToAdd);
@@ -42,7 +36,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
     [onSubmit]
   );
 
-  const customFieldsComponents = sortedCustomFieldsConfiguration.map((customFieldConf) => {
+  const customFieldsComponents = customFieldsConfiguration.map((customFieldConf) => {
     const customFieldFactory = customFieldsBuilderMap[customFieldConf.type];
     const customFieldType = customFieldFactory().build();
 
@@ -74,9 +68,3 @@ const CustomFieldsComponent: React.FC<Props> = ({
 CustomFieldsComponent.displayName = 'CustomFields';
 
 export const CustomFields = React.memo(CustomFieldsComponent);
-
-const sortCustomFieldsByLabel = (customFieldsConfiguration: Props['customFieldsConfiguration']) => {
-  return sortBy(customFieldsConfiguration, (customFieldConf) => {
-    return customFieldConf.label;
-  });
-};

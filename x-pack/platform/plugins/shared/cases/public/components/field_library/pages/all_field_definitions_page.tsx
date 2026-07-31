@@ -30,6 +30,7 @@ import { useGetFieldDefinitions } from '../hooks/use_get_field_definitions';
 import { useCreateFieldDefinition } from '../hooks/use_create_field_definition';
 import { useUpdateFieldDefinition } from '../hooks/use_update_field_definition';
 import { useDeleteFieldDefinition } from '../hooks/use_delete_field_definition';
+import { useReorderGlobalFieldDefinitions } from '../hooks/use_reorder_global_field_definitions';
 import { FieldDefinitionFlyout } from '../components/field_definition_flyout';
 import * as i18n from '../translations';
 import * as templatesI18n from '../../templates_v2/translations';
@@ -77,6 +78,30 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
   const { mutate: deleteFieldDef } = useDeleteFieldDefinition({
     onSuccess: () => setDeletingFieldDef(undefined),
   });
+  const { mutate: reorderGlobalFieldDefinitions, isLoading: isReorderingGlobalFieldDefinitions } =
+    useReorderGlobalFieldDefinitions();
+
+  const fieldDefinitions = useMemo(() => data?.fieldDefinitions ?? [], [data?.fieldDefinitions]);
+  const globalFieldDefinitions = useMemo(
+    () =>
+      fieldDefinitions
+        .map((fieldDefinition, index) => ({
+          fieldDefinition,
+          index,
+          displayOrder: fieldDefinition.displayOrder ?? index,
+        }))
+        .filter(({ fieldDefinition }) => fieldDefinition.isGlobal === true)
+        .sort((a, b) => a.displayOrder - b.displayOrder || a.index - b.index)
+        .map(({ fieldDefinition }) => fieldDefinition),
+    [fieldDefinitions]
+  );
+  const tableFieldDefinitions = useMemo(
+    () => [
+      ...globalFieldDefinitions,
+      ...fieldDefinitions.filter((fieldDefinition) => fieldDefinition.isGlobal !== true),
+    ],
+    [fieldDefinitions, globalFieldDefinitions]
+  );
 
   const handleCreate = useCallback(() => {
     setEditingFieldDef(undefined);
@@ -105,7 +130,14 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       if (editingFieldDef) {
         updateFieldDef({
           id: editingFieldDef.fieldDefinitionId,
-          fieldDefinition: { name, description, definition, owner: ownerValue, isGlobal },
+          fieldDefinition: {
+            name,
+            description,
+            definition,
+            owner: ownerValue,
+            isGlobal,
+            displayOrder: editingFieldDef.displayOrder,
+          },
         });
       } else {
         createFieldDef({
@@ -125,6 +157,31 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       deleteFieldDef({ id: deletingFieldDef.fieldDefinitionId });
     }
   }, [deletingFieldDef, deleteFieldDef]);
+
+  const handleMoveGlobalField = useCallback(
+    (fieldDefinitionId: string, direction: 'up' | 'down') => {
+      const currentIndex = globalFieldDefinitions.findIndex(
+        ({ fieldDefinitionId: id }) => id === fieldDefinitionId
+      );
+      const nextIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+
+      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= globalFieldDefinitions.length) {
+        return;
+      }
+
+      const reorderedGlobalFieldDefinitions = [...globalFieldDefinitions];
+      [reorderedGlobalFieldDefinitions[currentIndex], reorderedGlobalFieldDefinitions[nextIndex]] =
+        [reorderedGlobalFieldDefinitions[nextIndex], reorderedGlobalFieldDefinitions[currentIndex]];
+
+      reorderGlobalFieldDefinitions(
+        reorderedGlobalFieldDefinitions.map((fieldDefinition, index) => ({
+          ...fieldDefinition,
+          displayOrder: index,
+        }))
+      );
+    },
+    [globalFieldDefinitions, reorderGlobalFieldDefinitions]
+  );
 
   const columns: Array<EuiBasicTableColumn<FieldDefinition>> = [
     {
@@ -201,37 +258,71 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       name: i18n.ACTIONS_COLUMN,
       actions: [
         {
-          render: (fd: FieldDefinition) => (
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.EDIT_FIELD_DEFINITION} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="pencil"
-                    aria-label={i18n.EDIT_FIELD_DEFINITION}
-                    onClick={() => handleEdit(fd)}
-                    data-test-subj="fieldDefinitionEditButton"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.DELETE_FIELD_DEFINITION} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="trash"
-                    aria-label={i18n.DELETE_FIELD_DEFINITION}
-                    color="danger"
-                    onClick={() => handleDelete(fd)}
-                    data-test-subj="fieldDefinitionDeleteButton"
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ),
+          render: (fd: FieldDefinition) => {
+            const globalFieldIndex = globalFieldDefinitions.findIndex(
+              ({ fieldDefinitionId }) => fieldDefinitionId === fd.fieldDefinitionId
+            );
+            const canMoveGlobalField = fd.isGlobal === true && globalFieldIndex >= 0;
+
+            return (
+              <EuiFlexGroup gutterSize="xs" responsive={false}>
+                {canMoveGlobalField ? (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={i18n.MOVE_GLOBAL_FIELD_UP} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="sortUp"
+                          aria-label={i18n.MOVE_GLOBAL_FIELD_UP}
+                          onClick={() => handleMoveGlobalField(fd.fieldDefinitionId, 'up')}
+                          disabled={isReorderingGlobalFieldDefinitions || globalFieldIndex === 0}
+                          data-test-subj="fieldDefinitionMoveUpButton"
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={i18n.MOVE_GLOBAL_FIELD_DOWN} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          iconType="sortDown"
+                          aria-label={i18n.MOVE_GLOBAL_FIELD_DOWN}
+                          onClick={() => handleMoveGlobalField(fd.fieldDefinitionId, 'down')}
+                          disabled={
+                            isReorderingGlobalFieldDefinitions ||
+                            globalFieldIndex === globalFieldDefinitions.length - 1
+                          }
+                          data-test-subj="fieldDefinitionMoveDownButton"
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </>
+                ) : null}
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18n.EDIT_FIELD_DEFINITION} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="pencil"
+                      aria-label={i18n.EDIT_FIELD_DEFINITION}
+                      onClick={() => handleEdit(fd)}
+                      data-test-subj="fieldDefinitionEditButton"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={i18n.DELETE_FIELD_DEFINITION} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType="trash"
+                      aria-label={i18n.DELETE_FIELD_DEFINITION}
+                      color="danger"
+                      onClick={() => handleDelete(fd)}
+                      data-test-subj="fieldDefinitionDeleteButton"
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          },
         },
       ],
     },
   ];
-
-  const fieldDefinitions = data?.fieldDefinitions ?? [];
 
   const fieldLibraryMenu = useMemo(
     () => ({
@@ -277,7 +368,7 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
           <EuiSkeletonText lines={5} />
         ) : (
           <EuiBasicTable
-            items={fieldDefinitions}
+            items={tableFieldDefinitions}
             tableCaption={i18n.FIELD_DEFINITIONS_TABLE_CAPTION}
             rowHeader="name"
             columns={columns}

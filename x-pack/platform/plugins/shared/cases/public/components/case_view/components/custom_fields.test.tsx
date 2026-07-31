@@ -67,7 +67,7 @@ describe('Case View Page files tab', () => {
     expect(screen.queryByTestId('case-custom-field-wrapper-test_key_2')).not.toBeInTheDocument();
   });
 
-  it('should sort the custom fields correctly', async () => {
+  it('retains the custom field configuration order', async () => {
     const reversedConfiguration = [...customFieldsConfigurationMock].reverse();
 
     renderWithTestingProviders(
@@ -85,12 +85,12 @@ describe('Case View Page files tab', () => {
 
     expect(customFields.length).toBe(6);
 
-    expect(await within(customFields[0]).findByText('My test label 1')).toBeInTheDocument();
-    expect(await within(customFields[1]).findByText('My test label 2')).toBeInTheDocument();
-    expect(await within(customFields[2]).findByText('My test label 3')).toBeInTheDocument();
-    expect(await within(customFields[3]).findByText('My test label 4')).toBeInTheDocument();
-    expect(await within(customFields[4]).findByText('My test label 5')).toBeInTheDocument();
-    expect(await within(customFields[5]).findByText('My test label 6')).toBeInTheDocument();
+    expect(await within(customFields[0]).findByText('My test label 6')).toBeInTheDocument();
+    expect(await within(customFields[1]).findByText('My test label 5')).toBeInTheDocument();
+    expect(await within(customFields[2]).findByText('My test label 4')).toBeInTheDocument();
+    expect(await within(customFields[3]).findByText('My test label 3')).toBeInTheDocument();
+    expect(await within(customFields[4]).findByText('My test label 2')).toBeInTheDocument();
+    expect(await within(customFields[5]).findByText('My test label 1')).toBeInTheDocument();
   });
 
   it('pass the permissions to custom fields correctly', async () => {

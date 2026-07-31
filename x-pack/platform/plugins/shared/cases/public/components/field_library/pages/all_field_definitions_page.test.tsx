@@ -7,11 +7,13 @@
 
 import React from 'react';
 import { screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../../common/mock';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
 import { AllFieldDefinitionsPage } from './all_field_definitions_page';
 
 const mockGetFieldDefinitions = jest.fn();
+const mockReorderGlobalFieldDefinitions = jest.fn();
 
 jest.mock('../hooks/use_get_field_definitions', () => ({
   useGetFieldDefinitions: () => mockGetFieldDefinitions(),
@@ -27,6 +29,13 @@ jest.mock('../hooks/use_update_field_definition', () => ({
 
 jest.mock('../hooks/use_delete_field_definition', () => ({
   useDeleteFieldDefinition: () => ({ mutate: jest.fn() }),
+}));
+
+jest.mock('../hooks/use_reorder_global_field_definitions', () => ({
+  useReorderGlobalFieldDefinitions: () => ({
+    mutate: mockReorderGlobalFieldDefinitions,
+    isLoading: false,
+  }),
 }));
 
 jest.mock('../../../common/navigation', () => ({
@@ -48,6 +57,39 @@ describe('AllFieldDefinitionsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetFieldDefinitions.mockReturnValue({ data: { fieldDefinitions: [] }, isLoading: false });
+  });
+
+  it('reorders global fields from their Field Library actions', async () => {
+    const firstField = buildFieldDefinition({
+      fieldDefinitionId: 'first',
+      name: 'first_field',
+      isGlobal: true,
+      displayOrder: 0,
+    });
+    const secondField = buildFieldDefinition({
+      fieldDefinitionId: 'second',
+      name: 'second_field',
+      isGlobal: true,
+      displayOrder: 1,
+    });
+    mockGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [secondField, firstField] },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(<AllFieldDefinitionsPage />);
+
+    const moveUpButtons = screen.getAllByTestId('fieldDefinitionMoveUpButton');
+    const moveDownButtons = screen.getAllByTestId('fieldDefinitionMoveDownButton');
+    expect(moveUpButtons[0]).toBeDisabled();
+    expect(moveDownButtons[1]).toBeDisabled();
+
+    await userEvent.click(moveDownButtons[0]);
+
+    expect(mockReorderGlobalFieldDefinitions).toHaveBeenCalledWith([
+      expect.objectContaining({ fieldDefinitionId: 'second', displayOrder: 0 }),
+      expect.objectContaining({ fieldDefinitionId: 'first', displayOrder: 1 }),
+    ]);
   });
 
   it('renders the Label column immediately after the Name column', () => {

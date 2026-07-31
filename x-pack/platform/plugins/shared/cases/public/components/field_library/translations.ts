@@ -27,9 +27,19 @@ export const SUCCESS_UPDATING_FIELD_DEFINITION = i18n.translate(
   { defaultMessage: 'Field definition updated successfully' }
 );
 
+export const SUCCESS_REORDERING_GLOBAL_FIELD_DEFINITIONS = i18n.translate(
+  'xpack.cases.fieldLibrary.successReorderingGlobalFieldDefinitions',
+  { defaultMessage: 'Global field order updated successfully' }
+);
+
 export const ERROR_UPDATING_FIELD_DEFINITION = i18n.translate(
   'xpack.cases.fieldLibrary.errorUpdatingFieldDefinition',
   { defaultMessage: 'Failed to update field definition' }
+);
+
+export const ERROR_REORDERING_GLOBAL_FIELD_DEFINITIONS = i18n.translate(
+  'xpack.cases.fieldLibrary.errorReorderingGlobalFieldDefinitions',
+  { defaultMessage: 'Failed to update global field order' }
 );
 
 export const SUCCESS_DELETING_FIELD_DEFINITION = i18n.translate(
@@ -63,6 +73,15 @@ export const EDIT_FIELD_DEFINITION = i18n.translate(
 export const DELETE_FIELD_DEFINITION = i18n.translate(
   'xpack.cases.fieldLibrary.deleteFieldDefinition',
   { defaultMessage: 'Delete field definition' }
+);
+
+export const MOVE_GLOBAL_FIELD_UP = i18n.translate('xpack.cases.fieldLibrary.moveGlobalFieldUp', {
+  defaultMessage: 'Move global field up',
+});
+
+export const MOVE_GLOBAL_FIELD_DOWN = i18n.translate(
+  'xpack.cases.fieldLibrary.moveGlobalFieldDown',
+  { defaultMessage: 'Move global field down' }
 );
 
 export const COPY_FIELD = i18n.translate('xpack.cases.fieldLibrary.copyField', {
