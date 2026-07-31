@@ -138,7 +138,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/ebt": "1.4.1",
     "@elastic/ecs": "9.3.0",
-    "@elastic/elasticsearch": "9.4.0",
+    "@elastic/elasticsearch": "9.4.2",
     "@elastic/ems-client": "8.7.0",
     "@elastic/esql": "4.9.1",
     "@elastic/eui": "116.5.0",
