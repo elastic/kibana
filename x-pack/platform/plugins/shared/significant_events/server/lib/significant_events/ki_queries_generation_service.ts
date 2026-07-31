@@ -28,7 +28,7 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../semant
 import { isSignificantEventsAvailable } from '../feature_flags/is_significant_events_available';
 import { createSemanticCodeSearchTools } from '../semantic_code_search_grounding/semantic_code_search_tools';
 import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
-import type { EbtTelemetryClient } from '../telemetry';
+import type { EbtTelemetryClient } from '../telemetry/ebt';
 import { resolveConnectorForFeature } from '../../routes/utils/resolve_connector_for_feature';
 import { formatInferenceProviderError } from '../../routes/utils/create_connector_sse_error';
 import { identifyKIQueries } from './identify_ki_queries';
