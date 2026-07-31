@@ -106,7 +106,7 @@ export function QuickSearchVisor({
   const onBackToKql = useCallback(() => {
     setVisorMode(VisorMode.KQL);
     setNlValue('');
-  }, []);
+  }, [setNlValue]);
 
   useEffect(() => {
     const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);

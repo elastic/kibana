@@ -51,10 +51,7 @@ import type { ESQLControlVariable, ESQLQueryStats } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { QueryStringInput, FilterButtonGroup } from '@kbn/kql/public';
-import type {
-  SuggestionsAbstraction,
-  SuggestionsListSize,
-} from '@kbn/kql/public';
+import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
 import {
   DateRangePicker,
   type DateRangePickerSettings,
@@ -663,11 +660,11 @@ export const QueryBarTopRow = React.memo(
     // stays in sync with real query cadence. The timefilter drives data fetches in consumers like
     // Discover and Dashboard; without this the two independent timers drift apart over time.
     const [autoRefreshEpoch, setAutoRefreshEpoch] = useState<number | undefined>(undefined);
-    const visorNlResultRef = useRef<((generatedQuery: string) => void) | undefined>(undefined);
-    const [visorNlResultReady, setVisorNlResultReady] = useState(false);
+    const [visorNlResultHandler, setVisorNlResultHandler] = useState<
+      ((generatedQuery: string) => void) | undefined
+    >(undefined);
     const onVisorNlResultReady = useCallback((fn: (generatedQuery: string) => void) => {
-      visorNlResultRef.current = fn;
-      setVisorNlResultReady(true);
+      setVisorNlResultHandler(() => fn);
     }, []);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
@@ -1362,7 +1359,7 @@ export const QueryBarTopRow = React.memo(
                     query={
                       props.query && isOfAggregateQueryType(props.query) ? props.query.esql : ''
                     }
-                    onNlResult={visorNlResultReady ? visorNlResultRef.current : undefined}
+                    onNlResult={visorNlResultHandler}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
                   />
                 </EuiFlexItem>
@@ -1379,9 +1376,7 @@ export const QueryBarTopRow = React.memo(
                     padding-top: 0;
                   `}
                 >
-                  <EuiFlexItem>
-                    {props.esqlVariablesConfig?.controlsWrapper}
-                  </EuiFlexItem>
+                  <EuiFlexItem>{props.esqlVariablesConfig?.controlsWrapper}</EuiFlexItem>
                 </EuiFlexGroup>
               )}
               {!shouldShowDatePickerAsBadge() && props.filterBar}
