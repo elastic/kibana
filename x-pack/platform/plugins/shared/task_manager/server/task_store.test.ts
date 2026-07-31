@@ -1171,7 +1171,8 @@ describe('TaskStore', () => {
                       ...mockTask,
                       id: 'task1',
                       apiKey: 'encryptedKey1',
-                      uiamApiKey: 'plaintextUiamKey',
+                      // the exact base64(`${id}:${key}`) shape the plaintext bug persisted
+                      uiamApiKey: Buffer.from('uiamKeyId:essu_plaintextKey').toString('base64'),
                     },
                   },
                 },
@@ -1198,6 +1199,97 @@ describe('TaskStore', () => {
       );
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('Removed undecryptable uiamApiKey from task "task1"')
+      );
+    });
+
+    test('does not strip when the raw uiamApiKey is not recognizable as plaintext (e.g. lost encryption key)', async () => {
+      const mockSerializer = savedObjectsServiceMock.createSerializer();
+      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = jest
+        .fn()
+        .mockImplementation((doc: { _source?: { task?: { id?: string } } }) => ({
+          id: doc._source?.task?.id ?? 'task1',
+          version: '123',
+          type: 'task',
+          references: [],
+          attributes: doc._source?.task ?? mockTask,
+        }));
+
+      const mockEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = mockLogger();
+
+      const healStore = new TaskStore({
+        logger,
+        index: 'tasky',
+        taskManagerId: '',
+        serializer: mockSerializer,
+        esClient: mockEsClient,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
+        getIsSecurityEnabled: () => true,
+        executionContext: mockExecutionContextStart,
+        apiKeyStrategy: new EsApiKeyStrategy(),
+      });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* finder() {
+          yield {
+            saved_objects: [
+              {
+                id: 'task1',
+                attributes: { ...mockTask, id: 'task1' },
+                error: {
+                  message:
+                    'Failed to decrypt attribute "uiamApiKey" of saved object "task,task1": Unsupported state or unable to authenticate data',
+                },
+              },
+            ],
+          };
+        },
+      });
+      healStore.registerEncryptedSavedObjectsClient(esoClient);
+
+      mockEsClient.msearch.mockResponse({
+        took: 0,
+        responses: [
+          {
+            hits: {
+              hits: [
+                {
+                  _index: '.kibana_task_manager_8.16.0_001',
+                  _source: {
+                    task: {
+                      ...mockTask,
+                      id: 'task1',
+                      apiKey: 'encryptedKey1',
+                      // valid ESO ciphertext shape — base64 of binary, no `id:essu_` inside
+                      uiamApiKey: Buffer.from([1, 2, 3, 4, 5, 6, 7, 8]).toString('base64'),
+                    },
+                  },
+                },
+              ],
+            },
+            took: 0,
+            _shards: { failed: 0, successful: 1, total: 1 },
+            timed_out: false,
+            status: 200,
+          },
+        ],
+      });
+
+      await healStore.msearch([{}]);
+
+      expect(mockEsClient.update).not.toHaveBeenCalled();
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to decrypt uiamApiKey of task "task1" and its stored value is not recognizable as plaintext'
+        )
       );
     });
 

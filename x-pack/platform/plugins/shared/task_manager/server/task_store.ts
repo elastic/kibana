@@ -38,6 +38,7 @@ import {
 } from '@kbn/core/server';
 
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import { isUiamCredential } from '@kbn/core-security-server';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
@@ -306,13 +307,18 @@ export class TaskStore {
   }
 
   private async bulkGetDecryptedTaskApiKeys(
-    taskIds: string[]
+    tasks: Array<Pick<ConcreteTaskInstance, 'id' | 'uiamApiKey'>>
   ): Promise<Map<string, { apiKey?: string; uiamApiKey?: string }>> {
-    if (!this.canEncryptSo() || !taskIds.length) {
+    if (!this.canEncryptSo() || !tasks.length) {
       return new Map();
     }
 
-    const result = await this.getDecryptedApiKeys(taskIds);
+    const taskIds = tasks.map(({ id }) => id);
+    // Raw (still encrypted or plaintext-poisoned) values, used to verify a decrypt failure was
+    // caused by the plaintext-persistence bug before self-healing the doc.
+    const rawUiamApiKeysByTaskId = new Map(tasks.map(({ id, uiamApiKey }) => [id, uiamApiKey]));
+
+    const result = await this.getDecryptedApiKeys(taskIds, rawUiamApiKeysByTaskId);
 
     // the search doesn't wait for refresh, so may miss a newly created key
     const idsOfMissingKeys = taskIds.filter((id) => result.get(id) === undefined);
@@ -331,7 +337,7 @@ export class TaskStore {
     }
 
     // get the missing keys, a log an error if they continue to be missing
-    const missingResult = await this.getDecryptedApiKeys(idsOfMissingKeys);
+    const missingResult = await this.getDecryptedApiKeys(idsOfMissingKeys, rawUiamApiKeysByTaskId);
 
     for (const id of idsOfMissingKeys) {
       const foundKey = missingResult.get(id);
@@ -345,7 +351,10 @@ export class TaskStore {
     return result;
   }
 
-  private async getDecryptedApiKeys(taskIds: string[]) {
+  private async getDecryptedApiKeys(
+    taskIds: string[],
+    rawUiamApiKeysByTaskId?: Map<string, string | undefined>
+  ) {
     const kueryNode = nodeBuilder.or(
       taskIds.map((id) => {
         return nodeBuilder.is(`${TASK_SO_NAME}.id`, `${TASK_SO_NAME}:${id}`);
@@ -370,10 +379,20 @@ export class TaskStore {
         });
         const decryptionErrorMessage = savedObject.error?.message;
         if (decryptionErrorMessage && decryptionErrorMessage.includes('"uiamApiKey"')) {
-          undecryptableUiamKeyTaskIds.push({
-            id: savedObject.id,
-            errorMessage: decryptionErrorMessage,
-          });
+          // Only heal when the raw stored value is positively identified as plaintext from the
+          // pre-encryption-fix provisioning bug. Any other decrypt failure (e.g. valid ciphertext
+          // whose encryption key was lost through misconfigured rotation) must stay loud and
+          // untouched, since the data may be recoverable by fixing the key configuration.
+          if (containsPlaintextUiamApiKey(rawUiamApiKeysByTaskId?.get(savedObject.id))) {
+            undecryptableUiamKeyTaskIds.push({
+              id: savedObject.id,
+              errorMessage: decryptionErrorMessage,
+            });
+          } else {
+            this.logger.error(
+              `Failed to decrypt uiamApiKey of task "${savedObject.id}" and its stored value is not recognizable as plaintext, so it will not be cleaned up automatically — it may be valid ciphertext for a lost encryption key (e.g. misconfigured key rotation). Error: ${decryptionErrorMessage}`
+            );
+          }
         }
       });
     }
@@ -432,19 +451,19 @@ export class TaskStore {
   }
 
   private async bulkGetAndMergeTasksWithDecryptedApiKey(tasks: ConcreteTaskInstance[]) {
-    const ids: string[] = [];
+    const tasksWithKeys: Array<Pick<ConcreteTaskInstance, 'id' | 'uiamApiKey'>> = [];
 
     tasks.forEach((task) => {
       if (task.apiKey || task.uiamApiKey) {
-        ids.push(task.id);
+        tasksWithKeys.push({ id: task.id, uiamApiKey: task.uiamApiKey });
       }
     });
 
-    if (!ids.length) {
+    if (!tasksWithKeys.length) {
       return tasks;
     }
 
-    const decryptedKeysMap = await this.bulkGetDecryptedTaskApiKeys(ids);
+    const decryptedKeysMap = await this.bulkGetDecryptedTaskApiKeys(tasksWithKeys);
 
     const tasksWithDecryptedApiKeys = tasks.map((task) => {
       const decrypted = decryptedKeysMap.get(task.id);
@@ -1367,6 +1386,25 @@ function parseJSONField(json: string, fieldName: string, id: string) {
     return json ? JSON.parse(json) : {};
   } catch (error) {
     throw new Error(`Task "${id}"'s ${fieldName} field has invalid JSON: ${json}`);
+  }
+}
+
+/**
+ * Positively identifies a task `uiamApiKey` persisted in plaintext by the pre-encryption-fix
+ * provisioning bug (elastic/kibana#272530): the provisioning code writes `base64(id:essu_key)`,
+ * so a plaintext value base64-decodes cleanly to a string with a UIAM credential after the colon.
+ * ESO ciphertext decodes to binary and cannot match. A decrypt failure alone is not enough to
+ * conclude the value is plaintext — it could be valid ciphertext whose encryption key was lost.
+ */
+function containsPlaintextUiamApiKey(rawValue?: string): boolean {
+  if (!rawValue) {
+    return false;
+  }
+  try {
+    const [, key] = Buffer.from(rawValue, 'base64').toString().split(':');
+    return !!key && isUiamCredential(key);
+  } catch {
+    return false;
   }
 }
 

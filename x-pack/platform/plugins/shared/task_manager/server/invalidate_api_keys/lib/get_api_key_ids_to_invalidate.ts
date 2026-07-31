@@ -5,12 +5,43 @@
  * 2.0.
  */
 
-import type { SavedObjectsFindResponse, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  Logger,
+  SavedObjectsFindResponse,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import { isUiamCredential } from '@kbn/core-security-server';
 import type { AggregationsStringTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
 import type { ApiKeyToInvalidate } from '../../saved_objects/schemas/api_key_to_invalidate';
 import type { SavedObjectTypesToQuery } from './run_invalidate';
 import { queryForApiKeysInUse } from './query_for_api_keys_in_use';
+
+/**
+ * Matches a raw Elasticsearch API key id (short, URL-safe base64). ESO ciphertext is standard
+ * base64 of iv+salt+tag+payload — well over 100 characters and typically containing `+`/`/`/`=` —
+ * so a value matching this pattern was stored in plaintext, not encrypted with a lost key.
+ */
+const PLAINTEXT_ES_API_KEY_ID_REGEX = /^[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * Positively identifies attribute values persisted in plaintext by the pre-encryption-fix
+ * provisioning bug (elastic/kibana#269487, elastic/kibana#272530). A decrypt failure alone is not
+ * enough to conclude the value is plaintext — it could equally be valid ciphertext whose
+ * encryption key was lost (e.g. misconfigured key rotation), which must stay loud and recoverable.
+ */
+function hasVerifiedPlaintextKeyMaterial({
+  apiKeyId,
+  uiamApiKey,
+}: {
+  apiKeyId?: string;
+  uiamApiKey?: string;
+}): boolean {
+  if (uiamApiKey) {
+    return isUiamCredential(uiamApiKey);
+  }
+  return !!apiKeyId && PLAINTEXT_ES_API_KEY_ID_REGEX.test(apiKeyId);
+}
 
 export interface ApiKeyIdAndSOId {
   id: string;
@@ -35,6 +66,7 @@ export interface UndecryptableApiKeyAndSOId {
 interface GetApiKeyIdsToInvalidateOpts {
   apiKeySOsPendingInvalidation: SavedObjectsFindResponse<ApiKeyToInvalidate>;
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
+  logger?: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectType: string;
   savedObjectTypesToQuery: SavedObjectTypesToQuery[];
@@ -50,6 +82,7 @@ interface GetApiKeysToInvalidateResult {
 export async function getApiKeyIdsToInvalidate({
   apiKeySOsPendingInvalidation,
   encryptedSavedObjectsClient,
+  logger,
   savedObjectsClient,
   savedObjectType,
   savedObjectTypesToQuery,
@@ -57,6 +90,9 @@ export async function getApiKeyIdsToInvalidate({
   const apiKeyIds: ApiKeyIdAndSOId[] = [];
   const uiamApiKeys: UiamApiKeyAndSOId[] = [];
   const undecryptableApiKeys: UndecryptableApiKeyAndSOId[] = [];
+  // Undecryptable SOs without verifiable plaintext material: not deletable, but they must be
+  // excluded from subsequent fetch pages within this run to avoid re-processing them.
+  const undrainableSOIds: string[] = [];
 
   if (encryptedSavedObjectsClient) {
     // Decrypt the apiKeyId for each pending invalidation SO
@@ -70,20 +106,27 @@ export async function getApiKeyIdsToInvalidate({
               apiKeyPendingInvalidationSO.id
             );
         } catch (error) {
-          // Decryption failures are deterministic (e.g. attributes persisted in plaintext by a
-          // pre-encryption-fix provisioning run), so this SO can never be drained through the
-          // normal path — without special handling it would produce decrypt errors on every task
-          // run, forever, and (because the whole batch is decrypted together) block draining of
-          // healthy SOs. Collect it with the raw stored attribute values: when the root cause is
-          // the plaintext bug those values are the real key id/key and the key can still be
-          // invalidated before the SO is deleted.
+          // A decrypt failure never fails the whole batch (that would block draining of healthy
+          // SOs too), but the SO is only routed to deletion when the raw stored values are
+          // positively identified as plaintext from the pre-encryption-fix provisioning bug —
+          // in that case they are the real key id/key and the key can still be invalidated
+          // before the SO is deleted. Any other decrypt failure (e.g. valid ciphertext whose
+          // encryption key was lost through misconfigured rotation) is left in place and kept
+          // loud, since the data may be recoverable by fixing the key configuration.
           const { uiamApiKey, apiKeyId } = apiKeyPendingInvalidationSO.attributes;
-          undecryptableApiKeys.push({
-            id: apiKeyPendingInvalidationSO.id,
-            apiKeyId,
-            uiamApiKey,
-            error,
-          });
+          if (hasVerifiedPlaintextKeyMaterial({ apiKeyId, uiamApiKey })) {
+            undecryptableApiKeys.push({
+              id: apiKeyPendingInvalidationSO.id,
+              apiKeyId,
+              uiamApiKey,
+              error,
+            });
+          } else {
+            logger?.error(
+              `Failed to decrypt "${savedObjectType}" saved object "${apiKeyPendingInvalidationSO.id}" and its stored attributes are not recognizable as plaintext, so it will not be cleaned up automatically — the attributes may be valid ciphertext for a lost encryption key (e.g. misconfigured key rotation). Error: ${error.message}`
+            );
+            undrainableSOIds.push(apiKeyPendingInvalidationSO.id);
+          }
           return;
         }
 
@@ -180,6 +223,10 @@ export async function getApiKeyIdsToInvalidate({
     } else {
       undecryptableApiKeysToInvalidate.push(undecryptableApiKey);
     }
+  });
+
+  undrainableSOIds.forEach((id) => {
+    apiKeyIdsToExclude.push({ id, apiKeyId: '' });
   });
 
   return {

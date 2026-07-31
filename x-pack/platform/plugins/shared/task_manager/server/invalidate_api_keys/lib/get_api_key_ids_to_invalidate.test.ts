@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { getApiKeyIdsToInvalidate } from './get_api_key_ids_to_invalidate';
 import type {
   EncryptedSavedObjectsClient,
@@ -730,5 +730,53 @@ describe('undecryptable saved objects', () => {
       apiKeyIdsToInvalidate: [],
       apiKeyIdsToExclude: [{ id: '1', apiKeyId: 'plaintext-key-id' }],
     });
+  });
+
+  test('should not clean up an undecryptable SO whose stored attributes are not recognizable as plaintext', async () => {
+    const encryptedSavedObjectsClient = createEncryptedSavedObjectsClientMock();
+    const logger = loggingSystemMock.createLogger();
+    const decryptError = new Error(
+      'Failed to decrypt attribute "apiKeyId" of saved object "api_key_pending_invalidation,1": Unsupported state or unable to authenticate data'
+    );
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValueOnce(decryptError);
+
+    // valid ESO ciphertext shape: long standard base64 with +/= — not a plaintext key id
+    const ciphertextApiKeyId = `${Buffer.from(new Array(100).fill(7)).toString('base64')}==`;
+
+    const result = await getApiKeyIdsToInvalidate({
+      apiKeySOsPendingInvalidation: {
+        saved_objects: [
+          {
+            id: '1',
+            type: 'api_key_pending_invalidation',
+            score: 0,
+            attributes: {
+              apiKeyId: ciphertextApiKeyId,
+              createdAt: '2024-04-11T17:08:44.035Z',
+            },
+            references: [],
+          },
+        ],
+        total: 1,
+        per_page: 10,
+        page: 1,
+      },
+      encryptedSavedObjectsClient,
+      logger,
+      savedObjectsClient: internalSavedObjectsRepository,
+      savedObjectType: 'api_key_pending_invalidation',
+      savedObjectTypesToQuery: [],
+    });
+
+    // not deletable — excluded from this run so the fetch loop skips it, and kept loud
+    expect(result).toEqual({
+      apiKeyIdsToInvalidate: [],
+      apiKeyIdsToExclude: [{ id: '1', apiKeyId: '' }],
+    });
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Failed to decrypt "api_key_pending_invalidation" saved object "1" and its stored attributes are not recognizable as plaintext'
+      )
+    );
   });
 });

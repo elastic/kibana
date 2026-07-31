@@ -77,6 +77,7 @@ export async function runInvalidate(opts: RunInvalidateOpts): Promise<RunInvalid
       } = await getApiKeyIdsToInvalidate({
         apiKeySOsPendingInvalidation: apiKeysToInvalidate,
         encryptedSavedObjectsClient,
+        logger,
         savedObjectsClient,
         savedObjectType,
         savedObjectTypesToQuery: opts.savedObjectTypesToQuery,
