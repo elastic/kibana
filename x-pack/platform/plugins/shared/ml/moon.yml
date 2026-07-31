@@ -115,6 +115,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/task-manager-plugin'
   - '@kbn/test-jest-helpers'
+  - '@kbn/scout'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/ui-actions-plugin'
   - '@kbn/unified-field-list'
@@ -167,6 +168,7 @@ fileGroups:
     - common/**/*.json
     - public/**/*.json
     - server/**/*.json
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

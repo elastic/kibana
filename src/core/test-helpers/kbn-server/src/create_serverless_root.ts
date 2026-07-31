@@ -94,7 +94,7 @@ export function createTestServerlessInstances({
    */
   kibanaUrl?: string;
 } = {}): TestServerlessUtils {
-  adjustTimeout?.(150_000);
+  adjustTimeout?.(300_000);
 
   const esUtils = createServerlessES({
     enableCPS,

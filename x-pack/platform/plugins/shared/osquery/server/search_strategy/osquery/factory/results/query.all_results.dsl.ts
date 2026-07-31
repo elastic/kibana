@@ -6,6 +6,7 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
+import type { estypes } from '@elastic/elasticsearch';
 import { isEmpty } from 'lodash';
 import moment from 'moment/moment';
 import type { Filter } from '@kbn/es-query';
@@ -31,20 +32,17 @@ export const buildResultsQuery = ({
 }: ResultsRequestOptions): ISearchRequestParams => {
   const baseIndex = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 
-  let baseFilter: string;
-  if (scheduleId != null && executionCount != null) {
-    const scheduleQuery = `schedule_id: ${scheduleId} AND osquery_meta.schedule_execution_count: ${executionCount}`;
-    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    baseFilter = scheduleQuery + agentQuery;
-  } else {
-    const actionIdQuery = `action_id: ${actionId}`;
-    const agentQuery = agentId ? ` AND agent.id: ${agentId}` : '';
-    baseFilter = actionIdQuery + agentQuery;
-  }
-
-  if (!isEmpty(kuery)) {
-    baseFilter = baseFilter + ` AND ${kuery}`;
-  }
+  const identifierFilters: estypes.QueryDslQueryContainer[] =
+    scheduleId != null && executionCount != null
+      ? [
+          { term: { schedule_id: scheduleId } },
+          { term: { 'osquery_meta.schedule_execution_count': executionCount } },
+        ]
+      : [{ term: { action_id: actionId } }];
+  const agentIdFilter: estypes.QueryDslQueryContainer[] = agentId
+    ? [{ term: { 'agent.id': agentId } }]
+    : [];
+  const kueryFilter = kuery ? [getQueryFilter({ filter: kuery })] : [];
 
   const timeRangeFilter =
     startDate && !isEmpty(startDate)
@@ -60,15 +58,19 @@ export const buildResultsQuery = ({
         ]
       : [];
 
-  const kqlFilterClause = getQueryFilter({ filter: baseFilter });
-
   const parsedEsFilters: Filter[] = esFilters ? (JSON.parse(esFilters) as Filter[]) : [];
 
   const esFilterClauses =
     parsedEsFilters.length > 0 ? buildQueryFromFilters(parsedEsFilters, undefined).filter : [];
 
   // Space scoping is enforced centrally in the search strategy (enforceSpaceScope).
-  const filterQuery = [...timeRangeFilter, kqlFilterClause, ...esFilterClauses];
+  const filterQuery = [
+    ...timeRangeFilter,
+    ...identifierFilters,
+    ...agentIdFilter,
+    ...kueryFilter,
+    ...esFilterClauses,
+  ];
 
   let index: string;
 

@@ -7,6 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// The module under test invokes `run()` at import time to bootstrap the CLI.
+// Mock it out so importing the module for unit tests does not execute the CLI
+// against Jest's own argv (which fails with "Unknown flag(s)").
+jest.mock('@kbn/dev-cli-runner', () => ({
+  run: jest.fn(),
+}));
+
 import { REPO_ROOT } from '@kbn/repo-info';
 import { buildPipelineAnnotation } from './run_quick_checks';
 

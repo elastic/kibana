@@ -1,14 +1,10 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
     "noEmit": true,
-    "jsx": "react",
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "declaration": false,
+    // Only override the module resolution map; everything else (bundler
+    // resolution, module: preserve, jsx, strict, esModuleInterop, skipLibCheck)
+    // is inherited from the repo base so this config no longer drifts.
     "paths": {
       "@kbn/i18n": [
         "./react/services/i18n.tsx"

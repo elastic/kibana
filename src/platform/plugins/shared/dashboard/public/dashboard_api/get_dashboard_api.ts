@@ -293,6 +293,7 @@ export function getDashboardApi({
   const internalApi: DashboardInternalApi = {
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
+    ...unsavedChangesManager.internalApi,
     ...esqlVariablesManager.api,
     ...relatedPanelsManager.api,
     dashboardContainerRef$,

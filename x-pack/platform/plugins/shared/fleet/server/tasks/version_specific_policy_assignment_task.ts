@@ -19,7 +19,7 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
-import { escapeKuery, escapeQuotes } from '@kbn/es-query';
+import { escapeQuotes } from '@kbn/es-query';
 import { coerce } from 'semver';
 import pMap from 'p-map';
 
@@ -28,11 +28,18 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { agentPolicyService, appContextService, packagePolicyService } from '../services';
 import { getPackageInfo } from '../services/epm/packages';
 import { getAgentTemplateAssetsMap } from '../services/epm/packages/get';
-import { hasAgentVersionConditionInInputTemplate } from '../services/utils/version_specific_policies';
+import {
+  buildVariantAgentsKuery,
+  deleteVersionSpecificFleetServerPolicies,
+  hasAgentVersionConditionInInputTemplate,
+} from '../services/utils/version_specific_policies';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
-import { splitVersionSuffixFromPolicyId } from '../../common/services/version_specific_policies_utils';
-import { AGENT_POLICY_VERSION_SEPARATOR } from '../../common/constants';
+import {
+  splitVersionSuffixFromPolicyId,
+  buildVersionVariantsKueryFragment,
+} from '../../common/services/version_specific_policies_utils';
+import { AGENT_POLICY_INDEX, AGENT_POLICY_VERSION_SEPARATOR } from '../../common/constants';
 
 import { throwIfAborted } from './utils';
 
@@ -47,6 +54,9 @@ const AGENTS_BATCHSIZE = 1000;
 const MAX_CONCURRENT_REASSIGNMENTS = 5;
 // Time window to look for recently upgraded agents
 const RECENTLY_UPGRADED_WINDOW_MINUTES = 30;
+// Upper bound on the number of distinct version-specific policy ids we inspect for orphaned agents
+// in a single run. Far above any realistic deployment; a safety valve against unbounded aggregations.
+const MAX_VERSION_SPECIFIC_POLICY_BUCKETS = 10000;
 
 interface VersionSpecificPolicyAssignmentTaskConfig {
   taskInterval?: string;
@@ -172,6 +182,11 @@ export class VersionSpecificPolicyAssignmentTask {
 
     try {
       await this.processAgentPoliciesWithVersionConditions(esClient, soClient, abortController);
+      await this.reassignAgentsFromOrphanedVersionSpecificPolicies(
+        esClient,
+        soClient,
+        abortController
+      );
       this.endRun('success');
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
@@ -301,9 +316,9 @@ export class VersionSpecificPolicyAssignmentTask {
     // Query 2: Agents on any versioned policy derived from this parent that:
     //   - Were recently upgraded (version might have changed)
     //   - May need to move to a different versioned policy
-    const versionedPolicyKuery = `policy_id:${escapeKuery(
+    const versionedPolicyKuery = `${buildVersionVariantsKueryFragment(
       agentPolicyId
-    )}${AGENT_POLICY_VERSION_SEPARATOR}* AND upgraded_at >= "${recentlyUpgradedTime}"`;
+    )} AND upgraded_at >= "${recentlyUpgradedTime}"`;
 
     // Note: We intentionally do NOT query for agents with outdated policy revisions.
     // Agents already on the correct versioned policy will receive updated revisions
@@ -522,6 +537,166 @@ export class VersionSpecificPolicyAssignmentTask {
     } catch (error) {
       this.logger.error(
         `[VersionSpecificPolicyAssignmentTask] Error reassigning agents to ${targetPolicyId}: ${error}`
+      );
+    }
+  }
+
+  /**
+   * Orphan sweep: find version-specific (variant) policies whose parent policy no longer requires
+   * them (e.g. the integration/input that required them was removed), reassign any agents still on
+   * those variants back to the base policy so they keep syncing, and delete the stale variant
+   * documents.
+   *
+   * This complements the reassignment done inline when the agent policy is updated: it is the
+   * cross-space source of truth that recovers agents the inline path can't (agents in a different
+   * space than the request, or updates that predate the inline fix) and removes the variant
+   * documents once no agent references them. See https://github.com/elastic/kibana/issues/276294
+   */
+  private async reassignAgentsFromOrphanedVersionSpecificPolicies(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    abortController: AbortController
+  ) {
+    // Cheap first pass: enumerate the distinct policy ids present in `.fleet-policies` via a terms
+    // aggregation (not gated by `search.allow_expensive_queries`). That index is far smaller than
+    // `.fleet-agents` (one set of documents per policy, not per agent), so we drive the sweep off it
+    // rather than scanning agents; working from the documents also means stale variants are cleaned
+    // up even once every agent has already moved off them. The version suffix is filtered in memory
+    // below, which keeps the aggregation to a single field and yields exactly the base ids that have
+    // variant documents.
+    const policiesResponse = await esClient.search<
+      unknown,
+      { variant_policies: { buckets: Array<{ key: string }>; sum_other_doc_count: number } }
+    >({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      size: 0,
+      aggs: {
+        // Named 'variant_policies' for intent. The field is 'policy_id' (not 'policy_base_id')
+        // because we need every doc in the index — base and variant alike. Version-suffixed ids
+        // are then filtered in memory below to derive the set of parent ids with variant docs.
+        variant_policies: {
+          terms: { field: 'policy_id', size: MAX_VERSION_SPECIFIC_POLICY_BUCKETS },
+        },
+      },
+    });
+
+    const variantPoliciesAgg = policiesResponse.aggregations?.variant_policies;
+    const buckets = variantPoliciesAgg?.buckets ?? [];
+    if (buckets.length === 0) {
+      return;
+    }
+    if (variantPoliciesAgg?.sum_other_doc_count) {
+      this.logger.warn(
+        `[VersionSpecificPolicyAssignmentTask] More than ${MAX_VERSION_SPECIFIC_POLICY_BUCKETS} policies in .fleet-policies; some version-specific policies will be checked for orphaned assignments on a later run`
+      );
+    }
+
+    // Keep only version-specific variant ids (e.g. `policy1#9.4`) and collapse them down to their
+    // distinct parent policy ids.
+    const basePolicyIds = [
+      ...new Set(
+        buckets
+          .map((bucket) => splitVersionSuffixFromPolicyId(bucket.key))
+          .filter(({ version }) => version !== null)
+          .map(({ baseId }) => baseId)
+      ),
+    ];
+    if (basePolicyIds.length === 0) {
+      return;
+    }
+
+    // A variant is only orphaned if its parent policy still exists but no longer has version
+    // conditions. Parents that still have conditions are healthy; parents that no longer exist are
+    // handled by the agent policy deletion flow (which unenrolls agents and removes documents).
+    const parentPolicies = await agentPolicyService.getByIds(
+      soClient,
+      basePolicyIds.map((id) => ({ id, spaceId: '*' })),
+      { fields: ['id', 'has_agent_version_conditions'], ignoreMissing: true }
+    );
+    const orphanedParentPolicyIds = parentPolicies
+      .filter((policy) => !policy.has_agent_version_conditions)
+      .map((policy) => policy.id);
+
+    if (orphanedParentPolicyIds.length === 0) {
+      return;
+    }
+
+    this.logger.debug(
+      `[VersionSpecificPolicyAssignmentTask] Found ${orphanedParentPolicyIds.length} agent policies with orphaned version-specific assignments to clean up`
+    );
+
+    for (const parentPolicyId of orphanedParentPolicyIds) {
+      throwIfAborted(abortController);
+      await this.reassignOrphanedAgentsToBasePolicy(
+        esClient,
+        soClient,
+        parentPolicyId,
+        abortController
+      );
+    }
+  }
+
+  /**
+   * Reassign every agent still on a variant policy of the given parent back to the base policy
+   * (across all spaces, by agent id), then delete the now-stale variant `.fleet-policies` documents.
+   */
+  private async reassignOrphanedAgentsToBasePolicy(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    parentPolicyId: string,
+    abortController: AbortController
+  ) {
+    try {
+      const variantAgentsKuery = buildVariantAgentsKuery(parentPolicyId);
+
+      const agentIds: string[] = [];
+      // Include inactive agents: reassignment is a metadata update on `.fleet-agents` that is valid
+      // regardless of active status. Skipping them would delete the variant documents below while an
+      // inactive agent still references one, leaving it stuck on a missing policy when it reactivates.
+      const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
+        kuery: variantAgentsKuery,
+        perPage: AGENTS_BATCHSIZE,
+        showInactive: true,
+      });
+      for await (const agentsBatch of agentsFetcher) {
+        throwIfAborted(abortController);
+        for (const agent of agentsBatch) {
+          agentIds.push(agent.id);
+        }
+      }
+
+      if (agentIds.length > 0) {
+        this.logger.info(
+          `[VersionSpecificPolicyAssignmentTask] Reassigning ${agentIds.length} orphaned agents from version-specific policies of ${parentPolicyId} back to the base policy`
+        );
+        // Reassign by agent id (not kuery) so agents in every space are covered — the task runs
+        // with a space-agnostic saved objects client.
+        await reassignAgents(soClient, esClient, { agentIds, showInactive: true }, parentPolicyId);
+
+        // bulkUpdateAgents collects per-agent ES errors without throwing, so reassignAgents
+        // returns { actionId } even if some updates silently failed (e.g. retry_on_conflict
+        // exhausted under heavy check-in churn). Re-check the count before deleting variant docs:
+        // if any agents remain on the variant, skip deletion so the next sweep run can retry.
+        const { total: remaining } = await getAgentsByKuery(esClient, soClient, {
+          kuery: variantAgentsKuery,
+          showInactive: true,
+          perPage: 0,
+        });
+        if (remaining > 0) {
+          this.logger.warn(
+            `[VersionSpecificPolicyAssignmentTask] ${remaining} agent(s) still on variant policies of ${parentPolicyId} after reassignment (bulk update may have partially failed); skipping variant doc deletion so the next sweep run can retry`
+          );
+          return;
+        }
+      }
+
+      // All agents have been moved off the variant policies (or there were none to move).
+      // Safe to remove the now-stale variant documents.
+      await deleteVersionSpecificFleetServerPolicies(esClient, parentPolicyId);
+    } catch (error) {
+      this.logger.error(
+        `[VersionSpecificPolicyAssignmentTask] Error reassigning orphaned agents from version-specific policies of ${parentPolicyId}: ${error}`
       );
     }
   }

@@ -54,8 +54,26 @@ export const dataViewSpecSchema = schema.object(
         },
       })
     ),
+    allow_hidden_indices: schema.maybe(
+      schema.boolean({
+        meta: {
+          title: 'Allow hidden and system indices',
+          description: 'When `true`, allows the data view to match hidden indices.',
+        },
+      })
+    ),
     field_settings: schema.maybe(
       schema.recordOf(schema.string({ minLength: 1 }), fieldSettingsSchema)
+    ),
+    name: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: 256,
+        meta: {
+          title: 'Data view name',
+          description: 'The name of the data view. Example: "Sample data view".',
+        },
+      })
     ),
   },
   { meta: { id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' } }
