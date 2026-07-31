@@ -36138,7 +36138,6 @@
     "xpack.observability_onboarding.addDataPageV2.subtitle": "Connectez vos systèmes et bénéficiez d'une visibilité complète sur les logs, les indicateurs et les traces.",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "Clé API",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "Aucune clé API pour l'instant",
-    "xpack.observability_onboarding.apiEndpoints.copyButton": "Copier dans le presse-papiers",
     "xpack.observability_onboarding.apiEndpoints.createKey": "Créer une clé",
     "xpack.observability_onboarding.apiEndpoints.createKeyError": "Échec de la création de la clé API",
     "xpack.observability_onboarding.apiEndpoints.createKeyErrorFallback": "Un problème est survenu lors de la création de la clé API. Réessayez ou contactez votre administrateur.",
