@@ -11,7 +11,6 @@ import {
   TSDB_SCENARIO_DOCUMENT_COUNT,
   createTsdbScenarioTimeRange,
   enableElasticChartDebug,
-  getChartDebugData,
   sumFirstNValues,
   test,
 } from '../../fixtures';
@@ -87,7 +86,7 @@ const runScenario = async (
       });
 
       await pageObjects.lens.waitForVisualization('xyVisChart');
-      const chartData = await getChartDebugData(page, 'xyVisChart');
+      const chartData = await pageObjects.lens.getCurrentChartDebugState('xyVisChart');
       const counterSeries = chartData.bars?.[0]?.bars ?? [];
       const countSeries = chartData.bars?.[1]?.bars ?? [];
       expect(counterSeries.length).toBeGreaterThan(0);

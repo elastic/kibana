@@ -41,6 +41,23 @@ export interface ApiEndpointApiKeyResponse {
 export const hasManagedElasticsearchBulkEndpoint = (managedOtlpServiceUrl?: string): boolean =>
   Boolean(managedOtlpServiceUrl?.trim());
 
+const VENDOR_ENDPOINT_IDS: readonly ApiEndpointId[] = [
+  ApiEndpointId.Supabase,
+  ApiEndpointId.Vercel,
+];
+
+// Vendor paths exist only on the managed OTLP collector. Reject key creation when it is unavailable.
+export function ensureVendorEndpointAvailable(
+  id: ApiEndpointId,
+  isManagedOtlpServiceAvailable: boolean
+): void {
+  if (VENDOR_ENDPOINT_IDS.includes(id) && !isManagedOtlpServiceAvailable) {
+    throw Boom.badRequest(
+      `The ${id} endpoint requires the managed OTLP service, which is not available on this deployment.`
+    );
+  }
+}
+
 function hasRequiredPrivileges(
   id: ApiEndpointId,
   {
@@ -64,6 +81,9 @@ function hasRequiredPrivileges(
       return isManagedElasticsearchBulkEndpointAvailable
         ? hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] })
         : hasLogMonitoringPrivileges(esClient, true);
+    case ApiEndpointId.Supabase:
+    case ApiEndpointId.Vercel:
+      return hasApiKeyPrivileges(esClient, { application: [APM_EVENT_WRITE_APPLICATION] });
   }
 }
 
@@ -104,6 +124,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
         [ApiEndpointId.Prometheus]: null,
         [ApiEndpointId.OpenTelemetry]: null,
         [ApiEndpointId.Elasticsearch]: null,
+        [ApiEndpointId.Supabase]: null,
+        [ApiEndpointId.Vercel]: null,
       }),
     }),
   }),
@@ -132,6 +154,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       Boolean(managedOtlpServiceUrl);
     const isManagedElasticsearchBulkEndpointAvailable =
       hasManagedElasticsearchBulkEndpoint(managedOtlpServiceUrl);
+    const isVendorEndpointAvailable =
+      isManagedOtlpServiceAvailable && Boolean(managedOtlpServiceUrl);
 
     const apiKeyFactoryContext: ApiKeyFactoryContext = {
       isManagedOtlpServiceAvailable,
@@ -139,6 +163,8 @@ const createApiKeyRoute = createObservabilityOnboardingServerRoute({
       managedOtlpPrwEndpointEnabled,
       isManagedElasticsearchBulkEndpointAvailable,
     };
+
+    ensureVendorEndpointAvailable(id, isVendorEndpointAvailable);
 
     const hasPrivileges = await hasRequiredPrivileges(
       id,

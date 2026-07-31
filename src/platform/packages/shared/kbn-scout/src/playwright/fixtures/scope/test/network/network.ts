@@ -42,9 +42,10 @@ export class Network {
     }
   }
 
-  async countMatchingRequests(
+  async trackMatchingRequests(
     endpoint: string,
-    action: () => Promise<void>,
+
+    action: (getCount: () => number) => Promise<void>,
     options: CountMatchingRequestsOptions = {}
   ): Promise<number> {
     let count = 0;
@@ -56,11 +57,24 @@ export class Network {
 
     this.page.on('request', listener);
     try {
-      await action();
+      await action(() => count);
+      return count;
     } finally {
       this.page.off('request', listener);
     }
+  }
 
-    return count;
+  async countMatchingRequests(
+    endpoint: string,
+    action: () => Promise<void>,
+    options: CountMatchingRequestsOptions = {}
+  ): Promise<number> {
+    return this.trackMatchingRequests(
+      endpoint,
+      async () => {
+        await action();
+      },
+      options
+    );
   }
 }
