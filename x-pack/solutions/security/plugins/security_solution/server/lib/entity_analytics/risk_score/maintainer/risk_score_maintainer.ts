@@ -49,6 +49,7 @@ import { buildLookupIndex } from './steps/build_lookup_index';
 import {
   buildRiskScoreEntityMaintainerRunSummary,
   buildRiskScorePhase0EntityMaintainerRunSummary,
+  buildRiskScoreSkipEntityMaintainerRunSummary,
   type RiskScoreFrameworkStageSummary,
 } from './entity_maintainer_run_summary';
 export interface RiskScoreMaintainerDeps {
@@ -150,6 +151,7 @@ export const createRiskScoreMaintainer = ({
       });
       const canRun = await checkRunPrerequisites({
         telemetryReporter,
+        frameworkTelemetry,
         productFeaturesService,
         pluginsStart: runContext.pluginsStart,
         namespace: runContext.namespace,
@@ -345,12 +347,17 @@ const ensureLookupIndexReady = async ({
 
 const checkRunPrerequisites = async ({
   telemetryReporter,
+  frameworkTelemetry,
   productFeaturesService,
   pluginsStart,
   namespace,
   logger,
 }: {
+  // Dual telemetry: Entity Maintainers framework (`frameworkTelemetry`) plus the
+  // legacy risk-score reporter (`telemetryReporter`). Goal is to migrate all
+  // events onto the framework and retire the risk-score-specific reporter.
   telemetryReporter: TelemetryReporter;
+  frameworkTelemetry: FrameworkTelemetry;
   productFeaturesService: ProductFeaturesService;
   pluginsStart: PluginsStart;
   namespace: string;
@@ -370,6 +377,7 @@ const checkRunPrerequisites = async ({
     skipReason,
     idBasedRiskScoringEnabled: false,
   });
+  frameworkTelemetry.report(buildRiskScoreSkipEntityMaintainerRunSummary({ skipReason }));
   logger.debug('Risk score maintainer run skipped due to insufficient license or feature disabled');
   return false;
 };

@@ -22,6 +22,32 @@ export interface RiskScoreFrameworkStageSummary {
   errorKind?: string;
 }
 
+const EMPTY_FUNNEL = {
+  scanned: 0,
+  qualified: 0,
+  applied: 0,
+  failed: 0,
+} as const;
+
+/**
+ * Global license/feature skip — once per scheduled run that cannot start.
+ */
+export const buildRiskScoreSkipEntityMaintainerRunSummary = ({
+  skipReason,
+}: {
+  skipReason: string;
+}): EntityMaintainerRunSummary => ({
+  funnel: { ...EMPTY_FUNNEL },
+  stages: [
+    {
+      name: 'run',
+      status: 'skipped',
+      durationMs: 0,
+      skipReason,
+    },
+  ],
+});
+
 /**
  * Builds the entity-maintainers framework run-summary payload for phase 0
  * lookup-index build (once per maintainer run, not per entity type).
