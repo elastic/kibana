@@ -669,14 +669,6 @@ export const QueryBarTopRow = React.memo(
       visorNlResultRef.current = fn;
       setVisorNlResultReady(true);
     }, []);
-    const esqlEditorInitialStateRef = useRef(props.esqlEditorInitialState);
-    esqlEditorInitialStateRef.current = props.esqlEditorInitialState;
-    const onVisorAutoGenerationComplete = useCallback(() => {
-      props.onEsqlEditorInitialStateChange?.({
-        ...esqlEditorInitialStateRef.current,
-        visorPrompt: undefined,
-      });
-    }, [props.onEsqlEditorInitialStateChange]);
     useEffect(() => {
       if (shouldUseLegacyTimePicker || !propsOnRefreshChange) return;
 
@@ -1372,8 +1364,6 @@ export const QueryBarTopRow = React.memo(
                     }
                     onNlResult={visorNlResultReady ? visorNlResultRef.current : undefined}
                     onUpdateAndSubmitQuery={onVisorUpdateAndSubmit}
-                    initialPrompt={props.esqlEditorInitialState?.visorPrompt}
-                    onAutoGenerationComplete={onVisorAutoGenerationComplete}
                   />
                 </EuiFlexItem>
                 {renderDatePickerWithUpdateBtn()}

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -24,6 +23,17 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SourcesDropdown } from './sources_dropdown';
+import {
+  searchPlaceholder,
+  nlPlaceholder,
+  generatingLabel,
+  stopLabel,
+  askAiLabel,
+  backToKqlLabel,
+  enterHintFilterLabel,
+  enterHintGenerateLabel,
+  nlErrorMessage,
+} from './visor_i18n';
 import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
@@ -43,43 +53,7 @@ export interface QuickSearchVisorProps {
   // Callback when the query is updated and submitted
   onUpdateAndSubmitQuery: (query: string) => void;
   telemetryService?: ESQLEditorTelemetryService;
-  // When set, auto-triggers AI generation on mount using this prompt (bypasses diff review)
-  initialPrompt?: string;
-  // Called after auto-generation completes (success, error, or abort)
-  onAutoGenerationComplete?: () => void;
 }
-
-export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
-  defaultMessage: 'Filter using KQL',
-});
-
-const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
-  defaultMessage: 'Describe the query you want in plain language',
-});
-
-const generatingLabel = i18n.translate('esqlEditor.visor.generatingLabel', {
-  defaultMessage: 'Generating...',
-});
-
-const stopLabel = i18n.translate('esqlEditor.visor.stopLabel', {
-  defaultMessage: 'Stop',
-});
-
-const askAiLabel = i18n.translate('esqlEditor.visor.askAiLabel', {
-  defaultMessage: 'Ask AI',
-});
-
-const backToKqlLabel = i18n.translate('esqlEditor.visor.backToKql', {
-  defaultMessage: 'Back to KQL',
-});
-
-const enterHintFilterLabel = i18n.translate('esqlEditor.visor.enterHintFilter', {
-  defaultMessage: 'Filter',
-});
-
-const enterHintGenerateLabel = i18n.translate('esqlEditor.visor.enterHintGenerate', {
-  defaultMessage: 'Generate query',
-});
 
 export function QuickSearchVisor({
   query,
@@ -88,8 +62,6 @@ export function QuickSearchVisor({
   onNlResult,
   onUpdateAndSubmitQuery,
   telemetryService,
-  initialPrompt,
-  onAutoGenerationComplete,
 }: QuickSearchVisorProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { kql, core, data } = kibana.services;
@@ -100,16 +72,11 @@ export function QuickSearchVisor({
   const [visorMode, setVisorMode] = useState<'kql' | 'nl'>('kql');
   const [nlValue, setNlValue] = useState('');
   const [isNlLoading, setIsNlLoading] = useState(false);
-  const isNlLoadingRef = useRef(isNlLoading);
-  isNlLoadingRef.current = isNlLoading;
   const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const initializedRef = useRef(false);
   const userSelectedSourceRef = useRef(false);
-  const hasAutoTriggeredRef = useRef(false);
-  const onNlResultRef = useRef(onNlResult);
-  onNlResultRef.current = onNlResult;
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
@@ -153,77 +120,6 @@ export function QuickSearchVisor({
     [telemetryService]
   );
 
-  const autoGenerateFromPrompt = useCallback(
-    async (prompt: string) => {
-      if (isNlLoadingRef.current) return;
-      const abortController = new AbortController();
-      abortControllerRef.current = abortController;
-      setIsNlLoading(true);
-      setSearchValue(prompt);
-      const startTime = Date.now();
-      try {
-        const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
-          body: JSON.stringify({ nlInstruction: prompt, currentQuery: query }),
-          signal: abortController.signal,
-        });
-        if (result.content) {
-          trackNlResult(
-            prompt.length,
-            query.length,
-            startTime,
-            true,
-            undefined,
-            result.content.length
-          );
-          if (onNlResultRef.current) {
-            onNlResultRef.current(result.content);
-          } else {
-            onUpdateAndSubmitQuery(result.content);
-          }
-        }
-      } catch (error) {
-        if (abortController.signal.aborted) return;
-        reportEsqlError(error, { errorType: 'NlToEsql' });
-        const errorCode = String(
-          (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
-        );
-        trackNlResult(prompt.length, query.length, startTime, false, errorCode || undefined);
-        const message =
-          (error as { body?: { message?: string } })?.body?.message ??
-          i18n.translate('esqlEditor.visor.nlError', {
-            defaultMessage: 'Failed to generate ES|QL query',
-          });
-        core.notifications.toasts.addDanger({ title: message });
-      } finally {
-        setSearchValue('');
-        if (!abortController.signal.aborted) {
-          setIsNlLoading(false);
-        }
-        onAutoGenerationComplete?.();
-      }
-    },
-    [
-      query,
-      core.http,
-      core.notifications.toasts,
-      onUpdateAndSubmitQuery,
-      onAutoGenerationComplete,
-      trackNlResult,
-    ]
-  );
-
-  useEffect(() => {
-    if (!initialPrompt || hasAutoTriggeredRef.current) return;
-    setSearchValue(initialPrompt);
-  }, [initialPrompt]);
-
-  useEffect(() => {
-    if (!initialPrompt || hasAutoTriggeredRef.current) return;
-    if (!isNlToEsqlEnabled || hasConnector !== true) return;
-    hasAutoTriggeredRef.current = true;
-    autoGenerateFromPrompt(initialPrompt);
-  }, [initialPrompt, isNlToEsqlEnabled, hasConnector, autoGenerateFromPrompt]);
-
   const onStopGeneration = useCallback(() => {
     abortControllerRef.current?.abort();
     setIsNlLoading(false);
@@ -264,11 +160,7 @@ export function QuickSearchVisor({
         (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
       );
       trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
-      const message =
-        (error as { body?: { message?: string } })?.body?.message ??
-        i18n.translate('esqlEditor.visor.nlError', {
-          defaultMessage: 'Failed to generate ES|QL query',
-        });
+      const message = (error as { body?: { message?: string } })?.body?.message ?? nlErrorMessage;
       core.notifications.toasts.addDanger({ title: message });
     } finally {
       setNlValue('');
@@ -313,16 +205,14 @@ export function QuickSearchVisor({
       if (sources.length > 0) {
         setSelectedSources(sources);
       }
-      if (!initialPrompt) {
-        setSearchValue('');
-      }
+      setSearchValue('');
       initializedRef.current = true;
     } else if (sources.length > 0 && !userSelectedSourceRef.current) {
       if (!isEqual(selectedSources, sources)) {
         setSelectedSources(sources);
       }
     }
-  }, [query, selectedSources, initialPrompt]);
+  }, [query, selectedSources]);
 
   const sourcesKey = useMemo(
     () => selectedSources.map((source) => source.label).join(', '),

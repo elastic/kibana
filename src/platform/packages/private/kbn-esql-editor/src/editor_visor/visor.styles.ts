@@ -110,11 +110,6 @@ export const visorStyles = (
       padding-left: ${euiTheme.size.xs};
       flex-shrink: 0;
     `,
-    askAiIconWrapper: css`
-      padding-left: ${euiTheme.size.xs};
-      padding-right: ${euiTheme.size.xxs};
-      flex-shrink: 0;
-    `,
     aiBadgeWrapper: css`
       padding-left: ${euiTheme.size.xs};
       padding-right: ${euiTheme.size.s};

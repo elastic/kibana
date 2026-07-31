@@ -15,7 +15,6 @@ export interface ESQLEditorRestorableState {
   resizableContainerHeight: number;
   isHistoryOpen: boolean;
   historySelectedTabId: HistoryTabId;
-  visorPrompt?: string;
 }
 
 export const { withRestorableState, useRestorableState, useRestorableRef } =
