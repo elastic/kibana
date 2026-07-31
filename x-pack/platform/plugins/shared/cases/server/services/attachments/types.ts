@@ -14,6 +14,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsUpdateOptions,
 } from '@kbn/core/server';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { KueryNode } from '@kbn/es-query';
 import type { AttachmentType } from '../../../common';
 import type {
@@ -63,7 +64,9 @@ export interface GetAttachmentArgs {
   mode: AttachmentMode;
 }
 
-export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
+export type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'> & {
+  error?: SavedObjectError;
+};
 
 export interface BulkOptionalAttributes<T>
   extends Omit<SavedObjectsBulkResponse<T>, 'saved_objects'> {

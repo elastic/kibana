@@ -41,13 +41,17 @@ const testProps = {
   selectedJobOptions: [],
   showNewEventModal: jest.fn(),
   isGlobalCalendar: false,
+  isDst: false,
 };
 
 describe('CalendarForm', () => {
   test('Renders calendar form', () => {
-    const { container } = renderWithI18n(<CalendarForm {...testProps} />);
+    const { getByTestId } = renderWithI18n(<CalendarForm {...testProps} />);
 
-    expect(container.firstChild).toMatchSnapshot();
+    expect(getByTestId('mlCalendarFormNew')).toBeInTheDocument();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Create new calendar');
+    expect(getByTestId('mlCalendarIdInput')).toHaveValue('');
+    expect(getByTestId('mlCalendarDescriptionInput')).toHaveValue('');
   });
 
   test('CalendarId shown as title when editing', () => {
@@ -62,7 +66,7 @@ describe('CalendarForm', () => {
 
     const calendarForm = getByTestId('mlCalendarFormEdit');
     expect(calendarForm).toBeInTheDocument();
-
-    expect(calendarForm).toMatchSnapshot();
+    expect(getByTestId('appHeaderTitle')).toHaveTextContent('Calendar test-calendar');
+    expect(getByTestId('mlCalendarDescriptionText')).toHaveTextContent('test description');
   });
 });
