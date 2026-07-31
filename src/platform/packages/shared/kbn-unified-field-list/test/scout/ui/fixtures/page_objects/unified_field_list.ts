@@ -84,17 +84,23 @@ export class UnifiedFieldList {
   }
 
   async waitUntilSidebarHasLoaded(): Promise<void> {
+    await this.page.testSubj.waitForSelector('fieldListGroupedAvailableFields-countLoading', {
+      state: 'hidden',
+    });
+  }
+
+  private async waitUntilSidebarIsVisible(): Promise<void> {
     await this.page.testSubj
       .locator('fieldListGroupedAvailableFields')
       .waitFor({ state: 'visible' });
   }
 
   async searchField(name: string): Promise<void> {
-    await this.waitUntilSidebarHasLoaded();
+    await this.waitUntilSidebarIsVisible();
     const searchInput = this.page.testSubj.locator('fieldListFiltersFieldSearch');
     await searchInput.fill(name);
     await expect(searchInput).toHaveValue(name);
-    await this.waitUntilSidebarHasLoaded();
+    await this.waitUntilSidebarIsVisible();
   }
 
   async getAvailableFieldCount(): Promise<number> {
