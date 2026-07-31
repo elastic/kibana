@@ -9,6 +9,7 @@ import dateMath from '@kbn/datemath';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import { buildCombinedFilter, BooleanRelation, FilterStateStore } from '@kbn/es-query';
+import { UNTITLED_TIMELINE } from '../open_timeline/translations';
 import type { BrowserFields } from '../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import type { TimelineModel } from '../../store/model';
@@ -253,9 +254,24 @@ export const buildSuperTimelineModel = (
   const dateRange = mergeDateRange(timelines);
   const columns = mergeColumns(timelines);
   const indexNames = mergeIndexNames(timelines);
-  const superTimelineSourceIds = timelines
-    .map((t) => t.savedObjectId)
-    .filter((id): id is string => id !== null);
+  const superTimelineSources = timelines
+    .filter((t): t is typeof t & { savedObjectId: string } => t.savedObjectId !== null)
+    .map((t) => ({ id: t.savedObjectId, title: t.title || UNTITLED_TIMELINE }));
+  const superTimelineSourceIds = superTimelineSources.map((s) => s.id);
+  const superTimelineSourceTitles = superTimelineSources.map((s) => s.title);
+
+  const superTimelineDescriptions = timelines
+    .filter(
+      (t): t is typeof t & { savedObjectId: string; description: string } =>
+        Boolean(t.description) && t.savedObjectId !== null
+    )
+    .map((t) => ({
+      savedObjectId: t.savedObjectId,
+      title: t.title || UNTITLED_TIMELINE,
+      description: t.description,
+      updatedBy: t.updatedBy,
+      updated: t.updated,
+    }));
 
   const model: TimelineModel = {
     ...timelineDefaults,
@@ -275,6 +291,8 @@ export const buildSuperTimelineModel = (
     savedObjectId: null,
     isSuperTimeline: true,
     superTimelineSourceIds,
+    superTimelineSourceTitles,
+    superTimelineDescriptions,
   };
 
   return { model, skippedQueryTimelines };

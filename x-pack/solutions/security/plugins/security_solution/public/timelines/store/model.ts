@@ -147,6 +147,22 @@ export interface TimelineModel {
    * Used to fetch notes across all source timelines. Runtime-only — not persisted.
    */
   superTimelineSourceIds?: string[];
+  /**
+   * Display titles for each source timeline, parallel to superTimelineSourceIds.
+   * Runtime-only — not persisted.
+   */
+  superTimelineSourceTitles?: string[];
+  /**
+   * Descriptions from each source timeline that had one, shown as attributed comments in the
+   * Notes tab. Runtime-only — not persisted.
+   */
+  superTimelineDescriptions?: Array<{
+    savedObjectId: string;
+    title: string;
+    description: string;
+    updatedBy: string | null | undefined;
+    updated: number | null | undefined;
+  }>;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -202,6 +218,8 @@ export type SubsetTimelineModel = Readonly<
     | 'changed'
     | 'isSuperTimeline'
     | 'superTimelineSourceIds'
+    | 'superTimelineSourceTitles'
+    | 'superTimelineDescriptions'
   >
 >;
 

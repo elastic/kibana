@@ -48,6 +48,7 @@ import { NotesList } from '../../../../../notes/components/notes_list';
 import { Participants } from '../../../notes/participants';
 import { NOTES } from '../../../notes/translations';
 import { NO_NOTES_TITLE, NO_NOTES_DESCRIPTION } from '../../../super_timeline/translations';
+import { SuperTimelineNotes } from '../../../super_timeline/super_timeline_notes';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { getScrollToTopSelector } from '../selectors';
 import { useScrollToTop } from '../../../../../common/components/scroll_to_top';
@@ -96,6 +97,16 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   const superTimelineSourceIds = useMemo(
     () => timeline?.superTimelineSourceIds ?? [],
     [timeline?.superTimelineSourceIds]
+  );
+
+  const superTimelineSourceTitles = useMemo(
+    () => timeline?.superTimelineSourceTitles ?? [],
+    [timeline?.superTimelineSourceTitles]
+  );
+
+  const superTimelineDescriptions = useMemo(
+    () => timeline?.superTimelineDescriptions ?? [],
+    [timeline?.superTimelineDescriptions]
   );
 
   const timelineSavedObjectId = useMemo(
@@ -175,13 +186,20 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
   }, [timeline.description, timeline.updated, timeline.updatedBy]);
 
   const isSuperTimelineEmpty =
-    isSuperTimeline && fetchStatus === ReqStatus.Succeeded && notes.length === 0;
+    isSuperTimeline &&
+    fetchStatus === ReqStatus.Succeeded &&
+    notes.length === 0 &&
+    superTimelineDescriptions.length === 0;
 
   return (
     <EuiPanel
       css={css`
         height: 100%;
         overflow: auto;
+        /* EUI's hasShadow overlays an ::after border; with overflow:auto it cuts through content */
+        &::after {
+          display: none;
+        }
       `}
     >
       <EuiFlexGroup
@@ -196,7 +214,7 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {isSuperTimelineEmpty ? (
+          {isSuperTimelineEmpty && (
             <EuiFlexGroup
               alignItems="center"
               justifyContent="center"
@@ -214,7 +232,23 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-          ) : (
+          )}
+          {!isSuperTimelineEmpty && isSuperTimeline && (
+            <>
+              {fetchStatus === ReqStatus.Loading && (
+                <EuiLoadingElastic data-test-subj={NOTES_LOADING_TEST_ID} size="xxl" />
+              )}
+              {fetchStatus === ReqStatus.Succeeded && (
+                <SuperTimelineNotes
+                  notes={notes}
+                  superTimelineSourceIds={superTimelineSourceIds}
+                  superTimelineSourceTitles={superTimelineSourceTitles}
+                  superTimelineDescriptions={superTimelineDescriptions}
+                />
+              )}
+            </>
+          )}
+          {!isSuperTimeline && (
             <EuiFlexGroup data-test-subj={'new-notes-screen'}>
               <EuiFlexItem>
                 {timelineDescription}
@@ -228,12 +262,9 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = React.memo(({ t
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 ) : (
-                  <NotesList
-                    notes={notes}
-                    options={{ hideTimelineIcon: true, hideDeleteIcon: isSuperTimeline }}
-                  />
+                  <NotesList notes={notes} options={{ hideTimelineIcon: true }} />
                 )}
-                {!isSuperTimeline && canCreateNotes && (
+                {canCreateNotes && (
                   <>
                     <EuiSpacer />
                     <AddNote timelineId={timeline.savedObjectId} disableButton={!isTimelineSaved}>

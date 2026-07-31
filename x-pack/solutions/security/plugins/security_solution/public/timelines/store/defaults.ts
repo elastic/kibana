@@ -104,6 +104,8 @@ export const timelineDefaults: SubsetTimelineModel &
   rowHeight: 3,
   isSuperTimeline: false,
   superTimelineSourceIds: [],
+  superTimelineSourceTitles: [],
+  superTimelineDescriptions: [],
 };
 
 export const getTimelineManageDefaults = (id: string) => ({

@@ -84,6 +84,12 @@ export const ERROR_TITLE = i18n.translate(
   { defaultMessage: 'Failed to open Super Timeline' }
 );
 
+export const unnamedTimeline = (index: number) =>
+  i18n.translate('xpack.securitySolution.timeline.superTimeline.unnamedTimeline', {
+    defaultMessage: 'Timeline {number}',
+    values: { number: index + 1 },
+  });
+
 export const NO_NOTES_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.superTimeline.noNotesTitle',
   { defaultMessage: 'No notes across the selected timelines' }
