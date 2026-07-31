@@ -116,9 +116,18 @@ export const RulesListTableContainer: React.FC<RulesListTableContainerProps> = (
     if (!ruleToDelete) {
       return;
     }
+    const deletedId = ruleToDelete.id;
     deleteRuleMutation.mutate(
-      { id: ruleToDelete.id, name: ruleToDelete.metadata.name },
+      { id: deletedId, name: ruleToDelete.metadata.name },
       {
+        // Deleted rows can't stay selected — otherwise a stale ID lingers in
+        // the bulk-selection set and a follow-up bulk action would submit it,
+        // surfacing as a spurious per-row error from the server.
+        onSuccess: () => {
+          if (isRowSelected(deletedId)) {
+            onSelectRow(deletedId);
+          }
+        },
         onSettled: () => {
           setRuleToDelete(null);
           setExpandedRuleId(null);
