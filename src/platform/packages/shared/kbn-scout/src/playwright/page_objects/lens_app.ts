@@ -34,6 +34,9 @@ export class LensApp {
   private readonly confirmSaveButton;
   private readonly closeDimensionEditorButton;
   public readonly applyChangesButton;
+  public readonly chartTitle;
+  /** XY legend items (elastic-charts does not expose a `data-test-subj` for these). */
+  public readonly xyLegendItems;
   private readonly goBackToAppButton;
   private readonly discardChangesModal;
   private readonly confirmModalConfirmButton;
@@ -51,18 +54,107 @@ export class LensApp {
       'lns-indexPattern-dimensionContainerClose'
     );
     this.applyChangesButton = this.page.testSubj.locator('lnsApplyChanges__apply');
+    this.chartTitle = this.page.testSubj.locator('lns_ChartTitle');
+    this.xyLegendItems = this.page.locator('.echLegendItem');
     this.goBackToAppButton = this.page.testSubj.locator('lnsApp_goBackToAppButton');
     this.discardChangesModal = this.page.testSubj.locator('lnsApp_discardChangesModalOrigin');
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
   }
 
   async waitForLensApp() {
-    await this.lensApp.waitFor({ state: 'visible' });
+    await this.lensApp.waitFor({ state: 'visible', timeout: 20_000 });
   }
 
   async openFullEditor() {
     await this.page.gotoApp('lens');
     await this.waitForLensApp();
+  }
+
+  /**
+   * Navigates directly to the Lens editor for a saved visualization and waits for its
+   * chart to render. Prefer this over going through the visualize listing page when the
+   * saved-object id is known (e.g. fixture-loaded or freshly-saved visualizations).
+   *
+   * @param id - saved-object id of the Lens visualization
+   * @param chartTestSubj - `data-test-subj` of the rendered chart container
+   *   (e.g. `xyVisChart`, `partitionVisChart`, `mtrVis`, `legacyMtrVis`,
+   *   `lnsVisualizationContainer` for datatable).
+   */
+  async openEditor(id: string, chartTestSubj: string) {
+    await this.page.gotoApp('lens', { hash: `/edit/${id}` });
+    await this.waitForVisualization(chartTestSubj);
+  }
+
+  /**
+   * Adds a new KQL filter row to a filters-aggregation dimension editor.
+   *
+   * The query input debounces its `onChange` (~256ms; see `useDebouncedValue`
+   * in `@kbn/visualization-utils`), so the typed query only reaches the parent
+   * `filter.input` after the debounce fires. If we close the popover before
+   * then, `FilterPopover.closePopover` resets the input back to the default
+   * (`localFilter.input = filter.input`) and the filter reverts to
+   * "All records". We wait for the label input's placeholder — which mirrors
+   * `localFilter.input.query` — to match the typed query as the visible DOM
+   * signal that the debounce has flushed.
+   */
+  async addFilterToAgg(kql: string) {
+    await this.page.testSubj.click('lns-newBucket-add');
+    const queryInput = this.page.testSubj.locator('indexPattern-filters-queryStringInput');
+    await queryInput.waitFor({ state: 'visible' });
+    await queryInput.pressSequentially(kql);
+    await this.page.waitForFunction((expected) => {
+      const el = document.querySelector('[data-test-subj="indexPattern-filters-label"]');
+      return el instanceof HTMLInputElement && el.placeholder === expected;
+    }, kql);
+    // Close the popover by clicking its trigger button (identified by the typed query text).
+    // This toggles `activeFilterId` without invoking `closePopover()` (which resets
+    // localFilter.input to the prop value and can race with React's prop propagation).
+    await this.page.testSubj
+      .locator('indexPattern-filters-existingFilterTrigger')
+      .filter({ hasText: kql })
+      .click();
+  }
+
+  /** Returns the visible label of every existing filter row in a filters-aggregation editor. */
+  async getFiltersAggLabels(): Promise<string[]> {
+    const filters = await this.page.testSubj
+      .locator('indexPattern-filters-existingFilterContainer')
+      .all();
+    return Promise.all(filters.map(async (filter) => (await filter.innerText()).trim()));
+  }
+
+  /** Reads the current title displayed in the Lens editor header. */
+  async getChartTitle(): Promise<string> {
+    return (await this.page.testSubj.locator('lns_ChartTitle').innerText()).trim();
+  }
+
+  /**
+   * Switches the data view of a Lens layer via the layer's data view picker.
+   *
+   * @param dataViewTitle - title of the target data view (must already exist in the space).
+   * @param layerIndex - layer to switch; defaults to the first layer.
+   */
+  async switchLayerIndexPattern(dataViewTitle: string, layerIndex = 0) {
+    const trigger = this.getLayerIndexPatternTrigger(layerIndex);
+    await trigger.click();
+    const switcher = this.page.testSubj.locator('indexPattern-switcher');
+    await switcher.waitFor({ state: 'visible' });
+    await this.page.testSubj.typeWithDelay('indexPattern-switcher--input', dataViewTitle);
+    await switcher.locator(`[data-test-subj="dataView-${dataViewTitle}"]`).click();
+    await switcher.waitFor({ state: 'hidden' });
+  }
+
+  /** Returns the title of the currently selected data view for the given layer. */
+  async getSelectedLayerIndexPattern(layerIndex = 0): Promise<string> {
+    const trigger = this.getLayerIndexPatternTrigger(layerIndex);
+    await trigger.waitFor({ state: 'visible' });
+    return (await trigger.innerText()).trim();
+  }
+
+  private getLayerIndexPatternTrigger(layerIndex: number) {
+    return layerIndex === 0
+      ? this.page.testSubj.locator('lns_layerIndexPatternLabel')
+      : this.page.testSubj.locator(`lns-layerPanel-${layerIndex} > lns_layerIndexPatternLabel`);
   }
 
   /**
@@ -220,6 +312,15 @@ export class LensApp {
     await this.closeDimensionEditor();
   }
 
+  /** Enables empty rows for the current date histogram dimension. */
+  async enableIncludeEmptyRows() {
+    const includeEmptyRows = this.page.testSubj.locator('indexPattern-include-empty-rows');
+    await includeEmptyRows.click();
+    await includeEmptyRows
+      .and(this.page.locator('[aria-checked="true"]'))
+      .waitFor({ state: 'visible' });
+  }
+
   /** Closes the open dimension editor flyout. */
   async closeDimensionEditor() {
     await this.closeDimensionEditorButton.click();
@@ -360,7 +461,9 @@ export class LensApp {
     await operationButton.waitFor({ state: 'visible' });
     await operationButton.scrollIntoViewIfNeeded();
     await operationButton.click();
-    await expect(operationButton).toHaveAttribute('aria-pressed', 'true');
+    await operationButton
+      .and(this.page.locator('[aria-pressed="true"]'))
+      .waitFor({ state: 'visible' });
   }
 
   private async selectField(field: string) {
@@ -423,7 +526,7 @@ export class LensApp {
    */
   async waitForVisualization(chartSubj = 'lnsVisualizationContainer') {
     const workspace = this.page.testSubj.locator('lnsWorkspace');
-    await workspace.waitFor({ state: 'visible' });
+    await workspace.waitFor({ state: 'visible', timeout: 20_000 });
 
     const container = workspace.getByTestId(chartSubj);
     await container.waitFor({ state: 'visible' });

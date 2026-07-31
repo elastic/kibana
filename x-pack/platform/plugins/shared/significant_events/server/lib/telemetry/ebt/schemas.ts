@@ -14,7 +14,6 @@ import type {
   AgentToolKnowledgeIndicatorIdentificationStartedProps,
   CodeAnalysisGroundingProps,
   DetectionScanProps,
-  EndpointLatencyProps,
   KnowledgeIndicatorFeaturesIdentifiedProps,
   KnowledgeIndicatorQueriesGeneratedProps,
   KnowledgeIndicatorOnboardingScheduledProps,
@@ -22,27 +21,6 @@ import type {
   AgentToolDiscoveryWriteProps,
   AgentToolEventSearchProps,
 } from './types';
-
-const endpointLatencySchema: RootSchema<EndpointLatencyProps> = {
-  name: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Stream',
-    },
-  },
-  endpoint: {
-    type: 'keyword',
-    _meta: {
-      description: 'The name of the Streams endpoint',
-    },
-  },
-  duration_ms: {
-    type: 'long',
-    _meta: {
-      description: 'The duration of the endpoint in milliseconds',
-    },
-  },
-};
 
 const knowledgeIndicatorQueriesGeneratedSchema: RootSchema<KnowledgeIndicatorQueriesGeneratedProps> =
   {
@@ -755,7 +733,6 @@ export {
   codeAnalysisGroundingSchema,
   detectionScanSchema,
   discoveryTriggeredSchema,
-  endpointLatencySchema,
   knowledgeIndicatorFeaturesIdentifiedSchema,
   knowledgeIndicatorQueriesGeneratedSchema,
   onboardingScheduledSchema,
