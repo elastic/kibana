@@ -16,7 +16,7 @@ import {
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
-} from './management_apps';
+} from '@kbn/alerting-v2-constants';
 
 type ValueOf<T> = T[keyof T];
 type NestedValueOf<T extends Record<string, Record<string, string>>> = ValueOf<{

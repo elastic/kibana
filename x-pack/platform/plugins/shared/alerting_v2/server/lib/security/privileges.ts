@@ -14,7 +14,7 @@ import {
   ALERTING_V2_FEATURES,
   type AlertingV2FeatureDefinition,
 } from '../../../common/feature_privileges';
-import { ALERTING_V2_SECTION_ID } from '../../../common/management_apps';
+import { ALERTING_V2_SECTION_ID } from '@kbn/alerting-v2-constants';
 
 export { ALERTING_V2_API_PRIVILEGES };
 
