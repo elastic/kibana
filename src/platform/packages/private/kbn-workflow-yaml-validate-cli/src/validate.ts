@@ -12,6 +12,7 @@ import { validateSemantics } from './validate_semantics';
 import { validateLiquid } from './validate_liquid';
 import type { SchemaValidateFn } from './create_schema_validator';
 import type { ValidationIssue, ValidationOutcome, VariantMode } from './types';
+import { isErrorIssue } from './types';
 
 export interface ValidateWorkflowYamlInput {
   /** Path used only for reporting. */
@@ -45,7 +46,8 @@ export const validateWorkflowYaml = async ({
 
   return {
     file,
-    ok: issues.length === 0,
+    // Warnings (e.g. skipped LiquidJS positions) never fail the run.
+    ok: !issues.some(isErrorIssue),
     isTemplate: schemaResult.isTemplate,
     variant: schemaResult.variant,
     issues,

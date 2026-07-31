@@ -9,9 +9,15 @@
 
 import type { Document } from 'yaml';
 import type { ErrorObject } from 'ajv';
-import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
+import {
+  parseYamlToJSONWithoutValidation,
+  isVariableValue,
+  isDynamicValue,
+  isLiquidTagValue,
+} from '@kbn/workflows-yaml';
 import { TemplateMetadataSchema } from '@kbn/workflows-library';
 import type { ValidationIssue, ValidationVariant, VariantMode } from './types';
+import { isErrorIssue } from './types';
 import type { SchemaValidateFn } from './create_schema_validator';
 
 /** Root key that marks a file as an installable library template. */
@@ -39,7 +45,7 @@ export interface FileSchemaResult {
   variant: ValidationVariant | null;
   /** Schema + metadata + yaml-syntax issues. */
   issues: ValidationIssue[];
-  /** True when no schema/metadata/syntax issues were found (gate for the semantic layer). */
+  /** True when no error-severity schema/metadata/syntax issues were found (gate for the semantic layer). Warnings do not block it. */
   schemaPassed: boolean;
   /** The workflow object (template-metadata stripped) for the semantic layer, or null. */
   body: Record<string, unknown> | null;
@@ -53,6 +59,50 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 /** ajv `instancePath` (e.g. `/steps/0/type`) -> dotted path (`steps.0.type`). */
 const formatInstancePath = (instancePath: string): string =>
   instancePath === '' ? '<root>' : instancePath.replace(/^\//, '').replace(/\//g, '.');
+
+/** Undo JSON Pointer escaping (`~1` -> `/`, `~0` -> `~`) for one path segment. */
+const decodePointerSegment = (segment: string): string =>
+  segment.replace(/~1/g, '/').replace(/~0/g, '~');
+
+/** Resolve the value the parsed document holds at an ajv JSON-Pointer `instancePath`. */
+const resolveInstanceValue = (target: unknown, instancePath: string): unknown => {
+  if (instancePath === '') {
+    return target;
+  }
+  let value: unknown = target;
+  for (const segment of instancePath.split('/').slice(1).map(decodePointerSegment)) {
+    if (value == null || typeof value !== 'object') {
+      return undefined;
+    }
+    value = (value as Record<string, unknown>)[segment];
+  }
+  return value;
+};
+
+/**
+ * A value is a LiquidJS expression when it is a whole-value `{{ }}` / `${{ }}`,
+ * or contains a `{% %}` tag — the exact predicates the in-Kibana runtime uses to
+ * suppress schema errors. Kept in lock-step so the CLI, runtime, and weaver share
+ * one notion of "this value is dynamic".
+ */
+const isLiquidjsValue = (value: unknown): boolean =>
+  isVariableValue(value) || isDynamicValue(value) || isLiquidTagValue(value);
+
+/**
+ * Instance paths whose *own* value is a LiquidJS expression. Scalar-only: a
+ * structural error anchored on a parent object (e.g. a templated step `type`,
+ * reported at `/steps/N`) resolves to an object, not a template, so it is not
+ * collected and stays a failing error.
+ */
+const collectLiquidPaths = (errors: ErrorObject[], target: unknown): Set<string> => {
+  const paths = new Set<string>();
+  for (const error of errors) {
+    if (isLiquidjsValue(resolveInstanceValue(target, error.instancePath))) {
+      paths.add(error.instancePath);
+    }
+  }
+  return paths;
+};
 
 interface DiscriminatorParams {
   error?: string;
@@ -161,8 +211,14 @@ const pruneBranchNoise = (errors: ErrorObject[]): ErrorObject[] => {
  * `anyOf` wrappers also fire ("must be string" / "must match a schema in anyOf")
  * one level up; the deeper, specific error already explains the failure.
  */
-const pruneAncestorNoise = (errors: ErrorObject[]): ErrorObject[] => {
-  const paths = errors.map((error) => error.instancePath);
+const pruneAncestorNoise = (
+  errors: ErrorObject[],
+  extraAnchors: ReadonlySet<string> = new Set()
+): ErrorObject[] => {
+  // Anchors are the surviving errors plus any LiquidJS-valued paths: wrapper
+  // noise firing one level up from a tolerated template value is just as
+  // uninformative as noise above a deeper real error.
+  const paths = [...errors.map((error) => error.instancePath), ...extraAnchors];
   const isStrictAncestorOfAny = (path: string): boolean =>
     paths.some((other) => other !== path && other.startsWith(`${path}/`));
   return errors.filter((error) => !(isNoise(error) && isStrictAncestorOfAny(error.instancePath)));
@@ -192,14 +248,30 @@ const dedupeAndCap = (issues: ValidationIssue[]): ValidationIssue[] => {
   return capped;
 };
 
+/** One non-failing warning per LiquidJS-valued path (collapses the oneOf/anyOf noise there). */
+const toLiquidjsWarnings = (liquidPaths: ReadonlySet<string>): ValidationIssue[] =>
+  [...liquidPaths].map((path) => ({
+    source: 'liquidjs-expression' as const,
+    severity: 'warning' as const,
+    message: 'strict validation skipped (liquidjs expression)',
+    path: formatInstancePath(path),
+  }));
+
 /**
- * Turn ajv's raw errors into readable, de-noised issues: prune the tolerant
- * `anyOf` template-value noise (both same-location and ancestor), then map,
- * dedupe and cap.
+ * Turn ajv's raw errors into readable, de-noised issues. Errors whose value is a
+ * LiquidJS expression are reclassified as a single non-failing warning per path
+ * (mirroring the runtime's suppression); the rest are pruned of tolerant
+ * `anyOf`/`oneOf` template-value noise (same-location and ancestor), then mapped,
+ * deduped and capped as failing errors.
  */
-const toSchemaIssues = (errors: ErrorObject[]): ValidationIssue[] => {
-  const denoised = pruneAncestorNoise(pruneBranchNoise(errors));
-  return dedupeAndCap(denoised.map(toIssue));
+const toSchemaIssues = (errors: ErrorObject[], target: unknown): ValidationIssue[] => {
+  const liquidPaths = collectLiquidPaths(errors, target);
+
+  const realErrors = errors.filter((error) => !liquidPaths.has(error.instancePath));
+  const denoised = pruneAncestorNoise(pruneBranchNoise(realErrors), liquidPaths);
+  const errorIssues = dedupeAndCap(denoised.map(toIssue));
+
+  return [...errorIssues, ...toLiquidjsWarnings(liquidPaths)];
 };
 
 /**
@@ -290,7 +362,7 @@ export const validateFile = async ({
       path: '<root>',
     });
   } else if (schemaErrors.length > 0) {
-    const schemaIssues = toSchemaIssues(schemaErrors);
+    const schemaIssues = toSchemaIssues(schemaErrors, target);
     // Safety net: never drop a failure to zero issues.
     issues.push(
       ...(schemaIssues.length > 0
@@ -303,7 +375,9 @@ export const validateFile = async ({
     isTemplate,
     variant,
     issues,
-    schemaPassed: issues.length === 0,
+    // Warnings (e.g. skipped LiquidJS positions) do not gate the semantic layer;
+    // only error-severity issues do.
+    schemaPassed: !issues.some(isErrorIssue),
     body,
     document,
   };

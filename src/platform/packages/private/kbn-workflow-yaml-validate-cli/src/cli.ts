@@ -98,8 +98,10 @@ const runCli = () =>
       }
 
       if (summaryOnly) {
+        // Surface failures and pass-with-warnings files so skipped LiquidJS
+        // positions are not silently hidden in summary-only mode.
         for (const outcome of outcomes) {
-          if (!outcome.ok) {
+          if (!outcome.ok || outcome.issues.length > 0) {
             printFileResult(log, outcome);
           }
         }

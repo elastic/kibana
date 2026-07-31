@@ -10,6 +10,7 @@
 import type { ErrorObject } from 'ajv';
 import { validateFile } from './validate_file';
 import type { SchemaValidateFn } from './create_schema_validator';
+import type { ValidationIssue } from './types';
 
 // `validateFile` takes an injected `SchemaValidateFn` (the CLI backs it with a
 // worker thread running ajv). Here we stub that boundary with `ErrorObject[]`s
@@ -276,6 +277,182 @@ describe('validateFile', () => {
           path: 'steps.0',
           message: "must NOT have additional property 'connector-id'",
         },
+      ]);
+    });
+  });
+
+  describe('liquidjs-expression warnings', () => {
+    /** A single-step workflow whose `with.url` holds `value`. */
+    const withUrl = (value: string): string =>
+      [
+        'version: "1"',
+        'steps:',
+        '  - name: lookup',
+        '    type: virustotal.scanUrl',
+        '    with:',
+        `      url: ${JSON.stringify(value)}`,
+        '',
+      ].join('\n');
+
+    const oneOfErrorAt = (instancePath: string): ErrorObject =>
+      ({
+        instancePath,
+        schemaPath: '#/properties/with/properties/url/oneOf',
+        keyword: 'oneOf',
+        params: { passingSchemas: [0, 1] },
+        message: 'must match exactly one schema in oneOf',
+      } as ErrorObject);
+
+    const warningsOf = (result: { issues: ValidationIssue[] }) =>
+      result.issues.filter((issue) => issue.severity === 'warning');
+
+    it('downgrades a oneOf failure at a whole-value {{ }} to a non-failing warning', async () => {
+      const result = await validateFile({
+        yaml: withUrl('{{ liquidjs.item }}'),
+        validateSchema: failFn([oneOfErrorAt('/steps/0/with/url')]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(true);
+      expect(schemaIssuesOf(result)).toEqual([]);
+      expect(warningsOf(result)).toEqual([
+        {
+          source: 'liquidjs-expression',
+          severity: 'warning',
+          message: 'strict validation skipped (liquidjs expression)',
+          path: 'steps.0.with.url',
+        },
+      ]);
+    });
+
+    it.each([
+      ['dynamic ${{ }}', '${{ steps.a.output }}'],
+      ['liquid tag {% %}', '{% if x %}'],
+    ])('downgrades a %s whole value', async (_label, value) => {
+      const result = await validateFile({
+        yaml: withUrl(value),
+        validateSchema: failFn([oneOfErrorAt('/steps/0/with/url')]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(true);
+      expect(warningsOf(result)).toHaveLength(1);
+      expect(schemaIssuesOf(result)).toEqual([]);
+    });
+
+    it('keeps an EMBEDDED {{ }} inside a longer string as a failing error (runtime parity)', async () => {
+      const result = await validateFile({
+        yaml: withUrl('https://{{ inputs.host }}/x'),
+        validateSchema: failFn([oneOfErrorAt('/steps/0/with/url')]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(false);
+      expect(warningsOf(result)).toEqual([]);
+      expect(schemaIssuesOf(result)).toEqual([
+        {
+          source: 'schema',
+          path: 'steps.0.with.url',
+          message: 'must match exactly one schema in oneOf',
+        },
+      ]);
+    });
+
+    it('prunes tolerant wrapper noise at ancestors of a templated value', async () => {
+      const result = await validateFile({
+        yaml: withUrl('{{ liquidjs.item }}'),
+        validateSchema: failFn([
+          oneOfErrorAt('/steps/0/with/url'),
+          {
+            instancePath: '/steps/0/with',
+            schemaPath: '#/type',
+            keyword: 'type',
+            params: { type: 'string' },
+            message: 'must be string',
+          },
+          {
+            instancePath: '/steps/0/with',
+            schemaPath: '#/properties/with/anyOf',
+            keyword: 'anyOf',
+            params: {},
+            message: 'must match a schema in anyOf',
+          },
+          ...STEPS_WRAPPER_NOISE,
+        ] as ErrorObject[]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(true);
+      expect(schemaIssuesOf(result)).toEqual([]);
+      expect(warningsOf(result)).toHaveLength(1);
+    });
+
+    it('keeps a real error at a non-templated sibling while warning on the templated value', async () => {
+      const yaml = [
+        'version: "1"',
+        'steps:',
+        '  - name: lookup',
+        '    type: virustotal.scanUrl',
+        '    with:',
+        '      url: "{{ liquidjs.item }}"',
+        '  - name: other',
+        '    type: console',
+        '    connector-id: nope',
+        '',
+      ].join('\n');
+      const result = await validateFile({
+        yaml,
+        validateSchema: failFn([
+          oneOfErrorAt('/steps/0/with/url'),
+          {
+            instancePath: '/steps/1',
+            schemaPath: '#/additionalProperties',
+            keyword: 'additionalProperties',
+            params: { additionalProperty: 'connector-id' },
+            message: 'must NOT have additional properties',
+          },
+        ] as ErrorObject[]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(false);
+      expect(schemaIssuesOf(result)).toEqual([
+        {
+          source: 'schema',
+          path: 'steps.1',
+          message: "must NOT have additional property 'connector-id'",
+        },
+      ]);
+      expect(warningsOf(result)).toEqual([
+        {
+          source: 'liquidjs-expression',
+          severity: 'warning',
+          message: 'strict validation skipped (liquidjs expression)',
+          path: 'steps.0.with.url',
+        },
+      ]);
+    });
+
+    it('keeps a templated step type as a failing error (structural, anchored on the object)', async () => {
+      const yaml = [
+        'version: "1"',
+        'steps:',
+        '  - name: lookup',
+        '    type: "{{ inputs.type }}"',
+        '',
+      ].join('\n');
+      const result = await validateFile({
+        yaml,
+        validateSchema: failFn([
+          {
+            instancePath: '/steps/0',
+            schemaPath: '#/discriminator',
+            keyword: 'discriminator',
+            params: { error: 'mapping', tag: 'type', tagValue: '{{ inputs.type }}' },
+            message: 'value of tag "type" must be in oneOf',
+          },
+        ] as ErrorObject[]),
+        variantMode: 'strict',
+      });
+      expect(result.schemaPassed).toBe(false);
+      expect(warningsOf(result)).toEqual([]);
+      expect(schemaIssuesOf(result)).toEqual([
+        { source: 'schema', path: 'steps.0.type', message: 'unknown step type "{{ inputs.type }}"' },
       ]);
     });
   });
