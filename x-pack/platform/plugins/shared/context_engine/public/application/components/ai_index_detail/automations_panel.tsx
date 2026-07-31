@@ -11,7 +11,6 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
@@ -127,17 +126,43 @@ export const AutomationsPanel = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : !isManaged && !isLoading ? (
-            <EuiButtonEmpty
-              size="s"
-              iconType="pencil"
-              onClick={startEditing}
-              isDisabled={aiIndex === undefined}
-              data-test-subj="contextEditAutomationsButton"
-            >
-              {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.editButton', {
-                defaultMessage: 'Edit',
-              })}
-            </EuiButtonEmpty>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="plusInCircle"
+                  onClick={handleCreate}
+                  isLoading={isCreating}
+                  isDisabled={isBusy || !canAddMore}
+                  title={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.automations.createAutomationTooltip',
+                    { defaultMessage: 'Create a new automation' }
+                  )}
+                  aria-label={i18n.translate(
+                    'xpack.contextEngine.aiIndexDetail.automations.createAutomationAriaLabel',
+                    { defaultMessage: 'Create automation' }
+                  )}
+                  data-test-subj="contextCreateAutomationButton"
+                >
+                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
+                    defaultMessage: 'Create automation',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  size="s"
+                  iconType="pencil"
+                  onClick={startEditing}
+                  isDisabled={aiIndex === undefined}
+                  data-test-subj="contextEditAutomationsButton"
+                >
+                  {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.editButton', {
+                    defaultMessage: 'Edit',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -155,35 +180,6 @@ export const AutomationsPanel = ({
         <EuiSkeletonText lines={2} data-test-subj="contextAiIndexAutomationsLoading" />
       ) : (
         <>
-          {isEditing && (
-            <>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    iconType="popout"
-                    iconSide="right"
-                    onClick={handleCreate}
-                    isLoading={isCreating}
-                    isDisabled={isBusy || !canAddMore}
-                    data-test-subj="contextCreateAutomationButton"
-                  >
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createButton', {
-                      defaultMessage: 'Create a new automation',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs" color="subdued">
-                    {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.createHint', {
-                      defaultMessage: 'Opens the workflow editor in a new page.',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiHorizontalRule margin="m" />
-            </>
-          )}
           {automations.length === 0 && !isEditing ? (
             <EuiEmptyPrompt
               iconType="indexRuntime"

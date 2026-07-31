@@ -347,8 +347,7 @@ describe('AiIndexDetailPage', () => {
 
     await waitForElementToBeRemoved(() => screen.queryByTestId('contextAiIndexTitleLoading'));
 
-    fireEvent.click(screen.getByTestId('contextEditAutomationsButton'));
-    fireEvent.click(await screen.findByTestId('contextCreateAutomationButton'));
+    fireEvent.click(screen.getByTestId('contextCreateAutomationButton'));
 
     await waitFor(() => {
       expect(mockCreateWorkflow).toHaveBeenCalledWith({
