@@ -17,6 +17,7 @@ import {
   type CompactBulkError,
   toCompactBulkError,
 } from '../bulk_write';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 
 /**
  * Input for writing a significant event document. Derived from the canonical SignificantEvent
@@ -136,26 +137,45 @@ export async function eventsWriteBulkHandler({
 
   const createResults = extractCreateResults(response, prepared.length, 'Event');
 
-  return prepared.map(({ index, eventId, eventUuid, status }, responseIndex) => {
-    const detail = createResults[responseIndex];
-    if (detail.error) {
+  const results = prepared.map<EventsWriteBulkResult>(
+    ({ index, eventId, eventUuid, status }, responseIndex) => {
+      const detail = createResults[responseIndex];
+      if (detail.error) {
+        return {
+          index,
+          event_id: eventId,
+          status,
+          written: false,
+          reason: 'bulk_error',
+          error: toCompactBulkError(detail),
+        };
+      }
+
       return {
         index,
+        event_uuid: eventUuid,
         event_id: eventId,
         status,
-        written: false,
-        reason: 'bulk_error',
-        error: toCompactBulkError(detail),
+        written: true,
       };
     }
-    return {
-      index,
-      event_uuid: eventUuid,
-      event_id: eventId,
-      status,
-      written: true,
-    };
+  );
+
+  // Notify subscribed workflows (fire-and-forget) for successfully written docs only: no prior
+  // version -> created; a prior version with a different status (e.g. triage re-open) -> status
+  // changed. Emission is best-effort and guarded, so it never affects the returned results.
+  prepared.forEach(({ eventId, document }, responseIndex) => {
+    if (createResults[responseIndex].error) {
+      return;
+    }
+    emitSignificantEventWriteTriggers({
+      eventClient,
+      significantEvent: document,
+      priorSignificantEvent: latestEvents.get(eventId),
+    });
   });
+
+  return results;
 }
 
 /** Single-item adapter retained for callers such as `event_create` that require thrown item errors. */

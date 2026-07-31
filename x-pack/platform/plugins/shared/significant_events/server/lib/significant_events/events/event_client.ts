@@ -40,6 +40,11 @@ import {
   type eventsMappings,
 } from './data_stream';
 import { FIELD_EVENT_UUID, FIELD_EVENT_ID } from '../field_names';
+import type { TriggerEmitter } from '../../../workflows/triggers/emit';
+import type {
+  SignificantEventsTriggerId,
+  SignificantEventsTriggerPayloadMap,
+} from '../../../../common/workflows/triggers';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
 
@@ -113,8 +118,17 @@ export class EventClient {
       dataStreamClient: EventDataStreamClient;
       esClient: ElasticsearchClient;
       space: string;
+      triggerEmitter?: TriggerEmitter;
     }
   ) {}
+
+  /** Fire-and-forget: emits a workflow trigger event if an emitter is wired, otherwise a no-op. */
+  emitTrigger<T extends SignificantEventsTriggerId>(
+    triggerId: T,
+    payload: SignificantEventsTriggerPayloadMap[T]
+  ): void {
+    this.clients.triggerEmitter?.(triggerId, payload);
+  }
 
   private buildWhere(options: EventsFilterOptions): ESQLAstExpression | undefined {
     let where: ESQLAstExpression | undefined;

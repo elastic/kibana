@@ -22,6 +22,7 @@ import { z } from '@kbn/zod/v4';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
 import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
+import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
@@ -173,7 +174,29 @@ const eventsBulkCreateRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return getEventClient().bulkCreate(params.body);
+    const eventClient = getEventClient();
+    // Snapshot prior versions before the write so created vs status-changed can be distinguished.
+    const priorByEventId = await eventClient.findLatestByEventIds(
+      params.body.map((event) => event.event_id)
+    );
+
+    const response = await eventClient.bulkCreate(params.body);
+
+    // Notify subscribed workflows (fire-and-forget) for successfully written docs only. Emission is
+    // best-effort and guarded (see emitSignificantEventWriteTriggers), so it never affects the
+    // create response.
+    params.body.forEach((significantEvent, index) => {
+      if (response.items[index]?.create?.error) {
+        return;
+      }
+      emitSignificantEventWriteTriggers({
+        eventClient,
+        significantEvent,
+        priorSignificantEvent: priorByEventId.get(significantEvent.event_id),
+      });
+    });
+
+    return response;
   },
 });
 

@@ -14,6 +14,7 @@ import { DiscoveryService, discoveriesDataStream } from './discoveries';
 import type { DiscoveryClient } from './discoveries';
 import { EventService, eventsDataStream } from './events';
 import type { EventClient } from './events';
+import type { TriggerEmitter } from '../../workflows/triggers/emit';
 import { memoriesDataStream } from '../../memory_and_investigation/lib/memory';
 import { memoryHistoryDataStream } from '../../memory_and_investigation/lib/memory/history_data_stream';
 
@@ -49,15 +50,17 @@ export function createSignificantEventsClients({
   services,
   esClient,
   space,
+  triggerEmitter,
 }: {
   services: SignificantEventsServices;
   esClient: ElasticsearchClient;
   space: string;
+  triggerEmitter?: TriggerEmitter;
 }): SignificantEventsClients {
   return {
     getDetectionClient: () => services.detection.getClient({ esClient, space }),
     getDiscoveryClient: () => services.discovery.getClient({ esClient, space }),
-    getEventClient: () => services.event.getClient({ esClient, space }),
+    getEventClient: () => services.event.getClient({ esClient, space, triggerEmitter }),
   };
 }
 

@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
 import type { EventClient } from './event_client';
+import { emitSignificantEventInvestigationTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 
 export const attachInvestigationToEvent = async ({
   eventClient,
@@ -84,6 +85,14 @@ export const attachInvestigationToEvent = async ({
   };
 
   await eventClient.bulkCreate([updatedEvent], { throwOnFail: true });
+
+  emitSignificantEventInvestigationTriggers({
+    eventClient,
+    significantEvent: updatedEvent,
+    previousInvestigations: existing,
+    nextInvestigations: investigations,
+    targetedWorkflowExecutionId: investigation.workflow_execution_id,
+  });
 
   return { event_uuid: nextEventUuid, updated: 1, ignored: 0 };
 };

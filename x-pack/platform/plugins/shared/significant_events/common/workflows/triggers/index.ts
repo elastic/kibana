@@ -71,6 +71,21 @@ const investigationCompletedSchema = investigationEventSchema.extend({
 
 export type InvestigationCompletedTriggerPayload = z.infer<typeof investigationCompletedSchema>;
 
+/**
+ * Maps each significant-events workflow trigger id to the exact payload shape emitted for it. Used
+ * to type the server-side emitter end-to-end so a call site cannot pass the wrong payload for a
+ * given trigger id.
+ */
+export interface SignificantEventsTriggerPayloadMap {
+  [EVENT_CREATED_TRIGGER_ID]: SignificantEventTriggerBasePayload;
+  [EVENT_STATUS_CHANGED_TRIGGER_ID]: EventStatusChangedTriggerPayload;
+  [INVESTIGATION_STARTED_TRIGGER_ID]: InvestigationStartedTriggerPayload;
+  [INVESTIGATION_COMPLETED_TRIGGER_ID]: InvestigationCompletedTriggerPayload;
+}
+
+/** Union of every significant-events workflow trigger id. */
+export type SignificantEventsTriggerId = keyof SignificantEventsTriggerPayloadMap;
+
 export const eventCreatedTriggerCommonDefinition: CommonTriggerDefinition = {
   id: EVENT_CREATED_TRIGGER_ID,
   stability: 'tech_preview',
