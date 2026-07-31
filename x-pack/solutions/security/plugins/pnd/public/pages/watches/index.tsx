@@ -102,7 +102,12 @@ export const WatchesPage: React.FC = () => {
           <>
             {error ? (
               <>
-                <EuiCallOut color="warning" iconType="warning" title={i18n.STALE_DATA_WARNING} />
+                <EuiCallOut
+                  announceOnMount
+                  color="warning"
+                  iconType="warning"
+                  title={i18n.STALE_DATA_WARNING}
+                />
                 <EuiSpacer size="m" />
               </>
             ) : null}

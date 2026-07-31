@@ -41,6 +41,27 @@ jest.mock('../hooks/use_fetch_stream_features', () => ({
   useFetchStreamFeaturesByStream: () => new Map<string, never[]>(),
 }));
 
+jest.mock('../detection/change_point_lens_chart', () => ({
+  ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
+}));
+
+jest.mock('../hooks/use_fetch_detection_occurrences', () => ({
+  useFetchDetectionOccurrences: () => ({
+    data: new Map([
+      [
+        'rule-uuid-001',
+        [
+          { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
+          { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
+        ],
+      ],
+    ]),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  }),
+}));
+
 jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
     data: {
@@ -48,6 +69,7 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
         {
           detection_id: 'det-1',
           rule_name: 'latency-p95-spike',
+          rule_uuid: 'rule-uuid-001',
           stream_name: 'logs.web-frontend',
           change_point_type: 'spike',
           '@timestamp': '2026-07-10T12:00:00Z',
