@@ -36349,7 +36349,6 @@
     "xpack.observability_onboarding.addDataPageV2.subtitle": "连接您的系统，全面了解日志、指标和跟踪。",
     "xpack.observability_onboarding.apiEndpoints.apiKeyLabel": "API 密钥",
     "xpack.observability_onboarding.apiEndpoints.apiKeyPlaceholder": "暂无 API 密钥",
-    "xpack.observability_onboarding.apiEndpoints.copyButton": "复制到剪贴板",
     "xpack.observability_onboarding.apiEndpoints.createKey": "创建密钥",
     "xpack.observability_onboarding.apiEndpoints.createKeyError": "无法创建 API 密钥",
     "xpack.observability_onboarding.apiEndpoints.createKeyErrorFallback": "创建 API 密钥时出现问题。请重试或联系您的管理员。",
