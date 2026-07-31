@@ -18,6 +18,7 @@ import {
 
 const SOURCE_ID = 'default';
 const SOURCE_CONFIG_PATH = `/api/metrics/source/${SOURCE_ID}`;
+const MODIFIED_SOURCE_NAME = 'Modified Source';
 
 // String literals mirroring InfraRuleType.MetricThreshold / Aggregators.AVERAGE /
 // COMPARATORS.GREATER_THAN — kept inline so the Scout test package does not need to
@@ -94,12 +95,25 @@ test.describe('Infrastructure source configuration', { tag: tags.stateful.classi
   );
 
   test(
+    'persists a changed source name',
+    { tag: tags.serverless.observability.complete },
+    async ({ pageObjects: { metricsSettingsPage } }) => {
+      await metricsSettingsPage.goto();
+      await metricsSettingsPage.setName(MODIFIED_SOURCE_NAME);
+      await metricsSettingsPage.save();
+
+      await metricsSettingsPage.goto();
+      await expect(metricsSettingsPage.nameInput).toHaveValue(MODIFIED_SOURCE_NAME);
+    }
+  );
+
+  test(
     'reflects a non-matching metric index pattern across settings and the inventory',
     { tag: tags.serverless.observability.complete },
     async ({ pageObjects: { inventoryPage, metricsSettingsPage } }) => {
       await test.step('shows the missing-indices callout after saving a non-matching pattern', async () => {
         await metricsSettingsPage.goto();
-        await metricsSettingsPage.setName('Modified Source');
+        await metricsSettingsPage.setName(MODIFIED_SOURCE_NAME);
         await metricsSettingsPage.setMetricIndices('does-not-exist-*');
         await metricsSettingsPage.save();
         await expect(metricsSettingsPage.missingMetricIndicesCallout).toBeVisible({
@@ -135,7 +149,7 @@ test.describe('Infrastructure source configuration', { tag: tags.stateful.classi
     async ({ pageObjects: { inventoryPage, metricsSettingsPage } }) => {
       await test.step('shows the remote-cluster danger callout after saving', async () => {
         await metricsSettingsPage.goto();
-        await metricsSettingsPage.setName('Modified Source');
+        await metricsSettingsPage.setName(MODIFIED_SOURCE_NAME);
         await metricsSettingsPage.setMetricIndices('remote_cluster:metricbeat-*');
         await metricsSettingsPage.save();
         await expect(metricsSettingsPage.remoteClusterDangerCallout).toBeVisible({

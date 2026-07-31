@@ -131,6 +131,8 @@ export const ML_ANOMALIES_INDEX = '.ml-anomalies-shared';
 export const METRICS_AND_LOGS_ARCHIVE =
   'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs';
 
+export const METRICS_AND_LOGS_DATE_WITH_DATA = '10/17/2018 7:58:03 PM';
+
 export const METRICS_AND_LOGS_INDEX_PATTERNS = ['metricbeat-*', 'filebeat-*'];
 
 export const ML_JOB_IDS = [

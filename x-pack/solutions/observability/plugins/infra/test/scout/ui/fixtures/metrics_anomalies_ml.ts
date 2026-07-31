@@ -51,6 +51,26 @@ const readArchiveDocs = (): EsArchiverDoc[] => {
     .filter((doc) => doc.type === 'doc');
 };
 
+const assertExpectedJobConfigs = (jobConfigs: Array<Partial<estypes.MlJob>>) => {
+  const actualJobIds = jobConfigs.map(({ job_id: jobId }) => jobId ?? '<missing job_id>');
+  const actualJobIdSet = new Set(actualJobIds);
+  const expectedJobIdSet = new Set<string>(ML_JOB_IDS);
+  const missingJobIds = ML_JOB_IDS.filter((jobId) => !actualJobIdSet.has(jobId));
+  const unexpectedJobIds = actualJobIds.filter((jobId) => !expectedJobIdSet.has(jobId));
+
+  if (
+    actualJobIds.length !== ML_JOB_IDS.length ||
+    missingJobIds.length > 0 ||
+    unexpectedJobIds.length > 0
+  ) {
+    throw new Error(
+      `Metrics anomalies archive contains unexpected ML job configurations. Expected: ${ML_JOB_IDS.join(
+        ', '
+      )}; actual: ${actualJobIds.join(', ') || 'none'}`
+    );
+  }
+};
+
 // Removes the jobs (and, via the ML API, most of their results and their `ml-job` saved objects)
 // and purges any residual result documents. Deleting a job does not always remove every bulk-
 // indexed result doc, and orphaned results make the ML "create job" API reject the job id with a
@@ -112,6 +132,8 @@ export const loadMetricsAnomaliesMlData = async ({
       }
       return source as Partial<estypes.MlJob>;
     });
+
+  assertExpectedJobConfigs(jobConfigs);
 
   // Start from a clean slate so a previous (possibly crashed) run can't block job creation.
   await purgeMetricsAnomaliesMlData({ mlApi, esClient });

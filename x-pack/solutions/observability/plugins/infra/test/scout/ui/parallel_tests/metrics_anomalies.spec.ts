@@ -21,10 +21,6 @@ import {
 
 const SOURCE_CONFIG_PATH = '/api/metrics/source/default';
 
-interface SourceConfigurationResponse {
-  source: { configuration: { anomalyThreshold: number } };
-}
-
 // The anomaly threshold is stored on the shared default source configuration and read by the
 // anomalies table when it filters results. It's set via the API (rather than the settings form)
 // because it is test setup here, not the behavior under test; only this spec consumes it.
@@ -37,22 +33,11 @@ const setAnomalyThreshold = async (kbnClient: KbnClient, anomalyThreshold: numbe
 };
 
 test.describe('Metrics UI Anomaly Flyout', { tag: tags.stateful.classic }, () => {
-  let originalAnomalyThreshold: number;
-
-  test.beforeAll(async ({ kbnClient }) => {
-    const { data } = await kbnClient.request<SourceConfigurationResponse>({
-      method: 'GET',
-      path: SOURCE_CONFIG_PATH,
-    });
-    originalAnomalyThreshold = data.source.configuration.anomalyThreshold;
-  });
-
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, kbnClient }) => {
+    // Repair state left by a previously interrupted run, and isolate tests that mutate
+    // the shared default source configuration.
+    await setAnomalyThreshold(kbnClient, DEFAULT_ANOMALY_THRESHOLD);
     await browserAuth.loginAsAdmin();
-  });
-
-  test.afterAll(async ({ kbnClient }) => {
-    await setAnomalyThreshold(kbnClient, originalAnomalyThreshold);
   });
 
   test('shows both the Hosts and Kubernetes job cards on the inventory page', async ({

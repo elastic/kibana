@@ -34,15 +34,7 @@ const noLogsPrivileges: KibanaRole = {
 };
 
 test.describe('Logs feature controls - security', { tag: tags.stateful.classic }, () => {
-  // The FTR also asserted the read-only badge for logs privileges, but it checked
-  // it on the post-login page without opening the logs app. The classic Logs UI
-  // (`/app/logs`) is deprecated and redirects minimal-privilege roles to a Logs
-  // Explorer/Discover destination they can't access ("Application not found"), so
-  // there's no stable logs page to read the badge from. The read-only badge
-  // mechanic is fully covered by the infrastructure security suite instead; here
-  // we keep the faithful, deployment-stable check: the logs feature drives nav
-  // link visibility.
-  test('with logs all privileges shows the Logs nav link', async ({
+  test('with logs all privileges shows the Logs nav link without a read-only badge', async ({
     browserAuth,
     pageObjects: { featureControlsPage, collapsibleNav },
   }) => {
@@ -52,6 +44,7 @@ test.describe('Logs feature controls - security', { tag: tags.stateful.classic }
     await expect(featureControlsPage.getNavLink('Logs')).toBeVisible({
       timeout: EXTENDED_TIMEOUT,
     });
+    await expect(featureControlsPage.readOnlyBadge).toBeHidden();
   });
 
   test('with logs read privileges shows the Logs nav link', async ({

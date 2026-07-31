@@ -9,7 +9,7 @@ import type { KibanaRole } from '@kbn/scout-oblt';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
-import { EXTENDED_TIMEOUT } from '../../fixtures/constants';
+import { EXTENDED_TIMEOUT, METRICS_AND_LOGS_DATE_WITH_DATA } from '../../fixtures/constants';
 
 const ES_METRICBEAT_READ = {
   cluster: [],
@@ -34,14 +34,11 @@ const noInfrastructurePrivileges: KibanaRole = {
 };
 
 test.describe('Infrastructure feature controls - security', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ pageObjects: { featureControlsPage } }) => {
-    await featureControlsPage.forceInfraNoData();
-  });
-
   test('with infrastructure all privileges shows the nav link and no read-only badge', async ({
     browserAuth,
     pageObjects: { featureControlsPage, collapsibleNav },
   }) => {
+    await featureControlsPage.forceInfraNoData();
     await browserAuth.loginWithCustomRole(globalInfrastructureAll);
 
     await test.step('shows the Infrastructure nav link', async () => {
@@ -59,10 +56,24 @@ test.describe('Infrastructure feature controls - security', { tag: tags.stateful
     });
   });
 
+  test('with infrastructure all privileges renders inventory data without a read-only badge', async ({
+    browserAuth,
+    pageObjects: { featureControlsPage, inventoryPage },
+  }) => {
+    await browserAuth.loginWithCustomRole(globalInfrastructureAll);
+
+    await inventoryPage.goToPage();
+    await inventoryPage.goToTime(METRICS_AND_LOGS_DATE_WITH_DATA);
+
+    await expect(inventoryPage.waffleMap).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await expect(featureControlsPage.readOnlyBadge).toBeHidden();
+  });
+
   test('with infrastructure read privileges shows the nav link and a read-only badge', async ({
     browserAuth,
     pageObjects: { featureControlsPage, collapsibleNav },
   }) => {
+    await featureControlsPage.forceInfraNoData();
     await browserAuth.loginWithCustomRole(globalInfrastructureRead);
 
     await test.step('shows the Infrastructure nav link', async () => {
@@ -82,6 +93,23 @@ test.describe('Infrastructure feature controls - security', { tag: tags.stateful
         'Read only'
       );
     });
+  });
+
+  test('with infrastructure read privileges renders inventory data with a read-only badge', async ({
+    browserAuth,
+    pageObjects: { featureControlsPage, inventoryPage },
+  }) => {
+    await browserAuth.loginWithCustomRole(globalInfrastructureRead);
+
+    await inventoryPage.goToPage();
+    await inventoryPage.goToTime(METRICS_AND_LOGS_DATE_WITH_DATA);
+
+    await expect(inventoryPage.waffleMap).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await expect(featureControlsPage.readOnlyBadge).toBeVisible({ timeout: EXTENDED_TIMEOUT });
+    await expect(featureControlsPage.readOnlyBadge).toHaveAttribute(
+      'data-test-badge-label',
+      'Read only'
+    );
   });
 
   test('without infrastructure privileges hides the nav link and blocks the app', async ({
