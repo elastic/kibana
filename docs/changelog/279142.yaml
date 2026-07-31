@@ -8,3 +8,4 @@ products:
   target: 2026-07-28
 - product: kibana
 title: Support federated data sources in the threshold rule builder
+feature-id: data-federation

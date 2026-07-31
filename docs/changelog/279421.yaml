@@ -12,3 +12,4 @@ areas:
 - Dashboards and visualizations
 title: Allow Discover and Dashboards to proceed when federated data sources are available
 description: Discover and Dashboards no longer stop on the no-data screen when only federated or external data sources exist. Slow data checks now fall back gracefully so you can start working with ES|QL.
+feature-id: data-federation

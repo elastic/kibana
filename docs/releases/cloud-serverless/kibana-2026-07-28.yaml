@@ -1,10 +1,12 @@
 products:
 - product: cloud-serverless
   target: 2026-07-28
-  lifecycle: preview
+  lifecycle: ga
   repo: kibana
   owner: elastic
-release-date: 2026-07-28
+release-date: 2026-07-31
+hide-features:
+- data-federation
 entries:
 - file:
     name: 280493.yaml
@@ -123,9 +125,9 @@ entries:
   - https://github.com/elastic/kibana/pull/280538
 - file:
     name: 280105.yaml
-    checksum: 7e0eb17dc6f29da170ad2acb702726ebd8afbad5
+    checksum: 877680375897d935fb50869b504cfd03f0f23bf0
   type: bug-fix
-  title: Fix rounding units for `roundRelativeTime` setting (disabled by default)
+  title: Fix rounding units for `roundRelativeTime` setting
   products:
   - product: cloud-serverless
     target: 2026-07-28
@@ -290,9 +292,9 @@ entries:
   - https://github.com/elastic/kibana/pull/280986
 - file:
     name: 279822.yaml
-    checksum: 43a79b8404abbae8310a3a6e15787500c262cb8f
+    checksum: 83b2d0d23d9fb2fa1c80a54b0590616b2754050a
   type: bug-fix
-  title: Fix collapsed Actions column width in Entity Analytics
+  title: Fix collapsed actions column width in Entity Analytics
   products:
   - product: cloud-serverless
     target: 2026-07-28
@@ -333,9 +335,9 @@ entries:
   - https://github.com/elastic/kibana/pull/280070
 - file:
     name: 278614.yaml
-    checksum: 0b15bf8711df920472b12b65cd67acb6c240ad43
+    checksum: a16aabf6bc2c540e40526482e3a7196dd0b4c287
   type: bug-fix
-  title: Fix Similar errors panel failures in Discover when field mappings differ
+  title: Fix "Similar errors" panel failures in Discover when field mappings differ
   products:
   - product: cloud-serverless
     target: 2026-07-28
@@ -459,9 +461,9 @@ entries:
   - https://github.com/elastic/kibana/issues/208224
 - file:
     name: 273578.yaml
-    checksum: 9f7cf914d11c3c3549d1e8927ff1d6e145a43cf2
+    checksum: 2f4013f6eadb061e52d59f2973d7ce5c7b1a23cd
   type: bug-fix
-  title: Fix redundant Version label in APM annotation popups
+  title: Fix redundant version label in APM annotation popups
   products:
   - product: cloud-serverless
     target: 2026-07-28
@@ -484,7 +486,7 @@ entries:
   - https://github.com/elastic/kibana/pull/279837
 - file:
     name: 279421.yaml
-    checksum: 9fc6957c2d816e2556ac3a80de5961bef1caddb5
+    checksum: d0cae86bcd908337ae6c42981c96efef2d8f5ca8
   type: enhancement
   title: Allow Discover and Dashboards to proceed when federated data sources are available
   products:
@@ -492,6 +494,7 @@ entries:
     target: 2026-07-28
   - product: kibana
   description: Discover and Dashboards no longer stop on the no-data screen when only federated or external data sources exist. Slow data checks now fall back gracefully so you can start working with ES|QL.
+  feature-id: data-federation
   areas:
   - Discover and ES|QL
   - Dashboards and visualizations
@@ -542,9 +545,9 @@ entries:
   - https://github.com/elastic/kibana/pull/280253
 - file:
     name: 280316.yaml
-    checksum: 530b5254d85d46e7370449ccb611a450abf1cd9a
+    checksum: b74bdae54bc7bd5f88489beba4f471942ea7934d
   type: enhancement
-  title: Add allow_outdated_version flag for pinned Fleet package installs
+  title: Add `allow_outdated_version` flag for pinned Fleet package installs
   products:
   - product: cloud-serverless
     target: 2026-07-28
@@ -558,13 +561,14 @@ entries:
   - https://github.com/elastic/kibana/issues/275183
 - file:
     name: 279142.yaml
-    checksum: 43ff595760fa7811666479dcee4e6d795c87ac1b
+    checksum: 01380eeccd19f44b57ea641d108786eb5b287000
   type: feature
   title: Support federated data sources in the threshold rule builder
   products:
   - product: cloud-serverless
     target: 2026-07-28
   - product: kibana
+  feature-id: data-federation
   prs:
   - https://github.com/elastic/kibana/pull/279142
   issues:
@@ -628,9 +632,9 @@ entries:
   - https://github.com/elastic/kibana/pull/280669
 - file:
     name: 279903.yaml
-    checksum: 0f3759ebbc324bc66a88bcb0863ed822ac874ba4
+    checksum: f5c6cd63347abcbcc2703ca23558a7e14bc214dd
   type: bug-fix
-  title: Fix ES|QL failures when Fast mode is enabled on Basic or Platinum licenses
+  title: Fix ES|QL failures when fast mode is enabled on Basic or Platinum licenses
   products:
   - product: cloud-serverless
     target: 2026-07-28
