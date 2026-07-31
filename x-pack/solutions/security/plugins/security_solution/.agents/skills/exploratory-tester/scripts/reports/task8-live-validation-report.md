@@ -394,3 +394,39 @@ an ordering inconsistency in the `gh issue list` gate added in that same pass. B
 Verified after this pass: `action-scoped-collector.test.mjs` 95/95 (90 + 2 query-variant + 1
 abandoned-message regression tests), `action-scoped-collector-bridge.test.mjs` 52/52,
 `equivalence.test.mjs` 77/77, `test_session_resources.py` 131/131 (two full runs, both clean).
+
+## Fourth follow-up pass: fixes from re-review of the third follow-up commit
+
+A fourth review found the third pass's own-message fix was still per-key rather than truly global
+(same message, different but overlapping keys), and pushed back — correctly — on treating the
+abandoned/native-message limitation as something to document rather than fix, since a fix is in
+fact feasible without new instrumentation:
+
+- **Fixed (P2) — overlapping paths could still share one console credit:** the per-`(status,
+  path)` *count* from the third pass still let two different keys double-spend the *same* message
+  whenever one path is a substring of the other — `text.includes("/api/data")` is also true for a
+  message about `/api/data/export`, so a single message wrongly covered two independent requests
+  to genuinely different paths. Reproduced directly (two such requests, one message, zero
+  findings; correct answer is one). Replaced the per-key counting with a single shared
+  `consumedMessageIndices` Set: each qualifying event (in time order) claims the *first still
+  ‑unconsumed* message matching its status and path, and that message can never be claimed again by
+  any other event regardless of which key it also happens to satisfy. Two new regression tests
+  (one message covers exactly one of two overlapping-path requests; two messages cover both).
+- **Fixed (P2, previously only documented/pinned) — an abandoned request's native message could
+  still cover an unrelated real 500:** the third pass added a test *pinning* this as accepted,
+  current behavior rather than fixing it, reasoning there's no request↔console-message ID link to
+  attribute a native message to a specific request. That reasoning still holds for *which* request
+  produced a given native message, but it doesn't mean the ambiguity can't be resolved
+  conservatively: the reducer now reserves one native-message credit per same-status
+  `abandonedByNavigation` event — subtracted from the shared pool *before* any qualifying event can
+  claim one — on the assumption the abandoned event did produce it. This deliberately trades one
+  failure mode for a better one: it can occasionally flag a qualifying event that in fact had
+  legitimate native coverage (once an abandoned event of the same status reserved it away), but
+  that's a false positive a human can dismiss, versus the prior false negative (a genuinely silent
+  error going unreported) that the whole `silent_server_error` detector exists to catch. Updated
+  the previously-pinning test to assert the new (correct) outcome, and added a second case
+  confirming the real event is still covered once the reservation is satisfied by a second native
+  message.
+
+Verified after this pass: `action-scoped-collector.test.mjs` 98/98, `action-scoped-collector-bridge.test.mjs`
+52/52, `equivalence.test.mjs` 77/77, `test_session_resources.py` 131/131.

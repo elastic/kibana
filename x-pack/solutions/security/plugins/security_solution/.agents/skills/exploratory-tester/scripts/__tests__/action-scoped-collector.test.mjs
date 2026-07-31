@@ -332,18 +332,19 @@ console.log(
 }
 
 console.log(
-  '\n── Pinning a known, documented limitation: an abandoned request\'s native message can still cover an unrelated real 500 ──'
+  '\n── An abandoned request reserves its plausible native-message credit, so it can no longer wrongly cover an unrelated real 500 ──'
 );
 {
-  // P2 review finding, already called out in the code comment above the
-  // native-credit pool but previously untested: an abandonedByNavigation
-  // event never consumes its own credit (excluded from `qualifying`
-  // entirely), so if the browser genuinely logged a native message for it,
-  // that message stays in the shared pool and can be wrongly claimed by a
-  // completely unrelated real 500 of the same status. This is pinned here
-  // as documented, current (imperfect) behavior — not a regression to fix
-  // silently — because there is no request<->message ID link in the data to
-  // attribute the native message to the abandoned request specifically.
+  // Fix for a P2 review finding: an abandonedByNavigation event never
+  // consumes its own credit (excluded from `qualifying` entirely), so if
+  // the browser genuinely logged a native message for it, that message
+  // used to stay in the shared pool and get wrongly claimed by a completely
+  // unrelated real 500 of the same status — there is no request<->message
+  // ID link in the data to attribute the native message to the abandoned
+  // request specifically, so the reducer now reserves one credit per
+  // same-status abandoned event *before* any qualifying event can claim
+  // one, treating the ambiguity conservatively (assume the abandoned event
+  // used it) rather than risk a false negative on the real request.
   const abandonedEvent = {
     method: 'GET',
     url: 'https://kibana.example/api/abandoned',
@@ -377,9 +378,70 @@ console.log(
     JSON.stringify(r)
   );
   assert(
-    !r.level1.some((i) => i.type === 'silent_server_error'),
-    "documented limitation: the unrelated real 500 is wrongly covered by the abandoned request's leftover native-message credit — pinned, not silently expected to change",
+    r.level1.some((i) => i.type === 'silent_server_error' && i.url.includes('unrelated')),
+    "the sole native credit is reserved for the abandoned event, so the unrelated real 500 is now correctly reported as silent rather than wrongly suppressed",
     JSON.stringify(r.level1)
+  );
+
+  // Two native messages for the same status: one reserved for the abandoned
+  // event, one left for the real event — the real event should still be
+  // covered when the pool is large enough for both.
+  const r2 = reduceAction({
+    network: [abandonedEvent, unrelatedRealEvent],
+    console: [
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+      { type: 'error', text: 'Failed to load resource: the server responded with a status of 500 (Internal Server Error)' },
+    ],
+  });
+  assert(
+    !r2.level1.some((i) => i.type === 'silent_server_error'),
+    'with a second native message available, the real event is still covered once the abandoned event\'s reservation is satisfied',
+    JSON.stringify(r2.level1)
+  );
+}
+
+console.log(
+  '\n── Own-path-message matching consumes individual messages globally, so prefix-overlapping paths cannot share one credit ──'
+);
+{
+  // P2 review finding: the per-(status, path) count from the prior fix
+  // still let two *different* keys double-spend the same message whenever
+  // one path is a substring of the other — text.includes("/api/data") is
+  // true for a message about "/api/data/export" too, so a single message
+  // wrongly covered two independent requests to genuinely different paths.
+  const eventFor = (path, requestedAt) => ({
+    method: 'GET',
+    url: `https://kibana.example${path}`,
+    status: 500,
+    ok: false,
+    failure: null,
+    requestedAt,
+    respondedAt: requestedAt + 50,
+    resourceType: 'fetch',
+  });
+
+  const oneMessage = reduceAction({
+    network: [eventFor('/api/data', 0), eventFor('/api/data/export', 100)],
+    console: [{ type: 'error', text: '500 @ /api/data/export' }],
+  });
+  const oneMessageSilent = oneMessage.level1.filter((i) => i.type === 'silent_server_error');
+  assert(
+    oneMessageSilent.length === 1,
+    'two prefix-overlapping-path 500s + ONE message → exactly one is still reported, not zero',
+    JSON.stringify(oneMessage.level1)
+  );
+
+  const twoMessages = reduceAction({
+    network: [eventFor('/api/data', 0), eventFor('/api/data/export', 100)],
+    console: [
+      { type: 'error', text: '500 @ /api/data' },
+      { type: 'error', text: '500 @ /api/data/export' },
+    ],
+  });
+  assert(
+    !twoMessages.level1.some((i) => i.type === 'silent_server_error'),
+    'two prefix-overlapping-path 500s + TWO distinct messages → both are covered, zero silent_server_error findings',
+    JSON.stringify(twoMessages.level1)
   );
 }
 

@@ -275,38 +275,32 @@ export function reduceAction(action, priorState) {
     (ev) => ev.status != null && ev.status >= 500 && !ev.abandonedByNavigation
   );
 
-  // Phase 1 is itself a consumable-credit pool, not a presence test — for
-  // the same reason the native-message pool below is. A hand-authored
-  // message like "500 @ /api/data" never includes the query string (see
-  // pathnameOf), so `consoleText.includes(path)` alone would let ONE such
-  // message wrongly cover EVERY query-variant request to that path (e.g.
-  // /api/data?page=1 and /api/data?page=2 as two independent requests) —
-  // suppressing a genuinely-silent one purely because it shares a pathname
-  // with a different request that really was logged. Counting per exact
-  // (status, path) key, once per qualifying event needing it, means at most
-  // as many events get credited from their own message as there are
-  // messages actually matching that combination.
-  const ownMessageCountByKey = new Map();
-  function ownMessageCountFor(status, path) {
-    const key = `${status}|${path}`;
-    if (ownMessageCountByKey.has(key)) return ownMessageCountByKey.get(key);
-    const statusPattern = new RegExp(`\\b${status}\\b`);
-    let count = 0;
-    for (const msg of consoleMessages) {
-      const text = msg.text || '';
-      if (statusPattern.test(text) && text.includes(path)) count++;
-    }
-    ownMessageCountByKey.set(key, count);
-    return count;
-  }
-
+  // Phase 1 consumes individual console messages, not a per-(status, path)
+  // count — a per-key count still let two *different* keys double-spend the
+  // *same* message whenever one path is a substring of the other (e.g.
+  // "/api/data" and "/api/data/export": a single "500 @ /api/data/export"
+  // message satisfies `text.includes(path)` for both keys independently,
+  // since `text.includes("/api/data")` is also true). Tracking consumed
+  // message indices in one shared Set, across every key, means a message
+  // can back at most one surfaced event in total, however many different
+  // paths it happens to textually overlap with. Iterating `qualifying` in
+  // time order and taking the first unconsumed match is the same
+  // first-come heuristic already accepted below for the native pool: which
+  // *specific* same-status event a message attributes to when several
+  // equally match it is a heuristic, not a guarantee, but no single message
+  // can silently cover more than one event.
+  const consumedMessageIndices = new Set();
   const surfacedByOwnMessage = new Set();
   for (const ev of qualifying) {
     const path = pathnameOf(ev.url);
-    const key = `${ev.status}|${path}`;
-    const remaining = ownMessageCountFor(ev.status, path);
-    if (remaining > 0) {
-      ownMessageCountByKey.set(key, remaining - 1);
+    const statusPattern = new RegExp(`\\b${ev.status}\\b`);
+    const matchIndex = consoleMessages.findIndex((msg, idx) => {
+      if (consumedMessageIndices.has(idx)) return false;
+      const text = msg.text || '';
+      return statusPattern.test(text) && text.includes(path);
+    });
+    if (matchIndex !== -1) {
+      consumedMessageIndices.add(matchIndex);
       surfacedByOwnMessage.add(ev);
     }
   }
@@ -314,17 +308,38 @@ export function reduceAction(action, priorState) {
   // Phase 2: distribute remaining native-message credits, in request order,
   // among whatever's left over from phase 1. Order can still matter here —
   // there is no request<->console-message ID linking in the underlying data
-  // to attribute a specific native or own-path message to one request over
+  // to attribute a specific own-path or native message to one request over
   // another when credits are scarcer than qualifying events sharing a key,
   // so which *specific* event reads as silent in that case is a heuristic,
   // not a guarantee. This is a narrower, accepted limitation (which event
-  // gets flagged) rather than the presence-test bug phase 1 avoids (whether
-  // a genuinely-silent event gets wrongly suppressed by one that didn't need
-  // the credit). Relatedly, a native message genuinely produced by an
-  // `abandonedByNavigation` request (never in `qualifying`, so never
-  // consuming its own credit) remains in this pool and can be claimed here
-  // by an unrelated event of the same status — there is no way to tell those
-  // messages apart from the console text alone.
+  // gets flagged) rather than the bugs phase 1 avoids (a message silently
+  // covering more events than it could plausibly describe).
+  //
+  // A native message carries no URL at all, so it can't be attributed to a
+  // specific event even in principle — including an `abandonedByNavigation`
+  // one, which is excluded from `qualifying` and therefore never claims its
+  // own credit even when it plausibly produced the message. Reserving one
+  // credit per (status, abandoned event) — subtracted from the shared pool
+  // before any qualifying event gets to claim one — treats that ambiguity
+  // conservatively: it assumes the abandoned event *did* produce the
+  // message, so a qualifying event of the same status is reported as
+  // silent rather than risk wrongly suppressing a genuinely-silent one. The
+  // trade-off runs the other way from phase 1's fix: this can occasionally
+  // flag a qualifying event that in fact had legitimate native coverage,
+  // once an abandoned event of the same status has reserved it away — an
+  // accepted false-positive risk in a detector whose whole purpose is
+  // surfacing errors a false negative would otherwise hide.
+  const abandonedCountByStatus = new Map();
+  for (const ev of network) {
+    if (ev.abandonedByNavigation && ev.status != null) {
+      abandonedCountByStatus.set(ev.status, (abandonedCountByStatus.get(ev.status) || 0) + 1);
+    }
+  }
+  for (const [status, reserved] of abandonedCountByStatus) {
+    const available = nativeFailureCountByStatus.get(status) || 0;
+    nativeFailureCountByStatus.set(status, Math.max(0, available - reserved));
+  }
+
   const surfacedByNativeCredit = new Set();
   for (const ev of qualifying) {
     if (surfacedByOwnMessage.has(ev)) continue;
