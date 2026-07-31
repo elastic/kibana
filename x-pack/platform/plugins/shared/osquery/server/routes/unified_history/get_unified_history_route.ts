@@ -234,12 +234,19 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
                     { ignore: [404] }
                   )
                   .catch((err) => {
-                    // Graceful degradation: if the osquery integration has not been
-                    // upgraded yet, `planned_schedule_time` may be mapped as `keyword`
-                    // instead of `date`, which makes the `max` aggregation fail.
-                    // Return empty scheduled results until the integration is updated.
+                    // Graceful degradation is only intended for one case: if the osquery
+                    // integration has not been upgraded yet, `planned_schedule_time` may be
+                    // mapped as `keyword` instead of `date`, which makes the `max`
+                    // aggregation fail with a 400. Anything else — notably a 403 when the
+                    // caller cannot read the fanned-out indices — has to surface, because
+                    // returning empty here is indistinguishable from "no scheduled history".
+                    const statusCode = (err as { statusCode?: number }).statusCode;
+                    if (statusCode !== 400) {
+                      throw err;
+                    }
+
                     logger.warn(
-                      `Scheduled query aggregation failed (likely outdated integration mappings): ${err.message}`
+                      `Scheduled query aggregation failed, likely outdated integration mappings (spaceId: ${spaceId}, cpsEnabled: ${osqueryContext.cpsEnabled}): ${err.message}`
                     );
 
                     return emptyScheduledResult;
@@ -302,12 +309,14 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
 
           return response.ok({ body });
         } catch (err) {
-          const error = err as Error;
-          logger.error(`Failed to fetch unified history: ${error.message}`);
+          const error = err as Error & { statusCode?: number };
+          logger.error(
+            `Failed to fetch unified history (cpsEnabled: ${osqueryContext.cpsEnabled}, indices: ${ACTIONS_INDEX}* and ${ACTION_RESPONSES_DATA_STREAM_INDEX}-*): ${error.message}`
+          );
 
           return response.customError({
-            statusCode: 500,
-            body: { message: 'Failed to fetch query history' },
+            statusCode: error.statusCode ?? 500,
+            body: { message: error.message || 'Failed to fetch query history' },
           });
         }
       }

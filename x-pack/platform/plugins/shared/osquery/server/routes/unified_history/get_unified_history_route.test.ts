@@ -143,4 +143,57 @@ describe('getUnifiedHistoryRoute', () => {
       expect(mockScopedEsClient.search).not.toHaveBeenCalled();
     });
   });
+
+  describe('scheduled-search error handling', () => {
+    const callRoute = async () => {
+      setupRoute();
+      const mockResponse = httpServerMock.createResponseFactory();
+      await routeHandler(
+        {} as never,
+        httpServerMock.createKibanaRequest({ query: {} }),
+        mockResponse
+      );
+
+      return mockResponse;
+    };
+
+    const esError = (message: string, statusCode: number) =>
+      Object.assign(new Error(message), { statusCode });
+
+    it('degrades to empty scheduled results on a mapping failure', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockRejectedValueOnce(esError('illegal_argument_exception', 400));
+
+      const mockResponse = await callRoute();
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.customError).not.toHaveBeenCalled();
+    });
+
+    it('surfaces an authorization failure instead of reporting empty history', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockRejectedValueOnce(esError('security_exception', 403));
+
+      const mockResponse = await callRoute();
+
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 403 })
+      );
+    });
+
+    it('propagates the status code of a failing live-actions search', async () => {
+      mockEsClient.search
+        .mockRejectedValueOnce(esError('security_exception', 403))
+        .mockResolvedValueOnce(emptyScheduledAggregations);
+
+      const mockResponse = await callRoute();
+
+      expect(mockResponse.customError).toHaveBeenCalledWith(
+        expect.objectContaining({ statusCode: 403 })
+      );
+    });
+  });
 });

@@ -33,7 +33,10 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
   esClient: CoreStart['elasticsearch']['client'],
   osqueryContext: Pick<OsqueryAppContext, 'security' | 'service' | 'cpsEnabled'>
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  let es: typeof data.search.searchAsInternalUser;
+  // Only used by `cancel`, which has no access to the request that selected a
+  // client. Every search binds its own client locally, so concurrent requests
+  // cannot steal each other's identity.
+  let lastUsedEs: typeof data.search.searchAsInternalUser;
 
   return {
     search: (request, options, deps) => {
@@ -119,9 +122,11 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
             indices,
             osqueryContext.cpsEnabled
           );
-          es = useInternalSearchClient
+          const es = useInternalSearchClient
             ? data.search.searchAsInternalUser
             : data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
+
+          lastUsedEs = es;
 
           // When a PIT is present ES rejects requests that also specify `index`,
           // `allow_no_indices`, or `ignore_unavailable` (the PIT already encodes
@@ -203,8 +208,8 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       );
     },
     cancel: async (id, options, deps) => {
-      if (es?.cancel) {
-        return es.cancel(id, options, deps);
+      if (lastUsedEs?.cancel) {
+        return lastUsedEs.cancel(id, options, deps);
       }
     },
   };
