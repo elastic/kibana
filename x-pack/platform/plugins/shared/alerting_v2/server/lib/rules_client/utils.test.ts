@@ -435,10 +435,12 @@ describe('rotation error builders', () => {
   it('carries the rule name in error.details when provided', () => {
     expect(ruleDisabledError('rule-1', 'My rule').error.details).toEqual({ name: 'My rule' });
     expect(ruleRunningError('rule-1', 'My rule').error.details).toEqual({ name: 'My rule' });
-    expect(rotationFailedError('rule-1', 409, 'My rule').error.details).toEqual({ name: 'My rule' });
-    expect(toBulkError('rule-1', { statusCode: 409, message: 'x' }, 'My rule').error.details).toEqual(
-      { name: 'My rule' }
-    );
+    expect(rotationFailedError('rule-1', 409, 'My rule').error.details).toEqual({
+      name: 'My rule',
+    });
+    expect(
+      toBulkError('rule-1', { statusCode: 409, message: 'x' }, 'My rule').error.details
+    ).toEqual({ name: 'My rule' });
   });
 
   it('omits error.details when no name is provided (e.g. a not-found rule)', () => {
