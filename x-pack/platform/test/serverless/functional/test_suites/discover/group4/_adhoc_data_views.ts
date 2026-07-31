@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -42,15 +41,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.waitForRenderComplete();
   };
 
-  // Return to Discover from the context/single-doc view. Chrome-next (project layout) drops the
-  // breadcrumb trail and surfaces the parent page as a back button in the app header; classic
-  // project chrome still renders the Discover breadcrumb.
   const goBackToDiscover = async () => {
-    const backControl = (await globalNav.isNextProjectChrome())
-      ? 'appHeaderBack'
-      : '~breadcrumb-deepLinkId-discover';
-    await testSubjects.existOrFail(backControl);
-    await testSubjects.click(backControl);
+    await testSubjects.click('appHeaderBack');
     await PageObjects.discover.waitUntilTabIsLoaded();
   };
 
