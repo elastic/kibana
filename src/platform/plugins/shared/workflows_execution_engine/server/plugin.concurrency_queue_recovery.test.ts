@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 
 jest.mock('../common', () => ({
   createIndexes: jest.fn().mockResolvedValue(undefined),
