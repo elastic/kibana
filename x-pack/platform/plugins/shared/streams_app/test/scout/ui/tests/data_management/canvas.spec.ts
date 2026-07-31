@@ -185,6 +185,18 @@ test.describe(
         'aria-selected',
         'true'
       );
+
+      const flyoutUrl = page.url();
+      expect(flyoutUrl).toContain('flyoutName=');
+      expect(flyoutUrl).toContain('flyoutTab=overview');
+
+      const attachmentsTab = flyout.getByTestId('streamsCanvasFlyoutTab-attachments');
+
+      await attachmentsTab.click();
+
+      await expect(attachmentsTab).toHaveAttribute('aria-selected', 'true');
+      // Expect the url to have changed, and to have a certain tab value
+      expect(page.url()).toContain('flyoutTab=attachments');
     });
   }
 );

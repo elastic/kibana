@@ -12,30 +12,29 @@ import { useStreamsAppRouter } from './use_streams_app_router';
 
 export function useStreamsFlyoutRouter() {
   const {
-    path: { key },
     query: { flyoutTab = 'overview', flyoutName },
-  } = useStreamsAppParams('/{key}/management/{tab}');
+  } = useStreamsAppParams('/new-experience/{tab}');
   const { push, link } = useStreamsAppRouter();
   const { rangeFrom, rangeTo } = useTimeRange();
 
   const tabLink = useCallback(
     (tabName: string) =>
-      link('/{key}/management/{tab}', {
-        path: { key, tab: 'canvas' },
+      link('/new-experience/{tab}', {
+        path: { tab: 'canvas' },
         query: { flyoutTab: tabName, flyoutName, rangeFrom, rangeTo },
       }),
-    [link, key, rangeFrom, rangeTo, flyoutName]
+    [link, rangeFrom, rangeTo, flyoutName]
   );
 
   const setFlyout = useCallback(
     (name: string | null) => {
       const query = name ? { flyoutName: name, flyoutTab } : {};
-      push('/{key}/management/{tab}', {
-        path: { key, tab: 'canvas' },
+      push('/new-experience/{tab}', {
+        path: { tab: 'canvas' },
         query: { ...query, rangeFrom, rangeTo },
       });
     },
-    [push, key, rangeFrom, rangeTo, flyoutTab]
+    [push, rangeFrom, rangeTo, flyoutTab]
   );
 
   return {

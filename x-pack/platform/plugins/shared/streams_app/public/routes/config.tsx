@@ -127,9 +127,14 @@ const streamsAppRoutes = {
                   tab: t.string,
                 }),
               }),
-              t.partial({
+              t.intersection([
+                t.partial({
                 query: timeRangeQueryParams,
               }),
+              t.partial({
+                query: flyoutParams,
+              })
+              ]),
             ]),
           },
         },
@@ -180,9 +185,6 @@ const streamsAppRoutes = {
               }),
               t.partial({
                 query: managementQueryParams,
-              }),
-              t.partial({
-                query: flyoutParams,
               }),
             ]),
           },
