@@ -49,7 +49,11 @@ describe('buildCommentBody', () => {
   it('returns null for a package-only change even when the release is inconclusive', () => {
     expect(
       buildCommentBody(
-        report({ status: 'inconclusive', reason: 'GITHUB_TOKEN is not set', applicableConnectors: [] })
+        report({
+          status: 'inconclusive',
+          reason: 'GITHUB_TOKEN is not set',
+          applicableConnectors: [],
+        })
       )
     ).toBeNull();
   });
@@ -92,7 +96,9 @@ describe('buildCommentBody', () => {
   });
 
   it('says so when no versions were inspected', () => {
-    const body = buildCommentBody(report({ status: 'inconclusive', refs: [], reason: 'no slices' }));
+    const body = buildCommentBody(
+      report({ status: 'inconclusive', refs: [], reason: 'no slices' })
+    );
 
     expect(body).toContain('No Production-NonCanary versions were inspected.');
   });
@@ -131,8 +137,8 @@ describe('resolveAction', () => {
   });
 
   it('leaves an existing advisory alone when applicability is unknown', () => {
-    expect(
-      resolveAction(report({ applicabilityKnown: false, status: 'inconclusive' }))
-    ).toEqual({ action: 'skip' });
+    expect(resolveAction(report({ applicabilityKnown: false, status: 'inconclusive' }))).toEqual({
+      action: 'skip',
+    });
   });
 });
