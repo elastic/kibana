@@ -266,7 +266,14 @@ export const ConnectorIconsMap: Map<
     '.sentry',
     lazy(() => import(/* webpackChunkName: "connectorIconSentry" */ './specs/sentry/icon')),
   ],
-
+  [
+    '.buildkite',
+    lazy(() => import(/* webpackChunkName: "connectorIconBuildkite" */ './specs/buildkite/icon')),
+  ],
+  [
+    '.dynatrace',
+    lazy(() => import(/* webpackChunkName: "connectorIconDynatrace" */ './specs/dynatrace/icon')),
+  ],
   [
     '.datadog',
     lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),

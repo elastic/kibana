@@ -1,10 +1,36 @@
 {
-  "sha1": "f474b4c36ab8bdeabfb93c98c958d4178dfcca99",
+  "sha1": "6cdf0d873b32dab8fc774f11acb3f884d19418f3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
   ],
   "tests": [
+    {
+      "id": "4189aabe6643ea7-8cf1f3cf6c6d663",
+      "title": "Action Policies - create and edit creates a policy from the form and persists what was typed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_crud.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "4189aabe6643ea7-a0554bccd589a70",
+      "title": "Action Policies - create and edit edits an existing policy without dropping untouched fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/ui/tests/action_policies_crud.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
     {
       "id": "a3812d69333baa9-c6dcf15528a3e01",
       "title": "Action Policies - read/write privileges editor sees every write affordance",
