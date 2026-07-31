@@ -76,7 +76,7 @@ describe('TokenActions', () => {
     await waitFor(() => {
       expect(mockSendDeleteOneEnrollmentAPIKey).toHaveBeenCalledWith(MOCK_API_KEY.id);
       expect(mockAddSuccess).toHaveBeenCalledWith(
-        expect.stringContaining('Enrollment token revoked')
+        expect.stringContaining('Enrollment token successfully revoked')
       );
       expect(mockAddError).not.toHaveBeenCalled();
       expect(refresh).toHaveBeenCalled();
