@@ -59,3 +59,4 @@ export * from './specs/sentry/sentry';
 export * from './specs/buildkite/buildkite';
 export * from './specs/dynatrace/dynatrace';
 export * from './specs/datadog/datadog';
+export * from './specs/jenkins/jenkins';
