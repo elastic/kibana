@@ -26,7 +26,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { HitsCounter } from '../hits_counter';
+import { HitsCounter, type HitsCounterVariant } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({
   viewMode,
@@ -35,6 +35,7 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode,
   patternCount,
   fieldsCount,
+  hitsCounterVariant,
   dataView,
 }: {
   viewMode: VIEW_MODE;
@@ -43,6 +44,7 @@ export const DocumentViewModeToggle = ({
   setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
   fieldsCount?: number;
+  hitsCounterVariant?: HitsCounterVariant;
   dataView: DataView;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -224,8 +226,8 @@ export const DocumentViewModeToggle = ({
       );
     }
 
-    return <HitsCounter variant={isEsqlMode ? 'results' : 'documents'} />;
-  }, [viewMode, patternCount, fieldsCount, isEsqlMode]);
+    return <HitsCounter variant={hitsCounterVariant ?? (isEsqlMode ? 'results' : 'documents')} />;
+  }, [viewMode, patternCount, fieldsCount, isEsqlMode, hitsCounterVariant]);
 
   // if neither the pattern analysis nor field statistics view is available, there's only
   // one possible view (Documents/Results), so there's nothing to select between

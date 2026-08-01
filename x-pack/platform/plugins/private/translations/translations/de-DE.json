@@ -3012,8 +3012,6 @@
     "discover.dataCascade.grouping.function": "<bold>{selectedColumn}:</bold> <badge></badge>",
     "discover.dataCascade.header.groupBySelectorAriaLabel": "Gruppen zum Gruppieren auswählen",
     "discover.dataCascade.header.layoutSwitchLabel": "Gruppieren nach",
-    "discover.dataCascade.header.resultLabel": "Gruppe",
-    "discover.dataCascade.header.resultsLabel": "Gruppen",
     "discover.dataCascade.header.techPreviewLabel": "Gruppierte Ergebnisse (technische Vorschau)",
     "discover.dataCascade.header.techPreviewTooltip": "Ergebnisse werden gruppiert, wenn Stats BY ausgeführt wird",
     "discover.dataCascade.inspector.cascadeQueryDescription": "Diese Abfrage fordert Elasticsearch zum Abrufen der Dokumente auf, die dem Wert der erweiterten Kaskadenzeile entsprechen.",

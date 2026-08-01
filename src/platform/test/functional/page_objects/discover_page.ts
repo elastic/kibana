@@ -407,8 +407,12 @@ export class DiscoverPageObject extends FtrService {
 
   public async getBreakdownFieldValue() {
     const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await breakdownButton.getVisibleText();
 
-    return breakdownButton.getVisibleText();
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   public async chooseBreakdownField(field: string, value?: string) {

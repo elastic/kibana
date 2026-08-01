@@ -102,6 +102,32 @@ describe('hits counter', function () {
     component2.unmount();
   });
 
+  it('renders the groups variant with group/groups wording', async function () {
+    const { toolkit, dataStateContainer } = await setup();
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1899,
+    }) as DataTotalHits$;
+    dataStateContainer.data$.documents$ = getDocuments$();
+
+    const component1 = renderWithToolkit(toolkit, <HitsCounter variant="groups" />);
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1,899');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1,899 groups');
+
+    component1.unmount();
+
+    dataStateContainer.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 1,
+    }) as DataTotalHits$;
+
+    const component2 = renderWithToolkit(toolkit, <HitsCounter variant="groups" />);
+    expect(screen.getByTestId('discoverQueryHits')).toHaveTextContent('1');
+    expect(screen.getByTestId('discoverQueryTotalHits')).toHaveTextContent('1 group');
+
+    component2.unmount();
+  });
+
   it('should render a EuiLoadingSpinner when status is partial', async () => {
     const { toolkit, dataStateContainer } = await setup();
     dataStateContainer.data$.totalHits$ = new BehaviorSubject({

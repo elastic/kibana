@@ -3029,8 +3029,6 @@
     "discover.dataCascade.grouping.function": "<bold>{selectedColumn}:</bold> <badge></badge>",
     "discover.dataCascade.header.groupBySelectorAriaLabel": "グループ化するグループを選択",
     "discover.dataCascade.header.layoutSwitchLabel": "グループ化条件",
-    "discover.dataCascade.header.resultLabel": "グループ",
-    "discover.dataCascade.header.resultsLabel": "グループ",
     "discover.dataCascade.header.techPreviewLabel": "グループ化された結果（テクニカルプレビュー）",
     "discover.dataCascade.header.techPreviewTooltip": "Stats BYを実行すると結果がグループ化されます",
     "discover.dataCascade.inspector.cascadeQueryDescription": "このリクエストはElasticsearchに対してクエリを実行し、展開されたカスケード行の値に一致するドキュメントを取得します。",

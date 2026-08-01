@@ -197,14 +197,7 @@ export function useEsqlDataCascadeHeaderComponent({
         >
           {viewModeToggle && (
             <EuiFlexItem>
-              {React.cloneElement(viewModeToggle!, {
-                hitCounterLabel: i18n.translate('discover.dataCascade.header.resultLabel', {
-                  defaultMessage: 'group',
-                }),
-                hitCounterPluralLabel: i18n.translate('discover.dataCascade.header.resultsLabel', {
-                  defaultMessage: 'groups',
-                }),
-              })}
+              {React.cloneElement(viewModeToggle!, { hitsCounterVariant: 'groups' })}
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>

@@ -136,18 +136,10 @@ describe('useTableHeaderComponents', () => {
 describe('useEsqlDataCascadeHeaderComponent', () => {
   const mockCascadeGroupingChangeHandler = jest.fn();
 
-  // Renders the hit-counter-label props it receives so the test can assert on them,
+  // Renders the hits-counter-variant prop it receives so the test can assert on it,
   // in place of the real hit-count toggle (which independently owns the total-hits number).
-  const ToggleProbe = ({
-    hitCounterLabel,
-    hitCounterPluralLabel,
-  }: {
-    hitCounterLabel?: string;
-    hitCounterPluralLabel?: string;
-  }) => (
-    <div data-test-subj="toggle-probe">
-      {hitCounterLabel}/{hitCounterPluralLabel}
-    </div>
+  const ToggleProbe = ({ hitsCounterVariant }: { hitsCounterVariant?: string }) => (
+    <div data-test-subj="toggle-probe">{hitsCounterVariant}</div>
   );
 
   const renderCustomHeader = (viewModeToggle: React.ReactElement | undefined) => {
@@ -175,10 +167,10 @@ describe('useEsqlDataCascadeHeaderComponent', () => {
     );
   };
 
-  it('clones the view mode toggle with "group"/"groups" hit counter labels, instead of the generic hit labels', () => {
+  it('clones the view mode toggle with the "groups" hits counter variant, instead of the generic variant', () => {
     renderCustomHeader(<ToggleProbe />);
 
-    expect(screen.getByTestId('toggle-probe')).toHaveTextContent('group/groups');
+    expect(screen.getByTestId('toggle-probe')).toHaveTextContent('groups');
   });
 
   it('still renders the group-by selector when no view mode toggle is provided', () => {

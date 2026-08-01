@@ -16,7 +16,7 @@ import { FetchStatus } from '../../application/types';
 import { useDataState } from '../../application/main/hooks/use_data_state';
 import { useCurrentTabDataStateContainer } from '../../application/main/state_management/redux';
 
-export type HitsCounterVariant = 'documents' | 'results';
+export type HitsCounterVariant = 'documents' | 'results' | 'groups';
 
 export interface HitsCounterProps {
   variant: HitsCounterVariant;
@@ -79,6 +79,20 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ variant, hitsTotalToDi
         <FormattedMessage
           id="discover.hitsCounter.documentsLabel"
           defaultMessage="{formattedHits} {hits, plural, one {document} other {documents}}"
+          values={{ hits: hitsTotal, formattedHits }}
+        />
+      )
+    ) : variant === 'groups' ? (
+      showGreaterOrEqualSign ? (
+        <FormattedMessage
+          id="discover.hitsCounter.partialGroupsLabel"
+          defaultMessage="≥{formattedHits} {hits, plural, one {group} other {groups}}"
+          values={{ hits: hitsTotal, formattedHits }}
+        />
+      ) : (
+        <FormattedMessage
+          id="discover.hitsCounter.groupsLabel"
+          defaultMessage="{formattedHits} {hits, plural, one {group} other {groups}}"
           values={{ hits: hitsTotal, formattedHits }}
         />
       )
