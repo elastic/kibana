@@ -196,8 +196,7 @@ const baseCreateBodyFields = {
   template_id: schema.maybe(
     schema.string({
       meta: {
-        description:
-          'The identifier for the rule template this rule was created from, when known.',
+        description: 'The identifier for the rule template this rule was created from, when known.',
       },
     })
   ),

@@ -361,8 +361,7 @@ function reportRuleCreatedEvent(
   }
 ): void {
   try {
-    const resolvedTemplateId =
-      templateId ?? deriveFleetTemplateId(predefinedId, context.spaceId);
+    const resolvedTemplateId = templateId ?? deriveFleetTemplateId(predefinedId, context.spaceId);
 
     const sloId =
       alertTypeId === SLO_BURN_RATE_RULE_TYPE_ID &&

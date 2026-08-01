@@ -77,8 +77,7 @@ export const RULE_CREATED_EVENT: EventTypeOpts<RuleCreatedEventData> = {
     slo_id: {
       type: 'keyword',
       _meta: {
-        description:
-          'For burn-rate rules (slo.rules.burnRate), the id of the SLO being monitored.',
+        description: 'For burn-rate rules (slo.rules.burnRate), the id of the SLO being monitored.',
         optional: true,
       },
     },
