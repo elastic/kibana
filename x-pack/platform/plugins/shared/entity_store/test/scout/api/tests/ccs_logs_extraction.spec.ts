@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { EsClient } from '@kbn/scout-security';
+import type { EsClient } from '@kbn/scout';
 import { get } from 'lodash';
 import {
   PUBLIC_HEADERS,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-security';
+import { tags } from '@kbn/scout';
 import {
   ENTITY_LATEST,
   ENTITY_UPDATES,

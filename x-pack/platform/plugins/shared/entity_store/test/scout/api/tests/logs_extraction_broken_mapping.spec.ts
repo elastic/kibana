@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { apiTest } from '@kbn/scout-security';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import type { EsClient } from '@kbn/scout-security';
+import type { EsClient } from '@kbn/scout';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 import {
   ENTITY_CONFIDENCE,

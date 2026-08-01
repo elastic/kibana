@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EsClient } from '@kbn/scout-security';
-import type { apiTest } from '@kbn/scout-security';
+import type { EsClient } from '@kbn/scout';
+import type { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { EntityStoreStatusResponseBody } from '../../../../server/routes/apis/status';
 import { hashEuid } from '../../../../common/domain/euid';

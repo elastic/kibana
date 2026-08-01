@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ElasticsearchRoleDescriptor } from '@kbn/scout-security';
-import { apiTest } from '@kbn/scout-security';
+import type { ElasticsearchRoleDescriptor } from '@kbn/scout';
+import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
 import {

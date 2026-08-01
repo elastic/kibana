@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { test, tags } from '@kbn/scout-security';
-import type { ScoutPage, KbnClient } from '@kbn/scout-security';
+import { test, tags } from '@kbn/scout';
+import type { ScoutPage, KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { API_VERSIONS, ENTITY_STORE_ROUTES, FF_ENABLE_ENTITY_STORE_V2 } from '../../../../common';
 

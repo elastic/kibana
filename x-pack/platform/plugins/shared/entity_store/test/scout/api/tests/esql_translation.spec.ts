@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/api';
-import { apiTest } from '@kbn/scout-security';
+import { apiTest } from '@kbn/scout';
 import {
   PUBLIC_HEADERS,
   ENTITY_STORE_ROUTES,
