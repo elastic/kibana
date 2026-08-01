@@ -133,7 +133,7 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     esqlVariables: undefined,
     timeRange: undefined,
     isApproximate: false,
-    viewModeToggle: undefined,
+    renderViewModeToggle: undefined,
     expandedDoc$: new BehaviorSubject<DataTableRecord | undefined>(undefined),
     expandedDocOwner$: new BehaviorSubject<string | undefined>(undefined),
     getExpandedDocSetter: jest.fn(),

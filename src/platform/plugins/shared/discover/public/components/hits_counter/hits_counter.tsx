@@ -23,62 +23,64 @@ export interface HitsCounterProps {
   hitsTotalToDisplay?: number;
 }
 
-interface CountLabelValues extends Record<string, React.ReactNode> {
+interface CountLabelValues {
   hits?: number;
   formattedHits: React.ReactNode;
 }
 
 // One entry per variant, each with its full and "at least this many" (partial) wording.
 // Keeping the two forms next to each other makes them easy to compare when adding a variant.
+// `values` is destructured (rather than passed through as one object) so the i18n extractor
+// can statically see the `hits`/`formattedHits` keys each FormattedMessage is called with.
 const COUNT_LABELS: Record<
   HitsCounterVariant,
   Record<'full' | 'partial', (values: CountLabelValues) => React.ReactNode>
 > = {
   documents: {
-    full: (values) => (
+    full: ({ hits, formattedHits }) => (
       <FormattedMessage
         id="discover.hitsCounter.documentsLabel"
         defaultMessage="{formattedHits} {hits, plural, one {document} other {documents}}"
-        values={values}
+        values={{ hits, formattedHits }}
       />
     ),
-    partial: (values) => (
+    partial: ({ hits, formattedHits }) => (
       <FormattedMessage
         id="discover.hitsCounter.partialDocumentsLabel"
         defaultMessage="≥{formattedHits} {hits, plural, one {document} other {documents}}"
-        values={values}
+        values={{ hits, formattedHits }}
       />
     ),
   },
   results: {
-    full: (values) => (
+    full: ({ hits, formattedHits }) => (
       <FormattedMessage
         id="discover.hitsCounter.resultsLabel"
         defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
-        values={values}
+        values={{ hits, formattedHits }}
       />
     ),
-    partial: (values) => (
+    partial: ({ hits, formattedHits }) => (
       <FormattedMessage
         id="discover.hitsCounter.partialResultsLabel"
         defaultMessage="≥{formattedHits} {hits, plural, one {result} other {results}}"
-        values={values}
+        values={{ hits, formattedHits }}
       />
     ),
   },
   groups: {
-    full: (values) => (
+    full: ({ hits, formattedHits }) => (
       <FormattedMessage
         id="discover.hitsCounter.groupsLabel"
         defaultMessage="{formattedHits} {hits, plural, one {group} other {groups}}"
-        values={values}
+        values={{ hits, formattedHits }}
       />
     ),
-    partial: (values) => (
+    partial: ({ hits, formattedHits }) => (
       <FormattedMessage
         id="discover.hitsCounter.partialGroupsLabel"
         defaultMessage="≥{formattedHits} {hits, plural, one {group} other {groups}}"
-        values={values}
+        values={{ hits, formattedHits }}
       />
     ),
   },

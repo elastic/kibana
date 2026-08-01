@@ -28,6 +28,16 @@ import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { HitsCounter, type HitsCounterVariant } from '../hits_counter';
 
+export interface RenderViewModeToggleOptions {
+  /** Filled in by the (cross-plugin) Pattern Analysis tab once it knows how many patterns it found. */
+  patternCount?: number;
+  /** Lets a caller like the ES|QL cascade layout ask for "groups" wording instead of the default documents/results. */
+  hitsCounterVariant?: HitsCounterVariant;
+}
+
+/** Builds a `DocumentViewModeToggle` element. */
+export type RenderViewModeToggle = (options?: RenderViewModeToggleOptions) => ReactElement;
+
 export const DocumentViewModeToggle = ({
   viewMode,
   isEsqlMode,

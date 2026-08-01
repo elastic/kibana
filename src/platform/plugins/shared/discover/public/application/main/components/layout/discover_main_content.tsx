@@ -9,14 +9,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
+import {
+  DocumentViewModeToggle,
+  type RenderViewModeToggle,
+} from '../../../../components/view_mode_toggle';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
@@ -117,8 +120,8 @@ export const DiscoverMainContent = ({
   const showPanelsToggle = !isChartAvailable || !showChart;
   const [fieldsCount, setFieldsCount] = useState<number>();
 
-  const renderViewModeToggle = useCallback(
-    (patternCount?: number) => {
+  const renderViewModeToggle = useCallback<RenderViewModeToggle>(
+    ({ patternCount, hitsCounterVariant } = {}) => {
       return (
         <DocumentViewModeToggle
           viewMode={viewMode}
@@ -126,6 +129,7 @@ export const DiscoverMainContent = ({
           setDiscoverViewMode={setDiscoverViewMode}
           patternCount={patternCount}
           fieldsCount={fieldsCount}
+          hitsCounterVariant={hitsCounterVariant}
           dataView={dataView}
           prepend={
             showPanelsToggle ? (
@@ -150,8 +154,6 @@ export const DiscoverMainContent = ({
     ]
   );
 
-  const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
-
   return (
     <Droppable
       dropTypes={isDropAllowed ? DROP_PROPS.types : undefined}
@@ -170,7 +172,7 @@ export const DiscoverMainContent = ({
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
-              viewModeToggle={viewModeToggle}
+              renderViewModeToggle={renderViewModeToggle}
               dataView={dataView}
               onAddFilter={onAddFilter}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
@@ -178,7 +180,7 @@ export const DiscoverMainContent = ({
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>
-              <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderViewModeToggle()}</EuiFlexItem>
               <FieldStatisticsTab
                 dataView={dataView}
                 columns={columns}
@@ -194,7 +196,7 @@ export const DiscoverMainContent = ({
               dataView={dataView}
               switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true)}
               trackUiMetric={trackUiMetric}
-              renderViewModeToggle={renderViewModeToggle}
+              renderViewModeToggle={(patternCount) => renderViewModeToggle({ patternCount })}
             />
           ) : null}
         </EuiFlexGroup>
