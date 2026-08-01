@@ -13,6 +13,7 @@ import type {
   InternalRouteSecurity,
   AllRequiredCondition,
   AnyRequiredCondition,
+  RouteAuthz,
 } from '@kbn/core-http-server';
 
 interface PrivilegeGroupValue {
@@ -20,15 +21,18 @@ interface PrivilegeGroupValue {
   anyRequired: AnyRequiredCondition;
 }
 
+const isAuthzEnabled = (authz: RouteAuthz): authz is AuthzEnabled =>
+  (authz as AuthzDisabled).enabled !== false;
+
 export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | undefined) => {
   if (!routeSecurity) {
     return '';
   }
-  if (!('authz' in routeSecurity) || (routeSecurity.authz as AuthzDisabled).enabled === false) {
+  if (!('authz' in routeSecurity) || !isAuthzEnabled(routeSecurity.authz)) {
     return '';
   }
 
-  const privileges = (routeSecurity.authz as AuthzEnabled).requiredPrivileges;
+  const privileges = routeSecurity.authz.requiredPrivileges;
 
   const groupedPrivileges = privileges.reduce<PrivilegeGroupValue>(
     (groups, privilege) => {
@@ -79,5 +83,14 @@ export const extractAuthzDescription = (routeSecurity: InternalRouteSecurity | u
     return `Route required privileges: ${getPrivilegesDescription(allRequired, anyRequired)}.`;
   };
 
-  return `[Required authorization] ${getDescriptionForRoute()}`;
+  const requiredDescription = `[Required authorization] ${getDescriptionForRoute()}`;
+  const extendedPrivileges = routeSecurity.authz.extendedPrivileges;
+
+  if (!extendedPrivileges?.length) {
+    return requiredDescription;
+  }
+
+  return `${requiredDescription} Extended privileges (optional, expand functionality when granted): ${extendedPrivileges.join(
+    ', '
+  )}.`;
 };
