@@ -26,6 +26,11 @@ export const SyntheticsVaultConnectionCodec = t.intersection([
     namespace: t.string,
     kvMount: t.string,
     tlsSkipVerify: t.boolean,
+    // How long the agent caches a resolved secret before re-reading (e.g. "5m").
+    secretRefreshInterval: t.string,
+    // Bumped on save / manual refresh; part of the delivered blob so a change
+    // forces agents to re-resolve (and thus pick up a rotated secret).
+    refreshedAt: t.string,
     // token auth
     token: t.string,
     // approle auth
@@ -48,6 +53,8 @@ export const VaultConnectionStatusCodec = t.intersection([
     roleId: t.string,
     kvMount: t.string,
     tlsSkipVerify: t.boolean,
+    secretRefreshInterval: t.string,
+    refreshedAt: t.string,
     // whether an encrypted secret (token/secret_id) is stored, so the UI can show
     // "•••• saved" without ever receiving the value.
     hasSecret: t.boolean,

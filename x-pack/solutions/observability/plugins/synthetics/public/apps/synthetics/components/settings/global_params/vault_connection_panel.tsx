@@ -38,6 +38,7 @@ interface FormState {
   authMethod: VaultAuthMethod;
   namespace: string;
   kvMount: string;
+  secretRefreshInterval: string;
   roleId: string;
   token: string;
   secretId: string;
@@ -49,6 +50,7 @@ const emptyForm: FormState = {
   authMethod: 'approle',
   namespace: '',
   kvMount: 'secret',
+  secretRefreshInterval: '5m',
   roleId: '',
   token: '',
   secretId: '',
@@ -62,6 +64,7 @@ export const VaultConnectionPanel = () => {
   const [status, setStatus] = useState<VaultConnectionStatus | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const accordionId = useGeneratedHtmlId({ prefix: 'vaultConnection' });
 
@@ -76,6 +79,7 @@ export const VaultConnectionPanel = () => {
           authMethod: res.authMethod ?? 'approle',
           namespace: res.namespace ?? '',
           kvMount: res.kvMount ?? 'secret',
+          secretRefreshInterval: res.secretRefreshInterval ?? '5m',
           roleId: res.roleId ?? '',
           tlsSkipVerify: res.tlsSkipVerify ?? false,
           token: '',
@@ -102,6 +106,7 @@ export const VaultConnectionPanel = () => {
         authMethod: form.authMethod,
         namespace: form.namespace.trim() || undefined,
         kvMount: form.kvMount.trim() || undefined,
+        secretRefreshInterval: form.secretRefreshInterval.trim() || undefined,
         tlsSkipVerify: form.tlsSkipVerify,
       };
       if (form.authMethod === 'token') {
@@ -120,6 +125,23 @@ export const VaultConnectionPanel = () => {
       notifications?.toasts.addError(e as Error, { title: SAVE_ERROR_TOAST });
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Manual refresh: bump the connection version + re-push configs so agents
+  // re-resolve every vault-backed secret (picks up rotations).
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      const res = await http.post<VaultConnectionStatus>(
+        SYNTHETICS_API_URLS.VAULT_CONNECTION + '/_refresh'
+      );
+      setStatus(res);
+      notifications?.toasts.addSuccess(REFRESHED_TOAST);
+    } catch (e) {
+      notifications?.toasts.addError(e as Error, { title: REFRESH_ERROR_TOAST });
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -197,6 +219,17 @@ export const VaultConnectionPanel = () => {
                 />
               </EuiFormRow>
             </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow fullWidth label={REFRESH_INTERVAL_LABEL} helpText={REFRESH_INTERVAL_HELP}>
+                <EuiFieldText
+                  fullWidth
+                  data-test-subj="syntheticsVaultRefreshInterval"
+                  placeholder="5m"
+                  value={form.secretRefreshInterval}
+                  onChange={(e) => set('secretRefreshInterval', e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
           </EuiFlexGroup>
 
           {form.authMethod === 'token' ? (
@@ -262,15 +295,42 @@ export const VaultConnectionPanel = () => {
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
-          <EuiButton
-            fill
-            data-test-subj="syntheticsVaultSaveConnection"
-            isLoading={saving}
-            isDisabled={!canSave || !form.address}
-            onClick={onSave}
-          >
-            {status?.configured ? UPDATE_BUTTON : CONNECT_BUTTON}
-          </EuiButton>
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                data-test-subj="syntheticsVaultSaveConnection"
+                isLoading={saving}
+                isDisabled={!canSave || !form.address}
+                onClick={onSave}
+              >
+                {status?.configured ? UPDATE_BUTTON : CONNECT_BUTTON}
+              </EuiButton>
+            </EuiFlexItem>
+            {status?.configured && (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="refresh"
+                  data-test-subj="syntheticsVaultRefreshSecrets"
+                  isLoading={refreshing}
+                  isDisabled={!canSave}
+                  onClick={onRefresh}
+                >
+                  {REFRESH_BUTTON}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {status?.refreshedAt && (
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate('xpack.synthetics.vaultConnection.lastRefreshed', {
+                    defaultMessage: 'Last refreshed: {ts}',
+                    values: { ts: new Date(status.refreshedAt).toLocaleString() },
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiForm>
       </EuiAccordion>
     </EuiPanel>
@@ -321,6 +381,24 @@ const CONNECT_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.connect'
 });
 const UPDATE_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.update', {
   defaultMessage: 'Update connection',
+});
+const REFRESH_INTERVAL_LABEL = i18n.translate('xpack.synthetics.vaultConnection.refreshInterval', {
+  defaultMessage: 'Secret refresh interval',
+});
+const REFRESH_INTERVAL_HELP = i18n.translate(
+  'xpack.synthetics.vaultConnection.refreshIntervalHelp',
+  {
+    defaultMessage: 'How long the agent caches a resolved secret, e.g. "5m", "1h".',
+  }
+);
+const REFRESH_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.refreshButton', {
+  defaultMessage: 'Refresh secrets',
+});
+const REFRESHED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshedToast', {
+  defaultMessage: 'Refreshing secrets — configs are being re-pushed to agents',
+});
+const REFRESH_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshErrorToast', {
+  defaultMessage: 'Failed to refresh Vault secrets',
 });
 const SAVED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.savedToast', {
   defaultMessage: 'Vault connection saved',

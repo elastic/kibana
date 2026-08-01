@@ -21,6 +21,8 @@ export const SYNTHETICS_VAULT_CONNECTION_ENCRYPTED_TYPE = {
     'roleId',
     'kvMount',
     'tlsSkipVerify',
+    'secretRefreshInterval',
+    'refreshedAt',
   ]),
 };
 

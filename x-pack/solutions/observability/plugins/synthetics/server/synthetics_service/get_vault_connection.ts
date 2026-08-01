@@ -24,6 +24,10 @@ export interface HeartbeatVaultConfig {
   kv_mount?: string;
   namespace?: string;
   tls_skip_verify?: boolean;
+  secret_refresh_interval?: string;
+  // Opaque version (the connection's refreshedAt). Bumping it changes the blob,
+  // which forces the agent to re-resolve — the manual "refresh" mechanism.
+  version?: string;
   token?: string;
   role_id?: string;
   secret_id?: string;
@@ -59,6 +63,8 @@ export const getVaultConnectionConfig = async (
       kv_mount: attributes.kvMount,
       namespace: attributes.namespace,
       tls_skip_verify: attributes.tlsSkipVerify,
+      secret_refresh_interval: attributes.secretRefreshInterval,
+      version: attributes.refreshedAt,
       token: attributes.token,
       role_id: attributes.roleId,
       secret_id: attributes.secretId,
