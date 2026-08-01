@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { MemoryEntry } from './types';
+import type { StoredMemoryPage } from './data_stream';
 import { MemoryServiceImpl } from './memory_service';
 import { MEMORIES_DATA_STREAM } from '../../../../common/memory_and_investigation';
 
@@ -20,7 +20,7 @@ import { v4 as uuidV4 } from 'uuid';
 
 const mockedUuidV4 = uuidV4 as jest.MockedFunction<() => string>;
 
-type MemoryDocument = MemoryEntry & { '@timestamp'?: string; _id?: string };
+type MemoryDocument = StoredMemoryPage & { _id?: string };
 
 const sortByLatest = (a: MemoryDocument, b: MemoryDocument) => {
   if (b.version !== a.version) {
@@ -29,12 +29,25 @@ const sortByLatest = (a: MemoryDocument, b: MemoryDocument) => {
   return b.updated_at.localeCompare(a.updated_at);
 };
 
+const getValuesAtPath = (value: unknown, path: string[]): unknown[] => {
+  if (path.length === 0) {
+    return Array.isArray(value) ? value.flatMap((item) => getValuesAtPath(item, [])) : [value];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => getValuesAtPath(item, path));
+  }
+  if (typeof value !== 'object' || value === null) {
+    return [];
+  }
+  const [head, ...tail] = path;
+  return getValuesAtPath((value as Record<string, unknown>)[head], tail);
+};
+
+const getFieldValues = (doc: MemoryDocument, field: string): unknown[] =>
+  getValuesAtPath(doc, field.split('.'));
+
 const matchesFilter = (doc: MemoryDocument, filter: Record<string, unknown>): boolean =>
-  Object.entries(filter).every(([field, value]) => {
-    const docValue = doc[field as keyof MemoryDocument];
-    // Array fields (categories/tags/references) match if the term is one of their values.
-    return Array.isArray(docValue) ? docValue.some((item) => item === value) : docValue === value;
-  });
+  Object.entries(filter).every(([field, value]) => getFieldValues(doc, field).includes(value));
 
 const filterByQuery = (
   docs: MemoryDocument[],
@@ -58,8 +71,8 @@ const filterByQuery = (
       if ('terms' in clause) {
         const terms = clause.terms as Record<string, unknown>;
         const [[field, values]] = Object.entries(terms);
-        const fieldValues = values as unknown[];
-        return fieldValues.includes(doc[field as keyof MemoryDocument]);
+        const queryValues = values as unknown[];
+        return getFieldValues(doc, field).some((value) => queryValues.includes(value));
       }
       if ('ids' in clause) {
         const ids = clause.ids as { values?: unknown[] };
@@ -172,8 +185,7 @@ const createInMemoryEsClient = () => {
           if (request.fields?.length) {
             hit.fields = {};
             for (const field of request.fields) {
-              const value = source[field as keyof MemoryDocument];
-              hit.fields[field] = Array.isArray(value) ? value : [value];
+              hit.fields[field] = getFieldValues(source, field);
             }
           }
           return hit;
@@ -197,9 +209,9 @@ describe('MemoryServiceImpl', () => {
   });
 
   const createService = () => {
-    const { esClient } = createInMemoryEsClient();
+    const { esClient, memoryDocs } = createInMemoryEsClient();
     const service = new MemoryServiceImpl({ logger, esClient });
-    return { service, esClient };
+    return { service, esClient, memoryDocs };
   };
 
   it('creates, reads, updates, and lists a memory page', async () => {
@@ -207,13 +219,14 @@ describe('MemoryServiceImpl', () => {
       .mockReturnValueOnce('entry-uuid-1')
       .mockReturnValueOnce('history-uuid-1')
       .mockReturnValueOnce('history-uuid-2');
-    const { service } = createService();
+    const { service, memoryDocs } = createService();
 
     const created = await service.create({
       name: 'nginx-overview',
       title: 'Nginx overview',
       content: '# Nginx',
       categories: ['services'],
+      references: ['related-entry'],
       user,
     });
 
@@ -222,9 +235,16 @@ describe('MemoryServiceImpl', () => {
       name: 'nginx-overview',
       version: 1,
     });
+    expect(memoryDocs[0]).toMatchObject({
+      type: 'memory',
+      origin: { uri: 'memory://entry-uuid-1' },
+      references: [{ uri: 'memory://related-entry' }],
+      user_id: user,
+    });
 
-    await expect(service.getByName({ name: 'nginx-overview' })).resolves.toMatchObject({
+    await expect(service.get({ id: created.id })).resolves.toMatchObject({
       title: 'Nginx overview',
+      references: ['related-entry'],
     });
 
     mockedUuidV4.mockReturnValueOnce('history-uuid-3');
