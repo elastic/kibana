@@ -15,10 +15,9 @@ import {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { useSyntheticsSettingsContext } from '../../contexts';
 import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { NoPermissionsTooltip } from '../common/components/permissions';
-import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
+import { useCanRunTest, useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import { TEST_NOW_ARIA_LABEL, TEST_SCHEDULED_LABEL } from '../monitor_add_edit/form/run_test_btn';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
@@ -41,7 +40,8 @@ export const RunTestManuallyContextItem = ({
 
   const canUsePublicLocations = useCanUsePublicLocations(monitor?.[ConfigKey.LOCATIONS]);
 
-  const { canSave } = useSyntheticsSettingsContext();
+  // Manual test runs are allowed for write users OR run-only (`canRunTest`) users.
+  const canRunTest = useCanRunTest();
 
   const { space } = useKibanaSpace();
 
@@ -76,13 +76,13 @@ export const RunTestManuallyContextItem = ({
   return (
     <NoPermissionsTooltip
       content={content}
-      canEditSynthetics={canSave}
+      canEditSynthetics={canRunTest}
       canUsePublicLocations={canUsePublicLocations}
     >
       <EuiContextMenuItem
         data-test-subj="syntheticsRunTestManuallyButton"
         color="success"
-        disabled={!canUsePublicLocations || !canSave}
+        disabled={!canUsePublicLocations || !canRunTest}
         onClick={() => {
           if (monitor) {
             const spaceId = 'spaceId' in monitor ? (monitor.spaceId as string) : undefined;
