@@ -6,6 +6,7 @@
  */
 
 import { createHash } from 'crypto';
+import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { AlertEventsClient, getGroupHash, getValueByDottedPath } from './alert_events_client';
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -130,7 +131,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
     const result = await client.ingestAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
-      alert_status: alertEpisodeStatus.active,
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
     expect(result.episode_id).toMatch(
@@ -148,7 +149,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
     const result = await client.ingestAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
-      alert_status: alertEpisodeStatus.active,
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
     expect(result.episode_id).toBe(priorEpisodeId);
@@ -163,7 +164,7 @@ describe('AlertEventsClient.ingestAlertEvent episode lifecycle', () => {
     const result = await client.ingestAlertEvent({
       source: 'datadog',
       fingerprint: 'lifecycle-fp',
-      alert_status: alertEpisodeStatus.active,
+      alert_status: ALERT_EPISODE_STATUS.ACTIVE,
     });
 
     expect(result.episode_id).not.toBe(priorEpisodeId);
