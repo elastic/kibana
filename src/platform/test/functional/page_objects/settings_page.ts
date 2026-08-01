@@ -501,11 +501,22 @@ export class SettingsPageObject extends FtrService {
     }
   }
 
-  async addCustomDataViewId(value: string) {
+  // `toggleAdvancedSetting` flips the section between shown and hidden, so calling it
+  // unconditionally would collapse the section again when the form is filled a second time.
+  async showAdvancedSettings() {
+    if (await this.testSubjects.exists('advancedSettings')) {
+      return;
+    }
     await this.testSubjects.click('toggleAdvancedSetting');
+    await this.testSubjects.existOrFail('advancedSettings');
+  }
+
+  async addCustomDataViewId(value: string) {
+    await this.showAdvancedSettings();
     const customDataViewIdInput = await (
       await this.testSubjects.find('savedObjectIdField')
     ).findByTagName('input');
+    await customDataViewIdInput.clearValueWithKeyboard();
     await customDataViewIdInput.type(value);
   }
 
@@ -538,9 +549,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async allowHiddenClick() {
-    await this.testSubjects.click('toggleAdvancedSetting');
+    await this.showAdvancedSettings();
     const allowHiddenField = await this.testSubjects.find('allowHiddenField');
-    await (await allowHiddenField.findByTagName('button')).click();
+    const allowHiddenToggle = await allowHiddenField.findByTagName('button');
+    // The toggle is a switch, so re-clicking it on a second fill would turn allow-hidden back off.
+    if ((await allowHiddenToggle.getAttribute('aria-checked')) === 'true') {
+      return;
+    }
+    await allowHiddenToggle.click();
   }
 
   async createIndexPattern(
