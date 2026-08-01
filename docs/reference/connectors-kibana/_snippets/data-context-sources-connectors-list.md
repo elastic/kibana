@@ -23,6 +23,7 @@ Figma.
 - [Google Gmail](/reference/connectors-kibana/gmail-action-type.md): Search and read emails from Gmail.
 - [Grafana](/reference/connectors-kibana/grafana-action-type.md): Read alerts and rules, manage silences, and post annotations.
 - [HubSpot](/reference/connectors-kibana/hubspot-action-type.md): Search and retrieve contacts, companies, deals, and tickets from HubSpot CRM.
+- [Jenkins](/reference/connectors-kibana/jenkins-action-type.md): Trigger, monitor, and stop Jenkins builds, and manage jobs, test reports, and the build queue.
 - [Jina Reader](/reference/connectors-kibana/jina-action-type.md): Convert web pages into markdown from their URL and search the web for better LLM grounding.
 - [Jira Cloud](/reference/connectors-kibana/jira-cloud-action-type.md): Search issues with JQL, retrieve project and issue details, and look up users in Jira Cloud.
 - [Kubernetes](/reference/connectors-kibana/kubernetes-action-type.md): Read and modify resources in a Kubernetes cluster through its REST API.
