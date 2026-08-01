@@ -15,6 +15,7 @@ import type { MonitorFields } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getPrivateLocationsForMonitor } from '../monitor_cruds/add_monitor/utils';
 import { getMonitorNotFoundResponse } from './service_errors';
+import { MONITOR_RUN_API } from '../../feature';
 
 export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse> = () => ({
   method: 'POST',
@@ -31,7 +32,12 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory<TestNowResponse>
     const { monitorId } = routeContext.request.params;
     return triggerTestNow(monitorId, routeContext);
   },
-  writeAccess: true,
+  // Running a monitor is read-plus-execute (it never mutates the monitor SO), so it
+  // does not require `uptime-write`. Instead it needs EITHER `uptime-write` (so existing
+  // write users keep working, non-breaking) OR the `monitor-run` sub-feature privilege,
+  // which grants manual runs to an otherwise read-only role.
+  writeAccess: false,
+  anyRequiredPrivileges: ['uptime-write', MONITOR_RUN_API],
   options: { availability: { since: '9.2.0' } },
 });
 

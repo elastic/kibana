@@ -21,6 +21,7 @@ interface SweepRoute {
   method: Method;
   path: string;
   writeAccess: boolean;
+  anyRequiredPrivileges?: string[];
 }
 
 /**
@@ -41,6 +42,7 @@ const allRoutes: SweepRoute[] = syntheticsAppRestApiRoutes
       method: route.method as Method,
       path: route.path,
       writeAccess: route.writeAccess ?? true,
+      anyRequiredPrivileges: route.anyRequiredPrivileges,
     };
   });
 
@@ -55,6 +57,13 @@ const expectedBodyTag = (route: SweepRoute, readUser: boolean): string => {
     return readUser
       ? '[private-location-write,uptime-write]'
       : '[uptime-read,private-location-write,uptime-write]';
+  }
+
+  // Routes with an OR-set (e.g. run-test: `uptime-write` OR `monitor-run`). A read
+  // user is missing every OR member; a no-access user is additionally missing `uptime-read`.
+  if (route.anyRequiredPrivileges?.length) {
+    const anyPrivs = route.anyRequiredPrivileges.join(',');
+    return readUser ? `[${anyPrivs}]` : `[uptime-read,${anyPrivs}]`;
   }
 
   if (method === 'GET') {
@@ -156,7 +165,9 @@ apiTest.describe('SyntheticsAPISecurity', { tag: ['@local-stateful-classic'] }, 
 
   apiTest('throws permissions errors for read user', async ({ apiClient }) => {
     for (const route of allRoutes) {
-      if (!route.writeAccess) {
+      // Skip pure read routes, but keep OR-set routes (e.g. run-test) — a read user
+      // still lacks every OR member and should be rejected.
+      if (!route.writeAccess && !route.anyRequiredPrivileges?.length) {
         continue;
       }
       const res = await request(apiClient, route.method, `s/${spaceId}${route.path}`, readHeaders);

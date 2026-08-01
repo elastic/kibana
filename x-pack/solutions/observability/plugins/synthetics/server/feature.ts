@@ -30,8 +30,32 @@ import {
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 export const PRIVATE_LOCATION_WRITE_API = 'private-location-write';
+export const MONITOR_RUN_API = 'monitor-run';
 
 const alertingFeatures = SYNTHETICS_ALERTING_FEATURES;
+
+const canRunTestPrivilege: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'can_run_test',
+      name: i18n.translate('xpack.synthetics.features.canRunTest', {
+        defaultMessage: 'Can run tests manually',
+      }),
+      // `includeIn: 'none'` — never granted implicitly. The run-test route accepts
+      // EITHER `uptime-write` (which base `all` already has, so existing roles keep
+      // working) OR this `monitor-run` privilege, which lets an admin grant manual
+      // test runs to an otherwise read-only role without granting write access.
+      includeIn: 'none',
+      api: [MONITOR_RUN_API],
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['canRunTest'],
+    },
+  ],
+};
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,
@@ -169,6 +193,16 @@ export const syntheticsFeature = {
     },
   },
   subFeatures: [
+    {
+      name: i18n.translate('xpack.synthetics.features.app.runTest', {
+        defaultMessage: 'Run tests manually',
+      }),
+      description: i18n.translate('xpack.synthetics.features.app.runTest.description', {
+        defaultMessage:
+          'This feature allows a read-only user to trigger manual test runs of existing monitors, without granting the ability to create, edit, or delete monitors.',
+      }),
+      privilegeGroups: [canRunTestPrivilege],
+    },
     {
       name: i18n.translate('xpack.synthetics.features.app.elastic', {
         defaultMessage: 'Elastic managed locations',
