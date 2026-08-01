@@ -72,6 +72,9 @@ export const MutationInputSchema = lazySchema(() =>
       ),
     variables: z
       .record(z.string().max(MAX_OPERATION_NAME_LENGTH), z.unknown())
+      .refine((obj) => Object.keys(obj).length <= 100, {
+        message: 'A maximum of 100 variables is allowed.',
+      })
       .optional()
       .describe(
         'Variables to pass to the mutation, as a key/value map. ' +
