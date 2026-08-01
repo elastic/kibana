@@ -35,7 +35,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ variant, hitsTotalToDi
   const documentsCount = documentsState.result?.length || 0;
 
   if (!hitsTotal && hitsStatus === FetchStatus.LOADING) {
-    return <EuiLoadingSpinner size="s" />;
+    return <EuiLoadingSpinner size="m" />;
   }
 
   if (
