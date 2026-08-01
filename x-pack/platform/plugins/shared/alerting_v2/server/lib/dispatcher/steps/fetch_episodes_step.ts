@@ -26,7 +26,9 @@ import { getDispatchableAlertEventsQuery } from '../queries';
 
 interface RawAlertEpisode {
   last_event_timestamp: string;
-  rule_id: string;
+  rule_id: string | null;
+  source: string;
+  space_id: string;
   group_hash: string;
   episode_id: string;
   episode_status: AlertEpisodeStatus;
