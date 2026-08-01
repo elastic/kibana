@@ -6,7 +6,7 @@
  */
 
 import type { DataStreamDefinition } from '@kbn/data-streams';
-import type { MappingsDefinition } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { MEMORIES_DATA_STREAM } from '../../../../common/memory_and_investigation';
 
@@ -56,6 +56,17 @@ export interface StoredMemoryPage {
   updated_by: string;
   is_deleted: boolean;
 }
+
+type MappedMemoryPage = GetFieldsOf<typeof memoriesMappings>;
+type StoredMemoryPageMappingCheck = StoredMemoryPage extends MappedMemoryPage
+  ? Exclude<keyof StoredMemoryPage, keyof MappedMemoryPage> extends never
+    ? Exclude<keyof MappedMemoryPage, keyof StoredMemoryPage> extends never
+      ? true
+      : never
+    : never
+  : never;
+
+true satisfies StoredMemoryPageMappingCheck;
 
 export const memoriesDataStream: DataStreamDefinition<typeof memoriesMappings, StoredMemoryPage> = {
   name: MEMORIES_DATA_STREAM,
