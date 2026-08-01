@@ -37,24 +37,23 @@ const fieldIdentifier = (prefix: string, value: string): string =>
 const sources = (streams: string[]): string => streams.join(',');
 
 /**
- * TSDB-correct time-series aggregation for a metric field, by instrument kind.
- * metrics-* is index.mode=time_series, so these run under the `TS` source command:
- * counters are monotonic-with-resets (RATE first, then aggregate across series);
- * histograms use PERCENTILE_OVER_TIME; gauges/up-down counters use AVG_OVER_TIME.
- * Unknown kind defaults to counter — the dominant app instrument, and the extractor
- * tags a kind for every instrument it matches.
+ * TSDB time-series aggregation for a metric field, run under the `TS` source
+ * command (metrics-* is index.mode=time_series).
+ *
+ * Reality of the OTel -> Elasticsearch ingestion path: metric fields land as
+ * `time_series_metric: gauge` (even source counters — the cumulative value is
+ * stored as a gauge) or `histogram` (aggregate_metric_double). There are no
+ * `counter_*`-typed fields, so `RATE()` is rejected by ES. Gauges answer to the
+ * `*_OVER_TIME` family; `AVG(AVG_OVER_TIME(field))` is the safe, non-erroring SLI.
+ *
+ * Histograms (aggregate_metric_double) reject the plain over-time functions and
+ * need bespoke sub-field handling, so we skip them (return undefined) rather than
+ * emit a query that errors. If a future ingestion preserves `counter_*` typing,
+ * revisit with an ingested-type-aware lookup (see project memory).
  */
-const metricStatsClause = (field: string, kind: OtelMetricKind | undefined): string => {
-  switch (kind) {
-    case 'histogram':
-      return `p95 = AVG(PERCENTILE_OVER_TIME(${field}, 95))`;
-    case 'gauge':
-    case 'updown':
-      return `avg = AVG(AVG_OVER_TIME(${field}))`;
-    case 'counter':
-    default:
-      return `rate = SUM(RATE(${field}))`;
-  }
+const metricStatsClause = (field: string, kind: OtelMetricKind | undefined): string | undefined => {
+  if (kind === 'histogram') return undefined;
+  return `avg = AVG(AVG_OVER_TIME(${field}))`;
 };
 
 const severityForTier = (tier: OtelQueryTier): number =>
@@ -216,15 +215,19 @@ export function generateOtelQueries({
         add({ esql, tier: signal.kind, field, source: signal, stream: traceStreams[0] });
         break;
       }
-      case 'metric_name':
-        if (signal.value && value && metricStreams.length > 0) {
-          const field = fieldIdentifier('metrics', signal.value);
+      case 'metric_name': {
+        if (!signal.value || !value || metricStreams.length === 0) break;
+        const field = fieldIdentifier('metrics', signal.value);
+        const statsClause = metricStatsClause(field, signal.metricKind);
+        // Skip histograms: aggregate_metric_double can't be aggregated with the
+        // plain over-time functions, so there is no non-erroring SLI to emit.
+        if (statsClause) {
           add({
-            // metrics-* is index.mode=time_series (TSDB): use TS + a time-series
-            // aggregation. Never AVG()/SUM() a raw counter — RATE() first.
+            // metrics-* is index.mode=time_series (TSDB): TS source + a gauge-safe
+            // time-series aggregation (OTel counters ingest as gauges here).
             esql: `TS ${sources(
               metricStreams
-            )} | WHERE ${field} IS NOT NULL | STATS ${metricStatsClause(field, signal.metricKind)}`,
+            )} | WHERE ${field} IS NOT NULL | STATS ${statsClause}`,
             tier: signal.kind,
             field,
             source: signal,
@@ -232,6 +235,7 @@ export function generateOtelQueries({
           });
         }
         break;
+      }
     }
   }
 

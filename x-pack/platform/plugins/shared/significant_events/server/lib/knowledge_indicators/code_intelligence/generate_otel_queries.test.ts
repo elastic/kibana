@@ -54,22 +54,25 @@ describe('generateOtelQueries', () => {
       expect.arrayContaining([
         expect.stringContaining('WHERE name == "checkout" | STATS total = COUNT(*)'),
         'FROM logs-generic.otel-default | WHERE event_name == "charged"',
-        // metrics-* is TSDB: TS source + RATE() for a counter (default kind), never raw AVG()
-        'TS metrics-generic.otel-default | WHERE `metrics.checkout.requests` IS NOT NULL | STATS rate = SUM(RATE(`metrics.checkout.requests`))',
+        // metrics-* is TSDB: TS source + gauge-safe AVG_OVER_TIME (OTel counters ingest as gauges)
+        'TS metrics-generic.otel-default | WHERE `metrics.checkout.requests` IS NOT NULL | STATS avg = AVG(AVG_OVER_TIME(`metrics.checkout.requests`))',
       ])
     );
   });
 
-  it.each([
-    ['counter', 'STATS rate = SUM(RATE(`metrics.m`))'],
-    ['histogram', 'STATS p95 = AVG(PERCENTILE_OVER_TIME(`metrics.m`, 95))'],
-    ['gauge', 'STATS avg = AVG(AVG_OVER_TIME(`metrics.m`))'],
-    ['updown', 'STATS avg = AVG(AVG_OVER_TIME(`metrics.m`))'],
-  ] as const)('emits TSDB-correct aggregation for %s instruments', (metricKind, shape) => {
-    const queries = esql([signal({ kind: 'metric_name', value: 'm', metricKind })]);
-    expect(queries[0]).toBe(
-      `TS metrics-generic.otel-default | WHERE \`metrics.m\` IS NOT NULL | ${shape}`
-    );
+  it.each(['counter', 'gauge', 'updown'] as const)(
+    'emits gauge-safe TS aggregation for %s instruments (OTel->ES ingests them as gauges)',
+    (metricKind) => {
+      const queries = esql([signal({ kind: 'metric_name', value: 'm', metricKind })]);
+      expect(queries[0]).toBe(
+        'TS metrics-generic.otel-default | WHERE `metrics.m` IS NOT NULL | STATS avg = AVG(AVG_OVER_TIME(`metrics.m`))'
+      );
+    }
+  );
+
+  it('skips histogram metrics (aggregate_metric_double has no non-erroring over-time SLI)', () => {
+    const queries = esql([signal({ kind: 'metric_name', value: 'm', metricKind: 'histogram' })]);
+    expect(queries).toEqual([]);
   });
 
   it.each([
