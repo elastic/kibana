@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
@@ -31,21 +31,23 @@ import type { ConnectorActionDef } from '../apis/fetch_connector_spec';
 const SELECTED_ACTIONS_FIELD = 'config.selectedActions';
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-const MODE_ALL = 'all';
+const MODE_RECOMMENDED = 'recommended';
 const MODE_SPECIFIC = 'specific';
 
 const RADIO_OPTIONS = [
   {
-    id: MODE_ALL,
+    id: MODE_RECOMMENDED,
     label: i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.allActionsLabel', {
       defaultMessage: 'Recommended actions',
     }),
+    inputProps: { 'data-test-subj': 'connectorActionSelectorModeRecommended' },
   },
   {
     id: MODE_SPECIFIC,
     label: i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.specificActionsLabel', {
       defaultMessage: 'Specific actions',
     }),
+    inputProps: { 'data-test-subj': 'connectorActionSelectorModeSpecific' },
   },
 ];
 
@@ -54,7 +56,7 @@ export interface ConnectorActionSelectorProps {
   readOnly?: boolean;
 }
 
-// null = "all actions" sentinel; serializer strips it before saving.
+// null = "recommended (isTool) actions" sentinel; serializer strips it before saving.
 export const ConnectorActionSelector: React.FC<ConnectorActionSelectorProps> = ({
   actions,
   readOnly = false,
@@ -100,12 +102,27 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
   readOnly,
 }) => {
   const rawSelected = field.value;
-  const isAll = rawSelected === null;
+  const isRecommended = rawSelected === null;
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [searchQuery, setSearchQuery] = useState<EuiSearchBarOnChangeArgs['query']>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  const recommendedActionNames = useMemo(
+    () => actions.filter((a) => a.isTool).map((a) => a.name),
+    [actions]
+  );
+
+  // Remember the last non-empty specific selection so toggling modes does not wipe it.
+  const previousSpecificRef = useRef<string[] | null>(
+    Array.isArray(rawSelected) && rawSelected.length > 0 ? rawSelected : null
+  );
+  useEffect(() => {
+    if (Array.isArray(rawSelected) && rawSelected.length > 0) {
+      previousSpecificRef.current = rawSelected;
+    }
+  }, [rawSelected]);
 
   const filteredActions = useMemo(
     () =>
@@ -140,20 +157,15 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
   const currentPageActionsRef = useRef(currentPageActions);
   currentPageActionsRef.current = currentPageActions;
 
-  const defaultSelectedNames = useMemo(
-    () => actions.filter((a) => a.isTool).map((a) => a.name),
-    [actions]
-  );
-
   const handleModeChange = useCallback(
     (id: string) => {
-      if (id === MODE_ALL) {
+      if (id === MODE_RECOMMENDED) {
         field.setValue(null);
       } else {
-        field.setValue(defaultSelectedNames);
+        field.setValue(previousSpecificRef.current ?? recommendedActionNames);
       }
     },
-    [defaultSelectedNames, field]
+    [recommendedActionNames, field]
   );
 
   const handleSelectionChange = useCallback(
@@ -228,6 +240,7 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
   );
 
   const selectedCount = (rawSelected ?? []).length;
+  const emptySpecificSelection = !isRecommended && selectedCount === 0;
   const totalFiltered = filteredActions.length;
   const paginationStart = totalFiltered > 0 ? pageIndex * pageSize + 1 : 0;
   const paginationEnd = Math.min((pageIndex + 1) * pageSize, totalFiltered);
@@ -297,76 +310,97 @@ export const ConnectorActionSelectorUI: React.FC<UIProps> = ({
         label={i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.allowedActionsLabel', {
           defaultMessage: 'Allowed actions',
         })}
+        helpText={i18n.translate('kbn-alerts-ui-shared.connectorActionSelector.helpText', {
+          defaultMessage:
+            'Recommended actions are those marked for automated use. Choose specific actions to allow a custom set, ' +
+            'including actions that require user confirmation.',
+        })}
       >
         <EuiRadioGroup
           options={RADIO_OPTIONS}
-          idSelected={isAll ? MODE_ALL : MODE_SPECIFIC}
+          idSelected={isRecommended ? MODE_RECOMMENDED : MODE_SPECIFIC}
           onChange={handleModeChange}
           disabled={readOnly}
           name="connectorActionSelectorMode"
           data-test-subj="connectorActionSelectorMode"
         />
       </EuiFormRow>
-      {!isAll && actions.length > 0 && (
+      {!isRecommended && actions.length > 0 && (
         <>
           <EuiSpacer size="s" />
-          <EuiPanel hasBorder paddingSize="m">
-            <EuiInMemoryTable
-              items={actions}
-              columns={columns}
-              itemId="name"
-              selection={selection}
-              search={{
-                box: {
-                  incremental: true,
-                  placeholder: i18n.translate(
-                    'kbn-alerts-ui-shared.connectorActionSelector.searchPlaceholder',
-                    { defaultMessage: 'Search actions' }
-                  ),
-                },
-                onChange: ({ query, error }: EuiSearchBarOnChangeArgs) => {
-                  if (!error) {
-                    setSearchQuery(query);
-                    setPageIndex(0);
+          <EuiFormRow
+            isInvalid={emptySpecificSelection}
+            error={
+              emptySpecificSelection
+                ? i18n.translate(
+                    'kbn-alerts-ui-shared.connectorActionSelector.emptySelectionError',
+                    {
+                      defaultMessage:
+                        'Select at least one action, or switch to recommended actions.',
+                    }
+                  )
+                : undefined
+            }
+            fullWidth
+          >
+            <EuiPanel hasBorder paddingSize="m">
+              <EuiInMemoryTable
+                items={filteredActions}
+                columns={columns}
+                itemId="name"
+                selection={selection}
+                search={{
+                  box: {
+                    incremental: true,
+                    placeholder: i18n.translate(
+                      'kbn-alerts-ui-shared.connectorActionSelector.searchPlaceholder',
+                      { defaultMessage: 'Search actions' }
+                    ),
+                  },
+                  onChange: ({ query, error }: EuiSearchBarOnChangeArgs) => {
+                    if (!error) {
+                      setSearchQuery(query);
+                      setPageIndex(0);
+                    }
+                  },
+                }}
+                onTableChange={({ page, sort }: CriteriaWithPagination<ConnectorActionDef>) => {
+                  // EuiBasicTable clears selection before firing onChange on page/sort changes.
+                  // Capture now and restore below; React batches both calls so this one wins.
+                  const selectionToRestore = rawSelectedRef.current;
+                  if (sort) {
+                    setSortDirection(sort.direction);
                   }
-                },
-              }}
-              onTableChange={({ page, sort }: CriteriaWithPagination<ConnectorActionDef>) => {
-                // EuiBasicTable clears selection before firing onChange on page/sort changes.
-                // Capture now and restore below; React batches both calls so this one wins.
-                const selectionToRestore = rawSelectedRef.current;
-                if (sort) {
-                  setSortDirection(sort.direction);
-                }
-                if (page) {
-                  if (page.size !== pageSize) {
-                    setPageSize(page.size);
-                    setPageIndex(0);
-                  } else {
-                    setPageIndex(page.index);
+                  if (page) {
+                    if (page.size !== pageSize) {
+                      setPageSize(page.size);
+                      setPageIndex(0);
+                    } else {
+                      setPageIndex(page.index);
+                    }
                   }
-                }
-                field.setValue(selectionToRestore);
-              }}
-              pagination={{
-                initialPageSize: DEFAULT_PAGE_SIZE,
-                pageSizeOptions: PAGE_SIZE_OPTIONS,
-                showPerPageOptions: true,
-                pageIndex,
-                pageSize,
-              }}
-              sorting={{ sort: { field: 'name', direction: sortDirection } }}
-              childrenBetween={tableHeader}
-              rowProps={(item) => ({
-                'data-test-subj': `connectorActionSelectorRow-${item.name}`,
-              })}
-              tableCaption={i18n.translate(
-                'kbn-alerts-ui-shared.connectorActionSelector.tableCaption',
-                { defaultMessage: 'Connector actions' }
-              )}
-              data-test-subj="connectorActionSelectorTable"
-            />
-          </EuiPanel>
+                  field.setValue(selectionToRestore);
+                }}
+                pagination={{
+                  initialPageSize: DEFAULT_PAGE_SIZE,
+                  pageSizeOptions: PAGE_SIZE_OPTIONS,
+                  showPerPageOptions: true,
+                  pageIndex,
+                  pageSize,
+                }}
+                sorting={{ sort: { field: 'name', direction: sortDirection } }}
+                childrenBetween={tableHeader}
+                rowProps={(item) => ({
+                  'data-test-subj': `connectorActionSelectorRow-${item.name}`,
+                })}
+                tableCaption={i18n.translate(
+                  'kbn-alerts-ui-shared.connectorActionSelector.tableCaption',
+                  { defaultMessage: 'Connector actions' }
+                )}
+                data-test-subj="connectorActionSelectorTable"
+              />
+            </EuiPanel>
+          </EuiFormRow>
         </>
       )}
     </>

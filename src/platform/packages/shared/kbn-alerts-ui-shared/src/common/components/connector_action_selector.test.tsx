@@ -17,15 +17,27 @@ import { ConnectorActionSelectorUI } from './connector_action_selector';
 const ACTIONS: ConnectorActionDef[] = Array.from({ length: 12 }, (_, i) => ({
   name: `action${String(i + 1).padStart(2, '0')}`,
   description: `Description ${i + 1}`,
-  isTool: false,
+  isTool: i < 2,
 }));
 const ACTION_NAMES = ACTIONS.map((a) => a.name);
 
-function Fixture({ initialSelected }: { initialSelected: string[] | null }) {
+function Fixture({
+  initialSelected,
+  onValueChange,
+}: {
+  initialSelected: string[] | null;
+  onValueChange?: (value: string[] | null) => void;
+}) {
   const [value, setValue] = useState<string[] | null>(initialSelected);
   return (
     <ConnectorActionSelectorUI
-      field={{ value, setValue }}
+      field={{
+        value,
+        setValue: (next) => {
+          setValue(next);
+          onValueChange?.(next);
+        },
+      }}
       actions={ACTIONS}
       allActionNames={ACTION_NAMES}
       readOnly={false}
@@ -90,5 +102,34 @@ describe('ConnectorActionSelectorUI — cross-page selection', () => {
     await user.click(rowCheckbox('action11'));
 
     expect(screen.getByText('3 selected')).toBeInTheDocument();
+  });
+});
+
+describe('ConnectorActionSelectorUI — mode switching', () => {
+  it('preserves a specific selection when toggling recommended → specific', async () => {
+    const user = userEvent.setup();
+    const onValueChange = jest.fn();
+
+    render(<Fixture initialSelected={['action01', 'action03']} onValueChange={onValueChange} />);
+
+    await user.click(screen.getByTestId('connectorActionSelectorModeRecommended'));
+    expect(onValueChange).toHaveBeenLastCalledWith(null);
+
+    await user.click(screen.getByTestId('connectorActionSelectorModeSpecific'));
+    expect(onValueChange).toHaveBeenLastCalledWith(['action01', 'action03']);
+    expect(rowCheckbox('action01')).toBeChecked();
+    expect(rowCheckbox('action03')).toBeChecked();
+  });
+
+  it('shows an error when specific mode has zero actions selected', async () => {
+    const user = userEvent.setup();
+
+    render(<Fixture initialSelected={['action01']} />);
+
+    await user.click(screen.getByTestId('connectorActionSelectorClearSelection'));
+
+    expect(
+      screen.getByText('Select at least one action, or switch to recommended actions.')
+    ).toBeInTheDocument();
   });
 });
