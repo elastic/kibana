@@ -83,10 +83,18 @@ describe('PND canonical Daybreak schemas', () => {
           totalTokens: 26000,
           costBasis: 'unknown',
         },
+        executionIdentity: {
+          executionSubject: 'service-account:watch-orchestrator',
+          approvalSubject: 'analyst',
+          isSeparated: true,
+        },
       });
       expect(() => workerEvaluationRecordSchema.parse(r)).not.toThrow();
       expect(r.provenance.costBasis).toBe('unknown');
       expect(r.evidenceRefs).toEqual([]);
+      // D1 — execution identity is separated from approval identity.
+      expect(r.executionIdentity.isSeparated).toBe(true);
+      expect(r.executionIdentity.executionSubject).not.toBe(r.executionIdentity.approvalSubject);
     });
 
     it('carries real token counts with a self-hosted cost basis (gap #6)', () => {
@@ -109,6 +117,11 @@ describe('PND canonical Daybreak schemas', () => {
           // are authoritative, the dollar cost is not, so costUsd is omitted
           // and the basis is labelled rather than fabricated.
           costBasis: 'self-hosted',
+        },
+        executionIdentity: {
+          executionSubject: 'service-account:watch-orchestrator',
+          approvalSubject: 'analyst',
+          isSeparated: true,
         },
       });
       expect(() => workerEvaluationRecordSchema.parse(r)).not.toThrow();

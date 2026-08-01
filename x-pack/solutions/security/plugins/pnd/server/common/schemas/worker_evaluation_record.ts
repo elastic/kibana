@@ -29,6 +29,22 @@ export const provenanceSchema = z.object({
 export type Provenance = z.infer<typeof provenanceSchema>;
 
 /**
+ * Execution-identity block (D1). The Orchestrator runs Workers under a non-human
+ * service account (executionSubject) distinct from the human approver
+ * (approvalSubject). `isSeparated` is the D1 invariant: the two are never equal.
+ *
+ * UNRATIFIED: the real principals arrive with run-as/UIAM (#17942) and platform
+ * HITL (#17944). Persisted on every WorkerEvaluationRecord so E&T can audit that
+ * execution identity was separated from approval identity on every run.
+ */
+export const executionIdentitySchema = z.object({
+  executionSubject: z.string(),
+  approvalSubject: z.string(),
+  isSeparated: z.boolean(),
+});
+export type ExecutionIdentityRecord = z.infer<typeof executionIdentitySchema>;
+
+/**
  * Exactly one WorkerEvaluationRecord per worker run (no parallel store — the
  * canonical record E&T scores against the golden dataset).
  */
@@ -51,6 +67,7 @@ export const workerEvaluationRecordSchema = z.object({
   proposalId: z.string().optional(),
   evidenceRefs: z.array(z.string()).default([]),
   provenance: provenanceSchema,
+  executionIdentity: executionIdentitySchema,
   createdAt: z.string(),
 });
 export type WorkerEvaluationRecord = z.infer<typeof workerEvaluationRecordSchema>;
@@ -66,6 +83,7 @@ export interface BuildWorkerEvalArgs {
   proposalId?: string;
   evidenceRefs?: string[];
   provenance: Provenance;
+  executionIdentity: ExecutionIdentityRecord;
 }
 
 export const buildWorkerEvaluationRecord = (args: BuildWorkerEvalArgs): WorkerEvaluationRecord =>
@@ -81,5 +99,6 @@ export const buildWorkerEvaluationRecord = (args: BuildWorkerEvalArgs): WorkerEv
     proposalId: args.proposalId,
     evidenceRefs: args.evidenceRefs ?? [],
     provenance: provenanceSchema.parse(args.provenance),
+    executionIdentity: executionIdentitySchema.parse(args.executionIdentity),
     createdAt: new Date().toISOString(),
   });

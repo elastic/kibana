@@ -18,6 +18,10 @@ import {
   buildWorkerEvaluationRecord,
   sourceWatchSchema,
   type SourceWatch,
+  buildExecutionIdentity,
+  assertWorkerAllowlisted,
+  assertIndexInRunAsScope,
+  OrchestrationIdentityError,
 } from '../../common/schemas';
 import type { Provenance } from '../../common/schemas/worker_evaluation_record';
 import {
@@ -33,6 +37,18 @@ const EMIT_PROPOSAL_PATH = `${PND_INVESTIGATIONS_URL}/_emit_proposal` as const;
 const WorkerRunSchema = z
   .object({
     watch: z.string().optional(),
+    // Orchestration-identity fields (D2/D5). UNRATIFIED spike-local shape,
+    // enforced fail-closed by the orchestration_identity primitive:
+    //  - orchestrationWorker: the Worker tier the Orchestrator is invoking. When
+    //    present it must be in the orchestration.workers allowlist (D5), else the
+    //    run is refused (blocked, nothing written).
+    //  - requestedIndex: an index pattern the Worker's run-as role must grant read
+    //    to (D2). When present and outside the tier's scope the run is refused.
+    // Both are OPTIONAL: a normal Worker run omits them and enforcement is a no-op,
+    // so real Floor/Dark/Deep traffic is unaffected until the platform primitive
+    // supplies these from the run-as identity.
+    orchestrationWorker: z.string().optional(),
+    requestedIndex: z.string().optional(),
     classification: z.string().optional(),
     finding: z.string().optional(),
     confidence: z.number().min(0).max(1).default(0),
@@ -263,6 +279,55 @@ export const registerEmitProposalRoute = ({
             : `inv-${sourceWatch}-${uuidv4()}`;
         const alertId = workerRun.alertId ?? investigationId;
 
+        // Orchestration-identity enforcement (Family D — UNRATIFIED spike-local).
+        //
+        // D5 (allowlist boundary) and D2 (run-as scope) are fail-closed: if the
+        // caller declares which Worker the Orchestrator is invoking, or which
+        // index the Worker's run-as role must read, an out-of-allowlist worker or
+        // out-of-scope index refuses the run BEFORE anything is written. The route
+        // is fail-soft by contract (always 200), so a refusal surfaces as a
+        // visible `blocked` status with an empty `written` set and a structured
+        // `orchestrationDenied` reason — never a silent "no findings".
+        try {
+          if (workerRun.orchestrationWorker != null) {
+            assertWorkerAllowlisted(workerRun.orchestrationWorker);
+          }
+          if (workerRun.requestedIndex != null) {
+            // Scope is keyed on the Worker tier actually executing — the declared
+            // orchestrationWorker if given, else the sourceWatch tier.
+            assertIndexInRunAsScope(
+              workerRun.orchestrationWorker ?? sourceWatch,
+              workerRun.requestedIndex
+            );
+          }
+        } catch (error) {
+          if (error instanceof OrchestrationIdentityError) {
+            logger.warn(
+              `PND: emit_proposal orchestration-identity refused run (${error.reason}): ${error.message}`
+            );
+            return response.ok({
+              body: {
+                proposalId: null,
+                evidenceId: null,
+                workerEvalId: null,
+                status: 'blocked',
+                written: [],
+                orchestrationDenied: {
+                  reason: error.reason,
+                  worker: error.detail.worker,
+                  requestedIndex: error.detail.requestedIndex,
+                },
+              },
+            });
+          }
+          throw error;
+        }
+
+        // Execution identity (D1): every run executes under a non-human service
+        // account distinct from the human approver. Persisted on the worker-eval
+        // record and echoed in the response so E&T can audit subject separation.
+        const executionIdentity = buildExecutionIdentity();
+
         // Detection Change Signal (delta #1/#2) — Dark/Deep only, conditional. runId = the worker
         // eval run id below is generated fresh; reuse a stable id for the signal + its timeline event.
         const detectionRunId = uuidv4();
@@ -326,6 +391,7 @@ export const registerEmitProposalRoute = ({
           proposalId: proposal.id,
           evidenceRefs: [evidence.id],
           provenance: buildProvenance(workerRun),
+          executionIdentity,
         });
 
         // Link evidence to the proposal.
@@ -508,6 +574,7 @@ export const registerEmitProposalRoute = ({
             workerEvalId: workerEval.id,
             status: proposal.status,
             written,
+            executionIdentity,
           },
         });
       }

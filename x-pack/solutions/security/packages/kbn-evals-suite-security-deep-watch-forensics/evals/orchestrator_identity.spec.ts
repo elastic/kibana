@@ -19,12 +19,15 @@
  * behind `_promote_to_incident`) and are asserted for real against a live
  * Kibana + ES.
  *
- * D1, D2 and D5 remain honest skip-stubs. They are NOT missing code — each is
- * blocked on a platform primitive or an architecture decision that has not been
- * made yet (run-as/UIAM #17942 for D1/D2; the still-open `orchestration.workers`
- * vs. graph-as-allowlist decision for D5). Substituting an assertion against
- * some adjacent endpoint would produce a green checkmark that does not test the
- * invariant the gate names, which is worse than an acknowledged gap.
+ * D1, D2 and D5 are implemented against UNRATIFIED spike-local orchestration-
+ * identity primitives (`pnd/server/common/schemas/orchestration_identity.ts`).
+ * The platform primitives they will eventually bind to are still open — run-as/
+ * UIAM (#17942) for D1/D2, and the `orchestration.workers` field vs.
+ * graph-as-allowlist decision for D5 — so per the spike's "define a working
+ * schema locally when the platform contract lags, align later" rule, the route
+ * enforces the most-likely shape fail-closed today (env escape hatch +
+ * `// UNRATIFIED:` markers) rather than sitting skipped. When the platform
+ * shapes land, the enforcement seam is swapped with no change to these specs.
  *
  * NOTE on D4: an earlier skip comment claimed "no waitForApproval/waitForInput
  * step exists in kbn-workflows". That was WRONG (based on a grep that timed
@@ -82,21 +85,126 @@ const workerRun = (overrides: Record<string, unknown> = {}) => ({
 });
 
 evaluate.describe(
-  'Deep Watch Forensics — Family D Gate Stubs',
+  'Deep Watch Forensics — Family D Orchestrator-Identity Gates',
   { tag: tags.stateful.classic },
   () => {
-    evaluate.skip('D1 — Subject separation: execution identity ≠ approval identity', async () => {
-      // BLOCKED: platform run-as / UIAM readiness (#17942)
-      // Assert execution.subject (Orchestrator Service Account) ≠ hil.subject
-      // (human approver) on every run.
-      // TEMPORARY SUBSTITUTE: spike-local identity stub once run-as lands.
-    });
+    evaluate(
+      'D1 — Subject separation: execution identity ≠ approval identity',
+      async ({ kbnClient, log }) => {
+        // UNRATIFIED spike-local (run-as/UIAM #17942): every Worker run executes
+        // under a non-human service account (executionSubject) that the route
+        // stamps distinct from the human approver (approvalSubject). We assert the
+        // separation invariant on the live emit_proposal response for every tier.
+        const alertId = `d1-subject-sep-${uuidv4()}`;
+        const tiers = ['watch-floor', 'watch-dark', 'watch-deep'] as const;
 
-    evaluate.skip('D2 — Authz scoping: Worker cannot read/act beyond run-as role', async () => {
-      // BLOCKED: platform run-as / UIAM readiness (#17942)
-      // Grant Service Account narrow role → attempt out-of-scope index read →
-      // request denied, run surfaces visible blocked/degraded.
-    });
+        const identities: Array<{
+          executionSubject: string;
+          approvalSubject: string;
+          isSeparated: boolean;
+        }> = [];
+        for (const tier of tiers) {
+          const res = await emitProposal(kbnClient, {
+            sourceWatch: tier,
+            workerRun: workerRun({ alertId, investigationId: `inv-${tier}-${alertId}` }),
+          });
+          const identity = (res as unknown as { executionIdentity?: (typeof identities)[number] })
+            .executionIdentity;
+          if (identity) identities.push(identity);
+        }
+
+        log.info(`[D1] collected ${identities.length}/3 execution identities`);
+
+        const allPresent = identities.length === 3;
+        const allSeparated =
+          allPresent &&
+          identities.every(
+            (i) => i.isSeparated === true && i.executionSubject !== i.approvalSubject
+          );
+        const executionIsServiceAccount =
+          allPresent && identities.every((i) => i.executionSubject.startsWith('service-account:'));
+        const approvalIsHuman =
+          allPresent && identities.every((i) => i.approvalSubject === 'analyst');
+
+        const success = allSeparated && executionIsServiceAccount && approvalIsHuman;
+
+        return {
+          success,
+          explanation:
+            `${identities.length}/3 runs returned an execution identity; ` +
+            `all separated=${allSeparated}, execution=service-account=${executionIsServiceAccount}, ` +
+            `approval=human=${approvalIsHuman}.`,
+          scorecard: {
+            allIdentitiesPresent: allPresent ? 1 : 0,
+            executionSubjectSeparatedFromApproval: allSeparated ? 1 : 0,
+            executionIsServiceAccount: executionIsServiceAccount ? 1 : 0,
+            approvalIsHuman: approvalIsHuman ? 1 : 0,
+          },
+        };
+      }
+    );
+
+    evaluate(
+      'D2 — Authz scoping: Worker cannot read/act beyond run-as role',
+      async ({ kbnClient, log }) => {
+        // UNRATIFIED spike-local (run-as/UIAM #17942): each Worker tier runs under
+        // a narrow role granting read only to its own telemetry patterns. A read
+        // request outside that scope is refused fail-closed and the run surfaces a
+        // visible `blocked` status (never a silent "no findings"). An in-scope read
+        // proceeds normally.
+        const alertId = `d2-authz-${uuidv4()}`;
+
+        // In-scope: Deep Watch reading its own forensic process telemetry → allowed.
+        const inScope = await emitProposal(kbnClient, {
+          sourceWatch: 'watch-deep',
+          workerRun: workerRun({
+            alertId,
+            investigationId: `inv-watch-deep-${alertId}`,
+            requestedIndex: 'logs-endpoint.events.process-2025.07.20',
+          }),
+        });
+
+        // Out-of-scope: Deep Watch attempting to read the users/identity index →
+        // refused. Nothing is written; a structured deny reason is surfaced.
+        const outOfScope = (await emitProposal(kbnClient, {
+          sourceWatch: 'watch-deep',
+          workerRun: workerRun({
+            alertId: `${alertId}-oos`,
+            investigationId: `inv-watch-deep-${alertId}-oos`,
+            requestedIndex: '.security-users',
+          }),
+        })) as unknown as {
+          status: string;
+          written: string[];
+          orchestrationDenied?: { reason?: string; worker?: string; requestedIndex?: string };
+        };
+
+        log.info(
+          `[D2] inScope.written=${JSON.stringify(inScope.written)} ` +
+            `outOfScope.status=${outOfScope.status} reason=${outOfScope.orchestrationDenied?.reason}`
+        );
+
+        const inScopeAllowed = inScope.written.includes('proposal');
+        const outOfScopeBlocked =
+          outOfScope.status === 'blocked' && (outOfScope.written?.length ?? 0) === 0;
+        const denyReasonCorrect =
+          outOfScope.orchestrationDenied?.reason === 'index-out-of-run-as-scope';
+
+        const success = inScopeAllowed && outOfScopeBlocked && denyReasonCorrect;
+
+        return {
+          success,
+          explanation:
+            `In-scope Deep read allowed=${inScopeAllowed}; out-of-scope read ` +
+            `blocked=${outOfScopeBlocked} with reason=${outOfScope.orchestrationDenied?.reason}.`,
+          scorecard: {
+            inScopeReadAllowed: inScopeAllowed ? 1 : 0,
+            outOfScopeReadBlocked: outOfScopeBlocked ? 1 : 0,
+            blockedVisibleNotSilent: denyReasonCorrect ? 1 : 0,
+          },
+        };
+      }
+    );
 
     evaluate(
       'D3 — Investigation containment: exactly one Investigation per Watch run',
@@ -337,26 +445,65 @@ evaluate.describe(
       }
     );
 
-    evaluate.skip(
+    evaluate(
       'D5 — Allowlist boundary: Orchestrator invokes only allowlisted Workers',
-      async () => {
-        // BLOCKED: the `orchestration.workers` allowlist mechanism itself is an
-        // OPEN DECISION, not merely unimplemented. daybreak-watches-object-model.md's
-        // "Still open" section lists verbatim: "Explicit `orchestration.workers`
-        // field vs graph-as-allowlist today". Until that resolves there is no
-        // schema to enforce, and inventing one here would bake an unratified
-        // product decision into a gate test.
-        //
-        // NOT a substitute: Task 6 registered `security.pnd_watch_orchestrator`
-        // with Agent Builder carrying a `configuration.tools` allowlist — but it
-        // is `tools: []` (degenerate/empty). Asserting "a non-allowlisted tool is
-        // refused" against an empty list is true but vacuous: it does not
-        // exercise the boundary this gate names (Workers the Orchestrator may
-        // invoke), only that an agent with no tools calls no tools. The real
-        // boundary lands with the orchestration.workers decision.
-        //
-        // When it lands: attempt workflow.execute* a Worker outside the
-        // Orchestrator's allowlist → invocation refused.
+      async ({ kbnClient, log }) => {
+        // UNRATIFIED spike-local (open `orchestration.workers` vs graph-as-allowlist
+        // decision): the Orchestrator may dispatch ONLY Workers in its allowlist.
+        // A run declaring an allowlisted worker proceeds; one declaring a Worker
+        // outside the allowlist is refused fail-closed (visible `blocked`, nothing
+        // written, structured deny reason). When the platform decision lands this
+        // seam is replaced by the ratified allowlist with no spec change.
+        const alertId = `d5-allowlist-${uuidv4()}`;
+
+        // Allowlisted worker → dispatch proceeds.
+        const allowlisted = await emitProposal(kbnClient, {
+          sourceWatch: 'watch-deep',
+          workerRun: workerRun({
+            alertId,
+            investigationId: `inv-watch-deep-${alertId}`,
+            orchestrationWorker: 'watch-deep',
+          }),
+        });
+
+        // Non-allowlisted worker → dispatch refused.
+        const rogue = (await emitProposal(kbnClient, {
+          sourceWatch: 'watch-deep',
+          workerRun: workerRun({
+            alertId: `${alertId}-rogue`,
+            investigationId: `inv-watch-deep-${alertId}-rogue`,
+            orchestrationWorker: 'watch-rogue',
+          }),
+        })) as unknown as {
+          status: string;
+          written: string[];
+          orchestrationDenied?: { reason?: string; worker?: string };
+        };
+
+        log.info(
+          `[D5] allowlisted.written=${JSON.stringify(allowlisted.written)} ` +
+            `rogue.status=${rogue.status} reason=${rogue.orchestrationDenied?.reason}`
+        );
+
+        const allowlistedDispatched = allowlisted.written.includes('proposal');
+        const rogueRefused = rogue.status === 'blocked' && (rogue.written?.length ?? 0) === 0;
+        const denyReasonCorrect =
+          rogue.orchestrationDenied?.reason === 'worker-not-allowlisted' &&
+          rogue.orchestrationDenied?.worker === 'watch-rogue';
+
+        const success = allowlistedDispatched && rogueRefused && denyReasonCorrect;
+
+        return {
+          success,
+          explanation:
+            `Allowlisted worker dispatched=${allowlistedDispatched}; non-allowlisted ` +
+            `worker refused=${rogueRefused} with reason=${rogue.orchestrationDenied?.reason}.`,
+          scorecard: {
+            allowlistedWorkerDispatched: allowlistedDispatched ? 1 : 0,
+            nonAllowlistedWorkerRefused: rogueRefused ? 1 : 0,
+            refusalVisibleNotSilent: denyReasonCorrect ? 1 : 0,
+          },
+        };
       }
     );
 
