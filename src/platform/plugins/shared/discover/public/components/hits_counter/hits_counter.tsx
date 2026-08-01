@@ -23,6 +23,67 @@ export interface HitsCounterProps {
   hitsTotalToDisplay?: number;
 }
 
+interface CountLabelValues extends Record<string, React.ReactNode> {
+  hits?: number;
+  formattedHits: React.ReactNode;
+}
+
+// One entry per variant, each with its full and "at least this many" (partial) wording.
+// Keeping the two forms next to each other makes them easy to compare when adding a variant.
+const COUNT_LABELS: Record<
+  HitsCounterVariant,
+  Record<'full' | 'partial', (values: CountLabelValues) => React.ReactNode>
+> = {
+  documents: {
+    full: (values) => (
+      <FormattedMessage
+        id="discover.hitsCounter.documentsLabel"
+        defaultMessage="{formattedHits} {hits, plural, one {document} other {documents}}"
+        values={values}
+      />
+    ),
+    partial: (values) => (
+      <FormattedMessage
+        id="discover.hitsCounter.partialDocumentsLabel"
+        defaultMessage="≥{formattedHits} {hits, plural, one {document} other {documents}}"
+        values={values}
+      />
+    ),
+  },
+  results: {
+    full: (values) => (
+      <FormattedMessage
+        id="discover.hitsCounter.resultsLabel"
+        defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
+        values={values}
+      />
+    ),
+    partial: (values) => (
+      <FormattedMessage
+        id="discover.hitsCounter.partialResultsLabel"
+        defaultMessage="≥{formattedHits} {hits, plural, one {result} other {results}}"
+        values={values}
+      />
+    ),
+  },
+  groups: {
+    full: (values) => (
+      <FormattedMessage
+        id="discover.hitsCounter.groupsLabel"
+        defaultMessage="{formattedHits} {hits, plural, one {group} other {groups}}"
+        values={values}
+      />
+    ),
+    partial: (values) => (
+      <FormattedMessage
+        id="discover.hitsCounter.partialGroupsLabel"
+        defaultMessage="≥{formattedHits} {hits, plural, one {group} other {groups}}"
+        values={values}
+      />
+    ),
+  },
+};
+
 export const HitsCounter: React.FC<HitsCounterProps> = ({ variant, hitsTotalToDisplay }) => {
   const dataStateContainer = useCurrentTabDataStateContainer();
   const totalHits$ = dataStateContainer.data$.totalHits$;
@@ -67,48 +128,10 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ variant, hitsTotalToDi
     overflow: hidden;
   `;
 
-  const countLabel =
-    variant === 'documents' ? (
-      showGreaterOrEqualSign ? (
-        <FormattedMessage
-          id="discover.hitsCounter.partialDocumentsLabel"
-          defaultMessage="≥{formattedHits} {hits, plural, one {document} other {documents}}"
-          values={{ hits: hitsTotal, formattedHits }}
-        />
-      ) : (
-        <FormattedMessage
-          id="discover.hitsCounter.documentsLabel"
-          defaultMessage="{formattedHits} {hits, plural, one {document} other {documents}}"
-          values={{ hits: hitsTotal, formattedHits }}
-        />
-      )
-    ) : variant === 'groups' ? (
-      showGreaterOrEqualSign ? (
-        <FormattedMessage
-          id="discover.hitsCounter.partialGroupsLabel"
-          defaultMessage="≥{formattedHits} {hits, plural, one {group} other {groups}}"
-          values={{ hits: hitsTotal, formattedHits }}
-        />
-      ) : (
-        <FormattedMessage
-          id="discover.hitsCounter.groupsLabel"
-          defaultMessage="{formattedHits} {hits, plural, one {group} other {groups}}"
-          values={{ hits: hitsTotal, formattedHits }}
-        />
-      )
-    ) : showGreaterOrEqualSign ? (
-      <FormattedMessage
-        id="discover.hitsCounter.partialResultsLabel"
-        defaultMessage="≥{formattedHits} {hits, plural, one {result} other {results}}"
-        values={{ hits: hitsTotal, formattedHits }}
-      />
-    ) : (
-      <FormattedMessage
-        id="discover.hitsCounter.resultsLabel"
-        defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
-        values={{ hits: hitsTotal, formattedHits }}
-      />
-    );
+  const countLabel = COUNT_LABELS[variant][showGreaterOrEqualSign ? 'partial' : 'full']({
+    hits: hitsTotal,
+    formattedHits,
+  });
 
   return (
     <EuiFlexGroup
