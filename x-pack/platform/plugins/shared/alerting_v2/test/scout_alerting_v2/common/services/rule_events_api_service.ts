@@ -30,6 +30,8 @@ export interface RuleEventsApiService {
   find: (ruleId: string, filter?: RuleEventFilter) => Promise<AlertEvent[]>;
   /** Latest director-processed event per `group_hash` for a rule. */
   getLatestEpisodeStates: (ruleId: string) => Promise<Map<string, AlertEvent>>;
+  /** Finds an alert event by `group_hash` (used for external alerts with no `rule.id`). */
+  findByGroupHash: (groupHash: string) => Promise<AlertEvent | undefined>;
   /** Polls `find(...)` until at least `min` matching events exist. */
   waitForAtLeast: (ruleId: string, min: number, filter?: RuleEventFilter) => Promise<void>;
   /**
@@ -93,6 +95,17 @@ export const getRuleEventsApiService = ({
       return stateMap;
     });
 
+  const findByGroupHash: RuleEventsApiService['findByGroupHash'] = (groupHash) =>
+    measurePerformanceAsync(log, 'ruleEvents.findByGroupHash', async () => {
+      await esClient.indices.refresh({ index: ALERT_EVENTS_DATA_STREAM });
+      const result = await esClient.search<AlertEvent>({
+        index: ALERT_EVENTS_DATA_STREAM,
+        size: 1,
+        query: { term: { group_hash: groupHash } },
+      });
+      return result.hits.hits[0]?._source;
+    });
+
   const waitForAtLeast: RuleEventsApiService['waitForAtLeast'] = (ruleId, min, filter) =>
     expect
       .poll(() => find(ruleId, filter).then((events) => events.length), {
@@ -127,5 +140,5 @@ export const getRuleEventsApiService = ({
       );
     });
 
-  return { find, getLatestEpisodeStates, waitForAtLeast, seed, cleanUp };
+  return { find, getLatestEpisodeStates, findByGroupHash, waitForAtLeast, seed, cleanUp };
 };
