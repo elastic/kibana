@@ -43,11 +43,11 @@ import {
 } from './runtime_state';
 import { createContextAwarenessToolkit } from './context_awareness_toolkit';
 import {
-  DEFAULT_PROFILE_STATE_FIELDS,
+  PROFILE_APP_STATE_DEFAULT_FIELDS,
   TabsBarVisibility,
-  type DefaultProfileStateField,
+  type ProfileAppStateDefaultField,
   type DiscoverInternalState,
-  type ProfileStateSnapshot,
+  type ProfileAppStateSnapshot,
   type TabState,
   type RecentlyClosedTabState,
   TabInitializationStatus,
@@ -119,32 +119,32 @@ const normalizeVisiblePanelsState = (appState: TabState['appState']) => {
   return appState;
 };
 
-const setProfileStateSnapshotField = <TField extends DefaultProfileStateField>(
-  snapshot: ProfileStateSnapshot,
+const setProfileAppStateSnapshotField = <TField extends ProfileAppStateDefaultField>(
+  snapshot: ProfileAppStateSnapshot,
   field: TField,
   value: TabState['appState'][TField]
 ) => {
   snapshot[field] = value;
 };
 
-const syncProfileStateSnapshot = (
+const syncProfileAppStateSnapshot = (
   tab: TabState,
   profileId: string,
   nextAppState?: TabState['appState']
 ) => {
-  const profileStateSnapshots = tab.defaultProfileState.snapshotsByProfileId;
-  const profileStateSnapshot = profileStateSnapshots[profileId] ?? {};
+  const profileAppStateSnapshots = tab.profileAppStateDefaults.snapshotsByProfileId;
+  const profileAppStateSnapshot = profileAppStateSnapshots[profileId] ?? {};
   const snapshotAppState = nextAppState ?? tab.appState;
 
-  for (const field of DEFAULT_PROFILE_STATE_FIELDS) {
+  for (const field of PROFILE_APP_STATE_DEFAULT_FIELDS) {
     // If no nextAppState was passed, we're syncing the current app state (e.g. on profile init).
     // If nextAppState was passed, we're syncing only the changed fields (e.g. on user action).
     if (!nextAppState || !isEqual(tab.appState[field], nextAppState[field])) {
-      setProfileStateSnapshotField(profileStateSnapshot, field, snapshotAppState[field]);
+      setProfileAppStateSnapshotField(profileAppStateSnapshot, field, snapshotAppState[field]);
     }
   }
 
-  profileStateSnapshots[profileId] = profileStateSnapshot;
+  profileAppStateSnapshots[profileId] = profileAppStateSnapshot;
 };
 
 export const internalStateSlice = createSlice({
@@ -323,19 +323,19 @@ export const internalStateSlice = createSlice({
         }
 
         if (!action.payload.isSystemTriggered) {
-          syncProfileStateSnapshot(tab, action.payload.profileId, appState);
+          syncProfileAppStateSnapshot(tab, action.payload.profileId, appState);
         }
 
         tab.previousAppState = tab.appState;
         tab.appState = appState;
       }),
 
-    syncProfileStateSnapshot: (
+    syncProfileAppStateSnapshot: (
       state,
       action: TabAction<{ profileId: string; appState?: TabState['appState'] }>
     ) =>
       withTab(state, action.payload, (tab) => {
-        syncProfileStateSnapshot(tab, action.payload.profileId, action.payload.appState);
+        syncProfileAppStateSnapshot(tab, action.payload.profileId, action.payload.appState);
       }),
 
     setProfileState: (
@@ -411,9 +411,9 @@ export const internalStateSlice = createSlice({
       state.isESQLToDataViewTransitionModalVisible = action.payload;
     },
 
-    setProfileStateFieldsToReset: {
+    setProfileAppStateDefaultFieldsToReset: {
       prepare: (
-        payload: TabActionPayload<Pick<TabState['defaultProfileState'], 'fieldsToReset'>>
+        payload: TabActionPayload<Pick<TabState['profileAppStateDefaults'], 'fieldsToReset'>>
       ) => ({
         payload: {
           ...payload,
@@ -426,12 +426,12 @@ export const internalStateSlice = createSlice({
       reducer: (
         state,
         action: TabAction<{
-          fieldsToReset: Pick<TabState['defaultProfileState'], 'fieldsToReset' | 'resetId'>;
+          fieldsToReset: Pick<TabState['profileAppStateDefaults'], 'fieldsToReset' | 'resetId'>;
         }>
       ) =>
         withTab(state, action.payload, (tab) => {
-          tab.defaultProfileState = {
-            ...tab.defaultProfileState,
+          tab.profileAppStateDefaults = {
+            ...tab.profileAppStateDefaults,
             ...action.payload.fieldsToReset,
           };
         }),

@@ -30,7 +30,7 @@ import { buildStateSubscribe } from '../../utils/build_state_subscribe';
 import { createUrlSyncObservables } from '../../utils/create_url_sync_observables';
 import { createTabPersistableStateObservable } from '../../utils/create_tab_persistable_state_observable';
 import { createSearchSessionRestorationDataProvider } from '../../utils/create_search_session_restoration_data_provider';
-import { getFieldsToReset } from '../../utils/default_profile_state';
+import { getFieldsToReset } from '../../utils/profile_app_state_defaults';
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -113,7 +113,7 @@ export const initializeAndSync: InternalStateThunkActionCreator<[TabActionPayloa
       // Only reset profile defaults that are not already set in the URL.
       // Persisted tabs own their saved state, so only non-persisted fields can be reset.
       dispatch(
-        internalStateActions.setProfileStateFieldsToReset({
+        internalStateActions.setProfileAppStateDefaultFieldsToReset({
           tabId,
           fieldsToReset: getFieldsToReset({
             columns: columns === undefined && !hasPersistedTab,
