@@ -29,6 +29,16 @@ export interface QueryReconcilePlan {
   merges: QueryMerge[];
 }
 
+/**
+ * Stricter score floor for reconciliation than the recall-tuned
+ * `semantic_min_score` search default (0.15). NOTE: the semantic rank query
+ * minmax-normalizes `_score` over the retrieved set, so this floor is
+ * defense-in-depth only — the top hit always scores ~1.0 regardless of
+ * absolute similarity. The structural-signature gate below is the real guard
+ * against merging non-duplicates.
+ */
+export const RECONCILE_MIN_SCORE = 0.8;
+
 const CODE_EVIDENCE_PREFIX = 'code:';
 
 const hasCodeEvidence = (evidence: string[] = []): boolean =>
@@ -36,6 +46,70 @@ const hasCodeEvidence = (evidence: string[] = []): boolean =>
 
 const hasLogEvidence = (evidence: string[] = []): boolean =>
   evidence.some((line) => !line.trimStart().startsWith(CODE_EVIDENCE_PREFIX));
+
+const ESQL_KEYWORDS = new Set([
+  'and',
+  'or',
+  'not',
+  'null',
+  'true',
+  'false',
+  'like',
+  'rlike',
+  'in',
+  'is',
+  'by',
+  'asc',
+  'desc',
+]);
+
+const FIELD_COMPARISON_RE =
+  /([a-zA-Z_@][\w.]*)\s*(?:==|!=|>=|<=|>|<|\bIS\s+(?:NOT\s+)?NULL\b|\bLIKE\b|\bRLIKE\b|\bIN\s*\()/gi;
+const MATCH_FN_RE = /\b(?:MATCH|MATCH_PHRASE|MATCH_OPERATOR|QSTR|KQL)\s*\(\s*([a-zA-Z_@][\w.]*)/gi;
+const BY_CLAUSE_RE = /\bBY\s+((?:[a-zA-Z_@][\w.]*\s*,\s*)*[a-zA-Z_@][\w.]*)/gi;
+
+/**
+ * Deterministic structural signature of an ES|QL query: the sorted source
+ * set (FROM …) plus the sorted set of field names it filters or groups on.
+ * Two queries are only merge candidates when their signatures are equal —
+ * semantically-near queries over DIFFERENT fields (e.g. `status.code` vs
+ * `exception.type`) are distinct indicators, not duplicates, no matter how
+ * similar their titles read.
+ */
+export function esqlStructuralSignature(esqlText: string): string {
+  const text = esqlText.replace(/\s+/g, ' ').trim();
+
+  const fromMatch = text.match(/^\s*FROM\s+([^|]+)/i);
+  const sources = fromMatch
+    ? fromMatch[1]
+        .replace(/\bMETADATA\b.*$/i, '')
+        .split(',')
+        .map((source) => source.trim().toLowerCase())
+        .filter(Boolean)
+        .sort()
+    : [];
+
+  const fields = new Set<string>();
+  const addField = (raw: string) => {
+    const field = raw.toLowerCase();
+    if (!ESQL_KEYWORDS.has(field)) {
+      fields.add(field);
+    }
+  };
+  for (const match of text.matchAll(FIELD_COMPARISON_RE)) {
+    addField(match[1]);
+  }
+  for (const match of text.matchAll(MATCH_FN_RE)) {
+    addField(match[1]);
+  }
+  for (const match of text.matchAll(BY_CLAUSE_RE)) {
+    for (const field of match[1].split(',')) {
+      addField(field.trim());
+    }
+  }
+
+  return JSON.stringify({ sources, fields: [...fields].sort() });
+}
 
 /** Connected components over an undirected adjacency map. */
 export function computeClusters(ids: string[], adjacency: Map<string, Set<string>>): string[][] {
@@ -206,15 +280,19 @@ export async function reconcileCodeAndLogQueries({
   }
 
   const byId = new Map(links.map((link) => [link.query.id, link]));
+  const signatureById = new Map(
+    links.map((link) => [link.query.id, esqlStructuralSignature(link.query.esql.query)])
+  );
 
-  // Directed nearest-neighbor sets from semantic search over the KI embedding.
+  // Directed nearest-neighbor sets from semantic search over the KI embedding,
+  // with a stricter score floor than the recall-tuned search default.
   const neighbors = new Map<string, Set<string>>();
   for (const link of links) {
     const text = `${link.query.title}\n${link.query.description ?? ''}`;
     const matches = await kiClient.findQueries(
       streamName,
       text,
-      { ruleUnbacked: 'include' },
+      { ruleUnbacked: 'include', minScore: RECONCILE_MIN_SCORE },
       'semantic'
     );
     neighbors.set(
@@ -225,8 +303,10 @@ export async function reconcileCodeAndLogQueries({
     );
   }
 
-  // Keep only mutual matches — both queries must retrieve each other. This
-  // guards against loose one-directional semantic hits over-merging.
+  // Keep only mutual matches — both queries must retrieve each other — AND
+  // require an identical ES|QL structural signature. Semantic similarity is
+  // minmax-normalized (relative), so near-neighbor titles alone must never
+  // drive a delete; duplicates must also target the same sources and fields.
   const adjacency = new Map<string, Set<string>>();
   const addEdge = (a: string, b: string) => {
     if (!adjacency.has(a)) adjacency.set(a, new Set());
@@ -234,16 +314,37 @@ export async function reconcileCodeAndLogQueries({
   };
   for (const [id, set] of neighbors) {
     for (const other of set) {
-      if (neighbors.get(other)?.has(id)) {
-        addEdge(id, other);
-        addEdge(other, id);
+      if (!neighbors.get(other)?.has(id)) {
+        continue;
       }
+      if (signatureById.get(id) !== signatureById.get(other)) {
+        logger.debug(
+          `reconcile_queries: skipping semantic pair with different ES|QL structure: ${id} vs ${other}`
+        );
+        continue;
+      }
+      addEdge(id, other);
+      addEdge(other, id);
     }
   }
 
   const plan = buildQueryReconcilePlan(links, adjacency, logger);
   if (plan.merges.length === 0) {
     return { clustersMerged: 0, queriesTombstoned: 0, corroborated: 0 };
+  }
+
+  // Audit trail: record exactly what is about to be merged away, BEFORE the
+  // bulk executes, so a destructive merge is never silent.
+  for (const merge of plan.merges) {
+    const tombstoned = merge.duplicateIds
+      .map((id) => {
+        const dup = byId.get(id);
+        return dup ? `${id} "${dup.query.title}"` : id;
+      })
+      .join(', ');
+    logger.info(
+      `reconcile_queries: merging into "${merge.canonical.query.title}" (${merge.canonical.query.id}) on stream "${streamName}"; tombstoning: ${tombstoned}`
+    );
   }
 
   const operations = toReconcileOperations(plan);

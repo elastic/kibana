@@ -11,8 +11,10 @@ import type { KnowledgeIndicatorClient, KIBulkOperation } from '../knowledge_ind
 import {
   buildQueryReconcilePlan,
   computeClusters,
+  esqlStructuralSignature,
   pickCanonical,
   reconcileCodeAndLogQueries,
+  RECONCILE_MIN_SCORE,
   toReconcileOperations,
 } from './reconcile_query_kis';
 
@@ -23,6 +25,7 @@ const link = (overrides: {
   evidence?: string[];
   title?: string;
   updatedAt?: string;
+  esql?: string;
 }): QueryLink => ({
   stream_name: 'logs.checkout',
   rule_backed: overrides.ruleBacked ?? false,
@@ -33,7 +36,7 @@ const link = (overrides: {
     type: 'match',
     title: overrides.title ?? overrides.id,
     description: `desc ${overrides.id}`,
-    esql: { query: `FROM logs.checkout | WHERE x == "${overrides.id}"` },
+    esql: { query: overrides.esql ?? `FROM logs.checkout | WHERE x == "${overrides.id}"` },
     severity_score: overrides.severity,
     evidence: overrides.evidence,
   },
@@ -51,6 +54,40 @@ const adjacencyOf = (pairs: Array<[string, string]>): Map<string, Set<string>> =
   }
   return map;
 };
+
+describe('esqlStructuralSignature', () => {
+  it('is equal for the same fields with different literal values and spacing', () => {
+    expect(esqlStructuralSignature('FROM logs.a | WHERE msg == "x"')).toEqual(
+      esqlStructuralSignature('FROM  logs.a\n| WHERE msg  ==  "y"')
+    );
+  });
+
+  it('is equal across MATCH vs MATCH_PHRASE phrasings of the same field', () => {
+    expect(esqlStructuralSignature('FROM logs.a | WHERE MATCH(message, "boom")')).toEqual(
+      esqlStructuralSignature('FROM logs.a | WHERE MATCH_PHRASE(message, "kapow")')
+    );
+  });
+
+  it('differs when the WHERE fields differ', () => {
+    expect(esqlStructuralSignature('FROM traces | WHERE status.code == "Error"')).not.toEqual(
+      esqlStructuralSignature('FROM traces | WHERE exception.type IS NOT NULL')
+    );
+  });
+
+  it('differs when the FROM sources differ', () => {
+    expect(esqlStructuralSignature('FROM logs.a | WHERE msg == "x"')).not.toEqual(
+      esqlStructuralSignature('FROM logs.b | WHERE msg == "x"')
+    );
+  });
+
+  it('includes STATS BY grouping fields in the signature', () => {
+    expect(
+      esqlStructuralSignature(
+        'FROM traces | WHERE status.code == "Error" | STATS c = COUNT(*) BY name'
+      )
+    ).not.toEqual(esqlStructuralSignature('FROM traces | WHERE status.code == "Error"'));
+  });
+});
 
 describe('computeClusters', () => {
   it('groups connected ids and isolates singletons', () => {
@@ -195,5 +232,59 @@ describe('reconcileCodeAndLogQueries', () => {
     });
     expect(result.clustersMerged).toBe(0);
     expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('does not merge mutual semantic matches with different ES|QL structure', async () => {
+    // Near-identical titles, but structurally distinct queries: different
+    // fields mean different indicators — must NOT be tombstoned.
+    const errorRate = link({
+      id: 'err',
+      title: 'Payment: error rate',
+      esql: 'FROM traces | WHERE status.code == "Error" | STATS c = COUNT(*) BY name',
+    });
+    const exceptions = link({
+      id: 'exc',
+      title: 'Payment: errors by exception',
+      esql: 'FROM traces | WHERE exception.type IS NOT NULL | STATS c = COUNT(*) BY exception.type',
+    });
+    const { kiClient, bulk } = createKiClient([errorRate, exceptions], {
+      err: [exceptions],
+      exc: [errorRate],
+    });
+    const result = await reconcileCodeAndLogQueries({
+      streamName: 'logs.checkout',
+      kiClient,
+      logger: loggerMock.create(),
+    });
+    expect(result.clustersMerged).toBe(0);
+    expect(bulk).not.toHaveBeenCalled();
+  });
+
+  it('applies the stricter reconcile score floor to semantic search', async () => {
+    const a = link({ id: 'a', title: 'alpha' });
+    const b = link({ id: 'b', title: 'beta' });
+    const { kiClient } = createKiClient([a, b], { a: [b], b: [a] });
+    await reconcileCodeAndLogQueries({
+      streamName: 'logs.checkout',
+      kiClient,
+      logger: loggerMock.create(),
+    });
+    expect(kiClient.findQueries).toHaveBeenCalledWith(
+      'logs.checkout',
+      expect.any(String),
+      expect.objectContaining({ minScore: RECONCILE_MIN_SCORE }),
+      'semantic'
+    );
+  });
+
+  it('logs an audit line naming the canonical and every tombstoned query', async () => {
+    const keep = link({ id: 'keep', title: 'Payment failed', severity: 70 });
+    const drop = link({ id: 'drop', title: 'Payment failure', severity: 10 });
+    const { kiClient } = createKiClient([keep, drop], { keep: [drop], drop: [keep] });
+    const logger = loggerMock.create();
+    await reconcileCodeAndLogQueries({ streamName: 'logs.checkout', kiClient, logger });
+    const audit = logger.info.mock.calls.map((c) => String(c[0])).join('\n');
+    expect(audit).toContain('merging into "Payment failed" (keep)');
+    expect(audit).toContain('drop "Payment failure"');
   });
 });

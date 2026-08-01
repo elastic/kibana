@@ -121,6 +121,12 @@ export class IndicatorSearcher {
       queryIds?: string[];
       ruleIds?: string[];
       ruleUnbacked?: RuleUnbackedFilter;
+      /**
+       * Overrides the configured `semantic_min_score` floor for this call.
+       * Callers making destructive decisions from search results (e.g. query
+       * reconciliation) pass a stricter floor than the recall-tuned default.
+       */
+      minScore?: number;
     } = {}
   ): Promise<{ hits: KnowledgeIndicator[] }> {
     const streamNames = Array.isArray(streams) ? streams : [streams];
@@ -163,6 +169,7 @@ export class IndicatorSearcher {
       queryTypes?: string[];
       queryIds?: string[];
       ruleIds?: string[];
+      minScore?: number;
     },
     searchMode?: SearchMode
   ): Promise<QueryLink[]> {
@@ -173,6 +180,7 @@ export class IndicatorSearcher {
       queryIds: filters?.queryIds,
       ruleIds: filters?.ruleIds,
       ruleUnbacked: filters?.ruleUnbacked,
+      minScore: filters?.minScore,
     });
     const queryLinks = hits.flatMap((h) => (h.type === 'query' ? [h.query] : []));
     return queryLinks;
@@ -192,6 +200,7 @@ export class IndicatorSearcher {
       queryIds?: string[];
       ruleIds?: string[];
       ruleUnbacked?: RuleUnbackedFilter;
+      minScore?: number;
     }
   ): Promise<{ hits: KnowledgeIndicator[] }> {
     const hasFeatureKind = options.types?.length === 1 && options.types[0] === KI_TYPE_FEATURE;
@@ -262,7 +271,14 @@ export class IndicatorSearcher {
       return { hits: [] };
     }
 
-    const query = this.buildRankQuery(mode, phase2Where, queryText, options.types ?? [], limit);
+    const query = this.buildRankQuery(
+      mode,
+      phase2Where,
+      queryText,
+      options.types ?? [],
+      limit,
+      options.minScore
+    );
     const rankedRows = esqlToObjects<RankedIndicatorRow>(
       await queryEsql({ esClient: this.esClient, query })
     );
@@ -310,8 +326,10 @@ export class IndicatorSearcher {
     where: LatestSourceWhereCondition,
     queryText: string,
     types: KnowledgeIndicatorType[],
-    limit: number
+    limit: number,
+    minScoreOverride?: number
   ): ComposerQuery {
+    const semanticMinScore = minScoreOverride ?? this.config.semantic_min_score;
     if (mode === 'semantic') {
       return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
         | WHERE ${where}
@@ -321,7 +339,7 @@ export class IndicatorSearcher {
             | LIMIT ${limit}
           )
         | FUSE LINEAR WITH {"normalizer":"minmax"}
-        | WHERE _score >= ${this.config.semantic_min_score}
+        | WHERE _score >= ${semanticMinScore}
         | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
         | SORT _score DESC
         | LIMIT ${limit}`;
@@ -349,7 +367,7 @@ export class IndicatorSearcher {
             | LIMIT ${limit}
             | EVAL label = "semantic"
             | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
-            | WHERE _score >= ${this.config.semantic_min_score}
+            | WHERE _score >= ${semanticMinScore}
             | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
             | SORT _score DESC
             | LIMIT ${limit}
