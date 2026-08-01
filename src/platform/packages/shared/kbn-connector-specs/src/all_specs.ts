@@ -52,6 +52,7 @@ export * from './specs/one_drive/one_drive';
 export * from './specs/ansible_controller/ansible_controller';
 export * from './specs/argocd/argocd';
 export * from './specs/sublime_security/sublime_security';
+export * from './specs/workday/workday';
 export * from './specs/kubernetes/kubernetes';
 export * from './specs/new_relic/new_relic';
 export * from './specs/grafana/grafana';
