@@ -225,16 +225,13 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
+    // EuiButton renders its disabled state as the native `disabled` attribute rather than a
+    // class, and a disabled button never fires its onClick, so the element has to be probed
+    // directly: a click sent to it is dropped without throwing.
     await this.retry.waitFor('active save button', async () => {
-      return (
-        (
-          await this.find.allByCssSelector(
-            '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
-          )
-        ).length === 1
-      );
+      return await (await this.getSaveIndexPatternButton()).isEnabled();
     });
-    return await this.testSubjects.find('saveIndexPatternButton');
+    return await this.getSaveIndexPatternButton();
   }
 
   async clickEditIndexButton() {
