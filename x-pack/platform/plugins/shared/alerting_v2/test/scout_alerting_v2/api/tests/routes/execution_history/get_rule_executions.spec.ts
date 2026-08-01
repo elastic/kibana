@@ -129,6 +129,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
@@ -136,6 +137,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects perPage above the maximum', async ({ apiClient }) => {
@@ -143,6 +145,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects unknown outcome values', async ({ apiClient }) => {
@@ -150,6 +153,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest('validation: rejects malformed datetimes for from', async ({ apiClient }) => {
@@ -157,6 +161,7 @@ apiTest.describe('Get rule executions API', { tag: '@local-stateful-classic' }, 
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('BAD_REQUEST');
   });
 
   apiTest(
