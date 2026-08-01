@@ -58,6 +58,7 @@ export interface UsageStats {
   'agentBuilder:experimentalFeatures': boolean;
   'agentBuilder:bashSupport': boolean;
   'contextEngine:enabled': boolean;
+  'agentBuilder:uiamOAuthClientManagement': boolean;
   'agentBuilder:tracing:enabled': boolean;
   'agentBuilder:tracing:includeLlmResponses': boolean;
   'agentBuilder:tracing:includeRealIds': boolean;
@@ -112,6 +113,7 @@ export interface UsageStats {
   'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
+  'discover:defaultEsqlQuery': string;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];

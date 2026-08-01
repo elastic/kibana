@@ -19,6 +19,7 @@ import {
   fieldSettingsFieldNameSchema,
   indexPatternSchema,
   timeFieldSchema,
+  nameSchema,
 } from './common';
 
 export const fieldSettingsSchema = schema.oneOf(
@@ -48,6 +49,7 @@ export const dataViewReferenceSchema = schema.object(
 
 export const dataViewSpecSchema = schema.object(
   {
+    name: nameSchema,
     type: schema.literal(AS_CODE_DATA_VIEW_SPEC_TYPE),
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,

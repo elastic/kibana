@@ -238,8 +238,8 @@ export class WorkflowsExecutionEnginePlugin
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, logger);
+              const stepExecutionRepository = new StepExecutionRepository(esClient, logger);
 
               const interruptedOutcome = await resolveInterruptedWorkflowRunTask({
                 workflowExecutionRepository,
@@ -366,8 +366,8 @@ export class WorkflowsExecutionEnginePlugin
               };
 
               const esClient = coreStart.elasticsearch.client.asInternalUser;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, logger);
+              const stepExecutionRepository = new StepExecutionRepository(esClient, logger);
 
               const interruptedOutcome = await resolveInterruptedWorkflowResumeTask({
                 workflowExecutionRepository,
@@ -507,8 +507,8 @@ export class WorkflowsExecutionEnginePlugin
               const esClient = coreStart.elasticsearch.client.asInternalUser;
 
               const workflowRepository = new WorkflowRepository({ esClient, logger });
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
+              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, logger);
+              const stepExecutionRepository = new StepExecutionRepository(esClient, logger);
 
               const workflow = await workflowRepository.getWorkflow(workflowId, spaceId, {
                 includeGlobal: true,
@@ -681,7 +681,7 @@ export class WorkflowsExecutionEnginePlugin
 
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    const workflowExecutionRepository = new WorkflowExecutionRepository(esClient, this.logger);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
       workflowTaskManager,

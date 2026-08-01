@@ -6,18 +6,13 @@
  */
 
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { BulkCreateAlertActionBody } from '@kbn/alerting-v2-schemas';
+import type { BulkCreateAlertActionBody, BulkResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_ALERT_API_PATH } from '@kbn/alerting-v2-constants';
-
-export interface BulkCreateAlertActionsResponse {
-  processed: number;
-  total: number;
-}
 
 export const bulkCreateAlertActions = (
   http: HttpStart,
   items: BulkCreateAlertActionBody
-): Promise<BulkCreateAlertActionsResponse> =>
-  http.post<BulkCreateAlertActionsResponse>(`${ALERTING_V2_ALERT_API_PATH}/_bulk_action`, {
+): Promise<BulkResponse> =>
+  http.post<BulkResponse>(`${ALERTING_V2_ALERT_API_PATH}/_bulk_action`, {
     body: JSON.stringify(items),
   });
