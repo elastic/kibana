@@ -9,7 +9,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { type DropType, DropOverlayWrapper, Droppable } from '@kbn/dom-drag-drop';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -115,6 +115,7 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
   const showChart = useAppStateSelector((state) => !state.hideChart);
   const showPanelsToggle = !isChartAvailable || !showChart;
+  const [fieldsCount, setFieldsCount] = useState<number>();
 
   const renderViewModeToggle = useCallback(
     (patternCount?: number) => {
@@ -124,6 +125,7 @@ export const DiscoverMainContent = ({
           isEsqlMode={isEsqlMode}
           setDiscoverViewMode={setDiscoverViewMode}
           patternCount={patternCount}
+          fieldsCount={fieldsCount}
           dataView={dataView}
           prepend={
             showPanelsToggle ? (
@@ -137,7 +139,15 @@ export const DiscoverMainContent = ({
         />
       );
     },
-    [viewMode, isEsqlMode, setDiscoverViewMode, dataView, showPanelsToggle, isChartAvailable]
+    [
+      viewMode,
+      isEsqlMode,
+      setDiscoverViewMode,
+      fieldsCount,
+      dataView,
+      showPanelsToggle,
+      isChartAvailable,
+    ]
   );
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
@@ -175,6 +185,7 @@ export const DiscoverMainContent = ({
                 onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
                 isEsqlMode={isEsqlMode}
+                onFieldsCountChange={setFieldsCount}
               />
             </>
           ) : null}

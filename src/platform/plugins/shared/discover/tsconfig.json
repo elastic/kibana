@@ -73,6 +73,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-plugins-server",
     "@kbn/shared-ux-button-toolbar",
+    "@kbn/shared-ux-toolbar-selector",
     "@kbn/deeplinks-observability",
     "@kbn/esql-utils",
     "@kbn/managed-content-badge",

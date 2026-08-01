@@ -7,17 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps } from 'react';
-import React, { useMemo, useEffect, useState, type ReactElement, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import type { ReactElement } from 'react';
+import React, { useMemo, useEffect, useState, useCallback } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
+import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { HitsCounter, HitsCounterMode } from '../hits_counter';
+import { HitsCounter } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({
   viewMode,
@@ -25,21 +34,17 @@ export const DocumentViewModeToggle = ({
   prepend,
   setDiscoverViewMode,
   patternCount,
+  fieldsCount,
   dataView,
-  hitCounterLabel,
-  hitCounterPluralLabel,
-  hitsTotalToDisplay,
 }: {
   viewMode: VIEW_MODE;
   isEsqlMode: boolean;
   prepend?: ReactElement;
   setDiscoverViewMode: (viewMode: VIEW_MODE, replace?: boolean) => Promise<VIEW_MODE>;
   patternCount?: number;
+  fieldsCount?: number;
   dataView: DataView;
-} & Pick<
-  ComponentProps<typeof HitsCounter>,
-  'hitCounterLabel' | 'hitCounterPluralLabel' | 'hitsTotalToDisplay'
->) => {
+}) => {
   const { euiTheme } = useEuiTheme();
   const {
     uiSettings,
@@ -92,6 +97,12 @@ export const DocumentViewModeToggle = ({
     }
   }, [showPatternAnalysisTab, viewMode, setDiscoverViewMode]);
 
+  useEffect(() => {
+    if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) {
+      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true);
+    }
+  }, [viewMode, isEsqlMode, setDiscoverViewMode]);
+
   const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL;
 
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
@@ -99,17 +110,127 @@ export const DocumentViewModeToggle = ({
     padding: ${containerPadding} ${containerPadding} 0 ${containerPadding};
   `;
 
-  const tabsCss = css`
-    .euiTab__content {
-      line-height: ${euiTheme.size.xl};
-    }
-  `;
+  const documentsLabel = isEsqlMode
+    ? i18n.translate('discover.viewModes.esql.label', { defaultMessage: 'Results' })
+    : i18n.translate('discover.viewModes.document.label', { defaultMessage: 'Documents' });
+  const patternsLabel = i18n.translate('discover.viewModes.patternAnalysis.label', {
+    defaultMessage: 'Patterns',
+  });
+  const fieldStatisticsLabel = i18n.translate('discover.viewModes.fieldStatistics.label', {
+    defaultMessage: 'Field statistics',
+  });
 
-  useEffect(() => {
-    if (viewMode === VIEW_MODE.AGGREGATED_LEVEL && isEsqlMode) {
-      setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL, true);
+  const options = useMemo<SelectableEntry[]>(() => {
+    const entries: SelectableEntry[] = [
+      {
+        key: VIEW_MODE.DOCUMENT_LEVEL,
+        value: VIEW_MODE.DOCUMENT_LEVEL,
+        label: documentsLabel,
+        prepend: <EuiIcon type="table" aria-hidden={true} />,
+        checked: viewMode === VIEW_MODE.DOCUMENT_LEVEL ? 'on' : undefined,
+        'data-test-subj': 'dscViewModeDocumentOption',
+      },
+    ];
+
+    if (showPatternAnalysisTab) {
+      entries.push({
+        key: VIEW_MODE.PATTERN_LEVEL,
+        value: VIEW_MODE.PATTERN_LEVEL,
+        label: patternsLabel,
+        prepend: <EuiIcon type="pattern" aria-hidden={true} />,
+        checked: viewMode === VIEW_MODE.PATTERN_LEVEL ? 'on' : undefined,
+        'data-test-subj': 'dscViewModePatternAnalysisOption',
+      });
     }
-  }, [viewMode, isEsqlMode, setDiscoverViewMode]);
+
+    if (showFieldStatisticsTab) {
+      entries.push({
+        key: VIEW_MODE.AGGREGATED_LEVEL,
+        value: VIEW_MODE.AGGREGATED_LEVEL,
+        label: fieldStatisticsLabel,
+        prepend: <EuiIcon type="stats" aria-hidden={true} />,
+        disabled: isEsqlMode,
+        checked: viewMode === VIEW_MODE.AGGREGATED_LEVEL ? 'on' : undefined,
+        'data-test-subj': 'dscViewModeFieldStatsOption',
+      });
+    }
+
+    return entries;
+  }, [
+    documentsLabel,
+    patternsLabel,
+    fieldStatisticsLabel,
+    showPatternAnalysisTab,
+    showFieldStatisticsTab,
+    viewMode,
+    isEsqlMode,
+  ]);
+
+  const [buttonIcon, buttonText] =
+    viewMode === VIEW_MODE.PATTERN_LEVEL
+      ? ['pattern', patternsLabel]
+      : viewMode === VIEW_MODE.AGGREGATED_LEVEL
+      ? ['stats', fieldStatisticsLabel]
+      : ['tableDensityHigh', documentsLabel];
+
+  const buttonLabel = (
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiIcon type={buttonIcon} aria-hidden={true} />
+      </EuiFlexItem>
+      <EuiFlexItem>{buttonText}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const onChange = useCallback(
+    (chosen?: SelectableEntry) => {
+      if (chosen?.value) {
+        setDiscoverViewMode(chosen.value as VIEW_MODE);
+      }
+    },
+    [setDiscoverViewMode]
+  );
+
+  const countDisplay = useMemo(() => {
+    if (viewMode === VIEW_MODE.PATTERN_LEVEL) {
+      return patternCount === undefined ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
+        <EuiText size="s" data-test-subj="dscViewModePatternCount">
+          <strong>
+            <FormattedMessage
+              id="discover.viewModes.patternAnalysis.countLabel"
+              defaultMessage="{count} {count, plural, one {pattern} other {patterns}}"
+              values={{ count: patternCount }}
+            />
+          </strong>
+        </EuiText>
+      );
+    }
+
+    if (viewMode === VIEW_MODE.AGGREGATED_LEVEL) {
+      return fieldsCount === undefined ? (
+        <EuiLoadingSpinner size="m" />
+      ) : (
+        <EuiText size="s" data-test-subj="dscViewModeFieldsCount">
+          <strong>
+            <FormattedMessage
+              id="discover.viewModes.fieldStatistics.countLabel"
+              defaultMessage="{count} {count, plural, one {field} other {fields}}"
+              values={{ count: fieldsCount }}
+            />
+          </strong>
+        </EuiText>
+      );
+    }
+
+    return <HitsCounter variant={isEsqlMode ? 'results' : 'documents'} />;
+  }, [viewMode, patternCount, fieldsCount, isEsqlMode]);
+
+  // if neither the pattern analysis nor field statistics view is available, there's only
+  // one possible view (Documents/Results), so there's nothing to select between
+  const showOnlyDocumentsCounter =
+    showFieldStatisticsTab === false && showPatternAnalysisTab === false;
 
   return (
     <EuiFlexGroup
@@ -131,67 +252,22 @@ export const DocumentViewModeToggle = ({
           {prepend}
         </EuiFlexItem>
       )}
-      <EuiFlexItem grow={false}>
-        {showFieldStatisticsTab === false && showPatternAnalysisTab === false ? (
-          <HitsCounter
-            mode={HitsCounterMode.standalone}
-            hitCounterLabel={hitCounterLabel}
-            hitCounterPluralLabel={hitCounterPluralLabel}
-            hitsTotalToDisplay={hitsTotalToDisplay}
+      {!showOnlyDocumentsCounter && (
+        <EuiFlexItem grow={false}>
+          <ToolbarSelector
+            data-test-subj="dscViewModeToggle"
+            data-selected-value={viewMode}
+            searchable={false}
+            buttonLabel={buttonLabel}
+            popoverTitle={i18n.translate('discover.viewModes.popoverTitle', {
+              defaultMessage: 'Select view',
+            })}
+            options={options}
+            onChange={onChange}
           />
-        ) : (
-          <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
-            <EuiTab
-              isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
-              onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
-              data-test-subj="dscViewModeDocumentButton"
-            >
-              {isEsqlMode ? (
-                <FormattedMessage id="discover.viewModes.esql.label" defaultMessage="Results" />
-              ) : (
-                <FormattedMessage
-                  id="discover.viewModes.document.label"
-                  defaultMessage="Documents"
-                />
-              )}
-              <HitsCounter
-                mode={HitsCounterMode.appended}
-                hitCounterLabel={hitCounterLabel}
-                hitCounterPluralLabel={hitCounterPluralLabel}
-                hitsTotalToDisplay={hitsTotalToDisplay}
-              />
-            </EuiTab>
-
-            {showPatternAnalysisTab ? (
-              <EuiTab
-                isSelected={viewMode === VIEW_MODE.PATTERN_LEVEL}
-                onClick={() => setDiscoverViewMode(VIEW_MODE.PATTERN_LEVEL)}
-                data-test-subj="dscViewModePatternAnalysisButton"
-              >
-                <FormattedMessage
-                  id="discover.viewModes.patternAnalysis.label"
-                  defaultMessage="Patterns {patternCount}"
-                  values={{ patternCount: patternCount !== undefined ? ` (${patternCount})` : '' }}
-                />
-              </EuiTab>
-            ) : null}
-
-            {showFieldStatisticsTab ? (
-              <EuiTab
-                disabled={isEsqlMode}
-                isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
-                onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
-                data-test-subj="dscViewModeFieldStatsButton"
-              >
-                <FormattedMessage
-                  id="discover.viewModes.fieldStatistics.label"
-                  defaultMessage="Field statistics"
-                />
-              </EuiTab>
-            ) : null}
-          </EuiTabs>
-        )}
-      </EuiFlexItem>
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>{countDisplay}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

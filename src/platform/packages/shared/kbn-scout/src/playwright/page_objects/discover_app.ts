@@ -1090,6 +1090,12 @@ export class DiscoverApp {
     expect(queryMode).toBe('classic');
   }
 
+  async selectFieldStatisticsView() {
+    await this.page.testSubj.click('dscViewModeToggleButton');
+    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('dscViewModeFieldStatsOption');
+  }
+
   async writeAndSubmitEsqlQuery(query: string) {
     await this.selectTextBaseLang();
     await this.codeEditor.setCodeEditorValue(query);

@@ -16,24 +16,14 @@ import { FetchStatus } from '../../application/types';
 import { useDataState } from '../../application/main/hooks/use_data_state';
 import { useCurrentTabDataStateContainer } from '../../application/main/state_management/redux';
 
-export enum HitsCounterMode {
-  standalone = 'standalone',
-  appended = 'appended',
-}
+export type HitsCounterVariant = 'documents' | 'results';
 
 export interface HitsCounterProps {
-  mode: HitsCounterMode;
-  hitCounterLabel?: string;
-  hitCounterPluralLabel?: string;
+  variant: HitsCounterVariant;
   hitsTotalToDisplay?: number;
 }
 
-export const HitsCounter: React.FC<HitsCounterProps> = ({
-  mode,
-  hitsTotalToDisplay,
-  hitCounterLabel,
-  hitCounterPluralLabel,
-}) => {
+export const HitsCounter: React.FC<HitsCounterProps> = ({ variant, hitsTotalToDisplay }) => {
   const dataStateContainer = useCurrentTabDataStateContainer();
   const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
@@ -45,7 +35,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
   const documentsCount = documentsState.result?.length || 0;
 
   if (!hitsTotal && hitsStatus === FetchStatus.LOADING) {
-    return null;
+    return <EuiLoadingSpinner size="s" />;
   }
 
   if (
@@ -77,7 +67,36 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
     overflow: hidden;
   `;
 
-  const element = (
+  const countLabel =
+    variant === 'documents' ? (
+      showGreaterOrEqualSign ? (
+        <FormattedMessage
+          id="discover.hitsCounter.partialDocumentsLabel"
+          defaultMessage="≥{formattedHits} {hits, plural, one {document} other {documents}}"
+          values={{ hits: hitsTotal, formattedHits }}
+        />
+      ) : (
+        <FormattedMessage
+          id="discover.hitsCounter.documentsLabel"
+          defaultMessage="{formattedHits} {hits, plural, one {document} other {documents}}"
+          values={{ hits: hitsTotal, formattedHits }}
+        />
+      )
+    ) : showGreaterOrEqualSign ? (
+      <FormattedMessage
+        id="discover.hitsCounter.partialResultsLabel"
+        defaultMessage="≥{formattedHits} {hits, plural, one {result} other {results}}"
+        values={{ hits: hitsTotal, formattedHits }}
+      />
+    ) : (
+      <FormattedMessage
+        id="discover.hitsCounter.resultsLabel"
+        defaultMessage="{formattedHits} {hits, plural, one {result} other {results}}"
+        values={{ hits: hitsTotal, formattedHits }}
+      />
+    );
+
+  return (
     <EuiFlexGroup
       gutterSize="xs"
       responsive={false}
@@ -90,57 +109,7 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
     >
       <EuiFlexItem grow={false} aria-live="polite" css={hitsCounterTextCss}>
         <EuiText className="eui-textTruncate" size="s">
-          <strong>
-            {showGreaterOrEqualSign ? (
-              mode === HitsCounterMode.standalone ? (
-                <FormattedMessage
-                  id="discover.hitsCounter.partialHitsPluralTitle"
-                  defaultMessage={`≥{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterPluralLabel}}}`}
-                  values={{
-                    hits: hitsTotal,
-                    formattedHits,
-                    hitCounterLabel:
-                      hitCounterLabel ??
-                      i18n.translate('discover.hitsCounter.resultLabel', {
-                        defaultMessage: 'result',
-                      }),
-                    hitCounterPluralLabel:
-                      hitCounterPluralLabel ??
-                      i18n.translate('discover.hitsCounter.resultsLabel', {
-                        defaultMessage: 'results',
-                      }),
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="discover.hitsCounter.partialHits"
-                  defaultMessage="≥{formattedHits}"
-                  values={{ formattedHits }}
-                />
-              )
-            ) : mode === HitsCounterMode.standalone ? (
-              <FormattedMessage
-                id="discover.hitsCounter.hitsPluralTitle"
-                defaultMessage={`{formattedHits} {hits, plural, one {{hitCounterLabel}} other {{hitCounterPluralLabel}}}`}
-                values={{
-                  hits: hitsTotal,
-                  formattedHits,
-                  hitCounterLabel:
-                    hitCounterLabel ??
-                    i18n.translate('discover.hitsCounter.resultLabel', {
-                      defaultMessage: 'result',
-                    }),
-                  hitCounterPluralLabel:
-                    hitCounterPluralLabel ??
-                    i18n.translate('discover.hitsCounter.resultsLabel', {
-                      defaultMessage: 'results',
-                    }),
-                }}
-              />
-            ) : (
-              formattedHits
-            )}
-          </strong>
+          <strong>{countLabel}</strong>
         </EuiText>
       </EuiFlexItem>
       {hitsStatus === FetchStatus.PARTIAL && (
@@ -167,15 +136,5 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
-  );
-
-  return mode === HitsCounterMode.appended ? (
-    <>
-      {' ('}
-      {element}
-      {')'}
-    </>
-  ) : (
-    element
   );
 };
