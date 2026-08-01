@@ -119,6 +119,7 @@ import { registerGapAutoFillSchedulerTask } from './lib/rule_gaps/task/gap_auto_
 import { ChangeTrackingService } from './rules_client/lib/change_tracking';
 import { UiamApiKeyProvisioningTask } from './provisioning';
 import { uiamProvisioningEvents } from './provisioning/event_based_telemetry';
+import { ruleCreateTelemetryEvents } from './application/rule/methods/create/event_based_telemetry';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -429,6 +430,9 @@ export class AlertingPlugin {
     );
 
     uiamProvisioningEvents.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+    ruleCreateTelemetryEvents.forEach((eventConfig) =>
+      core.analytics.registerEventType(eventConfig)
+    );
 
     this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
       logger: this.logger,
@@ -714,6 +718,7 @@ export class AlertingPlugin {
       shouldGrantUiam,
       isServerless: this.isServerless,
       featureFlags: core.featureFlags,
+      analytics: core.analytics,
     });
 
     rulesSettingsClientFactory.initialize({

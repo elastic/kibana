@@ -169,6 +169,7 @@ export function RulePage() {
         }}
         id={id}
         ruleTypeId={ruleTypeId}
+        templateId={templateId}
         validConsumers={observabilityRuleCreationValidConsumers}
         multiConsumerSelection={AlertConsumers.ALERTS}
         onCancel={() => {

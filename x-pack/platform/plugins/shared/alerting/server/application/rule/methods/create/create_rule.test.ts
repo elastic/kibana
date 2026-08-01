@@ -5163,4 +5163,150 @@ This is the type of text _investigation guides_ will contain.`;
       );
     });
   });
+  describe('telemetry', () => {
+    function mockSuccessfulCreate() {
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          alertTypeId: '123',
+          consumer: 'bar',
+          enabled: true,
+          schedule: { interval: '1m' },
+          params: {
+            bar: true,
+          },
+          executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+          running: false,
+          createdAt: '2019-02-12T21:01:22.479Z',
+          actions: [
+            {
+              group: 'default',
+              actionRef: 'action_0',
+              actionTypeId: 'test',
+              uuid: 'test-uuid',
+              params: {
+                foo: true,
+              },
+            },
+          ],
+        },
+        references: [
+          {
+            name: 'action_0',
+            type: 'action',
+            id: '1',
+          },
+        ],
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: '1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          actions: [],
+          scheduledTaskId: 'task-123',
+        },
+        references: [
+          {
+            id: '1',
+            name: 'action_0',
+            type: 'action',
+          },
+        ],
+      });
+    }
+
+    test('reports a rule create event with the expected payload', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({ data: getMockData() });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        {
+          rule_id: 'mock-saved-object-id',
+          created_at: '2019-02-12T21:01:22.479Z',
+          rule_type_id: '123',
+          enabled: true,
+          consumer: 'bar',
+          producer: 'alerts',
+        }
+      );
+    });
+
+    test('includes the template id when explicitly provided', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({ data: getMockData(), templateId: 'my-template' });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({ template_id: 'my-template' })
+      );
+    });
+
+    test('derives the template id from a fleet-prefixed predefined rule id when not provided', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({
+        data: getMockData(),
+        options: { id: 'fleet-default-elastic_agent-cpu-usage' },
+      });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({ template_id: 'cpu-usage' })
+      );
+    });
+
+    test('does not fail rule creation when reportEvent throws', async () => {
+      mockSuccessfulCreate();
+      (rulesClientParams.analytics!.reportEvent as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('report failed');
+      });
+
+      await expect(rulesClient.create({ data: getMockData() })).resolves.toBeDefined();
+    });
+
+    test('includes slo_id for burn-rate rules', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({
+        data: getMockData({
+          alertTypeId: 'slo.rules.burnRate',
+          params: { sloId: 'slo-123', bar: true },
+          actions: [],
+        }),
+      });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({
+          rule_type_id: 'slo.rules.burnRate',
+          slo_id: 'slo-123',
+        })
+      );
+    });
+
+    test('includes dashboard_ids when artifacts.dashboards are present', async () => {
+      mockSuccessfulCreate();
+
+      await rulesClient.create({
+        data: getMockData({
+          actions: [],
+          artifacts: {
+            dashboards: [{ id: 'dash-1' }, { id: 'dash-2' }],
+          },
+        }),
+      });
+
+      expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
+        'alerting_rule_created',
+        expect.objectContaining({
+          dashboard_ids: ['dash-1', 'dash-2'],
+        })
+      );
+    });
+  });
+
 });
