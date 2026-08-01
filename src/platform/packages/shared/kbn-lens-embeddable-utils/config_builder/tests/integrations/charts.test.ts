@@ -29,6 +29,7 @@ const stableChartTypes = new Set([
   'lnsTagcloud',
   'lnsMetric',
   'lnsLegacyMetric',
+  'lnsXY',
 ]);
 
 // These need special attention to be sure they are correctly handled in the transformations
@@ -39,6 +40,49 @@ const skipList: Record<string, string[]> = {
     'Node x pipeline hotspots - by time spent',
     'Events between Ports',
     'Top hosts by memory usage over time',
+  ],
+  lnsXY: [
+    // TODO: These panels use seriesType values (`area_unstacked` & `bar_unstacked`) that are not
+    // recognized by the XY API schema. Need to investigate where these come from and why they
+    // were not correctly migrated to the current values.
+    '[HAProxy OTel] Server (panel: 7)',
+    '[HAProxy OTel] Server (panel: 8)',
+    '[Kafka OTel] Consumer Groups (panel: 2)',
+    '[Kafka OTel] Replication Health (panel: 2)',
+    '[Kafka OTel] Replication Health (panel: 3)',
+    '[Kafka OTel] Topics & Partitions (panel: 2)',
+    '[Logs Oracle] Query Performance & Plans (panel: 4)',
+    '[NVIDIA GPU OTel] Overview (panel: 13)',
+    '[NVIDIA GPU OTel] Overview (panel: 14)',
+    '[NVIDIA GPU OTel] Overview (panel: 18)',
+    '[NVIDIA GPU OTel] Overview (panel: 19)',
+    '[PostgreSQL OTel] Locks (panel: 3)',
+    '[PostgreSQL OTel] Locks (panel: 4)',
+    '[PostgreSQL OTel] Overview (panel: 13)',
+    '[RabbitMQ OTel] Nodes (panel: 10)',
+    '[RabbitMQ OTel] Nodes (panel: 11)',
+    '[RabbitMQ OTel] Nodes (panel: 12)',
+    '[RabbitMQ OTel] Nodes (panel: 9)',
+    '[RabbitMQ OTel] Overview (panel: 10)',
+    '[RabbitMQ OTel] Overview (panel: 7)',
+    '[RabbitMQ OTel] Overview (panel: 8)',
+    '[RabbitMQ OTel] Queues (panel: 10)',
+    '[SQL Server OTel] Concurrency & errors (panel: 13)',
+    '[SQL Server OTel] Database I/O (panel: 12)',
+    '[SQL Server OTel] Overview (panel: 9)',
+    '[SQL Server OTel] Query performance (panel: 10)',
+    '[SQL Server OTel] Query performance (panel: 11)',
+    '[Tomcat OTel] JVM & OS Resources (panel: 17)',
+    '[Tomcat OTel] JVM & OS Resources (panel: 20)',
+    '[Tomcat OTel] JVM & OS Resources (panel: 21)',
+    '[Tomcat OTel] JVM Memory & GC (panel: 12)',
+    '[Tomcat OTel] JVM Memory & GC (panel: 13)',
+    '[Tomcat OTel] JVM Memory & GC (panel: 18)',
+    '[Tomcat OTel] JVM Memory & GC (panel: 19)',
+    '[Tomcat OTel] JVM Memory & GC (panel: 20)',
+    '[Tomcat OTel] Overview (panel: 15)',
+    '[vSphere OTel] Storage (panel: 9)',
+    'Memory Usage',
   ],
 };
 

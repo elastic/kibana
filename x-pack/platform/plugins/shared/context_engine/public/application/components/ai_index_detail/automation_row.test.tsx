@@ -84,12 +84,12 @@ describe('AutomationRow', () => {
     expect(screen.queryByText('Disabled')).not.toBeInTheDocument();
   });
 
-  it('renders the Edit workflow link with the given editHref and target="_blank"', () => {
+  it('renders the Edit workflow link with the given editHref for in-app navigation', () => {
     renderAutomationRow({ editHref: '/app/workflows/edit/123' });
 
     const link = screen.getByTestId('contextOpenWorkflowButton');
     expect(link).toHaveAttribute('href', '/app/workflows/edit/123');
-    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).not.toHaveAttribute('target');
   });
 
   it('renders no actions when isEditing is false', () => {
