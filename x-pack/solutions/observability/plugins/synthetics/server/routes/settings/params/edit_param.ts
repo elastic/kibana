@@ -50,6 +50,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
             type: schema.literal('vault'),
             path: schema.string({ minLength: 1 }),
             field: schema.string({ minLength: 1 }),
+            connection: schema.maybe(schema.string()),
           })
         ),
         description: schema.maybe(schema.string()),
@@ -86,7 +87,11 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       // persist the structured source. When switching (back) to a literal value,
       // drop any previously-stored vault source.
       if (data.source) {
-        newParam.value = buildVaultReference(data.source.path, data.source.field);
+        newParam.value = buildVaultReference(
+          data.source.path,
+          data.source.field,
+          data.source.connection
+        );
         newParam.source = data.source;
       } else if (data.value) {
         newParam.value = data.value;

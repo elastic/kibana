@@ -9,7 +9,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldPassword,
   EuiFieldText,
   EuiFlexGroup,
@@ -25,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
   VaultAuthMethod,
@@ -34,6 +36,7 @@ import type {
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 
 interface FormState {
+  name: string;
   address: string;
   authMethod: VaultAuthMethod;
   namespace: string;
@@ -43,9 +46,12 @@ interface FormState {
   token: string;
   secretId: string;
   tlsSkipVerify: boolean;
+  isNew: boolean;
+  hasSecret: boolean;
 }
 
-const emptyForm: FormState = {
+const blankForm = (): FormState => ({
+  name: '',
   address: '',
   authMethod: 'approle',
   namespace: '',
@@ -55,37 +61,40 @@ const emptyForm: FormState = {
   token: '',
   secretId: '',
   tlsSkipVerify: false,
-};
+  isNew: true,
+  hasSecret: false,
+});
+
+const toForm = (c: VaultConnectionStatus): FormState => ({
+  name: c.name ?? '',
+  address: c.address ?? '',
+  authMethod: c.authMethod ?? 'approle',
+  namespace: c.namespace ?? '',
+  kvMount: c.kvMount ?? 'secret',
+  secretRefreshInterval: c.secretRefreshInterval ?? '5m',
+  roleId: c.roleId ?? '',
+  token: '',
+  secretId: '',
+  tlsSkipVerify: c.tlsSkipVerify ?? false,
+  isNew: false,
+  hasSecret: c.hasSecret ?? false,
+});
 
 export const VaultConnectionPanel = () => {
   const { http, notifications, application } = useKibana<ClientPluginsStart>().services;
   const canSave = (application?.capabilities.uptime.save ?? false) as boolean;
 
-  const [status, setStatus] = useState<VaultConnectionStatus | null>(null);
-  const [form, setForm] = useState<FormState>(emptyForm);
+  const [connections, setConnections] = useState<VaultConnectionStatus[]>([]);
+  const [editing, setEditing] = useState<FormState | null>(null);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const accordionId = useGeneratedHtmlId({ prefix: 'vaultConnection' });
+  const accordionId = useGeneratedHtmlId({ prefix: 'vaultConnections' });
 
   const load = useCallback(async () => {
     try {
-      const res = await http.get<VaultConnectionStatus>(SYNTHETICS_API_URLS.VAULT_CONNECTION);
-      setStatus(res);
-      if (res.configured) {
-        setForm((f) => ({
-          ...f,
-          address: res.address ?? '',
-          authMethod: res.authMethod ?? 'approle',
-          namespace: res.namespace ?? '',
-          kvMount: res.kvMount ?? 'secret',
-          secretRefreshInterval: res.secretRefreshInterval ?? '5m',
-          roleId: res.roleId ?? '',
-          tlsSkipVerify: res.tlsSkipVerify ?? false,
-          token: '',
-          secretId: '',
-        }));
-      }
+      const res = await http.get<VaultConnectionStatus[]>(SYNTHETICS_API_URLS.VAULT_CONNECTION);
+      setConnections(Array.isArray(res) ? res : []);
     } catch (e) {
       // non-fatal for the params page
     }
@@ -96,31 +105,31 @@ export const VaultConnectionPanel = () => {
   }, [load]);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
-    setForm((f) => ({ ...f, [key]: value }));
+    setEditing((f) => (f ? { ...f, [key]: value } : f));
 
   const onSave = async () => {
+    if (!editing) return;
     setSaving(true);
     try {
       const body: Record<string, unknown> = {
-        address: form.address.trim(),
-        authMethod: form.authMethod,
-        namespace: form.namespace.trim() || undefined,
-        kvMount: form.kvMount.trim() || undefined,
-        secretRefreshInterval: form.secretRefreshInterval.trim() || undefined,
-        tlsSkipVerify: form.tlsSkipVerify,
+        name: editing.name.trim(),
+        address: editing.address.trim(),
+        authMethod: editing.authMethod,
+        namespace: editing.namespace.trim() || undefined,
+        kvMount: editing.kvMount.trim() || undefined,
+        secretRefreshInterval: editing.secretRefreshInterval.trim() || undefined,
+        tlsSkipVerify: editing.tlsSkipVerify,
       };
-      if (form.authMethod === 'token') {
-        if (form.token) body.token = form.token;
+      if (editing.authMethod === 'token') {
+        if (editing.token) body.token = editing.token;
       } else {
-        body.roleId = form.roleId.trim();
-        if (form.secretId) body.secretId = form.secretId;
+        body.roleId = editing.roleId.trim();
+        if (editing.secretId) body.secretId = editing.secretId;
       }
-      const res = await http.put<VaultConnectionStatus>(SYNTHETICS_API_URLS.VAULT_CONNECTION, {
-        body: JSON.stringify(body),
-      });
-      setStatus(res);
-      setForm((f) => ({ ...f, token: '', secretId: '' }));
+      await http.put(SYNTHETICS_API_URLS.VAULT_CONNECTION, { body: JSON.stringify(body) });
       notifications?.toasts.addSuccess(SAVED_TOAST);
+      setEditing(null);
+      await load();
     } catch (e) {
       notifications?.toasts.addError(e as Error, { title: SAVE_ERROR_TOAST });
     } finally {
@@ -128,16 +137,21 @@ export const VaultConnectionPanel = () => {
     }
   };
 
-  // Manual refresh: bump the connection version + re-push configs so agents
-  // re-resolve every vault-backed secret (picks up rotations).
-  const onRefresh = async () => {
+  const onDelete = async (name: string) => {
+    try {
+      await http.delete(`${SYNTHETICS_API_URLS.VAULT_CONNECTION}/${encodeURIComponent(name)}`);
+      await load();
+    } catch (e) {
+      notifications?.toasts.addError(e as Error, { title: DELETE_ERROR_TOAST });
+    }
+  };
+
+  const onRefreshAll = async () => {
     setRefreshing(true);
     try {
-      const res = await http.post<VaultConnectionStatus>(
-        SYNTHETICS_API_URLS.VAULT_CONNECTION + '/_refresh'
-      );
-      setStatus(res);
+      await http.post(`${SYNTHETICS_API_URLS.VAULT_CONNECTION}/_refresh`);
       notifications?.toasts.addSuccess(REFRESHED_TOAST);
+      await load();
     } catch (e) {
       notifications?.toasts.addError(e as Error, { title: REFRESH_ERROR_TOAST });
     } finally {
@@ -145,26 +159,48 @@ export const VaultConnectionPanel = () => {
     }
   };
 
-  const statusBadge = status?.configured ? (
-    <EuiBadge color="success" iconType="check">
-      {i18n.translate('xpack.synthetics.vaultConnection.connectedBadge', {
-        defaultMessage: 'Connected: {address}',
-        values: { address: status.address ?? '' },
-      })}
-    </EuiBadge>
-  ) : (
-    <EuiBadge color="hollow">
-      {i18n.translate('xpack.synthetics.vaultConnection.notConnectedBadge', {
-        defaultMessage: 'Not connected',
-      })}
-    </EuiBadge>
-  );
+  const columns: Array<EuiBasicTableColumn<VaultConnectionStatus>> = [
+    {
+      field: 'name',
+      name: NAME_LABEL,
+      render: (n: string) => <EuiBadge iconType="lock">{n}</EuiBadge>,
+    },
+    { field: 'address', name: ADDRESS_LABEL },
+    { field: 'authMethod', name: AUTH_METHOD_LABEL },
+    {
+      field: 'secretRefreshInterval',
+      name: REFRESH_INTERVAL_LABEL,
+      render: (v?: string) => v ?? '5m',
+    },
+    {
+      name: ACTIONS_LABEL,
+      actions: [
+        {
+          name: EDIT_LABEL,
+          description: EDIT_LABEL,
+          icon: 'pencil',
+          type: 'icon',
+          onClick: (c: VaultConnectionStatus) => setEditing(toForm(c)),
+          enabled: () => canSave,
+        },
+        {
+          name: DELETE_LABEL,
+          description: DELETE_LABEL,
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: (c: VaultConnectionStatus) => onDelete(c.name ?? ''),
+          enabled: () => canSave,
+        },
+      ],
+    },
+  ];
 
   return (
     <EuiPanel hasBorder paddingSize="m">
       <EuiAccordion
         id={accordionId}
-        initialIsOpen={!status?.configured}
+        initialIsOpen={connections.length === 0}
         buttonContent={
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
@@ -172,215 +208,236 @@ export const VaultConnectionPanel = () => {
                 <strong>{TITLE}</strong>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{statusBadge}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color={connections.length ? 'success' : 'hollow'}>
+                {i18n.translate('xpack.synthetics.vaultConnection.count', {
+                  defaultMessage: '{n} connected',
+                  values: { n: connections.length },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
       >
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.synthetics.vaultConnection.description"
-            defaultMessage="Connect a HashiCorp Vault account. The connection is stored encrypted and propagated to your private-location agents (Heartbeat), which resolve vault-backed parameters at runtime. The secret values never leave Vault's trust boundary."
-          />
+          {DESCRIPTION}
         </EuiText>
         <EuiSpacer size="m" />
-        <EuiForm component="form">
-          <EuiFormRow fullWidth label={ADDRESS_LABEL} helpText={ADDRESS_HELP}>
-            <EuiFieldText
-              fullWidth
-              data-test-subj="syntheticsVaultAddress"
-              placeholder="https://vault.internal:8200"
-              value={form.address}
-              onChange={(e) => set('address', e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFormRow fullWidth label={AUTH_METHOD_LABEL}>
-                <EuiSelect
-                  fullWidth
-                  data-test-subj="syntheticsVaultAuthMethod"
-                  value={form.authMethod}
-                  options={[
-                    { value: 'approle', text: 'AppRole' },
-                    { value: 'token', text: 'Token' },
-                  ]}
-                  onChange={(e) => set('authMethod', e.target.value as VaultAuthMethod)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow fullWidth label={KV_MOUNT_LABEL} helpText={KV_MOUNT_HELP}>
-                <EuiFieldText
-                  fullWidth
-                  data-test-subj="syntheticsVaultKvMount"
-                  value={form.kvMount}
-                  onChange={(e) => set('kvMount', e.target.value)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiFormRow fullWidth label={REFRESH_INTERVAL_LABEL} helpText={REFRESH_INTERVAL_HELP}>
-                <EuiFieldText
-                  fullWidth
-                  data-test-subj="syntheticsVaultRefreshInterval"
-                  placeholder="5m"
-                  value={form.secretRefreshInterval}
-                  onChange={(e) => set('secretRefreshInterval', e.target.value)}
-                />
-              </EuiFormRow>
-            </EuiFlexItem>
-          </EuiFlexGroup>
 
-          {form.authMethod === 'token' ? (
-            <EuiFormRow
-              fullWidth
-              label={TOKEN_LABEL}
-              helpText={status?.hasSecret ? SECRET_SAVED_HELP : undefined}
+        {connections.length > 0 && (
+          <>
+            <EuiBasicTable
+              tableCaption={TITLE}
+              items={connections}
+              columns={columns}
+              itemId="name"
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
+
+        <EuiFlexGroup gutterSize="s" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="plusInCircle"
+              data-test-subj="syntheticsVaultAddConnection"
+              isDisabled={!canSave || !!editing}
+              onClick={() => setEditing(blankForm())}
             >
-              <EuiFieldPassword
-                fullWidth
-                type="dual"
-                data-test-subj="syntheticsVaultToken"
-                placeholder={status?.hasSecret ? '••••••••' : ''}
-                value={form.token}
-                onChange={(e) => set('token', e.target.value)}
-              />
-            </EuiFormRow>
-          ) : (
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFormRow fullWidth label={ROLE_ID_LABEL}>
-                  <EuiFieldText
-                    fullWidth
-                    data-test-subj="syntheticsVaultRoleId"
-                    value={form.roleId}
-                    onChange={(e) => set('roleId', e.target.value)}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFormRow
-                  fullWidth
-                  label={SECRET_ID_LABEL}
-                  helpText={status?.hasSecret ? SECRET_SAVED_HELP : undefined}
-                >
-                  <EuiFieldPassword
-                    fullWidth
-                    type="dual"
-                    data-test-subj="syntheticsVaultSecretId"
-                    placeholder={status?.hasSecret ? '••••••••' : ''}
-                    value={form.secretId}
-                    onChange={(e) => set('secretId', e.target.value)}
-                  />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-
-          <EuiFormRow fullWidth label={NAMESPACE_LABEL} helpText={NAMESPACE_HELP}>
-            <EuiFieldText
-              fullWidth
-              data-test-subj="syntheticsVaultNamespace"
-              value={form.namespace}
-              onChange={(e) => set('namespace', e.target.value)}
-            />
-          </EuiFormRow>
-          <EuiFormRow fullWidth>
-            <EuiSwitch
-              label={TLS_SKIP_LABEL}
-              data-test-subj="syntheticsVaultTlsSkip"
-              checked={form.tlsSkipVerify}
-              onChange={(e) => set('tlsSkipVerify', e.target.checked)}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="m" />
-          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+              {ADD_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+          {connections.length > 0 && (
             <EuiFlexItem grow={false}>
               <EuiButton
-                fill
-                data-test-subj="syntheticsVaultSaveConnection"
-                isLoading={saving}
-                isDisabled={!canSave || !form.address}
-                onClick={onSave}
+                iconType="refresh"
+                data-test-subj="syntheticsVaultRefreshSecrets"
+                isLoading={refreshing}
+                isDisabled={!canSave}
+                onClick={onRefreshAll}
               >
-                {status?.configured ? UPDATE_BUTTON : CONNECT_BUTTON}
+                {REFRESH_BUTTON}
               </EuiButton>
             </EuiFlexItem>
-            {status?.configured && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="refresh"
-                  data-test-subj="syntheticsVaultRefreshSecrets"
-                  isLoading={refreshing}
-                  isDisabled={!canSave}
-                  onClick={onRefresh}
-                >
-                  {REFRESH_BUTTON}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            {status?.refreshedAt && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {i18n.translate('xpack.synthetics.vaultConnection.lastRefreshed', {
-                    defaultMessage: 'Last refreshed: {ts}',
-                    values: { ts: new Date(status.refreshedAt).toLocaleString() },
-                  })}
-                </EuiText>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiForm>
+          )}
+        </EuiFlexGroup>
+
+        {editing && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiPanel hasBorder paddingSize="m" color="subdued">
+              <EuiForm component="form">
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFormRow fullWidth label={NAME_LABEL} helpText={NAME_HELP}>
+                      <EuiFieldText
+                        fullWidth
+                        data-test-subj="syntheticsVaultName"
+                        disabled={!editing.isNew}
+                        value={editing.name}
+                        onChange={(e) => set('name', e.target.value)}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow fullWidth label={ADDRESS_LABEL}>
+                      <EuiFieldText
+                        fullWidth
+                        data-test-subj="syntheticsVaultAddress"
+                        placeholder="https://vault.internal:8200"
+                        value={editing.address}
+                        onChange={(e) => set('address', e.target.value)}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <EuiFormRow fullWidth label={AUTH_METHOD_LABEL}>
+                      <EuiSelect
+                        fullWidth
+                        data-test-subj="syntheticsVaultAuthMethod"
+                        value={editing.authMethod}
+                        options={[
+                          { value: 'approle', text: 'AppRole' },
+                          { value: 'token', text: 'Token' },
+                        ]}
+                        onChange={(e) => set('authMethod', e.target.value as VaultAuthMethod)}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow fullWidth label={KV_MOUNT_LABEL}>
+                      <EuiFieldText
+                        fullWidth
+                        data-test-subj="syntheticsVaultKvMount"
+                        value={editing.kvMount}
+                        onChange={(e) => set('kvMount', e.target.value)}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      fullWidth
+                      label={REFRESH_INTERVAL_LABEL}
+                      helpText={REFRESH_INTERVAL_HELP}
+                    >
+                      <EuiFieldText
+                        fullWidth
+                        data-test-subj="syntheticsVaultRefreshInterval"
+                        placeholder="5m"
+                        value={editing.secretRefreshInterval}
+                        onChange={(e) => set('secretRefreshInterval', e.target.value)}
+                      />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {editing.authMethod === 'token' ? (
+                  <EuiFormRow
+                    fullWidth
+                    label={TOKEN_LABEL}
+                    helpText={editing.hasSecret ? SECRET_SAVED_HELP : undefined}
+                  >
+                    <EuiFieldPassword
+                      fullWidth
+                      type="dual"
+                      data-test-subj="syntheticsVaultToken"
+                      placeholder={editing.hasSecret ? '••••••••' : ''}
+                      value={editing.token}
+                      onChange={(e) => set('token', e.target.value)}
+                    />
+                  </EuiFormRow>
+                ) : (
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiFormRow fullWidth label={ROLE_ID_LABEL}>
+                        <EuiFieldText
+                          fullWidth
+                          data-test-subj="syntheticsVaultRoleId"
+                          value={editing.roleId}
+                          onChange={(e) => set('roleId', e.target.value)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFormRow
+                        fullWidth
+                        label={SECRET_ID_LABEL}
+                        helpText={editing.hasSecret ? SECRET_SAVED_HELP : undefined}
+                      >
+                        <EuiFieldPassword
+                          fullWidth
+                          type="dual"
+                          data-test-subj="syntheticsVaultSecretId"
+                          placeholder={editing.hasSecret ? '••••••••' : ''}
+                          value={editing.secretId}
+                          onChange={(e) => set('secretId', e.target.value)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                )}
+                <EuiFormRow fullWidth>
+                  <EuiSwitch
+                    label={TLS_SKIP_LABEL}
+                    data-test-subj="syntheticsVaultTlsSkip"
+                    checked={editing.tlsSkipVerify}
+                    onChange={(e) => set('tlsSkipVerify', e.target.checked)}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="m" />
+                <EuiFlexGroup gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      fill
+                      data-test-subj="syntheticsVaultSaveConnection"
+                      isLoading={saving}
+                      isDisabled={!editing.name || !editing.address}
+                      onClick={onSave}
+                    >
+                      {SAVE_LABEL}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      data-test-subj="syntheticsVaultConnectionPanelButton"
+                      onClick={() => setEditing(null)}
+                    >
+                      {CANCEL_LABEL}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiForm>
+            </EuiPanel>
+          </>
+        )}
       </EuiAccordion>
     </EuiPanel>
   );
 };
 
 const TITLE = i18n.translate('xpack.synthetics.vaultConnection.title', {
-  defaultMessage: 'HashiCorp Vault connection',
+  defaultMessage: 'HashiCorp Vault connections',
+});
+const DESCRIPTION = i18n.translate('xpack.synthetics.vaultConnection.description', {
+  defaultMessage:
+    "Connect one or more HashiCorp Vault accounts. Connections are stored encrypted and propagated to your private-location agents (Heartbeat), which resolve vault-backed parameters at runtime. Secret values never leave Vault's trust boundary. Reference a connection from a parameter by its name.",
+});
+const NAME_LABEL = i18n.translate('xpack.synthetics.vaultConnection.name', {
+  defaultMessage: 'Name',
+});
+const NAME_HELP = i18n.translate('xpack.synthetics.vaultConnection.nameHelp', {
+  defaultMessage: 'Referenced by params, e.g. "prod". Cannot be changed after creation.',
 });
 const ADDRESS_LABEL = i18n.translate('xpack.synthetics.vaultConnection.address', {
   defaultMessage: 'Vault address',
 });
-const ADDRESS_HELP = i18n.translate('xpack.synthetics.vaultConnection.addressHelp', {
-  defaultMessage: 'Base URL of your Vault server.',
-});
 const AUTH_METHOD_LABEL = i18n.translate('xpack.synthetics.vaultConnection.authMethod', {
-  defaultMessage: 'Authentication method',
+  defaultMessage: 'Auth method',
 });
 const KV_MOUNT_LABEL = i18n.translate('xpack.synthetics.vaultConnection.kvMount', {
   defaultMessage: 'KV v2 mount',
-});
-const KV_MOUNT_HELP = i18n.translate('xpack.synthetics.vaultConnection.kvMountHelp', {
-  defaultMessage: 'Secrets engine mount path (default "secret").',
-});
-const TOKEN_LABEL = i18n.translate('xpack.synthetics.vaultConnection.token', {
-  defaultMessage: 'Token',
-});
-const ROLE_ID_LABEL = i18n.translate('xpack.synthetics.vaultConnection.roleId', {
-  defaultMessage: 'Role ID',
-});
-const SECRET_ID_LABEL = i18n.translate('xpack.synthetics.vaultConnection.secretId', {
-  defaultMessage: 'Secret ID',
-});
-const NAMESPACE_LABEL = i18n.translate('xpack.synthetics.vaultConnection.namespace', {
-  defaultMessage: 'Vault namespace',
-});
-const NAMESPACE_HELP = i18n.translate('xpack.synthetics.vaultConnection.namespaceHelp', {
-  defaultMessage: 'Optional. Vault Enterprise namespace.',
-});
-const TLS_SKIP_LABEL = i18n.translate('xpack.synthetics.vaultConnection.tlsSkip', {
-  defaultMessage: 'Skip TLS verification (dev only)',
-});
-const SECRET_SAVED_HELP = i18n.translate('xpack.synthetics.vaultConnection.secretSaved', {
-  defaultMessage: 'A secret is already stored. Leave blank to keep it.',
-});
-const CONNECT_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.connect', {
-  defaultMessage: 'Connect',
-});
-const UPDATE_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.update', {
-  defaultMessage: 'Update connection',
 });
 const REFRESH_INTERVAL_LABEL = i18n.translate('xpack.synthetics.vaultConnection.refreshInterval', {
   defaultMessage: 'Secret refresh interval',
@@ -391,18 +448,54 @@ const REFRESH_INTERVAL_HELP = i18n.translate(
     defaultMessage: 'How long the agent caches a resolved secret, e.g. "5m", "1h".',
   }
 );
+const TOKEN_LABEL = i18n.translate('xpack.synthetics.vaultConnection.token', {
+  defaultMessage: 'Token',
+});
+const ROLE_ID_LABEL = i18n.translate('xpack.synthetics.vaultConnection.roleId', {
+  defaultMessage: 'Role ID',
+});
+const SECRET_ID_LABEL = i18n.translate('xpack.synthetics.vaultConnection.secretId', {
+  defaultMessage: 'Secret ID',
+});
+const TLS_SKIP_LABEL = i18n.translate('xpack.synthetics.vaultConnection.tlsSkip', {
+  defaultMessage: 'Skip TLS verification (dev only)',
+});
+const SECRET_SAVED_HELP = i18n.translate('xpack.synthetics.vaultConnection.secretSaved', {
+  defaultMessage: 'A secret is already stored. Leave blank to keep it.',
+});
+const ACTIONS_LABEL = i18n.translate('xpack.synthetics.vaultConnection.actions', {
+  defaultMessage: 'Actions',
+});
+const ADD_LABEL = i18n.translate('xpack.synthetics.vaultConnection.add', {
+  defaultMessage: 'Add connection',
+});
+const EDIT_LABEL = i18n.translate('xpack.synthetics.vaultConnection.edit', {
+  defaultMessage: 'Edit',
+});
+const DELETE_LABEL = i18n.translate('xpack.synthetics.vaultConnection.delete', {
+  defaultMessage: 'Delete',
+});
+const SAVE_LABEL = i18n.translate('xpack.synthetics.vaultConnection.save', {
+  defaultMessage: 'Save connection',
+});
+const CANCEL_LABEL = i18n.translate('xpack.synthetics.vaultConnection.cancel', {
+  defaultMessage: 'Cancel',
+});
 const REFRESH_BUTTON = i18n.translate('xpack.synthetics.vaultConnection.refreshButton', {
   defaultMessage: 'Refresh secrets',
-});
-const REFRESHED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshedToast', {
-  defaultMessage: 'Refreshing secrets — configs are being re-pushed to agents',
-});
-const REFRESH_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshErrorToast', {
-  defaultMessage: 'Failed to refresh Vault secrets',
 });
 const SAVED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.savedToast', {
   defaultMessage: 'Vault connection saved',
 });
 const SAVE_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.saveErrorToast', {
   defaultMessage: 'Failed to save Vault connection',
+});
+const DELETE_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.deleteErrorToast', {
+  defaultMessage: 'Failed to delete Vault connection',
+});
+const REFRESHED_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshedToast', {
+  defaultMessage: 'Refreshing secrets — configs are being re-pushed to agents',
+});
+const REFRESH_ERROR_TOAST = i18n.translate('xpack.synthetics.vaultConnection.refreshErrorToast', {
+  defaultMessage: 'Failed to refresh Vault secrets',
 });

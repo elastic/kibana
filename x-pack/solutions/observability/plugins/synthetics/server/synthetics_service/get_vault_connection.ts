@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsVaultConnection } from '../../common/runtime_types';
 import { syntheticsVaultConnectionType } from '../../common/types/saved_objects';
-import { VAULT_CONNECTION_SO_ID } from '../saved_objects/synthetics_vault_connection';
 import type { SyntheticsServerSetup } from '../types';
 
 /**
- * The Heartbeat-shaped `vault:` config block, assembled from the encrypted
- * connection saved object. This is the block Heartbeat's config resolver reads
- * to expand ${vault/<path>#<field>} references. Snake-cased to match Heartbeat
+ * A Heartbeat-shaped `vault:` connection, assembled from an encrypted connection
+ * saved object. This is what Heartbeat's resolver reads to expand
+ * ${vault/[<name>@]<path>#<field>} references. Snake-cased to match Heartbeat
  * (go-ucfg) config keys.
  */
 export interface HeartbeatVaultConfig {
   enabled: true;
+  name: string;
   address: string;
   auth_method: 'token' | 'approle';
   kv_mount?: string;
@@ -33,46 +32,52 @@ export interface HeartbeatVaultConfig {
   secret_id?: string;
 }
 
+const toHeartbeatConfig = (attributes: SyntheticsVaultConnection): HeartbeatVaultConfig => ({
+  enabled: true,
+  name: attributes.name,
+  address: attributes.address,
+  auth_method: attributes.authMethod,
+  kv_mount: attributes.kvMount,
+  namespace: attributes.namespace,
+  tls_skip_verify: attributes.tlsSkipVerify,
+  secret_refresh_interval: attributes.secretRefreshInterval,
+  version: attributes.refreshedAt,
+  token: attributes.token,
+  role_id: attributes.roleId,
+  secret_id: attributes.secretId,
+});
+
 /**
- * Reads and decrypts the Vault connection for a space and returns it as a
- * Heartbeat `vault:` config block, or null when no connection is configured.
+ * Reads and decrypts every Vault connection for a space and returns them as an
+ * array of Heartbeat `vault:` connection blocks. Empty when none are configured.
  *
- * Note: this yields the plaintext secret, so it must only be used when
- * assembling the config delivered to a private-location agent — never returned
- * to the browser. Delivering this block to agent-run Heartbeat through the
- * Fleet policy requires the synthetics integration package to carry it; see the
- * POC notes.
+ * Note: this yields plaintext secrets, so it must only be used when assembling
+ * the config delivered to a private-location agent (via a Fleet secret) — never
+ * returned to the browser.
  */
-export const getVaultConnectionConfig = async (
+export const getVaultConnectionConfigs = async (
   server: SyntheticsServerSetup,
   spaceId: string
-): Promise<HeartbeatVaultConfig | null> => {
+): Promise<HeartbeatVaultConfig[]> => {
   const encryptedClient = server.encryptedSavedObjects.getClient();
-  try {
-    const { attributes } =
-      await encryptedClient.getDecryptedAsInternalUser<SyntheticsVaultConnection>(
-        syntheticsVaultConnectionType,
-        VAULT_CONNECTION_SO_ID,
-        { namespace: spaceId }
-      );
+  const finder =
+    await encryptedClient.createPointInTimeFinderDecryptedAsInternalUser<SyntheticsVaultConnection>(
+      {
+        type: syntheticsVaultConnectionType,
+        perPage: 1000,
+        namespaces: [spaceId],
+      }
+    );
 
-    return {
-      enabled: true,
-      address: attributes.address,
-      auth_method: attributes.authMethod,
-      kv_mount: attributes.kvMount,
-      namespace: attributes.namespace,
-      tls_skip_verify: attributes.tlsSkipVerify,
-      secret_refresh_interval: attributes.secretRefreshInterval,
-      version: attributes.refreshedAt,
-      token: attributes.token,
-      role_id: attributes.roleId,
-      secret_id: attributes.secretId,
-    };
-  } catch (error) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-      return null;
+  const configs: HeartbeatVaultConfig[] = [];
+  for await (const result of finder.find()) {
+    for (const so of result.saved_objects) {
+      if (so.attributes) {
+        configs.push(toHeartbeatConfig(so.attributes));
+      }
     }
-    throw error;
   }
+  finder.close().catch(() => {});
+
+  return configs;
 };

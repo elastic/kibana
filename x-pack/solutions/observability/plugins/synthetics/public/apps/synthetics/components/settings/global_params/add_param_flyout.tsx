@@ -104,6 +104,7 @@ export const AddParamFlyout = ({
         type: 'vault',
         path: (source?.path ?? '').trim(),
         field: (source?.field ?? '').trim(),
+        connection: source?.connection?.trim() || undefined,
       };
     } else if (!(isEditingItem && id && isEmpty(value))) {
       // include the literal value unless editing and left blank (keep current)

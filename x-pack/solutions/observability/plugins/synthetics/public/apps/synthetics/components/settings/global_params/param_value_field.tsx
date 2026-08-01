@@ -10,16 +10,20 @@ import {
   EuiCode,
   EuiFieldText,
   EuiFormRow,
+  EuiSelect,
   EuiSpacer,
   EuiTextArea,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OptionalText } from '../components/optional_text';
 import type { ListParamItem } from './params_list';
 import type { ParamFormData, ParamValueSourceType } from './add_param_form';
 import { VALUE_LABEL, VALUE_REQUIRED } from './add_param_form';
+import type { VaultConnectionStatus } from '../../../../../../common/runtime_types';
+import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 
 export const ParamValueField = ({
   isEditingItem,
@@ -93,9 +97,30 @@ export const ParamValueField = ({
 const VaultSourceFields = () => {
   const { register } = useFormContext<ParamFormData>();
   const { errors } = useFormState<ParamFormData>();
+  const { http } = useKibana().services;
+  const [connections, setConnections] = useState<string[]>([]);
+
+  useEffect(() => {
+    http
+      ?.get<VaultConnectionStatus[]>(SYNTHETICS_API_URLS.VAULT_CONNECTION)
+      .then((res) => setConnections((Array.isArray(res) ? res : []).map((c) => c.name ?? '')))
+      .catch(() => {});
+  }, [http]);
 
   return (
     <>
+      <EuiFormRow fullWidth label={VAULT_CONNECTION_LABEL} helpText={VAULT_CONNECTION_HELP}>
+        <EuiSelect
+          fullWidth
+          data-test-subj="syntheticsParamVaultConnection"
+          hasNoInitialSelection={connections.length > 1}
+          options={[
+            { value: '', text: VAULT_DEFAULT_CONNECTION },
+            ...connections.map((n) => ({ value: n, text: n })),
+          ]}
+          {...register('source.connection')}
+        />
+      </EuiFormRow>
       <EuiFormRow
         fullWidth
         label={VAULT_PATH_LABEL}
@@ -155,6 +180,18 @@ export const NEW_VALUE_LABEL = i18n.translate(
   }
 );
 
+const VAULT_CONNECTION_LABEL = i18n.translate('xpack.synthetics.paramForm.vaultConnectionLabel', {
+  defaultMessage: 'Vault connection',
+});
+const VAULT_CONNECTION_HELP = i18n.translate('xpack.synthetics.paramForm.vaultConnectionHelp', {
+  defaultMessage: 'Which configured Vault connection to resolve this secret from.',
+});
+const VAULT_DEFAULT_CONNECTION = i18n.translate(
+  'xpack.synthetics.paramForm.vaultDefaultConnection',
+  {
+    defaultMessage: 'Default connection',
+  }
+);
 const VAULT_PATH_LABEL = i18n.translate('xpack.synthetics.paramForm.vaultPathLabel', {
   defaultMessage: 'Vault secret path',
 });

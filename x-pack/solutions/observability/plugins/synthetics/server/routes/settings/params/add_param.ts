@@ -25,6 +25,7 @@ const VaultSourceSchema = schema.object({
   type: schema.literal('vault'),
   path: schema.string({ minLength: 1 }),
   field: schema.string({ minLength: 1 }),
+  connection: schema.maybe(schema.string()),
 });
 
 const ParamsObjectSchema = schema.object({
@@ -149,7 +150,9 @@ const toParamAttributes = (
   param: SyntheticsParamRequest
 ): Omit<SyntheticsParamSOAttributes, 'id'> => {
   const { share_across_spaces: _shareAcrossSpaces, value, source, ...rest } = param;
-  const effectiveValue = source ? buildVaultReference(source.path, source.field) : value ?? '';
+  const effectiveValue = source
+    ? buildVaultReference(source.path, source.field, source.connection)
+    : value ?? '';
   return {
     ...rest,
     ...(source ? { source } : {}),

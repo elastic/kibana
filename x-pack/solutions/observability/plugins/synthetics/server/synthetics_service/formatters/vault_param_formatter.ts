@@ -37,12 +37,15 @@ export const VAULT_REF_REGEX = /\$\{vault\/[^#{}]+#[^{}]+\}/g;
 
 /**
  * Builds the edge-resolved reference token stored as a vault-backed param's
- * value, e.g. buildVaultReference('myapp/creds', 'password') ->
- * '${vault/myapp/creds#password}'. Heartbeat expands this token at runtime.
+ * value. With a connection name it emits ${vault/<connection>@<path>#<field>}
+ * (routes to that named Vault connection); without one it emits
+ * ${vault/<path>#<field>} (the default connection). Heartbeat expands the token
+ * at runtime.
  */
-export const buildVaultReference = (path: string, field: string): string => {
+export const buildVaultReference = (path: string, field: string, connection?: string): string => {
   const cleanPath = path.replace(/^\/+|\/+$/g, '');
-  return '${vault/' + cleanPath + '#' + field + '}';
+  const prefix = connection ? `vault/${connection}@` : 'vault/';
+  return '${' + prefix + cleanPath + '#' + field + '}';
 };
 
 /**

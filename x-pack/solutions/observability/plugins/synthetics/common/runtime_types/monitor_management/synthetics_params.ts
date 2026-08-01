@@ -13,11 +13,17 @@ import * as t from 'io-ts';
  * fetches or stores the plaintext secret. The effective param `value` is the
  * edge-resolved token `${vault/<path>#<field>}`.
  */
-export const SyntheticsParamVaultSourceCodec = t.type({
-  type: t.literal('vault'),
-  path: t.string,
-  field: t.string,
-});
+export const SyntheticsParamVaultSourceCodec = t.intersection([
+  t.type({
+    type: t.literal('vault'),
+    path: t.string,
+    field: t.string,
+  }),
+  t.partial({
+    // Name of the Vault connection to resolve against (omit = default connection).
+    connection: t.string,
+  }),
+]);
 
 export type SyntheticsParamVaultSource = t.TypeOf<typeof SyntheticsParamVaultSourceCodec>;
 

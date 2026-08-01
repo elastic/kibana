@@ -19,6 +19,8 @@ export type VaultAuthMethod = t.TypeOf<typeof VaultAuthMethodCodec>;
  */
 export const SyntheticsVaultConnectionCodec = t.intersection([
   t.type({
+    // Unique connection name, addressed by params as ${vault/<name>@<path>#<field>}.
+    name: t.string,
     address: t.string,
     authMethod: VaultAuthMethodCodec,
   }),
@@ -47,6 +49,7 @@ export type SyntheticsVaultConnection = t.TypeOf<typeof SyntheticsVaultConnectio
 export const VaultConnectionStatusCodec = t.intersection([
   t.type({ configured: t.boolean }),
   t.partial({
+    name: t.string,
     address: t.string,
     namespace: t.string,
     authMethod: VaultAuthMethodCodec,
@@ -62,3 +65,5 @@ export const VaultConnectionStatusCodec = t.intersection([
 ]);
 
 export type VaultConnectionStatus = t.TypeOf<typeof VaultConnectionStatusCodec>;
+
+export const VaultConnectionStatusListCodec = t.array(VaultConnectionStatusCodec);
