@@ -273,7 +273,8 @@ export class StreamsApp {
 
   // Streams table utility methods
   async expectStreamsTableVisible() {
-    await expect(this.page.getByTestId('streamsTable')).toBeVisible();
+    // Cold Cloud first-load: Kibana core bootstrap can exceed the default 10s before the table renders.
+    await expect(this.page.getByTestId('streamsTable')).toBeVisible({ timeout: 30_000 });
   }
 
   async verifyDatePickerTimeRange(expectedRange: { from: string; to: string }) {
