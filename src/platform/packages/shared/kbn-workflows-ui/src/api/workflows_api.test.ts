@@ -8,6 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowApi } from './workflows_api';
 
 const VERSION = '2023-10-31';
@@ -313,7 +314,7 @@ describe('WorkflowApi', () => {
     it('should call GET /api/workflows/workflow/executions with structured params', async () => {
       const params = {
         kql: 'status: completed',
-        statuses: ['completed' as 'completed'],
+        statuses: [ExecutionStatus.COMPLETED],
         sortField: 'startedAt',
         sortOrder: 'desc' as const,
         startedAfter: 'now-15m',

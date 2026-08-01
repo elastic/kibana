@@ -9,7 +9,6 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { createWorkflowExecutionsDataView } from './workflow_executions_data_view';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
 import { createStartServicesMock } from '../../mocks';
@@ -42,7 +41,6 @@ describe('WorkflowExecutionsTable', () => {
 
   it('calls the internal executions search API', async () => {
     const services = createStartServicesMock();
-    const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
     jest.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
@@ -52,7 +50,6 @@ describe('WorkflowExecutionsTable', () => {
 
     render(
       <WorkflowExecutionsTable
-        dataView={dataView}
         filters={[]}
         query={defaultQuery}
         spaceId="my-space"
@@ -70,11 +67,11 @@ describe('WorkflowExecutionsTable', () => {
       expect.objectContaining({
         version: '2023-10-31',
         query: expect.objectContaining({
-          from: 0,
+          page: 1,
           size: 25,
           trackTotalHits: true,
-          query: expect.any(String),
-          sort: expect.any(String),
+          sortField: expect.any(String),
+          sortOrder: expect.any(String),
         }),
       })
     );
@@ -82,7 +79,6 @@ describe('WorkflowExecutionsTable', () => {
 
   it('shows empty state when search returns no executions', async () => {
     const services = createStartServicesMock();
-    const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
     jest.mocked(services.http.get).mockResolvedValue({
       results: [],
       page: 1,
@@ -92,7 +88,6 @@ describe('WorkflowExecutionsTable', () => {
 
     render(
       <WorkflowExecutionsTable
-        dataView={dataView}
         filters={[]}
         query={defaultQuery}
         spaceId="default"
@@ -109,7 +104,6 @@ describe('WorkflowExecutionsTable', () => {
 
   it('shows a pagination limit callout when total exceeds the result window', async () => {
     const services = createStartServicesMock();
-    const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
 
     jest.mocked(services.http.get).mockResolvedValue({
       results: [
@@ -132,7 +126,6 @@ describe('WorkflowExecutionsTable', () => {
 
     render(
       <WorkflowExecutionsTable
-        dataView={dataView}
         filters={[]}
         query={defaultQuery}
         spaceId="default"
@@ -148,7 +141,7 @@ describe('WorkflowExecutionsTable', () => {
     expect(jest.mocked(services.http.get).mock.calls[0][1]).toEqual(
       expect.objectContaining({
         query: expect.objectContaining({
-          from: 0,
+          page: 1,
           size: 25,
         }),
       })
@@ -157,13 +150,11 @@ describe('WorkflowExecutionsTable', () => {
 
   it('shows a generic error prompt for non-index errors', async () => {
     const services = createStartServicesMock();
-    const dataView = createWorkflowExecutionsDataView(services.fieldFormats);
 
     jest.mocked(services.http.get).mockRejectedValue(new Error('cluster unavailable'));
 
     render(
       <WorkflowExecutionsTable
-        dataView={dataView}
         filters={[]}
         query={defaultQuery}
         spaceId="default"

@@ -44,9 +44,8 @@ export interface UseWorkflowExecutionsSearchParams {
  */
 const extractFilterValues = (filters: Filter[], fieldKey: string): string[] => {
   const values: string[] = [];
-  for (const f of filters) {
-    if (f.meta.disabled || f.meta.key !== fieldKey) continue;
-
+  const relevant = filters.filter((f) => !f.meta.disabled && f.meta.key === fieldKey);
+  for (const f of relevant) {
     if (f.meta.type === 'phrases' && Array.isArray(f.meta.params)) {
       // Multi-select from OptionsListControl or search bar
       values.push(...(f.meta.params as string[]));
