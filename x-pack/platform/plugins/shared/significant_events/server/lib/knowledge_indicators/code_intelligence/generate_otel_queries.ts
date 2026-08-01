@@ -31,6 +31,9 @@ export interface GenerateOtelQueriesResult {
 }
 
 const escapeString = (value: string): string => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+const escapeIdentifier = (value: string): string => value.replace(/`/g, '``');
+const fieldIdentifier = (prefix: string, value: string): string =>
+  `\`${escapeIdentifier(`${prefix}.${value}`)}\``;
 const sources = (streams: string[]): string => streams.join(',');
 
 const severityForTier = (tier: OtelQueryTier): number =>
@@ -176,7 +179,7 @@ export function generateOtelQueries({
         break;
       case 'attr_key': {
         if (!signal.value || traceStreams.length === 0) break;
-        const field = `attributes.${signal.value}`;
+        const field = fieldIdentifier('attributes', signal.value);
         let esql: string;
         if (signal.valueHint === 'bool') {
           esql = `FROM ${sources(traceStreams)} | WHERE ${field} == false`;
@@ -193,8 +196,8 @@ export function generateOtelQueries({
         break;
       }
       case 'metric_name':
-        if (value && metricStreams.length > 0) {
-          const field = `metrics.${signal.value}`;
+        if (signal.value && value && metricStreams.length > 0) {
+          const field = fieldIdentifier('metrics', signal.value);
           add({
             esql: `FROM ${sources(
               metricStreams

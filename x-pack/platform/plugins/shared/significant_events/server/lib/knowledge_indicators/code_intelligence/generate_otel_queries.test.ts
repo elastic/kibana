@@ -54,24 +54,37 @@ describe('generateOtelQueries', () => {
       expect.arrayContaining([
         expect.stringContaining('WHERE name == "checkout" | STATS total = COUNT(*)'),
         'FROM logs-generic.otel-default | WHERE event_name == "charged"',
-        'FROM metrics-generic.otel-default | WHERE metrics.checkout.requests IS NOT NULL | STATS avg = AVG(metrics.checkout.requests)',
+        'FROM metrics-generic.otel-default | WHERE `metrics.checkout.requests` IS NOT NULL | STATS avg = AVG(`metrics.checkout.requests`)',
       ])
     );
   });
 
   it.each([
-    ['bool', 'WHERE attributes.app.amount == false'],
+    ['bool', 'WHERE `attributes.app.amount` == false'],
     [
       'number',
-      'STATS avg = AVG(attributes.app.amount), max = MAX(attributes.app.amount), p95 = PERCENTILE(attributes.app.amount, 95)',
+      'STATS avg = AVG(`attributes.app.amount`), max = MAX(`attributes.app.amount`), p95 = PERCENTILE(`attributes.app.amount`, 95)',
     ],
-    ['enum', 'STATS c = COUNT(*) BY attributes.app.amount'],
-    ['id', 'STATS c = COUNT(*) BY attributes.app.amount'],
-    ['unknown', 'STATS c = COUNT(*) BY attributes.app.amount'],
+    ['enum', 'STATS c = COUNT(*) BY `attributes.app.amount`'],
+    ['id', 'STATS c = COUNT(*) BY `attributes.app.amount`'],
+    ['unknown', 'STATS c = COUNT(*) BY `attributes.app.amount`'],
   ] as const)('maps %s attribute hints to traces', (valueHint, shape) => {
     const queries = esql([signal({ kind: 'attr_key', value: 'app.amount', valueHint })]);
     expect(queries[0]).toContain('FROM traces-generic.otel-default');
     expect(queries[0]).toContain(shape);
+  });
+
+  it('quotes field identifiers containing special characters', () => {
+    const queries = esql([
+      signal({ kind: 'attr_key', value: 'app.feature-enabled', valueHint: 'bool' }),
+      signal({ kind: 'metric_name', value: 'http server/duration' }),
+    ]);
+    expect(queries).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('`attributes.app.feature-enabled`'),
+        expect.stringContaining('`metrics.http server/duration`'),
+      ])
+    );
   });
 
   it('does not generate queries for templated signals', () => {
