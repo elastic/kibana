@@ -9,8 +9,9 @@ import type { TaskStore } from '@a2a-js/sdk/server';
 import type { Task, TaskState } from '@a2a-js/sdk';
 import { v4 as uuidv4 } from 'uuid';
 import type { KibanaRequest } from '@kbn/core/server';
-import { ExecutionStatus, isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '../../services/execution';
+import type { AgentExecution } from '../../services/execution';
 import type { InternalStartServices } from '../../services';
 import { getCurrentSpaceId } from '../spaces';
 

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AgentExecutionMode, ChatEventType, ExecutionStatus } from '@kbn/agent-builder-common';
-import type { AgentExecution } from '@kbn/agent-builder-server/execution';
+import { ChatEventType } from '@kbn/agent-builder-common';
+import { ExecutionStatus } from '../../services/execution';
+import type { AgentExecution } from '../../services/execution';
 import { KibanaTaskStore } from './kibana_task_store';
 
 describe('KibanaTaskStore', () => {
@@ -19,7 +20,6 @@ describe('KibanaTaskStore', () => {
       spaceId: 'default',
       eventCount: 0,
       events: [],
-      executionMode: AgentExecutionMode.conversation,
       agentParams: { nextInput: { message: 'hello' } },
       ...overrides,
     } as AgentExecution);
