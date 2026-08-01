@@ -11,7 +11,7 @@ import { type Observable, distinctUntilChanged, map, skip } from 'rxjs';
 import { isEqual } from 'lodash';
 import { type GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { type INullableBaseStateContainer } from '@kbn/kibana-utils-plugin/public';
-import type { AnyAction, ThunkDispatch } from 'redux-toolkit-v1';
+import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit';
 import {
   internalStateActions,
   selectCurrentProfileStateDefinition,
@@ -38,7 +38,7 @@ export const createUrlSyncObservables = ({
   services,
 }: {
   tabId: string;
-  dispatch: ThunkDispatch<DiscoverInternalState, InternalStateDependencies, AnyAction>;
+  dispatch: ThunkDispatch<DiscoverInternalState, InternalStateDependencies, UnknownAction>;
   getState: () => DiscoverInternalState;
   internalState$: Observable<DiscoverInternalState>;
   runtimeStateManager: InternalStateDependencies['runtimeStateManager'];

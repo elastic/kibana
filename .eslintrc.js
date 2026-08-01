@@ -3174,7 +3174,6 @@ module.exports.overrides.push({
     'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
-    'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
     'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',

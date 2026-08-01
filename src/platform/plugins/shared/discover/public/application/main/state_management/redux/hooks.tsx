@@ -8,12 +8,13 @@
  */
 
 import {
+  type EqualityFn,
   type TypedUseSelectorHook,
   type ReactReduxContextValue,
   Provider as ReduxProvider,
   createDispatchHook,
   createSelectorHook,
-} from 'react-redux-v7';
+} from 'react-redux';
 import type { PropsWithChildren } from 'react';
 import React, { useMemo, createContext, useContext } from 'react';
 import defaultComparator from 'fast-deep-equal';
@@ -28,11 +29,17 @@ import { selectTab } from './selectors';
 import { type TabActionInjector, createTabActionInjector } from './utils';
 import type { ChartPortalNode } from '../../components/chart';
 
-const internalStateContext = createContext<ReactReduxContextValue>(
-  // Recommended approach for versions of Redux prior to v9:
-  // https://github.com/reduxjs/react-redux/issues/1565#issuecomment-867143221
-  null as unknown as ReactReduxContextValue
-);
+const internalStateContext = createContext<ReactReduxContextValue | null>(null);
+
+const useInternalStateContext = () => {
+  const context = useContext(internalStateContext);
+
+  if (!context) {
+    throw new Error('Internal state hooks must be used within an InternalStateProvider');
+  }
+
+  return context;
+};
 
 export const InternalStateProvider = ({
   store,
@@ -48,12 +55,12 @@ export const useInternalStateDispatch = createDispatchHook(
 ) as () => InternalStateDispatch;
 
 export const useInternalStateGetState = (): (() => DiscoverInternalState) => {
-  const { store } = useContext(internalStateContext);
+  const { store } = useInternalStateContext();
   return store.getState as () => DiscoverInternalState;
 };
 
 export const useInternalStateSubscribe = (): ((listener: () => void) => () => void) => {
-  const { store } = useContext(internalStateContext);
+  const { store } = useInternalStateContext();
   return store.subscribe;
 };
 
@@ -95,7 +102,10 @@ export const useCurrentTabContext = () => {
   return context;
 };
 
-export const useCurrentTabSelector: TypedUseSelectorHook<TabState> = (selector, equalityFn) => {
+export const useCurrentTabSelector = <TSelected,>(
+  selector: (state: TabState) => TSelected,
+  equalityFn?: EqualityFn<TSelected>
+): TSelected => {
   const { currentTabId } = useCurrentTabContext();
   return useInternalStateSelector((state) => selector(selectTab(state, currentTabId)), equalityFn);
 };
