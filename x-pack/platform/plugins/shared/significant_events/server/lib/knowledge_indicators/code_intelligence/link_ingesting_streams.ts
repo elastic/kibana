@@ -38,11 +38,23 @@ export interface LogStreamBinding {
   messageField: string;
   /** Whether `messageField` is a `text` field (use `MATCH_PHRASE`, not `LIKE`). */
   messageIsText: boolean;
+  /** Whether the stream's index currently holds any documents. */
+  hasDocs?: boolean;
 }
 
 // Candidate fields that carry the log message, most-specific first (ECS
-// `message`, then OTel `body.text` / `body`).
-const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text', 'message.text', 'body'];
+// `message`, then OTel `body.text` / `body`, then the OTel Logs/Events API
+// `event_name` / `attributes.event.name` — many services emit *semantic events*
+// with the human-readable text in `event_name`, no `message`/`body.text` at all;
+// without these a query bound to such a stream can never match).
+const MESSAGE_FIELD_CANDIDATES = [
+  'message',
+  'body.text',
+  'message.text',
+  'body',
+  'event_name',
+  'attributes.event.name',
+];
 
 interface FieldCapsEntry {
   [type: string]: { type?: string; aggregatable?: boolean; searchable?: boolean } | undefined;
@@ -117,7 +129,19 @@ export async function resolveLogBearingStreams({
           return;
         }
 
-        bindings.push({ stream: name, index, convention, messageField, messageIsText });
+        // Probe whether the stream actually carries data. A stream can be mapped
+        // (template) yet empty (e.g. `logs.ecs`); binding predictive queries to
+        // it wastes them. We keep the flag rather than dropping here so the
+        // chicken-vs-egg fallback (all candidates empty) still works.
+        let hasDocs = false;
+        try {
+          const { count } = await esClient.count({ index, ignore_unavailable: true });
+          hasDocs = count > 0;
+        } catch {
+          hasDocs = true; // On probe failure, do not exclude the stream.
+        }
+
+        bindings.push({ stream: name, index, convention, messageField, messageIsText, hasDocs });
       } catch (error) {
         logger.debug(
           `code_features: log-stream probe failed for "${name}": ${
@@ -128,7 +152,11 @@ export async function resolveLogBearingStreams({
     })
   );
 
-  return bindings.sort((a, b) => a.stream.localeCompare(b.stream));
+  // Prefer streams that actually ingest data; fall back to all candidates only
+  // when none have data yet (preserves the predictive chicken-vs-egg case).
+  const withData = bindings.filter((binding) => binding.hasDocs);
+  const effective = withData.length > 0 ? withData : bindings;
+  return effective.sort((a, b) => a.stream.localeCompare(b.stream));
 }
 
 /**

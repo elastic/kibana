@@ -22,6 +22,29 @@ const MACRO_CALL_RE =
 // Placeholder / interpolation markers that end the static portion of a message.
 const PLACEHOLDER_RE = /\{\}|\{\{|\{[^}]*\}|%[sdfvarx@]|\$\{|\$[A-Za-z_]|#\{/;
 
+// Global variant used to split a message into its static segments. Matches the
+// same interpolation markers as PLACEHOLDER_RE plus `%+v` / `%-3d` style flags,
+// so a mid-string variable splits the message instead of ending it.
+const PLACEHOLDER_SPLIT_RE =
+  /\{\{|\{[^}]*\}|%[-+#0-9.]*[sdfvarxXeEgGqwtbcpToU@]|\$\{[^}]*\}|\$[A-Za-z_][A-Za-z0-9_]*|#\{[^}]*\}/g;
+
+/** Minimum length for a static segment to be a useful, selective query anchor. */
+const MIN_SEGMENT_LENGTH = 4;
+
+/**
+ * Splits a message into its static (non-interpolated) segments, in source order,
+ * dropping interpolation placeholders and segments too short to be selective.
+ * `"Consumed record orderId: {id} total: {n}"` -> `["Consumed record orderId:", "total:"]`.
+ * Unlike {@link staticPrefixOf}, this keeps the segments *after* a mid-string
+ * variable, so the predictive query can AND them and still match at runtime.
+ */
+export function staticSegmentsOf(message: string): string[] {
+  return message
+    .split(PLACEHOLDER_SPLIT_RE)
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length >= MIN_SEGMENT_LENGTH);
+}
+
 const normalizeLevel = (level: string): string => {
   const lower = level.toLowerCase();
   return lower === 'warning' ? 'warn' : lower;
@@ -58,12 +81,14 @@ export function extractLogSignatures(chunk: LoggingChunk): LogSignature[] {
     if (staticPrefix.length < 3) {
       return [];
     }
+    const staticSegments = staticSegmentsOf(message);
     return [
       {
         level,
         severity: severityForLevel(level),
         message,
         staticPrefix,
+        staticSegments: staticSegments.length > 0 ? staticSegments : [staticPrefix],
         location: chunk.location,
       },
     ];
@@ -89,11 +114,13 @@ export function extractLogSignatures(chunk: LoggingChunk): LogSignature[] {
         continue;
       }
       seen.add(key);
+      const staticSegments = staticSegmentsOf(message);
       signatures.push({
         level,
         severity: severityForLevel(level),
         message,
         staticPrefix,
+        staticSegments: staticSegments.length > 0 ? staticSegments : [staticPrefix],
         location: chunk.location,
       });
     }

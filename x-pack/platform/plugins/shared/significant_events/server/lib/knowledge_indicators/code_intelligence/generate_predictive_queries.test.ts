@@ -18,6 +18,7 @@ const signature = (overrides: Partial<LogSignature> = {}): LogSignature => ({
   severity: 70,
   message: 'Payment failed for order {}',
   staticPrefix: 'Payment failed for order',
+  staticSegments: ['Payment failed for order'],
   location: 'src/pay.go:42',
   ...overrides,
 });
@@ -42,6 +43,30 @@ describe('buildPredictiveEsql', () => {
       messageIsText: true,
     });
     expect(esql).toContain('MATCH_PHRASE(body.text, "Tracking ID Created")');
+    expect(isValidEsqlSyntax(esql)).toBe(true);
+  });
+
+  it('ANDs static segments across a mid-string variable (text field)', () => {
+    const esql = buildPredictiveEsql({
+      samplingSource: 'logs.otel',
+      staticPrefix: 'Consumed record orderId:',
+      segments: ['Consumed record orderId:', 'and updated total to:'],
+      messageField: 'message',
+      messageIsText: true,
+    });
+    expect(esql).toContain(
+      'MATCH_PHRASE(message, "Consumed record orderId:") AND MATCH_PHRASE(message, "and updated total to:")'
+    );
+    expect(isValidEsqlSyntax(esql)).toBe(true);
+  });
+
+  it('ANDs static segments on a keyword field with LIKE', () => {
+    const esql = buildPredictiveEsql({
+      samplingSource: 'logs.generic',
+      staticPrefix: 'heap usage is',
+      segments: ['heap usage is', 'percent'],
+    });
+    expect(esql).toContain('message LIKE "*heap usage is*" AND message LIKE "*percent*"');
     expect(isValidEsqlSyntax(esql)).toBe(true);
   });
 

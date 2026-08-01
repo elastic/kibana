@@ -28,6 +28,7 @@ const createEsClient = (): ElasticsearchClient =>
         message: { keyword: { type: 'keyword', aggregatable: true, searchable: true } },
       },
     })),
+    count: jest.fn(async () => ({ count: 1 })),
   } as unknown as ElasticsearchClient);
 
 const createKiClient = (featuresByStream: Record<string, Feature[]> = {}) => {

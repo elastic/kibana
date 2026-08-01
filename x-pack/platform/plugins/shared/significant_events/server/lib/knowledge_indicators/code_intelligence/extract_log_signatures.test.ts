@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
+import { extractLogSignatures, staticPrefixOf, staticSegmentsOf } from './extract_log_signatures';
 
 describe('staticPrefixOf', () => {
   it('returns the text before an interpolation placeholder', () => {
@@ -13,6 +13,31 @@ describe('staticPrefixOf', () => {
     expect(staticPrefixOf('user %s not found')).toBe('user');
     expect(staticPrefixOf('starting service ${name}')).toBe('starting service');
     expect(staticPrefixOf('no placeholders here')).toBe('no placeholders here');
+  });
+});
+
+describe('staticSegmentsOf', () => {
+  it('keeps static segments on BOTH sides of a mid-string variable', () => {
+    // The collapsed single-phrase form 'orderId: and updated total to:' can never
+    // match at runtime; the segments can (ANDed).
+    expect(
+      staticSegmentsOf('Consumed record orderId: ${orderId} and updated total to: ${count}')
+    ).toEqual(['Consumed record orderId:', 'and updated total to:']);
+  });
+
+  it('splits Go/Java/C# placeholder styles', () => {
+    expect(staticSegmentsOf('failed POST to email service: expected 200, got %d')).toEqual([
+      'failed POST to email service: expected 200, got',
+    ]);
+    expect(staticSegmentsOf('Order details: {@OrderResult}.')).toEqual(['Order details:']);
+    expect(staticSegmentsOf('Current heap usage is {0} percent')).toEqual([
+      'Current heap usage is',
+      'percent',
+    ]);
+  });
+
+  it('drops segments shorter than the anchor minimum', () => {
+    expect(staticSegmentsOf('a %s b %s cccc')).toEqual(['cccc']);
   });
 });
 
@@ -28,6 +53,7 @@ describe('extractLogSignatures', () => {
       severity: 70,
       message: 'Payment failed for order {}',
       staticPrefix: 'Payment failed for order',
+      staticSegments: ['Payment failed for order'],
     });
   });
 
@@ -85,6 +111,7 @@ describe('extractLogSignatures', () => {
         severity: 70,
         message: 'failed to charge card',
         staticPrefix: 'failed to charge card',
+        staticSegments: ['failed to charge card'],
         location: 'main.go:355',
       },
     ]);

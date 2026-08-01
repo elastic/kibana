@@ -40,23 +40,37 @@ const toTitle = (staticPrefix: string): string =>
  *
  * Field-aware `messageField` (default `message`): `text` fields use
  * `MATCH_PHRASE` (same operator the log pipeline uses on OTel `body.text`);
- * keyword fields use `LIKE "*prefix*"` (`LIKE` is invalid on `text`).
+ * keyword fields use `LIKE "*segment*"` (`LIKE` is invalid on `text`).
+ *
+ * Segment-aware: a message with mid-string variables yields multiple static
+ * `segments` (e.g. `["orderId:", "total:"]`). Each segment becomes its own
+ * clause, ANDed together, so the query still matches once the variables are
+ * filled at runtime — the collapsed single-phrase form (`"orderId: total:"`)
+ * never would. Falls back to `staticPrefix` when no segments are supplied.
  */
 export function buildPredictiveEsql({
   samplingSource,
   staticPrefix,
+  segments,
   messageField = 'message',
   messageIsText = false,
 }: {
   samplingSource: string;
   staticPrefix: string;
+  segments?: string[];
   messageField?: string;
   messageIsText?: boolean;
 }): string {
-  const messageClause = messageIsText
-    ? `MATCH_PHRASE(${messageField}, "${escapeQuotes(sanitizeForLike(staticPrefix))}")`
-    : `${messageField} LIKE "*${sanitizeForLike(staticPrefix)}*"`;
-  return `FROM ${samplingSource} METADATA _id, _source | WHERE ${messageClause}`;
+  const anchors = (segments && segments.length > 0 ? segments : [staticPrefix])
+    .map((segment) => sanitizeForLike(segment))
+    .filter((segment) => segment.length > 0);
+  const effective = anchors.length > 0 ? anchors : [sanitizeForLike(staticPrefix)];
+  const clause = (anchor: string): string =>
+    messageIsText
+      ? `MATCH_PHRASE(${messageField}, "${escapeQuotes(anchor)}")`
+      : `${messageField} LIKE "*${anchor}*"`;
+  const where = effective.map(clause).join(' AND ');
+  return `FROM ${samplingSource} METADATA _id, _source | WHERE ${where}`;
 }
 
 /**
@@ -107,6 +121,7 @@ export function generatePredictiveQueries({
     const esql = buildPredictiveEsql({
       samplingSource,
       staticPrefix: signature.staticPrefix,
+      segments: signature.staticSegments,
       messageField,
       messageIsText,
     });

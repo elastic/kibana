@@ -136,5 +136,14 @@ export interface LogSignature {
   message: string;
   /** The leading static text before any interpolation placeholder. */
   staticPrefix: string;
+  /**
+   * All static (non-interpolated) segments of the message, in source order, with
+   * interpolation placeholders removed. A message like
+   * `"orderId: {id} total: {n}"` yields `["orderId:", "total:"]`. Used to build a
+   * segment-AND predictive query that still matches once the variables are filled
+   * at runtime (the collapsed single-phrase form cannot). Always contains at least
+   * `staticPrefix` when that is non-trivial.
+   */
+  staticSegments: string[];
   location?: string;
 }
