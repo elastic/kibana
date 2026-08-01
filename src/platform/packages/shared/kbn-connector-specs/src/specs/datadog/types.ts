@@ -9,35 +9,6 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-export const RegisterWebhookInputSchema = lazySchema(() =>
-  z.object({
-    name: z
-      .string()
-      .min(1)
-      .describe(
-        'Webhook name in Datadog. Monitors notify it as @webhook-{name}. Example: "kibana-external-alerts"'
-      ),
-    url: z
-      .string()
-      .url()
-      .describe(
-        'Destination URL Datadog will POST to. For now a placeholder is fine (e.g. https://example.com/kibana/inbound/datadog).'
-      ),
-    customAuthHeader: z
-      .string()
-      .optional()
-      .describe(
-        'Optional Bearer token value sent as Authorization header on webhook POSTs. Leave empty to skip.'
-      ),
-  })
-);
-
-export const WebhookNameInputSchema = lazySchema(() =>
-  z.object({
-    name: z.string().min(1).describe('Datadog webhook integration name'),
-  })
-);
-
 export const MuteMonitorInputSchema = lazySchema(() =>
   z.object({
     monitorId: z
@@ -91,13 +62,7 @@ export const ListMonitorsInputSchema = lazySchema(() =>
   })
 );
 
-export type RegisterWebhookInput = z.infer<typeof RegisterWebhookInputSchema>;
-export type WebhookNameInput = z.infer<typeof WebhookNameInputSchema>;
 export type MuteMonitorInput = z.infer<typeof MuteMonitorInputSchema>;
 export type UnmuteMonitorInput = z.infer<typeof UnmuteMonitorInputSchema>;
 export type GetMonitorInput = z.infer<typeof GetMonitorInputSchema>;
 export type ListMonitorsInput = z.infer<typeof ListMonitorsInputSchema>;
-
-/** Payload template registered on Datadog webhooks — Keep-aligned fingerprint fields. */
-export const DATADOG_WEBHOOK_PAYLOAD_TEMPLATE =
-  '{ "monitor_id": "$ALERT_ID", "groups": "$ALERT_SCOPE", "title": "$ALERT_TITLE", "transition": "$ALERT_TRANSITION", "priority": "$ALERT_PRIORITY", "tags": "$TAGS", "link": "$LINK", "date": "$DATE", "org_id": "$ORG_ID" }';

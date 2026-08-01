@@ -11,10 +11,10 @@
  * Datadog connector (`.datadog`)
  *
  * General Datadog integration for Workflows / Agent Builder.
- * First action group covers monitors + webhook registration; additional
- * Datadog API domains (downtimes, events, hosts, metrics, incidents) should
- * be added as actions on this same connector — do not create `.datadog_*`
- * variants for each domain.
+ * First action group covers monitor discovery and mute/unmute write-back;
+ * additional Datadog API domains (webhooks, downtimes, events, hosts,
+ * metrics, incidents) should be added as actions on this same connector —
+ * do not create `.datadog_*` variants for each domain.
  *
  * Auth: Datadog Personal Access Token (PAT) or Service Access Token (SAT)
  * via native `bearer` (`Authorization: Bearer <token>`). Prefer SAT for
@@ -26,19 +26,14 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import {
-  DATADOG_WEBHOOK_PAYLOAD_TEMPLATE,
   GetMonitorInputSchema,
   ListMonitorsInputSchema,
   MuteMonitorInputSchema,
-  RegisterWebhookInputSchema,
   UnmuteMonitorInputSchema,
-  WebhookNameInputSchema,
   type GetMonitorInput,
   type ListMonitorsInput,
   type MuteMonitorInput,
-  type RegisterWebhookInput,
   type UnmuteMonitorInput,
-  type WebhookNameInput,
 } from './types';
 
 interface DatadogConfig {
@@ -60,7 +55,7 @@ export const DatadogConnector: ConnectorSpec = {
     displayName: 'Datadog',
     description: i18n.translate('connectorSpecs.datadog.metadata.description', {
       defaultMessage:
-        'Manage Datadog monitors and webhooks; extensible for downtimes, events, hosts, metrics, and incidents',
+        'Manage Datadog monitors (list, get, mute, unmute); extensible for downtimes, events, hosts, metrics, and incidents',
     }),
     // gold matches classic stack action peers (.pagerduty, .webhook) and
     // threat-intel-ish specs (e.g. .virustotal); not a final packaging call.
@@ -124,78 +119,17 @@ export const DatadogConnector: ConnectorSpec = {
     '',
     'General Datadog integration. Auth with a Personal Access Token (PAT) or',
     'Service Access Token (SAT) as Bearer — prefer SAT for automation.',
-    'Alerting actions use Monitors + Webhooks Integration APIs;',
-    'additional domains (downtimes, events, hosts, metrics, incidents) belong on this same connector.',
+    'Current actions cover monitor discovery and mute/unmute write-back;',
+    'additional domains (webhooks, downtimes, events, hosts, metrics, incidents)',
+    'belong on this same connector.',
     '',
-    '### Alerting setup',
-    '1. Call `registerWebhook` with a Kibana inbound URL (placeholder OK while inbound is WIP).',
-    '2. In Datadog, add `@webhook-{name}` to monitor notification messages.',
-    '3. Use `listMonitors` / `getMonitor` to find monitor IDs, then `muteMonitor` / `unmuteMonitor` for write-back.',
-    '',
-    '### Fingerprint notes (alerting)',
-    'Webhook payload includes monitor_id ($ALERT_ID) and groups ($ALERT_SCOPE) — Keep-aligned series identity.',
+    '### Monitors',
+    '1. Use `listMonitors` / `getMonitor` to find monitor IDs.',
+    '2. Use `muteMonitor` / `unmuteMonitor` for write-back (silence).',
+    '3. For monitors currently alerting, filter with `groupStates: "alert"`.',
   ].join('\n'),
 
   actions: {
-    // --- Monitors & webhooks (alerting) ------------------------------------
-    registerWebhook: {
-      isTool: true,
-      description:
-        'Create a Datadog webhook integration that POSTs monitor notifications to a URL. ' +
-        'Returns the created webhook name. Monitors must mention @webhook-{name} to fire it.',
-      input: RegisterWebhookInputSchema,
-      handler: async (ctx, input: RegisterWebhookInput) => {
-        const body: Record<string, string> = {
-          name: input.name,
-          url: input.url,
-          payload: DATADOG_WEBHOOK_PAYLOAD_TEMPLATE,
-        };
-        if (input.customAuthHeader) {
-          body.custom_headers = JSON.stringify({
-            Authorization: `Bearer ${input.customAuthHeader}`,
-          });
-        }
-        // Bearer auth is applied by the auth type on ctx.client defaults.
-        const response = await ctx.client.post(
-          `${getBaseUrl(ctx)}/api/v1/integration/webhooks/configuration/webhooks`,
-          body
-        );
-        return {
-          name: response.data?.name ?? input.name,
-          url: response.data?.url ?? input.url,
-          raw: response.data,
-        };
-      },
-    },
-
-    getWebhook: {
-      isTool: true,
-      description: 'Fetch a Datadog webhook integration by name to verify registration.',
-      input: WebhookNameInputSchema,
-      handler: async (ctx, input: WebhookNameInput) => {
-        const response = await ctx.client.get(
-          `${getBaseUrl(ctx)}/api/v1/integration/webhooks/configuration/webhooks/${encodeURIComponent(
-            input.name
-          )}`
-        );
-        return response.data;
-      },
-    },
-
-    deleteWebhook: {
-      isTool: true,
-      description: 'Delete a Datadog webhook integration by name.',
-      input: WebhookNameInputSchema,
-      handler: async (ctx, input: WebhookNameInput) => {
-        await ctx.client.delete(
-          `${getBaseUrl(ctx)}/api/v1/integration/webhooks/configuration/webhooks/${encodeURIComponent(
-            input.name
-          )}`
-        );
-        return { deleted: true, name: input.name };
-      },
-    },
-
     muteMonitor: {
       isTool: true,
       description:

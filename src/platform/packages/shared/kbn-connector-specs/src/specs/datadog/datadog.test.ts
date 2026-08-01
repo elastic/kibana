@@ -9,7 +9,6 @@
 
 import type { ActionContext } from '../../connector_spec';
 import { DatadogConnector } from './datadog';
-import { DATADOG_WEBHOOK_PAYLOAD_TEMPLATE } from './types';
 
 describe('DatadogConnector', () => {
   const mockClient = {
@@ -45,6 +44,15 @@ describe('DatadogConnector', () => {
     expect(types).not.toContain('api_key_header');
   });
 
+  it('exposes monitor actions only (no webhook CRUD)', () => {
+    expect(Object.keys(DatadogConnector.actions).sort()).toEqual([
+      'getMonitor',
+      'listMonitors',
+      'muteMonitor',
+      'unmuteMonitor',
+    ]);
+  });
+
   it('test probes monitors with page_size 1', async () => {
     mockClient.get.mockResolvedValueOnce({
       data: [{ id: 1, name: 'm' }],
@@ -57,31 +65,6 @@ describe('DatadogConnector', () => {
       expect.objectContaining({ params: { page_size: 1 } })
     );
     expect(result).toEqual(expect.objectContaining({ ok: true, site: 'datadoghq.com' }));
-  });
-
-  it('registerWebhook posts payload template', async () => {
-    mockClient.post.mockResolvedValue({
-      data: { name: 'kibana-test', url: 'https://example.com/hook' },
-    });
-
-    const result = await DatadogConnector.actions.registerWebhook.handler(mockContext, {
-      name: 'kibana-test',
-      url: 'https://example.com/hook',
-      customAuthHeader: 'secret-token',
-    });
-
-    expect(mockClient.post).toHaveBeenCalledWith(
-      'https://api.datadoghq.com/api/v1/integration/webhooks/configuration/webhooks',
-      {
-        name: 'kibana-test',
-        url: 'https://example.com/hook',
-        payload: DATADOG_WEBHOOK_PAYLOAD_TEMPLATE,
-        custom_headers: JSON.stringify({ Authorization: 'Bearer secret-token' }),
-      }
-    );
-    expect(result).toEqual(
-      expect.objectContaining({ name: 'kibana-test', url: 'https://example.com/hook' })
-    );
   });
 
   it('muteMonitor posts to mute endpoint', async () => {
@@ -99,6 +82,53 @@ describe('DatadogConnector', () => {
       { scope: 'host:web01' }
     );
     expect(result).toEqual(expect.objectContaining({ id: 309422658, overallState: 'Alert' }));
+  });
+
+  it('unmuteMonitor posts to unmute endpoint', async () => {
+    mockClient.post.mockResolvedValue({
+      data: { id: 309422658, overall_state: 'OK' },
+    });
+
+    const result = await DatadogConnector.actions.unmuteMonitor.handler(mockContext, {
+      monitorId: 309422658,
+    });
+
+    expect(mockClient.post).toHaveBeenCalledWith(
+      'https://api.datadoghq.com/api/v1/monitor/309422658/unmute',
+      {}
+    );
+    expect(result).toEqual(expect.objectContaining({ id: 309422658, overallState: 'OK' }));
+  });
+
+  it('getMonitor fetches with downtimes', async () => {
+    mockClient.get.mockResolvedValue({
+      data: {
+        id: 42,
+        name: 'CPU high',
+        type: 'metric alert',
+        query: 'avg(last_5m):avg:system.cpu.user{*} > 80',
+        overall_state: 'Alert',
+        tags: ['env:demo'],
+        matching_downtimes: [],
+      },
+    });
+
+    const result = await DatadogConnector.actions.getMonitor.handler(mockContext, {
+      monitorId: 42,
+    });
+
+    expect(mockClient.get).toHaveBeenCalledWith(
+      'https://api.datadoghq.com/api/v1/monitor/42',
+      expect.objectContaining({ params: { with_downtimes: true } })
+    );
+    expect(result).toEqual(
+      expect.objectContaining({
+        id: 42,
+        name: 'CPU high',
+        overallState: 'Alert',
+        matchingDowntimes: [],
+      })
+    );
   });
 
   it('listMonitors maps monitor summaries', async () => {
