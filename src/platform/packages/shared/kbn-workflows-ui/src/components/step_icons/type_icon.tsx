@@ -108,7 +108,9 @@ export const TypeIcon = React.memo<TypeIconProps>(({ type, kind, title, ...rest 
 
   return (
     <EuiToolTip content={label} anchorProps={{ css: css({ display: 'inline-flex' }) }}>
-      <span css={tooltipAnchorStyle}>{icon}</span>
+      <span css={tooltipAnchorStyle} tabIndex={0}>
+        {icon}
+      </span>
     </EuiToolTip>
   );
 });
