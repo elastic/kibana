@@ -60,11 +60,31 @@ describe('extractOtelSignals', () => {
     });
     expect(signals).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ kind: 'metric_name', value: 'checkout.requests' }),
+        expect.objectContaining({
+          kind: 'metric_name',
+          value: 'checkout.requests',
+          metricKind: 'counter',
+        }),
         expect.objectContaining({ kind: 'error_status' }),
         expect.objectContaining({ kind: 'record_exception' }),
       ])
     );
     expect(signals.some(({ value }) => value?.startsWith('test'))).toBe(false);
+  });
+
+  it('tags the metric instrument kind for counters, histograms, up-down counters, and gauges', () => {
+    const signals = extract({
+      'src/m.ts': [
+        'meter.createCounter("orders.count")',
+        'meter.createHistogram("request.duration")',
+        'meter.createUpDownCounter("queue.depth")',
+        'meter.createObservableGauge("pool.size")',
+      ].join('\n'),
+    });
+    const kindOf = (value: string) => signals.find((signal) => signal.value === value)?.metricKind;
+    expect(kindOf('orders.count')).toBe('counter');
+    expect(kindOf('request.duration')).toBe('histogram');
+    expect(kindOf('queue.depth')).toBe('updown');
+    expect(kindOf('pool.size')).toBe('gauge');
   });
 });

@@ -11,7 +11,7 @@ import {
   QUERY_TYPE_STATS,
   type StreamQuery,
 } from '@kbn/significant-events-schema';
-import type { OtelSignal, OtelSignalCounts, OtelSignalKind } from './types';
+import type { OtelMetricKind, OtelSignal, OtelSignalCounts, OtelSignalKind } from './types';
 
 const OTEL_QUERY_NAMESPACE = 'dfcdbec1-93a0-5c3a-8805-0ad6095f1100';
 
@@ -35,6 +35,27 @@ const escapeIdentifier = (value: string): string => value.replace(/`/g, '``');
 const fieldIdentifier = (prefix: string, value: string): string =>
   `\`${escapeIdentifier(`${prefix}.${value}`)}\``;
 const sources = (streams: string[]): string => streams.join(',');
+
+/**
+ * TSDB-correct time-series aggregation for a metric field, by instrument kind.
+ * metrics-* is index.mode=time_series, so these run under the `TS` source command:
+ * counters are monotonic-with-resets (RATE first, then aggregate across series);
+ * histograms use PERCENTILE_OVER_TIME; gauges/up-down counters use AVG_OVER_TIME.
+ * Unknown kind defaults to counter — the dominant app instrument, and the extractor
+ * tags a kind for every instrument it matches.
+ */
+const metricStatsClause = (field: string, kind: OtelMetricKind | undefined): string => {
+  switch (kind) {
+    case 'histogram':
+      return `p95 = AVG(PERCENTILE_OVER_TIME(${field}, 95))`;
+    case 'gauge':
+    case 'updown':
+      return `avg = AVG(AVG_OVER_TIME(${field}))`;
+    case 'counter':
+    default:
+      return `rate = SUM(RATE(${field}))`;
+  }
+};
 
 const severityForTier = (tier: OtelQueryTier): number =>
   tier === 'error_status' ||
@@ -199,9 +220,11 @@ export function generateOtelQueries({
         if (signal.value && value && metricStreams.length > 0) {
           const field = fieldIdentifier('metrics', signal.value);
           add({
-            esql: `FROM ${sources(
+            // metrics-* is index.mode=time_series (TSDB): use TS + a time-series
+            // aggregation. Never AVG()/SUM() a raw counter — RATE() first.
+            esql: `TS ${sources(
               metricStreams
-            )} | WHERE ${field} IS NOT NULL | STATS avg = AVG(${field})`,
+            )} | WHERE ${field} IS NOT NULL | STATS ${metricStatsClause(field, signal.metricKind)}`,
             tier: signal.kind,
             field,
             source: signal,

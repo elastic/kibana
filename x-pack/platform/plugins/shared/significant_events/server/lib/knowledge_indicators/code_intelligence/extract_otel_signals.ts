@@ -8,13 +8,13 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isExcludedLoggingPath } from './constants';
 import { codeGrep, fetchLineWindows, splitRepository } from './discover_logging_sites';
-import type { OtelSignal, OtelSignalKind, OtelValueHint } from './types';
+import type { OtelMetricKind, OtelSignal, OtelSignalKind, OtelValueHint } from './types';
 
 const EXTRACT_PATTERNS: readonly string[] = [
   '.*(startSpan|start_as_current_span|startActiveSpan|spanBuilder|StartActivity|[.]Start[(]).*',
   '.*(addEvent|add_event|AddEvent|ActivityEvent).*',
   '.*(setAttribute|setAttributes|set_attribute|SetTag|SpanAttribute).*',
-  '.*(createCounter|createHistogram|create_counter|create_histogram|Int64Counter|counterBuilder|histogramBuilder).*',
+  '.*(createCounter|createUpDownCounter|createHistogram|createObservableGauge|createObservableCounter|create_counter|create_histogram|Int64Counter|Float64Counter|counterBuilder|histogramBuilder|Gauge).*',
   '.*(setStatus|set_status|SetStatus).*(ERROR|Error|kError|codes[.]Error).*',
   '.*(recordException|record_exception|RecordError|record_error).*',
 ] as const;
@@ -56,6 +56,15 @@ const inferValueHint = (key: string, expression = ''): OtelValueHint => {
 
 const isSemconvAttribute = (key: string): boolean => /^(?:http|db|rpc|net|messaging)\./.test(key);
 
+/** Infers the metric instrument kind from the matched constructor token. */
+const metricKindFromToken = (token: string): OtelMetricKind => {
+  const normalized = token.toLowerCase();
+  if (normalized.includes('histogram')) return 'histogram';
+  if (normalized.includes('updown')) return 'updown';
+  if (normalized.includes('gauge')) return 'gauge';
+  return 'counter';
+};
+
 const literalSignal = ({
   kind,
   raw,
@@ -63,6 +72,7 @@ const literalSignal = ({
   file,
   line,
   valueHint,
+  metricKind,
 }: {
   kind: OtelSignalKind;
   raw: string;
@@ -70,12 +80,22 @@ const literalSignal = ({
   file: string;
   line: number;
   valueHint?: OtelValueHint;
+  metricKind?: OtelMetricKind;
 }): OtelSignal | undefined => {
   const interpolation = raw.search(/\$\{|#\{|%[a-zA-Z]|\{[^}]+\}/);
   const templated = interpolation !== -1;
   const value = (templated ? raw.slice(0, interpolation) : raw).trim().replace(/[.\s_-]+$/, '');
   if (!value) return undefined;
-  return { kind, value, valueHint, templated: templated || undefined, language, file, line };
+  return {
+    kind,
+    value,
+    valueHint,
+    templated: templated || undefined,
+    language,
+    file,
+    line,
+    ...(metricKind ? { metricKind } : {}),
+  };
 };
 
 export interface OtelSourceWindow {
@@ -150,9 +170,18 @@ export function extractOtelSignalsFromWindows(windows: OtelSourceWindow[]): Otel
     }
 
     const metricPattern =
-      /(?:create_?(?:Counter|Histogram|UpDownCounter)|Int64Counter|Float64Counter|Int64Histogram|Float64Histogram|counterBuilder|histogramBuilder)\s*\(\s*(["'`])([^"'`]+)\1/gi;
+      /(create_?(?:Observable)?(?:UpDownCounter|Counter|Histogram|Gauge)|Int64Counter|Float64Counter|Int64Histogram|Float64Histogram|Int64Gauge|Float64Gauge|counterBuilder|histogramBuilder|gaugeBuilder)\s*\(\s*(["'`])([^"'`]+)\2/gi;
     for (const match of content.matchAll(metricPattern)) {
-      add(literalSignal({ kind: 'metric_name', raw: match[2], language, file, line }));
+      add(
+        literalSignal({
+          kind: 'metric_name',
+          raw: match[3],
+          language,
+          file,
+          line,
+          metricKind: metricKindFromToken(match[1]),
+        })
+      );
     }
 
     if (

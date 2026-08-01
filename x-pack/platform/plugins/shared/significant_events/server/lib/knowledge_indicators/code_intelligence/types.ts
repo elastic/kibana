@@ -40,11 +40,21 @@ export type OtelSignalKind =
 
 export type OtelValueHint = 'bool' | 'number' | 'enum' | 'id' | 'unknown';
 
+/**
+ * OTel metric instrument kind, inferred from the constructor call
+ * (createCounter / createHistogram / createUpDownCounter / createObservableGauge…).
+ * Drives the TSDB-correct aggregation in `generate_otel_queries` — counters need
+ * `RATE()`, gauges need `*_OVER_TIME()`. Never `AVG()`/`SUM()` a raw counter.
+ */
+export type OtelMetricKind = 'counter' | 'histogram' | 'updown' | 'gauge';
+
 /** One source-grounded OTel instrumentation signal. */
 export interface OtelSignal {
   kind: OtelSignalKind;
   value?: string;
   valueHint?: OtelValueHint;
+  /** Only set for `metric_name` signals — selects the time-series aggregation. */
+  metricKind?: OtelMetricKind;
   templated?: boolean;
   language: string;
   file: string;
