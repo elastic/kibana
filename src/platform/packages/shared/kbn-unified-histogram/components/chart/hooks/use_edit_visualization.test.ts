@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MouseEvent as ReactMouseEvent } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { waitFor, renderHook } from '@testing-library/react';
@@ -44,11 +45,41 @@ describe('useEditVisualization', () => {
     );
     await waitFor(() => expect(hook.result.current).toBeDefined());
     hook.result.current!();
-    expect(navigateToPrefilledEditor).toHaveBeenCalledWith({
-      id: '',
-      time_range: relativeTimeRange,
-      attributes: lensAttributes,
-    });
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
+      {
+        id: '',
+        time_range: relativeTimeRange,
+        attributes: lensAttributes,
+      },
+      { openInNewTab: false }
+    );
+  });
+
+  it('should open the editor in a new tab on a modified click', async () => {
+    getTriggerCompatibleActions.mockReturnValue(Promise.resolve([{ id: 'test' }]));
+    const relativeTimeRange = { from: 'now-15m', to: 'now' };
+    const lensAttributes = {
+      visualizationType: 'lnsXY',
+      title: 'test',
+    } as TypedLensByValueInput['attributes'];
+    const hook = renderHook(() =>
+      useEditVisualization({
+        services: unifiedHistogramServicesMock,
+        dataView: dataViewWithTimefieldMock,
+        relativeTimeRange,
+        lensAttributes,
+      })
+    );
+    await waitFor(() => expect(hook.result.current).toBeDefined());
+    hook.result.current!(new MouseEvent('click', { ctrlKey: true }) as unknown as ReactMouseEvent);
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
+      {
+        id: '',
+        time_range: relativeTimeRange,
+        attributes: lensAttributes,
+      },
+      { openInNewTab: true }
+    );
   });
 
   it('should return undefined if the data view has no ID', async () => {
