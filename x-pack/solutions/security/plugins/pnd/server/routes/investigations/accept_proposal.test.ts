@@ -55,8 +55,11 @@ const BASE_DEPS = {
   getWatchProjection: () => undefined,
 };
 
-const INVESTIGATION_ID = 'inv-1';
-const PROPOSAL_ID = 'prop-1';
+// A real proposal fixture (from real_data.ts) that carries evidence + a
+// recommendation, so it passes the gap #7 approval gate on the happy path.
+// 'contain' type (non-escalate) so it exercises the updateProposalStatus path.
+const INVESTIGATION_ID = 'inv-floor-finws04-002';
+const PROPOSAL_ID = 'prop-floor-finws04-002';
 const PATH = `${PND_INVESTIGATIONS_URL}/{id}/proposals/{proposalId}/accept`;
 
 const createContext = (): RequestHandlerContext =>
@@ -187,5 +190,40 @@ describe('accept proposal route', () => {
     await router.getHandler(PATH)(createContext(), request, response);
 
     expect(response.ok).toHaveBeenCalled();
+  });
+
+  it('fail-closed: rejects with 400 when the proposal has no evidence (gap #7 gate)', async () => {
+    const router = createCapturingRouter();
+    const logger = createLogger();
+    const mockStore = {
+      updateProposalStatus: jest.fn().mockResolvedValue(undefined),
+      recordDeepWatchOutcome: jest.fn().mockResolvedValue(undefined),
+      reconcileInvestigationAfterDecision: jest.fn().mockResolvedValue(undefined),
+    };
+
+    registerAcceptProposalRoute({
+      ...BASE_DEPS,
+      router,
+      logger,
+      config: BASE_CONFIG,
+      getWorkflowsManagement: () => undefined,
+      getInvestigationStore: () => mockStore as any,
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    // 'inv-1'/'prop-1' has no backing real proposal — getRealProposalById
+    // returns null, so the gate sees no evidence/recommendation and must
+    // reject rather than let an unsubstantiated proposal reach 'approved'.
+    const request = httpServerMock.createKibanaRequest({
+      method: 'post',
+      path: PATH,
+      params: { id: 'inv-1', proposalId: 'prop-1' },
+    });
+
+    await router.getHandler(PATH)(createContext(), request, response);
+
+    expect(mockStore.updateProposalStatus).not.toHaveBeenCalled();
+    expect(response.ok).not.toHaveBeenCalled();
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 400 }));
   });
 });

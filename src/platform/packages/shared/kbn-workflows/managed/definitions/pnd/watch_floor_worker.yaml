@@ -106,3 +106,8 @@ steps:
         modelId: '{{ steps.triage_alerts.output.metadata.usage.modelId | default: "unknown" }}'
         connectorId: '{{ steps.triage_alerts.output.metadata.usage.connectorId | default: "unknown" }}'
         latencyMs: '${{ steps.triage_alerts.output.metadata.usage.latencyMs | default: 0 }}'
+        # LLM token usage (gap #6) — real counts from the ai.agent step's own usage
+        # metadata (input_tokens/output_tokens from model_usage events), not guessed.
+        inputTokens: '${{ steps.triage_alerts.output.metadata.usage.inputTokens | default: 0 }}'
+        outputTokens: '${{ steps.triage_alerts.output.metadata.usage.outputTokens | default: 0 }}'
+        totalTokens: '${{ steps.triage_alerts.output.metadata.usage.totalTokens | default: 0 }}'

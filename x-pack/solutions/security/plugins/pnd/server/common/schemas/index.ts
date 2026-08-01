@@ -7,6 +7,8 @@
 
 export * from './versions';
 export * from './proposal';
+export * from './gate';
+export * from './shared_approval_gate_adapter';
 export * from './evidence_package';
 export * from './worker_evaluation_record';
 export * from './detection_change';

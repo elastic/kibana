@@ -131,3 +131,8 @@ steps:
         modelId: '{{ steps.threat_intel_hunt.output.metadata.usage.modelId | default: "unknown" }}'
         connectorId: '{{ steps.threat_intel_hunt.output.metadata.usage.connectorId | default: "unknown" }}'
         latencyMs: '${{ steps.threat_intel_hunt.output.metadata.usage.latencyMs | default: 0 }}'
+        # LLM token usage (gap #6) — real counts from the ai.agent step's own usage
+        # metadata (input_tokens/output_tokens from model_usage events), not guessed.
+        inputTokens: '${{ steps.threat_intel_hunt.output.metadata.usage.inputTokens | default: 0 }}'
+        outputTokens: '${{ steps.threat_intel_hunt.output.metadata.usage.outputTokens | default: 0 }}'
+        totalTokens: '${{ steps.threat_intel_hunt.output.metadata.usage.totalTokens | default: 0 }}'

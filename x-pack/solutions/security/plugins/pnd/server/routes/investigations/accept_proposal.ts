@@ -12,6 +12,7 @@ import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
 import { PND_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
 import { getRealProposalById } from './real_data';
+import { requireSharedApprovalGate, ReadinessGateError, type Proposal } from '../../common/schemas';
 
 const AcceptProposalRequestParams = z.object({
   id: z.string().min(1).max(256),
@@ -128,6 +129,41 @@ export const registerAcceptProposalRoute = ({
           const connectorId = request.body?.connectorId;
 
           const proposal = getRealProposalById(investigationId, proposalId);
+
+          // Shared Approval Gate (gap #7 / security-team#17944). The accept
+          // action IS the recorded human approval, so we stamp the acting
+          // analyst as the approver, then run the fail-closed gate before any
+          // 'approved' status is persisted. A proposal missing evidence or a
+          // recommendation is rejected (400) — an unverified proposal can never
+          // reach 'approved'. This is the single seam the platform HITL gate
+          // replaces when #17944 lands; callers below stay unchanged.
+          // The accept action itself is the recorded human approval; 'analyst'
+          // matches the actor already stamped on the investigation timeline
+          // below. (When platform HITL lands per #17944 it supplies the real
+          // approver identity; the gate's fail-closed property does not depend
+          // on it — evidence + recommendation presence is what it enforces.)
+          const approverId = 'analyst';
+          const evidenceRefIds = Array.isArray(proposal?.evidenceRefs)
+            ? proposal.evidenceRefs.map((ref) => (typeof ref === 'string' ? ref : ref.id))
+            : [];
+          const gateInput: Proposal = {
+            id: proposalId,
+            schemaVersion: '1',
+            sourceWatch: 'watch-floor',
+            investigationId,
+            title: proposal?.summary ?? proposalId,
+            status: 'new',
+            confidence: typeof proposal?.confidence === 'number' ? proposal.confidence : 0,
+            recommendation: proposal?.recommendation ?? '',
+            reasoning: proposal?.reasoning ?? '',
+            evidenceRefs: evidenceRefIds,
+            approvals: [{ approver: approverId, approvedAt: new Date().toISOString() }],
+            requiredApproverCount: 1,
+            draft: false,
+            approvalRequired: true,
+            createdAt: new Date().toISOString(),
+          };
+          requireSharedApprovalGate(gateInput, 'approved');
 
           // Reflect the analyst decision on the investigation timeline (both the
           // non-escalation "approve/isolate" path and escalation share this),
@@ -296,6 +332,24 @@ export const registerAcceptProposalRoute = ({
             },
           });
         } catch (error) {
+          // Fail-closed gate rejection (gap #7) — the proposal is not eligible
+          // for approval (missing evidence/recommendation). This is a client
+          // error (400), distinct from an unexpected server failure (500).
+          if (error instanceof ReadinessGateError) {
+            logger.warn(
+              `Proposal ${
+                error.failure.proposalId
+              } rejected by approval gate: missing ${error.failure.missingRequirements.join(', ')}`
+            );
+            return response.customError({
+              statusCode: 400,
+              body: {
+                message: `Proposal cannot be approved: missing ${error.failure.missingRequirements.join(
+                  ', '
+                )}`,
+              },
+            });
+          }
           logger.error(`Failed to accept proposal: ${error}`);
           return response.customError({
             statusCode: 500,

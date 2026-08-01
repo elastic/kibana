@@ -52,6 +52,20 @@ export const proposalSchema = z.object({
   recommendation: z.string(),
   reasoning: z.string(),
   evidenceRefs: z.array(z.string()).default([]),
+  // Human-in-the-loop approval ledger (gap #7 / security-team#17944). The
+  // readiness gate requires `approvals.length >= requiredApproverCount` before
+  // a proposal may transition to `approved`. Fail-closed: default
+  // requiredApproverCount is 1, so a proposal with an empty ledger can never be
+  // auto-approved — a human decision must be recorded first.
+  approvals: z
+    .array(
+      z.object({
+        approver: z.string(),
+        approvedAt: z.string(),
+      })
+    )
+    .default([]),
+  requiredApproverCount: z.number().int().positive().default(1),
   draft: z.boolean().default(false),
   approvalRequired: z.boolean().default(true),
   createdAt: z.string(),

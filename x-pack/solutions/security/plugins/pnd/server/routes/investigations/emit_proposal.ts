@@ -19,6 +19,7 @@ import {
   sourceWatchSchema,
   type SourceWatch,
 } from '../../common/schemas';
+import type { Provenance } from '../../common/schemas/worker_evaluation_record';
 import {
   detectionChangeSignalSchema,
   ruleTuningTriggerSchema,
@@ -64,6 +65,14 @@ const WorkerRunSchema = z
     modelId: z.string().optional(),
     connectorId: z.string().optional(),
     latencyMs: z.number().optional(),
+    // LLM token usage (gap #6) — sourced from the ai.agent step's own
+    // `metadata.usage` (input_tokens/output_tokens accumulated from model_usage
+    // events), rendered by the worker YAML. Optional: a worker that reported no
+    // usage omits them and the provenance block simply carries no token counts,
+    // rather than fabricating zeros as if the model were free.
+    inputTokens: z.number().nonnegative().optional(),
+    outputTokens: z.number().nonnegative().optional(),
+    totalTokens: z.number().nonnegative().optional(),
     // Detection Change Signal (delta #1/#2). The Dark/Deep worker YAML renders the model's
     // `detection_change_signal.gaps` to a JSON string here. Optional/conditional: absent, empty,
     // 'null', or an empty array all mean "no gap" and nothing is attached to the Investigation.
@@ -83,8 +92,43 @@ const WorkerRunSchema = z
   })
   .passthrough();
 
+type WorkerRun = z.infer<typeof WorkerRunSchema>;
+
 /**
- * Parse the worker's rendered `detectionChangeSignalGaps` JSON string into a typed, non-empty
+ * Build the provenance block for a WorkerEvaluationRecord from the worker's
+ * reported usage (gap #6). Token counts, model, connector, and latency all come
+ * from the ai.agent step's own `metadata.usage`, never guessed.
+ *
+ * costBasis is deliberately conservative:
+ *  - 'self-hosted' when we have real token counts but no verified USD price.
+ *    The tokens are authoritative; the dollar cost is not, so we label the
+ *    basis rather than inventing a costUsd. (EIS/self-hosted connectors carry
+ *    no per-token list price we can trust here.)
+ *  - 'unknown' when the worker reported no token usage at all — there is
+ *    nothing to base a cost on, and we must not imply the run was free.
+ *
+ * No costUsd is emitted: attaching a number would assert a price we cannot
+ * verify. When a ratified price table lands (gap follow-up), costUsd + a
+ * 'list-price' basis can be derived from these same token counts.
+ */
+const buildProvenance = (workerRun: WorkerRun): Provenance => {
+  const hasTokens =
+    workerRun.inputTokens !== undefined ||
+    workerRun.outputTokens !== undefined ||
+    workerRun.totalTokens !== undefined;
+
+  return {
+    modelId: workerRun.modelId ?? 'unknown',
+    connectorId: workerRun.connectorId ?? 'unknown',
+    latencyMs: workerRun.latencyMs ?? 0,
+    ...(workerRun.inputTokens !== undefined ? { inputTokens: workerRun.inputTokens } : {}),
+    ...(workerRun.outputTokens !== undefined ? { outputTokens: workerRun.outputTokens } : {}),
+    ...(workerRun.totalTokens !== undefined ? { totalTokens: workerRun.totalTokens } : {}),
+    costBasis: hasTokens ? 'self-hosted' : 'unknown',
+  };
+};
+
+/**
  * DetectionChangeSignal. Returns undefined when there is no real gap (absent / empty / 'null' /
  * empty array / malformed), so an absent signal attaches nothing (conditional emission).
  */
@@ -281,12 +325,7 @@ export const registerEmitProposalRoute = ({
           confidence: workerRun.confidence,
           proposalId: proposal.id,
           evidenceRefs: [evidence.id],
-          provenance: {
-            modelId: workerRun.modelId ?? 'unknown',
-            connectorId: workerRun.connectorId ?? 'unknown',
-            latencyMs: workerRun.latencyMs ?? 0,
-            costBasis: 'unknown',
-          },
+          provenance: buildProvenance(workerRun),
         });
 
         // Link evidence to the proposal.

@@ -88,5 +88,35 @@ describe('PND canonical Daybreak schemas', () => {
       expect(r.provenance.costBasis).toBe('unknown');
       expect(r.evidenceRefs).toEqual([]);
     });
+
+    it('carries real token counts with a self-hosted cost basis (gap #6)', () => {
+      const r = buildWorkerEvaluationRecord({
+        id: 'wer-2',
+        watch: 'watch-dark',
+        investigationId: 'inv-2',
+        runId: 'run-2',
+        verdict: 'true_positive',
+        confidence: 0.88,
+        proposalId: 'prop-2',
+        provenance: {
+          modelId: 'anthropic-claude-6-sonnet',
+          connectorId: 'eis-anthropic-claude-4-6-sonnet',
+          latencyMs: 18400,
+          inputTokens: 31000,
+          outputTokens: 5200,
+          totalTokens: 36200,
+          // No verified USD price for a self-hosted/EIS connector — the tokens
+          // are authoritative, the dollar cost is not, so costUsd is omitted
+          // and the basis is labelled rather than fabricated.
+          costBasis: 'self-hosted',
+        },
+      });
+      expect(() => workerEvaluationRecordSchema.parse(r)).not.toThrow();
+      expect(r.provenance.inputTokens).toBe(31000);
+      expect(r.provenance.outputTokens).toBe(5200);
+      expect(r.provenance.totalTokens).toBe(36200);
+      expect(r.provenance.costBasis).toBe('self-hosted');
+      expect(r.provenance.costUsd).toBeUndefined();
+    });
   });
 });
