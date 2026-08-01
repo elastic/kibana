@@ -417,6 +417,49 @@ describe('validation workflows forward source into the persist step', () => {
   });
 });
 
+// The default validation workflow wires the (POC) correlate-entities step
+// between validation and persistence. The step is best-effort enrichment:
+// with its feature flag OFF it passes discoveries through unmodified, so the
+// wiring is safe to ship in the managed definition. Lock in the data flow so
+// persist always consumes the correlate step's output.
+describe('ATTACK_DISCOVERY_VALIDATE_WORKFLOW correlate_entities wiring', () => {
+  const parsedValidate = parse(ATTACK_DISCOVERY_VALIDATE_WORKFLOW.yaml) as ParsedWorkflow;
+  const steps = parsedValidate.steps ?? [];
+  const stepTypes = steps.map(({ type }) => type);
+
+  it('bumps the version to 3 for the correlate_entities step insertion', () => {
+    expect(ATTACK_DISCOVERY_VALIDATE_WORKFLOW.version).toBe(3);
+  });
+
+  it('orders the steps validate -> correlate -> persist', () => {
+    expect(stepTypes).toEqual([
+      'security.attack-discovery.defaultValidation',
+      'security.attack-discovery.correlateEntities',
+      'security.attack-discovery.persistDiscoveries',
+    ]);
+  });
+
+  it('feeds the validation output into the correlate step', () => {
+    const correlateStep = steps.find(
+      ({ type }) => type === 'security.attack-discovery.correlateEntities'
+    );
+
+    expect(correlateStep?.with?.attack_discoveries).toBe(
+      '${{ steps.validate_discoveries.output.validated_discoveries }}'
+    );
+  });
+
+  it('feeds the correlate step output into the persist step', () => {
+    const persistStep = steps.find(
+      ({ type }) => type === 'security.attack-discovery.persistDiscoveries'
+    );
+
+    expect(persistStep?.with?.attack_discoveries).toBe(
+      '${{ steps.correlate_entities.output.correlated_discoveries }}'
+    );
+  });
+});
+
 // Backs the claim in `definitions/index.ts` that adding the Attack Discovery
 // workflows to `managedWorkflowDefinitions` is feature-flag-off safe. Membership
 // in the registry only makes a definition *discoverable by id*; it never installs

@@ -62,10 +62,10 @@ describe('DiscoveriesPublicPlugin', () => {
       expect(setupDeps.workflowsExtensions.registerStepDefinition).toHaveBeenCalled();
     });
 
-    it('registers five step loaders (functions)', () => {
+    it('registers six step loaders (functions)', () => {
       const loaders = setupWithFlag(true);
 
-      expect(loaders).toHaveLength(5);
+      expect(loaders).toHaveLength(6);
     });
 
     it('resolves all loaders to definitions when the feature flag is on', async () => {
@@ -73,7 +73,7 @@ describe('DiscoveriesPublicPlugin', () => {
 
       const definitions = await Promise.all(loaders.map((loader) => loader()));
 
-      expect(definitions.filter((definition) => definition != null)).toHaveLength(5);
+      expect(definitions.filter((definition) => definition != null)).toHaveLength(6);
     });
 
     it('resolves all loaders to undefined when the feature flag is off', async () => {

@@ -32,14 +32,39 @@ export const ApiConfigSchema = z.object({
 export type ApiConfig = z.infer<typeof ApiConfigSchema>;
 
 /**
+ * An entity correlated with an attack discovery: the Entity Store EUID
+ * (stored as-is, e.g. `user:jdoe`) and the entity type.
+ */
+export const AttackDiscoveryEntitySchema = z.object({
+  id: z.string(),
+  type: z.string(),
+});
+
+export type AttackDiscoveryEntity = z.infer<typeof AttackDiscoveryEntitySchema>;
+
+/**
+ * An observable extracted from the alerts behind an attack discovery that did
+ * NOT match an Entity Store entity. `type_key` mirrors the Cases observable
+ * type keys (e.g. `observable-type-ipv4`).
+ */
+export const AttackDiscoveryObservableEntitySchema = z.object({
+  type_key: z.string(),
+  value: z.string(),
+});
+
+export type AttackDiscoveryObservableEntity = z.infer<typeof AttackDiscoveryObservableEntitySchema>;
+
+/**
  * Reusable schema for a single generated attack discovery.
  */
 export const AttackDiscoverySchema = z.object({
   alert_ids: z.array(z.string()),
   details_markdown: z.string(),
+  entities: z.array(AttackDiscoveryEntitySchema).optional(),
   entity_summary_markdown: z.string().optional(),
   id: z.string().optional(),
   mitre_attack_tactics: z.array(z.string()).optional(),
+  observable_entities: z.array(AttackDiscoveryObservableEntitySchema).optional(),
   summary_markdown: z.string(),
   timestamp: z.string().optional(),
   title: z.string(),

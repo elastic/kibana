@@ -25,6 +25,7 @@
     "optionalPlugins": [
       "agentBuilder",
       "elasticAssistant",
+      "entityStore",
       "inference",
       "ruleRegistry",
       "spaces",

@@ -22,6 +22,15 @@ jest.mock('../../../../../flyout_v2/use_flyout_api');
 jest.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => ({
   useIsNewFlyoutEnabled: jest.fn().mockReturnValue(false),
 }));
+jest.mock('../../../../../flyout_v2/shared/components/open_flyout_link', () => ({
+  OpenFlyoutLink: jest.fn(
+    ({ field, value }: { field: string; value: string }) => (
+      <a data-test-subj="fieldMarkdownRendererIpLink" data-field={field}>
+        {value}
+      </a>
+    )
+  ),
+}));
 
 describe('FieldMarkdownRenderer', () => {
   const mockOpenRightPanel = jest.fn();
@@ -125,6 +134,52 @@ describe('FieldMarkdownRenderer', () => {
     const entityButton = screen.queryByTestId('entityButton');
 
     expect(entityButton).not.toBeInTheDocument();
+  });
+
+  it('renders the IP flyout link for ip fields when the new flyout is enabled', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon="" name="source.ip" operator={':'} value="203.22.67.116" />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    const ipLink = screen.getByTestId('fieldMarkdownRendererIpLink');
+
+    expect(ipLink).toBeInTheDocument();
+    expect(ipLink).toHaveAttribute('data-field', 'source.ip');
+    expect(ipLink).toHaveTextContent('203.22.67.116');
+  });
+
+  it('does NOT render the IP flyout link when the new flyout is disabled', () => {
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon="" name="source.ip" operator={':'} value="203.22.67.116" />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('fieldMarkdownRendererIpLink')).not.toBeInTheDocument();
+    expect(screen.getByText('203.22.67.116')).toBeInTheDocument();
+  });
+
+  it('does NOT render the IP flyout link for non-ip fields', () => {
+    jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+    render(
+      <TestProviders>
+        <MarkdownFormatterContext.Provider value={{ disableActions: false }}>
+          <FieldMarkdownRenderer icon="" name="process.name" operator={':'} value="explorer.exe" />
+        </MarkdownFormatterContext.Provider>
+      </TestProviders>
+    );
+
+    expect(screen.queryByTestId('fieldMarkdownRendererIpLink')).not.toBeInTheDocument();
+    expect(screen.getByText('explorer.exe')).toBeInTheDocument();
   });
 
   it('renders disabled actions badge when disableActions is true', () => {

@@ -96,7 +96,16 @@ steps:
       generation_uuid: ${{ inputs.generation_uuid }}
       replacements: ${{ inputs.replacements }}
 
-  # Step 2: Persist validated discoveries to the Elasticsearch index
+  # Step 2: Correlate validated discoveries with Entity Store entities
+  # (best-effort enrichment: on any failure, discoveries pass through unmodified)
+  - name: correlate_entities
+    type: security.attack-discovery.correlateEntities
+    timeout: '5m'
+    with:
+      alerts_index_pattern: '{%- if inputs.alerts_index_pattern -%}{{ inputs.alerts_index_pattern }}{%- else -%}.alerts-security.alerts-{{ workflow.spaceId }}{%- endif -%}'
+      attack_discoveries: ${{ steps.validate_discoveries.output.validated_discoveries }}
+
+  # Step 3: Persist validated discoveries to the Elasticsearch index
   - name: persist_discoveries
     type: security.attack-discovery.persistDiscoveries
     timeout: '5m'
@@ -104,7 +113,7 @@ steps:
       alerts_context_count: ${{ inputs.alerts_context_count }}
       anonymized_alerts: ${{ inputs.anonymized_alerts }}
       api_config: ${{ inputs.api_config }}
-      attack_discoveries: ${{ steps.validate_discoveries.output.validated_discoveries }}
+      attack_discoveries: ${{ steps.correlate_entities.output.correlated_discoveries }}
       connector_name: ${{ inputs.connector_name }}
       enable_field_rendering: ${{ inputs.enable_field_rendering }}
       generation_uuid: ${{ inputs.generation_uuid }}

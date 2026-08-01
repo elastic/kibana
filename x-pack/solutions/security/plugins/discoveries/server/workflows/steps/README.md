@@ -1,6 +1,6 @@
 # Attack Discovery Workflow Steps
 
-This document is the contract reference for the five Attack Discovery workflow steps: schema source, anonymization-boundary flow, per-step justification (why a step instead of a REST endpoint), failure modes, and the checklist for adding a new step.
+This document is the contract reference for the six Attack Discovery workflow steps: schema source, anonymization-boundary flow, per-step justification (why a step instead of a REST endpoint), failure modes, and the checklist for adding a new step.
 
 For the system-level architecture (the four entry points, the orchestrator, security surfaces, etc.), see the canonical [discoveries plugin README](../../../README.md).
 
@@ -46,13 +46,14 @@ const toV4Schema = <T>(schema: unknown): zV4.ZodType<T> =>
 
 ## Overview
 
-Attack Discovery registers **five** workflow step types. Each step is a server-side `createServerStepDefinition` backed by a shared common definition in `common/step_types/`.
+Attack Discovery registers **six** workflow step types. Each step is a server-side `createServerStepDefinition` backed by a shared common definition in `common/step_types/`.
 
 | Step Type ID | Category | Status |
 |---|---|---|
 | `security.attack-discovery.defaultAlertRetrieval` | Elasticsearch | Implemented |
 | `security.attack-discovery.generate` | AI | Implemented |
 | `security.attack-discovery.defaultValidation` | Kibana | Implemented |
+| `security.attack-discovery.correlateEntities` | Kibana | Implemented (POC, FF `securitySolution.attackDiscoveryEntityCorrelationEnabled` default OFF) |
 | `security.attack-discovery.persistDiscoveries` | Kibana | Implemented |
 | `security.attack-discovery.run` | AI | Implemented |
 
@@ -65,6 +66,7 @@ The anonymization boundary sits at `defaultAlertRetrieval`. Everything downstrea
 | `defaultAlertRetrieval` | DSL filter / ES\|QL query | `string[]` (anonymized) + `replacements` | **produced** |
 | `generate` | `string[]` (anonymized strings only) | `attack_discoveries` | passes through |
 | `defaultValidation` | `attack_discoveries` | validation result | not in output (consumed internally for hallucination check) |
+| `correlateEntities` | validated discoveries | discoveries + `entities`/`observable_entities` | passes through (embedded per-discovery `replacements` are consumed internally to de-anonymize alert IDs for the alerts-index query, and echoed unchanged) |
 | `persistDiscoveries` | validated discoveries + `replacements` | persisted IDs | consumed (de-anonymize on display) |
 | `run` | retrieval + gen + validate config | discoveries (no `replacements`) | **excluded by output schema** |
 
@@ -223,6 +225,43 @@ There is no `_validate` REST endpoint — validation runs only as this workflow 
 |-----------|------------|
 | **Input** | `attack_discoveries`, `api_config`, `connector_name`, `generation_uuid`, `replacements`, `alerts_index_pattern` (optional) |
 | **Output** | `validated_discoveries`, `filtered_count`, `filter_reason` (optional) |
+
+---
+
+## Step 3b (POC): `security.attack-discovery.correlateEntities`
+
+### Purpose
+
+Best-effort enrichment between validation and persistence: derives the distinct user/host/service EUIDs across each discovery's alerts (painless runtime fields + terms aggs with a `top_hits` sample, mirroring the flyout's `use_attack_entities_lists` hook), looks the candidates up in the Entity Store (`listEntities` with a terms filter on `entity.id`), and attaches:
+
+- `entities: [{ id, type }]` — EUIDs found in the store, stored **as-is**
+- `observable_entities: [{ type_key, value }]` — unmatched user/host/service values plus observables extracted from the sample alert documents using the Cases auto-extraction rule set (IPs, hostnames, file hashes, file paths, domains, agent ids); type keys are local constants in `common/observable_types.ts` that mirror the Cases keys, plus POC-local `observable-type-user-name` / `observable-type-service-name`
+
+### Consumer
+
+- **Default pipeline**: The `system-attack-discovery-validate` workflow's second step (between `validate_discoveries` and `persist_discoveries`).
+
+### User Pattern
+
+```yaml
+steps:
+  - name: correlate_entities
+    type: security.attack-discovery.correlateEntities
+    timeout: '5m'
+    with:
+      attack_discoveries: ${{ steps.validate_discoveries.output.validated_discoveries }}
+```
+
+### Degradation contract
+
+The step NEVER fails the workflow for enrichment errors. When the `securitySolution.attackDiscoveryEntityCorrelationEnabled` feature flag (default **OFF**) is disabled, when the Entity Store plugin is unavailable, or when any query fails, discoveries pass through unmodified (per-discovery and overall try/catch; the handler never returns `{ error }`).
+
+### Inputs/Outputs Summary
+
+| Direction | Key Fields |
+|-----------|------------|
+| **Input** | `attack_discoveries`, `alerts_index_pattern` (optional, defaults to `.alerts-security.alerts-<spaceId>`) |
+| **Output** | `correlated_discoveries`, `entities_matched_count`, `observable_entities_count` |
 
 ---
 

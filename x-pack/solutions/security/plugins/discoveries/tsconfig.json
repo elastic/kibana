@@ -25,6 +25,7 @@
     "@kbn/management-settings-ids",
     "@kbn/rule-registry-plugin",
     "@kbn/discoveries",
+    "@kbn/entity-store",
     "@kbn/security-plugin",
     "@kbn/scout-security",
     "@kbn/securitysolution-es-utils",

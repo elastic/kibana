@@ -19,6 +19,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { AttackDiscoveryExecutorOptions } from '@kbn/attack-discovery-schedules-common';
 import type { CustomRequestHandlerContext } from '@kbn/core/server';
+import type { EntityStoreStartContract } from '@kbn/entity-store/server';
 import type { IEventLogService } from '@kbn/event-log-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
@@ -69,6 +70,7 @@ export interface DiscoveriesPluginStartDeps {
   actions: ActionsPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   elasticAssistant?: ElasticAssistantPluginStart;
+  entityStore?: EntityStoreStartContract;
   inference?: InferenceServerStart;
   security: SecurityPluginStart;
   spaces?: SpacesPluginStart;

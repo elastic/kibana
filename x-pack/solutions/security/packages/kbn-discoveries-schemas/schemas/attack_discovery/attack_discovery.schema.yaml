@@ -28,6 +28,21 @@ components:
         details_markdown:
           description: Details of the attack with bulleted markdown that always uses special syntax for field names and values from the source data.
           type: string
+        entities:
+          description: Entity Store entities correlated with the attack discovery (each id is an Entity Store EUID, stored as-is)
+          items:
+            type: object
+            required:
+              - id
+              - type
+            properties:
+              id:
+                description: The Entity Store EUID (e.g. `user:jdoe`)
+                type: string
+              type:
+                description: The entity type (e.g. `user`, `host`, `service`)
+                type: string
+          type: array
         entity_summary_markdown:
           description: A short (no more than a sentence) summary of the attack discovery featuring only the host.name and user.name fields (when they are applicable), using the same syntax
           type: string
@@ -35,6 +50,21 @@ components:
           description: An array of MITRE ATT&CK tactic for the attack discovery
           items:
             type: string
+          type: array
+        observable_entities:
+          description: Observables extracted from the attack discovery's alerts that did not match an Entity Store entity
+          items:
+            type: object
+            required:
+              - type_key
+              - value
+            properties:
+              type_key:
+                description: Observable type key mirroring the Cases observable types (e.g. `observable-type-ipv4`)
+                type: string
+              value:
+                description: The observable value
+                type: string
           type: array
         summary_markdown:
           description: A markdown summary of attack discovery, using the same syntax

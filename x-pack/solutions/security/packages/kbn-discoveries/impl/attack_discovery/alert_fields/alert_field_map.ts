@@ -19,9 +19,15 @@ import {
   ALERT_ATTACK_DISCOVERY_API_CONFIG_PROVIDER,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_ENTITIES,
+  ALERT_ATTACK_DISCOVERY_ENTITIES_ID,
+  ALERT_ATTACK_DISCOVERY_ENTITIES_TYPE,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
+  ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES,
+  ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES_TYPE_KEY,
+  ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES_VALUE,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS_VALUE,
@@ -124,6 +130,23 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
     array: false,
     required: true,
   },
+  [ALERT_ATTACK_DISCOVERY_ENTITIES]: {
+    // Entity Store entities correlated with the attack discovery (POC)
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_ENTITIES_ID]: {
+    // Entity Store EUID, stored as-is (e.g. `user:jdoe`)
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_ENTITIES_TYPE]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   [ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN]: {
     type: 'text',
     array: false,
@@ -136,6 +159,24 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
     required: false,
   },
   [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES]: {
+    // Observables extracted from the discovery's alerts that did NOT match an
+    // Entity Store entity (POC)
+    type: 'object',
+    array: true,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES_TYPE_KEY]: {
+    // Mirrors the Cases observable type keys (e.g. `observable-type-ipv4`)
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
+  [ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES_VALUE]: {
     type: 'keyword',
     array: true,
     required: false,

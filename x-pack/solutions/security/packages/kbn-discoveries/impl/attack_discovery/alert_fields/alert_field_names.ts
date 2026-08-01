@@ -24,12 +24,23 @@ export const ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN =
   'kibana.alert.attack_discovery.details_markdown' as const;
 export const ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS =
   'kibana.alert.attack_discovery.details_markdown_with_replacements' as const;
+export const ALERT_ATTACK_DISCOVERY_ENTITIES = 'kibana.alert.attack_discovery.entities' as const;
+export const ALERT_ATTACK_DISCOVERY_ENTITIES_ID =
+  'kibana.alert.attack_discovery.entities.id' as const;
+export const ALERT_ATTACK_DISCOVERY_ENTITIES_TYPE =
+  'kibana.alert.attack_discovery.entities.type' as const;
 export const ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN =
   'kibana.alert.attack_discovery.entity_summary_markdown' as const;
 export const ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS =
   'kibana.alert.attack_discovery.entity_summary_markdown_with_replacements' as const;
 export const ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS =
   'kibana.alert.attack_discovery.mitre_attack_tactics' as const;
+export const ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES =
+  'kibana.alert.attack_discovery.observable_entities' as const;
+export const ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES_TYPE_KEY =
+  'kibana.alert.attack_discovery.observable_entities.type_key' as const;
+export const ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES_VALUE =
+  'kibana.alert.attack_discovery.observable_entities.value' as const;
 export const ALERT_ATTACK_DISCOVERY_REPLACEMENTS =
   'kibana.alert.attack_discovery.replacements' as const;
 export const ALERT_ATTACK_DISCOVERY_REPLACEMENTS_UUID =

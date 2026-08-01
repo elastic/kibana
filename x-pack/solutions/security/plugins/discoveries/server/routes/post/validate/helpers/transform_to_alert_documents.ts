@@ -43,9 +43,11 @@ import {
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS,
+  ALERT_ATTACK_DISCOVERY_ENTITIES,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_ENTITY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS,
+  ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN,
   ALERT_ATTACK_DISCOVERY_SUMMARY_MARKDOWN_WITH_REPLACEMENTS,
@@ -64,6 +66,24 @@ type AttackDiscoveryAlertDocumentBase = Omit<
 >;
 
 /**
+ * Optional entity-correlation fields attached to discoveries by the
+ * `security.attack-discovery.correlateEntities` workflow step.
+ *
+ * These are declared in the OpenAPI source
+ * (`kbn-discoveries-schemas/schemas/attack_discovery/attack_discovery.schema.yaml`)
+ * but not yet present in the generated `PostValidateRequestBody` type —
+ * regenerating the package currently rewrites every generated schema with a
+ * newer generator style and deletes `post_validate.gen.ts` (its
+ * `.schema.yaml` source was removed with the route), so the fields are typed
+ * locally at this non-generated boundary instead. Nothing zod-parses the
+ * workflow-path payload, so the values flow through at runtime.
+ */
+interface CorrelatedDiscoveryFields {
+  entities?: Array<{ id: string; type: string }>;
+  observable_entities?: Array<{ type_key: string; value: string }>;
+}
+
+/**
  * Converts snake_case fields from REST API to camelCase for internal use
  */
 const convertApiFieldsToCamelCase = (body: PostValidateRequestBody) => {
@@ -79,16 +99,23 @@ const convertApiFieldsToCamelCase = (body: PostValidateRequestBody) => {
       model: body.api_config.model,
       provider: body.api_config.provider,
     },
-    attackDiscoveries: body.attack_discoveries.map((discovery) => ({
-      alertIds: discovery.alert_ids,
-      detailsMarkdown: discovery.details_markdown,
-      entitySummaryMarkdown: discovery.entity_summary_markdown,
-      id: discovery.id,
-      mitreAttackTactics: discovery.mitre_attack_tactics,
-      summaryMarkdown: discovery.summary_markdown,
-      timestamp: discovery.timestamp,
-      title: discovery.title,
-    })),
+    attackDiscoveries: body.attack_discoveries.map((discovery) => {
+      const { entities, observable_entities: observableEntities } = discovery as typeof discovery &
+        CorrelatedDiscoveryFields;
+
+      return {
+        alertIds: discovery.alert_ids,
+        detailsMarkdown: discovery.details_markdown,
+        entities,
+        entitySummaryMarkdown: discovery.entity_summary_markdown,
+        id: discovery.id,
+        mitreAttackTactics: discovery.mitre_attack_tactics,
+        observableEntities,
+        summaryMarkdown: discovery.summary_markdown,
+        timestamp: discovery.timestamp,
+        title: discovery.title,
+      };
+    }),
     connectorName: body.connector_name,
     enableFieldRendering: body.enable_field_rendering,
     generationUuid: body.generation_uuid,
@@ -230,6 +257,7 @@ export const transformToAlertDocuments = ({
         provider: restParams.apiConfig.provider,
       },
       [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN]: attackDiscovery.detailsMarkdown,
+      [ALERT_ATTACK_DISCOVERY_ENTITIES]: attackDiscovery.entities,
       [ALERT_ATTACK_DISCOVERY_DETAILS_MARKDOWN_WITH_REPLACEMENTS]:
         replaceAnonymizedValuesWithOriginalValues({
           messageContent: attackDiscovery.detailsMarkdown,
@@ -244,6 +272,7 @@ export const transformToAlertDocuments = ({
             })
           : undefined,
       [ALERT_ATTACK_DISCOVERY_MITRE_ATTACK_TACTICS]: attackDiscovery.mitreAttackTactics,
+      [ALERT_ATTACK_DISCOVERY_OBSERVABLE_ENTITIES]: attackDiscovery.observableEntities,
       [ALERT_ATTACK_DISCOVERY_REPLACEMENTS]: !isEmpty(restParams.replacements)
         ? Object.entries(restParams.replacements as Record<string, string>).map(
             ([uuid, value]) => ({

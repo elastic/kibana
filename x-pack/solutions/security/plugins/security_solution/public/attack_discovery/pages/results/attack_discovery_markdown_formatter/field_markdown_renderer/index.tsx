@@ -7,10 +7,13 @@
 
 import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { EcsFlat } from '@elastic/ecs';
 import React, { useCallback, useMemo } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DraggableBadge } from '../../../../../common/components/draggables';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { OpenFlyoutLink } from '../../../../../flyout_v2/shared/components/open_flyout_link';
+import { IP_FIELD_TYPE } from '../../../../../timelines/components/timeline/body/renderers/constants';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_TYPE_BY_FIELD, getFlyoutPanelProps } from './helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
@@ -18,6 +21,14 @@ import { useMarkdownFormatterContext } from '../context';
 import type { ParsedField } from '../types';
 
 const contextId = 'FieldMarkdownRenderer';
+
+/**
+ * IP fields are matched by ECS field *type* (same rule as the alerts page field renderers), so
+ * `source.ip`, `destination.ip`, `host.ip`, etc. all qualify without a hardcoded field list.
+ */
+const isIpField = (fieldName: string): boolean =>
+  (EcsFlat[fieldName as keyof typeof EcsFlat] as { type?: string } | undefined)?.type ===
+  IP_FIELD_TYPE;
 
 const inlineFieldWrapperCss = css`
   display: inline-block;
@@ -103,6 +114,21 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
     [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
   );
 
+  // IP values open the network flyout on click (new flyout system only), same as the alerts page.
+  // Rendered as the badge's children so the hover cell actions (filter for/out, timeline, copy)
+  // from DraggableBadge are preserved.
+  const ipLink: React.ReactElement | null = useMemo(
+    () =>
+      enableNewFlyout && typeof value === 'string' && isIpField(name) ? (
+        <OpenFlyoutLink
+          data-test-subj="fieldMarkdownRendererIpLink"
+          field={name}
+          value={value}
+        />
+      ) : null,
+    [enableNewFlyout, name, value]
+  );
+
   if (disableActions) {
     return (
       <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
@@ -131,7 +157,7 @@ export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
         field={name}
         value={value}
       >
-        {entityButton}
+        {ipLink ?? entityButton}
       </DraggableBadge>
     </span>
   );

@@ -16,6 +16,7 @@ import type {
   DiscoveriesPublicPluginStartDeps,
 } from './types';
 import {
+  correlateEntitiesStepPublicDefinition,
   defaultAlertRetrievalStepPublicDefinition,
   defaultValidationStepPublicDefinition,
   generateStepPublicDefinition,
@@ -56,6 +57,7 @@ export class DiscoveriesPublicPlugin
         return enabled ? definition : undefined;
       };
 
+    plugins.workflowsExtensions.registerStepDefinition(gate(correlateEntitiesStepPublicDefinition));
     plugins.workflowsExtensions.registerStepDefinition(
       gate(defaultAlertRetrievalStepPublicDefinition)
     );

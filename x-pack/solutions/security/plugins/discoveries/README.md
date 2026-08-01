@@ -250,13 +250,14 @@ graph TD
 
 ## Workflow Steps reference
 
-The plugin registers five workflow step handlers (see [`server/workflows/register_workflow_steps.ts`](server/workflows/register_workflow_steps.ts)). Per-step contracts (input/output schemas, anonymization flow, failure modes, "adding a new step" checklist) are in the [workflow steps README](server/workflows/steps/README.md).
+The plugin registers six workflow step handlers (see [`server/workflows/register_workflow_steps.ts`](server/workflows/register_workflow_steps.ts)). Per-step contracts (input/output schemas, anonymization flow, failure modes, "adding a new step" checklist) are in the [workflow steps README](server/workflows/steps/README.md).
 
 | Step Type ID | Purpose | Inputs (summary) | Outputs (summary) |
 |---|---|---|---|
 | `security.attack-discovery.defaultAlertRetrieval` | Retrieves and anonymizes alerts (DSL or ES\|QL) | `alertsIndexPattern`, `anonymizationFields`, `apiConfig`, `filter`, `size`, `start`/`end` | `alerts`, `anonymizedAlerts`, `replacements`, `apiConfig`, `connectorName`, `alertsContextCount` |
 | `security.attack-discovery.generate` | Generates attack discoveries from anonymized alerts via LangGraph | `alerts` (string[]), `apiConfig`, `replacements`, `size` | `attack_discoveries`, `execution_uuid`, `replacements` |
 | `security.attack-discovery.defaultValidation` | Hallucination detection + deduplication | `attackDiscoveries`, `anonymizedAlerts`, `apiConfig`, `connectorName`, `generationUuid`, `alertsContextCount`, `replacements` | `validated_discoveries`, `filtered_count`, `filter_reason` |
+| `security.attack-discovery.correlateEntities` | (POC) Correlates discoveries with Entity Store entities; best-effort — passes discoveries through unmodified on any failure or when the `securitySolution.attackDiscoveryEntityCorrelationEnabled` FF (default OFF) is disabled | `attack_discoveries`, `alerts_index_pattern` (optional) | `correlated_discoveries` (discoveries + `entities`/`observable_entities`), `entities_matched_count`, `observable_entities_count` |
 | `security.attack-discovery.persistDiscoveries` | Persists validated discoveries to the AD data store | (as above) | `persisted_discoveries`, `duplicates_dropped_count`, `discoveries_to_persist` (echo of input — the handover) |
 | `security.attack-discovery.run` | Runs the full pipeline (retrieve → generate → validate → persist) as a single step | `connector_id` (optional — defaults to `genAiSettings:defaultAIConnector` → inference fallback), `alert_retrieval_mode`, `mode`, `alerts` (optional), `size`, `start`/`end`, `filter`, `esql_query` | `attack_discoveries`, `execution_uuid`, `alerts_context_count`, `discovery_count` |
 

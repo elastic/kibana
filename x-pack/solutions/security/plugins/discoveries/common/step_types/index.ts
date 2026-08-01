@@ -15,6 +15,11 @@ export {
   DefaultValidationStepTypeId,
 } from './default_validation_step';
 
+export {
+  CorrelateEntitiesStepCommonDefinition,
+  CorrelateEntitiesStepTypeId,
+} from './correlate_entities_step';
+
 export { GenerateStepCommonDefinition, GenerateStepTypeId } from './generate_step';
 
 export {
@@ -24,6 +29,18 @@ export {
 
 export { RunStepCommonDefinition, RunStepTypeId } from './run_step';
 
-export { AnonymizedAlertSchema, ApiConfigSchema, AttackDiscoverySchema } from './shared_schemas';
+export {
+  AnonymizedAlertSchema,
+  ApiConfigSchema,
+  AttackDiscoveryEntitySchema,
+  AttackDiscoveryObservableEntitySchema,
+  AttackDiscoverySchema,
+} from './shared_schemas';
 
-export type { AnonymizedAlert, ApiConfig, AttackDiscovery } from './shared_schemas';
+export type {
+  AnonymizedAlert,
+  ApiConfig,
+  AttackDiscovery,
+  AttackDiscoveryEntity,
+  AttackDiscoveryObservableEntity,
+} from './shared_schemas';
