@@ -28,10 +28,7 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.datadog',
-    lazy(
-      () =>
-        import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')
-    ),
+    lazy(() => import(/* webpackChunkName: "connectorIconDatadog" */ './specs/datadog/icon')),
   ],
   [
     '.alienvault-otx',
