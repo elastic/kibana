@@ -26,10 +26,12 @@ import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../connector_spec';
 import {
+  DATADOG_SITES,
   GetMonitorInputSchema,
   ListMonitorsInputSchema,
   MuteMonitorInputSchema,
   UnmuteMonitorInputSchema,
+  type DatadogSite,
   type GetMonitorInput,
   type ListMonitorsInput,
   type MuteMonitorInput,
@@ -37,12 +39,16 @@ import {
 } from './types';
 
 interface DatadogConfig {
-  site?: string;
+  site?: DatadogSite | string;
 }
 
-function getSite(ctx: ActionContext): string {
+/** Exported for unit tests — builds `https://api.${site}` from connector config. */
+export function getSite(ctx: ActionContext): DatadogSite {
   const site = (ctx.config as DatadogConfig | undefined)?.site?.trim();
-  return site && site.length > 0 ? site : 'datadoghq.com';
+  if (site && (DATADOG_SITES as readonly string[]).includes(site)) {
+    return site as DatadogSite;
+  }
+  return 'datadoghq.com';
 }
 
 function getBaseUrl(ctx: ActionContext): string {
@@ -97,19 +103,19 @@ export const DatadogConnector: ConnectorSpec = {
   schema: lazySchema(() =>
     z.object({
       site: z
-        .string()
+        .enum(DATADOG_SITES)
         .default('datadoghq.com')
-        .describe('Datadog site hostname (e.g. datadoghq.com, datadoghq.eu)')
+        .describe('Datadog site (API hostname suffix). US1: datadoghq.com, EU: datadoghq.eu')
         .meta({
-          widget: 'text',
+          // z.enum defaults to select in response-ops-form-generator; set explicitly for clarity.
+          widget: 'select',
           label: i18n.translate('connectorSpecs.datadog.config.site.label', {
             defaultMessage: 'Datadog site',
           }),
           helpText: i18n.translate('connectorSpecs.datadog.config.site.helpText', {
             defaultMessage:
-              'Site hostname without scheme. US1: datadoghq.com, EU: datadoghq.eu, US3: us3.datadoghq.com',
+              'Select your Datadog site. Values are API host suffixes (api.<site>) — not the app.* labels from Datadog’s docs.',
           }),
-          placeholder: 'datadoghq.com',
         }),
     })
   ),
@@ -154,12 +160,15 @@ export const DatadogConnector: ConnectorSpec = {
 
     unmuteMonitor: {
       isTool: true,
-      description: 'Unmute a previously muted Datadog monitor.',
+      description:
+        'Unmute a previously muted Datadog monitor. Pass the same scope used when muting (e.g. "host:web01"); omit scope to unmute the global * scope.',
       input: UnmuteMonitorInputSchema,
       handler: async (ctx, input: UnmuteMonitorInput) => {
+        const body: Record<string, unknown> = {};
+        if (input.scope) body.scope = input.scope;
         const response = await ctx.client.post(
           `${getBaseUrl(ctx)}/api/v1/monitor/${input.monitorId}/unmute`,
-          {}
+          body
         );
         return {
           id: response.data?.id ?? input.monitorId,

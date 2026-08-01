@@ -8,13 +8,13 @@
  */
 
 import type { ActionContext } from '../../connector_spec';
-import { DatadogConnector } from './datadog';
+import { DatadogConnector, getSite } from './datadog';
+import { DATADOG_SITES } from './types';
 
 describe('DatadogConnector', () => {
   const mockClient = {
     get: jest.fn(),
     post: jest.fn(),
-    delete: jest.fn(),
   };
 
   const mockContext = {
@@ -53,6 +53,21 @@ describe('DatadogConnector', () => {
     ]);
   });
 
+  describe('getSite', () => {
+    it('defaults to datadoghq.com when unset or unknown', () => {
+      expect(getSite({ ...mockContext, config: {} })).toBe('datadoghq.com');
+      expect(getSite({ ...mockContext, config: { site: 'app.datadoghq.com' } })).toBe(
+        'datadoghq.com'
+      );
+    });
+
+    it('accepts every known Datadog site', () => {
+      for (const site of DATADOG_SITES) {
+        expect(getSite({ ...mockContext, config: { site } })).toBe(site);
+      }
+    });
+  });
+
   it('test probes monitors with page_size 1', async () => {
     mockClient.get.mockResolvedValueOnce({
       data: [{ id: 1, name: 'm' }],
@@ -65,6 +80,21 @@ describe('DatadogConnector', () => {
       expect.objectContaining({ params: { page_size: 1 } })
     );
     expect(result).toEqual(expect.objectContaining({ ok: true, site: 'datadoghq.com' }));
+  });
+
+  it('uses api.<site> for non-US1 sites', async () => {
+    mockClient.get.mockResolvedValueOnce({ data: [] });
+    const euCtx = {
+      ...mockContext,
+      config: { site: 'datadoghq.eu' },
+    } as unknown as ActionContext;
+
+    await DatadogConnector.test!.handler(euCtx);
+
+    expect(mockClient.get).toHaveBeenCalledWith(
+      'https://api.datadoghq.eu/api/v1/monitor',
+      expect.any(Object)
+    );
   });
 
   it('muteMonitor posts to mute endpoint', async () => {
@@ -84,12 +114,29 @@ describe('DatadogConnector', () => {
     expect(result).toEqual(expect.objectContaining({ id: 309422658, overallState: 'Alert' }));
   });
 
-  it('unmuteMonitor posts to unmute endpoint', async () => {
+  it('unmuteMonitor posts scope when provided', async () => {
     mockClient.post.mockResolvedValue({
       data: { id: 309422658, overall_state: 'OK' },
     });
 
     const result = await DatadogConnector.actions.unmuteMonitor.handler(mockContext, {
+      monitorId: 309422658,
+      scope: 'host:web01',
+    });
+
+    expect(mockClient.post).toHaveBeenCalledWith(
+      'https://api.datadoghq.com/api/v1/monitor/309422658/unmute',
+      { scope: 'host:web01' }
+    );
+    expect(result).toEqual(expect.objectContaining({ id: 309422658, overallState: 'OK' }));
+  });
+
+  it('unmuteMonitor posts empty body when scope omitted', async () => {
+    mockClient.post.mockResolvedValue({
+      data: { id: 309422658, overall_state: 'OK' },
+    });
+
+    await DatadogConnector.actions.unmuteMonitor.handler(mockContext, {
       monitorId: 309422658,
     });
 
@@ -97,7 +144,6 @@ describe('DatadogConnector', () => {
       'https://api.datadoghq.com/api/v1/monitor/309422658/unmute',
       {}
     );
-    expect(result).toEqual(expect.objectContaining({ id: 309422658, overallState: 'OK' }));
   });
 
   it('getMonitor fetches with downtimes', async () => {
