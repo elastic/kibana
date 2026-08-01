@@ -95,6 +95,61 @@ describe('generateConfigSchema', () => {
     ).toThrow(/unknownKey|Unrecognized/);
   });
 
+  describe('customValidator - selectedActions', () => {
+    it('rejects an empty selectedActions array', () => {
+      const validator = generateConfigSchema(z.object({ apiUrl: z.string() }), [
+        'search',
+        'sendMessage',
+      ]);
+
+      expect(() =>
+        validator.customValidator!(
+          { apiUrl: 'https://example.com', selectedActions: [] },
+          validatorServices
+        )
+      ).toThrow('selectedActions must include at least one action when set.');
+    });
+
+    it('rejects unknown action names', () => {
+      const validator = generateConfigSchema(z.object({ apiUrl: z.string() }), [
+        'search',
+        'sendMessage',
+      ]);
+
+      expect(() =>
+        validator.customValidator!(
+          { apiUrl: 'https://example.com', selectedActions: ['search', 'typoAction'] },
+          validatorServices
+        )
+      ).toThrow('selectedActions contains unknown action names: typoAction.');
+    });
+
+    it('allows a valid non-empty selectedActions allowlist', () => {
+      const validator = generateConfigSchema(z.object({ apiUrl: z.string() }), [
+        'search',
+        'sendMessage',
+      ]);
+
+      expect(() =>
+        validator.customValidator!(
+          { apiUrl: 'https://example.com', selectedActions: ['search'] },
+          validatorServices
+        )
+      ).not.toThrow();
+    });
+
+    it('allows absent selectedActions (recommended mode)', () => {
+      const validator = generateConfigSchema(z.object({ apiUrl: z.string() }), [
+        'search',
+        'sendMessage',
+      ]);
+
+      expect(() =>
+        validator.customValidator!({ apiUrl: 'https://example.com' }, validatorServices)
+      ).not.toThrow();
+    });
+  });
+
   describe('customValidator - allowedHosts validation for URL fields', () => {
     it('calls ensureUriAllowed for uri formatted config fields when validate meta is set', () => {
       const validator = generateConfigSchema(

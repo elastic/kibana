@@ -232,8 +232,8 @@ export const McpToolsSelectionTable: React.FC<McpToolsSelectionTableProps> = ({
             } else {
               setTablePageIndex(page.index);
             }
-            onChange(selectionToRestore);
           }
+          onChange(selectionToRestore);
         }}
         pagination={{
           initialPageSize: DEFAULT_PAGE_SIZE,

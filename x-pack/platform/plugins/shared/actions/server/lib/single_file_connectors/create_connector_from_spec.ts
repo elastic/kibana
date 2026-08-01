@@ -73,7 +73,7 @@ export const createConnectorTypeFromSpec = (
     name: spec.metadata.displayName,
     supportedFeatureIds: spec.metadata.supportedFeatureIds,
     validate: {
-      config: generateConfigSchema(spec.schema),
+      config: generateConfigSchema(spec.schema, Object.keys(spec.actions ?? {})),
       secrets: generateSecretsSchema(spec.auth, configUtils),
       ...(paramsValidator ? { params: paramsValidator } : {}),
     },

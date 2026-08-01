@@ -12,6 +12,7 @@ import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
+  ...jest.requireActual('@kbn/connector-specs'),
   getConnectorSpec: jest.fn(),
 }));
 

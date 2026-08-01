@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getConnectorSpec, isSelectedActionEnabled } from '@kbn/connector-specs';
 import type {
   BaseConnectorContract,
   ConnectorContractUnion,
@@ -205,11 +206,14 @@ function convertDynamicConnectorsToContractsInternal(
         connectorType.subActions.forEach((subAction) => {
           const hasPermittedInstance =
             connectorType.instances.length === 0 ||
-            connectorType.instances.some(
-              ({ config }) =>
-                !Array.isArray(config?.selectedActions) ||
-                config.selectedActions.includes(subAction.name)
-            );
+            connectorType.instances.some(({ config }) => {
+              const spec = getConnectorSpec(connectorType.actionTypeId);
+              return isSelectedActionEnabled(
+                subAction.name,
+                config?.selectedActions,
+                spec?.actions
+              );
+            });
           if (!hasPermittedInstance) {
             return;
           }

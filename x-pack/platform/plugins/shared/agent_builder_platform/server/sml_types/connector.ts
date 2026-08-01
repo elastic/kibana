@@ -12,7 +12,13 @@ import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { getConnectorSpec } from '@kbn/connector-specs';
+import {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  getConnectorSpec,
+  isSpecificActionsSelection,
+  type SelectedActions,
+} from '@kbn/connector-specs';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
 
 const CONNECTOR_SML_TYPE = 'connector';
@@ -73,30 +79,21 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         };
         const name = attrs.name ?? originId;
         const actionTypeId = attrs.actionTypeId ?? '';
-        const selectedActions = attrs.config?.selectedActions as string[] | null | undefined;
+        const selectedActions = attrs.config?.selectedActions as SelectedActions;
 
         const spec = getConnectorSpec(actionTypeId);
         const displayName = spec?.metadata.displayName ?? actionTypeId;
         const description = spec?.metadata.description ?? '';
 
-        const allSpecActions = spec?.actions ? Object.entries(spec.actions) : [];
-        const toolActions = allSpecActions.filter(
-          ([, action]) => action.isTool && action.description
+        const isRestricted = isSpecificActionsSelection(selectedActions);
+        const visibleActions = spec
+          ? filterActionsBySelection(spec.actions, selectedActions, {
+              requireDescription: true,
+            })
+          : [];
+        const subActionDescriptions = visibleActions.map(([actionName, action]) =>
+          formatConnectorActionLine(actionName, action)
         );
-
-        // When selectedActions restricts the connector, only list callable actions and say so.
-        const isRestricted = Array.isArray(selectedActions) && selectedActions.length > 0;
-        const allowedSet = isRestricted ? new Set(selectedActions) : null;
-
-        const visibleActions = allowedSet
-          ? allSpecActions.filter(
-              ([actionName, action]) => allowedSet.has(actionName) && action.description
-            )
-          : toolActions;
-        const subActionDescriptions = visibleActions.map(([actionName, action]) => {
-          const hitlSuffix = !action.isTool ? ' (requires user confirmation before calling)' : '';
-          return `${actionName}: ${action.description}${hitlSuffix}`;
-        });
 
         const headerParts = [...new Set([name, displayName, description].filter(Boolean))];
         const contentParts = [
@@ -135,16 +132,13 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
         };
         const connectorName = attrs.name ?? originId;
         const connectorType = attrs.actionTypeId ?? '';
-        const attachmentSelectedActions = attrs.config?.selectedActions as
-          | string[]
-          | null
-          | undefined;
+        const attachmentSelectedActions = attrs.config?.selectedActions as SelectedActions;
 
         const data: ConnectorAttachmentData = {
           connector_id: originId,
           connector_name: connectorName,
           connector_type: connectorType,
-          ...(Array.isArray(attachmentSelectedActions) && attachmentSelectedActions.length > 0
+          ...(isSpecificActionsSelection(attachmentSelectedActions)
             ? { selected_actions: attachmentSelectedActions }
             : {}),
         };

@@ -419,7 +419,7 @@ describe('generateExecutorFunction', () => {
   });
 
   describe('selectedActions enforcement', () => {
-    it('allows execution when selectedActions is undefined (all actions permitted)', async () => {
+    it('allows isTool actions when selectedActions is undefined (recommended)', async () => {
       const executor = generateExecutorFunction({
         actions: makeActions(),
         getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
@@ -430,6 +430,23 @@ describe('generateExecutorFunction', () => {
 
       expect(result.status).toBe('ok');
       expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('blocks non-isTool actions when selectedActions is undefined (recommended)', async () => {
+      const hitlHandler = jest.fn().mockResolvedValue({ ok: true });
+      const executor = generateExecutorFunction({
+        actions: {
+          toolAction: { isTool: true, input: {} as never, handler: mockHandler },
+          hitlAction: { isTool: false, input: {} as never, handler: hitlHandler },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
+      await expect(executor({ ...opts, config: {} })).rejects.toThrow(
+        "[Action][ExternalService] Action 'hitlAction' is not enabled for this connector."
+      );
+      expect(hitlHandler).not.toHaveBeenCalled();
     });
 
     it('allows execution when subAction is in selectedActions', async () => {
@@ -443,6 +460,22 @@ describe('generateExecutorFunction', () => {
 
       expect(result.status).toBe('ok');
       expect(mockHandler).toHaveBeenCalled();
+    });
+
+    it('allows non-isTool actions when explicitly listed in selectedActions', async () => {
+      const hitlHandler = jest.fn().mockResolvedValue({ ok: true });
+      const executor = generateExecutorFunction({
+        actions: {
+          hitlAction: { isTool: false, input: {} as never, handler: hitlHandler },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const opts = makeExecOptions({ subAction: 'hitlAction', subActionParams: {} });
+      const result = await executor({ ...opts, config: { selectedActions: ['hitlAction'] } });
+
+      expect(result.status).toBe('ok');
+      expect(hitlHandler).toHaveBeenCalled();
     });
 
     it('throws and logs when subAction is not in selectedActions', async () => {
@@ -474,6 +507,31 @@ describe('generateExecutorFunction', () => {
       await expect(executor({ ...opts, config: { selectedActions: [] } })).rejects.toThrow(
         "[Action][ExternalService] Action 'testAction' is not enabled for this connector."
       );
+    });
+
+    it('allows _test even when selectedActions is a restricted allowlist', async () => {
+      const testHandler = jest.fn().mockResolvedValue({ connected: true });
+      const executor = generateExecutorFunction({
+        actions: {
+          testAction: { isTool: true, input: {} as never, handler: mockHandler },
+          [TEST_CONNECTOR_SUB_ACTION]: {
+            isTool: false,
+            input: {} as never,
+            handler: testHandler,
+          },
+        },
+        getAxiosInstanceWithAuth: mockGetAxiosInstanceWithAuth,
+      });
+
+      const opts = makeExecOptions({
+        subAction: TEST_CONNECTOR_SUB_ACTION,
+        subActionParams: {},
+      });
+      const result = await executor({ ...opts, config: { selectedActions: ['testAction'] } });
+
+      expect(result.status).toBe('ok');
+      expect(testHandler).toHaveBeenCalled();
+      expect(mockHandler).not.toHaveBeenCalled();
     });
   });
 

@@ -27,7 +27,7 @@ export type { ConnectorSpecResponse } from '../apis/fetch_connector_spec';
 
 const WORKFLOWS_CONNECTOR_FEATURE_ID = 'workflows';
 
-// isTool:false actions are intended for human-in-the-loop (HITL) use: they are safe to
+// isTool:false actions are intended for human-in-the-loop (HITL) use.
 const EXPOSE_ALL_ACTIONS = true;
 
 export function shouldHideWorkflowsOnlyConnector(
@@ -190,7 +190,7 @@ function createConnectorFormSerializer() {
       ...(secrets?.authType ? { authType: secrets.authType } : {}),
     };
 
-    // null = "all actions" sentinel; strip so no selectedActions key is saved.
+    // null = "recommended actions" sentinel; strip so no selectedActions key is saved.
     if (updatedConfig.selectedActions === null) {
       delete updatedConfig.selectedActions;
     }

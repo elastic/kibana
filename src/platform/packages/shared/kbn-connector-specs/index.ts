@@ -25,6 +25,14 @@ export {
 export { getConnectorSpec } from './src/get_connector_spec';
 export { isToolAction, TEST_CONNECTOR_SUB_ACTION } from './src/connector_spec';
 export {
+  filterActionsBySelection,
+  formatConnectorActionLine,
+  HITL_ACTION_CONFIRMATION_SUFFIX,
+  isSelectedActionEnabled,
+  isSpecificActionsSelection,
+  type SelectedActions,
+} from './src/selected_actions';
+export {
   getConnectorActionErrorMeta,
   setConnectorActionErrorMeta,
   getFinitePositiveNumber,
