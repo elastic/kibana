@@ -12,6 +12,45 @@ export interface LanguageCount {
   count: number;
 }
 
+/** Counts of OTel imports and instrumentation idioms found in service source. */
+export interface OtelSignalCounts {
+  instrumentation_grpc: number;
+  instrumentation_http: number;
+  instrumentation_other: number;
+  start_span: number;
+  set_attribute: number;
+  add_event: number;
+  record_exception: number;
+  set_status_error: number;
+  create_metric: number;
+}
+
+export interface OtelDetection {
+  hasOtel: boolean;
+  signalCounts: OtelSignalCounts;
+}
+
+export type OtelSignalKind =
+  | 'span_name'
+  | 'event_name'
+  | 'attr_key'
+  | 'metric_name'
+  | 'error_status'
+  | 'record_exception';
+
+export type OtelValueHint = 'bool' | 'number' | 'enum' | 'id' | 'unknown';
+
+/** One source-grounded OTel instrumentation signal. */
+export interface OtelSignal {
+  kind: OtelSignalKind;
+  value?: string;
+  valueHint?: OtelValueHint;
+  templated?: boolean;
+  language: string;
+  file: string;
+  line: number;
+}
+
 /** A recognized Infrastructure-as-Code technology detected from file paths. */
 export type IacKind = 'kubernetes' | 'helm' | 'compose' | 'terraform' | 'pulumi' | 'cloudformation';
 
@@ -123,6 +162,8 @@ export interface DiscoveredService {
   language: string;
   repositoryLanguages?: LanguageCount[];
   iacSignals?: IacSignal[];
+  hasOtel: boolean;
+  signalCounts: OtelSignalCounts;
 }
 
 /**

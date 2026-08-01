@@ -17,6 +17,7 @@ import type {
   IacSignal,
   IndexedRepoRef,
   LanguageCount,
+  OtelDetection,
   ServiceCandidateRoot,
 } from './types';
 
@@ -87,6 +88,8 @@ export interface ClassifyServicesOptions {
   readmeLinesByRepo: Map<string, string[]>;
   /** Per-repository byte-weighted language histogram, keyed by `"org/repo"`. */
   repositoryLanguagesByRepo: Map<string, LanguageCount[]>;
+  /** Per-service-root deterministic OTel detections, keyed by `repository::root`. */
+  otelDetectionByRoot: Map<string, OtelDetection>;
   logger: Logger;
   abortSignal?: AbortSignal;
 }
@@ -122,6 +125,7 @@ export async function classifyServices({
   iacSignalsByRepo,
   readmeLinesByRepo,
   repositoryLanguagesByRepo,
+  otelDetectionByRoot,
   logger,
   abortSignal,
 }: ClassifyServicesOptions): Promise<DiscoveredService[]> {
@@ -136,15 +140,32 @@ export async function classifyServices({
     serviceRoot: string,
     name: string,
     language: string
-  ): DiscoveredService => ({
-    repository,
-    gitSha: gitShaByRepo.get(repository) ?? '',
-    serviceRoot,
-    name,
-    language,
-    iacSignals: iacSignalsByRepo.get(repository),
-    repositoryLanguages: repositoryLanguagesByRepo.get(repository),
-  });
+  ): DiscoveredService => {
+    const detection = otelDetectionByRoot.get(`${repository}::${serviceRoot}`) ?? {
+      hasOtel: false,
+      signalCounts: {
+        instrumentation_grpc: 0,
+        instrumentation_http: 0,
+        instrumentation_other: 0,
+        start_span: 0,
+        set_attribute: 0,
+        add_event: 0,
+        record_exception: 0,
+        set_status_error: 0,
+        create_metric: 0,
+      },
+    };
+    return {
+      repository,
+      gitSha: gitShaByRepo.get(repository) ?? '',
+      serviceRoot,
+      name,
+      language,
+      iacSignals: iacSignalsByRepo.get(repository),
+      repositoryLanguages: repositoryLanguagesByRepo.get(repository),
+      ...detection,
+    };
+  };
 
   const degrade = (): DiscoveredService[] =>
     candidates.map((candidate) =>

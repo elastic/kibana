@@ -80,10 +80,40 @@ steps:
                 gitSha: '{{ foreach.item.gitSha }}'
                 repositoryLanguages: '${{ foreach.item.repositoryLanguages }}'
                 iacSignals: '${{ foreach.item.iacSignals }}'
+                hasOtel: '${{ foreach.item.hasOtel }}'
                 service:
                   name: '{{ foreach.item.name }}'
                   serviceRoot: '{{ foreach.item.serviceRoot }}'
                   language: '{{ foreach.item.language }}'
+            on-failure:
+              retry:
+                max-attempts: 2
+                delay: '5s'
+                strategy: exponential
+
+      - name: process_otel_services
+        type: foreach
+        foreach: '${{ steps.discover_services.output.services | where: "hasOtel", true }}'
+        max-concurrency: 1
+        iteration-on-failure:
+          continue: true
+        steps:
+          - name: identify_otel_signals
+            type: kibana.request
+            with:
+              method: POST
+              path: '/internal/streams/code_intelligence/_identify_otel_signals'
+              headers:
+                x-elastic-internal-origin: 'kibana'
+                elastic-api-version: '1'
+              body:
+                repository: '{{ foreach.item.repository }}'
+                gitSha: '{{ foreach.item.gitSha }}'
+                serviceRoot: '{{ foreach.item.serviceRoot }}'
+                name: '{{ foreach.item.name }}'
+                language: '{{ foreach.item.language }}'
+                hasOtel: '${{ foreach.item.hasOtel }}'
+                signalCounts: '${{ foreach.item.signalCounts }}'
             on-failure:
               retry:
                 max-attempts: 2

@@ -7,12 +7,18 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
-import { getStreamSamplingSource, isOtelStream, type Streams } from '@kbn/streams-schema';
+import {
+  getStreamSamplingSource,
+  isOtelStream,
+  normalizeEsqlSafe,
+  type Streams,
+} from '@kbn/streams-schema';
 import {
   deriveKnowledgeIndicatorSource,
   SignificantEventsWorkflowStatus,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
   type Feature,
   type QueryLink,
   type SignificantEventsWorkflowStatusResult,
@@ -31,9 +37,14 @@ import {
   linkServiceEntities,
   discoverLoggingSites,
   classifyLoggingSites,
+  extractOtelSignals,
+  generateOtelQueries,
+  classifyOtelSignals,
+  resolveSignalStreams,
   listIndexedRepos,
   discoverCandidateRoots,
   buildLanguageHistogram,
+  detectOtelInstrumentation,
   classifyServices,
   isCodeIntelligenceAgentAvailable,
   CODE_INTELLIGENCE_AGENT_ID,
@@ -41,6 +52,7 @@ import {
   type IacSignal,
   type LanguageCount,
   type DiscoveredService,
+  type OtelDetection,
   type ServiceCodeMetadata,
   type StreamSamplingSource,
 } from '../../../../lib/knowledge_indicators/code_intelligence';
@@ -467,6 +479,166 @@ const buildServiceCodeMetadata = (
   return Object.keys(metadata).length > 0 ? metadata : undefined;
 };
 
+const otelSignalCountsSchema = z.object({
+  instrumentation_grpc: z.number().nonnegative(),
+  instrumentation_http: z.number().nonnegative(),
+  instrumentation_other: z.number().nonnegative(),
+  start_span: z.number().nonnegative(),
+  set_attribute: z.number().nonnegative(),
+  add_event: z.number().nonnegative(),
+  record_exception: z.number().nonnegative(),
+  set_status_error: z.number().nonnegative(),
+  create_metric: z.number().nonnegative(),
+});
+
+const identifyOtelSignalsRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/code_intelligence/_identify_otel_signals',
+  options: {
+    access: 'internal',
+    summary: 'Extract typed OTel queries for one instrumented service',
+    timeout: { idleSocket: 600_000 },
+  },
+  security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+  params: z.object({
+    body: z.object({
+      repository: z.string(),
+      gitSha: z.string(),
+      serviceRoot: z.string(),
+      name: z.string(),
+      language: z.string(),
+      hasOtel: z.boolean(),
+      signalCounts: otelSignalCountsSchema,
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients, server, logger }) => {
+    const scopedClients = await getScopedClients({ request });
+    const { scopedClusterClient, licensing, inferenceClient } = scopedClients;
+    await assertSignificantEventsAccess({ server, licensing });
+    const { repository, gitSha, serviceRoot, name, language, signalCounts } = params.body;
+    const routeLogger = logger.get('code_intelligence', 'identify_otel_signals', name);
+    const esClient = scopedClusterClient.asCurrentUser;
+    const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+    const streams = await listStreamSamplingSources(scopedClients.streamsClient);
+
+    const runTemplateFallback = async () => {
+      const candidates = await discoverLoggingSites({
+        esClient,
+        repository,
+        gitSha,
+        serviceRoot,
+        language,
+        logger: routeLogger,
+      });
+      const connectorId = await resolveConnectorForFeature({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+        featureName: 'logging-site classification',
+        request,
+      });
+      const loggingChunks = await classifyLoggingSites({
+        inferenceClient,
+        connectorId,
+        candidates,
+        logger: routeLogger,
+      });
+      return identifyCodeQueries({
+        serviceName: name,
+        repository,
+        gitSha,
+        streams,
+        kiClient,
+        loggingChunks,
+        esClient,
+        logger: routeLogger,
+        hasOtel: true,
+        otelGateBypassed: true,
+      });
+    };
+
+    let queriesGenerated = 0;
+    try {
+      const signals = await extractOtelSignals({
+        esClient,
+        repository,
+        gitSha,
+        serviceRoot,
+        logger: routeLogger,
+      });
+      const resolved = await resolveSignalStreams({ streams, esClient, logger: routeLogger });
+      const generated = generateOtelQueries({
+        serviceName: name,
+        repository,
+        gitSha,
+        signals,
+        signalCounts,
+        ...resolved,
+      });
+
+      if (generated.gateBypassed) {
+        routeLogger.warn(`otel gate bypassed for service "${name}"; using template query fallback`);
+        const fallback = await runTemplateFallback();
+        return { status: 'gate_bypassed' as const, queriesGenerated: fallback.generatedCount ?? 0 };
+      }
+
+      const connectorId = await resolveConnectorForFeature({
+        searchInferenceEndpoints: server.searchInferenceEndpoints,
+        featureId: SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
+        featureName: 'OTel signal classification',
+        request,
+      });
+      const classified = await classifyOtelSignals({
+        inferenceClient,
+        connectorId,
+        candidates: generated.queries,
+        logger: routeLogger,
+      });
+      const byStream = new Map<string, typeof classified>();
+      for (const candidate of classified) {
+        const entries = byStream.get(candidate.stream) ?? [];
+        entries.push(candidate);
+        byStream.set(candidate.stream, entries);
+      }
+      for (const [streamName, candidates] of byStream) {
+        const { [streamName]: existing } = await kiClient.getStreamToQueryLinksMap([streamName]);
+        const existingEsql = new Set(
+          existing.map(({ query }) => normalizeEsqlSafe(query.esql.query))
+        );
+        const fresh = candidates.filter(
+          ({ query }) => !existingEsql.has(normalizeEsqlSafe(query.esql.query))
+        );
+        if (fresh.length === 0) continue;
+        await kiClient.bulk(
+          streamName,
+          fresh.map(({ query }) => ({ index: { query: { ...query, rule_backed: false } } }))
+        );
+        queriesGenerated += fresh.length;
+        await reconcileCodeAndLogQueries({ streamName, kiClient, logger: routeLogger });
+      }
+      return { status: 'generated' as const, queriesGenerated };
+    } catch (error) {
+      routeLogger.warn(
+        `otel gate bypassed for service "${name}" after typed extraction failure: ${
+          error instanceof Error ? error.message : String(error)
+        }; using template query fallback`
+      );
+      try {
+        const fallback = await runTemplateFallback();
+        return {
+          status: 'gate_bypassed' as const,
+          queriesGenerated: queriesGenerated + (fallback.generatedCount ?? 0),
+        };
+      } catch (fallbackError) {
+        routeLogger.warn(
+          `otel template fallback failed for service "${name}": ${
+            fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+          }`
+        );
+        throw fallbackError;
+      }
+    }
+  },
+});
+
 const identifyServiceRoute = createServerRoute({
   endpoint: 'POST /internal/streams/code_intelligence/_identify_service',
   options: {
@@ -501,6 +673,7 @@ const identifyServiceRoute = createServerRoute({
           })
         )
         .nullish(),
+      hasOtel: z.boolean().optional(),
       service: z.object({
         name: z.string(),
         serviceRoot: z.string(),
@@ -612,6 +785,7 @@ const identifyServiceRoute = createServerRoute({
       loggingChunks,
       esClient,
       logger: routeLogger,
+      hasOtel: params.body.hasOtel ?? false,
     });
 
     // Reconcile code- and log-derived Query KIs on each ingesting stream that
@@ -707,6 +881,7 @@ const discoverServicesRoute = createServerRoute({
     const iacSignalsByRepo = new Map<string, IacSignal[]>();
     const readmeLinesByRepo = new Map<string, string[]>();
     const repositoryLanguagesByRepo = new Map<string, LanguageCount[]>();
+    const otelDetectionByRoot = new Map<string, OtelDetection>();
     for (const repo of repos) {
       const {
         candidates: roots,
@@ -721,6 +896,18 @@ const discoverServicesRoute = createServerRoute({
         logger: routeLogger,
       });
       candidates.push(...roots);
+      for (const root of roots) {
+        otelDetectionByRoot.set(
+          `${repo.repository}::${root.serviceRoot}`,
+          await detectOtelInstrumentation({
+            esClient,
+            repository: repo.repository,
+            gitSha: repo.gitSha,
+            serviceRoot: root.serviceRoot,
+            logger: routeLogger,
+          })
+        );
+      }
       manifestPathsByRepo.set(repo.repository, manifestPaths);
       manifestLinesByRepo.set(repo.repository, manifestLines);
       serviceNameLinesByRepo.set(repo.repository, serviceNameLines);
@@ -757,6 +944,7 @@ const discoverServicesRoute = createServerRoute({
       iacSignalsByRepo,
       readmeLinesByRepo,
       repositoryLanguagesByRepo,
+      otelDetectionByRoot,
       logger: routeLogger,
     });
 
@@ -954,6 +1142,7 @@ export const internalKICodeFeaturesRoutes = {
   ...listCodeKnowledgeIndicatorsRoute,
   ...serviceDistributionRoute,
   ...identifyServiceRoute,
+  ...identifyOtelSignalsRoute,
   ...discoverServicesRoute,
   ...runCodeIntelligenceRoute,
   ...codeIntelligenceRunStatusRoute,

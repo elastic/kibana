@@ -30,11 +30,21 @@ export {
   linkServiceEntities,
   resolveIngestingStreams,
   resolveLogBearingStreams,
+  resolveSignalStreams,
+  type SignalStreams,
   type ServiceCodeMetadata,
   type StreamSamplingSource,
   type LogStreamBinding,
 } from './link_ingesting_streams';
 export { extractLogSignatures, staticPrefixOf } from './extract_log_signatures';
+export { extractOtelSignals } from './extract_otel_signals';
+export {
+  generateOtelQueries,
+  type OtelQueryCandidate,
+  type OtelQueryTier,
+  type GenerateOtelQueriesResult,
+} from './generate_otel_queries';
+export { classifyOtelSignals } from './classify_otel_signals';
 export {
   discoverLoggingSites,
   fetchLineWindows,
@@ -53,6 +63,11 @@ export {
   type DiscoverCandidateRootsResult,
 } from './discover_services';
 export { classifyServices, type ClassifyServicesOptions } from './classify_services';
+export {
+  detectOtelInstrumentation,
+  EMPTY_OTEL_SIGNAL_COUNTS,
+  type DetectOtelInstrumentationOptions,
+} from './detect_otel_instrumentation';
 export {
   generatePredictiveQueries,
   buildPredictiveEsql,
@@ -88,4 +103,9 @@ export type {
   IndexedRepoRef,
   ServiceCandidateRoot,
   DiscoveredService,
+  OtelDetection,
+  OtelSignalCounts,
+  OtelSignal,
+  OtelSignalKind,
+  OtelValueHint,
 } from './types';

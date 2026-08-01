@@ -30,7 +30,8 @@ export type IdentifyCodeQueriesStatus =
   | 'no_service'
   | 'no_repo'
   | 'no_signatures'
-  | 'no_ingesting';
+  | 'no_ingesting'
+  | 'otel_gated';
 
 export interface IdentifyCodeQueriesResult {
   status: IdentifyCodeQueriesStatus;
@@ -55,6 +56,9 @@ export interface IdentifyCodeQueriesOptions {
   loggingChunks: LoggingChunk[];
   esClient: ElasticsearchClient;
   logger: Logger;
+  /** OTel services use typed queries unless their OTel stream resolution was bypassed. */
+  hasOtel?: boolean;
+  otelGateBypassed?: boolean;
 }
 
 /**
@@ -79,10 +83,19 @@ export async function identifyCodeQueries({
   loggingChunks,
   esClient,
   logger,
+  hasOtel = false,
+  otelGateBypassed = false,
 }: IdentifyCodeQueriesOptions): Promise<IdentifyCodeQueriesResult> {
   // The KI key is the service name; the service identity itself is represented as
   // an entity/service KI on the ingesting stream (not a code_analysis feature).
   const serviceName = serviceKey;
+  if (hasOtel && !otelGateBypassed) {
+    logger.debug(`code_queries: skipped message-string queries for OTel service "${serviceName}"`);
+    return { status: 'otel_gated', serviceName, generatedCount: 0, streams: [] };
+  }
+  if (hasOtel && otelGateBypassed) {
+    logger.warn(`otel gate bypassed for service "${serviceName}"; using template query fallback`);
+  }
   const resolvedRepository = repository;
   const fingerprint = gitSha;
 

@@ -84,6 +84,36 @@ export const DEFAULT_LOG_SEVERITY = 40;
  */
 export const SOURCERER_LINES_INDEX = 'sourcerer-v1-lines*' as const;
 
+/** OTel import and instrumentation idioms, one Lucene RLIKE-safe grep each. */
+export const OTEL_INSTRUMENTATION_PATTERNS = {
+  instrumentation_grpc: [
+    '.*otelgrpc.*',
+    '.*instrumentation[-./]grpc.*',
+    '.*OpenTelemetry[.]Instrumentation[.]Grpc.*',
+  ],
+  instrumentation_http: [
+    '.*otelhttp.*',
+    '.*instrumentation[-./](http|fetch|requests|urllib3|aspnetcore|sinatra).*',
+    '.*OpenTelemetry[.]Instrumentation[.](Http|AspNetCore).*',
+  ],
+  instrumentation_other: [
+    '.*@opentelemetry/.*',
+    '.*go[.]opentelemetry[.]io/.*',
+    '.*opentelemetry-instrumentation-.*',
+    '.*opentelemetry[._](api|sdk).*',
+    '.*from.*@opentelemetry/.*',
+    '.*OpenTelemetry[.].*',
+  ],
+  start_span: ['.*(startSpan|start_as_current_span|startActiveSpan|spanBuilder|StartActivity).*'],
+  set_attribute: ['.*(setAttribute|setAttributes|set_attribute|SetTag).*'],
+  add_event: ['.*(addEvent|add_event|AddEvent).*'],
+  record_exception: ['.*(recordException|record_exception|RecordError|record_error).*'],
+  set_status_error: ['.*(setStatus|set_status|SetStatus).*(ERROR|Error|kError|codes[.]Error).*'],
+  create_metric: [
+    '.*(createCounter|createHistogram|create_counter|create_histogram|Int64Counter|counterBuilder|histogramBuilder).*',
+  ],
+} as const;
+
 /**
  * Repository-relative path fragments that mark a file as TEST or BUILD/CI
  * tooling rather than production service code. Logging-site grep excludes any

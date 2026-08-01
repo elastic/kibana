@@ -11,6 +11,7 @@ import type { Feature } from '@kbn/significant-events-schema';
 import type { KIBulkOperation, KnowledgeIndicatorClient } from '../knowledge_indicator_client';
 import {
   linkServiceEntities,
+  resolveSignalStreams,
   serviceEntityConfidence,
   type ServiceCodeMetadata,
   type StreamSamplingSource,
@@ -61,6 +62,34 @@ const link = async (
   });
   return { result, bulk };
 };
+
+describe('resolveSignalStreams', () => {
+  it('resolves non-empty trace/metric/log streams and excludes empty logs', async () => {
+    const esClient = {
+      fieldCaps: jest.fn(async () => ({
+        fields: { message: { keyword: { type: 'keyword', searchable: true } } },
+      })),
+      count: jest.fn(async ({ index }: { index: string }) => ({
+        count: index === 'logs.ecs' ? 0 : 1,
+      })),
+    } as unknown as ElasticsearchClient;
+    const result = await resolveSignalStreams({
+      streams: [
+        { name: 'traces.otel', index: 'traces-generic.otel-default', convention: 'otel' },
+        { name: 'metrics.otel', index: 'metrics-generic.otel-default', convention: 'otel' },
+        { name: 'logs.otel', index: 'logs-generic.otel-default', convention: 'otel' },
+        { name: 'logs.ecs', index: 'logs.ecs', convention: 'ecs' },
+      ],
+      esClient,
+      logger: loggerMock.create(),
+    });
+    expect(result).toEqual({
+      traceStreams: ['traces-generic.otel-default'],
+      metricStreams: ['metrics-generic.otel-default'],
+      logStreams: ['logs-generic.otel-default'],
+    });
+  });
+});
 
 describe('linkServiceEntities', () => {
   it('calibrates confidence and persists code-derived service metadata', async () => {

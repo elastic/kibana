@@ -28,6 +28,13 @@ export const SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID =
 export const SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID =
   'significant_events_code_intelligence' as const;
 
+/**
+ * OTel signal classification: naming, severity, and deduplication over
+ * deterministically extracted instrumentation signals and typed queries.
+ */
+export const SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID =
+  'significant_events_otel_signals' as const;
+
 /** Discovery and significant event generation. */
 export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
   'significant_events_discovery' as const;

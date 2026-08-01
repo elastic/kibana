@@ -53,6 +53,7 @@ const opts = (candidates: ServiceCandidateRoot[]) => ({
   ]),
   readmeLinesByRepo: new Map<string, string[]>(),
   repositoryLanguagesByRepo: new Map<string, LanguageCount[]>(),
+  otelDetectionByRoot: new Map(),
   candidates,
   logger: loggerMock.create(),
 });
@@ -156,6 +157,8 @@ describe('classifyServices', () => {
       name: 'checkout',
       language: 'Go',
       iacSignals: [{ kind: 'compose', path: 'compose.yaml' }],
+      hasOtel: false,
+      signalCounts: expect.any(Object),
     });
     expect(services).toContainEqual(
       expect.objectContaining({ name: 'opentelemetry-demo', serviceRoot: '', language: 'Go' })

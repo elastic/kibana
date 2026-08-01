@@ -16,6 +16,7 @@ import {
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_CODE_INTELLIGENCE_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -163,6 +164,21 @@ export function registerSignificantEventsInferenceFeatures(
         {
           defaultMessage:
             'Model used to classify grep-discovered code candidates (logging call sites and deployable services). A low-stakes, high-volume task — a fast, cheap model is recommended.',
+        }
+      ),
+      recommendedEndpoints: CODE_INTELLIGENCE_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
+    },
+    {
+      featureId: SIGNIFICANT_EVENTS_OTEL_SIGNALS_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.otelSignalsName', {
+        defaultMessage: 'OTel signal classification',
+      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.otelSignalsDescription',
+        {
+          defaultMessage:
+            'Model used for naming, severity, and deduplication of deterministically extracted OTel signals.',
         }
       ),
       recommendedEndpoints: CODE_INTELLIGENCE_RECOMMENDED_MODELS,

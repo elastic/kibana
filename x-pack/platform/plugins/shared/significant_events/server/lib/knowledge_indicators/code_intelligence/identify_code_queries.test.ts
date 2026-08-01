@@ -95,6 +95,39 @@ describe('identifyCodeQueries', () => {
     expect(result.status).toBe('generated');
   });
 
+  it('gates message-string queries for OTel services unless stream resolution was bypassed', async () => {
+    const logger = loggerMock.create();
+    const { kiClient, bulk } = createKiClient([]);
+    const gated = await identifyCodeQueries({
+      serviceName: SERVICE_KEY,
+      repository: REPO,
+      gitSha: 'sha1',
+      streams,
+      kiClient,
+      loggingChunks: [{ content: 'logger.error("boom")' }],
+      esClient: createEsClient(true),
+      logger,
+      hasOtel: true,
+    });
+    expect(gated.status).toBe('otel_gated');
+    expect(bulk).not.toHaveBeenCalled();
+
+    const bypassed = await identifyCodeQueries({
+      serviceName: SERVICE_KEY,
+      repository: REPO,
+      gitSha: 'sha1',
+      streams,
+      kiClient,
+      loggingChunks: [{ content: 'logger.error("boom")' }],
+      esClient: createEsClient(true),
+      logger,
+      hasOtel: true,
+      otelGateBypassed: true,
+    });
+    expect(bypassed.status).toBe('generated');
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('otel gate bypassed'));
+  });
+
   it('returns no_signatures when no logging chunks yield signatures', async () => {
     const { kiClient, bulk } = createKiClient([serviceNameFeature()]);
     const result = await identifyCodeQueries({

@@ -30,6 +30,12 @@ export interface StreamSamplingSource {
  * content, not a service field — log streams here carry no queryable service
  * field, so the message is the join signal.
  */
+export interface SignalStreams {
+  traceStreams: string[];
+  metricStreams: string[];
+  logStreams: string[];
+}
+
 export interface LogStreamBinding {
   stream: string;
   index: string;
@@ -163,6 +169,59 @@ export async function resolveLogBearingStreams({
  * The log-bearing stream name(s) predictive code queries target (names only; see
  * {@link resolveLogBearingStreams} for the message field to query each with).
  */
+/** Resolves non-empty trace, metric, and log sampling sources for typed OTel queries. */
+export async function resolveSignalStreams({
+  streams,
+  esClient,
+  logger,
+}: {
+  streams: StreamSamplingSource[];
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<SignalStreams> {
+  const hasDocs = async ({ name, index }: StreamSamplingSource): Promise<string | undefined> => {
+    try {
+      const { count } = await esClient.count({ index, ignore_unavailable: true });
+      return count > 0 ? index : undefined;
+    } catch (error) {
+      logger.debug(
+        `code_features: signal-stream probe failed for "${name}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
+    }
+  };
+  const traceCandidates = streams.filter(
+    ({ name, index }) => name.startsWith('traces-') || index.startsWith('traces-')
+  );
+  const metricCandidates = streams.filter(
+    ({ name, index }) => name.startsWith('metrics-') || index.startsWith('metrics-')
+  );
+  const [traces, metrics, logBindings] = await Promise.all([
+    Promise.all(traceCandidates.map(hasDocs)),
+    Promise.all(metricCandidates.map(hasDocs)),
+    resolveLogBearingStreams({
+      streams: streams.filter(
+        ({ name, index }) =>
+          (name.startsWith('logs') || index.startsWith('logs')) &&
+          !name.startsWith('traces') &&
+          !name.startsWith('metrics')
+      ),
+      esClient,
+      logger,
+    }),
+  ]);
+  return {
+    traceStreams: traces.filter((stream): stream is string => Boolean(stream)).sort(),
+    metricStreams: metrics.filter((stream): stream is string => Boolean(stream)).sort(),
+    logStreams: logBindings
+      .filter((binding) => binding.hasDocs)
+      .map(({ index }) => index)
+      .sort(),
+  };
+}
+
 export async function resolveIngestingStreams(args: {
   streams: StreamSamplingSource[];
   esClient: ElasticsearchClient;
