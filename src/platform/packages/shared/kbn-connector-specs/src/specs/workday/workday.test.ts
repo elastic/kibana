@@ -412,10 +412,7 @@ describe('Workday', () => {
       if (!Workday.test) {
         throw new Error('Test handler not defined');
       }
-      const result = (await Workday.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Invalid client credentials');
+      await expect(Workday.test.handler(mockContext)).rejects.toThrow('Invalid client credentials');
     });
 
     it('should handle network errors', async () => {
@@ -424,10 +421,7 @@ describe('Workday', () => {
       if (!Workday.test) {
         throw new Error('Test handler not defined');
       }
-      const result = (await Workday.test.handler(mockContext)) as TestResult;
-
-      expect(result.ok).toBe(false);
-      expect(result.message).toBe('Network timeout');
+      await expect(Workday.test.handler(mockContext)).rejects.toThrow('Network timeout');
     });
   });
 
