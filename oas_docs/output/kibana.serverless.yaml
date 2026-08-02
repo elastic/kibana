@@ -60310,55 +60310,44 @@ paths:
                   type: object
                   properties:
                     additionalIndexPatterns:
-                      default: []
                       items:
                         type: string
                       type: array
                     delay:
-                      default: 1m
                       pattern: '[smdh]$'
                       type: string
                     docsLimit:
-                      default: 10000
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
                     excludedIndexPatterns:
-                      default: []
                       items:
                         type: string
                       type: array
                     fieldHistoryLength:
-                      default: 10
                       maximum: 9007199254740991
                       minimum: -9007199254740991
                       type: integer
                     frequency:
-                      default: 1m
                       pattern: '[smdh]$'
                       type: string
                     lookbackPeriod:
-                      default: 3h
                       pattern: '[smdh]$'
                       type: string
                     maxLogsPerPage:
-                      default: 50000
                       maximum: 9007199254740991
                       minimum: 1
                       type: integer
                     maxLogsPerWindow:
-                      default: 100000
                       maximum: 9007199254740991
                       minimum: 0
                       type: integer
                     maxLogsPerWindowCapBehavior:
-                      default: drop
                       enum:
                         - defer
                         - drop
                       type: string
                     maxTimeWindowSize:
-                      default: 15m
                       pattern: '[smdh]$'
                       type: string
       responses:

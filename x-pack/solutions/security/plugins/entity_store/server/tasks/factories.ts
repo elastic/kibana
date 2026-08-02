@@ -9,11 +9,12 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
 import { AssetManagerClient } from '../domain/asset_manager';
-import { LogsExtractionClient } from '../domain/logs_extraction';
+import { LogsExtractionClient, LogsExtractionConfigClient } from '../domain/logs_extraction';
 import { createRemoteLogsExtractionClient } from '../domain/logs_extraction/remote';
 import {
   EngineDescriptorClient,
   EntityStoreGlobalStateClient,
+  LogExtractionOverridesClient,
   type RemoteLogExtractionStateClient,
 } from '../domain/saved_objects';
 import type { TelemetryReporter } from '../telemetry/events';
@@ -22,6 +23,8 @@ export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
   /** Exposed so AssetManager can reuse the same instance for uninstall cleanup. */
   remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
+  logsExtractionConfigClient: LogsExtractionConfigClient;
+  globalStateClient: EntityStoreGlobalStateClient;
 }
 
 export interface AssetManagerClientFactoryResult {
@@ -68,19 +71,27 @@ export async function createLogsExtractionClient({
       isServerless,
     });
 
+  const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
+  const logsExtractionConfigClient = new LogsExtractionConfigClient(
+    new LogExtractionOverridesClient(soClient, namespace),
+    globalStateClient
+  );
+
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
     esClient,
     dataViewsService,
     engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
-    globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
+    logsExtractionConfigClient,
     remoteLogsExtractionClient,
   });
 
   return {
     logsExtractionClient,
     remoteLogExtractionStateClient,
+    logsExtractionConfigClient,
+    globalStateClient,
   };
 }
 
@@ -104,17 +115,19 @@ export async function createAssetManagerClient({
   const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
   const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
   const engineDescriptorClient = new EngineDescriptorClient(soClient, namespace, logger);
-  const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
 
-  const { logsExtractionClient, remoteLogExtractionStateClient } = await createLogsExtractionClient(
-    {
-      core,
-      fakeRequest,
-      logger,
-      namespace,
-      isServerless,
-    }
-  );
+  const {
+    logsExtractionClient,
+    remoteLogExtractionStateClient,
+    logsExtractionConfigClient,
+    globalStateClient,
+  } = await createLogsExtractionClient({
+    core,
+    fakeRequest,
+    logger,
+    namespace,
+    isServerless,
+  });
 
   return {
     esClient,
@@ -125,6 +138,7 @@ export async function createAssetManagerClient({
       taskManager: pluginsStart.taskManager,
       engineDescriptorClient,
       globalStateClient,
+      logsExtractionConfigClient,
       remoteLogExtractionStateClient,
       namespace,
       isServerless,

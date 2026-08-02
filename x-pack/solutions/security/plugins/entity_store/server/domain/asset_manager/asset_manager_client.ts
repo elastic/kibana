@@ -28,15 +28,16 @@ import {
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
 import { installSharedElasticsearchAssets, uninstallElasticsearchAssets } from './install_assets';
+import type { LogExtractionConfig } from '../saved_objects';
 import {
   EngineDescriptorTypeName,
   type EngineDescriptor,
   type EngineDescriptorClient,
   type EntityStoreGlobalStateClient,
   HistorySnapshotState,
-  LogExtractionConfig,
 } from '../saved_objects';
-import type { HistorySnapshotBodyParams, LogExtractionInstallParams } from '../../routes/constants';
+import type { LogsExtractionConfigClient } from '../logs_extraction';
+import type { HistorySnapshotBodyParams, LogExtractionBodyParams } from '../../routes/constants';
 import { ENGINE_STATUS, ENTITY_STORE_STATUS } from '../constants';
 import type {
   EntityStoreStatus,
@@ -77,6 +78,7 @@ interface AssetManagerDependencies {
   taskManager: TaskManagerStartContract;
   engineDescriptorClient: EngineDescriptorClient;
   globalStateClient: EntityStoreGlobalStateClient;
+  logsExtractionConfigClient: LogsExtractionConfigClient;
   remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   namespace: string;
   isServerless: boolean;
@@ -93,6 +95,7 @@ export class AssetManagerClient {
   private readonly taskManager: TaskManagerStartContract;
   private readonly engineDescriptorClient: EngineDescriptorClient;
   private readonly globalStateClient: EntityStoreGlobalStateClient;
+  private readonly logsExtractionConfigClient: LogsExtractionConfigClient;
   private readonly remoteLogExtractionStateClient: RemoteLogExtractionStateClient;
   private readonly namespace: string;
   private readonly isServerless: boolean;
@@ -108,6 +111,7 @@ export class AssetManagerClient {
     this.taskManager = deps.taskManager;
     this.engineDescriptorClient = deps.engineDescriptorClient;
     this.globalStateClient = deps.globalStateClient;
+    this.logsExtractionConfigClient = deps.logsExtractionConfigClient;
     this.remoteLogExtractionStateClient = deps.remoteLogExtractionStateClient;
     this.namespace = deps.namespace;
     this.isServerless = deps.isServerless;
@@ -120,20 +124,16 @@ export class AssetManagerClient {
   public async init(
     request: KibanaRequest,
     entityTypes: EntityType[],
-    logsExtractionParams?: LogExtractionInstallParams,
+    logsExtractionParams?: LogExtractionBodyParams,
     historySnapshotParams?: HistorySnapshotBodyParams
   ) {
     try {
-      const existingState = await this.globalStateClient.find();
-      const logsExtraction = resolveLogsExtractionOnInstall(
-        existingState?.logsExtraction,
-        logsExtractionParams
-      );
       const historySnapshot = HistorySnapshotState.parse(historySnapshotParams ?? {});
 
       // Phase 1: Install shared ES assets/storage and run independent setup tasks.
-      await Promise.all([
-        this.globalStateClient.init({ historySnapshot, logsExtraction }),
+      const [logsExtraction] = await Promise.all([
+        this.logsExtractionConfigClient.init(logsExtractionParams),
+        this.globalStateClient.init({ historySnapshot }),
 
         // V1 cleanup is legacy migration work — run it as the internal user so enabling the
         // entity store does not require the user to hold transform/enrich/index admin on v1 assets.
@@ -269,6 +269,7 @@ export class AssetManagerClient {
             logger: this.logger,
           }),
           this.globalStateClient.delete(),
+          this.logsExtractionConfigClient.delete(),
           stopStatusReportTask({
             taskManager: this.taskManager,
             logger: this.logger,
@@ -296,11 +297,11 @@ export class AssetManagerClient {
 
   public async getStatus(withComponents: boolean = false): Promise<GetStatusResult> {
     try {
-      const [engines, { historySnapshot, logsExtraction: logsExtractionConfig }] =
-        await Promise.all([
-          this.engineDescriptorClient.getAll(),
-          this.globalStateClient.findOrThrow(),
-        ]);
+      const [engines, { historySnapshot }, logsExtractionConfig] = await Promise.all([
+        this.engineDescriptorClient.getAll(),
+        this.globalStateClient.findOrThrow(),
+        this.logsExtractionConfigClient.get(),
+      ]);
 
       const status = this.calculateEntityStoreStatus(engines);
 
@@ -328,8 +329,7 @@ export class AssetManagerClient {
   }
 
   public async getLogExtractionConfig(): Promise<LogExtractionConfig> {
-    const globalState = await this.globalStateClient.find();
-    return globalState?.logsExtraction ?? LogExtractionConfig.parse({});
+    return this.logsExtractionConfigClient.get();
   }
 
   private async initEntity(
@@ -569,18 +569,4 @@ export class AssetManagerClient {
 
     return ENTITY_STORE_STATUS.RUNNING;
   }
-}
-
-function resolveLogsExtractionOnInstall(
-  existing: LogExtractionConfig | undefined,
-  params: LogExtractionInstallParams | undefined
-): LogExtractionConfig {
-  const hasParams = params !== undefined && Object.keys(params).length > 0;
-  if (hasParams) {
-    return LogExtractionConfig.parse(params);
-  }
-  if (existing !== undefined) {
-    return existing;
-  }
-  return LogExtractionConfig.parse({});
 }

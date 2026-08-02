@@ -6,3 +6,14 @@
  */
 
 export { LogsExtractionClient } from './logs_extraction_client';
+export { LogsExtractionConfigClient } from './logs_extraction_config_client';
+export {
+  LEGACY_LOG_EXTRACTION_DEFAULTS,
+  LATEST_LOG_EXTRACTION_DEFAULTS,
+  LogExtractionConfig,
+  LogExtractionOverrides,
+  getLegacyLogExtractionOverrides as extractOverridesFromLegacyLogsExtraction,
+  omitEqualToBaseline,
+  resolveLogExtractionConfig,
+  getLatestLogExtractionOverrides as toStoredOverrides,
+} from './config';

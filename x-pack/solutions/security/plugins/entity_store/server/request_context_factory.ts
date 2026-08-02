@@ -20,8 +20,9 @@ import {
   EngineDescriptorClient,
   EntityStoreGlobalStateClient,
   EntityStorePreferencesClient,
+  LogExtractionOverridesClient,
 } from './domain/saved_objects';
-import { LogsExtractionClient } from './domain/logs_extraction';
+import { LogsExtractionClient, LogsExtractionConfigClient } from './domain/logs_extraction';
 import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remote';
 import { HistorySnapshotClient } from './domain/history_snapshot';
 import { CRUDClient } from './domain/crud';
@@ -77,6 +78,11 @@ export async function createRequestHandlerContext({
     logger
   );
 
+  const logsExtractionConfigClient = new LogsExtractionConfigClient(
+    new LogExtractionOverridesClient(core.savedObjects.client, namespace),
+    globalStateClient
+  );
+
   // The preferences saved object is plugin-internal (not in the security feature's saved-object
   // types and hidden from the generic SO HTTP API). Access it with a client that skips the
   // security extension so it doesn't require per-type saved-object privileges; the `/preferences`
@@ -121,7 +127,7 @@ export async function createRequestHandlerContext({
     esClient,
     dataViewsService,
     engineDescriptorClient,
-    globalStateClient,
+    logsExtractionConfigClient,
     remoteLogsExtractionClient,
   });
 
@@ -142,6 +148,7 @@ export async function createRequestHandlerContext({
       taskManager: taskManagerStart,
       engineDescriptorClient,
       globalStateClient,
+      logsExtractionConfigClient,
       remoteLogExtractionStateClient,
       namespace,
       isServerless,

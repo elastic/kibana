@@ -6,54 +6,33 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { LATEST_LOG_EXTRACTION_DEFAULTS, LogExtractionConfig } from '../../logs_extraction/config';
 
 export const DEFAULT_HISTORY_SNAPSHOT_FREQUENCY = '24h';
 
-export const LOG_EXTRACTION_DELAY_DEFAULT = '1m';
-export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = '3h';
-export const LOG_EXTRACTION_FREQUENCY_DEFAULT = '1m';
-// Max amount of entities to extract in one ESQL query
-export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
-// Max raw log documents per logs to be processed in a query (inside elastic search)
-export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 50_000;
-export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '59s';
-export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
-// Max total raw log documents to process per task run; 0 = no cap
-export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 100_000;
-export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'drop' as const;
+export const LOG_EXTRACTION_DELAY_DEFAULT = LATEST_LOG_EXTRACTION_DEFAULTS.delay;
+export const LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT = LATEST_LOG_EXTRACTION_DEFAULTS.lookbackPeriod;
+export const LOG_EXTRACTION_FREQUENCY_DEFAULT = LATEST_LOG_EXTRACTION_DEFAULTS.frequency;
+export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = LATEST_LOG_EXTRACTION_DEFAULTS.docsLimit;
+export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT =
+  LATEST_LOG_EXTRACTION_DEFAULTS.maxLogsPerPage;
+export const LOG_EXTRACTION_TIMEOUT_DEFAULT = LATEST_LOG_EXTRACTION_DEFAULTS.timeout;
+export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT =
+  LATEST_LOG_EXTRACTION_DEFAULTS.maxTimeWindowSize;
+export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT =
+  LATEST_LOG_EXTRACTION_DEFAULTS.maxLogsPerWindow;
+export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT =
+  LATEST_LOG_EXTRACTION_DEFAULTS.maxLogsPerWindowCapBehavior;
 
-export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
-export const LogExtractionConfig = z.object({
-  additionalIndexPatterns: z.array(z.string()).default([]),
-  excludedIndexPatterns: z.array(z.string()).default([]),
-  fieldHistoryLength: z.number().int().default(10),
-  lookbackPeriod: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_LOOKBACK_PERIOD_DEFAULT),
-  delay: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_DELAY_DEFAULT),
-  docsLimit: z.number().int().min(1).default(LOG_EXTRACTION_DOCS_LIMIT_DEFAULT),
-  maxLogsPerPage: z.number().int().min(1).default(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT),
-  timeout: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_TIMEOUT_DEFAULT),
-  frequency: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
-  maxTimeWindowSize: z
-    .string()
-    .regex(/[smdh]$/)
-    .default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
-  maxLogsPerWindow: z.number().int().min(0).default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
-  maxLogsPerWindowCapBehavior: z
-    .enum(['defer', 'drop'])
-    .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
-});
+export type { LogExtractionConfig as LogExtractionConfigType } from '../../logs_extraction/config';
+export {
+  LATEST_LOG_EXTRACTION_DEFAULTS,
+  LEGACY_LOG_EXTRACTION_DEFAULTS,
+  LogExtractionConfig,
+  LogExtractionOverrides,
+  resolveLogExtractionConfig,
+  getLatestLogExtractionOverrides as toStoredOverrides,
+} from '../../logs_extraction/config';
 
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;
 export const HistorySnapshotStatus = z.enum(['started', 'stopped']);
@@ -77,5 +56,5 @@ export const HistorySnapshotState = z.object({
 export type EntityStoreGlobalState = z.infer<typeof EntityStoreGlobalState>;
 export const EntityStoreGlobalState = z.object({
   historySnapshot: HistorySnapshotState,
-  logsExtraction: LogExtractionConfig,
+  logsExtraction: LogExtractionConfig.optional(),
 });

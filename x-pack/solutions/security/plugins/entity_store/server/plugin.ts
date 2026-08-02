@@ -26,7 +26,9 @@ import {
   EntityStoreGlobalStateType,
   EntityStorePreferencesType,
   LegacyCcsLogExtractionStateType,
+  LogExtractionOverridesType,
   RemoteLogExtractionStateType,
+  migrateAllLogExtractionOverridesFromGlobalState,
 } from './domain/saved_objects';
 import { EntityResolutionRuleType } from './domain/resolution/rules/saved_object';
 import { registerEntityMaintainerTask } from './tasks/entity_maintainers';
@@ -91,6 +93,7 @@ export class EntityStorePlugin
     this.logger.debug('Registering saved objects types');
     core.savedObjects.registerType(EngineDescriptorType);
     core.savedObjects.registerType(EntityStoreGlobalStateType);
+    core.savedObjects.registerType(LogExtractionOverridesType);
     core.savedObjects.registerType(EntityStorePreferencesType);
     core.savedObjects.registerType(RemoteLogExtractionStateType);
     core.savedObjects.registerType(LegacyCcsLogExtractionStateType);
@@ -128,6 +131,13 @@ export class EntityStorePlugin
     plugins.taskManager.registerApiKeyInvalidateFn(
       plugins.security?.authc.apiKeys.invalidateAsInternalUser
     );
+
+    migrateAllLogExtractionOverridesFromGlobalState({
+      coreStart: core,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error('Failed to migrate log extraction overrides from global state', { error });
+    });
 
     const logger = this.logger;
     return {

@@ -11,7 +11,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { EntityStoreGlobalState, HistorySnapshotState, LogExtractionConfig } from './constants';
+import { EntityStoreGlobalState, HistorySnapshotState } from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
 
 export class EntityStoreGlobalStateClient {
@@ -26,9 +26,6 @@ export class EntityStoreGlobalStateClient {
     if (response.total === 0) {
       return undefined;
     }
-    // Apply zod defaults to the persisted attributes so that fields added in newer Kibana
-    // versions (e.g. `maxTimeWindowSize`) are populated for SOs that were written before the
-    // field existed. This avoids `undefined` reaching consumers like `parseDurationToMs`.
     return EntityStoreGlobalState.parse(response.saved_objects[0].attributes);
   }
 
@@ -42,52 +39,76 @@ export class EntityStoreGlobalStateClient {
     return response;
   }
 
-  async init(
-    initialState?: Partial<EntityStoreGlobalState>
-  ): Promise<Partial<EntityStoreGlobalState>> {
+  async init(initialState?: {
+    historySnapshot?: Partial<HistorySnapshotState>;
+  }): Promise<EntityStoreGlobalState> {
     const existing = await this.find();
     if (existing !== undefined) {
-      return this.updateInternal(this.getSavedObjectId(), initialState ?? {});
+      if (initialState?.historySnapshot !== undefined) {
+        return this.updateHistorySnapshot(initialState.historySnapshot);
+      }
+      return existing;
     }
 
     const id = this.getSavedObjectId();
     this.logger.debug(`Creating global state with id ${id}`);
 
-    const historySnapshot = HistorySnapshotState.parse(initialState?.historySnapshot ?? {});
-    const logsExtraction = LogExtractionConfig.parse(initialState?.logsExtraction ?? {});
-    const defaultState: EntityStoreGlobalState = {
-      historySnapshot,
-      logsExtraction,
-    };
-    const parsed = EntityStoreGlobalState.parse(defaultState);
+    const parsed = EntityStoreGlobalState.parse({
+      historySnapshot: initialState?.historySnapshot ?? {},
+    });
 
-    const { attributes } = await this.soClient.create<EntityStoreGlobalState>(
-      EntityStoreGlobalStateTypeName,
-      parsed,
-      { id }
-    );
-
-    return attributes;
+    await this.soClient.create(EntityStoreGlobalStateTypeName, parsed, { id });
+    return parsed;
   }
 
-  async update(partial: Partial<EntityStoreGlobalState>): Promise<Partial<EntityStoreGlobalState>> {
-    await this.findOrThrow();
-
-    const id = this.getSavedObjectId();
-    return this.updateInternal(id, partial);
+  /** @deprecated Prefer `updateHistorySnapshot` — kept for call-site compatibility. */
+  async update(partial: {
+    historySnapshot?: Partial<HistorySnapshotState>;
+  }): Promise<EntityStoreGlobalState> {
+    if (partial.historySnapshot === undefined) {
+      return this.findOrThrow();
+    }
+    return this.updateHistorySnapshot(partial.historySnapshot);
   }
 
-  private async updateInternal(
-    id: string,
-    partial: Partial<EntityStoreGlobalState>
-  ): Promise<Partial<EntityStoreGlobalState>> {
-    const { attributes } = await this.soClient.update<EntityStoreGlobalState>(
+  async updateHistorySnapshot(
+    partial: Partial<HistorySnapshotState>
+  ): Promise<EntityStoreGlobalState> {
+    const existing = await this.findOrThrow();
+    const historySnapshot = HistorySnapshotState.parse({
+      ...existing.historySnapshot,
+      ...partial,
+    });
+
+    await this.soClient.update(
       EntityStoreGlobalStateTypeName,
-      id,
-      partial,
+      this.getSavedObjectId(),
+      { historySnapshot },
       { refresh: 'wait_for', mergeAttributes: true }
     );
-    return attributes;
+
+    return { ...existing, historySnapshot };
+  }
+
+  /**
+   * Drop legacy `logsExtraction` from global state while keeping historySnapshot.
+   * Uses full attribute replace so the field is actually removed from the SO.
+   */
+  async clearLogsExtraction(): Promise<void> {
+    const existing = await this.find();
+    if (existing === undefined || existing.logsExtraction === undefined) {
+      return;
+    }
+
+    const next: EntityStoreGlobalState = {
+      historySnapshot: existing.historySnapshot,
+    };
+
+    await this.soClient.update(EntityStoreGlobalStateTypeName, this.getSavedObjectId(), next, {
+      refresh: 'wait_for',
+      mergeAttributes: false,
+    });
+    this.logger.debug('Cleared legacy logsExtraction from global state');
   }
 
   async delete(): Promise<void> {

@@ -7,7 +7,11 @@
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
-import { EngineDescriptorTypeName, EntityStoreGlobalStateTypeName } from '@kbn/entity-store/server';
+import {
+  EngineDescriptorTypeName,
+  EntityStoreGlobalStateTypeName,
+  LogExtractionOverridesTypeName,
+} from '@kbn/entity-store/server';
 import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
@@ -60,6 +64,7 @@ export const securityV5SavedObjects = [
   // Entity Store v2 saved objects
   EngineDescriptorTypeName,
   EntityStoreGlobalStateTypeName,
+  LogExtractionOverridesTypeName,
   ...savedObjectTypes.filter(
     (type) =>
       ![

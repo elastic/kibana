@@ -8,9 +8,9 @@
 import path from 'node:path';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
+import { ENTITY_STORE_STATUS } from '../../domain/constants';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
 import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
@@ -64,12 +64,14 @@ export function registerUpdate(router: EntityStorePluginRouter) {
         );
         if (forbidden) return forbidden;
 
+        const { status } = await assetManager.getStatus();
+        if (status === ENTITY_STORE_STATUS.NOT_INSTALLED) {
+          return res.notFound({ body: { message: 'Entity store is not installed' } });
+        }
+
         try {
           await logsExtractionClient.updateConfig(req.body.logExtraction);
         } catch (error) {
-          if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-            return res.notFound({ body: { message: 'Entity store is not installed' } });
-          }
           logger.error(error);
           throw error;
         }

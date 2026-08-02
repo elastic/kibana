@@ -75,12 +75,13 @@ function mockExtractSuccessSequence(
     .mockResolvedValueOnce({ columns: [], values: [] });
 }
 import {
-  LogExtractionConfig,
+  resolveLogExtractionConfig,
+  toStoredOverrides,
   LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT,
   type EngineDescriptorClient,
-  type EntityStoreGlobalState,
-  type EntityStoreGlobalStateClient,
 } from '../saved_objects';
+import type { LogsExtractionConfigClient } from './logs_extraction_config_client';
+import type { LogExtractionOverrides } from './config';
 import { ENGINE_STATUS } from '../constants';
 import type { EntityType } from '../../../common/domain/definitions/entity_schema';
 
@@ -129,34 +130,24 @@ function createMockEngineDescriptor(
   };
 }
 
-function createMockGlobalStateClient(
-  logExtractionOverrides?: Partial<{
-    lookbackPeriod: string;
-    delay: string;
-    maxTimeWindowSize: string;
-    maxLogsPerWindow: number;
-    excludedIndexPatterns: string[];
-    additionalIndexPatterns: string[];
-  }>
-): jest.Mocked<Pick<EntityStoreGlobalStateClient, 'find' | 'findOrThrow' | 'update'>> {
-  const logsExtraction = LogExtractionConfig.parse({
-    docsLimit: 10000,
-    additionalIndexPatterns: logExtractionOverrides?.additionalIndexPatterns ?? [],
-    excludedIndexPatterns: logExtractionOverrides?.excludedIndexPatterns ?? [],
-    lookbackPeriod: logExtractionOverrides?.lookbackPeriod ?? '3h',
-    delay: logExtractionOverrides?.delay ?? '1m',
-    // Default to a very large cap so existing tests run as a single sub-window. The dedicated
-    // sub-window cap describe block overrides this to exercise capping behavior.
-    maxTimeWindowSize: logExtractionOverrides?.maxTimeWindowSize ?? '999d',
-    // Default to 0 (disabled) so volume-cap logic doesn't interfere with unrelated tests.
-    // The dedicated volume-cap describe block overrides this via setupVolCapTest.
-    maxLogsPerWindow: logExtractionOverrides?.maxLogsPerWindow ?? 0,
+function createMockLogsExtractionConfigClient(
+  extraOverrides: LogExtractionOverrides = {}
+): jest.Mocked<Pick<LogsExtractionConfigClient, 'get' | 'update' | 'delete'>> {
+  // Default to a very large time-window cap and disabled volume cap so unrelated tests run as a
+  // single uncapped window; dedicated cap describes override these via extraOverrides.
+  let overrides = toStoredOverrides({
+    maxTimeWindowSize: '999d',
+    maxLogsPerWindow: 0,
+    ...extraOverrides,
   });
-  const state = { logsExtraction } as EntityStoreGlobalState;
+
   return {
-    find: jest.fn().mockResolvedValue(state),
-    findOrThrow: jest.fn().mockResolvedValue(state),
-    update: jest.fn().mockResolvedValue({}),
+    get: jest.fn(async () => resolveLogExtractionConfig(overrides)),
+    update: jest.fn(async (patch: LogExtractionOverrides = {}) => {
+      overrides = toStoredOverrides({ ...overrides, ...patch });
+      return resolveLogExtractionConfig(overrides);
+    }),
+    delete: jest.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -168,8 +159,32 @@ describe('LogsExtractionClient', () => {
   let mockEngineDescriptorClient: jest.Mocked<
     Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
   >;
-  let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
+  let mockLogsExtractionConfigClient: ReturnType<typeof createMockLogsExtractionConfigClient>;
   let mockRemoteLogsExtractionClient: ReturnType<typeof createMockRemoteLogsExtractionClient>;
+
+  const buildClient = (
+    configOverrides?: LogExtractionOverrides
+  ): {
+    client: LogsExtractionClient;
+    mockLogsExtractionConfigClient: ReturnType<typeof createMockLogsExtractionConfigClient>;
+  } => {
+    const logsExtractionConfigClient = createMockLogsExtractionConfigClient(configOverrides);
+    const extractionClient = new LogsExtractionClient({
+      logger: mockLogger,
+      namespace: 'default',
+      esClient: mockEsClient,
+      dataViewsService: mockDataViewsService,
+      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
+      logsExtractionConfigClient:
+        logsExtractionConfigClient as unknown as LogsExtractionConfigClient,
+      remoteLogsExtractionClient:
+        mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
+    });
+    return {
+      client: extractionClient,
+      mockLogsExtractionConfigClient: logsExtractionConfigClient,
+    };
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -192,19 +207,11 @@ describe('LogsExtractionClient', () => {
       findOrThrow: jest.fn(),
       update: jest.fn().mockResolvedValue({}),
     };
-    mockGlobalStateClient = createMockGlobalStateClient();
     mockRemoteLogsExtractionClient = createMockRemoteLogsExtractionClient();
 
-    client = new LogsExtractionClient({
-      logger: mockLogger,
-      namespace: 'default',
-      esClient: mockEsClient,
-      dataViewsService: mockDataViewsService,
-      engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
-      globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-      remoteLogsExtractionClient:
-        mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
-    });
+    const built = buildClient();
+    client = built.client;
+    mockLogsExtractionConfigClient = built.mockLogsExtractionConfigClient;
   });
 
   describe('extractLogs', () => {
@@ -293,19 +300,9 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      mockGlobalStateClient = createMockGlobalStateClient({
+      ({ client, mockLogsExtractionConfigClient } = buildClient({
         excludedIndexPatterns: ['logs-proxy-*'],
-      });
-      client = new LogsExtractionClient({
-        logger: mockLogger,
-        namespace: 'default',
-        esClient: mockEsClient,
-        dataViewsService: mockDataViewsService,
-        engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
-        globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        remoteLogsExtractionClient:
-          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
-      });
+      }));
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
@@ -407,17 +404,7 @@ describe('LogsExtractionClient', () => {
       // small for sampling to help, so the probe is exact. An empty result from an exact probe
       // is definitive (no real docs can be missed the way a sampled probe can miss them), so
       // the loop should stop immediately instead of running a redundant sweep extraction.
-      mockGlobalStateClient = createMockGlobalStateClient({ maxLogsPerWindow: 1 });
-      client = new LogsExtractionClient({
-        logger: mockLogger,
-        namespace: 'default',
-        esClient: mockEsClient,
-        dataViewsService: mockDataViewsService,
-        engineDescriptorClient: mockEngineDescriptorClient as unknown as EngineDescriptorClient,
-        globalStateClient: mockGlobalStateClient as unknown as EntityStoreGlobalStateClient,
-        remoteLogsExtractionClient:
-          mockRemoteLogsExtractionClient as unknown as RemoteLogsExtractionClient,
-      });
+      ({ client, mockLogsExtractionConfigClient } = buildClient({ maxLogsPerWindow: 1 }));
 
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
@@ -448,15 +435,11 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      const globalStateWithDelay5s = {
-        logsExtraction: LogExtractionConfig.parse({
-          lookbackPeriod: '3h',
-          delay: '5s',
-          maxTimeWindowSize: '999d',
-        }),
-      } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      ({ client, mockLogsExtractionConfigClient } = buildClient({
+        lookbackPeriod: '3h',
+        delay: '5s',
+        maxTimeWindowSize: '999d',
+      }));
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -495,15 +478,11 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      const globalStateWithDelay5s = {
-        logsExtraction: LogExtractionConfig.parse({
-          lookbackPeriod: '3h',
-          delay: '5s',
-          maxTimeWindowSize: '999d',
-        }),
-      } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      ({ client, mockLogsExtractionConfigClient } = buildClient({
+        lookbackPeriod: '3h',
+        delay: '5s',
+        maxTimeWindowSize: '999d',
+      }));
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user') as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -533,15 +512,11 @@ describe('LogsExtractionClient', () => {
         getIndexPattern: jest.fn().mockReturnValue('logs-*'),
       };
 
-      const globalStateWithDelay5s = {
-        logsExtraction: LogExtractionConfig.parse({
-          lookbackPeriod: '3h',
-          delay: '5s',
-          maxTimeWindowSize: '999d',
-        }),
-      } as EntityStoreGlobalState;
-      mockGlobalStateClient.find.mockResolvedValue(globalStateWithDelay5s);
-      mockGlobalStateClient.findOrThrow.mockResolvedValue(globalStateWithDelay5s);
+      ({ client, mockLogsExtractionConfigClient } = buildClient({
+        lookbackPeriod: '3h',
+        delay: '5s',
+        maxTimeWindowSize: '999d',
+      }));
       mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
         createMockEngineDescriptor('user', { lastExecutionTimestamp }) as Awaited<
           ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -1085,17 +1060,13 @@ describe('LogsExtractionClient', () => {
         maxLogsPerWindowCapBehavior?: 'defer' | 'drop';
       }) => {
         jest.useFakeTimers({ now: fixedNow.getTime() });
-        const globalState = {
-          logsExtraction: LogExtractionConfig.parse({
-            lookbackPeriod: '3h',
-            delay: '1m',
-            maxTimeWindowSize: '999d',
-            maxLogsPerWindow: overrides.maxLogsPerWindow,
-            maxLogsPerWindowCapBehavior: overrides.maxLogsPerWindowCapBehavior ?? 'drop',
-          }),
-        } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        ({ client, mockLogsExtractionConfigClient } = buildClient({
+          lookbackPeriod: '3h',
+          delay: '1m',
+          maxTimeWindowSize: '999d',
+          maxLogsPerWindow: overrides.maxLogsPerWindow,
+          maxLogsPerWindowCapBehavior: overrides.maxLogsPerWindowCapBehavior ?? 'drop',
+        }));
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user') as Awaited<
             ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -1437,15 +1408,11 @@ describe('LogsExtractionClient', () => {
         maxTimeWindowSize: string;
       }) => {
         jest.useFakeTimers({ now: fixedNow.getTime() });
-        const globalState = {
-          logsExtraction: LogExtractionConfig.parse({
-            lookbackPeriod: '3h',
-            delay: '1m',
-            maxTimeWindowSize: overrides.maxTimeWindowSize,
-          }),
-        } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        ({ client, mockLogsExtractionConfigClient } = buildClient({
+          lookbackPeriod: '3h',
+          delay: '1m',
+          maxTimeWindowSize: overrides.maxTimeWindowSize,
+        }));
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user', {
             lastExecutionTimestamp: overrides.lastExecutionTimestamp,
@@ -1520,15 +1487,11 @@ describe('LogsExtractionClient', () => {
         const fromDate = '2024-01-01T00:00:00.000Z';
         const toDate = '2024-01-01T23:59:00.000Z'; // 24h, far exceeds the 5m default cap
 
-        const globalState = {
-          logsExtraction: LogExtractionConfig.parse({
-            lookbackPeriod: '3h',
-            delay: '1m',
-            maxTimeWindowSize: '5m',
-          }),
-        } as EntityStoreGlobalState;
-        mockGlobalStateClient.find.mockResolvedValue(globalState);
-        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        ({ client, mockLogsExtractionConfigClient } = buildClient({
+          lookbackPeriod: '3h',
+          delay: '1m',
+          maxTimeWindowSize: '5m',
+        }));
         mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
           createMockEngineDescriptor('user') as Awaited<
             ReturnType<EngineDescriptorClient['findOrThrow']>
@@ -1685,13 +1648,10 @@ describe('LogsExtractionClient', () => {
   });
 
   describe('updateConfig', () => {
-    it('should merge provided params over current config and persist via globalStateClient', async () => {
+    it('should merge provided params over current config via logsExtractionConfigClient', async () => {
       await client.updateConfig({ delay: '5m' });
 
-      expect(mockGlobalStateClient.findOrThrow).toHaveBeenCalledTimes(1);
-      expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
-        logsExtraction: expect.objectContaining({ delay: '5m' }),
-      });
+      expect(mockLogsExtractionConfigClient.update).toHaveBeenCalledWith({ delay: '5m' });
     });
 
     it('should return the merged config', async () => {
@@ -1702,15 +1662,12 @@ describe('LogsExtractionClient', () => {
     });
 
     it('should preserve existing config values not present in params', async () => {
-      // createMockGlobalStateClient sets lookbackPeriod to '3h'
       const result = await client.updateConfig({ delay: '5m' });
 
       expect(result.lookbackPeriod).toBe('3h');
     });
 
     it('should apply defaults for any config fields absent from both params and current state', async () => {
-      // logsExtraction from mock has all fields set via LogExtractionConfig.parse
-      // providing no params should keep the full config intact
       const result = await client.updateConfig({});
 
       expect(result.delay).toBe('1m');
@@ -1734,16 +1691,6 @@ describe('LogsExtractionClient', () => {
       expect(result.frequency).toBe('1m');
       expect(result.docsLimit).toBe(5000);
       expect(result.fieldHistoryLength).toBe(5);
-    });
-
-    it('should throw when global state is not found', async () => {
-      const notFoundError = new Error('No global state found for this namespace');
-      mockGlobalStateClient.findOrThrow.mockRejectedValue(notFoundError);
-
-      await expect(client.updateConfig({ delay: '5m' })).rejects.toThrow(
-        'No global state found for this namespace'
-      );
-      expect(mockGlobalStateClient.update).not.toHaveBeenCalled();
     });
   });
 });

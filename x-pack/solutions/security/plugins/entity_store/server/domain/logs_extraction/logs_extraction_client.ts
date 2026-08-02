@@ -48,19 +48,13 @@ import {
   getAlertsIndexName,
   getSecuritySolutionDataViewName,
 } from '../asset_manager/external_indices_contants';
-import {
-  type LogExtractionConfig,
-  LogExtractionConfig as LogExtractionConfigSchema,
-} from '../saved_objects';
-import {
-  type EngineDescriptorClient,
-  type EngineLogExtractionState,
-  type EntityStoreGlobalStateClient,
-} from '../saved_objects';
+import type { LogExtractionConfig } from './config';
+import { type EngineDescriptorClient, type EngineLogExtractionState } from '../saved_objects';
 import { ENGINE_STATUS } from '../constants';
 import type { RemoteLogsExtractionClient } from './remote';
 import { EntityStoreNotRunningError } from '../errors';
-import type { LogExtractionUpdateParams } from '../../routes/constants';
+import type { LogExtractionBodyParams } from '../../routes/constants';
+import type { LogsExtractionConfigClient } from './logs_extraction_config_client';
 
 /** Engine state with all cursor fields cleared. Used between sub-window iterations so a fresh
  * sub-window does not re-trigger recovery from cursors persisted by an earlier sub-window. */
@@ -103,7 +97,7 @@ export interface LogsExtractionClientDependencies {
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
-  globalStateClient: EntityStoreGlobalStateClient;
+  logsExtractionConfigClient: LogsExtractionConfigClient;
   remoteLogsExtractionClient: RemoteLogsExtractionClient;
 }
 
@@ -113,7 +107,7 @@ export class LogsExtractionClient {
   esClient: ElasticsearchClient;
   dataViewsService: DataViewsService;
   engineDescriptorClient: EngineDescriptorClient;
-  globalStateClient: EntityStoreGlobalStateClient;
+  logsExtractionConfigClient: LogsExtractionConfigClient;
   remoteLogsExtractionClient: RemoteLogsExtractionClient;
   constructor({
     logger,
@@ -121,7 +115,7 @@ export class LogsExtractionClient {
     esClient,
     dataViewsService,
     engineDescriptorClient,
-    globalStateClient,
+    logsExtractionConfigClient,
     remoteLogsExtractionClient,
   }: LogsExtractionClientDependencies) {
     this.logger = logger;
@@ -129,7 +123,7 @@ export class LogsExtractionClient {
     this.esClient = esClient;
     this.dataViewsService = dataViewsService;
     this.engineDescriptorClient = engineDescriptorClient;
-    this.globalStateClient = globalStateClient;
+    this.logsExtractionConfigClient = logsExtractionConfigClient;
     this.remoteLogsExtractionClient = remoteLogsExtractionClient;
   }
 
@@ -140,8 +134,8 @@ export class LogsExtractionClient {
     if (engineDescriptor.status !== ENGINE_STATUS.STARTED) {
       throw new EntityStoreNotRunningError();
     }
-    const globalState = await this.globalStateClient.findOrThrow();
-    return { config: globalState.logsExtraction, engineState: engineDescriptor.logExtractionState };
+    const config = await this.logsExtractionConfigClient.get();
+    return { config, engineState: engineDescriptor.logExtractionState };
   }
 
   public async extractLogs(
@@ -213,14 +207,8 @@ export class LogsExtractionClient {
     }
   }
 
-  public async updateConfig(params: LogExtractionUpdateParams): Promise<LogExtractionConfig> {
-    const globalState = await this.globalStateClient.findOrThrow();
-    const mergedConfig = LogExtractionConfigSchema.parse({
-      ...globalState.logsExtraction,
-      ...params,
-    });
-    await this.globalStateClient.update({ logsExtraction: mergedConfig });
-    return mergedConfig;
+  public async updateConfig(params: LogExtractionBodyParams): Promise<LogExtractionConfig> {
+    return this.logsExtractionConfigClient.update(params);
   }
 
   private async runQueryAndIngestDocs({
